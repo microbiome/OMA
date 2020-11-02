@@ -94,6 +94,17 @@ jobs:
           key: ${{ env.cache-version }}-${{ runner.os }}-biocversion-RELEASE_3_12-r-4.0-${{ hashFiles('.github/depends.Rds') }}
           restore-keys: ${{ env.cache-version }}-${{ runner.os }}-biocversion-RELEASE_3_12-r-4.0-
 
+      - name: Install BiocManager
+        run: |
+          message(paste('****', Sys.time(), 'installing BiocManager ****'))
+          remotes::install_cran("BiocManager")
+        shell: Rscript {0}
+
+      - name: Set BiocVersion
+        run: |
+          BiocManager::install(version = "release", ask = FALSE)
+        shell: Rscript {0}
+
       - name: Cache R packages on Linux
         if: "!contains(github.event.head_commit.message, '/nocache') && runner.os == 'Linux' "
         uses: actions/cache@v1
@@ -115,17 +126,6 @@ jobs:
         if: github.ref == 'refs/heads/master' && env.run_pkgdown == 'true' && runner.os == 'Linux'
         run: |
           remotes::install_cran("bookdown")
-        shell: Rscript {0}
-
-      - name: Install BiocManager
-        run: |
-          message(paste('****', Sys.time(), 'installing BiocManager ****'))
-          remotes::install_cran("BiocManager")
-        shell: Rscript {0}
-
-      - name: Set BiocVersion
-        run: |
-          BiocManager::install(version = "release", ask = FALSE)
         shell: Rscript {0}
 
       - name: Install dependencies
