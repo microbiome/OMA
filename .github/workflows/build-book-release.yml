@@ -120,7 +120,7 @@ jobs:
           sudo -s eval "$sysreqs"
 
       - name: Install bookdown
-        if: github.ref == 'refs/heads/master' && env.run_pkgdown == 'true' && runner.os == 'Linux'
+        if: github.ref == 'refs/heads/master' && runner.os == 'Linux'
         run: |
           remotes::install_cran("bookdown")
         shell: Rscript {0}
@@ -156,7 +156,10 @@ jobs:
         shell: Rscript {0}
 
       - name: Bookdown
+        if: github.ref == 'refs/heads/master' && runner.os == 'Linux'
         run: |
+          ls -l
+          echo pwd
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git worktree add --track -B gh-pages docs origin/gh-pages
@@ -164,12 +167,11 @@ jobs:
           cd docs
           git add -A .
           git commit --allow-empty -m "Build book @$(git rev-parse --verify --short HEAD)"
-          git remote -v
           git push --force origin HEAD:gh-pages
           cd ..
 
       - name: Upload check results
-        if: failure()
+        if: github.ref == 'refs/heads/master' && runner.os == 'Linux' && failure()
         uses: actions/upload-artifact@master
         with:
           name: ${{ runner.os }}-biocversion-RELEASE_3_12-r-4.0-results
