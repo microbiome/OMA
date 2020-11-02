@@ -76,8 +76,6 @@ jobs:
 
       - name: Checkout Repository
         uses: actions/checkout@v2
-        with:
-          persist-credentials: false
 
       - name: Query dependencies
         run: |
@@ -157,19 +155,18 @@ jobs:
           sessioninfo::session_info(pkgs, include_base = TRUE)
         shell: Rscript {0}
 
-      - name: Render bookdown
-        if: github.ref == 'refs/heads/master' && runner.os == 'Linux'
+      - name: Bookdown
         run: |
-          bookdown::render_book("index.Rmd", "bookdown::gitbook")
-        shell: Rscript {0}
-
-      # - name: Deploy bookdown
-      #   uses: JamesIves/github-pages-deploy-action@3.7.1
-      #   with:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     BRANCH: gh-pages # The branch the action should deploy to.
-      #     FOLDER: docs # The folder the action should deploy.
-      #     CLEAN: true # Automatically remove deleted files from the deploy branch
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git worktree add --track -B gh-pages docs origin/gh-pages
+          Rscript -e 'bookdown::render_book("index.Rmd", "bookdown::gitbook")'
+          cd docs
+          git add -A .
+          git commit --allow-empty -m "Build book @$(git rev-parse --verify --short HEAD)"
+          git remote -v
+          git push --force origin HEAD:gh-pages
+          cd ..
 
       - name: Upload check results
         if: failure()
