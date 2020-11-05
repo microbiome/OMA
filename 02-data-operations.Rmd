@@ -7,6 +7,7 @@ output: html_document
 
 # Data Operations  
 
+Experimental and putting my thoughts (rough notes)
 ## Common terminologies  
 
 The `mia` package uses classes defined by [`TreeSummarizedExperiment`](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html), [`MicrobiomeExperiment`](https://github.com/FelixErnst/MicrobiomeExperiment) and in general [`SummarizedExperiment`](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html).  
@@ -30,6 +31,7 @@ library(mia)
 library(dplyr)
 library(ggplot2)
 library(tibble)
+library(pheatmap)
 ```
 
 Example data  
@@ -100,6 +102,7 @@ rowL <- rowLinks(x = me)
 ## Library size   
 
 Get total counts/sample  
+see `microbiome::readcount`.  
 
 ```{r lib-size}
 
@@ -206,9 +209,10 @@ me_phy <- agglomerateByRank(me, rank = "Phylum",
 ```
 
 ### Top taxa  
-Define a function to get top taxa.  
+Define a function to get top taxa.   
+Note: `getTopTaxa`  
 ```{r top-1}
-topTaxa <- function(x, method=c("sum","mean","median"), top=5){
+getTopTaxa <- function(x, method=c("sum","mean","median"), top=5){
     taxs <- NULL
     if(method=="sum"){
         taxs <- sort(rowSums(assay(x)),decreasing = TRUE)[1:top]
@@ -225,7 +229,7 @@ topTaxa <- function(x, method=c("sum","mean","median"), top=5){
 
 Get top 10 taxa  
 ```{r top-2}
-top_phy <- topTaxa(me_phy, method="median", top=10)
+top_phy <- getTopTaxa(me_phy, method="median", top=10)
 top_phy
 ```
 
@@ -242,12 +246,11 @@ molten_se <- meltAssay(me_phy,
 ```
 
 
-
 ### Barplot visualization    
 
 A barplot of composition for top 10 phyla  
 
-```{r eval=TRUE}
+```{r barplot, eval=TRUE}
 # Chage all not in top_phy to "Other" category
 molten_se <- molten_se %>% 
     mutate(TaxVar= ifelse(FeatureID %in% top_phy, Phylum, "Other"))
@@ -267,6 +270,58 @@ p + scale_y_continuous(labels = scales::percent) # this can be optional (relativ
 
 ```
 
+## Get top taxa and taxonomy   
 
+### Features  
+Can we get taxonomic rank(s) for top features?
+```{r top-feature-taxo}
 
+top_features <- getTopTaxa(me, method="median", top=10)
+tax_data <- rowData(me)[top_features,taxonomyRanks(me)]
+tax_data %>% as.data.frame()
 
+```
+
+### Top Genera  
+ 
+```{r top-gen}
+me_gen <- agglomerateByRank(me, rank = "Genus",
+                            agglomerateTree = TRUE)
+
+top_genera <- getTopTaxa(me_gen, method="median", top=10)
+top_genera
+```
+Since there are several taxa unclassified at Genus level, we get different taxonomic levels?  
+It is a challenge to deal with high number of missing values within this hierarchical data, especially as we go to lower taxonomic ranks.   
+
+## Taxonomic labels  
+
+```{r tax-labels-1}
+getTaxonomyLabels(me)[1:10]
+```
+
+Get assay and label best available taxonomic classification.   
+```{r tax-labels-2}
+feature_tab <- assay(me, "counts")
+
+# change IDs to best available taxonomic classification
+rownames(feature_tab) <- getTaxonomyLabels(me)
+feature_tab[1:6,1:6]
+```
+
+How can we store this ? or Change rownames in rowData and assays to use best taxonomic classification instead of some non-informative IDs e.g. "549656","331820" or "ASV001", "ASV002" ?  
+
+Check heatmap  
+```{r tax-labels-heatmap-1}
+
+pheatmap(feature_tab[26:50,1:20])
+
+```
+
+Without processing  
+
+```{r tax-labels-heatmap-2}
+pheatmap(assay(me, "counts")[26:50,1:20])
+```
+
+First heatmap is more informative than second.  
