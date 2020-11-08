@@ -12,31 +12,6 @@ Install the development version from GitHub using `remotes` R package.
 remotes::install_github("FelixErnst/mia")
 ```
 
-```
-## Microbiom... (3012ee51f... -> cd40180ab...) [GitHub]
-## generics     (0.0.2        -> 0.1.0       ) [CRAN]
-## labeling     (0.3          -> 0.4.2       ) [CRAN]
-## cpp11        (0.2.2        -> 0.2.4       ) [CRAN]
-## 
-##      checking for file ‘/tmp/Rtmpltr73W/remotes34b7ad6b18e/FelixErnst-MicrobiomeExperiment-cd40180/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/Rtmpltr73W/remotes34b7ad6b18e/FelixErnst-MicrobiomeExperiment-cd40180/DESCRIPTION’
-##   ─  preparing ‘MicrobiomeExperiment’:
-##      checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
-##   ─  checking for LF line-endings in source and make files and shell scripts
-##   ─  checking for empty or unneeded directories
-## ─  looking to see if a ‘data/datalist’ file should be added
-##   ─  building ‘MicrobiomeExperiment_0.99.0.9014.tar.gz’ (480ms)
-##      
-##      checking for file ‘/tmp/Rtmpltr73W/remotes34b79f1cc91/FelixErnst-mia-d5ba1c2/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/Rtmpltr73W/remotes34b79f1cc91/FelixErnst-mia-d5ba1c2/DESCRIPTION’
-##   ─  preparing ‘mia’:
-##      checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
-##   ─  checking for LF line-endings in source and make files and shell scripts
-##   ─  checking for empty or unneeded directories
-## ─  looking to see if a ‘data/datalist’ file should be added
-##   ─  building ‘mia_0.0.0.9002.tar.gz’ (451ms)
-##      
-## 
-```
-
 ## Package data  
 
 The datasets in `mia` are conversions of the `phyloseq` datasets `GlobalPatterns` `enterotype`, `esophagus` and `soilrep`. 
