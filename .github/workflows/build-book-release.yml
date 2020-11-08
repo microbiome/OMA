@@ -155,15 +155,23 @@ jobs:
           sessioninfo::session_info(pkgs, include_base = TRUE)
         shell: Rscript {0}
 
-      - name: Bookdown
-        if: github.ref == 'refs/heads/master' && runner.os == 'Linux'
+      - name: Bookdown Deploy Preparation
+        if: runner.os == 'Linux'
         run: |
           git fetch --all
           commit=$(git --work-tree=../ rev-parse --verify --short HEAD)
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git worktree add --track -B gh-pages docs origin/gh-pages
+
+      - name: Bookdown
+        if: github.ref == 'refs/heads/master' && runner.os == 'Linux'
+        run: |
           Rscript -e 'bookdown::render_book("index.Rmd", "bookdown::gitbook")'
+
+      - name: Bookdown Deploy
+        if: github.ref == 'refs/heads/master' && runner.os == 'Linux'
+        run: |
           cd docs
           git add -A .
           git commit --allow-empty -m "Build book @$commit"
