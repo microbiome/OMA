@@ -1,24 +1,19 @@
----
-title: "Data operations"
-author: "Sudarshan"
-date: "11/4/2020"
-output: html_document
----
 
-# Data Operations  
+# Data operations {#Data-operations}  
 
-Experimental and putting my thoughts (rough notes)
 ## Common terminologies  
 
 The `mia` package uses classes defined by [`TreeSummarizedExperiment`](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html), [`MicrobiomeExperiment`](https://github.com/FelixErnst/MicrobiomeExperiment) and in general [`SummarizedExperiment`](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html).  
 
 `assays`     : Similar to `otu_table` in `phyloseq`. An `SummarizedExperiment` object 
                can hold multiple assays, raw counts, transformed counts. See also 
-               [`MultiAssayExperiment`](https://bioconductor.org/packages/release/bioc/html/MultiAssayExperiment.html)   
-`rowData`    : Slot similar to `tax_table` in `phyloseq`   
-`colData`    : Slot similar to `sample_data` in `phyloseq`  
-`rowTree`    : Slot for phylogenetic tree. Similar to `phy_tree` in `phyloseq`  
-`FeatureIDs` : These are row names in `assays` and `rowData`. Synonymous to OTU/ASV ids.  
+               [`MultiAssayExperiment`](https://bioconductor.org/packages/release/bioc/html/MultiAssayExperiment.html)    
+`rowData`    : Slot similar to `tax_table` in `phyloseq` consisting of taxonomic information.     
+`colData`    : Slot similar to `sample_data` in `phyloseq` consisting of information related to samples.    
+`rowTree`    : Slot for phylogenetic tree. Similar to `phy_tree` in `phyloseq`   
+
+In this book, you will come across terms like `FeatureIDs` and `SampleIDs`.   
+`FeatureIDs` : These are row names in `assays` and `rowData`. This is basically OTU/ASV ids.  
 `SampleIDs`  : These are column names in `assays` and row names in `colData`.   
 
 
@@ -31,12 +26,12 @@ library(mia)
 library(dplyr)
 library(ggplot2)
 library(tibble)
-library(pheatmap)
 ```
 
 Example data  
 ```{r data}
-data(GlobalPatterns, package = "MicrobiomeExperiment")
+
+data("GlobalPatterns")
 me <- GlobalPatterns 
 ```
 
@@ -64,6 +59,7 @@ me_reab <- assay(me, "relabundance")
 me_reab[1:5,1:7]
 ```
 
+
 ### colData  
 Get colData as a data.frame.   
 ```{r coldata}
@@ -88,7 +84,6 @@ me_row_data[1:5,1:5]
 ### rowTree  
 Get rowTree     
 ```{r rowtree}
-
 me_row_tree <- rowTree(me) 
 me_row_tree
 ```
@@ -168,17 +163,22 @@ Retrieving of specific elements are required for specific analysis. For instance
 
 ### Abundances of all taxa in specific sample 
 ```{r pick-sample}
-#Note: getAbundanceSample()
-taxa.abundances.cc1 <- assay(me)[, "CC1"]
-taxa.abundances.cc1[1:10]
+
+taxa.abund.cc1 <- getAbundanceSample(me, 
+                                     sample_id = "CC1",
+                                     abund_values = "counts")
+
+taxa.abund.cc1[1:10]
 
 ```
 
 ### Abundances of specific taxa in all samples   
 
 ```{r pick-feature}
-#Note: getAbundanceFeature()
-taxa.abundances <- assay(me)["255340",]
+
+taxa.abundances <- getAbundanceFeature(me, 
+                                      feature_id = "255340",
+                                       abund_values = "counts")
 taxa.abundances[1:10]
 ```
 
@@ -197,78 +197,22 @@ me_joined <- rowData(me) %>%
     rownames_to_column("FeatureID") %>% 
     left_join(me_reab) 
 
-head(me_joined)
+me_joined[1:3,1:8]
 
 ```
 
-## Barplot  
-As example we first `agglomerateByRank` to phylum level.  
-```{r agg-phy}
-me_phy <- agglomerateByRank(me, rank = "Phylum",
-                        agglomerateTree = TRUE)
-```
-
-### Top taxa  
-Define a function to get top taxa.   
-Note: `getTopTaxa`  
-```{r top-1}
-getTopTaxa <- function(x, method=c("sum","mean","median"), top=5){
-    taxs <- NULL
-    if(method=="sum"){
-        taxs <- sort(rowSums(assay(x)),decreasing = TRUE)[1:top]
-    } else if (method=="mean"){
-        taxs <- sort(rowMeans(assay(x)),decreasing = TRUE)[1:top]
-    } else if (method=="median") {
-        taxs <- rowMedians(assay(x))
-        names(taxs) <- rownames(assay(x))
-        taxs <- sort(taxs,decreasing = TRUE)[1:top]
-    }
-    return(names(taxs))
-}
-```
-
-Get top 10 taxa  
-```{r top-2}
-top_phy <- getTopTaxa(me_phy, method="median", top=10)
-top_phy
-```
 
 ### Convert to long data.frame  
 
 ```{r ldf-1}
 
-molten_se <- meltAssay(me_phy,
-  add_row_data = TRUE,
-  add_col_data = TRUE,
-  abund_values = "relabundance"
-)
+molten_se <- meltAssay(me,
+                       add_row_data = TRUE,
+                       add_col_data = TRUE,
+                       abund_values = "relabundance")
 
 ```
 
-
-### Barplot visualization    
-
-A barplot of composition for top 10 phyla  
-
-```{r barplot, eval=TRUE}
-# Chage all not in top_phy to "Other" category
-molten_se <- molten_se %>% 
-    mutate(TaxVar= ifelse(FeatureID %in% top_phy, Phylum, "Other"))
-
-p <- ggplot(molten_se, aes_string(x="SampleID", y="relabundance", fill="TaxVar")) +
-    geom_bar(position="stack", stat="identity") +
-    scale_x_discrete() + 
-    labs(y = "Relative Abundance",x="") + 
-    theme_bw() +
-    theme(axis.text.x=element_text(angle=90, 
-                                   hjust=0.95,
-                                   vjust=0.2),
-          panel.grid = element_blank(),
-          legend.text = element_text(face="italic")) +
-    scale_fill_brewer("Phylum",palette = "Paired") # this can be argument (fill.colors= "Paired") or something similar
-p + scale_y_continuous(labels = scales::percent) # this can be optional (relative==TRUE) or something similar
-
-```
 
 ## Get top taxa and taxonomy   
 
@@ -282,17 +226,3 @@ tax_data %>% as.data.frame()
 
 ```
 
-### Top Genera  
- 
-```{r top-gen}
-me_gen <- agglomerateByRank(me, rank = "Genus",
-                            agglomerateTree = TRUE)
-
-top_genera <- getTopTaxa(me_gen, method="median", top=10)
-top_genera
-```
-Since there are several taxa unclassified at Genus level, we get different taxonomic levels?  
-It is a challenge to deal with high number of missing values within this hierarchical data, especially as we go to lower taxonomic ranks.   
-
-
-[Pull reference to pull where this is discussed](https://github.com/FelixErnst/mia/pull/13)
