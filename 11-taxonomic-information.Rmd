@@ -1,0 +1,76 @@
+# Taxonomic information {#taxonomic-information}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+```{r, message=FALSE}
+library(mia)
+data("GlobalPatterns")
+se <- GlobalPatterns 
+```
+
+## Data agglomeration {#data-agglomeration}
+
+Agglomerate at a specific taxonomic rank. If multiple assays (counts and relabundance) exists, both will be agglomerated.
+
+```{r}
+altExp(se, "Family") <- agglomerateByRank(se, rank = "Family",
+                                          agglomerateTree = TRUE)
+
+se
+altExp(se, "Family")
+```
+
+```{r}
+altExp(se, "Family") <- relAbundanceCounts(altExp(se, "Family"))
+assay(altExp(se, "Family"), "relabundance")[1:5,1:7]
+```
+  
+```{r}
+assay(altExp(se, "Family"), "counts")[1:5,1:7]
+```
+
+These newly created data can also be kept in `altExp` a feature provided by 
+`SingleCellExperiment`.    
+
+`altExpNames` now consists of `family` level data. This can be extended to use 
+any level present in `r taxonomyRanks(se)`.   
+
+## Get unique  
+
+Get which Phyla are present.  
+```{r unique-1}
+head(unique(rowData(se)[,"Phylum"]))
+```
+
+## Pick specific  
+
+Retrieving of specific elements are required for specific analysis. For
+instance, extracting abundances for a specific taxa in all samples or all taxa 
+in one sample.  
+
+### Abundances of all taxa in specific sample 
+```{r}
+taxa.abund.cc1 <- getAbundanceSample(se, 
+                                     sample_id = "CC1",
+                                     abund_values = "counts")
+
+taxa.abund.cc1[1:10]
+```
+
+### Abundances of specific taxa in all samples   
+
+```{r}
+taxa.abundances <- getAbundanceFeature(se, 
+                                      feature_id = "255340",
+                                       abund_values = "counts")
+taxa.abundances[1:10]
+```
+
+## Session Info {-}
+
+```{r sessionInfo, echo=FALSE, results='asis'}
+prettySessionInfo()
+```
