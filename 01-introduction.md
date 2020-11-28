@@ -1,5 +1,7 @@
 # (PART) Introduction {-}
 
+# Data Infrastructure {#data-introduction}
+
 <script>
 document.addEventListener("click", function (event) {
     if (event.target.classList.contains("rebook-collapse")) {
@@ -34,8 +36,6 @@ document.addEventListener("click", function (event) {
   background-color: #f1f1f1;
 }
 </style>
-
-# Data Infrastructure {#data-introduction}
 
 The
 [`SummarizedExperiment`](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)
@@ -384,6 +384,8 @@ molten_se
 ```
 
 ## Conclusion
+
+Some wrapping up...
 
 ## Session Info {-}
 

@@ -173,7 +173,7 @@ colData(se)
 ## Even3     1078241
 ```
 
-The calcualted library sizes can be visualized using the `plotColData` function.
+The calulated library sizes can be visualized using the `plotColData` function.
 
 
 ```r
@@ -182,7 +182,10 @@ plotColData(se,"sum","X.SampleID", colour_by = "X.SampleID") +
     theme(axis.text.x = element_text(angle = 45, hjust=1))
 ```
 
-<img src="12-quality-control_files/figure-html/viz-lib-size-1-1.png" width="768" />
+<div class="figure">
+<img src="12-quality-control_files/figure-html/plot-viz-lib-size-1-1.png" alt="Library sizes per sample." width="768" />
+<p class="caption">(\#fig:plot-viz-lib-size-1)Library sizes per sample.</p>
+</div>
 
 
 ```r
@@ -190,7 +193,11 @@ plotColData(se,"sum","SampleType", colour_by = "SampleType") +
     theme(axis.text.x = element_text(angle = 45, hjust=1))
 ```
 
-<img src="12-quality-control_files/figure-html/viz-lib-size-2-1.png" width="768" />
+<div class="figure">
+<img src="12-quality-control_files/figure-html/plot-viz-lib-size-2-1.png" alt="Library sizes per sample type." width="768" />
+<p class="caption">(\#fig:plot-viz-lib-size-2)Library sizes per sample type.</p>
+</div>
+
 
 ## Session Info {-}
 
@@ -232,36 +239,37 @@ loaded via a namespace (and not attached):
  [1] viridis_0.5.1             BiocSingular_1.6.0       
  [3] tidyr_1.1.2               viridisLite_0.3.0        
  [5] DelayedMatrixStats_1.12.1 scuttle_1.0.3            
- [7] vipor_0.4.5               GenomeInfoDbData_1.2.4   
- [9] yaml_2.2.1                pillar_1.4.7             
-[11] lattice_0.20-41           glue_1.4.2               
-[13] beachmat_2.6.2            digest_0.6.27            
-[15] colorspace_2.0-0          htmltools_0.5.0          
-[17] Matrix_1.2-18             XML_3.99-0.5             
-[19] pkgconfig_2.0.3           bookdown_0.21            
-[21] zlibbioc_1.36.0           purrr_0.3.4              
-[23] scales_1.1.1              processx_3.4.4           
-[25] BiocParallel_1.24.1       tibble_3.0.4             
-[27] farver_2.0.3              generics_0.1.0           
-[29] ellipsis_0.3.1            withr_2.3.0              
-[31] magrittr_2.0.1            crayon_1.3.4             
-[33] CodeDepends_0.6.5         evaluate_0.14            
-[35] ps_1.4.0                  nlme_3.1-150             
-[37] beeswarm_0.2.3            graph_1.68.0             
-[39] tools_4.0.3               lifecycle_0.2.0          
-[41] stringr_1.4.0             munsell_0.5.0            
-[43] DelayedArray_0.16.0       irlba_2.3.3              
-[45] callr_3.5.1               compiler_4.0.3           
-[47] rsvd_1.0.3                rlang_0.4.9              
-[49] grid_4.0.3                RCurl_1.98-1.2           
-[51] BiocNeighbors_1.8.1       labeling_0.4.2           
-[53] bitops_1.0-6              rmarkdown_2.5            
-[55] gtable_0.3.0              codetools_0.2-18         
-[57] R6_2.5.0                  gridExtra_2.3            
-[59] knitr_1.30                dplyr_1.0.2              
-[61] ape_5.4-1                 ggbeeswarm_0.6.0         
-[63] stringi_1.5.3             Rcpp_1.0.5               
-[65] vctrs_0.3.5               tidyselect_1.1.0         
-[67] xfun_0.19                 sparseMatrixStats_1.2.0  
+ [7] highr_0.8                 vipor_0.4.5              
+ [9] GenomeInfoDbData_1.2.4    yaml_2.2.1               
+[11] pillar_1.4.7              lattice_0.20-41          
+[13] glue_1.4.2                beachmat_2.6.2           
+[15] digest_0.6.27             colorspace_2.0-0         
+[17] htmltools_0.5.0           Matrix_1.2-18            
+[19] XML_3.99-0.5              pkgconfig_2.0.3          
+[21] bookdown_0.21             zlibbioc_1.36.0          
+[23] purrr_0.3.4               scales_1.1.1             
+[25] processx_3.4.4            BiocParallel_1.24.1      
+[27] tibble_3.0.4              farver_2.0.3             
+[29] generics_0.1.0            ellipsis_0.3.1           
+[31] withr_2.3.0               magrittr_2.0.1           
+[33] crayon_1.3.4              CodeDepends_0.6.5        
+[35] evaluate_0.14             ps_1.4.0                 
+[37] nlme_3.1-150              beeswarm_0.2.3           
+[39] graph_1.68.0              tools_4.0.3              
+[41] lifecycle_0.2.0           stringr_1.4.0            
+[43] munsell_0.5.0             DelayedArray_0.16.0      
+[45] irlba_2.3.3               callr_3.5.1              
+[47] compiler_4.0.3            rsvd_1.0.3               
+[49] rlang_0.4.9               grid_4.0.3               
+[51] RCurl_1.98-1.2            BiocNeighbors_1.8.1      
+[53] labeling_0.4.2            bitops_1.0-6             
+[55] rmarkdown_2.5             gtable_0.3.0             
+[57] codetools_0.2-18          R6_2.5.0                 
+[59] gridExtra_2.3             knitr_1.30               
+[61] dplyr_1.0.2               ape_5.4-1                
+[63] ggbeeswarm_0.6.0          stringi_1.5.3            
+[65] Rcpp_1.0.5                vctrs_0.3.5              
+[67] tidyselect_1.1.0          xfun_0.19                
+[69] sparseMatrixStats_1.2.0  
 ```
 </div>

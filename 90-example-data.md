@@ -1,5 +1,7 @@
 # (PART) Appendix {-}
 
+# Example data {#example-data}
+
 <script>
 document.addEventListener("click", function (event) {
     if (event.target.classList.contains("rebook-collapse")) {
@@ -34,8 +36,6 @@ document.addEventListener("click", function (event) {
   background-color: #f1f1f1;
 }
 </style>
-
-# Example data {#example-data}
 
 ## Package data {#package-data}
 
