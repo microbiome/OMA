@@ -1,0 +1,57 @@
+# Quality Control {#quality-control}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+```{r, message=FALSE}
+library(mia)
+data("GlobalPatterns")
+se <- GlobalPatterns 
+```
+
+## Get top taxa and taxonomy   
+
+### Features  
+
+The `getTopTaxa` can be used for identifying top taxa in the data.   
+```{r top-feature-taxo}
+top_features <- getTopTaxa(se, method="median", top=10)
+tax_data <- rowData(se)[top_features,taxonomyRanks(se)]
+tax_data
+```
+
+## Library size   
+
+The total counts/sample can be calculated using the
+`perCellQCMetrics`/`addPerCellQC` from the `scater` package. The first one 
+just calculates the values, whereas the latter one directly adds them to the
+`colData`.
+
+```{r lib-size}
+library(scater)
+perCellQCMetrics(se)
+se <- addPerCellQC(se)
+colData(se)
+```
+
+The calulated library sizes can be visualized using the `plotColData` function.
+
+```{r plot-viz-lib-size-1, fig.width=8, fig.height=4, fig.cap="Library sizes per sample."}
+library(ggplot2)
+plotColData(se,"sum","X.SampleID", colour_by = "X.SampleID") + 
+    theme(axis.text.x = element_text(angle = 45, hjust=1))
+```
+
+```{r plot-viz-lib-size-2, fig.width=8, fig.height=4, fig.cap="Library sizes per sample type."}
+plotColData(se,"sum","SampleType", colour_by = "SampleType") + 
+    theme(axis.text.x = element_text(angle = 45, hjust=1))
+```
+
+
+## Session Info {-}
+
+```{r sessionInfo, echo=FALSE, results='asis'}
+prettySessionInfo()
+```
