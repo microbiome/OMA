@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Microbiome Analysis</title>
-  <meta name="description" content="Microbiome Analysis" />
+  <title>Chapter 5 Microbiome Exploration | Microbiome Analysis</title>
+  <meta name="description" content="Chapter 5 Microbiome Exploration | Microbiome Analysis" />
   <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Microbiome Analysis" />
+  <meta property="og:title" content="Chapter 5 Microbiome Exploration | Microbiome Analysis" />
   <meta property="og:type" content="book" />
   <meta property="og:url" content="https://github.com/microbiome/MiaBook" />
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="microbiome/MiaBook" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Microbiome Analysis" />
+  <meta name="twitter:title" content="Chapter 5 Microbiome Exploration | Microbiome Analysis" />
   
   
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-<link rel="next" href="data-introduction.html"/>
+<link rel="prev" href="quality-control.html"/>
+<link rel="next" href="example-data.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
@@ -217,31 +217,149 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Microbiome Analysis</h1>
-<p class="date"><em><strong>Authors:</strong> Leo Lahti [aut], Sudershan Shetty [aut], Felix GM Ernst [aut, cre]<br/> <strong>Version:</strong> 0.98.0003<br/> <strong>Modified:</strong> 2020-12-02<br/> <strong>Compiled:</strong> 2020-12-03<br/> <strong>Environment:</strong> R version 4.0.3 (2020-10-10), Bioconductor 3.12<br/> <strong>License:</strong> CC BY-NC-SA 3.0 US<br/> <strong>Copyright:</strong> <br/> <strong>Source:</strong> <a href="https://github.com/microbiome/MiaBook" class="uri">https://github.com/microbiome/MiaBook</a></em></p>
-</div>
-<div id="preface" class="section level1 unnumbered">
-<h1>Preface</h1>
-<p>This website is a book on microbiome analysis in the Bioconductor universe and
-is showing common principles and workflows of performing microbiome analysis.</p>
-<p>The book was borne out of necessity, while updating tools for microbiome
-analysis to work with common classes of the Bioconductor project handling
-count data of various sorts. It is heavily influenced by similar resources, such
-as the <a href="https://www.nature.com/articles/s41592-019-0654-x">Orchestrating Single-Cell Analysis with Bioconductor</a>
-book, <a href="http://joey711.github.io/phyloseq/tutorials-index">phyloseq tutorials</a>
-and <a href="https://microbiome.github.io/tutorials/">microbiome tutorials</a>.</p>
-<p>We focus on microbiome analysis tools, new, updated and established methods.
-In the <em>Introduction</em> section, we show how to work with the key data
-infrastructure <code>TreeSummarizedExperiment</code> and related classes, how this
-framework relates to other infrastructure and how to load microbiome analysis
-data to work with in the context of this framework.</p>
-<p>The second section, <em>Focus Topics</em>, is all about the steps for analyzing
-microbiome data, beginning with the most common steps and progressing to
-more specialized methods in subsequent sections.</p>
-<p>The third section, <em>Appendix</em>, contains the rest of things we didn’t find
-another place for, yet.</p>
+<div id="microbiome-exploration" class="section level1">
+<h1><span class="header-section-number">Chapter 5</span> Microbiome Exploration</h1>
+<script>
+document.addEventListener("click", function (event) {
+    if (event.target.classList.contains("rebook-collapse")) {
+        event.target.classList.toggle("active");
+        var content = event.target.nextElementSibling;
+        if (content.style.display === "block") {
+            content.style.display = "none";
+        } else {
+            content.style.display = "block";
+        }
+    }
+})
+</script>
+<style>
+.rebook-collapse {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
 
+.rebook-content {
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #f1f1f1;
+}
+</style>
+<p>This chapter focuses on the exploration of microbiome data and establish
+commonly used descriptors of a microbiome. The main difference to quality
+control is that the exploration assumes the technical aspects of the dataset
+have been investigated to your satisfaction. Generally speaking at this point
+you should be quite certain, that the dataset doesn’t suffer from severe
+technical biases or you should at least be aware of potential problems.</p>
+<p>In reality you might need to go back and forth between QC and exploration,
+since you discover through exploration of your dataset technical aspects you
+need to check.</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="microbiome-exploration.html#cb50-1"></a><span class="kw">library</span>(mia)</span>
+<span id="cb50-2"><a href="microbiome-exploration.html#cb50-2"></a><span class="kw">data</span>(<span class="st">&quot;GlobalPatterns&quot;</span>)</span>
+<span id="cb50-3"><a href="microbiome-exploration.html#cb50-3"></a>se &lt;-<span class="st"> </span>GlobalPatterns </span></code></pre></div>
+<div id="prevalence" class="section level2">
+<h2><span class="header-section-number">5.1</span> Prevalence</h2>
+<p>Prevalence is a measurements, which describes in how many samples certain
+microbes were detected.</p>
+<p>Investigating the prevalence of microbes allows you either to focus on changes,
+which pertain to most of the samples, or to focus on less often found microbes,
+which are nonetheless abundantly found in a small number of samples.</p>
+<p>Population prevalence (frequency) at a 1% relative abundance threshold:</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="microbiome-exploration.html#cb51-1"></a><span class="kw">head</span>(<span class="kw">getPrevalence</span>(se, <span class="dt">detection =</span> <span class="dv">1</span><span class="op">/</span><span class="dv">100</span>, <span class="dt">sort =</span> <span class="ot">TRUE</span>, <span class="dt">as_relative =</span> <span class="ot">TRUE</span>))</span></code></pre></div>
+<pre><code>## 331820 158660  98605 326977 145149 114821 
+## 0.2308 0.2308 0.1923 0.1923 0.1538 0.1538</code></pre>
+<p>Population prevalence (frequency) at the absolute abundance threshold at read count 1:</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="microbiome-exploration.html#cb53-1"></a><span class="kw">head</span>(<span class="kw">getPrevalence</span>(se, <span class="dt">detection =</span> <span class="dv">1</span>, <span class="dt">sort =</span> <span class="ot">TRUE</span>, <span class="dt">abund_values =</span> <span class="st">&quot;counts&quot;</span>,</span>
+<span id="cb53-2"><a href="microbiome-exploration.html#cb53-2"></a>                   <span class="dt">as_relative =</span> <span class="ot">FALSE</span>))</span></code></pre></div>
+<pre><code>## 145149 114821 108747 526804  98605 180658 
+##      1      1      1      1      1      1</code></pre>
+<div id="prevalent-microbiota-analysis" class="section level3">
+<h3><span class="header-section-number">5.1.1</span> Prevalent microbiota analysis</h3>
+<p>If you only need the names of the prevalent taxa, do as follows. This
+returns the taxa that exceed the given prevalence and detection
+thresholds.</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="microbiome-exploration.html#cb55-1"></a>prev &lt;-<span class="st"> </span><span class="kw">getPrevalentTaxa</span>(se, <span class="dt">detection =</span> <span class="dv">0</span>, <span class="dt">prevalence =</span> <span class="dv">50</span><span class="op">/</span><span class="dv">100</span>)</span></code></pre></div>
+<p>See also related functions for the analysis of rare and variable taxa
+(rareMembers; rareAbundance; lowAbundance).</p>
+</div>
+<div id="plotting-prevalence" class="section level3">
+<h3><span class="header-section-number">5.1.2</span> Plotting prevalence</h3>
+<p>TODO</p>
+</div>
+</div>
+<div id="session-info-4" class="section level2 unnumbered">
+<h2>Session Info</h2>
+<button class="rebook-collapse">
+View session info
+</button>
+<div class="rebook-content">
+<pre><code>R version 4.0.3 (2020-10-10)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 20.04 LTS
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=C             
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats4    stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] mia_0.0.0.9009                   MicrobiomeExperiment_0.99.0.9014
+ [3] Biostrings_2.58.0                XVector_0.30.0                  
+ [5] TreeSummarizedExperiment_1.6.0   SingleCellExperiment_1.12.0     
+ [7] SummarizedExperiment_1.20.0      Biobase_2.50.0                  
+ [9] GenomicRanges_1.42.0             GenomeInfoDb_1.26.1             
+[11] IRanges_2.24.0                   S4Vectors_0.28.0                
+[13] BiocGenerics_0.36.0              MatrixGenerics_1.2.0            
+[15] matrixStats_0.57.0               BiocStyle_2.18.1                
+[17] rebook_1.0.0                     BiocManager_1.30.10             
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.1.0          xfun_0.19                
+ [3] beachmat_2.6.2            purrr_0.3.4              
+ [5] lattice_0.20-41           vctrs_0.3.5              
+ [7] generics_0.1.0            htmltools_0.5.0          
+ [9] yaml_2.2.1                XML_3.99-0.5             
+[11] rlang_0.4.9               pillar_1.4.7             
+[13] scuttle_1.0.3             glue_1.4.2               
+[15] BiocParallel_1.24.1       CodeDepends_0.6.5        
+[17] GenomeInfoDbData_1.2.4    lifecycle_0.2.0          
+[19] stringr_1.4.0             zlibbioc_1.36.0          
+[21] codetools_0.2-18          evaluate_0.14            
+[23] knitr_1.30                callr_3.5.1              
+[25] ps_1.4.0                  Rcpp_1.0.5               
+[27] DelayedArray_0.16.0       graph_1.68.0             
+[29] digest_0.6.27             stringi_1.5.3            
+[31] bookdown_0.21             processx_3.4.5           
+[33] dplyr_1.0.2               grid_4.0.3               
+[35] tools_4.0.3               bitops_1.0-6             
+[37] magrittr_2.0.1            RCurl_1.98-1.2           
+[39] tibble_3.0.4              tidyr_1.1.2              
+[41] pkgconfig_2.0.3           crayon_1.3.4             
+[43] ape_5.4-1                 ellipsis_0.3.1           
+[45] Matrix_1.2-18             DelayedMatrixStats_1.12.1
+[47] sparseMatrixStats_1.2.0   rmarkdown_2.5            
+[49] R6_2.5.0                  nlme_3.1-150             
+[51] compiler_4.0.3           </code></pre>
+</div>
+
+</div>
 </div>
 
 
@@ -251,8 +369,8 @@ another place for, yet.</p>
           </div>
         </div>
       </div>
-
-<a href="data-introduction.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="quality-control.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="example-data.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

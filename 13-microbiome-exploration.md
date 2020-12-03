@@ -1,6 +1,4 @@
-# (PART) Appendix {-}
-
-# Example data {#example-data}
+# Microbiome Exploration {#microbiome-exploration}
 
 <script>
 document.addEventListener("click", function (event) {
@@ -37,46 +35,74 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
-## Package data {#package-data}
+This chapter focuses on the exploration of microbiome data and establish 
+commonly used descriptors of a microbiome. The main difference to quality
+control is that the exploration assumes the technical aspects of the dataset
+have been investigated to your satisfaction. Generally speaking at this point 
+you should be quite certain, that the dataset doesn't suffer from severe 
+technical biases or you should at least be aware of potential problems.
 
-The datasets in `mia` are conversions of the `phyloseq` datasets 
-`GlobalPatterns` `enterotype`, `esophagus` and `soilrep`.
-
-### GlobalPatterns
+In reality you might need to go back and forth between QC and exploration, 
+since you discover through exploration of your dataset technical aspects you 
+need to check.
 
 
 ```r
 library(mia)
-# Example how to load data
 data("GlobalPatterns")
+se <- GlobalPatterns 
+```
+## Prevalence
 
-GlobalPatterns
+Prevalence is a measurements, which describes in how many samples certain
+microbes were detected.
+
+Investigating the prevalence of microbes allows you either to focus on changes,
+which pertain to most of the samples, or to focus on less often found microbes,
+which are nonetheless abundantly found in a small number of samples.
+
+Population prevalence (frequency) at a 1% relative abundance threshold:
+
+
+```r
+head(getPrevalence(se, detection = 1/100, sort = TRUE, as_relative = TRUE))
 ```
 
 ```
-## class: TreeSummarizedExperiment 
-## dim: 19216 26 
-## metadata(0):
-## assays(1): counts
-## rownames(19216): 549322 522457 ... 200359 271582
-## rowData names(7): Kingdom Phylum ... Genus Species
-## colnames(26): CL3 CC1 ... Even2 Even3
-## colData names(7): X.SampleID Primer ... SampleType Description
-## reducedDimNames(0):
-## altExpNames(0):
-## rowLinks: a LinkDataFrame (19216 rows)
-## rowTree: a phylo (19216 leaves)
-## colLinks: NULL
-## colTree: NULL
+## 331820 158660  98605 326977 145149 114821 
+## 0.2308 0.2308 0.1923 0.1923 0.1538 0.1538
 ```
 
-### Enterotype
+Population prevalence (frequency) at the absolute abundance threshold at read count 1:
 
 
-### Esophagus
+```r
+head(getPrevalence(se, detection = 1, sort = TRUE, abund_values = "counts",
+                   as_relative = FALSE))
+```
+
+```
+## 145149 114821 108747 526804  98605 180658 
+##      1      1      1      1      1      1
+```
+
+### Prevalent microbiota analysis
+
+If you only need the names of the prevalent taxa, do as follows. This
+returns the taxa that exceed the given prevalence and detection
+thresholds.
 
 
-### Soilrep
+```r
+prev <- getPrevalentTaxa(se, detection = 0, prevalence = 50/100)
+```
+
+See also related functions for the analysis of rare and variable taxa
+(rareMembers; rareAbundance; lowAbundance). 
+
+### Plotting prevalence
+
+TODO
 
 
 ## Session Info {-}

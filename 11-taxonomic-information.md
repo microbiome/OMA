@@ -203,7 +203,7 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] mia_0.0.0.9007                   MicrobiomeExperiment_0.99.0.9014
+ [1] mia_0.0.0.9009                   MicrobiomeExperiment_0.99.0.9014
  [3] Biostrings_2.58.0                XVector_0.30.0                  
  [5] TreeSummarizedExperiment_1.6.0   SingleCellExperiment_1.12.0     
  [7] SummarizedExperiment_1.20.0      Biobase_2.50.0                  
@@ -229,7 +229,7 @@ loaded via a namespace (and not attached):
 [25] ps_1.4.0                  Rcpp_1.0.5               
 [27] DelayedArray_0.16.0       graph_1.68.0             
 [29] digest_0.6.27             stringi_1.5.3            
-[31] bookdown_0.21             processx_3.4.4           
+[31] bookdown_0.21             processx_3.4.5           
 [33] dplyr_1.0.2               grid_4.0.3               
 [35] tools_4.0.3               bitops_1.0-6             
 [37] magrittr_2.0.1            RCurl_1.98-1.2           

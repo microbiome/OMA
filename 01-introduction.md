@@ -412,7 +412,7 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] mia_0.0.0.9007                   MicrobiomeExperiment_0.99.0.9014
+ [1] mia_0.0.0.9009                   MicrobiomeExperiment_0.99.0.9014
  [3] Biostrings_2.58.0                XVector_0.30.0                  
  [5] TreeSummarizedExperiment_1.6.0   SingleCellExperiment_1.12.0     
  [7] SummarizedExperiment_1.20.0      Biobase_2.50.0                  
@@ -449,7 +449,7 @@ loaded via a namespace (and not attached):
 [47] ellipsis_0.3.1            generics_0.1.0           
 [49] vctrs_0.3.5               tools_4.0.3              
 [51] glue_1.4.2                purrr_0.3.4              
-[53] processx_3.4.4            yaml_2.2.1               
+[53] processx_3.4.5            yaml_2.2.1               
 [55] knitr_1.30               
 ```
 </div>

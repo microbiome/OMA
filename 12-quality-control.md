@@ -225,7 +225,7 @@ attached base packages:
 
 other attached packages:
  [1] scater_1.18.3                    ggplot2_3.3.2                   
- [3] mia_0.0.0.9007                   MicrobiomeExperiment_0.99.0.9014
+ [3] mia_0.0.0.9009                   MicrobiomeExperiment_0.99.0.9014
  [5] Biostrings_2.58.0                XVector_0.30.0                  
  [7] TreeSummarizedExperiment_1.6.0   SingleCellExperiment_1.12.0     
  [9] SummarizedExperiment_1.20.0      Biobase_2.50.0                  
@@ -248,7 +248,7 @@ loaded via a namespace (and not attached):
 [19] XML_3.99-0.5              pkgconfig_2.0.3          
 [21] bookdown_0.21             zlibbioc_1.36.0          
 [23] purrr_0.3.4               scales_1.1.1             
-[25] processx_3.4.4            BiocParallel_1.24.1      
+[25] processx_3.4.5            BiocParallel_1.24.1      
 [27] tibble_3.0.4              farver_2.0.3             
 [29] generics_0.1.0            ellipsis_0.3.1           
 [31] withr_2.3.0               magrittr_2.0.1           
