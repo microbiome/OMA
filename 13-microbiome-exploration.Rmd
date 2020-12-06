@@ -31,37 +31,133 @@ Investigating the prevalence of microbes allows you either to focus on changes,
 which pertain to most of the samples, or to focus on less often found microbes,
 which are nonetheless abundantly found in a small number of samples.
 
-Population prevalence (frequency) at a 1% relative abundance threshold:
+On the raw data, the population prevalence (frequency) at a 1% relative
+abundance threshold (`detection = 1/100` and `as_relative = TRUE`), can look
+like this. The low prevalence in this examples can be explained by rather
+different sample types as well as the in depth nature of the data.
 
 ```{r exploration-prevalence}
 head(getPrevalence(se, detection = 1/100, sort = TRUE, as_relative = TRUE))
 ```
 
-Population prevalence (frequency) at the absolute abundance threshold at read count 1:
+The `detection` and `as_relative` can also be used to access, how many samples
+do pass a threshold for raw counts. Here the population prevalence (frequency) 
+at the absolute abundance threshold (`as_relative = FALSE`) at read count 1
+(`detection = TRUE`) is accessed.
 
 ```{r concepts_prevalence2}
 head(getPrevalence(se, detection = 1, sort = TRUE, abund_values = "counts",
                    as_relative = FALSE))
 ```
 
+Note that, if the output should used for subsetting or storing the data in 
+the `rowData`, set `sort = FALSE`.
+
 ### Prevalent microbiota analysis
 
-If you only need the names of the prevalent taxa, do as follows. This
-returns the taxa that exceed the given prevalence and detection
+To investigate the microbiome data at a selected taxonomic levels, two 
+approaches are available.
+
+First the data can be agglomerated to the taxonomic level and `getPrevalence` 
+be used on the result.
+
+```{r}
+altExp(se,"Phylum") <- agglomerateByRank(se, "Phylum")
+head(getPrevalence(altExp(se,"Phylum"), detection = 1/100, sort = TRUE,
+                   abund_values = "counts", as_relative = TRUE))
+
+```
+
+Alternatively the `rank` argument can be set, to perform the agglomeration on
+the fly.
+
+```{r}
+altExp(se,"Phylum") <- agglomerateByRank(se, "Phylum")
+head(getPrevalence(se, rank = "Phylum", detection = 1/100, sort = TRUE,
+                   abund_values = "counts", as_relative = TRUE))
+```
+
+The differnence in the naming scheme, is that by default `na.rm = TRUE` is used
+for agglomoration in `getPrevalence`, whereas the default for 
+`agglomerateByRank` is `FALSE` to prevent accidental data loss.
+
+If you only need the names of the prevalent taxa, `getPrevalentTaxa` is
+available. This returns the taxa that exceed the given prevalence and detection
 thresholds.
 
 ```{r core-members, message=FALSE, warning=FALSE, eval = FALSE}
-prev <- getPrevalentTaxa(se, detection = 0, prevalence = 50/100)
+getPrevalentTaxa(se, detection = 0, prevalence = 50/100)
+prev <- getPrevalentTaxa(se, detection = 0, prevalence = 50/100,
+                         rank = "Phylum", sort = TRUE)
+prev
 ```
 
+Note, that the `detection` and `prevalence` thresholds are not the same, since
+`detection` can be applied to relative counts or absolute couts depending on 
+whether `as_relative` is set `TRUE` or `FALSE`
+
+TODO
 See also related functions for the analysis of rare and variable taxa
 (rareMembers; rareAbundance; lowAbundance). 
 
 ### Plotting prevalence
 
-TODO
+To plot the prevalence, the data is first added to the `rowData`.
 
+```{r}
+rowData(altExp(se,"Phylum"))$prevalence <- 
+    getPrevalence(altExp(se,"Phylum"), detection = 1/100, sort = FALSE,
+                  abund_values = "counts", as_relative = TRUE)
+```
 
+Then it can be plotted via the plotting functions from the `scater` package.
+ 
+```{r, message=FALSE, warning=FALSE}
+library(scater)
+plotRowData(altExp(se,"Phylum"), "prevalence", colour_by = "Phylum")
+```
+
+Additionally, the prevalence can be plotted on the taxonomic tree using the
+`miaViz` package.
+
+```{r}
+altExps(se) <- splitByRanks(se)
+altExps(se) <-
+   lapply(altExps(se),
+          function(y){
+              rowData(y)$prevalence <- 
+                  getPrevalence(y, detection = 1/100, sort = FALSE,
+                                abund_values = "counts", as_relative = TRUE)
+              y
+          })
+top_phyla <- getTopTaxa(altExp(se,"Phylum"),
+                        method="prevalence",
+                        top=10L,
+                        abund_values="counts")
+top_phyla_mean <- getTopTaxa(altExp(se,"Phylum"),
+                             method="mean",
+                             top=10L,
+                             abund_values="counts")
+x <- unsplitByRanks(se, ranks = taxonomyRanks(se)[1:6])
+x <- addTaxonomyTree(x)
+```
+ 
+After some preparation the data is assembled and can be plotted via 
+`plotRowTree`.
+
+```{r plot-prev-prev, message=FALSE, fig.cap="Prevalence of top phyla as jduged by prevalence"}
+library(miaViz)
+plotRowTree(x[rowData(x)$Phylum %in% top_phyla,],
+            edge_colour_by = "Phylum",
+            tip_colour_by = "prevalence",
+            node_colour_by = "prevalence")
+```
+```{r plot-prev-mean, message=FALSE, fig.cap="Prevalence of top phyla as jduged by prevalence"}
+plotRowTree(x[rowData(x)$Phylum %in% top_phyla_mean,],
+            edge_colour_by = "Phylum",
+            tip_colour_by = "prevalence",
+            node_colour_by = "prevalence")
+```
 
 ## Session Info {-}
 
