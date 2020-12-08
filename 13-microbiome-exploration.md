@@ -52,6 +52,7 @@ library(mia)
 data("GlobalPatterns")
 se <- GlobalPatterns 
 ```
+
 ## Prevalence
 
 Prevalence is a measurements, which describes in how many samples certain
@@ -61,7 +62,10 @@ Investigating the prevalence of microbes allows you either to focus on changes,
 which pertain to most of the samples, or to focus on less often found microbes,
 which are nonetheless abundantly found in a small number of samples.
 
-Population prevalence (frequency) at a 1% relative abundance threshold:
+On the raw data, the population prevalence (frequency) at a 1% relative
+abundance threshold (`detection = 1/100` and `as_relative = TRUE`), can look
+like this. The low prevalence in this examples can be explained by rather
+different sample types as well as the in depth nature of the data.
 
 
 ```r
@@ -73,7 +77,10 @@ head(getPrevalence(se, detection = 1/100, sort = TRUE, as_relative = TRUE))
 ## 0.2308 0.2308 0.1923 0.1923 0.1538 0.1538
 ```
 
-Population prevalence (frequency) at the absolute abundance threshold at read count 1:
+The `detection` and `as_relative` can also be used to access, how many samples
+do pass a threshold for raw counts. Here the population prevalence (frequency) 
+at the absolute abundance threshold (`as_relative = FALSE`) at read count 1
+(`detection = TRUE`) is accessed.
 
 
 ```r
@@ -86,24 +93,147 @@ head(getPrevalence(se, detection = 1, sort = TRUE, abund_values = "counts",
 ##      1      1      1      1      1      1
 ```
 
+Note that, if the output should used for subsetting or storing the data in 
+the `rowData`, set `sort = FALSE`.
+
 ### Prevalent microbiota analysis
 
-If you only need the names of the prevalent taxa, do as follows. This
-returns the taxa that exceed the given prevalence and detection
+To investigate the microbiome data at a selected taxonomic levels, two 
+approaches are available.
+
+First the data can be agglomerated to the taxonomic level and `getPrevalence` 
+be used on the result.
+
+
+```r
+altExp(se,"Phylum") <- agglomerateByRank(se, "Phylum")
+head(getPrevalence(altExp(se,"Phylum"), detection = 1/100, sort = TRUE,
+                   abund_values = "counts", as_relative = TRUE))
+```
+
+```
+##   Phylum:Bacteroidetes  Phylum:Proteobacteria  Phylum:Actinobacteria 
+##                 1.0000                 0.9231                 0.8462 
+##   Phylum:Cyanobacteria      Phylum:Firmicutes Phylum:Verrucomicrobia 
+##                 0.6154                 0.5769                 0.4615
+```
+
+Alternatively the `rank` argument can be set, to perform the agglomeration on
+the fly.
+
+
+```r
+altExp(se,"Phylum") <- agglomerateByRank(se, "Phylum")
+head(getPrevalence(se, rank = "Phylum", detection = 1/100, sort = TRUE,
+                   abund_values = "counts", as_relative = TRUE))
+```
+
+```
+##   Bacteroidetes  Proteobacteria  Actinobacteria   Cyanobacteria      Firmicutes 
+##          1.0000          0.9231          0.8462          0.6154          0.5769 
+## Verrucomicrobia 
+##          0.4615
+```
+
+The difference in the naming scheme, is that by default `na.rm = TRUE` is used
+for agglomeration in `getPrevalence`, whereas the default for 
+`agglomerateByRank` is `FALSE` to prevent accidental data loss.
+
+If you only need the names of the prevalent taxa, `getPrevalentTaxa` is
+available. This returns the taxa that exceed the given prevalence and detection
 thresholds.
 
 
 ```r
-prev <- getPrevalentTaxa(se, detection = 0, prevalence = 50/100)
+getPrevalentTaxa(se, detection = 0, prevalence = 50/100)
+prev <- getPrevalentTaxa(se, detection = 0, prevalence = 50/100,
+                         rank = "Phylum", sort = TRUE)
+prev
 ```
 
+Note, that the `detection` and `prevalence` thresholds are not the same, since
+`detection` can be applied to relative counts or absolute couts depending on 
+whether `as_relative` is set `TRUE` or `FALSE`
+
+TODO
 See also related functions for the analysis of rare and variable taxa
 (rareMembers; rareAbundance; lowAbundance). 
 
 ### Plotting prevalence
 
-TODO
+To plot the prevalence, the data is first added to the `rowData`.
 
+
+```r
+rowData(altExp(se,"Phylum"))$prevalence <- 
+    getPrevalence(altExp(se,"Phylum"), detection = 1/100, sort = FALSE,
+                  abund_values = "counts", as_relative = TRUE)
+```
+
+Then it can be plotted via the plotting functions from the `scater` package.
+ 
+
+```r
+library(scater)
+plotRowData(altExp(se,"Phylum"), "prevalence", colour_by = "Phylum")
+```
+
+<img src="13-microbiome-exploration_files/figure-html/unnamed-chunk-5-1.png" width="672" />
+
+Additionally, the prevalence can be plotted on the taxonomic tree using the
+`miaViz` package.
+
+
+```r
+altExps(se) <- splitByRanks(se)
+altExps(se) <-
+   lapply(altExps(se),
+          function(y){
+              rowData(y)$prevalence <- 
+                  getPrevalence(y, detection = 1/100, sort = FALSE,
+                                abund_values = "counts", as_relative = TRUE)
+              y
+          })
+top_phyla <- getTopTaxa(altExp(se,"Phylum"),
+                        method="prevalence",
+                        top=10L,
+                        abund_values="counts")
+top_phyla_mean <- getTopTaxa(altExp(se,"Phylum"),
+                             method="mean",
+                             top=10L,
+                             abund_values="counts")
+x <- unsplitByRanks(se, ranks = taxonomyRanks(se)[1:6])
+x <- addTaxonomyTree(x)
+```
+ 
+After some preparation the data is assembled and can be plotted via 
+`plotRowTree`.
+
+
+```r
+library(miaViz)
+plotRowTree(x[rowData(x)$Phylum %in% top_phyla,],
+            edge_colour_by = "Phylum",
+            tip_colour_by = "prevalence",
+            node_colour_by = "prevalence")
+```
+
+<div class="figure">
+<img src="13-microbiome-exploration_files/figure-html/plot-prev-prev-1.png" alt="Prevalence of top phyla as jduged by prevalence" width="672" />
+<p class="caption">(\#fig:plot-prev-prev)Prevalence of top phyla as jduged by prevalence</p>
+</div>
+
+```r
+plotRowTree(x[rowData(x)$Phylum %in% top_phyla_mean,],
+            edge_colour_by = "Phylum",
+            tip_colour_by = "prevalence",
+            node_colour_by = "prevalence")
+```
+
+<div class="figure">
+<img src="13-microbiome-exploration_files/figure-html/plot-prev-mean-1.png" alt="Prevalence of top phyla as jduged by prevalence" width="672" />
+<p class="caption">(\#fig:plot-prev-mean)Prevalence of top phyla as jduged by prevalence</p>
+</div>
 
 ## Session Info {-}
 
@@ -130,42 +260,57 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] mia_0.0.0.9009                   MicrobiomeExperiment_0.99.0.9014
- [3] Biostrings_2.58.0                XVector_0.30.0                  
- [5] TreeSummarizedExperiment_1.6.0   SingleCellExperiment_1.12.0     
- [7] SummarizedExperiment_1.20.0      Biobase_2.50.0                  
- [9] GenomicRanges_1.42.0             GenomeInfoDb_1.26.1             
-[11] IRanges_2.24.0                   S4Vectors_0.28.0                
-[13] BiocGenerics_0.36.0              MatrixGenerics_1.2.0            
-[15] matrixStats_0.57.0               BiocStyle_2.18.1                
-[17] rebook_1.0.0                     BiocManager_1.30.10             
+ [1] miaViz_0.98.3                    scater_1.18.3                   
+ [3] ggplot2_3.3.2                    mia_0.98.14                     
+ [5] MicrobiomeExperiment_0.99.0.9014 Biostrings_2.58.0               
+ [7] XVector_0.30.0                   TreeSummarizedExperiment_1.6.2  
+ [9] SingleCellExperiment_1.12.0      SummarizedExperiment_1.20.0     
+[11] Biobase_2.50.0                   GenomicRanges_1.42.0            
+[13] GenomeInfoDb_1.26.1              IRanges_2.24.0                  
+[15] S4Vectors_0.28.0                 BiocGenerics_0.36.0             
+[17] MatrixGenerics_1.2.0             matrixStats_0.57.0              
+[19] BiocStyle_2.18.1                 rebook_1.0.0                    
+[21] BiocManager_1.30.10             
 
 loaded via a namespace (and not attached):
- [1] tidyselect_1.1.0          xfun_0.19                
- [3] beachmat_2.6.2            purrr_0.3.4              
- [5] lattice_0.20-41           vctrs_0.3.5              
- [7] generics_0.1.0            htmltools_0.5.0          
- [9] yaml_2.2.1                XML_3.99-0.5             
-[11] rlang_0.4.9               pillar_1.4.7             
-[13] scuttle_1.0.3             glue_1.4.2               
-[15] BiocParallel_1.24.1       CodeDepends_0.6.5        
-[17] GenomeInfoDbData_1.2.4    lifecycle_0.2.0          
-[19] stringr_1.4.0             zlibbioc_1.36.0          
-[21] codetools_0.2-18          evaluate_0.14            
-[23] knitr_1.30                callr_3.5.1              
-[25] ps_1.4.0                  Rcpp_1.0.5               
-[27] DelayedArray_0.16.0       graph_1.68.0             
-[29] digest_0.6.27             stringi_1.5.3            
-[31] bookdown_0.21             processx_3.4.5           
-[33] dplyr_1.0.2               grid_4.0.3               
-[35] tools_4.0.3               bitops_1.0-6             
-[37] magrittr_2.0.1            RCurl_1.98-1.2           
-[39] tibble_3.0.4              tidyr_1.1.2              
-[41] pkgconfig_2.0.3           crayon_1.3.4             
-[43] ape_5.4-1                 ellipsis_0.3.1           
-[45] Matrix_1.2-18             DelayedMatrixStats_1.12.1
-[47] sparseMatrixStats_1.2.0   rmarkdown_2.5            
-[49] R6_2.5.0                  nlme_3.1-150             
-[51] compiler_4.0.3           
+ [1] nlme_3.1-150              bitops_1.0-6             
+ [3] ggtree_2.4.1              tools_4.0.3              
+ [5] R6_2.5.0                  irlba_2.3.3              
+ [7] vipor_0.4.5               lazyeval_0.2.2           
+ [9] colorspace_2.0-0          withr_2.3.0              
+[11] tidyselect_1.1.0          gridExtra_2.3            
+[13] processx_3.4.5            compiler_4.0.3           
+[15] graph_1.68.0              BiocNeighbors_1.8.1      
+[17] DelayedArray_0.16.0       labeling_0.4.2           
+[19] bookdown_0.21             scales_1.1.1             
+[21] callr_3.5.1               stringr_1.4.0            
+[23] digest_0.6.27             rmarkdown_2.5            
+[25] pkgconfig_2.0.3           htmltools_0.5.0          
+[27] sparseMatrixStats_1.2.0   highr_0.8                
+[29] rlang_0.4.9               DelayedMatrixStats_1.12.1
+[31] generics_0.1.0            farver_2.0.3             
+[33] jsonlite_1.7.1            BiocParallel_1.24.1      
+[35] dplyr_1.0.2               RCurl_1.98-1.2           
+[37] magrittr_2.0.1            BiocSingular_1.6.0       
+[39] GenomeInfoDbData_1.2.4    scuttle_1.0.3            
+[41] patchwork_1.1.0           Matrix_1.2-18            
+[43] Rcpp_1.0.5                ggbeeswarm_0.6.0         
+[45] munsell_0.5.0             ape_5.4-1                
+[47] viridis_0.5.1             lifecycle_0.2.0          
+[49] stringi_1.5.3             yaml_2.2.1               
+[51] zlibbioc_1.36.0           grid_4.0.3               
+[53] crayon_1.3.4              lattice_0.20-41          
+[55] beachmat_2.6.2            CodeDepends_0.6.5        
+[57] knitr_1.30                ps_1.5.0                 
+[59] pillar_1.4.7              codetools_0.2-18         
+[61] XML_3.99-0.5              glue_1.4.2               
+[63] evaluate_0.14             treeio_1.14.3            
+[65] vctrs_0.3.5               gtable_0.3.0             
+[67] purrr_0.3.4               tidyr_1.1.2              
+[69] xfun_0.19                 rsvd_1.0.3               
+[71] tidytree_0.3.3            viridisLite_0.3.0        
+[73] tibble_3.0.4              aplot_0.0.6              
+[75] rvcheck_0.1.8             beeswarm_0.2.3           
+[77] ellipsis_0.3.1           
 ```
 </div>

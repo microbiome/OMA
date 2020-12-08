@@ -1,6 +1,4 @@
-# (PART) Focus Topics {-}
-
-# Overview
+# Microbiome Diversity {#microbiome-diversity}
 
 <script>
 document.addEventListener("click", function (event) {
@@ -37,13 +35,23 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
-## Introduction
 
-## Microbiome experiment types
+## Alpha diversity
 
-## Processing steps
 
-## Quick Start
+
+## Beta diversity
+
+
+### Community comparisons
+
+PERMANOVA and other methods.
+
+
+### Visualizing beta diversity
+
+Ordination with PCoA, UMAP, and other methods.
+
 
 ## Session Info {-}
 

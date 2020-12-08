@@ -412,9 +412,9 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] mia_0.0.0.9009                   MicrobiomeExperiment_0.99.0.9014
+ [1] mia_0.98.14                      MicrobiomeExperiment_0.99.0.9014
  [3] Biostrings_2.58.0                XVector_0.30.0                  
- [5] TreeSummarizedExperiment_1.6.0   SingleCellExperiment_1.12.0     
+ [5] TreeSummarizedExperiment_1.6.2   SingleCellExperiment_1.12.0     
  [7] SummarizedExperiment_1.20.0      Biobase_2.50.0                  
  [9] GenomicRanges_1.42.0             GenomeInfoDb_1.26.1             
 [11] IRanges_2.24.0                   S4Vectors_0.28.0                
@@ -423,33 +423,41 @@ other attached packages:
 [17] rebook_1.0.0                     BiocManager_1.30.10             
 
 loaded via a namespace (and not attached):
- [1] Rcpp_1.0.5                ape_5.4-1                
- [3] lattice_0.20-41           tidyr_1.1.2              
- [5] ps_1.4.0                  utf8_1.1.4               
- [7] assertthat_0.2.1          digest_0.6.27            
- [9] R6_2.5.0                  evaluate_0.14            
-[11] pillar_1.4.7              sparseMatrixStats_1.2.0  
-[13] zlibbioc_1.36.0           rlang_0.4.9              
-[15] callr_3.5.1               Matrix_1.2-18            
-[17] rmarkdown_2.5             BiocParallel_1.24.1      
-[19] stringr_1.4.0             RCurl_1.98-1.2           
-[21] beachmat_2.6.2            DelayedArray_0.16.0      
-[23] compiler_4.0.3            xfun_0.19                
-[25] pkgconfig_2.0.3           CodeDepends_0.6.5        
-[27] htmltools_0.5.0           tidyselect_1.1.0         
-[29] tibble_3.0.4              GenomeInfoDbData_1.2.4   
-[31] bookdown_0.21             codetools_0.2-18         
-[33] XML_3.99-0.5              fansi_0.4.1              
-[35] crayon_1.3.4              dplyr_1.0.2              
-[37] bitops_1.0-6              grid_4.0.3               
-[39] nlme_3.1-150              lifecycle_0.2.0          
-[41] magrittr_2.0.1            graph_1.68.0             
-[43] cli_2.2.0                 stringi_1.5.3            
-[45] scuttle_1.0.3             DelayedMatrixStats_1.12.1
-[47] ellipsis_0.3.1            generics_0.1.0           
-[49] vctrs_0.3.5               tools_4.0.3              
-[51] glue_1.4.2                purrr_0.3.4              
-[53] processx_3.4.5            yaml_2.2.1               
-[55] knitr_1.30               
+ [1] viridis_0.5.1             tidyr_1.1.2              
+ [3] BiocSingular_1.6.0        viridisLite_0.3.0        
+ [5] DelayedMatrixStats_1.12.1 scuttle_1.0.3            
+ [7] assertthat_0.2.1          vipor_0.4.5              
+ [9] GenomeInfoDbData_1.2.4    yaml_2.2.1               
+[11] pillar_1.4.7              lattice_0.20-41          
+[13] glue_1.4.2                beachmat_2.6.2           
+[15] digest_0.6.27             colorspace_2.0-0         
+[17] htmltools_0.5.0           Matrix_1.2-18            
+[19] XML_3.99-0.5              pkgconfig_2.0.3          
+[21] bookdown_0.21             zlibbioc_1.36.0          
+[23] purrr_0.3.4               scales_1.1.1             
+[25] processx_3.4.5            BiocParallel_1.24.1      
+[27] tibble_3.0.4              generics_0.1.0           
+[29] ggplot2_3.3.2             ellipsis_0.3.1           
+[31] cli_2.2.0                 magrittr_2.0.1           
+[33] crayon_1.3.4              CodeDepends_0.6.5        
+[35] evaluate_0.14             ps_1.5.0                 
+[37] fansi_0.4.1               nlme_3.1-150             
+[39] beeswarm_0.2.3            graph_1.68.0             
+[41] tools_4.0.3               scater_1.18.3            
+[43] lifecycle_0.2.0           stringr_1.4.0            
+[45] munsell_0.5.0             DelayedArray_0.16.0      
+[47] irlba_2.3.3               callr_3.5.1              
+[49] compiler_4.0.3            rsvd_1.0.3               
+[51] rlang_0.4.9               grid_4.0.3               
+[53] RCurl_1.98-1.2            BiocNeighbors_1.8.1      
+[55] bitops_1.0-6              rmarkdown_2.5            
+[57] gtable_0.3.0              codetools_0.2-18         
+[59] R6_2.5.0                  gridExtra_2.3            
+[61] knitr_1.30                dplyr_1.0.2              
+[63] utf8_1.1.4                ape_5.4-1                
+[65] stringi_1.5.3             ggbeeswarm_0.6.0         
+[67] Rcpp_1.0.5                vctrs_0.3.5              
+[69] tidyselect_1.1.0          xfun_0.19                
+[71] sparseMatrixStats_1.2.0  
 ```
 </div>

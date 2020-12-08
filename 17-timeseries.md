@@ -1,6 +1,4 @@
-# (PART) Focus Topics {-}
-
-# Overview
+# Microbiome time series {#microbiome-timeseries}
 
 <script>
 document.addEventListener("click", function (event) {
@@ -37,13 +35,13 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
-## Introduction
+This chapter focuses on the exploration of microbiome time series.
 
-## Microbiome experiment types
 
-## Processing steps
+## Stability
 
-## Quick Start
+## Tipping elements
+
 
 ## Session Info {-}
 

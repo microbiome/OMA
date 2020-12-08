@@ -1,6 +1,4 @@
-# (PART) Focus Topics {-}
-
-# Overview
+# Differential abundance {#differential-abundance}
 
 <script>
 document.addEventListener("click", function (event) {
@@ -37,13 +35,11 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
-## Introduction
 
-## Microbiome experiment types
 
-## Processing steps
+A number of methods for differential abundance analysis are available,
+and reviewed elsewhere.
 
-## Quick Start
 
 ## Session Info {-}
 

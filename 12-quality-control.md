@@ -225,9 +225,9 @@ attached base packages:
 
 other attached packages:
  [1] scater_1.18.3                    ggplot2_3.3.2                   
- [3] mia_0.0.0.9009                   MicrobiomeExperiment_0.99.0.9014
+ [3] mia_0.98.14                      MicrobiomeExperiment_0.99.0.9014
  [5] Biostrings_2.58.0                XVector_0.30.0                  
- [7] TreeSummarizedExperiment_1.6.0   SingleCellExperiment_1.12.0     
+ [7] TreeSummarizedExperiment_1.6.2   SingleCellExperiment_1.12.0     
  [9] SummarizedExperiment_1.20.0      Biobase_2.50.0                  
 [11] GenomicRanges_1.42.0             GenomeInfoDb_1.26.1             
 [13] IRanges_2.24.0                   S4Vectors_0.28.0                
@@ -236,8 +236,8 @@ other attached packages:
 [19] rebook_1.0.0                     BiocManager_1.30.10             
 
 loaded via a namespace (and not attached):
- [1] viridis_0.5.1             BiocSingular_1.6.0       
- [3] tidyr_1.1.2               viridisLite_0.3.0        
+ [1] viridis_0.5.1             tidyr_1.1.2              
+ [3] BiocSingular_1.6.0        viridisLite_0.3.0        
  [5] DelayedMatrixStats_1.12.1 scuttle_1.0.3            
  [7] highr_0.8                 vipor_0.4.5              
  [9] GenomeInfoDbData_1.2.4    yaml_2.2.1               
@@ -253,7 +253,7 @@ loaded via a namespace (and not attached):
 [29] generics_0.1.0            ellipsis_0.3.1           
 [31] withr_2.3.0               magrittr_2.0.1           
 [33] crayon_1.3.4              CodeDepends_0.6.5        
-[35] evaluate_0.14             ps_1.4.0                 
+[35] evaluate_0.14             ps_1.5.0                 
 [37] nlme_3.1-150              beeswarm_0.2.3           
 [39] graph_1.68.0              tools_4.0.3              
 [41] lifecycle_0.2.0           stringr_1.4.0            
@@ -267,7 +267,7 @@ loaded via a namespace (and not attached):
 [57] codetools_0.2-18          R6_2.5.0                 
 [59] gridExtra_2.3             knitr_1.30               
 [61] dplyr_1.0.2               ape_5.4-1                
-[63] ggbeeswarm_0.6.0          stringi_1.5.3            
+[63] stringi_1.5.3             ggbeeswarm_0.6.0         
 [65] Rcpp_1.0.5                vctrs_0.3.5              
 [67] tidyselect_1.1.0          xfun_0.19                
 [69] sparseMatrixStats_1.2.0  

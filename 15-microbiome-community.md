@@ -1,6 +1,4 @@
-# (PART) Focus Topics {-}
-
-# Overview
+# Microbiome Community {#microbiome-community}
 
 <script>
 document.addEventListener("click", function (event) {
@@ -37,13 +35,17 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
-## Introduction
 
-## Microbiome experiment types
 
-## Processing steps
+## Community composition
 
-## Quick Start
+Heatmaps
+
+
+## Community typing
+
+- Community State Types (CST)
+- Dirichlet Multinomial Mixtures (DMM)
 
 ## Session Info {-}
 

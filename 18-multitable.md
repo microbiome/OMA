@@ -1,6 +1,4 @@
-# (PART) Focus Topics {-}
-
-# Overview
+# Multi-table methods {#multitable}
 
 <script>
 document.addEventListener("click", function (event) {
@@ -37,13 +35,10 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
-## Introduction
+This chapter focuses on multi-table methods.
 
-## Microbiome experiment types
 
-## Processing steps
 
-## Quick Start
 
 ## Session Info {-}
 
