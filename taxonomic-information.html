@@ -164,11 +164,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="overview.html"><a href="overview.html#session-info-1"><i class="fa fa-check"></i>Session Info</a></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="taxonomic-information.html"><a href="taxonomic-information.html"><i class="fa fa-check"></i><b>3</b> Taxonomic information</a><ul>
-<li class="chapter" data-level="3.1" data-path="taxonomic-information.html"><a href="taxonomic-information.html#data-agglomeration"><i class="fa fa-check"></i><b>3.1</b> Data agglomeration</a></li>
-<li class="chapter" data-level="3.2" data-path="taxonomic-information.html"><a href="taxonomic-information.html#get-unique"><i class="fa fa-check"></i><b>3.2</b> Get unique</a></li>
-<li class="chapter" data-level="3.3" data-path="taxonomic-information.html"><a href="taxonomic-information.html#pick-specific"><i class="fa fa-check"></i><b>3.3</b> Pick specific</a><ul>
-<li class="chapter" data-level="3.3.1" data-path="taxonomic-information.html"><a href="taxonomic-information.html#abundances-of-all-taxa-in-specific-sample"><i class="fa fa-check"></i><b>3.3.1</b> Abundances of all taxa in specific sample</a></li>
-<li class="chapter" data-level="3.3.2" data-path="taxonomic-information.html"><a href="taxonomic-information.html#abundances-of-specific-taxa-in-all-samples"><i class="fa fa-check"></i><b>3.3.2</b> Abundances of specific taxa in all samples</a></li>
+<li class="chapter" data-level="3.1" data-path="taxonomic-information.html"><a href="taxonomic-information.html#assigning-taxonomic-information."><i class="fa fa-check"></i><b>3.1</b> Assigning taxonomic information.</a><ul>
+<li class="chapter" data-level="3.1.1" data-path="taxonomic-information.html"><a href="taxonomic-information.html#dada2"><i class="fa fa-check"></i><b>3.1.1</b> dada2</a></li>
+<li class="chapter" data-level="3.1.2" data-path="taxonomic-information.html"><a href="taxonomic-information.html#decipher"><i class="fa fa-check"></i><b>3.1.2</b> DECIPHER</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="taxonomic-information.html"><a href="taxonomic-information.html#functions-to-access-taxonomic-information"><i class="fa fa-check"></i><b>3.2</b> Functions to access taxonomic information</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="taxonomic-information.html"><a href="taxonomic-information.html#generate-a-taxonomic-tree-on-the-fly"><i class="fa fa-check"></i><b>3.2.1</b> Generate a taxonomic tree on the fly</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="taxonomic-information.html"><a href="taxonomic-information.html#data-agglomeration"><i class="fa fa-check"></i><b>3.3</b> Data agglomeration</a></li>
+<li class="chapter" data-level="3.4" data-path="taxonomic-information.html"><a href="taxonomic-information.html#pick-specific"><i class="fa fa-check"></i><b>3.4</b> Pick specific</a><ul>
+<li class="chapter" data-level="3.4.1" data-path="taxonomic-information.html"><a href="taxonomic-information.html#abundances-of-all-taxa-in-specific-sample"><i class="fa fa-check"></i><b>3.4.1</b> Abundances of all taxa in specific sample</a></li>
+<li class="chapter" data-level="3.4.2" data-path="taxonomic-information.html"><a href="taxonomic-information.html#abundances-of-specific-taxa-in-all-samples"><i class="fa fa-check"></i><b>3.4.2</b> Abundances of specific taxa in all samples</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="taxonomic-information.html"><a href="taxonomic-information.html#session-info-2"><i class="fa fa-check"></i>Session Info</a></li>
 </ul></li>
@@ -279,32 +285,169 @@ document.addEventListener("click", function (event) {
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="taxonomic-information.html#cb24-1"></a><span class="kw">library</span>(mia)</span>
 <span id="cb24-2"><a href="taxonomic-information.html#cb24-2"></a><span class="kw">data</span>(<span class="st">&quot;GlobalPatterns&quot;</span>)</span>
 <span id="cb24-3"><a href="taxonomic-information.html#cb24-3"></a>se &lt;-<span class="st"> </span>GlobalPatterns </span></code></pre></div>
-<div id="data-agglomeration" class="section level2">
-<h2><span class="header-section-number">3.1</span> Data agglomeration</h2>
-<p>Agglomerate at a specific taxonomic rank. If multiple assays (counts and relabundance) exists, both will be agglomerated.</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="taxonomic-information.html#cb25-1"></a><span class="kw">altExp</span>(se, <span class="st">&quot;Family&quot;</span>) &lt;-<span class="st"> </span><span class="kw">agglomerateByRank</span>(se, <span class="dt">rank =</span> <span class="st">&quot;Family&quot;</span>,</span>
-<span id="cb25-2"><a href="taxonomic-information.html#cb25-2"></a>                                          <span class="dt">agglomerateTree =</span> <span class="ot">TRUE</span>)</span>
-<span id="cb25-3"><a href="taxonomic-information.html#cb25-3"></a></span>
-<span id="cb25-4"><a href="taxonomic-information.html#cb25-4"></a>se</span></code></pre></div>
+<p>Taxonomic information are a key part of analyzing microbiome data and without
+it, any type of data analysis probably will not make much sense. However,
+the degree of detail of taxonomic information differs depending on the dataset
+and annotation data used.</p>
+<p>Therefore, the mia package expects a loose assembly of taxonomic information
+and assumes certain key aspects:</p>
+<ul>
+<li>Taxonomic information is given as character vectors or factors in the
+<code>rowData</code> of an <code>SummarizedExperiment</code> object.</li>
+<li>The columns containing the taxonomic information must be named <code>domain</code>,
+<code>kingdom</code>, <code>phylum</code>, <code>class</code>, <code>order</code>, <code>family</code>, <code>genus</code>, <code>species</code> or with
+a capital first letter.</li>
+<li>the columns must be given in the order shown above</li>
+<li>column can be omited, but the order must remain</li>
+</ul>
+<div id="assigning-taxonomic-information." class="section level2">
+<h2><span class="header-section-number">3.1</span> Assigning taxonomic information.</h2>
+<p>There are a number of methods to assign taxonomic information. We like to give
+a short introduction about the methods available without ranking one over the
+other. This has to be your choice based on the result for the individual
+dataset.</p>
+<div id="dada2" class="section level3">
+<h3><span class="header-section-number">3.1.1</span> dada2</h3>
+<p>The dada2 package <span class="citation">(<span class="citeproc-not-found" data-reference-id="R-dada2"><strong>???</strong></span>)</span> implements the <code>assignTaxonomy</code> function, which
+takes as input the ASV sequences associated with each row of data and a training
+dataset. For more information visit the
+<a href="https://benjjneb.github.io/dada2/assign.html">dada2 website</a>.</p>
+</div>
+<div id="decipher" class="section level3">
+<h3><span class="header-section-number">3.1.2</span> DECIPHER</h3>
+<p>The DECIPHER package <span class="citation">(<span class="citeproc-not-found" data-reference-id="R-DECIPHER"><strong>???</strong></span>)</span> implements the <code>IDTAXA</code> algorithm to assign
+either taxonomic information or function information. For <code>mia</code>
+only the first option is of interest for now and more information can be
+found on the <a href="http://www2.decipher.codes/Classification.html">DECIPHER website</a></p>
+</div>
+</div>
+<div id="functions-to-access-taxonomic-information" class="section level2">
+<h2><span class="header-section-number">3.2</span> Functions to access taxonomic information</h2>
+<p><code>checkTaxonomy</code> checks whether the taxonomic information is usable for <code>mia</code></p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="taxonomic-information.html#cb25-1"></a><span class="kw">checkTaxonomy</span>(se)</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>Since the <code>rowData</code> can contain other data, <code>taxonomyRanks</code> will return the
+columns <code>mia</code> assumes to contain the taxonomic information.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="taxonomic-information.html#cb27-1"></a><span class="kw">taxonomyRanks</span>(se)</span></code></pre></div>
+<pre><code>## [1] &quot;Kingdom&quot; &quot;Phylum&quot;  &quot;Class&quot;   &quot;Order&quot;   &quot;Family&quot;  &quot;Genus&quot;   &quot;Species&quot;</code></pre>
+<p>This can then be used to subset the <code>rowData</code> to columns needed.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="taxonomic-information.html#cb29-1"></a><span class="kw">rowData</span>(se)[,<span class="kw">taxonomyRanks</span>(se)]</span></code></pre></div>
+<pre><code>## DataFrame with 19216 rows and 7 columns
+##            Kingdom        Phylum        Class        Order        Family
+##        &lt;character&gt;   &lt;character&gt;  &lt;character&gt;  &lt;character&gt;   &lt;character&gt;
+## 549322     Archaea Crenarchaeota Thermoprotei           NA            NA
+## 522457     Archaea Crenarchaeota Thermoprotei           NA            NA
+## 951        Archaea Crenarchaeota Thermoprotei Sulfolobales Sulfolobaceae
+## 244423     Archaea Crenarchaeota        Sd-NA           NA            NA
+## 586076     Archaea Crenarchaeota        Sd-NA           NA            NA
+## ...            ...           ...          ...          ...           ...
+## 278222    Bacteria           SR1           NA           NA            NA
+## 463590    Bacteria           SR1           NA           NA            NA
+## 535321    Bacteria           SR1           NA           NA            NA
+## 200359    Bacteria           SR1           NA           NA            NA
+## 271582    Bacteria           SR1           NA           NA            NA
+##              Genus                Species
+##        &lt;character&gt;            &lt;character&gt;
+## 549322          NA                     NA
+## 522457          NA                     NA
+## 951     Sulfolobus Sulfolobusacidocalda..
+## 244423          NA                     NA
+## 586076          NA                     NA
+## ...            ...                    ...
+## 278222          NA                     NA
+## 463590          NA                     NA
+## 535321          NA                     NA
+## 200359          NA                     NA
+## 271582          NA                     NA</code></pre>
+<p><code>taxonomyRankEmpty</code> checks for empty values in the given <code>rank</code> and returns a
+logical vector of <code>length(x)</code>.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="taxonomic-information.html#cb31-1"></a><span class="kw">all</span>(<span class="op">!</span><span class="kw">taxonomyRankEmpty</span>(se, <span class="dt">rank =</span> <span class="st">&quot;Kingdom&quot;</span>))</span></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="taxonomic-information.html#cb33-1"></a><span class="kw">table</span>(<span class="kw">taxonomyRankEmpty</span>(se, <span class="dt">rank =</span> <span class="st">&quot;Genus&quot;</span>))</span></code></pre></div>
+<pre><code>## 
+## FALSE  TRUE 
+##  8008 11208</code></pre>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="taxonomic-information.html#cb35-1"></a><span class="kw">table</span>(<span class="kw">taxonomyRankEmpty</span>(se, <span class="dt">rank =</span> <span class="st">&quot;Species&quot;</span>))</span></code></pre></div>
+<pre><code>## 
+## FALSE  TRUE 
+##  1413 17803</code></pre>
+<p><code>getTaxonomyLabels</code> is a multi-purpose function, which turns taxonomic
+information into a character vector of <code>length(x)</code></p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="taxonomic-information.html#cb37-1"></a><span class="kw">head</span>(<span class="kw">getTaxonomyLabels</span>(se))</span></code></pre></div>
+<pre><code>## [1] &quot;Class:Thermoprotei&quot;               &quot;Class:Thermoprotei_1&quot;            
+## [3] &quot;Species:Sulfolobusacidocaldarius&quot; &quot;Class:Sd-NA&quot;                     
+## [5] &quot;Class:Sd-NA_1&quot;                    &quot;Class:Sd-NA_2&quot;</code></pre>
+<p>By default this will used the lowest non-empty information to construct a
+string with the following scheme <code>level:value</code>. If all levels are the same
+this part is omited, but can be added by setting <code>with_rank = TRUE</code></p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="taxonomic-information.html#cb39-1"></a>phylum &lt;-<span class="st"> </span><span class="op">!</span><span class="kw">is.na</span>(<span class="kw">rowData</span>(se)<span class="op">$</span>Phylum) <span class="op">&amp;</span><span class="st"> </span></span>
+<span id="cb39-2"><a href="taxonomic-information.html#cb39-2"></a><span class="st">    </span><span class="kw">vapply</span>(<span class="kw">data.frame</span>(<span class="kw">apply</span>(<span class="kw">rowData</span>(se)[,<span class="kw">taxonomyRanks</span>(se)[<span class="dv">3</span><span class="op">:</span><span class="dv">7</span>]],1L,is.na)),all,<span class="kw">logical</span>(<span class="dv">1</span>))</span>
+<span id="cb39-3"><a href="taxonomic-information.html#cb39-3"></a><span class="kw">head</span>(<span class="kw">getTaxonomyLabels</span>(se[phylum,]))</span></code></pre></div>
+<pre><code>## [1] &quot;Crenarchaeota&quot;    &quot;Crenarchaeota_1&quot;  &quot;Crenarchaeota_2&quot;  &quot;Actinobacteria&quot;  
+## [5] &quot;Actinobacteria_1&quot; &quot;Spirochaetes&quot;</code></pre>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="taxonomic-information.html#cb41-1"></a><span class="kw">head</span>(<span class="kw">getTaxonomyLabels</span>(se[phylum,], <span class="dt">with_rank =</span> <span class="ot">TRUE</span>))</span></code></pre></div>
+<pre><code>## [1] &quot;Phylum:Crenarchaeota&quot;    &quot;Phylum:Crenarchaeota_1&quot; 
+## [3] &quot;Phylum:Crenarchaeota_2&quot;  &quot;Phylum:Actinobacteria&quot;  
+## [5] &quot;Phylum:Actinobacteria_1&quot; &quot;Phylum:Spirochaetes&quot;</code></pre>
+<p>By default the return value of <code>getTaxonomyLabels</code> contains only unique elements
+by passing it through <code>make.unique</code>. This step can be omited by setting
+<code>make_unique = FALSE</code></p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="taxonomic-information.html#cb43-1"></a><span class="kw">head</span>(<span class="kw">getTaxonomyLabels</span>(se[phylum,], <span class="dt">with_rank =</span> <span class="ot">TRUE</span>, <span class="dt">make_unique =</span> <span class="ot">FALSE</span>))</span></code></pre></div>
+<pre><code>## [1] &quot;Phylum:Crenarchaeota&quot;  &quot;Phylum:Crenarchaeota&quot;  &quot;Phylum:Crenarchaeota&quot; 
+## [4] &quot;Phylum:Actinobacteria&quot; &quot;Phylum:Actinobacteria&quot; &quot;Phylum:Spirochaetes&quot;</code></pre>
+<p>To apply the loop resolving function <code>resolveLoop</code> from the
+<code>TreeSummarizedExperiment</code> package <span class="citation">(<span class="citeproc-not-found" data-reference-id="R-TreeSummarizedExperiment"><strong>???</strong></span>)</span> within
+<code>getTaxonomyLabels</code>, set <code>resolve_loops = TRUE</code>.</p>
+<div id="generate-a-taxonomic-tree-on-the-fly" class="section level3">
+<h3><span class="header-section-number">3.2.1</span> Generate a taxonomic tree on the fly</h3>
+<p>To create a taxonomic tree <code>taxonomyTree</code> used the information and returns a
+<code>phylo</code> object. Duplicate information from the <code>rowData</code> are removed.</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="taxonomic-information.html#cb45-1"></a><span class="kw">taxonomyTree</span>(se)</span></code></pre></div>
+<pre><code>## 
+## Phylogenetic tree with 1645 tips and 1089 internal nodes.
+## 
+## Tip labels:
+##   Species:Cenarchaeumsymbiosum, Species:pIVWA5, Species:CandidatusNitrososphaeragargensis, Species:SCA1145, Species:SCA1170, Species:Sulfolobusacidocaldarius, ...
+## Node labels:
+##   root:ALL, Kingdom:Archaea, Phylum:Crenarchaeota, Class:C2, Class:Sd-NA, Class:Thaumarchaeota, ...
+## 
+## Rooted; includes branch lengths.</code></pre>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="taxonomic-information.html#cb47-1"></a>se &lt;-<span class="st"> </span><span class="kw">addTaxonomyTree</span>(se)</span>
+<span id="cb47-2"><a href="taxonomic-information.html#cb47-2"></a>se</span></code></pre></div>
 <pre><code>## class: TreeSummarizedExperiment 
 ## dim: 19216 26 
 ## metadata(0):
 ## assays(1): counts
-## rownames(19216): 549322 522457 ... 200359 271582
+## rownames(19216): Class:Thermoprotei Class:Thermoprotei ... Phylum:SR1
+##   Phylum:SR1
 ## rowData names(7): Kingdom Phylum ... Genus Species
 ## colnames(26): CL3 CC1 ... Even2 Even3
 ## colData names(7): X.SampleID Primer ... SampleType Description
 ## reducedDimNames(0):
-## altExpNames(1): Family
+## altExpNames(0):
 ## rowLinks: a LinkDataFrame (19216 rows)
-## rowTree: a phylo (19216 leaves)
+## rowTree: a phylo (1645 leaves)
 ## colLinks: NULL
 ## colTree: NULL</code></pre>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="taxonomic-information.html#cb27-1"></a><span class="kw">altExp</span>(se, <span class="st">&quot;Family&quot;</span>)</span></code></pre></div>
+<p>The implementation is based on the the <code>toTree</code> function from the
+<code>TreeSummarizedExperiment</code> package <span class="citation">(<span class="citeproc-not-found" data-reference-id="R-TreeSummarizedExperiment"><strong>???</strong></span>)</span>.</p>
+</div>
+</div>
+<div id="data-agglomeration" class="section level2">
+<h2><span class="header-section-number">3.3</span> Data agglomeration</h2>
+<p>One of the main applications of taxonomic information in regards to count data
+is to agglomerate count data on taxonomic levels and track the influence of
+changing conditions through these levels. For this <code>mia</code> contains the
+<code>agglomerateByRank</code> function. The ideal location to store the agglomerated data
+is as an alternative experiment.</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="taxonomic-information.html#cb49-1"></a>se &lt;-<span class="st"> </span><span class="kw">relAbundanceCounts</span>(se)</span>
+<span id="cb49-2"><a href="taxonomic-information.html#cb49-2"></a><span class="kw">altExp</span>(se, <span class="st">&quot;Family&quot;</span>) &lt;-<span class="st"> </span><span class="kw">agglomerateByRank</span>(se, <span class="dt">rank =</span> <span class="st">&quot;Family&quot;</span>,</span>
+<span id="cb49-3"><a href="taxonomic-information.html#cb49-3"></a>                                          <span class="dt">agglomerateTree =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb49-4"><a href="taxonomic-information.html#cb49-4"></a><span class="kw">altExp</span>(se, <span class="st">&quot;Family&quot;</span>)</span></code></pre></div>
 <pre><code>## class: TreeSummarizedExperiment 
 ## dim: 603 26 
 ## metadata(0):
-## assays(1): counts
+## assays(2): counts relabundance
 ## rownames(603): Class:Thermoprotei Family:Sulfolobaceae ...
 ##   Family:Thermodesulfobiaceae Phylum:SR1
 ## rowData names(7): Kingdom Phylum ... Genus Species
@@ -313,59 +456,61 @@ document.addEventListener("click", function (event) {
 ## reducedDimNames(0):
 ## altExpNames(0):
 ## rowLinks: a LinkDataFrame (603 rows)
-## rowTree: a phylo (6325 leaves)
+## rowTree: a phylo (876 leaves)
 ## colLinks: NULL
 ## colTree: NULL</code></pre>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="taxonomic-information.html#cb29-1"></a><span class="kw">altExp</span>(se, <span class="st">&quot;Family&quot;</span>) &lt;-<span class="st"> </span><span class="kw">relAbundanceCounts</span>(<span class="kw">altExp</span>(se, <span class="st">&quot;Family&quot;</span>))</span>
-<span id="cb29-2"><a href="taxonomic-information.html#cb29-2"></a><span class="kw">assay</span>(<span class="kw">altExp</span>(se, <span class="st">&quot;Family&quot;</span>), <span class="st">&quot;relabundance&quot;</span>)[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="op">:</span><span class="dv">7</span>]</span></code></pre></div>
+<p>If multiple assays (counts and relabundance) exists, both will be agglomerated.</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="taxonomic-information.html#cb51-1"></a><span class="kw">assayNames</span>(se)</span></code></pre></div>
+<pre><code>## [1] &quot;counts&quot;       &quot;relabundance&quot;</code></pre>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="taxonomic-information.html#cb53-1"></a><span class="kw">assayNames</span>(<span class="kw">altExp</span>(se, <span class="st">&quot;Family&quot;</span>))</span></code></pre></div>
+<pre><code>## [1] &quot;counts&quot;       &quot;relabundance&quot;</code></pre>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="taxonomic-information.html#cb55-1"></a><span class="kw">assay</span>(<span class="kw">altExp</span>(se, <span class="st">&quot;Family&quot;</span>), <span class="st">&quot;relabundance&quot;</span>)[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="op">:</span><span class="dv">7</span>]</span></code></pre></div>
 <pre><code>##                            CL3       CC1 SV1 M31Fcsw M11Fcsw M31Plmr   M11Plmr
 ## Class:Thermoprotei   0.0000000 0.000e+00   0       0       0       0 0.000e+00
 ## Family:Sulfolobaceae 0.0000000 0.000e+00   0       0       0       0 2.305e-06
 ## Class:Sd-NA          0.0000000 0.000e+00   0       0       0       0 0.000e+00
 ## Order:NRP-J          0.0001991 2.070e-04   0       0       0       0 6.914e-06
 ## Family:SAGMA-X       0.0000000 6.165e-06   0       0       0       0 0.000e+00</code></pre>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="taxonomic-information.html#cb31-1"></a><span class="kw">assay</span>(<span class="kw">altExp</span>(se, <span class="st">&quot;Family&quot;</span>), <span class="st">&quot;counts&quot;</span>)[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="op">:</span><span class="dv">7</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="taxonomic-information.html#cb57-1"></a><span class="kw">assay</span>(<span class="kw">altExp</span>(se, <span class="st">&quot;Family&quot;</span>), <span class="st">&quot;counts&quot;</span>)[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="op">:</span><span class="dv">7</span>]</span></code></pre></div>
 <pre><code>##                      CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr
 ## Class:Thermoprotei     0   0   0       0       0       0       0
 ## Family:Sulfolobaceae   0   0   0       0       0       0       1
 ## Class:Sd-NA            0   0   0       0       0       0       0
 ## Order:NRP-J          172 235   0       0       0       0       3
 ## Family:SAGMA-X         0   7   0       0       0       0       0</code></pre>
-<p>These newly created data can also be kept in <code>altExp</code> a feature provided by
-<code>SingleCellExperiment</code>.</p>
-<p><code>altExpNames</code> now consists of <code>family</code> level data. This can be extended to use
+<p><code>altExpNames</code> now consists of <code>Family</code> level data. This can be extended to use
 any level present in Kingdom, Phylum, Class, Order, Family, Genus, Species.</p>
 </div>
-<div id="get-unique" class="section level2">
-<h2><span class="header-section-number">3.2</span> Get unique</h2>
-<p>Get which Phyla are present.</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="taxonomic-information.html#cb33-1"></a><span class="kw">head</span>(<span class="kw">unique</span>(<span class="kw">rowData</span>(se)[,<span class="st">&quot;Phylum&quot;</span>]))</span></code></pre></div>
-<pre><code>## [1] &quot;Crenarchaeota&quot;  &quot;Euryarchaeota&quot;  &quot;Actinobacteria&quot; &quot;Spirochaetes&quot;  
-## [5] &quot;MVP-15&quot;         &quot;Proteobacteria&quot;</code></pre>
-</div>
 <div id="pick-specific" class="section level2">
-<h2><span class="header-section-number">3.3</span> Pick specific</h2>
+<h2><span class="header-section-number">3.4</span> Pick specific</h2>
 <p>Retrieving of specific elements are required for specific analysis. For
 instance, extracting abundances for a specific taxa in all samples or all taxa
 in one sample.</p>
 <div id="abundances-of-all-taxa-in-specific-sample" class="section level3">
-<h3><span class="header-section-number">3.3.1</span> Abundances of all taxa in specific sample</h3>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="taxonomic-information.html#cb35-1"></a>taxa.abund.cc1 &lt;-<span class="st"> </span><span class="kw">getAbundanceSample</span>(se, </span>
-<span id="cb35-2"><a href="taxonomic-information.html#cb35-2"></a>                                     <span class="dt">sample_id =</span> <span class="st">&quot;CC1&quot;</span>,</span>
-<span id="cb35-3"><a href="taxonomic-information.html#cb35-3"></a>                                     <span class="dt">abund_values =</span> <span class="st">&quot;counts&quot;</span>)</span>
-<span id="cb35-4"><a href="taxonomic-information.html#cb35-4"></a></span>
-<span id="cb35-5"><a href="taxonomic-information.html#cb35-5"></a>taxa.abund.cc1[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>]</span></code></pre></div>
-<pre><code>## 549322 522457    951 244423 586076 246140 143239 244960 255340 144887 
-##      0      0      0      0      0      0      1      0    194      5</code></pre>
+<h3><span class="header-section-number">3.4.1</span> Abundances of all taxa in specific sample</h3>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="taxonomic-information.html#cb59-1"></a>taxa.abund.cc1 &lt;-<span class="st"> </span><span class="kw">getAbundanceSample</span>(se, </span>
+<span id="cb59-2"><a href="taxonomic-information.html#cb59-2"></a>                                     <span class="dt">sample_id =</span> <span class="st">&quot;CC1&quot;</span>,</span>
+<span id="cb59-3"><a href="taxonomic-information.html#cb59-3"></a>                                     <span class="dt">abund_values =</span> <span class="st">&quot;counts&quot;</span>)</span>
+<span id="cb59-4"><a href="taxonomic-information.html#cb59-4"></a>taxa.abund.cc1[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>]</span></code></pre></div>
+<pre><code>##               Class:Thermoprotei               Class:Thermoprotei 
+##                                0                                0 
+## Species:Sulfolobusacidocaldarius                      Class:Sd-NA 
+##                                0                                0 
+##                      Class:Sd-NA                      Class:Sd-NA 
+##                                0                                0 
+##                      Order:NRP-J                      Order:NRP-J 
+##                                1                                0 
+##                      Order:NRP-J                      Order:NRP-J 
+##                              194                                5</code></pre>
 </div>
 <div id="abundances-of-specific-taxa-in-all-samples" class="section level3">
-<h3><span class="header-section-number">3.3.2</span> Abundances of specific taxa in all samples</h3>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="taxonomic-information.html#cb37-1"></a>taxa.abundances &lt;-<span class="st"> </span><span class="kw">getAbundanceFeature</span>(se, </span>
-<span id="cb37-2"><a href="taxonomic-information.html#cb37-2"></a>                                      <span class="dt">feature_id =</span> <span class="st">&quot;255340&quot;</span>,</span>
-<span id="cb37-3"><a href="taxonomic-information.html#cb37-3"></a>                                       <span class="dt">abund_values =</span> <span class="st">&quot;counts&quot;</span>)</span>
-<span id="cb37-4"><a href="taxonomic-information.html#cb37-4"></a>taxa.abundances[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>]</span></code></pre></div>
+<h3><span class="header-section-number">3.4.2</span> Abundances of specific taxa in all samples</h3>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="taxonomic-information.html#cb61-1"></a>taxa.abundances &lt;-<span class="st"> </span><span class="kw">getAbundanceFeature</span>(se, </span>
+<span id="cb61-2"><a href="taxonomic-information.html#cb61-2"></a>                                      <span class="dt">feature_id =</span> <span class="st">&quot;Phylum:Bacteroidetes&quot;</span>,</span>
+<span id="cb61-3"><a href="taxonomic-information.html#cb61-3"></a>                                      <span class="dt">abund_values =</span> <span class="st">&quot;counts&quot;</span>)</span>
+<span id="cb61-4"><a href="taxonomic-information.html#cb61-4"></a>taxa.abundances[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>]</span></code></pre></div>
 <pre><code>##     CL3     CC1     SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr F21Plmr M31Tong M11Tong 
-##     153     194       0       0       0       0       0       0       0       0</code></pre>
+##       2      18       2       0       0       0       0       1       0       0</code></pre>
 </div>
 </div>
 <div id="session-info-2" class="section level2 unnumbered">
