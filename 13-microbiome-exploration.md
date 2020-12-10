@@ -261,13 +261,13 @@ attached base packages:
 
 other attached packages:
  [1] miaViz_0.98.3                    scater_1.18.3                   
- [3] ggplot2_3.3.2                    mia_0.98.14                     
+ [3] ggplot2_3.3.2                    mia_0.98.15                     
  [5] MicrobiomeExperiment_0.99.0.9014 Biostrings_2.58.0               
  [7] XVector_0.30.0                   TreeSummarizedExperiment_1.6.2  
  [9] SingleCellExperiment_1.12.0      SummarizedExperiment_1.20.0     
 [11] Biobase_2.50.0                   GenomicRanges_1.42.0            
-[13] GenomeInfoDb_1.26.1              IRanges_2.24.0                  
-[15] S4Vectors_0.28.0                 BiocGenerics_0.36.0             
+[13] GenomeInfoDb_1.26.2              IRanges_2.24.0                  
+[15] S4Vectors_0.28.1                 BiocGenerics_0.36.0             
 [17] MatrixGenerics_1.2.0             matrixStats_0.57.0              
 [19] BiocStyle_2.18.1                 rebook_1.0.0                    
 [21] BiocManager_1.30.10             
@@ -280,7 +280,7 @@ loaded via a namespace (and not attached):
  [9] colorspace_2.0-0          withr_2.3.0              
 [11] tidyselect_1.1.0          gridExtra_2.3            
 [13] processx_3.4.5            compiler_4.0.3           
-[15] graph_1.68.0              BiocNeighbors_1.8.1      
+[15] graph_1.68.0              BiocNeighbors_1.8.2      
 [17] DelayedArray_0.16.0       labeling_0.4.2           
 [19] bookdown_0.21             scales_1.1.1             
 [21] callr_3.5.1               stringr_1.4.0            

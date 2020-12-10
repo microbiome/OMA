@@ -104,12 +104,12 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] mia_0.98.14                      MicrobiomeExperiment_0.99.0.9014
+ [1] mia_0.98.15                      MicrobiomeExperiment_0.99.0.9014
  [3] Biostrings_2.58.0                XVector_0.30.0                  
  [5] TreeSummarizedExperiment_1.6.2   SingleCellExperiment_1.12.0     
  [7] SummarizedExperiment_1.20.0      Biobase_2.50.0                  
- [9] GenomicRanges_1.42.0             GenomeInfoDb_1.26.1             
-[11] IRanges_2.24.0                   S4Vectors_0.28.0                
+ [9] GenomicRanges_1.42.0             GenomeInfoDb_1.26.2             
+[11] IRanges_2.24.0                   S4Vectors_0.28.1                
 [13] BiocGenerics_0.36.0              MatrixGenerics_1.2.0            
 [15] matrixStats_0.57.0               BiocStyle_2.18.1                
 [17] rebook_1.0.0                     BiocManager_1.30.10             
@@ -140,7 +140,7 @@ loaded via a namespace (and not attached):
 [45] callr_3.5.1               compiler_4.0.3           
 [47] rsvd_1.0.3                rlang_0.4.9              
 [49] grid_4.0.3                RCurl_1.98-1.2           
-[51] BiocNeighbors_1.8.1       bitops_1.0-6             
+[51] BiocNeighbors_1.8.2       bitops_1.0-6             
 [53] rmarkdown_2.5             gtable_0.3.0             
 [55] codetools_0.2-18          R6_2.5.0                 
 [57] gridExtra_2.3             knitr_1.30               
