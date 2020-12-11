@@ -104,7 +104,7 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] mia_0.98.16                      MicrobiomeExperiment_0.99.0.9014
+ [1] mia_0.98.17                      MicrobiomeExperiment_0.99.0.9014
  [3] Biostrings_2.58.0                XVector_0.30.0                  
  [5] TreeSummarizedExperiment_1.6.2   SingleCellExperiment_1.12.0     
  [7] SummarizedExperiment_1.20.0      Biobase_2.50.0                  
@@ -132,7 +132,7 @@ loaded via a namespace (and not attached):
 [29] ggplot2_3.3.2               ellipsis_0.3.1             
 [31] magrittr_2.0.1              crayon_1.3.4               
 [33] CodeDepends_0.6.5           evaluate_0.14              
-[35] ps_1.5.0                    nlme_3.1-150               
+[35] ps_1.5.0                    nlme_3.1-151               
 [37] beeswarm_0.2.3              graph_1.68.0               
 [39] tools_4.0.3                 scater_1.18.3              
 [41] lifecycle_0.2.0             stringr_1.4.0              
