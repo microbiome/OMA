@@ -5,10 +5,63 @@ library(rebook)
 chapterPreamble()
 ```
 
+Diversity measurements are an important topic, when analyzing microbiome data. 
+Typically three levels of diversity measurements exist, which are trying to
+put a number on different aspects of the questions associated with diversity.
+
+Many different ways for estimating such diversity measurements have been 
+described in the literature. Which measurement is best or applicable for your 
+samples, is not the aim of the following sections.
+
+```{r}
+data("GlobalPatterns")
+se <- GlobalPatterns
+```
 
 ## Alpha diversity
 
+_Alpha diversity_, also sometimes interchangeably used with the terms 
+_species diversity_ or _species richness_, summarizes the number different
+species and their abundance per sample into a single number.
 
+For this purpose wrapper functions are available interacting with other packages
+implementing the calculation, such as _vegan_ [@R-vegan].
+
+`estimateAlphaDiversity` is the main function for this purpose, which calculates
+the selected diversity based on the selected assay data and adds it to the 
+`colData` of the `SummarizedExperiment` under the given column `name`.
+
+```{r}
+se <- estimateAlphaDiversity(se, abund_values = "counts",
+                             index = "shannon", name = "shannon")
+head(colData(se)$shannon)
+```
+
+This allows the values to analyzed directly from the `colData`, for example
+by plotting them using `plotColData` from the _scater_ package [@R-scater].
+
+```{r plot-div-shannon, message=FALSE, fig.cap="Shannon diversity estimates plotted grouped by sample typo."}
+library(scater)
+plotColData(se, "shannon", "SampleType", colour_by = "SampleType")
+```
+
+By default `estimateAlphaDiversity` will calculate all available estimates...
+
+```{r}
+se <- estimateAlphaDiversity(se)
+```
+
+A plot comparing them can then be constructed directly.
+
+```{r}
+plots <- lapply(c("shannon","simpson","inv_simpson", "richness", "chao1", "ACE"),
+                plotColData,
+                object = se,
+                x = "SampleType",
+                colour_by = "SampleType")
+plots <- lapply(plots,"+", theme(axis.text.x = element_text(angle=45,hjust=1)))
+ggpubr::ggarrange(plotlist = plots, nrow = 1, common.legend = TRUE, legend = "right")
+```
 
 ## Beta diversity
 
