@@ -7,13 +7,15 @@ chapterPreamble()
 
 Diversity measurements are an important topic, when analyzing microbiome data. 
 Typically three levels of diversity measurements exist, which are trying to
-put a number on different aspects of the questions associated with diversity.
+put a number on different aspects of the questions associated with diversity 
+[@Whittaker1690].
 
 Many different ways for estimating such diversity measurements have been 
 described in the literature. Which measurement is best or applicable for your 
 samples, is not the aim of the following sections.
 
 ```{r}
+library(mia)
 data("GlobalPatterns")
 se <- GlobalPatterns
 ```
@@ -40,9 +42,10 @@ head(colData(se)$shannon)
 This allows the values to analyzed directly from the `colData`, for example
 by plotting them using `plotColData` from the _scater_ package [@R-scater].
 
-```{r plot-div-shannon, message=FALSE, fig.cap="Shannon diversity estimates plotted grouped by sample typo."}
+```{r plot-div-shannon, message=FALSE, fig.cap="Shannon diversity estimates plotted grouped by sample type."}
 library(scater)
-plotColData(se, "shannon", "SampleType", colour_by = "SampleType")
+plotColData(se, "shannon", "SampleType", colour_by = "SampleType") +
+    theme(axis.text.x = element_text(angle=45,hjust=1))
 ```
 
 By default `estimateAlphaDiversity` will calculate all available estimates...
@@ -51,7 +54,7 @@ By default `estimateAlphaDiversity` will calculate all available estimates...
 se <- estimateAlphaDiversity(se)
 ```
 
-A plot comparing them can then be constructed directly.
+.. and a plot comparing them can then be constructed directly.
 
 ```{r}
 plots <- lapply(c("shannon","simpson","inv_simpson", "richness", "chao1", "ACE"),
@@ -60,21 +63,104 @@ plots <- lapply(c("shannon","simpson","inv_simpson", "richness", "chao1", "ACE")
                 x = "SampleType",
                 colour_by = "SampleType")
 plots <- lapply(plots,"+", theme(axis.text.x = element_text(angle=45,hjust=1)))
-ggpubr::ggarrange(plotlist = plots, nrow = 1, common.legend = TRUE, legend = "right")
+ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 3, common.legend = TRUE, legend = "right")
 ```
 
 ## Beta diversity
 
+In comparison to alpha diversities, beta diversities describe inter-microbiome
+(dis-)similarites. Technically speaking, beta diversities are usually
+represented as `dist` objects, which contain triangular data describing the
+distance between each pair of samples. These distances are than subjected to
+multi-dimensional scaling, also known as PCoA, to retrieve reduced dimensions
+for further evaluation or visualization.
 
-### Community comparisons
+### Calculating beta diversity
+
+In the following examples distances are calculated by variable functions
+supplied to the `FUN` argument. The function can defined by the usre, but it
+must return a `dist` function, which can then be used to calculate reduced
+dimension either via MDS or NMDS and the results can be stored in the
+`reducedDim`. The whole process is wrapped in the `runMDS` and `runNMDS`
+functions.
+
+```{r, message=FALSE}
+se <- runMDS2(se, FUN = vegan::vegdist, name = "MDS_BC")
+```
+
+To visualize reduced dimensions, `scater` implements the `plotReducedDim` 
+function, which can enrich a plot with additional information as colour, shape 
+or size.
+
+```{r plot-mds-bray-curtis, fig.cap="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."}
+plotReducedDim(se, "MDS_BC", colour_by = "SampleType")
+```
+
+With additional tools from the `ggplot2` universe, comparisons can be 
+performed informing on the applicability to visualize the samples in a 
+meaningful way.
+
+```{r plot-mds-nmds-comparison, fig.cap="Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.", message=FALSE}
+se <- runMDS2(se, FUN = vegan::vegdist, name = "MDS_euclidean",
+             method = "euclidean")
+se <- runNMDS(se, FUN = vegan::vegdist, name = "NMDS_BC")
+se <- runNMDS(se, FUN = vegan::vegdist, name = "NMDS_euclidean",
+              method = "euclidean")
+plots <- lapply(c("MDS_BC","MDS_euclidean","NMDS_BC","NMDS_euclidean"),
+                plotReducedDim, object = se, colour_by = "SampleType")
+ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 2, common.legend = TRUE,
+                  legend = "right")
+```
+
+The _UniFrac_ is a special case, since it requires data on the relationship
+of features in form on a `phylo` tree. `calculateUniFrac` performs the 
+calculation to return a `dist` object, which can again be used within `runMDS`.
+
+```{r}
+se <- runMDS2(se, FUN = calculateUniFrac, name = "UniFrac",
+              tree = rowTree(se),
+              ntop = nrow(se))
+```
+
+Plotting can be performed again using `plotReducedDim`.
+
+```{r plot-unifrac}
+plotReducedDim(se, "UniFrac", colour_by = "SampleType")
+```
+
+### Other ordination methods
+
+Other dimension reduction methods, such as `PCA`, `t-SNE` and `UMAP` are 
+inherited directly from the `scater` package.
+
+```{r}
+se <- runPCA(se, name = "PCA", exprs_values = "counts", ncomponents = 10)
+```
+
+```{r plot-pca, fig.cap="PCA plot on the GlobalPatterns data set containing sample from different sources."}
+plotReducedDim(se, "PCA", colour_by = "SampleType")
+```
+
+As mentioned before, applicability of the different methods depends on your
+sample set.
+
+```{r}
+se <- runTSNE(se, name = "TSNE", exprs_values = "counts", ncomponents = 3)
+```
+
+```{r plot-tsne, fig.cap="t-SNE plot on the GlobalPatterns data set containing sample from different sources."}
+plotReducedDim(se, "TSNE", colour_by = "SampleType", ncomponents = c(1:3))
+```
+
+## Community comparisons
 
 PERMANOVA and other methods.
 
+## Further reading
 
-### Visualizing beta diversity
-
-Ordination with PCoA, UMAP, and other methods.
-
+In certain settings beta diversities might be used to group samples without
+prior knowledge. For this we want to point to excellent resources on 
+[how to extract information from the clusters](http://bioconductor.org/books/release/OSCA/clustering.html).
 
 ## Session Info {-}
 
