@@ -11,20 +11,143 @@ data("GlobalPatterns")
 se <- GlobalPatterns 
 ```
 
-## Data agglomeration {#data-agglomeration}
+Taxonomic information are a key part of analyzing microbiome data and without
+it, any type of data analysis probably will not make much sense. However,
+the degree of detail of taxonomic information differs depending on the dataset
+and annotation data used.
 
-Agglomerate at a specific taxonomic rank. If multiple assays (counts and relabundance) exists, both will be agglomerated.
+Therefore, the mia package expects a loose assembly of taxonomic information
+and assumes certain key aspects:
+
+* Taxonomic information is given as character vectors or factors in the 
+`rowData` of an `SummarizedExperiment` object.
+* The columns containing the taxonomic information must be named `domain`,
+`kingdom`, `phylum`, `class`, `order`, `family`, `genus`, `species` or with
+a capital first letter.
+* the columns must be given in the order shown above
+* column can be omited, but the order must remain
+
+## Assigning taxonomic information.
+
+There are a number of methods to assign taxonomic information. We like to give
+a short introduction about the methods available without ranking one over the 
+other. This has to be your choice based on the result for the individual 
+dataset.
+
+### dada2
+
+The dada2 package [@R-dada2] implements the `assignTaxonomy` function, which 
+takes as input the ASV sequences associated with each row of data and a training
+dataset. For more information visit the 
+[dada2 website](https://benjjneb.github.io/dada2/assign.html).
+
+### DECIPHER
+
+The DECIPHER package [@R-DECIPHER] implements the `IDTAXA` algorithm to assign
+either taxonomic information or function information. For `mia`
+only the first option is of interest for now and more information can be
+found on the [DECIPHER website](http://www2.decipher.codes/Classification.html)
+
+## Functions to access taxonomic information
+
+`checkTaxonomy` checks whether the taxonomic information is usable for `mia`
 
 ```{r}
-altExp(se, "Family") <- agglomerateByRank(se, rank = "Family",
-                                          agglomerateTree = TRUE)
+checkTaxonomy(se)
+```
 
-se
-altExp(se, "Family")
+Since the `rowData` can contain other data, `taxonomyRanks` will return the 
+columns `mia` assumes to contain the taxonomic information.
+
+```{r}
+taxonomyRanks(se)
+```
+
+This can then be used to subset the `rowData` to columns needed.
+
+```{r}
+rowData(se)[,taxonomyRanks(se)]
+```
+
+`taxonomyRankEmpty` checks for empty values in the given `rank` and returns a 
+logical vector of `length(x)`.
+
+```{r}
+all(!taxonomyRankEmpty(se, rank = "Kingdom"))
+table(taxonomyRankEmpty(se, rank = "Genus"))
+table(taxonomyRankEmpty(se, rank = "Species"))
+```
+
+`getTaxonomyLabels` is a multi-purpose function, which turns taxonomic
+information into a character vector of `length(x)`
+
+```{r}
+head(getTaxonomyLabels(se))
+```
+
+By default this will used the lowest non-empty information to construct a
+string with the following scheme `level:value`. If all levels are the same
+this part is omited, but can be added by setting `with_rank = TRUE`
+
+```{r}
+phylum <- !is.na(rowData(se)$Phylum) & 
+    vapply(data.frame(apply(rowData(se)[,taxonomyRanks(se)[3:7]],1L,is.na)),all,logical(1))
+head(getTaxonomyLabels(se[phylum,]))
+head(getTaxonomyLabels(se[phylum,], with_rank = TRUE))
+```
+
+By default the return value of `getTaxonomyLabels` contains only unique elements
+by passing it through `make.unique`. This step can be omited by setting 
+`make_unique = FALSE`
+
+```{r}
+head(getTaxonomyLabels(se[phylum,], with_rank = TRUE, make_unique = FALSE))
+```
+
+To apply the loop resolving function `resolveLoop` from the
+`TreeSummarizedExperiment` package [@R-TreeSummarizedExperiment] within
+`getTaxonomyLabels`, set `resolve_loops = TRUE`.
+
+### Generate a taxonomic tree on the fly
+
+To create a taxonomic tree `taxonomyTree` used the information and returns a
+`phylo` object. Duplicate information from the `rowData` are removed.
+
+```{r}
+taxonomyTree(se)
 ```
 
 ```{r}
-altExp(se, "Family") <- relAbundanceCounts(altExp(se, "Family"))
+se <- addTaxonomyTree(se)
+se
+```
+
+The implementation is based on the the `toTree` function from the
+`TreeSummarizedExperiment` package [@R-TreeSummarizedExperiment].
+
+## Data agglomeration {#data-agglomeration}
+
+One of the main applications of taxonomic information in regards to count data
+is to agglomerate count data on taxonomic levels and track the influence of 
+changing conditions through these levels. For this `mia` contains the
+`agglomerateByRank` function. The ideal location to store the agglomerated data
+is as an alternative experiment.
+
+```{r}
+se <- relAbundanceCounts(se)
+altExp(se, "Family") <- agglomerateByRank(se, rank = "Family",
+                                          agglomerateTree = TRUE)
+altExp(se, "Family")
+```
+
+If multiple assays (counts and relabundance) exists, both will be agglomerated.
+
+```{r}
+assayNames(se)
+assayNames(altExp(se, "Family"))
+```
+
+```{r}
 assay(altExp(se, "Family"), "relabundance")[1:5,1:7]
 ```
   
@@ -32,18 +155,8 @@ assay(altExp(se, "Family"), "relabundance")[1:5,1:7]
 assay(altExp(se, "Family"), "counts")[1:5,1:7]
 ```
 
-These newly created data can also be kept in `altExp` a feature provided by 
-`SingleCellExperiment`.    
-
-`altExpNames` now consists of `family` level data. This can be extended to use 
-any level present in `r taxonomyRanks(se)`.   
-
-## Get unique  
-
-Get which Phyla are present.  
-```{r unique-1}
-head(unique(rowData(se)[,"Phylum"]))
-```
+`altExpNames` now consists of `Family` level data. This can be extended to use 
+any level present in `r mia::taxonomyRanks(se)`.   
 
 ## Pick specific  
 
@@ -56,7 +169,6 @@ in one sample.
 taxa.abund.cc1 <- getAbundanceSample(se, 
                                      sample_id = "CC1",
                                      abund_values = "counts")
-
 taxa.abund.cc1[1:10]
 ```
 
@@ -64,8 +176,8 @@ taxa.abund.cc1[1:10]
 
 ```{r}
 taxa.abundances <- getAbundanceFeature(se, 
-                                      feature_id = "255340",
-                                       abund_values = "counts")
+                                      feature_id = "Phylum:Bacteroidetes",
+                                      abund_values = "counts")
 taxa.abundances[1:10]
 ```
 
