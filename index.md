@@ -2,7 +2,7 @@
 title: "Microbiome Analysis"
 documentclass: book
 site: bookdown::bookdown_site
-bibliography: [book.bib, packages.bib]
+bibliography: [book.bib]
 biblio-style: apalike
 link-citations: yes
 github-repo: microbiome/MiaBook
@@ -14,7 +14,7 @@ github-repo: microbiome/MiaBook
 date: "**Authors:** Leo Lahti [aut], Sudarshan Shetty [aut], Felix GM Ernst [aut, cre]<br/>
   **Version:** 0.98.0003<br/>
   **Modified:** 2020-12-06<br/>
-  **Compiled:** 2020-12-11<br/>
+  **Compiled:** 2020-12-25<br/>
   **Environment:** R version 4.0.3 (2020-10-10), Bioconductor 3.12<br/>
   **License:** CC BY-NC-SA 3.0 US<br/>
   **Copyright:** <br/>

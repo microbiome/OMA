@@ -49,8 +49,6 @@
 
 
 <script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script>
-<link href="libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
-<script src="libs/anchor-sections-1.0/anchor-sections.js"></script>
 
 
 <style type="text/css">
@@ -195,9 +193,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="6" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html"><i class="fa fa-check"></i><b>6</b> Microbiome Diversity</a><ul>
 <li class="chapter" data-level="6.1" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#alpha-diversity"><i class="fa fa-check"></i><b>6.1</b> Alpha diversity</a></li>
 <li class="chapter" data-level="6.2" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#beta-diversity"><i class="fa fa-check"></i><b>6.2</b> Beta diversity</a><ul>
-<li class="chapter" data-level="6.2.1" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#community-comparisons"><i class="fa fa-check"></i><b>6.2.1</b> Community comparisons</a></li>
-<li class="chapter" data-level="6.2.2" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#visualizing-beta-diversity"><i class="fa fa-check"></i><b>6.2.2</b> Visualizing beta diversity</a></li>
+<li class="chapter" data-level="6.2.1" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#calculating-beta-diversity"><i class="fa fa-check"></i><b>6.2.1</b> Calculating beta diversity</a></li>
+<li class="chapter" data-level="6.2.2" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#other-ordination-methods"><i class="fa fa-check"></i><b>6.2.2</b> Other ordination methods</a></li>
 </ul></li>
+<li class="chapter" data-level="6.3" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#community-comparisons"><i class="fa fa-check"></i><b>6.3</b> Community comparisons</a><ul>
+<li class="chapter" data-level="6.3.1" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#permanova---significance-test-for-group-level-differences"><i class="fa fa-check"></i><b>6.3.1</b> PERMANOVA - significance test for group-level differences</a></li>
+<li class="chapter" data-level="6.3.2" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#permdisp2---checking-the-homogeneity-condition"><i class="fa fa-check"></i><b>6.3.2</b> PERMDISP2 - Checking the homogeneity condition</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#further-reading"><i class="fa fa-check"></i><b>6.4</b> Further reading</a></li>
 <li class="chapter" data-level="" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#session-info-5"><i class="fa fa-check"></i>Session Info</a></li>
 </ul></li>
 <li class="chapter" data-level="7" data-path="microbiome-community.html"><a href="microbiome-community.html"><i class="fa fa-check"></i><b>7</b> Microbiome Community</a><ul>
@@ -282,19 +285,200 @@ document.addEventListener("click", function (event) {
   background-color: #f1f1f1;
 }
 </style>
+<p>Diversity measurements are an important topic, when analyzing microbiome data.
+Typically three levels of diversity measurements exist, which are trying to
+put a number on different aspects of the questions associated with diversity
+<span class="citation">(<span class="citeproc-not-found" data-reference-id="Whittaker1690"><strong>???</strong></span>)</span>.</p>
+<p>Many different ways for estimating such diversity measurements have been
+described in the literature. Which measurement is best or applicable for your
+samples, is not the aim of the following sections.</p>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="microbiome-diversity.html#cb90-1"></a><span class="kw">library</span>(mia)</span>
+<span id="cb90-2"><a href="microbiome-diversity.html#cb90-2"></a><span class="kw">data</span>(<span class="st">&quot;GlobalPatterns&quot;</span>)</span>
+<span id="cb90-3"><a href="microbiome-diversity.html#cb90-3"></a>se &lt;-<span class="st"> </span>GlobalPatterns</span></code></pre></div>
 <div id="alpha-diversity" class="section level2">
 <h2><span class="header-section-number">6.1</span> Alpha diversity</h2>
+<p><strong><em>Alpha diversity</em></strong>, also sometimes interchangeably used with the terms
+<strong><em>species diversity</em></strong> or <strong><em>species richness</em></strong>, summarizes the number
+different species and their abundance per sample into a single number.</p>
+<p>For this purpose wrapper functions are available interacting with other packages
+implementing the calculation, such as <code>_vegan_</code> <span class="citation">(Oksanen et al. <a href="#ref-R-vegan" role="doc-biblioref">2020</a>)</span>.</p>
+<p><code>estimateAlphaDiversity</code> is the main function for this purpose, which calculates
+the selected diversity based on the selected assay data and adds it to the
+<code>colData</code> of the <code>SummarizedExperiment</code> under the given column <code>name</code>.</p>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="microbiome-diversity.html#cb91-1"></a>se &lt;-<span class="st"> </span><span class="kw">estimateAlphaDiversity</span>(se, <span class="dt">abund_values =</span> <span class="st">&quot;counts&quot;</span>,</span>
+<span id="cb91-2"><a href="microbiome-diversity.html#cb91-2"></a>                             <span class="dt">index =</span> <span class="st">&quot;shannon&quot;</span>, <span class="dt">name =</span> <span class="st">&quot;shannon&quot;</span>)</span>
+<span id="cb91-3"><a href="microbiome-diversity.html#cb91-3"></a><span class="kw">head</span>(<span class="kw">colData</span>(se)<span class="op">$</span>shannon)</span></code></pre></div>
+<pre><code>##     CL3     CC1     SV1 M31Fcsw M11Fcsw M31Plmr 
+##   6.577   6.777   6.498   3.828   3.288   4.289</code></pre>
+<p>This allows the values to analyzed directly from the <code>colData</code>, for example
+by plotting them using <code>plotColData</code> from the <code>_scater_</code> package <span class="citation">(McCarthy et al. <a href="#ref-R-scater" role="doc-biblioref">2020</a>)</span>.</p>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="microbiome-diversity.html#cb93-1"></a><span class="kw">library</span>(scater)</span>
+<span id="cb93-2"><a href="microbiome-diversity.html#cb93-2"></a><span class="kw">plotColData</span>(se, <span class="st">&quot;shannon&quot;</span>, <span class="st">&quot;SampleType&quot;</span>, <span class="dt">colour_by =</span> <span class="st">&quot;SampleType&quot;</span>) <span class="op">+</span></span>
+<span id="cb93-3"><a href="microbiome-diversity.html#cb93-3"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">angle=</span><span class="dv">45</span>,<span class="dt">hjust=</span><span class="dv">1</span>))</span></code></pre></div>
+<div class="figure"><span id="fig:plot-div-shannon"></span>
+<img src="14-microbiome-diversity_files/figure-html/plot-div-shannon-1.png" alt="Shannon diversity estimates plotted grouped by sample type." width="672" />
+<p class="caption">
+Figure 6.1: Shannon diversity estimates plotted grouped by sample type.
+</p>
+</div>
+<p>By default <code>estimateAlphaDiversity</code> will calculate all available estimates…</p>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="microbiome-diversity.html#cb94-1"></a>se &lt;-<span class="st"> </span><span class="kw">estimateAlphaDiversity</span>(se)</span></code></pre></div>
+<p>.. and a plot comparing them can then be constructed directly.</p>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="microbiome-diversity.html#cb95-1"></a>plots &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="kw">c</span>(<span class="st">&quot;shannon&quot;</span>,<span class="st">&quot;simpson&quot;</span>,<span class="st">&quot;inv_simpson&quot;</span>, <span class="st">&quot;richness&quot;</span>, <span class="st">&quot;chao1&quot;</span>, <span class="st">&quot;ACE&quot;</span>),</span>
+<span id="cb95-2"><a href="microbiome-diversity.html#cb95-2"></a>                plotColData,</span>
+<span id="cb95-3"><a href="microbiome-diversity.html#cb95-3"></a>                <span class="dt">object =</span> se,</span>
+<span id="cb95-4"><a href="microbiome-diversity.html#cb95-4"></a>                <span class="dt">x =</span> <span class="st">&quot;SampleType&quot;</span>,</span>
+<span id="cb95-5"><a href="microbiome-diversity.html#cb95-5"></a>                <span class="dt">colour_by =</span> <span class="st">&quot;SampleType&quot;</span>)</span>
+<span id="cb95-6"><a href="microbiome-diversity.html#cb95-6"></a>plots &lt;-<span class="st"> </span><span class="kw">lapply</span>(plots,<span class="st">&quot;+&quot;</span>, <span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">angle=</span><span class="dv">45</span>,<span class="dt">hjust=</span><span class="dv">1</span>)))</span>
+<span id="cb95-7"><a href="microbiome-diversity.html#cb95-7"></a>ggpubr<span class="op">::</span><span class="kw">ggarrange</span>(<span class="dt">plotlist =</span> plots, <span class="dt">nrow =</span> <span class="dv">2</span>, <span class="dt">ncol =</span> <span class="dv">3</span>, <span class="dt">common.legend =</span> <span class="ot">TRUE</span>, <span class="dt">legend =</span> <span class="st">&quot;right&quot;</span>)</span></code></pre></div>
+<p><img src="14-microbiome-diversity_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 </div>
 <div id="beta-diversity" class="section level2">
 <h2><span class="header-section-number">6.2</span> Beta diversity</h2>
-<div id="community-comparisons" class="section level3">
-<h3><span class="header-section-number">6.2.1</span> Community comparisons</h3>
-<p>PERMANOVA and other methods.</p>
+<p>In comparison to alpha diversities, beta diversities describe inter-microbiome
+(dis-)similarites. Technically speaking, beta diversities are usually
+represented as <code>dist</code> objects, which contain triangular data describing the
+distance between each pair of samples. These distances can be subjected to
+multi-dimensional scaling, also known as PCoA, to retrieve reduced dimensions
+for further evaluation or visualization.</p>
+<div id="calculating-beta-diversity" class="section level3">
+<h3><span class="header-section-number">6.2.1</span> Calculating beta diversity</h3>
+<p>In the following examples distances are calculated by variable functions
+supplied to the <code>FUN</code> argument. The function can defined by the usre, but it
+must return a <code>dist</code> function, which can then be used to calculate reduced
+dimension either via MDS or NMDS and the results can be stored in the
+<code>reducedDim</code>. The whole process is wrapped in the <code>runMDS</code> and <code>runNMDS</code>
+functions.</p>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="microbiome-diversity.html#cb96-1"></a>se &lt;-<span class="st"> </span><span class="kw">runMDS2</span>(se, <span class="dt">FUN =</span> vegan<span class="op">::</span>vegdist, <span class="dt">name =</span> <span class="st">&quot;MDS_BC&quot;</span>)</span></code></pre></div>
+<p>To visualize reduced dimensions, <code>scater</code> implements the <code>plotReducedDim</code>
+function, which can enrich a plot with additional information as colour, shape
+or size.</p>
+<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="microbiome-diversity.html#cb97-1"></a><span class="kw">plotReducedDim</span>(se, <span class="st">&quot;MDS_BC&quot;</span>, <span class="dt">colour_by =</span> <span class="st">&quot;SampleType&quot;</span>)</span></code></pre></div>
+<div class="figure"><span id="fig:plot-mds-bray-curtis"></span>
+<img src="14-microbiome-diversity_files/figure-html/plot-mds-bray-curtis-1.png" alt="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset." width="672" />
+<p class="caption">
+Figure 6.2: MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset.
+</p>
 </div>
-<div id="visualizing-beta-diversity" class="section level3">
-<h3><span class="header-section-number">6.2.2</span> Visualizing beta diversity</h3>
-<p>Ordination with PCoA, UMAP, and other methods.</p>
+<p>With additional tools from the <code>ggplot2</code> universe, comparisons can be
+performed informing on the applicability to visualize the samples in a
+meaningful way.</p>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="microbiome-diversity.html#cb98-1"></a>se &lt;-<span class="st"> </span><span class="kw">runMDS2</span>(se, <span class="dt">FUN =</span> vegan<span class="op">::</span>vegdist, <span class="dt">name =</span> <span class="st">&quot;MDS_euclidean&quot;</span>,</span>
+<span id="cb98-2"><a href="microbiome-diversity.html#cb98-2"></a>             <span class="dt">method =</span> <span class="st">&quot;euclidean&quot;</span>)</span>
+<span id="cb98-3"><a href="microbiome-diversity.html#cb98-3"></a>se &lt;-<span class="st"> </span><span class="kw">runNMDS</span>(se, <span class="dt">FUN =</span> vegan<span class="op">::</span>vegdist, <span class="dt">name =</span> <span class="st">&quot;NMDS_BC&quot;</span>)</span></code></pre></div>
+<pre><code>## initial  value 47.733208 
+## iter   5 value 33.853364
+## iter  10 value 32.891200
+## final  value 32.823570 
+## converged</code></pre>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb100-1"><a href="microbiome-diversity.html#cb100-1"></a>se &lt;-<span class="st"> </span><span class="kw">runNMDS</span>(se, <span class="dt">FUN =</span> vegan<span class="op">::</span>vegdist, <span class="dt">name =</span> <span class="st">&quot;NMDS_euclidean&quot;</span>,</span>
+<span id="cb100-2"><a href="microbiome-diversity.html#cb100-2"></a>              <span class="dt">method =</span> <span class="st">&quot;euclidean&quot;</span>)</span></code></pre></div>
+<pre><code>## initial  value 31.882673 
+## final  value 31.882673 
+## converged</code></pre>
+<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb102-1"><a href="microbiome-diversity.html#cb102-1"></a>plots &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="kw">c</span>(<span class="st">&quot;MDS_BC&quot;</span>,<span class="st">&quot;MDS_euclidean&quot;</span>,<span class="st">&quot;NMDS_BC&quot;</span>,<span class="st">&quot;NMDS_euclidean&quot;</span>),</span>
+<span id="cb102-2"><a href="microbiome-diversity.html#cb102-2"></a>                plotReducedDim, <span class="dt">object =</span> se, <span class="dt">colour_by =</span> <span class="st">&quot;SampleType&quot;</span>)</span>
+<span id="cb102-3"><a href="microbiome-diversity.html#cb102-3"></a>ggpubr<span class="op">::</span><span class="kw">ggarrange</span>(<span class="dt">plotlist =</span> plots, <span class="dt">nrow =</span> <span class="dv">2</span>, <span class="dt">ncol =</span> <span class="dv">2</span>, <span class="dt">common.legend =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb102-4"><a href="microbiome-diversity.html#cb102-4"></a>                  <span class="dt">legend =</span> <span class="st">&quot;right&quot;</span>)</span></code></pre></div>
+<div class="figure"><span id="fig:plot-mds-nmds-comparison"></span>
+<img src="14-microbiome-diversity_files/figure-html/plot-mds-nmds-comparison-1.png" alt="Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset." width="672" />
+<p class="caption">
+Figure 6.3: Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.
+</p>
 </div>
+<p>The <em>UniFrac</em> is a special case, since it requires data on the relationship
+of features in form on a <code>phylo</code> tree. <code>calculateUniFrac</code> performs the
+calculation to return a <code>dist</code> object, which can again be used within <code>runMDS</code>.</p>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="microbiome-diversity.html#cb103-1"></a>se &lt;-<span class="st"> </span><span class="kw">runMDS2</span>(se, <span class="dt">FUN =</span> calculateUniFrac, <span class="dt">name =</span> <span class="st">&quot;UniFrac&quot;</span>,</span>
+<span id="cb103-2"><a href="microbiome-diversity.html#cb103-2"></a>              <span class="dt">tree =</span> <span class="kw">rowTree</span>(se),</span>
+<span id="cb103-3"><a href="microbiome-diversity.html#cb103-3"></a>              <span class="dt">ntop =</span> <span class="kw">nrow</span>(se))</span></code></pre></div>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="microbiome-diversity.html#cb104-1"></a><span class="kw">plotReducedDim</span>(se, <span class="st">&quot;UniFrac&quot;</span>, <span class="dt">colour_by =</span> <span class="st">&quot;SampleType&quot;</span>)</span></code></pre></div>
+<div class="figure"><span id="fig:plot-unifrac"></span>
+<img src="14-microbiome-diversity_files/figure-html/plot-unifrac-1.png" alt="UniFrac distances scaled by MDS of the GlobalPattern dataset." width="672" />
+<p class="caption">
+Figure 6.4: UniFrac distances scaled by MDS of the GlobalPattern dataset.
+</p>
+</div>
+</div>
+<div id="other-ordination-methods" class="section level3">
+<h3><span class="header-section-number">6.2.2</span> Other ordination methods</h3>
+<p>Other dimension reduction methods, such as <code>PCA</code>, <code>t-SNE</code> and <code>UMAP</code> are
+inherited directly from the <code>scater</code> package.</p>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="microbiome-diversity.html#cb105-1"></a>se &lt;-<span class="st"> </span><span class="kw">runPCA</span>(se, <span class="dt">name =</span> <span class="st">&quot;PCA&quot;</span>, <span class="dt">exprs_values =</span> <span class="st">&quot;counts&quot;</span>, <span class="dt">ncomponents =</span> <span class="dv">10</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="microbiome-diversity.html#cb106-1"></a><span class="kw">plotReducedDim</span>(se, <span class="st">&quot;PCA&quot;</span>, <span class="dt">colour_by =</span> <span class="st">&quot;SampleType&quot;</span>)</span></code></pre></div>
+<div class="figure"><span id="fig:plot-pca"></span>
+<img src="14-microbiome-diversity_files/figure-html/plot-pca-1.png" alt="PCA plot on the GlobalPatterns data set containing sample from different sources." width="672" />
+<p class="caption">
+Figure 6.5: PCA plot on the GlobalPatterns data set containing sample from different sources.
+</p>
+</div>
+<p>As mentioned before, applicability of the different methods depends on your
+sample set.</p>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="microbiome-diversity.html#cb107-1"></a>se &lt;-<span class="st"> </span><span class="kw">runTSNE</span>(se, <span class="dt">name =</span> <span class="st">&quot;TSNE&quot;</span>, <span class="dt">exprs_values =</span> <span class="st">&quot;counts&quot;</span>, <span class="dt">ncomponents =</span> <span class="dv">3</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb108-1"><a href="microbiome-diversity.html#cb108-1"></a><span class="kw">plotReducedDim</span>(se, <span class="st">&quot;TSNE&quot;</span>, <span class="dt">colour_by =</span> <span class="st">&quot;SampleType&quot;</span>, <span class="dt">ncomponents =</span> <span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>))</span></code></pre></div>
+<div class="figure"><span id="fig:plot-tsne"></span>
+<img src="14-microbiome-diversity_files/figure-html/plot-tsne-1.png" alt="t-SNE plot on the GlobalPatterns data set containing sample from different sources." width="672" />
+<p class="caption">
+Figure 6.6: t-SNE plot on the GlobalPatterns data set containing sample from different sources.
+</p>
+</div>
+</div>
+</div>
+<div id="community-comparisons" class="section level2">
+<h2><span class="header-section-number">6.3</span> Community comparisons</h2>
+<p>TODO: Introduction</p>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="microbiome-diversity.html#cb109-1"></a><span class="kw">library</span>(microbiomeDataSets)</span>
+<span id="cb109-2"><a href="microbiome-diversity.html#cb109-2"></a>se.lahti &lt;-<span class="st"> </span><span class="kw">LahtiMData</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb110-1"><a href="microbiome-diversity.html#cb110-1"></a>se.lahti &lt;-<span class="st"> </span><span class="kw">relAbundanceCounts</span>(se.lahti)</span>
+<span id="cb110-2"><a href="microbiome-diversity.html#cb110-2"></a>se.lahti &lt;-<span class="st"> </span><span class="kw">runNMDS</span>(se.lahti, <span class="dt">FUN =</span> vegan<span class="op">::</span>vegdist, <span class="dt">name =</span> <span class="st">&quot;BC&quot;</span>, <span class="dt">nmdsFUN =</span> <span class="st">&quot;monoMDS&quot;</span>,</span>
+<span id="cb110-3"><a href="microbiome-diversity.html#cb110-3"></a>                    <span class="dt">exprs_values =</span> <span class="st">&quot;relabundance&quot;</span>,</span>
+<span id="cb110-4"><a href="microbiome-diversity.html#cb110-4"></a>                    <span class="dt">keep_dist =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="microbiome-diversity.html#cb111-1"></a><span class="kw">plotReducedDim</span>(se.lahti, <span class="st">&quot;BC&quot;</span>, <span class="dt">colour_by =</span> <span class="st">&quot;group&quot;</span>)</span></code></pre></div>
+<p><img src="14-microbiome-diversity_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>TODO: Conclusion</p>
+<div id="permanova---significance-test-for-group-level-differences" class="section level3">
+<h3><span class="header-section-number">6.3.1</span> PERMANOVA - significance test for group-level differences</h3>
+<p>TODO: Introduction, References</p>
+<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="microbiome-diversity.html#cb112-1"></a><span class="kw">library</span>(vegan)</span>
+<span id="cb112-2"><a href="microbiome-diversity.html#cb112-2"></a>permanova &lt;-<span class="st"> </span>vegan<span class="op">::</span><span class="kw">adonis</span>(<span class="kw">t</span>(<span class="kw">assay</span>(se.lahti,<span class="st">&quot;relabundance&quot;</span>)) <span class="op">~</span><span class="st"> </span>group,</span>
+<span id="cb112-3"><a href="microbiome-diversity.html#cb112-3"></a>                           <span class="dt">data =</span> <span class="kw">colData</span>(se.lahti),</span>
+<span id="cb112-4"><a href="microbiome-diversity.html#cb112-4"></a>                           <span class="dt">permutations =</span> <span class="dv">9999</span>)</span>
+<span id="cb112-5"><a href="microbiome-diversity.html#cb112-5"></a></span>
+<span id="cb112-6"><a href="microbiome-diversity.html#cb112-6"></a><span class="co"># P-value</span></span>
+<span id="cb112-7"><a href="microbiome-diversity.html#cb112-7"></a><span class="kw">print</span>(<span class="kw">as.data.frame</span>(permanova<span class="op">$</span>aov.tab)[<span class="st">&quot;group&quot;</span>, <span class="st">&quot;Pr(&gt;F)&quot;</span>])</span></code></pre></div>
+<pre><code>## [1] 0.2651</code></pre>
+<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="microbiome-diversity.html#cb114-1"></a>coef &lt;-<span class="st"> </span><span class="kw">coefficients</span>(permanova)[<span class="st">&quot;group1&quot;</span>,]</span>
+<span id="cb114-2"><a href="microbiome-diversity.html#cb114-2"></a>top.coef &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">head</span>(coef[<span class="kw">rev</span>(<span class="kw">order</span>(<span class="kw">abs</span>(coef)))],<span class="dv">20</span>))</span></code></pre></div>
+<p>TODO: Conclusion</p>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="microbiome-diversity.html#cb115-1"></a><span class="kw">ggplot</span>(<span class="kw">data.frame</span>(<span class="dt">x =</span> top.coef,</span>
+<span id="cb115-2"><a href="microbiome-diversity.html#cb115-2"></a>                  <span class="dt">y =</span> <span class="kw">factor</span>(<span class="kw">names</span>(top.coef),</span>
+<span id="cb115-3"><a href="microbiome-diversity.html#cb115-3"></a>                                      <span class="kw">unique</span>(<span class="kw">names</span>(top.coef)))),</span>
+<span id="cb115-4"><a href="microbiome-diversity.html#cb115-4"></a>        <span class="kw">aes</span>(<span class="dt">x =</span> x, <span class="dt">y =</span> y)) <span class="op">+</span></span>
+<span id="cb115-5"><a href="microbiome-diversity.html#cb115-5"></a><span class="st">    </span><span class="kw">geom_bar</span>(<span class="dt">stat=</span><span class="st">&quot;identity&quot;</span>) <span class="op">+</span></span>
+<span id="cb115-6"><a href="microbiome-diversity.html#cb115-6"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">x=</span><span class="st">&quot;&quot;</span>,<span class="dt">y=</span><span class="st">&quot;&quot;</span>,<span class="dt">title=</span><span class="st">&quot;Top Taxa&quot;</span>) <span class="op">+</span></span>
+<span id="cb115-7"><a href="microbiome-diversity.html#cb115-7"></a><span class="st">    </span><span class="kw">theme_bw</span>()</span></code></pre></div>
+<p><img src="14-microbiome-diversity_files/figure-html/plot-top-coef-anova-1.png" width="672" /></p>
+<p>TODO: Conclusion</p>
+</div>
+<div id="permdisp2---checking-the-homogeneity-condition" class="section level3">
+<h3><span class="header-section-number">6.3.2</span> PERMDISP2 - Checking the homogeneity condition</h3>
+<p>TODO: Introduction, References</p>
+<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb116-1"><a href="microbiome-diversity.html#cb116-1"></a><span class="kw">anova</span>(vegan<span class="op">::</span><span class="kw">betadisper</span>(<span class="kw">attr</span>(<span class="kw">reducedDim</span>(se.lahti,<span class="st">&quot;BC&quot;</span>),<span class="st">&quot;dist&quot;</span>),</span>
+<span id="cb116-2"><a href="microbiome-diversity.html#cb116-2"></a>                        <span class="kw">colData</span>(se.lahti)<span class="op">$</span>group))</span></code></pre></div>
+<pre><code>## Analysis of Variance Table
+## 
+## Response: Distances
+##           Df Sum Sq Mean Sq F value Pr(&gt;F)
+## Groups     1  0.000 0.00002       0   0.95
+## Residuals 42  0.158 0.00376</code></pre>
+<p>TODO: Conclusion</p>
+</div>
+</div>
+<div id="further-reading" class="section level2">
+<h2><span class="header-section-number">6.4</span> Further reading</h2>
+<p>In certain settings beta diversities might be used to group samples without
+prior knowledge. For this we want to point to excellent resources on
+<a href="http://bioconductor.org/books/release/OSCA/clustering.html">how to extract information from the clusters</a>.</p>
 </div>
 <div id="session-info-5" class="section level2 unnumbered">
 <h2>Session Info</h2>
@@ -318,22 +502,95 @@ locale:
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
+[1] parallel  stats4    stats     graphics  grDevices utils     datasets 
+[8] methods   base     
 
 other attached packages:
-[1] BiocStyle_2.18.1    rebook_1.0.0        BiocManager_1.30.10
+ [1] vegan_2.5-7                      lattice_0.20-41                 
+ [3] permute_0.9-5                    microbiomeDataSets_0.98.2       
+ [5] MultiAssayExperiment_1.16.0      scater_1.18.3                   
+ [7] ggplot2_3.3.2                    mia_0.98.21                     
+ [9] MicrobiomeExperiment_0.99.0.9014 Biostrings_2.58.0               
+[11] XVector_0.30.0                   TreeSummarizedExperiment_1.6.2  
+[13] SingleCellExperiment_1.12.0      SummarizedExperiment_1.20.0     
+[15] Biobase_2.50.0                   GenomicRanges_1.42.0            
+[17] GenomeInfoDb_1.26.2              IRanges_2.24.1                  
+[19] S4Vectors_0.28.1                 BiocGenerics_0.36.0             
+[21] MatrixGenerics_1.2.0             matrixStats_0.57.0              
+[23] BiocStyle_2.18.1                 rebook_1.0.0                    
+[25] BiocManager_1.30.10             
 
 loaded via a namespace (and not attached):
- [1] bookdown_0.21       codetools_0.2-18    XML_3.99-0.5       
- [4] ps_1.5.0            digest_0.6.27       stats4_4.0.3       
- [7] magrittr_2.0.1      evaluate_0.14       graph_1.68.0       
-[10] rlang_0.4.9         stringi_1.5.3       callr_3.5.1        
-[13] rmarkdown_2.5       tools_4.0.3         stringr_1.4.0      
-[16] processx_3.4.5      parallel_4.0.3      xfun_0.19          
-[19] yaml_2.2.1          compiler_4.0.3      BiocGenerics_0.36.0
-[22] htmltools_0.5.0     CodeDepends_0.6.5   knitr_1.30         </code></pre>
+  [1] readxl_1.3.1                  backports_1.2.1              
+  [3] AnnotationHub_2.22.0          BiocFileCache_1.14.0         
+  [5] splines_4.0.3                 BiocParallel_1.24.1          
+  [7] digest_0.6.27                 htmltools_0.5.0              
+  [9] viridis_0.5.1                 magrittr_2.0.1               
+ [11] memoise_1.1.0                 cluster_2.1.0                
+ [13] openxlsx_4.2.3                colorspace_2.0-0             
+ [15] blob_1.2.1                    rappdirs_0.3.1               
+ [17] haven_2.3.1                   xfun_0.19                    
+ [19] dplyr_1.0.2                   callr_3.5.1                  
+ [21] crayon_1.3.4                  RCurl_1.98-1.2               
+ [23] graph_1.68.0                  ape_5.4-1                    
+ [25] glue_1.4.2                    gtable_0.3.0                 
+ [27] zlibbioc_1.36.0               DelayedArray_0.16.0          
+ [29] car_3.0-10                    BiocSingular_1.6.0           
+ [31] abind_1.4-5                   scales_1.1.1                 
+ [33] DBI_1.1.0                     rstatix_0.6.0                
+ [35] Rcpp_1.0.5                    xtable_1.8-4                 
+ [37] viridisLite_0.3.0             foreign_0.8-81               
+ [39] bit_4.0.4                     rsvd_1.0.3                   
+ [41] httr_1.4.2                    ellipsis_0.3.1               
+ [43] pkgconfig_2.0.3               XML_3.99-0.5                 
+ [45] farver_2.0.3                  scuttle_1.0.4                
+ [47] CodeDepends_0.6.5             dbplyr_2.0.0                 
+ [49] AnnotationDbi_1.52.0          tidyselect_1.1.0             
+ [51] labeling_0.4.2                rlang_0.4.9                  
+ [53] later_1.1.0.1                 munsell_0.5.0                
+ [55] BiocVersion_3.12.0            cellranger_1.1.0             
+ [57] tools_4.0.3                   DirichletMultinomial_1.32.0  
+ [59] generics_0.1.0                RSQLite_2.2.1                
+ [61] ExperimentHub_1.16.0          broom_0.7.3                  
+ [63] fastmap_1.0.1                 evaluate_0.14                
+ [65] stringr_1.4.0                 yaml_2.2.1                   
+ [67] processx_3.4.5                knitr_1.30                   
+ [69] bit64_4.0.5                   zip_2.1.1                    
+ [71] purrr_0.3.4                   nlme_3.1-151                 
+ [73] sparseMatrixStats_1.2.0       mime_0.9                     
+ [75] compiler_4.0.3                beeswarm_0.2.3               
+ [77] curl_4.3                      interactiveDisplayBase_1.28.0
+ [79] ggsignif_0.6.0                tibble_3.0.4                 
+ [81] stringi_1.5.3                 highr_0.8                    
+ [83] ps_1.5.0                      forcats_0.5.0                
+ [85] Matrix_1.3-0                  vctrs_0.3.6                  
+ [87] pillar_1.4.7                  lifecycle_0.2.0              
+ [89] BiocNeighbors_1.8.2           data.table_1.13.4            
+ [91] cowplot_1.1.0                 bitops_1.0-6                 
+ [93] irlba_2.3.3                   httpuv_1.5.4                 
+ [95] R6_2.5.0                      bookdown_0.21                
+ [97] promises_1.1.1                gridExtra_2.3                
+ [99] rio_0.5.16                    vipor_0.4.5                  
+[101] codetools_0.2-18              MASS_7.3-53                  
+[103] assertthat_0.2.1              withr_2.3.0                  
+[105] GenomeInfoDbData_1.2.4        mgcv_1.8-33                  
+[107] hms_0.5.3                     grid_4.0.3                   
+[109] beachmat_2.6.4                tidyr_1.1.2                  
+[111] rmarkdown_2.6                 DelayedMatrixStats_1.12.1    
+[113] carData_3.0-4                 Rtsne_0.15                   
+[115] ggpubr_0.4.0                  shiny_1.5.0                  
+[117] ggbeeswarm_0.6.0             </code></pre>
 </div>
 
+</div>
+</div>
+<h3>Bibliography</h3>
+<div id="refs" class="references">
+<div id="ref-R-scater">
+<p>McCarthy, Davis, Kieran Campbell, Aaron Lun, and Quin Wills. 2020. <em>Scater: Single-Cell Analysis Toolkit for Gene Expression Data in R</em>. <a href="http://bioconductor.org/packages/scater/">http://bioconductor.org/packages/scater/</a>.</p>
+</div>
+<div id="ref-R-vegan">
+<p>Oksanen, Jari, F. Guillaume Blanchet, Michael Friendly, Roeland Kindt, Pierre Legendre, Dan McGlinn, Peter R. Minchin, et al. 2020. <em>Vegan: Community Ecology Package</em>. <a href="https://CRAN.R-project.org/package=vegan">https://CRAN.R-project.org/package=vegan</a>.</p>
 </div>
 </div>
             </section>

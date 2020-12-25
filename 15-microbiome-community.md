@@ -78,7 +78,7 @@ loaded via a namespace (and not attached):
  [4] ps_1.5.0            digest_0.6.27       stats4_4.0.3       
  [7] magrittr_2.0.1      evaluate_0.14       graph_1.68.0       
 [10] rlang_0.4.9         stringi_1.5.3       callr_3.5.1        
-[13] rmarkdown_2.5       tools_4.0.3         stringr_1.4.0      
+[13] rmarkdown_2.6       tools_4.0.3         stringr_1.4.0      
 [16] processx_3.4.5      parallel_4.0.3      xfun_0.19          
 [19] yaml_2.2.1          compiler_4.0.3      BiocGenerics_0.36.0
 [22] htmltools_0.5.0     CodeDepends_0.6.5   knitr_1.30         
