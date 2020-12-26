@@ -5,10 +5,11 @@ library(rebook)
 chapterPreamble()
 ```
 
-Diversity measurements are an important topic, when analyzing microbiome data. 
-Typically three levels of diversity measurements exist, which are trying to
-put a number on different aspects of the questions associated with diversity 
-[@Whittaker1690].
+Diversity estimates are a central topic in microbiome data analysis. 
+
+There are three commonly employed levels of diversity measurements,
+which are trying to put a number on different aspects of the questions
+associated with diversity [@Whittaker1690].
 
 Many different ways for estimating such diversity measurements have been 
 described in the literature. Which measurement is best or applicable for your 
@@ -22,35 +23,56 @@ se <- GlobalPatterns
 
 ## Alpha diversity indices
 
-### Richness
 
-### Evenness
+**_Alpha diversity_**, also sometimes interchangeably used with the
+term **_species diversity_**, summarizes the distribution of species
+abundances in a given sample into a single number that depends on
+species richness and evenness. Diversity indices measure the overall
+community heterogeneity. A number of ecological diversity measures are
+available. The Hill coefficient combines many standard indices into a
+single equation that provides observed richness, inverse Simpson, and
+Shannon diversity, and generalized diversity as special cases. In
+general, diversity increases together with increasing richness and
+evenness. Sometimes richness, evenness, and dominance are considered
+to be variants of alpha diversity.
 
-### Diversity
+**Richness** refers to the total number of species in a community
+(sample). The simplest richness index is the number of observed
+species (observed richness). Assuming limited sampling from the
+community, however, this may underestimate the true species
+richness. Several estimators are available, including for instance ACE
+[@reference] and Chao1 [@reference]. Richness estimates are unaffected
+by species abundances.
 
-### Dominance
+**Evenness** focuses on species abundances, and can thus complement
+  the number of species. A typical evenness index is the Pielou's
+  evenness, which is Shannon diversity normalized by the observed
+  richness.
+
+**Dominance** indices are in general negatively correlated with
+  diversity, and sometimes used in ecological literature. High
+  dominance is obtained when one or few species have a high share of
+  the total species abundance in the community.
 
 
+### Estimating alpha diversity
 
-**_Alpha diversity_**, also sometimes interchangeably used with the terms
-**_species diversity_** or **_species richness_**, summarizes the number
-different species and their abundance per sample into a single number.
+Alpha diversity can be estimated with wrapper functions that interact
+with other packages implementing the calculation, such as _`vegan`_
+[@R-vegan].
 
-For this purpose wrapper functions are available interacting with other packages
-implementing the calculation, such as `_vegan_` [@R-vegan].
-
-`estimateAlphaDiversity` is the main function for this purpose, which calculates
-the selected diversity based on the selected assay data and adds it to the 
+The main function, `estimateAlphaDiversity`, calculates the selected
+diversity index based on the selected assay data and adds it to the
 `colData` of the `SummarizedExperiment` under the given column `name`.
 
 ```{r}
-se <- estimateAlphaDiversity(se, abund_values = "counts",
+se <- mia::estimateAlphaDiversity(se, abund_values = "counts",
                              index = "shannon", name = "shannon")
 head(colData(se)$shannon)
 ```
 
 This allows the values to analyzed directly from the `colData`, for example
-by plotting them using `plotColData` from the `_scater_` package [@R-scater].
+by plotting them using `plotColData` from the _`scater`_ package [@R-scater].
 
 ```{r plot-div-shannon, message=FALSE, fig.cap="Shannon diversity estimates plotted grouped by sample type."}
 library(scater)
@@ -58,7 +80,7 @@ plotColData(se, "shannon", "SampleType", colour_by = "SampleType") +
     theme(axis.text.x = element_text(angle=45,hjust=1))
 ```
 
-By default `estimateAlphaDiversity` will calculate all available estimates...
+All available indices will be calculated by default...
 
 ```{r}
 se <- estimateAlphaDiversity(se)
@@ -78,36 +100,44 @@ ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 3, common.legend = TRUE, le
 
 ## Beta diversity
 
-In comparison to alpha diversities, beta diversities describe inter-microbiome
-(dis-)similarites. Technically speaking, beta diversities are usually
-represented as `dist` objects, which contain triangular data describing the
-distance between each pair of samples. These distances can be subjected to
-multi-dimensional scaling, also known as PCoA, to retrieve reduced dimensions
-for further evaluation or visualization.
+Where alpha diversity focuses on community variation within a
+community (sample), beta diversity quantifies (dis-)similarites
+between communities (samples).
 
-### Calculating beta diversity
+Technically, beta diversities are usually represented as `dist`
+objects, which contain triangular data describing the distance between
+each pair of samples. These distances can be further subjected to
+ordination with methods such as multi-dimensional scaling (also known
+as PCoA) to retrieve reduced dimensions for further evaluation or
+visualization. [TODO we could here instead link to ordination chapter?]
 
-In the following examples distances are calculated by variable functions
-supplied to the `FUN` argument. The function can defined by the usre, but it
-must return a `dist` function, which can then be used to calculate reduced
-dimension either via MDS or NMDS and the results can be stored in the
-`reducedDim`. The whole process is wrapped in the `runMDS` and `runNMDS`
+
+### Estimating beta diversity
+
+In the following examples distances are calculated by variable
+functions supplied to the `FUN` argument. The function can defined by
+the user. It must return a `dist` function, which can then be used to
+calculate reduced dimension either via ordination methods (such as MDS
+or NMDS), and the results can be stored in the `reducedDim`.
+
+This entire process is wrapped in the `runMDS` and `runNMDS`
 functions.
 
 ```{r, message=FALSE}
 se <- runMDS2(se, FUN = vegan::vegdist, name = "MDS_BC")
 ```
 
-To visualize reduced dimensions, `scater` implements the `plotReducedDim` 
-function, which can enrich a plot with additional information as colour, shape 
-or size.
+Sample similarities can be visualized on a lower-dimensional display
+(typically 2D) using the `plotReducedDim` function in the
+`scater`package. This provides also further tools to incorporate
+additional information using variations in colour, shape or size.
 
 ```{r plot-mds-bray-curtis, fig.cap="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."}
 plotReducedDim(se, "MDS_BC", colour_by = "SampleType")
 ```
 
 With additional tools from the `ggplot2` universe, comparisons can be 
-performed informing on the applicability to visualize the samples in a 
+performed informing on the applicability to visualize sample similarities in a 
 meaningful way.
 
 ```{r plot-mds-nmds-comparison, fig.cap="Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.", message=FALSE}
@@ -122,9 +152,11 @@ ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 2, common.legend = TRUE,
                   legend = "right")
 ```
 
-The _UniFrac_ is a special case, since it requires data on the relationship
-of features in form on a `phylo` tree. `calculateUniFrac` performs the 
-calculation to return a `dist` object, which can again be used within `runMDS`.
+The _UniFrac_ method is a special case, as it requires data on the
+relationship of features in form on a `phylo` tree. `calculateUniFrac`
+performs the calculation to return a `dist` object, which can again be
+used within `runMDS`.
+
 
 ```{r}
 se <- runMDS2(se, FUN = calculateUniFrac, name = "UniFrac",
@@ -152,6 +184,8 @@ plotReducedDim(se, "PCA", colour_by = "SampleType")
 As mentioned before, applicability of the different methods depends on your
 sample set.
 
+FIXME: let us switch to UMAP for the examples?
+
 ```{r}
 se <- runTSNE(se, name = "TSNE", exprs_values = "counts", ncomponents = 3)
 ```
@@ -160,14 +194,26 @@ se <- runTSNE(se, name = "TSNE", exprs_values = "counts", ncomponents = 3)
 plotReducedDim(se, "TSNE", colour_by = "SampleType", ncomponents = c(1:3))
 ```
 
-## Community comparisons
 
-TODO: Introduction
+
+## Community comparisons [TODO combine with the material above for simplicity?]
+
+
+A typical comparison of community composition starts with a visual
+comparison of the groups on a 2D ordination.
+
+Let us load an example data set:
 
 ```{r, message=FALSE}
 library(microbiomeDataSets)
 se.lahti <- LahtiMData()
 ```
+
+
+Then we estimate relative abundances and MDS ordination based on
+Bray-Curtis (BC) dissimilarity between the groups, and visualize the
+results.
+
 
 ```{r}
 se.lahti <- relAbundanceCounts(se.lahti)
@@ -180,15 +226,23 @@ se.lahti <- runNMDS(se.lahti, FUN = vegan::vegdist, name = "BC", nmdsFUN = "mono
 plotReducedDim(se.lahti, "BC", colour_by = "group")
 ```
 
-TODO: Conclusion
+No clear difference between the groups can be visually observed.
 
 
-### PERMANOVA - significance test for group-level differences
+### Testing differences in community composition between sample groups
 
-Add introductions and conclusions to the PERMANOVA and PERMDISP2 as indicated?
+The permutational analysis of variance (PERMANOVA) [@Anderson2001] is
+a widely used non-parametric multivariate method that can be used to
+estimate the actual statistical significance of differences in the
+observed community composition between two groups of
+samples.
 
+PERMANOVA evaluates the hypothesis that the centroids and dispersion
+of the community are equivalent between the compared groups. A small
+p-value indicates that the compared groups have, on average, a
+different community composition.
 
-TODO: Introduction, References
+This method is implemented in the `vegan` package (function `adonis`).
 
 ```{r}
 library(vegan)
@@ -200,12 +254,22 @@ permanova <- vegan::adonis(t(assay(se.lahti,"relabundance")) ~ group,
 print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
+In this case, the community composition is not significantly different
+between the groups.
+
+Let us visualize the model coefficients for species that exhibit the
+largest differences between the groups. This gives some insights into
+how the groups tend to differ from each other in terms of community
+composition.
+
+
 ```{r}
 coef <- coefficients(permanova)["group1",]
 top.coef <- sort(head(coef[rev(order(abs(coef)))],20))
 ```
 
-TODO: Conclusion
+
+
 
 ```{r plot-top-coef-anova, fig.cap=""}
 ggplot(data.frame(x = top.coef,
@@ -217,24 +281,36 @@ ggplot(data.frame(x = top.coef,
     theme_bw()
 ```
 
-TODO: Conclusion
+In the above example, the largest differences between the two groups
+can be attributed to Bacteroides intestinalis (elevated in the first
+group) and Faecalibacterium prausnitzii (elevated in the second
+group), and many other co-varying species.
 
-### PERMDISP2 - Checking the homogeneity condition
 
-TODO: Introduction, References
+
+### Checking the homogeneity condition 
+
+It is important to note that the application of PERMANOVA assumes
+homogeneous group dispersions (variances). This can be tested with the
+PERMDISP2 method [@Anderson2006].
+
 
 ```{r}
 anova(vegan::betadisper(attr(reducedDim(se.lahti,"BC"),"dist"),
                         colData(se.lahti)$group))
 ```
 
-TODO: Conclusion
+In our example, the groups have similar dispersions, and PERMANOVA is
+an appropriate choice for comparing community compositions.
+
 
 ## Further reading
 
 In certain settings beta diversities might be used to group samples without
 prior knowledge. For this we want to point to excellent resources on 
 [how to extract information from the clusters](http://bioconductor.org/books/release/OSCA/clustering.html).
+
+See also [community typing](15-microbiome-community.md).
 
 ## Session Info {-}
 
