@@ -242,7 +242,7 @@ plotRowTree(x[rowData(x)$Phylum %in% top_phyla_mean,],
 ```
 R version 4.0.3 (2020-10-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04 LTS
+Running under: Ubuntu 20.04.1 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -261,7 +261,7 @@ attached base packages:
 
 other attached packages:
  [1] miaViz_0.98.6                    scater_1.18.3                   
- [3] ggplot2_3.3.2                    mia_0.98.21                     
+ [3] ggplot2_3.3.3                    mia_0.98.21                     
  [5] MicrobiomeExperiment_0.99.0.9014 Biostrings_2.58.0               
  [7] XVector_0.30.0                   TreeSummarizedExperiment_1.6.2  
  [9] SingleCellExperiment_1.12.0      SummarizedExperiment_1.20.0     
@@ -289,7 +289,7 @@ loaded via a namespace (and not attached):
 [27] digest_0.6.27               rmarkdown_2.6              
 [29] pkgconfig_2.0.3             htmltools_0.5.0            
 [31] sparseMatrixStats_1.2.0     highr_0.8                  
-[33] rlang_0.4.9                 DelayedMatrixStats_1.12.1  
+[33] rlang_0.4.10                DelayedMatrixStats_1.12.1  
 [35] farver_2.0.3                generics_0.1.0             
 [37] jsonlite_1.7.2              BiocParallel_1.24.1        
 [39] dplyr_1.0.2                 RCurl_1.98-1.2             
@@ -303,7 +303,7 @@ loaded via a namespace (and not attached):
 [55] yaml_2.2.1                  MASS_7.3-53                
 [57] zlibbioc_1.36.0             grid_4.0.3                 
 [59] crayon_1.3.4                lattice_0.20-41            
-[61] cowplot_1.1.0               beachmat_2.6.4             
+[61] cowplot_1.1.1               beachmat_2.6.4             
 [63] splines_4.0.3               CodeDepends_0.6.5          
 [65] knitr_1.30                  ps_1.5.0                   
 [67] pillar_1.4.7                codetools_0.2-18           

@@ -54,7 +54,7 @@ Heatmaps
 ```
 R version 4.0.3 (2020-10-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04 LTS
+Running under: Ubuntu 20.04.1 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -77,7 +77,7 @@ loaded via a namespace (and not attached):
  [1] bookdown_0.21       codetools_0.2-18    XML_3.99-0.5       
  [4] ps_1.5.0            digest_0.6.27       stats4_4.0.3       
  [7] magrittr_2.0.1      evaluate_0.14       graph_1.68.0       
-[10] rlang_0.4.9         stringi_1.5.3       callr_3.5.1        
+[10] rlang_0.4.10        stringi_1.5.3       callr_3.5.1        
 [13] rmarkdown_2.6       tools_4.0.3         stringr_1.4.0      
 [16] processx_3.4.5      parallel_4.0.3      xfun_0.19          
 [19] yaml_2.2.1          compiler_4.0.3      BiocGenerics_0.36.0

@@ -206,7 +206,7 @@ plotColData(se,"sum","SampleType", colour_by = "SampleType") +
 ```
 R version 4.0.3 (2020-10-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04 LTS
+Running under: Ubuntu 20.04.1 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -224,7 +224,7 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] scater_1.18.3                    ggplot2_3.3.2                   
+ [1] scater_1.18.3                    ggplot2_3.3.3                   
  [3] mia_0.98.21                      MicrobiomeExperiment_0.99.0.9014
  [5] Biostrings_2.58.0                XVector_0.30.0                  
  [7] TreeSummarizedExperiment_1.6.2   SingleCellExperiment_1.12.0     
@@ -251,7 +251,7 @@ loaded via a namespace (and not attached):
 [25] digest_0.6.27               rmarkdown_2.6              
 [27] pkgconfig_2.0.3             htmltools_0.5.0            
 [29] sparseMatrixStats_1.2.0     highr_0.8                  
-[31] rlang_0.4.9                 DelayedMatrixStats_1.12.1  
+[31] rlang_0.4.10                DelayedMatrixStats_1.12.1  
 [33] farver_2.0.3                generics_0.1.0             
 [35] BiocParallel_1.24.1         dplyr_1.0.2                
 [37] RCurl_1.98-1.2              magrittr_2.0.1             
@@ -263,7 +263,7 @@ loaded via a namespace (and not attached):
 [49] stringi_1.5.3               yaml_2.2.1                 
 [51] MASS_7.3-53                 zlibbioc_1.36.0            
 [53] grid_4.0.3                  crayon_1.3.4               
-[55] lattice_0.20-41             cowplot_1.1.0              
+[55] lattice_0.20-41             cowplot_1.1.1              
 [57] beachmat_2.6.4              splines_4.0.3              
 [59] CodeDepends_0.6.5           knitr_1.30                 
 [61] ps_1.5.0                    pillar_1.4.7               

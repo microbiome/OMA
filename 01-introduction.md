@@ -394,7 +394,7 @@ Some wrapping up...
 ```
 R version 4.0.3 (2020-10-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04 LTS
+Running under: Ubuntu 20.04.1 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -438,7 +438,7 @@ loaded via a namespace (and not attached):
 [25] digest_0.6.27               rmarkdown_2.6              
 [27] scater_1.18.3               pkgconfig_2.0.3            
 [29] htmltools_0.5.0             sparseMatrixStats_1.2.0    
-[31] rlang_0.4.9                 DelayedMatrixStats_1.12.1  
+[31] rlang_0.4.10                DelayedMatrixStats_1.12.1  
 [33] generics_0.1.0              BiocParallel_1.24.1        
 [35] dplyr_1.0.2                 RCurl_1.98-1.2             
 [37] magrittr_2.0.1              BiocSingular_1.6.0         
@@ -458,7 +458,7 @@ loaded via a namespace (and not attached):
 [65] evaluate_0.14               vctrs_0.3.6                
 [67] gtable_0.3.0                purrr_0.3.4                
 [69] tidyr_1.1.2                 assertthat_0.2.1           
-[71] ggplot2_3.3.2               xfun_0.19                  
+[71] ggplot2_3.3.3               xfun_0.19                  
 [73] rsvd_1.0.3                  viridisLite_0.3.0          
 [75] tibble_3.0.4                beeswarm_0.2.3             
 [77] cluster_2.1.0               ellipsis_0.3.1             
