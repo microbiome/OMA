@@ -14,7 +14,7 @@ github-repo: microbiome/MiaBook
 date: "**Authors:** Leo Lahti [aut], Sudarshan Shetty [aut], Felix GM Ernst [aut, cre]<br/>
   **Version:** 0.98.0003<br/>
   **Modified:** 2020-12-06<br/>
-  **Compiled:** 2021-01-01<br/>
+  **Compiled:** 2021-01-02<br/>
   **Environment:** R version 4.0.3 (2020-10-10), Bioconductor 3.12<br/>
   **License:** CC BY-NC-SA 3.0 US<br/>
   **Copyright:** <br/>
