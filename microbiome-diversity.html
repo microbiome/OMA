@@ -191,14 +191,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="microbiome-exploration.html"><a href="microbiome-exploration.html#session-info-4"><i class="fa fa-check"></i>Session Info</a></li>
 </ul></li>
 <li class="chapter" data-level="6" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html"><i class="fa fa-check"></i><b>6</b> Microbiome Diversity</a><ul>
-<li class="chapter" data-level="6.1" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#alpha-diversity"><i class="fa fa-check"></i><b>6.1</b> Alpha diversity</a></li>
+<li class="chapter" data-level="6.1" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#alpha-diversity-indices"><i class="fa fa-check"></i><b>6.1</b> Alpha diversity indices</a><ul>
+<li class="chapter" data-level="6.1.1" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#estimating-alpha-diversity"><i class="fa fa-check"></i><b>6.1.1</b> Estimating alpha diversity</a></li>
+</ul></li>
 <li class="chapter" data-level="6.2" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#beta-diversity"><i class="fa fa-check"></i><b>6.2</b> Beta diversity</a><ul>
-<li class="chapter" data-level="6.2.1" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#calculating-beta-diversity"><i class="fa fa-check"></i><b>6.2.1</b> Calculating beta diversity</a></li>
+<li class="chapter" data-level="6.2.1" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#estimating-beta-diversity"><i class="fa fa-check"></i><b>6.2.1</b> Estimating beta diversity</a></li>
 <li class="chapter" data-level="6.2.2" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#other-ordination-methods"><i class="fa fa-check"></i><b>6.2.2</b> Other ordination methods</a></li>
 </ul></li>
-<li class="chapter" data-level="6.3" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#community-comparisons"><i class="fa fa-check"></i><b>6.3</b> Community comparisons</a><ul>
-<li class="chapter" data-level="6.3.1" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#permanova---significance-test-for-group-level-differences"><i class="fa fa-check"></i><b>6.3.1</b> PERMANOVA - significance test for group-level differences</a></li>
-<li class="chapter" data-level="6.3.2" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#permdisp2---checking-the-homogeneity-condition"><i class="fa fa-check"></i><b>6.3.2</b> PERMDISP2 - Checking the homogeneity condition</a></li>
+<li class="chapter" data-level="6.3" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#community-comparisons-todo-combine-with-the-material-above-for-simplicity"><i class="fa fa-check"></i><b>6.3</b> Community comparisons [TODO combine with the material above for simplicity?]</a><ul>
+<li class="chapter" data-level="6.3.1" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#testing-differences-in-community-composition-between-sample-groups"><i class="fa fa-check"></i><b>6.3.1</b> Testing differences in community composition between sample groups</a></li>
+<li class="chapter" data-level="6.3.2" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#checking-the-homogeneity-condition"><i class="fa fa-check"></i><b>6.3.2</b> Checking the homogeneity condition</a></li>
 </ul></li>
 <li class="chapter" data-level="6.4" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#further-reading"><i class="fa fa-check"></i><b>6.4</b> Further reading</a></li>
 <li class="chapter" data-level="" data-path="microbiome-diversity.html"><a href="microbiome-diversity.html#session-info-5"><i class="fa fa-check"></i>Session Info</a></li>
@@ -285,33 +287,59 @@ document.addEventListener("click", function (event) {
   background-color: #f1f1f1;
 }
 </style>
-<p>Diversity measurements are an important topic, when analyzing microbiome data.
-Typically three levels of diversity measurements exist, which are trying to
-put a number on different aspects of the questions associated with diversity
-<span class="citation">(<span class="citeproc-not-found" data-reference-id="Whittaker1690"><strong>???</strong></span>)</span>.</p>
+<p>Diversity estimates are a central topic in microbiome data analysis.</p>
+<p>There are three commonly employed levels of diversity measurements,
+which are trying to put a number on different aspects of the questions
+associated with diversity <span class="citation">(<span class="citeproc-not-found" data-reference-id="Whittaker1690"><strong>???</strong></span>)</span>.</p>
 <p>Many different ways for estimating such diversity measurements have been
 described in the literature. Which measurement is best or applicable for your
 samples, is not the aim of the following sections.</p>
 <div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="microbiome-diversity.html#cb90-1"></a><span class="kw">library</span>(mia)</span>
 <span id="cb90-2"><a href="microbiome-diversity.html#cb90-2"></a><span class="kw">data</span>(<span class="st">&quot;GlobalPatterns&quot;</span>)</span>
 <span id="cb90-3"><a href="microbiome-diversity.html#cb90-3"></a>se &lt;-<span class="st"> </span>GlobalPatterns</span></code></pre></div>
-<div id="alpha-diversity" class="section level2">
-<h2><span class="header-section-number">6.1</span> Alpha diversity</h2>
-<p><strong><em>Alpha diversity</em></strong>, also sometimes interchangeably used with the terms
-<strong><em>species diversity</em></strong> or <strong><em>species richness</em></strong>, summarizes the number
-different species and their abundance per sample into a single number.</p>
-<p>For this purpose wrapper functions are available interacting with other packages
-implementing the calculation, such as <code>_vegan_</code> <span class="citation">(Oksanen et al. <a href="#ref-R-vegan" role="doc-biblioref">2020</a>)</span>.</p>
-<p><code>estimateAlphaDiversity</code> is the main function for this purpose, which calculates
-the selected diversity based on the selected assay data and adds it to the
+<div id="alpha-diversity-indices" class="section level2">
+<h2><span class="header-section-number">6.1</span> Alpha diversity indices</h2>
+<p><strong><em>Alpha diversity</em></strong>, also sometimes interchangeably used with the
+term <strong><em>species diversity</em></strong>, summarizes the distribution of species
+abundances in a given sample into a single number that depends on
+species richness and evenness. Diversity indices measure the overall
+community heterogeneity. A number of ecological diversity measures are
+available. The Hill coefficient combines many standard indices into a
+single equation that provides observed richness, inverse Simpson, and
+Shannon diversity, and generalized diversity as special cases. In
+general, diversity increases together with increasing richness and
+evenness. Sometimes richness, evenness, and dominance are considered
+to be variants of alpha diversity.</p>
+<p><strong>Richness</strong> refers to the total number of species in a community
+(sample). The simplest richness index is the number of observed
+species (observed richness). Assuming limited sampling from the
+community, however, this may underestimate the true species
+richness. Several estimators are available, including for instance ACE
+<span class="citation">(<span class="citeproc-not-found" data-reference-id="reference"><strong>???</strong></span>)</span> and Chao1 <span class="citation">(<span class="citeproc-not-found" data-reference-id="reference"><strong>???</strong></span>)</span>. Richness estimates are unaffected
+by species abundances.</p>
+<p><strong>Evenness</strong> focuses on species abundances, and can thus complement
+the number of species. A typical evenness index is the Pielou’s
+evenness, which is Shannon diversity normalized by the observed
+richness.</p>
+<p><strong>Dominance</strong> indices are in general negatively correlated with
+diversity, and sometimes used in ecological literature. High
+dominance is obtained when one or few species have a high share of
+the total species abundance in the community.</p>
+<div id="estimating-alpha-diversity" class="section level3">
+<h3><span class="header-section-number">6.1.1</span> Estimating alpha diversity</h3>
+<p>Alpha diversity can be estimated with wrapper functions that interact
+with other packages implementing the calculation, such as <em><code>vegan</code></em>
+<span class="citation">(Oksanen et al. <a href="#ref-R-vegan" role="doc-biblioref">2020</a>)</span>.</p>
+<p>The main function, <code>estimateAlphaDiversity</code>, calculates the selected
+diversity index based on the selected assay data and adds it to the
 <code>colData</code> of the <code>SummarizedExperiment</code> under the given column <code>name</code>.</p>
-<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="microbiome-diversity.html#cb91-1"></a>se &lt;-<span class="st"> </span><span class="kw">estimateAlphaDiversity</span>(se, <span class="dt">abund_values =</span> <span class="st">&quot;counts&quot;</span>,</span>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="microbiome-diversity.html#cb91-1"></a>se &lt;-<span class="st"> </span>mia<span class="op">::</span><span class="kw">estimateAlphaDiversity</span>(se, <span class="dt">abund_values =</span> <span class="st">&quot;counts&quot;</span>,</span>
 <span id="cb91-2"><a href="microbiome-diversity.html#cb91-2"></a>                             <span class="dt">index =</span> <span class="st">&quot;shannon&quot;</span>, <span class="dt">name =</span> <span class="st">&quot;shannon&quot;</span>)</span>
 <span id="cb91-3"><a href="microbiome-diversity.html#cb91-3"></a><span class="kw">head</span>(<span class="kw">colData</span>(se)<span class="op">$</span>shannon)</span></code></pre></div>
 <pre><code>##     CL3     CC1     SV1 M31Fcsw M11Fcsw M31Plmr 
 ##   6.577   6.777   6.498   3.828   3.288   4.289</code></pre>
 <p>This allows the values to analyzed directly from the <code>colData</code>, for example
-by plotting them using <code>plotColData</code> from the <code>_scater_</code> package <span class="citation">(McCarthy et al. <a href="#ref-R-scater" role="doc-biblioref">2020</a>)</span>.</p>
+by plotting them using <code>plotColData</code> from the <em><code>scater</code></em> package <span class="citation">(McCarthy et al. <a href="#ref-R-scater" role="doc-biblioref">2020</a>)</span>.</p>
 <div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="microbiome-diversity.html#cb93-1"></a><span class="kw">library</span>(scater)</span>
 <span id="cb93-2"><a href="microbiome-diversity.html#cb93-2"></a><span class="kw">plotColData</span>(se, <span class="st">&quot;shannon&quot;</span>, <span class="st">&quot;SampleType&quot;</span>, <span class="dt">colour_by =</span> <span class="st">&quot;SampleType&quot;</span>) <span class="op">+</span></span>
 <span id="cb93-3"><a href="microbiome-diversity.html#cb93-3"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">angle=</span><span class="dv">45</span>,<span class="dt">hjust=</span><span class="dv">1</span>))</span></code></pre></div>
@@ -321,7 +349,7 @@ by plotting them using <code>plotColData</code> from the <code>_scater_</code> p
 Figure 6.1: Shannon diversity estimates plotted grouped by sample type.
 </p>
 </div>
-<p>By default <code>estimateAlphaDiversity</code> will calculate all available estimates…</p>
+<p>All available indices will be calculated by default…</p>
 <div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="microbiome-diversity.html#cb94-1"></a>se &lt;-<span class="st"> </span><span class="kw">estimateAlphaDiversity</span>(se)</span></code></pre></div>
 <p>.. and a plot comparing them can then be constructed directly.</p>
 <div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="microbiome-diversity.html#cb95-1"></a>plots &lt;-<span class="st"> </span><span class="kw">lapply</span>(<span class="kw">c</span>(<span class="st">&quot;shannon&quot;</span>,<span class="st">&quot;simpson&quot;</span>,<span class="st">&quot;inv_simpson&quot;</span>, <span class="st">&quot;richness&quot;</span>, <span class="st">&quot;chao1&quot;</span>, <span class="st">&quot;ACE&quot;</span>),</span>
@@ -333,26 +361,32 @@ Figure 6.1: Shannon diversity estimates plotted grouped by sample type.
 <span id="cb95-7"><a href="microbiome-diversity.html#cb95-7"></a>ggpubr<span class="op">::</span><span class="kw">ggarrange</span>(<span class="dt">plotlist =</span> plots, <span class="dt">nrow =</span> <span class="dv">2</span>, <span class="dt">ncol =</span> <span class="dv">3</span>, <span class="dt">common.legend =</span> <span class="ot">TRUE</span>, <span class="dt">legend =</span> <span class="st">&quot;right&quot;</span>)</span></code></pre></div>
 <p><img src="14-microbiome-diversity_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 </div>
+</div>
 <div id="beta-diversity" class="section level2">
 <h2><span class="header-section-number">6.2</span> Beta diversity</h2>
-<p>In comparison to alpha diversities, beta diversities describe inter-microbiome
-(dis-)similarites. Technically speaking, beta diversities are usually
-represented as <code>dist</code> objects, which contain triangular data describing the
-distance between each pair of samples. These distances can be subjected to
-multi-dimensional scaling, also known as PCoA, to retrieve reduced dimensions
-for further evaluation or visualization.</p>
-<div id="calculating-beta-diversity" class="section level3">
-<h3><span class="header-section-number">6.2.1</span> Calculating beta diversity</h3>
-<p>In the following examples distances are calculated by variable functions
-supplied to the <code>FUN</code> argument. The function can defined by the usre, but it
-must return a <code>dist</code> function, which can then be used to calculate reduced
-dimension either via MDS or NMDS and the results can be stored in the
-<code>reducedDim</code>. The whole process is wrapped in the <code>runMDS</code> and <code>runNMDS</code>
+<p>Where alpha diversity focuses on community variation within a
+community (sample), beta diversity quantifies (dis-)similarites
+between communities (samples).</p>
+<p>Technically, beta diversities are usually represented as <code>dist</code>
+objects, which contain triangular data describing the distance between
+each pair of samples. These distances can be further subjected to
+ordination with methods such as multi-dimensional scaling (also known
+as PCoA) to retrieve reduced dimensions for further evaluation or
+visualization. [TODO we could here instead link to ordination chapter?]</p>
+<div id="estimating-beta-diversity" class="section level3">
+<h3><span class="header-section-number">6.2.1</span> Estimating beta diversity</h3>
+<p>In the following examples distances are calculated by variable
+functions supplied to the <code>FUN</code> argument. The function can defined by
+the user. It must return a <code>dist</code> function, which can then be used to
+calculate reduced dimension either via ordination methods (such as MDS
+or NMDS), and the results can be stored in the <code>reducedDim</code>.</p>
+<p>This entire process is wrapped in the <code>runMDS</code> and <code>runNMDS</code>
 functions.</p>
 <div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="microbiome-diversity.html#cb96-1"></a>se &lt;-<span class="st"> </span><span class="kw">runMDS2</span>(se, <span class="dt">FUN =</span> vegan<span class="op">::</span>vegdist, <span class="dt">name =</span> <span class="st">&quot;MDS_BC&quot;</span>)</span></code></pre></div>
-<p>To visualize reduced dimensions, <code>scater</code> implements the <code>plotReducedDim</code>
-function, which can enrich a plot with additional information as colour, shape
-or size.</p>
+<p>Sample similarities can be visualized on a lower-dimensional display
+(typically 2D) using the <code>plotReducedDim</code> function in the
+<code>scater</code>package. This provides also further tools to incorporate
+additional information using variations in colour, shape or size.</p>
 <div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="microbiome-diversity.html#cb97-1"></a><span class="kw">plotReducedDim</span>(se, <span class="st">&quot;MDS_BC&quot;</span>, <span class="dt">colour_by =</span> <span class="st">&quot;SampleType&quot;</span>)</span></code></pre></div>
 <div class="figure"><span id="fig:plot-mds-bray-curtis"></span>
 <img src="14-microbiome-diversity_files/figure-html/plot-mds-bray-curtis-1.png" alt="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset." width="672" />
@@ -361,7 +395,7 @@ Figure 6.2: MDS plot based on the Bray-Curtis distances on the GlobalPattern dat
 </p>
 </div>
 <p>With additional tools from the <code>ggplot2</code> universe, comparisons can be
-performed informing on the applicability to visualize the samples in a
+performed informing on the applicability to visualize sample similarities in a
 meaningful way.</p>
 <div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="microbiome-diversity.html#cb98-1"></a>se &lt;-<span class="st"> </span><span class="kw">runMDS2</span>(se, <span class="dt">FUN =</span> vegan<span class="op">::</span>vegdist, <span class="dt">name =</span> <span class="st">&quot;MDS_euclidean&quot;</span>,</span>
 <span id="cb98-2"><a href="microbiome-diversity.html#cb98-2"></a>             <span class="dt">method =</span> <span class="st">&quot;euclidean&quot;</span>)</span>
@@ -386,9 +420,10 @@ meaningful way.</p>
 Figure 6.3: Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.
 </p>
 </div>
-<p>The <em>UniFrac</em> is a special case, since it requires data on the relationship
-of features in form on a <code>phylo</code> tree. <code>calculateUniFrac</code> performs the
-calculation to return a <code>dist</code> object, which can again be used within <code>runMDS</code>.</p>
+<p>The <em>UniFrac</em> method is a special case, as it requires data on the
+relationship of features in form on a <code>phylo</code> tree. <code>calculateUniFrac</code>
+performs the calculation to return a <code>dist</code> object, which can again be
+used within <code>runMDS</code>.</p>
 <div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="microbiome-diversity.html#cb103-1"></a>se &lt;-<span class="st"> </span><span class="kw">runMDS2</span>(se, <span class="dt">FUN =</span> calculateUniFrac, <span class="dt">name =</span> <span class="st">&quot;UniFrac&quot;</span>,</span>
 <span id="cb103-2"><a href="microbiome-diversity.html#cb103-2"></a>              <span class="dt">tree =</span> <span class="kw">rowTree</span>(se),</span>
 <span id="cb103-3"><a href="microbiome-diversity.html#cb103-3"></a>              <span class="dt">ntop =</span> <span class="kw">nrow</span>(se))</span></code></pre></div>
@@ -414,6 +449,7 @@ Figure 6.5: PCA plot on the GlobalPatterns data set containing sample from diffe
 </div>
 <p>As mentioned before, applicability of the different methods depends on your
 sample set.</p>
+<p>FIXME: let us switch to UMAP for the examples?</p>
 <div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="microbiome-diversity.html#cb107-1"></a>se &lt;-<span class="st"> </span><span class="kw">runTSNE</span>(se, <span class="dt">name =</span> <span class="st">&quot;TSNE&quot;</span>, <span class="dt">exprs_values =</span> <span class="st">&quot;counts&quot;</span>, <span class="dt">ncomponents =</span> <span class="dv">3</span>)</span></code></pre></div>
 <div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb108-1"><a href="microbiome-diversity.html#cb108-1"></a><span class="kw">plotReducedDim</span>(se, <span class="st">&quot;TSNE&quot;</span>, <span class="dt">colour_by =</span> <span class="st">&quot;SampleType&quot;</span>, <span class="dt">ncomponents =</span> <span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>))</span></code></pre></div>
 <div class="figure"><span id="fig:plot-tsne"></span>
@@ -424,21 +460,35 @@ Figure 6.6: t-SNE plot on the GlobalPatterns data set containing sample from dif
 </div>
 </div>
 </div>
-<div id="community-comparisons" class="section level2">
-<h2><span class="header-section-number">6.3</span> Community comparisons</h2>
-<p>TODO: Introduction</p>
+<div id="community-comparisons-todo-combine-with-the-material-above-for-simplicity" class="section level2">
+<h2><span class="header-section-number">6.3</span> Community comparisons [TODO combine with the material above for simplicity?]</h2>
+<p>A typical comparison of community composition starts with a visual
+comparison of the groups on a 2D ordination.</p>
+<p>Let us load an example data set:</p>
 <div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="microbiome-diversity.html#cb109-1"></a><span class="kw">library</span>(microbiomeDataSets)</span>
 <span id="cb109-2"><a href="microbiome-diversity.html#cb109-2"></a>se.lahti &lt;-<span class="st"> </span><span class="kw">LahtiMData</span>()</span></code></pre></div>
+<p>Then we estimate relative abundances and MDS ordination based on
+Bray-Curtis (BC) dissimilarity between the groups, and visualize the
+results.</p>
 <div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb110-1"><a href="microbiome-diversity.html#cb110-1"></a>se.lahti &lt;-<span class="st"> </span><span class="kw">relAbundanceCounts</span>(se.lahti)</span>
 <span id="cb110-2"><a href="microbiome-diversity.html#cb110-2"></a>se.lahti &lt;-<span class="st"> </span><span class="kw">runNMDS</span>(se.lahti, <span class="dt">FUN =</span> vegan<span class="op">::</span>vegdist, <span class="dt">name =</span> <span class="st">&quot;BC&quot;</span>, <span class="dt">nmdsFUN =</span> <span class="st">&quot;monoMDS&quot;</span>,</span>
 <span id="cb110-3"><a href="microbiome-diversity.html#cb110-3"></a>                    <span class="dt">exprs_values =</span> <span class="st">&quot;relabundance&quot;</span>,</span>
 <span id="cb110-4"><a href="microbiome-diversity.html#cb110-4"></a>                    <span class="dt">keep_dist =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
 <div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="microbiome-diversity.html#cb111-1"></a><span class="kw">plotReducedDim</span>(se.lahti, <span class="st">&quot;BC&quot;</span>, <span class="dt">colour_by =</span> <span class="st">&quot;group&quot;</span>)</span></code></pre></div>
 <p><img src="14-microbiome-diversity_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
-<p>TODO: Conclusion</p>
-<div id="permanova---significance-test-for-group-level-differences" class="section level3">
-<h3><span class="header-section-number">6.3.1</span> PERMANOVA - significance test for group-level differences</h3>
-<p>TODO: Introduction, References</p>
+<p>No clear difference between the groups can be visually observed.</p>
+<div id="testing-differences-in-community-composition-between-sample-groups" class="section level3">
+<h3><span class="header-section-number">6.3.1</span> Testing differences in community composition between sample groups</h3>
+<p>The permutational analysis of variance (PERMANOVA) <span class="citation">(Anderson <a href="#ref-Anderson2001" role="doc-biblioref">2001</a>)</span> is
+a widely used non-parametric multivariate method that can be used to
+estimate the actual statistical significance of differences in the
+observed community composition between two groups of
+samples.</p>
+<p>PERMANOVA evaluates the hypothesis that the centroids and dispersion
+of the community are equivalent between the compared groups. A small
+p-value indicates that the compared groups have, on average, a
+different community composition.</p>
+<p>This method is implemented in the <code>vegan</code> package (function <code>adonis</code>).</p>
 <div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="microbiome-diversity.html#cb112-1"></a><span class="kw">library</span>(vegan)</span>
 <span id="cb112-2"><a href="microbiome-diversity.html#cb112-2"></a>permanova &lt;-<span class="st"> </span>vegan<span class="op">::</span><span class="kw">adonis</span>(<span class="kw">t</span>(<span class="kw">assay</span>(se.lahti,<span class="st">&quot;relabundance&quot;</span>)) <span class="op">~</span><span class="st"> </span>group,</span>
 <span id="cb112-3"><a href="microbiome-diversity.html#cb112-3"></a>                           <span class="dt">data =</span> <span class="kw">colData</span>(se.lahti),</span>
@@ -446,10 +496,15 @@ Figure 6.6: t-SNE plot on the GlobalPatterns data set containing sample from dif
 <span id="cb112-5"><a href="microbiome-diversity.html#cb112-5"></a></span>
 <span id="cb112-6"><a href="microbiome-diversity.html#cb112-6"></a><span class="co"># P-value</span></span>
 <span id="cb112-7"><a href="microbiome-diversity.html#cb112-7"></a><span class="kw">print</span>(<span class="kw">as.data.frame</span>(permanova<span class="op">$</span>aov.tab)[<span class="st">&quot;group&quot;</span>, <span class="st">&quot;Pr(&gt;F)&quot;</span>])</span></code></pre></div>
-<pre><code>## [1] 0.2812</code></pre>
+<pre><code>## [1] 0.2741</code></pre>
+<p>In this case, the community composition is not significantly different
+between the groups.</p>
+<p>Let us visualize the model coefficients for species that exhibit the
+largest differences between the groups. This gives some insights into
+how the groups tend to differ from each other in terms of community
+composition.</p>
 <div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="microbiome-diversity.html#cb114-1"></a>coef &lt;-<span class="st"> </span><span class="kw">coefficients</span>(permanova)[<span class="st">&quot;group1&quot;</span>,]</span>
 <span id="cb114-2"><a href="microbiome-diversity.html#cb114-2"></a>top.coef &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">head</span>(coef[<span class="kw">rev</span>(<span class="kw">order</span>(<span class="kw">abs</span>(coef)))],<span class="dv">20</span>))</span></code></pre></div>
-<p>TODO: Conclusion</p>
 <div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="microbiome-diversity.html#cb115-1"></a><span class="kw">ggplot</span>(<span class="kw">data.frame</span>(<span class="dt">x =</span> top.coef,</span>
 <span id="cb115-2"><a href="microbiome-diversity.html#cb115-2"></a>                  <span class="dt">y =</span> <span class="kw">factor</span>(<span class="kw">names</span>(top.coef),</span>
 <span id="cb115-3"><a href="microbiome-diversity.html#cb115-3"></a>                                      <span class="kw">unique</span>(<span class="kw">names</span>(top.coef)))),</span>
@@ -458,11 +513,16 @@ Figure 6.6: t-SNE plot on the GlobalPatterns data set containing sample from dif
 <span id="cb115-6"><a href="microbiome-diversity.html#cb115-6"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">x=</span><span class="st">&quot;&quot;</span>,<span class="dt">y=</span><span class="st">&quot;&quot;</span>,<span class="dt">title=</span><span class="st">&quot;Top Taxa&quot;</span>) <span class="op">+</span></span>
 <span id="cb115-7"><a href="microbiome-diversity.html#cb115-7"></a><span class="st">    </span><span class="kw">theme_bw</span>()</span></code></pre></div>
 <p><img src="14-microbiome-diversity_files/figure-html/plot-top-coef-anova-1.png" width="672" /></p>
-<p>TODO: Conclusion</p>
+<p>In the above example, the largest differences between the two groups
+can be attributed to Bacteroides intestinalis (elevated in the first
+group) and Faecalibacterium prausnitzii (elevated in the second
+group), and many other co-varying species.</p>
 </div>
-<div id="permdisp2---checking-the-homogeneity-condition" class="section level3">
-<h3><span class="header-section-number">6.3.2</span> PERMDISP2 - Checking the homogeneity condition</h3>
-<p>TODO: Introduction, References</p>
+<div id="checking-the-homogeneity-condition" class="section level3">
+<h3><span class="header-section-number">6.3.2</span> Checking the homogeneity condition</h3>
+<p>It is important to note that the application of PERMANOVA assumes
+homogeneous group dispersions (variances). This can be tested with the
+PERMDISP2 method <span class="citation">(Anderson <a href="#ref-Anderson2006" role="doc-biblioref">2006</a>)</span>.</p>
 <div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb116-1"><a href="microbiome-diversity.html#cb116-1"></a><span class="kw">anova</span>(vegan<span class="op">::</span><span class="kw">betadisper</span>(<span class="kw">attr</span>(<span class="kw">reducedDim</span>(se.lahti,<span class="st">&quot;BC&quot;</span>),<span class="st">&quot;dist&quot;</span>),</span>
 <span id="cb116-2"><a href="microbiome-diversity.html#cb116-2"></a>                        <span class="kw">colData</span>(se.lahti)<span class="op">$</span>group))</span></code></pre></div>
 <pre><code>## Analysis of Variance Table
@@ -471,7 +531,8 @@ Figure 6.6: t-SNE plot on the GlobalPatterns data set containing sample from dif
 ##           Df Sum Sq Mean Sq F value Pr(&gt;F)
 ## Groups     1  0.000 0.00002       0   0.95
 ## Residuals 42  0.158 0.00376</code></pre>
-<p>TODO: Conclusion</p>
+<p>In our example, the groups have similar dispersions, and PERMANOVA is
+an appropriate choice for comparing community compositions.</p>
 </div>
 </div>
 <div id="further-reading" class="section level2">
@@ -479,6 +540,7 @@ Figure 6.6: t-SNE plot on the GlobalPatterns data set containing sample from dif
 <p>In certain settings beta diversities might be used to group samples without
 prior knowledge. For this we want to point to excellent resources on
 <a href="http://bioconductor.org/books/release/OSCA/clustering.html">how to extract information from the clusters</a>.</p>
+<p>See also <a href="15-microbiome-community.md">community typing</a>.</p>
 </div>
 <div id="session-info-5" class="section level2 unnumbered">
 <h2>Session Info</h2>
@@ -586,6 +648,12 @@ loaded via a namespace (and not attached):
 </div>
 <h3>Bibliography</h3>
 <div id="refs" class="references">
+<div id="ref-Anderson2001">
+<p>Anderson, Marti J. 2001. “A New Method for Non-Parametric Multivariate Analysis of Variance.” <em>Austral Ecology</em> 26 (1): 32–46. <a href="https://doi.org/10.1111/j.1442-9993.2001.01070.pp.x">https://doi.org/10.1111/j.1442-9993.2001.01070.pp.x</a>.</p>
+</div>
+<div id="ref-Anderson2006">
+<p>Anderson, Marti J. 2006. “Distance-Based Tests for Homogeneity of Multivariate Dispersions.” <em>Biometrics</em> 62: 245–53. <a href="https://doi.org/10.1111/j.1541-0420.2005.00440.x">https://doi.org/10.1111/j.1541-0420.2005.00440.x</a>.</p>
+</div>
 <div id="ref-R-scater">
 <p>McCarthy, Davis, Kieran Campbell, Aaron Lun, and Quin Wills. 2020. <em>Scater: Single-Cell Analysis Toolkit for Gene Expression Data in R</em>. <a href="http://bioconductor.org/packages/scater/">http://bioconductor.org/packages/scater/</a>.</p>
 </div>
