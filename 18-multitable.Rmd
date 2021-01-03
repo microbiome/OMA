@@ -1,50 +1,103 @@
-# Multi-table methods {#multitable}
+# Representation of multiple data tables {#multitable}
 
 ```{r setup, echo=FALSE, results="asis"}
 library(rebook)
 chapterPreamble()
 ```
 
-This chapter focuses on multi-table methods.
-
-
-
-## Representation of multiple data tables
+Microbiome data can be part of multiomics experiments and analysis strategies
+and we want to outline the understanding in which we think the packages 
+explained and used in this book relate to these experiment layouts
+using the `TreeSummarizedExperiment` and classes beyond.
 
 Many microbiome experiments include multiple versions and types of
-data. We start by providing recommendations on how to represent
+data generated independently or derived from each other through transformation
+or agglomeration. We start by providing recommendations on how to represent
 different varieties of multi-table data within the
-TreeSummarizedExperiment framework.
+`TreeSummarizedExperiment` class.
 
-**Transformations** The original count-based taxonomic abundance
-tables may have different transformations, such as log10p, clr, or
-relative abundance. These are typically stored in _assays_.
+## Assay data
 
-TODO: Example - OR refer to the data basics/manipulation section.
+The original count-based taxonomic abundance tables may have different 
+transformations, such as logarithmic, Centered Log-Ratio (CLR), or relative 
+abundance. These are typically stored in _**assays**_.
 
+```{r}
+library(mia)
+data(GlobalPatterns)
+se <- GlobalPatterns
+assays(se)
+```
 
-**Alternative experiments** differ from transformations as they can
-  contain complementary data. One can have taxonomic abundance
-  profiles quantified with different measurement technologies, for
-  instance, such as phylogenetic microarrays, amplicon sequencing, or
-  metagenomic sequencing. Assuming that the taxonomic information can
-  be mapped between these types. Alternative experiments can be
-  represented as 1) separate _assays_; or 2) using the altExp() option in 
+As example the relative abundence is calculated.
 
-TODO: Example on assays - OR refer to the data basics/manipulation section.
+```{r}
+se <- relAbundanceCounts(se)
+assays(se)
+```
 
-TODO: Example on SingleCellExperiment::altExp() [examples](https://bioconductor.org/packages/3.12/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html)
+Here the dimension of the count data remains unchanged is actually an 
+requirement of any `SummarizedExperiment` object.
 
+## Alternative experiments
 
-**Multiple experiments** relate to complementary measurement types,
-  such as transcriptomic or metabolomic profiling of the microbiome or
-  the host. Multiple experiments can be represented using the same
-  options as alternative exaperiments, or by using the
-  MultiAssayExperiment class.
+_**Alternative experiments**_ differ from transformations as they can
+contain complementary data, which is no longer tied to the same dimensions
+as the assay data. However, the same number of columns aka. the number of 
+samples must be the same.
 
-TODO: Example on MultiAssayExperiment()
+This comes into play as one can have taxonomic abundance profiles quantified
+with different measurement technologies, for instance, such as phylogenetic
+microarrays, amplicon sequencing, or metagenomic sequencing. The data can be 
+stored as
 
+1. Separate _assays_ assuming that the taxonomic information can be mapped 
+between feature directly 1:1; or 
+2. data in the _altExp_ slot of the `TreeSummarizedExperiment`, if the feature 
+dimensions differ. Each element of the _altExp_ slot is a `SummarizedExperiment`
+or an object from a derived class with independent feature data.
 
+As an example the agglomeration on a taxonomic levels can be shown most easily,
+but just as reminder, this can be data from a different source all together.
+
+```{r}
+se.phylum <- agglomerateByRank(se, "Phylum")
+# the same number of columns
+dim(se)
+dim(se.phylum)
+# adding it to the alternative experiments
+altExp(se, "Phylum") <- se.phylum
+altExpNames(se)
+# subsetting along sample in altExp and assay data
+se[,1:10]
+dim(altExp(se[,1:10],"Phylum"))
+```
+
+For more details have a look at the [Intro vignette](https://bioconductor.org/packages/3.12/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html) of the 
+`SingleCellExperiment` package [@R-SingleCellExperiment].
+
+## MultiAssayExperiments
+
+_**Multiple experiments**_ relate to complementary measurement types,
+such as transcriptomic or metabolomic profiling of the microbiome or
+the host. Multiple experiments can be represented using the same
+options as alternative experiments, or by using the
+`MultiAssayExperiment` class [@R-MultiAssayExperiment]. Depending on how the 
+datasets relate to each other the data can be stored as:
+
+1. Separate _altExp_ If the samples can be matched directly 1:1; or
+2. As an `MultiAssayExperiment` objects, in which the connections between sample
+are definded through a `sampleMap`. Each element on the `experimentsList` of
+an `MultiAssayExperiment` is `matrix` or `matrix`-like object including 
+`SummarizedExperiment` objects.
+
+```{r}
+#TODO: Find the right dataset to explain a non 1:1 sample relationship
+```
+
+For information have a look at the [intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html)
+of the `MultiAssayExperiment` package.
+ 
 ## Session Info {-}
 
 ```{r sessionInfo, echo=FALSE, results='asis'}
