@@ -16,6 +16,9 @@ or agglomeration. We start by providing recommendations on how to represent
 different varieties of multi-table data within the
 `TreeSummarizedExperiment` class.
 
+The options and recommendations are summarized in Table \@ref(tab:options).
+
+
 ## Assay data
 
 The original count-based taxonomic abundance tables may have different 
@@ -29,27 +32,29 @@ se <- GlobalPatterns
 assays(se)
 ```
 
-As example the relative abundence is calculated.
+As an example the relative abundance is calculated.
 
 ```{r}
 se <- relAbundanceCounts(se)
 assays(se)
 ```
 
-Here the dimension of the count data remains unchanged is actually an 
-requirement of any `SummarizedExperiment` object.
+Here the dimension of the count data remains unchanged. This is
+actually a requirement for any `SummarizedExperiment` object.
+
 
 ## Alternative experiments
 
 _**Alternative experiments**_ differ from transformations as they can
-contain complementary data, which is no longer tied to the same dimensions
-as the assay data. However, the same number of columns aka. the number of 
-samples must be the same.
+contain complementary data, which is no longer tied to the same
+dimensions as the assay data. However, the number of samples (columns)
+must be the same, however.
 
-This comes into play as one can have taxonomic abundance profiles quantified
-with different measurement technologies, for instance, such as phylogenetic
-microarrays, amplicon sequencing, or metagenomic sequencing. The data can be 
-stored as
+This can come into play for instance when one has taxonomic abundance
+profiles quantified with different measurement technologies, such as
+phylogenetic microarrays, amplicon sequencing, or metagenomic
+sequencing. Such alternative experiments that concern the same samples
+can be stored as
 
 1. Separate _assays_ assuming that the taxonomic information can be mapped 
 between feature directly 1:1; or 
@@ -57,24 +62,32 @@ between feature directly 1:1; or
 dimensions differ. Each element of the _altExp_ slot is a `SummarizedExperiment`
 or an object from a derived class with independent feature data.
 
-As an example the agglomeration on a taxonomic levels can be shown most easily,
-but just as reminder, this can be data from a different source all together.
+
+As an example, we show how to store taxonomic abundance tables
+agglomerated at different taxonomic levels. However, the data could as
+well originate from entirely different measurement sources as long as
+the samples are matched.
 
 ```{r}
+# Agglomerate the data to Phylym level
 se.phylum <- agglomerateByRank(se, "Phylum")
-# the same number of columns
+# both have the same number of columns (samples)
 dim(se)
 dim(se.phylum)
-# adding it to the alternative experiments
+
+# Add the new table as an alternative experiment
 altExp(se, "Phylum") <- se.phylum
 altExpNames(se)
-# subsetting along sample in altExp and assay data
+
+# Pick a sample subset: this acts on both altExp and assay data
 se[,1:10]
 dim(altExp(se[,1:10],"Phylum"))
 ```
 
-For more details have a look at the [Intro vignette](https://bioconductor.org/packages/3.12/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html) of the 
+For more details of altExp have a look at the [Intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html) of the 
 `SingleCellExperiment` package [@R-SingleCellExperiment].
+
+
 
 ## MultiAssayExperiments
 
@@ -85,19 +98,33 @@ options as alternative experiments, or by using the
 `MultiAssayExperiment` class [@R-MultiAssayExperiment]. Depending on how the 
 datasets relate to each other the data can be stored as:
 
-1. Separate _altExp_ If the samples can be matched directly 1:1; or
-2. As an `MultiAssayExperiment` objects, in which the connections between sample
-are definded through a `sampleMap`. Each element on the `experimentsList` of
-an `MultiAssayExperiment` is `matrix` or `matrix`-like object including 
-`SummarizedExperiment` objects.
+1. Separate _altExp_ if the samples can be matched directly 1:1; or
+2. As `MultiAssayExperiment` objects, in which the connections between
+sample are defined through a `sampleMap`. Each element on the
+`experimentsList` of an `MultiAssayExperiment` is `matrix` or
+`matrix`-like object including `SummarizedExperiment` objects, and the
+number of samples can differ between the elements.
+
 
 ```{r}
 #TODO: Find the right dataset to explain a non 1:1 sample relationship
 ```
 
-For information have a look at the [intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html)
-of the `MultiAssayExperiment` package.
+
+For information have a look at the [intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html) of the `MultiAssayExperiment` package.  
+
  
+   Option   Rows (samples)    Cols (features)               Recommended  
+---------   --------------    ---------------  ------------------------
+   assays  	     match              match      Data transformations             
+   altExp            match              free    Alternative experiments   
+MultiAssay         mapping              free     Multi-omic experiments    
+
+Table: (\#tab:options) **Recommended options for storing multiple data tables in microbiome studies** The _assays_ are best suited for data transformations (one-to-one match between samples and columns across the assays). The _alternative experiments_ are particularly suitable for alternative versions of the data that is of same type but may have a different number of features (e.g. taxonomic groups); this is for instance the case with taxonomic abundance tables agglomerated at different levels (e.g. genus vs. phyla) or alternative profiling technologies (e.g. amplicon sequencing vs. shallow shotgun metagenomics). For alternative experiments one-to-one match between samples (rows) is required but the alternative experiment tables can have different numbers of features (columns). Finally, elements of the _MultiAssayExperiment_ provide the most flexible way to incorporate multi-omic data tables with flexible numbers of samples and features. We recommend these conventions as the basis for methods development and application in microbiome studies.
+
+
+
+
 ## Session Info {-}
 
 ```{r sessionInfo, echo=FALSE, results='asis'}
