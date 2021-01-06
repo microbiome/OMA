@@ -39,7 +39,7 @@ Diversity estimates are a central topic in microbiome data analysis.
 
 There are three commonly employed levels of diversity measurements,
 which are trying to put a number on different aspects of the questions
-associated with diversity [@Whittaker1690].
+associated with diversity [@Whittaker1960].
 
 Many different ways for estimating such diversity measurements have been 
 described in the literature. Which measurement is best or applicable for your 
@@ -52,8 +52,7 @@ data("GlobalPatterns")
 se <- GlobalPatterns
 ```
 
-## Alpha diversity indices
-
+## Alpha diversity
 
 **_Alpha diversity_**, also sometimes interchangeably used with the
 term **_species diversity_**, summarizes the distribution of species
@@ -362,7 +361,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2741
+## [1] 0.2772
 ```
 
 In this case, the community composition is not significantly different
