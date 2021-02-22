@@ -42,6 +42,13 @@ community, however, this may underestimate the true species
 richness. Several estimators are available, including for instance ACE
 [@reference] and Chao1 [@reference]. Richness estimates are unaffected
 by species abundances.
+  
+**Phylogenetic diversity** was first proposed by [@Faith1992], unlike the 
+  diversity measures mentioned above, Phylogenetic diversity (PD) 
+  measure incorporates information from phylogenetic relationships 
+  stored in `phylo` tree between species in a community (sample). The 
+  Faith's PD is calculated as the sum of branch length of all species in 
+  a community (sample).
 
 **Evenness** focuses on species abundances, and can thus complement
   the number of species. A typical evenness index is the Pielou's
@@ -53,47 +60,50 @@ by species abundances.
   dominance is obtained when one or few species have a high share of
   the total species abundance in the community.  
   
-**Phylogenetic diversity** was first proposed by [@Faith1992], unlike the 
-  diversity measures mentioned above, Phylogenetic diversity (PD) 
-  measure incorporates information from phylogenetic relationships 
-  stored in `phylo` tree between species in a community (sample). The 
-  Faith's PD is calculated as the sum of branch length of all species in 
-  a community (sample).
-
-
 ### Estimating alpha diversity
 
 Alpha diversity can be estimated with wrapper functions that interact
 with other packages implementing the calculation, such as _`vegan`_
 [@R-vegan].
 
-The main function, `estimateAlphaDiversity`, calculates the selected
-diversity index based on the selected assay data and adds it to the
-`colData` of the `SummarizedExperiment` under the given column `name`.
+#### Richness  
 
-```{r estimate-shannon}
-se <- mia::estimateAlphaDiversity(se, abund_values = "counts",
-                             index = "shannon", name = "shannon")
-head(colData(se)$shannon)
+Richness is gives the number of features present within a community and can be calculated with `estimateRichness`. Each of the estimate diversity/richness/evenness/dominance functions adds the calculated measure(s) to the `colData` of the `SummarizedExperiment` under the given column `name`.  
+
+```{r}
+se <- estimateRichness(se, 
+                       abund_values = "counts", 
+                       name="richness")
+
+head(colData(se)$richness)
 ```
-
 This allows access to the values to be analyzed directly from the `colData`, for example
 by plotting them using `plotColData` from the _`scater`_ package [@R-scater].
 
 ```{r plot-div-shannon, message=FALSE, fig.cap="Shannon diversity estimates plotted grouped by sample type."}
 library(scater)
-plotColData(se, "shannon", "SampleType", colour_by = "SampleType") +
+plotColData(se, 
+            "richness", 
+            "SampleType", 
+            colour_by = "SampleType") +
     theme(axis.text.x = element_text(angle=45,hjust=1))
 ```
 
-All available indices will be calculated by default...
+#### Diversity  
 
-```{r all-estimateDiv}
-se <- estimateAlphaDiversity(se)
+**Non-Phylogenetic measures**  
+The main function, `estimateAlphaDiversity`, calculates the selected
+diversity index based on the selected assay data.  
+
+```{r estimate-shannon}
+se <- mia::estimateDiversity(se, 
+                             abund_values = "counts",
+                             index = "shannon", 
+                             name = "shannon")
+head(colData(se)$shannon)
 ```
 
-
-### Phylogenetic diversity   
+**Phylogenetic diversity**  
 
 The phylogenetic diversity is not calculated by `mia::estimateAlphaDiversity`. Here, we show how `PD` can be calculated and added to the `colData` of the `SummarizedExperiment`.  
 The widely used implementation of phylogenetic diversity is in the _`picante`_ [@R-picante, @Kembel2010].  
@@ -118,18 +128,49 @@ df.pd <- picante::pd(t(mat), # note here t() this will convert rows to columns
 
 ```
 
-The resulting `data.frame` consist of two columns, `PD` and `SR`. The column `PD` has phylogenetic diversity values and `SR` is species richness (same as observed richness). We will add these values to the `colData` of the `SummarizedExperiment`.  
+The resulting `data.frame` consists of two columns, `PD` and `SR`. The column `PD` has phylogenetic diversity values and `SR` is species richness (same as observed richness). We will add these values to the `colData` of the `SummarizedExperiment`.  
 
 ```{r phylo-div-3}
 # adds it  under the given column `name`
 colData(se) <- cbind(colData(se), DataFrame(df.pd))
 ```
 
+#### Evenness  
 
-.. and a plot comparing them can then be constructed directly. 
+Evenness can be calculated with `estimateEvenness`.  
 
+```{r evenness-1}
+se <- estimateEvenness(se, 
+                       abund_values = "counts", 
+                       index="simpson")
+head(colData(se)$simpson)
+```
+
+
+#### Dominance  
+
+Dominance can be calculated with `estimateDominance`. Here, the `Relative index` is calculated which is the relative abundance of the most dominant species in the sample.   
+
+```{r dominance-1}
+se <- estimateDominance(se, 
+                       abund_values = "counts", 
+                       index="relative")
+
+head(colData(se)$relative)
+```
+
+#### Rarity  
+TODO...
+```{r}
+
+```
+
+
+### Visualize alpha diversities  
+
+A plot comparing all the diversity measures calculated above and stored in `colData` can then be constructed directly.  
 ```{r plot-all-diversities}
-plots <- lapply(c("shannon","simpson","inv_simpson", "richness", "chao1", "PD"),
+plots <- lapply(c("richness", "shannon","simpson", "relative", "PD"),
                 plotColData,
                 object = se,
                 x = "SampleType",
@@ -137,6 +178,14 @@ plots <- lapply(c("shannon","simpson","inv_simpson", "richness", "chao1", "PD"),
 plots <- lapply(plots,"+", theme(axis.text.x = element_text(angle=45,hjust=1)))
 ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 3, common.legend = TRUE, legend = "right")
 ```
+
+
+Alternatively, all available indices within `mia` can be calculated by default using `estimateAlphaDiversity`...
+
+```{r all-estimateDiv}
+se <- estimateAlphaDiversity(se)
+```
+
 
 ## Beta diversity
 
