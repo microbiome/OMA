@@ -15,7 +15,7 @@ Many different ways for estimating such diversity measurements have been
 described in the literature. Which measurement is best or applicable for your 
 samples, is not the aim of the following sections.
 
-```{r}
+```{r load-pkg-data}
 library(mia)
 data("GlobalPatterns")
 se <- GlobalPatterns
@@ -51,7 +51,14 @@ by species abundances.
 **Dominance** indices are in general negatively correlated with
   diversity, and sometimes used in ecological literature. High
   dominance is obtained when one or few species have a high share of
-  the total species abundance in the community.
+  the total species abundance in the community.  
+  
+**Phylogenetic diversity** was first proposed by [@Faith1992], unlike the 
+  diversity measures mentioned above, Phylogenetic diversity (PD) 
+  measure incorporates information from phylogenetic relationships 
+  stored in `phylo` tree between species in a community (sample). The 
+  Faith's PD is calculated as the sum of branch length of all species in 
+  a community (sample).
 
 
 ### Estimating alpha diversity
@@ -64,13 +71,13 @@ The main function, `estimateAlphaDiversity`, calculates the selected
 diversity index based on the selected assay data and adds it to the
 `colData` of the `SummarizedExperiment` under the given column `name`.
 
-```{r}
+```{r estimate-shannon}
 se <- mia::estimateAlphaDiversity(se, abund_values = "counts",
                              index = "shannon", name = "shannon")
 head(colData(se)$shannon)
 ```
 
-This allows the values to analyzed directly from the `colData`, for example
+This allows access to the values to be analyzed directly from the `colData`, for example
 by plotting them using `plotColData` from the _`scater`_ package [@R-scater].
 
 ```{r plot-div-shannon, message=FALSE, fig.cap="Shannon diversity estimates plotted grouped by sample type."}
@@ -81,14 +88,48 @@ plotColData(se, "shannon", "SampleType", colour_by = "SampleType") +
 
 All available indices will be calculated by default...
 
-```{r}
+```{r all-estimateDiv}
 se <- estimateAlphaDiversity(se)
 ```
 
-.. and a plot comparing them can then be constructed directly.
 
-```{r}
-plots <- lapply(c("shannon","simpson","inv_simpson", "richness", "chao1", "ACE"),
+### Phylogenetic diversity   
+
+The phylogenetic diversity is not calculated by `mia::estimateAlphaDiversity`. Here, we show how `PD` can be calculated and added to the `colData` of the `SummarizedExperiment`.  
+The widely used implementation of phylogenetic diversity is in the _`picante`_ [@R-picante, @Kembel2010].  
+
+Load `picante` R package and get the `phylo` stored in `rowTree`. 
+```{r phylo-div-1}
+library(picante)
+gp.tree <- rowTree(se)
+print(gp.tree)
+```
+
+The output of `print(gp.tree)` suggests that the tree is rooted in this example dataset.  
+
+```{r phylo-div-2}
+# extract counts for features
+mat <- assay(se, "counts")
+
+# calculate pd
+df.pd <- picante::pd(t(mat), # note here t() this will convert rows to columns
+                     gp.tree,
+                     include.root=TRUE) # The tree is rooted hence TRUE, else it should be FALSE
+
+```
+
+The resulting `data.frame` consist of two columns, `PD` and `SR`. The column `PD` has phylogenetic diversity values and `SR` is species richness (same as observed richness). We will add these values to the `colData` of the `SummarizedExperiment`.  
+
+```{r phylo-div-3}
+# adds it  under the given column `name`
+colData(se) <- cbind(colData(se), DataFrame(df.pd))
+```
+
+
+.. and a plot comparing them can then be constructed directly. 
+
+```{r plot-all-diversities}
+plots <- lapply(c("shannon","simpson","inv_simpson", "richness", "chao1", "PD"),
                 plotColData,
                 object = se,
                 x = "SampleType",
@@ -100,7 +141,7 @@ ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 3, common.legend = TRUE, le
 ## Beta diversity
 
 Where alpha diversity focuses on community variation within a
-community (sample), beta diversity quantifies (dis-)similarites
+community (sample), beta diversity quantifies (dis-)similarities
 between communities (samples).
 
 Technically, beta diversities are usually represented as `dist`
@@ -157,7 +198,7 @@ performs the calculation to return a `dist` object, which can again be
 used within `runMDS`.
 
 
-```{r}
+```{r run-mds2}
 se <- runMDS2(se, FUN = calculateUniFrac, name = "UniFrac",
               tree = rowTree(se),
               ntop = nrow(se))
@@ -172,7 +213,7 @@ plotReducedDim(se, "UniFrac", colour_by = "SampleType")
 Other dimension reduction methods, such as `PCA`, `t-SNE` and `UMAP` are 
 inherited directly from the `scater` package.
 
-```{r}
+```{r run-pca}
 se <- runPCA(se, name = "PCA", exprs_values = "counts", ncomponents = 10)
 ```
 
@@ -185,7 +226,7 @@ sample set.
 
 FIXME: let us switch to UMAP for the examples?
 
-```{r}
+```{r run-tsne}
 se <- runTSNE(se, name = "TSNE", exprs_values = "counts", ncomponents = 3)
 ```
 
@@ -214,7 +255,7 @@ Bray-Curtis (BC) dissimilarity between the groups, and visualize the
 results.
 
 
-```{r}
+```{r run-nmds-lahti}
 se.lahti <- relAbundanceCounts(se.lahti)
 se.lahti <- runNMDS(se.lahti, FUN = vegan::vegdist, name = "BC", nmdsFUN = "monoMDS",
                     exprs_values = "relabundance",
