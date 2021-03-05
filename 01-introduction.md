@@ -79,13 +79,15 @@ BiocManager::install("FelixErnst/mia")
 
 [`microbiome`](https://bioconductor.org/packages/devel/bioc/html/microbiome.html)
 
+
 ## Background
 
-The `phyloseq` package and class was around before the [`SummarizedExperiment`](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)  
+The widely used `phyloseq` package and class were around before the [`SummarizedExperiment`](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)  
 and the derived 
 [`TreeSummarizedExperiment`](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html) 
-class. To make the transition easy 
-here is short description how `phyloseq` and `*Experiment` classes relate to 
+class. Many methods for taxonomic profiling data are readily for the  `phyloseq` class structure. 
+
+In order to facilitate the transition, we provide here a short description how `phyloseq` and `*Experiment` classes relate to 
 each other.
 
 `assays`     : This slot is similar to `otu_table` in `phyloseq`. In a `SummarizedExperiment`
@@ -103,7 +105,54 @@ In this book, you will come across terms like `FeatureIDs` and `SampleIDs`.
 `colnames` are encouraged to be used, since they relate to actual objects we 
 work with.
 
+
+
 ## Loading experimental microbiome data
+
+
+### Importing data 
+
+
+TODO: data importer from standard CSV/TSV/tree files directly into `TSE`?
+
+Alternative input file formats: data from QIIME2 file formats can be
+directly imported in `TreeSummarizedExperiment` format. See
+`help(mia::makeTreeSummarizedExperimentFromqiime2)` for examples.
+
+
+### Conversions between data formats in R
+
+If the data is has already been imported in R in another format, it
+can be readily converted into `TreeSummarizedExperiment`, as shown in our next
+example. Note that similar conversion functions to
+`TreeSummarizedExperiment` are available for multiple data formats via
+the `mia` package (see makeTreeSummarizedExperimentFrom* for phyloseq,
+Biom, and DADA2).
+
+
+```r
+library(mia)
+
+# phyloseq example data
+data(GlobalPatterns, package="phyloseq") 
+GlobalPatterns_phyloseq <- GlobalPatterns
+
+# convert phyloseq to TSE
+GlobalPatterns_TSE <- makeTreeSummarizedExperimentFromphyloseq(GlobalPatterns_phyloseq) 
+```
+
+
+We can also convert `TreeSummarizedExperiment` objects into `phyloseq`
+with respect to the shared components that are supported by both
+formats (i.e. taxonomic abundance table, sample metadata, taxonomic
+table, phylogenetic tree, sequence information). This is useful for
+instance when additional methods are available for `phyloseq`.
+
+TODO: conversion function from TSE to phyloseq
+
+
+
+
 
 ## Metadata
 
@@ -127,9 +176,10 @@ se
 ## colnames(26): CL3 CC1 ... Even2 Even3
 ## colData names(7): X.SampleID Primer ... SampleType Description
 ## reducedDimNames(0):
+## mainExpName: NULL
 ## altExpNames(0):
 ## rowLinks: a LinkDataFrame (19216 rows)
-## rowTree: a phylo (19216 leaves)
+## rowTree: 1 phylo tree(s) (19216 leaves)
 ## colLinks: NULL
 ## colTree: NULL
 ```
@@ -320,20 +370,20 @@ rowLinks(se)
 ```
 
 ```
-## LinkDataFrame with 19216 rows and 4 columns
-##            nodeLab nodeLab_alias   nodeNum    isLeaf
-##        <character>   <character> <integer> <logical>
-## 549322      549322       alias_1         1      TRUE
-## 522457      522457       alias_2         2      TRUE
-## 951            951       alias_3         3      TRUE
-## 244423      244423       alias_4         4      TRUE
-## 586076      586076       alias_5         5      TRUE
-## ...            ...           ...       ...       ...
-## 278222      278222   alias_19212     19212      TRUE
-## 463590      463590   alias_19213     19213      TRUE
-## 535321      535321   alias_19214     19214      TRUE
-## 200359      200359   alias_19215     19215      TRUE
-## 271582      271582   alias_19216     19216      TRUE
+## LinkDataFrame with 19216 rows and 5 columns
+##           nodeLab   nodeNum nodeLab_alias    isLeaf   whichTree
+##       <character> <integer>   <character> <logical> <character>
+## 1          549322         1       alias_1      TRUE       phylo
+## 2          522457         2       alias_2      TRUE       phylo
+## 3             951         3       alias_3      TRUE       phylo
+## 4          244423         4       alias_4      TRUE       phylo
+## 5          586076         5       alias_5      TRUE       phylo
+## ...           ...       ...           ...       ...         ...
+## 19212      278222     19212   alias_19212      TRUE       phylo
+## 19213      463590     19213   alias_19213      TRUE       phylo
+## 19214      535321     19214   alias_19214      TRUE       phylo
+## 19215      200359     19215   alias_19215      TRUE       phylo
+## 19216      271582     19216   alias_19216      TRUE       phylo
 ```
 
 Please note that there can be a 1:1 relationship between tree nodes and 
@@ -364,18 +414,18 @@ molten_se
 
 ```
 ## # A tibble: 499,616 x 17
-##    FeatureID SampleID relabundance Kingdom Phylum Class Order Family Genus
-##    <fct>     <fct>           <dbl> <chr>   <chr>  <chr> <chr> <chr>  <chr>
-##  1 549322    CL3                 0 Archaea Crena… Ther… <NA>  <NA>   <NA> 
-##  2 549322    CC1                 0 Archaea Crena… Ther… <NA>  <NA>   <NA> 
-##  3 549322    SV1                 0 Archaea Crena… Ther… <NA>  <NA>   <NA> 
-##  4 549322    M31Fcsw             0 Archaea Crena… Ther… <NA>  <NA>   <NA> 
-##  5 549322    M11Fcsw             0 Archaea Crena… Ther… <NA>  <NA>   <NA> 
-##  6 549322    M31Plmr             0 Archaea Crena… Ther… <NA>  <NA>   <NA> 
-##  7 549322    M11Plmr             0 Archaea Crena… Ther… <NA>  <NA>   <NA> 
-##  8 549322    F21Plmr             0 Archaea Crena… Ther… <NA>  <NA>   <NA> 
-##  9 549322    M31Tong             0 Archaea Crena… Ther… <NA>  <NA>   <NA> 
-## 10 549322    M11Tong             0 Archaea Crena… Ther… <NA>  <NA>   <NA> 
+##    FeatureID SampleID relabundance Kingdom Phylum    Class    Order Family Genus
+##    <fct>     <fct>           <dbl> <chr>   <chr>     <chr>    <chr> <chr>  <chr>
+##  1 549322    CL3                 0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  2 549322    CC1                 0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  3 549322    SV1                 0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  4 549322    M31Fcsw             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  5 549322    M11Fcsw             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  6 549322    M31Plmr             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  7 549322    M11Plmr             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  8 549322    F21Plmr             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  9 549322    M31Tong             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+## 10 549322    M11Tong             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
 ## # … with 499,606 more rows, and 8 more variables: Species <chr>,
 ## #   X.SampleID <fct>, Primer <fct>, Final_Barcode <fct>,
 ## #   Barcode_truncated_plus_T <fct>, Barcode_full_length <fct>,
@@ -391,7 +441,7 @@ Some wrapping up...
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.0.3 (2020-10-10)
+R Under development (unstable) (2021-02-25 r80035)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 20.04.1 LTS
 
@@ -411,55 +461,72 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] mia_0.98.21                      MicrobiomeExperiment_0.99.0.9014
- [3] Biostrings_2.58.0                XVector_0.30.0                  
- [5] TreeSummarizedExperiment_1.6.2   SingleCellExperiment_1.12.0     
- [7] SummarizedExperiment_1.20.0      Biobase_2.50.0                  
- [9] GenomicRanges_1.42.0             GenomeInfoDb_1.26.2             
-[11] IRanges_2.24.1                   S4Vectors_0.28.1                
-[13] BiocGenerics_0.36.0              MatrixGenerics_1.2.0            
-[15] matrixStats_0.57.0               BiocStyle_2.18.1                
-[17] rebook_1.0.0                     BiocManager_1.30.10             
+ [1] mia_0.98.40                      TreeSummarizedExperiment_1.99.11
+ [3] Biostrings_2.59.2                XVector_0.31.1                  
+ [5] SingleCellExperiment_1.13.12     SummarizedExperiment_1.21.1     
+ [7] Biobase_2.51.0                   GenomicRanges_1.43.3            
+ [9] GenomeInfoDb_1.27.6              IRanges_2.25.6                  
+[11] S4Vectors_0.29.7                 BiocGenerics_0.37.1             
+[13] MatrixGenerics_1.3.1             matrixStats_0.58.0              
+[15] BiocStyle_2.19.1                 rebook_1.1.15                   
+[17] BiocManager_1.30.10             
 
 loaded via a namespace (and not attached):
- [1] nlme_3.1-151                bitops_1.0-6               
- [3] DirichletMultinomial_1.32.0 tools_4.0.3                
- [5] utf8_1.1.4                  R6_2.5.0                   
- [7] irlba_2.3.3                 vegan_2.5-7                
- [9] vipor_0.4.5                 mgcv_1.8-33                
-[11] colorspace_2.0-0            permute_0.9-5              
-[13] tidyselect_1.1.0            gridExtra_2.3              
-[15] processx_3.4.5              compiler_4.0.3             
-[17] graph_1.68.0                cli_2.2.0                  
-[19] BiocNeighbors_1.8.2         DelayedArray_0.16.0        
-[21] bookdown_0.21               scales_1.1.1               
-[23] callr_3.5.1                 stringr_1.4.0              
-[25] digest_0.6.27               rmarkdown_2.6              
-[27] scater_1.18.3               pkgconfig_2.0.3            
-[29] htmltools_0.5.0             sparseMatrixStats_1.2.0    
-[31] rlang_0.4.10                DelayedMatrixStats_1.12.1  
-[33] generics_0.1.0              BiocParallel_1.24.1        
-[35] dplyr_1.0.2                 RCurl_1.98-1.2             
-[37] magrittr_2.0.1              BiocSingular_1.6.0         
-[39] GenomeInfoDbData_1.2.4      scuttle_1.0.4              
-[41] Matrix_1.3-0                fansi_0.4.1                
-[43] Rcpp_1.0.5                  ggbeeswarm_0.6.0           
-[45] munsell_0.5.0               ape_5.4-1                  
-[47] viridis_0.5.1               lifecycle_0.2.0            
-[49] stringi_1.5.3               yaml_2.2.1                 
-[51] MASS_7.3-53                 zlibbioc_1.36.0            
-[53] grid_4.0.3                  crayon_1.3.4               
-[55] lattice_0.20-41             beachmat_2.6.4             
-[57] splines_4.0.3               CodeDepends_0.6.5          
-[59] knitr_1.30                  ps_1.5.0                   
-[61] pillar_1.4.7                codetools_0.2-18           
-[63] XML_3.99-0.5                glue_1.4.2                 
-[65] evaluate_0.14               vctrs_0.3.6                
-[67] gtable_0.3.0                purrr_0.3.4                
-[69] tidyr_1.1.2                 assertthat_0.2.1           
-[71] ggplot2_3.3.3               xfun_0.19                  
-[73] rsvd_1.0.3                  viridisLite_0.3.0          
-[75] tibble_3.0.4                beeswarm_0.2.3             
-[77] cluster_2.1.0               ellipsis_0.3.1             
+  [1] ggbeeswarm_0.6.0            colorspace_2.0-0           
+  [3] ellipsis_0.3.1              scuttle_1.1.18             
+  [5] BiocNeighbors_1.9.4         rstudioapi_0.13            
+  [7] bit64_4.0.5                 fansi_0.4.2                
+  [9] codetools_0.2-18            splines_4.1.0              
+ [11] sparseMatrixStats_1.3.6     cachem_1.0.4               
+ [13] knitr_1.31                  scater_1.19.11             
+ [15] ade4_1.7-16                 jsonlite_1.7.2             
+ [17] phyloseq_1.35.0             cluster_2.1.1              
+ [19] graph_1.69.0                compiler_4.1.0             
+ [21] assertthat_0.2.1            Matrix_1.3-2               
+ [23] fastmap_1.1.0               cli_2.3.1                  
+ [25] BiocSingular_1.7.2          prettyunits_1.1.1          
+ [27] htmltools_0.5.1.1           tools_4.1.0                
+ [29] igraph_1.2.6                rsvd_1.0.3                 
+ [31] gtable_0.3.0                glue_1.4.2                 
+ [33] GenomeInfoDbData_1.2.4      reshape2_1.4.4             
+ [35] dplyr_1.0.4                 Rcpp_1.0.6                 
+ [37] jquerylib_0.1.3             rhdf5filters_1.3.4         
+ [39] vctrs_0.3.6                 multtest_2.47.0            
+ [41] debugme_1.1.0               ape_5.4-1                  
+ [43] nlme_3.1-152                DECIPHER_2.19.2            
+ [45] iterators_1.0.13            DelayedMatrixStats_1.13.5  
+ [47] xfun_0.21                   stringr_1.4.0              
+ [49] ps_1.6.0                    beachmat_2.7.7             
+ [51] lifecycle_1.0.0             irlba_2.3.3                
+ [53] XML_3.99-0.5                zlibbioc_1.37.0            
+ [55] MASS_7.3-53.1               scales_1.1.1               
+ [57] hms_1.0.0                   biomformat_1.19.0          
+ [59] rhdf5_2.35.2                yaml_2.2.1                 
+ [61] memoise_2.0.0               gridExtra_2.3              
+ [63] ggplot2_3.3.3               sass_0.3.1                 
+ [65] stringi_1.5.3               RSQLite_2.2.3              
+ [67] foreach_1.5.1               ScaledMatrix_0.99.2        
+ [69] permute_0.9-5               filelock_1.0.2             
+ [71] BiocParallel_1.25.4         rlang_0.4.10               
+ [73] pkgconfig_2.0.3             bitops_1.0-6               
+ [75] evaluate_0.14               lattice_0.20-41            
+ [77] Rhdf5lib_1.13.4             purrr_0.3.4                
+ [79] CodeDepends_0.6.5           bit_4.0.4                  
+ [81] processx_3.4.5              tidyselect_1.1.0           
+ [83] plyr_1.8.6                  magrittr_2.0.1             
+ [85] bookdown_0.21               R6_2.5.0                   
+ [87] generics_0.1.0              DelayedArray_0.17.9        
+ [89] DBI_1.1.1                   pillar_1.5.0               
+ [91] mgcv_1.8-34                 survival_3.2-7             
+ [93] RCurl_1.98-1.2              tibble_3.1.0               
+ [95] crayon_1.4.1                utf8_1.1.4                 
+ [97] rmarkdown_2.7               progress_1.2.2             
+ [99] viridis_0.5.1               grid_4.1.0                 
+[101] data.table_1.14.0           blob_1.2.1                 
+[103] callr_3.5.1                 vegan_2.5-7                
+[105] digest_0.6.27               tidyr_1.1.3                
+[107] munsell_0.5.0               DirichletMultinomial_1.33.2
+[109] beeswarm_0.2.3              viridisLite_0.3.0          
+[111] vipor_0.4.5                 bslib_0.2.4                
 ```
 </div>
