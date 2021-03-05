@@ -106,15 +106,33 @@ between communities (samples).
 Technically, beta diversities are usually represented as `dist`
 objects, which contain triangular data describing the distance between
 each pair of samples. These distances can be further subjected to
-ordination with methods such as multi-dimensional scaling (also known
-as PCoA) to retrieve reduced dimensions for further evaluation or
-visualization. [TODO we could here instead link to ordination chapter?]
+ordination. Ordination is a common concept in ecology that aims to
+reduce the dimensionsionality of the data for further evaluation or
+visualization. Ordination techniques aim to capture as much of
+essential information in the data as possible in a lower dimensional
+representation.  Dimension reduction is bound to loose information but
+the common ordination techniques aim to preserve relevant information
+of sample similarities in an optimal way, which is defined in
+different way by different methods. [TODO add references and/or link
+to ordination chapter instead?]
+
+Some of the most common ordination methods in microbiome research
+include Principal Component Analysis (PCA), metric and non-metric
+multi-dimensional scaling (MDS, NMDS), The MDS methods is also known
+as Principal Coordinates Analysis (PCoA). Other recently popular
+techniques include t-SNE and UMAP. 
+
+Some of the above-mentioned ordination methods (PCA, MDS/PCoA) allow
+the estimation of explained variance in the data for each ordination
+axis; this is informative to show in the figures when it is defined
+and available.
+
 
 
 ### Estimating beta diversity
 
-In the following examples distances are calculated by variable
-functions supplied to the `FUN` argument. The function can defined by
+In the following examples dissimilarities are calculated by 
+functions supplied to the `FUN` argument. This function can defined by
 the user. It must return a `dist` function, which can then be used to
 calculate reduced dimension either via ordination methods (such as MDS
 or NMDS), and the results can be stored in the `reducedDim`.
@@ -132,8 +150,18 @@ Sample similarities can be visualized on a lower-dimensional display
 additional information using variations in colour, shape or size.
 
 ```{r plot-mds-bray-curtis, fig.cap="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."}
-plotReducedDim(se, "MDS_BC", colour_by = "SampleType")
+# Create ggplot object
+p <- plotReducedDim(se, "MDS_BC", colour_by = "SampleType")
+
+# Add explained variance for each axis
+e <- attr(reducedDim(se, "MDS_BC"), "eig");
+rel_eig <- e/sum(e[e>0])		  
+p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]],1), "%", ")", sep = ""),
+              y = paste("PCoA 2 (", round(100 * rel_eig[[2]],1), "%", ")", sep = ""))
+
+print(p)
 ```
+
 
 With additional tools from the `ggplot2` universe, comparisons can be 
 performed informing on the applicability to visualize sample similarities in a 
@@ -149,6 +177,7 @@ plots <- lapply(c("MDS_BC","MDS_euclidean","NMDS_BC","NMDS_euclidean"),
                 plotReducedDim, object = se, colour_by = "SampleType")
 ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 2, common.legend = TRUE,
                   legend = "right")
+
 ```
 
 The _UniFrac_ method is a special case, as it requires data on the
