@@ -1,4 +1,4 @@
-# Microbiome Analysis Book
+# Orchestrating Microbiome Analysis Book
 
 ## Overview
 
