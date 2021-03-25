@@ -218,9 +218,9 @@ Table: (\#tab:options) **Recommended options for storing multiple data tables in
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R Under development (unstable) (2021-02-25 r80035)
+R Under development (unstable) (2021-03-18 r80099)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.1 LTS
+Running under: Ubuntu 20.04.2 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -238,14 +238,14 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] mia_0.98.40                      TreeSummarizedExperiment_1.99.11
+ [1] mia_0.99.5                       TreeSummarizedExperiment_1.99.11
  [3] Biostrings_2.59.2                XVector_0.31.1                  
  [5] SingleCellExperiment_1.13.12     SummarizedExperiment_1.21.1     
  [7] Biobase_2.51.0                   GenomicRanges_1.43.3            
- [9] GenomeInfoDb_1.27.6              IRanges_2.25.6                  
-[11] S4Vectors_0.29.7                 BiocGenerics_0.37.1             
+ [9] GenomeInfoDb_1.27.8              IRanges_2.25.6                  
+[11] S4Vectors_0.29.9                 BiocGenerics_0.37.1             
 [13] MatrixGenerics_1.3.1             matrixStats_0.58.0              
-[15] BiocStyle_2.19.1                 rebook_1.1.15                   
+[15] BiocStyle_2.19.1                 rebook_1.1.16                   
 [17] BiocManager_1.30.10             
 
 loaded via a namespace (and not attached):
@@ -253,12 +253,12 @@ loaded via a namespace (and not attached):
  [3] DirichletMultinomial_1.33.2 bit64_4.0.5                
  [5] filelock_1.0.2              tools_4.1.0                
  [7] bslib_0.2.4                 vegan_2.5-7                
- [9] utf8_1.1.4                  R6_2.5.0                   
+ [9] utf8_1.2.1                  R6_2.5.0                   
 [11] irlba_2.3.3                 vipor_0.4.5                
 [13] mgcv_1.8-34                 DBI_1.1.1                  
 [15] colorspace_2.0-0            permute_0.9-5              
 [17] gridExtra_2.3               tidyselect_1.1.0           
-[19] processx_3.4.5              bit_4.0.4                  
+[19] processx_3.5.0              bit_4.0.4                  
 [21] compiler_4.1.0              graph_1.69.0               
 [23] BiocNeighbors_1.9.4         DelayedArray_0.17.9        
 [25] bookdown_0.21               sass_0.3.1                 
@@ -267,11 +267,11 @@ loaded via a namespace (and not attached):
 [31] rmarkdown_2.7               scater_1.19.11             
 [33] pkgconfig_2.0.3             htmltools_0.5.1.1          
 [35] sparseMatrixStats_1.3.6     fastmap_1.1.0              
-[37] rlang_0.4.10                RSQLite_2.2.3              
+[37] rlang_0.4.10                RSQLite_2.2.4              
 [39] DelayedMatrixStats_1.13.5   jquerylib_0.1.3            
 [41] generics_0.1.0              jsonlite_1.7.2             
-[43] BiocParallel_1.25.4         dplyr_1.0.4                
-[45] RCurl_1.98-1.2              magrittr_2.0.1             
+[43] BiocParallel_1.25.5         dplyr_1.0.5                
+[45] RCurl_1.98-1.3              magrittr_2.0.1             
 [47] BiocSingular_1.7.2          GenomeInfoDbData_1.2.4     
 [49] scuttle_1.1.18              Matrix_1.3-2               
 [51] Rcpp_1.0.6                  ggbeeswarm_0.6.0           
@@ -285,16 +285,16 @@ loaded via a namespace (and not attached):
 [67] lattice_0.20-41             splines_4.1.0              
 [69] beachmat_2.7.7              CodeDepends_0.6.5          
 [71] knitr_1.31                  ps_1.6.0                   
-[73] pillar_1.5.0                codetools_0.2-18           
-[75] ScaledMatrix_0.99.2         XML_3.99-0.5               
+[73] pillar_1.5.1                codetools_0.2-18           
+[75] ScaledMatrix_0.99.2         XML_3.99-0.6               
 [77] glue_1.4.2                  evaluate_0.14              
 [79] vctrs_0.3.6                 tidyr_1.1.3                
 [81] gtable_0.3.0                purrr_0.3.4                
 [83] assertthat_0.2.1            cachem_1.0.4               
-[85] ggplot2_3.3.3               xfun_0.21                  
+[85] ggplot2_3.3.3               xfun_0.22                  
 [87] rsvd_1.0.3                  viridisLite_0.3.0          
 [89] tibble_3.1.0                memoise_2.0.0              
-[91] beeswarm_0.2.3              cluster_2.1.1              
+[91] beeswarm_0.3.1              cluster_2.1.1              
 [93] ellipsis_0.3.1             
 ```
 </div>

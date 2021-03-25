@@ -52,9 +52,9 @@ Heatmaps
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R Under development (unstable) (2021-02-25 r80035)
+R Under development (unstable) (2021-03-18 r80099)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.1 LTS
+Running under: Ubuntu 20.04.2 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -71,18 +71,18 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] BiocStyle_2.19.1    rebook_1.1.15       BiocManager_1.30.10
+[1] BiocStyle_2.19.1    rebook_1.1.16       BiocManager_1.30.10
 
 loaded via a namespace (and not attached):
  [1] graph_1.69.0        knitr_1.31          magrittr_2.0.1     
  [4] BiocGenerics_0.37.1 R6_2.5.0            rlang_0.4.10       
  [7] stringr_1.4.0       tools_4.1.0         parallel_4.1.0     
-[10] xfun_0.21           jquerylib_0.1.3     htmltools_0.5.1.1  
+[10] xfun_0.22           jquerylib_0.1.3     htmltools_0.5.1.1  
 [13] CodeDepends_0.6.5   yaml_2.2.1          digest_0.6.27      
-[16] bookdown_0.21       processx_3.4.5      callr_3.5.1        
+[16] bookdown_0.21       processx_3.5.0      callr_3.5.1        
 [19] ps_1.6.0            codetools_0.2-18    sass_0.3.1         
 [22] evaluate_0.14       rmarkdown_2.7       stringi_1.5.3      
 [25] compiler_4.1.0      bslib_0.2.4         filelock_1.0.2     
-[28] XML_3.99-0.5        stats4_4.1.0        jsonlite_1.7.2     
+[28] XML_3.99-0.6        stats4_4.1.0        jsonlite_1.7.2     
 ```
 </div>

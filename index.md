@@ -1,25 +1,25 @@
 --- 
-title: "Microbiome Analysis"
+title: "Orchestrating Microbiome Analysis"
 documentclass: book
 site: bookdown::bookdown_site
 bibliography: [book.bib]
 biblio-style: apalike
 link-citations: yes
-github-repo: microbiome/MiaBook
+github-repo: microbiome/OMA
 ---
 
 
 
 ---
 date: "**Authors:** Leo Lahti [aut], Sudarshan Shetty [aut], Felix GM Ernst [aut, cre]<br/>
-  **Version:** 0.98.5<br/>
-  **Modified:** 2021-03-05<br/>
-  **Compiled:** 2021-03-05<br/>
-  **Environment:** R Under development (unstable) (2021-02-25 r80035), Bioconductor 3.13<br/>
+  **Version:** 0.98.8<br/>
+  **Modified:** 2021-03-25<br/>
+  **Compiled:** 2021-03-25<br/>
+  **Environment:** R Under development (unstable) (2021-03-18 r80099), Bioconductor 3.13<br/>
   **License:** CC BY-NC-SA 3.0 US<br/>
   **Copyright:** <br/>
-  **Source:** https://github.com/microbiome/MiaBook"
-url: "https://github.com/microbiome/MiaBook"
+  **Source:** https://github.com/microbiome/OMA"
+url: "https://github.com/microbiome/OMA"
 ---
 
 # Preface {-}
