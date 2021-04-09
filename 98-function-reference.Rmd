@@ -1,13 +1,3 @@
---- 
-title: "Test"
-documentclass: book
-site: bookdown::bookdown_site
-bibliography: [book.bib]
-biblio-style: apalike
-link-citations: yes
-github-repo: microbiome/MiaBook
----
-
 # (PART) Appendix {-}
 
 # Function reference {#function-ref}
