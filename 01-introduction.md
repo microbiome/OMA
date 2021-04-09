@@ -414,22 +414,21 @@ molten_se
 
 ```
 ## # A tibble: 499,616 x 17
-##    FeatureID SampleID relabundance Kingdom Phylum    Class    Order Family Genus
-##    <fct>     <fct>           <dbl> <chr>   <chr>     <chr>    <chr> <chr>  <chr>
-##  1 549322    CL3                 0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  2 549322    CC1                 0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  3 549322    SV1                 0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  4 549322    M31Fcsw             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  5 549322    M11Fcsw             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  6 549322    M31Plmr             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  7 549322    M11Plmr             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  8 549322    F21Plmr             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  9 549322    M31Tong             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-## 10 549322    M11Tong             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-## # … with 499,606 more rows, and 8 more variables: Species <chr>,
-## #   X.SampleID <fct>, Primer <fct>, Final_Barcode <fct>,
-## #   Barcode_truncated_plus_T <fct>, Barcode_full_length <fct>,
-## #   SampleType <fct>, Description <fct>
+##    FeatureID SampleID counts Kingdom Phylum   Class   Order Family Genus Species
+##    <fct>     <fct>     <dbl> <chr>   <chr>    <chr>   <chr> <chr>  <chr> <chr>  
+##  1 549322    CL3           0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
+##  2 549322    CC1           0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
+##  3 549322    SV1           0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
+##  4 549322    M31Fcsw       0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
+##  5 549322    M11Fcsw       0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
+##  6 549322    M31Plmr       0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
+##  7 549322    M11Plmr       0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
+##  8 549322    F21Plmr       0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
+##  9 549322    M31Tong       0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
+## 10 549322    M11Tong       0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
+## # … with 499,606 more rows, and 7 more variables: X.SampleID <fct>,
+## #   Primer <fct>, Final_Barcode <fct>, Barcode_truncated_plus_T <fct>,
+## #   Barcode_full_length <fct>, SampleType <fct>, Description <fct>
 ```
 
 ## Conclusion
@@ -441,7 +440,7 @@ Some wrapping up...
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R Under development (unstable) (2021-03-18 r80099)
+R Under development (unstable) (2021-04-05 r80145)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 20.04.2 LTS
 
@@ -461,15 +460,15 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] mia_0.99.5                       TreeSummarizedExperiment_1.99.11
+ [1] mia_0.99.10                      TreeSummarizedExperiment_1.99.11
  [3] Biostrings_2.59.2                XVector_0.31.1                  
- [5] SingleCellExperiment_1.13.12     SummarizedExperiment_1.21.1     
- [7] Biobase_2.51.0                   GenomicRanges_1.43.3            
- [9] GenomeInfoDb_1.27.8              IRanges_2.25.6                  
-[11] S4Vectors_0.29.9                 BiocGenerics_0.37.1             
+ [5] SingleCellExperiment_1.13.14     SummarizedExperiment_1.21.3     
+ [7] Biobase_2.51.0                   GenomicRanges_1.43.4            
+ [9] GenomeInfoDb_1.27.10             IRanges_2.25.7                  
+[11] S4Vectors_0.29.15                BiocGenerics_0.37.1             
 [13] MatrixGenerics_1.3.1             matrixStats_0.58.0              
-[15] BiocStyle_2.19.1                 rebook_1.1.16                   
-[17] BiocManager_1.30.10             
+[15] BiocStyle_2.19.2                 rebook_1.1.19                   
+[17] BiocManager_1.30.12             
 
 loaded via a namespace (and not attached):
   [1] ggbeeswarm_0.6.0            colorspace_2.0-0           
@@ -477,13 +476,13 @@ loaded via a namespace (and not attached):
   [5] BiocNeighbors_1.9.4         rstudioapi_0.13            
   [7] bit64_4.0.5                 fansi_0.4.2                
   [9] codetools_0.2-18            splines_4.1.0              
- [11] sparseMatrixStats_1.3.6     cachem_1.0.4               
+ [11] sparseMatrixStats_1.3.7     cachem_1.0.4               
  [13] knitr_1.31                  scater_1.19.11             
  [15] ade4_1.7-16                 jsonlite_1.7.2             
  [17] phyloseq_1.35.0             cluster_2.1.1              
  [19] graph_1.69.0                compiler_4.1.0             
  [21] assertthat_0.2.1            Matrix_1.3-2               
- [23] fastmap_1.1.0               cli_2.3.1                  
+ [23] fastmap_1.1.0               cli_2.4.0                  
  [25] BiocSingular_1.7.2          prettyunits_1.1.1          
  [27] htmltools_0.5.1.1           tools_4.1.0                
  [29] igraph_1.2.6                rsvd_1.0.3                 
@@ -491,7 +490,7 @@ loaded via a namespace (and not attached):
  [33] GenomeInfoDbData_1.2.4      reshape2_1.4.4             
  [35] dplyr_1.0.5                 Rcpp_1.0.6                 
  [37] jquerylib_0.1.3             rhdf5filters_1.3.4         
- [39] vctrs_0.3.6                 multtest_2.47.0            
+ [39] vctrs_0.3.7                 multtest_2.47.0            
  [41] debugme_1.1.0               ape_5.4-1                  
  [43] nlme_3.1-152                DECIPHER_2.19.2            
  [45] iterators_1.0.13            DelayedMatrixStats_1.13.5  
@@ -504,7 +503,7 @@ loaded via a namespace (and not attached):
  [59] rhdf5_2.35.2                yaml_2.2.1                 
  [61] memoise_2.0.0               gridExtra_2.3              
  [63] ggplot2_3.3.3               sass_0.3.1                 
- [65] stringi_1.5.3               RSQLite_2.2.4              
+ [65] stringi_1.5.3               RSQLite_2.2.5              
  [67] foreach_1.5.1               ScaledMatrix_0.99.2        
  [69] permute_0.9-5               filelock_1.0.2             
  [71] BiocParallel_1.25.5         rlang_0.4.10               
@@ -512,21 +511,21 @@ loaded via a namespace (and not attached):
  [75] evaluate_0.14               lattice_0.20-41            
  [77] Rhdf5lib_1.13.4             purrr_0.3.4                
  [79] CodeDepends_0.6.5           bit_4.0.4                  
- [81] processx_3.5.0              tidyselect_1.1.0           
- [83] plyr_1.8.6                  magrittr_2.0.1             
- [85] bookdown_0.21               R6_2.5.0                   
- [87] generics_0.1.0              DelayedArray_0.17.9        
- [89] DBI_1.1.1                   pillar_1.5.1               
- [91] mgcv_1.8-34                 survival_3.2-10            
- [93] RCurl_1.98-1.3              tibble_3.1.0               
+ [81] tidyselect_1.1.0            plyr_1.8.6                 
+ [83] magrittr_2.0.1              bookdown_0.21              
+ [85] R6_2.5.0                    generics_0.1.0             
+ [87] DelayedArray_0.17.10        DBI_1.1.1                  
+ [89] pillar_1.5.1                mgcv_1.8-34                
+ [91] survival_3.2-10             RCurl_1.98-1.3             
+ [93] tibble_3.1.0                dir.expiry_0.99.4          
  [95] crayon_1.4.1                utf8_1.2.1                 
  [97] rmarkdown_2.7               progress_1.2.2             
  [99] viridis_0.5.1               grid_4.1.0                 
 [101] data.table_1.14.0           blob_1.2.1                 
-[103] callr_3.5.1                 vegan_2.5-7                
-[105] digest_0.6.27               tidyr_1.1.3                
-[107] munsell_0.5.0               DirichletMultinomial_1.33.2
-[109] beeswarm_0.3.1              viridisLite_0.3.0          
-[111] vipor_0.4.5                 bslib_0.2.4                
+[103] vegan_2.5-7                 digest_0.6.27              
+[105] tidyr_1.1.3                 munsell_0.5.0              
+[107] DirichletMultinomial_1.33.2 beeswarm_0.3.1             
+[109] viridisLite_0.3.0           vipor_0.4.5                
+[111] bslib_0.2.4                
 ```
 </div>
