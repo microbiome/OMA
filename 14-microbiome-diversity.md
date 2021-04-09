@@ -148,20 +148,123 @@ ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 3, common.legend = TRUE, le
 
 Where alpha diversity focuses on community variation within a
 community (sample), beta diversity quantifies (dis-)similarites
-between communities (samples).
+between communities (samples). Some of the most popular beta diversity
+measures in microbiome research include Bray-Curtis index (for
+compositional data), Jaccard index (for presence / absence data,
+ignoring abundance information), Aitchison distance (Euclidean
+distance for clr transformed abundances, aiming to avoid the
+compositionality bias), and the Unifrac distances (that take into
+account the phylogenetic tree information). Only some of the commonly
+used beta diversity measures are actual _distances_; this is a
+mathematically well-defined concept and many ecological beta diversity
+measures, such as Bray-Curtis index, are not proper distances.
+Therefore, the term dissimilarity or beta diversity is commonly used.
 
 Technically, beta diversities are usually represented as `dist`
 objects, which contain triangular data describing the distance between
 each pair of samples. These distances can be further subjected to
-ordination with methods such as multi-dimensional scaling (also known
-as PCoA) to retrieve reduced dimensions for further evaluation or
-visualization. [TODO we could here instead link to ordination chapter?]
+ordination. Ordination is a common concept in ecology that aims to
+reduce the dimensionsionality of the data for further evaluation or
+visualization. Ordination techniques aim to capture as much of
+essential information in the data as possible in a lower dimensional
+representation.  Dimension reduction is bound to loose information but
+the common ordination techniques aim to preserve relevant information
+of sample similarities in an optimal way, which is defined in
+different way by different methods. [TODO add references and/or link
+to ordination chapter instead?]
+
+Some of the most common ordination methods in microbiome research
+include Principal Component Analysis (PCA), metric and non-metric
+multi-dimensional scaling (MDS, NMDS), The MDS methods is also known
+as Principal Coordinates Analysis (PCoA). Other recently popular
+techniques include t-SNE and UMAP. 
+
+
+### Explained variance
+
+The percentage of explained variance is typically shown for PCA
+ordination plots. This quantifies the proportion of overall variance
+in the data that is captured by the PCA axes, or how well the
+ordination axes reflect the original distances.
+
+Sometimes a similar measure is shown for MDS/PCoA. The interpretation
+is generally different, however, and hence we do not recommend using
+it. PCA is a special case of PCoA with Euclidean distances.  With
+non-Euclidean dissimilarities PCoA uses a trick where the pointwise
+dissimilarities are first cast into similarities a Euclidean space
+(with some information loss i.e. stress) and then projected to the
+maximal variance axes. In this case, the maximal variance axes do not
+directly reflect the correspondence of the projected distances and
+original distances, as they do for PCA.
+
+In typical use cases, we would like to know how well the ordination
+reflects the original similarity structures; then the quantity of
+interest is the so-called "stress" function, which measures the
+difference in pairwise similarities between the data points in the
+original (high-dimensional) vs. projected (low-dimensional) space.
+
+Hence, we propose that for PCoA and other ordination methods, users
+would report relative stress (varies in the unit interval; the smaller
+the better). This can be calculated as shown below. For further
+examples, check the [note from Huber
+lab](https://www.huber.embl.de/users/klaus/Teaching/statisticalMethods-lab.pdf).
+
+
+
+```r
+# Example data
+data(GlobalPatterns)
+
+# Data matrix (features x samples)
+x <- GlobalPatterns
+x <- transformCounts(x, method = "relabundance")
+x <- assay(x, "relabundance")
+
+# Quantify dissimilarities in the original feature space
+library(vegan)
+d0 <- as.matrix(vegdist(t(x), "bray"))
+
+# PCoA Ordination
+pcoa <- as.data.frame(cmdscale(d0, k = 2))
+names(pcoa) <- c("PCoA1", "PCoA2")
+
+# Quantify dissimilarities in the ordination space
+dp <- as.matrix(dist(pcoa))
+
+# Calculate stress i.e. relative difference in the original and
+# projected dissimilarities
+stress <- sum((dp - d0)^2)/sum(d0^2)
+```
+
+
+Shepard plot visualizes the original versus projected (ordination)
+dissimilarities between the data points:
+
+
+```r
+ord <- order(as.vector(d0))
+df <- data.frame(d0 = as.vector(d0)[ord],
+                  dmds = as.vector(dp)[ord])
+
+library(ggplot2)
+ggplot(aes(x = d0, y = dmds), data=df) + 
+       geom_smooth() +
+       geom_point() +       
+       labs(title = "Shepard plot",
+       x = "Original distance",
+       y = "MDS distance",       
+            subtitle = paste("Stress:", round(stress, 2)))
+```
+
+<img src="14-microbiome-diversity_files/figure-html/shepard-1.png" width="672" />
+
+
 
 
 ### Estimating beta diversity
 
-In the following examples distances are calculated by variable
-functions supplied to the `FUN` argument. The function can defined by
+In the following examples dissimilarities are calculated by 
+functions supplied to the `FUN` argument. This function can defined by
 the user. It must return a `dist` function, which can then be used to
 calculate reduced dimension either via ordination methods (such as MDS
 or NMDS), and the results can be stored in the `reducedDim`.
@@ -181,13 +284,23 @@ additional information using variations in colour, shape or size.
 
 
 ```r
-plotReducedDim(se, "MDS_BC", colour_by = "SampleType")
+# Create ggplot object
+p <- plotReducedDim(se, "MDS_BC", colour_by = "SampleType")
+
+# Add explained variance for each axis
+e <- attr(reducedDim(se, "MDS_BC"), "eig");
+rel_eig <- e/sum(e[e>0])		  
+p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]],1), "%", ")", sep = ""),
+              y = paste("PCoA 2 (", round(100 * rel_eig[[2]],1), "%", ")", sep = ""))
+
+print(p)
 ```
 
 <div class="figure">
 <img src="14-microbiome-diversity_files/figure-html/plot-mds-bray-curtis-1.png" alt="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset." width="672" />
 <p class="caption">(\#fig:plot-mds-bray-curtis)MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset.</p>
 </div>
+
 
 With additional tools from the `ggplot2` universe, comparisons can be 
 performed informing on the applicability to visualize sample similarities in a 
@@ -330,7 +443,7 @@ se.lahti <- runNMDS(se.lahti, FUN = vegan::vegdist, name = "BC", nmdsFUN = "mono
 plotReducedDim(se.lahti, "BC", colour_by = "group")
 ```
 
-<img src="14-microbiome-diversity_files/figure-html/unnamed-chunk-11-1.png" width="672" />
+<img src="14-microbiome-diversity_files/figure-html/unnamed-chunk-10-1.png" width="672" />
 
 No clear difference between the groups can be visually observed.
 
@@ -362,7 +475,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2815
+## [1] 0.27
 ```
 
 In this case, the community composition is not significantly different
@@ -462,9 +575,9 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] vegan_2.5-7                      lattice_0.20-41                 
- [3] permute_0.9-5                    microbiomeDataSets_0.99.5       
- [5] MultiAssayExperiment_1.17.20     scater_1.19.11                  
+ [1] microbiomeDataSets_0.99.5        MultiAssayExperiment_1.17.20    
+ [3] vegan_2.5-7                      lattice_0.20-41                 
+ [5] permute_0.9-5                    scater_1.19.11                  
  [7] ggplot2_3.3.3                    mia_0.99.10                     
  [9] TreeSummarizedExperiment_1.99.11 Biostrings_2.59.2               
 [11] XVector_0.31.1                   SingleCellExperiment_1.13.14    
