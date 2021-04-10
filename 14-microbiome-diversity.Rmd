@@ -40,7 +40,7 @@ to be variants of alpha diversity.
 species (observed richness). Assuming limited sampling from the
 community, however, this may underestimate the true species
 richness. Several estimators are available, including for instance ACE
-[@reference] and Chao1 [@reference]. Richness estimates are unaffected
+[@Chao1992] and Chao1 [@Chao1984]. Richness estimates are unaffected
 by species abundances.
   
 **Phylogenetic diversity** was first proposed by [@Faith1992], unlike the 
@@ -68,14 +68,15 @@ with other packages implementing the calculation, such as _`vegan`_
 
 #### Richness  
 
-Richness is gives the number of features present within a community and can be calculated with `estimateRichness`. Each of the estimate diversity/richness/evenness/dominance functions adds the calculated measure(s) to the `colData` of the `SummarizedExperiment` under the given column `name`.  
+Richness gives the number of features present within a community and can be calculated with `estimateRichness`. Each of the estimate diversity/richness/evenness/dominance functions adds the calculated measure(s) to the `colData` of the `SummarizedExperiment` under the given column `name`. Here, we calculate `observed` features as a measure of richness.     
 
 ```{r}
-se <- estimateRichness(se, 
+se <- mia::estimateRichness(se, 
                        abund_values = "counts", 
-                       name="richness")
+                       index = "observed", 
+                       name="observed")
 
-head(colData(se)$richness)
+head(colData(se)$observed)
 ```
 This allows access to the values to be analyzed directly from the `colData`, for example
 by plotting them using `plotColData` from the _`scater`_ package [@R-scater].
@@ -83,16 +84,18 @@ by plotting them using `plotColData` from the _`scater`_ package [@R-scater].
 ```{r plot-div-shannon, message=FALSE, fig.cap="Shannon diversity estimates plotted grouped by sample type."}
 library(scater)
 plotColData(se, 
-            "richness", 
+            "observed", 
             "SampleType", 
             colour_by = "SampleType") +
-    theme(axis.text.x = element_text(angle=45,hjust=1))
+    theme(axis.text.x = element_text(angle=45,hjust=1)) + 
+  ylab(expression(Richness[Observed]))
+
 ```
 
 #### Diversity  
 
 **Non-Phylogenetic measures**  
-The main function, `estimateAlphaDiversity`, calculates the selected
+The main function, `estimateDiversity`, calculates the selected
 diversity index based on the selected assay data.  
 
 ```{r estimate-shannon}
@@ -105,34 +108,18 @@ head(colData(se)$shannon)
 
 **Phylogenetic diversity**  
 
-The phylogenetic diversity is not calculated by `mia::estimateAlphaDiversity`. Here, we show how `PD` can be calculated and added to the `colData` of the `SummarizedExperiment`.  
-The widely used implementation of phylogenetic diversity is in the _`picante`_ [@R-picante, @Kembel2010].  
+The phylogenetic diversity is calculated by `mia::estimateDiversity`. This is a faster re-implementation of   
+the widely function in _`picante`_ [@R-picante, @Kembel2010].  
 
 Load `picante` R package and get the `phylo` stored in `rowTree`. 
 ```{r phylo-div-1}
-library(picante)
-gp.tree <- rowTree(se)
-print(gp.tree)
-```
 
-The output of `print(gp.tree)` suggests that the tree is rooted in this example dataset.  
+se <- mia::estimateDiversity(se, 
+                             abund_values = "counts",
+                             index = "faith", 
+                             name = "faith")
+head(colData(se)$faith)
 
-```{r phylo-div-2}
-# extract counts for features
-mat <- assay(se, "counts")
-
-# calculate pd
-df.pd <- picante::pd(t(mat), # note here t() this will convert rows to columns
-                     gp.tree,
-                     include.root=TRUE) # The tree is rooted hence TRUE, else it should be FALSE
-
-```
-
-The resulting `data.frame` consists of two columns, `PD` and `SR`. The column `PD` has phylogenetic diversity values and `SR` is species richness (same as observed richness). We will add these values to the `colData` of the `SummarizedExperiment`.  
-
-```{r phylo-div-3}
-# adds it  under the given column `name`
-colData(se) <- cbind(colData(se), DataFrame(df.pd))
 ```
 
 #### Evenness  
@@ -170,7 +157,7 @@ TODO...
 
 A plot comparing all the diversity measures calculated above and stored in `colData` can then be constructed directly.  
 ```{r plot-all-diversities}
-plots <- lapply(c("richness", "shannon","simpson", "relative", "PD"),
+plots <- lapply(c("observed", "shannon","simpson", "relative", "faith"),
                 plotColData,
                 object = se,
                 x = "SampleType",
@@ -180,31 +167,122 @@ ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 3, common.legend = TRUE, le
 ```
 
 
-Alternatively, all available indices within `mia` can be calculated by default using `estimateAlphaDiversity`...
-
-```{r all-estimateDiv}
-se <- estimateAlphaDiversity(se)
-```
-
-
 ## Beta diversity
 
 Where alpha diversity focuses on community variation within a
-community (sample), beta diversity quantifies (dis-)similarities
-between communities (samples).
+community (sample), beta diversity quantifies (dis-)similarites
+between communities (samples). Some of the most popular beta diversity
+measures in microbiome research include Bray-Curtis index (for
+compositional data), Jaccard index (for presence / absence data,
+ignoring abundance information), Aitchison distance (Euclidean
+distance for clr transformed abundances, aiming to avoid the
+compositionality bias), and the Unifrac distances (that take into
+account the phylogenetic tree information). Only some of the commonly
+used beta diversity measures are actual _distances_; this is a
+mathematically well-defined concept and many ecological beta diversity
+measures, such as Bray-Curtis index, are not proper distances.
+Therefore, the term dissimilarity or beta diversity is commonly used.
 
 Technically, beta diversities are usually represented as `dist`
 objects, which contain triangular data describing the distance between
 each pair of samples. These distances can be further subjected to
-ordination with methods such as multi-dimensional scaling (also known
-as PCoA) to retrieve reduced dimensions for further evaluation or
-visualization. [TODO we could here instead link to ordination chapter?]
+ordination. Ordination is a common concept in ecology that aims to
+reduce the dimensionsionality of the data for further evaluation or
+visualization. Ordination techniques aim to capture as much of
+essential information in the data as possible in a lower dimensional
+representation.  Dimension reduction is bound to loose information but
+the common ordination techniques aim to preserve relevant information
+of sample similarities in an optimal way, which is defined in
+different way by different methods. [TODO add references and/or link
+to ordination chapter instead?]
+
+Some of the most common ordination methods in microbiome research
+include Principal Component Analysis (PCA), metric and non-metric
+multi-dimensional scaling (MDS, NMDS), The MDS methods is also known
+as Principal Coordinates Analysis (PCoA). Other recently popular
+techniques include t-SNE and UMAP. 
+
+
+### Explained variance
+
+The percentage of explained variance is typically shown for PCA
+ordination plots. This quantifies the proportion of overall variance
+in the data that is captured by the PCA axes, or how well the
+ordination axes reflect the original distances.
+
+Sometimes a similar measure is shown for MDS/PCoA. The interpretation
+is generally different, however, and hence we do not recommend using
+it. PCA is a special case of PCoA with Euclidean distances.  With
+non-Euclidean dissimilarities PCoA uses a trick where the pointwise
+dissimilarities are first cast into similarities a Euclidean space
+(with some information loss i.e. stress) and then projected to the
+maximal variance axes. In this case, the maximal variance axes do not
+directly reflect the correspondence of the projected distances and
+original distances, as they do for PCA.
+
+In typical use cases, we would like to know how well the ordination
+reflects the original similarity structures; then the quantity of
+interest is the so-called "stress" function, which measures the
+difference in pairwise similarities between the data points in the
+original (high-dimensional) vs. projected (low-dimensional) space.
+
+Hence, we propose that for PCoA and other ordination methods, users
+would report relative stress (varies in the unit interval; the smaller
+the better). This can be calculated as shown below. For further
+examples, check the [note from Huber
+lab](https://www.huber.embl.de/users/klaus/Teaching/statisticalMethods-lab.pdf).
+
+
+```{r relstress}
+# Example data
+data(GlobalPatterns)
+
+# Data matrix (features x samples)
+x <- GlobalPatterns
+x <- transformCounts(x, method = "relabundance")
+x <- assay(x, "relabundance")
+
+# Quantify dissimilarities in the original feature space
+library(vegan)
+d0 <- as.matrix(vegdist(t(x), "bray"))
+
+# PCoA Ordination
+pcoa <- as.data.frame(cmdscale(d0, k = 2))
+names(pcoa) <- c("PCoA1", "PCoA2")
+
+# Quantify dissimilarities in the ordination space
+dp <- as.matrix(dist(pcoa))
+
+# Calculate stress i.e. relative difference in the original and
+# projected dissimilarities
+stress <- sum((dp - d0)^2)/sum(d0^2)
+```
+
+
+Shepard plot visualizes the original versus projected (ordination)
+dissimilarities between the data points:
+
+```{r shepard}
+ord <- order(as.vector(d0))
+df <- data.frame(d0 = as.vector(d0)[ord],
+                  dmds = as.vector(dp)[ord])
+
+library(ggplot2)
+ggplot(aes(x = d0, y = dmds), data=df) + 
+       geom_smooth() +
+       geom_point() +       
+       labs(title = "Shepard plot",
+       x = "Original distance",
+       y = "MDS distance",       
+            subtitle = paste("Stress:", round(stress, 2))) +
+  theme_bw()
+```
 
 
 ### Estimating beta diversity
 
-In the following examples distances are calculated by variable
-functions supplied to the `FUN` argument. The function can defined by
+In the following examples dissimilarities are calculated by 
+functions supplied to the `FUN` argument. This function can defined by
 the user. It must return a `dist` function, which can then be used to
 calculate reduced dimension either via ordination methods (such as MDS
 or NMDS), and the results can be stored in the `reducedDim`.
@@ -212,8 +290,8 @@ or NMDS), and the results can be stored in the `reducedDim`.
 This entire process is wrapped in the `runMDS` and `runNMDS`
 functions.
 
-```{r, message=FALSE}
-se <- runMDS2(se, FUN = vegan::vegdist, name = "MDS_BC")
+```{r runMDS, message=FALSE}
+se <- runMDS(se, FUN = vegan::vegdist, name = "MDS_BC", exprs_values = "counts")
 ```
 
 Sample similarities can be visualized on a lower-dimensional display
@@ -222,16 +300,26 @@ Sample similarities can be visualized on a lower-dimensional display
 additional information using variations in colour, shape or size.
 
 ```{r plot-mds-bray-curtis, fig.cap="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."}
-plotReducedDim(se, "MDS_BC", colour_by = "SampleType")
+# Create ggplot object
+p <- plotReducedDim(se, "MDS_BC", colour_by = "SampleType")
+
+# Add explained variance for each axis
+e <- attr(reducedDim(se, "MDS_BC"), "eig");
+rel_eig <- e/sum(e[e>0])		  
+p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]],1), "%", ")", sep = ""),
+              y = paste("PCoA 2 (", round(100 * rel_eig[[2]],1), "%", ")", sep = ""))
+
+print(p)
 ```
+
 
 With additional tools from the `ggplot2` universe, comparisons can be 
 performed informing on the applicability to visualize sample similarities in a 
 meaningful way.
 
 ```{r plot-mds-nmds-comparison, fig.cap="Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.", message=FALSE}
-se <- runMDS2(se, FUN = vegan::vegdist, name = "MDS_euclidean",
-             method = "euclidean")
+se <- runMDS(se, FUN = vegan::vegdist, name = "MDS_euclidean",
+             method = "euclidean", exprs_values = "counts")
 se <- runNMDS(se, FUN = vegan::vegdist, name = "NMDS_BC")
 se <- runNMDS(se, FUN = vegan::vegdist, name = "NMDS_euclidean",
               method = "euclidean")
@@ -239,6 +327,7 @@ plots <- lapply(c("MDS_BC","MDS_euclidean","NMDS_BC","NMDS_euclidean"),
                 plotReducedDim, object = se, colour_by = "SampleType")
 ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 2, common.legend = TRUE,
                   legend = "right")
+
 ```
 
 The _UniFrac_ method is a special case, as it requires data on the
@@ -247,10 +336,11 @@ performs the calculation to return a `dist` object, which can again be
 used within `runMDS`.
 
 
-```{r run-mds2}
-se <- runMDS2(se, FUN = calculateUniFrac, name = "UniFrac",
-              tree = rowTree(se),
-              ntop = nrow(se))
+```{r}
+se <- runMDS(se, FUN = calculateUniFrac, name = "UniFrac",
+             tree = rowTree(se),
+             ntop = nrow(se),
+             exprs_values = "counts")
 ```
 
 ```{r plot-unifrac, fig.cap="UniFrac distances scaled by MDS of the GlobalPattern dataset."}
@@ -262,7 +352,7 @@ plotReducedDim(se, "UniFrac", colour_by = "SampleType")
 Other dimension reduction methods, such as `PCA`, `t-SNE` and `UMAP` are 
 inherited directly from the `scater` package.
 
-```{r run-pca}
+```{r}
 se <- runPCA(se, name = "PCA", exprs_values = "counts", ncomponents = 10)
 ```
 
@@ -275,7 +365,7 @@ sample set.
 
 FIXME: let us switch to UMAP for the examples?
 
-```{r run-tsne}
+```{r}
 se <- runTSNE(se, name = "TSNE", exprs_values = "counts", ncomponents = 3)
 ```
 
@@ -304,7 +394,7 @@ Bray-Curtis (BC) dissimilarity between the groups, and visualize the
 results.
 
 
-```{r run-nmds-lahti}
+```{r}
 se.lahti <- relAbundanceCounts(se.lahti)
 se.lahti <- runNMDS(se.lahti, FUN = vegan::vegdist, name = "BC", nmdsFUN = "monoMDS",
                     exprs_values = "relabundance",
@@ -371,8 +461,8 @@ ggplot(data.frame(x = top.coef,
 ```
 
 In the above example, the largest differences between the two groups
-can be attributed to Bacteroides intestinalis (elevated in the first
-group) and Faecalibacterium prausnitzii (elevated in the second
+can be attributed to _Bacteroides intestinalis_ (elevated in the first
+group) and _Faecalibacterium prausnitzii_ (elevated in the second
 group), and many other co-varying species.
 
 
@@ -389,13 +479,13 @@ anova(vegan::betadisper(attr(reducedDim(se.lahti,"BC"),"dist"),
                         colData(se.lahti)$group))
 ```
 
-In our example, the groups have similar dispersions, and PERMANOVA is
+In our example, the groups have similar dispersion, and PERMANOVA is
 an appropriate choice for comparing community compositions.
 
 
 ## Further reading
 
-In certain settings beta diversities might be used to group samples without
+In certain settings, beta diversities might be used to group samples without
 prior knowledge. For this we want to point to excellent resources on 
 [how to extract information from the clusters](http://bioconductor.org/books/release/OSCA/clustering.html).
 
