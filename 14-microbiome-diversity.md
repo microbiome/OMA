@@ -71,8 +71,15 @@ to be variants of alpha diversity.
 species (observed richness). Assuming limited sampling from the
 community, however, this may underestimate the true species
 richness. Several estimators are available, including for instance ACE
-[@reference] and Chao1 [@reference]. Richness estimates are unaffected
+[@Chao1992] and Chao1 [@Chao1984]. Richness estimates are unaffected
 by species abundances.
+  
+**Phylogenetic diversity** was first proposed by [@Faith1992], unlike the 
+  diversity measures mentioned above, Phylogenetic diversity (PD) 
+  measure incorporates information from phylogenetic relationships 
+  stored in `phylo` tree between species in a community (sample). The 
+  Faith's PD is calculated as the sum of branch length of all species in 
+  a community (sample).
 
 **Evenness** focuses on species abundances, and can thus complement
   the number of species. A typical evenness index is the Pielou's
@@ -82,23 +89,63 @@ by species abundances.
 **Dominance** indices are in general negatively correlated with
   diversity, and sometimes used in ecological literature. High
   dominance is obtained when one or few species have a high share of
-  the total species abundance in the community.
-
-
+  the total species abundance in the community.  
+  
 ### Estimating alpha diversity
 
 Alpha diversity can be estimated with wrapper functions that interact
 with other packages implementing the calculation, such as _`vegan`_
 [@R-vegan].
 
-The main function, `estimateDiversity`, calculates the selected
-diversity index based on the selected assay data and adds it to the
-`colData` of the `SummarizedExperiment` under the given column `name`.
+#### Richness  
+
+Richness gives the number of features present within a community and can be calculated with `estimateRichness`. Each of the estimate diversity/richness/evenness/dominance functions adds the calculated measure(s) to the `colData` of the `SummarizedExperiment` under the given column `name`. Here, we calculate `observed` features as a measure of richness.     
 
 
 ```r
-se <- mia::estimateDiversity(se, abund_values = "counts",
-                             index = "shannon", name = "shannon")
+se <- mia::estimateRichness(se, 
+                       abund_values = "counts", 
+                       index = "observed", 
+                       name="observed")
+
+head(colData(se)$observed)
+```
+
+```
+##     CL3     CC1     SV1 M31Fcsw M11Fcsw M31Plmr 
+##    6964    7679    5729    2667    2574    3214
+```
+This allows access to the values to be analyzed directly from the `colData`, for example
+by plotting them using `plotColData` from the _`scater`_ package [@R-scater].
+
+
+```r
+library(scater)
+plotColData(se, 
+            "observed", 
+            "SampleType", 
+            colour_by = "SampleType") +
+    theme(axis.text.x = element_text(angle=45,hjust=1)) + 
+  ylab(expression(Richness[Observed]))
+```
+
+<div class="figure">
+<img src="14-microbiome-diversity_files/figure-html/plot-div-shannon-1.png" alt="Shannon diversity estimates plotted grouped by sample type." width="672" />
+<p class="caption">(\#fig:plot-div-shannon)Shannon diversity estimates plotted grouped by sample type.</p>
+</div>
+
+#### Diversity  
+
+**Non-Phylogenetic measures**  
+The main function, `estimateDiversity`, calculates the selected
+diversity index based on the selected assay data.  
+
+
+```r
+se <- mia::estimateDiversity(se, 
+                             abund_values = "counts",
+                             index = "shannon", 
+                             name = "shannon")
 head(colData(se)$shannon)
 ```
 
@@ -107,33 +154,71 @@ head(colData(se)$shannon)
 ##   6.577   6.777   6.498   3.828   3.288   4.289
 ```
 
-This allows the values to analyzed directly from the `colData`, for example
-by plotting them using `plotColData` from the _`scater`_ package [@R-scater].
+**Phylogenetic diversity**  
 
+The phylogenetic diversity is calculated by `mia::estimateDiversity`. This is a faster re-implementation of   
+the widely function in _`picante`_ [@R-picante, @Kembel2010].  
+
+Load `picante` R package and get the `phylo` stored in `rowTree`. 
 
 ```r
-library(scater)
-plotColData(se, "shannon", "SampleType", colour_by = "SampleType") +
-    theme(axis.text.x = element_text(angle=45,hjust=1))
+se <- mia::estimateDiversity(se, 
+                             abund_values = "counts",
+                             index = "faith", 
+                             name = "faith")
+head(colData(se)$faith)
 ```
 
-<div class="figure">
-<img src="14-microbiome-diversity_files/figure-html/plot-div-shannon-1.png" alt="Shannon diversity estimates plotted grouped by sample type." width="672" />
-<p class="caption">(\#fig:plot-div-shannon)Shannon diversity estimates plotted grouped by sample type.</p>
-</div>
-
-All available indices will be calculated by default...
-
-
-```r
-se <- estimateDiversity(se)
+```
+## [1] 250.5 262.3 208.5 117.9 119.8 135.8
 ```
 
-.. and a plot comparing them can then be constructed directly.
+#### Evenness  
+
+Evenness can be calculated with `estimateEvenness`.  
 
 
 ```r
-plots <- lapply(c("shannon","gini_simpson","inverse_simpson", "coverage", "fisher"),
+se <- estimateEvenness(se, 
+                       abund_values = "counts", 
+                       index="simpson")
+head(colData(se)$simpson)
+```
+
+```
+## [1] 0.026871 0.027197 0.047049 0.005179 0.004304 0.005011
+```
+
+
+#### Dominance  
+
+Dominance can be calculated with `estimateDominance`. Here, the `Relative index` is calculated which is the relative abundance of the most dominant species in the sample.   
+
+
+```r
+se <- estimateDominance(se, 
+                       abund_values = "counts", 
+                       index="relative")
+
+head(colData(se)$relative)
+```
+
+```
+##     CL3     CC1     SV1 M31Fcsw M11Fcsw M31Plmr 
+## 0.03910 0.03226 0.01690 0.22981 0.21778 0.22329
+```
+
+#### Rarity  
+TODO...
+
+
+
+### Visualize alpha diversities  
+
+A plot comparing all the diversity measures calculated above and stored in `colData` can then be constructed directly.  
+
+```r
+plots <- lapply(c("observed", "shannon","simpson", "relative", "faith"),
                 plotColData,
                 object = se,
                 x = "SampleType",
@@ -142,7 +227,8 @@ plots <- lapply(plots,"+", theme(axis.text.x = element_text(angle=45,hjust=1)))
 ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 3, common.legend = TRUE, legend = "right")
 ```
 
-<img src="14-microbiome-diversity_files/figure-html/unnamed-chunk-4-1.png" width="672" />
+<img src="14-microbiome-diversity_files/figure-html/plot-all-diversities-1.png" width="672" />
+
 
 ## Beta diversity
 
@@ -253,12 +339,11 @@ ggplot(aes(x = d0, y = dmds), data=df) +
        labs(title = "Shepard plot",
        x = "Original distance",
        y = "MDS distance",       
-            subtitle = paste("Stress:", round(stress, 2)))
+            subtitle = paste("Stress:", round(stress, 2))) +
+  theme_bw()
 ```
 
 <img src="14-microbiome-diversity_files/figure-html/shepard-1.png" width="672" />
-
-
 
 
 ### Estimating beta diversity
@@ -443,7 +528,7 @@ se.lahti <- runNMDS(se.lahti, FUN = vegan::vegdist, name = "BC", nmdsFUN = "mono
 plotReducedDim(se.lahti, "BC", colour_by = "group")
 ```
 
-<img src="14-microbiome-diversity_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+<img src="14-microbiome-diversity_files/figure-html/unnamed-chunk-8-1.png" width="672" />
 
 No clear difference between the groups can be visually observed.
 
@@ -475,7 +560,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.27
+## [1] 0.2718
 ```
 
 In this case, the community composition is not significantly different
@@ -510,8 +595,8 @@ ggplot(data.frame(x = top.coef,
 <img src="14-microbiome-diversity_files/figure-html/plot-top-coef-anova-1.png" width="672" />
 
 In the above example, the largest differences between the two groups
-can be attributed to Bacteroides intestinalis (elevated in the first
-group) and Faecalibacterium prausnitzii (elevated in the second
+can be attributed to _Bacteroides intestinalis_ (elevated in the first
+group) and _Faecalibacterium prausnitzii_ (elevated in the second
 group), and many other co-varying species.
 
 
@@ -538,13 +623,13 @@ anova(vegan::betadisper(attr(reducedDim(se.lahti,"BC"),"dist"),
 ## Residuals 42  0.158 0.00376
 ```
 
-In our example, the groups have similar dispersions, and PERMANOVA is
+In our example, the groups have similar dispersion, and PERMANOVA is
 an appropriate choice for comparing community compositions.
 
 
 ## Further reading
 
-In certain settings beta diversities might be used to group samples without
+In certain settings, beta diversities might be used to group samples without
 prior knowledge. For this we want to point to excellent resources on 
 [how to extract information from the clusters](http://bioconductor.org/books/release/OSCA/clustering.html).
 
@@ -555,7 +640,7 @@ See also [community typing](15-microbiome-community.md).
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R Under development (unstable) (2021-04-05 r80145)
+R Under development (unstable) (2021-04-08 r80148)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 20.04.2 LTS
 
@@ -582,15 +667,15 @@ other attached packages:
  [9] TreeSummarizedExperiment_1.99.11 Biostrings_2.59.2               
 [11] XVector_0.31.1                   SingleCellExperiment_1.13.14    
 [13] SummarizedExperiment_1.21.3      Biobase_2.51.0                  
-[15] GenomicRanges_1.43.4             GenomeInfoDb_1.27.10            
+[15] GenomicRanges_1.43.4             GenomeInfoDb_1.27.11            
 [17] IRanges_2.25.7                   S4Vectors_0.29.15               
 [19] BiocGenerics_0.37.1              MatrixGenerics_1.3.1            
 [21] matrixStats_0.58.0               BiocStyle_2.19.2                
-[23] rebook_1.1.19                    BiocManager_1.30.12             
+[23] rebook_1.1.20                   
 
 loaded via a namespace (and not attached):
   [1] readxl_1.3.1                  backports_1.2.1              
-  [3] AnnotationHub_2.99.0          BiocFileCache_1.99.1         
+  [3] AnnotationHub_2.99.1          BiocFileCache_1.99.3         
   [5] splines_4.1.0                 BiocParallel_1.25.5          
   [7] digest_0.6.27                 htmltools_0.5.1.1            
   [9] viridis_0.5.1                 fansi_0.4.2                  
@@ -621,8 +706,8 @@ loaded via a namespace (and not attached):
  [59] rlang_0.4.10                  BiocVersion_3.13.1           
  [61] munsell_0.5.0                 cellranger_1.1.0             
  [63] tools_4.1.0                   cachem_1.0.4                 
- [65] ExperimentHub_1.99.0          DirichletMultinomial_1.33.2  
- [67] generics_0.1.0                RSQLite_2.2.5                
+ [65] ExperimentHub_1.99.1          DirichletMultinomial_1.33.2  
+ [67] generics_0.1.0                RSQLite_2.2.6                
  [69] broom_0.7.6                   evaluate_0.14                
  [71] stringr_1.4.0                 fastmap_1.1.0                
  [73] yaml_2.2.1                    knitr_1.31                   
@@ -638,20 +723,21 @@ loaded via a namespace (and not attached):
  [93] highr_0.8                     forcats_0.5.1                
  [95] Matrix_1.3-2                  vctrs_0.3.7                  
  [97] pillar_1.5.1                  lifecycle_1.0.0              
- [99] jquerylib_0.1.3               BiocNeighbors_1.9.4          
-[101] data.table_1.14.0             cowplot_1.1.1                
-[103] bitops_1.0-6                  irlba_2.3.3                  
-[105] httpuv_1.5.5                  R6_2.5.0                     
-[107] promises_1.2.0.1              bookdown_0.21                
-[109] gridExtra_2.3                 rio_0.5.26                   
-[111] vipor_0.4.5                   codetools_0.2-18             
-[113] MASS_7.3-53.1                 assertthat_0.2.1             
-[115] withr_2.4.1                   GenomeInfoDbData_1.2.4       
-[117] mgcv_1.8-34                   hms_1.0.0                    
-[119] grid_4.1.0                    beachmat_2.7.7               
-[121] tidyr_1.1.3                   rmarkdown_2.7                
-[123] DelayedMatrixStats_1.13.5     carData_3.0-4                
-[125] Rtsne_0.15                    ggpubr_0.4.0                 
-[127] shiny_1.6.0                   ggbeeswarm_0.6.0             
+ [99] BiocManager_1.30.12           jquerylib_0.1.3              
+[101] BiocNeighbors_1.9.4           data.table_1.14.0            
+[103] cowplot_1.1.1                 bitops_1.0-6                 
+[105] irlba_2.3.3                   httpuv_1.5.5                 
+[107] R6_2.5.0                      promises_1.2.0.1             
+[109] bookdown_0.21                 gridExtra_2.3                
+[111] rio_0.5.26                    vipor_0.4.5                  
+[113] codetools_0.2-18              MASS_7.3-53.1                
+[115] assertthat_0.2.1              withr_2.4.1                  
+[117] GenomeInfoDbData_1.2.4        mgcv_1.8-34                  
+[119] hms_1.0.0                     grid_4.1.0                   
+[121] beachmat_2.7.7                tidyr_1.1.3                  
+[123] rmarkdown_2.7                 DelayedMatrixStats_1.13.5    
+[125] carData_3.0-4                 Rtsne_0.15                   
+[127] ggpubr_0.4.0                  shiny_1.6.0                  
+[129] ggbeeswarm_0.6.0             
 ```
 </div>

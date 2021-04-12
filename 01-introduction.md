@@ -110,14 +110,37 @@ work with.
 ## Loading experimental microbiome data
 
 
-### Importing data 
+### Importing data from external files
+
+Microbiome (taxonomic) profiling data is commonly distributed in
+various file formats. You can import such external data files as a
+(Tree)SummarizedExperiment object but the details depend on the file
+format. Here, we provide examples for common formats.
+
+A specific import function is provided for QIIME2 files (see
+`help(mia::loadFromQIIME2)`).
+
+TODO: link to Mothur and other importers.
+
+**CSV data tables** can be imported with the standard R functions,
+  then converted to the desired format. For detailed examples, you can
+  check the [Bioconductor course
+  material](https://bioconductor.org/help/course-materials/2019/BSS2019/04_Practical_CoreApproachesInBioconductor.html)
+  by Martin Morgan. The following example reads abundance tables,
+  taxonomic mapping tables, and sample metadata, assuming that the
+  input data files are properly prepared with appropriate row and
+  column names.
 
 
-TODO: data importer from standard CSV/TSV/tree files directly into `TSE`?
+```r
+counts <- read.csv(count_file)   # Abundance table (e.g. ASV data; to assay data)
+tax <- read.csv(tax_file)        # Taxonomy table (to rowData)
+samples <- read.csv(sample_file) # Sample data (to colData)
+se <- SummarizedExperiment(assays = list(counts = counts),
+                           colData = samples,
+                           rowData = tax)
+```
 
-Alternative input file formats: data from QIIME2 file formats can be
-directly imported in `TreeSummarizedExperiment` format. See
-`help(mia::makeTreeSummarizedExperimentFromqiime2)` for examples.
 
 
 ### Conversions between data formats in R
@@ -440,7 +463,7 @@ Some wrapping up...
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R Under development (unstable) (2021-04-05 r80145)
+R Under development (unstable) (2021-04-08 r80148)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 20.04.2 LTS
 
@@ -464,11 +487,10 @@ other attached packages:
  [3] Biostrings_2.59.2                XVector_0.31.1                  
  [5] SingleCellExperiment_1.13.14     SummarizedExperiment_1.21.3     
  [7] Biobase_2.51.0                   GenomicRanges_1.43.4            
- [9] GenomeInfoDb_1.27.10             IRanges_2.25.7                  
+ [9] GenomeInfoDb_1.27.11             IRanges_2.25.7                  
 [11] S4Vectors_0.29.15                BiocGenerics_0.37.1             
 [13] MatrixGenerics_1.3.1             matrixStats_0.58.0              
-[15] BiocStyle_2.19.2                 rebook_1.1.19                   
-[17] BiocManager_1.30.12             
+[15] BiocStyle_2.19.2                 rebook_1.1.20                   
 
 loaded via a namespace (and not attached):
   [1] ggbeeswarm_0.6.0            colorspace_2.0-0           
@@ -480,52 +502,52 @@ loaded via a namespace (and not attached):
  [13] knitr_1.31                  scater_1.19.11             
  [15] ade4_1.7-16                 jsonlite_1.7.2             
  [17] phyloseq_1.35.0             cluster_2.1.1              
- [19] graph_1.69.0                compiler_4.1.0             
- [21] assertthat_0.2.1            Matrix_1.3-2               
- [23] fastmap_1.1.0               cli_2.4.0                  
- [25] BiocSingular_1.7.2          prettyunits_1.1.1          
- [27] htmltools_0.5.1.1           tools_4.1.0                
- [29] igraph_1.2.6                rsvd_1.0.3                 
- [31] gtable_0.3.0                glue_1.4.2                 
- [33] GenomeInfoDbData_1.2.4      reshape2_1.4.4             
- [35] dplyr_1.0.5                 Rcpp_1.0.6                 
- [37] jquerylib_0.1.3             rhdf5filters_1.3.4         
- [39] vctrs_0.3.7                 multtest_2.47.0            
- [41] debugme_1.1.0               ape_5.4-1                  
- [43] nlme_3.1-152                DECIPHER_2.19.2            
- [45] iterators_1.0.13            DelayedMatrixStats_1.13.5  
- [47] xfun_0.22                   stringr_1.4.0              
- [49] ps_1.6.0                    beachmat_2.7.7             
- [51] lifecycle_1.0.0             irlba_2.3.3                
- [53] XML_3.99-0.6                zlibbioc_1.37.0            
- [55] MASS_7.3-53.1               scales_1.1.1               
- [57] hms_1.0.0                   biomformat_1.19.0          
- [59] rhdf5_2.35.2                yaml_2.2.1                 
- [61] memoise_2.0.0               gridExtra_2.3              
- [63] ggplot2_3.3.3               sass_0.3.1                 
- [65] stringi_1.5.3               RSQLite_2.2.5              
- [67] foreach_1.5.1               ScaledMatrix_0.99.2        
- [69] permute_0.9-5               filelock_1.0.2             
- [71] BiocParallel_1.25.5         rlang_0.4.10               
- [73] pkgconfig_2.0.3             bitops_1.0-6               
- [75] evaluate_0.14               lattice_0.20-41            
- [77] Rhdf5lib_1.13.4             purrr_0.3.4                
- [79] CodeDepends_0.6.5           bit_4.0.4                  
- [81] tidyselect_1.1.0            plyr_1.8.6                 
- [83] magrittr_2.0.1              bookdown_0.21              
- [85] R6_2.5.0                    generics_0.1.0             
- [87] DelayedArray_0.17.10        DBI_1.1.1                  
- [89] pillar_1.5.1                mgcv_1.8-34                
- [91] survival_3.2-10             RCurl_1.98-1.3             
- [93] tibble_3.1.0                dir.expiry_0.99.4          
- [95] crayon_1.4.1                utf8_1.2.1                 
- [97] rmarkdown_2.7               progress_1.2.2             
- [99] viridis_0.5.1               grid_4.1.0                 
-[101] data.table_1.14.0           blob_1.2.1                 
-[103] vegan_2.5-7                 digest_0.6.27              
-[105] tidyr_1.1.3                 munsell_0.5.0              
-[107] DirichletMultinomial_1.33.2 beeswarm_0.3.1             
-[109] viridisLite_0.3.0           vipor_0.4.5                
-[111] bslib_0.2.4                
+ [19] graph_1.69.0                BiocManager_1.30.12        
+ [21] compiler_4.1.0              assertthat_0.2.1           
+ [23] Matrix_1.3-2                fastmap_1.1.0              
+ [25] cli_2.4.0                   BiocSingular_1.7.2         
+ [27] prettyunits_1.1.1           htmltools_0.5.1.1          
+ [29] tools_4.1.0                 igraph_1.2.6               
+ [31] rsvd_1.0.3                  gtable_0.3.0               
+ [33] glue_1.4.2                  GenomeInfoDbData_1.2.4     
+ [35] reshape2_1.4.4              dplyr_1.0.5                
+ [37] Rcpp_1.0.6                  jquerylib_0.1.3            
+ [39] rhdf5filters_1.3.4          vctrs_0.3.7                
+ [41] multtest_2.47.0             debugme_1.1.0              
+ [43] ape_5.4-1                   nlme_3.1-152               
+ [45] DECIPHER_2.19.2             iterators_1.0.13           
+ [47] DelayedMatrixStats_1.13.5   xfun_0.22                  
+ [49] stringr_1.4.0               ps_1.6.0                   
+ [51] beachmat_2.7.7              lifecycle_1.0.0            
+ [53] irlba_2.3.3                 XML_3.99-0.6               
+ [55] zlibbioc_1.37.0             MASS_7.3-53.1              
+ [57] scales_1.1.1                hms_1.0.0                  
+ [59] biomformat_1.19.0           rhdf5_2.35.2               
+ [61] yaml_2.2.1                  memoise_2.0.0              
+ [63] gridExtra_2.3               ggplot2_3.3.3              
+ [65] sass_0.3.1                  stringi_1.5.3              
+ [67] RSQLite_2.2.6               foreach_1.5.1              
+ [69] ScaledMatrix_0.99.2         permute_0.9-5              
+ [71] filelock_1.0.2              BiocParallel_1.25.5        
+ [73] rlang_0.4.10                pkgconfig_2.0.3            
+ [75] bitops_1.0-6                evaluate_0.14              
+ [77] lattice_0.20-41             Rhdf5lib_1.13.4            
+ [79] purrr_0.3.4                 CodeDepends_0.6.5          
+ [81] bit_4.0.4                   tidyselect_1.1.0           
+ [83] plyr_1.8.6                  magrittr_2.0.1             
+ [85] bookdown_0.21               R6_2.5.0                   
+ [87] generics_0.1.0              DelayedArray_0.17.10       
+ [89] DBI_1.1.1                   pillar_1.5.1               
+ [91] mgcv_1.8-34                 survival_3.2-10            
+ [93] RCurl_1.98-1.3              tibble_3.1.0               
+ [95] dir.expiry_0.99.4           crayon_1.4.1               
+ [97] utf8_1.2.1                  rmarkdown_2.7              
+ [99] progress_1.2.2              viridis_0.5.1              
+[101] grid_4.1.0                  data.table_1.14.0          
+[103] blob_1.2.1                  vegan_2.5-7                
+[105] digest_0.6.27               tidyr_1.1.3                
+[107] munsell_0.5.0               DirichletMultinomial_1.33.2
+[109] beeswarm_0.3.1              viridisLite_0.3.0          
+[111] vipor_0.4.5                 bslib_0.2.4                
 ```
 </div>

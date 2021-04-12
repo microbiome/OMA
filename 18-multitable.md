@@ -218,7 +218,7 @@ Table: (\#tab:options) **Recommended options for storing multiple data tables in
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R Under development (unstable) (2021-04-05 r80145)
+R Under development (unstable) (2021-04-08 r80148)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 20.04.2 LTS
 
@@ -242,11 +242,10 @@ other attached packages:
  [3] Biostrings_2.59.2                XVector_0.31.1                  
  [5] SingleCellExperiment_1.13.14     SummarizedExperiment_1.21.3     
  [7] Biobase_2.51.0                   GenomicRanges_1.43.4            
- [9] GenomeInfoDb_1.27.10             IRanges_2.25.7                  
+ [9] GenomeInfoDb_1.27.11             IRanges_2.25.7                  
 [11] S4Vectors_0.29.15                BiocGenerics_0.37.1             
 [13] MatrixGenerics_1.3.1             matrixStats_0.58.0              
-[15] BiocStyle_2.19.2                 rebook_1.1.19                   
-[17] BiocManager_1.30.12             
+[15] BiocStyle_2.19.2                 rebook_1.1.20                   
 
 loaded via a namespace (and not attached):
  [1] nlme_3.1-152                bitops_1.0-6               
@@ -266,7 +265,7 @@ loaded via a namespace (and not attached):
 [29] rmarkdown_2.7               scater_1.19.11             
 [31] pkgconfig_2.0.3             htmltools_0.5.1.1          
 [33] sparseMatrixStats_1.3.7     fastmap_1.1.0              
-[35] rlang_0.4.10                RSQLite_2.2.5              
+[35] rlang_0.4.10                RSQLite_2.2.6              
 [37] DelayedMatrixStats_1.13.5   jquerylib_0.1.3            
 [39] generics_0.1.0              jsonlite_1.7.2             
 [41] BiocParallel_1.25.5         dplyr_1.0.5                
@@ -287,13 +286,13 @@ loaded via a namespace (and not attached):
 [71] pillar_1.5.1                codetools_0.2-18           
 [73] ScaledMatrix_0.99.2         XML_3.99-0.6               
 [75] glue_1.4.2                  evaluate_0.14              
-[77] vctrs_0.3.7                 tidyr_1.1.3                
-[79] gtable_0.3.0                purrr_0.3.4                
-[81] assertthat_0.2.1            cachem_1.0.4               
-[83] ggplot2_3.3.3               xfun_0.22                  
-[85] rsvd_1.0.3                  viridisLite_0.3.0          
-[87] tibble_3.1.0                memoise_2.0.0              
-[89] beeswarm_0.3.1              cluster_2.1.1              
-[91] ellipsis_0.3.1             
+[77] BiocManager_1.30.12         vctrs_0.3.7                
+[79] tidyr_1.1.3                 gtable_0.3.0               
+[81] purrr_0.3.4                 assertthat_0.2.1           
+[83] cachem_1.0.4                ggplot2_3.3.3              
+[85] xfun_0.22                   rsvd_1.0.3                 
+[87] viridisLite_0.3.0           tibble_3.1.0               
+[89] memoise_2.0.0               beeswarm_0.3.1             
+[91] cluster_2.1.1               ellipsis_0.3.1             
 ```
 </div>
