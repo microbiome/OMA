@@ -48,7 +48,7 @@ This chapter focuses on the exploration of microbiome time series.
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R Under development (unstable) (2021-04-08 r80148)
+R version 4.1.0 (2021-05-18)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 20.04.2 LTS
 
@@ -67,18 +67,18 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] BiocStyle_2.19.2 rebook_1.1.20   
+[1] BiocStyle_2.21.3 rebook_1.3.0    
 
 loaded via a namespace (and not attached):
- [1] graph_1.69.0        knitr_1.31          magrittr_2.0.1     
- [4] BiocGenerics_0.37.1 R6_2.5.0            rlang_0.4.10       
- [7] stringr_1.4.0       tools_4.1.0         parallel_4.1.0     
-[10] xfun_0.22           jquerylib_0.1.3     htmltools_0.5.1.1  
-[13] CodeDepends_0.6.5   yaml_2.2.1          digest_0.6.27      
-[16] bookdown_0.21       dir.expiry_0.99.4   BiocManager_1.30.12
-[19] codetools_0.2-18    sass_0.3.1          evaluate_0.14      
-[22] rmarkdown_2.7       stringi_1.5.3       compiler_4.1.0     
-[25] bslib_0.2.4         filelock_1.0.2      XML_3.99-0.6       
-[28] stats4_4.1.0        jsonlite_1.7.2     
+ [1] graph_1.71.2        knitr_1.33          magrittr_2.0.1     
+ [4] BiocGenerics_0.39.1 R6_2.5.0            rlang_0.4.11       
+ [7] stringr_1.4.0       tools_4.1.0         xfun_0.24          
+[10] jquerylib_0.1.4     htmltools_0.5.1.1   CodeDepends_0.6.5  
+[13] yaml_2.2.1          digest_0.6.27       bookdown_0.22      
+[16] dir.expiry_1.1.0    BiocManager_1.30.16 codetools_0.2-18   
+[19] sass_0.4.0          evaluate_0.14       rmarkdown_2.9      
+[22] stringi_1.6.2       compiler_4.1.0      bslib_0.2.5.1      
+[25] filelock_1.0.2      stats4_4.1.0        XML_3.99-0.6       
+[28] jsonlite_1.7.2     
 ```
 </div>
