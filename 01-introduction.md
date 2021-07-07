@@ -105,7 +105,20 @@ In this book, you will come across terms like `FeatureIDs` and `SampleIDs`.
 `colnames` are encouraged to be used, since they relate to actual objects we 
 work with.
 
+<img src="https://raw.githubusercontent.com/FelixErnst/TreeSummarizedExperiment
+/2293440c6e70ae4d6e978b6fdf2c42fdea7fb36a/vignettes/tse2.png" width="100%"/>
 
+**Figure sources:** 
+
+**Original article**
+-   Huang R _et al_. (2021) [TreeSummarizedExperiment: a S4 class 
+for data with hierarchical structure](https://doi.org/10.12688/
+f1000research.26669.2). F1000Research 9:1246.
+
+**Reference Sequence slot extension**
+- Lahti L _et al_. (2020) [Upgrading the R/Bioconductor ecosystem for microbiome 
+research](https://doi.org/10.7490/
+f1000research.1118447.1) F1000Research 9:1464 (slides).
 
 ## Loading experimental microbiome data
 
@@ -116,11 +129,6 @@ Microbiome (taxonomic) profiling data is commonly distributed in
 various file formats. You can import such external data files as a
 (Tree)SummarizedExperiment object but the details depend on the file
 format. Here, we provide examples for common formats.
-
-A specific import function is provided for QIIME2 files (see
-`help(mia::loadFromQIIME2)`).
-
-TODO: link to Mothur and other importers.
 
 **CSV data tables** can be imported with the standard R functions,
   then converted to the desired format. For detailed examples, you can
@@ -141,7 +149,286 @@ se <- SummarizedExperiment(assays = list(counts = counts),
                            rowData = tax)
 ```
 
+A specific import functions are provided for:
 
+-   Biom files (see `help(mia::loadFromBiom)`)
+-   QIIME2 files (see `help(mia::loadFromQIIME2)`)
+-   Mothur files (see `help(mia::loadFromMothur)`)
+
+#### Example for importing Biom files
+
+This example shows how Biom files are imported into a TreeSummarizedExperiment object. 
+
+The data is from following publication: 
+Tengeler AC _et al._ (2020) [**Gut microbiota from persons with
+attention-deficit/hyperactivity disorder affects the brain in
+mice**](https://doi.org/10.1186/s40168-020-00816-x). 
+
+The data set consists of 3 files:
+
+-   biom file: abundance table and taxonomy information
+-   csv file: sample metadata
+-   tree file: phylogenetic tree
+
+Store the data in your desired local directory (for instance, _data/_ under the
+working directory), and define source file paths
+
+
+```r
+biom_file_path <- "data/Aggregated_humanization2.biom"
+sample_meta_file_path <- "data/Mapping_file_ADHD_aggregated.csv"
+tree_file_path <- "data/Data_humanization_phylo_aggregation.tre"
+```
+
+Now we can load the biom data into a SummarizedExperiment (SE) object.
+
+
+```r
+library(mia)
+
+# Imports the data
+se <- loadFromBiom(biom_file_path)
+
+# Check
+se
+```
+
+```
+## class: SummarizedExperiment 
+## dim: 151 27 
+## metadata(0):
+## assays(1): counts
+## rownames(151): 1726470 1726471 ... 17264756 17264757
+## rowData names(6): taxonomy1 taxonomy2 ... taxonomy5 taxonomy6
+## colnames(27): A110 A111 ... A38 A39
+## colData names(0):
+```
+
+The `assays` slot includes a list of abundance tables. The imported abundance table is named as "counts".
+Let us inspect only the first cols and rows.
+
+
+```r
+assays(se)$counts[1:3, 1:3]
+```
+
+```
+##           A110  A111  A12
+## 1726470  17722 11630    0
+## 1726471  12052     0 2679
+## 17264731     0   970    0
+```
+
+The `rowdata` includes taxonomic information from the biom file. The `head()` command
+shows just the beginning of the data table for an overview.
+
+`knitr::kable()` is for printing the information more nicely.
+
+
+```r
+head(rowData(se))
+```
+
+```
+## DataFrame with 6 rows and 6 columns
+##             taxonomy1          taxonomy2           taxonomy3
+##           <character>        <character>         <character>
+## 1726470  "k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+## 1726471  "k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+## 17264731 "k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+## 17264726 "k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+## 1726472  "k__Bacteria p__Verrucomicrobia c__Verrucomicrobiae
+## 17264724 "k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+##                      taxonomy4              taxonomy5           taxonomy6
+##                    <character>            <character>         <character>
+## 1726470       o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides"
+## 1726471       o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides"
+## 17264731      o__Bacteroidales  f__Porphyromonadaceae g__Parabacteroides"
+## 17264726      o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides"
+## 1726472  o__Verrucomicrobiales f__Verrucomicrobiaceae     g__Akkermansia"
+## 17264724      o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides"
+```
+
+These taxonomic rank names (column names) are not real rank names. Let’s replace them with real rank names.
+
+In addition to that, the taxa names include, e.g., '"k__' before the name, so let's
+make them cleaner by removing them. 
+
+
+```r
+names(rowData(se)) <- c("Kingdom", "Phylum", "Class", "Order", 
+                        "Family", "Genus")
+
+# Goes through the whole DataFrame. Removes '.*[kpcofg]__' from strings, where [kpcofg] 
+# is any character from listed ones, and .* any character.
+rowdata_modified <- BiocParallel::bplapply(rowData(se), 
+                                           FUN = stringr::str_remove, 
+                                           pattern = '.*[kpcofg]__')
+
+# Genus level has additional '\"', so let's delete that also
+rowdata_modified <- BiocParallel::bplapply(rowdata_modified, 
+                                           FUN = stringr::str_remove, 
+                                           pattern = '\"')
+
+# rowdata_modified is a list, so it is converted back to DataFrame format. 
+rowdata_modified <- DataFrame(rowdata_modified)
+
+# And then assigned back to the SE object
+rowData(se) <- rowdata_modified
+
+# Now we have a nicer table
+head(rowData(se))
+```
+
+```
+## DataFrame with 6 rows and 6 columns
+##              Kingdom          Phylum            Class              Order
+##          <character>     <character>      <character>        <character>
+## 1726470     Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726471     Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 17264731    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 17264726    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726472     Bacteria Verrucomicrobia Verrucomicrobiae Verrucomicrobiales
+## 17264724    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+##                       Family           Genus
+##                  <character>     <character>
+## 1726470       Bacteroidaceae     Bacteroides
+## 1726471       Bacteroidaceae     Bacteroides
+## 17264731  Porphyromonadaceae Parabacteroides
+## 17264726      Bacteroidaceae     Bacteroides
+## 1726472  Verrucomicrobiaceae     Akkermansia
+## 17264724      Bacteroidaceae     Bacteroides
+```
+
+We notice that the imported biom file did not contain the sample meta data
+yet, so it includes an empty data frame.
+
+
+```r
+head(colData(se))
+```
+
+```
+## DataFrame with 6 rows and 0 columns
+```
+
+Let us add a sample meta data file.
+
+
+```r
+# We use this to check what type of data it is
+# read.table(sample_meta_file_path)
+
+# It seems like a comma separated file and it does not include headers
+# Let us read it and then convert from data.frame to DataFrame
+# (required for our purposes)
+sample_meta <- DataFrame(read.table(sample_meta_file_path, sep = ",", header = FALSE))
+
+# Add sample names to rownames
+rownames(sample_meta) <- sample_meta[,1]
+
+# Delete column that included sample names
+sample_meta[,1] <- NULL
+
+# We can add headers
+colnames(sample_meta) <- c("patient_status", "cohort", "patient_status_vs_cohort", "sample_name")
+
+# Then it can be added to colData
+colData(se) <- sample_meta
+```
+
+Now `colData` includes the sample metadata.
+
+
+```r
+head(colData(se))
+```
+
+```
+## DataFrame with 6 rows and 4 columns
+##      patient_status      cohort patient_status_vs_cohort sample_name
+##         <character> <character>              <character> <character>
+## A110           ADHD    Cohort_1            ADHD_Cohort_1        A110
+## A12            ADHD    Cohort_1            ADHD_Cohort_1         A12
+## A15            ADHD    Cohort_1            ADHD_Cohort_1         A15
+## A19            ADHD    Cohort_1            ADHD_Cohort_1         A19
+## A21            ADHD    Cohort_2            ADHD_Cohort_2         A21
+## A23            ADHD    Cohort_2            ADHD_Cohort_2         A23
+```
+
+Now, let's add a phylogenetic tree.
+
+The current data object, se, is a SummarizedExperiment object. This
+does not include a slot for adding a phylogenetic tree. In order to do
+this, we can convert the SE object to an extended TreeSummarizedExperiment
+object which includes also a `rowTree` slot.
+
+
+```r
+tse <- as(se, "TreeSummarizedExperiment")
+
+# tse includes same data as se
+tse
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 151 27 
+## metadata(0):
+## assays(1): counts
+## rownames(151): 1726470 1726471 ... 17264756 17264757
+## rowData names(6): Kingdom Phylum ... Family Genus
+## colnames(27): A110 A12 ... A35 A38
+## colData names(4): patient_status cohort patient_status_vs_cohort
+##   sample_name
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: NULL
+## rowTree: NULL
+## colLinks: NULL
+## colTree: NULL
+```
+
+Next, let us read the tree data file and add it to the R data object (tse).
+
+
+```r
+# Reads the tree file
+tree <- ape::read.tree(tree_file_path)
+
+# Add tree to rowTree
+rowTree(tse) <- tree
+
+# Check
+tse
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 151 27 
+## metadata(0):
+## assays(1): counts
+## rownames(151): 1726470 1726471 ... 17264756 17264757
+## rowData names(6): Kingdom Phylum ... Family Genus
+## colnames(27): A110 A12 ... A35 A38
+## colData names(4): patient_status cohort patient_status_vs_cohort
+##   sample_name
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (151 rows)
+## rowTree: 1 phylo tree(s) (151 leaves)
+## colLinks: NULL
+## colTree: NULL
+```
+
+Now `rowTree` includes a phylogenetic tree:
+
+
+```r
+head(rowTree(tse))
+```
 
 ### Conversions between data formats in R
 
@@ -483,72 +770,71 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.1.5                      TreeSummarizedExperiment_2.1.3
+ [1] mia_1.1.6                      TreeSummarizedExperiment_2.1.3
  [3] Biostrings_2.61.1              XVector_0.33.0                
  [5] SingleCellExperiment_1.15.1    SummarizedExperiment_1.23.1   
  [7] Biobase_2.53.0                 GenomicRanges_1.45.0          
- [9] GenomeInfoDb_1.29.2            IRanges_2.27.0                
+ [9] GenomeInfoDb_1.29.3            IRanges_2.27.0                
 [11] S4Vectors_0.31.0               BiocGenerics_0.39.1           
-[13] MatrixGenerics_1.5.0           matrixStats_0.59.0            
+[13] MatrixGenerics_1.5.1           matrixStats_0.59.0            
 [15] BiocStyle_2.21.3               rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
   [1] ggbeeswarm_0.6.0            colorspace_2.0-2           
   [3] ellipsis_0.3.2              scuttle_1.3.0              
-  [5] BiocNeighbors_1.11.0        rstudioapi_0.13            
-  [7] bit64_4.0.5                 fansi_0.5.0                
-  [9] decontam_1.13.0             splines_4.1.0              
- [11] codetools_0.2-18            sparseMatrixStats_1.5.0    
- [13] cachem_1.0.5                knitr_1.33                 
- [15] scater_1.21.2               ade4_1.7-17                
- [17] phyloseq_1.37.0             jsonlite_1.7.2             
- [19] cluster_2.1.2               graph_1.71.2               
- [21] BiocManager_1.30.16         compiler_4.1.0             
- [23] assertthat_0.2.1            Matrix_1.3-4               
- [25] fastmap_1.1.0               lazyeval_0.2.2             
- [27] cli_2.5.0                   BiocSingular_1.9.1         
- [29] htmltools_0.5.1.1           tools_4.1.0                
- [31] igraph_1.2.6                rsvd_1.0.5                 
- [33] gtable_0.3.0                glue_1.4.2                 
- [35] GenomeInfoDbData_1.2.6      reshape2_1.4.4             
- [37] dplyr_1.0.7                 Rcpp_1.0.6                 
- [39] jquerylib_0.1.4             rhdf5filters_1.5.0         
- [41] vctrs_0.3.8                 multtest_2.49.0            
- [43] ape_5.5                     nlme_3.1-152               
- [45] DECIPHER_2.21.0             iterators_1.0.13           
- [47] DelayedMatrixStats_1.15.0   xfun_0.24                  
- [49] stringr_1.4.0               ps_1.6.0                   
- [51] beachmat_2.9.0              lifecycle_1.0.0            
- [53] irlba_2.3.3                 XML_3.99-0.6               
- [55] zlibbioc_1.39.0             MASS_7.3-54                
- [57] scales_1.1.1                biomformat_1.21.0          
- [59] parallel_4.1.0              rhdf5_2.37.0               
- [61] yaml_2.2.1                  memoise_2.0.0              
- [63] gridExtra_2.3               ggplot2_3.3.5              
- [65] sass_0.4.0                  stringi_1.6.2              
- [67] RSQLite_2.2.7               foreach_1.5.1              
- [69] ScaledMatrix_1.1.0          tidytree_0.3.4             
- [71] permute_0.9-5               filelock_1.0.2             
- [73] BiocParallel_1.27.0         rlang_0.4.11               
- [75] pkgconfig_2.0.3             bitops_1.0-7               
- [77] evaluate_0.14               lattice_0.20-44            
- [79] Rhdf5lib_1.15.1             purrr_0.3.4                
- [81] treeio_1.17.2               CodeDepends_0.6.5          
- [83] bit_4.0.4                   tidyselect_1.1.1           
- [85] plyr_1.8.6                  magrittr_2.0.1             
- [87] bookdown_0.22               R6_2.5.0                   
- [89] generics_0.1.0              DelayedArray_0.19.1        
- [91] DBI_1.1.1                   mgcv_1.8-36                
- [93] pillar_1.6.1                survival_3.2-11            
- [95] RCurl_1.98-1.3              tibble_3.1.2               
- [97] dir.expiry_1.1.0            crayon_1.4.1               
- [99] utf8_1.2.1                  rmarkdown_2.9              
-[101] viridis_0.6.1               grid_4.1.0                 
-[103] data.table_1.14.0           blob_1.2.1                 
-[105] vegan_2.5-7                 digest_0.6.27              
-[107] tidyr_1.1.3                 munsell_0.5.0              
-[109] DirichletMultinomial_1.35.0 beeswarm_0.4.0             
-[111] viridisLite_0.4.0           vipor_0.4.5                
-[113] bslib_0.2.5.1              
+  [5] BiocNeighbors_1.11.0        bit64_4.0.5                
+  [7] fansi_0.5.0                 decontam_1.13.0            
+  [9] splines_4.1.0               codetools_0.2-18           
+ [11] sparseMatrixStats_1.5.0     cachem_1.0.5               
+ [13] knitr_1.33                  scater_1.21.2              
+ [15] ade4_1.7-17                 phyloseq_1.37.0            
+ [17] jsonlite_1.7.2              cluster_2.1.2              
+ [19] graph_1.71.2                BiocManager_1.30.16        
+ [21] compiler_4.1.0              assertthat_0.2.1           
+ [23] Matrix_1.3-4                fastmap_1.1.0              
+ [25] lazyeval_0.2.2              cli_3.0.0                  
+ [27] BiocSingular_1.9.1          htmltools_0.5.1.1          
+ [29] tools_4.1.0                 igraph_1.2.6               
+ [31] rsvd_1.0.5                  gtable_0.3.0               
+ [33] glue_1.4.2                  GenomeInfoDbData_1.2.6     
+ [35] reshape2_1.4.4              dplyr_1.0.7                
+ [37] Rcpp_1.0.6                  jquerylib_0.1.4            
+ [39] rhdf5filters_1.5.0          vctrs_0.3.8                
+ [41] multtest_2.49.0             ape_5.5                    
+ [43] nlme_3.1-152                DECIPHER_2.21.0            
+ [45] iterators_1.0.13            DelayedMatrixStats_1.15.0  
+ [47] xfun_0.24                   stringr_1.4.0              
+ [49] beachmat_2.9.0              lifecycle_1.0.0            
+ [51] irlba_2.3.3                 XML_3.99-0.6               
+ [53] zlibbioc_1.39.0             MASS_7.3-54                
+ [55] scales_1.1.1                biomformat_1.21.0          
+ [57] parallel_4.1.0              rhdf5_2.37.0               
+ [59] yaml_2.2.1                  memoise_2.0.0              
+ [61] gridExtra_2.3               ggplot2_3.3.5              
+ [63] sass_0.4.0                  stringi_1.6.2              
+ [65] RSQLite_2.2.7               foreach_1.5.1              
+ [67] ScaledMatrix_1.1.0          tidytree_0.3.4             
+ [69] permute_0.9-5               filelock_1.0.2             
+ [71] BiocParallel_1.27.1         rlang_0.4.11               
+ [73] pkgconfig_2.0.3             bitops_1.0-7               
+ [75] evaluate_0.14               lattice_0.20-44            
+ [77] Rhdf5lib_1.15.2             purrr_0.3.4                
+ [79] treeio_1.17.2               CodeDepends_0.6.5          
+ [81] bit_4.0.4                   tidyselect_1.1.1           
+ [83] plyr_1.8.6                  magrittr_2.0.1             
+ [85] bookdown_0.22               R6_2.5.0                   
+ [87] generics_0.1.0              DelayedArray_0.19.1        
+ [89] DBI_1.1.1                   mgcv_1.8-36                
+ [91] pillar_1.6.1                survival_3.2-11            
+ [93] RCurl_1.98-1.3              tibble_3.1.2               
+ [95] dir.expiry_1.1.0            crayon_1.4.1               
+ [97] utf8_1.2.1                  rmarkdown_2.9              
+ [99] viridis_0.6.1               grid_4.1.0                 
+[101] data.table_1.14.0           blob_1.2.1                 
+[103] vegan_2.5-7                 digest_0.6.27              
+[105] tidyr_1.1.3                 munsell_0.5.0              
+[107] DirichletMultinomial_1.35.0 beeswarm_0.4.0             
+[109] viridisLite_0.4.0           vipor_0.4.5                
+[111] bslib_0.2.5.1              
 ```
 </div>

@@ -407,6 +407,15 @@ object multiple assays, raw counts, transformed counts can be stored. See also
 <p><code>FeatureIDs</code> and <code>SampleIDs</code> are used but the technical terms <code>rownames</code> and
 <code>colnames</code> are encouraged to be used, since they relate to actual objects we
 work with.</p>
+<p><img src="https://raw.githubusercontent.com/FelixErnst/TreeSummarizedExperiment
+/2293440c6e70ae4d6e978b6fdf2c42fdea7fb36a/vignettes/tse2.png" width="100%"/></p>
+<p><strong>Figure sources:</strong></p>
+<p><strong>Original article</strong>
+- Huang R <em>et al</em>. (2021) <a href="https://doi.org/10.12688/%20f1000research.26669.2">TreeSummarizedExperiment: a S4 class
+for data with hierarchical structure</a>. F1000Research 9:1246.</p>
+<p><strong>Reference Sequence slot extension</strong>
+- Lahti L <em>et al</em>. (2020) <a href="https://doi.org/10.7490/%20f1000research.1118447.1">Upgrading the R/Bioconductor ecosystem for microbiome
+research</a> F1000Research 9:1464 (slides).</p>
 </div>
 <div id="loading-experimental-microbiome-data" class="section level2" number="1.3">
 <h2><span class="header-section-number">1.3</span> Loading experimental microbiome data</h2>
@@ -416,9 +425,6 @@ work with.</p>
 various file formats. You can import such external data files as a
 (Tree)SummarizedExperiment object but the details depend on the file
 format. Here, we provide examples for common formats.</p>
-<p>A specific import function is provided for QIIME2 files (see
-<code>help(mia::loadFromQIIME2)</code>).</p>
-<p>TODO: link to Mothur and other importers.</p>
 <p><strong>CSV data tables</strong> can be imported with the standard R functions,
 then converted to the desired format. For detailed examples, you can
 check the <a href="https://bioconductor.org/help/course-materials/2019/BSS2019/04_Practical_CoreApproachesInBioconductor.html">Bioconductor course
@@ -433,6 +439,204 @@ column names.</p>
 <span id="cb2-4"><a href="data-introduction.html#cb2-4" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">SummarizedExperiment</span>(<span class="at">assays =</span> <span class="fu">list</span>(<span class="at">counts =</span> counts),</span>
 <span id="cb2-5"><a href="data-introduction.html#cb2-5" aria-hidden="true" tabindex="-1"></a>                           <span class="at">colData =</span> samples,</span>
 <span id="cb2-6"><a href="data-introduction.html#cb2-6" aria-hidden="true" tabindex="-1"></a>                           <span class="at">rowData =</span> tax)</span></code></pre></div>
+<p>A specific import functions are provided for:</p>
+<ul>
+<li>Biom files (see <code>help(mia::loadFromBiom)</code>)</li>
+<li>QIIME2 files (see <code>help(mia::loadFromQIIME2)</code>)</li>
+<li>Mothur files (see <code>help(mia::loadFromMothur)</code>)</li>
+</ul>
+<div id="example-for-importing-biom-files" class="section level4" number="1.3.1.1">
+<h4><span class="header-section-number">1.3.1.1</span> Example for importing Biom files</h4>
+<p>This example shows how Biom files are imported into a TreeSummarizedExperiment object.</p>
+<p>The data is from following publication:
+Tengeler AC <em>et al.</em> (2020) <a href="https://doi.org/10.1186/s40168-020-00816-x"><strong>Gut microbiota from persons with
+attention-deficit/hyperactivity disorder affects the brain in
+mice</strong></a>.</p>
+<p>The data set consists of 3 files:</p>
+<ul>
+<li>biom file: abundance table and taxonomy information</li>
+<li>csv file: sample metadata</li>
+<li>tree file: phylogenetic tree</li>
+</ul>
+<p>Store the data in your desired local directory (for instance, <em>data/</em> under the
+working directory), and define source file paths</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="data-introduction.html#cb3-1" aria-hidden="true" tabindex="-1"></a>biom_file_path <span class="ot">&lt;-</span> <span class="st">&quot;data/Aggregated_humanization2.biom&quot;</span></span>
+<span id="cb3-2"><a href="data-introduction.html#cb3-2" aria-hidden="true" tabindex="-1"></a>sample_meta_file_path <span class="ot">&lt;-</span> <span class="st">&quot;data/Mapping_file_ADHD_aggregated.csv&quot;</span></span>
+<span id="cb3-3"><a href="data-introduction.html#cb3-3" aria-hidden="true" tabindex="-1"></a>tree_file_path <span class="ot">&lt;-</span> <span class="st">&quot;data/Data_humanization_phylo_aggregation.tre&quot;</span></span></code></pre></div>
+<p>Now we can load the biom data into a SummarizedExperiment (SE) object.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="data-introduction.html#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mia)</span>
+<span id="cb4-2"><a href="data-introduction.html#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="data-introduction.html#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Imports the data</span></span>
+<span id="cb4-4"><a href="data-introduction.html#cb4-4" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">loadFromBiom</span>(biom_file_path)</span>
+<span id="cb4-5"><a href="data-introduction.html#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="data-introduction.html#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Check</span></span>
+<span id="cb4-7"><a href="data-introduction.html#cb4-7" aria-hidden="true" tabindex="-1"></a>se</span></code></pre></div>
+<pre><code>## class: SummarizedExperiment 
+## dim: 151 27 
+## metadata(0):
+## assays(1): counts
+## rownames(151): 1726470 1726471 ... 17264756 17264757
+## rowData names(6): taxonomy1 taxonomy2 ... taxonomy5 taxonomy6
+## colnames(27): A110 A111 ... A38 A39
+## colData names(0):</code></pre>
+<p>The <code>assays</code> slot includes a list of abundance tables. The imported abundance table is named as “counts.”
+Let us inspect only the first cols and rows.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="data-introduction.html#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">assays</span>(se)<span class="sc">$</span>counts[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div>
+<pre><code>##           A110  A111  A12
+## 1726470  17722 11630    0
+## 1726471  12052     0 2679
+## 17264731     0   970    0</code></pre>
+<p>The <code>rowdata</code> includes taxonomic information from the biom file. The <code>head()</code> command
+shows just the beginning of the data table for an overview.</p>
+<p><code>knitr::kable()</code> is for printing the information more nicely.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="data-introduction.html#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">rowData</span>(se))</span></code></pre></div>
+<pre><code>## DataFrame with 6 rows and 6 columns
+##             taxonomy1          taxonomy2           taxonomy3
+##           &lt;character&gt;        &lt;character&gt;         &lt;character&gt;
+## 1726470  &quot;k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+## 1726471  &quot;k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+## 17264731 &quot;k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+## 17264726 &quot;k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+## 1726472  &quot;k__Bacteria p__Verrucomicrobia c__Verrucomicrobiae
+## 17264724 &quot;k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+##                      taxonomy4              taxonomy5           taxonomy6
+##                    &lt;character&gt;            &lt;character&gt;         &lt;character&gt;
+## 1726470       o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides&quot;
+## 1726471       o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides&quot;
+## 17264731      o__Bacteroidales  f__Porphyromonadaceae g__Parabacteroides&quot;
+## 17264726      o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides&quot;
+## 1726472  o__Verrucomicrobiales f__Verrucomicrobiaceae     g__Akkermansia&quot;
+## 17264724      o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides&quot;</code></pre>
+<p>These taxonomic rank names (column names) are not real rank names. Let’s replace them with real rank names.</p>
+<p>In addition to that, the taxa names include, e.g., ’"k__’ before the name, so let’s
+make them cleaner by removing them.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="data-introduction.html#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">rowData</span>(se)) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Kingdom&quot;</span>, <span class="st">&quot;Phylum&quot;</span>, <span class="st">&quot;Class&quot;</span>, <span class="st">&quot;Order&quot;</span>, </span>
+<span id="cb10-2"><a href="data-introduction.html#cb10-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">&quot;Family&quot;</span>, <span class="st">&quot;Genus&quot;</span>)</span>
+<span id="cb10-3"><a href="data-introduction.html#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="data-introduction.html#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Goes through the whole DataFrame. Removes &#39;.*[kpcofg]__&#39; from strings, where [kpcofg] </span></span>
+<span id="cb10-5"><a href="data-introduction.html#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># is any character from listed ones, and .* any character.</span></span>
+<span id="cb10-6"><a href="data-introduction.html#cb10-6" aria-hidden="true" tabindex="-1"></a>rowdata_modified <span class="ot">&lt;-</span> BiocParallel<span class="sc">::</span><span class="fu">bplapply</span>(<span class="fu">rowData</span>(se), </span>
+<span id="cb10-7"><a href="data-introduction.html#cb10-7" aria-hidden="true" tabindex="-1"></a>                                           <span class="at">FUN =</span> stringr<span class="sc">::</span>str_remove, </span>
+<span id="cb10-8"><a href="data-introduction.html#cb10-8" aria-hidden="true" tabindex="-1"></a>                                           <span class="at">pattern =</span> <span class="st">&#39;.*[kpcofg]__&#39;</span>)</span>
+<span id="cb10-9"><a href="data-introduction.html#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="data-introduction.html#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Genus level has additional &#39;\&quot;&#39;, so let&#39;s delete that also</span></span>
+<span id="cb10-11"><a href="data-introduction.html#cb10-11" aria-hidden="true" tabindex="-1"></a>rowdata_modified <span class="ot">&lt;-</span> BiocParallel<span class="sc">::</span><span class="fu">bplapply</span>(rowdata_modified, </span>
+<span id="cb10-12"><a href="data-introduction.html#cb10-12" aria-hidden="true" tabindex="-1"></a>                                           <span class="at">FUN =</span> stringr<span class="sc">::</span>str_remove, </span>
+<span id="cb10-13"><a href="data-introduction.html#cb10-13" aria-hidden="true" tabindex="-1"></a>                                           <span class="at">pattern =</span> <span class="st">&#39;</span><span class="sc">\&quot;</span><span class="st">&#39;</span>)</span>
+<span id="cb10-14"><a href="data-introduction.html#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="data-introduction.html#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co"># rowdata_modified is a list, so it is converted back to DataFrame format. </span></span>
+<span id="cb10-16"><a href="data-introduction.html#cb10-16" aria-hidden="true" tabindex="-1"></a>rowdata_modified <span class="ot">&lt;-</span> <span class="fu">DataFrame</span>(rowdata_modified)</span>
+<span id="cb10-17"><a href="data-introduction.html#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="data-introduction.html#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="co"># And then assigned back to the SE object</span></span>
+<span id="cb10-19"><a href="data-introduction.html#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="fu">rowData</span>(se) <span class="ot">&lt;-</span> rowdata_modified</span>
+<span id="cb10-20"><a href="data-introduction.html#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-21"><a href="data-introduction.html#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Now we have a nicer table</span></span>
+<span id="cb10-22"><a href="data-introduction.html#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">rowData</span>(se))</span></code></pre></div>
+<pre><code>## DataFrame with 6 rows and 6 columns
+##              Kingdom          Phylum            Class              Order
+##          &lt;character&gt;     &lt;character&gt;      &lt;character&gt;        &lt;character&gt;
+## 1726470     Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726471     Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 17264731    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 17264726    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726472     Bacteria Verrucomicrobia Verrucomicrobiae Verrucomicrobiales
+## 17264724    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+##                       Family           Genus
+##                  &lt;character&gt;     &lt;character&gt;
+## 1726470       Bacteroidaceae     Bacteroides
+## 1726471       Bacteroidaceae     Bacteroides
+## 17264731  Porphyromonadaceae Parabacteroides
+## 17264726      Bacteroidaceae     Bacteroides
+## 1726472  Verrucomicrobiaceae     Akkermansia
+## 17264724      Bacteroidaceae     Bacteroides</code></pre>
+<p>We notice that the imported biom file did not contain the sample meta data
+yet, so it includes an empty data frame.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="data-introduction.html#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">colData</span>(se))</span></code></pre></div>
+<pre><code>## DataFrame with 6 rows and 0 columns</code></pre>
+<p>Let us add a sample meta data file.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="data-introduction.html#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># We use this to check what type of data it is</span></span>
+<span id="cb14-2"><a href="data-introduction.html#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># read.table(sample_meta_file_path)</span></span>
+<span id="cb14-3"><a href="data-introduction.html#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="data-introduction.html#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># It seems like a comma separated file and it does not include headers</span></span>
+<span id="cb14-5"><a href="data-introduction.html#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Let us read it and then convert from data.frame to DataFrame</span></span>
+<span id="cb14-6"><a href="data-introduction.html#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># (required for our purposes)</span></span>
+<span id="cb14-7"><a href="data-introduction.html#cb14-7" aria-hidden="true" tabindex="-1"></a>sample_meta <span class="ot">&lt;-</span> <span class="fu">DataFrame</span>(<span class="fu">read.table</span>(sample_meta_file_path, <span class="at">sep =</span> <span class="st">&quot;,&quot;</span>, <span class="at">header =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb14-8"><a href="data-introduction.html#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="data-introduction.html#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Add sample names to rownames</span></span>
+<span id="cb14-10"><a href="data-introduction.html#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(sample_meta) <span class="ot">&lt;-</span> sample_meta[,<span class="dv">1</span>]</span>
+<span id="cb14-11"><a href="data-introduction.html#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="data-introduction.html#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Delete column that included sample names</span></span>
+<span id="cb14-13"><a href="data-introduction.html#cb14-13" aria-hidden="true" tabindex="-1"></a>sample_meta[,<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb14-14"><a href="data-introduction.html#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="data-introduction.html#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co"># We can add headers</span></span>
+<span id="cb14-16"><a href="data-introduction.html#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(sample_meta) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;patient_status&quot;</span>, <span class="st">&quot;cohort&quot;</span>, <span class="st">&quot;patient_status_vs_cohort&quot;</span>, <span class="st">&quot;sample_name&quot;</span>)</span>
+<span id="cb14-17"><a href="data-introduction.html#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-18"><a href="data-introduction.html#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Then it can be added to colData</span></span>
+<span id="cb14-19"><a href="data-introduction.html#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="fu">colData</span>(se) <span class="ot">&lt;-</span> sample_meta</span></code></pre></div>
+<p>Now <code>colData</code> includes the sample metadata.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="data-introduction.html#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">colData</span>(se))</span></code></pre></div>
+<pre><code>## DataFrame with 6 rows and 4 columns
+##      patient_status      cohort patient_status_vs_cohort sample_name
+##         &lt;character&gt; &lt;character&gt;              &lt;character&gt; &lt;character&gt;
+## A110           ADHD    Cohort_1            ADHD_Cohort_1        A110
+## A12            ADHD    Cohort_1            ADHD_Cohort_1         A12
+## A15            ADHD    Cohort_1            ADHD_Cohort_1         A15
+## A19            ADHD    Cohort_1            ADHD_Cohort_1         A19
+## A21            ADHD    Cohort_2            ADHD_Cohort_2         A21
+## A23            ADHD    Cohort_2            ADHD_Cohort_2         A23</code></pre>
+<p>Now, let’s add a phylogenetic tree.</p>
+<p>The current data object, se, is a SummarizedExperiment object. This
+does not include a slot for adding a phylogenetic tree. In order to do
+this, we can convert the SE object to an extended TreeSummarizedExperiment
+object which includes also a <code>rowTree</code> slot.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="data-introduction.html#cb17-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">as</span>(se, <span class="st">&quot;TreeSummarizedExperiment&quot;</span>)</span>
+<span id="cb17-2"><a href="data-introduction.html#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="data-introduction.html#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co"># tse includes same data as se</span></span>
+<span id="cb17-4"><a href="data-introduction.html#cb17-4" aria-hidden="true" tabindex="-1"></a>tse</span></code></pre></div>
+<pre><code>## class: TreeSummarizedExperiment 
+## dim: 151 27 
+## metadata(0):
+## assays(1): counts
+## rownames(151): 1726470 1726471 ... 17264756 17264757
+## rowData names(6): Kingdom Phylum ... Family Genus
+## colnames(27): A110 A12 ... A35 A38
+## colData names(4): patient_status cohort patient_status_vs_cohort
+##   sample_name
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: NULL
+## rowTree: NULL
+## colLinks: NULL
+## colTree: NULL</code></pre>
+<p>Next, let us read the tree data file and add it to the R data object (tse).</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="data-introduction.html#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reads the tree file</span></span>
+<span id="cb19-2"><a href="data-introduction.html#cb19-2" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">read.tree</span>(tree_file_path)</span>
+<span id="cb19-3"><a href="data-introduction.html#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="data-introduction.html#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Add tree to rowTree</span></span>
+<span id="cb19-5"><a href="data-introduction.html#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rowTree</span>(tse) <span class="ot">&lt;-</span> tree</span>
+<span id="cb19-6"><a href="data-introduction.html#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="data-introduction.html#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Check</span></span>
+<span id="cb19-8"><a href="data-introduction.html#cb19-8" aria-hidden="true" tabindex="-1"></a>tse</span></code></pre></div>
+<pre><code>## class: TreeSummarizedExperiment 
+## dim: 151 27 
+## metadata(0):
+## assays(1): counts
+## rownames(151): 1726470 1726471 ... 17264756 17264757
+## rowData names(6): Kingdom Phylum ... Family Genus
+## colnames(27): A110 A12 ... A35 A38
+## colData names(4): patient_status cohort patient_status_vs_cohort
+##   sample_name
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (151 rows)
+## rowTree: 1 phylo tree(s) (151 leaves)
+## colLinks: NULL
+## colTree: NULL</code></pre>
+<p>Now <code>rowTree</code> includes a phylogenetic tree:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="data-introduction.html#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">rowTree</span>(tse))</span></code></pre></div>
+</div>
 </div>
 <div id="conversions-between-data-formats-in-r" class="section level3" number="1.3.2">
 <h3><span class="header-section-number">1.3.2</span> Conversions between data formats in R</h3>
@@ -442,14 +646,14 @@ example. Note that similar conversion functions to
 <code>TreeSummarizedExperiment</code> are available for multiple data formats via
 the <code>mia</code> package (see makeTreeSummarizedExperimentFrom* for phyloseq,
 Biom, and DADA2).</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="data-introduction.html#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mia)</span>
-<span id="cb3-2"><a href="data-introduction.html#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="data-introduction.html#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># phyloseq example data</span></span>
-<span id="cb3-4"><a href="data-introduction.html#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(GlobalPatterns, <span class="at">package=</span><span class="st">&quot;phyloseq&quot;</span>) </span>
-<span id="cb3-5"><a href="data-introduction.html#cb3-5" aria-hidden="true" tabindex="-1"></a>GlobalPatterns_phyloseq <span class="ot">&lt;-</span> GlobalPatterns</span>
-<span id="cb3-6"><a href="data-introduction.html#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="data-introduction.html#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># convert phyloseq to TSE</span></span>
-<span id="cb3-8"><a href="data-introduction.html#cb3-8" aria-hidden="true" tabindex="-1"></a>GlobalPatterns_TSE <span class="ot">&lt;-</span> <span class="fu">makeTreeSummarizedExperimentFromphyloseq</span>(GlobalPatterns_phyloseq) </span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="data-introduction.html#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mia)</span>
+<span id="cb22-2"><a href="data-introduction.html#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="data-introduction.html#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># phyloseq example data</span></span>
+<span id="cb22-4"><a href="data-introduction.html#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(GlobalPatterns, <span class="at">package=</span><span class="st">&quot;phyloseq&quot;</span>) </span>
+<span id="cb22-5"><a href="data-introduction.html#cb22-5" aria-hidden="true" tabindex="-1"></a>GlobalPatterns_phyloseq <span class="ot">&lt;-</span> GlobalPatterns</span>
+<span id="cb22-6"><a href="data-introduction.html#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="data-introduction.html#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co"># convert phyloseq to TSE</span></span>
+<span id="cb22-8"><a href="data-introduction.html#cb22-8" aria-hidden="true" tabindex="-1"></a>GlobalPatterns_TSE <span class="ot">&lt;-</span> <span class="fu">makeTreeSummarizedExperimentFromphyloseq</span>(GlobalPatterns_phyloseq) </span></code></pre></div>
 <p>We can also convert <code>TreeSummarizedExperiment</code> objects into <code>phyloseq</code>
 with respect to the shared components that are supported by both
 formats (i.e. taxonomic abundance table, sample metadata, taxonomic
@@ -463,10 +667,10 @@ instance when additional methods are available for <code>phyloseq</code>.</p>
 </div>
 <div id="microbiome-and-tree-data-specific-aspects" class="section level2" number="1.5">
 <h2><span class="header-section-number">1.5</span> Microbiome and tree data specific aspects</h2>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="data-introduction.html#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mia)</span>
-<span id="cb4-2"><a href="data-introduction.html#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;GlobalPatterns&quot;</span>)</span>
-<span id="cb4-3"><a href="data-introduction.html#cb4-3" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> GlobalPatterns </span>
-<span id="cb4-4"><a href="data-introduction.html#cb4-4" aria-hidden="true" tabindex="-1"></a>se</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="data-introduction.html#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mia)</span>
+<span id="cb23-2"><a href="data-introduction.html#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;GlobalPatterns&quot;</span>)</span>
+<span id="cb23-3"><a href="data-introduction.html#cb23-3" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> GlobalPatterns </span>
+<span id="cb23-4"><a href="data-introduction.html#cb23-4" aria-hidden="true" tabindex="-1"></a>se</span></code></pre></div>
 <pre><code>## class: TreeSummarizedExperiment 
 ## dim: 19216 26 
 ## metadata(0):
@@ -486,11 +690,11 @@ instance when additional methods are available for <code>phyloseq</code>.</p>
 <h3><span class="header-section-number">1.5.1</span> Assays</h3>
 <p>The <code>assays</code> slot contains the experimental data as count matrices. Multiple
 matrices can be stored the result of <code>assays</code> is actually a list of matrices.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="data-introduction.html#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">assays</span>(se)</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="data-introduction.html#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">assays</span>(se)</span></code></pre></div>
 <pre><code>## List of length 1
 ## names(1): counts</code></pre>
 <p>Individual assays can be accessed via <code>assay</code></p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="data-introduction.html#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">assay</span>(se, <span class="st">&quot;counts&quot;</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="data-introduction.html#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">assay</span>(se, <span class="st">&quot;counts&quot;</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>]</span></code></pre></div>
 <pre><code>##        CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr
 ## 549322   0   0   0       0       0       0       0
 ## 522457   0   0   0       0       0       0       0
@@ -499,13 +703,13 @@ matrices can be stored the result of <code>assays</code> is actually a list of m
 ## 586076   0   0   0       0       0       0       0</code></pre>
 <p>To illustrate the use of multiple assays, the relative abundance data can be
 calcualted and stored along the original count data using <code>relAbundanceCounts</code>.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="data-introduction.html#cb10-1" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">relAbundanceCounts</span>(se)</span>
-<span id="cb10-2"><a href="data-introduction.html#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">assays</span>(se)</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="data-introduction.html#cb29-1" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">relAbundanceCounts</span>(se)</span>
+<span id="cb29-2"><a href="data-introduction.html#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">assays</span>(se)</span></code></pre></div>
 <pre><code>## List of length 2
 ## names(2): counts relabundance</code></pre>
 <p>Now there are two assays available in the <code>se</code> object, <code>counts</code> and
 <code>relabundance</code>.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="data-introduction.html#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">assay</span>(se, <span class="st">&quot;relabundance&quot;</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="data-introduction.html#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">assay</span>(se, <span class="st">&quot;relabundance&quot;</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>]</span></code></pre></div>
 <pre><code>##        CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr   M11Plmr
 ## 549322   0   0   0       0       0       0 0.000e+00
 ## 522457   0   0   0       0       0       0 0.000e+00
@@ -516,7 +720,7 @@ calcualted and stored along the original count data using <code>relAbundanceCoun
 <div id="coldata" class="section level3" number="1.5.2">
 <h3><span class="header-section-number">1.5.2</span> colData</h3>
 <p><code>colData</code> contains data on the samples.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="data-introduction.html#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colData</span>(se)</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="data-introduction.html#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colData</span>(se)</span></code></pre></div>
 <pre><code>## DataFrame with 26 rows and 7 columns
 ##         X.SampleID   Primer Final_Barcode Barcode_truncated_plus_T
 ##           &lt;factor&gt; &lt;factor&gt;      &lt;factor&gt;                 &lt;factor&gt;
@@ -562,7 +766,7 @@ calcualted and stored along the original count data using <code>relAbundanceCoun
 <h3><span class="header-section-number">1.5.3</span> rowData</h3>
 <p><code>rowData</code> contains data on the features of the samples analyzed. Of particular
 interest for the microbiome field this is used to store taxonomic information.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="data-introduction.html#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rowData</span>(se)</span></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="data-introduction.html#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rowData</span>(se)</span></code></pre></div>
 <pre><code>## DataFrame with 19216 rows and 7 columns
 ##            Kingdom        Phylum        Class        Order        Family
 ##        &lt;character&gt;   &lt;character&gt;  &lt;character&gt;  &lt;character&gt;   &lt;character&gt;
@@ -597,7 +801,7 @@ interest for the microbiome field this is used to store taxonomic information.</
 <code>TreeSummarizedExperiment</code> class is able to keep track of feature and node
 relations via two functions, <code>rowTree</code> and <code>rowLinks</code>.</p>
 <p>A tree can be accessed via <code>rowTree</code> as <code>phylo</code> object.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="data-introduction.html#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rowTree</span>(se)</span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="data-introduction.html#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rowTree</span>(se)</span></code></pre></div>
 <pre><code>## 
 ## Phylogenetic tree with 19216 tips and 19215 internal nodes.
 ## 
@@ -608,7 +812,7 @@ relations via two functions, <code>rowTree</code> and <code>rowLinks</code>.</p>
 ## 
 ## Rooted; includes branch lengths.</code></pre>
 <p>The links to the individual features are available through <code>rowLinks</code>.</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="data-introduction.html#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rowLinks</span>(se)</span></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="data-introduction.html#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rowLinks</span>(se)</span></code></pre></div>
 <pre><code>## LinkDataFrame with 19216 rows and 5 columns
 ##           nodeLab   nodeNum nodeLab_alias    isLeaf   whichTree
 ##       &lt;character&gt; &lt;integer&gt;   &lt;character&gt; &lt;logical&gt; &lt;character&gt;
@@ -638,12 +842,12 @@ few functions to help in these situations.</p>
 <p>For several custom analysis and visualization packages such as those from the
 <code>tidyverse</code> the <code>SE</code> data can be converted to long data.frame format with
 <code>meltAssay</code>.</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="data-introduction.html#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mia)</span>
-<span id="cb22-2"><a href="data-introduction.html#cb22-2" aria-hidden="true" tabindex="-1"></a>molten_se <span class="ot">&lt;-</span> <span class="fu">meltAssay</span>(se,</span>
-<span id="cb22-3"><a href="data-introduction.html#cb22-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">add_row_data =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb22-4"><a href="data-introduction.html#cb22-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">add_col_data =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb22-5"><a href="data-introduction.html#cb22-5" aria-hidden="true" tabindex="-1"></a>                       <span class="at">abund_values =</span> <span class="st">&quot;relabundance&quot;</span>)</span>
-<span id="cb22-6"><a href="data-introduction.html#cb22-6" aria-hidden="true" tabindex="-1"></a>molten_se</span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="data-introduction.html#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mia)</span>
+<span id="cb41-2"><a href="data-introduction.html#cb41-2" aria-hidden="true" tabindex="-1"></a>molten_se <span class="ot">&lt;-</span> <span class="fu">meltAssay</span>(se,</span>
+<span id="cb41-3"><a href="data-introduction.html#cb41-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">add_row_data =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb41-4"><a href="data-introduction.html#cb41-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">add_col_data =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb41-5"><a href="data-introduction.html#cb41-5" aria-hidden="true" tabindex="-1"></a>                       <span class="at">abund_values =</span> <span class="st">&quot;relabundance&quot;</span>)</span>
+<span id="cb41-6"><a href="data-introduction.html#cb41-6" aria-hidden="true" tabindex="-1"></a>molten_se</span></code></pre></div>
 <pre><code>## # A tibble: 499,616 x 17
 ##    FeatureID SampleID counts Kingdom Phylum   Class   Order Family Genus Species
 ##    &lt;fct&gt;     &lt;fct&gt;     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;  
@@ -692,73 +896,72 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.1.5                      TreeSummarizedExperiment_2.1.3
+ [1] mia_1.1.6                      TreeSummarizedExperiment_2.1.3
  [3] Biostrings_2.61.1              XVector_0.33.0                
  [5] SingleCellExperiment_1.15.1    SummarizedExperiment_1.23.1   
  [7] Biobase_2.53.0                 GenomicRanges_1.45.0          
- [9] GenomeInfoDb_1.29.2            IRanges_2.27.0                
+ [9] GenomeInfoDb_1.29.3            IRanges_2.27.0                
 [11] S4Vectors_0.31.0               BiocGenerics_0.39.1           
-[13] MatrixGenerics_1.5.0           matrixStats_0.59.0            
+[13] MatrixGenerics_1.5.1           matrixStats_0.59.0            
 [15] BiocStyle_2.21.3               rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
   [1] ggbeeswarm_0.6.0            colorspace_2.0-2           
   [3] ellipsis_0.3.2              scuttle_1.3.0              
-  [5] BiocNeighbors_1.11.0        rstudioapi_0.13            
-  [7] bit64_4.0.5                 fansi_0.5.0                
-  [9] decontam_1.13.0             splines_4.1.0              
- [11] codetools_0.2-18            sparseMatrixStats_1.5.0    
- [13] cachem_1.0.5                knitr_1.33                 
- [15] scater_1.21.2               ade4_1.7-17                
- [17] phyloseq_1.37.0             jsonlite_1.7.2             
- [19] cluster_2.1.2               graph_1.71.2               
- [21] BiocManager_1.30.16         compiler_4.1.0             
- [23] assertthat_0.2.1            Matrix_1.3-4               
- [25] fastmap_1.1.0               lazyeval_0.2.2             
- [27] cli_2.5.0                   BiocSingular_1.9.1         
- [29] htmltools_0.5.1.1           tools_4.1.0                
- [31] igraph_1.2.6                rsvd_1.0.5                 
- [33] gtable_0.3.0                glue_1.4.2                 
- [35] GenomeInfoDbData_1.2.6      reshape2_1.4.4             
- [37] dplyr_1.0.7                 Rcpp_1.0.6                 
- [39] jquerylib_0.1.4             rhdf5filters_1.5.0         
- [41] vctrs_0.3.8                 multtest_2.49.0            
- [43] ape_5.5                     nlme_3.1-152               
- [45] DECIPHER_2.21.0             iterators_1.0.13           
- [47] DelayedMatrixStats_1.15.0   xfun_0.24                  
- [49] stringr_1.4.0               ps_1.6.0                   
- [51] beachmat_2.9.0              lifecycle_1.0.0            
- [53] irlba_2.3.3                 XML_3.99-0.6               
- [55] zlibbioc_1.39.0             MASS_7.3-54                
- [57] scales_1.1.1                biomformat_1.21.0          
- [59] parallel_4.1.0              rhdf5_2.37.0               
- [61] yaml_2.2.1                  memoise_2.0.0              
- [63] gridExtra_2.3               ggplot2_3.3.5              
- [65] sass_0.4.0                  stringi_1.6.2              
- [67] RSQLite_2.2.7               foreach_1.5.1              
- [69] ScaledMatrix_1.1.0          tidytree_0.3.4             
- [71] permute_0.9-5               filelock_1.0.2             
- [73] BiocParallel_1.27.0         rlang_0.4.11               
- [75] pkgconfig_2.0.3             bitops_1.0-7               
- [77] evaluate_0.14               lattice_0.20-44            
- [79] Rhdf5lib_1.15.1             purrr_0.3.4                
- [81] treeio_1.17.2               CodeDepends_0.6.5          
- [83] bit_4.0.4                   tidyselect_1.1.1           
- [85] plyr_1.8.6                  magrittr_2.0.1             
- [87] bookdown_0.22               R6_2.5.0                   
- [89] generics_0.1.0              DelayedArray_0.19.1        
- [91] DBI_1.1.1                   mgcv_1.8-36                
- [93] pillar_1.6.1                survival_3.2-11            
- [95] RCurl_1.98-1.3              tibble_3.1.2               
- [97] dir.expiry_1.1.0            crayon_1.4.1               
- [99] utf8_1.2.1                  rmarkdown_2.9              
-[101] viridis_0.6.1               grid_4.1.0                 
-[103] data.table_1.14.0           blob_1.2.1                 
-[105] vegan_2.5-7                 digest_0.6.27              
-[107] tidyr_1.1.3                 munsell_0.5.0              
-[109] DirichletMultinomial_1.35.0 beeswarm_0.4.0             
-[111] viridisLite_0.4.0           vipor_0.4.5                
-[113] bslib_0.2.5.1              </code></pre>
+  [5] BiocNeighbors_1.11.0        bit64_4.0.5                
+  [7] fansi_0.5.0                 decontam_1.13.0            
+  [9] splines_4.1.0               codetools_0.2-18           
+ [11] sparseMatrixStats_1.5.0     cachem_1.0.5               
+ [13] knitr_1.33                  scater_1.21.2              
+ [15] ade4_1.7-17                 phyloseq_1.37.0            
+ [17] jsonlite_1.7.2              cluster_2.1.2              
+ [19] graph_1.71.2                BiocManager_1.30.16        
+ [21] compiler_4.1.0              assertthat_0.2.1           
+ [23] Matrix_1.3-4                fastmap_1.1.0              
+ [25] lazyeval_0.2.2              cli_3.0.0                  
+ [27] BiocSingular_1.9.1          htmltools_0.5.1.1          
+ [29] tools_4.1.0                 igraph_1.2.6               
+ [31] rsvd_1.0.5                  gtable_0.3.0               
+ [33] glue_1.4.2                  GenomeInfoDbData_1.2.6     
+ [35] reshape2_1.4.4              dplyr_1.0.7                
+ [37] Rcpp_1.0.6                  jquerylib_0.1.4            
+ [39] rhdf5filters_1.5.0          vctrs_0.3.8                
+ [41] multtest_2.49.0             ape_5.5                    
+ [43] nlme_3.1-152                DECIPHER_2.21.0            
+ [45] iterators_1.0.13            DelayedMatrixStats_1.15.0  
+ [47] xfun_0.24                   stringr_1.4.0              
+ [49] beachmat_2.9.0              lifecycle_1.0.0            
+ [51] irlba_2.3.3                 XML_3.99-0.6               
+ [53] zlibbioc_1.39.0             MASS_7.3-54                
+ [55] scales_1.1.1                biomformat_1.21.0          
+ [57] parallel_4.1.0              rhdf5_2.37.0               
+ [59] yaml_2.2.1                  memoise_2.0.0              
+ [61] gridExtra_2.3               ggplot2_3.3.5              
+ [63] sass_0.4.0                  stringi_1.6.2              
+ [65] RSQLite_2.2.7               foreach_1.5.1              
+ [67] ScaledMatrix_1.1.0          tidytree_0.3.4             
+ [69] permute_0.9-5               filelock_1.0.2             
+ [71] BiocParallel_1.27.1         rlang_0.4.11               
+ [73] pkgconfig_2.0.3             bitops_1.0-7               
+ [75] evaluate_0.14               lattice_0.20-44            
+ [77] Rhdf5lib_1.15.2             purrr_0.3.4                
+ [79] treeio_1.17.2               CodeDepends_0.6.5          
+ [81] bit_4.0.4                   tidyselect_1.1.1           
+ [83] plyr_1.8.6                  magrittr_2.0.1             
+ [85] bookdown_0.22               R6_2.5.0                   
+ [87] generics_0.1.0              DelayedArray_0.19.1        
+ [89] DBI_1.1.1                   mgcv_1.8-36                
+ [91] pillar_1.6.1                survival_3.2-11            
+ [93] RCurl_1.98-1.3              tibble_3.1.2               
+ [95] dir.expiry_1.1.0            crayon_1.4.1               
+ [97] utf8_1.2.1                  rmarkdown_2.9              
+ [99] viridis_0.6.1               grid_4.1.0                 
+[101] data.table_1.14.0           blob_1.2.1                 
+[103] vegan_2.5-7                 digest_0.6.27              
+[105] tidyr_1.1.3                 munsell_0.5.0              
+[107] DirichletMultinomial_1.35.0 beeswarm_0.4.0             
+[109] viridisLite_0.4.0           vipor_0.4.5                
+[111] bslib_0.2.5.1              </code></pre>
 </div>
 
 </div>

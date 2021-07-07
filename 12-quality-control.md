@@ -225,13 +225,13 @@ attached base packages:
 
 other attached packages:
  [1] scater_1.21.2                  ggplot2_3.3.5                 
- [3] scuttle_1.3.0                  mia_1.1.5                     
+ [3] scuttle_1.3.0                  mia_1.1.6                     
  [5] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.1             
  [7] XVector_0.33.0                 SingleCellExperiment_1.15.1   
  [9] SummarizedExperiment_1.23.1    Biobase_2.53.0                
-[11] GenomicRanges_1.45.0           GenomeInfoDb_1.29.2           
+[11] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
 [13] IRanges_2.27.0                 S4Vectors_0.31.0              
-[15] BiocGenerics_0.39.1            MatrixGenerics_1.5.0          
+[15] BiocGenerics_0.39.1            MatrixGenerics_1.5.1          
 [17] matrixStats_0.59.0             BiocStyle_2.21.3              
 [19] rebook_1.3.0                  
 
@@ -265,7 +265,7 @@ loaded via a namespace (and not attached):
  [53] stringi_1.6.2               RSQLite_2.2.7              
  [55] highr_0.9                   ScaledMatrix_1.1.0         
  [57] tidytree_0.3.4              permute_0.9-5              
- [59] filelock_1.0.2              BiocParallel_1.27.0        
+ [59] filelock_1.0.2              BiocParallel_1.27.1        
  [61] rlang_0.4.11                pkgconfig_2.0.3            
  [63] bitops_1.0-7                evaluate_0.14              
  [65] lattice_0.20-44             purrr_0.3.4                

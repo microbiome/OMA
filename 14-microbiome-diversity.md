@@ -560,7 +560,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2668
+## [1] 0.2737
 ```
 
 In this case, the community composition is not significantly different
@@ -664,20 +664,20 @@ other attached packages:
  [3] vegan_2.5-7                    lattice_0.20-44               
  [5] permute_0.9-5                  scater_1.21.2                 
  [7] ggplot2_3.3.5                  scuttle_1.3.0                 
- [9] mia_1.1.5                      TreeSummarizedExperiment_2.1.3
+ [9] mia_1.1.6                      TreeSummarizedExperiment_2.1.3
 [11] Biostrings_2.61.1              XVector_0.33.0                
 [13] SingleCellExperiment_1.15.1    SummarizedExperiment_1.23.1   
 [15] Biobase_2.53.0                 GenomicRanges_1.45.0          
-[17] GenomeInfoDb_1.29.2            IRanges_2.27.0                
+[17] GenomeInfoDb_1.29.3            IRanges_2.27.0                
 [19] S4Vectors_0.31.0               BiocGenerics_0.39.1           
-[21] MatrixGenerics_1.5.0           matrixStats_0.59.0            
+[21] MatrixGenerics_1.5.1           matrixStats_0.59.0            
 [23] BiocStyle_2.21.3               rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
   [1] readxl_1.3.1                  backports_1.2.1              
   [3] AnnotationHub_3.1.3           BiocFileCache_2.1.1          
   [5] plyr_1.8.6                    lazyeval_0.2.2               
-  [7] splines_4.1.0                 BiocParallel_1.27.0          
+  [7] splines_4.1.0                 BiocParallel_1.27.1          
   [9] digest_0.6.27                 htmltools_0.5.1.1            
  [11] viridis_0.6.1                 fansi_0.5.0                  
  [13] magrittr_2.0.1                memoise_2.0.0                
