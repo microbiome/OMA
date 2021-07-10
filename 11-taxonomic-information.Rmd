@@ -158,6 +158,72 @@ assay(altExp(se, "Family"), "counts")[1:5,1:7]
 `altExpNames` now consists of `Family` level data. This can be extended to use 
 any level present in `r mia::taxonomyRanks(se)`.   
 
+## Data transformation
+
+Data transformation is very common procedure in microbiome analysis. 
+In transformation, each data point is replaced with transformed value that is 
+calculated by applying transformation formula to the data point. Transformation 
+can be used, for example, to normalize skewed data, or to reduce weight of bigger 
+values compared to smaller values. 
+
+In mia package, transformations are applied to abundance data. Transformed 
+abundance table is stored back to 'assays'. mia includes transformation 
+functions for sample-wise or column-wise transformation ('transformSamples()'), 
+and for feature-wise or row-wise transformation ('transformFeatures()'). 
+
+'transformSamples' includes following transformation methods:
+
+-   centered log ratio transformation (clr)
+-   hellinger (hellinger)
+-   log10 (log10)
+-   presence/absence (pa)
+-   rank (rank)
+-   relative (relabundance)
+
+'transformFeatures' includes following transformation methods:
+
+-   log10 (log10)
+-   presence/absence (pa)
+-   Z-standardization (z)
+
+
+Following prameters are used as an input: 
+
+-   'x' is a SummarizedExperiment object
+
+-   'abund_values' specifies the abundance table where transformation is applied.
+
+-   'method' specifies the transformation method that is used. By default, 
+transformation is applied to 'counts' table.
+
+-   'pseudocount' specifies the value that is added to data. It must be added when
+logarithmic transformation is done (clr, hellinger, log10), and the data 
+contains zeros.
+
+-   'name' specifies the name of transformed abundance table. It is optional, but it
+is preferred. By default, name is same as the method that is used.
+
+```{r}
+se <- transformSamples(x = se, abund_values = "counts", method = "log10", 
+                       pseudocount = 1, name = "log10_transformation")
+
+head(assay(se, "log10_transformation"))
+```
+
+-   In 'pa' transformation, 'threshold' specifies the value that divides observations to
+be absent or present. By default, it is 0.
+
+```{r}
+se <- transformFeatures(se, method = "pa", threshold = 10)
+
+head(assay(se, "pa"))
+```
+
+```{r}
+# list of abundance tables hat assays slot contains
+assays(se)
+```
+
 ## Pick specific  
 
 Retrieving of specific elements are required for specific analysis. For
