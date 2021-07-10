@@ -293,7 +293,7 @@ loaded via a namespace (and not attached):
  [35] igraph_1.2.6                rsvd_1.0.5                 
  [37] gtable_0.3.0                glue_1.4.2                 
  [39] GenomeInfoDbData_1.2.6      reshape2_1.4.4             
- [41] dplyr_1.0.7                 Rcpp_1.0.6                 
+ [41] dplyr_1.0.7                 Rcpp_1.0.7                 
  [43] jquerylib_0.1.4             vctrs_0.3.8                
  [45] ape_5.5                     nlme_3.1-152               
  [47] DECIPHER_2.21.0             DelayedMatrixStats_1.15.0  

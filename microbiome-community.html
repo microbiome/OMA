@@ -256,7 +256,11 @@ div.csl-indent {
 <li class="chapter" data-level="7" data-path="microbiome-community.html"><a href="microbiome-community.html"><i class="fa fa-check"></i><b>7</b> Microbiome Community</a>
 <ul>
 <li class="chapter" data-level="7.1" data-path="microbiome-community.html"><a href="microbiome-community.html#community-composition"><i class="fa fa-check"></i><b>7.1</b> Community composition</a></li>
-<li class="chapter" data-level="7.2" data-path="microbiome-community.html"><a href="microbiome-community.html#community-typing"><i class="fa fa-check"></i><b>7.2</b> Community typing</a></li>
+<li class="chapter" data-level="7.2" data-path="microbiome-community.html"><a href="microbiome-community.html#community-typing"><i class="fa fa-check"></i><b>7.2</b> Community typing</a>
+<ul>
+<li class="chapter" data-level="7.2.1" data-path="microbiome-community.html"><a href="microbiome-community.html#dirichlet-multinomial-mixtures-dmm"><i class="fa fa-check"></i><b>7.2.1</b> Dirichlet Multinomial Mixtures (DMM)</a></li>
+<li class="chapter" data-level="7.2.2" data-path="microbiome-community.html"><a href="microbiome-community.html#pcoa-for-asv-level-data-with-bray-curtis-with-dmm-clusters-shown-with-colors"><i class="fa fa-check"></i><b>7.2.2</b> PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors</a></li>
+</ul></li>
 <li class="chapter" data-level="" data-path="microbiome-community.html"><a href="microbiome-community.html#session-info-6"><i class="fa fa-check"></i>Session Info</a></li>
 </ul></li>
 <li class="chapter" data-level="8" data-path="differential-abundance.html"><a href="differential-abundance.html"><i class="fa fa-check"></i><b>8</b> Differential abundance</a>
@@ -351,16 +355,200 @@ document.addEventListener("click", function (event) {
   background-color: #f1f1f1;
 }
 </style>
+<pre><code>## Loading required package: ecodist</code></pre>
+<pre><code>## Warning in library(package, lib.loc = lib.loc, character.only = TRUE,
+## logical.return = TRUE, : there is no package called &#39;ecodist&#39;</code></pre>
+<pre><code>## Installing package into &#39;/__w/_temp/Library&#39;
+## (as &#39;lib&#39; is unspecified)</code></pre>
+<div class="sourceCode" id="cb152"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb152-1"><a href="microbiome-community.html#cb152-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mia)</span>
+<span id="cb152-2"><a href="microbiome-community.html#cb152-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;GlobalPatterns&quot;</span>)</span>
+<span id="cb152-3"><a href="microbiome-community.html#cb152-3" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> GlobalPatterns</span></code></pre></div>
 <div id="community-composition" class="section level2" number="7.1">
 <h2><span class="header-section-number">7.1</span> Community composition</h2>
 <p>Heatmaps</p>
 </div>
 <div id="community-typing" class="section level2" number="7.2">
 <h2><span class="header-section-number">7.2</span> Community typing</h2>
-<ul>
-<li>Community State Types (CST)</li>
-<li>Dirichlet Multinomial Mixtures (DMM)</li>
-</ul>
+<div id="dirichlet-multinomial-mixtures-dmm" class="section level3" number="7.2.1">
+<h3><span class="header-section-number">7.2.1</span> Dirichlet Multinomial Mixtures (DMM)</h3>
+<p>This section focus on DMM analysis.</p>
+<p>One technique that allows to search for groups of samples that are
+similar to each other is the <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030126">Dirichlet-Multinomial Mixture
+Model</a>. In
+DMM, we first determine the number of clusters (k) that best fit the
+data (model evidence) using Laplace approximation. After fitting the
+model with k clusters, we obtain for each sample k probabilities that
+reflect the probability that a sample belongs to the given cluster.</p>
+<p>Let’s cluster the data with DMM clustering.</p>
+<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb153-1"><a href="microbiome-community.html#cb153-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Runs model and calculates the most likely number of clusters from 1 to 7.</span></span>
+<span id="cb153-2"><a href="microbiome-community.html#cb153-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Since this is a large dataset it takes long computational time.</span></span>
+<span id="cb153-3"><a href="microbiome-community.html#cb153-3" aria-hidden="true" tabindex="-1"></a><span class="co"># For this reason we use only a subset of the data; agglomerated by Phylum as a rank.</span></span>
+<span id="cb153-4"><a href="microbiome-community.html#cb153-4" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">relAbundanceCounts</span>(tse)</span>
+<span id="cb153-5"><a href="microbiome-community.html#cb153-5" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(tse, <span class="at">rank =</span> <span class="st">&quot;Phylum&quot;</span>, <span class="at">agglomerateTree=</span><span class="cn">TRUE</span>)</span>
+<span id="cb153-6"><a href="microbiome-community.html#cb153-6" aria-hidden="true" tabindex="-1"></a>tse_dmn <span class="ot">&lt;-</span> <span class="fu">runDMN</span>(tse, <span class="at">name =</span> <span class="st">&quot;DMN&quot;</span>, <span class="at">k =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb154"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb154-1"><a href="microbiome-community.html#cb154-1" aria-hidden="true" tabindex="-1"></a><span class="co"># It is stored in metadata</span></span>
+<span id="cb154-2"><a href="microbiome-community.html#cb154-2" aria-hidden="true" tabindex="-1"></a>tse_dmn</span></code></pre></div>
+<pre><code>## class: TreeSummarizedExperiment 
+## dim: 67 26 
+## metadata(1): DMN
+## assays(2): counts relabundance
+## rownames(67): Phylum:Crenarchaeota Phylum:Euryarchaeota ...
+##   Phylum:Synergistetes Phylum:SR1
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(26): CL3 CC1 ... Even2 Even3
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (67 rows)
+## rowTree: 1 phylo tree(s) (66 leaves)
+## colLinks: NULL
+## colTree: NULL</code></pre>
+<p>Return information on metadata that the object contains.</p>
+<div class="sourceCode" id="cb156"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb156-1"><a href="microbiome-community.html#cb156-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">metadata</span>(tse_dmn))</span></code></pre></div>
+<pre><code>## [1] &quot;DMN&quot;</code></pre>
+<p>This returns a list of DMN objects for a closer investigation.</p>
+<div class="sourceCode" id="cb158"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb158-1"><a href="microbiome-community.html#cb158-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getDMN</span>(tse_dmn)</span></code></pre></div>
+<pre><code>## [[1]]
+## class: DMN 
+## k: 1 
+## samples x taxa: 26 x 67 
+## Laplace: 7715 BIC: 7802 AIC: 7760 
+## 
+## [[2]]
+## class: DMN 
+## k: 2 
+## samples x taxa: 26 x 67 
+## Laplace: 7673 BIC: 7927 AIC: 7842 
+## 
+## [[3]]
+## class: DMN 
+## k: 3 
+## samples x taxa: 26 x 67 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
+## 
+## [[4]]
+## class: DMN 
+## k: 4 
+## samples x taxa: 26 x 67 
+## Laplace: 7752 BIC: 8274 AIC: 8103 
+## 
+## [[5]]
+## class: DMN 
+## k: 5 
+## samples x taxa: 26 x 67 
+## Laplace: 7849 BIC: 8554 AIC: 8341 
+## 
+## [[6]]
+## class: DMN 
+## k: 6 
+## samples x taxa: 26 x 67 
+## Laplace: NaN BIC: NaN AIC: NaN 
+## 
+## [[7]]
+## class: DMN 
+## k: 7 
+## samples x taxa: 26 x 67 
+## Laplace: 8099 BIC: 9099 AIC: 8800</code></pre>
+<p>Show Laplace approximation (model evidence) for each model of the k models.</p>
+<div class="sourceCode" id="cb160"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb160-1"><a href="microbiome-community.html#cb160-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(miaViz)</span>
+<span id="cb160-2"><a href="microbiome-community.html#cb160-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plotDMNFit</span>(tse_dmn, <span class="at">type =</span> <span class="st">&quot;laplace&quot;</span>)</span></code></pre></div>
+<p><img src="15-microbiome-community_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Return the model that has the best fit.</p>
+<div class="sourceCode" id="cb161"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb161-1"><a href="microbiome-community.html#cb161-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getBestDMNFit</span>(tse_dmn, <span class="at">type =</span> <span class="st">&quot;laplace&quot;</span>)</span></code></pre></div>
+<pre><code>## class: DMN 
+## k: 2 
+## samples x taxa: 26 x 67 
+## Laplace: 7673 BIC: 7927 AIC: 7842</code></pre>
+</div>
+<div id="pcoa-for-asv-level-data-with-bray-curtis-with-dmm-clusters-shown-with-colors" class="section level3" number="7.2.2">
+<h3><span class="header-section-number">7.2.2</span> PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors</h3>
+<p>Group samples and return DMNGroup object that contains a summary.
+Patient status is used for grouping.</p>
+<div class="sourceCode" id="cb163"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb163-1"><a href="microbiome-community.html#cb163-1" aria-hidden="true" tabindex="-1"></a>dmn_group <span class="ot">&lt;-</span> <span class="fu">calculateDMNgroup</span>(tse_dmn, <span class="at">variable =</span> <span class="st">&quot;SampleType&quot;</span>,  <span class="at">exprs_values =</span> <span class="st">&quot;counts&quot;</span>,</span>
+<span id="cb163-2"><a href="microbiome-community.html#cb163-2" aria-hidden="true" tabindex="-1"></a>                               <span class="at">k =</span> <span class="dv">2</span>, <span class="at">seed=</span>.Machine<span class="sc">$</span>integer.max)</span>
+<span id="cb163-3"><a href="microbiome-community.html#cb163-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb163-4"><a href="microbiome-community.html#cb163-4" aria-hidden="true" tabindex="-1"></a>dmn_group</span></code></pre></div>
+<pre><code>## class: DMNGroup 
+## summary:
+##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
+## Feces              2       4   67 1078.3 -106.14   901.2 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.17   717.0  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918</code></pre>
+<p>Mixture weights (rough measure of the cluster size).</p>
+<div class="sourceCode" id="cb165"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb165-1"><a href="microbiome-community.html#cb165-1" aria-hidden="true" tabindex="-1"></a>DirichletMultinomial<span class="sc">::</span><span class="fu">mixturewt</span>(<span class="fu">getBestDMNFit</span>(tse_dmn))</span></code></pre></div>
+<pre><code>##       pi theta
+## 1 0.5385 20.58
+## 2 0.4615 15.28</code></pre>
+<p>Samples-cluster assignment probabilities / how probable it is that sample belongs
+to each cluster</p>
+<div class="sourceCode" id="cb167"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb167-1"><a href="microbiome-community.html#cb167-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(DirichletMultinomial<span class="sc">::</span><span class="fu">mixture</span>(<span class="fu">getBestDMNFit</span>(tse_dmn)))</span></code></pre></div>
+<pre><code>##              [,1]      [,2]
+## CL3     1.000e+00 5.058e-17
+## CC1     1.000e+00 3.916e-22
+## SV1     1.000e+00 1.957e-12
+## M31Fcsw 7.879e-26 1.000e+00
+## M11Fcsw 1.132e-16 1.000e+00
+## M31Plmr 1.123e-13 1.000e+00</code></pre>
+<p>Contribution of each taxa to each component</p>
+<div class="sourceCode" id="cb169"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb169-1"><a href="microbiome-community.html#cb169-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(DirichletMultinomial<span class="sc">::</span><span class="fu">fitted</span>(<span class="fu">getBestDMNFit</span>(tse_dmn)))</span></code></pre></div>
+<pre><code>##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30380 0.1354658
+## Phylum:Euryarchaeota  0.23114 0.1468635
+## Phylum:Actinobacteria 1.21373 1.0600310
+## Phylum:Spirochaetes   0.21392 0.1318418
+## Phylum:MVP-15         0.02982 0.0007677
+## Phylum:Proteobacteria 6.84478 1.8154540</code></pre>
+<p>Get the assignment probabilities</p>
+<div class="sourceCode" id="cb171"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb171-1"><a href="microbiome-community.html#cb171-1" aria-hidden="true" tabindex="-1"></a>prob <span class="ot">&lt;-</span> DirichletMultinomial<span class="sc">::</span><span class="fu">mixture</span>(<span class="fu">getBestDMNFit</span>(tse_dmn))</span>
+<span id="cb171-2"><a href="microbiome-community.html#cb171-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Add column names</span></span>
+<span id="cb171-3"><a href="microbiome-community.html#cb171-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(prob) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;comp1&quot;</span>, <span class="st">&quot;comp2&quot;</span>)</span>
+<span id="cb171-4"><a href="microbiome-community.html#cb171-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb171-5"><a href="microbiome-community.html#cb171-5" aria-hidden="true" tabindex="-1"></a><span class="co"># For each row, finds column that has the highest value. Then extract the column </span></span>
+<span id="cb171-6"><a href="microbiome-community.html#cb171-6" aria-hidden="true" tabindex="-1"></a><span class="co"># names of highest values.</span></span>
+<span id="cb171-7"><a href="microbiome-community.html#cb171-7" aria-hidden="true" tabindex="-1"></a>vec <span class="ot">&lt;-</span> <span class="fu">colnames</span>(prob)[<span class="fu">max.col</span>(prob,<span class="at">ties.method =</span> <span class="st">&quot;first&quot;</span>)]</span></code></pre></div>
+<p>Computing the euclidean PCoA and storing it as a dataframe</p>
+<div class="sourceCode" id="cb172"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb172-1"><a href="microbiome-community.html#cb172-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Does clr transformation. Pseudocount is added, because data contains zeros.</span></span>
+<span id="cb172-2"><a href="microbiome-community.html#cb172-2" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformCounts</span>(tse, <span class="at">method =</span> <span class="st">&quot;clr&quot;</span>, <span class="at">pseudocount =</span> <span class="dv">1</span>)</span>
+<span id="cb172-3"><a href="microbiome-community.html#cb172-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb172-4"><a href="microbiome-community.html#cb172-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Gets clr table</span></span>
+<span id="cb172-5"><a href="microbiome-community.html#cb172-5" aria-hidden="true" tabindex="-1"></a>clr_assay <span class="ot">&lt;-</span> <span class="fu">assays</span>(tse)<span class="sc">$</span>clr</span>
+<span id="cb172-6"><a href="microbiome-community.html#cb172-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb172-7"><a href="microbiome-community.html#cb172-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Transposes it to get taxa to columns</span></span>
+<span id="cb172-8"><a href="microbiome-community.html#cb172-8" aria-hidden="true" tabindex="-1"></a>clr_assay <span class="ot">&lt;-</span> <span class="fu">t</span>(clr_assay)</span>
+<span id="cb172-9"><a href="microbiome-community.html#cb172-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb172-10"><a href="microbiome-community.html#cb172-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculates Euclidean distances between samples. Because taxa is in columns,</span></span>
+<span id="cb172-11"><a href="microbiome-community.html#cb172-11" aria-hidden="true" tabindex="-1"></a><span class="co"># it is used to compare different samples.</span></span>
+<span id="cb172-12"><a href="microbiome-community.html#cb172-12" aria-hidden="true" tabindex="-1"></a>euclidean_dist <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">vegdist</span>(clr_assay, <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>)</span>
+<span id="cb172-13"><a href="microbiome-community.html#cb172-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb172-14"><a href="microbiome-community.html#cb172-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Does principal coordinate analysis</span></span>
+<span id="cb172-15"><a href="microbiome-community.html#cb172-15" aria-hidden="true" tabindex="-1"></a>euclidean_pcoa <span class="ot">&lt;-</span> ecodist<span class="sc">::</span><span class="fu">pco</span>(euclidean_dist)</span>
+<span id="cb172-16"><a href="microbiome-community.html#cb172-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb172-17"><a href="microbiome-community.html#cb172-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates a data frame from principal coordinates</span></span>
+<span id="cb172-18"><a href="microbiome-community.html#cb172-18" aria-hidden="true" tabindex="-1"></a>euclidean_pcoa_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">pcoa1 =</span> euclidean_pcoa<span class="sc">$</span>vectors[,<span class="dv">1</span>], </span>
+<span id="cb172-19"><a href="microbiome-community.html#cb172-19" aria-hidden="true" tabindex="-1"></a>                                <span class="at">pcoa2 =</span> euclidean_pcoa<span class="sc">$</span>vectors[,<span class="dv">2</span>])</span></code></pre></div>
+<div class="sourceCode" id="cb173"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb173-1"><a href="microbiome-community.html#cb173-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates a data frame that contains principal coordinates and DMM information</span></span>
+<span id="cb173-2"><a href="microbiome-community.html#cb173-2" aria-hidden="true" tabindex="-1"></a>euclidean_dmm_pcoa_df <span class="ot">&lt;-</span> <span class="fu">cbind</span>(euclidean_pcoa_df,</span>
+<span id="cb173-3"><a href="microbiome-community.html#cb173-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">dmm_component =</span> vec)</span>
+<span id="cb173-4"><a href="microbiome-community.html#cb173-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates a plot</span></span>
+<span id="cb173-5"><a href="microbiome-community.html#cb173-5" aria-hidden="true" tabindex="-1"></a>euclidean_dmm_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> euclidean_dmm_pcoa_df, </span>
+<span id="cb173-6"><a href="microbiome-community.html#cb173-6" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">aes</span>(<span class="at">x=</span>pcoa1, <span class="at">y=</span>pcoa2,</span>
+<span id="cb173-7"><a href="microbiome-community.html#cb173-7" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">color =</span> dmm_component)) <span class="sc">+</span></span>
+<span id="cb173-8"><a href="microbiome-community.html#cb173-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb173-9"><a href="microbiome-community.html#cb173-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Coordinate 1&quot;</span>,</span>
+<span id="cb173-10"><a href="microbiome-community.html#cb173-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Coordinate 2&quot;</span>,</span>
+<span id="cb173-11"><a href="microbiome-community.html#cb173-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">&quot;PCoA with Aitchison distances&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb173-12"><a href="microbiome-community.html#cb173-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>)) <span class="co"># makes titles smaller</span></span>
+<span id="cb173-13"><a href="microbiome-community.html#cb173-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb173-14"><a href="microbiome-community.html#cb173-14" aria-hidden="true" tabindex="-1"></a>euclidean_dmm_plot</span></code></pre></div>
+<p><img src="15-microbiome-community_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>
 </div>
 <div id="session-info-6" class="section level2 unnumbered">
 <h2>Session Info</h2>
@@ -384,22 +572,79 @@ locale:
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
+[1] stats4    stats     graphics  grDevices utils     datasets  methods  
+[8] base     
 
 other attached packages:
-[1] BiocStyle_2.21.3 rebook_1.3.0    
+ [1] miaViz_1.1.1                   ggraph_2.0.5                  
+ [3] ggplot2_3.3.5                  mia_1.1.6                     
+ [5] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.1             
+ [7] XVector_0.33.0                 SingleCellExperiment_1.15.1   
+ [9] SummarizedExperiment_1.23.1    Biobase_2.53.0                
+[11] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
+[13] IRanges_2.27.0                 S4Vectors_0.31.0              
+[15] BiocGenerics_0.39.1            MatrixGenerics_1.5.1          
+[17] matrixStats_0.59.0             ecodist_2.0.7                 
+[19] BiocStyle_2.21.3               rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
- [1] graph_1.71.2        knitr_1.33          magrittr_2.0.1     
- [4] BiocGenerics_0.39.1 R6_2.5.0            rlang_0.4.11       
- [7] stringr_1.4.0       tools_4.1.0         xfun_0.24          
-[10] jquerylib_0.1.4     htmltools_0.5.1.1   CodeDepends_0.6.5  
-[13] yaml_2.2.1          digest_0.6.27       bookdown_0.22      
-[16] dir.expiry_1.1.0    BiocManager_1.30.16 codetools_0.2-18   
-[19] sass_0.4.0          evaluate_0.14       rmarkdown_2.9      
-[22] stringi_1.6.2       compiler_4.1.0      bslib_0.2.5.1      
-[25] filelock_1.0.2      stats4_4.1.0        XML_3.99-0.6       
-[28] jsonlite_1.7.2     </code></pre>
+  [1] ggtree_3.1.2                ggnewscale_0.4.5           
+  [3] ggbeeswarm_0.6.0            colorspace_2.0-2           
+  [5] ellipsis_0.3.2              scuttle_1.3.0              
+  [7] BiocNeighbors_1.11.0        aplot_0.0.6                
+  [9] farver_2.1.0                graphlayouts_0.7.1         
+ [11] ggrepel_0.9.1               bit64_4.0.5                
+ [13] fansi_0.5.0                 decontam_1.13.0            
+ [15] splines_4.1.0               codetools_0.2-18           
+ [17] sparseMatrixStats_1.5.0     cachem_1.0.5               
+ [19] knitr_1.33                  scater_1.21.2              
+ [21] polyclip_1.10-0             jsonlite_1.7.2             
+ [23] cluster_2.1.2               graph_1.71.2               
+ [25] ggforce_0.3.3               BiocManager_1.30.16        
+ [27] compiler_4.1.0              rvcheck_0.1.8              
+ [29] assertthat_0.2.1            Matrix_1.3-4               
+ [31] fastmap_1.1.0               lazyeval_0.2.2             
+ [33] tweenr_1.0.2                BiocSingular_1.9.1         
+ [35] htmltools_0.5.1.1           tools_4.1.0                
+ [37] igraph_1.2.6                rsvd_1.0.5                 
+ [39] gtable_0.3.0                glue_1.4.2                 
+ [41] GenomeInfoDbData_1.2.6      reshape2_1.4.4             
+ [43] dplyr_1.0.7                 Rcpp_1.0.7                 
+ [45] jquerylib_0.1.4             vctrs_0.3.8                
+ [47] ape_5.5                     nlme_3.1-152               
+ [49] DECIPHER_2.21.0             DelayedMatrixStats_1.15.0  
+ [51] xfun_0.24                   stringr_1.4.0              
+ [53] beachmat_2.9.0              lifecycle_1.0.0            
+ [55] irlba_2.3.3                 XML_3.99-0.6               
+ [57] zlibbioc_1.39.0             MASS_7.3-54                
+ [59] scales_1.1.1                tidygraph_1.2.0            
+ [61] parallel_4.1.0              yaml_2.2.1                 
+ [63] memoise_2.0.0               gridExtra_2.3              
+ [65] sass_0.4.0                  stringi_1.6.2              
+ [67] RSQLite_2.2.7               highr_0.9                  
+ [69] ScaledMatrix_1.1.0          permute_0.9-5              
+ [71] tidytree_0.3.4              filelock_1.0.2             
+ [73] BiocParallel_1.27.1         rlang_0.4.11               
+ [75] pkgconfig_2.0.3             bitops_1.0-7               
+ [77] evaluate_0.14               lattice_0.20-44            
+ [79] purrr_0.3.4                 labeling_0.4.2             
+ [81] patchwork_1.1.1             treeio_1.17.2              
+ [83] CodeDepends_0.6.5           bit_4.0.4                  
+ [85] tidyselect_1.1.1            plyr_1.8.6                 
+ [87] magrittr_2.0.1              bookdown_0.22              
+ [89] R6_2.5.0                    generics_0.1.0             
+ [91] DelayedArray_0.19.1         DBI_1.1.1                  
+ [93] withr_2.4.2                 mgcv_1.8-36                
+ [95] pillar_1.6.1                RCurl_1.98-1.3             
+ [97] tibble_3.1.2                dir.expiry_1.1.0           
+ [99] crayon_1.4.1                utf8_1.2.1                 
+[101] rmarkdown_2.9               viridis_0.6.1              
+[103] grid_4.1.0                  blob_1.2.1                 
+[105] vegan_2.5-7                 digest_0.6.27              
+[107] tidyr_1.1.3                 munsell_0.5.0              
+[109] DirichletMultinomial_1.35.0 beeswarm_0.4.0             
+[111] viridisLite_0.4.0           vipor_0.4.5                
+[113] bslib_0.2.5.1              </code></pre>
 </div>
 
 </div>

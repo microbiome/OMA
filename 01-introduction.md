@@ -798,7 +798,7 @@ loaded via a namespace (and not attached):
  [31] rsvd_1.0.5                  gtable_0.3.0               
  [33] glue_1.4.2                  GenomeInfoDbData_1.2.6     
  [35] reshape2_1.4.4              dplyr_1.0.7                
- [37] Rcpp_1.0.6                  jquerylib_0.1.4            
+ [37] Rcpp_1.0.7                  jquerylib_0.1.4            
  [39] rhdf5filters_1.5.0          vctrs_0.3.8                
  [41] multtest_2.49.0             ape_5.5                    
  [43] nlme_3.1-152                DECIPHER_2.21.0            

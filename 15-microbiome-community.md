@@ -35,6 +35,26 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
+```
+## Loading required package: ecodist
+```
+
+```
+## Warning in library(package, lib.loc = lib.loc, character.only = TRUE,
+## logical.return = TRUE, : there is no package called 'ecodist'
+```
+
+```
+## Installing package into '/__w/_temp/Library'
+## (as 'lib' is unspecified)
+```
+
+
+```r
+library(mia)
+data("GlobalPatterns")
+tse <- GlobalPatterns
+```
 
 
 ## Community composition
@@ -44,8 +64,277 @@ Heatmaps
 
 ## Community typing
 
-- Community State Types (CST)
-- Dirichlet Multinomial Mixtures (DMM)
+### Dirichlet Multinomial Mixtures (DMM)
+
+This section focus on DMM analysis. 
+
+One technique that allows to search for groups of samples that are
+similar to each other is the [Dirichlet-Multinomial Mixture
+Model](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030126). In
+DMM, we first determine the number of clusters (k) that best fit the
+data (model evidence) using Laplace approximation. After fitting the
+model with k clusters, we obtain for each sample k probabilities that
+reflect the probability that a sample belongs to the given cluster.
+
+Let's cluster the data with DMM clustering. 
+
+
+```r
+# Runs model and calculates the most likely number of clusters from 1 to 7.
+# Since this is a large dataset it takes long computational time.
+# For this reason we use only a subset of the data; agglomerated by Phylum as a rank.
+tse <- relAbundanceCounts(tse)
+tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
+```
+
+
+```r
+# It is stored in metadata
+tse_dmn
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 67 26 
+## metadata(1): DMN
+## assays(2): counts relabundance
+## rownames(67): Phylum:Crenarchaeota Phylum:Euryarchaeota ...
+##   Phylum:Synergistetes Phylum:SR1
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(26): CL3 CC1 ... Even2 Even3
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (67 rows)
+## rowTree: 1 phylo tree(s) (66 leaves)
+## colLinks: NULL
+## colTree: NULL
+```
+
+Return information on metadata that the object contains.
+
+
+```r
+names(metadata(tse_dmn))
+```
+
+```
+## [1] "DMN"
+```
+
+This returns a list of DMN objects for a closer investigation.
+
+
+```r
+getDMN(tse_dmn)
+```
+
+```
+## [[1]]
+## class: DMN 
+## k: 1 
+## samples x taxa: 26 x 67 
+## Laplace: 7715 BIC: 7802 AIC: 7760 
+## 
+## [[2]]
+## class: DMN 
+## k: 2 
+## samples x taxa: 26 x 67 
+## Laplace: 7673 BIC: 7927 AIC: 7842 
+## 
+## [[3]]
+## class: DMN 
+## k: 3 
+## samples x taxa: 26 x 67 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
+## 
+## [[4]]
+## class: DMN 
+## k: 4 
+## samples x taxa: 26 x 67 
+## Laplace: 7752 BIC: 8274 AIC: 8103 
+## 
+## [[5]]
+## class: DMN 
+## k: 5 
+## samples x taxa: 26 x 67 
+## Laplace: 7849 BIC: 8554 AIC: 8341 
+## 
+## [[6]]
+## class: DMN 
+## k: 6 
+## samples x taxa: 26 x 67 
+## Laplace: NaN BIC: NaN AIC: NaN 
+## 
+## [[7]]
+## class: DMN 
+## k: 7 
+## samples x taxa: 26 x 67 
+## Laplace: 8099 BIC: 9099 AIC: 8800
+```
+
+
+Show Laplace approximation (model evidence) for each model of the k models.
+
+
+```r
+library(miaViz)
+plotDMNFit(tse_dmn, type = "laplace")
+```
+
+<img src="15-microbiome-community_files/figure-html/unnamed-chunk-4-1.png" width="672" />
+
+Return the model that has the best fit.
+
+
+```r
+getBestDMNFit(tse_dmn, type = "laplace")
+```
+
+```
+## class: DMN 
+## k: 2 
+## samples x taxa: 26 x 67 
+## Laplace: 7673 BIC: 7927 AIC: 7842
+```
+### PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors
+
+Group samples and return DMNGroup object that contains a summary.
+Patient status is used for grouping.
+
+
+```r
+dmn_group <- calculateDMNgroup(tse_dmn, variable = "SampleType",  exprs_values = "counts",
+                               k = 2, seed=.Machine$integer.max)
+
+dmn_group
+```
+
+```
+## class: DMNGroup 
+## summary:
+##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
+## Feces              2       4   67 1078.3 -106.14   901.2 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.17   717.0  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
+```
+
+Mixture weights  (rough measure of the cluster size).
+
+
+
+```r
+DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
+```
+
+```
+##       pi theta
+## 1 0.5385 20.58
+## 2 0.4615 15.28
+```
+
+
+Samples-cluster assignment probabilities / how probable it is that sample belongs
+to each cluster
+
+
+```r
+head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
+```
+
+```
+##              [,1]      [,2]
+## CL3     1.000e+00 5.058e-17
+## CC1     1.000e+00 3.916e-22
+## SV1     1.000e+00 1.957e-12
+## M31Fcsw 7.879e-26 1.000e+00
+## M11Fcsw 1.132e-16 1.000e+00
+## M31Plmr 1.123e-13 1.000e+00
+```
+
+Contribution of each taxa to each component
+
+
+```r
+head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
+```
+
+```
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30380 0.1354658
+## Phylum:Euryarchaeota  0.23114 0.1468635
+## Phylum:Actinobacteria 1.21373 1.0600310
+## Phylum:Spirochaetes   0.21392 0.1318418
+## Phylum:MVP-15         0.02982 0.0007677
+## Phylum:Proteobacteria 6.84478 1.8154540
+```
+Get the assignment probabilities
+
+
+
+```r
+prob <- DirichletMultinomial::mixture(getBestDMNFit(tse_dmn))
+# Add column names
+colnames(prob) <- c("comp1", "comp2")
+
+# For each row, finds column that has the highest value. Then extract the column 
+# names of highest values.
+vec <- colnames(prob)[max.col(prob,ties.method = "first")]
+```
+
+Computing the euclidean PCoA and storing it as a dataframe
+
+
+```r
+# Does clr transformation. Pseudocount is added, because data contains zeros.
+tse <- transformCounts(tse, method = "clr", pseudocount = 1)
+
+# Gets clr table
+clr_assay <- assays(tse)$clr
+
+# Transposes it to get taxa to columns
+clr_assay <- t(clr_assay)
+
+# Calculates Euclidean distances between samples. Because taxa is in columns,
+# it is used to compare different samples.
+euclidean_dist <- vegan::vegdist(clr_assay, method = "euclidean")
+
+# Does principal coordinate analysis
+euclidean_pcoa <- ecodist::pco(euclidean_dist)
+
+# Creates a data frame from principal coordinates
+euclidean_pcoa_df <- data.frame(pcoa1 = euclidean_pcoa$vectors[,1], 
+                                pcoa2 = euclidean_pcoa$vectors[,2])
+```
+
+
+```r
+# Creates a data frame that contains principal coordinates and DMM information
+euclidean_dmm_pcoa_df <- cbind(euclidean_pcoa_df,
+                               dmm_component = vec)
+# Creates a plot
+euclidean_dmm_plot <- ggplot(data = euclidean_dmm_pcoa_df, 
+                             aes(x=pcoa1, y=pcoa2,
+                                 color = dmm_component)) +
+  geom_point() +
+  labs(x = "Coordinate 1",
+       y = "Coordinate 2",
+       title = "PCoA with Aitchison distances") +  
+  theme(title = element_text(size = 12)) # makes titles smaller
+
+euclidean_dmm_plot
+```
+
+<img src="15-microbiome-community_files/figure-html/unnamed-chunk-12-1.png" width="672" />
+
 
 ## Session Info {-}
 
@@ -68,21 +357,78 @@ locale:
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
+[1] stats4    stats     graphics  grDevices utils     datasets  methods  
+[8] base     
 
 other attached packages:
-[1] BiocStyle_2.21.3 rebook_1.3.0    
+ [1] miaViz_1.1.1                   ggraph_2.0.5                  
+ [3] ggplot2_3.3.5                  mia_1.1.6                     
+ [5] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.1             
+ [7] XVector_0.33.0                 SingleCellExperiment_1.15.1   
+ [9] SummarizedExperiment_1.23.1    Biobase_2.53.0                
+[11] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
+[13] IRanges_2.27.0                 S4Vectors_0.31.0              
+[15] BiocGenerics_0.39.1            MatrixGenerics_1.5.1          
+[17] matrixStats_0.59.0             ecodist_2.0.7                 
+[19] BiocStyle_2.21.3               rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
- [1] graph_1.71.2        knitr_1.33          magrittr_2.0.1     
- [4] BiocGenerics_0.39.1 R6_2.5.0            rlang_0.4.11       
- [7] stringr_1.4.0       tools_4.1.0         xfun_0.24          
-[10] jquerylib_0.1.4     htmltools_0.5.1.1   CodeDepends_0.6.5  
-[13] yaml_2.2.1          digest_0.6.27       bookdown_0.22      
-[16] dir.expiry_1.1.0    BiocManager_1.30.16 codetools_0.2-18   
-[19] sass_0.4.0          evaluate_0.14       rmarkdown_2.9      
-[22] stringi_1.6.2       compiler_4.1.0      bslib_0.2.5.1      
-[25] filelock_1.0.2      stats4_4.1.0        XML_3.99-0.6       
-[28] jsonlite_1.7.2     
+  [1] ggtree_3.1.2                ggnewscale_0.4.5           
+  [3] ggbeeswarm_0.6.0            colorspace_2.0-2           
+  [5] ellipsis_0.3.2              scuttle_1.3.0              
+  [7] BiocNeighbors_1.11.0        aplot_0.0.6                
+  [9] farver_2.1.0                graphlayouts_0.7.1         
+ [11] ggrepel_0.9.1               bit64_4.0.5                
+ [13] fansi_0.5.0                 decontam_1.13.0            
+ [15] splines_4.1.0               codetools_0.2-18           
+ [17] sparseMatrixStats_1.5.0     cachem_1.0.5               
+ [19] knitr_1.33                  scater_1.21.2              
+ [21] polyclip_1.10-0             jsonlite_1.7.2             
+ [23] cluster_2.1.2               graph_1.71.2               
+ [25] ggforce_0.3.3               BiocManager_1.30.16        
+ [27] compiler_4.1.0              rvcheck_0.1.8              
+ [29] assertthat_0.2.1            Matrix_1.3-4               
+ [31] fastmap_1.1.0               lazyeval_0.2.2             
+ [33] tweenr_1.0.2                BiocSingular_1.9.1         
+ [35] htmltools_0.5.1.1           tools_4.1.0                
+ [37] igraph_1.2.6                rsvd_1.0.5                 
+ [39] gtable_0.3.0                glue_1.4.2                 
+ [41] GenomeInfoDbData_1.2.6      reshape2_1.4.4             
+ [43] dplyr_1.0.7                 Rcpp_1.0.7                 
+ [45] jquerylib_0.1.4             vctrs_0.3.8                
+ [47] ape_5.5                     nlme_3.1-152               
+ [49] DECIPHER_2.21.0             DelayedMatrixStats_1.15.0  
+ [51] xfun_0.24                   stringr_1.4.0              
+ [53] beachmat_2.9.0              lifecycle_1.0.0            
+ [55] irlba_2.3.3                 XML_3.99-0.6               
+ [57] zlibbioc_1.39.0             MASS_7.3-54                
+ [59] scales_1.1.1                tidygraph_1.2.0            
+ [61] parallel_4.1.0              yaml_2.2.1                 
+ [63] memoise_2.0.0               gridExtra_2.3              
+ [65] sass_0.4.0                  stringi_1.6.2              
+ [67] RSQLite_2.2.7               highr_0.9                  
+ [69] ScaledMatrix_1.1.0          permute_0.9-5              
+ [71] tidytree_0.3.4              filelock_1.0.2             
+ [73] BiocParallel_1.27.1         rlang_0.4.11               
+ [75] pkgconfig_2.0.3             bitops_1.0-7               
+ [77] evaluate_0.14               lattice_0.20-44            
+ [79] purrr_0.3.4                 labeling_0.4.2             
+ [81] patchwork_1.1.1             treeio_1.17.2              
+ [83] CodeDepends_0.6.5           bit_4.0.4                  
+ [85] tidyselect_1.1.1            plyr_1.8.6                 
+ [87] magrittr_2.0.1              bookdown_0.22              
+ [89] R6_2.5.0                    generics_0.1.0             
+ [91] DelayedArray_0.19.1         DBI_1.1.1                  
+ [93] withr_2.4.2                 mgcv_1.8-36                
+ [95] pillar_1.6.1                RCurl_1.98-1.3             
+ [97] tibble_3.1.2                dir.expiry_1.1.0           
+ [99] crayon_1.4.1                utf8_1.2.1                 
+[101] rmarkdown_2.9               viridis_0.6.1              
+[103] grid_4.1.0                  blob_1.2.1                 
+[105] vegan_2.5-7                 digest_0.6.27              
+[107] tidyr_1.1.3                 munsell_0.5.0              
+[109] DirichletMultinomial_1.35.0 beeswarm_0.4.0             
+[111] viridisLite_0.4.0           vipor_0.4.5                
+[113] bslib_0.2.5.1              
 ```
 </div>

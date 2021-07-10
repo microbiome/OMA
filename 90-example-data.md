@@ -131,7 +131,7 @@ loaded via a namespace (and not attached):
 [27] rsvd_1.0.5                  gtable_0.3.0               
 [29] glue_1.4.2                  GenomeInfoDbData_1.2.6     
 [31] reshape2_1.4.4              dplyr_1.0.7                
-[33] Rcpp_1.0.6                  jquerylib_0.1.4            
+[33] Rcpp_1.0.7                  jquerylib_0.1.4            
 [35] vctrs_0.3.8                 ape_5.5                    
 [37] nlme_3.1-152                DECIPHER_2.21.0            
 [39] DelayedMatrixStats_1.15.0   xfun_0.24                  

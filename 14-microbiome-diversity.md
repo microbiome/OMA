@@ -560,7 +560,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2737
+## [1] 0.2719
 ```
 
 In this case, the community composition is not significantly different
@@ -693,7 +693,7 @@ loaded via a namespace (and not attached):
  [33] DelayedArray_0.19.1           car_3.0-11                   
  [35] BiocSingular_1.9.1            abind_1.4-5                  
  [37] scales_1.1.1                  DBI_1.1.1                    
- [39] rstatix_0.7.0                 Rcpp_1.0.6                   
+ [39] rstatix_0.7.0                 Rcpp_1.0.7                   
  [41] xtable_1.8-4                  viridisLite_0.4.0            
  [43] decontam_1.13.0               tidytree_0.3.4               
  [45] foreign_0.8-81                bit_4.0.4                    

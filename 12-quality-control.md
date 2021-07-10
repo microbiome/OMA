@@ -251,7 +251,7 @@ loaded via a namespace (and not attached):
  [25] tools_4.1.0                 rsvd_1.0.5                 
  [27] gtable_0.3.0                glue_1.4.2                 
  [29] GenomeInfoDbData_1.2.6      reshape2_1.4.4             
- [31] dplyr_1.0.7                 Rcpp_1.0.6                 
+ [31] dplyr_1.0.7                 Rcpp_1.0.7                 
  [33] jquerylib_0.1.4             vctrs_0.3.8                
  [35] ape_5.5                     nlme_3.1-152               
  [37] DECIPHER_2.21.0             DelayedMatrixStats_1.15.0  
