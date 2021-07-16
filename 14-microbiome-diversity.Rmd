@@ -373,6 +373,78 @@ se <- runTSNE(se, name = "TSNE", exprs_values = "counts", ncomponents = 3)
 plotReducedDim(se, "TSNE", colour_by = "SampleType", ncomponents = c(1:3))
 ```
 
+### Visualizing the most dominant genus on PCoA
+
+In this section we try to visualize most dominant genus in the alcohol study dataset from [curatedMetagenomicData](https://bioconductor.org/packages/release/data/experiment/vignettes/curatedMetagenomicData/inst/doc/curatedMetagenomicData.html) on PCoA.
+
+```{r, message=FALSE, warning=FALSE}
+# Installing the package
+if (!require(curatedMetagenomicData)){
+  BiocManager::install("curatedMetagenomicData")  
+}
+```
+
+Retrieving data as a TreeSummarizedExperiment object.
+
+```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+library(DT)
+# Querying the data
+TreeSE <- sampleMetadata %>%
+    filter(age >= 18) %>%
+    filter(!is.na(alcohol)) %>%
+    filter(body_site == "stool") %>%
+    select(where(~ !all(is.na(.x)))) %>%
+    returnSamples("relative_abundance")
+TreeSE
+```
+
+Agglomerating the data at a Genus level and getting the dominant taxa per sample.
+
+```{r}
+TreeSE_Genus <- agglomerateByRank(TreeSE, rank="Genus")
+TreeSE_Genus <- addPerSampleDominantTaxa(TreeSE_Genus,abund_values="relative_abundance", name = "dominant_taxa")
+```
+
+Performing PCoA with Bray-Curtis dissimilarity.
+
+```{r}
+rel_abund_assay <- assays(TreeSE_Genus)$relative_abundance
+# Computing Bray-Curtis
+bray_curtis <- vegan::vegdist(t(rel_abund_assay), method = "bray")
+
+# Performing PCoA
+bray_curtis_pcoa <- ecodist::pco(bray_curtis)
+
+# Storing results in the TreeSummarizedExperiment object
+reducedDim(TreeSE_Genus, "PCoA" )<- cbind(bray_curtis_pcoa$vectors[,1],
+                                         bray_curtis_pcoa$vectors[,2])
+
+# Getting the variance explained by the two first dimensions
+var_explained <- bray_curtis_pcoa$values[1:2]
+```
+
+Getting top taxa and visualizing the abundance on PCoA.
+
+```{r}
+library(scater)
+# Getting the 6 top taxa
+top_taxa <- getTopTaxa(TreeSE_Genus,top = 6, abund_values = "relative_abundance")
+
+# Naming all the rest of non top-taxa as "Other"
+most_abundant <- lapply(colData(TreeSE_Genus)$dominant_taxa,
+                   function(x){if (x %in% top_taxa) {x} else {"Other"}})
+
+# Storing the pervious results as a new column whithin colData
+colData(TreeSE_Genus)$most_abundant <- as.character(most_abundant)
+
+# Visualization
+plot <-plotReducedDim(TreeSE_Genus,"PCoA", colour_by = "most_abundant") +
+  scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"))+
+  labs(x=paste("PCoA 1 (",round(var_explained[1],1),"%)"),
+       y=paste("PCoA 2 (",round(var_explained[2],1),"%)"))
+plot
+```
 
 
 ## Community comparisons [TODO combine with the material above for simplicity?]
