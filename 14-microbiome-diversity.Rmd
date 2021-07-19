@@ -375,7 +375,8 @@ plotReducedDim(se, "TSNE", colour_by = "SampleType", ncomponents = c(1:3))
 
 ### Visualizing the most dominant genus on PCoA
 
-In this section we try to visualize most dominant genus in the alcohol study dataset from [curatedMetagenomicData](https://bioconductor.org/packages/release/data/experiment/vignettes/curatedMetagenomicData/inst/doc/curatedMetagenomicData.html) on PCoA.
+In this section we visualize most dominant genus in the alcohol study dataset from [curatedMetagenomicData](https://bioconductor.org/packages/release/data/experiment/vignettes/curatedMetagenomicData/inst/doc/curatedMetagenomicData.html) on PCoA.
+A similar visualization has been used in [Taxonomic signatures of cause-specific mortality risk in human gut microbiome](https://www.nature.com/articles/s41467-021-22962-y), Salosensaari et al. (2021).
 
 ```{r, message=FALSE, warning=FALSE}
 # Installing the package
@@ -391,64 +392,53 @@ library(curatedMetagenomicData)
 library(dplyr)
 library(DT)
 # Querying the data
-TreeSE <- sampleMetadata %>%
-    filter(age >= 18) %>%
-    filter(!is.na(alcohol)) %>%
-    filter(body_site == "stool") %>%
-    select(where(~ !all(is.na(.x)))) %>%
+tse <- sampleMetadata %>%
+    filter(age >= 18) %>% # taking only data of age 18 or above
+    filter(!is.na(alcohol)) %>% # excluding missing values
     returnSamples("relative_abundance")
-TreeSE
+tse
 ```
 
 Agglomerating the data at a Genus level and getting the dominant taxa per sample.
 
 ```{r}
-TreeSE_Genus <- agglomerateByRank(TreeSE, rank="Genus")
-TreeSE_Genus <- addPerSampleDominantTaxa(TreeSE_Genus,abund_values="relative_abundance", name = "dominant_taxa")
+tse_Genus <- agglomerateByRank(tse, rank="Genus")
+tse_Genus <- addPerSampleDominantTaxa(tse_Genus,abund_values="relative_abundance", name = "dominant_taxa")
 ```
 
 Performing PCoA with Bray-Curtis dissimilarity.
-
 ```{r}
-rel_abund_assay <- assays(TreeSE_Genus)$relative_abundance
-# Computing Bray-Curtis
-bray_curtis <- vegan::vegdist(t(rel_abund_assay), method = "bray")
-
-# Performing PCoA
-bray_curtis_pcoa <- ecodist::pco(bray_curtis)
-
-# Storing results in the TreeSummarizedExperiment object
-reducedDim(TreeSE_Genus, "PCoA" )<- cbind(bray_curtis_pcoa$vectors[,1],
-                                         bray_curtis_pcoa$vectors[,2])
-
-# Getting the variance explained by the two first dimensions
-var_explained <- bray_curtis_pcoa$values[1:2]
+tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist,
+              name = "PCoA_BC", exprs_values = "relative_abundance")
 ```
 
 Getting top taxa and visualizing the abundance on PCoA.
 
 ```{r}
-library(scater)
 # Getting the 6 top taxa
-top_taxa <- getTopTaxa(TreeSE_Genus,top = 6, abund_values = "relative_abundance")
+top_taxa <- getTopTaxa(tse_Genus,top = 6, abund_values = "relative_abundance")
 
 # Naming all the rest of non top-taxa as "Other"
-most_abundant <- lapply(colData(TreeSE_Genus)$dominant_taxa,
+most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
                    function(x){if (x %in% top_taxa) {x} else {"Other"}})
 
-# Storing the pervious results as a new column whithin colData
-colData(TreeSE_Genus)$most_abundant <- as.character(most_abundant)
+# Storing the previous results as a new column within colData
+colData(tse_Genus)$most_abundant <- as.character(most_abundant)
 
 # Calculating percentage of the most abundant
 most_abundant_freq <- table(as.character(most_abundant))
 most_abundant_percent <- round(most_abundant_freq/sum(most_abundant_freq)*100, 1)
 
+# Retrieving the explained variance
+e <- attr(reducedDim(tse_Genus, "PCoA_BC"), "eig");
+var_explained <- e/sum(e[e>0])*100
+
 # Visualization
-plot <-plotReducedDim(TreeSE_Genus,"PCoA", colour_by = "most_abundant") +
+plot <-plotReducedDim(tse_Genus,"PCoA_BC", colour_by = "most_abundant") +
   scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
                       labels=paste0(names(most_abundant_percent),"(",most_abundant_percent,"%)"))+
-  labs(x=paste("PCoA 1 (",round(var_explained[1],1),"%)"),
-       y=paste("PCoA 2 (",round(var_explained[2],1),"%)"),
+  labs(x=paste("PC 1 (",round(var_explained[1],1),"%)"),
+       y=paste("PC 2 (",round(var_explained[2],1),"%)"),
        color="")
 plot
 ```
@@ -456,26 +446,26 @@ plot
 Similarly lets visualize and compare the alcohol sub-polulation.
 ```{r}
 # Calculating the frequencies and percentages for both categories
-freq_yes <- table(as.character(most_abundant[colData(TreeSE_Genus)$alcohol=="yes"]))
-freq_no <- table(as.character(most_abundant[colData(TreeSE_Genus)$alcohol=="no"]))
+freq_yes <- table(as.character(most_abundant[colData(tse_Genus)$alcohol=="yes"]))
+freq_no <- table(as.character(most_abundant[colData(tse_Genus)$alcohol=="no"]))
 percent_yes <- round(freq_yes/sum(freq_yes)*100, 1)
 percent_no <- round(freq_no/sum(freq_no)*100, 1)
 
 # Visualization
-plotReducedDim(TreeSE_Genus[,colData(TreeSE_Genus)$alcohol=="yes"],
-                          "PCoA", colour_by = "most_abundant") +
+plotReducedDim(tse_Genus[,colData(tse_Genus)$alcohol=="yes"],
+                          "PCoA_BC", colour_by = "most_abundant") +
   scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
                       labels=paste0(names(percent_yes),"(",percent_yes,"%)"))+
-  labs(x=paste("PCoA 1 (",round(var_explained[1],1),"%)"),
-       y=paste("PCoA 2 (",round(var_explained[2],1),"%)"),
+  labs(x=paste("PC 1 (",round(var_explained[1],1),"%)"),
+       y=paste("PC 2 (",round(var_explained[2],1),"%)"),
        title = "alcohol = yes", color="")
 
-plotReducedDim(TreeSE_Genus[,colData(TreeSE_Genus)$alcohol=="no"],
-                          "PCoA", colour_by = "most_abundant") +
+plotReducedDim(tse_Genus[,colData(tse_Genus)$alcohol=="no"],
+                          "PCoA_BC", colour_by = "most_abundant") +
   scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
                       labels=paste0(names(percent_no),"(",percent_no,"%)"))+
-  labs(x=paste("PCoA 1 (",round(var_explained[1],1),"%)"),
-       y=paste("PCoA 2 (",round(var_explained[2],1),"%)"),
+  labs(x=paste("PC 1 (",round(var_explained[1],1),"%)"),
+       y=paste("PC 2 (",round(var_explained[2],1),"%)"),
        title = "alcohol = no", color="")
 ```
 
