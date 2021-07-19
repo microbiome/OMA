@@ -225,7 +225,7 @@ attached base packages:
 
 other attached packages:
  [1] scater_1.21.2                  ggplot2_3.3.5                 
- [3] scuttle_1.3.0                  mia_1.1.6                     
+ [3] scuttle_1.3.0                  mia_1.1.7                     
  [5] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.1             
  [7] XVector_0.33.0                 SingleCellExperiment_1.15.1   
  [9] SummarizedExperiment_1.23.1    Biobase_2.53.0                
@@ -262,10 +262,10 @@ loaded via a namespace (and not attached):
  [47] scales_1.1.1                parallel_4.1.0             
  [49] yaml_2.2.1                  memoise_2.0.0              
  [51] gridExtra_2.3               sass_0.4.0                 
- [53] stringi_1.6.2               RSQLite_2.2.7              
+ [53] stringi_1.7.2               RSQLite_2.2.7              
  [55] highr_0.9                   ScaledMatrix_1.1.0         
  [57] tidytree_0.3.4              permute_0.9-5              
- [59] filelock_1.0.2              BiocParallel_1.27.1        
+ [59] filelock_1.0.2              BiocParallel_1.27.2        
  [61] rlang_0.4.11                pkgconfig_2.0.3            
  [63] bitops_1.0-7                evaluate_0.14              
  [65] lattice_0.20-44             purrr_0.3.4                

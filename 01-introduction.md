@@ -745,6 +745,61 @@ molten_se
 
 Some wrapping up...
 
+## Additional Reading
+
+### Lecture slides
+
+Introduction to microbiome data science [lecture slides](https://github.com/microbiome/course_2021_radboud/tree/main/slides).
+
+### R programming resources
+
+ * R programming basics: [Base R](https://www.rstudio.com/wp-content/uploads/2016/10/r-cheat-sheet-3.pdf)
+ * Basics of R programming: [Base R](https://raw.githubusercontent.com/rstudio/cheatsheets/master/base-r.pdf)
+ * [R cheat sheets](https://www.rstudio.com/resources/cheatsheets/)
+ * R visualization with [ggplot2](https://www.rstudio.com/wp-content/uploads/2016/11/ggplot2-cheatsheet-2.1.pdf) 
+ * [R graphics cookbook](http://www.cookbook-r.com/Graphs/)
+
+Rmarkdown
+
+* [Rmarkdown tips](https://rmarkdown.rstudio.com/)
+
+
+RStudio
+
+* [RStudio cheat sheet](https://www.rstudio.com/wp-content/uploads/2016/01/rstudio-IDE-cheatsheet.pdf) 
+
+### Resources for TreeSummarizedExperiment
+
+ * SingleCellExperiment
+   + [Publication](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html)
+   + [Project page](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html)
+ * SummarizedExperiment
+   + [Publication](https://bioconductor.org/packages/release/bioc/vignettes/SummarizedExperiment/inst/doc/SummarizedExperiment.html)
+   + [Project page](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)
+ * TreeSummarizedExperiment
+   + [Publication](https://f1000research.com/articles/9-1246)
+   + [Project page](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html)
+   
+### Resources for phyloseq
+
+ * [List of R tools for microbiome analysis](https://microsud.github.io/Tools-Microbiome-Analysis/)
+ * [phyloseq](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0061217)
+ * [microbiome tutorial](http://microbiome.github.io/tutorials/)
+ * [microbiomeutilities](https://microsud.github.io/microbiomeutilities/)
+ * Bioconductor Workflow for Microbiome Data Analysis: from raw reads to community analyses ([Callahan et al. F1000, 2016](https://f1000research.com/articles/5-1492/v2)).
+
+
+
+
+### Further reading
+
+
+* [Data Analysis and Visualization in R for Ecologists](https://datacarpentry.org/R-ecology-lesson/) by Data Carpentry
+
+* [Modern Statistics for Modern Biology. Holmes & Huber (2018)](http://web.stanford.edu/class/bios221/book/) for background in statistical analysis
+
+* [Microbiome Data Science. Shetty & Lahti, 2019](https://openresearchlabs.github.io/publications/papers/2018-Shetty-Lahti-MDS.pdf)
+
 ## Session Info {-}
 
 <button class="rebook-collapse">View session info</button>
@@ -770,7 +825,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.1.6                      TreeSummarizedExperiment_2.1.3
+ [1] mia_1.1.7                      TreeSummarizedExperiment_2.1.3
  [3] Biostrings_2.61.1              XVector_0.33.0                
  [5] SingleCellExperiment_1.15.1    SummarizedExperiment_1.23.1   
  [7] Biobase_2.53.0                 GenomicRanges_1.45.0          
@@ -811,11 +866,11 @@ loaded via a namespace (and not attached):
  [57] parallel_4.1.0              rhdf5_2.37.0               
  [59] yaml_2.2.1                  memoise_2.0.0              
  [61] gridExtra_2.3               ggplot2_3.3.5              
- [63] sass_0.4.0                  stringi_1.6.2              
+ [63] sass_0.4.0                  stringi_1.7.2              
  [65] RSQLite_2.2.7               foreach_1.5.1              
  [67] ScaledMatrix_1.1.0          tidytree_0.3.4             
  [69] permute_0.9-5               filelock_1.0.2             
- [71] BiocParallel_1.27.1         rlang_0.4.11               
+ [71] BiocParallel_1.27.2         rlang_0.4.11               
  [73] pkgconfig_2.0.3             bitops_1.0-7               
  [75] evaluate_0.14               lattice_0.20-44            
  [77] Rhdf5lib_1.15.2             purrr_0.3.4                

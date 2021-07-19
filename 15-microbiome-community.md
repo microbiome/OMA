@@ -39,16 +39,6 @@ document.addEventListener("click", function (event) {
 ## Loading required package: ecodist
 ```
 
-```
-## Warning in library(package, lib.loc = lib.loc, character.only = TRUE,
-## logical.return = TRUE, : there is no package called 'ecodist'
-```
-
-```
-## Installing package into '/__w/_temp/Library'
-## (as 'lib' is unspecified)
-```
-
 
 ```r
 library(mia)
@@ -154,7 +144,7 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7752 BIC: 8274 AIC: 8103 
+## Laplace: 7792 BIC: 8357 AIC: 8187 
 ## 
 ## [[5]]
 ## class: DMN 
@@ -166,13 +156,13 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: NaN BIC: NaN AIC: NaN 
+## Laplace: 7943 BIC: 8813 AIC: 8557 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8099 BIC: 9099 AIC: 8800
+## Laplace: 8011 BIC: 9035 AIC: 8736
 ```
 
 
@@ -216,15 +206,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.14   901.2 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.17   717.0  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.23   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
-## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
+## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
+## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -238,7 +228,7 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 ```
 ##       pi theta
 ## 1 0.5385 20.58
-## 2 0.4615 15.28
+## 2 0.4615 15.32
 ```
 
 
@@ -252,12 +242,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.058e-17
-## CC1     1.000e+00 3.916e-22
-## SV1     1.000e+00 1.957e-12
-## M31Fcsw 7.879e-26 1.000e+00
-## M11Fcsw 1.132e-16 1.000e+00
-## M31Plmr 1.123e-13 1.000e+00
+## CL3     1.000e+00 4.551e-17
+## CC1     1.000e+00 3.482e-22
+## SV1     1.000e+00 1.733e-12
+## M31Fcsw 7.456e-26 1.000e+00
+## M11Fcsw 1.094e-16 1.000e+00
+## M31Plmr 1.150e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -269,12 +259,12 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 
 ```
 ##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30380 0.1354658
-## Phylum:Euryarchaeota  0.23114 0.1468635
-## Phylum:Actinobacteria 1.21373 1.0600310
-## Phylum:Spirochaetes   0.21392 0.1318418
-## Phylum:MVP-15         0.02982 0.0007677
-## Phylum:Proteobacteria 6.84478 1.8154540
+## Phylum:Crenarchaeota  0.30380 0.1354015
+## Phylum:Euryarchaeota  0.23113 0.1468854
+## Phylum:Actinobacteria 1.21377 1.0580907
+## Phylum:Spirochaetes   0.21392 0.1318034
+## Phylum:MVP-15         0.02983 0.0007693
+## Phylum:Proteobacteria 6.84265 1.8117561
 ```
 Get the assignment probabilities
 
@@ -362,7 +352,7 @@ attached base packages:
 
 other attached packages:
  [1] miaViz_1.1.1                   ggraph_2.0.5                  
- [3] ggplot2_3.3.5                  mia_1.1.6                     
+ [3] ggplot2_3.3.5                  mia_1.1.7                     
  [5] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.1             
  [7] XVector_0.33.0                 SingleCellExperiment_1.15.1   
  [9] SummarizedExperiment_1.23.1    Biobase_2.53.0                
@@ -405,11 +395,11 @@ loaded via a namespace (and not attached):
  [59] scales_1.1.1                tidygraph_1.2.0            
  [61] parallel_4.1.0              yaml_2.2.1                 
  [63] memoise_2.0.0               gridExtra_2.3              
- [65] sass_0.4.0                  stringi_1.6.2              
+ [65] sass_0.4.0                  stringi_1.7.2              
  [67] RSQLite_2.2.7               highr_0.9                  
  [69] ScaledMatrix_1.1.0          permute_0.9-5              
  [71] tidytree_0.3.4              filelock_1.0.2             
- [73] BiocParallel_1.27.1         rlang_0.4.11               
+ [73] BiocParallel_1.27.2         rlang_0.4.11               
  [75] pkgconfig_2.0.3             bitops_1.0-7               
  [77] evaluate_0.14               lattice_0.20-44            
  [79] purrr_0.3.4                 labeling_0.4.2             

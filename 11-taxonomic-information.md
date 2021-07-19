@@ -435,7 +435,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.1.6                      TreeSummarizedExperiment_2.1.3
+ [1] mia_1.1.7                      TreeSummarizedExperiment_2.1.3
  [3] Biostrings_2.61.1              XVector_0.33.0                
  [5] SingleCellExperiment_1.15.1    SummarizedExperiment_1.23.1   
  [7] Biobase_2.53.0                 GenomicRanges_1.45.0          
@@ -472,10 +472,10 @@ loaded via a namespace (and not attached):
 [49] parallel_4.1.0              yaml_2.2.1                 
 [51] memoise_2.0.0               gridExtra_2.3              
 [53] ggplot2_3.3.5               sass_0.4.0                 
-[55] stringi_1.6.2               RSQLite_2.2.7              
+[55] stringi_1.7.2               RSQLite_2.2.7              
 [57] ScaledMatrix_1.1.0          tidytree_0.3.4             
 [59] permute_0.9-5               filelock_1.0.2             
-[61] BiocParallel_1.27.1         rlang_0.4.11               
+[61] BiocParallel_1.27.2         rlang_0.4.11               
 [63] pkgconfig_2.0.3             bitops_1.0-7               
 [65] evaluate_0.14               lattice_0.20-44            
 [67] purrr_0.3.4                 treeio_1.17.2              
