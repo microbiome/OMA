@@ -144,25 +144,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7792 BIC: 8357 AIC: 8187 
+## Laplace: 7750 BIC: 8327 AIC: 8156 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7849 BIC: 8554 AIC: 8341 
+## Laplace: 7844 BIC: 8548 AIC: 8335 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7943 BIC: 8813 AIC: 8557 
+## Laplace: 7942 BIC: 8822 AIC: 8566 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8011 BIC: 9035 AIC: 8736
+## Laplace: 7998 BIC: 9014 AIC: 8715
 ```
 
 
@@ -227,8 +227,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.32
+## 1 0.5385 20.60
+## 2 0.4615 15.28
 ```
 
 
@@ -242,12 +242,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 4.551e-17
-## CC1     1.000e+00 3.482e-22
-## SV1     1.000e+00 1.733e-12
-## M31Fcsw 7.456e-26 1.000e+00
-## M11Fcsw 1.094e-16 1.000e+00
-## M31Plmr 1.150e-13 1.000e+00
+## CL3     1.000e+00 5.060e-17
+## CC1     1.000e+00 3.874e-22
+## SV1     1.000e+00 2.036e-12
+## M31Fcsw 7.321e-26 1.000e+00
+## M11Fcsw 1.062e-16 1.000e+00
+## M31Plmr 9.979e-14 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -258,13 +258,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30380 0.1354015
-## Phylum:Euryarchaeota  0.23113 0.1468854
-## Phylum:Actinobacteria 1.21377 1.0580907
-## Phylum:Spirochaetes   0.21392 0.1318034
-## Phylum:MVP-15         0.02983 0.0007693
-## Phylum:Proteobacteria 6.84265 1.8117561
+##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354655
+## Phylum:Euryarchaeota  0.2314 0.1468635
+## Phylum:Actinobacteria 1.2106 1.0600006
+## Phylum:Spirochaetes   0.2141 0.1318416
+## Phylum:MVP-15         0.0299 0.0007679
+## Phylum:Proteobacteria 6.8415 1.8154726
 ```
 Get the assignment probabilities
 

@@ -493,7 +493,138 @@ plotReducedDim(se, "TSNE", colour_by = "SampleType", ncomponents = c(1:3))
 <p class="caption">(\#fig:plot-tsne)t-SNE plot on the GlobalPatterns data set containing sample from different sources.</p>
 </div>
 
+### Visualizing the most dominant genus on PCoA
 
+In this section we visualize most dominant genus in the alcohol study dataset from [curatedMetagenomicData](https://bioconductor.org/packages/release/data/experiment/vignettes/curatedMetagenomicData/inst/doc/curatedMetagenomicData.html) on PCoA.
+A similar visualization has been used in [Taxonomic signatures of cause-specific mortality risk in human gut microbiome](https://www.nature.com/articles/s41467-021-22962-y), Salosensaari et al. (2021).
+
+
+```r
+# Installing the package
+if (!require(curatedMetagenomicData)){
+  BiocManager::install("curatedMetagenomicData")  
+}
+```
+
+Retrieving data as a TreeSummarizedExperiment object.
+
+
+```r
+library(curatedMetagenomicData)
+library(dplyr)
+library(DT)
+# Querying the data
+tse <- sampleMetadata %>%
+    filter(age >= 18) %>% # taking only data of age 18 or above
+    filter(!is.na(alcohol)) %>% # excluding missing values
+    returnSamples("relative_abundance")
+tse
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 1057 780 
+## metadata(0):
+## assays(1): relative_abundance
+## rownames(1057):
+##   k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Propionibacteriales|f__Propionibacteriaceae|g__Cutibacterium|s__Cutibacterium_acnes
+##   k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Klebsiella|s__Klebsiella_pneumoniae
+##   ...
+##   k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Anaerostipes|s__Anaerostipes_sp_494a
+##   k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Barnesiellaceae|g__Barnesiella|s__Barnesiella_viscericola
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(780): WBE003 WBE004 ... YSZC12003_37879 YSZC12003_37880
+## colData names(129): study_name subject_id ... ALT eGFR
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (1057 rows)
+## rowTree: 1 phylo tree(s) (10430 leaves)
+## colLinks: NULL
+## colTree: NULL
+```
+
+Agglomerating the data at a Genus level and getting the dominant taxa per sample.
+
+
+```r
+tse_Genus <- agglomerateByRank(tse, rank="Genus")
+tse_Genus <- addPerSampleDominantTaxa(tse_Genus,abund_values="relative_abundance", name = "dominant_taxa")
+```
+
+Performing PCoA with Bray-Curtis dissimilarity.
+
+```r
+tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist,
+              name = "PCoA_BC", exprs_values = "relative_abundance")
+```
+
+Getting top taxa and visualizing the abundance on PCoA.
+
+
+```r
+# Getting the 6 top taxa
+top_taxa <- getTopTaxa(tse_Genus,top = 6, abund_values = "relative_abundance")
+
+# Naming all the rest of non top-taxa as "Other"
+most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
+                   function(x){if (x %in% top_taxa) {x} else {"Other"}})
+
+# Storing the previous results as a new column within colData
+colData(tse_Genus)$most_abundant <- as.character(most_abundant)
+
+# Calculating percentage of the most abundant
+most_abundant_freq <- table(as.character(most_abundant))
+most_abundant_percent <- round(most_abundant_freq/sum(most_abundant_freq)*100, 1)
+
+# Retrieving the explained variance
+e <- attr(reducedDim(tse_Genus, "PCoA_BC"), "eig");
+var_explained <- e/sum(e[e>0])*100
+
+# Visualization
+plot <-plotReducedDim(tse_Genus,"PCoA_BC", colour_by = "most_abundant") +
+  scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
+                      labels=paste0(names(most_abundant_percent),"(",most_abundant_percent,"%)"))+
+  labs(x=paste("PC 1 (",round(var_explained[1],1),"%)"),
+       y=paste("PC 2 (",round(var_explained[2],1),"%)"),
+       color="")
+plot
+```
+
+<img src="14-microbiome-diversity_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+
+Similarly lets visualize and compare the alcohol sub-polulation.
+
+```r
+# Calculating the frequencies and percentages for both categories
+freq_yes <- table(as.character(most_abundant[colData(tse_Genus)$alcohol=="yes"]))
+freq_no <- table(as.character(most_abundant[colData(tse_Genus)$alcohol=="no"]))
+percent_yes <- round(freq_yes/sum(freq_yes)*100, 1)
+percent_no <- round(freq_no/sum(freq_no)*100, 1)
+
+# Visualization
+plotReducedDim(tse_Genus[,colData(tse_Genus)$alcohol=="yes"],
+                          "PCoA_BC", colour_by = "most_abundant") +
+  scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
+                      labels=paste0(names(percent_yes),"(",percent_yes,"%)"))+
+  labs(x=paste("PC 1 (",round(var_explained[1],1),"%)"),
+       y=paste("PC 2 (",round(var_explained[2],1),"%)"),
+       title = "alcohol = yes", color="")
+```
+
+<img src="14-microbiome-diversity_files/figure-html/unnamed-chunk-11-1.png" width="672" />
+
+```r
+plotReducedDim(tse_Genus[,colData(tse_Genus)$alcohol=="no"],
+                          "PCoA_BC", colour_by = "most_abundant") +
+  scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
+                      labels=paste0(names(percent_no),"(",percent_no,"%)"))+
+  labs(x=paste("PC 1 (",round(var_explained[1],1),"%)"),
+       y=paste("PC 2 (",round(var_explained[2],1),"%)"),
+       title = "alcohol = no", color="")
+```
+
+<img src="14-microbiome-diversity_files/figure-html/unnamed-chunk-11-2.png" width="672" />
 
 ## Community comparisons [TODO combine with the material above for simplicity?]
 
@@ -528,7 +659,7 @@ se.lahti <- runNMDS(se.lahti, FUN = vegan::vegdist, name = "BC", nmdsFUN = "mono
 plotReducedDim(se.lahti, "BC", colour_by = "group")
 ```
 
-<img src="14-microbiome-diversity_files/figure-html/unnamed-chunk-8-1.png" width="672" />
+<img src="14-microbiome-diversity_files/figure-html/unnamed-chunk-14-1.png" width="672" />
 
 No clear difference between the groups can be visually observed.
 
@@ -560,7 +691,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2772
+## [1] 0.2748
 ```
 
 In this case, the community composition is not significantly different
@@ -661,17 +792,19 @@ attached base packages:
 
 other attached packages:
  [1] microbiomeDataSets_1.1.0       MultiAssayExperiment_1.19.1   
- [3] vegan_2.5-7                    lattice_0.20-44               
- [5] permute_0.9-5                  scater_1.21.2                 
- [7] ggplot2_3.3.5                  scuttle_1.3.0                 
- [9] mia_1.1.7                      TreeSummarizedExperiment_2.1.3
-[11] Biostrings_2.61.1              XVector_0.33.0                
-[13] SingleCellExperiment_1.15.1    SummarizedExperiment_1.23.1   
-[15] Biobase_2.53.0                 GenomicRanges_1.45.0          
-[17] GenomeInfoDb_1.29.3            IRanges_2.27.0                
-[19] S4Vectors_0.31.0               BiocGenerics_0.39.1           
-[21] MatrixGenerics_1.5.1           matrixStats_0.59.0            
-[23] BiocStyle_2.21.3               rebook_1.3.0                  
+ [3] DT_0.18                        dplyr_1.0.7                   
+ [5] curatedMetagenomicData_3.1.1   vegan_2.5-7                   
+ [7] lattice_0.20-44                permute_0.9-5                 
+ [9] scater_1.21.2                  ggplot2_3.3.5                 
+[11] scuttle_1.3.0                  mia_1.1.7                     
+[13] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.1             
+[15] XVector_0.33.0                 SingleCellExperiment_1.15.1   
+[17] SummarizedExperiment_1.23.1    Biobase_2.53.0                
+[19] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
+[21] IRanges_2.27.0                 S4Vectors_0.31.0              
+[23] BiocGenerics_0.39.1            MatrixGenerics_1.5.1          
+[25] matrixStats_0.59.0             BiocStyle_2.21.3              
+[27] rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
   [1] readxl_1.3.1                  backports_1.2.1              
@@ -685,19 +818,19 @@ loaded via a namespace (and not attached):
  [17] DECIPHER_2.21.0               openxlsx_4.2.4               
  [19] colorspace_2.0-2              rappdirs_0.3.3               
  [21] blob_1.2.1                    haven_2.4.1                  
- [23] xfun_0.24                     dplyr_1.0.7                  
- [25] crayon_1.4.1                  RCurl_1.98-1.3               
- [27] jsonlite_1.7.2                graph_1.71.2                 
- [29] ape_5.5                       glue_1.4.2                   
- [31] gtable_0.3.0                  zlibbioc_1.39.0              
- [33] DelayedArray_0.19.1           car_3.0-11                   
- [35] BiocSingular_1.9.1            abind_1.4-5                  
- [37] scales_1.1.1                  DBI_1.1.1                    
- [39] rstatix_0.7.0                 Rcpp_1.0.7                   
- [41] xtable_1.8-4                  viridisLite_0.4.0            
- [43] decontam_1.13.0               tidytree_0.3.4               
- [45] foreign_0.8-81                bit_4.0.4                    
- [47] rsvd_1.0.5                    httr_1.4.2                   
+ [23] xfun_0.24                     crayon_1.4.1                 
+ [25] RCurl_1.98-1.3                jsonlite_1.7.2               
+ [27] graph_1.71.2                  ape_5.5                      
+ [29] glue_1.4.2                    gtable_0.3.0                 
+ [31] zlibbioc_1.39.0               DelayedArray_0.19.1          
+ [33] car_3.0-11                    BiocSingular_1.9.1           
+ [35] abind_1.4-5                   scales_1.1.1                 
+ [37] DBI_1.1.1                     rstatix_0.7.0                
+ [39] Rcpp_1.0.7                    xtable_1.8-4                 
+ [41] viridisLite_0.4.0             decontam_1.13.0              
+ [43] tidytree_0.3.4                foreign_0.8-81               
+ [45] bit_4.0.4                     rsvd_1.0.5                   
+ [47] htmlwidgets_1.5.3             httr_1.4.2                   
  [49] dir.expiry_1.1.0              ellipsis_0.3.2               
  [51] pkgconfig_2.0.3               XML_3.99-0.6                 
  [53] farver_2.1.0                  dbplyr_2.1.1                 
