@@ -439,14 +439,45 @@ most_abundant <- lapply(colData(TreeSE_Genus)$dominant_taxa,
 # Storing the pervious results as a new column whithin colData
 colData(TreeSE_Genus)$most_abundant <- as.character(most_abundant)
 
+# Calculating percentage of the most abundant
+most_abundant_freq <- table(as.character(most_abundant))
+most_abundant_percent <- round(most_abundant_freq/sum(most_abundant_freq)*100, 1)
+
 # Visualization
 plot <-plotReducedDim(TreeSE_Genus,"PCoA", colour_by = "most_abundant") +
-  scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"))+
+  scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
+                      labels=paste0(names(most_abundant_percent),"(",most_abundant_percent,"%)"))+
   labs(x=paste("PCoA 1 (",round(var_explained[1],1),"%)"),
-       y=paste("PCoA 2 (",round(var_explained[2],1),"%)"))
+       y=paste("PCoA 2 (",round(var_explained[2],1),"%)"),
+       color="")
 plot
 ```
 
+Similarly lets visualize and compare the alcohol sub-polulation.
+```{r}
+# Calculating the frequencies and percentages for both categories
+freq_yes <- table(as.character(most_abundant[colData(TreeSE_Genus)$alcohol=="yes"]))
+freq_no <- table(as.character(most_abundant[colData(TreeSE_Genus)$alcohol=="no"]))
+percent_yes <- round(freq_yes/sum(freq_yes)*100, 1)
+percent_no <- round(freq_no/sum(freq_no)*100, 1)
+
+# Visualization
+plotReducedDim(TreeSE_Genus[,colData(TreeSE_Genus)$alcohol=="yes"],
+                          "PCoA", colour_by = "most_abundant") +
+  scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
+                      labels=paste0(names(percent_yes),"(",percent_yes,"%)"))+
+  labs(x=paste("PCoA 1 (",round(var_explained[1],1),"%)"),
+       y=paste("PCoA 2 (",round(var_explained[2],1),"%)"),
+       title = "alcohol = yes", color="")
+
+plotReducedDim(TreeSE_Genus[,colData(TreeSE_Genus)$alcohol=="no"],
+                          "PCoA", colour_by = "most_abundant") +
+  scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
+                      labels=paste0(names(percent_no),"(",percent_no,"%)"))+
+  labs(x=paste("PCoA 1 (",round(var_explained[1],1),"%)"),
+       y=paste("PCoA 2 (",round(var_explained[2],1),"%)"),
+       title = "alcohol = no", color="")
+```
 
 ## Community comparisons [TODO combine with the material above for simplicity?]
 
