@@ -1,0 +1,121 @@
+## Community comparisons [TODO combine with the material above for simplicity?]
+
+
+A typical comparison of community composition starts with a visual
+comparison of the groups on a 2D ordination.
+
+Let us load an example data set:
+
+```{r, message=FALSE}
+library(microbiomeDataSets)
+se.lahti <- LahtiMData()
+```
+
+
+Then we estimate relative abundances and MDS ordination based on
+Bray-Curtis (BC) dissimilarity between the groups, and visualize the
+results.
+
+
+```{r}
+se.lahti <- relAbundanceCounts(se.lahti)
+se.lahti <- runNMDS(se.lahti, FUN = vegan::vegdist, name = "BC", nmdsFUN = "monoMDS",
+                    exprs_values = "relabundance",
+                    keep_dist = TRUE)
+```
+
+```{r}
+plotReducedDim(se.lahti, "BC", colour_by = "group")
+```
+
+No clear difference between the groups can be visually observed.
+
+
+### Testing differences in community composition between sample groups
+
+The permutational analysis of variance (PERMANOVA) [@Anderson2001] is
+a widely used non-parametric multivariate method that can be used to
+estimate the actual statistical significance of differences in the
+observed community composition between two groups of
+samples.
+
+PERMANOVA evaluates the hypothesis that the centroids and dispersion
+of the community are equivalent between the compared groups. A small
+p-value indicates that the compared groups have, on average, a
+different community composition.
+
+This method is implemented in the `vegan` package (function `adonis`).
+
+```{r}
+library(vegan)
+permanova <- vegan::adonis(t(assay(se.lahti,"relabundance")) ~ group,
+                           data = colData(se.lahti),
+                           permutations = 9999)
+
+# P-value
+print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
+```
+
+In this case, the community composition is not significantly different
+between the groups.
+
+Let us visualize the model coefficients for species that exhibit the
+largest differences between the groups. This gives some insights into
+how the groups tend to differ from each other in terms of community
+composition.
+
+
+```{r}
+coef <- coefficients(permanova)["group1",]
+top.coef <- sort(head(coef[rev(order(abs(coef)))],20))
+```
+
+
+
+
+```{r plot-top-coef-anova, fig.cap=""}
+ggplot(data.frame(x = top.coef,
+                  y = factor(names(top.coef),
+                                      unique(names(top.coef)))),
+        aes(x = x, y = y)) +
+    geom_bar(stat="identity") +
+    labs(x="",y="",title="Top Taxa") +
+    theme_bw()
+```
+
+In the above example, the largest differences between the two groups
+can be attributed to _Bacteroides intestinalis_ (elevated in the first
+group) and _Faecalibacterium prausnitzii_ (elevated in the second
+group), and many other co-varying species.
+
+
+
+### Checking the homogeneity condition 
+
+It is important to note that the application of PERMANOVA assumes
+homogeneous group dispersions (variances). This can be tested with the
+PERMDISP2 method [@Anderson2006].
+
+
+```{r}
+anova(vegan::betadisper(attr(reducedDim(se.lahti,"BC"),"dist"),
+                        colData(se.lahti)$group))
+```
+
+In our example, the groups have similar dispersion, and PERMANOVA is
+an appropriate choice for comparing community compositions.
+
+
+## Further reading
+
+In certain settings, beta diversities might be used to group samples without
+prior knowledge. For this we want to point to excellent resources on 
+[how to extract information from the clusters](http://bioconductor.org/books/release/OSCA/clustering.html).
+
+See also [community typing](15-microbiome-community.md).
+
+## Session Info {-}
+
+```{r sessionInfo, echo=FALSE, results='asis'}
+prettySessionInfo()
+```
