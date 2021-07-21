@@ -691,7 +691,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2748
+## [1] 0.2682
 ```
 
 In this case, the community composition is not significantly different
@@ -854,7 +854,7 @@ loaded via a namespace (and not attached):
  [89] beeswarm_0.4.0                filelock_1.0.2               
  [91] curl_4.3.2                    ggsignif_0.6.2               
  [93] treeio_1.17.2                 tibble_3.1.2                 
- [95] bslib_0.2.5.1                 stringi_1.7.2                
+ [95] bslib_0.2.5.1                 stringi_1.7.3                
  [97] highr_0.9                     forcats_0.5.1                
  [99] Matrix_1.3-4                  vctrs_0.3.8                  
 [101] pillar_1.6.1                  lifecycle_1.0.0              

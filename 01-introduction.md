@@ -847,7 +847,7 @@ loaded via a namespace (and not attached):
  [19] graph_1.71.2                BiocManager_1.30.16        
  [21] compiler_4.1.0              assertthat_0.2.1           
  [23] Matrix_1.3-4                fastmap_1.1.0              
- [25] lazyeval_0.2.2              cli_3.0.0                  
+ [25] lazyeval_0.2.2              cli_3.0.1                  
  [27] BiocSingular_1.9.1          htmltools_0.5.1.1          
  [29] tools_4.1.0                 igraph_1.2.6               
  [31] rsvd_1.0.5                  gtable_0.3.0               
@@ -866,7 +866,7 @@ loaded via a namespace (and not attached):
  [57] parallel_4.1.0              rhdf5_2.37.0               
  [59] yaml_2.2.1                  memoise_2.0.0              
  [61] gridExtra_2.3               ggplot2_3.3.5              
- [63] sass_0.4.0                  stringi_1.7.2              
+ [63] sass_0.4.0                  stringi_1.7.3              
  [65] RSQLite_2.2.7               foreach_1.5.1              
  [67] ScaledMatrix_1.1.0          tidytree_0.3.4             
  [69] permute_0.9-5               filelock_1.0.2             

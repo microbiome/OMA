@@ -51,6 +51,34 @@ tse <- GlobalPatterns
 
 Heatmaps
 
+### Composition barplot
+
+A typical way to visualize microbiome composition is by using composition barplot.
+In the following, relative abundance is calculated and top 5 taxa is retrieved for the
+Phylum rank. Thereafter, the barplot is visualized ordering rank by abundance values
+and samples by "Bacteroidetes":
+
+
+```r
+library(miaViz)
+# Computing relative abundance
+tse <- relAbundanceCounts(tse)
+
+# Getting top taxa on a Phylum level
+tse_phylum <- agglomerateByRank(tse, rank ="Phylum", onRankOnly=TRUE)
+top_taxa <- getTopTaxa(tse_phylum,top = 5, abund_values = "relabundance")
+
+# Renaming the "Phylum" rank to keep only top taxa and the rest to "Other"
+phylum_renamed <- lapply(rowData(tse)$Phylum,
+                   function(x){if (x %in% top_taxa) {x} else {"Other"}})
+rowData(tse)$Phylum <- as.character(phylum_renamed)
+
+# Visualizing the composition barplot, with samples order by "Bacteroidetes"
+plotAbundance(tse, abund_values="relabundance", rank = "Phylum",
+              order_rank_by="abund", order_sample_by = "Bacteroidetes")
+```
+
+<img src="15-microbiome-community_files/figure-html/unnamed-chunk-1-1.png" width="672" />
 
 ## Community typing
 
@@ -73,7 +101,7 @@ Let's cluster the data with DMM clustering.
 # Runs model and calculates the most likely number of clusters from 1 to 7.
 # Since this is a large dataset it takes long computational time.
 # For this reason we use only a subset of the data; agglomerated by Phylum as a rank.
-tse <- relAbundanceCounts(tse)
+tse <- GlobalPatterns
 tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
 ```
@@ -88,7 +116,7 @@ tse_dmn
 ## class: TreeSummarizedExperiment 
 ## dim: 67 26 
 ## metadata(1): DMN
-## assays(2): counts relabundance
+## assays(1): counts
 ## rownames(67): Phylum:Crenarchaeota Phylum:Euryarchaeota ...
 ##   Phylum:Synergistetes Phylum:SR1
 ## rowData names(7): Kingdom Phylum ... Genus Species
@@ -138,19 +166,19 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7690 BIC: 8076 AIC: 7948 
+## Laplace: 7689 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7750 BIC: 8327 AIC: 8156 
+## Laplace: 7751 BIC: 8274 AIC: 8103 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7844 BIC: 8548 AIC: 8335 
+## Laplace: 7854 BIC: 8553 AIC: 8340 
 ## 
 ## [[6]]
 ## class: DMN 
@@ -162,7 +190,7 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 7998 BIC: 9014 AIC: 8715
+## Laplace: NaN BIC: NaN AIC: NaN
 ```
 
 
@@ -174,7 +202,7 @@ library(miaViz)
 plotDMNFit(tse_dmn, type = "laplace")
 ```
 
-<img src="15-microbiome-community_files/figure-html/unnamed-chunk-4-1.png" width="672" />
+<img src="15-microbiome-community_files/figure-html/unnamed-chunk-5-1.png" width="672" />
 
 Return the model that has the best fit.
 
@@ -206,15 +234,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.23   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -227,7 +255,7 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.60
+## 1 0.5385 20.59
 ## 2 0.4615 15.28
 ```
 
@@ -242,12 +270,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.060e-17
-## CC1     1.000e+00 3.874e-22
-## SV1     1.000e+00 2.036e-12
-## M31Fcsw 7.321e-26 1.000e+00
-## M11Fcsw 1.062e-16 1.000e+00
-## M31Plmr 9.979e-14 1.000e+00
+## CL3     1.000e+00 4.972e-17
+## CC1     1.000e+00 3.800e-22
+## SV1     1.000e+00 2.013e-12
+## M31Fcsw 7.397e-26 1.000e+00
+## M11Fcsw 1.072e-16 1.000e+00
+## M31Plmr 9.954e-14 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -258,13 +286,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354655
-## Phylum:Euryarchaeota  0.2314 0.1468635
-## Phylum:Actinobacteria 1.2106 1.0600006
-## Phylum:Spirochaetes   0.2141 0.1318416
-## Phylum:MVP-15         0.0299 0.0007679
-## Phylum:Proteobacteria 6.8415 1.8154726
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30441 0.1354637
+## Phylum:Euryarchaeota  0.23141 0.1468593
+## Phylum:Actinobacteria 1.21032 1.0600251
+## Phylum:Spirochaetes   0.21408 0.1318401
+## Phylum:MVP-15         0.02988 0.0007626
+## Phylum:Proteobacteria 6.83954 1.8153719
 ```
 Get the assignment probabilities
 
@@ -323,7 +351,7 @@ euclidean_dmm_plot <- ggplot(data = euclidean_dmm_pcoa_df,
 euclidean_dmm_plot
 ```
 
-<img src="15-microbiome-community_files/figure-html/unnamed-chunk-12-1.png" width="672" />
+<img src="15-microbiome-community_files/figure-html/unnamed-chunk-13-1.png" width="672" />
 
 
 ## Session Info {-}
@@ -395,7 +423,7 @@ loaded via a namespace (and not attached):
  [59] scales_1.1.1                tidygraph_1.2.0            
  [61] parallel_4.1.0              yaml_2.2.1                 
  [63] memoise_2.0.0               gridExtra_2.3              
- [65] sass_0.4.0                  stringi_1.7.2              
+ [65] sass_0.4.0                  stringi_1.7.3              
  [67] RSQLite_2.2.7               highr_0.9                  
  [69] ScaledMatrix_1.1.0          permute_0.9-5              
  [71] tidytree_0.3.4              filelock_1.0.2             

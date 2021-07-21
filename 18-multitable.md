@@ -275,7 +275,7 @@ loaded via a namespace (and not attached):
 [49] parallel_4.1.0              yaml_2.2.1                 
 [51] memoise_2.0.0               gridExtra_2.3              
 [53] ggplot2_3.3.5               sass_0.4.0                 
-[55] stringi_1.7.2               RSQLite_2.2.7              
+[55] stringi_1.7.3               RSQLite_2.2.7              
 [57] ScaledMatrix_1.1.0          tidytree_0.3.4             
 [59] permute_0.9-5               filelock_1.0.2             
 [61] BiocParallel_1.27.2         rlang_0.4.11               

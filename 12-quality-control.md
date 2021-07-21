@@ -262,7 +262,7 @@ loaded via a namespace (and not attached):
  [47] scales_1.1.1                parallel_4.1.0             
  [49] yaml_2.2.1                  memoise_2.0.0              
  [51] gridExtra_2.3               sass_0.4.0                 
- [53] stringi_1.7.2               RSQLite_2.2.7              
+ [53] stringi_1.7.3               RSQLite_2.2.7              
  [55] highr_0.9                   ScaledMatrix_1.1.0         
  [57] tidytree_0.3.4              permute_0.9-5              
  [59] filelock_1.0.2              BiocParallel_1.27.2        

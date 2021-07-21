@@ -304,7 +304,7 @@ loaded via a namespace (and not attached):
  [57] scales_1.1.1                tidygraph_1.2.0            
  [59] parallel_4.1.0              yaml_2.2.1                 
  [61] memoise_2.0.0               gridExtra_2.3              
- [63] sass_0.4.0                  stringi_1.7.2              
+ [63] sass_0.4.0                  stringi_1.7.3              
  [65] RSQLite_2.2.7               highr_0.9                  
  [67] ScaledMatrix_1.1.0          tidytree_0.3.4             
  [69] permute_0.9-5               filelock_1.0.2             

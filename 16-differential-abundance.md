@@ -75,7 +75,7 @@ loaded via a namespace (and not attached):
 [13] yaml_2.2.1          digest_0.6.27       bookdown_0.22      
 [16] dir.expiry_1.1.0    BiocManager_1.30.16 codetools_0.2-18   
 [19] sass_0.4.0          evaluate_0.14       rmarkdown_2.9      
-[22] stringi_1.7.2       compiler_4.1.0      bslib_0.2.5.1      
+[22] stringi_1.7.3       compiler_4.1.0      bslib_0.2.5.1      
 [25] filelock_1.0.2      stats4_4.1.0        XML_3.99-0.6       
 [28] jsonlite_1.7.2     
 ```
