@@ -20,6 +20,31 @@ tse <- GlobalPatterns
 
 Heatmaps
 
+### Composition barplot
+
+A typical way to visualize microbiome composition is by using composition barplot.
+In the following, relative abundance is calculated and top 5 taxa is retrieved for the
+Phylum rank. Thereafter, the barplot is visualized ordering rank by abundance values
+and samples by "Bacteroidetes":
+
+```{r}
+library(miaViz)
+# Computing relative abundance
+tse <- relAbundanceCounts(tse)
+
+# Getting top taxa on a Phylum level
+tse_phylum <- agglomerateByRank(tse, rank ="Phylum", onRankOnly=TRUE)
+top_taxa <- getTopTaxa(tse_phylum,top = 5, abund_values = "relabundance")
+
+# Renaming the "Phylum" rank to keep only top taxa and the rest to "Other"
+phylum_renamed <- lapply(rowData(tse)$Phylum,
+                   function(x){if (x %in% top_taxa) {x} else {"Other"}})
+rowData(tse)$Phylum <- as.character(phylum_renamed)
+
+# Visualizing the composition barplot, with samples order by "Bacteroidetes"
+plotAbundance(tse, abund_values="relabundance", rank = "Phylum",
+              order_rank_by="abund", order_sample_by = "Bacteroidetes")
+```
 
 ## Community typing
 
@@ -41,7 +66,7 @@ Let's cluster the data with DMM clustering.
 # Runs model and calculates the most likely number of clusters from 1 to 7.
 # Since this is a large dataset it takes long computational time.
 # For this reason we use only a subset of the data; agglomerated by Phylum as a rank.
-tse <- relAbundanceCounts(tse)
+tse <- GlobalPatterns
 tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
 ```
