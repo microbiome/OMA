@@ -157,6 +157,44 @@ head(colData(se)$shannon)
 ##   6.577   6.777   6.498   3.828   3.288   4.289
 ```
 
+Alpha diversities can be visualized with boxplot. Here, Shannon index is compared 
+between different sample type groups. Individual data points are visualized by 
+plotting them as points with `geom_jitter`.
+
+`geom_signif` is used to test, if these differences are statistically significant.
+It adds p-values to plot.
+
+
+```r
+if( !require(ggsignif) ){
+  install.packages(ggsignif)
+}
+library(ggplot2)
+library(ggsignif)
+
+# Subsets the data. Takes only those samples that are from feces, skin, or tongue,
+# and creates data frame from the collected data
+df <- as.data.frame(colData(se)[colData(se)$SampleType %in% 
+                                  c("Feces", "Skin", "Tongue"), ])
+
+# Changes old levels with new levels
+df$SampleType <- factor(df$SampleType)
+
+# For significance testing, all different combinations are determined
+comb <- split(t(combn(levels(df$SampleType), 2)), 
+           seq(nrow(t(combn(levels(df$SampleType), 2)))))
+
+ggplot(df, aes(x = SampleType, y = shannon)) +
+  # Outliers are removed, because otherwise each data point would be plotted twice; 
+  # as an outlier of boxplot and as a point of dotplot.
+  geom_boxplot(outlier.shape = NA) + 
+  geom_jitter(width = 0.2) + 
+  geom_signif(comparisons = comb, map_signif_level = FALSE) +
+  theme(text = element_text(size = 10))
+```
+
+<img src="14a_alpha_diversity_files/figure-html/visualize-shannon-1.png" width="672" />
+
 **Phylogenetic diversity**  
 
 The phylogenetic diversity is calculated by `mia::estimateDiversity`. This is a faster re-implementation of   
