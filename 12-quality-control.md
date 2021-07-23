@@ -173,7 +173,29 @@ colData(se)
 ## Even3     1078241
 ```
 
-The calulated library sizes can be visualized using the `plotColData` function.
+The distribution of calculated library sizes can be visualized as a histogram.
+
+
+```r
+library(ggplot2)
+ggplot(as.data.frame(colData(se))) +
+    geom_histogram(aes(x = sum), color = "black", fill = "gray", bins = 30) +
+    labs(x = "Library size", y = "Frequency") +
+    theme_bw() +
+    theme(panel.grid.major = element_blank(), # Removes the grid
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank(),
+          axis.line = element_line(colour = "black")) # Adds y-axis
+```
+
+<div class="figure">
+<img src="12-quality-control_files/figure-html/plot-viz-lib-size-1-1.png" alt="Library size distribution." width="768" />
+<p class="caption">(\#fig:plot-viz-lib-size-1)Library size distribution.</p>
+</div>
+
+Library sizes - and other variables from `colData` - can be also visualized by using 
+specified function called `plotColData`.
 
 
 ```r
@@ -183,8 +205,8 @@ plotColData(se,"sum","X.SampleID", colour_by = "X.SampleID") +
 ```
 
 <div class="figure">
-<img src="12-quality-control_files/figure-html/plot-viz-lib-size-1-1.png" alt="Library sizes per sample." width="768" />
-<p class="caption">(\#fig:plot-viz-lib-size-1)Library sizes per sample.</p>
+<img src="12-quality-control_files/figure-html/plot-viz-lib-size-2-1.png" alt="Library sizes per sample." width="768" />
+<p class="caption">(\#fig:plot-viz-lib-size-2)Library sizes per sample.</p>
 </div>
 
 
@@ -194,8 +216,8 @@ plotColData(se,"sum","SampleType", colour_by = "SampleType") +
 ```
 
 <div class="figure">
-<img src="12-quality-control_files/figure-html/plot-viz-lib-size-2-1.png" alt="Library sizes per sample type." width="768" />
-<p class="caption">(\#fig:plot-viz-lib-size-2)Library sizes per sample type.</p>
+<img src="12-quality-control_files/figure-html/plot-viz-lib-size-3-1.png" alt="Library sizes per sample type." width="768" />
+<p class="caption">(\#fig:plot-viz-lib-size-3)Library sizes per sample type.</p>
 </div>
 
 
