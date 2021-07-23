@@ -111,25 +111,37 @@ head(colData(se)$shannon)
 
 Alpha diversities can be visualized with boxplot. Here, Shannon index is compared 
 between different sample type groups. Individual data points are visualized by 
-plotting them as points. With more data points, test `geom_jitter` function
-instead of `geom_point`.
+plotting them as points with `geom_jitter`.
+
+`geom_signif` is used to test, if these differences are statistically significant.
+It adds p-values to plot.
 
 ```{r visualize-shannon}
+if( !require(ggsignif) ){
+  install.packages(ggsignif)
+}
 library(ggplot2)
-ggplot(as.data.frame(colData(se)), aes(x = SampleType, y = shannon)) +
+library(ggsignif)
+
+# Subsets the data. Takes only those samples that are from feces, skin, or tongue,
+# and creates data frame from the collected data
+df <- as.data.frame(colData(se)[colData(se)$SampleType %in% 
+                                  c("Feces", "Skin", "Tongue"), ])
+
+# Changes old levels with new levels
+df$SampleType <- factor(df$SampleType)
+
+# For significance testing, all different combinations are determined
+comb <- split(t(combn(levels(df$SampleType), 2)), 
+           seq(nrow(t(combn(levels(df$SampleType), 2)))))
+
+ggplot(df, aes(x = SampleType, y = shannon)) +
   # Outliers are removed, because otherwise each data point would be plotted twice; 
   # as an outlier of boxplot and as a point of dotplot.
   geom_boxplot(outlier.shape = NA) + 
-  geom_point() + 
+  geom_jitter(width = 0.2) + 
+  geom_signif(comparisons = comb, map_signif_level = FALSE) +
   theme(text = element_text(size = 10))
-```
-To test, if these differences that can be seen in plot are statistically significant
-we do pairwise Wilcoxon test. It compares every group with each others to see if 
-their values differ. 
-
-```{r pairwise-wilcoxon}
-df <- as.data.frame(colData(se))
-pairwise.wilcox.test(df$shannon, df$SampleType,  p.adjust.method = "fdr")
 ```
 
 **Phylogenetic diversity**  
