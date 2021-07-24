@@ -400,6 +400,8 @@ plot
 
 <img src="14b_beta_diversity_files/figure-html/unnamed-chunk-8-1.png" width="672" />
 
+Note: A 3D interactive version of the earlier plot can be found at [link](https://microbiome.github.io/OMA/interactive_3d_plots.html).
+
 Similarly lets visualize and compare the alcohol sub-polulation.
 
 ```r
@@ -498,7 +500,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2716
+## [1] 0.2677
 ```
 
 In this case, the community composition is not significantly different
