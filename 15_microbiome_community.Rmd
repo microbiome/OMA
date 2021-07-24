@@ -15,10 +15,7 @@ data("GlobalPatterns")
 tse <- GlobalPatterns
 ```
 
-
 ## Community composition
-
-Heatmaps
 
 ### Composition barplot
 
@@ -44,6 +41,30 @@ rowData(tse)$Phylum <- as.character(phylum_renamed)
 # Visualizing the composition barplot, with samples order by "Bacteroidetes"
 plotAbundance(tse, abund_values="relabundance", rank = "Phylum",
               order_rank_by="abund", order_sample_by = "Bacteroidetes")
+```
+
+### Composition heatmap 
+
+Community composition can be visualized with heatmap where other axis represent
+samples and another taxa. Color of each intersection point represent abundance
+of a taxon in a specific sample. 
+
+Here, Z-transformed abundances are plotted at Phylum level. 
+
+```{r heatmap}
+library(ggplot2)
+# Does z-transformation
+tse_phylum <- transformFeatures(tse_phylum, method = "z", name = "Ztransform")
+# Melts the assay
+df <- meltAssay(tse_phylum, assay_name = "Ztransform")
+
+# Creates a ggplot object
+ggplot(df, aes(x = SampleID, y = FeatureID, fill = Ztransform)) +
+  geom_tile() +
+  scale_fill_gradient(low = "blue", high = "red") + 
+  theme(text = element_text(size=10),
+        axis.text.x = element_text(angle=45, hjust=1)) +
+  labs(x = "Samples", y = "Taxa")
 ```
 
 ## Community typing
