@@ -46,10 +46,7 @@ data("GlobalPatterns")
 tse <- GlobalPatterns
 ```
 
-
 ## Community composition
-
-Heatmaps
 
 ### Composition barplot
 
@@ -79,6 +76,33 @@ plotAbundance(tse, abund_values="relabundance", rank = "Phylum",
 ```
 
 <img src="15_microbiome_community_files/figure-html/unnamed-chunk-1-1.png" width="672" />
+
+### Composition heatmap 
+
+Community composition can be visualized with heatmap where other axis represent
+samples and another taxa. Color of each intersection point represent abundance
+of a taxon in a specific sample. 
+
+Here, Z-transformed abundances are plotted at Phylum level. 
+
+
+```r
+library(ggplot2)
+# Does z-transformation
+tse_phylum <- transformFeatures(tse_phylum, method = "z", name = "Ztransform")
+# Melts the assay
+df <- meltAssay(tse_phylum, assay_name = "Ztransform")
+
+# Creates a ggplot object
+ggplot(df, aes(x = SampleID, y = FeatureID, fill = Ztransform)) +
+  geom_tile() +
+  scale_fill_gradient(low = "blue", high = "red") + 
+  theme(text = element_text(size=10),
+        axis.text.x = element_text(angle=45, hjust=1)) +
+  labs(x = "Samples", y = "Taxa")
+```
+
+<img src="15_microbiome_community_files/figure-html/heatmap-1.png" width="672" />
 
 ## Community typing
 
@@ -160,7 +184,7 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7672 BIC: 7927 AIC: 7842 
+## Laplace: 7673 BIC: 7927 AIC: 7842 
 ## 
 ## [[3]]
 ## class: DMN 
@@ -172,25 +196,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7741 BIC: 8282 AIC: 8112 
+## Laplace: 7781 BIC: 8343 AIC: 8173 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7854 BIC: 8553 AIC: 8340 
+## Laplace: NaN BIC: NaN AIC: NaN 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7909 BIC: 8759 AIC: 8503 
+## Laplace: NaN BIC: NaN AIC: NaN 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8015 BIC: 9058 AIC: 8759
+## Laplace: NaN BIC: NaN AIC: NaN
 ```
 
 
@@ -215,7 +239,7 @@ getBestDMNFit(tse_dmn, type = "laplace")
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7672 BIC: 7927 AIC: 7842
+## Laplace: 7673 BIC: 7927 AIC: 7842
 ```
 ### PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors
 
@@ -240,7 +264,7 @@ dmn_group
 ## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
 ## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Skin               2       3   67  992.6  -84.93   826.1 1066.8 1128
 ## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
 ## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 ```
@@ -255,8 +279,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.60
-## 2 0.4615 15.18
+## 1 0.5385 20.59
+## 2 0.4615 15.30
 ```
 
 
@@ -270,12 +294,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 6.283e-17
-## CC1     1.000e+00 5.847e-22
-## SV1     1.000e+00 2.627e-12
-## M31Fcsw 7.451e-26 1.000e+00
-## M11Fcsw 1.017e-16 1.000e+00
-## M31Plmr 1.025e-13 1.000e+00
+## CL3     1.000e+00 4.797e-17
+## CC1     1.000e+00 3.668e-22
+## SV1     1.000e+00 1.879e-12
+## M31Fcsw 7.376e-26 1.000e+00
+## M11Fcsw 1.076e-16 1.000e+00
+## M31Plmr 1.069e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -286,13 +310,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1353371
-## Phylum:Euryarchaeota  0.2314 0.1467130
-## Phylum:Actinobacteria 1.2104 1.0569245
-## Phylum:Spirochaetes   0.2141 0.1317331
-## Phylum:MVP-15         0.0299 0.0007622
-## Phylum:Proteobacteria 6.8416 1.8067058
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30409 0.1354376
+## Phylum:Euryarchaeota  0.23130 0.1468752
+## Phylum:Actinobacteria 1.21203 1.0592304
+## Phylum:Spirochaetes   0.21402 0.1318256
+## Phylum:MVP-15         0.02986 0.0007684
+## Phylum:Proteobacteria 6.84442 1.8136055
 ```
 Get the assignment probabilities
 

@@ -366,6 +366,120 @@ assay(altExp(se, "Family"), "counts")[1:5,1:7]
 `altExpNames` now consists of `Family` level data. This can be extended to use 
 any level present in Kingdom, Phylum, Class, Order, Family, Genus, Species.   
 
+## Data transformation
+
+Data transformation is very common procedure in microbiome analysis. 
+In transformation, each data point is replaced with transformed value that is 
+calculated by applying transformation formula to the data point. Transformation 
+can be used, for example, to normalize skewed data, or to reduce weight of bigger 
+values compared to smaller values. 
+
+In mia package, transformations are applied to abundance data. Transformed 
+abundance table is stored back to 'assays'. mia includes transformation 
+functions for sample-wise or column-wise transformation ('transformSamples()'), 
+and for feature-wise or row-wise transformation ('transformFeatures()'). 
+
+For complete list of available transformations and parameters, see function 
+[help](https://microbiome.github.io/mia/reference/transformCounts.html).
+
+
+```r
+se <- transformSamples(x = se, abund_values = "counts", method = "clr", 
+                       pseudocount = 1, name = "clr_transformation")
+
+head(assay(se, "clr_transformation"))
+```
+
+```
+##                                      CL3    CC1     SV1 M31Fcsw M11Fcsw M31Plmr
+## Class:Thermoprotei               -0.9552 -1.124 -0.7435 -0.2916 -0.2652  -0.356
+## Class:Thermoprotei               -0.9552 -1.124 -0.7435 -0.2916 -0.2652  -0.356
+## Species:Sulfolobusacidocaldarius -0.9552 -1.124 -0.7435 -0.2916 -0.2652  -0.356
+## Class:Sd-NA                      -0.9552 -1.124 -0.7435 -0.2916 -0.2652  -0.356
+## Class:Sd-NA                      -0.9552 -1.124 -0.7435 -0.2916 -0.2652  -0.356
+## Class:Sd-NA                      -0.9552 -1.124 -0.7435 -0.2916 -0.2652  -0.356
+##                                  M11Plmr F21Plmr M31Tong M11Tong LMEpi24M
+## Class:Thermoprotei               -0.4713 -0.2645 -0.2547 -0.1572   -0.359
+## Class:Thermoprotei               -0.4713 -0.2645 -0.2547 -0.1572   -0.359
+## Species:Sulfolobusacidocaldarius  0.2219 -0.2645 -0.2547 -0.1572   -0.359
+## Class:Sd-NA                      -0.4713 -0.2645 -0.2547 -0.1572   -0.359
+## Class:Sd-NA                      -0.4713 -0.2645 -0.2547 -0.1572   -0.359
+## Class:Sd-NA                      -0.4713 -0.2645 -0.2547 -0.1572   -0.359
+##                                  SLEpi20M  AQC1cm  AQC4cm  AQC7cm     NP2
+## Class:Thermoprotei                 0.3704  2.6250  3.7862  4.0751  0.4502
+## Class:Thermoprotei                -0.3228 -0.7072  0.2697  1.1459 -0.2429
+## Species:Sulfolobusacidocaldarius  -0.3228 -0.7072 -0.8289 -0.8001 -0.2429
+## Class:Sd-NA                       -0.3228 -0.7072  2.3066  2.6011 -0.2429
+## Class:Sd-NA                       -0.3228 -0.7072  0.2697 -0.1069 -0.2429
+## Class:Sd-NA                       -0.3228 -0.7072 -0.1357  0.5862 -0.2429
+##                                     NP3     NP5 TRRsed1 TRRsed2 TRRsed3    TS28
+## Class:Thermoprotei               -0.433 -0.3606 -0.2677 -0.4828 -0.4384 -0.2691
+## Class:Thermoprotei               -0.433 -0.3606 -0.2677 -0.4828 -0.4384 -0.2691
+## Species:Sulfolobusacidocaldarius -0.433 -0.3606 -0.2677 -0.4828 -0.4384 -0.2691
+## Class:Sd-NA                      -0.433 -0.3606 -0.2677 -0.4828 -0.4384 -0.2691
+## Class:Sd-NA                      -0.433 -0.3606 -0.2677 -0.4828 -0.4384 -0.2691
+## Class:Sd-NA                      -0.433 -0.3606 -0.2677 -0.4828 -0.4384 -0.2691
+##                                     TS29   Even1   Even2   Even3
+## Class:Thermoprotei               -0.2569 -0.3481 -0.2534 -0.2382
+## Class:Thermoprotei               -0.2569 -0.3481 -0.2534 -0.2382
+## Species:Sulfolobusacidocaldarius -0.2569 -0.3481 -0.2534 -0.2382
+## Class:Sd-NA                      -0.2569 -0.3481 -0.2534 -0.2382
+## Class:Sd-NA                      -0.2569 -0.3481 -0.2534 -0.2382
+## Class:Sd-NA                      -0.2569 -0.3481 -0.2534 -0.2382
+```
+
+-   In 'pa' transformation, 'threshold' specifies the value that divides observations to
+be absent or present. By default, it is 0.
+
+
+```r
+se <- transformFeatures(se, method = "pa", threshold = 10)
+
+head(assay(se, "pa"))
+```
+
+```
+##                                  CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr
+## Class:Thermoprotei                 0   0   0       0       0       0       0
+## Class:Thermoprotei                 0   0   0       0       0       0       0
+## Species:Sulfolobusacidocaldarius   0   0   0       0       0       0       0
+## Class:Sd-NA                        0   0   0       0       0       0       0
+## Class:Sd-NA                        0   0   0       0       0       0       0
+## Class:Sd-NA                        0   0   0       0       0       0       0
+##                                  F21Plmr M31Tong M11Tong LMEpi24M SLEpi20M
+## Class:Thermoprotei                     0       0       0        0        0
+## Class:Thermoprotei                     0       0       0        0        0
+## Species:Sulfolobusacidocaldarius       0       0       0        0        0
+## Class:Sd-NA                            0       0       0        0        0
+## Class:Sd-NA                            0       0       0        0        0
+## Class:Sd-NA                            0       0       0        0        0
+##                                  AQC1cm AQC4cm AQC7cm NP2 NP3 NP5 TRRsed1
+## Class:Thermoprotei                    1      1      1   0   0   0       0
+## Class:Thermoprotei                    0      0      0   0   0   0       0
+## Species:Sulfolobusacidocaldarius      0      0      0   0   0   0       0
+## Class:Sd-NA                           0      1      1   0   0   0       0
+## Class:Sd-NA                           0      0      0   0   0   0       0
+## Class:Sd-NA                           0      0      0   0   0   0       0
+##                                  TRRsed2 TRRsed3 TS28 TS29 Even1 Even2 Even3
+## Class:Thermoprotei                     0       0    0    0     0     0     0
+## Class:Thermoprotei                     0       0    0    0     0     0     0
+## Species:Sulfolobusacidocaldarius       0       0    0    0     0     0     0
+## Class:Sd-NA                            0       0    0    0     0     0     0
+## Class:Sd-NA                            0       0    0    0     0     0     0
+## Class:Sd-NA                            0       0    0    0     0     0     0
+```
+
+
+```r
+# list of abundance tables that assays slot contains
+assays(se)
+```
+
+```
+## List of length 4
+## names(4): counts relabundance clr_transformation pa
+```
+
 ## Pick specific  
 
 Retrieving of specific elements are required for specific analysis. For
