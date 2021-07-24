@@ -1,172 +1,9 @@
-# Microbiome Diversity {#microbiome-diversity}
+
 
 ```{r setup, echo=FALSE, results="asis"}
 library(rebook)
 chapterPreamble()
 ```
-
-Diversity estimates are a central topic in microbiome data analysis. 
-
-There are three commonly employed levels of diversity measurements,
-which are trying to put a number on different aspects of the questions
-associated with diversity [@Whittaker1960].
-
-Many different ways for estimating such diversity measurements have been 
-described in the literature. Which measurement is best or applicable for your 
-samples, is not the aim of the following sections.
-
-```{r load-pkg-data}
-library(mia)
-data("GlobalPatterns")
-se <- GlobalPatterns
-```
-
-## Alpha diversity
-
-**_Alpha diversity_**, also sometimes interchangeably used with the
-term **_species diversity_**, summarizes the distribution of species
-abundances in a given sample into a single number that depends on
-species richness and evenness. Diversity indices measure the overall
-community heterogeneity. A number of ecological diversity measures are
-available. The Hill coefficient combines many standard indices into a
-single equation that provides observed richness, inverse Simpson, and
-Shannon diversity, and generalized diversity as special cases. In
-general, diversity increases together with increasing richness and
-evenness. Sometimes richness, evenness, and dominance are considered
-to be variants of alpha diversity.
-
-**Richness** refers to the total number of species in a community
-(sample). The simplest richness index is the number of observed
-species (observed richness). Assuming limited sampling from the
-community, however, this may underestimate the true species
-richness. Several estimators are available, including for instance ACE
-[@Chao1992] and Chao1 [@Chao1984]. Richness estimates are unaffected
-by species abundances.
-  
-**Phylogenetic diversity** was first proposed by [@Faith1992], unlike the 
-  diversity measures mentioned above, Phylogenetic diversity (PD) 
-  measure incorporates information from phylogenetic relationships 
-  stored in `phylo` tree between species in a community (sample). The 
-  Faith's PD is calculated as the sum of branch length of all species in 
-  a community (sample).
-
-**Evenness** focuses on species abundances, and can thus complement
-  the number of species. A typical evenness index is the Pielou's
-  evenness, which is Shannon diversity normalized by the observed
-  richness.
-
-**Dominance** indices are in general negatively correlated with
-  diversity, and sometimes used in ecological literature. High
-  dominance is obtained when one or few species have a high share of
-  the total species abundance in the community.  
-  
-### Estimating alpha diversity
-
-Alpha diversity can be estimated with wrapper functions that interact
-with other packages implementing the calculation, such as _`vegan`_
-[@R-vegan].
-
-#### Richness  
-
-Richness gives the number of features present within a community and can be calculated with `estimateRichness`. Each of the estimate diversity/richness/evenness/dominance functions adds the calculated measure(s) to the `colData` of the `SummarizedExperiment` under the given column `name`. Here, we calculate `observed` features as a measure of richness.     
-
-```{r}
-se <- mia::estimateRichness(se, 
-                       abund_values = "counts", 
-                       index = "observed", 
-                       name="observed")
-
-head(colData(se)$observed)
-```
-This allows access to the values to be analyzed directly from the `colData`, for example
-by plotting them using `plotColData` from the _`scater`_ package [@R-scater].
-
-```{r plot-div-shannon, message=FALSE, fig.cap="Shannon diversity estimates plotted grouped by sample type."}
-library(scater)
-plotColData(se, 
-            "observed", 
-            "SampleType", 
-            colour_by = "SampleType") +
-    theme(axis.text.x = element_text(angle=45,hjust=1)) + 
-  ylab(expression(Richness[Observed]))
-
-```
-
-#### Diversity  
-
-**Non-Phylogenetic measures**  
-The main function, `estimateDiversity`, calculates the selected
-diversity index based on the selected assay data.  
-
-```{r estimate-shannon}
-se <- mia::estimateDiversity(se, 
-                             abund_values = "counts",
-                             index = "shannon", 
-                             name = "shannon")
-head(colData(se)$shannon)
-```
-
-**Phylogenetic diversity**  
-
-The phylogenetic diversity is calculated by `mia::estimateDiversity`. This is a faster re-implementation of   
-the widely function in _`picante`_ [@R-picante, @Kembel2010].  
-
-Load `picante` R package and get the `phylo` stored in `rowTree`. 
-```{r phylo-div-1}
-
-se <- mia::estimateDiversity(se, 
-                             abund_values = "counts",
-                             index = "faith", 
-                             name = "faith")
-head(colData(se)$faith)
-
-```
-
-#### Evenness  
-
-Evenness can be calculated with `estimateEvenness`.  
-
-```{r evenness-1}
-se <- estimateEvenness(se, 
-                       abund_values = "counts", 
-                       index="simpson")
-head(colData(se)$simpson)
-```
-
-
-#### Dominance  
-
-Dominance can be calculated with `estimateDominance`. Here, the `Relative index` is calculated which is the relative abundance of the most dominant species in the sample.   
-
-```{r dominance-1}
-se <- estimateDominance(se, 
-                       abund_values = "counts", 
-                       index="relative")
-
-head(colData(se)$relative)
-```
-
-#### Rarity  
-TODO...
-```{r}
-
-```
-
-
-### Visualize alpha diversities  
-
-A plot comparing all the diversity measures calculated above and stored in `colData` can then be constructed directly.  
-```{r plot-all-diversities}
-plots <- lapply(c("observed", "shannon","simpson", "relative", "faith"),
-                plotColData,
-                object = se,
-                x = "SampleType",
-                colour_by = "SampleType")
-plots <- lapply(plots,"+", theme(axis.text.x = element_text(angle=45,hjust=1)))
-ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 3, common.legend = TRUE, legend = "right")
-```
-
-
 ## Beta diversity
 
 Where alpha diversity focuses on community variation within a
@@ -235,6 +72,7 @@ lab](https://www.huber.embl.de/users/klaus/Teaching/statisticalMethods-lab.pdf).
 
 ```{r relstress}
 # Example data
+library(mia)
 data(GlobalPatterns)
 
 # Data matrix (features x samples)
@@ -291,6 +129,8 @@ This entire process is wrapped in the `runMDS` and `runNMDS`
 functions.
 
 ```{r runMDS, message=FALSE}
+library(scater)
+se <- GlobalPatterns
 se <- runMDS(se, FUN = vegan::vegdist, name = "MDS_BC", exprs_values = "counts")
 ```
 
@@ -373,7 +213,103 @@ se <- runTSNE(se, name = "TSNE", exprs_values = "counts", ncomponents = 3)
 plotReducedDim(se, "TSNE", colour_by = "SampleType", ncomponents = c(1:3))
 ```
 
+### Visualizing the most dominant genus on PCoA
 
+In this section we visualize most dominant genus in the alcohol study dataset from [curatedMetagenomicData](https://bioconductor.org/packages/release/data/experiment/vignettes/curatedMetagenomicData/inst/doc/curatedMetagenomicData.html) on PCoA.
+A similar visualization has been used in [Taxonomic signatures of cause-specific mortality risk in human gut microbiome](https://www.nature.com/articles/s41467-021-22962-y), Salosensaari et al. (2021).
+
+```{r, message=FALSE, warning=FALSE}
+# Installing the package
+if (!require(curatedMetagenomicData)){
+  BiocManager::install("curatedMetagenomicData")  
+}
+```
+
+Retrieving data as a TreeSummarizedExperiment object.
+
+```{r, message=FALSE, warning=FALSE}
+library(curatedMetagenomicData)
+library(dplyr)
+library(DT)
+# Querying the data
+tse <- sampleMetadata %>%
+    filter(age >= 18) %>% # taking only data of age 18 or above
+    filter(!is.na(alcohol)) %>% # excluding missing values
+    returnSamples("relative_abundance")
+tse
+```
+
+Agglomerating the data at a Genus level and getting the dominant taxa per sample.
+
+```{r}
+tse_Genus <- agglomerateByRank(tse, rank="Genus")
+tse_Genus <- addPerSampleDominantTaxa(tse_Genus,abund_values="relative_abundance", name = "dominant_taxa")
+```
+
+Performing PCoA with Bray-Curtis dissimilarity.
+```{r}
+tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist,
+              name = "PCoA_BC", exprs_values = "relative_abundance")
+```
+
+Getting top taxa and visualizing the abundance on PCoA.
+
+```{r}
+# Getting the 6 top taxa
+top_taxa <- getTopTaxa(tse_Genus,top = 6, abund_values = "relative_abundance")
+
+# Naming all the rest of non top-taxa as "Other"
+most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
+                   function(x){if (x %in% top_taxa) {x} else {"Other"}})
+
+# Storing the previous results as a new column within colData
+colData(tse_Genus)$most_abundant <- as.character(most_abundant)
+
+# Calculating percentage of the most abundant
+most_abundant_freq <- table(as.character(most_abundant))
+most_abundant_percent <- round(most_abundant_freq/sum(most_abundant_freq)*100, 1)
+
+# Retrieving the explained variance
+e <- attr(reducedDim(tse_Genus, "PCoA_BC"), "eig");
+var_explained <- e/sum(e[e>0])*100
+
+# Visualization
+plot <-plotReducedDim(tse_Genus,"PCoA_BC", colour_by = "most_abundant") +
+  scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
+                      labels=paste0(names(most_abundant_percent),"(",most_abundant_percent,"%)"))+
+  labs(x=paste("PC 1 (",round(var_explained[1],1),"%)"),
+       y=paste("PC 2 (",round(var_explained[2],1),"%)"),
+       color="")
+plot
+```
+
+Note: A 3D interactive version of the earlier plot can be found from [here](https://microbiome.github.io/OMA/interactive-3d-plots.html).
+
+Similarly lets visualize and compare the alcohol sub-polulation.
+```{r}
+# Calculating the frequencies and percentages for both categories
+freq_yes <- table(as.character(most_abundant[colData(tse_Genus)$alcohol=="yes"]))
+freq_no <- table(as.character(most_abundant[colData(tse_Genus)$alcohol=="no"]))
+percent_yes <- round(freq_yes/sum(freq_yes)*100, 1)
+percent_no <- round(freq_no/sum(freq_no)*100, 1)
+
+# Visualization
+plotReducedDim(tse_Genus[,colData(tse_Genus)$alcohol=="yes"],
+                          "PCoA_BC", colour_by = "most_abundant") +
+  scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
+                      labels=paste0(names(percent_yes),"(",percent_yes,"%)"))+
+  labs(x=paste("PC 1 (",round(var_explained[1],1),"%)"),
+       y=paste("PC 2 (",round(var_explained[2],1),"%)"),
+       title = "alcohol = yes", color="")
+
+plotReducedDim(tse_Genus[,colData(tse_Genus)$alcohol=="no"],
+                          "PCoA_BC", colour_by = "most_abundant") +
+  scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
+                      labels=paste0(names(percent_no),"(",percent_no,"%)"))+
+  labs(x=paste("PC 1 (",round(var_explained[1],1),"%)"),
+       y=paste("PC 2 (",round(var_explained[2],1),"%)"),
+       title = "alcohol = no", color="")
+```
 
 ## Community comparisons [TODO combine with the material above for simplicity?]
 
@@ -446,7 +382,6 @@ composition.
 coef <- coefficients(permanova)["group1",]
 top.coef <- sort(head(coef[rev(order(abs(coef)))],20))
 ```
-
 
 
 

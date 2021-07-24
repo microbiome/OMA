@@ -15,11 +15,57 @@ data("GlobalPatterns")
 tse <- GlobalPatterns
 ```
 
-
 ## Community composition
 
-Heatmaps
+### Composition barplot
 
+A typical way to visualize microbiome composition is by using composition barplot.
+In the following, relative abundance is calculated and top 5 taxa is retrieved for the
+Phylum rank. Thereafter, the barplot is visualized ordering rank by abundance values
+and samples by "Bacteroidetes":
+
+```{r}
+library(miaViz)
+# Computing relative abundance
+tse <- relAbundanceCounts(tse)
+
+# Getting top taxa on a Phylum level
+tse_phylum <- agglomerateByRank(tse, rank ="Phylum", onRankOnly=TRUE)
+top_taxa <- getTopTaxa(tse_phylum,top = 5, abund_values = "relabundance")
+
+# Renaming the "Phylum" rank to keep only top taxa and the rest to "Other"
+phylum_renamed <- lapply(rowData(tse)$Phylum,
+                   function(x){if (x %in% top_taxa) {x} else {"Other"}})
+rowData(tse)$Phylum <- as.character(phylum_renamed)
+
+# Visualizing the composition barplot, with samples order by "Bacteroidetes"
+plotAbundance(tse, abund_values="relabundance", rank = "Phylum",
+              order_rank_by="abund", order_sample_by = "Bacteroidetes")
+```
+
+### Composition heatmap 
+
+Community composition can be visualized with heatmap where other axis represent
+samples and another taxa. Color of each intersection point represent abundance
+of a taxon in a specific sample. 
+
+Here, Z-transformed abundances are plotted at Phylum level. 
+
+```{r heatmap}
+library(ggplot2)
+# Does z-transformation
+tse_phylum <- transformFeatures(tse_phylum, method = "z", name = "Ztransform")
+# Melts the assay
+df <- meltAssay(tse_phylum, assay_name = "Ztransform")
+
+# Creates a ggplot object
+ggplot(df, aes(x = SampleID, y = FeatureID, fill = Ztransform)) +
+  geom_tile() +
+  scale_fill_gradient(low = "blue", high = "red") + 
+  theme(text = element_text(size=10),
+        axis.text.x = element_text(angle=45, hjust=1)) +
+  labs(x = "Samples", y = "Taxa")
+```
 
 ## Community typing
 
@@ -41,7 +87,7 @@ Let's cluster the data with DMM clustering.
 # Runs model and calculates the most likely number of clusters from 1 to 7.
 # Since this is a large dataset it takes long computational time.
 # For this reason we use only a subset of the data; agglomerated by Phylum as a rank.
-tse <- relAbundanceCounts(tse)
+tse <- GlobalPatterns
 tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
 ```
