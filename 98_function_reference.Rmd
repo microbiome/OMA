@@ -1,6 +1,6 @@
 # (PART) Appendix {-}
 
-# Function reference {#function-ref}
+# Function Reference {#function-ref}
 
 ## Objects
 
