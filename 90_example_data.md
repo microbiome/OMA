@@ -1,6 +1,6 @@
 # (PART) Appendix {-}
 
-# Example data {#example-data}
+# Example Data {#example-data}
 
 <script>
 document.addEventListener("click", function (event) {

@@ -1,4 +1,4 @@
-# Taxonomic information {#taxonomic-information}
+# Taxonomic Information {#taxonomic-information}
 
 <script>
 document.addEventListener("click", function (event) {
