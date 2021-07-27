@@ -77,8 +77,15 @@ specified function called `plotColData`.
 
 ```{r plot-viz-lib-size-2, fig.width=8, fig.height=4, fig.cap="Library sizes per sample."}
 library(ggplot2)
-plotColData(se,"sum","X.SampleID", colour_by = "X.SampleID") + 
-    theme(axis.text.x = element_text(angle = 45, hjust=1))
+# Sort samples by read count, order the factor levels, and store back to se as DataFrame
+# TODO: plotColData could include an option for sorting samples based on colData variables
+colData(se) <- as.data.frame(colData(se)) %>%
+                 arrange(X.SampleID) %>%
+        	 mutate(X.SampleID = factor(X.SampleID, levels=X.SampleID)) %>%
+		 DataFrame
+plotColData(se,"sum","X.SampleID", colour_by = "SampleType") + 
+    theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+    labs(y = "Library size (N)", x = "Sample ID") 	    
 ```
 
 ```{r plot-viz-lib-size-3, fig.width=8, fig.height=4, fig.cap="Library sizes per sample type."}
