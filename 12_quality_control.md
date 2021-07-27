@@ -173,20 +173,41 @@ colData(se)
 ## Even3     1078241
 ```
 
-The distribution of calculated library sizes can be visualized as a histogram.
+The distribution of calculated library sizes can be visualized as a
+histogram (left), or by sorting the samples by library size (right).
 
 
 ```r
 library(ggplot2)
-ggplot(as.data.frame(colData(se))) +
-    geom_histogram(aes(x = sum), color = "black", fill = "gray", bins = 30) +
-    labs(x = "Library size", y = "Frequency") +
-    theme_bw() +
-    theme(panel.grid.major = element_blank(), # Removes the grid
+
+p1 <- ggplot(as.data.frame(colData(se))) +
+        geom_histogram(aes(x = sum), color = "black", fill = "gray", bins = 30) +
+        labs(x = "Library size", y = "Frequency (n)") + 
+        # scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x), 
+        # labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+        theme_bw() +
+        theme(panel.grid.major = element_blank(), # Removes the grid
           panel.grid.minor = element_blank(),
           panel.border = element_blank(),
           panel.background = element_blank(),
           axis.line = element_line(colour = "black")) # Adds y-axis
+
+library(dplyr)
+df <- as.data.frame(colData(se)) %>%
+        arrange(sum) %>%
+        mutate(index = 1:n())
+p2 <- ggplot(df, aes(y = index, x = sum/1e6)) +
+        geom_point() +	
+        labs(x = "Library size (million reads)", y = "Sample index") +	
+        theme_bw() +
+        theme(panel.grid.major = element_blank(), # Removes the grid
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank(),
+          axis.line = element_line(colour = "black")) # Adds y-axis
+
+library(patchwork)
+p1 + p2
 ```
 
 <div class="figure">
@@ -200,8 +221,15 @@ specified function called `plotColData`.
 
 ```r
 library(ggplot2)
-plotColData(se,"sum","X.SampleID", colour_by = "X.SampleID") + 
-    theme(axis.text.x = element_text(angle = 45, hjust=1))
+# Sort samples by read count, order the factor levels, and store back to se as DataFrame
+# TODO: plotColData could include an option for sorting samples based on colData variables
+colData(se) <- as.data.frame(colData(se)) %>%
+                 arrange(X.SampleID) %>%
+        	 mutate(X.SampleID = factor(X.SampleID, levels=X.SampleID)) %>%
+		 DataFrame
+plotColData(se,"sum","X.SampleID", colour_by = "SampleType") + 
+    theme(axis.text.x = element_text(angle = 45, hjust=1)) +
+    labs(y = "Library size (N)", x = "Sample ID") 	    
 ```
 
 <div class="figure">
@@ -246,67 +274,68 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] scater_1.21.2                  ggplot2_3.3.5                 
- [3] scuttle_1.3.0                  mia_1.1.7                     
- [5] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.1             
- [7] XVector_0.33.0                 SingleCellExperiment_1.15.1   
- [9] SummarizedExperiment_1.23.1    Biobase_2.53.0                
-[11] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
-[13] IRanges_2.27.0                 S4Vectors_0.31.0              
-[15] BiocGenerics_0.39.1            MatrixGenerics_1.5.1          
-[17] matrixStats_0.59.0             BiocStyle_2.21.3              
-[19] rebook_1.3.0                  
+ [1] patchwork_1.1.1                dplyr_1.0.7                   
+ [3] scater_1.21.2                  ggplot2_3.3.5                 
+ [5] scuttle_1.3.0                  mia_1.1.7                     
+ [7] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.1             
+ [9] XVector_0.33.0                 SingleCellExperiment_1.15.1   
+[11] SummarizedExperiment_1.23.1    Biobase_2.53.0                
+[13] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
+[15] IRanges_2.27.0                 S4Vectors_0.31.0              
+[17] BiocGenerics_0.39.1            MatrixGenerics_1.5.1          
+[19] matrixStats_0.59.0             BiocStyle_2.21.3              
+[21] rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
-  [1] ggbeeswarm_0.6.0            colorspace_2.0-2           
-  [3] ellipsis_0.3.2              BiocNeighbors_1.11.0       
-  [5] farver_2.1.0                bit64_4.0.5                
-  [7] fansi_0.5.0                 decontam_1.13.0            
-  [9] splines_4.1.0               codetools_0.2-18           
- [11] sparseMatrixStats_1.5.0     cachem_1.0.5               
- [13] knitr_1.33                  jsonlite_1.7.2             
- [15] cluster_2.1.2               graph_1.71.2               
- [17] BiocManager_1.30.16         compiler_4.1.0             
- [19] assertthat_0.2.1            Matrix_1.3-4               
- [21] fastmap_1.1.0               lazyeval_0.2.2             
- [23] BiocSingular_1.9.1          htmltools_0.5.1.1          
- [25] tools_4.1.0                 rsvd_1.0.5                 
- [27] gtable_0.3.0                glue_1.4.2                 
- [29] GenomeInfoDbData_1.2.6      reshape2_1.4.4             
- [31] dplyr_1.0.7                 Rcpp_1.0.7                 
- [33] jquerylib_0.1.4             vctrs_0.3.8                
- [35] ape_5.5                     nlme_3.1-152               
- [37] DECIPHER_2.21.0             DelayedMatrixStats_1.15.0  
- [39] xfun_0.24                   stringr_1.4.0              
- [41] beachmat_2.9.0              lifecycle_1.0.0            
- [43] irlba_2.3.3                 XML_3.99-0.6               
- [45] zlibbioc_1.39.0             MASS_7.3-54                
- [47] scales_1.1.1                parallel_4.1.0             
- [49] yaml_2.2.1                  memoise_2.0.0              
- [51] gridExtra_2.3               sass_0.4.0                 
- [53] stringi_1.7.3               RSQLite_2.2.7              
- [55] highr_0.9                   ScaledMatrix_1.1.0         
- [57] tidytree_0.3.4              permute_0.9-5              
- [59] filelock_1.0.2              BiocParallel_1.27.2        
- [61] rlang_0.4.11                pkgconfig_2.0.3            
- [63] bitops_1.0-7                evaluate_0.14              
- [65] lattice_0.20-44             purrr_0.3.4                
- [67] labeling_0.4.2              treeio_1.17.2              
- [69] CodeDepends_0.6.5           cowplot_1.1.1              
- [71] bit_4.0.4                   tidyselect_1.1.1           
- [73] plyr_1.8.6                  magrittr_2.0.1             
- [75] bookdown_0.22               R6_2.5.0                   
- [77] generics_0.1.0              DelayedArray_0.19.1        
- [79] DBI_1.1.1                   withr_2.4.2                
- [81] mgcv_1.8-36                 pillar_1.6.1               
- [83] RCurl_1.98-1.3              tibble_3.1.3               
- [85] dir.expiry_1.1.0            crayon_1.4.1               
- [87] utf8_1.2.2                  rmarkdown_2.9              
- [89] viridis_0.6.1               grid_4.1.0                 
- [91] blob_1.2.2                  vegan_2.5-7                
- [93] digest_0.6.27               tidyr_1.1.3                
- [95] munsell_0.5.0               DirichletMultinomial_1.35.0
- [97] beeswarm_0.4.0              viridisLite_0.4.0          
- [99] vipor_0.4.5                 bslib_0.2.5.1              
+ [1] ggbeeswarm_0.6.0            colorspace_2.0-2           
+ [3] ellipsis_0.3.2              BiocNeighbors_1.11.0       
+ [5] farver_2.1.0                bit64_4.0.5                
+ [7] fansi_0.5.0                 decontam_1.13.0            
+ [9] splines_4.1.0               codetools_0.2-18           
+[11] sparseMatrixStats_1.5.0     cachem_1.0.5               
+[13] knitr_1.33                  jsonlite_1.7.2             
+[15] cluster_2.1.2               graph_1.71.2               
+[17] BiocManager_1.30.16         compiler_4.1.0             
+[19] assertthat_0.2.1            Matrix_1.3-4               
+[21] fastmap_1.1.0               lazyeval_0.2.2             
+[23] BiocSingular_1.9.1          htmltools_0.5.1.1          
+[25] tools_4.1.0                 rsvd_1.0.5                 
+[27] gtable_0.3.0                glue_1.4.2                 
+[29] GenomeInfoDbData_1.2.6      reshape2_1.4.4             
+[31] Rcpp_1.0.7                  jquerylib_0.1.4            
+[33] vctrs_0.3.8                 ape_5.5                    
+[35] nlme_3.1-152                DECIPHER_2.21.0            
+[37] DelayedMatrixStats_1.15.0   xfun_0.24                  
+[39] stringr_1.4.0               beachmat_2.9.0             
+[41] lifecycle_1.0.0             irlba_2.3.3                
+[43] XML_3.99-0.6                zlibbioc_1.39.0            
+[45] MASS_7.3-54                 scales_1.1.1               
+[47] parallel_4.1.0              yaml_2.2.1                 
+[49] memoise_2.0.0               gridExtra_2.3              
+[51] sass_0.4.0                  stringi_1.7.3              
+[53] RSQLite_2.2.7               highr_0.9                  
+[55] ScaledMatrix_1.1.0          tidytree_0.3.4             
+[57] permute_0.9-5               filelock_1.0.2             
+[59] BiocParallel_1.27.2         rlang_0.4.11               
+[61] pkgconfig_2.0.3             bitops_1.0-7               
+[63] evaluate_0.14               lattice_0.20-44            
+[65] purrr_0.3.4                 labeling_0.4.2             
+[67] treeio_1.17.2               CodeDepends_0.6.5          
+[69] cowplot_1.1.1               bit_4.0.4                  
+[71] tidyselect_1.1.1            plyr_1.8.6                 
+[73] magrittr_2.0.1              bookdown_0.22              
+[75] R6_2.5.0                    generics_0.1.0             
+[77] DelayedArray_0.19.1         DBI_1.1.1                  
+[79] withr_2.4.2                 mgcv_1.8-36                
+[81] pillar_1.6.1                RCurl_1.98-1.3             
+[83] tibble_3.1.3                dir.expiry_1.1.0           
+[85] crayon_1.4.1                utf8_1.2.2                 
+[87] rmarkdown_2.9               viridis_0.6.1              
+[89] grid_4.1.0                  blob_1.2.2                 
+[91] vegan_2.5-7                 digest_0.6.27              
+[93] tidyr_1.1.3                 munsell_0.5.0              
+[95] DirichletMultinomial_1.35.0 beeswarm_0.4.0             
+[97] viridisLite_0.4.0           vipor_0.4.5                
+[99] bslib_0.2.5.1              
 ```
 </div>

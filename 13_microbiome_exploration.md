@@ -260,7 +260,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] miaViz_1.1.2                   ggraph_2.0.5                  
+ [1] miaViz_1.1.3                   ggraph_2.0.5                  
  [3] scater_1.21.2                  ggplot2_3.3.5                 
  [5] scuttle_1.3.0                  mia_1.1.7                     
  [7] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.1             
