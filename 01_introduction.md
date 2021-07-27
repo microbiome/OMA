@@ -723,7 +723,7 @@ molten_se
 ```
 
 ```
-## # A tibble: 499,616 x 17
+## # A tibble: 499,616 × 17
 ##    FeatureID SampleID counts Kingdom Phylum   Class   Order Family Genus Species
 ##    <fct>     <fct>     <dbl> <chr>   <chr>    <chr>   <chr> <chr>  <chr> <chr>  
 ##  1 549322    CL3           0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
@@ -881,11 +881,11 @@ loaded via a namespace (and not attached):
  [87] generics_0.1.0              DelayedArray_0.19.1        
  [89] DBI_1.1.1                   mgcv_1.8-36                
  [91] pillar_1.6.1                survival_3.2-11            
- [93] RCurl_1.98-1.3              tibble_3.1.2               
+ [93] RCurl_1.98-1.3              tibble_3.1.3               
  [95] dir.expiry_1.1.0            crayon_1.4.1               
- [97] utf8_1.2.1                  rmarkdown_2.9              
+ [97] utf8_1.2.2                  rmarkdown_2.9              
  [99] viridis_0.6.1               grid_4.1.0                 
-[101] data.table_1.14.0           blob_1.2.1                 
+[101] data.table_1.14.0           blob_1.2.2                 
 [103] vegan_2.5-7                 digest_0.6.27              
 [105] tidyr_1.1.3                 munsell_0.5.0              
 [107] DirichletMultinomial_1.35.0 beeswarm_0.4.0             

@@ -498,7 +498,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.273
+## [1] 0.271
 ```
 
 In this case, the community composition is not significantly different
@@ -623,7 +623,7 @@ loaded via a namespace (and not attached):
  [15] ScaledMatrix_1.1.0            cluster_2.1.2                
  [17] DECIPHER_2.21.0               openxlsx_4.2.4               
  [19] colorspace_2.0-2              rappdirs_0.3.3               
- [21] blob_1.2.1                    haven_2.4.1                  
+ [21] blob_1.2.2                    haven_2.4.1                  
  [23] xfun_0.24                     crayon_1.4.1                 
  [25] RCurl_1.98-1.3                jsonlite_1.7.2               
  [27] graph_1.71.2                  ape_5.5                      
@@ -641,7 +641,7 @@ loaded via a namespace (and not attached):
  [51] pkgconfig_2.0.3               XML_3.99-0.6                 
  [53] farver_2.1.0                  dbplyr_2.1.1                 
  [55] CodeDepends_0.6.5             sass_0.4.0                   
- [57] utf8_1.2.1                    AnnotationDbi_1.55.1         
+ [57] utf8_1.2.2                    AnnotationDbi_1.55.1         
  [59] later_1.2.0                   tidyselect_1.1.1             
  [61] labeling_0.4.2                rlang_0.4.11                 
  [63] reshape2_1.4.4                BiocVersion_3.14.0           
@@ -659,7 +659,7 @@ loaded via a namespace (and not attached):
  [87] png_0.1-7                     interactiveDisplayBase_1.31.0
  [89] beeswarm_0.4.0                filelock_1.0.2               
  [91] curl_4.3.2                    ggsignif_0.6.2               
- [93] treeio_1.17.2                 tibble_3.1.2                 
+ [93] treeio_1.17.2                 tibble_3.1.3                 
  [95] bslib_0.2.5.1                 stringi_1.7.3                
  [97] highr_0.9                     forcats_0.5.1                
  [99] Matrix_1.3-4                  vctrs_0.3.8                  

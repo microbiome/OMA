@@ -288,11 +288,11 @@ loaded via a namespace (and not attached):
 [75] R6_2.5.0                    generics_0.1.0             
 [77] DelayedArray_0.19.1         DBI_1.1.1                  
 [79] mgcv_1.8-36                 pillar_1.6.1               
-[81] RCurl_1.98-1.3              tibble_3.1.2               
+[81] RCurl_1.98-1.3              tibble_3.1.3               
 [83] dir.expiry_1.1.0            crayon_1.4.1               
-[85] utf8_1.2.1                  rmarkdown_2.9              
+[85] utf8_1.2.2                  rmarkdown_2.9              
 [87] viridis_0.6.1               grid_4.1.0                 
-[89] blob_1.2.1                  vegan_2.5-7                
+[89] blob_1.2.2                  vegan_2.5-7                
 [91] digest_0.6.27               tidyr_1.1.3                
 [93] munsell_0.5.0               DirichletMultinomial_1.35.0
 [95] beeswarm_0.4.0              viridisLite_0.4.0          

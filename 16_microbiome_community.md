@@ -196,25 +196,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7751 BIC: 8274 AIC: 8103 
+## Laplace: 7792 BIC: 8357 AIC: 8187 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7854 BIC: 8553 AIC: 8340 
+## Laplace: 7849 BIC: 8548 AIC: 8335 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7952 BIC: 8850 AIC: 8594 
+## Laplace: 7908 BIC: 8758 AIC: 8502 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8011 BIC: 9035 AIC: 8736
+## Laplace: 8087 BIC: 9113 AIC: 8814
 ```
 
 
@@ -258,15 +258,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  793.17  1872.8 1674.5 1735
+## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
-## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
+## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
+## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -279,8 +279,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.29
+## 1 0.5385 20.60
+## 2 0.4615 15.28
 ```
 
 
@@ -294,12 +294,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.041e-17
-## CC1     1.000e+00 3.887e-22
-## SV1     1.000e+00 1.939e-12
-## M31Fcsw 7.866e-26 1.000e+00
-## M11Fcsw 1.137e-16 1.000e+00
-## M31Plmr 1.118e-13 1.000e+00
+## CL3     1.000e+00 5.057e-17
+## CC1     1.000e+00 3.865e-22
+## SV1     1.000e+00 2.033e-12
+## M31Fcsw 7.328e-26 1.000e+00
+## M11Fcsw 1.064e-16 1.000e+00
+## M31Plmr 9.986e-14 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -310,13 +310,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30380 0.1354611
-## Phylum:Euryarchaeota  0.23113 0.1468692
-## Phylum:Actinobacteria 1.21355 1.0604577
-## Phylum:Spirochaetes   0.21392 0.1318400
-## Phylum:MVP-15         0.02982 0.0007674
-## Phylum:Proteobacteria 6.84505 1.8150154
+##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354648
+## Phylum:Euryarchaeota  0.2314 0.1468589
+## Phylum:Actinobacteria 1.2104 1.0601103
+## Phylum:Spirochaetes   0.2141 0.1318402
+## Phylum:MVP-15         0.0299 0.0007674
+## Phylum:Proteobacteria 6.8419 1.8154581
 ```
 Get the assignment probabilities
 
@@ -463,10 +463,10 @@ loaded via a namespace (and not attached):
  [91] DelayedArray_0.19.1         DBI_1.1.1                  
  [93] withr_2.4.2                 mgcv_1.8-36                
  [95] pillar_1.6.1                RCurl_1.98-1.3             
- [97] tibble_3.1.2                dir.expiry_1.1.0           
- [99] crayon_1.4.1                utf8_1.2.1                 
+ [97] tibble_3.1.3                dir.expiry_1.1.0           
+ [99] crayon_1.4.1                utf8_1.2.2                 
 [101] rmarkdown_2.9               viridis_0.6.1              
-[103] grid_4.1.0                  blob_1.2.1                 
+[103] grid_4.1.0                  blob_1.2.2                 
 [105] vegan_2.5-7                 digest_0.6.27              
 [107] tidyr_1.1.3                 munsell_0.5.0              
 [109] DirichletMultinomial_1.35.0 beeswarm_0.4.0             

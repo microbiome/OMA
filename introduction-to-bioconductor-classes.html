@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 5 Microbiome Exploration | Orchestrating Microbiome Analysis</title>
-  <meta name="description" content="Chapter 5 Microbiome Exploration | Orchestrating Microbiome Analysis" />
+  <title>Introduction to Bioconductor Classes | Orchestrating Microbiome Analysis</title>
+  <meta name="description" content="Introduction to Bioconductor Classes | Orchestrating Microbiome Analysis" />
   <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 5 Microbiome Exploration | Orchestrating Microbiome Analysis" />
+  <meta property="og:title" content="Introduction to Bioconductor Classes | Orchestrating Microbiome Analysis" />
   <meta property="og:type" content="book" />
   <meta property="og:url" content="https://github.com/microbiome/OMA" />
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="microbiome/OMA" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 5 Microbiome Exploration | Orchestrating Microbiome Analysis" />
+  <meta name="twitter:title" content="Introduction to Bioconductor Classes | Orchestrating Microbiome Analysis" />
   
   
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="quality-control.html"/>
-<link rel="next" href="alpha-diversity.html"/>
+<link rel="prev" href="index.html"/>
+<link rel="next" href="data-introduction.html"/>
 <script src="libs/header-attrs-2.9/header-attrs.js"></script>
 <script src="libs/jquery-3.5.1/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -348,278 +348,41 @@ div.csl-indent {
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="microbiome-exploration" class="section level1" number="5">
-<h1><span class="header-section-number">Chapter 5</span> Microbiome Exploration</h1>
-<script>
-document.addEventListener("click", function (event) {
-    if (event.target.classList.contains("rebook-collapse")) {
-        event.target.classList.toggle("active");
-        var content = event.target.nextElementSibling;
-        if (content.style.display === "block") {
-            content.style.display = "none";
-        } else {
-            content.style.display = "block";
-        }
-    }
-})
-</script>
-<style>
-.rebook-collapse {
-  background-color: #eee;
-  color: #444;
-  cursor: pointer;
-  padding: 18px;
-  width: 100%;
-  border: none;
-  text-align: left;
-  outline: none;
-  font-size: 15px;
-}
-
-.rebook-content {
-  padding: 0 18px;
-  display: none;
-  overflow: hidden;
-  background-color: #f1f1f1;
-}
-</style>
-<p>This chapter focuses on the exploration of microbiome data and establish
-commonly used descriptors of a microbiome. The main difference to quality
-control is that the exploration assumes the technical aspects of the dataset
-have been investigated to your satisfaction. Generally speaking at this point
-you should be quite certain, that the dataset doesn’t suffer from severe
-technical biases or you should at least be aware of potential problems.</p>
-<p>In reality you might need to go back and forth between QC and exploration,
-since you discover through exploration of your dataset technical aspects you
-need to check.</p>
-<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb102-1"><a href="microbiome-exploration.html#cb102-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mia)</span>
-<span id="cb102-2"><a href="microbiome-exploration.html#cb102-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;GlobalPatterns&quot;</span>)</span>
-<span id="cb102-3"><a href="microbiome-exploration.html#cb102-3" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> GlobalPatterns </span></code></pre></div>
-<div id="prevalence" class="section level2" number="5.1">
-<h2><span class="header-section-number">5.1</span> Prevalence</h2>
-<p>Prevalence is a measurements, which describes in how many samples certain
-microbes were detected.</p>
-<p>Investigating the prevalence of microbes allows you either to focus on changes,
-which pertain to most of the samples, or to focus on less often found microbes,
-which are nonetheless abundantly found in a small number of samples.</p>
-<p>On the raw data, the population prevalence (frequency) at a 1% relative
-abundance threshold (<code>detection = 1/100</code> and <code>as_relative = TRUE</code>), can look
-like this. The low prevalence in this examples can be explained by rather
-different sample types as well as the in depth nature of the data.</p>
-<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="microbiome-exploration.html#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">getPrevalence</span>(se, <span class="at">detection =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">100</span>, <span class="at">sort =</span> <span class="cn">TRUE</span>, <span class="at">as_relative =</span> <span class="cn">TRUE</span>))</span></code></pre></div>
-<pre><code>## 331820 158660  98605 326977 145149 114821 
-## 0.2308 0.2308 0.1923 0.1923 0.1538 0.1538</code></pre>
-<p>The <code>detection</code> and <code>as_relative</code> can also be used to access, how many samples
-do pass a threshold for raw counts. Here the population prevalence (frequency)
-at the absolute abundance threshold (<code>as_relative = FALSE</code>) at read count 1
-(<code>detection = TRUE</code>) is accessed.</p>
-<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="microbiome-exploration.html#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">getPrevalence</span>(se, <span class="at">detection =</span> <span class="dv">1</span>, <span class="at">sort =</span> <span class="cn">TRUE</span>, <span class="at">abund_values =</span> <span class="st">&quot;counts&quot;</span>,</span>
-<span id="cb105-2"><a href="microbiome-exploration.html#cb105-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">as_relative =</span> <span class="cn">FALSE</span>))</span></code></pre></div>
-<pre><code>## 145149 114821 108747 526804  98605 180658 
-##      1      1      1      1      1      1</code></pre>
-<p>Note that, if the output should used for subsetting or storing the data in
-the <code>rowData</code>, set <code>sort = FALSE</code>.</p>
-<div id="prevalent-microbiota-analysis" class="section level3" number="5.1.1">
-<h3><span class="header-section-number">5.1.1</span> Prevalent microbiota analysis</h3>
-<p>To investigate the microbiome data at a selected taxonomic levels, two
-approaches are available.</p>
-<p>First the data can be agglomerated to the taxonomic level and <code>getPrevalence</code>
-be used on the result.</p>
-<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="microbiome-exploration.html#cb107-1" aria-hidden="true" tabindex="-1"></a><span class="fu">altExp</span>(se,<span class="st">&quot;Phylum&quot;</span>) <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(se, <span class="st">&quot;Phylum&quot;</span>)</span>
-<span id="cb107-2"><a href="microbiome-exploration.html#cb107-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">getPrevalence</span>(<span class="fu">altExp</span>(se,<span class="st">&quot;Phylum&quot;</span>), <span class="at">detection =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">100</span>, <span class="at">sort =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb107-3"><a href="microbiome-exploration.html#cb107-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">abund_values =</span> <span class="st">&quot;counts&quot;</span>, <span class="at">as_relative =</span> <span class="cn">TRUE</span>))</span></code></pre></div>
-<pre><code>##   Phylum:Bacteroidetes  Phylum:Proteobacteria  Phylum:Actinobacteria 
-##                 1.0000                 0.9231                 0.8462 
-##   Phylum:Cyanobacteria      Phylum:Firmicutes Phylum:Verrucomicrobia 
-##                 0.6154                 0.5769                 0.4615</code></pre>
-<p>Alternatively the <code>rank</code> argument can be set, to perform the agglomeration on
-the fly.</p>
-<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="microbiome-exploration.html#cb109-1" aria-hidden="true" tabindex="-1"></a><span class="fu">altExp</span>(se,<span class="st">&quot;Phylum&quot;</span>) <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(se, <span class="st">&quot;Phylum&quot;</span>)</span>
-<span id="cb109-2"><a href="microbiome-exploration.html#cb109-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">getPrevalence</span>(se, <span class="at">rank =</span> <span class="st">&quot;Phylum&quot;</span>, <span class="at">detection =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">100</span>, <span class="at">sort =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb109-3"><a href="microbiome-exploration.html#cb109-3" aria-hidden="true" tabindex="-1"></a>                   <span class="at">abund_values =</span> <span class="st">&quot;counts&quot;</span>, <span class="at">as_relative =</span> <span class="cn">TRUE</span>))</span></code></pre></div>
-<pre><code>##   Bacteroidetes  Proteobacteria  Actinobacteria   Cyanobacteria      Firmicutes 
-##          1.0000          0.9231          0.8462          0.6154          0.5769 
-## Verrucomicrobia 
-##          0.4615</code></pre>
-<p>The difference in the naming scheme, is that by default <code>na.rm = TRUE</code> is used
-for agglomeration in <code>getPrevalence</code>, whereas the default for
-<code>agglomerateByRank</code> is <code>FALSE</code> to prevent accidental data loss.</p>
-<p>If you only need the names of the prevalent taxa, <code>getPrevalentTaxa</code> is
-available. This returns the taxa that exceed the given prevalence and detection
-thresholds.</p>
-<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="microbiome-exploration.html#cb111-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getPrevalentTaxa</span>(se, <span class="at">detection =</span> <span class="dv">0</span>, <span class="at">prevalence =</span> <span class="dv">50</span><span class="sc">/</span><span class="dv">100</span>)</span>
-<span id="cb111-2"><a href="microbiome-exploration.html#cb111-2" aria-hidden="true" tabindex="-1"></a>prev <span class="ot">&lt;-</span> <span class="fu">getPrevalentTaxa</span>(se, <span class="at">detection =</span> <span class="dv">0</span>, <span class="at">prevalence =</span> <span class="dv">50</span><span class="sc">/</span><span class="dv">100</span>,</span>
-<span id="cb111-3"><a href="microbiome-exploration.html#cb111-3" aria-hidden="true" tabindex="-1"></a>                         <span class="at">rank =</span> <span class="st">&quot;Phylum&quot;</span>, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb111-4"><a href="microbiome-exploration.html#cb111-4" aria-hidden="true" tabindex="-1"></a>prev</span></code></pre></div>
-<p>Note, that the <code>detection</code> and <code>prevalence</code> thresholds are not the same, since
-<code>detection</code> can be applied to relative counts or absolute couts depending on
-whether <code>as_relative</code> is set <code>TRUE</code> or <code>FALSE</code></p>
-<p>TODO
-See also related functions for the analysis of rare and variable taxa
-(rareMembers; rareAbundance; lowAbundance).</p>
-</div>
-<div id="plotting-prevalence" class="section level3" number="5.1.2">
-<h3><span class="header-section-number">5.1.2</span> Plotting prevalence</h3>
-<p>To plot the prevalence, the data is first added to the <code>rowData</code>.</p>
-<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="microbiome-exploration.html#cb112-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rowData</span>(<span class="fu">altExp</span>(se,<span class="st">&quot;Phylum&quot;</span>))<span class="sc">$</span>prevalence <span class="ot">&lt;-</span> </span>
-<span id="cb112-2"><a href="microbiome-exploration.html#cb112-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">getPrevalence</span>(<span class="fu">altExp</span>(se,<span class="st">&quot;Phylum&quot;</span>), <span class="at">detection =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">100</span>, <span class="at">sort =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb112-3"><a href="microbiome-exploration.html#cb112-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">abund_values =</span> <span class="st">&quot;counts&quot;</span>, <span class="at">as_relative =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
-<p>Then it can be plotted via the plotting functions from the <code>scater</code> package.</p>
-<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="microbiome-exploration.html#cb113-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(scater)</span>
-<span id="cb113-2"><a href="microbiome-exploration.html#cb113-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plotRowData</span>(<span class="fu">altExp</span>(se,<span class="st">&quot;Phylum&quot;</span>), <span class="st">&quot;prevalence&quot;</span>, <span class="at">colour_by =</span> <span class="st">&quot;Phylum&quot;</span>)</span></code></pre></div>
-<p><img src="13_microbiome_exploration_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
-<p>Additionally, the prevalence can be plotted on the taxonomic tree using the
-<code>miaViz</code> package.</p>
-<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="microbiome-exploration.html#cb114-1" aria-hidden="true" tabindex="-1"></a><span class="fu">altExps</span>(se) <span class="ot">&lt;-</span> <span class="fu">splitByRanks</span>(se)</span>
-<span id="cb114-2"><a href="microbiome-exploration.html#cb114-2" aria-hidden="true" tabindex="-1"></a><span class="fu">altExps</span>(se) <span class="ot">&lt;-</span></span>
-<span id="cb114-3"><a href="microbiome-exploration.html#cb114-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">lapply</span>(<span class="fu">altExps</span>(se),</span>
-<span id="cb114-4"><a href="microbiome-exploration.html#cb114-4" aria-hidden="true" tabindex="-1"></a>          <span class="cf">function</span>(y){</span>
-<span id="cb114-5"><a href="microbiome-exploration.html#cb114-5" aria-hidden="true" tabindex="-1"></a>              <span class="fu">rowData</span>(y)<span class="sc">$</span>prevalence <span class="ot">&lt;-</span> </span>
-<span id="cb114-6"><a href="microbiome-exploration.html#cb114-6" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">getPrevalence</span>(y, <span class="at">detection =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">100</span>, <span class="at">sort =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb114-7"><a href="microbiome-exploration.html#cb114-7" aria-hidden="true" tabindex="-1"></a>                                <span class="at">abund_values =</span> <span class="st">&quot;counts&quot;</span>, <span class="at">as_relative =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb114-8"><a href="microbiome-exploration.html#cb114-8" aria-hidden="true" tabindex="-1"></a>              y</span>
-<span id="cb114-9"><a href="microbiome-exploration.html#cb114-9" aria-hidden="true" tabindex="-1"></a>          })</span>
-<span id="cb114-10"><a href="microbiome-exploration.html#cb114-10" aria-hidden="true" tabindex="-1"></a>top_phyla <span class="ot">&lt;-</span> <span class="fu">getTopTaxa</span>(<span class="fu">altExp</span>(se,<span class="st">&quot;Phylum&quot;</span>),</span>
-<span id="cb114-11"><a href="microbiome-exploration.html#cb114-11" aria-hidden="true" tabindex="-1"></a>                        <span class="at">method=</span><span class="st">&quot;prevalence&quot;</span>,</span>
-<span id="cb114-12"><a href="microbiome-exploration.html#cb114-12" aria-hidden="true" tabindex="-1"></a>                        <span class="at">top=</span>10L,</span>
-<span id="cb114-13"><a href="microbiome-exploration.html#cb114-13" aria-hidden="true" tabindex="-1"></a>                        <span class="at">abund_values=</span><span class="st">&quot;counts&quot;</span>)</span>
-<span id="cb114-14"><a href="microbiome-exploration.html#cb114-14" aria-hidden="true" tabindex="-1"></a>top_phyla_mean <span class="ot">&lt;-</span> <span class="fu">getTopTaxa</span>(<span class="fu">altExp</span>(se,<span class="st">&quot;Phylum&quot;</span>),</span>
-<span id="cb114-15"><a href="microbiome-exploration.html#cb114-15" aria-hidden="true" tabindex="-1"></a>                             <span class="at">method=</span><span class="st">&quot;mean&quot;</span>,</span>
-<span id="cb114-16"><a href="microbiome-exploration.html#cb114-16" aria-hidden="true" tabindex="-1"></a>                             <span class="at">top=</span>10L,</span>
-<span id="cb114-17"><a href="microbiome-exploration.html#cb114-17" aria-hidden="true" tabindex="-1"></a>                             <span class="at">abund_values=</span><span class="st">&quot;counts&quot;</span>)</span>
-<span id="cb114-18"><a href="microbiome-exploration.html#cb114-18" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">unsplitByRanks</span>(se, <span class="at">ranks =</span> <span class="fu">taxonomyRanks</span>(se)[<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>])</span>
-<span id="cb114-19"><a href="microbiome-exploration.html#cb114-19" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">addTaxonomyTree</span>(x)</span></code></pre></div>
-<p>After some preparation the data is assembled and can be plotted via
-<code>plotRowTree</code>.</p>
-<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="microbiome-exploration.html#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(miaViz)</span>
-<span id="cb115-2"><a href="microbiome-exploration.html#cb115-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plotRowTree</span>(x[<span class="fu">rowData</span>(x)<span class="sc">$</span>Phylum <span class="sc">%in%</span> top_phyla,],</span>
-<span id="cb115-3"><a href="microbiome-exploration.html#cb115-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">edge_colour_by =</span> <span class="st">&quot;Phylum&quot;</span>,</span>
-<span id="cb115-4"><a href="microbiome-exploration.html#cb115-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">tip_colour_by =</span> <span class="st">&quot;prevalence&quot;</span>,</span>
-<span id="cb115-5"><a href="microbiome-exploration.html#cb115-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">node_colour_by =</span> <span class="st">&quot;prevalence&quot;</span>)</span></code></pre></div>
-<div class="figure"><span id="fig:plot-prev-prev"></span>
-<img src="13_microbiome_exploration_files/figure-html/plot-prev-prev-1.png" alt="Prevalence of top phyla as judged by prevalence" width="672" />
-<p class="caption">
-Figure 5.1: Prevalence of top phyla as judged by prevalence
-</p>
-</div>
-<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb116-1"><a href="microbiome-exploration.html#cb116-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotRowTree</span>(x[<span class="fu">rowData</span>(x)<span class="sc">$</span>Phylum <span class="sc">%in%</span> top_phyla_mean,],</span>
-<span id="cb116-2"><a href="microbiome-exploration.html#cb116-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">edge_colour_by =</span> <span class="st">&quot;Phylum&quot;</span>,</span>
-<span id="cb116-3"><a href="microbiome-exploration.html#cb116-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">tip_colour_by =</span> <span class="st">&quot;prevalence&quot;</span>,</span>
-<span id="cb116-4"><a href="microbiome-exploration.html#cb116-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">node_colour_by =</span> <span class="st">&quot;prevalence&quot;</span>)</span></code></pre></div>
-<div class="figure"><span id="fig:plot-prev-mean"></span>
-<img src="13_microbiome_exploration_files/figure-html/plot-prev-mean-1.png" alt="Prevalence of top phyla as judged by mean abundance" width="672" />
-<p class="caption">
-Figure 5.2: Prevalence of top phyla as judged by mean abundance
-</p>
-</div>
-</div>
-</div>
-<div id="session-info-4" class="section level2 unnumbered">
-<h2>Session Info</h2>
-<button class="rebook-collapse">
-View session info
-</button>
-<div class="rebook-content">
-<pre><code>R version 4.1.0 (2021-05-18)
-Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.2 LTS
-
-Matrix products: default
-BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
-
-locale:
- [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
- [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
- [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=C             
- [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
- [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
-
-attached base packages:
-[1] stats4    stats     graphics  grDevices utils     datasets  methods  
-[8] base     
-
-other attached packages:
- [1] miaViz_1.1.2                   ggraph_2.0.5                  
- [3] scater_1.21.2                  ggplot2_3.3.5                 
- [5] scuttle_1.3.0                  mia_1.1.7                     
- [7] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.1             
- [9] XVector_0.33.0                 SingleCellExperiment_1.15.1   
-[11] SummarizedExperiment_1.23.1    Biobase_2.53.0                
-[13] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
-[15] IRanges_2.27.0                 S4Vectors_0.31.0              
-[17] BiocGenerics_0.39.1            MatrixGenerics_1.5.1          
-[19] matrixStats_0.59.0             BiocStyle_2.21.3              
-[21] rebook_1.3.0                  
-
-loaded via a namespace (and not attached):
-  [1] ggtree_3.1.2                ggnewscale_0.4.5           
-  [3] ggbeeswarm_0.6.0            colorspace_2.0-2           
-  [5] ellipsis_0.3.2              BiocNeighbors_1.11.0       
-  [7] aplot_0.0.6                 farver_2.1.0               
-  [9] graphlayouts_0.7.1          ggrepel_0.9.1              
- [11] bit64_4.0.5                 fansi_0.5.0                
- [13] decontam_1.13.0             splines_4.1.0              
- [15] codetools_0.2-18            sparseMatrixStats_1.5.0    
- [17] cachem_1.0.5                knitr_1.33                 
- [19] polyclip_1.10-0             jsonlite_1.7.2             
- [21] cluster_2.1.2               graph_1.71.2               
- [23] ggforce_0.3.3               BiocManager_1.30.16        
- [25] compiler_4.1.0              rvcheck_0.1.8              
- [27] assertthat_0.2.1            Matrix_1.3-4               
- [29] fastmap_1.1.0               lazyeval_0.2.2             
- [31] tweenr_1.0.2                BiocSingular_1.9.1         
- [33] htmltools_0.5.1.1           tools_4.1.0                
- [35] igraph_1.2.6                rsvd_1.0.5                 
- [37] gtable_0.3.0                glue_1.4.2                 
- [39] GenomeInfoDbData_1.2.6      reshape2_1.4.4             
- [41] dplyr_1.0.7                 Rcpp_1.0.7                 
- [43] jquerylib_0.1.4             vctrs_0.3.8                
- [45] ape_5.5                     nlme_3.1-152               
- [47] DECIPHER_2.21.0             DelayedMatrixStats_1.15.0  
- [49] xfun_0.24                   stringr_1.4.0              
- [51] beachmat_2.9.0              lifecycle_1.0.0            
- [53] irlba_2.3.3                 XML_3.99-0.6               
- [55] zlibbioc_1.39.0             MASS_7.3-54                
- [57] scales_1.1.1                tidygraph_1.2.0            
- [59] parallel_4.1.0              yaml_2.2.1                 
- [61] memoise_2.0.0               gridExtra_2.3              
- [63] sass_0.4.0                  stringi_1.7.3              
- [65] RSQLite_2.2.7               highr_0.9                  
- [67] ScaledMatrix_1.1.0          tidytree_0.3.4             
- [69] permute_0.9-5               filelock_1.0.2             
- [71] BiocParallel_1.27.2         rlang_0.4.11               
- [73] pkgconfig_2.0.3             bitops_1.0-7               
- [75] evaluate_0.14               lattice_0.20-44            
- [77] purrr_0.3.4                 patchwork_1.1.1            
- [79] labeling_0.4.2              treeio_1.17.2              
- [81] CodeDepends_0.6.5           cowplot_1.1.1              
- [83] bit_4.0.4                   tidyselect_1.1.1           
- [85] plyr_1.8.6                  magrittr_2.0.1             
- [87] bookdown_0.22               R6_2.5.0                   
- [89] generics_0.1.0              DelayedArray_0.19.1        
- [91] DBI_1.1.1                   withr_2.4.2                
- [93] mgcv_1.8-36                 pillar_1.6.1               
- [95] RCurl_1.98-1.3              tibble_3.1.3               
- [97] dir.expiry_1.1.0            crayon_1.4.1               
- [99] utf8_1.2.2                  rmarkdown_2.9              
-[101] viridis_0.6.1               grid_4.1.0                 
-[103] blob_1.2.2                  vegan_2.5-7                
-[105] digest_0.6.27               tidyr_1.1.3                
-[107] munsell_0.5.0               DirichletMultinomial_1.35.0
-[109] beeswarm_0.4.0              viridisLite_0.4.0          
-[111] vipor_0.4.5                 bslib_0.2.5.1              </code></pre>
-</div>
+<div id="introduction-to-bioconductor-classes" class="section level1 unnumbered">
+<h1>Introduction to Bioconductor Classes</h1>
+<p><strong>S4 system</strong></p>
+<p>S4 class system has brought several useful features to the object-oriented programming paradigm within R.
+It has been constantly deployed in R packages, including the <a href="https://bioconductor.org/">Bioconductor</a> package.</p>
+<div class="line-block">  Books:</div>
+<ul>
+<li>John M. Chambers. Software for Data Analysis: Programming with R. Springer, New York, 2008. ISBN-13 978-0387759357.</li>
+<li>I Robert Gentleman. R Programming for Bioinformatics. Chapman &amp; Hall/CRC, New York, 2008. ISBN-13 978-1420063677</li>
+</ul>
+<div class="line-block">  Online Document:</div>
+<ul>
+<li>Hervé Pagès, <a href="https://bioconductor.org/packages/release/bioc/vignettes/S4Vectors/inst/doc/S4QuickOverview.pdf">A quick overview of the S4 class system</a>.</li>
+<li>Laurent Gatto, <a href="https://bioconductor.org/help/course-materials/2013/CSAMA2013/friday/afternoon/S4-tutorial.pdf">A practical tutorial on S4 programming</a></li>
+<li>John M. Chambers. <a href="http://developer.r-project.org/howMethodsWork.pdf">How S4 Methods Work</a></li>
+</ul>
+<p><strong>Additional useful classes include:</strong></p>
+<ul>
+<li><a href="https://rdrr.io/bioc/S4Vectors/man/DataFrame-class.html">DataFrame</a> which behaves similarly to <code>data.frame</code>, yet efficient and fast when used with large datasets.</li>
+<li><a href="https://rdrr.io/bioc/Biostrings/man/DNAString-class.html">DNAString</a> along with <code>DNAStringSet</code>,<code>RNAString</code> and <code>RNAStringSet</code> efficient storage and handling of long biological sequences are offered within the <a href="https://rdrr.io/bioc/Biostrings/">Biostrings</a> package.</li>
+<li><a href="https://bioconductor.org/packages/3.13/bioc/html/GenomicRanges.html">GenomicRanges</a> offers an efficient representation and manipulation of genomic annotations and alignments, see e.g. <code>GRanges</code> and <code>GRangesList</code> at <a href="https://bioconductor.org/packages/release/bioc/vignettes/GenomicRanges/inst/doc/GenomicRangesIntroduction.html">An Introduction to the GenomicRangesPackage</a>.</li>
+</ul>
+<p><a href="http://girke.bioinformatics.ucr.edu/GEN242/tutorials/rsequences/rsequences/">NGS Analysis Basics</a> is an example walk-through of the above mentioned features, with detailed examples provided.</p>
 
 </div>
-</div>
+
+
+
             </section>
 
           </div>
         </div>
       </div>
-<a href="quality-control.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="alpha-diversity.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="data-introduction.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
