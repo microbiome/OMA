@@ -63,8 +63,8 @@ available. The Hill coefficient combines many standard indices into a
 single equation that provides observed richness, inverse Simpson, and
 Shannon diversity, and generalized diversity as special cases. In
 general, diversity increases together with increasing richness and
-evenness. Sometimes richness, evenness, and dominance are considered
-to be variants of alpha diversity.
+evenness. Sometimes richness, phylogenetic diversity, evenness, dominance, 
+and rarity are considered to be variants of alpha diversity.
 
 **Richness** refers to the total number of species in a community
 (sample). The simplest richness index is the number of observed
@@ -90,6 +90,10 @@ by species abundances.
   diversity, and sometimes used in ecological literature. High
   dominance is obtained when one or few species have a high share of
   the total species abundance in the community.  
+  
+**Rarity** indices characterize the concentration of taxa at low abundance. 
+  Prevalence and detection thresholds determine rare taxa whose total concentration
+  is represented as a rarity index.
   
 ## Estimating alpha diversity
 
@@ -247,8 +251,22 @@ head(colData(se)$relative)
 ```
 
 ### Rarity  
-TODO...
 
+`mia` package provides one rarity index called log-modulo skewness. It can be 
+calculated with `estimateDiversity`.
+
+
+```r
+se <- mia::estimateDiversity(se, 
+                             abund_values = "counts",
+                             index = "log_modulo_skewness")
+
+head(colData(se)$log_modulo_skewness)
+```
+
+```
+## [1] 2.061 2.061 2.061 2.061 2.061 2.061
+```
 
 
 ## Visualize alpha diversities  
