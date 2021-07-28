@@ -269,7 +269,7 @@ other attached packages:
 [13] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
 [15] IRanges_2.27.0                 S4Vectors_0.31.0              
 [17] BiocGenerics_0.39.1            MatrixGenerics_1.5.1          
-[19] matrixStats_0.59.0             BiocStyle_2.21.3              
+[19] matrixStats_0.60.0             BiocStyle_2.21.3              
 [21] rebook_1.3.0                  
 
 loaded via a namespace (and not attached):

@@ -498,7 +498,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2779
+## [1] 0.2674
 ```
 
 In this case, the community composition is not significantly different
@@ -597,7 +597,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] microbiomeDataSets_1.1.0       MultiAssayExperiment_1.19.3   
+ [1] microbiomeDataSets_1.1.1       MultiAssayExperiment_1.19.3   
  [3] DT_0.18                        dplyr_1.0.7                   
  [5] curatedMetagenomicData_3.1.1   scater_1.21.2                 
  [7] scuttle_1.3.0                  ggplot2_3.3.5                 
@@ -609,7 +609,7 @@ other attached packages:
 [19] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
 [21] IRanges_2.27.0                 S4Vectors_0.31.0              
 [23] BiocGenerics_0.39.1            MatrixGenerics_1.5.1          
-[25] matrixStats_0.59.0             BiocStyle_2.21.3              
+[25] matrixStats_0.60.0             BiocStyle_2.21.3              
 [27] rebook_1.3.0                  
 
 loaded via a namespace (and not attached):

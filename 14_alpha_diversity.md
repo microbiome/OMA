@@ -300,7 +300,7 @@ other attached packages:
 [11] Biobase_2.53.0                 GenomicRanges_1.45.0          
 [13] GenomeInfoDb_1.29.3            IRanges_2.27.0                
 [15] S4Vectors_0.31.0               BiocGenerics_0.39.1           
-[17] MatrixGenerics_1.5.1           matrixStats_0.59.0            
+[17] MatrixGenerics_1.5.1           matrixStats_0.60.0            
 [19] BiocStyle_2.21.3               rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
