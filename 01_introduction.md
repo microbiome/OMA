@@ -446,11 +446,41 @@ library(mia)
 # phyloseq example data
 data(GlobalPatterns, package="phyloseq") 
 GlobalPatterns_phyloseq <- GlobalPatterns
-
-# convert phyloseq to TSE
-GlobalPatterns_TSE <- makeTreeSummarizedExperimentFromPhyloseq(GlobalPatterns_phyloseq) 
+GlobalPatterns_phyloseq
 ```
 
+```
+## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 19216 taxa and 26 samples ]
+## sample_data() Sample Data:       [ 26 samples by 7 sample variables ]
+## tax_table()   Taxonomy Table:    [ 19216 taxa by 7 taxonomic ranks ]
+## phy_tree()    Phylogenetic Tree: [ 19216 tips and 19215 internal nodes ]
+```
+
+
+```r
+# convert phyloseq to TSE
+GlobalPatterns_TSE <- makeTreeSummarizedExperimentFromPhyloseq(GlobalPatterns_phyloseq) 
+GlobalPatterns_TSE
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 19216 26 
+## metadata(0):
+## assays(1): counts
+## rownames(19216): 549322 522457 ... 200359 271582
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(26): CL3 CC1 ... Even2 Even3
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (19216 rows)
+## rowTree: 1 phylo tree(s) (19216 leaves)
+## colLinks: NULL
+## colTree: NULL
+```
 
 We can also convert `TreeSummarizedExperiment` objects into `phyloseq`
 with respect to the shared components that are supported by both
@@ -458,11 +488,20 @@ formats (i.e. taxonomic abundance table, sample metadata, taxonomic
 table, phylogenetic tree, sequence information). This is useful for
 instance when additional methods are available for `phyloseq`.
 
-TODO: conversion function from TSE to phyloseq
 
+```r
+# convert TSE to phyloseq
+GlobalPatterns_phyloseq2 <- makePhyloseqFromTreeSummarizedExperiment(GlobalPatterns_TSE) 
+GlobalPatterns_phyloseq2
+```
 
-
-
+```
+## phyloseq-class experiment-level object
+## otu_table()   OTU Table:         [ 19216 taxa and 26 samples ]
+## sample_data() Sample Data:       [ 26 samples by 7 sample variables ]
+## tax_table()   Taxonomy Table:    [ 19216 taxa by 7 taxonomic ranks ]
+## phy_tree()    Phylogenetic Tree: [ 19216 tips and 19215 internal nodes ]
+```
 
 ## Metadata
 
@@ -471,7 +510,7 @@ TODO: conversion function from TSE to phyloseq
 
 ```r
 library(mia)
-data("GlobalPatterns")
+data("GlobalPatterns", package = "mia")
 se <- GlobalPatterns 
 se
 ```
@@ -825,14 +864,15 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.1.7                      TreeSummarizedExperiment_2.1.3
- [3] Biostrings_2.61.1              XVector_0.33.0                
- [5] SingleCellExperiment_1.15.1    SummarizedExperiment_1.23.1   
- [7] Biobase_2.53.0                 GenomicRanges_1.45.0          
- [9] GenomeInfoDb_1.29.3            IRanges_2.27.0                
-[11] S4Vectors_0.31.0               BiocGenerics_0.39.1           
-[13] MatrixGenerics_1.5.1           matrixStats_0.60.0            
-[15] BiocStyle_2.21.3               rebook_1.3.0                  
+ [1] phyloseq_1.37.0                mia_1.1.7                     
+ [3] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.1             
+ [5] XVector_0.33.0                 SingleCellExperiment_1.15.1   
+ [7] SummarizedExperiment_1.23.1    Biobase_2.53.0                
+ [9] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
+[11] IRanges_2.27.0                 S4Vectors_0.31.0              
+[13] BiocGenerics_0.39.1            MatrixGenerics_1.5.1          
+[15] matrixStats_0.60.0             BiocStyle_2.21.3              
+[17] rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
   [1] ggbeeswarm_0.6.0            colorspace_2.0-2           
@@ -842,54 +882,53 @@ loaded via a namespace (and not attached):
   [9] splines_4.1.0               codetools_0.2-18           
  [11] sparseMatrixStats_1.5.0     cachem_1.0.5               
  [13] knitr_1.33                  scater_1.21.2              
- [15] ade4_1.7-17                 phyloseq_1.37.0            
- [17] jsonlite_1.7.2              cluster_2.1.2              
- [19] graph_1.71.2                BiocManager_1.30.16        
- [21] compiler_4.1.0              assertthat_0.2.1           
- [23] Matrix_1.3-4                fastmap_1.1.0              
- [25] lazyeval_0.2.2              cli_3.0.1                  
- [27] BiocSingular_1.9.1          htmltools_0.5.1.1          
- [29] tools_4.1.0                 igraph_1.2.6               
- [31] rsvd_1.0.5                  gtable_0.3.0               
- [33] glue_1.4.2                  GenomeInfoDbData_1.2.6     
- [35] reshape2_1.4.4              dplyr_1.0.7                
- [37] Rcpp_1.0.7                  jquerylib_0.1.4            
- [39] rhdf5filters_1.5.0          vctrs_0.3.8                
- [41] multtest_2.49.0             ape_5.5                    
- [43] nlme_3.1-152                DECIPHER_2.21.0            
- [45] iterators_1.0.13            DelayedMatrixStats_1.15.0  
- [47] xfun_0.24                   stringr_1.4.0              
- [49] beachmat_2.9.0              lifecycle_1.0.0            
- [51] irlba_2.3.3                 XML_3.99-0.6               
- [53] zlibbioc_1.39.0             MASS_7.3-54                
- [55] scales_1.1.1                biomformat_1.21.0          
- [57] parallel_4.1.0              rhdf5_2.37.0               
- [59] yaml_2.2.1                  memoise_2.0.0              
- [61] gridExtra_2.3               ggplot2_3.3.5              
- [63] sass_0.4.0                  stringi_1.7.3              
- [65] RSQLite_2.2.7               foreach_1.5.1              
- [67] ScaledMatrix_1.1.0          tidytree_0.3.4             
- [69] permute_0.9-5               filelock_1.0.2             
- [71] BiocParallel_1.27.2         rlang_0.4.11               
- [73] pkgconfig_2.0.3             bitops_1.0-7               
- [75] evaluate_0.14               lattice_0.20-44            
- [77] Rhdf5lib_1.15.2             purrr_0.3.4                
- [79] treeio_1.17.2               CodeDepends_0.6.5          
- [81] bit_4.0.4                   tidyselect_1.1.1           
- [83] plyr_1.8.6                  magrittr_2.0.1             
- [85] bookdown_0.22               R6_2.5.0                   
- [87] generics_0.1.0              DelayedArray_0.19.1        
- [89] DBI_1.1.1                   mgcv_1.8-36                
- [91] pillar_1.6.1                survival_3.2-11            
- [93] RCurl_1.98-1.3              tibble_3.1.3               
- [95] dir.expiry_1.1.0            crayon_1.4.1               
- [97] utf8_1.2.2                  rmarkdown_2.9              
- [99] viridis_0.6.1               grid_4.1.0                 
-[101] data.table_1.14.0           blob_1.2.2                 
-[103] vegan_2.5-7                 digest_0.6.27              
-[105] tidyr_1.1.3                 munsell_0.5.0              
-[107] DirichletMultinomial_1.35.0 beeswarm_0.4.0             
-[109] viridisLite_0.4.0           vipor_0.4.5                
-[111] bslib_0.2.5.1              
+ [15] ade4_1.7-17                 jsonlite_1.7.2             
+ [17] cluster_2.1.2               graph_1.71.2               
+ [19] BiocManager_1.30.16         compiler_4.1.0             
+ [21] assertthat_0.2.1            Matrix_1.3-4               
+ [23] fastmap_1.1.0               lazyeval_0.2.2             
+ [25] cli_3.0.1                   BiocSingular_1.9.1         
+ [27] htmltools_0.5.1.1           tools_4.1.0                
+ [29] igraph_1.2.6                rsvd_1.0.5                 
+ [31] gtable_0.3.0                glue_1.4.2                 
+ [33] GenomeInfoDbData_1.2.6      reshape2_1.4.4             
+ [35] dplyr_1.0.7                 Rcpp_1.0.7                 
+ [37] jquerylib_0.1.4             rhdf5filters_1.5.0         
+ [39] vctrs_0.3.8                 multtest_2.49.0            
+ [41] ape_5.5                     nlme_3.1-152               
+ [43] DECIPHER_2.21.0             iterators_1.0.13           
+ [45] DelayedMatrixStats_1.15.0   xfun_0.24                  
+ [47] stringr_1.4.0               beachmat_2.9.0             
+ [49] lifecycle_1.0.0             irlba_2.3.3                
+ [51] XML_3.99-0.6                zlibbioc_1.39.0            
+ [53] MASS_7.3-54                 scales_1.1.1               
+ [55] biomformat_1.21.0           parallel_4.1.0             
+ [57] rhdf5_2.37.0                yaml_2.2.1                 
+ [59] memoise_2.0.0               gridExtra_2.3              
+ [61] ggplot2_3.3.5               sass_0.4.0                 
+ [63] stringi_1.7.3               RSQLite_2.2.7              
+ [65] foreach_1.5.1               ScaledMatrix_1.1.0         
+ [67] tidytree_0.3.4              permute_0.9-5              
+ [69] filelock_1.0.2              BiocParallel_1.27.2        
+ [71] rlang_0.4.11                pkgconfig_2.0.3            
+ [73] bitops_1.0-7                evaluate_0.14              
+ [75] lattice_0.20-44             Rhdf5lib_1.15.2            
+ [77] purrr_0.3.4                 treeio_1.17.2              
+ [79] CodeDepends_0.6.5           bit_4.0.4                  
+ [81] tidyselect_1.1.1            plyr_1.8.6                 
+ [83] magrittr_2.0.1              bookdown_0.22              
+ [85] R6_2.5.0                    generics_0.1.0             
+ [87] DelayedArray_0.19.1         DBI_1.1.1                  
+ [89] mgcv_1.8-36                 pillar_1.6.1               
+ [91] survival_3.2-11             RCurl_1.98-1.3             
+ [93] tibble_3.1.3                dir.expiry_1.1.0           
+ [95] crayon_1.4.1                utf8_1.2.2                 
+ [97] rmarkdown_2.9               viridis_0.6.1              
+ [99] grid_4.1.0                  data.table_1.14.0          
+[101] blob_1.2.2                  vegan_2.5-7                
+[103] digest_0.6.27               tidyr_1.1.3                
+[105] munsell_0.5.0               DirichletMultinomial_1.35.0
+[107] beeswarm_0.4.0              viridisLite_0.4.0          
+[109] vipor_0.4.5                 bslib_0.2.5.1              
 ```
 </div>
