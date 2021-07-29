@@ -274,11 +274,12 @@ head(colData(se)$log_modulo_skewness)
 A plot comparing all the diversity measures calculated above and stored in `colData` can then be constructed directly.  
 
 ```r
-plots <- lapply(c("observed", "shannon","simpson", "relative", "faith"),
+plots <- lapply(c("observed", "shannon","simpson", "relative", "faith","log_modulo_skewness"),
                 plotColData,
                 object = se,
                 x = "SampleType",
                 colour_by = "SampleType")
+
 plots <- lapply(plots,"+", theme(axis.text.x = element_text(angle=45,hjust=1)))
 ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 3, common.legend = TRUE, legend = "right")
 ```
@@ -353,7 +354,7 @@ loaded via a namespace (and not attached):
  [57] munsell_0.5.0               tools_4.1.0                
  [59] cachem_1.0.5                DirichletMultinomial_1.35.0
  [61] generics_0.1.0              RSQLite_2.2.7              
- [63] broom_0.7.8                 evaluate_0.14              
+ [63] broom_0.7.9                 evaluate_0.14              
  [65] stringr_1.4.0               fastmap_1.1.0              
  [67] yaml_2.2.1                  knitr_1.33                 
  [69] bit64_4.0.5                 zip_2.2.0                  
