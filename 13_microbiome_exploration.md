@@ -260,15 +260,15 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] miaViz_1.1.3                   ggraph_2.0.5                  
- [3] scater_1.21.2                  ggplot2_3.3.5                 
- [5] scuttle_1.3.0                  mia_1.1.7                     
- [7] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.1             
+ [1] miaViz_1.1.4                   ggraph_2.0.5                  
+ [3] scater_1.21.3                  ggplot2_3.3.5                 
+ [5] scuttle_1.3.0                  mia_1.1.8                     
+ [7] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.2             
  [9] XVector_0.33.0                 SingleCellExperiment_1.15.1   
 [11] SummarizedExperiment_1.23.1    Biobase_2.53.0                
 [13] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
 [15] IRanges_2.27.0                 S4Vectors_0.31.0              
-[17] BiocGenerics_0.39.1            MatrixGenerics_1.5.1          
+[17] BiocGenerics_0.39.1            MatrixGenerics_1.5.2          
 [19] matrixStats_0.60.0             BiocStyle_2.21.3              
 [21] rebook_1.3.0                  
 
@@ -319,7 +319,7 @@ loaded via a namespace (and not attached):
  [87] bookdown_0.22               R6_2.5.0                   
  [89] generics_0.1.0              DelayedArray_0.19.1        
  [91] DBI_1.1.1                   withr_2.4.2                
- [93] mgcv_1.8-36                 pillar_1.6.1               
+ [93] mgcv_1.8-36                 pillar_1.6.2               
  [95] RCurl_1.98-1.3              tibble_3.1.3               
  [97] dir.expiry_1.1.0            crayon_1.4.1               
  [99] utf8_1.2.2                  rmarkdown_2.9              
