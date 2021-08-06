@@ -59,49 +59,6 @@ if (!require(fido)){
 }
 ```
 
-```
-## driver       (NA -> 16e449946...) [GitHub]
-## distribut... (NA -> 0.2.2       ) [CRAN]
-## tensorA      (NA -> 0.36.2      ) [CRAN]
-## checkmate    (NA -> 2.0.0       ) [CRAN]
-## svUnit       (NA -> 1.0.6       ) [CRAN]
-## HDInterval   (NA -> 0.2.2       ) [CRAN]
-## RcppGSL      (NA -> 0.3.9       ) [CRAN]
-## posterior    (NA -> 1.0.1       ) [CRAN]
-## arrayhelpers (NA -> 1.1-0       ) [CRAN]
-## coda         (NA -> 0.19-4      ) [CRAN]
-## ggdist       (NA -> 3.0.0       ) [CRAN]
-## RcppZiggurat (NA -> 0.1.6       ) [CRAN]
-## RcppNumer... (NA -> 0.4-0       ) [CRAN]
-## tidybayes    (NA -> 3.0.0       ) [CRAN]
-## 
-##      checking for file ‘/tmp/RtmpiALWgt/remotes7c329de8600/jsilve24-driver-16e4499/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/RtmpiALWgt/remotes7c329de8600/jsilve24-driver-16e4499/DESCRIPTION’
-##   ─  preparing ‘driver’:
-##   ✔  checking DESCRIPTION meta-information
-##   ─  checking for LF line-endings in source and make files and shell scripts
-##   ─  checking for empty or unneeded directories
-##      Omitted ‘LazyData’ from DESCRIPTION
-##   ─  building ‘driver_0.1.1.tar.gz’
-##      
-##      checking for file ‘/tmp/RtmpiALWgt/remotes7c332b730a4/jsilve24-fido-c692141/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/RtmpiALWgt/remotes7c332b730a4/jsilve24-fido-c692141/DESCRIPTION’
-##   ─  preparing ‘fido’:
-##      checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
-##   ─  cleaning src
-## ─  running ‘cleanup’
-##      Warning: /tmp/RtmpdNtyvB/Rbuild95fe7f9cc4/fido/man/loglikPibbleCollapsed.Rd:28: unknown macro '\item'
-##    Warning: /tmp/RtmpdNtyvB/Rbuild95fe7f9cc4/fido/man/loglikPibbleCollapsed.Rd:30: unknown macro '\item'
-##    Warning: /tmp/RtmpdNtyvB/Rbuild95fe7f9cc4/fido/man/loglikPibbleCollapsed.Rd:33: unexpected section header '\value'
-##      Warning: /tmp/RtmpdNtyvB/Rbuild95fe7f9cc4/fido/man/loglikPibbleCollapsed.Rd:41: unexpected section header '\description'
-##    Warning: /tmp/RtmpdNtyvB/Rbuild95fe7f9cc4/fido/man/loglikPibbleCollapsed.Rd:51: unexpected section header '\examples'
-##    Warning: /tmp/RtmpdNtyvB/Rbuild95fe7f9cc4/fido/man/loglikPibbleCollapsed.Rd:83: unexpected END_OF_INPUT '
-##    '
-##   ─  checking for LF line-endings in source and make files and shell scripts
-##   ─  checking for empty or unneeded directories
-##   ─  building ‘fido_0.1.13.tar.gz’
-##      
-## 
-```
-
 Loading the libraries and importing data:
 
 
@@ -282,7 +239,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.9981
+## Proportions of Observations within 95% Credible Interval: 0.9978
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
@@ -341,80 +298,72 @@ other attached packages:
 [19] rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
-  [1] utf8_1.2.2                    tidyselect_1.1.1             
-  [3] RSQLite_2.2.7                 AnnotationDbi_1.55.1         
-  [5] grid_4.1.0                    BiocParallel_1.27.2          
-  [7] devtools_2.4.2                munsell_0.5.0                
-  [9] ScaledMatrix_1.1.0            codetools_0.2-18             
- [11] withr_2.4.2                   colorspace_2.0-2             
- [13] filelock_1.0.2                highr_0.9                    
- [15] knitr_1.33                    labeling_0.4.2               
- [17] GenomeInfoDbData_1.2.6        bit64_4.0.5                  
- [19] farver_2.1.0                  driver_0.1.1                 
- [21] rprojroot_2.0.2               coda_0.19-4                  
- [23] vctrs_0.3.8                   treeio_1.17.2                
- [25] generics_0.1.0                xfun_0.24                    
- [27] BiocFileCache_2.1.1           R6_2.5.0                     
- [29] ggbeeswarm_0.6.0              rsvd_1.0.5                   
- [31] bitops_1.0-7                  cachem_1.0.5                 
- [33] DelayedArray_0.19.1           assertthat_0.2.1             
- [35] promises_1.2.0.1              scales_1.1.1                 
- [37] beeswarm_0.4.0                gtable_0.3.0                 
- [39] beachmat_2.9.0                processx_3.5.2               
- [41] rlang_0.4.11                  splines_4.1.0                
- [43] lazyeval_0.2.2                checkmate_2.0.0              
- [45] BiocManager_1.30.16           yaml_2.2.1                   
- [47] reshape2_1.4.4                abind_1.4-5                  
- [49] backports_1.2.1               httpuv_1.6.1                 
- [51] tensorA_0.36.2                tools_4.1.0                  
- [53] usethis_2.0.1                 bookdown_0.22                
- [55] ggplot2_3.3.5                 ellipsis_0.3.2               
- [57] decontam_1.13.0               RColorBrewer_1.1-2           
- [59] jquerylib_0.1.4               posterior_1.0.1              
- [61] sessioninfo_1.1.1             Rcpp_1.0.7                   
- [63] plyr_1.8.6                    sparseMatrixStats_1.5.0      
- [65] zlibbioc_1.39.0               purrr_0.3.4                  
- [67] RCurl_1.98-1.3                ps_1.6.0                     
- [69] prettyunits_1.1.1             viridis_0.6.1                
- [71] ggrepel_0.9.1                 cluster_2.1.2                
- [73] fs_1.5.0                      DECIPHER_2.21.0              
- [75] magrittr_2.0.1                ggdist_3.0.0                 
- [77] tidybayes_3.0.0               pkgload_1.2.1                
- [79] mime_0.11                     evaluate_0.14                
- [81] arrayhelpers_1.1-0            xtable_1.8-4                 
- [83] XML_3.99-0.6                  gridExtra_2.3                
- [85] testthat_3.0.4                compiler_4.1.0               
- [87] scater_1.21.3                 tibble_3.1.3                 
- [89] crayon_1.4.1                  htmltools_0.5.1.1            
- [91] mgcv_1.8-36                   later_1.2.0                  
- [93] tidyr_1.1.3                   DBI_1.1.1                    
- [95] ExperimentHub_2.1.4           dbplyr_2.1.1                 
- [97] MASS_7.3-54                   rappdirs_0.3.3               
- [99] Matrix_1.3-4                  permute_0.9-5                
-[101] cli_3.0.1                     parallel_4.1.0               
-[103] pkgconfig_2.0.3               dir.expiry_1.1.0             
-[105] scuttle_1.3.0                 svUnit_1.0.6                 
-[107] vipor_0.4.5                   bslib_0.2.5.1                
-[109] DirichletMultinomial_1.35.0   stringr_1.4.0                
-[111] distributional_0.2.2          callr_3.7.0                  
-[113] digest_0.6.27                 vegan_2.5-7                  
-[115] graph_1.71.2                  rmarkdown_2.9                
-[117] tidytree_0.3.4                DelayedMatrixStats_1.15.0    
-[119] curl_4.3.2                    shiny_1.6.0                  
-[121] lifecycle_1.0.0               nlme_3.1-152                 
-[123] jsonlite_1.7.2                BiocNeighbors_1.11.0         
-[125] desc_1.3.0                    CodeDepends_0.6.5            
-[127] viridisLite_0.4.0             fansi_0.5.0                  
-[129] pillar_1.6.2                  lattice_0.20-44              
-[131] KEGGREST_1.33.0               fastmap_1.1.0                
-[133] httr_1.4.2                    pkgbuild_1.2.0               
-[135] interactiveDisplayBase_1.31.2 glue_1.4.2                   
-[137] remotes_2.4.0                 png_0.1-7                    
-[139] BiocVersion_3.14.0            bit_4.0.4                    
-[141] stringi_1.7.3                 sass_0.4.0                   
-[143] blob_1.2.2                    BiocSingular_1.9.1           
-[145] AnnotationHub_3.1.4           memoise_2.0.0                
-[147] dplyr_1.0.7                   irlba_2.3.3                  
-[149] ape_5.5                      
+  [1] backports_1.2.1               AnnotationHub_3.1.4          
+  [3] BiocFileCache_2.1.1           plyr_1.8.6                   
+  [5] lazyeval_0.2.2                driver_0.1.1                 
+  [7] splines_4.1.0                 svUnit_1.0.6                 
+  [9] BiocParallel_1.27.2           ggplot2_3.3.5                
+ [11] scater_1.21.3                 digest_0.6.27                
+ [13] htmltools_0.5.1.1             viridis_0.6.1                
+ [15] fansi_0.5.0                   magrittr_2.0.1               
+ [17] checkmate_2.0.0               memoise_2.0.0                
+ [19] ScaledMatrix_1.1.0            cluster_2.1.2                
+ [21] DECIPHER_2.21.0               colorspace_2.0-2             
+ [23] rappdirs_0.3.3                blob_1.2.2                   
+ [25] ggrepel_0.9.1                 ggdist_3.0.0                 
+ [27] xfun_0.24                     dplyr_1.0.7                  
+ [29] crayon_1.4.1                  RCurl_1.98-1.3               
+ [31] jsonlite_1.7.2                graph_1.71.2                 
+ [33] ape_5.5                       glue_1.4.2                   
+ [35] gtable_0.3.0                  zlibbioc_1.39.0              
+ [37] DelayedArray_0.19.1           distributional_0.2.2         
+ [39] BiocSingular_1.9.1            abind_1.4-5                  
+ [41] scales_1.1.1                  DBI_1.1.1                    
+ [43] Rcpp_1.0.7                    xtable_1.8-4                 
+ [45] viridisLite_0.4.0             decontam_1.13.0              
+ [47] tidytree_0.3.4                bit_4.0.4                    
+ [49] rsvd_1.0.5                    httr_1.4.2                   
+ [51] RColorBrewer_1.1-2            arrayhelpers_1.1-0           
+ [53] dir.expiry_1.1.0              posterior_1.0.1              
+ [55] ellipsis_0.3.2                pkgconfig_2.0.3              
+ [57] XML_3.99-0.6                  tidybayes_3.0.0              
+ [59] farver_2.1.0                  scuttle_1.3.0                
+ [61] dbplyr_2.1.1                  CodeDepends_0.6.5            
+ [63] sass_0.4.0                    utf8_1.2.2                   
+ [65] labeling_0.4.2                AnnotationDbi_1.55.1         
+ [67] later_1.2.0                   tidyselect_1.1.1             
+ [69] rlang_0.4.11                  reshape2_1.4.4               
+ [71] munsell_0.5.0                 BiocVersion_3.14.0           
+ [73] tools_4.1.0                   cachem_1.0.5                 
+ [75] DirichletMultinomial_1.35.0   generics_0.1.0               
+ [77] RSQLite_2.2.7                 ExperimentHub_2.1.4          
+ [79] evaluate_0.14                 stringr_1.4.0                
+ [81] fastmap_1.1.0                 yaml_2.2.1                   
+ [83] knitr_1.33                    bit64_4.0.5                  
+ [85] purrr_0.3.4                   KEGGREST_1.33.0              
+ [87] nlme_3.1-152                  sparseMatrixStats_1.5.0      
+ [89] mime_0.11                     compiler_4.1.0               
+ [91] png_0.1-7                     interactiveDisplayBase_1.31.2
+ [93] curl_4.3.2                    beeswarm_0.4.0               
+ [95] filelock_1.0.2                treeio_1.17.2                
+ [97] tibble_3.1.3                  bslib_0.2.5.1                
+ [99] stringi_1.7.3                 highr_0.9                    
+[101] lattice_0.20-44               Matrix_1.3-4                 
+[103] vegan_2.5-7                   permute_0.9-5                
+[105] tensorA_0.36.2                vctrs_0.3.8                  
+[107] pillar_1.6.2                  lifecycle_1.0.0              
+[109] BiocManager_1.30.16           jquerylib_0.1.4              
+[111] BiocNeighbors_1.11.0          bitops_1.0-7                 
+[113] irlba_2.3.3                   httpuv_1.6.1                 
+[115] R6_2.5.0                      promises_1.2.0.1             
+[117] bookdown_0.22                 gridExtra_2.3                
+[119] vipor_0.4.5                   codetools_0.2-18             
+[121] MASS_7.3-54                   assertthat_0.2.1             
+[123] withr_2.4.2                   GenomeInfoDbData_1.2.6       
+[125] mgcv_1.8-36                   parallel_4.1.0               
+[127] grid_4.1.0                    beachmat_2.9.0               
+[129] tidyr_1.1.3                   coda_0.19-4                  
+[131] rmarkdown_2.9                 DelayedMatrixStats_1.15.0    
+[133] shiny_1.6.0                   ggbeeswarm_0.6.0             
 ```
 </div>

@@ -11,7 +11,7 @@ github-repo: microbiome/OMA
 
 
 ---
-date: "**Authors:** Leo Lahti [aut], Sudarshan Shetty [aut], Felix GM Ernst [aut, cre]<br/>
+date: "**Authors:** Leo Lahti [aut], Sudarshan Shetty [aut], Felix GM Ernst [aut, cre], Henrik Eckermann [ctb], Chouaib Benchraka [ctb], Tuomas Borman [ctb], Shigdel Rajesh [ctb], Chandler Ross [ctb]<br/>
   **Version:** 0.98.9<br/>
   **Modified:** 2021-04-10<br/>
   **Compiled:** 2021-08-06<br/>
