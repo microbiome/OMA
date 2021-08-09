@@ -33,12 +33,16 @@ We recommend you to have a look at [Nearing et al.](https://www.biorxiv.org/cont
 
 ```{r load-pkg-data}
 library(mia)
-library(tidyverse) 
-library(tidySummarizedExperiment) # to apply dplyr functions with tse
+library(ggplot2)
+library(patchwork) # to combine ggplot objects
+library(dplyr)
+library(tibble)
+library(purrr)
+library(knitr) # to print tables neatly
+library(tidySummarizedExperiment) # to apply dplyr functions to tse objects
 library(ANCOMBC) # DAA analysis method
 library(DESeq2) # DAA analysis method
-library(knitr) # to print tables neatly
-library(patchwork) # to add ggplot objects to each other
+
 
 # we use the dmn_se dataset and restrict it to 
 # obese vs lean for easy illustration
@@ -50,6 +54,8 @@ d <- as.data.frame(colData(tse))
 count(d, pheno) %>% kable()
 
 ```
+
+
 
 
 ## Wilcoxon test
@@ -70,15 +76,18 @@ daa <- assay(tse, "clr") %>%
           add_column(x = colData(tse)[[x]])
 
 genera <- select(daa, -Sample_ID, -x) %>% colnames()
-
+# the map function is very similar to a "for loop". Here, For each genus in
+# the vector genera, perform the actions in {} while genus is a place holder 
+# for each genus.
 wilcoxon_p <- map_dfr(genera, function(genus) {
   form <- as.formula(glue::glue("{genus} ~ x"))
   p <- wilcox.test(form, data = daa)$p.value
   tibble(genus = genus, p = p)
 })
 
-# check the number of differentially abundant taxa between groups
+# adjust for multiple testing 
 wilcoxon_p$p_adjusted <- p.adjust(wilcoxon_p$p, method = "fdr")
+# check the number of differentially abundant taxa between groups
 ggplot(wilcoxon_p, aes(p_adjusted)) +
   geom_histogram()
 ```
@@ -108,11 +117,15 @@ df <- as.data.frame(res)
 # Adds taxon column that includes names of taxa
 df$taxon <- rownames(df)
 
-# Orders the rows of data frame in increasing order firstly based on column "log2FoldChange" 
-# and secondly based on "padj" column
+
 ggplot(df, aes(padj)) +
   geom_histogram()
-kable(head(df))
+# Orders the rows of data frame in decreasing order based on column
+# "log2FoldChange" and secondly based on "padj" column in ascending order
+# then show the top 6 only.
+arrange(df, desc(log2FoldChange), padj) %>%
+  head() %>%
+  kable()
 ```
 
 ## ANCOM-BC
@@ -187,7 +200,10 @@ summ <- full_join(
   rownames_to_column(out$res$diff_abn, "genus"),
   by = "genus") %>%
   full_join(wilcoxon_p, by = "genus") %>%
+  # rename according to which padj value belong to which method
   select(genus, wilcoxon = p_adjusted, deseq2 = padj, ancombc = phenoObese) %>%
+  # apply decision criterion of padj <= 0.05; address issue based on naming 
+  # error (see below comment)
   mutate(
     across(c(deseq2, wilcoxon), function(x) x <= 0.05),
     across(c(deseq2, wilcoxon, ancombc), function(x) ifelse(is.na(x), FALSE, x)),
@@ -195,10 +211,12 @@ summ <- full_join(
   )
 # one thing you always have to watch out for is the naming of taxa. R might
 # change the names, e.g. if you generate a dataframe while the given names are
-# not allowed to be column names. This happened here with Escherichia/Shigella
-# and that caused some of the NA values. Make sure to always inspect why you
-# got NA values instead of a pvalue. Since Escherichia/Shigella was FALSE for
-# all methods, I could fix it above by just setting the NA to FALSE.
+# not suitable to be column names. This happened here with Escherichia/Shigella,
+# which was change to Escherichia.Shigella by R. That caused some of the NA
+# values where we expected p values or booleans (ANCOMBC output). Make sure to
+# always inspect why you do not get the output you would have expected. Since
+# Escherichia/Shigella was FALSE for all methods, I can easily work around this 
+# by setting the NAs to FALSE.
 
 # which genera are identified by all methods?
 filter(summ, score == 3) %>% kable()
@@ -242,7 +260,7 @@ ancombc_plots[[1]] +
 
 ## Confounding effects 
 
-To perform causal inference, it is crucial that the method is able to include covariates in the model. This is not possible with e.g. the Wilcoxon test. Other methods such as both ANCOM methods, DESeq2, MaAsLin2 and others allow this. Below we show how to include a covariate in ANCOM-BC. See e.g. [here](https://hbctraining.github.io/DGE_workshop/lessons/04_DGE_DESeq2_analysis.html) on how to do the same for DESeq2. It is very similar for all the methods that allow this.
+To perform causal inference, it is crucial that the method is able to include covariates in the model. This is not possible with e.g. the Wilcoxon test. Other methods such as both ANCOM methods, DESeq2, MaAsLin2 and others allow this. Below we show how to include a covariate in ANCOM-BC. See e.g. [here](https://hbctraining.github.io/DGE_workshop/lessons/04_DGE_DESeq2_analysis.html) on how to do the same for DESeq2. It is very similar for all the methods that allow this. Since in this dataset there are no covariates, I first simulate a new variable and add it to the TSE object.
 
 ```{r}
 # to join new data to existing colData we need to put rownames as a column 
@@ -260,7 +278,7 @@ tse <- full_join(tse, df_sim, by = "sample_id")
 pseq <- makePhyloseqFromTreeSummarizedExperiment(tse)
 out_cov = ancombc(
   phyloseq = pseq, 
-  formula = "pheno + age", 
+  formula = "pheno + age", # here we add age to the model
   p_adj_method = "fdr", 
   zero_cut = 0.90, 
   lib_cut = 0, 
