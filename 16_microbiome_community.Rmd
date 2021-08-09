@@ -210,6 +210,75 @@ euclidean_dmm_plot <- ggplot(data = euclidean_dmm_pcoa_df,
 euclidean_dmm_plot
 ```
 
+## Community Detection
+
+Another approach for discovering communities within the samples of the data under question,
+is to run community detection algorithms after building a graph. The following demonstration 
+builds a graph based on the k nearest-neighbors and performs the community detection on the fly.
+
+_`bluster`_ [@R-bluster] package offers several clustering methods, among which graph-based are
+present, enabling the community detection task.
+
+Installing package:
+
+```{r}
+if(!require(bluster)){
+  BiocManager::install("bluster")
+}
+```
+
+We compare two algorithms results, "short random walks"[@Pons2006] versus "louvain"[@Blondel2008]. 
+Graph is constructed using different k values (the number of nearest neighbors to consider during graph construction) 
+using the clr assay data. Then plotting the communities using the earlier PCoA ordination.
+The results obtained using "short random walks":
+
+```{r, message=FALSE, warning=FALSE}
+library(bluster)
+library(patchwork) # For arranging several plots as a grid
+
+k <- c(2,3,5,10)
+ClustAndPlot <- function(x) {
+  # Creating the graph and running the short random walks algorithm  
+  graph_clusters <- clusterRows(t(assays(tse)$clr), NNGraphParam(k=x))
+euclidean_pcoa_df$communities <- graph_clusters
+# Results of the clustering as a color for each sample  
+ggplot(data = euclidean_pcoa_df, 
+                             aes(x=pcoa1, y=pcoa2,
+                                 color = communities)) +
+  geom_point() +
+  labs(x = "PC1",
+       y = "PC2",
+       title = paste0("k = ", x))
+}
+
+# Applying the function for different k values
+plots <- lapply(k,ClustAndPlot)
+
+# Displaying plots in a grid
+(plots[[1]] + plots[[2]]) / (plots[[3]] + plots[[4]])
+```
+
+using "louvain":
+
+```{r, message=FALSE, warning=FALSE}
+
+k <- c(2,3,5,10)
+ClustAndPlot2 <- function(x) {
+  graph_clusters <- clusterRows(t(assays(tse)$clr), NNGraphParam(k=x,cluster.fun="louvain"))
+euclidean_pcoa_df$communities <- graph_clusters
+ggplot(data = euclidean_pcoa_df, 
+                             aes(x=pcoa1, y=pcoa2,
+                                 color = communities)) +
+  geom_point() +
+  labs(x = "PC1",
+       y = "PC2",
+       title = paste0("k = ", x))
+}
+
+plots <- lapply(k,ClustAndPlot2)
+(plots[[1]] + plots[[2]]) / (plots[[3]] + plots[[4]])
+```
+
 
 ## Session Info {-}
 
