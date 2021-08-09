@@ -49,7 +49,9 @@ Community composition can be visualized with heatmap where other axis represent
 samples and another taxa. Color of each intersection point represent abundance
 of a taxon in a specific sample. 
 
-Here, Z-transformed abundances are plotted at Phylum level. 
+Here, abundances are first CLR (centered log ratio) transformed, and then 
+Z transformation is applied to CLR-transformed data. After that abundances are 
+plotted at Phylum level. 
 
 ```{r heatmap}
 library(ggplot2)
@@ -75,6 +77,89 @@ ggplot(df, aes(x = SampleID, y = FeatureID, fill = clr_z)) +
         axis.text.x = element_text(angle=45, hjust=1),
         legend.key.size = unit(1, "cm")) +
   labs(x = "Samples", y = "Taxa")
+```
+
+pheatmap is a package that provides methods to plot clustered heatmaps. 
+
+```{r pheatmap1}
+if(!require(pheatmap)){
+    install.packages("pheatmap")
+}
+library(pheatmap)
+
+# Takes subset: only samples from feces, skin, or tongue
+tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces", "Skin", "Tongue") ]
+
+# Does clr-transformation
+tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "clr", pseudocount = 1)
+# Does z-transformation
+tse_phylum_subset <- transformFeatures(tse_phylum_subset, method = "z", name = "clr_z")
+
+# Get 10 most abundant taxa, and subsets the data by them
+top_taxa <- getTopTaxa(tse_phylum_subset, top = 20)
+tse_phylum_subset <- tse_phylum_subset[top_taxa, ]
+
+# Gets the assay table
+mat <- assay(tse_phylum_subset, "clr_z")
+
+# Creates the heatmap
+pheatmap(mat)
+```
+
+We can create clusters by hierarchical clustering and 
+visualize them with dendrogram.
+
+```{r pheatmap2}
+# Package for creating dendrograms
+if(!require(dendextend)){
+    install.packages("dendextend")
+}
+library(dendextend)
+
+# Hierarchical clustering
+taxa_clusters <- hclust(dist(mat), method = "complete")
+
+# Creates a dendrogram
+taxa_dendrogram <- as.dendrogram(taxa_clusters)
+
+# Plots it
+plot(taxa_dendrogram)
+```
+
+Based on dendogram, we decide to create three clusters. 
+
+```{r pheatmap3}
+# Creates clusters
+taxa_clusters <- cutree(tree = taxa_dendrogram, k = 3)
+
+# Prints taxa and their clusters
+taxa_clusters 
+```
+
+```{r pheatmap4}
+# Creates clusters, and adds information to rowData
+rowData(tse_phylum_subset)$clusters <- cutree(tree = taxa_dendrogram, k = 3)
+
+# Prints taxa and their clusters
+rowData(tse_phylum_subset)$clusters
+```
+
+Now we can create heatmap with additional annotations.
+
+```{r pheatmap5}
+# Creates data frame that includes cluster data
+taxa_clusters <- rowData(tse_phylum_subset)$clusters
+taxa_clusters <- as.character(taxa_clusters)
+taxa_clusters <- data.frame(cluster = taxa_clusters)
+row.names(taxa_clusters) <- rownames(tse_phylum_subset)
+
+# Creates data frame that includes sample type data
+sample_types <- colData(tse_phylum_subset)$SampleType
+sample_types <- data.frame(sample_types = sample_types)
+row.names(sample_types) <- colnames(tse_phylum_subset)
+
+pheatmap(mat, annotation_row = taxa_clusters, 
+         annotation_col = sample_types )
 ```
 
 ## Community typing
