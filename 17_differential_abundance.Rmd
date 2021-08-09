@@ -27,7 +27,7 @@ There are many tools to perform DAA. The most popular tools, without going into 
 - [Wilcoxon test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/wilcox.test)  
 
 
-We recommend you to have a look at [Nearing et al.](https://www.biorxiv.org/content/10.1101/2021.05.10.443486v1.full) who compared all these listed methods across 38 diverse datasets. Because different methods have different approaches (parametric vs non-parametric, different normalization techiniques etc.) to perform the same task (test differential abundance), results can differ between methods. Unfortunately, as Nearing et al. point out, they differ disturbingly much. Therefore, it is highly recommended to pick several methods to get an idea about how robust and potentially reproducible your findings are depending on the method. In this section we demonstrate 3 methods (ANCOM-BC, Wilcoxon-test and Deseq2) and will compare the results between them. Note that the purpose of this section is to show how to perform DAA in R, not how to correctly do causal inference. E.g. there might be confounding factors that might drive (the absence of) differences between the shown groups that we ignore for simplicity. Furthermore, we picked a dataset that merely has microbial abundances in a TSE object as well as a grouping variable in the sample data. We simplify the analysis by only including 2 of the 3 groups. 
+We recommend you to have a look at [Nearing et al.](https://www.biorxiv.org/content/10.1101/2021.05.10.443486v1.full) who compared all these listed methods across 38 different datasets. Because different methods have different approaches (parametric vs non-parametric, different normalization techiniques etc.) to perform the same task (test differential abundance), results can differ between methods. Unfortunately, as Nearing et al. point out, they differ disturbingly much. Therefore, it is highly recommended to pick several methods to get an idea about how robust and potentially reproducible your findings are depending on the method. In this section we demonstrate 3 methods (ANCOM-BC, Wilcoxon-test and Deseq2) and will compare the results between them. Note that the purpose of this section is to show how to perform DAA in R, not how to correctly do causal inference. E.g. there might be confounding factors that might drive (the absence of) differences between the shown groups that we ignore for simplicity. Furthermore, we picked a dataset that merely has microbial abundances in a TSE object as well as a grouping variable in the sample data. We simplify the analysis by only including 2 of the 3 groups. 
 
 
 
@@ -50,7 +50,7 @@ data(dmn_se)
 tse <- dmn_se
 tse <- tse[ ,colData(tse)$pheno != "Overwt"]
 d <- as.data.frame(colData(tse))
-# how many observation do we have per group?
+# how many observations do we have per group?
 count(d, pheno) %>% kable()
 
 ```
@@ -74,18 +74,19 @@ daa <- assay(tse, "clr") %>%
           data.frame() %>%
           rownames_to_column("Sample_ID") %>%
           add_column(x = colData(tse)[[x]])
-
+# select all genera that we perform the test on
 genera <- select(daa, -Sample_ID, -x) %>% colnames()
-# the map function is very similar to a "for loop". Here, For each genus in
-# the vector genera, perform the actions in {} while genus is a place holder 
-# for each genus.
+# the map function is very similar to a "for loop". Here, for each genus in
+# the vector "genera", perform the actions in {} while genus is a place holder 
+# for each genus. Because we chose map_dfr, results will be binded rowwise into 
+# a dataframe.
 wilcoxon_p <- map_dfr(genera, function(genus) {
   form <- as.formula(glue::glue("{genus} ~ x"))
   p <- wilcox.test(form, data = daa)$p.value
   tibble(genus = genus, p = p)
 })
 
-# adjust for multiple testing 
+# add adjusted p values to the dataframe 
 wilcoxon_p$p_adjusted <- p.adjust(wilcoxon_p$p, method = "fdr")
 # check the number of differentially abundant taxa between groups
 ggplot(wilcoxon_p, aes(p_adjusted)) +
@@ -100,7 +101,7 @@ Our second analysis method is DESeq2. DESeq2 utilizes the negative binomial dist
 tutorial [Introduction to DGE -
 ARCHIVED](https://hbctraining.github.io/DGE_workshop/lessons/04_DGE_DESeq2_analysis.html)
  
-Now let us show how to do this. First, run the DESeq2 analysis.
+Here is the R code corresponding to the DESeq2 analysis:
 
 ```{r}
 
@@ -117,12 +118,12 @@ df <- as.data.frame(res)
 # Adds taxon column that includes names of taxa
 df$taxon <- rownames(df)
 
-
+# check the number of differentially abundant taxa between groups
 ggplot(df, aes(padj)) +
   geom_histogram()
-# Orders the rows of data frame in decreasing order based on column
-# "log2FoldChange" and secondly based on "padj" column in ascending order
-# then show the top 6 only.
+# order the rows of the results dataframe in decreasing order based on the
+# column "log2FoldChange" and secondly based on the column "padj" in ascending
+# order, then show the top 6 only.
 arrange(df, desc(log2FoldChange), padj) %>%
   head() %>%
   kable()
@@ -131,7 +132,7 @@ arrange(df, desc(log2FoldChange), padj) %>%
 ## ANCOM-BC
 
 [The analysis of composition of microbiomes with bias correction (ANCOM-BC)](https://www.nature.com/articles/s41467-020-17041-7) 
-is a recently developed method for differential abundance testing. It is based on an [earlier published approach](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4450248/). The previous version of ANCOM was among the methods that produced the most consistent results and is probably a conservative approach. However, the new ANCOM-BC method operates quite differently compared to the former ANCOM method.
+is a recently developed method for differential abundance testing. It is based on an [earlier published approach](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4450248/). The previous version of ANCOM was among the methods that produced the [most consistent results and is probably a conservative approach](https://www.biorxiv.org/content/10.1101/2021.05.10.443486v1.full). However, the new ANCOM-BC method operates quite differently compared to the former ANCOM method.
 
 As the only method, ANCOM-BC incorporates the so called *sampling fraction* into the model. The latter term could be empirically estimated by the ratio of the library size to the microbial load. According to the authors, variations in this sampling fraction would bias differential abundance analyses if ignored. Furthermore, this method provides p-values, and confidence intervals for each taxon. It also controls the FDR and it is computationally simple to implement. 
 
@@ -177,8 +178,7 @@ kable(head(res$diff_abn))
 
 ## Comparison of the methods
 
-Our main interest when we compare the methods with regard to a research question is whether they agree on whether a taxon is differentially abundant. 
-First let us print how many taxa were identified by each method to begin:
+When we compare the methods in the context of a research question, we could look at e.g. at whether they agree based on the applied decision criterion (e.g. adjusted p value < 0.05).  That is what we illustrate here. First let us print how many taxa were identified by each method to begin:
 
 ```{r}
 # how many taxa are significant for wilcoxon test
@@ -191,7 +191,7 @@ sum(out$res$diff_abn$phenoObese)
 
 
 
-We can also look at the intersection of identified taxa
+In the next step we will look at the intersection of identified taxa. Here we encountered a common issue that we want to warn you about regarding the names of taxa.  R might change these names, e.g. if you generate a dataframe while the given names are not suitable to be column names. This happened here with `Escherichia/Shigella`, which was changed to `Escherichia.Shigella` automatically by R in the Wilcoxon test section. That caused some of the `NA` values where we expected p values (DESeq2 and Wilcoxon output) or boolean values (ANCOMBC output). Make sure to always inspect why you do not get the output you would have expected. Since `Escherichia/Shigella` was FALSE (adjusted p > 0.05) for all methods, I could easily work around this below by setting the `NA` to FALSE.
 
 ```{r}
 # create a dataframe that indicates for each genus and method if it was DA
@@ -203,20 +203,12 @@ summ <- full_join(
   # rename according to which padj value belong to which method
   select(genus, wilcoxon = p_adjusted, deseq2 = padj, ancombc = phenoObese) %>%
   # apply decision criterion of padj <= 0.05; address issue based on naming 
-  # error (see below comment)
+  # error (see description above)
   mutate(
     across(c(deseq2, wilcoxon), function(x) x <= 0.05),
     across(c(deseq2, wilcoxon, ancombc), function(x) ifelse(is.na(x), FALSE, x)),
     score = rowSums(across(c(deseq2, ancombc, wilcoxon)))
   )
-# one thing you always have to watch out for is the naming of taxa. R might
-# change the names, e.g. if you generate a dataframe while the given names are
-# not suitable to be column names. This happened here with Escherichia/Shigella,
-# which was change to Escherichia.Shigella by R. That caused some of the NA
-# values where we expected p values or booleans (ANCOMBC output). Make sure to
-# always inspect why you do not get the output you would have expected. Since
-# Escherichia/Shigella was FALSE for all methods, I can easily work around this 
-# by setting the NAs to FALSE.
 
 # which genera are identified by all methods?
 filter(summ, score == 3) %>% kable()
@@ -294,6 +286,7 @@ out_cov = ancombc(
 # now the model answers the question: holding age constant, are 
 # bacterial taxa differentially abundant? Or, if that is of interest,
 # holding phenotype constant, is age associated with bacterial abundance?
+# Again we only show the first 6 entries.
 kable(head(out_cov$res$diff_abn))
 ```
 
