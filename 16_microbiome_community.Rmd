@@ -53,17 +53,27 @@ Here, Z-transformed abundances are plotted at Phylum level.
 
 ```{r heatmap}
 library(ggplot2)
+# Does clr-transformation
+tse_phylum <- transformSamples(tse_phylum, method = "clr", pseudocount = 1)
 # Does z-transformation
-tse_phylum <- transformFeatures(tse_phylum, method = "z", name = "Ztransform")
+tse_phylum <- transformFeatures(tse_phylum, method = "z", name = "clr_z")
 # Melts the assay
-df <- meltAssay(tse_phylum, assay_name = "Ztransform")
+df <- meltAssay(tse_phylum, assay_name = "clr_z")
+
+# Determines the scaling of colours
+maxval <- round(max(abs(df$clr_z)))
+limits <- c(-maxval, maxval)
+breaks <- seq(from = min(limits), to = max(limits), by = 0.5)
+colours <- c("darkblue", "blue", "white", "red", "darkred")
 
 # Creates a ggplot object
-ggplot(df, aes(x = SampleID, y = FeatureID, fill = Ztransform)) +
+ggplot(df, aes(x = SampleID, y = FeatureID, fill = clr_z)) +
   geom_tile() +
-  scale_fill_gradient(low = "blue", high = "red") + 
+  scale_fill_gradientn(name = "CLR + Z transform", 
+                       breaks = breaks, limits = limits, colours = colours) + 
   theme(text = element_text(size=10),
-        axis.text.x = element_text(angle=45, hjust=1)) +
+        axis.text.x = element_text(angle=45, hjust=1),
+        legend.key.size = unit(1, "cm")) +
   labs(x = "Samples", y = "Taxa")
 ```
 
