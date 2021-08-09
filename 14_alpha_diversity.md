@@ -312,14 +312,14 @@ attached base packages:
 
 other attached packages:
  [1] ggsignif_0.6.2                 scater_1.21.3                 
- [3] ggplot2_3.3.5                  scuttle_1.3.0                 
+ [3] ggplot2_3.3.5                  scuttle_1.3.1                 
  [5] mia_1.1.8                      TreeSummarizedExperiment_2.1.3
  [7] Biostrings_2.61.2              XVector_0.33.0                
  [9] SingleCellExperiment_1.15.1    SummarizedExperiment_1.23.1   
 [11] Biobase_2.53.0                 GenomicRanges_1.45.0          
 [13] GenomeInfoDb_1.29.3            IRanges_2.27.0                
 [15] S4Vectors_0.31.0               BiocGenerics_0.39.1           
-[17] MatrixGenerics_1.5.2           matrixStats_0.60.0            
+[17] MatrixGenerics_1.5.3           matrixStats_0.60.0            
 [19] BiocStyle_2.21.3               rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
@@ -359,7 +359,7 @@ loaded via a namespace (and not attached):
  [67] fastmap_1.1.0               yaml_2.2.1                 
  [69] knitr_1.33                  bit64_4.0.5                
  [71] zip_2.2.0                   purrr_0.3.4                
- [73] nlme_3.1-152                sparseMatrixStats_1.5.0    
+ [73] nlme_3.1-152                sparseMatrixStats_1.5.2    
  [75] compiler_4.1.0              beeswarm_0.4.0             
  [77] filelock_1.0.2              curl_4.3.2                 
  [79] treeio_1.17.2               tibble_3.1.3               
@@ -380,7 +380,7 @@ loaded via a namespace (and not attached):
 [109] mgcv_1.8-36                 parallel_4.1.0             
 [111] hms_1.1.0                   grid_4.1.0                 
 [113] beachmat_2.9.0              tidyr_1.1.3                
-[115] rmarkdown_2.9               DelayedMatrixStats_1.15.0  
+[115] rmarkdown_2.9               DelayedMatrixStats_1.15.2  
 [117] carData_3.0-4               ggpubr_0.4.0               
 [119] ggbeeswarm_0.6.0           
 ```

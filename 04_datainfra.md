@@ -870,17 +870,17 @@ other attached packages:
  [7] SummarizedExperiment_1.23.1    Biobase_2.53.0                
  [9] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
 [11] IRanges_2.27.0                 S4Vectors_0.31.0              
-[13] BiocGenerics_0.39.1            MatrixGenerics_1.5.2          
+[13] BiocGenerics_0.39.1            MatrixGenerics_1.5.3          
 [15] matrixStats_0.60.0             BiocStyle_2.21.3              
 [17] rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
   [1] ggbeeswarm_0.6.0            colorspace_2.0-2           
-  [3] ellipsis_0.3.2              scuttle_1.3.0              
+  [3] ellipsis_0.3.2              scuttle_1.3.1              
   [5] BiocNeighbors_1.11.0        ggrepel_0.9.1              
   [7] bit64_4.0.5                 fansi_0.5.0                
   [9] decontam_1.13.0             splines_4.1.0              
- [11] codetools_0.2-18            sparseMatrixStats_1.5.0    
+ [11] codetools_0.2-18            sparseMatrixStats_1.5.2    
  [13] cachem_1.0.5                knitr_1.33                 
  [15] scater_1.21.3               ade4_1.7-17                
  [17] jsonlite_1.7.2              cluster_2.1.2              
@@ -897,7 +897,7 @@ loaded via a namespace (and not attached):
  [39] rhdf5filters_1.5.0          vctrs_0.3.8                
  [41] multtest_2.49.0             ape_5.5                    
  [43] nlme_3.1-152                DECIPHER_2.21.0            
- [45] iterators_1.0.13            DelayedMatrixStats_1.15.0  
+ [45] iterators_1.0.13            DelayedMatrixStats_1.15.2  
  [47] xfun_0.24                   stringr_1.4.0              
  [49] beachmat_2.9.0              lifecycle_1.0.0            
  [51] irlba_2.3.3                 XML_3.99-0.6               

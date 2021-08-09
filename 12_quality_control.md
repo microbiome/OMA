@@ -276,13 +276,13 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.1                dplyr_1.0.7                   
  [3] scater_1.21.3                  ggplot2_3.3.5                 
- [5] scuttle_1.3.0                  mia_1.1.8                     
+ [5] scuttle_1.3.1                  mia_1.1.8                     
  [7] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.2             
  [9] XVector_0.33.0                 SingleCellExperiment_1.15.1   
 [11] SummarizedExperiment_1.23.1    Biobase_2.53.0                
 [13] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
 [15] IRanges_2.27.0                 S4Vectors_0.31.0              
-[17] BiocGenerics_0.39.1            MatrixGenerics_1.5.2          
+[17] BiocGenerics_0.39.1            MatrixGenerics_1.5.3          
 [19] matrixStats_0.60.0             BiocStyle_2.21.3              
 [21] rebook_1.3.0                  
 
@@ -292,7 +292,7 @@ loaded via a namespace (and not attached):
   [5] farver_2.1.0                ggrepel_0.9.1              
   [7] bit64_4.0.5                 fansi_0.5.0                
   [9] decontam_1.13.0             splines_4.1.0              
- [11] codetools_0.2-18            sparseMatrixStats_1.5.0    
+ [11] codetools_0.2-18            sparseMatrixStats_1.5.2    
  [13] cachem_1.0.5                knitr_1.33                 
  [15] jsonlite_1.7.2              cluster_2.1.2              
  [17] graph_1.71.2                BiocManager_1.30.16        
@@ -305,7 +305,7 @@ loaded via a namespace (and not attached):
  [31] reshape2_1.4.4              Rcpp_1.0.7                 
  [33] jquerylib_0.1.4             vctrs_0.3.8                
  [35] ape_5.5                     nlme_3.1-152               
- [37] DECIPHER_2.21.0             DelayedMatrixStats_1.15.0  
+ [37] DECIPHER_2.21.0             DelayedMatrixStats_1.15.2  
  [39] xfun_0.24                   stringr_1.4.0              
  [41] beachmat_2.9.0              lifecycle_1.0.0            
  [43] irlba_2.3.3                 XML_3.99-0.6               

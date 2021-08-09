@@ -239,7 +239,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.998
+## Proportions of Observations within 95% Credible Interval: 0.9978
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
@@ -293,7 +293,7 @@ other attached packages:
  [9] Biobase_2.53.0                 GenomicRanges_1.45.0          
 [11] GenomeInfoDb_1.29.3            IRanges_2.27.0                
 [13] S4Vectors_0.31.0               BiocGenerics_0.39.1           
-[15] MatrixGenerics_1.5.2           matrixStats_0.60.0            
+[15] MatrixGenerics_1.5.3           matrixStats_0.60.0            
 [17] fido_0.1.13                    BiocStyle_2.21.3              
 [19] rebook_1.3.0                  
 
@@ -327,7 +327,7 @@ loaded via a namespace (and not attached):
  [53] dir.expiry_1.1.0              posterior_1.0.1              
  [55] ellipsis_0.3.2                pkgconfig_2.0.3              
  [57] XML_3.99-0.6                  tidybayes_3.0.0              
- [59] farver_2.1.0                  scuttle_1.3.0                
+ [59] farver_2.1.0                  scuttle_1.3.1                
  [61] dbplyr_2.1.1                  CodeDepends_0.6.5            
  [63] sass_0.4.0                    utf8_1.2.2                   
  [65] labeling_0.4.2                AnnotationDbi_1.55.1         
@@ -341,7 +341,7 @@ loaded via a namespace (and not attached):
  [81] fastmap_1.1.0                 yaml_2.2.1                   
  [83] knitr_1.33                    bit64_4.0.5                  
  [85] purrr_0.3.4                   KEGGREST_1.33.0              
- [87] nlme_3.1-152                  sparseMatrixStats_1.5.0      
+ [87] nlme_3.1-152                  sparseMatrixStats_1.5.2      
  [89] mime_0.11                     compiler_4.1.0               
  [91] png_0.1-7                     interactiveDisplayBase_1.31.2
  [93] curl_4.3.2                    beeswarm_0.4.0               
@@ -363,7 +363,7 @@ loaded via a namespace (and not attached):
 [125] mgcv_1.8-36                   parallel_4.1.0               
 [127] grid_4.1.0                    beachmat_2.9.0               
 [129] tidyr_1.1.3                   coda_0.19-4                  
-[131] rmarkdown_2.9                 DelayedMatrixStats_1.15.0    
+[131] rmarkdown_2.9                 DelayedMatrixStats_1.15.2    
 [133] shiny_1.6.0                   ggbeeswarm_0.6.0             
 ```
 </div>
