@@ -159,13 +159,80 @@ sample_types <- data.frame(sample_types = sample_types)
 row.names(sample_types) <- colnames(tse_phylum_subset)
 
 pheatmap(mat, annotation_row = taxa_clusters, 
-         annotation_col = sample_types )
+         annotation_col = sample_types)
 ```
 
 In addition to _pheatmap_ package, there are also other packages that provide 
 functions for more complex heatmaps. One example is _iheatmapr_ package. Examples
 of using it you can find from its 
 [vignette](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html).
+
+# Cross-correlation
+
+With cross-correlation analysis, we can analyze how strongly and how different
+variables are associated between each other. For instance, we can analyze if 
+higher presence of specific taxon equals to higher level of biomolecule. 
+
+Here, we analyze associations between taxa correlate and lipids. Data is from 
+following publication Lahti _et al_. (2015) [Associations between the human intestinal 
+microbiota, Lactobacillus rhamnosus GG and serum lipids indicated by 
+integrated analysis of high-throughput profiling 
+data](https://peerj.com/articles/32/).
+
+```{r cross-correlation1}
+if(!require(microbiomeDataSets)){
+    install.packages("microbiomeDataSets")
+}
+# Imports the data
+#tse <- microbiomeDataSets::peerj32()
+
+# Microbiome data
+tse[[1]] 
+```
+
+```{r cross-correlation2}
+# Lipid data
+tse[[2]]
+```
+
+```{r cross-correlation3}
+if(!require(microbiome)){
+    install.packages("microbiome")
+}
+
+# Does log10 transform for microbiome data
+tse[[1]] <- transformSamples(tse[[1]], method = "log10", pseudocount = 1)
+
+# Gets microbiome and lipid data to cross-correlate
+x <- t(assay(tse[[1]], "log10"))
+y <- t(assay(tse[[2]], "counts"))
+
+# Cross correlates data sets
+correlation.table <- microbiome::associate(x, y, method = "spearman", mode = "table", 
+                                           p.adj.threshold = 0.05, n.signif = 1)
+
+knitr::kable(head(correlation.table))
+```
+
+```{r cross-correlation4}
+# Determines the scaling of colours
+limits <- c(-1, 1)
+breaks <- seq(from = min(limits), to = max(limits), by = 0.2)
+colours <- c("darkblue", "blue", "white", "red", "darkred")
+
+# Creates a ggplot object
+ggplot(correlation.table, aes(x = X1, y = X2, fill = Correlation)) +
+  geom_tile() +
+  scale_fill_gradientn(name = "Correlation", 
+                       breaks = breaks, limits = limits, colours = colours) + 
+  theme(text = element_text(size=10),
+        axis.text.x = element_text(angle=45, hjust=1),
+        legend.key.size = unit(1, "cm")) +
+  labs(x = "Taxa", y = "Lipids")
+```
+
+
+
 
 ## Community typing
 
