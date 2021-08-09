@@ -242,10 +242,10 @@ the function `plotAbundanceDensity` where most abundant taxa can be plotted
 including several options.
 
 In the following few demonstrations are shown, using the 
-[@LahtiL2014] dataset.
+[@Lahti2014] dataset.
 
 A Jitter plot based on relative abundance data, similar to the one presented at 
-[@SaloS2021] supplementary figure 1, could be visualized as follows: 
+[@Salosensaari2021] supplementary figure 1, could be visualized as follows: 
 
 
 ```r
