@@ -184,7 +184,7 @@ if(!require(microbiomeDataSets)){
     install.packages("microbiomeDataSets")
 }
 # Imports the data
-#tse <- microbiomeDataSets::peerj32()
+tse <- microbiomeDataSets::peerj32()
 
 # Microbiome data
 tse[[1]] 
@@ -208,20 +208,55 @@ x <- t(assay(tse[[1]], "log10"))
 y <- t(assay(tse[[2]], "counts"))
 
 # Cross correlates data sets
-correlation.table <- microbiome::associate(x, y, method = "spearman", mode = "table", 
+correlation_table <- microbiome::associate(x, y, method = "spearman", mode = "table", 
                                            p.adj.threshold = 0.05, n.signif = 1)
 
-knitr::kable(head(correlation.table))
+knitr::kable(head(correlation_table))
 ```
 
+Manipulates and reorders the table
+
 ```{r cross-correlation4}
+if(!require(reshape2)){
+    install.packages("reshape2")
+}
+# Gets taxa that has at least one statistically significant correlation
+taxa <- as.character(
+  unique(correlation_table[correlation_table[["p.adj"]] < 0.05 &
+                             abs(correlation_table[["Correlation"]]) > 0, "X1"]))
+# Gets taxa that has at least one statistically significant correlation
+lipids <- as.character(
+  unique(correlation_table[correlation_table[["p.adj"]] < 0.05 &
+                             abs(correlation_table[["Correlation"]]) > 0, "X2"]))
+
+# Takes only those taxa and lipids that has statistically significant values
+correlation_table <- correlation_table[correlation_table[["X1"]] %in% taxa & 
+                                           correlation_table[["X2"]] %in% lipids, ]
+
+# Converts data to matrix, correlations as values
+mat <- reshape2::acast(correlation_table, X2 ~ X1, value.var = "Correlation")
+
+# Hierarchical clustering, gets the order of taxa and lipids
+taxa_indices <- hclust(as.dist(1 - cor(mat, use="pairwise.complete.obs")))$order
+order_taxa <- colnames(mat)[taxa_indices]
+lipids_indices <- hclust(as.dist(1 - cor(t(mat), use="pairwise.complete.obs")))$order
+order_lipids <- rownames(mat)[lipids_indices]
+
+# Converts taxa and lipids columns to factor so that they have desired order
+correlation_table[["X1"]] <- factor(correlation_table[["X1"]], levels = order_taxa)
+correlation_table[["X2"]] <- factor(correlation_table[["X2"]], levels = order_lipids)
+```
+
+Creates the heatmap
+
+```{r cross-correlation5}
 # Determines the scaling of colours
 limits <- c(-1, 1)
 breaks <- seq(from = min(limits), to = max(limits), by = 0.2)
 colours <- c("darkblue", "blue", "white", "red", "darkred")
 
 # Creates a ggplot object
-ggplot(correlation.table, aes(x = X1, y = X2, fill = Correlation)) +
+ggplot(correlation_table, aes(x = X1, y = X2, fill = Correlation)) +
   geom_tile() +
   scale_fill_gradientn(name = "Correlation", 
                        breaks = breaks, limits = limits, colours = colours) + 
@@ -230,9 +265,6 @@ ggplot(correlation.table, aes(x = X1, y = X2, fill = Correlation)) +
         legend.key.size = unit(1, "cm")) +
   labs(x = "Taxa", y = "Lipids")
 ```
-
-
-
 
 ## Community typing
 
