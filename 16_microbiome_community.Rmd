@@ -219,14 +219,15 @@ Manipulates and reorders the table
 if(!require(reshape2)){
     install.packages("reshape2")
 }
+if(!require(dplyr)){
+    install.packages("dplyr")
+}
 # Gets taxa that has at least one statistically significant correlation
-taxa <- as.character(
-  unique(correlation_table[correlation_table[["p.adj"]] < 0.05 &
-                             abs(correlation_table[["Correlation"]]) > 0, "X1"]))
+taxa <- correlation_table %>% dplyr::filter(p.adj < 0.05 & abs(Correlation) > 0) %>% 
+  dplyr::select(X1) %>% unique %>% sapply(as.character)
 # Gets taxa that has at least one statistically significant correlation
-lipids <- as.character(
-  unique(correlation_table[correlation_table[["p.adj"]] < 0.05 &
-                             abs(correlation_table[["Correlation"]]) > 0, "X2"]))
+lipids <- correlation_table %>% dplyr::filter(p.adj < 0.05 & abs(Correlation) > 0) %>% 
+  dplyr::select(X2) %>% unique %>% sapply(as.character)
 
 # Takes only those taxa and lipids that has statistically significant values
 correlation_table <- correlation_table[correlation_table[["X1"]] %in% taxa & 
@@ -248,17 +249,25 @@ correlation_table[["X2"]] <- factor(correlation_table[["X2"]], levels = order_li
 
 Creates the heatmap
 
-```{r cross-correlation5}
+```{r cross-correlation5, fig.height = 8, fig.width = 6}
 # Determines the scaling of colours
 limits <- c(-1, 1)
 breaks <- seq(from = min(limits), to = max(limits), by = 0.2)
 colours <- c("darkblue", "blue", "white", "red", "darkred")
 
+# Which observation have p-value under 0.05? --> creates a subset
+cor_table_sub <- correlation_table[which(correlation_table[["Correlation"]] < 0.05), ]
+
 # Creates a ggplot object
 ggplot(correlation_table, aes(x = X1, y = X2, fill = Correlation)) +
   geom_tile() +
+  
   scale_fill_gradientn(name = "Correlation", 
                        breaks = breaks, limits = limits, colours = colours) + 
+  
+  # Adds label to those observations that have p-value under 0.05
+  geom_text(data = cor_table_sub, aes(x = X1, y = X2, label = "+")) +
+  
   theme(text = element_text(size=10),
         axis.text.x = element_text(angle=45, hjust=1),
         legend.key.size = unit(1, "cm")) +
