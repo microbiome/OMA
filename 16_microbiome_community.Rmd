@@ -229,22 +229,26 @@ if(!require(bluster)){
 
 The algorithm used is "short random walks"[@Pons2006]. 
 Graph is constructed using different k values (the number of nearest neighbors to consider during graph construction) 
-using the clr assay data. Then plotting the communities using the earlier PCoA ordination as a visual exploration aid.
+using the clr assay data. Then plotting the communities using UMAP ordination as a visual exploration aid.
 
 ```{r, message=FALSE, warning=FALSE}
 library(bluster)
 library(patchwork) # For arranging several plots as a grid
+library(scater)
+
+# Calculating the log transformation required by UMAP ordination 
+tse <- transformCounts(tse, method = "log10", pseudocount = 1)
+# Performing and storing UMAP
+tse <- runUMAP(tse, name="UMAP", exprs_values="log10")
 
 k <- c(2,3,5,10)
 ClustAndPlot <- function(x) {
   # Creating the graph and running the short random walks algorithm  
   graph_clusters <- clusterRows(t(assays(tse)$clr), NNGraphParam(k=x))
-  euclidean_pcoa_df$communities <- graph_clusters
   
-  # Results of the clustering as a color for each sample  
-  ggplot(data = euclidean_pcoa_df, aes(x=pcoa1, y=pcoa2, color = communities)) +
-    geom_point() +
-    labs(x = "PC1", y = "PC2", title = paste0("k = ", x))
+  # Results of the clustering as a color for each sample
+  plotUMAP(tse, colour_by = I(graph_clusters)) +
+    labs(title = paste0("k = ", x))
 }
 
 # Applying the function for different k values
@@ -252,6 +256,28 @@ plots <- lapply(k,ClustAndPlot)
 
 # Displaying plots in a grid
 (plots[[1]] + plots[[2]]) / (plots[[3]] + plots[[4]])
+```
+
+Similarly the _`bluster`_ [@R-bluster] package offers clustering diagnostics
+that can be used for judging the clustering quality (see [Assorted clustering diagnostics](http://bioconductor.org/packages/release/bioc/vignettes/bluster/inst/doc/diagnostics.html)).
+In the following, silhouette width as a diagnostic tool is computed and results are visualized
+for each case presented earlier:
+
+```{r, message=FALSE, warning=FALSE}
+
+ClustDiagPlot <- function(x) {
+  # Getting the clustering results
+  graph_clusters <- clusterRows(t(assays(tse)$clr), NNGraphParam(k=x))
+  
+  # Computing the diagnostic info
+  sil <- approxSilhouette(t(assays(tse)$clr), graph_clusters)
+  
+  # Plotting as a boxlpot to observe cluster separation
+  boxplot(split(sil$width, graph_clusters), main=paste0("k = ", x))
+  
+}
+# Applying the function for different k values
+res <- lapply(k,ClustDiagPlot)
 ```
 
 ## Session Info {-}
