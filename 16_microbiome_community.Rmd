@@ -229,20 +229,22 @@ if(!require(bluster)){
 
 The algorithm used is "short random walks" [@Pons2006]. 
 Graph is constructed using different k values (the number of nearest neighbors to consider during graph construction) 
-using the clr assay data. Then plotting the communities using UMAP [@McInnes2018] ordination as a visual exploration aid.
+using the robust centered log ratio (rclr) assay data. Then plotting the communities using UMAP [@McInnes2018] ordination as a visual exploration aid.
 
 ```{r, message=FALSE, warning=FALSE}
 library(bluster)
 library(patchwork) # For arranging several plots as a grid
 library(scater)
 
+tse <- transformCounts(tse, method = "rclr")
+
 # Performing and storing UMAP
-tse <- runUMAP(tse, name="UMAP", exprs_values="clr")
+tse <- runUMAP(tse, name="UMAP", exprs_values="rclr")
 
 k <- c(2,3,5,10)
 ClustAndPlot <- function(x) {
   # Creating the graph and running the short random walks algorithm  
-  graph_clusters <- clusterRows(t(assays(tse)$clr), NNGraphParam(k=x))
+  graph_clusters <- clusterRows(t(assays(tse)$rclr), NNGraphParam(k=x))
   
   # Results of the clustering as a color for each sample
   plotUMAP(tse, colour_by = I(graph_clusters)) +
@@ -265,10 +267,10 @@ for each case presented earlier. For more about Silhouettes read [@Rousseeuw1987
 
 ClustDiagPlot <- function(x) {
   # Getting the clustering results
-  graph_clusters <- clusterRows(t(assays(tse)$clr), NNGraphParam(k=x))
+  graph_clusters <- clusterRows(t(assays(tse)$rclr), NNGraphParam(k=x))
   
   # Computing the diagnostic info
-  sil <- approxSilhouette(t(assays(tse)$clr), graph_clusters)
+  sil <- approxSilhouette(t(assays(tse)$rclr), graph_clusters)
   
   # Plotting as a boxlpot to observe cluster separation
   boxplot(split(sil$width, graph_clusters), main=paste0("k = ", x))
