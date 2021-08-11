@@ -498,7 +498,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2725
+## [1] 0.2704
 ```
 
 In this case, the community composition is not significantly different
@@ -602,7 +602,7 @@ other attached packages:
  [5] curatedMetagenomicData_3.1.1   scater_1.21.3                 
  [7] scuttle_1.3.1                  ggplot2_3.3.5                 
  [9] vegan_2.5-7                    lattice_0.20-44               
-[11] permute_0.9-5                  mia_1.1.8                     
+[11] permute_0.9-5                  mia_1.1.9                     
 [13] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.2             
 [15] XVector_0.33.0                 SingleCellExperiment_1.15.1   
 [17] SummarizedExperiment_1.23.1    Biobase_2.53.0                
@@ -616,7 +616,7 @@ loaded via a namespace (and not attached):
   [1] readxl_1.3.1                  backports_1.2.1              
   [3] AnnotationHub_3.1.4           BiocFileCache_2.1.1          
   [5] plyr_1.8.6                    lazyeval_0.2.2               
-  [7] splines_4.1.0                 BiocParallel_1.27.2          
+  [7] splines_4.1.0                 BiocParallel_1.27.3          
   [9] digest_0.6.27                 htmltools_0.5.1.1            
  [11] viridis_0.6.1                 fansi_0.5.0                  
  [13] magrittr_2.0.1                memoise_2.0.0                
@@ -624,7 +624,7 @@ loaded via a namespace (and not attached):
  [17] DECIPHER_2.21.0               openxlsx_4.2.4               
  [19] colorspace_2.0-2              rappdirs_0.3.3               
  [21] blob_1.2.2                    ggrepel_0.9.1                
- [23] haven_2.4.3                   xfun_0.24                    
+ [23] haven_2.4.3                   xfun_0.25                    
  [25] crayon_1.4.1                  RCurl_1.98-1.3               
  [27] jsonlite_1.7.2                graph_1.71.2                 
  [29] ape_5.5                       glue_1.4.2                   
@@ -677,7 +677,7 @@ loaded via a namespace (and not attached):
 [123] mgcv_1.8-36                   parallel_4.1.0               
 [125] hms_1.1.0                     grid_4.1.0                   
 [127] beachmat_2.9.0                tidyr_1.1.3                  
-[129] rmarkdown_2.9                 DelayedMatrixStats_1.15.2    
+[129] rmarkdown_2.10                DelayedMatrixStats_1.15.2    
 [131] carData_3.0-4                 Rtsne_0.15                   
 [133] ggpubr_0.4.0                  shiny_1.6.0                  
 [135] ggbeeswarm_0.6.0             

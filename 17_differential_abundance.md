@@ -287,7 +287,7 @@ attached base packages:
 
 other attached packages:
  [1] microbiomeDataSets_1.1.1       MultiAssayExperiment_1.19.5   
- [3] mia_1.1.8                      TreeSummarizedExperiment_2.1.3
+ [3] mia_1.1.9                      TreeSummarizedExperiment_2.1.3
  [5] Biostrings_2.61.2              XVector_0.33.0                
  [7] SingleCellExperiment_1.15.1    SummarizedExperiment_1.23.1   
  [9] Biobase_2.53.0                 GenomicRanges_1.45.0          
@@ -302,7 +302,7 @@ loaded via a namespace (and not attached):
   [3] BiocFileCache_2.1.1           plyr_1.8.6                   
   [5] lazyeval_0.2.2                driver_0.1.1                 
   [7] splines_4.1.0                 svUnit_1.0.6                 
-  [9] BiocParallel_1.27.2           ggplot2_3.3.5                
+  [9] BiocParallel_1.27.3           ggplot2_3.3.5                
  [11] scater_1.21.3                 digest_0.6.27                
  [13] htmltools_0.5.1.1             viridis_0.6.1                
  [15] fansi_0.5.0                   magrittr_2.0.1               
@@ -311,7 +311,7 @@ loaded via a namespace (and not attached):
  [21] DECIPHER_2.21.0               colorspace_2.0-2             
  [23] rappdirs_0.3.3                blob_1.2.2                   
  [25] ggrepel_0.9.1                 ggdist_3.0.0                 
- [27] xfun_0.24                     dplyr_1.0.7                  
+ [27] xfun_0.25                     dplyr_1.0.7                  
  [29] crayon_1.4.1                  RCurl_1.98-1.3               
  [31] jsonlite_1.7.2                graph_1.71.2                 
  [33] ape_5.5                       glue_1.4.2                   
@@ -363,7 +363,7 @@ loaded via a namespace (and not attached):
 [125] mgcv_1.8-36                   parallel_4.1.0               
 [127] grid_4.1.0                    beachmat_2.9.0               
 [129] tidyr_1.1.3                   coda_0.19-4                  
-[131] rmarkdown_2.9                 DelayedMatrixStats_1.15.2    
+[131] rmarkdown_2.10                DelayedMatrixStats_1.15.2    
 [133] shiny_1.6.0                   ggbeeswarm_0.6.0             
 ```
 </div>

@@ -80,7 +80,7 @@ head(getPrevalence(se, detection = 1/100, sort = TRUE, as_relative = TRUE))
 The `detection` and `as_relative` can also be used to access, how many samples
 do pass a threshold for raw counts. Here the population prevalence (frequency) 
 at the absolute abundance threshold (`as_relative = FALSE`) at read count 1
-(`detection = TRUE`) is accessed.
+(`detection = 1`) is accessed.
 
 
 ```r
@@ -302,7 +302,7 @@ other attached packages:
  [1] microbiomeDataSets_1.1.1       MultiAssayExperiment_1.19.5   
  [3] miaViz_1.1.4                   ggraph_2.0.5                  
  [5] scater_1.21.3                  ggplot2_3.3.5                 
- [7] scuttle_1.3.1                  mia_1.1.8                     
+ [7] scuttle_1.3.1                  mia_1.1.9                     
  [9] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.2             
 [11] XVector_0.33.0                 SingleCellExperiment_1.15.1   
 [13] SummarizedExperiment_1.23.1    Biobase_2.53.0                
@@ -316,14 +316,14 @@ loaded via a namespace (and not attached):
   [1] AnnotationHub_3.1.4           BiocFileCache_2.1.1          
   [3] plyr_1.8.6                    igraph_1.2.6                 
   [5] lazyeval_0.2.2                splines_4.1.0                
-  [7] BiocParallel_1.27.2           digest_0.6.27                
+  [7] BiocParallel_1.27.3           digest_0.6.27                
   [9] htmltools_0.5.1.1             viridis_0.6.1                
  [11] fansi_0.5.0                   magrittr_2.0.1               
  [13] memoise_2.0.0                 ScaledMatrix_1.1.0           
  [15] cluster_2.1.2                 DECIPHER_2.21.0              
  [17] graphlayouts_0.7.1            colorspace_2.0-2             
  [19] rappdirs_0.3.3                blob_1.2.2                   
- [21] ggrepel_0.9.1                 xfun_0.24                    
+ [21] ggrepel_0.9.1                 xfun_0.25                    
  [23] dplyr_1.0.7                   crayon_1.4.1                 
  [25] RCurl_1.98-1.3                jsonlite_1.7.2               
  [27] graph_1.71.2                  ape_5.5                      
@@ -374,7 +374,7 @@ loaded via a namespace (and not attached):
 [117] withr_2.4.2                   GenomeInfoDbData_1.2.6       
 [119] mgcv_1.8-36                   parallel_4.1.0               
 [121] grid_4.1.0                    beachmat_2.9.0               
-[123] tidyr_1.1.3                   rmarkdown_2.9                
+[123] tidyr_1.1.3                   rmarkdown_2.10               
 [125] DelayedMatrixStats_1.15.2     rvcheck_0.1.8                
 [127] ggnewscale_0.4.5              ggforce_0.3.3                
 [129] shiny_1.6.0                   ggbeeswarm_0.6.0             
