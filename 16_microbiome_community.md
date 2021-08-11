@@ -190,31 +190,31 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7690 BIC: 8076 AIC: 7948 
+## Laplace: 7689 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7752 BIC: 8274 AIC: 8103 
+## Laplace: 7792 BIC: 8357 AIC: 8187 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7858 BIC: 8578 AIC: 8364 
+## Laplace: 7909 BIC: 8599 AIC: 8386 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7969 BIC: 8835 AIC: 8579 
+## Laplace: 7943 BIC: 8813 AIC: 8557 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: NaN BIC: NaN AIC: NaN
+## Laplace: 8004 BIC: 9051 AIC: 8752
 ```
 
 
@@ -264,9 +264,9 @@ dmn_group
 ## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
 ## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
+## Skin               2       3   67  992.6  -84.98   826.1 1066.8 1128
 ## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Tongue             2       2   67  783.0 -107.78   605.0  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -279,8 +279,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.31
+## 1 0.5385 20.59
+## 2 0.4615 15.32
 ```
 
 
@@ -294,12 +294,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 4.497e-17
+## CL3     1.000e+00 4.479e-17
 ## CC1     1.000e+00 3.406e-22
-## SV1     1.000e+00 1.713e-12
-## M31Fcsw 7.426e-26 1.000e+00
-## M11Fcsw 1.093e-16 1.000e+00
-## M31Plmr 1.153e-13 1.000e+00
+## SV1     1.000e+00 1.707e-12
+## M31Fcsw 7.406e-26 1.000e+00
+## M11Fcsw 1.089e-16 1.000e+00
+## M31Plmr 1.148e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -311,12 +311,12 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 
 ```
 ##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30381 0.1353995
-## Phylum:Euryarchaeota  0.23114 0.1468888
-## Phylum:Actinobacteria 1.21369 1.0581675
-## Phylum:Spirochaetes   0.21393 0.1318019
-## Phylum:MVP-15         0.02982 0.0007655
-## Phylum:Proteobacteria 6.84471 1.8111249
+## Phylum:Crenarchaeota  0.30381 0.1354014
+## Phylum:Euryarchaeota  0.23114 0.1468956
+## Phylum:Actinobacteria 1.21328 1.0578403
+## Phylum:Spirochaetes   0.21392 0.1318039
+## Phylum:MVP-15         0.02981 0.0007674
+## Phylum:Proteobacteria 6.84588 1.8110907
 ```
 Get the assignment probabilities
 
@@ -377,6 +377,81 @@ euclidean_dmm_plot
 
 <img src="16_microbiome_community_files/figure-html/unnamed-chunk-13-1.png" width="672" />
 
+## Community Detection
+
+Another approach for discovering communities within the samples of the data under question,
+is to run community detection algorithms after building a graph. The following demonstration 
+builds a graph based on the k nearest-neighbors and performs the community detection on the fly.
+
+_`bluster`_ [@R-bluster] package offers several clustering methods, among which graph-based are
+present, enabling the community detection task.
+
+Installing package:
+
+
+```r
+if(!require(bluster)){
+  BiocManager::install("bluster")
+}
+```
+
+The algorithm used is "short random walks" [@Pons2006]. 
+Graph is constructed using different k values (the number of nearest neighbors to consider during graph construction) 
+using the robust centered log ratio (rclr) assay data. Then plotting the communities using UMAP [@McInnes2018] ordination as a visual exploration aid.
+
+
+```r
+library(bluster)
+library(patchwork) # For arranging several plots as a grid
+library(scater)
+
+tse <- transformCounts(tse, method = "rclr")
+
+# Performing and storing UMAP
+tse <- runUMAP(tse, name="UMAP", exprs_values="rclr")
+
+k <- c(2,3,5,10)
+ClustAndPlot <- function(x) {
+  # Creating the graph and running the short random walks algorithm  
+  graph_clusters <- clusterRows(t(assays(tse)$rclr), NNGraphParam(k=x))
+  
+  # Results of the clustering as a color for each sample
+  plotUMAP(tse, colour_by = I(graph_clusters)) +
+    labs(title = paste0("k = ", x))
+}
+
+# Applying the function for different k values
+plots <- lapply(k,ClustAndPlot)
+
+# Displaying plots in a grid
+(plots[[1]] + plots[[2]]) / (plots[[3]] + plots[[4]])
+```
+
+<img src="16_microbiome_community_files/figure-html/unnamed-chunk-15-1.png" width="672" />
+
+Similarly the _`bluster`_ [@R-bluster] package offers clustering diagnostics
+that can be used for judging the clustering quality (see [Assorted clustering diagnostics](http://bioconductor.org/packages/release/bioc/vignettes/bluster/inst/doc/diagnostics.html)).
+In the following, Silhouette width as a diagnostic tool is computed and results are visualized
+for each case presented earlier. For more about Silhouettes read [@Rousseeuw1987].
+
+
+```r
+ClustDiagPlot <- function(x) {
+  # Getting the clustering results
+  graph_clusters <- clusterRows(t(assays(tse)$rclr), NNGraphParam(k=x))
+  
+  # Computing the diagnostic info
+  sil <- approxSilhouette(t(assays(tse)$rclr), graph_clusters)
+  
+  # Plotting as a boxlpot to observe cluster separation
+  boxplot(split(sil$width, graph_clusters), main=paste0("k = ", x))
+  
+}
+# Applying the function for different k values
+res <- lapply(k,ClustDiagPlot)
+```
+
+<img src="16_microbiome_community_files/figure-html/unnamed-chunk-16-1.png" width="672" /><img src="16_microbiome_community_files/figure-html/unnamed-chunk-16-2.png" width="672" /><img src="16_microbiome_community_files/figure-html/unnamed-chunk-16-3.png" width="672" /><img src="16_microbiome_community_files/figure-html/unnamed-chunk-16-4.png" width="672" />
 
 ## Session Info {-}
 
@@ -403,74 +478,76 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] miaViz_1.1.4                   ggraph_2.0.5                  
- [3] ggplot2_3.3.5                  mia_1.1.9                     
- [5] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.2             
- [7] XVector_0.33.0                 SingleCellExperiment_1.15.1   
- [9] SummarizedExperiment_1.23.1    Biobase_2.53.0                
-[11] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
-[13] IRanges_2.27.0                 S4Vectors_0.31.0              
-[15] BiocGenerics_0.39.1            MatrixGenerics_1.5.3          
-[17] matrixStats_0.60.0             ecodist_2.0.7                 
-[19] BiocStyle_2.21.3               rebook_1.3.0                  
+ [1] scater_1.21.3                  scuttle_1.3.1                 
+ [3] patchwork_1.1.1                bluster_1.3.0                 
+ [5] miaViz_1.1.4                   ggraph_2.0.5                  
+ [7] ggplot2_3.3.5                  mia_1.1.9                     
+ [9] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.2             
+[11] XVector_0.33.0                 SingleCellExperiment_1.15.1   
+[13] SummarizedExperiment_1.23.1    Biobase_2.53.0                
+[15] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
+[17] IRanges_2.27.0                 S4Vectors_0.31.0              
+[19] BiocGenerics_0.39.1            MatrixGenerics_1.5.3          
+[21] matrixStats_0.60.0             ecodist_2.0.7                 
+[23] BiocStyle_2.21.3               rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
-  [1] ggtree_3.1.2                ggnewscale_0.4.5           
-  [3] ggbeeswarm_0.6.0            colorspace_2.0-2           
-  [5] ellipsis_0.3.2              scuttle_1.3.1              
-  [7] BiocNeighbors_1.11.0        aplot_0.0.6                
-  [9] farver_2.1.0                graphlayouts_0.7.1         
- [11] ggrepel_0.9.1               bit64_4.0.5                
- [13] fansi_0.5.0                 decontam_1.13.0            
- [15] splines_4.1.0               codetools_0.2-18           
- [17] sparseMatrixStats_1.5.2     cachem_1.0.5               
- [19] knitr_1.33                  scater_1.21.3              
- [21] polyclip_1.10-0             jsonlite_1.7.2             
- [23] cluster_2.1.2               graph_1.71.2               
- [25] ggforce_0.3.3               BiocManager_1.30.16        
- [27] compiler_4.1.0              rvcheck_0.1.8              
- [29] assertthat_0.2.1            Matrix_1.3-4               
- [31] fastmap_1.1.0               lazyeval_0.2.2             
- [33] tweenr_1.0.2                BiocSingular_1.9.1         
- [35] htmltools_0.5.1.1           tools_4.1.0                
- [37] igraph_1.2.6                rsvd_1.0.5                 
- [39] gtable_0.3.0                glue_1.4.2                 
- [41] GenomeInfoDbData_1.2.6      reshape2_1.4.4             
- [43] dplyr_1.0.7                 Rcpp_1.0.7                 
- [45] jquerylib_0.1.4             vctrs_0.3.8                
- [47] ape_5.5                     nlme_3.1-152               
- [49] DECIPHER_2.21.0             DelayedMatrixStats_1.15.2  
- [51] xfun_0.25                   stringr_1.4.0              
- [53] beachmat_2.9.0              lifecycle_1.0.0            
- [55] irlba_2.3.3                 XML_3.99-0.6               
- [57] zlibbioc_1.39.0             MASS_7.3-54                
- [59] scales_1.1.1                tidygraph_1.2.0            
- [61] parallel_4.1.0              yaml_2.2.1                 
- [63] memoise_2.0.0               gridExtra_2.3              
- [65] sass_0.4.0                  stringi_1.7.3              
- [67] RSQLite_2.2.7               highr_0.9                  
- [69] ScaledMatrix_1.1.0          permute_0.9-5              
- [71] tidytree_0.3.4              filelock_1.0.2             
- [73] BiocParallel_1.27.3         rlang_0.4.11               
- [75] pkgconfig_2.0.3             bitops_1.0-7               
- [77] evaluate_0.14               lattice_0.20-44            
- [79] purrr_0.3.4                 labeling_0.4.2             
- [81] patchwork_1.1.1             treeio_1.17.2              
- [83] CodeDepends_0.6.5           bit_4.0.4                  
- [85] tidyselect_1.1.1            plyr_1.8.6                 
- [87] magrittr_2.0.1              bookdown_0.22              
- [89] R6_2.5.0                    generics_0.1.0             
- [91] DelayedArray_0.19.1         DBI_1.1.1                  
- [93] withr_2.4.2                 mgcv_1.8-36                
- [95] pillar_1.6.2                RCurl_1.98-1.3             
- [97] tibble_3.1.3                dir.expiry_1.1.0           
- [99] crayon_1.4.1                utf8_1.2.2                 
-[101] rmarkdown_2.10              viridis_0.6.1              
-[103] grid_4.1.0                  vegan_2.5-7                
-[105] blob_1.2.2                  digest_0.6.27              
-[107] tidyr_1.1.3                 munsell_0.5.0              
-[109] DirichletMultinomial_1.35.0 beeswarm_0.4.0             
-[111] viridisLite_0.4.0           vipor_0.4.5                
-[113] bslib_0.2.5.1              
+  [1] plyr_1.8.6                  igraph_1.2.6               
+  [3] lazyeval_0.2.2              splines_4.1.0              
+  [5] BiocParallel_1.27.3         digest_0.6.27              
+  [7] htmltools_0.5.1.1           viridis_0.6.1              
+  [9] fansi_0.5.0                 magrittr_2.0.1             
+ [11] memoise_2.0.0               ScaledMatrix_1.1.0         
+ [13] cluster_2.1.2               DECIPHER_2.21.0            
+ [15] graphlayouts_0.7.1          colorspace_2.0-2           
+ [17] blob_1.2.2                  ggrepel_0.9.1              
+ [19] xfun_0.25                   dplyr_1.0.7                
+ [21] crayon_1.4.1                RCurl_1.98-1.3             
+ [23] jsonlite_1.7.2              graph_1.71.2               
+ [25] ape_5.5                     glue_1.4.2                 
+ [27] polyclip_1.10-0             gtable_0.3.0               
+ [29] zlibbioc_1.39.0             DelayedArray_0.19.1        
+ [31] BiocSingular_1.9.1          scales_1.1.1               
+ [33] DBI_1.1.1                   Rcpp_1.0.7                 
+ [35] viridisLite_0.4.0           decontam_1.13.0            
+ [37] tidytree_0.3.4              bit_4.0.4                  
+ [39] rsvd_1.0.5                  FNN_1.1.3                  
+ [41] dir.expiry_1.1.0            ellipsis_0.3.2             
+ [43] pkgconfig_2.0.3             XML_3.99-0.6               
+ [45] farver_2.1.0                CodeDepends_0.6.5          
+ [47] sass_0.4.0                  uwot_0.1.10                
+ [49] utf8_1.2.2                  tidyselect_1.1.1           
+ [51] labeling_0.4.2              rlang_0.4.11               
+ [53] reshape2_1.4.4              munsell_0.5.0              
+ [55] tools_4.1.0                 cachem_1.0.5               
+ [57] DirichletMultinomial_1.35.0 generics_0.1.0             
+ [59] RSQLite_2.2.7               evaluate_0.14              
+ [61] stringr_1.4.0               fastmap_1.1.0              
+ [63] yaml_2.2.1                  ggtree_3.1.2               
+ [65] knitr_1.33                  bit64_4.0.5                
+ [67] tidygraph_1.2.0             purrr_0.3.4                
+ [69] nlme_3.1-152                sparseMatrixStats_1.5.2    
+ [71] aplot_0.0.6                 compiler_4.1.0             
+ [73] beeswarm_0.4.0              filelock_1.0.2             
+ [75] treeio_1.17.2               tibble_3.1.3               
+ [77] tweenr_1.0.2                bslib_0.2.5.1              
+ [79] stringi_1.7.3               highr_0.9                  
+ [81] RSpectra_0.16-0             lattice_0.20-44            
+ [83] Matrix_1.3-4                vegan_2.5-7                
+ [85] permute_0.9-5               vctrs_0.3.8                
+ [87] pillar_1.6.2                lifecycle_1.0.0            
+ [89] BiocManager_1.30.16         jquerylib_0.1.4            
+ [91] BiocNeighbors_1.11.0        cowplot_1.1.1              
+ [93] bitops_1.0-7                irlba_2.3.3                
+ [95] R6_2.5.0                    bookdown_0.22              
+ [97] gridExtra_2.3               vipor_0.4.5                
+ [99] codetools_0.2-18            MASS_7.3-54                
+[101] assertthat_0.2.1            withr_2.4.2                
+[103] GenomeInfoDbData_1.2.6      mgcv_1.8-36                
+[105] parallel_4.1.0              grid_4.1.0                 
+[107] beachmat_2.9.0              tidyr_1.1.3                
+[109] rmarkdown_2.10              DelayedMatrixStats_1.15.2  
+[111] rvcheck_0.1.8               ggnewscale_0.4.5           
+[113] ggforce_0.3.3               ggbeeswarm_0.6.0           
 ```
 </div>
