@@ -379,7 +379,7 @@ loaded via a namespace (and not attached):
 [107] withr_2.4.2                 GenomeInfoDbData_1.2.6     
 [109] mgcv_1.8-36                 parallel_4.1.0             
 [111] hms_1.1.0                   grid_4.1.0                 
-[113] beachmat_2.9.0              tidyr_1.1.3                
+[113] beachmat_2.9.1              tidyr_1.1.3                
 [115] rmarkdown_2.10              DelayedMatrixStats_1.15.2  
 [117] carData_3.0-4               ggpubr_0.4.0               
 [119] ggbeeswarm_0.6.0           

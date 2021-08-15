@@ -580,7 +580,7 @@ loaded via a namespace (and not attached):
 [37] ape_5.5                     nlme_3.1-152               
 [39] DECIPHER_2.21.0             DelayedMatrixStats_1.15.2  
 [41] xfun_0.25                   stringr_1.4.0              
-[43] beachmat_2.9.0              lifecycle_1.0.0            
+[43] beachmat_2.9.1              lifecycle_1.0.0            
 [45] irlba_2.3.3                 XML_3.99-0.6               
 [47] zlibbioc_1.39.0             MASS_7.3-54                
 [49] scales_1.1.1                parallel_4.1.0             

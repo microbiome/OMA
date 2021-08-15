@@ -313,7 +313,7 @@ other attached packages:
 [23] rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
-  [1] AnnotationHub_3.1.4           BiocFileCache_2.1.1          
+  [1] AnnotationHub_3.1.5           BiocFileCache_2.1.1          
   [3] plyr_1.8.6                    igraph_1.2.6                 
   [5] lazyeval_0.2.2                splines_4.1.0                
   [7] BiocParallel_1.27.3           digest_0.6.27                
@@ -373,7 +373,7 @@ loaded via a namespace (and not attached):
 [115] MASS_7.3-54                   assertthat_0.2.1             
 [117] withr_2.4.2                   GenomeInfoDbData_1.2.6       
 [119] mgcv_1.8-36                   parallel_4.1.0               
-[121] grid_4.1.0                    beachmat_2.9.0               
+[121] grid_4.1.0                    beachmat_2.9.1               
 [123] tidyr_1.1.3                   rmarkdown_2.10               
 [125] DelayedMatrixStats_1.15.2     rvcheck_0.1.8                
 [127] ggnewscale_0.4.5              ggforce_0.3.3                

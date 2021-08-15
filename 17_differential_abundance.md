@@ -239,7 +239,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.9979
+## Proportions of Observations within 95% Credible Interval: 0.998
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
@@ -298,7 +298,7 @@ other attached packages:
 [19] rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
-  [1] backports_1.2.1               AnnotationHub_3.1.4          
+  [1] backports_1.2.1               AnnotationHub_3.1.5          
   [3] BiocFileCache_2.1.1           plyr_1.8.6                   
   [5] lazyeval_0.2.2                driver_0.1.1                 
   [7] splines_4.1.0                 svUnit_1.0.6                 
@@ -361,7 +361,7 @@ loaded via a namespace (and not attached):
 [121] MASS_7.3-54                   assertthat_0.2.1             
 [123] withr_2.4.2                   GenomeInfoDbData_1.2.6       
 [125] mgcv_1.8-36                   parallel_4.1.0               
-[127] grid_4.1.0                    beachmat_2.9.0               
+[127] grid_4.1.0                    beachmat_2.9.1               
 [129] tidyr_1.1.3                   coda_0.19-4                  
 [131] rmarkdown_2.10                DelayedMatrixStats_1.15.2    
 [133] shiny_1.6.0                   ggbeeswarm_0.6.0             

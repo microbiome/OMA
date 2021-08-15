@@ -307,7 +307,7 @@ loaded via a namespace (and not attached):
  [35] ape_5.5                     nlme_3.1-152               
  [37] DECIPHER_2.21.0             DelayedMatrixStats_1.15.2  
  [39] xfun_0.25                   stringr_1.4.0              
- [41] beachmat_2.9.0              lifecycle_1.0.0            
+ [41] beachmat_2.9.1              lifecycle_1.0.0            
  [43] irlba_2.3.3                 XML_3.99-0.6               
  [45] zlibbioc_1.39.0             MASS_7.3-54                
  [47] scales_1.1.1                parallel_4.1.0             
