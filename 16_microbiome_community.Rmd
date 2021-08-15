@@ -49,22 +49,229 @@ Community composition can be visualized with heatmap where other axis represent
 samples and another taxa. Color of each intersection point represent abundance
 of a taxon in a specific sample. 
 
-Here, Z-transformed abundances are plotted at Phylum level. 
+Here, abundances are first CLR (centered log ratio) transformed, and then 
+Z transformation is applied to CLR-transformed data. After that abundances are 
+plotted at Phylum level. 
 
 ```{r heatmap}
 library(ggplot2)
+# Does clr-transformation
+tse_phylum <- transformSamples(tse_phylum, method = "clr", pseudocount = 1)
 # Does z-transformation
-tse_phylum <- transformFeatures(tse_phylum, method = "z", name = "Ztransform")
+tse_phylum <- transformFeatures(tse_phylum, abund_values = "clr", 
+                                method = "z", name = "clr_z")
 # Melts the assay
-df <- meltAssay(tse_phylum, assay_name = "Ztransform")
+df <- meltAssay(tse_phylum, assay_name = "clr_z")
+
+# Determines the scaling of colours
+maxval <- round(max(abs(df$clr_z)))
+limits <- c(-maxval, maxval)
+breaks <- seq(from = min(limits), to = max(limits), by = 0.5)
+colours <- c("darkblue", "blue", "white", "red", "darkred")
 
 # Creates a ggplot object
-ggplot(df, aes(x = SampleID, y = FeatureID, fill = Ztransform)) +
+ggplot(df, aes(x = SampleID, y = FeatureID, fill = clr_z)) +
   geom_tile() +
-  scale_fill_gradient(low = "blue", high = "red") + 
+  scale_fill_gradientn(name = "CLR + Z transform", 
+                       breaks = breaks, limits = limits, colours = colours) + 
   theme(text = element_text(size=10),
-        axis.text.x = element_text(angle=45, hjust=1)) +
+        axis.text.x = element_text(angle=45, hjust=1),
+        legend.key.size = unit(1, "cm")) +
   labs(x = "Samples", y = "Taxa")
+```
+
+_pheatmap_ is a package that provides methods to plot clustered heatmaps. 
+
+```{r pheatmap1}
+if(!require(pheatmap)){
+    install.packages("pheatmap")
+}
+library(pheatmap)
+
+# Takes subset: only samples from feces, skin, or tongue
+tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces", "Skin", "Tongue") ]
+
+# Does clr-transformation
+tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "clr", pseudocount = 1)
+# Does z-transformation
+tse_phylum_subset <- transformFeatures(tse_phylum_subset, abund_values = "clr", 
+                                       method = "z", name = "clr_z")
+
+# Get 10 most abundant taxa, and subsets the data by them
+top_taxa <- getTopTaxa(tse_phylum_subset, top = 20)
+tse_phylum_subset <- tse_phylum_subset[top_taxa, ]
+
+# Gets the assay table
+mat <- assay(tse_phylum_subset, "clr_z")
+
+# Creates the heatmap
+pheatmap(mat)
+```
+
+We can create clusters by hierarchical clustering and 
+visualize them with dendrogram.
+
+```{r pheatmap2}
+# Package for creating dendrograms
+if(!require(dendextend)){
+    install.packages("dendextend")
+}
+library(dendextend)
+
+# Hierarchical clustering
+taxa_clusters <- hclust(dist(mat), method = "complete")
+
+# Creates a dendrogram
+taxa_dendrogram <- as.dendrogram(taxa_clusters)
+
+# Plots it
+plot(taxa_dendrogram)
+```
+
+Based on dendrogram, we decide to create three clusters. 
+
+```{r pheatmap3}
+# Creates clusters
+taxa_clusters <- cutree(tree = taxa_dendrogram, k = 3)
+
+# Prints taxa and their clusters
+taxa_clusters 
+```
+
+```{r pheatmap4}
+# Creates clusters, and adds information to rowData
+rowData(tse_phylum_subset)$clusters <- cutree(tree = taxa_dendrogram, k = 3)
+
+# Prints taxa and their clusters
+rowData(tse_phylum_subset)$clusters
+```
+
+Now we can create heatmap with additional annotations.
+
+```{r pheatmap5}
+# Creates data frame that includes cluster data
+taxa_clusters <- rowData(tse_phylum_subset)$clusters
+taxa_clusters <- as.character(taxa_clusters)
+taxa_clusters <- data.frame(cluster = taxa_clusters)
+row.names(taxa_clusters) <- rownames(tse_phylum_subset)
+
+# Creates data frame that includes sample type data
+sample_types <- unfactor(colData(tse_phylum_subset)$SampleType)
+sample_types <- data.frame(sample_types = sample_types)
+row.names(sample_types) <- colnames(tse_phylum_subset)
+
+pheatmap(mat, annotation_row = taxa_clusters, 
+         annotation_col = sample_types)
+```
+
+In addition to _pheatmap_ package, there are also other packages that provide 
+functions for more complex heatmaps. One example is _iheatmapr_ package. Examples
+of using it you can find from its 
+[vignette](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html).
+
+# Cross-correlation
+
+With cross-correlation analysis, we can analyze how strongly and how different
+variables are associated between each other. For instance, we can analyze if 
+higher presence of specific taxon equals to higher level of biomolecule. 
+
+Here, we analyze associations between taxa correlate and lipids. Data is from 
+following publication Lahti _et al_. (2015) [Associations between the human intestinal 
+microbiota, Lactobacillus rhamnosus GG and serum lipids indicated by 
+integrated analysis of high-throughput profiling 
+data](https://peerj.com/articles/32/).
+
+```{r cross-correlation1}
+# Imports the data
+tse <- microbiomeDataSets::peerj32()
+
+# Microbiome data
+tse[[1]] 
+```
+
+```{r cross-correlation2}
+# Lipid data
+tse[[2]]
+```
+
+```{r cross-correlation3}
+if(!require(microbiome)){
+    BiocManager::install("microbiome")
+}
+
+# Does log10 transform for microbiome data
+tse[[1]] <- transformSamples(tse[[1]], method = "log10", pseudocount = 1)
+
+# Gets microbiome and lipid data to cross-correlate
+x <- t(assay(tse[[1]], "log10"))
+y <- t(assay(tse[[2]], "counts"))
+
+# Cross correlates data sets
+correlation_table <- microbiome::associate(x, y, method = "spearman", mode = "table", 
+                                           p.adj.threshold = 0.05, n.signif = 1)
+
+knitr::kable(head(correlation_table))
+```
+
+Manipulates and reorders the table
+
+```{r cross-correlation4}
+if(!require(reshape2)){
+    install.packages("reshape2")
+}
+if(!require(dplyr)){
+    install.packages("dplyr")
+}
+# Gets taxa that has at least one statistically significant correlation
+taxa <- correlation_table %>% dplyr::filter(p.adj < 0.05 & abs(Correlation) > 0) %>% 
+  dplyr::select(X1) %>% unique %>% sapply(as.character)
+# Gets taxa that has at least one statistically significant correlation
+lipids <- correlation_table %>% dplyr::filter(p.adj < 0.05 & abs(Correlation) > 0) %>% 
+  dplyr::select(X2) %>% unique %>% sapply(as.character)
+
+# Takes only those taxa and lipids that has statistically significant values
+correlation_table <- correlation_table[correlation_table[["X1"]] %in% taxa & 
+                                           correlation_table[["X2"]] %in% lipids, ]
+
+# Converts data to matrix, correlations as values
+mat <- reshape2::acast(correlation_table, X2 ~ X1, value.var = "Correlation")
+
+# Hierarchical clustering, gets the order of taxa and lipids
+taxa_indices <- hclust(as.dist(1 - cor(mat, use="pairwise.complete.obs")))$order
+order_taxa <- colnames(mat)[taxa_indices]
+lipids_indices <- hclust(as.dist(1 - cor(t(mat), use="pairwise.complete.obs")))$order
+order_lipids <- rownames(mat)[lipids_indices]
+
+# Converts taxa and lipids columns to factor so that they have desired order
+correlation_table[["X1"]] <- factor(correlation_table[["X1"]], levels = order_taxa)
+correlation_table[["X2"]] <- factor(correlation_table[["X2"]], levels = order_lipids)
+```
+
+Creates the heatmap
+
+```{r cross-correlation5, fig.height = 8, fig.width = 6}
+# Determines the scaling of colours
+limits <- c(-1, 1)
+breaks <- seq(from = min(limits), to = max(limits), by = 0.2)
+colours <- c("darkblue", "blue", "white", "red", "darkred")
+
+# Which observation have p-value under 0.05? --> creates a subset
+cor_table_sub <- correlation_table[which(correlation_table[["Correlation"]] < 0.05), ]
+
+# Creates a ggplot object
+ggplot(correlation_table, aes(x = X1, y = X2, fill = Correlation)) +
+  geom_tile() +
+  
+  scale_fill_gradientn(name = "Correlation", 
+                       breaks = breaks, limits = limits, colours = colours) + 
+  
+  # Adds label to those observations that have p-value under 0.05
+  geom_text(data = cor_table_sub, aes(x = X1, y = X2, label = "+")) +
+  
+  theme(text = element_text(size=10),
+        axis.text.x = element_text(angle=45, hjust=1),
+        legend.key.size = unit(1, "cm")) +
+  labs(x = "Taxa", y = "Lipids")
 ```
 
 ## Community typing
