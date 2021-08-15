@@ -83,26 +83,319 @@ Community composition can be visualized with heatmap where other axis represent
 samples and another taxa. Color of each intersection point represent abundance
 of a taxon in a specific sample. 
 
-Here, Z-transformed abundances are plotted at Phylum level. 
+Here, abundances are first CLR (centered log ratio) transformed, and then 
+Z transformation is applied to CLR-transformed data. After that abundances are 
+plotted at Phylum level. 
 
 
 ```r
 library(ggplot2)
+# Does clr-transformation
+tse_phylum <- transformSamples(tse_phylum, method = "clr", pseudocount = 1)
 # Does z-transformation
-tse_phylum <- transformFeatures(tse_phylum, method = "z", name = "Ztransform")
+tse_phylum <- transformFeatures(tse_phylum, abund_values = "clr", 
+                                method = "z", name = "clr_z")
 # Melts the assay
-df <- meltAssay(tse_phylum, assay_name = "Ztransform")
+df <- meltAssay(tse_phylum, assay_name = "clr_z")
+
+# Determines the scaling of colours
+maxval <- round(max(abs(df$clr_z)))
+limits <- c(-maxval, maxval)
+breaks <- seq(from = min(limits), to = max(limits), by = 0.5)
+colours <- c("darkblue", "blue", "white", "red", "darkred")
 
 # Creates a ggplot object
-ggplot(df, aes(x = SampleID, y = FeatureID, fill = Ztransform)) +
+ggplot(df, aes(x = SampleID, y = FeatureID, fill = clr_z)) +
   geom_tile() +
-  scale_fill_gradient(low = "blue", high = "red") + 
+  scale_fill_gradientn(name = "CLR + Z transform", 
+                       breaks = breaks, limits = limits, colours = colours) + 
   theme(text = element_text(size=10),
-        axis.text.x = element_text(angle=45, hjust=1)) +
+        axis.text.x = element_text(angle=45, hjust=1),
+        legend.key.size = unit(1, "cm")) +
   labs(x = "Samples", y = "Taxa")
 ```
 
 <img src="16_microbiome_community_files/figure-html/heatmap-1.png" width="672" />
+
+_pheatmap_ is a package that provides methods to plot clustered heatmaps. 
+
+
+```r
+if(!require(pheatmap)){
+    install.packages("pheatmap")
+}
+library(pheatmap)
+
+# Takes subset: only samples from feces, skin, or tongue
+tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces", "Skin", "Tongue") ]
+
+# Does clr-transformation
+tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "clr", pseudocount = 1)
+# Does z-transformation
+tse_phylum_subset <- transformFeatures(tse_phylum_subset, abund_values = "clr", 
+                                       method = "z", name = "clr_z")
+
+# Get 10 most abundant taxa, and subsets the data by them
+top_taxa <- getTopTaxa(tse_phylum_subset, top = 20)
+tse_phylum_subset <- tse_phylum_subset[top_taxa, ]
+
+# Gets the assay table
+mat <- assay(tse_phylum_subset, "clr_z")
+
+# Creates the heatmap
+pheatmap(mat)
+```
+
+<img src="16_microbiome_community_files/figure-html/pheatmap1-1.png" width="672" />
+
+We can create clusters by hierarchical clustering and 
+visualize them with dendrogram.
+
+
+```r
+# Package for creating dendrograms
+if(!require(dendextend)){
+    install.packages("dendextend")
+}
+library(dendextend)
+
+# Hierarchical clustering
+taxa_clusters <- hclust(dist(mat), method = "complete")
+
+# Creates a dendrogram
+taxa_dendrogram <- as.dendrogram(taxa_clusters)
+
+# Plots it
+plot(taxa_dendrogram)
+```
+
+<img src="16_microbiome_community_files/figure-html/pheatmap2-1.png" width="672" />
+
+Based on dendrogram, we decide to create three clusters. 
+
+
+```r
+# Creates clusters
+taxa_clusters <- cutree(tree = taxa_dendrogram, k = 3)
+
+# Prints taxa and their clusters
+taxa_clusters 
+```
+
+```
+##       Firmicutes    Bacteroidetes   Proteobacteria   Actinobacteria 
+##                1                1                2                3 
+##    Cyanobacteria     Fusobacteria      Tenericutes  Verrucomicrobia 
+##                2                2                1                1 
+##    Lentisphaerae    Euryarchaeota    Acidobacteria     Spirochaetes 
+##                1                1                3                2 
+##   Planctomycetes           Thermi      Chloroflexi              SR1 
+##                3                3                3                2 
+##    Synergistetes    Crenarchaeota Gemmatimonadetes           SAR406 
+##                2                3                3                1
+```
+
+
+```r
+# Creates clusters, and adds information to rowData
+rowData(tse_phylum_subset)$clusters <- cutree(tree = taxa_dendrogram, k = 3)
+
+# Prints taxa and their clusters
+rowData(tse_phylum_subset)$clusters
+```
+
+```
+##       Firmicutes    Bacteroidetes   Proteobacteria   Actinobacteria 
+##                1                1                2                3 
+##    Cyanobacteria     Fusobacteria      Tenericutes  Verrucomicrobia 
+##                2                2                1                1 
+##    Lentisphaerae    Euryarchaeota    Acidobacteria     Spirochaetes 
+##                1                1                3                2 
+##   Planctomycetes           Thermi      Chloroflexi              SR1 
+##                3                3                3                2 
+##    Synergistetes    Crenarchaeota Gemmatimonadetes           SAR406 
+##                2                3                3                1
+```
+
+Now we can create heatmap with additional annotations.
+
+
+```r
+# Creates data frame that includes cluster data
+taxa_clusters <- rowData(tse_phylum_subset)$clusters
+taxa_clusters <- as.character(taxa_clusters)
+taxa_clusters <- data.frame(cluster = taxa_clusters)
+row.names(taxa_clusters) <- rownames(tse_phylum_subset)
+
+# Creates data frame that includes sample type data
+sample_types <- unfactor(colData(tse_phylum_subset)$SampleType)
+sample_types <- data.frame(sample_types = sample_types)
+row.names(sample_types) <- colnames(tse_phylum_subset)
+
+pheatmap(mat, annotation_row = taxa_clusters, 
+         annotation_col = sample_types)
+```
+
+<img src="16_microbiome_community_files/figure-html/pheatmap5-1.png" width="672" />
+
+In addition to _pheatmap_ package, there are also other packages that provide 
+functions for more complex heatmaps. One example is _iheatmapr_ package. Examples
+of using it you can find from its 
+[vignette](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html).
+
+# Cross-correlation
+
+With cross-correlation analysis, we can analyze how strongly and how different
+variables are associated between each other. For instance, we can analyze if 
+higher presence of specific taxon equals to higher level of biomolecule. 
+
+Here, we analyze associations between taxa correlate and lipids. Data is from 
+following publication Lahti _et al_. (2015) [Associations between the human intestinal 
+microbiota, Lactobacillus rhamnosus GG and serum lipids indicated by 
+integrated analysis of high-throughput profiling 
+data](https://peerj.com/articles/32/).
+
+
+```r
+# Imports the data
+tse <- microbiomeDataSets::peerj32()
+
+# Microbiome data
+tse[[1]] 
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 130 44 
+## metadata(0):
+## assays(1): counts
+## rownames(130): Actinomycetaceae Aerococcus ... Xanthomonadaceae
+##   Yersinia et rel.
+## rowData names(3): Phylum Family Genus
+## colnames(44): sample-1 sample-2 ... sample-43 sample-44
+## colData names(0):
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: NULL
+## rowTree: NULL
+## colLinks: NULL
+## colTree: NULL
+```
+
+
+```r
+# Lipid data
+tse[[2]]
+```
+
+```
+## class: SummarizedExperiment 
+## dim: 389 44 
+## metadata(0):
+## assays(1): counts
+## rownames(389): Cer(d18:1/16:0).1 Cer(d18:1/16:0).2 ... TG(60:11)
+##   TG(60:9)
+## rowData names(0):
+## colnames(44): sample-1 sample-2 ... sample-43 sample-44
+## colData names(0):
+```
+
+
+```r
+if(!require(microbiome)){
+    BiocManager::install("microbiome")
+}
+
+# Does log10 transform for microbiome data
+tse[[1]] <- transformSamples(tse[[1]], method = "log10", pseudocount = 1)
+
+# Gets microbiome and lipid data to cross-correlate
+x <- t(assay(tse[[1]], "log10"))
+y <- t(assay(tse[[2]], "counts"))
+
+# Cross correlates data sets
+correlation_table <- microbiome::associate(x, y, method = "spearman", mode = "table", 
+                                           p.adj.threshold = 0.05, n.signif = 1)
+
+knitr::kable(head(correlation_table))
+```
+
+
+
+|    |X1                              |X2         | Correlation|  p.adj|
+|:---|:-------------------------------|:----------|-----------:|------:|
+|552 |Ruminococcus gnavus et rel.     |TG(54:5).2 |      0.7165| 0.0023|
+|614 |Uncultured Bacteroidetes        |TG(56:2).1 |     -0.6964| 0.0039|
+|100 |Lactobacillus plantarum et rel. |PC(40:3)   |     -0.6737| 0.0051|
+|252 |Ruminococcus gnavus et rel.     |TG(50:4)   |      0.6912| 0.0051|
+|357 |Ruminococcus gnavus et rel.     |TG(52:5)   |      0.6806| 0.0051|
+|537 |Ruminococcus gnavus et rel.     |TG(54:4).2 |      0.6820| 0.0051|
+
+Manipulates and reorders the table
+
+
+```r
+if(!require(reshape2)){
+    install.packages("reshape2")
+}
+if(!require(dplyr)){
+    install.packages("dplyr")
+}
+# Gets taxa that has at least one statistically significant correlation
+taxa <- correlation_table %>% dplyr::filter(p.adj < 0.05 & abs(Correlation) > 0) %>% 
+  dplyr::select(X1) %>% unique %>% sapply(as.character)
+# Gets taxa that has at least one statistically significant correlation
+lipids <- correlation_table %>% dplyr::filter(p.adj < 0.05 & abs(Correlation) > 0) %>% 
+  dplyr::select(X2) %>% unique %>% sapply(as.character)
+
+# Takes only those taxa and lipids that has statistically significant values
+correlation_table <- correlation_table[correlation_table[["X1"]] %in% taxa & 
+                                           correlation_table[["X2"]] %in% lipids, ]
+
+# Converts data to matrix, correlations as values
+mat <- reshape2::acast(correlation_table, X2 ~ X1, value.var = "Correlation")
+
+# Hierarchical clustering, gets the order of taxa and lipids
+taxa_indices <- hclust(as.dist(1 - cor(mat, use="pairwise.complete.obs")))$order
+order_taxa <- colnames(mat)[taxa_indices]
+lipids_indices <- hclust(as.dist(1 - cor(t(mat), use="pairwise.complete.obs")))$order
+order_lipids <- rownames(mat)[lipids_indices]
+
+# Converts taxa and lipids columns to factor so that they have desired order
+correlation_table[["X1"]] <- factor(correlation_table[["X1"]], levels = order_taxa)
+correlation_table[["X2"]] <- factor(correlation_table[["X2"]], levels = order_lipids)
+```
+
+Creates the heatmap
+
+
+```r
+# Determines the scaling of colours
+limits <- c(-1, 1)
+breaks <- seq(from = min(limits), to = max(limits), by = 0.2)
+colours <- c("darkblue", "blue", "white", "red", "darkred")
+
+# Which observation have p-value under 0.05? --> creates a subset
+cor_table_sub <- correlation_table[which(correlation_table[["Correlation"]] < 0.05), ]
+
+# Creates a ggplot object
+ggplot(correlation_table, aes(x = X1, y = X2, fill = Correlation)) +
+  geom_tile() +
+  
+  scale_fill_gradientn(name = "Correlation", 
+                       breaks = breaks, limits = limits, colours = colours) + 
+  
+  # Adds label to those observations that have p-value under 0.05
+  geom_text(data = cor_table_sub, aes(x = X1, y = X2, label = "+")) +
+  
+  theme(text = element_text(size=10),
+        axis.text.x = element_text(angle=45, hjust=1),
+        legend.key.size = unit(1, "cm")) +
+  labs(x = "Taxa", y = "Lipids")
+```
+
+<img src="16_microbiome_community_files/figure-html/cross-correlation5-1.png" width="576" />
 
 ## Community typing
 
@@ -196,25 +489,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7781 BIC: 8343 AIC: 8173 
+## Laplace: 7741 BIC: 8282 AIC: 8112 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7858 BIC: 8578 AIC: 8364 
+## Laplace: 7910 BIC: 8599 AIC: 8386 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7942 BIC: 8822 AIC: 8566 
+## Laplace: 7952 BIC: 8850 AIC: 8594 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8016 BIC: 9020 AIC: 8721
+## Laplace: 8105 BIC: 9118 AIC: 8820
 ```
 
 
@@ -261,10 +554,10 @@ dmn_group
 ## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
 ## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
 ## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
-## Mock               2       3   67  998.6  -70.60   839.3 1072.8 1134
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
 ## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.93   826.1 1066.8 1128
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
 ## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
 ## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 ```
@@ -295,11 +588,11 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 ```
 ##              [,1]      [,2]
 ## CL3     1.000e+00 4.993e-17
-## CC1     1.000e+00 3.779e-22
-## SV1     1.000e+00 2.019e-12
-## M31Fcsw 7.328e-26 1.000e+00
-## M11Fcsw 1.063e-16 1.000e+00
-## M31Plmr 9.980e-14 1.000e+00
+## CC1     1.000e+00 3.786e-22
+## SV1     1.000e+00 2.018e-12
+## M31Fcsw 7.306e-26 1.000e+00
+## M11Fcsw 1.061e-16 1.000e+00
+## M31Plmr 9.981e-14 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -311,12 +604,12 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 
 ```
 ##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354644
-## Phylum:Euryarchaeota  0.2314 0.1468593
-## Phylum:Actinobacteria 1.2104 1.0601432
-## Phylum:Spirochaetes   0.2141 0.1318400
-## Phylum:MVP-15         0.0299 0.0007634
-## Phylum:Proteobacteria 6.8416 1.8154116
+## Phylum:Crenarchaeota  0.3043 0.1354652
+## Phylum:Euryarchaeota  0.2314 0.1468630
+## Phylum:Actinobacteria 1.2105 1.0600236
+## Phylum:Spirochaetes   0.2141 0.1318413
+## Phylum:MVP-15         0.0299 0.0007642
+## Phylum:Proteobacteria 6.8423 1.8150916
 ```
 Get the assignment probabilities
 
@@ -483,74 +776,92 @@ attached base packages:
 other attached packages:
  [1] scater_1.21.3                  scuttle_1.3.1                 
  [3] patchwork_1.1.1                bluster_1.3.0                 
- [5] miaViz_1.1.4                   ggraph_2.0.5                  
- [7] ggplot2_3.3.5                  mia_1.1.9                     
- [9] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.2             
-[11] XVector_0.33.0                 SingleCellExperiment_1.15.1   
-[13] SummarizedExperiment_1.23.1    Biobase_2.53.0                
-[15] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
-[17] IRanges_2.27.0                 S4Vectors_0.31.0              
-[19] BiocGenerics_0.39.1            MatrixGenerics_1.5.3          
-[21] matrixStats_0.60.0             ecodist_2.0.7                 
-[23] BiocStyle_2.21.3               rebook_1.3.0                  
+ [5] dplyr_1.0.7                    reshape2_1.4.4                
+ [7] microbiomeDataSets_1.1.1       MultiAssayExperiment_1.19.5   
+ [9] dendextend_1.15.1              pheatmap_1.0.12               
+[11] miaViz_1.1.4                   ggraph_2.0.5                  
+[13] ggplot2_3.3.5                  mia_1.1.9                     
+[15] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.2             
+[17] XVector_0.33.0                 SingleCellExperiment_1.15.1   
+[19] SummarizedExperiment_1.23.1    Biobase_2.53.0                
+[21] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
+[23] IRanges_2.27.0                 S4Vectors_0.31.0              
+[25] BiocGenerics_0.39.1            MatrixGenerics_1.5.3          
+[27] matrixStats_0.60.0             ecodist_2.0.7                 
+[29] BiocStyle_2.21.3               rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
-  [1] plyr_1.8.6                  igraph_1.2.6               
-  [3] lazyeval_0.2.2              splines_4.1.0              
-  [5] BiocParallel_1.27.3         digest_0.6.27              
-  [7] htmltools_0.5.1.1           viridis_0.6.1              
-  [9] fansi_0.5.0                 magrittr_2.0.1             
- [11] memoise_2.0.0               ScaledMatrix_1.1.0         
- [13] cluster_2.1.2               DECIPHER_2.21.0            
- [15] graphlayouts_0.7.1          colorspace_2.0-2           
- [17] blob_1.2.2                  ggrepel_0.9.1              
- [19] xfun_0.25                   dplyr_1.0.7                
- [21] crayon_1.4.1                RCurl_1.98-1.3             
- [23] jsonlite_1.7.2              graph_1.71.2               
- [25] ape_5.5                     glue_1.4.2                 
- [27] polyclip_1.10-0             gtable_0.3.0               
- [29] zlibbioc_1.39.0             DelayedArray_0.19.1        
- [31] BiocSingular_1.9.1          scales_1.1.1               
- [33] DBI_1.1.1                   Rcpp_1.0.7                 
- [35] viridisLite_0.4.0           decontam_1.13.0            
- [37] tidytree_0.3.4              bit_4.0.4                  
- [39] rsvd_1.0.5                  FNN_1.1.3                  
- [41] dir.expiry_1.1.0            ellipsis_0.3.2             
- [43] pkgconfig_2.0.3             XML_3.99-0.6               
- [45] farver_2.1.0                CodeDepends_0.6.5          
- [47] sass_0.4.0                  uwot_0.1.10                
- [49] utf8_1.2.2                  tidyselect_1.1.1           
- [51] labeling_0.4.2              rlang_0.4.11               
- [53] reshape2_1.4.4              munsell_0.5.0              
- [55] tools_4.1.0                 cachem_1.0.5               
- [57] DirichletMultinomial_1.35.0 generics_0.1.0             
- [59] RSQLite_2.2.7               evaluate_0.14              
- [61] stringr_1.4.0               fastmap_1.1.0              
- [63] yaml_2.2.1                  ggtree_3.1.3               
- [65] knitr_1.33                  bit64_4.0.5                
- [67] tidygraph_1.2.0             purrr_0.3.4                
- [69] nlme_3.1-152                sparseMatrixStats_1.5.2    
- [71] aplot_0.0.6                 compiler_4.1.0             
- [73] beeswarm_0.4.0              filelock_1.0.2             
- [75] treeio_1.17.2               tibble_3.1.3               
- [77] tweenr_1.0.2                bslib_0.2.5.1              
- [79] stringi_1.7.3               highr_0.9                  
- [81] lattice_0.20-44             Matrix_1.3-4               
- [83] vegan_2.5-7                 permute_0.9-5              
- [85] vctrs_0.3.8                 pillar_1.6.2               
- [87] lifecycle_1.0.0             BiocManager_1.30.16        
- [89] jquerylib_0.1.4             BiocNeighbors_1.11.0       
- [91] cowplot_1.1.1               bitops_1.0-7               
- [93] irlba_2.3.3                 R6_2.5.0                   
- [95] bookdown_0.22               gridExtra_2.3              
- [97] vipor_0.4.5                 codetools_0.2-18           
- [99] MASS_7.3-54                 assertthat_0.2.1           
-[101] withr_2.4.2                 GenomeInfoDbData_1.2.6     
-[103] mgcv_1.8-36                 parallel_4.1.0             
-[105] grid_4.1.0                  beachmat_2.9.1             
-[107] tidyr_1.1.3                 rmarkdown_2.10             
-[109] DelayedMatrixStats_1.15.2   rvcheck_0.1.8              
-[111] ggnewscale_0.4.5            ggforce_0.3.3              
-[113] ggbeeswarm_0.6.0           
+  [1] utf8_1.2.2                    tidyselect_1.1.1             
+  [3] RSQLite_2.2.7                 AnnotationDbi_1.55.1         
+  [5] grid_4.1.0                    BiocParallel_1.27.3          
+  [7] Rtsne_0.15                    munsell_0.5.0                
+  [9] ScaledMatrix_1.1.0            codetools_0.2-18             
+ [11] withr_2.4.2                   colorspace_2.0-2             
+ [13] filelock_1.0.2                phyloseq_1.37.0              
+ [15] highr_0.9                     knitr_1.33                   
+ [17] labeling_0.4.2                GenomeInfoDbData_1.2.6       
+ [19] polyclip_1.10-0               bit64_4.0.5                  
+ [21] farver_2.1.0                  rhdf5_2.37.0                 
+ [23] vctrs_0.3.8                   treeio_1.17.2                
+ [25] generics_0.1.0                xfun_0.25                    
+ [27] BiocFileCache_2.1.1           R6_2.5.0                     
+ [29] ggbeeswarm_0.6.0              graphlayouts_0.7.1           
+ [31] rsvd_1.0.5                    rhdf5filters_1.5.0           
+ [33] bitops_1.0-7                  microbiome_1.15.0            
+ [35] cachem_1.0.5                  DelayedArray_0.19.1          
+ [37] assertthat_0.2.1              promises_1.2.0.1             
+ [39] scales_1.1.1                  beeswarm_0.4.0               
+ [41] gtable_0.3.0                  beachmat_2.9.1               
+ [43] tidygraph_1.2.0               rlang_0.4.11                 
+ [45] splines_4.1.0                 lazyeval_0.2.2               
+ [47] BiocManager_1.30.16           yaml_2.2.1                   
+ [49] httpuv_1.6.1                  tools_4.1.0                  
+ [51] bookdown_0.22                 ellipsis_0.3.2               
+ [53] decontam_1.13.0               biomformat_1.21.0            
+ [55] jquerylib_0.1.4               RColorBrewer_1.1-2           
+ [57] Rcpp_1.0.7                    plyr_1.8.6                   
+ [59] sparseMatrixStats_1.5.2       zlibbioc_1.39.0              
+ [61] purrr_0.3.4                   RCurl_1.98-1.3               
+ [63] viridis_0.6.1                 cowplot_1.1.1                
+ [65] ggrepel_0.9.1                 cluster_2.1.2                
+ [67] DECIPHER_2.21.0               magrittr_2.0.1               
+ [69] data.table_1.14.0             ggnewscale_0.4.5             
+ [71] mime_0.11                     evaluate_0.14                
+ [73] xtable_1.8-4                  XML_3.99-0.6                 
+ [75] gridExtra_2.3                 compiler_4.1.0               
+ [77] tibble_3.1.3                  crayon_1.4.1                 
+ [79] htmltools_0.5.1.1             mgcv_1.8-36                  
+ [81] later_1.2.0                   tidyr_1.1.3                  
+ [83] aplot_0.0.6                   DBI_1.1.1                    
+ [85] tweenr_1.0.2                  ExperimentHub_2.1.4          
+ [87] dbplyr_2.1.1                  MASS_7.3-54                  
+ [89] rappdirs_0.3.3                Matrix_1.3-4                 
+ [91] ade4_1.7-17                   permute_0.9-5                
+ [93] parallel_4.1.0                igraph_1.2.6                 
+ [95] pkgconfig_2.0.3               rvcheck_0.1.8                
+ [97] dir.expiry_1.1.0              foreach_1.5.1                
+ [99] ggtree_3.1.3                  vipor_0.4.5                  
+[101] bslib_0.2.5.1                 DirichletMultinomial_1.35.0  
+[103] multtest_2.49.0               stringr_1.4.0                
+[105] digest_0.6.27                 vegan_2.5-7                  
+[107] graph_1.71.2                  rmarkdown_2.10               
+[109] tidytree_0.3.4                uwot_0.1.10                  
+[111] DelayedMatrixStats_1.15.2     curl_4.3.2                   
+[113] shiny_1.6.0                   lifecycle_1.0.0              
+[115] nlme_3.1-152                  jsonlite_1.7.2               
+[117] Rhdf5lib_1.15.2               BiocNeighbors_1.11.0         
+[119] CodeDepends_0.6.5             viridisLite_0.4.0            
+[121] fansi_0.5.0                   pillar_1.6.2                 
+[123] lattice_0.20-44               survival_3.2-11              
+[125] KEGGREST_1.33.0               fastmap_1.1.0                
+[127] httr_1.4.2                    interactiveDisplayBase_1.31.2
+[129] glue_1.4.2                    FNN_1.1.3                    
+[131] png_0.1-7                     iterators_1.0.13             
+[133] BiocVersion_3.14.0            bit_4.0.4                    
+[135] ggforce_0.3.3                 stringi_1.7.3                
+[137] sass_0.4.0                    blob_1.2.2                   
+[139] BiocSingular_1.9.1            AnnotationHub_3.1.5          
+[141] memoise_2.0.0                 irlba_2.3.3                  
+[143] ape_5.5                      
 ```
 </div>

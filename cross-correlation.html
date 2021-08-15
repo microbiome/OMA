@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 10 Cross-correlation | Orchestrating Microbiome Analysis</title>
+  <meta name="description" content="Chapter 10 Cross-correlation | Orchestrating Microbiome Analysis" />
+  <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 10 Cross-correlation | Orchestrating Microbiome Analysis" />
+  <meta property="og:type" content="book" />
+  <meta property="og:url" content="https://github.com/microbiome/OMA" />
+  
+  
+  <meta name="github-repo" content="microbiome/OMA" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 10 Cross-correlation | Orchestrating Microbiome Analysis" />
+  
+  
+  
+
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="microbiome-community.html"/>
+<link rel="next" href="differential-abundance.html"/>
+<script src="libs/header-attrs-2.10/header-attrs.js"></script>
+<script src="libs/jquery-3.5.1/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<script src="libs/plotly-binding-4.9.4.1/plotly.js"></script>
+<script src="libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="libs/crosstalk-1.1.1/css/crosstalk.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.1.1/js/crosstalk.min.js"></script>
+<link href="libs/plotly-htmlwidgets-css-1.57.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="libs/plotly-main-1.57.1/plotly-latest.min.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Orchestrating Microbiome Analysis</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="chapter" data-level="" data-path="introduction-to-bioconductor-classes.html"><a href="introduction-to-bioconductor-classes.html"><i class="fa fa-check"></i>Introduction to Bioconductor Classes</a></li>
+<li class="part"><span><b>I Introduction</b></span></li>
+<li class="chapter" data-level="1" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="introduction.html"><a href="introduction.html#community"><i class="fa fa-check"></i><b>1.1</b> Community</a></li>
+<li class="chapter" data-level="1.2" data-path="introduction.html"><a href="introduction.html#acknowledgements"><i class="fa fa-check"></i><b>1.2</b> Acknowledgements</a></li>
+</ul></li>
+<li class="part"><span><b>II Introduction</b></span></li>
+<li class="chapter" data-level="2" data-path="data-introduction.html"><a href="data-introduction.html"><i class="fa fa-check"></i><b>2</b> Data Infrastructure</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="data-introduction.html"><a href="data-introduction.html#installation"><i class="fa fa-check"></i><b>2.1</b> Installation</a>
+<ul>
+<li class="chapter" data-level="2.1.1" data-path="data-introduction.html"><a href="data-introduction.html#packages"><i class="fa fa-check"></i><b>2.1.1</b> Packages</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="data-introduction.html"><a href="data-introduction.html#background"><i class="fa fa-check"></i><b>2.2</b> Background</a></li>
+<li class="chapter" data-level="2.3" data-path="data-introduction.html"><a href="data-introduction.html#loading-experimental-microbiome-data"><i class="fa fa-check"></i><b>2.3</b> Loading experimental microbiome data</a>
+<ul>
+<li class="chapter" data-level="2.3.1" data-path="data-introduction.html"><a href="data-introduction.html#importing-data-from-external-files"><i class="fa fa-check"></i><b>2.3.1</b> Importing data from external files</a></li>
+<li class="chapter" data-level="2.3.2" data-path="data-introduction.html"><a href="data-introduction.html#conversions-between-data-formats-in-r"><i class="fa fa-check"></i><b>2.3.2</b> Conversions between data formats in R</a></li>
+</ul></li>
+<li class="chapter" data-level="2.4" data-path="data-introduction.html"><a href="data-introduction.html#metadata"><i class="fa fa-check"></i><b>2.4</b> Metadata</a></li>
+<li class="chapter" data-level="2.5" data-path="data-introduction.html"><a href="data-introduction.html#microbiome-and-tree-data-specific-aspects"><i class="fa fa-check"></i><b>2.5</b> Microbiome and tree data specific aspects</a>
+<ul>
+<li class="chapter" data-level="2.5.1" data-path="data-introduction.html"><a href="data-introduction.html#assays"><i class="fa fa-check"></i><b>2.5.1</b> Assays</a></li>
+<li class="chapter" data-level="2.5.2" data-path="data-introduction.html"><a href="data-introduction.html#coldata"><i class="fa fa-check"></i><b>2.5.2</b> colData</a></li>
+<li class="chapter" data-level="2.5.3" data-path="data-introduction.html"><a href="data-introduction.html#rowdata"><i class="fa fa-check"></i><b>2.5.3</b> rowData</a></li>
+<li class="chapter" data-level="2.5.4" data-path="data-introduction.html"><a href="data-introduction.html#rowtree"><i class="fa fa-check"></i><b>2.5.4</b> rowTree</a></li>
+</ul></li>
+<li class="chapter" data-level="2.6" data-path="data-introduction.html"><a href="data-introduction.html#data-conversion"><i class="fa fa-check"></i><b>2.6</b> Data conversion</a>
+<ul>
+<li class="chapter" data-level="2.6.1" data-path="data-introduction.html"><a href="data-introduction.html#tidy-data"><i class="fa fa-check"></i><b>2.6.1</b> Tidy data</a></li>
+</ul></li>
+<li class="chapter" data-level="2.7" data-path="data-introduction.html"><a href="data-introduction.html#conclusion"><i class="fa fa-check"></i><b>2.7</b> Conclusion</a></li>
+<li class="chapter" data-level="2.8" data-path="data-introduction.html"><a href="data-introduction.html#additional-reading"><i class="fa fa-check"></i><b>2.8</b> Additional Reading</a>
+<ul>
+<li class="chapter" data-level="2.8.1" data-path="data-introduction.html"><a href="data-introduction.html#lecture-slides"><i class="fa fa-check"></i><b>2.8.1</b> Lecture slides</a></li>
+<li class="chapter" data-level="2.8.2" data-path="data-introduction.html"><a href="data-introduction.html#r-programming-resources"><i class="fa fa-check"></i><b>2.8.2</b> R programming resources</a></li>
+<li class="chapter" data-level="2.8.3" data-path="data-introduction.html"><a href="data-introduction.html#resources-for-treesummarizedexperiment"><i class="fa fa-check"></i><b>2.8.3</b> Resources for TreeSummarizedExperiment</a></li>
+<li class="chapter" data-level="2.8.4" data-path="data-introduction.html"><a href="data-introduction.html#resources-for-phyloseq"><i class="fa fa-check"></i><b>2.8.4</b> Resources for phyloseq</a></li>
+<li class="chapter" data-level="2.8.5" data-path="data-introduction.html"><a href="data-introduction.html#further-reading"><i class="fa fa-check"></i><b>2.8.5</b> Further reading</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="data-introduction.html"><a href="data-introduction.html#session-info"><i class="fa fa-check"></i>Session Info</a></li>
+</ul></li>
+<li class="part"><span><b>III Focus Topics</b></span></li>
+<li class="chapter" data-level="3" data-path="overview.html"><a href="overview.html"><i class="fa fa-check"></i><b>3</b> Overview</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="overview.html"><a href="overview.html#introduction-1"><i class="fa fa-check"></i><b>3.1</b> Introduction</a></li>
+<li class="chapter" data-level="3.2" data-path="overview.html"><a href="overview.html#microbiome-experiment-types"><i class="fa fa-check"></i><b>3.2</b> Microbiome experiment types</a></li>
+<li class="chapter" data-level="3.3" data-path="overview.html"><a href="overview.html#processing-steps"><i class="fa fa-check"></i><b>3.3</b> Processing steps</a></li>
+<li class="chapter" data-level="3.4" data-path="overview.html"><a href="overview.html#quick-start"><i class="fa fa-check"></i><b>3.4</b> Quick Start</a></li>
+<li class="chapter" data-level="" data-path="overview.html"><a href="overview.html#session-info-1"><i class="fa fa-check"></i>Session Info</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="taxonomic-information.html"><a href="taxonomic-information.html"><i class="fa fa-check"></i><b>4</b> Taxonomic Information</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="taxonomic-information.html"><a href="taxonomic-information.html#assigning-taxonomic-information."><i class="fa fa-check"></i><b>4.1</b> Assigning taxonomic information.</a>
+<ul>
+<li class="chapter" data-level="4.1.1" data-path="taxonomic-information.html"><a href="taxonomic-information.html#dada2"><i class="fa fa-check"></i><b>4.1.1</b> dada2</a></li>
+<li class="chapter" data-level="4.1.2" data-path="taxonomic-information.html"><a href="taxonomic-information.html#decipher"><i class="fa fa-check"></i><b>4.1.2</b> DECIPHER</a></li>
+</ul></li>
+<li class="chapter" data-level="4.2" data-path="taxonomic-information.html"><a href="taxonomic-information.html#functions-to-access-taxonomic-information"><i class="fa fa-check"></i><b>4.2</b> Functions to access taxonomic information</a>
+<ul>
+<li class="chapter" data-level="4.2.1" data-path="taxonomic-information.html"><a href="taxonomic-information.html#generate-a-taxonomic-tree-on-the-fly"><i class="fa fa-check"></i><b>4.2.1</b> Generate a taxonomic tree on the fly</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="taxonomic-information.html"><a href="taxonomic-information.html#data-agglomeration"><i class="fa fa-check"></i><b>4.3</b> Data agglomeration</a></li>
+<li class="chapter" data-level="4.4" data-path="taxonomic-information.html"><a href="taxonomic-information.html#data-transformation"><i class="fa fa-check"></i><b>4.4</b> Data transformation</a></li>
+<li class="chapter" data-level="4.5" data-path="taxonomic-information.html"><a href="taxonomic-information.html#pick-specific"><i class="fa fa-check"></i><b>4.5</b> Pick specific</a>
+<ul>
+<li class="chapter" data-level="4.5.1" data-path="taxonomic-information.html"><a href="taxonomic-information.html#abundances-of-all-taxa-in-specific-sample"><i class="fa fa-check"></i><b>4.5.1</b> Abundances of all taxa in specific sample</a></li>
+<li class="chapter" data-level="4.5.2" data-path="taxonomic-information.html"><a href="taxonomic-information.html#abundances-of-specific-taxa-in-all-samples"><i class="fa fa-check"></i><b>4.5.2</b> Abundances of specific taxa in all samples</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="taxonomic-information.html"><a href="taxonomic-information.html#session-info-2"><i class="fa fa-check"></i>Session Info</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="quality-control.html"><a href="quality-control.html"><i class="fa fa-check"></i><b>5</b> Quality Control</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="quality-control.html"><a href="quality-control.html#get-top-taxa-and-taxonomy"><i class="fa fa-check"></i><b>5.1</b> Get top taxa and taxonomy</a>
+<ul>
+<li class="chapter" data-level="5.1.1" data-path="quality-control.html"><a href="quality-control.html#features"><i class="fa fa-check"></i><b>5.1.1</b> Features</a></li>
+</ul></li>
+<li class="chapter" data-level="5.2" data-path="quality-control.html"><a href="quality-control.html#library-size"><i class="fa fa-check"></i><b>5.2</b> Library size</a></li>
+<li class="chapter" data-level="" data-path="quality-control.html"><a href="quality-control.html#session-info-3"><i class="fa fa-check"></i>Session Info</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="microbiome-exploration.html"><a href="microbiome-exploration.html"><i class="fa fa-check"></i><b>6</b> Microbiome Exploration</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="microbiome-exploration.html"><a href="microbiome-exploration.html#prevalence"><i class="fa fa-check"></i><b>6.1</b> Prevalence</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="microbiome-exploration.html"><a href="microbiome-exploration.html#prevalent-microbiota-analysis"><i class="fa fa-check"></i><b>6.1.1</b> Prevalent microbiota analysis</a></li>
+<li class="chapter" data-level="6.1.2" data-path="microbiome-exploration.html"><a href="microbiome-exploration.html#plotting-prevalence"><i class="fa fa-check"></i><b>6.1.2</b> Plotting prevalence</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="microbiome-exploration.html"><a href="microbiome-exploration.html#abundance"><i class="fa fa-check"></i><b>6.2</b> Abundance</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="alpha-diversity.html"><a href="alpha-diversity.html"><i class="fa fa-check"></i><b>7</b> Alpha Diversity</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="alpha-diversity.html"><a href="alpha-diversity.html#estimating-alpha-diversity"><i class="fa fa-check"></i><b>7.1</b> Estimating alpha diversity</a>
+<ul>
+<li class="chapter" data-level="7.1.1" data-path="alpha-diversity.html"><a href="alpha-diversity.html#richness"><i class="fa fa-check"></i><b>7.1.1</b> Richness</a></li>
+<li class="chapter" data-level="7.1.2" data-path="alpha-diversity.html"><a href="alpha-diversity.html#diversity"><i class="fa fa-check"></i><b>7.1.2</b> Diversity</a></li>
+<li class="chapter" data-level="7.1.3" data-path="alpha-diversity.html"><a href="alpha-diversity.html#evenness"><i class="fa fa-check"></i><b>7.1.3</b> Evenness</a></li>
+<li class="chapter" data-level="7.1.4" data-path="alpha-diversity.html"><a href="alpha-diversity.html#dominance"><i class="fa fa-check"></i><b>7.1.4</b> Dominance</a></li>
+<li class="chapter" data-level="7.1.5" data-path="alpha-diversity.html"><a href="alpha-diversity.html#rarity"><i class="fa fa-check"></i><b>7.1.5</b> Rarity</a></li>
+</ul></li>
+<li class="chapter" data-level="7.2" data-path="alpha-diversity.html"><a href="alpha-diversity.html#visualize-alpha-diversities"><i class="fa fa-check"></i><b>7.2</b> Visualize alpha diversities</a></li>
+<li class="chapter" data-level="" data-path="alpha-diversity.html"><a href="alpha-diversity.html#session-info-4"><i class="fa fa-check"></i>Session Info</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="beta-diversity.html"><a href="beta-diversity.html"><i class="fa fa-check"></i><b>8</b> Beta Diversity</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="beta-diversity.html"><a href="beta-diversity.html#explained-variance"><i class="fa fa-check"></i><b>8.1</b> Explained variance</a></li>
+<li class="chapter" data-level="8.2" data-path="beta-diversity.html"><a href="beta-diversity.html#estimating-beta-diversity"><i class="fa fa-check"></i><b>8.2</b> Estimating beta diversity</a></li>
+<li class="chapter" data-level="8.3" data-path="beta-diversity.html"><a href="beta-diversity.html#other-ordination-methods"><i class="fa fa-check"></i><b>8.3</b> Other ordination methods</a></li>
+<li class="chapter" data-level="8.4" data-path="beta-diversity.html"><a href="beta-diversity.html#visualizing-the-most-dominant-genus-on-pcoa"><i class="fa fa-check"></i><b>8.4</b> Visualizing the most dominant genus on PCoA</a></li>
+<li class="chapter" data-level="8.5" data-path="beta-diversity.html"><a href="beta-diversity.html#community-comparisons-todo-combine-with-the-material-above-for-simplicity"><i class="fa fa-check"></i><b>8.5</b> Community comparisons [TODO combine with the material above for simplicity?]</a>
+<ul>
+<li class="chapter" data-level="8.5.1" data-path="beta-diversity.html"><a href="beta-diversity.html#testing-differences-in-community-composition-between-sample-groups"><i class="fa fa-check"></i><b>8.5.1</b> Testing differences in community composition between sample groups</a></li>
+<li class="chapter" data-level="8.5.2" data-path="beta-diversity.html"><a href="beta-diversity.html#checking-the-homogeneity-condition"><i class="fa fa-check"></i><b>8.5.2</b> Checking the homogeneity condition</a></li>
+</ul></li>
+<li class="chapter" data-level="8.6" data-path="beta-diversity.html"><a href="beta-diversity.html#further-reading-1"><i class="fa fa-check"></i><b>8.6</b> Further reading</a></li>
+<li class="chapter" data-level="" data-path="beta-diversity.html"><a href="beta-diversity.html#session-info-5"><i class="fa fa-check"></i>Session Info</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="microbiome-community.html"><a href="microbiome-community.html"><i class="fa fa-check"></i><b>9</b> Microbiome Community</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="microbiome-community.html"><a href="microbiome-community.html#community-composition"><i class="fa fa-check"></i><b>9.1</b> Community composition</a>
+<ul>
+<li class="chapter" data-level="9.1.1" data-path="microbiome-community.html"><a href="microbiome-community.html#composition-barplot"><i class="fa fa-check"></i><b>9.1.1</b> Composition barplot</a></li>
+<li class="chapter" data-level="9.1.2" data-path="microbiome-community.html"><a href="microbiome-community.html#composition-heatmap"><i class="fa fa-check"></i><b>9.1.2</b> Composition heatmap</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="cross-correlation.html"><a href="cross-correlation.html"><i class="fa fa-check"></i><b>10</b> Cross-correlation</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="cross-correlation.html"><a href="cross-correlation.html#community-typing"><i class="fa fa-check"></i><b>10.1</b> Community typing</a>
+<ul>
+<li class="chapter" data-level="10.1.1" data-path="cross-correlation.html"><a href="cross-correlation.html#dirichlet-multinomial-mixtures-dmm"><i class="fa fa-check"></i><b>10.1.1</b> Dirichlet Multinomial Mixtures (DMM)</a></li>
+<li class="chapter" data-level="10.1.2" data-path="cross-correlation.html"><a href="cross-correlation.html#pcoa-for-asv-level-data-with-bray-curtis-with-dmm-clusters-shown-with-colors"><i class="fa fa-check"></i><b>10.1.2</b> PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors</a></li>
+</ul></li>
+<li class="chapter" data-level="10.2" data-path="cross-correlation.html"><a href="cross-correlation.html#community-detection"><i class="fa fa-check"></i><b>10.2</b> Community Detection</a></li>
+<li class="chapter" data-level="" data-path="cross-correlation.html"><a href="cross-correlation.html#session-info-6"><i class="fa fa-check"></i>Session Info</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="differential-abundance.html"><a href="differential-abundance.html"><i class="fa fa-check"></i><b>11</b> Differential Abundance</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="differential-abundance.html"><a href="differential-abundance.html#tree-based-methods"><i class="fa fa-check"></i><b>11.1</b> Tree-based methods</a>
+<ul>
+<li class="chapter" data-level="11.1.1" data-path="differential-abundance.html"><a href="differential-abundance.html#group-wise-associations-testing-based-on-balances"><i class="fa fa-check"></i><b>11.1.1</b> Group-wise associations testing based on balances</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="differential-abundance.html"><a href="differential-abundance.html#session-info-7"><i class="fa fa-check"></i>Session Info</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="microbiome-timeseries.html"><a href="microbiome-timeseries.html"><i class="fa fa-check"></i><b>12</b> Microbiome Time Series</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="microbiome-timeseries.html"><a href="microbiome-timeseries.html#stability"><i class="fa fa-check"></i><b>12.1</b> Stability</a></li>
+<li class="chapter" data-level="12.2" data-path="microbiome-timeseries.html"><a href="microbiome-timeseries.html#tipping-elements"><i class="fa fa-check"></i><b>12.2</b> Tipping elements</a></li>
+<li class="chapter" data-level="" data-path="microbiome-timeseries.html"><a href="microbiome-timeseries.html#session-info-8"><i class="fa fa-check"></i>Session Info</a></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="multitable.html"><a href="multitable.html"><i class="fa fa-check"></i><b>13</b> Representation of Multiple Data Tables</a>
+<ul>
+<li class="chapter" data-level="13.1" data-path="multitable.html"><a href="multitable.html#assay-data"><i class="fa fa-check"></i><b>13.1</b> Assay data</a></li>
+<li class="chapter" data-level="13.2" data-path="multitable.html"><a href="multitable.html#alternative-experiments"><i class="fa fa-check"></i><b>13.2</b> Alternative experiments</a></li>
+<li class="chapter" data-level="13.3" data-path="multitable.html"><a href="multitable.html#multiassayexperiments"><i class="fa fa-check"></i><b>13.3</b> MultiAssayExperiments</a></li>
+<li class="chapter" data-level="" data-path="multitable.html"><a href="multitable.html#session-info-9"><i class="fa fa-check"></i>Session Info</a></li>
+</ul></li>
+<li class="part"><span><b>IV Appendix</b></span></li>
+<li class="chapter" data-level="14" data-path="example-data.html"><a href="example-data.html"><i class="fa fa-check"></i><b>14</b> Example Data</a>
+<ul>
+<li class="chapter" data-level="14.1" data-path="example-data.html"><a href="example-data.html#package-data"><i class="fa fa-check"></i><b>14.1</b> Package data</a>
+<ul>
+<li class="chapter" data-level="14.1.1" data-path="example-data.html"><a href="example-data.html#globalpatterns"><i class="fa fa-check"></i><b>14.1.1</b> GlobalPatterns</a></li>
+<li class="chapter" data-level="14.1.2" data-path="example-data.html"><a href="example-data.html#enterotype"><i class="fa fa-check"></i><b>14.1.2</b> Enterotype</a></li>
+<li class="chapter" data-level="14.1.3" data-path="example-data.html"><a href="example-data.html#esophagus"><i class="fa fa-check"></i><b>14.1.3</b> Esophagus</a></li>
+<li class="chapter" data-level="14.1.4" data-path="example-data.html"><a href="example-data.html#soilrep"><i class="fa fa-check"></i><b>14.1.4</b> Soilrep</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="example-data.html"><a href="example-data.html#session-info-10"><i class="fa fa-check"></i>Session Info</a></li>
+</ul></li>
+<li class="part"><span><b>V Appendix</b></span></li>
+<li class="chapter" data-level="15" data-path="function-ref.html"><a href="function-ref.html"><i class="fa fa-check"></i><b>15</b> Function Reference</a>
+<ul>
+<li class="chapter" data-level="15.1" data-path="function-ref.html"><a href="function-ref.html#objects"><i class="fa fa-check"></i><b>15.1</b> Objects</a></li>
+<li class="chapter" data-level="15.2" data-path="function-ref.html"><a href="function-ref.html#reduced-dimension-pca-t-sne-umap-mds-etc"><i class="fa fa-check"></i><b>15.2</b> Reduced dimension (PCA, t-SNE, UMAP, MDS, etc)</a></li>
+<li class="chapter" data-level="15.3" data-path="function-ref.html"><a href="function-ref.html#plotting"><i class="fa fa-check"></i><b>15.3</b> Plotting</a></li>
+</ul></li>
+<li class="part"><span><b>VI Appendix</b></span></li>
+<li class="chapter" data-level="16" data-path="extras.html"><a href="extras.html"><i class="fa fa-check"></i><b>16</b> Extras</a>
+<ul>
+<li class="chapter" data-level="16.1" data-path="extras.html"><a href="extras.html#interactive-3d-plots"><i class="fa fa-check"></i><b>16.1</b> Interactive 3D Plots</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="bibliography.html"><a href="bibliography.html"><i class="fa fa-check"></i>Bibliography</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Orchestrating Microbiome Analysis</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="cross-correlation" class="section level1" number="10">
+<h1><span class="header-section-number">Chapter 10</span> Cross-correlation</h1>
+<p>With cross-correlation analysis, we can analyze how strongly and how different
+variables are associated between each other. For instance, we can analyze if
+higher presence of specific taxon equals to higher level of biomolecule.</p>
+<p>Here, we analyze associations between taxa correlate and lipids. Data is from
+following publication Lahti <em>et al</em>. (2015) <a href="https://peerj.com/articles/32/">Associations between the human intestinal
+microbiota, Lactobacillus rhamnosus GG and serum lipids indicated by
+integrated analysis of high-throughput profiling
+data</a>.</p>
+<div class="sourceCode" id="cb186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb186-1"><a href="cross-correlation.html#cb186-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Imports the data</span></span>
+<span id="cb186-2"><a href="cross-correlation.html#cb186-2" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> microbiomeDataSets<span class="sc">::</span><span class="fu">peerj32</span>()</span>
+<span id="cb186-3"><a href="cross-correlation.html#cb186-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb186-4"><a href="cross-correlation.html#cb186-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Microbiome data</span></span>
+<span id="cb186-5"><a href="cross-correlation.html#cb186-5" aria-hidden="true" tabindex="-1"></a>tse[[<span class="dv">1</span>]] </span></code></pre></div>
+<pre><code>## class: TreeSummarizedExperiment 
+## dim: 130 44 
+## metadata(0):
+## assays(1): counts
+## rownames(130): Actinomycetaceae Aerococcus ... Xanthomonadaceae
+##   Yersinia et rel.
+## rowData names(3): Phylum Family Genus
+## colnames(44): sample-1 sample-2 ... sample-43 sample-44
+## colData names(0):
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: NULL
+## rowTree: NULL
+## colLinks: NULL
+## colTree: NULL</code></pre>
+<div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb188-1"><a href="cross-correlation.html#cb188-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Lipid data</span></span>
+<span id="cb188-2"><a href="cross-correlation.html#cb188-2" aria-hidden="true" tabindex="-1"></a>tse[[<span class="dv">2</span>]]</span></code></pre></div>
+<pre><code>## class: SummarizedExperiment 
+## dim: 389 44 
+## metadata(0):
+## assays(1): counts
+## rownames(389): Cer(d18:1/16:0).1 Cer(d18:1/16:0).2 ... TG(60:11)
+##   TG(60:9)
+## rowData names(0):
+## colnames(44): sample-1 sample-2 ... sample-43 sample-44
+## colData names(0):</code></pre>
+<div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb190-1"><a href="cross-correlation.html#cb190-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(microbiome)){</span>
+<span id="cb190-2"><a href="cross-correlation.html#cb190-2" aria-hidden="true" tabindex="-1"></a>    BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;microbiome&quot;</span>)</span>
+<span id="cb190-3"><a href="cross-correlation.html#cb190-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb190-4"><a href="cross-correlation.html#cb190-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb190-5"><a href="cross-correlation.html#cb190-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Does log10 transform for microbiome data</span></span>
+<span id="cb190-6"><a href="cross-correlation.html#cb190-6" aria-hidden="true" tabindex="-1"></a>tse[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">transformSamples</span>(tse[[<span class="dv">1</span>]], <span class="at">method =</span> <span class="st">&quot;log10&quot;</span>, <span class="at">pseudocount =</span> <span class="dv">1</span>)</span>
+<span id="cb190-7"><a href="cross-correlation.html#cb190-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb190-8"><a href="cross-correlation.html#cb190-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Gets microbiome and lipid data to cross-correlate</span></span>
+<span id="cb190-9"><a href="cross-correlation.html#cb190-9" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">assay</span>(tse[[<span class="dv">1</span>]], <span class="st">&quot;log10&quot;</span>))</span>
+<span id="cb190-10"><a href="cross-correlation.html#cb190-10" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">assay</span>(tse[[<span class="dv">2</span>]], <span class="st">&quot;counts&quot;</span>))</span>
+<span id="cb190-11"><a href="cross-correlation.html#cb190-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb190-12"><a href="cross-correlation.html#cb190-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Cross correlates data sets</span></span>
+<span id="cb190-13"><a href="cross-correlation.html#cb190-13" aria-hidden="true" tabindex="-1"></a>correlation_table <span class="ot">&lt;-</span> microbiome<span class="sc">::</span><span class="fu">associate</span>(x, y, <span class="at">method =</span> <span class="st">&quot;spearman&quot;</span>, <span class="at">mode =</span> <span class="st">&quot;table&quot;</span>, </span>
+<span id="cb190-14"><a href="cross-correlation.html#cb190-14" aria-hidden="true" tabindex="-1"></a>                                           <span class="at">p.adj.threshold =</span> <span class="fl">0.05</span>, <span class="at">n.signif =</span> <span class="dv">1</span>)</span>
+<span id="cb190-15"><a href="cross-correlation.html#cb190-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb190-16"><a href="cross-correlation.html#cb190-16" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">head</span>(correlation_table))</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="left">X1</th>
+<th align="left">X2</th>
+<th align="right">Correlation</th>
+<th align="right">p.adj</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">552</td>
+<td align="left">Ruminococcus gnavus et rel.</td>
+<td align="left">TG(54:5).2</td>
+<td align="right">0.7165</td>
+<td align="right">0.0023</td>
+</tr>
+<tr class="even">
+<td align="left">614</td>
+<td align="left">Uncultured Bacteroidetes</td>
+<td align="left">TG(56:2).1</td>
+<td align="right">-0.6964</td>
+<td align="right">0.0039</td>
+</tr>
+<tr class="odd">
+<td align="left">100</td>
+<td align="left">Lactobacillus plantarum et rel.</td>
+<td align="left">PC(40:3)</td>
+<td align="right">-0.6737</td>
+<td align="right">0.0051</td>
+</tr>
+<tr class="even">
+<td align="left">252</td>
+<td align="left">Ruminococcus gnavus et rel.</td>
+<td align="left">TG(50:4)</td>
+<td align="right">0.6912</td>
+<td align="right">0.0051</td>
+</tr>
+<tr class="odd">
+<td align="left">357</td>
+<td align="left">Ruminococcus gnavus et rel.</td>
+<td align="left">TG(52:5)</td>
+<td align="right">0.6806</td>
+<td align="right">0.0051</td>
+</tr>
+<tr class="even">
+<td align="left">537</td>
+<td align="left">Ruminococcus gnavus et rel.</td>
+<td align="left">TG(54:4).2</td>
+<td align="right">0.6820</td>
+<td align="right">0.0051</td>
+</tr>
+</tbody>
+</table>
+<p>Manipulates and reorders the table</p>
+<div class="sourceCode" id="cb191"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb191-1"><a href="cross-correlation.html#cb191-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(reshape2)){</span>
+<span id="cb191-2"><a href="cross-correlation.html#cb191-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;reshape2&quot;</span>)</span>
+<span id="cb191-3"><a href="cross-correlation.html#cb191-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb191-4"><a href="cross-correlation.html#cb191-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(dplyr)){</span>
+<span id="cb191-5"><a href="cross-correlation.html#cb191-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;dplyr&quot;</span>)</span>
+<span id="cb191-6"><a href="cross-correlation.html#cb191-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb191-7"><a href="cross-correlation.html#cb191-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Gets taxa that has at least one statistically significant correlation</span></span>
+<span id="cb191-8"><a href="cross-correlation.html#cb191-8" aria-hidden="true" tabindex="-1"></a>taxa <span class="ot">&lt;-</span> correlation_table <span class="sc">%&gt;%</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(p.adj <span class="sc">&lt;</span> <span class="fl">0.05</span> <span class="sc">&amp;</span> <span class="fu">abs</span>(Correlation) <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb191-9"><a href="cross-correlation.html#cb191-9" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(X1) <span class="sc">%&gt;%</span> unique <span class="sc">%&gt;%</span> <span class="fu">sapply</span>(as.character)</span>
+<span id="cb191-10"><a href="cross-correlation.html#cb191-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Gets taxa that has at least one statistically significant correlation</span></span>
+<span id="cb191-11"><a href="cross-correlation.html#cb191-11" aria-hidden="true" tabindex="-1"></a>lipids <span class="ot">&lt;-</span> correlation_table <span class="sc">%&gt;%</span> dplyr<span class="sc">::</span><span class="fu">filter</span>(p.adj <span class="sc">&lt;</span> <span class="fl">0.05</span> <span class="sc">&amp;</span> <span class="fu">abs</span>(Correlation) <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb191-12"><a href="cross-correlation.html#cb191-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(X2) <span class="sc">%&gt;%</span> unique <span class="sc">%&gt;%</span> <span class="fu">sapply</span>(as.character)</span>
+<span id="cb191-13"><a href="cross-correlation.html#cb191-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb191-14"><a href="cross-correlation.html#cb191-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Takes only those taxa and lipids that has statistically significant values</span></span>
+<span id="cb191-15"><a href="cross-correlation.html#cb191-15" aria-hidden="true" tabindex="-1"></a>correlation_table <span class="ot">&lt;-</span> correlation_table[correlation_table[[<span class="st">&quot;X1&quot;</span>]] <span class="sc">%in%</span> taxa <span class="sc">&amp;</span> </span>
+<span id="cb191-16"><a href="cross-correlation.html#cb191-16" aria-hidden="true" tabindex="-1"></a>                                           correlation_table[[<span class="st">&quot;X2&quot;</span>]] <span class="sc">%in%</span> lipids, ]</span>
+<span id="cb191-17"><a href="cross-correlation.html#cb191-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb191-18"><a href="cross-correlation.html#cb191-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Converts data to matrix, correlations as values</span></span>
+<span id="cb191-19"><a href="cross-correlation.html#cb191-19" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> reshape2<span class="sc">::</span><span class="fu">acast</span>(correlation_table, X2 <span class="sc">~</span> X1, <span class="at">value.var =</span> <span class="st">&quot;Correlation&quot;</span>)</span>
+<span id="cb191-20"><a href="cross-correlation.html#cb191-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb191-21"><a href="cross-correlation.html#cb191-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Hierarchical clustering, gets the order of taxa and lipids</span></span>
+<span id="cb191-22"><a href="cross-correlation.html#cb191-22" aria-hidden="true" tabindex="-1"></a>taxa_indices <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">as.dist</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">cor</span>(mat, <span class="at">use=</span><span class="st">&quot;pairwise.complete.obs&quot;</span>)))<span class="sc">$</span>order</span>
+<span id="cb191-23"><a href="cross-correlation.html#cb191-23" aria-hidden="true" tabindex="-1"></a>order_taxa <span class="ot">&lt;-</span> <span class="fu">colnames</span>(mat)[taxa_indices]</span>
+<span id="cb191-24"><a href="cross-correlation.html#cb191-24" aria-hidden="true" tabindex="-1"></a>lipids_indices <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">as.dist</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">cor</span>(<span class="fu">t</span>(mat), <span class="at">use=</span><span class="st">&quot;pairwise.complete.obs&quot;</span>)))<span class="sc">$</span>order</span>
+<span id="cb191-25"><a href="cross-correlation.html#cb191-25" aria-hidden="true" tabindex="-1"></a>order_lipids <span class="ot">&lt;-</span> <span class="fu">rownames</span>(mat)[lipids_indices]</span>
+<span id="cb191-26"><a href="cross-correlation.html#cb191-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb191-27"><a href="cross-correlation.html#cb191-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Converts taxa and lipids columns to factor so that they have desired order</span></span>
+<span id="cb191-28"><a href="cross-correlation.html#cb191-28" aria-hidden="true" tabindex="-1"></a>correlation_table[[<span class="st">&quot;X1&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">factor</span>(correlation_table[[<span class="st">&quot;X1&quot;</span>]], <span class="at">levels =</span> order_taxa)</span>
+<span id="cb191-29"><a href="cross-correlation.html#cb191-29" aria-hidden="true" tabindex="-1"></a>correlation_table[[<span class="st">&quot;X2&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">factor</span>(correlation_table[[<span class="st">&quot;X2&quot;</span>]], <span class="at">levels =</span> order_lipids)</span></code></pre></div>
+<p>Creates the heatmap</p>
+<div class="sourceCode" id="cb192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb192-1"><a href="cross-correlation.html#cb192-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Determines the scaling of colours</span></span>
+<span id="cb192-2"><a href="cross-correlation.html#cb192-2" aria-hidden="true" tabindex="-1"></a>limits <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb192-3"><a href="cross-correlation.html#cb192-3" aria-hidden="true" tabindex="-1"></a>breaks <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="fu">min</span>(limits), <span class="at">to =</span> <span class="fu">max</span>(limits), <span class="at">by =</span> <span class="fl">0.2</span>)</span>
+<span id="cb192-4"><a href="cross-correlation.html#cb192-4" aria-hidden="true" tabindex="-1"></a>colours <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;darkblue&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;white&quot;</span>, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;darkred&quot;</span>)</span>
+<span id="cb192-5"><a href="cross-correlation.html#cb192-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb192-6"><a href="cross-correlation.html#cb192-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Which observation have p-value under 0.05? --&gt; creates a subset</span></span>
+<span id="cb192-7"><a href="cross-correlation.html#cb192-7" aria-hidden="true" tabindex="-1"></a>cor_table_sub <span class="ot">&lt;-</span> correlation_table[<span class="fu">which</span>(correlation_table[[<span class="st">&quot;Correlation&quot;</span>]] <span class="sc">&lt;</span> <span class="fl">0.05</span>), ]</span>
+<span id="cb192-8"><a href="cross-correlation.html#cb192-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb192-9"><a href="cross-correlation.html#cb192-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates a ggplot object</span></span>
+<span id="cb192-10"><a href="cross-correlation.html#cb192-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(correlation_table, <span class="fu">aes</span>(<span class="at">x =</span> X1, <span class="at">y =</span> X2, <span class="at">fill =</span> Correlation)) <span class="sc">+</span></span>
+<span id="cb192-11"><a href="cross-correlation.html#cb192-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb192-12"><a href="cross-correlation.html#cb192-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb192-13"><a href="cross-correlation.html#cb192-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">name =</span> <span class="st">&quot;Correlation&quot;</span>, </span>
+<span id="cb192-14"><a href="cross-correlation.html#cb192-14" aria-hidden="true" tabindex="-1"></a>                       <span class="at">breaks =</span> breaks, <span class="at">limits =</span> limits, <span class="at">colours =</span> colours) <span class="sc">+</span> </span>
+<span id="cb192-15"><a href="cross-correlation.html#cb192-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb192-16"><a href="cross-correlation.html#cb192-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Adds label to those observations that have p-value under 0.05</span></span>
+<span id="cb192-17"><a href="cross-correlation.html#cb192-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">data =</span> cor_table_sub, <span class="fu">aes</span>(<span class="at">x =</span> X1, <span class="at">y =</span> X2, <span class="at">label =</span> <span class="st">&quot;+&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb192-18"><a href="cross-correlation.html#cb192-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb192-19"><a href="cross-correlation.html#cb192-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">10</span>),</span>
+<span id="cb192-20"><a href="cross-correlation.html#cb192-20" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle=</span><span class="dv">45</span>, <span class="at">hjust=</span><span class="dv">1</span>),</span>
+<span id="cb192-21"><a href="cross-correlation.html#cb192-21" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.key.size =</span> <span class="fu">unit</span>(<span class="dv">1</span>, <span class="st">&quot;cm&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb192-22"><a href="cross-correlation.html#cb192-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Taxa&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Lipids&quot;</span>)</span></code></pre></div>
+<p><img src="16_microbiome_community_files/figure-html/cross-correlation5-1.png" width="576" /></p>
+<div id="community-typing" class="section level2" number="10.1">
+<h2><span class="header-section-number">10.1</span> Community typing</h2>
+<div id="dirichlet-multinomial-mixtures-dmm" class="section level3" number="10.1.1">
+<h3><span class="header-section-number">10.1.1</span> Dirichlet Multinomial Mixtures (DMM)</h3>
+<p>This section focus on DMM analysis.</p>
+<p>One technique that allows to search for groups of samples that are
+similar to each other is the <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030126">Dirichlet-Multinomial Mixture
+Model</a>. In
+DMM, we first determine the number of clusters (k) that best fit the
+data (model evidence) using Laplace approximation. After fitting the
+model with k clusters, we obtain for each sample k probabilities that
+reflect the probability that a sample belongs to the given cluster.</p>
+<p>Let’s cluster the data with DMM clustering.</p>
+<div class="sourceCode" id="cb193"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb193-1"><a href="cross-correlation.html#cb193-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Runs model and calculates the most likely number of clusters from 1 to 7.</span></span>
+<span id="cb193-2"><a href="cross-correlation.html#cb193-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Since this is a large dataset it takes long computational time.</span></span>
+<span id="cb193-3"><a href="cross-correlation.html#cb193-3" aria-hidden="true" tabindex="-1"></a><span class="co"># For this reason we use only a subset of the data; agglomerated by Phylum as a rank.</span></span>
+<span id="cb193-4"><a href="cross-correlation.html#cb193-4" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> GlobalPatterns</span>
+<span id="cb193-5"><a href="cross-correlation.html#cb193-5" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(tse, <span class="at">rank =</span> <span class="st">&quot;Phylum&quot;</span>, <span class="at">agglomerateTree=</span><span class="cn">TRUE</span>)</span>
+<span id="cb193-6"><a href="cross-correlation.html#cb193-6" aria-hidden="true" tabindex="-1"></a>tse_dmn <span class="ot">&lt;-</span> <span class="fu">runDMN</span>(tse, <span class="at">name =</span> <span class="st">&quot;DMN&quot;</span>, <span class="at">k =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb194"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb194-1"><a href="cross-correlation.html#cb194-1" aria-hidden="true" tabindex="-1"></a><span class="co"># It is stored in metadata</span></span>
+<span id="cb194-2"><a href="cross-correlation.html#cb194-2" aria-hidden="true" tabindex="-1"></a>tse_dmn</span></code></pre></div>
+<pre><code>## class: TreeSummarizedExperiment 
+## dim: 67 26 
+## metadata(1): DMN
+## assays(1): counts
+## rownames(67): Phylum:Crenarchaeota Phylum:Euryarchaeota ...
+##   Phylum:Synergistetes Phylum:SR1
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(26): CL3 CC1 ... Even2 Even3
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (67 rows)
+## rowTree: 1 phylo tree(s) (66 leaves)
+## colLinks: NULL
+## colTree: NULL</code></pre>
+<p>Return information on metadata that the object contains.</p>
+<div class="sourceCode" id="cb196"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb196-1"><a href="cross-correlation.html#cb196-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">metadata</span>(tse_dmn))</span></code></pre></div>
+<pre><code>## [1] &quot;DMN&quot;</code></pre>
+<p>This returns a list of DMN objects for a closer investigation.</p>
+<div class="sourceCode" id="cb198"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb198-1"><a href="cross-correlation.html#cb198-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getDMN</span>(tse_dmn)</span></code></pre></div>
+<pre><code>## [[1]]
+## class: DMN 
+## k: 1 
+## samples x taxa: 26 x 67 
+## Laplace: 7715 BIC: 7802 AIC: 7760 
+## 
+## [[2]]
+## class: DMN 
+## k: 2 
+## samples x taxa: 26 x 67 
+## Laplace: 7673 BIC: 7927 AIC: 7842 
+## 
+## [[3]]
+## class: DMN 
+## k: 3 
+## samples x taxa: 26 x 67 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
+## 
+## [[4]]
+## class: DMN 
+## k: 4 
+## samples x taxa: 26 x 67 
+## Laplace: 7741 BIC: 8282 AIC: 8112 
+## 
+## [[5]]
+## class: DMN 
+## k: 5 
+## samples x taxa: 26 x 67 
+## Laplace: 7910 BIC: 8599 AIC: 8386 
+## 
+## [[6]]
+## class: DMN 
+## k: 6 
+## samples x taxa: 26 x 67 
+## Laplace: 7952 BIC: 8850 AIC: 8594 
+## 
+## [[7]]
+## class: DMN 
+## k: 7 
+## samples x taxa: 26 x 67 
+## Laplace: 8105 BIC: 9118 AIC: 8820</code></pre>
+<p>Show Laplace approximation (model evidence) for each model of the k models.</p>
+<div class="sourceCode" id="cb200"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb200-1"><a href="cross-correlation.html#cb200-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(miaViz)</span>
+<span id="cb200-2"><a href="cross-correlation.html#cb200-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plotDMNFit</span>(tse_dmn, <span class="at">type =</span> <span class="st">&quot;laplace&quot;</span>)</span></code></pre></div>
+<p><img src="16_microbiome_community_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Return the model that has the best fit.</p>
+<div class="sourceCode" id="cb201"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb201-1"><a href="cross-correlation.html#cb201-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getBestDMNFit</span>(tse_dmn, <span class="at">type =</span> <span class="st">&quot;laplace&quot;</span>)</span></code></pre></div>
+<pre><code>## class: DMN 
+## k: 2 
+## samples x taxa: 26 x 67 
+## Laplace: 7673 BIC: 7927 AIC: 7842</code></pre>
+</div>
+<div id="pcoa-for-asv-level-data-with-bray-curtis-with-dmm-clusters-shown-with-colors" class="section level3" number="10.1.2">
+<h3><span class="header-section-number">10.1.2</span> PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors</h3>
+<p>Group samples and return DMNGroup object that contains a summary.
+Patient status is used for grouping.</p>
+<div class="sourceCode" id="cb203"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb203-1"><a href="cross-correlation.html#cb203-1" aria-hidden="true" tabindex="-1"></a>dmn_group <span class="ot">&lt;-</span> <span class="fu">calculateDMNgroup</span>(tse_dmn, <span class="at">variable =</span> <span class="st">&quot;SampleType&quot;</span>,  <span class="at">exprs_values =</span> <span class="st">&quot;counts&quot;</span>,</span>
+<span id="cb203-2"><a href="cross-correlation.html#cb203-2" aria-hidden="true" tabindex="-1"></a>                               <span class="at">k =</span> <span class="dv">2</span>, <span class="at">seed=</span>.Machine<span class="sc">$</span>integer.max)</span>
+<span id="cb203-3"><a href="cross-correlation.html#cb203-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb203-4"><a href="cross-correlation.html#cb203-4" aria-hidden="true" tabindex="-1"></a>dmn_group</span></code></pre></div>
+<pre><code>## class: DMNGroup 
+## summary:
+##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918</code></pre>
+<p>Mixture weights (rough measure of the cluster size).</p>
+<div class="sourceCode" id="cb205"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb205-1"><a href="cross-correlation.html#cb205-1" aria-hidden="true" tabindex="-1"></a>DirichletMultinomial<span class="sc">::</span><span class="fu">mixturewt</span>(<span class="fu">getBestDMNFit</span>(tse_dmn))</span></code></pre></div>
+<pre><code>##       pi theta
+## 1 0.5385 20.60
+## 2 0.4615 15.28</code></pre>
+<p>Samples-cluster assignment probabilities / how probable it is that sample belongs
+to each cluster</p>
+<div class="sourceCode" id="cb207"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb207-1"><a href="cross-correlation.html#cb207-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(DirichletMultinomial<span class="sc">::</span><span class="fu">mixture</span>(<span class="fu">getBestDMNFit</span>(tse_dmn)))</span></code></pre></div>
+<pre><code>##              [,1]      [,2]
+## CL3     1.000e+00 4.993e-17
+## CC1     1.000e+00 3.786e-22
+## SV1     1.000e+00 2.018e-12
+## M31Fcsw 7.306e-26 1.000e+00
+## M11Fcsw 1.061e-16 1.000e+00
+## M31Plmr 9.981e-14 1.000e+00</code></pre>
+<p>Contribution of each taxa to each component</p>
+<div class="sourceCode" id="cb209"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb209-1"><a href="cross-correlation.html#cb209-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(DirichletMultinomial<span class="sc">::</span><span class="fu">fitted</span>(<span class="fu">getBestDMNFit</span>(tse_dmn)))</span></code></pre></div>
+<pre><code>##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354652
+## Phylum:Euryarchaeota  0.2314 0.1468630
+## Phylum:Actinobacteria 1.2105 1.0600236
+## Phylum:Spirochaetes   0.2141 0.1318413
+## Phylum:MVP-15         0.0299 0.0007642
+## Phylum:Proteobacteria 6.8423 1.8150916</code></pre>
+<p>Get the assignment probabilities</p>
+<div class="sourceCode" id="cb211"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb211-1"><a href="cross-correlation.html#cb211-1" aria-hidden="true" tabindex="-1"></a>prob <span class="ot">&lt;-</span> DirichletMultinomial<span class="sc">::</span><span class="fu">mixture</span>(<span class="fu">getBestDMNFit</span>(tse_dmn))</span>
+<span id="cb211-2"><a href="cross-correlation.html#cb211-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Add column names</span></span>
+<span id="cb211-3"><a href="cross-correlation.html#cb211-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(prob) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;comp1&quot;</span>, <span class="st">&quot;comp2&quot;</span>)</span>
+<span id="cb211-4"><a href="cross-correlation.html#cb211-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb211-5"><a href="cross-correlation.html#cb211-5" aria-hidden="true" tabindex="-1"></a><span class="co"># For each row, finds column that has the highest value. Then extract the column </span></span>
+<span id="cb211-6"><a href="cross-correlation.html#cb211-6" aria-hidden="true" tabindex="-1"></a><span class="co"># names of highest values.</span></span>
+<span id="cb211-7"><a href="cross-correlation.html#cb211-7" aria-hidden="true" tabindex="-1"></a>vec <span class="ot">&lt;-</span> <span class="fu">colnames</span>(prob)[<span class="fu">max.col</span>(prob,<span class="at">ties.method =</span> <span class="st">&quot;first&quot;</span>)]</span></code></pre></div>
+<p>Computing the euclidean PCoA and storing it as a dataframe</p>
+<div class="sourceCode" id="cb212"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb212-1"><a href="cross-correlation.html#cb212-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Does clr transformation. Pseudocount is added, because data contains zeros.</span></span>
+<span id="cb212-2"><a href="cross-correlation.html#cb212-2" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformCounts</span>(tse, <span class="at">method =</span> <span class="st">&quot;clr&quot;</span>, <span class="at">pseudocount =</span> <span class="dv">1</span>)</span>
+<span id="cb212-3"><a href="cross-correlation.html#cb212-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb212-4"><a href="cross-correlation.html#cb212-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Gets clr table</span></span>
+<span id="cb212-5"><a href="cross-correlation.html#cb212-5" aria-hidden="true" tabindex="-1"></a>clr_assay <span class="ot">&lt;-</span> <span class="fu">assays</span>(tse)<span class="sc">$</span>clr</span>
+<span id="cb212-6"><a href="cross-correlation.html#cb212-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb212-7"><a href="cross-correlation.html#cb212-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Transposes it to get taxa to columns</span></span>
+<span id="cb212-8"><a href="cross-correlation.html#cb212-8" aria-hidden="true" tabindex="-1"></a>clr_assay <span class="ot">&lt;-</span> <span class="fu">t</span>(clr_assay)</span>
+<span id="cb212-9"><a href="cross-correlation.html#cb212-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb212-10"><a href="cross-correlation.html#cb212-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculates Euclidean distances between samples. Because taxa is in columns,</span></span>
+<span id="cb212-11"><a href="cross-correlation.html#cb212-11" aria-hidden="true" tabindex="-1"></a><span class="co"># it is used to compare different samples.</span></span>
+<span id="cb212-12"><a href="cross-correlation.html#cb212-12" aria-hidden="true" tabindex="-1"></a>euclidean_dist <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">vegdist</span>(clr_assay, <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>)</span>
+<span id="cb212-13"><a href="cross-correlation.html#cb212-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb212-14"><a href="cross-correlation.html#cb212-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Does principal coordinate analysis</span></span>
+<span id="cb212-15"><a href="cross-correlation.html#cb212-15" aria-hidden="true" tabindex="-1"></a>euclidean_pcoa <span class="ot">&lt;-</span> ecodist<span class="sc">::</span><span class="fu">pco</span>(euclidean_dist)</span>
+<span id="cb212-16"><a href="cross-correlation.html#cb212-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb212-17"><a href="cross-correlation.html#cb212-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates a data frame from principal coordinates</span></span>
+<span id="cb212-18"><a href="cross-correlation.html#cb212-18" aria-hidden="true" tabindex="-1"></a>euclidean_pcoa_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">pcoa1 =</span> euclidean_pcoa<span class="sc">$</span>vectors[,<span class="dv">1</span>], </span>
+<span id="cb212-19"><a href="cross-correlation.html#cb212-19" aria-hidden="true" tabindex="-1"></a>                                <span class="at">pcoa2 =</span> euclidean_pcoa<span class="sc">$</span>vectors[,<span class="dv">2</span>])</span></code></pre></div>
+<div class="sourceCode" id="cb213"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb213-1"><a href="cross-correlation.html#cb213-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates a data frame that contains principal coordinates and DMM information</span></span>
+<span id="cb213-2"><a href="cross-correlation.html#cb213-2" aria-hidden="true" tabindex="-1"></a>euclidean_dmm_pcoa_df <span class="ot">&lt;-</span> <span class="fu">cbind</span>(euclidean_pcoa_df,</span>
+<span id="cb213-3"><a href="cross-correlation.html#cb213-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">dmm_component =</span> vec)</span>
+<span id="cb213-4"><a href="cross-correlation.html#cb213-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates a plot</span></span>
+<span id="cb213-5"><a href="cross-correlation.html#cb213-5" aria-hidden="true" tabindex="-1"></a>euclidean_dmm_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> euclidean_dmm_pcoa_df, </span>
+<span id="cb213-6"><a href="cross-correlation.html#cb213-6" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">aes</span>(<span class="at">x=</span>pcoa1, <span class="at">y=</span>pcoa2,</span>
+<span id="cb213-7"><a href="cross-correlation.html#cb213-7" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">color =</span> dmm_component)) <span class="sc">+</span></span>
+<span id="cb213-8"><a href="cross-correlation.html#cb213-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb213-9"><a href="cross-correlation.html#cb213-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Coordinate 1&quot;</span>,</span>
+<span id="cb213-10"><a href="cross-correlation.html#cb213-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">&quot;Coordinate 2&quot;</span>,</span>
+<span id="cb213-11"><a href="cross-correlation.html#cb213-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">&quot;PCoA with Aitchison distances&quot;</span>) <span class="sc">+</span>  </span>
+<span id="cb213-12"><a href="cross-correlation.html#cb213-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>)) <span class="co"># makes titles smaller</span></span>
+<span id="cb213-13"><a href="cross-correlation.html#cb213-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb213-14"><a href="cross-correlation.html#cb213-14" aria-hidden="true" tabindex="-1"></a>euclidean_dmm_plot</span></code></pre></div>
+<p><img src="16_microbiome_community_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+</div>
+</div>
+<div id="community-detection" class="section level2" number="10.2">
+<h2><span class="header-section-number">10.2</span> Community Detection</h2>
+<p>Another approach for discovering communities within the samples of the data under question,
+is to run community detection algorithms after building a graph. The following demonstration
+builds a graph based on the k nearest-neighbors and performs the community detection on the fly.</p>
+<p><em><code>bluster</code></em> <span class="citation">(<a href="#ref-R-bluster" role="doc-biblioref">Lun 2021</a>)</span> package offers several clustering methods, among which graph-based are
+present, enabling the community detection task.</p>
+<p>Installing package:</p>
+<div class="sourceCode" id="cb214"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb214-1"><a href="cross-correlation.html#cb214-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(bluster)){</span>
+<span id="cb214-2"><a href="cross-correlation.html#cb214-2" aria-hidden="true" tabindex="-1"></a>  BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;bluster&quot;</span>)</span>
+<span id="cb214-3"><a href="cross-correlation.html#cb214-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>The algorithm used is “short random walks” <span class="citation">(<a href="#ref-Pons2006" role="doc-biblioref">Pons and Latapy 2006</a>)</span>.
+Graph is constructed using different k values (the number of nearest neighbors to consider during graph construction)
+using the robust centered log ratio (rclr) assay data. Then plotting the communities using UMAP <span class="citation">(<a href="#ref-McInnes2018" role="doc-biblioref">McInnes, Healy, and Melville 2018</a>)</span> ordination as a visual exploration aid.
+In the following demonstration we use the <code>enterotype</code> dataset from the <span class="citation">(<a href="#ref-R-mia" role="doc-biblioref">Ernst, Shetty, and Lahti 2020</a>)</span> package.</p>
+<div class="sourceCode" id="cb215"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb215-1"><a href="cross-correlation.html#cb215-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bluster)</span>
+<span id="cb215-2"><a href="cross-correlation.html#cb215-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork) <span class="co"># For arranging several plots as a grid</span></span>
+<span id="cb215-3"><a href="cross-correlation.html#cb215-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(scater)</span>
+<span id="cb215-4"><a href="cross-correlation.html#cb215-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb215-5"><a href="cross-correlation.html#cb215-5" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;enterotype&quot;</span>)</span>
+<span id="cb215-6"><a href="cross-correlation.html#cb215-6" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> enterotype</span>
+<span id="cb215-7"><a href="cross-correlation.html#cb215-7" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformCounts</span>(tse, <span class="at">method =</span> <span class="st">&quot;rclr&quot;</span>)</span>
+<span id="cb215-8"><a href="cross-correlation.html#cb215-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb215-9"><a href="cross-correlation.html#cb215-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Performing and storing UMAP</span></span>
+<span id="cb215-10"><a href="cross-correlation.html#cb215-10" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">runUMAP</span>(tse, <span class="at">name=</span><span class="st">&quot;UMAP&quot;</span>, <span class="at">exprs_values=</span><span class="st">&quot;rclr&quot;</span>)</span>
+<span id="cb215-11"><a href="cross-correlation.html#cb215-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb215-12"><a href="cross-correlation.html#cb215-12" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">10</span>)</span>
+<span id="cb215-13"><a href="cross-correlation.html#cb215-13" aria-hidden="true" tabindex="-1"></a>ClustAndPlot <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb215-14"><a href="cross-correlation.html#cb215-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Creating the graph and running the short random walks algorithm  </span></span>
+<span id="cb215-15"><a href="cross-correlation.html#cb215-15" aria-hidden="true" tabindex="-1"></a>  graph_clusters <span class="ot">&lt;-</span> <span class="fu">clusterRows</span>(<span class="fu">t</span>(<span class="fu">assays</span>(tse)<span class="sc">$</span>rclr), <span class="fu">NNGraphParam</span>(<span class="at">k=</span>x))</span>
+<span id="cb215-16"><a href="cross-correlation.html#cb215-16" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb215-17"><a href="cross-correlation.html#cb215-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Results of the clustering as a color for each sample</span></span>
+<span id="cb215-18"><a href="cross-correlation.html#cb215-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plotUMAP</span>(tse, <span class="at">colour_by =</span> <span class="fu">I</span>(graph_clusters)) <span class="sc">+</span></span>
+<span id="cb215-19"><a href="cross-correlation.html#cb215-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="fu">paste0</span>(<span class="st">&quot;k = &quot;</span>, x))</span>
+<span id="cb215-20"><a href="cross-correlation.html#cb215-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb215-21"><a href="cross-correlation.html#cb215-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb215-22"><a href="cross-correlation.html#cb215-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Applying the function for different k values</span></span>
+<span id="cb215-23"><a href="cross-correlation.html#cb215-23" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">lapply</span>(k,ClustAndPlot)</span>
+<span id="cb215-24"><a href="cross-correlation.html#cb215-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb215-25"><a href="cross-correlation.html#cb215-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Displaying plots in a grid</span></span>
+<span id="cb215-26"><a href="cross-correlation.html#cb215-26" aria-hidden="true" tabindex="-1"></a>(plots[[<span class="dv">1</span>]] <span class="sc">+</span> plots[[<span class="dv">2</span>]]) <span class="sc">/</span> (plots[[<span class="dv">3</span>]] <span class="sc">+</span> plots[[<span class="dv">4</span>]])</span></code></pre></div>
+<p><img src="16_microbiome_community_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>Similarly the <em><code>bluster</code></em> <span class="citation">(<a href="#ref-R-bluster" role="doc-biblioref">Lun 2021</a>)</span> package offers clustering diagnostics
+that can be used for judging the clustering quality (see <a href="http://bioconductor.org/packages/release/bioc/vignettes/bluster/inst/doc/diagnostics.html">Assorted clustering diagnostics</a>).
+In the following, Silhouette width as a diagnostic tool is computed and results are visualized
+for each case presented earlier. For more about Silhouettes read <span class="citation">(<a href="#ref-Rousseeuw1987" role="doc-biblioref">Rousseeuw 1987</a>)</span>.</p>
+<div class="sourceCode" id="cb216"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb216-1"><a href="cross-correlation.html#cb216-1" aria-hidden="true" tabindex="-1"></a>ClustDiagPlot <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb216-2"><a href="cross-correlation.html#cb216-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Getting the clustering results</span></span>
+<span id="cb216-3"><a href="cross-correlation.html#cb216-3" aria-hidden="true" tabindex="-1"></a>  graph_clusters <span class="ot">&lt;-</span> <span class="fu">clusterRows</span>(<span class="fu">t</span>(<span class="fu">assays</span>(tse)<span class="sc">$</span>rclr), <span class="fu">NNGraphParam</span>(<span class="at">k=</span>x))</span>
+<span id="cb216-4"><a href="cross-correlation.html#cb216-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb216-5"><a href="cross-correlation.html#cb216-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Computing the diagnostic info</span></span>
+<span id="cb216-6"><a href="cross-correlation.html#cb216-6" aria-hidden="true" tabindex="-1"></a>  sil <span class="ot">&lt;-</span> <span class="fu">approxSilhouette</span>(<span class="fu">t</span>(<span class="fu">assays</span>(tse)<span class="sc">$</span>rclr), graph_clusters)</span>
+<span id="cb216-7"><a href="cross-correlation.html#cb216-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb216-8"><a href="cross-correlation.html#cb216-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Plotting as a boxlpot to observe cluster separation</span></span>
+<span id="cb216-9"><a href="cross-correlation.html#cb216-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">boxplot</span>(<span class="fu">split</span>(sil<span class="sc">$</span>width, graph_clusters), <span class="at">main=</span><span class="fu">paste0</span>(<span class="st">&quot;k = &quot;</span>, x))</span>
+<span id="cb216-10"><a href="cross-correlation.html#cb216-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb216-11"><a href="cross-correlation.html#cb216-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb216-12"><a href="cross-correlation.html#cb216-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Applying the function for different k values</span></span>
+<span id="cb216-13"><a href="cross-correlation.html#cb216-13" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">lapply</span>(k,ClustDiagPlot)</span></code></pre></div>
+<p><img src="16_microbiome_community_files/figure-html/unnamed-chunk-16-1.png" width="672" /><img src="16_microbiome_community_files/figure-html/unnamed-chunk-16-2.png" width="672" /><img src="16_microbiome_community_files/figure-html/unnamed-chunk-16-3.png" width="672" /><img src="16_microbiome_community_files/figure-html/unnamed-chunk-16-4.png" width="672" /></p>
+</div>
+<div id="session-info-6" class="section level2 unnumbered">
+<h2>Session Info</h2>
+<button class="rebook-collapse">
+View session info
+</button>
+<div class="rebook-content">
+<pre><code>R version 4.1.0 (2021-05-18)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 20.04.2 LTS
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=C             
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats4    stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] scater_1.21.3                  scuttle_1.3.1                 
+ [3] patchwork_1.1.1                bluster_1.3.0                 
+ [5] dplyr_1.0.7                    reshape2_1.4.4                
+ [7] microbiomeDataSets_1.1.1       MultiAssayExperiment_1.19.5   
+ [9] dendextend_1.15.1              pheatmap_1.0.12               
+[11] miaViz_1.1.4                   ggraph_2.0.5                  
+[13] ggplot2_3.3.5                  mia_1.1.9                     
+[15] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.2             
+[17] XVector_0.33.0                 SingleCellExperiment_1.15.1   
+[19] SummarizedExperiment_1.23.1    Biobase_2.53.0                
+[21] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
+[23] IRanges_2.27.0                 S4Vectors_0.31.0              
+[25] BiocGenerics_0.39.1            MatrixGenerics_1.5.3          
+[27] matrixStats_0.60.0             ecodist_2.0.7                 
+[29] BiocStyle_2.21.3               rebook_1.3.0                  
+
+loaded via a namespace (and not attached):
+  [1] utf8_1.2.2                    tidyselect_1.1.1             
+  [3] RSQLite_2.2.7                 AnnotationDbi_1.55.1         
+  [5] grid_4.1.0                    BiocParallel_1.27.3          
+  [7] Rtsne_0.15                    munsell_0.5.0                
+  [9] ScaledMatrix_1.1.0            codetools_0.2-18             
+ [11] withr_2.4.2                   colorspace_2.0-2             
+ [13] filelock_1.0.2                phyloseq_1.37.0              
+ [15] highr_0.9                     knitr_1.33                   
+ [17] labeling_0.4.2                GenomeInfoDbData_1.2.6       
+ [19] polyclip_1.10-0               bit64_4.0.5                  
+ [21] farver_2.1.0                  rhdf5_2.37.0                 
+ [23] vctrs_0.3.8                   treeio_1.17.2                
+ [25] generics_0.1.0                xfun_0.25                    
+ [27] BiocFileCache_2.1.1           R6_2.5.0                     
+ [29] ggbeeswarm_0.6.0              graphlayouts_0.7.1           
+ [31] rsvd_1.0.5                    rhdf5filters_1.5.0           
+ [33] bitops_1.0-7                  microbiome_1.15.0            
+ [35] cachem_1.0.5                  DelayedArray_0.19.1          
+ [37] assertthat_0.2.1              promises_1.2.0.1             
+ [39] scales_1.1.1                  beeswarm_0.4.0               
+ [41] gtable_0.3.0                  beachmat_2.9.1               
+ [43] tidygraph_1.2.0               rlang_0.4.11                 
+ [45] splines_4.1.0                 lazyeval_0.2.2               
+ [47] BiocManager_1.30.16           yaml_2.2.1                   
+ [49] httpuv_1.6.1                  tools_4.1.0                  
+ [51] bookdown_0.22                 ellipsis_0.3.2               
+ [53] decontam_1.13.0               biomformat_1.21.0            
+ [55] jquerylib_0.1.4               RColorBrewer_1.1-2           
+ [57] Rcpp_1.0.7                    plyr_1.8.6                   
+ [59] sparseMatrixStats_1.5.2       zlibbioc_1.39.0              
+ [61] purrr_0.3.4                   RCurl_1.98-1.3               
+ [63] viridis_0.6.1                 cowplot_1.1.1                
+ [65] ggrepel_0.9.1                 cluster_2.1.2                
+ [67] DECIPHER_2.21.0               magrittr_2.0.1               
+ [69] data.table_1.14.0             ggnewscale_0.4.5             
+ [71] mime_0.11                     evaluate_0.14                
+ [73] xtable_1.8-4                  XML_3.99-0.6                 
+ [75] gridExtra_2.3                 compiler_4.1.0               
+ [77] tibble_3.1.3                  crayon_1.4.1                 
+ [79] htmltools_0.5.1.1             mgcv_1.8-36                  
+ [81] later_1.2.0                   tidyr_1.1.3                  
+ [83] aplot_0.0.6                   DBI_1.1.1                    
+ [85] tweenr_1.0.2                  ExperimentHub_2.1.4          
+ [87] dbplyr_2.1.1                  MASS_7.3-54                  
+ [89] rappdirs_0.3.3                Matrix_1.3-4                 
+ [91] ade4_1.7-17                   permute_0.9-5                
+ [93] parallel_4.1.0                igraph_1.2.6                 
+ [95] pkgconfig_2.0.3               rvcheck_0.1.8                
+ [97] dir.expiry_1.1.0              foreach_1.5.1                
+ [99] ggtree_3.1.3                  vipor_0.4.5                  
+[101] bslib_0.2.5.1                 DirichletMultinomial_1.35.0  
+[103] multtest_2.49.0               stringr_1.4.0                
+[105] digest_0.6.27                 vegan_2.5-7                  
+[107] graph_1.71.2                  rmarkdown_2.10               
+[109] tidytree_0.3.4                uwot_0.1.10                  
+[111] DelayedMatrixStats_1.15.2     curl_4.3.2                   
+[113] shiny_1.6.0                   lifecycle_1.0.0              
+[115] nlme_3.1-152                  jsonlite_1.7.2               
+[117] Rhdf5lib_1.15.2               BiocNeighbors_1.11.0         
+[119] CodeDepends_0.6.5             viridisLite_0.4.0            
+[121] fansi_0.5.0                   pillar_1.6.2                 
+[123] lattice_0.20-44               survival_3.2-11              
+[125] KEGGREST_1.33.0               fastmap_1.1.0                
+[127] httr_1.4.2                    interactiveDisplayBase_1.31.2
+[129] glue_1.4.2                    FNN_1.1.3                    
+[131] png_0.1-7                     iterators_1.0.13             
+[133] BiocVersion_3.14.0            bit_4.0.4                    
+[135] ggforce_0.3.3                 stringi_1.7.3                
+[137] sass_0.4.0                    blob_1.2.2                   
+[139] BiocSingular_1.9.1            AnnotationHub_3.1.5          
+[141] memoise_2.0.0                 irlba_2.3.3                  
+[143] ape_5.5                      </code></pre>
+</div>
+
+</div>
+</div>
+<h3>Bibliography</h3>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-R-mia" class="csl-entry">
+Ernst, Felix G. M., Sudarshan Shetty, and Leo Lahti. 2020. <em>Mia: Microbiome Analysis</em>.
+</div>
+<div id="ref-R-bluster" class="csl-entry">
+Lun, Aaron. 2021. <em><span class="nocase">bluster: Clustering Algorithms for Bioconductor</span></em>. <a href="https://bioconductor.org/packages/3.14/bioc/html/bluster.html">https://bioconductor.org/packages/3.14/bioc/html/bluster.html</a>.
+</div>
+<div id="ref-McInnes2018" class="csl-entry">
+McInnes, Leland, John Healy, and James Melville. 2018. <span>“<span class="nocase">UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction</span>.”</span> <em>arXiv e-Prints</em>, arXiv:1802.03426. <a href="https://arxiv.org/abs/1802.03426">https://arxiv.org/abs/1802.03426</a>.
+</div>
+<div id="ref-Pons2006" class="csl-entry">
+Pons, Pascal, and Matthieu Latapy. 2006. <span>“Computing Communities in Large Networks Using Random Walks.”</span> <em>Journal of Graph Algorithms and Applications</em> 10 (January): 191–218. <a href="https://doi.org/10.7155/jgaa.00124">https://doi.org/10.7155/jgaa.00124</a>.
+</div>
+<div id="ref-Rousseeuw1987" class="csl-entry">
+Rousseeuw, Peter J. 1987. <span>“Silhouettes: A Graphical Aid to the Interpretation and Validation of Cluster Analysis.”</span> <em>Journal of Computational and Applied Mathematics</em> 20: 53–65. https://doi.org/<a href="https://doi.org/10.1016/0377-0427(87)90125-7">https://doi.org/10.1016/0377-0427(87)90125-7</a>.
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="microbiome-community.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="differential-abundance.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": true,
+"facebook": false,
+"twitter": true,
+"linkedin": true,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["OMA.pdf"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
