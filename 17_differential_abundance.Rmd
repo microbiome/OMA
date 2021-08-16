@@ -10,13 +10,26 @@ chapterPreamble()
 
 *What is DAA and why do we do it?*
 
-In this section we will work with one of the [openly available datasets](https://rdrr.io/github/FelixErnst/mia/man/mia-datasets.html)in mia to illustrate how to perform differential abundance analysis (DAA). DAA aims to identify differences in taxon abundance between two or more groups (e.g. treatment vs control) for each taxon of a sample. This can be performed at any phylogenetic level but we will work at Genus level abundances in this section. We perform DAA to identify biomarkers and/or gain understanding of a complex system by looking at its isolated components. For example, identifying that a bacterial taxon is different between e.g. a patient group with disease *X* vs a healthy control group might lead to important insights into the pathophysiology. Changes in the microbiota might be causal or a consequence of the disease. Either way, it can help to understand the system as a whole. Be aware that this approach has also been critisized [recently](https://arxiv.org/abs/2104.07266).
+In this section we will work with one of the 
+[openly available datasets](https://microbiome.github.io/mia/reference/mia-datasets.html) in mia to illustrate how to perform differential abundance
+analysis (DAA). DAA aims to identify differences in taxon abundance between two
+or more groups (e.g. treatment vs control) for each taxon of a sample. This can
+be performed at any phylogenetic level but we will work at Genus level
+abundances in this section. We perform DAA to identify biomarkers and/or gain
+understanding of a complex system by looking at its isolated components. For
+example, identifying that a bacterial taxon is different between e.g. a patient
+group with disease *X* vs a healthy control group might lead to important
+insights into the pathophysiology. Changes in the microbiota might be causal or
+a consequence of the disease. Either way, it can help to understand the system
+as a whole. Be aware that this approach has also been critisized
+[recently](https://arxiv.org/abs/2104.07266).
 
 
 
 *How to do DAA*
 
-There are many tools to perform DAA. The most popular tools, without going into evaluating whether or not they perform well for this task, are:  
+There are many tools to perform DAA. The most popular tools, without going into
+evaluating whether or not they perform well for this task, are:  
 - [ALDEx2](https://bioconductor.org/packages/release/bioc/html/ALDEx2.html)   
 - [ANCOM](https://github.com/FrederickHuangLin/ANCOM) [(BC)](https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html)  
 - [corncob](https://cran.r-project.org/web/packages/corncob/index.html)  
@@ -30,7 +43,23 @@ There are many tools to perform DAA. The most popular tools, without going into 
 - [Wilcoxon test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/wilcox.test)  
 
 
-We recommend you to have a look at [Nearing et al.](https://www.biorxiv.org/content/10.1101/2021.05.10.443486v1.full) who compared all these listed methods across 38 different datasets. Because different methods have different approaches (parametric vs non-parametric, different normalization techiniques etc.) to perform the same task (test differential abundance), results can differ between methods. Unfortunately, as Nearing et al. point out, they differ disturbingly much. Therefore, it is highly recommended to pick several methods to get an idea about how robust and potentially reproducible your findings are depending on the method. In this section we demonstrate 3 methods (ANCOM-BC, Wilcoxon-test and Deseq2) and will compare the results between them. Note that the purpose of this section is to show how to perform DAA in R, not how to correctly do causal inference. E.g. there might be confounding factors that might drive (the absence of) differences between the shown groups that we ignore for simplicity. Furthermore, we picked a dataset that merely has microbial abundances in a TSE object as well as a grouping variable in the sample data. We simplify the analysis by only including 2 of the 3 groups. 
+We recommend you to have a look at 
+[Nearing et al.](https://www.biorxiv.org/content/10.1101/2021.05.10.443486v1.full) who compared all these listed methods across 38
+different datasets. Because different methods have different approaches
+(parametric vs non-parametric, different normalization techiniques etc.) to
+perform the same task (test differential abundance), results can differ between
+methods. Unfortunately, as Nearing et al. point out, they differ disturbingly
+much. Therefore, it is highly recommended to pick several methods to get an
+idea about how robust and potentially reproducible your findings are depending
+on the method. In this section we demonstrate 3 methods 
+(ANCOM-BC, Wilcoxon-test and DESeq2) and will compare the results between them.
+Note that the purpose of this section is to show how to perform DAA in R, not
+how to correctly do causal inference. E.g. there might be confounding factors
+that might drive (the absence of) differences between the shown groups that we
+ignore for simplicity. Furthermore, we picked a dataset that merely has
+microbial abundances in a TSE object as well as a grouping variable in the
+sample data. We simplify the analysis by only including 2 of the 3 groups. 
+
 
 
 ```{r load-pkg-data}
@@ -77,7 +106,9 @@ count(d, pheno) %>% kable()
 ### Wilcoxon test
 
 A Wilcoxon test estimates difference between two groups. It is a
-non-parametric alternative to a t-test. As multiple non-independent tests will be performed, we will need to adjust the p-values for multiple testing. Below code shows how to do both steps:
+non-parametric alternative to a t-test. As multiple non-independent tests will
+be performed, we will need to adjust the p-values for multiple testing. Below
+code shows how to do both steps:
 
 ```{r}
 # for the Wilcoxon test, we will need CLR transformed abundances
@@ -113,7 +144,11 @@ ggplot(wilcoxon_p, aes(p_adjusted)) +
 
 
 ### DESeq2
-Our second analysis method is DESeq2. DESeq2 utilizes the negative binomial distribution to detect differences in read counts between groups. It performs a data normalization automatically that accounts for differences between library sizes. It will also automatically output adjusted p-values. More information about this method can be found, e.g., from Harvard Chan Bioinformatic Core's
+Our second analysis method is DESeq2. DESeq2 utilizes the negative binomial
+distribution to detect differences in read counts between groups. It performs a
+data normalization automatically that accounts for differences between library
+sizes. It will also automatically output adjusted p-values. More information
+about this method can be found, e.g., from Harvard Chan Bioinformatic Core's
 tutorial [Introduction to DGE -
 ARCHIVED](https://hbctraining.github.io/DGE_workshop/lessons/04_DGE_DESeq2_analysis.html)
  
@@ -147,13 +182,30 @@ arrange(df, desc(log2FoldChange), padj) %>%
 
 ### ANCOM-BC
 
-[The analysis of composition of microbiomes with bias correction (ANCOM-BC)](https://www.nature.com/articles/s41467-020-17041-7) 
-is a recently developed method for differential abundance testing. It is based on an [earlier published approach](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4450248/). The previous version of ANCOM was among the methods that produced the [most consistent results and is probably a conservative approach](https://www.biorxiv.org/content/10.1101/2021.05.10.443486v1.full). However, the new ANCOM-BC method operates quite differently compared to the former ANCOM method.
+[The analysis of composition of microbiomes with bias correction 
+(ANCOM-BC)](https://www.nature.com/articles/s41467-020-17041-7) 
+is a recently developed method for differential abundance testing. It is based
+on an 
+[earlier published approach](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4450248/). 
+The previous version of ANCOM was among the methods that produced the 
+[most consistent results and is probably a conservative approach](https://www.biorxiv.org/content/10.1101/2021.05.10.443486v1.full). 
+However, the new ANCOM-BC method operates quite differently compared to the
+former ANCOM method.
 
-As the only method, ANCOM-BC incorporates the so called *sampling fraction* into the model. The latter term could be empirically estimated by the ratio of the library size to the microbial load. According to the authors, variations in this sampling fraction would bias differential abundance analyses if ignored. Furthermore, this method provides p-values, and confidence intervals for each taxon. It also controls the FDR and it is computationally simple to implement. 
+
+As the only method, ANCOM-BC incorporates the so called *sampling fraction*
+into the model. The latter term could be empirically estimated by the ratio of
+the library size to the microbial load. According to the authors, variations in
+this sampling fraction would bias differential abundance analyses if ignored.
+Furthermore, this method provides p-values, and confidence intervals for each
+taxon. It also controls the FDR and it is computationally simple to implement. 
+
 
 As we will see below, to obtain results, all that is needed is to pass 
-a phyloseq object to the `ancombc()` function. Therefore, below we first convert our `tse` object to a `phyloseq` object. Then, we specify the formula. In this formula, other covariates could potentially be included to adjust for confounding. We show this further below. 
+a phyloseq object to the `ancombc()` function. Therefore, below we first
+convert our `tse` object to a `phyloseq` object. Then, we specify the formula.
+In this formula, other covariates could potentially be included to adjust for
+confounding. We show this further below. 
 Please check the [function documentation](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html) 
 to learn about the additional arguments that we specify below.
 
@@ -183,8 +235,13 @@ res <- out$res
 
 The object `out` contains all model output. Again, see the 
 [documentation of the function](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html) 
-under **Value** for an explanation of all the output objects. Our question whether taxa are differentially abundant can be answered by looking at the `res` object, which now contains dataframes with the coefficients, 
-standard errors, p-values and q-values. Conveniently, there is a dataframe `diff_abn`. Here, for each taxon it is indicated whether it is differentially abundant between the groups. Below we show the first 6 entries of this dataframe:  
+under **Value** for an explanation of all the output objects. Our question
+whether taxa are differentially abundant can be answered by looking at the
+`res` object, which now contains dataframes with the coefficients, 
+standard errors, p-values and q-values. Conveniently, there is a dataframe
+`diff_abn`. Here, for each taxon it is indicated whether it is differentially
+abundant between the groups. Below we show the first 6 entries of this
+dataframe:  
 
 ```{r}
 kable(head(res$diff_abn))
@@ -194,7 +251,11 @@ kable(head(res$diff_abn))
 
 ### Comparison of the methods
 
-When we compare the methods in the context of a research question, we could look at e.g. at whether they agree based on the applied decision criterion (e.g. adjusted p value < 0.05).  That is what we illustrate here. First let us print how many taxa were identified by each method to begin:
+When we compare the methods in the context of a research question, we could
+look at e.g. at whether they agree based on the applied decision criterion
+(e.g. adjusted p value < 0.05).  That is what we illustrate here. First let us
+print how many taxa were identified by each method to begin:
+
 
 ```{r}
 # how many taxa are significant for wilcoxon test
@@ -207,7 +268,18 @@ sum(out$res$diff_abn$phenoObese)
 
 
 
-In the next step we will look at the intersection of identified taxa. Here we encountered a common issue that we want to warn you about regarding the names of taxa.  R might change these names, e.g. if you generate a dataframe while the given names are not suitable to be column names. This happened here with `Escherichia/Shigella`, which was changed to `Escherichia.Shigella` automatically by R in the Wilcoxon test section. That caused some of the `NA` values where we expected p values (DESeq2 and Wilcoxon output) or boolean values (ANCOMBC output). Make sure to always inspect why you do not get the output you would have expected. Since `Escherichia/Shigella` was FALSE (adjusted p > 0.05) for all methods, I could easily work around this below by setting the `NA` to FALSE.
+In the next step we will look at the intersection of identified taxa. Here we
+encountered a common issue that we want to warn you about regarding the names
+of taxa.  R might change these names, e.g. if you generate a dataframe while
+the given names are not suitable to be column names. This happened here with
+`Escherichia/Shigella`, which was changed to `Escherichia.Shigella`
+automatically by R in the Wilcoxon test section. That caused some of the `NA`
+values where we expected p values (DESeq2 and Wilcoxon output) or boolean
+values (ANCOMBC output). Make sure to always inspect why you do not get the
+output you would have expected. Since `Escherichia/Shigella` was FALSE
+(adjusted p > 0.05) for all methods, I could easily work around this below by
+setting the `NA` to FALSE.
+
 
 ```{r}
 # create a dataframe that indicates for each genus and method if it was DA
@@ -230,7 +302,9 @@ summ <- full_join(
 filter(summ, score == 3) %>% kable()
 ```
 
-We see that while each method at least identified 14 genera as differentially abundant, they only agree on 5 genera. Lets plot those 5 genera:
+We see that while each method at least identified 14 genera as differentially
+abundant, they only agree on 5 genera. Lets plot those 5 genera:
+
 
 ```{r}
 # create a plot for each genus where the score is indicated in the title
@@ -268,7 +342,14 @@ ancombc_plots[[1]] +
 
 ### Confounding variables
 
-To perform causal inference, it is crucial that the method is able to include covariates in the model. This is not possible with e.g. the Wilcoxon test. Other methods such as both ANCOM methods, DESeq2, MaAsLin2 and others allow this. Below we show how to include a covariate in ANCOM-BC. See e.g. [here](https://hbctraining.github.io/DGE_workshop/lessons/04_DGE_DESeq2_analysis.html) on how to do the same for DESeq2. It is very similar for all the methods that allow this. Since in this dataset there are no covariates, I first simulate a new variable and add it to the TSE object.
+To perform causal inference, it is crucial that the method is able to include
+covariates in the model. This is not possible with e.g. the Wilcoxon test.
+Other methods such as both ANCOM methods, DESeq2, MaAsLin2 and others allow
+this. Below we show how to include a covariate in ANCOM-BC. See e.g.
+[here](https://hbctraining.github.io/DGE_workshop/lessons/04_DGE_DESeq2_analysis.html) on how to do the same for DESeq2. 
+It is very similar for all the methods that allow this. Since in this dataset
+there are no covariates, I first simulate a new variable and add it to the TSE
+object.
 
 ```{r}
 # to join new data to existing colData we need to put rownames as a column 
@@ -306,7 +387,10 @@ out_cov = ancombc(
 kable(head(out_cov$res$diff_abn))
 ```
 
-In the next section of this book chapter we cover methods that can also take into account the phylogenetic information of bacterial taxa to perform group-wise associations.
+In the next section of this book chapter we cover methods that can also take
+into account the phylogenetic information of bacterial taxa to perform 
+group-wise associations.
+
 
 
 ## Tree-based methods
@@ -314,11 +398,19 @@ In the next section of this book chapter we cover methods that can also take int
 ### Group-wise associations testing based on balances with fido
 
 [TreeSummarizedExperiment](https://bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html) 
-frequently includes a Phylogenetic tree along with associated data about the experiment (at `colData`), that holds covariates which can be used for analyzing group-wise associations. 
+frequently includes a Phylogenetic tree along with associated data about the
+experiment (at `colData`), that holds covariates which can be used for
+analyzing group-wise associations. 
 
-Such an analysis could be performed with the function `pibble` from the `fido` package, that offers a Multinomial Logistic-Normal Linear Regression model; see [vignette](https://jsilve24.github.io/fido/articles/introduction-to-fido.html) of package.
+Such an analysis could be performed with the function `pibble` from the `fido`
+package, that offers a Multinomial Logistic-Normal Linear Regression model; see
+[vignette](https://jsilve24.github.io/fido/articles/introduction-to-fido.html) of package.
 
-The following presents such an exemplary analysis based on the [Sprockett et al. (2020)](https://doi.org/10.1038/s41467-020-17541-6) available through `microbiomeDataSets` package.
+
+The following presents such an exemplary analysis based on the 
+[Sprockett et al. (2020)](https://doi.org/10.1038/s41467-020-17541-6) available
+through `microbiomeDataSets` package.
+
 
 ```{r, message=FALSE, warning=FALSE}
 if (!require(fido)){
@@ -338,7 +430,9 @@ tse <- SprockettTHData()
 names(colData(tse))
 ```
 
-We pick three covariates ("Sex","Age_Years","Delivery_Mode") during this analysis as an example, and beforehand we check for missing data:
+We pick three covariates ("Sex","Age_Years","Delivery_Mode") during this
+analysis as an example, and beforehand we check for missing data:
+
 
 ```{r}
 cov_names <- c("Sex","Age_Years","Delivery_Mode")
@@ -348,6 +442,7 @@ na_summary
 ```
 
 We drop samples with na values at the covariates (features) under analysis: 
+
 
 ```{r}
 tse <- tse[ , !is.na(colData(tse)$Delivery_Mode) ]
@@ -364,7 +459,8 @@ tse_phylum <- agglomerateByRank(tse, "Phylum")
 tse_phylum
 ```
 
-We extract the counts assay and feature data to build the model matrix having an extra row of ones presenting the intercept for the regression task later: 
+We extract the counts assay and feature data to build the model matrix having
+an extra row of ones presenting the intercept for the regression task later: 
 
 ```{r}
 Y <- assays(tse_phylum)$counts
