@@ -52,18 +52,18 @@ Technically, beta diversities are usually represented as `dist`
 objects, which contain triangular data describing the distance between
 each pair of samples. These distances can be further subjected to
 ordination. Ordination is a common concept in ecology that aims to
-reduce the dimensionsionality of the data for further evaluation or
+reduce the dimensionality of the data for further evaluation or
 visualization. Ordination techniques aim to capture as much of
 essential information in the data as possible in a lower dimensional
 representation.  Dimension reduction is bound to loose information but
 the common ordination techniques aim to preserve relevant information
 of sample similarities in an optimal way, which is defined in
-different way by different methods. [TODO add references and/or link
+different ways by different methods. [TODO add references and/or link
 to ordination chapter instead?]
 
 Some of the most common ordination methods in microbiome research
 include Principal Component Analysis (PCA), metric and non-metric
-multi-dimensional scaling (MDS, NMDS), The MDS methods is also known
+multi-dimensional scaling (MDS, NMDS), The MDS methods are also known
 as Principal Coordinates Analysis (PCoA). Other recently popular
 techniques include t-SNE and UMAP. 
 
@@ -79,7 +79,7 @@ Sometimes a similar measure is shown for MDS/PCoA. The interpretation
 is generally different, however, and hence we do not recommend using
 it. PCA is a special case of PCoA with Euclidean distances.  With
 non-Euclidean dissimilarities PCoA uses a trick where the pointwise
-dissimilarities are first cast into similarities a Euclidean space
+dissimilarities are first cast into similarities in a Euclidean space
 (with some information loss i.e. stress) and then projected to the
 maximal variance axes. In this case, the maximal variance axes do not
 directly reflect the correspondence of the projected distances and
@@ -102,7 +102,7 @@ lab](https://www.huber.embl.de/users/klaus/Teaching/statisticalMethods-lab.pdf).
 ```r
 # Example data
 library(mia)
-data(GlobalPatterns)
+data(GlobalPatterns, package="mia")
 
 # Data matrix (features x samples)
 x <- GlobalPatterns
@@ -152,9 +152,9 @@ ggplot(aes(x = d0, y = dmds), data=df) +
 ## Estimating beta diversity
 
 In the following examples dissimilarities are calculated by 
-functions supplied to the `FUN` argument. This function can defined by
+functions supplied to the `FUN` argument. This function can be defined by
 the user. It must return a `dist` function, which can then be used to
-calculate reduced dimension either via ordination methods (such as MDS
+calculate reduced dimensions either via ordination methods (such as MDS
 or NMDS), and the results can be stored in the `reducedDim`.
 
 This entire process is wrapped in the `runMDS` and `runNMDS`
@@ -169,8 +169,8 @@ se <- runMDS(se, FUN = vegan::vegdist, name = "MDS_BC", exprs_values = "counts")
 
 Sample similarities can be visualized on a lower-dimensional display
 (typically 2D) using the `plotReducedDim` function in the
-`scater`package. This provides also further tools to incorporate
-additional information using variations in colour, shape or size.
+`scater` package. This provides also further tools to incorporate
+additional information using variations in color, shape or size.
 
 
 ```r
@@ -368,7 +368,7 @@ Getting top taxa and visualizing the abundance on PCoA.
 
 
 ```r
-# Getting the 6 top taxa
+# Getting the top taxa
 top_taxa <- getTopTaxa(tse_Genus,top = 6, abund_values = "relative_abundance")
 
 # Naming all the rest of non top-taxa as "Other"
@@ -400,7 +400,7 @@ plot
 
 Note: A 3D interactive version of the earlier plot can be found from [here](https://microbiome.github.io/OMA/interactive-3d-plots.html).
 
-Similarly lets visualize and compare the alcohol sub-polulation.
+Similarly let's visualize and compare the alcohol sub-polulation.
 
 ```r
 # Calculating the frequencies and percentages for both categories
@@ -498,7 +498,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2702
+## [1] 0.2728
 ```
 
 In this case, the community composition is not significantly different
@@ -603,7 +603,7 @@ other attached packages:
  [7] scuttle_1.3.1                  ggplot2_3.3.5                 
  [9] vegan_2.5-7                    lattice_0.20-44               
 [11] permute_0.9-5                  mia_1.1.9                     
-[13] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.2             
+[13] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
 [15] XVector_0.33.0                 SingleCellExperiment_1.15.1   
 [17] SummarizedExperiment_1.23.1    Biobase_2.53.0                
 [19] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           

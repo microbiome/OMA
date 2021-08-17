@@ -222,7 +222,7 @@ fido::plot(priors, pars="Lambda") + ggplot2::xlim(c(-5, 5))
 <img src="17_differential_abundance_files/figure-html/unnamed-chunk-8-1.png" width="672" />
 
 Estimating the posterior by including the data at `Y`.
-Note: Some computational failures could occur (see [discussion](https://github-wiki-see.page/m/jsilve24/fido/wiki/Frequently-Asked-Questions))
+Note: Some computational failures could occur (see [discussion](https://github-wiki-see.page/m/jsilve24/fido/wiki/Frequently-Asked-Questions));
 the arguments `multDirichletBoot` `calcGradHess` could be passed in such case.
 
 
@@ -239,7 +239,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.9981
+## Proportions of Observations within 95% Credible Interval: 0.998
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
@@ -287,7 +287,7 @@ attached base packages:
 
 other attached packages:
  [1] microbiomeDataSets_1.1.1       MultiAssayExperiment_1.19.5   
- [3] mia_1.1.9                      TreeSummarizedExperiment_2.1.3
+ [3] mia_1.1.9                      TreeSummarizedExperiment_2.1.4
  [5] Biostrings_2.61.2              XVector_0.33.0                
  [7] SingleCellExperiment_1.15.1    SummarizedExperiment_1.23.1   
  [9] Biobase_2.53.0                 GenomicRanges_1.45.0          

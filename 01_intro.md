@@ -41,13 +41,34 @@ document.addEventListener("click", function (event) {
 ## Community
 
 This resource is a result of a community-driven development process
-that has emerged over the past decade. The community is open, and you can best find us and join us through the following channels:
+that has emerged over the past decade. You can contact the developers,
+and join miaverse community through the following channels:
 
  - [Bioconductor Slack](https://bioc-community.herokuapp.com/) channel #miaverse
  - [Gitter / Matrix](https://gitter.im/microbiome/miaverse) channel #miaverse
  - Project homepage at [microbiome.github.io](microbiome.github.io)
 
-You are also welcome to contact the key developers directly.
+
+
+## Developers and contributors
+
+The following individuals have contributed to the development of
+miaverse R packages, data resources, and online documentation
+including the OMA book:
+
+- Tuomas Borman
+- Henrik Eckermann
+- Chouaib Benchraka
+- Chandler Ross
+- Shigdel Rajesh
+- Yağmur Şimşek
+- Giulio Benedetti 
+- Héctor Corrada Bravo
+- Domenick Braccia
+- Ruizhu Huang
+- Sudarshan Shetty
+- Felix Ernst
+- [Leo Lahti](http://www.iki.fi/Leo.Lahti)
 
 
 ## Acknowledgements
@@ -75,7 +96,7 @@ Single-Cell Analysis with Bioconductor, or _OSCA_ book by Robert
 Amezquita, Aaron Lun, Stephanie Hicks, and Raphael Gottardo
 [@Amezquita2020] has carried out closely related work on the
 _SummarizedExperiment_ data container and its derivatives in the field
-of single cell sequencing studies. Many methods and approached used in
+of single cell sequencing studies. Many methods and approaches used in
 this book have been derived from the OSCA framework, with the
 necessary further adjustments for microbiome research.
 
@@ -99,9 +120,35 @@ the basis for microbiome analysis, including the
 by Lucas Schiffer, Levi Waldron and others [@Pasolli2017].
 
 
+## Package ecosystem
+
+The miaverse (TreeSE) framework is supported (at least) by the
+following packages. Some of these are independently developed and
+maintained.
 
 
+Data container:
 
+- [TreeSummarizedExperiment](http://bioconductor.org/packages/devel/bioc/html/TreeSummarizedExperiment.html)
+
+
+R packages (miaverse):
+
+- [mia](microbiome.github.io/mia)
+- [miaViz](microbiome.github.io/miaViz)
+- [philr](http://bioconductor.org/packages/devel/bioc/html/philr.html) (external)
+
+
+Demonstration data:
+
+- [mia](microbiome.github.io/mia) - classical microbiome data sets; see `rdata(package="mia")`
+- [microbiomeDataSets](microbiome.github.io/microbiomeDataSets) - microbiome data from ExperimentHub 
+- [curatedMetagenomicData](https://waldronlab.io/curatedMetagenomicData/) (external)
+
+
+Online tutorials and training material:
+
+- [OMA](microbiome.github.io/OMA)
 
 
 

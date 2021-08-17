@@ -35,12 +35,12 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
-This chapter focuses on the exploration of microbiome data and establish 
+This chapter focuses on the exploration of microbiome data and establishes 
 commonly used descriptors of a microbiome. The main difference to quality
-control is that the exploration assumes the technical aspects of the dataset
-have been investigated to your satisfaction. Generally speaking at this point 
-you should be quite certain, that the dataset doesn't suffer from severe 
-technical biases or you should at least be aware of potential problems.
+control is that the exploration assumes that technical aspects of the dataset
+have been investigated to your satisfaction. Generally speaking, at this point 
+you should be quite certain that the dataset doesn't suffer from severe 
+technical biases, or you should at least be aware of potential problems.
 
 In reality you might need to go back and forth between QC and exploration, 
 since you discover through exploration of your dataset technical aspects you 
@@ -49,13 +49,13 @@ need to check.
 
 ```r
 library(mia)
-data("GlobalPatterns")
+data("GlobalPatterns", package="mia")
 se <- GlobalPatterns 
 ```
 
 ## Prevalence
 
-Prevalence is a measurements, which describes in how many samples certain
+Prevalence is a measurement, which describes in how many samples certain
 microbes were detected.
 
 Investigating the prevalence of microbes allows you either to focus on changes,
@@ -64,8 +64,8 @@ which are nonetheless abundantly found in a small number of samples.
 
 On the raw data, the population prevalence (frequency) at a 1% relative
 abundance threshold (`detection = 1/100` and `as_relative = TRUE`), can look
-like this. The low prevalence in this examples can be explained by rather
-different sample types as well as the in depth nature of the data.
+like this. The low prevalence in this example can be explained by rather
+different sample types as well as the in-depth nature of the data.
 
 
 ```r
@@ -93,12 +93,12 @@ head(getPrevalence(se, detection = 1, sort = TRUE, abund_values = "counts",
 ##      1      1      1      1      1      1
 ```
 
-Note that, if the output should used for subsetting or storing the data in 
+Note that, if the output should be used for subsetting or storing the data in 
 the `rowData`, set `sort = FALSE`.
 
 ### Prevalent microbiota analysis
 
-To investigate the microbiome data at a selected taxonomic levels, two 
+To investigate the microbiome data at a selected taxonomic level, two 
 approaches are available.
 
 First the data can be agglomerated to the taxonomic level and `getPrevalence` 
@@ -118,7 +118,7 @@ head(getPrevalence(altExp(se,"Phylum"), detection = 1/100, sort = TRUE,
 ##                 0.6154                 0.5769                 0.4615
 ```
 
-Alternatively the `rank` argument can be set, to perform the agglomeration on
+Alternatively, the `rank` argument can be set to perform the agglomeration on
 the fly.
 
 
@@ -135,7 +135,7 @@ head(getPrevalence(se, rank = "Phylum", detection = 1/100, sort = TRUE,
 ##          0.4615
 ```
 
-The difference in the naming scheme, is that by default `na.rm = TRUE` is used
+The difference in the naming scheme is that, by default, `na.rm = TRUE` is used
 for agglomeration in `getPrevalence`, whereas the default for 
 `agglomerateByRank` is `FALSE` to prevent accidental data loss.
 
@@ -151,8 +151,8 @@ prev <- getPrevalentTaxa(se, detection = 0, prevalence = 50/100,
 prev
 ```
 
-Note, that the `detection` and `prevalence` thresholds are not the same, since
-`detection` can be applied to relative counts or absolute couts depending on 
+Note that the `detection` and `prevalence` thresholds are not the same, since
+`detection` can be applied to relative counts or absolute counts depending on 
 whether `as_relative` is set `TRUE` or `FALSE`
 
 TODO
@@ -263,7 +263,7 @@ plotAbundanceDensity(tse, layout = "jitter", abund_values = "relabundance",
 
 <img src="13_microbiome_exploration_files/figure-html/unnamed-chunk-7-1.png" width="672" />
 
-Relative abundance values for the top 5 taxa for instance can be visualized as a
+For instance, relative abundance values for the top 5 taxa can be visualized as a
 density plot over a log scaled axis, using "nationality" as an overlaying information:
 
 
@@ -303,7 +303,7 @@ other attached packages:
  [3] miaViz_1.1.4                   ggraph_2.0.5                  
  [5] scater_1.21.3                  ggplot2_3.3.5                 
  [7] scuttle_1.3.1                  mia_1.1.9                     
- [9] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.2             
+ [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
 [11] XVector_0.33.0                 SingleCellExperiment_1.15.1   
 [13] SummarizedExperiment_1.23.1    Biobase_2.53.0                
 [15] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           

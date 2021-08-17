@@ -53,7 +53,7 @@ processed data within the analysis workflows.
 Recently,
 [`TreeSummarizedExperiment`](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html)
 (`TSE`)
-were developed to extend the `SE` and `SCE` class for incorporating hierarchical
+was developed to extend the `SE` and `SCE` class for incorporating hierarchical
 information (including phylogenetic tree) and reference sequences.
 
 The `mia` package implements tools using these classes for analysis of
@@ -85,7 +85,7 @@ BiocManager::install("FelixErnst/mia")
 The widely used `phyloseq` package and class were around before the [`SummarizedExperiment`](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)  
 and the derived 
 [`TreeSummarizedExperiment`](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html) 
-class. Many methods for taxonomic profiling data are readily for the  `phyloseq` class structure. 
+class. Many methods for taxonomic profiling data are readily available for the  `phyloseq` class structure. 
 
 In order to facilitate the transition, we provide here a short description how `phyloseq` and `*Experiment` classes relate to 
 each other.
@@ -149,7 +149,7 @@ se <- SummarizedExperiment(assays = list(counts = counts),
                            rowData = tax)
 ```
 
-A specific import functions are provided for:
+Specific import functions are provided for:
 
 -   Biom files (see `help(mia::loadFromBiom)`)
 -   QIIME2 files (see `help(mia::loadFromQIIME2)`)
@@ -312,7 +312,7 @@ head(colData(se))
 ## DataFrame with 6 rows and 0 columns
 ```
 
-Let us add a sample meta data file.
+Let us add a sample metadata file.
 
 
 ```r
@@ -432,7 +432,7 @@ head(rowTree(tse))
 
 ### Conversions between data formats in R
 
-If the data is has already been imported in R in another format, it
+If the data has already been imported in R in another format, it
 can be readily converted into `TreeSummarizedExperiment`, as shown in our next
 example. Note that similar conversion functions to
 `TreeSummarizedExperiment` are available for multiple data formats via
@@ -649,7 +649,7 @@ colData(se)
 
 ### rowData
 
-`rowData` contains data on the features of the samples analyzed. Of particular
+`rowData` contains data on the features of the analyzed samples. Of particular
 interest for the microbiome field this is used to store taxonomic information.
 
 
@@ -742,13 +742,13 @@ the links in an existing object, the `changeTree` function is available.
 
 ## Data conversion
 
-Sometimes custom solutions are need for analyzing the data. `mia` contains a 
+Sometimes custom solutions are needed for analyzing the data. `mia` contains a 
 few functions to help in these situations.
 
 ### Tidy data
 
-For several custom analysis and visualization packages such as those from the 
-`tidyverse` the `SE` data can be converted to long data.frame format with 
+For several custom analysis and visualization packages, such as those from the 
+`tidyverse`, the `SE` data can be converted to long data.frame format with 
 `meltAssay`.    
 
 
@@ -865,7 +865,7 @@ attached base packages:
 
 other attached packages:
  [1] phyloseq_1.37.0                mia_1.1.9                     
- [3] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.2             
+ [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
  [5] XVector_0.33.0                 SingleCellExperiment_1.15.1   
  [7] SummarizedExperiment_1.23.1    Biobase_2.53.0                
  [9] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           

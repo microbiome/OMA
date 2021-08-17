@@ -49,7 +49,7 @@ samples, is not the aim of the following sections.
 
 ```r
 library(mia)
-data("GlobalPatterns")
+data("GlobalPatterns", package="mia")
 se <- GlobalPatterns
 ```
 
@@ -74,7 +74,7 @@ richness. Several estimators are available, including for instance ACE
 [@Chao1992] and Chao1 [@Chao1984]. Richness estimates are unaffected
 by species abundances.
   
-**Phylogenetic diversity** was first proposed by [@Faith1992], unlike the 
+**Phylogenetic diversity** was first proposed by [@Faith1992]. Unlike the 
   diversity measures mentioned above, Phylogenetic diversity (PD) 
   measure incorporates information from phylogenetic relationships 
   stored in `phylo` tree between species in a community (sample). The 
@@ -162,7 +162,7 @@ Alpha diversities can be visualized with boxplot. Here, Shannon index is compare
 between different sample type groups. Individual data points are visualized by 
 plotting them as points with `geom_jitter`.
 
-`geom_signif` is used to test, if these differences are statistically significant.
+`geom_signif` is used to test whether these differences are statistically significant.
 It adds p-values to plot.
 
 
@@ -199,7 +199,7 @@ ggplot(df, aes(x = SampleType, y = shannon)) +
 **Phylogenetic diversity**  
 
 The phylogenetic diversity is calculated by `mia::estimateDiversity`. This is a faster re-implementation of   
-the widely function in _`picante`_ [@R-picante, @Kembel2010].  
+the widely used function in _`picante`_ [@R-picante, @Kembel2010].  
 
 Load `picante` R package and get the `phylo` stored in `rowTree`. 
 
@@ -313,7 +313,7 @@ attached base packages:
 other attached packages:
  [1] ggsignif_0.6.2                 scater_1.21.3                 
  [3] ggplot2_3.3.5                  scuttle_1.3.1                 
- [5] mia_1.1.9                      TreeSummarizedExperiment_2.1.3
+ [5] mia_1.1.9                      TreeSummarizedExperiment_2.1.4
  [7] Biostrings_2.61.2              XVector_0.33.0                
  [9] SingleCellExperiment_1.15.1    SummarizedExperiment_1.23.1   
 [11] Biobase_2.53.0                 GenomicRanges_1.45.0          

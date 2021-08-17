@@ -38,11 +38,11 @@ document.addEventListener("click", function (event) {
 
 ```r
 library(mia)
-data("GlobalPatterns")
+data("GlobalPatterns", package="mia")
 se <- GlobalPatterns 
 ```
 
-Taxonomic information are a key part of analyzing microbiome data and without
+Taxonomic information is a key part of analyzing microbiome data and without
 it, any type of data analysis probably will not make much sense. However,
 the degree of detail of taxonomic information differs depending on the dataset
 and annotation data used.
@@ -51,7 +51,7 @@ Therefore, the mia package expects a loose assembly of taxonomic information
 and assumes certain key aspects:
 
 * Taxonomic information is given as character vectors or factors in the 
-`rowData` of an `SummarizedExperiment` object.
+`rowData` of a `SummarizedExperiment` object.
 * The columns containing the taxonomic information must be named `domain`,
 `kingdom`, `phylum`, `class`, `order`, `family`, `genus`, `species` or with
 a capital first letter.
@@ -77,7 +77,7 @@ dataset. For more information visit the
 The DECIPHER package [@R-DECIPHER] implements the `IDTAXA` algorithm to assign
 either taxonomic information or function information. For `mia`
 only the first option is of interest for now and more information can be
-found on the [DECIPHER website](http://www2.decipher.codes/Classification.html)
+found on the [DECIPHER website](http://www2.decipher.codes/Classification.html).
 
 ## Functions to access taxonomic information
 
@@ -187,9 +187,9 @@ head(getTaxonomyLabels(se))
 ## [5] "Class:Sd-NA_1"                    "Class:Sd-NA_2"
 ```
 
-By default this will used the lowest non-empty information to construct a
-string with the following scheme `level:value`. If all levels are the same
-this part is omited, but can be added by setting `with_rank = TRUE`
+By default, this will use the lowest non-empty information to construct a
+string with the following scheme `level:value`. If all levels are the same,
+this part is omitted, but can be added by setting `with_rank = TRUE`.
 
 
 ```r
@@ -214,8 +214,8 @@ head(getTaxonomyLabels(se[phylum,], with_rank = TRUE))
 ```
 
 By default the return value of `getTaxonomyLabels` contains only unique elements
-by passing it through `make.unique`. This step can be omited by setting 
-`make_unique = FALSE`
+by passing it through `make.unique`. This step can be omitted by setting 
+`make_unique = FALSE`.
 
 
 ```r
@@ -233,8 +233,8 @@ To apply the loop resolving function `resolveLoop` from the
 
 ### Generate a taxonomic tree on the fly
 
-To create a taxonomic tree `taxonomyTree` used the information and returns a
-`phylo` object. Duplicate information from the `rowData` are removed.
+To create a taxonomic tree, `taxonomyTree` used the information and returns a
+`phylo` object. Duplicate information from the `rowData` is removed.
 
 
 ```r
@@ -278,7 +278,7 @@ se
 ## colTree: NULL
 ```
 
-The implementation is based on the the `toTree` function from the
+The implementation is based on the `toTree` function from the
 `TreeSummarizedExperiment` package [@R-TreeSummarizedExperiment].
 
 ## Data agglomeration {#data-agglomeration}
@@ -316,7 +316,7 @@ altExp(se, "Family")
 ## colTree: NULL
 ```
 
-If multiple assays (counts and relabundance) exists, both will be agglomerated.
+If multiple assays (counts and relabundance) exist, both will be agglomerated.
 
 
 ```r
@@ -368,13 +368,13 @@ any level present in Kingdom, Phylum, Class, Order, Family, Genus, Species.
 
 ## Data transformation
 
-Data transformation is very common procedure in microbiome analysis. 
+Data transformation is a very common procedure in microbiome analysis. 
 In transformation, each data point is replaced with transformed value that is 
 calculated by applying transformation formula to the data point. Transformation 
 can be used, for example, to normalize skewed data, or to reduce weight of bigger 
 values compared to smaller values. 
 
-In mia package, transformations are applied to abundance data. Transformed 
+In mia package, transformations are applied to abundance data. The transformed 
 abundance table is stored back to 'assays'. mia includes transformation 
 functions for sample-wise or column-wise transformation ('transformSamples()'), 
 and for feature-wise or row-wise transformation ('transformFeatures()'). 
@@ -482,7 +482,7 @@ assays(se)
 
 ## Pick specific  
 
-Retrieving of specific elements are required for specific analysis. For
+Retrieving of specific elements that are required for specific analysis. For
 instance, extracting abundances for a specific taxa in all samples or all taxa 
 in one sample.  
 
@@ -549,7 +549,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.1.9                      TreeSummarizedExperiment_2.1.3
+ [1] mia_1.1.9                      TreeSummarizedExperiment_2.1.4
  [3] Biostrings_2.61.2              XVector_0.33.0                
  [5] SingleCellExperiment_1.15.1    SummarizedExperiment_1.23.1   
  [7] Biobase_2.53.0                 GenomicRanges_1.45.0          

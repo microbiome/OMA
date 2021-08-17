@@ -38,7 +38,7 @@ document.addEventListener("click", function (event) {
 
 ```r
 library(mia)
-data("GlobalPatterns")
+data("GlobalPatterns", package="mia")
 se <- GlobalPatterns 
 ```
 
@@ -85,7 +85,7 @@ tax_data
 ## Library size   
 
 The total counts/sample can be calculated using the
-`perCellQCMetrics`/`addPerCellQC` from the `scater` package. The first one 
+`perCellQCMetrics`/`addPerCellQC` from the `scater` package. The former one 
 just calculates the values, whereas the latter one directly adds them to the
 `colData`.
 
@@ -277,7 +277,7 @@ other attached packages:
  [1] patchwork_1.1.1                dplyr_1.0.7                   
  [3] scater_1.21.3                  ggplot2_3.3.5                 
  [5] scuttle_1.3.1                  mia_1.1.9                     
- [7] TreeSummarizedExperiment_2.1.3 Biostrings_2.61.2             
+ [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
  [9] XVector_0.33.0                 SingleCellExperiment_1.15.1   
 [11] SummarizedExperiment_1.23.1    Biobase_2.53.0                
 [13] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
