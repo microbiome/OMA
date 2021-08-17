@@ -9,7 +9,7 @@ Bioconductor in R. This is a book based on R Markdown and **bookdown**
 ## Deployment
 
 For now the book is deployed to GitHub Pages from GitHub Actions. 
-The book can also be build locally:
+The book can also be built locally:
 
 ```
 bookdown::render_book("index.Rmd", "bookdown::gitbook")

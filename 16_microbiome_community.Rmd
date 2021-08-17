@@ -20,7 +20,7 @@ tse <- GlobalPatterns
 ### Composition barplot
 
 A typical way to visualize microbiome composition is by using composition barplot.
-In the following, relative abundance is calculated and top 5 taxa is retrieved for the
+In the following, relative abundance is calculated and top taxa are retrieved for the
 Phylum rank. Thereafter, the barplot is visualized ordering rank by abundance values
 and samples by "Bacteroidetes":
 
@@ -45,12 +45,12 @@ plotAbundance(tse, abund_values="relabundance", rank = "Phylum",
 
 ### Composition heatmap 
 
-Community composition can be visualized with heatmap where other axis represent
-samples and another taxa. Color of each intersection point represent abundance
+Community composition can be visualized with heatmap, where the horizontal axis represents
+samples and the vertical axis the taxa. Color of each intersection point represents abundance
 of a taxon in a specific sample. 
 
 Here, abundances are first CLR (centered log ratio) transformed, and then 
-Z transformation is applied to CLR-transformed data. After that abundances are 
+Z transformation is applied to CLR-transformed data. After that, abundances are 
 plotted at Phylum level. 
 
 ```{r heatmap}
@@ -97,7 +97,7 @@ tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "clr", pseudoc
 tse_phylum_subset <- transformFeatures(tse_phylum_subset, abund_values = "clr", 
                                        method = "z", name = "clr_z")
 
-# Get 10 most abundant taxa, and subsets the data by them
+# Get n most abundant taxa, and subsets the data by them
 top_taxa <- getTopTaxa(tse_phylum_subset, top = 20)
 tse_phylum_subset <- tse_phylum_subset[top_taxa, ]
 
@@ -155,7 +155,7 @@ taxa_clusters <- as.character(taxa_clusters)
 taxa_clusters <- data.frame(cluster = taxa_clusters)
 row.names(taxa_clusters) <- rownames(tse_phylum_subset)
 
-# Creates data frame that includes sample type data
+# Creates data frame that includes data on sample type
 sample_types <- unfactor(colData(tse_phylum_subset)$SampleType)
 sample_types <- data.frame(sample_types = sample_types)
 row.names(sample_types) <- colnames(tse_phylum_subset)
@@ -171,9 +171,9 @@ of using it you can find from its
 
 # Cross-correlation
 
-With cross-correlation analysis, we can analyze how strongly and how different
+With cross-correlation analysis, we can analyze how strongly and how differently
 variables are associated between each other. For instance, we can analyze if 
-higher presence of specific taxon equals to higher level of biomolecule. 
+higher presence of a specific taxon equals to higher levels of a biomolecule. 
 
 Here, we analyze associations between taxa correlate and lipids. Data is from 
 following publication Lahti _et al_. (2015) [Associations between the human intestinal 
@@ -222,14 +222,14 @@ if(!require(reshape2)){
 if(!require(dplyr)){
     install.packages("dplyr")
 }
-# Gets taxa that has at least one statistically significant correlation
+# Gets taxa that have at least one statistically significant correlation
 taxa <- correlation_table %>% dplyr::filter(p.adj < 0.05 & abs(Correlation) > 0) %>% 
   dplyr::select(X1) %>% unique %>% sapply(as.character)
-# Gets taxa that has at least one statistically significant correlation
+# Gets taxa that have at least one statistically significant correlation
 lipids <- correlation_table %>% dplyr::filter(p.adj < 0.05 & abs(Correlation) > 0) %>% 
   dplyr::select(X2) %>% unique %>% sapply(as.character)
 
-# Takes only those taxa and lipids that has statistically significant values
+# Takes only those taxa and lipids that have statistically significant values
 correlation_table <- correlation_table[correlation_table[["X1"]] %in% taxa & 
                                            correlation_table[["X2"]] %in% lipids, ]
 
@@ -242,7 +242,7 @@ order_taxa <- colnames(mat)[taxa_indices]
 lipids_indices <- hclust(as.dist(1 - cor(t(mat), use="pairwise.complete.obs")))$order
 order_lipids <- rownames(mat)[lipids_indices]
 
-# Converts taxa and lipids columns to factor so that they have desired order
+# Converts taxa and lipids columns to factor so that they have the desired order
 correlation_table[["X1"]] <- factor(correlation_table[["X1"]], levels = order_taxa)
 correlation_table[["X2"]] <- factor(correlation_table[["X2"]], levels = order_lipids)
 ```
@@ -250,7 +250,7 @@ correlation_table[["X2"]] <- factor(correlation_table[["X2"]], levels = order_li
 Creates the heatmap
 
 ```{r cross-correlation5, fig.height = 8, fig.width = 6}
-# Determines the scaling of colours
+# Determines the scaling of colors
 limits <- c(-1, 1)
 breaks <- seq(from = min(limits), to = max(limits), by = 0.2)
 colours <- c("darkblue", "blue", "white", "red", "darkred")
@@ -468,7 +468,7 @@ plots <- lapply(k,ClustAndPlot)
 (plots[[1]] + plots[[2]]) / (plots[[3]] + plots[[4]])
 ```
 
-Similarly the _`bluster`_ [@R-bluster] package offers clustering diagnostics
+Similarly, the _`bluster`_ [@R-bluster] package offers clustering diagnostics
 that can be used for judging the clustering quality (see [Assorted clustering diagnostics](http://bioconductor.org/packages/release/bioc/vignettes/bluster/inst/doc/diagnostics.html)).
 In the following, Silhouette width as a diagnostic tool is computed and results are visualized
 for each case presented earlier. For more about Silhouettes read [@Rousseeuw1987].
