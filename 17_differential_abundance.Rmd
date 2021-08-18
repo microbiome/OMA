@@ -21,7 +21,7 @@ example, identifying that a bacterial taxon is different between e.g. a patient
 group with disease *X* vs a healthy control group might lead to important
 insights into the pathophysiology. Changes in the microbiota might be causal or
 a consequence of the disease. Either way, it can help to understand the system
-as a whole. Be aware that this approach has also been critisized
+as a whole. Be aware that this approach has also been criticized
 [recently](https://arxiv.org/abs/2104.07266).
 
 
@@ -31,10 +31,10 @@ as a whole. Be aware that this approach has also been critisized
 There are many tools to perform DAA. The most popular tools, without going into
 evaluating whether or not they perform well for this task, are:  
 - [ALDEx2](https://bioconductor.org/packages/release/bioc/html/ALDEx2.html)   
-- [ANCOM](https://github.com/FrederickHuangLin/ANCOM) [(BC)](https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html)  
+- [ANCOM-BC](https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html)  
 - [corncob](https://cran.r-project.org/web/packages/corncob/index.html)  
 - [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)  
-- [edge](https://bioconductor.org/packages/release/bioc/html/edgeR.html)  
+- [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html)  
 - [LEFse](https://bioconductor.org/packages/release/bioc/html/lefser.html)  
 - [MaAsLin2](https://www.bioconductor.org/packages/release/bioc/html/Maaslin2.html)  
 - [metagenomeSeq](https://www.bioconductor.org/packages/release/bioc/html/metagenomeSeq.html)  
@@ -44,141 +44,151 @@ evaluating whether or not they perform well for this task, are:
 
 
 We recommend you to have a look at 
-[Nearing et al.](https://www.biorxiv.org/content/10.1101/2021.05.10.443486v1.full) who compared all these listed methods across 38
+[Nearing et al. (2021)](https://www.biorxiv.org/content/10.1101/2021.05.10.443486v1.full) who compared all these listed methods across 38
 different datasets. Because different methods have different approaches
 (parametric vs non-parametric, different normalization techiniques etc.) to
 perform the same task (test differential abundance), results can differ between
-methods. Unfortunately, as Nearing et al. point out, they differ disturbingly
+methods. Unfortunately, as Nearing et al. (2021) point out, they differ disturbingly
 much. Therefore, it is highly recommended to pick several methods to get an
 idea about how robust and potentially reproducible your findings are depending
-on the method. In this section we demonstrate 3 methods 
-(ANCOM-BC, Wilcoxon-test and DESeq2) and will compare the results between them.
+on the method. In this section we demonstrate 3 methods that can be recommended
+based on this recent review (ANCOM-BC, ALDEx2 and Maaslin2) and we will compare
+the results between them.
 Note that the purpose of this section is to show how to perform DAA in R, not
 how to correctly do causal inference. E.g. there might be confounding factors
 that might drive (the absence of) differences between the shown groups that we
-ignore for simplicity. Furthermore, we picked a dataset that merely has
+ignore for simplicity. However, we will show how you could include covariates
+in those models. Furthermore, we picked a dataset that merely has
 microbial abundances in a TSE object as well as a grouping variable in the
 sample data. We simplify the analysis by only including 2 of the 3 groups. 
 
 
 
+
 ```{r load-pkg-data}
-# packages we use in this tutorial and whether they will be installed via 
-# Bioconductor.
-required_pkg <- list(
-  "patchwork" = "CRAN",
-  "devtools" = "CRAN",
-  "dplyr" = "CRAN", 
-  "tibble" = "CRAN",
-  "purrr" = "CRAN",
-  "ggplot2" = "CRAN",
-  "knitr" = "CRAN",
-  "tidySummarizedExperiment" = "BIOC",
-  "ANCOMBC" = "BIOC",
-  "DESeq2" = "BIOC",
-  "mia" = "BIOC"
-)
-
-
-# install required packages
-for (pkg in names(required_pkg)) {
-  if (required_pkg[[pkg]] == "BIOC" & !pkg %in% installed.packages()) {
-    BiocManager::install(pkg)
-  } else if (required_pkg[[pkg]] == "CRAN" & !pkg %in% installed.packages()) {
-    install.packages(pkg, dependencies = TRUE)
-  } 
-  library(pkg, character.only = TRUE)
-}
+library(mia)
+library(patchwork)
+library(tidySummarizedExperiment)
+library(ANCOMBC)
+library(ALDEx2)
+library(Maaslin2)
+library(knitr)
+library(tidyverse)
 
 # we use the dmn_se dataset and restrict it to 
 # obese vs lean for easy illustration
 data(dmn_se)
 tse <- dmn_se
 tse <- tse[ ,colData(tse)$pheno != "Overwt"]
-d <- as.data.frame(colData(tse))
+colData(tse)$pheno <- fct_drop(colData(tse)$pheno, "Overwt")
 # how many observations do we have per group?
-count(d, pheno) %>% kable()
+count(as.data.frame(colData(tse)), pheno) %>% kable()
 ```
 
+### Prevalence Filtering 
 
-
-
-### Wilcoxon test
-
-A Wilcoxon test estimates difference between two groups. It is a
-non-parametric alternative to a t-test. As multiple non-independent tests will
-be performed, we will need to adjust the p-values for multiple testing. Below
-code shows how to do both steps:
+Before we jump to our analyses, we may want to perform prevalence filtering.
+Nearing et al. (2021) found that applying a 10% threshold for the prevalence of
+the taxa generally resulted in more robust results. Some tools have builtin
+arguments for that. By applying the threshold to our input data, we can make
+sure it is applied for all tools. Below we show how to do this in `mia`:
 
 ```{r}
-# for the Wilcoxon test, we will need CLR transformed abundances
-tse <- transformCounts(tse, method = "clr", pseudocount = 1)
-
-# format data so that we can perform the wilcoxon tests using map 
-x <- "pheno"
-daa <- assay(tse, "clr") %>% 
-          t() %>%
-          data.frame() %>%
-          rownames_to_column("Sample_ID") %>%
-          add_column(x = colData(tse)[[x]])
-# select all genera that we perform the test on
-genera <- select(daa, -Sample_ID, -x) %>% colnames()
-# the map function is very similar to a "for loop". Here, for each genus in
-# the vector "genera", perform the actions in {} while genus is a place holder 
-# for each genus. Because we chose map_dfr, results will be binded rowwise into 
-# a dataframe.
-wilcoxon_p <- map_dfr(genera, function(genus) {
-  form <- as.formula(glue::glue("{genus} ~ x"))
-  p <- wilcox.test(form, data = daa)$p.value
-  tibble(genus = genus, p = p)
-})
-
-# add adjusted p values to the dataframe 
-wilcoxon_p$p_adjusted <- p.adjust(wilcoxon_p$p, method = "fdr")
-# check the number of differentially abundant taxa between groups
-ggplot(wilcoxon_p, aes(p_adjusted)) +
-  geom_histogram()
+tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 0.1)
 ```
 
+### ALDEx2
 
+In this section, we will show how to perform a simple ALDEx2 analysis. If you
+would choose to pick a single method, this method could be recommended to use.
+According to the developers experience, it tends to identify the common
+features identified by other methods. This statement is in line with a recent
+independent evaluation by Nearing et al. (2021).  Please also have a look at
+the more extensive [vignette](https://bioconductor.org/packages/release/bioc/vignettes/ALDEx2/inst/doc/ALDEx2_vignette.html) 
+that covers this flexible tool in more depth. ALDEx2 estimates technical
+variation within each sample per taxon by utilizing the Dirichlet distribution.
+It furthermore applies the centered-log-ratio transformation (or closely
+related log-ratio transforms). Depending on the experimental setup, it will
+perform a two sample Welch's T-test and Wilcoxon-test or a one-way ANOVA and
+Kruskal-Wallis-test. For more complex study designs, there is a possibility to 
+utilize the `glm` functionality within ALDEx2. The Benjamini-Hochberg procedure
+is applied in any case to correct for multiple testing. Below we show a simple
+example that illustrates the workflow.
 
-
-### DESeq2
-Our second analysis method is DESeq2. DESeq2 utilizes the negative binomial
-distribution to detect differences in read counts between groups. It performs a
-data normalization automatically that accounts for differences between library
-sizes. It will also automatically output adjusted p-values. More information
-about this method can be found, e.g., from Harvard Chan Bioinformatic Core's
-tutorial [Introduction to DGE -
-ARCHIVED](https://hbctraining.github.io/DGE_workshop/lessons/04_DGE_DESeq2_analysis.html)
- 
-Here is the R code corresponding to the DESeq2 analysis:
 
 ```{r}
+# Generate Monte Carlo samples of the Dirichlet distribution for each sample.
+# Convert each instance using the centred log-ratio transform.
+# This is the input for all further analyses.
+x <- aldex.clr(
+  reads = assay(tse),
+  conds = colData(tse)$pheno, 
+  # 128 recommened for ttest, 1000 for rigorous effect size calculation
+  mc.samples = 128, 
+  denom = "all",
+  verbose = FALSE
+)
+# calculates expected values of the Welch's t-test and Wilcoxon rank test on
+# the data returned by aldex.clr
+x_tt <- aldex.ttest(
+  x, 
+  paired.test = FALSE, 
+  verbose = FALSE)
+# determines the median clr abundance of the feature in all samples and in
+# groups, the median difference between the two groups, the median variation
+# within each group and the effect size, which is the median of the ratio
+# of the between group difference and the larger of the variance within groups
+x_effect <- aldex.effect(x, CI = TRUE, verbose = FALSE)
+# combine all outputs 
+aldex_out <- data.frame(x_tt, x_effect)
+```
 
-# Creates DESeq2 object from the data. . 
-ds2 <- DESeqDataSet(tse, ~pheno)
-# perform DESeq2 analysis 
-dds <- DESeq(ds2)
-# Gets the results from the object
-res <- results(dds)
+Now, we can create a so called Bland-Altman or MA plot (left). It shows the
+association between the relative abundance and the magnitude of the difference
+per sample. Next to that, we can also create a plot that shows the dispersion
+on the x-axis instead of log-ratio abundance. Red dots represent genera that are
+differentially abundant ($q \leq 0.1$) between the 2 groups. Black points are
+rare taxa and grey ones are abundant taxa.
 
-# Creates a data frame from results
-df <- as.data.frame(res)
+```{r}
+par(mfrow = c(1, 2))
+  aldex.plot(
+    aldex_out, 
+    type = "MA", 
+    test = "welch", 
+    xlab = "Log-ratio abundance",
+    ylab = "Difference",
+    cutoff = 0.05
+  )
+  aldex.plot(
+    aldex_out, 
+    type = "MW", 
+    test = "welch",
+    xlab = "Dispersion",
+    ylab = "Difference",
+    cutoff = 0.05
+  )
+```
 
-# Adds taxon column that includes names of taxa
-df$taxon <- rownames(df)
+The evaluation as differential abundant in above plots is based on the
+corrected pvalue. According to the ALDEx2 developers, the safest approach is to
+identify those features where the 95% CI of the
+effect size does not cross 0. As we can see in below table, this is not the
+case for any of the identified 
+genera (see overlap column, which indicates the proportion of overlap). Also,
+the authors recommend an effect 
+size cutoff of 1 rather than only interpreting the pvalue. Again, this is not 
+the case for any feature.
 
-# check the number of differentially abundant taxa between groups
-ggplot(df, aes(padj)) +
-  geom_histogram()
-# order the rows of the results dataframe in decreasing order based on the
-# column "log2FoldChange" and secondly based on the column "padj" in ascending
-# order, then show the top 6 only.
-arrange(df, desc(log2FoldChange), padj) %>%
-  head() %>%
+
+```{r}
+rownames_to_column(aldex_out, "genus") %>%
+  filter(wi.eBH <= 0.05)  %>% # here we chose the wilcoxon output rather than tt
+  select(genus, we.eBH, wi.eBH, effect, overlap) %>%
   kable()
 ```
+
+
 
 ### ANCOM-BC
 
@@ -218,7 +228,7 @@ out = ancombc(
   phyloseq = pseq, 
   formula = "pheno", 
   p_adj_method = "fdr", 
-  zero_cut = 0.90, 
+  zero_cut = 1, # no prev filtering necessary anymore 
   lib_cut = 0, 
   group = "pheno", 
   struc_zero = TRUE, 
@@ -249,70 +259,105 @@ kable(head(res$diff_abn))
 
 
 
+### MaAsLin2 
+
+Lastly, we will illustrate how to use MaAsLin2, which is the next generation of
+MaAsLin. As it is based on generalized linear models, it is flexible for different study designs and covariate
+structures. The official package tutorial can be found [here](https://github.com/biobakery/biobakery/wiki/maaslin2). 
+
+```{r}
+# maaslin expects features as columns and samples as rows 
+# for both the asv/otu table as well as meta data 
+asv <- t(assay(tse))
+meta_data <- data.frame(colData(tse))
+# you can specifiy different GLMs/normalizations/transforms. We used similar
+# settings as in Nearing et al. (2021) here:
+fit_data <- Maaslin2(
+  asv,
+  meta_data,
+  output = "DAA example",
+  transform = "AST",
+  fixed_effects = "pheno",
+  # random_effects = c(...), # you can also fit MLM by specifying random effects
+  # specifying a ref is especially important if you have more than 2 levels
+  reference = "pheno,Lean",  
+  normalization = "TSS",
+  standardize = FALSE,
+  min_prevalence = 0 # prev filterin already done
+)
+# which genera are identified as differentially abundant? (leave out "head" to
+# see all)
+kable(head(filter(fit_data$results, qval <= 0.05)))
+# A folder will be created that is called like the above specified output.
+# It contains also figures to visualize the difference between genera 
+# for the significant ones.
+```
+
+
+
 ### Comparison of the methods
 
 When we compare the methods in the context of a research question, we could
 look at e.g. at whether they agree based on the applied decision criterion
-(e.g. adjusted p value < 0.05).  That is what we illustrate here. First let us
-print how many taxa were identified by each method to begin:
+(e.g. adjusted p value < 0.05). That is what we illustrate here. First we will 
+look at how many taxa were identified by each method to begin with. In the next
+step we will look at the intersection of identified taxa. To achieve that, we
+first create a dataframe that summarises the decision criterion for each method
+and shows a score from 0 to 3 indicating how many methods agreed on a particular
+taxon.
+
 
 
 ```{r}
-# how many taxa are significant for wilcoxon test
-sum(wilcoxon_p$p_adjusted < 0.05, na.rm = TRUE)
-# DESeq2 
-sum(df$padj<0.05, na.rm = TRUE)
-# and ANCOM-BC
-sum(out$res$diff_abn$phenoObese)
-```
-
-
-
-In the next step we will look at the intersection of identified taxa. Here we
-encountered a common issue that we want to warn you about regarding the names
-of taxa.  R might change these names, e.g. if you generate a dataframe while
-the given names are not suitable to be column names. This happened here with
-`Escherichia/Shigella`, which was changed to `Escherichia.Shigella`
-automatically by R in the Wilcoxon test section. That caused some of the `NA`
-values where we expected p values (DESeq2 and Wilcoxon output) or boolean
-values (ANCOMBC output). Make sure to always inspect why you do not get the
-output you would have expected. Since `Escherichia/Shigella` was FALSE
-(adjusted p > 0.05) for all methods, I could easily work around this below by
-setting the `NA` to FALSE.
-
-
-```{r}
-# create a dataframe that indicates for each genus and method if it was DA
 summ <- full_join(
-  rownames_to_column(df, "genus"),
-  rownames_to_column(out$res$diff_abn, "genus"),
-  by = "genus") %>%
-  full_join(wilcoxon_p, by = "genus") %>%
-  # rename according to which padj value belong to which method
-  select(genus, wilcoxon = p_adjusted, deseq2 = padj, ancombc = phenoObese) %>%
-  # apply decision criterion of padj <= 0.05; address issue based on naming 
-  # error (see description above)
+    rownames_to_column(aldex_out, "genus") %>%
+      select(genus, aldex2 = wi.eBH),
+    rownames_to_column(out$res$diff_abn, "genus") %>%
+      select(genus, ancombc = phenoObese),
+    by = "genus") %>%
+  full_join(
+    select(fit_data$results, genus = feature, maaslin2 = qval), 
+    by = "genus") %>%
   mutate(
-    across(c(deseq2, wilcoxon), function(x) x <= 0.05),
-    across(c(deseq2, wilcoxon, ancombc), function(x) ifelse(is.na(x), FALSE, x)),
-    score = rowSums(across(c(deseq2, ancombc, wilcoxon)))
+    across(c(aldex2, maaslin2), ~ .x <= 0.05),
+    # the following line would be necessary without prevalence filtering 
+    # as some methods output NA
+    #across(-genus, function(x) ifelse(is.na(x), FALSE, x)),
+    score = rowSums(across(c(aldex2, ancombc, maaslin2)))
   )
 
+# This is how it looks like:
+head(kable(summ))
+```
+
+Now we can answer our questions:
+
+```{r}
+# how many genera were identified by each method?
+summarise(summ, across(where(is.logical), sum)) %>%
+  kable()
 # which genera are identified by all methods?
 filter(summ, score == 3) %>% kable()
 ```
 
-We see that while each method at least identified 14 genera as differentially
-abundant, they only agree on 5 genera. Lets plot those 5 genera:
+We see that while each method identified at least 8 genera as differentially
+abundant. Interestingly, ALDEx2 identified only 8 genera. Thus, all of those
+were identified by both of the other methods. We could plot the data for any
+method or for those taxa that were identified by all methods:
+
 
 
 ```{r}
+plot_data <- data.frame(t(assay(tse)))
+plot_data$pheno <- colData(tse)$pheno
 # create a plot for each genus where the score is indicated in the title
 plots <- pmap(select(summ, genus, score), function(genus, score) {
-  ggplot(daa, aes_string("x", genus)) +
-  geom_boxplot() +
-  ggtitle(glue::glue("Robustness score {score}")) +
-  theme_bw()
+  ggplot(plot_data, aes_string("pheno", genus)) +
+    geom_boxplot(aes(fill = pheno), outlier.shape = NA) +
+    geom_jitter(width = 0.2, alpha = 0.5) +
+    ggtitle(glue::glue("Robustness score {score}")) +
+    theme_bw() +
+    theme(legend.position = "none")
 })
 
 # now we can show only those genera that have at least score 3 (or 2 or 1)
@@ -324,18 +369,21 @@ robust_plots[[1]] +
   robust_plots[[2]] + 
   robust_plots[[3]] + 
   robust_plots[[4]] +
-  robust_plots[[5]]  
+  robust_plots[[5]] +
+  robust_plots[[6]] +
+  robust_plots[[7]] +
+  robust_plots[[8]] +
+  plot_layout(nrow = 2)
 # or if we have most trust in any specific method we can show genera that 
 # are differentially abundant according to that method and then look in the
-# title how many methods also identified it:
-ancombc_plots <- plots[summ$ancombc]
-# we only show the first 6 here 
+# title how many methods also identified it (we only show first 6 here):
+ancombc_plots <- plots[summ$ancombc] 
 ancombc_plots[[1]] + 
   ancombc_plots[[2]] + 
   ancombc_plots[[3]] + 
   ancombc_plots[[4]] +
   ancombc_plots[[5]] +
-  ancombc_plots[[6]]
+  ancombc_plots[[6]] 
 ```
 
 
@@ -344,12 +392,12 @@ ancombc_plots[[1]] +
 
 To perform causal inference, it is crucial that the method is able to include
 covariates in the model. This is not possible with e.g. the Wilcoxon test.
-Other methods such as both ANCOM methods, DESeq2, MaAsLin2 and others allow
-this. Below we show how to include a covariate in ANCOM-BC. See e.g.
-[here](https://hbctraining.github.io/DGE_workshop/lessons/04_DGE_DESeq2_analysis.html) on how to do the same for DESeq2. 
+Other methods such as both ANCOM methods, ALDEx2, DESeq2, MaAsLin2 and others
+allow this. Below we show how to include a covariate in ANCOM-BC.
 It is very similar for all the methods that allow this. Since in this dataset
 there are no covariates, I first simulate a new variable and add it to the TSE
 object.
+
 
 ```{r}
 # to join new data to existing colData we need to put rownames as a column 
@@ -390,6 +438,12 @@ kable(head(out_cov$res$diff_abn))
 In the next section of this book chapter we cover methods that can also take
 into account the phylogenetic information of bacterial taxa to perform 
 group-wise associations.
+
+
+
+
+
+
 
 
 
