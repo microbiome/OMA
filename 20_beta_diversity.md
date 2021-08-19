@@ -498,7 +498,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2743
+## [1] 0.2703
 ```
 
 In this case, the community composition is not significantly different

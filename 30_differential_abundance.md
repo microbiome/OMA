@@ -36,9 +36,9 @@ document.addEventListener("click", function (event) {
 </style>
 
 
-## Introduction to differential abundance analysis (DAA)
+## Introduction to differential abundance analysis
 
-*What is DAA and why do we do it?*
+*What is differential abundance analysis (DAA) and why do we do it?*
 
 In this section we will work with one of the 
 [openly available datasets](https://microbiome.github.io/mia/reference/mia-datasets.html) in mia to illustrate how to perform differential abundance
@@ -122,6 +122,12 @@ count(as.data.frame(colData(tse)), pheno) %>% kable()
 |:-----|---:|
 |Lean  |  61|
 |Obese | 193|
+
+```r
+# set a seed because some tools can randomly vary and then produce 
+# different results:
+set.seed(1)
+```
 
 ### Prevalence Filtering 
 
@@ -236,14 +242,15 @@ rownames_to_column(aldex_out, "genus") %>%
 
 |genus                 | we.eBH| wi.eBH|  effect| overlap|
 |:---------------------|------:|------:|-------:|-------:|
-|Alistipes             | 0.0017| 0.0001| -0.3919|  0.2930|
-|Barnesiella           | 0.0402| 0.0071| -0.3370|  0.3406|
-|Catenibacterium       | 0.0334| 0.0420|  0.2537|  0.3805|
-|Lactobacillus         | 0.0235| 0.0153|  0.3040|  0.3584|
-|Megasphaera           | 0.0001| 0.0002|  0.5334|  0.2761|
-|Oscillibacter         | 0.0005| 0.0015| -0.3646|  0.3291|
-|Parabacteroides       | 0.0544| 0.0139| -0.2888|  0.3590|
-|Phascolarctobacterium | 0.0329| 0.0084| -0.3338|  0.3470|
+|Alistipes             | 0.0009| 0.0001| -0.3823|  0.2979|
+|Barnesiella           | 0.0442| 0.0066| -0.3229|  0.3489|
+|Catenibacterium       | 0.0266| 0.0330|  0.2713|  0.3718|
+|Lactobacillus         | 0.0282| 0.0183|  0.2983|  0.3537|
+|Megasphaera           | 0.0000| 0.0001|  0.5249|  0.2758|
+|Oscillibacter         | 0.0004| 0.0014| -0.3681|  0.3291|
+|Parabacteroides       | 0.0541| 0.0133| -0.2832|  0.3509|
+|Phascolarctobacterium | 0.0238| 0.0077| -0.3491|  0.3404|
+|Uknown                | 0.0786| 0.0439| -0.2474|  0.3852|
 
 
 
@@ -358,228 +365,6 @@ fit_data <- Maaslin2(
 )
 ```
 
-```
-## [1] "Creating output folder"
-## [1] "Creating output figures folder"
-## 2021-08-19 14:43:50 INFO::Writing function arguments to log file
-## 2021-08-19 14:43:50 INFO::Verifying options selected are valid
-## 2021-08-19 14:43:50 INFO::Determining format of input files
-## 2021-08-19 14:43:50 INFO::Input format is data samples as rows and metadata samples as rows
-## 2021-08-19 14:43:50 INFO::Formula for fixed effects: expr ~  pheno
-## 2021-08-19 14:43:50 INFO::Filter data based on min abundance and min prevalence
-## 2021-08-19 14:43:50 INFO::Total samples in data: 254
-## 2021-08-19 14:43:50 INFO::Min samples required with min abundance for a feature not to be filtered: 0.000000
-## 2021-08-19 14:43:50 INFO::Total filtered features: 0
-## 2021-08-19 14:43:50 INFO::Filtered feature names from abundance and prevalence filtering:
-## 2021-08-19 14:43:50 INFO::Total filtered features with variance filtering: 0
-## 2021-08-19 14:43:50 INFO::Filtered feature names from variance filtering:
-## 2021-08-19 14:43:50 INFO::Running selected normalization method: TSS
-## 2021-08-19 14:43:50 INFO::Bypass z-score application to metadata
-## 2021-08-19 14:43:50 INFO::Running selected transform method: AST
-## 2021-08-19 14:43:50 INFO::Running selected analysis method: LM
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 1, Acetanaerobacterium
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 2, Acetivibrio
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 3, Acidaminococcus
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 4, Akkermansia
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 5, Alistipes
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 6, Allisonella
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 7, Anaerostipes
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 8, Anaerotruncus
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 9, Asaccharobacter
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 10, Bacteroides
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 11, Barnesiella
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 12, Bifidobacterium
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 13, Butyricicoccus
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 14, Butyricimonas
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 15, Catenibacterium
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 16, Clostridium
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 17, Collinsella
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 18, Coprobacillus
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 19, Coprococcus
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 20, Desulfovibrio
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 21, Dialister
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 22, Dorea
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 23, Eggerthella
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 24, Eubacterium
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 25, Faecalibacterium
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 26, Gordonibacter
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 27, Hespellia
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 28, Holdemania
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 29, Lachnobacterium
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 30, Lactobacillus
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 31, Lactococcus
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 32, Lactonifactor
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 33, Marvinbryantia
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 34, Megasphaera
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 35, Odoribacter
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 36, Oribacterium
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 37, Oscillibacter
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 38, Parabacteroides
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 39, Paraprevotella
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 40, Parasutterella
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 41, Phascolarctobacterium
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 42, Prevotella
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 43, Pseudobutyrivibrio
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 44, Roseburia
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 45, Ruminococcus
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 46, Slackia
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 47, Sporacetigenium
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 48, Sporobacter
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 49, Streptococcus
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 50, Subdoligranulum
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 51, Sutterella
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 52, Tepidibacter
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 53, Turicibacter
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 54, Uknown
-## 2021-08-19 14:43:50 INFO::Fitting model to feature number 55, Veillonella
-## 2021-08-19 14:43:50 INFO::Counting total values for each feature
-## 2021-08-19 14:43:50 INFO::Writing residuals to file DAA example/residuals.rds
-## 2021-08-19 14:43:50 INFO::Writing fitted values to file DAA example/fitted.rds
-## 2021-08-19 14:43:50 INFO::Writing all results to file (ordered by increasing q-values): DAA example/all_results.tsv
-## 2021-08-19 14:43:50 INFO::Writing the significant results (those which are less than or equal to the threshold of 0.250000 ) to file (ordered by increasing q-values): DAA example/significant_results.tsv
-## 2021-08-19 14:43:50 INFO::Writing heatmap of significant results to file: DAA example/heatmap.pdf
-## [1] "There is not enough metadata in the associations to create a heatmap plot. Please review the associations in text output file."
-## 2021-08-19 14:43:50 INFO::Writing association plots (one for each significant association) to output folder: DAA example
-## 2021-08-19 14:43:50 INFO::Plotting associations from most to least significant, grouped by metadata
-## 2021-08-19 14:43:50 INFO::Plotting data for metadata number 1, pheno
-## 2021-08-19 14:43:50 INFO::Creating boxplot for categorical data, pheno vs Megasphaera
-```
-
-```
-## 2021-08-19 14:43:50 INFO::Creating boxplot for categorical data, pheno vs Barnesiella
-```
-
-```
-## 2021-08-19 14:43:50 INFO::Creating boxplot for categorical data, pheno vs Parabacteroides
-```
-
-```
-## 2021-08-19 14:43:51 INFO::Creating boxplot for categorical data, pheno vs Phascolarctobacterium
-```
-
-```
-## 2021-08-19 14:43:51 INFO::Creating boxplot for categorical data, pheno vs Alistipes
-```
-
-```
-## 2021-08-19 14:43:51 INFO::Creating boxplot for categorical data, pheno vs Desulfovibrio
-```
-
-```
-## 2021-08-19 14:43:51 INFO::Creating boxplot for categorical data, pheno vs Holdemania
-```
-
-```
-## 2021-08-19 14:43:51 INFO::Creating boxplot for categorical data, pheno vs Acidaminococcus
-```
-
-```
-## 2021-08-19 14:43:51 INFO::Creating boxplot for categorical data, pheno vs Lactobacillus
-```
-
-```
-## 2021-08-19 14:43:51 INFO::Creating boxplot for categorical data, pheno vs Oscillibacter
-```
-
-```
-## 2021-08-19 14:43:51 INFO::Creating boxplot for categorical data, pheno vs Dorea
-```
-
-```
-## 2021-08-19 14:43:51 INFO::Creating boxplot for categorical data, pheno vs Acetanaerobacterium
-```
-
-```
-## 2021-08-19 14:43:51 INFO::Creating boxplot for categorical data, pheno vs Catenibacterium
-```
-
-```
-## 2021-08-19 14:43:52 INFO::Creating boxplot for categorical data, pheno vs Dialister
-```
-
-```
-## 2021-08-19 14:43:52 INFO::Creating boxplot for categorical data, pheno vs Turicibacter
-```
-
-```
-## 2021-08-19 14:43:52 INFO::Creating boxplot for categorical data, pheno vs Veillonella
-```
-
-```
-## 2021-08-19 14:43:52 INFO::Creating boxplot for categorical data, pheno vs Bifidobacterium
-```
-
-```
-## 2021-08-19 14:43:52 INFO::Creating boxplot for categorical data, pheno vs Coprobacillus
-```
-
-```
-## 2021-08-19 14:43:52 INFO::Creating boxplot for categorical data, pheno vs Clostridium
-```
-
-```
-## 2021-08-19 14:43:52 INFO::Creating boxplot for categorical data, pheno vs Eggerthella
-```
-
-```
-## 2021-08-19 14:43:52 INFO::Creating boxplot for categorical data, pheno vs Allisonella
-```
-
-```
-## 2021-08-19 14:43:52 INFO::Creating boxplot for categorical data, pheno vs Lachnobacterium
-```
-
-```
-## 2021-08-19 14:43:52 INFO::Creating boxplot for categorical data, pheno vs Roseburia
-```
-
-```
-## 2021-08-19 14:43:53 INFO::Creating boxplot for categorical data, pheno vs Collinsella
-```
-
-```
-## 2021-08-19 14:43:53 INFO::Creating boxplot for categorical data, pheno vs Eubacterium
-```
-
-```
-## 2021-08-19 14:43:53 INFO::Creating boxplot for categorical data, pheno vs Lactonifactor
-```
-
-```
-## 2021-08-19 14:43:53 INFO::Creating boxplot for categorical data, pheno vs Ruminococcus
-```
-
-```
-## 2021-08-19 14:43:53 INFO::Creating boxplot for categorical data, pheno vs Gordonibacter
-```
-
-```
-## 2021-08-19 14:43:53 INFO::Creating boxplot for categorical data, pheno vs Prevotella
-```
-
-```
-## 2021-08-19 14:43:53 INFO::Creating boxplot for categorical data, pheno vs Streptococcus
-```
-
-```
-## 2021-08-19 14:43:53 INFO::Creating boxplot for categorical data, pheno vs Asaccharobacter
-```
-
-```
-## 2021-08-19 14:43:53 INFO::Creating boxplot for categorical data, pheno vs Paraprevotella
-```
-
-```
-## 2021-08-19 14:43:53 INFO::Creating boxplot for categorical data, pheno vs Sporobacter
-```
-
-```
-## 2021-08-19 14:43:54 INFO::Creating boxplot for categorical data, pheno vs Odoribacter
-```
-
-```
-## 2021-08-19 14:43:54 INFO::Creating boxplot for categorical data, pheno vs Sutterella
-```
 
 ```r
 # which genera are identified as differentially abundant? (leave out "head" to
@@ -603,7 +388,6 @@ kable(head(filter(fit_data$results, qval <= 0.05)))
 # It contains also figures to visualize the difference between genera 
 # for the significant ones.
 ```
-
 
 
 ### Comparison of the methods
@@ -639,17 +423,19 @@ summ <- full_join(
   )
 
 # This is how it looks like:
-head(kable(summ))
+kable(head(summ))
 ```
 
-```
-## [1] "|genus                 |aldex2 |ancombc |maaslin2 | score|"
-## [2] "|:---------------------|:------|:-------|:--------|-----:|"
-## [3] "|Acetanaerobacterium   |FALSE  |TRUE    |TRUE     |     2|"
-## [4] "|Acetivibrio           |FALSE  |FALSE   |FALSE    |     0|"
-## [5] "|Acidaminococcus       |FALSE  |TRUE    |TRUE     |     2|"
-## [6] "|Akkermansia           |FALSE  |FALSE   |FALSE    |     0|"
-```
+
+
+|genus               |aldex2 |ancombc |maaslin2 | score|
+|:-------------------|:------|:-------|:--------|-----:|
+|Acetanaerobacterium |FALSE  |TRUE    |TRUE     |     2|
+|Acetivibrio         |FALSE  |FALSE   |FALSE    |     0|
+|Acidaminococcus     |FALSE  |TRUE    |TRUE     |     2|
+|Akkermansia         |FALSE  |FALSE   |FALSE    |     0|
+|Alistipes           |TRUE   |TRUE    |TRUE     |     3|
+|Allisonella         |FALSE  |FALSE   |FALSE    |     0|
 
 Now we can answer our questions:
 
@@ -664,7 +450,7 @@ summarise(summ, across(where(is.logical), sum)) %>%
 
 | aldex2| ancombc| maaslin2|
 |------:|-------:|--------:|
-|      8|      22|       16|
+|      9|      22|       16|
 
 ```r
 # which genera are identified by all methods?
@@ -684,10 +470,10 @@ filter(summ, score == 3) %>% kable()
 |Parabacteroides       |TRUE   |TRUE    |TRUE     |     3|
 |Phascolarctobacterium |TRUE   |TRUE    |TRUE     |     3|
 
-We see that while each method identified at least 8 genera as differentially
-abundant. Interestingly, ALDEx2 identified only 8 genera. Thus, all of those
-were identified by both of the other methods. We could plot the data for any
-method or for those taxa that were identified by all methods:
+We see that each method identified at least 9 genera as differentially
+abundant. Eight of those that were identified by ALDEx2,
+were also identified by both of the other methods. We could plot the data for 
+any method or for those taxa that were identified by all methods:
 
 
 
@@ -710,6 +496,7 @@ robust_plots <- plots[summ$score == 3]
 
 
 # to display this nicely in the book we use patchwork here:
+# (we show first 8)
 robust_plots[[1]] + 
   robust_plots[[2]] + 
   robust_plots[[3]] + 
@@ -721,7 +508,7 @@ robust_plots[[1]] +
   plot_layout(nrow = 2)
 ```
 
-<img src="30_differential_abundance_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+<img src="30_differential_abundance_files/figure-html/unnamed-chunk-11-1.png" width="672" />
 
 ```r
 # or if we have most trust in any specific method we can show genera that 
@@ -736,7 +523,7 @@ ancombc_plots[[1]] +
   ancombc_plots[[6]] 
 ```
 
-<img src="30_differential_abundance_files/figure-html/unnamed-chunk-10-2.png" width="672" />
+<img src="30_differential_abundance_files/figure-html/unnamed-chunk-11-2.png" width="672" />
 
 
 
@@ -912,7 +699,7 @@ names_covariates(priors) <- rownames(X)
 fido::plot(priors, pars="Lambda") + ggplot2::xlim(c(-5, 5))
 ```
 
-<img src="30_differential_abundance_files/figure-html/unnamed-chunk-19-1.png" width="672" />
+<img src="30_differential_abundance_files/figure-html/unnamed-chunk-20-1.png" width="672" />
 
 Estimating the posterior by including the data at `Y`.
 Note: Some computational failures could occur (see [discussion](https://github-wiki-see.page/m/jsilve24/fido/wiki/Frequently-Asked-Questions))
@@ -932,7 +719,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.9977
+## Proportions of Observations within 95% Credible Interval: 0.9981
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
@@ -942,7 +729,7 @@ names_categories(posterior) <- rownames(Y)
 fido::plot(posterior,par="Lambda",focus.cov=rownames(X)[2:4])
 ```
 
-<img src="30_differential_abundance_files/figure-html/unnamed-chunk-22-1.png" width="672" />
+<img src="30_differential_abundance_files/figure-html/unnamed-chunk-23-1.png" width="672" />
 
 Seemingly the covariate "Age_Years" does not have effect on the model as "Delivery_Mode" would,
 and "Sex" to some extent. Let's take a closer look at the two latter ones:
@@ -952,7 +739,7 @@ and "Sex" to some extent. Let's take a closer look at the two latter ones:
 fido::plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
 ```
 
-<img src="30_differential_abundance_files/figure-html/unnamed-chunk-23-1.png" width="672" />
+<img src="30_differential_abundance_files/figure-html/unnamed-chunk-24-1.png" width="672" />
 
 ## Session Info {-}
 
