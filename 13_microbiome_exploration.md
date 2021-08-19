@@ -302,7 +302,7 @@ other attached packages:
  [1] microbiomeDataSets_1.1.1       MultiAssayExperiment_1.19.5   
  [3] miaViz_1.1.4                   ggraph_2.0.5                  
  [5] scater_1.21.3                  ggplot2_3.3.5                 
- [7] scuttle_1.3.1                  mia_1.1.9                     
+ [7] scuttle_1.3.1                  mia_1.1.10                    
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
 [11] XVector_0.33.0                 SingleCellExperiment_1.15.1   
 [13] SummarizedExperiment_1.23.1    Biobase_2.53.0                

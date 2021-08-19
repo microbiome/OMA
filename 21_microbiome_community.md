@@ -277,7 +277,7 @@ attached base packages:
 other attached packages:
  [1] dendextend_1.15.1              pheatmap_1.0.12               
  [3] miaViz_1.1.4                   ggraph_2.0.5                  
- [5] ggplot2_3.3.5                  mia_1.1.9                     
+ [5] ggplot2_3.3.5                  mia_1.1.10                    
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
  [9] XVector_0.33.0                 SingleCellExperiment_1.15.1   
 [11] SummarizedExperiment_1.23.1    Biobase_2.53.0                

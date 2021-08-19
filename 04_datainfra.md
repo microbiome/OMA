@@ -864,7 +864,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] phyloseq_1.37.0                mia_1.1.9                     
+ [1] phyloseq_1.37.0                mia_1.1.10                    
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
  [5] XVector_0.33.0                 SingleCellExperiment_1.15.1   
  [7] SummarizedExperiment_1.23.1    Biobase_2.53.0                
