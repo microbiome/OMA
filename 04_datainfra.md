@@ -763,21 +763,22 @@ molten_se
 
 ```
 ## # A tibble: 499,616 × 17
-##    FeatureID SampleID counts Kingdom Phylum   Class   Order Family Genus Species
-##    <fct>     <fct>     <dbl> <chr>   <chr>    <chr>   <chr> <chr>  <chr> <chr>  
-##  1 549322    CL3           0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
-##  2 549322    CC1           0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
-##  3 549322    SV1           0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
-##  4 549322    M31Fcsw       0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
-##  5 549322    M11Fcsw       0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
-##  6 549322    M31Plmr       0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
-##  7 549322    M11Plmr       0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
-##  8 549322    F21Plmr       0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
-##  9 549322    M31Tong       0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
-## 10 549322    M11Tong       0 Archaea Crenarc… Thermo… <NA>  <NA>   <NA>  <NA>   
-## # … with 499,606 more rows, and 7 more variables: X.SampleID <fct>,
-## #   Primer <fct>, Final_Barcode <fct>, Barcode_truncated_plus_T <fct>,
-## #   Barcode_full_length <fct>, SampleType <fct>, Description <fct>
+##    FeatureID SampleID relabundance Kingdom Phylum    Class    Order Family Genus
+##    <fct>     <fct>           <dbl> <chr>   <chr>     <chr>    <chr> <chr>  <chr>
+##  1 549322    CL3                 0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  2 549322    CC1                 0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  3 549322    SV1                 0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  4 549322    M31Fcsw             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  5 549322    M11Fcsw             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  6 549322    M31Plmr             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  7 549322    M11Plmr             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  8 549322    F21Plmr             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+##  9 549322    M31Tong             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+## 10 549322    M11Tong             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
+## # … with 499,606 more rows, and 8 more variables: Species <chr>,
+## #   X.SampleID <fct>, Primer <fct>, Final_Barcode <fct>,
+## #   Barcode_truncated_plus_T <fct>, Barcode_full_length <fct>,
+## #   SampleType <fct>, Description <fct>
 ```
 
 ## Conclusion
@@ -864,13 +865,13 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] phyloseq_1.37.0                mia_1.1.10                    
+ [1] phyloseq_1.37.0                mia_1.1.11                    
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
  [5] XVector_0.33.0                 SingleCellExperiment_1.15.1   
  [7] SummarizedExperiment_1.23.1    Biobase_2.53.0                
  [9] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
-[11] IRanges_2.27.0                 S4Vectors_0.31.0              
-[13] BiocGenerics_0.39.1            MatrixGenerics_1.5.3          
+[11] IRanges_2.27.2                 S4Vectors_0.31.1              
+[13] BiocGenerics_0.39.2            MatrixGenerics_1.5.3          
 [15] matrixStats_0.60.0             BiocStyle_2.21.3              
 [17] rebook_1.3.0                  
 
@@ -910,7 +911,7 @@ loaded via a namespace (and not attached):
  [65] RSQLite_2.2.7               foreach_1.5.1              
  [67] ScaledMatrix_1.1.0          tidytree_0.3.4             
  [69] permute_0.9-5               filelock_1.0.2             
- [71] BiocParallel_1.27.3         rlang_0.4.11               
+ [71] BiocParallel_1.27.4         rlang_0.4.11               
  [73] pkgconfig_2.0.3             bitops_1.0-7               
  [75] evaluate_0.14               lattice_0.20-44            
  [77] Rhdf5lib_1.15.2             purrr_0.3.4                

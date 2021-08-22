@@ -101,7 +101,7 @@ tse_phylum <- transformSamples(tse_phylum, method = "clr", pseudocount = 1)
 tse_phylum <- transformFeatures(tse_phylum, abund_values = "clr", 
                                 method = "z", name = "clr_z")
 # Melts the assay
-df <- meltAssay(tse_phylum, assay_name = "clr_z")
+df <- meltAssay(tse_phylum, abund_values = "clr_z")
 
 # Determines the scaling of colours
 maxval <- round(max(abs(df$clr_z)))
@@ -277,20 +277,20 @@ attached base packages:
 other attached packages:
  [1] dendextend_1.15.1              pheatmap_1.0.12               
  [3] miaViz_1.1.4                   ggraph_2.0.5                  
- [5] ggplot2_3.3.5                  mia_1.1.10                    
+ [5] ggplot2_3.3.5                  mia_1.1.11                    
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
  [9] XVector_0.33.0                 SingleCellExperiment_1.15.1   
 [11] SummarizedExperiment_1.23.1    Biobase_2.53.0                
 [13] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
-[15] IRanges_2.27.0                 S4Vectors_0.31.0              
-[17] BiocGenerics_0.39.1            MatrixGenerics_1.5.3          
+[15] IRanges_2.27.2                 S4Vectors_0.31.1              
+[17] BiocGenerics_0.39.2            MatrixGenerics_1.5.3          
 [19] matrixStats_0.60.0             ecodist_2.0.7                 
 [21] BiocStyle_2.21.3               rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
   [1] plyr_1.8.6                  igraph_1.2.6               
   [3] lazyeval_0.2.2              splines_4.1.0              
-  [5] BiocParallel_1.27.3         scater_1.21.3              
+  [5] BiocParallel_1.27.4         scater_1.21.3              
   [7] digest_0.6.27               htmltools_0.5.1.1          
   [9] viridis_0.6.1               fansi_0.5.0                
  [11] magrittr_2.0.1              memoise_2.0.0              

@@ -302,13 +302,13 @@ other attached packages:
  [1] microbiomeDataSets_1.1.1       MultiAssayExperiment_1.19.5   
  [3] miaViz_1.1.4                   ggraph_2.0.5                  
  [5] scater_1.21.3                  ggplot2_3.3.5                 
- [7] scuttle_1.3.1                  mia_1.1.10                    
+ [7] scuttle_1.3.1                  mia_1.1.11                    
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
 [11] XVector_0.33.0                 SingleCellExperiment_1.15.1   
 [13] SummarizedExperiment_1.23.1    Biobase_2.53.0                
 [15] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
-[17] IRanges_2.27.0                 S4Vectors_0.31.0              
-[19] BiocGenerics_0.39.1            MatrixGenerics_1.5.3          
+[17] IRanges_2.27.2                 S4Vectors_0.31.1              
+[19] BiocGenerics_0.39.2            MatrixGenerics_1.5.3          
 [21] matrixStats_0.60.0             BiocStyle_2.21.3              
 [23] rebook_1.3.0                  
 
@@ -316,7 +316,7 @@ loaded via a namespace (and not attached):
   [1] AnnotationHub_3.1.5           BiocFileCache_2.1.1          
   [3] plyr_1.8.6                    igraph_1.2.6                 
   [5] lazyeval_0.2.2                splines_4.1.0                
-  [7] BiocParallel_1.27.3           digest_0.6.27                
+  [7] BiocParallel_1.27.4           digest_0.6.27                
   [9] htmltools_0.5.1.1             viridis_0.6.1                
  [11] fansi_0.5.0                   magrittr_2.0.1               
  [13] memoise_2.0.0                 ScaledMatrix_1.1.0           

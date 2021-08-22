@@ -313,19 +313,19 @@ attached base packages:
 other attached packages:
  [1] ggsignif_0.6.2                 scater_1.21.3                 
  [3] ggplot2_3.3.5                  scuttle_1.3.1                 
- [5] mia_1.1.10                     TreeSummarizedExperiment_2.1.4
+ [5] mia_1.1.11                     TreeSummarizedExperiment_2.1.4
  [7] Biostrings_2.61.2              XVector_0.33.0                
  [9] SingleCellExperiment_1.15.1    SummarizedExperiment_1.23.1   
 [11] Biobase_2.53.0                 GenomicRanges_1.45.0          
-[13] GenomeInfoDb_1.29.3            IRanges_2.27.0                
-[15] S4Vectors_0.31.0               BiocGenerics_0.39.1           
+[13] GenomeInfoDb_1.29.3            IRanges_2.27.2                
+[15] S4Vectors_0.31.1               BiocGenerics_0.39.2           
 [17] MatrixGenerics_1.5.3           matrixStats_0.60.0            
 [19] BiocStyle_2.21.3               rebook_1.3.0                  
 
 loaded via a namespace (and not attached):
   [1] readxl_1.3.1                backports_1.2.1            
   [3] plyr_1.8.6                  lazyeval_0.2.2             
-  [5] splines_4.1.0               BiocParallel_1.27.3        
+  [5] splines_4.1.0               BiocParallel_1.27.4        
   [7] digest_0.6.27               htmltools_0.5.1.1          
   [9] viridis_0.6.1               fansi_0.5.0                
  [11] magrittr_2.0.1              memoise_2.0.0              

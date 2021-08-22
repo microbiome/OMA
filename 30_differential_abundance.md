@@ -719,7 +719,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.9981
+## Proportions of Observations within 95% Credible Interval: 0.998
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
@@ -777,13 +777,13 @@ other attached packages:
 [17] truncnorm_1.0-8                NADA_1.6-1.1                  
 [19] survival_3.2-11                MASS_7.3-54                   
 [21] ANCOMBC_1.3.2                  tidySummarizedExperiment_1.3.0
-[23] patchwork_1.1.1                mia_1.1.10                    
+[23] patchwork_1.1.1                mia_1.1.11                    
 [25] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
 [27] XVector_0.33.0                 SingleCellExperiment_1.15.1   
 [29] SummarizedExperiment_1.23.1    Biobase_2.53.0                
 [31] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
-[33] IRanges_2.27.0                 S4Vectors_0.31.0              
-[35] BiocGenerics_0.39.1            MatrixGenerics_1.5.3          
+[33] IRanges_2.27.2                 S4Vectors_0.31.1              
+[35] BiocGenerics_0.39.2            MatrixGenerics_1.5.3          
 [37] matrixStats_0.60.0             BiocStyle_2.21.3              
 [39] rebook_1.3.0                  
 
@@ -862,7 +862,7 @@ loaded via a namespace (and not attached):
 [143] R6_2.5.0                      mime_0.11                    
 [145] pillar_1.6.2                  htmltools_0.5.1.1            
 [147] glue_1.4.2                    fastmap_1.1.0                
-[149] BiocParallel_1.27.3           BiocNeighbors_1.11.0         
+[149] BiocParallel_1.27.4           BiocNeighbors_1.11.0         
 [151] interactiveDisplayBase_1.31.2 codetools_0.2-18             
 [153] pcaPP_1.9-74                  mvtnorm_1.1-2                
 [155] utf8_1.2.2                    lattice_0.20-44              
