@@ -389,7 +389,7 @@ features, but this is not a must have. This means there can be features, which
 are not linked to nodes, and nodes, which are not linked to features. To change
 the links in an existing object, the `changeTree` function is available.
 
-## Data manupulation
+## Data manipulation
 
 Sometimes custom solutions are needed for analyzing the data. `mia` contains a 
 few functions to help in these situations.
@@ -439,21 +439,21 @@ dim(se) ## [1] n°features    n°samples
 
 #### Subset by sample (column-wise)
 
-For the sake of demonstration, here we will extract a subset containing only the samples of human origin (feces, skin or tongue), stored as `SampleType` within `colData(se)`.
+For the sake of demonstration, here we will extract a subset containing only the samples of human origin (feces, skin or tongue), stored as `SampleType` within `colData(se)` and also in `se`.
 
 First, we would like to see all the possible values that `SampleType` can take on and how frequent those are: 
 
 ```{r}
 # inspect possible values for SampleType
-unique(colData(se)$SampleType)
+unique(se$SampleType)
 ```
 ```{r eval = FALSE}
 # show recurrence for each value
-colData(se)$SampleType %>% table()
+se$SampleType %>% table()
 ```
 ```{r echo = FALSE}
 # show recurrence for each value
-colData(se)$SampleType %>% table() %>% kable() %>%
+se$SampleType %>% table() %>% kable() %>%
     kableExtra::kable_styling("striped", latex_options="scale_down") %>% 
     kableExtra::scroll_box(width = "100%")
 ```
@@ -464,7 +464,7 @@ Next, we _logical index_ across the columns of `se` (make sure to leave the firs
 
 ```{r}
 # subset by sample
-se_subset_by_sample <- se[ , colData(se)$SampleType == "Feces" | colData(se)$SampleType == "Skin" | colData(se)$SampleType == "Tongue"]
+se_subset_by_sample <- se[ , se$SampleType %in% c("Feces", "Skin", "Tongue")]
 # show dimensions
 dim(se_subset_by_sample)
 ```
@@ -508,11 +508,11 @@ Depending on your research question, you might need to or need not agglomerate t
 
 Next, we _logical index_ across the rows of `se` (make sure to leave the second index empty to select all columns) and filter for the features that fall in either Actinobacteria or Chlamydiae. For this, we use the information on the samples from the meta data `rowData(se)`.
 
-Because the expression within the brackets has to be logical (whether TRUE or FALSE), the terms separated by the OR operator `|` are enclosed within parentheses. Then, the term after the AND operator `&` filters out all the features that present a NA in place of Phylum.
+The  first term with the `%in%` operator are includes all  the features of interest, whereas the second term after the AND operator `&` filters out all the features that present a NA in place of Phylum.
 
 ```{r}
 # subset by feature
-se_subset_by_feature <- se[(rowData(se)$Phylum == "Actinobacteria" | rowData(se)$Phylum == "Chlamydiae") & !is.na(rowData(se)$Phylum), ]
+se_subset_by_feature <- se[rowData(se)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(se)$Phylum), ]
 # show dimensions
 dim(se_subset_by_feature)
 ```
@@ -528,7 +528,7 @@ When total abundances of certain Phyla are of relevance, the data is initially a
 se_phylum <- se %>% agglomerateByRank(rank = "Phylum")
 
 # subset by feature and get rid of NAs
-se_phylum_subset_by_feature <- se_phylum[(rowData(se_phylum)$Phylum == "Actinobacteria" | rowData(se_phylum)$Phylum == "Chlamydiae") & !is.na(rowData(se_phylum)$Phylum), ]
+se_phylum_subset_by_feature <- se_phylum[rowData(se_phylum)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(se_phylum)$Phylum), ]
 # show dimensions
 dim(se_phylum_subset_by_feature)
 ```
@@ -561,14 +561,14 @@ Finally, we can subset data by sample and feature at once. The resulting subset 
 
 ```{r}
 # subset by sample and feature and get rid of NAs
-se_subset_by_sample_feature <- se[(rowData(se)$Phylum == "Actinobacteria" | rowData(se)$Phylum == "Chlamydiae") & !is.na(rowData(se)$Phylum), colData(se)$SampleType == "Feces" | colData(se)$SampleType == "Skin" | colData(se)$SampleType == "Tongue"]
+se_subset_by_sample_feature <- se[rowData(se)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(se)$Phylum), se$SampleType %in% c("Feces", "Skin", "Tongue")]
 # show dimensions
 dim(se_subset_by_sample_feature)
 ```
 
 **Note**: the dimensions of `se_subset_by_sample_feature` agree with those of the previous subsets (9 columns filtered by sample and 1652 rows filtered by feature).
 
-If a study was to consider and quantify the presence of Actinobacteria as well as Chlamydiae in different sites of the human body, `se_subset_by_sample_feature` might be an ideal subset to start with.
+If a study was to consider and quantify the presence of Actinobacteria as well as Chlamydiae in different sites of the human body, `se_subset_by_sample_feature` might be a suitable subset to start with.
 
 ## Conclusion
 
