@@ -2,8 +2,11 @@
 
 **S4 system**
 
-S4 class system has brought several useful features to the object-oriented programming paradigm within R.
-It has been constantly deployed in R packages, including the [Bioconductor](https://bioconductor.org/) package.
+S4 class system has brought several useful features to the
+object-oriented programming paradigm within R.  It has been constantly
+deployed in R packages, including the
+[Bioconductor](https://bioconductor.org/) package.
+
 
 |   Books:
 
