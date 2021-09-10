@@ -39,16 +39,6 @@ document.addEventListener("click", function (event) {
 ## Loading required package: ecodist
 ```
 
-```
-## Warning in library(package, lib.loc = lib.loc, character.only = TRUE,
-## logical.return = TRUE, : there is no package called 'ecodist'
-```
-
-```
-## Installing package into '/__w/_temp/Library'
-## (as 'lib' is unspecified)
-```
-
 
 ```r
 library(mia)

@@ -35,75 +35,77 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
-The
 [`SummarizedExperiment`](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)
-(`SE`) is a widely used class for analyzing data obtained by common sequencing
-techniques. `SE` is common structure for several Bioconductor packages that are
-used for analyzing RNAseq, ChIp-Seq data. `SE` class is also used in R packages
-for analyzing microarrays, flow cytometry, proteomics, single-cell sequencing
-data and many more. The single-cell analysis is facilitated by
-[SingelCellExperiment
-class](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html)
-(`SCE`), which allows the user to store results of dimensionality reduction and
-alternative experiments. Alternative experiments (`altExps`) can be differently
-processed data within the analysis workflows.
+(`SE`) is a generic and highly optimized container for complex data
+structures. It has become a common choice for analysing various types
+of biomedical profiling data, such as RNAseq, ChIp-Seq, microarrays,
+flow cytometry, proteomics, and single-cell
+sequencing. [`TreeSummarizedExperiment`](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html)
+(`TreeSE`) was developed as an extension to incorporate hierarchical
+information (such as phylogenetic trees and sample hierarchies) and
+reference sequences.
 
-Recently,
-[`TreeSummarizedExperiment`](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html)
-(`TSE`)
-was developed to extend the `SE` and `SCE` class for incorporating hierarchical
-information (including phylogenetic tree) and reference sequences.
-
-The `mia` package implements tools using these classes for analysis of
-microbiome sequencing data.
+In microbiome data science, these containers can be used to link
+taxonomic abundance tables with rich side information on the features
+and samples. Taxonomic abundance data can be obtained by 16S rRNA
+amplicon or metagenomic sequencing, phylogenetic microarrays, or by
+other means.
 
 
-## Installation
 
-Install the development version from GitHub using `remotes` R package.  
+## Package installation
+
+Several R packages are now available providing methods for the
+analysis and manipulation of data sets in such containers. One of
+these is `mia`.
+
+Install the Biocondcuctor development version with:
 
 
 ```r
-# install remotes 
-#install.packages("remotes")
-BiocManager::install("microbiome/mia")
+BiocManager::install("microbiome/mia", version="devel")
 ```
-
-
-### Packages    
-
-1. `mia`    : Microbiome analysis tools   
-2. `miaViz` : Microbiome analysis specific visualization
-
-**See also:**    
-
-[`microbiome`](https://bioconductor.org/packages/devel/bioc/html/microbiome.html)
 
 
 ## Background
 
-The widely used `phyloseq` package and class were around before the [`SummarizedExperiment`](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html) and the derived [`TreeSummarizedExperiment`](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html) class. Many methods for taxonomic profiling data are readily available for the  `phyloseq` class structure. 
+The widely used `phyloseq` package and class were around before the
+[`SummarizedExperiment`](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)
+and the derived
+[`TreeSummarizedExperiment`](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html)
+class. Many methods for taxonomic profiling data are readily available
+for the `phyloseq` class structure.
 
-In order to facilitate the transition, we provide here a short description how `phyloseq` and `*Experiment` classes relate to 
-each other.
+In order to facilitate the transition, we provide here a short
+description how `phyloseq` and `*Experiment` classes relate to each
+other.
 
-`assays`     : This slot is similar to `otu_table` in `phyloseq`. In a `SummarizedExperiment`
-               object multiple assays, raw counts, transformed counts can be stored. See also 
-               [`MultiAssayExperiment`](https://bioconductor.org/packages/release/bioc/html/MultiAssayExperiment.html) for storing data from multiple `experiments` such as RNASeq, Proteomics, etc.       
-`rowData`    : This slot is similar to `tax_table` in `phyloseq` to store taxonomic information.     
-`colData`    : This slot is similar to `sample_data` in `phyloseq` to store information related to samples.    
-`rowTree`    : This slot is similar to `phy_tree` in `phyloseq` to store phylogenetic tree.     
+`assays` : This slot is similar to `otu_table` in `phyloseq`. In a
+               `SummarizedExperiment` object multiple assays, raw
+               counts, transformed counts can be stored. See also
+               [`MultiAssayExperiment`](https://bioconductor.org/packages/release/bioc/html/MultiAssayExperiment.html)
+               for storing data from multiple `experiments` such as
+               RNASeq, Proteomics, etc.  `rowData` : This slot is
+               similar to `tax_table` in `phyloseq` to store taxonomic
+               information.  `colData` : This slot is similar to
+               `sample_data` in `phyloseq` to store information
+               related to samples.  `rowTree` : This slot is similar
+               to `phy_tree` in `phyloseq` to store phylogenetic tree.
 
-In this book, you will come across terms like `FeatureIDs` and `SampleIDs`.   
-`FeatureIDs` : These are basically OTU/ASV ids which are row names in `assays` and `rowData`.    
-`SampleIDs`  : As the name suggests, these are sample ids which are column names in `assays` and row names in `colData`.  
+In this book, you will come across terms like `FeatureIDs` and
+`SampleIDs`.  `FeatureIDs` : These are basically OTU/ASV ids which are
+row names in `assays` and `rowData`.  `SampleIDs` : As the name
+suggests, these are sample ids which are column names in `assays` and
+row names in `colData`.
 
-`FeatureIDs` and `SampleIDs` are used but the technical terms `rownames` and 
-`colnames` are encouraged to be used, since they relate to actual objects we 
-work with.
+`FeatureIDs` and `SampleIDs` are used but the technical terms
+`rownames` and `colnames` are encouraged to be used, since they relate
+to actual objects we work with.
 
-<img src="https://raw.githubusercontent.com/FelixErnst/TreeSummarizedExperiment
-/2293440c6e70ae4d6e978b6fdf2c42fdea7fb36a/vignettes/tse2.png" width="100%"/>
+<img
+src="https://raw.githubusercontent.com/FelixErnst/TreeSummarizedExperiment
+/2293440c6e70ae4d6e978b6fdf2c42fdea7fb36a/vignettes/tse2.png"
+width="100%"/>
 
 **Figure sources:** 
 
@@ -152,6 +154,7 @@ Specific import functions are provided for:
 -   QIIME2 files (see `help(mia::loadFromQIIME2)`)
 -   Mothur files (see `help(mia::loadFromMothur)`)
 
+
 #### Example for importing Biom files
 
 This example shows how Biom files are imported into a `TreeSummarizedExperiment` object. 
@@ -167,6 +170,7 @@ The data set consists of 3 files:
 -   csv file: sample metadata
 -   tree file: phylogenetic tree
 
+
 Store the data in your desired local directory (for instance, _data/_ under the
 working directory), and define source file paths
 
@@ -181,7 +185,7 @@ Now we can load the biom data into a SummarizedExperiment (SE) object.
 
 
 ```r
-library("mia")
+library(mia)
 
 # Imports the data
 se <- loadFromBiom(biom_file_path)
@@ -201,8 +205,9 @@ se
 ## colData names(0):
 ```
 
-The `assays` slot includes a list of abundance tables. The imported abundance table is named as "counts".
-Let us inspect only the first cols and rows.
+The `assays` slot includes a list of abundance tables. The imported
+abundance table is named as "counts".  Let us inspect only the first
+cols and rows.
 
 
 ```r
@@ -246,7 +251,8 @@ head(rowData(se))
 ## 17264724      o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides"
 ```
 
-These taxonomic rank names (column names) are not real rank names. Let’s replace them with real rank names.
+These taxonomic rank names (column names) are not real rank
+names. Let’s replace them with real rank names.
 
 In addition to that, the taxa names include, e.g., '"k__' before the name, so let's
 make them cleaner by removing them. 
@@ -780,7 +786,11 @@ molten_se
 
 ### Subsetting
 
-**Subsetting** data helps to draw the focus of analysis on particular sets of samples and / or features. When dealing with large data sets, the subset of interest can be extracted and investigated separately. This might improve performance and reduce the computational load.
+**Subsetting** data helps to draw the focus of analysis on particular
+  sets of samples and / or features. When dealing with large data
+  sets, the subset of interest can be extracted and investigated
+  separately. This might improve performance and reduce the
+  computational load.
 
 Load:
 
@@ -876,14 +886,20 @@ se$SampleType %>% table()
 </tbody>
 </table></div>
 
-**Note**: after subsetting, expect the number of columns to equal the sum of the recurrences of the samples that you are interested in. For instance, `ncols = Feces + Skin + Tongue = 4 + 3 + 2 = 9`.
+**Note**: after subsetting, expect the number of columns to equal the
+  sum of the recurrences of the samples that you are interested
+  in. For instance, `ncols = Feces + Skin + Tongue = 4 + 3 + 2 = 9`.
 
-Next, we _logical index_ across the columns of `se` (make sure to leave the first index empty to select all rows) and filter for the samples of human origin. For this, we use the information on the samples from the meta data `colData(se)`.
+Next, we _logical index_ across the columns of `se` (make sure to
+leave the first index empty to select all rows) and filter for the
+samples of human origin. For this, we use the information on the
+samples from the meta data `colData(se)`.
 
 
 ```r
 # subset by sample
 se_subset_by_sample <- se[ , se$SampleType %in% c("Feces", "Skin", "Tongue")]
+
 # show dimensions
 dim(se_subset_by_sample)
 ```
@@ -892,7 +908,10 @@ dim(se_subset_by_sample)
 ## [1] 19216     9
 ```
 
-As a sanity check, the new object `se_subset_by_sample` should have the original number of features (rows) and a number of samples (columns) equal to the sum of the samples of interest (in this case 9).
+As a sanity check, the new object `se_subset_by_sample` should have
+the original number of features (rows) and a number of samples
+(columns) equal to the sum of the samples of interest (in this case
+9).
 
 Several characteristics can be used to subset by sample:
 
@@ -904,9 +923,14 @@ Several characteristics can be used to subset by sample:
 
 #### Subset by feature (row-wise)
 
-Similarly, here we will extract a subset containing only the features that belong to the Phyla "Actinobacteria" and "Chlamydiae", stored as `Phylum` within `rowData(se)`. However, subsetting by feature implies a few more obstacles, such as the presence of NA elements and the possible need for agglomeration.
+Similarly, here we will extract a subset containing only the features
+that belong to the Phyla "Actinobacteria" and "Chlamydiae", stored as
+`Phylum` within `rowData(se)`. However, subsetting by feature implies
+a few more obstacles, such as the presence of NA elements and the
+possible need for agglomeration.
 
-As previously, we would first like to see all the possible values that `Phylum` can take on and how frequent those are:
+As previously, we would first like to see all the possible values that
+`Phylum` can take on and how frequent those are:
   
 
 ```r
@@ -1213,20 +1237,35 @@ rowData(se)$Phylum %>% table()
 </tbody>
 </table></div>
 
-**Note**: after subsetting, expect the number of columns to equal the sum of the recurrences of the feature(s) that you are interested in. For instance, `nrows = Actinobacteria + Chlamydiae = 1631 + 21 = 1652`.
+**Note**: after subsetting, expect the number of columns to equal the
+  sum of the recurrences of the feature(s) that you are interested
+  in. For instance, `nrows = Actinobacteria + Chlamydiae = 1631 + 21 =
+  1652`.
 
-Depending on your research question, you might need to or need not agglomerate the data in the first place: if you want to find the abundance of each and every feature that belongs to Actinobacteria and Chlamydiae, agglomeration is not needed; if you want to find the total abundance of all the features that belong to Actinobacteria or Chlamydiae, agglomeration is recommended.
+Depending on your research question, you might need to or need not
+agglomerate the data in the first place: if you want to find the
+abundance of each and every feature that belongs to Actinobacteria and
+Chlamydiae, agglomeration is not needed; if you want to find the total
+abundance of all the features that belong to Actinobacteria or
+Chlamydiae, agglomeration is recommended.
 
-##### Not agglomerated data
+##### Non-agglomerated data
 
-Next, we _logical index_ across the rows of `se` (make sure to leave the second index empty to select all columns) and filter for the features that fall in either Actinobacteria or Chlamydiae. For this, we use the information on the samples from the meta data `rowData(se)`.
+Next, we _logical index_ across the rows of `se` (make sure to leave
+the second index empty to select all columns) and filter for the
+features that fall in either Actinobacteria or Chlamydiae. For this,
+we use the information on the samples from the meta data
+`rowData(se)`.
 
-The  first term with the `%in%` operator are includes all  the features of interest, whereas the second term after the AND operator `&` filters out all the features that present a NA in place of Phylum.
+The first term with the `%in%` operator are includes all the features
+of interest, whereas the second term after the AND operator `&`
+filters out all the features that present a NA in place of Phylum.
 
 
 ```r
 # subset by feature
 se_subset_by_feature <- se[rowData(se)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(se)$Phylum), ]
+
 # show dimensions
 dim(se_subset_by_feature)
 ```
@@ -1248,6 +1287,7 @@ se_phylum <- se %>% agglomerateByRank(rank = "Phylum")
 
 # subset by feature and get rid of NAs
 se_phylum_subset_by_feature <- se_phylum[rowData(se_phylum)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(se_phylum)$Phylum), ]
+
 # show dimensions
 dim(se_phylum_subset_by_feature)
 ```
@@ -1256,9 +1296,10 @@ dim(se_phylum_subset_by_feature)
 ## [1]  2 26
 ```
 
-**Note**: as data was agglomerated, the number of rows equal the number of Phyla used to index (in this case, just 2)
+**Note**: as data was agglomerated, the number of rows equal the
+  number of Phyla used to index (in this case, just 2)
 
-Or alternatively:
+Alternatively:
 
 
 ```r
@@ -1281,16 +1322,20 @@ Fewer characteristics can be used to subset by feature:
 * Taxonomic rank
 * Meta-taxonomic group
 
-For subsetting by Kingdom, agglomeration does not apply, whereas for the other ranks it can be applied if necessary.
+For subsetting by Kingdom, agglomeration does not apply, whereas for
+the other ranks it can be applied if necessary.
 
 #### Subset by sample and feature
 
-Finally, we can subset data by sample and feature at once. The resulting subset contains all the samples of human origin and all the features of Phyla "Actinobacteria" or "Chlamydiae".
+Finally, we can subset data by sample and feature at once. The
+resulting subset contains all the samples of human origin and all the
+features of Phyla "Actinobacteria" or "Chlamydiae".
 
 
 ```r
 # subset by sample and feature and get rid of NAs
 se_subset_by_sample_feature <- se[rowData(se)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(se)$Phylum), se$SampleType %in% c("Feces", "Skin", "Tongue")]
+
 # show dimensions
 dim(se_subset_by_sample_feature)
 ```
@@ -1299,19 +1344,18 @@ dim(se_subset_by_sample_feature)
 ## [1] 1652    9
 ```
 
-**Note**: the dimensions of `se_subset_by_sample_feature` agree with those of the previous subsets (9 columns filtered by sample and 1652 rows filtered by feature).
+**Note**: the dimensions of `se_subset_by_sample_feature` agree with
+  those of the previous subsets (9 columns filtered by sample and 1652
+  rows filtered by feature).
 
-If a study was to consider and quantify the presence of Actinobacteria as well as Chlamydiae in different sites of the human body, `se_subset_by_sample_feature` might be a suitable subset to start with.
+If a study was to consider and quantify the presence of Actinobacteria
+as well as Chlamydiae in different sites of the human body,
+`se_subset_by_sample_feature` might be a suitable subset to start
+with.
 
-## Conclusion
-
-Some wrapping up...
 
 ## Additional Reading
 
-### Lecture slides
-
-Introduction to microbiome data science [lecture slides](https://github.com/microbiome/course_2021_radboud/tree/main/slides).
 
 ### R programming resources
 
@@ -1351,10 +1395,7 @@ RStudio
  * Bioconductor Workflow for Microbiome Data Analysis: from raw reads to community analyses ([Callahan et al. F1000, 2016](https://f1000research.com/articles/5-1492/v2)).
 
 
-
-
 ### Further reading
-
 
 * [Data Analysis and Visualization in R for Ecologists](https://datacarpentry.org/R-ecology-lesson/) by Data Carpentry
 
