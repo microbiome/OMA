@@ -1,5 +1,3 @@
-# (PART) Appendix {-}
-
 # Function Reference {#function-ref}
 
 ## Objects

@@ -1,5 +1,3 @@
-# (PART) Introduction {-}
-
 # Data Infrastructure {#data-introduction}
 
 <script>
@@ -59,6 +57,7 @@ information (including phylogenetic tree) and reference sequences.
 The `mia` package implements tools using these classes for analysis of
 microbiome sequencing data.
 
+
 ## Installation
 
 Install the development version from GitHub using `remotes` R package.  
@@ -67,8 +66,9 @@ Install the development version from GitHub using `remotes` R package.
 ```r
 # install remotes 
 #install.packages("remotes")
-BiocManager::install("FelixErnst/mia")
+BiocManager::install("microbiome/mia")
 ```
+
 
 ### Packages    
 
@@ -82,10 +82,7 @@ BiocManager::install("FelixErnst/mia")
 
 ## Background
 
-The widely used `phyloseq` package and class were around before the [`SummarizedExperiment`](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)  
-and the derived 
-[`TreeSummarizedExperiment`](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html) 
-class. Many methods for taxonomic profiling data are readily available for the  `phyloseq` class structure. 
+The widely used `phyloseq` package and class were around before the [`SummarizedExperiment`](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html) and the derived [`TreeSummarizedExperiment`](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html) class. Many methods for taxonomic profiling data are readily available for the  `phyloseq` class structure. 
 
 In order to facilitate the transition, we provide here a short description how `phyloseq` and `*Experiment` classes relate to 
 each other.
@@ -120,8 +117,8 @@ f1000research.26669.2). F1000Research 9:1246.
 research](https://doi.org/10.7490/
 f1000research.1118447.1) F1000Research 9:1464 (slides).
 
-## Loading experimental microbiome data
 
+## Loading experimental microbiome data
 
 ### Importing data from external files
 
@@ -141,9 +138,9 @@ format. Here, we provide examples for common formats.
 
 
 ```r
-counts <- read.csv(count_file)   # Abundance table (e.g. ASV data; to assay data)
-tax <- read.csv(tax_file)        # Taxonomy table (to rowData)
-samples <- read.csv(sample_file) # Sample data (to colData)
+counts  <- read.csv(count_file)   # Abundance table (e.g. ASV data; to assay data)
+tax     <- read.csv(tax_file)     # Taxonomy table (to rowData)
+samples <- read.csv(sample_file)  # Sample data (to colData)
 se <- SummarizedExperiment(assays = list(counts = counts),
                            colData = samples,
                            rowData = tax)
@@ -157,7 +154,7 @@ Specific import functions are provided for:
 
 #### Example for importing Biom files
 
-This example shows how Biom files are imported into a TreeSummarizedExperiment object. 
+This example shows how Biom files are imported into a `TreeSummarizedExperiment` object. 
 
 The data is from following publication: 
 Tengeler AC _et al._ (2020) [**Gut microbiota from persons with
@@ -184,7 +181,7 @@ Now we can load the biom data into a SummarizedExperiment (SE) object.
 
 
 ```r
-library(mia)
+library("mia")
 
 # Imports the data
 se <- loadFromBiom(biom_file_path)
@@ -740,7 +737,7 @@ features, but this is not a must have. This means there can be features, which
 are not linked to nodes, and nodes, which are not linked to features. To change
 the links in an existing object, the `changeTree` function is available.
 
-## Data conversion
+## Data manipulation
 
 Sometimes custom solutions are needed for analyzing the data. `mia` contains a 
 few functions to help in these situations.
@@ -780,6 +777,531 @@ molten_se
 ## #   Barcode_truncated_plus_T <fct>, Barcode_full_length <fct>,
 ## #   SampleType <fct>, Description <fct>
 ```
+
+### Subsetting
+
+**Subsetting** data helps to draw the focus of analysis on particular sets of samples and / or features. When dealing with large data sets, the subset of interest can be extracted and investigated separately. This might improve performance and reduce the computational load.
+
+Load:
+
+* mia
+* dplyr
+* knitr
+* data `GlobalPatterns`
+
+
+
+Let us store `GlobalPatterns` into `se` and check its original number of features (rows) and samples (columns). **Note**: when subsetting by sample, expect the number of columns to decrease; when subsetting by feature, expect the number of rows to decrease.
+
+
+```r
+# store data into se and check dimensions
+data("GlobalPatterns", package="mia")
+se <- GlobalPatterns
+# show dimensions
+dim(se) ## [1] n°features    n°samples
+```
+
+```
+## [1] 19216    26
+```
+
+#### Subset by sample (column-wise)
+
+For the sake of demonstration, here we will extract a subset containing only the samples of human origin (feces, skin or tongue), stored as `SampleType` within `colData(se)` and also in `se`.
+
+First, we would like to see all the possible values that `SampleType` can take on and how frequent those are: 
+
+
+```r
+# inspect possible values for SampleType
+unique(se$SampleType)
+```
+
+```
+## [1] Soil               Feces              Skin               Tongue            
+## [5] Freshwater         Freshwater (creek) Ocean              Sediment (estuary)
+## [9] Mock              
+## 9 Levels: Feces Freshwater Freshwater (creek) Mock ... Tongue
+```
+
+```r
+# show recurrence for each value
+se$SampleType %>% table()
+```
+<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; "><table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> . </th>
+   <th style="text-align:right;"> Freq </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Feces </td>
+   <td style="text-align:right;"> 4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Freshwater </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Freshwater (creek) </td>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Mock </td>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Ocean </td>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Sediment (estuary) </td>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Skin </td>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Soil </td>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Tongue </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+</tbody>
+</table></div>
+
+**Note**: after subsetting, expect the number of columns to equal the sum of the recurrences of the samples that you are interested in. For instance, `ncols = Feces + Skin + Tongue = 4 + 3 + 2 = 9`.
+
+Next, we _logical index_ across the columns of `se` (make sure to leave the first index empty to select all rows) and filter for the samples of human origin. For this, we use the information on the samples from the meta data `colData(se)`.
+
+
+```r
+# subset by sample
+se_subset_by_sample <- se[ , se$SampleType %in% c("Feces", "Skin", "Tongue")]
+# show dimensions
+dim(se_subset_by_sample)
+```
+
+```
+## [1] 19216     9
+```
+
+As a sanity check, the new object `se_subset_by_sample` should have the original number of features (rows) and a number of samples (columns) equal to the sum of the samples of interest (in this case 9).
+
+Several characteristics can be used to subset by sample:
+
+* origin
+* sampling time
+* sequencing method
+* DNA / RNA barcode
+* cohort
+
+#### Subset by feature (row-wise)
+
+Similarly, here we will extract a subset containing only the features that belong to the Phyla "Actinobacteria" and "Chlamydiae", stored as `Phylum` within `rowData(se)`. However, subsetting by feature implies a few more obstacles, such as the presence of NA elements and the possible need for agglomeration.
+
+As previously, we would first like to see all the possible values that `Phylum` can take on and how frequent those are:
+  
+
+```r
+# inspect possible values for Phylum
+unique(rowData(se)$Phylum)
+```
+
+```
+##  [1] "Crenarchaeota"    "Euryarchaeota"    "Actinobacteria"   "Spirochaetes"    
+##  [5] "MVP-15"           "Proteobacteria"   "SBR1093"          "Fusobacteria"    
+##  [9] "Tenericutes"      "ZB3"              "Cyanobacteria"    "GOUTA4"          
+## [13] "TG3"              "Chlorobi"         "Bacteroidetes"    "Caldithrix"      
+## [17] "KSB1"             "SAR406"           "LCP-89"           "Thermi"          
+## [21] "Gemmatimonadetes" "Fibrobacteres"    "GN06"             "AC1"             
+## [25] "TM6"              "OP8"              "Elusimicrobia"    "NC10"            
+## [29] "SPAM"             NA                 "Acidobacteria"    "CCM11b"          
+## [33] "Nitrospirae"      "NKB19"            "BRC1"             "Hyd24-12"        
+## [37] "WS3"              "PAUC34f"          "GN04"             "GN12"            
+## [41] "Verrucomicrobia"  "Lentisphaerae"    "LD1"              "Chlamydiae"      
+## [45] "OP3"              "Planctomycetes"   "Firmicutes"       "OP9"             
+## [49] "WPS-2"            "Armatimonadetes"  "SC3"              "TM7"             
+## [53] "GN02"             "SM2F11"           "ABY1_OD1"         "ZB2"             
+## [57] "OP11"             "Chloroflexi"      "SC4"              "WS1"             
+## [61] "GAL15"            "AD3"              "WS2"              "Caldiserica"     
+## [65] "Thermotogae"      "Synergistetes"    "SR1"
+```
+
+```r
+# show recurrence for each value
+rowData(se)$Phylum %>% table()
+```
+<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; "><table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> . </th>
+   <th style="text-align:right;"> Freq </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> ABY1_OD1 </td>
+   <td style="text-align:right;"> 7 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> AC1 </td>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Acidobacteria </td>
+   <td style="text-align:right;"> 1021 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Actinobacteria </td>
+   <td style="text-align:right;"> 1631 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> AD3 </td>
+   <td style="text-align:right;"> 9 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Armatimonadetes </td>
+   <td style="text-align:right;"> 61 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Bacteroidetes </td>
+   <td style="text-align:right;"> 2382 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> BRC1 </td>
+   <td style="text-align:right;"> 13 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Caldiserica </td>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Caldithrix </td>
+   <td style="text-align:right;"> 10 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> CCM11b </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Chlamydiae </td>
+   <td style="text-align:right;"> 21 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Chlorobi </td>
+   <td style="text-align:right;"> 64 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Chloroflexi </td>
+   <td style="text-align:right;"> 437 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Crenarchaeota </td>
+   <td style="text-align:right;"> 106 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Cyanobacteria </td>
+   <td style="text-align:right;"> 393 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Elusimicrobia </td>
+   <td style="text-align:right;"> 31 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Euryarchaeota </td>
+   <td style="text-align:right;"> 102 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Fibrobacteres </td>
+   <td style="text-align:right;"> 7 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Firmicutes </td>
+   <td style="text-align:right;"> 4356 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Fusobacteria </td>
+   <td style="text-align:right;"> 37 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> GAL15 </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Gemmatimonadetes </td>
+   <td style="text-align:right;"> 191 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> GN02 </td>
+   <td style="text-align:right;"> 8 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> GN04 </td>
+   <td style="text-align:right;"> 7 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> GN06 </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> GN12 </td>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> GOUTA4 </td>
+   <td style="text-align:right;"> 11 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Hyd24-12 </td>
+   <td style="text-align:right;"> 4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> KSB1 </td>
+   <td style="text-align:right;"> 6 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> LCP-89 </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> LD1 </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Lentisphaerae </td>
+   <td style="text-align:right;"> 21 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> MVP-15 </td>
+   <td style="text-align:right;"> 5 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> NC10 </td>
+   <td style="text-align:right;"> 9 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Nitrospirae </td>
+   <td style="text-align:right;"> 74 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> NKB19 </td>
+   <td style="text-align:right;"> 16 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> OP11 </td>
+   <td style="text-align:right;"> 6 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> OP3 </td>
+   <td style="text-align:right;"> 30 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> OP8 </td>
+   <td style="text-align:right;"> 27 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> OP9 </td>
+   <td style="text-align:right;"> 4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> PAUC34f </td>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Planctomycetes </td>
+   <td style="text-align:right;"> 638 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Proteobacteria </td>
+   <td style="text-align:right;"> 6416 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> SAR406 </td>
+   <td style="text-align:right;"> 21 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> SBR1093 </td>
+   <td style="text-align:right;"> 9 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> SC3 </td>
+   <td style="text-align:right;"> 8 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> SC4 </td>
+   <td style="text-align:right;"> 8 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> SM2F11 </td>
+   <td style="text-align:right;"> 5 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> SPAM </td>
+   <td style="text-align:right;"> 22 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Spirochaetes </td>
+   <td style="text-align:right;"> 124 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> SR1 </td>
+   <td style="text-align:right;"> 5 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Synergistetes </td>
+   <td style="text-align:right;"> 7 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Tenericutes </td>
+   <td style="text-align:right;"> 143 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> TG3 </td>
+   <td style="text-align:right;"> 5 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Thermi </td>
+   <td style="text-align:right;"> 46 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Thermotogae </td>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> TM6 </td>
+   <td style="text-align:right;"> 27 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> TM7 </td>
+   <td style="text-align:right;"> 32 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Verrucomicrobia </td>
+   <td style="text-align:right;"> 470 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> WPS-2 </td>
+   <td style="text-align:right;"> 20 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> WS1 </td>
+   <td style="text-align:right;"> 5 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> WS2 </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> WS3 </td>
+   <td style="text-align:right;"> 70 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> ZB2 </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> ZB3 </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+</tbody>
+</table></div>
+
+**Note**: after subsetting, expect the number of columns to equal the sum of the recurrences of the feature(s) that you are interested in. For instance, `nrows = Actinobacteria + Chlamydiae = 1631 + 21 = 1652`.
+
+Depending on your research question, you might need to or need not agglomerate the data in the first place: if you want to find the abundance of each and every feature that belongs to Actinobacteria and Chlamydiae, agglomeration is not needed; if you want to find the total abundance of all the features that belong to Actinobacteria or Chlamydiae, agglomeration is recommended.
+
+##### Not agglomerated data
+
+Next, we _logical index_ across the rows of `se` (make sure to leave the second index empty to select all columns) and filter for the features that fall in either Actinobacteria or Chlamydiae. For this, we use the information on the samples from the meta data `rowData(se)`.
+
+The  first term with the `%in%` operator are includes all  the features of interest, whereas the second term after the AND operator `&` filters out all the features that present a NA in place of Phylum.
+
+
+```r
+# subset by feature
+se_subset_by_feature <- se[rowData(se)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(se)$Phylum), ]
+# show dimensions
+dim(se_subset_by_feature)
+```
+
+```
+## [1] 1652   26
+```
+
+As a sanity check, the new object `se_subset_by_feature` should have the original number of samples (columns) and a number of features (rows) equal to the sum of the features of interest (in this case 1652).
+
+##### Agglomerated data
+
+When total abundances of certain Phyla are of relevance, the data is initially agglomerated by Phylum. Then, similar steps as in the case of not agglomerated data are followed.
+
+
+```r
+# agglomerate by Phylum
+se_phylum <- se %>% agglomerateByRank(rank = "Phylum")
+
+# subset by feature and get rid of NAs
+se_phylum_subset_by_feature <- se_phylum[rowData(se_phylum)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(se_phylum)$Phylum), ]
+# show dimensions
+dim(se_phylum_subset_by_feature)
+```
+
+```
+## [1]  2 26
+```
+
+**Note**: as data was agglomerated, the number of rows equal the number of Phyla used to index (in this case, just 2)
+
+Or alternatively:
+
+
+```r
+# store features of interest into phyla
+phyla <- c("Phylum:Actinobacteria", "Phylum:Chlamydiae")
+# subset by feature
+se_phylum_subset_by_feature <- se_phylum[phyla, ]
+# show dimensions
+dim(se_subset_by_feature)
+```
+
+```
+## [1] 1652   26
+```
+
+The code above returns the not agglomerated version of the data.
+
+Fewer characteristics can be used to subset by feature:
+
+* Taxonomic rank
+* Meta-taxonomic group
+
+For subsetting by Kingdom, agglomeration does not apply, whereas for the other ranks it can be applied if necessary.
+
+#### Subset by sample and feature
+
+Finally, we can subset data by sample and feature at once. The resulting subset contains all the samples of human origin and all the features of Phyla "Actinobacteria" or "Chlamydiae".
+
+
+```r
+# subset by sample and feature and get rid of NAs
+se_subset_by_sample_feature <- se[rowData(se)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(se)$Phylum), se$SampleType %in% c("Feces", "Skin", "Tongue")]
+# show dimensions
+dim(se_subset_by_sample_feature)
+```
+
+```
+## [1] 1652    9
+```
+
+**Note**: the dimensions of `se_subset_by_sample_feature` agree with those of the previous subsets (9 columns filtered by sample and 1652 rows filtered by feature).
+
+If a study was to consider and quantify the presence of Actinobacteria as well as Chlamydiae in different sites of the human body, `se_subset_by_sample_feature` might be a suitable subset to start with.
 
 ## Conclusion
 
@@ -845,9 +1367,9 @@ RStudio
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.1.0 (2021-05-18)
+R version 4.1.1 (2021-08-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.2 LTS
+Running under: Ubuntu 20.04.3 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -865,72 +1387,76 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] phyloseq_1.37.0                mia_1.1.11                    
- [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
- [5] XVector_0.33.0                 SingleCellExperiment_1.15.1   
- [7] SummarizedExperiment_1.23.1    Biobase_2.53.0                
- [9] GenomicRanges_1.45.0           GenomeInfoDb_1.29.3           
-[11] IRanges_2.27.2                 S4Vectors_0.31.1              
-[13] BiocGenerics_0.39.2            MatrixGenerics_1.5.3          
-[15] matrixStats_0.60.0             BiocStyle_2.21.3              
-[17] rebook_1.3.0                  
+ [1] knitr_1.33                     dplyr_1.0.7                   
+ [3] phyloseq_1.37.0                mia_1.1.14                    
+ [5] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
+ [7] XVector_0.33.0                 SingleCellExperiment_1.15.2   
+ [9] SummarizedExperiment_1.23.4    Biobase_2.53.0                
+[11] GenomicRanges_1.45.0           GenomeInfoDb_1.29.8           
+[13] IRanges_2.27.2                 S4Vectors_0.31.3              
+[15] BiocGenerics_0.39.2            MatrixGenerics_1.5.4          
+[17] matrixStats_0.60.1-9001        BiocStyle_2.21.3              
+[19] rebook_1.3.1                  
 
 loaded via a namespace (and not attached):
-  [1] ggbeeswarm_0.6.0            colorspace_2.0-2           
-  [3] ellipsis_0.3.2              scuttle_1.3.1              
-  [5] BiocNeighbors_1.11.0        ggrepel_0.9.1              
-  [7] bit64_4.0.5                 fansi_0.5.0                
-  [9] decontam_1.13.0             splines_4.1.0              
- [11] codetools_0.2-18            sparseMatrixStats_1.5.2    
- [13] cachem_1.0.5                knitr_1.33                 
- [15] scater_1.21.3               ade4_1.7-17                
- [17] jsonlite_1.7.2              cluster_2.1.2              
- [19] graph_1.71.2                BiocManager_1.30.16        
- [21] compiler_4.1.0              assertthat_0.2.1           
- [23] Matrix_1.3-4                fastmap_1.1.0              
- [25] lazyeval_0.2.2              cli_3.0.1                  
- [27] BiocSingular_1.9.1          htmltools_0.5.1.1          
- [29] tools_4.1.0                 igraph_1.2.6               
- [31] rsvd_1.0.5                  gtable_0.3.0               
- [33] glue_1.4.2                  GenomeInfoDbData_1.2.6     
- [35] reshape2_1.4.4              dplyr_1.0.7                
- [37] Rcpp_1.0.7                  jquerylib_0.1.4            
- [39] rhdf5filters_1.5.0          vctrs_0.3.8                
- [41] multtest_2.49.0             ape_5.5                    
- [43] nlme_3.1-152                DECIPHER_2.21.0            
- [45] iterators_1.0.13            DelayedMatrixStats_1.15.2  
- [47] xfun_0.25                   stringr_1.4.0              
- [49] beachmat_2.9.1              lifecycle_1.0.0            
- [51] irlba_2.3.3                 XML_3.99-0.6               
- [53] zlibbioc_1.39.0             MASS_7.3-54                
- [55] scales_1.1.1                biomformat_1.21.0          
- [57] parallel_4.1.0              rhdf5_2.37.0               
- [59] yaml_2.2.1                  memoise_2.0.0              
- [61] gridExtra_2.3               ggplot2_3.3.5              
- [63] sass_0.4.0                  stringi_1.7.3              
- [65] RSQLite_2.2.7               foreach_1.5.1              
- [67] ScaledMatrix_1.1.0          tidytree_0.3.4             
- [69] permute_0.9-5               filelock_1.0.2             
- [71] BiocParallel_1.27.4         rlang_0.4.11               
- [73] pkgconfig_2.0.3             bitops_1.0-7               
- [75] evaluate_0.14               lattice_0.20-44            
- [77] Rhdf5lib_1.15.2             purrr_0.3.4                
- [79] treeio_1.17.2               CodeDepends_0.6.5          
- [81] bit_4.0.4                   tidyselect_1.1.1           
- [83] plyr_1.8.6                  magrittr_2.0.1             
- [85] bookdown_0.22               R6_2.5.0                   
- [87] generics_0.1.0              DelayedArray_0.19.1        
- [89] DBI_1.1.1                   mgcv_1.8-36                
- [91] pillar_1.6.2                survival_3.2-11            
- [93] RCurl_1.98-1.3              tibble_3.1.3               
- [95] dir.expiry_1.1.0            crayon_1.4.1               
- [97] utf8_1.2.2                  rmarkdown_2.10             
- [99] viridis_0.6.1               grid_4.1.0                 
-[101] data.table_1.14.0           blob_1.2.2                 
-[103] vegan_2.5-7                 digest_0.6.27              
-[105] tidyr_1.1.3                 munsell_0.5.0              
-[107] DirichletMultinomial_1.35.0 beeswarm_0.4.0             
-[109] viridisLite_0.4.0           vipor_0.4.5                
-[111] bslib_0.2.5.1              
+  [1] systemfonts_1.0.2           plyr_1.8.6                 
+  [3] igraph_1.2.6                lazyeval_0.2.2             
+  [5] splines_4.1.1               BiocParallel_1.27.6        
+  [7] ggplot2_3.3.5               scater_1.21.3              
+  [9] digest_0.6.27               foreach_1.5.1              
+ [11] htmltools_0.5.2             viridis_0.6.1              
+ [13] fansi_0.5.0                 magrittr_2.0.1             
+ [15] memoise_2.0.0               ScaledMatrix_1.1.0         
+ [17] cluster_2.1.2               DECIPHER_2.21.0            
+ [19] svglite_2.0.0               colorspace_2.0-2           
+ [21] blob_1.2.2                  rvest_1.0.1                
+ [23] ggrepel_0.9.1               xfun_0.25                  
+ [25] crayon_1.4.1                RCurl_1.98-1.4             
+ [27] jsonlite_1.7.2              graph_1.71.2               
+ [29] survival_3.2-13             iterators_1.0.13           
+ [31] ape_5.5                     glue_1.4.2                 
+ [33] kableExtra_1.3.4            gtable_0.3.0               
+ [35] zlibbioc_1.39.0             webshot_0.5.2              
+ [37] DelayedArray_0.19.2         BiocSingular_1.9.1         
+ [39] Rhdf5lib_1.15.2             scales_1.1.1               
+ [41] DBI_1.1.1                   Rcpp_1.0.7                 
+ [43] viridisLite_0.4.0           decontam_1.13.0            
+ [45] tidytree_0.3.5              bit_4.0.4                  
+ [47] rsvd_1.0.5                  httr_1.4.2                 
+ [49] dir.expiry_1.1.0            ellipsis_0.3.2             
+ [51] pkgconfig_2.0.3             XML_3.99-0.7               
+ [53] scuttle_1.3.1               CodeDepends_0.6.5          
+ [55] sass_0.4.0                  utf8_1.2.2                 
+ [57] tidyselect_1.1.1            rlang_0.4.11               
+ [59] reshape2_1.4.4              munsell_0.5.0              
+ [61] tools_4.1.1                 cachem_1.0.6               
+ [63] cli_3.0.1                   DirichletMultinomial_1.35.0
+ [65] generics_0.1.0              RSQLite_2.2.8              
+ [67] ade4_1.7-17                 evaluate_0.14              
+ [69] biomformat_1.21.0           stringr_1.4.0              
+ [71] fastmap_1.1.0               yaml_2.2.1                 
+ [73] bit64_4.0.5                 purrr_0.3.4                
+ [75] nlme_3.1-153                sparseMatrixStats_1.5.3    
+ [77] xml2_1.3.2                  compiler_4.1.1             
+ [79] rstudioapi_0.13             beeswarm_0.4.0             
+ [81] filelock_1.0.2              treeio_1.17.2              
+ [83] tibble_3.1.4                bslib_0.3.0                
+ [85] stringi_1.7.4               highr_0.9                  
+ [87] lattice_0.20-44             Matrix_1.3-4               
+ [89] vegan_2.5-7                 permute_0.9-5              
+ [91] multtest_2.49.0             vctrs_0.3.8                
+ [93] pillar_1.6.2                lifecycle_1.0.0            
+ [95] rhdf5filters_1.5.0          BiocManager_1.30.16        
+ [97] jquerylib_0.1.4             BiocNeighbors_1.11.0       
+ [99] data.table_1.14.0           bitops_1.0-7               
+[101] irlba_2.3.3                 R6_2.5.1                   
+[103] bookdown_0.24               gridExtra_2.3              
+[105] vipor_0.4.5                 codetools_0.2-18           
+[107] MASS_7.3-54                 assertthat_0.2.1           
+[109] rhdf5_2.37.3                GenomeInfoDbData_1.2.6     
+[111] mgcv_1.8-36                 parallel_4.1.1             
+[113] grid_4.1.1                  beachmat_2.9.1             
+[115] tidyr_1.1.3                 rmarkdown_2.10             
+[117] DelayedMatrixStats_1.15.4   ggbeeswarm_0.6.0           
 ```
 </div>

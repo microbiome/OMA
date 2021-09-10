@@ -49,7 +49,6 @@ and join miaverse community through the following channels:
  - Project homepage at [microbiome.github.io](microbiome.github.io)
 
 
-
 ## Developers and contributors
 
 The following individuals have contributed to the development of

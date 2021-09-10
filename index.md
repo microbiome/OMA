@@ -11,28 +11,42 @@ github-repo: microbiome/OMA
 
 
 ---
-date: "**Authors:** Leo Lahti [aut], Sudarshan Shetty [aut], Felix GM Ernst [aut, cre], Henrik Eckermann [ctb], Chouaib Benchraka [ctb], Tuomas Borman [ctb], Shigdel Rajesh [ctb], Chandler Ross [ctb]<br/>
+date: "**Authors:** Leo Lahti [aut], Sudarshan Shetty [aut], Felix GM Ernst [aut, cre]<br/>
   **Version:** 0.98.9<br/>
-  **Modified:** 2021-04-10<br/>
-  **Compiled:** 2021-08-22<br/>
-  **Environment:** R version 4.1.0 (2021-05-18), Bioconductor 3.14<br/>
+  **Modified:** 2021-09-10<br/>
+  **Compiled:** 2021-09-10<br/>
+  **Environment:** R version 4.1.1 (2021-08-10), Bioconductor 3.14<br/>
   **License:** CC BY-NC-SA 3.0 US<br/>
   **Copyright:** <br/>
   **Source:** https://github.com/microbiome/OMA"
 url: "https://github.com/microbiome/OMA"
 ---
 
-# Preface {-}
+# Welcome {-}
 
-This website is a book on microbiome analysis in the Bioconductor universe and
-is showing common principles and workflows of performing microbiome analysis.
 
-The book was borne out of necessity, while updating tools for microbiome
-analysis to work with common classes of the Bioconductor project handling 
-count data of various sorts. It is heavily influenced by similar resources, such
-as the [Orchestrating Single-Cell Analysis with Bioconductor](https://www.nature.com/articles/s41592-019-0654-x)
-book, [phyloseq tutorials](http://joey711.github.io/phyloseq/tutorials-index)
-and [microbiome tutorials](https://microbiome.github.io/tutorials/).
+<a href="https://bioconductor.org"><img src="https://github.com/Bioconductor/BiocStickers/raw/master/Bioconductor/Bioconductor-serial.gif" width="200" alt="Bioconductor Sticker" align="right" style="margin: 0 1em 0 1em" /></a>
+
+
+You are reading the online book, **Orchestrating Microbiome Analysis
+with Bioconductor** [@OMA], where we go through common strategies and
+workflows in microbiome data science. The book shows through concrete
+examples how you can use some of the latest advances in the
+R/Bioconductor ecosystem for microbiome data manipulation, analysis,
+and reproducible reporting. The book was borne out of necessity, while
+updating microbiome analysis tools to work with Bioconductor classes
+that provide support for multi-modal data collections. At the same
+time, the techniques are more generic and often applicable in other
+contexts as well.
+
+This work is heavily influenced by similar resources, such as the
+Orchestrating Single-Cell Analysis with Bioconductor [@Amezquita2020natmeth],
+[phyloseq tutorials](http://joey711.github.io/phyloseq/tutorials-index) [@Callahan2016] and
+[microbiome tutorials](https://microbiome.github.io/tutorials/) [@Shetty2019].
+This book extends the previous efforts of such related work, teaching the grammar
+of Bioconductor workflows and thus supporting the
+adoption of general data analysis skills in the analysis of large,
+hierarchical multi-modal data collections.
 
 We focus on microbiome analysis tools, new, updated and established methods.
 In the *Introduction* section, we show how to work with the key data 
@@ -40,12 +54,29 @@ infrastructure `TreeSummarizedExperiment` and related classes, how this
 framework relates to other infrastructure and how to load microbiome analysis 
 data to work with in the context of this framework.
 
+This book is organized into three parts. We start by introducing the
+material and link to further resources for learning R and
+Bioconductor. We will describe the microbiome data containers, the
+TreeSummarizedExperiment class.
+
 The second section, *Focus Topics*, is all about the steps for analyzing
 microbiome data, beginning with the most common steps and progressing to
 more specialized methods in subsequent sections.
 
-The third section, *Appendix*, contains the rest of things we didn't find 
-another place for, yet.
+The third part, *Workflows*, provides case studies for the
+various datasets used throughout the book.
+
+The final section, *Appendix*, provides links to further resources.
+
+
+--------------
+
+The book is written in RMarkdown with the bookdown R package. OMA is a
+collaborative effort. Several individuals who have contributed
+methods, workflows and improvements are acknowledged in the Appendix.
+This online resource is **free to use** with the
+[Creative Commons Attribution-NonCommercial 3.0](https://creativecommons.org/licenses/by-nc/3.0/us/) License.
+
 
 
 
