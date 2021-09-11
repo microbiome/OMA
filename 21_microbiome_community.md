@@ -290,7 +290,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] plyr_1.8.6                  igraph_1.2.6               
   [3] lazyeval_0.2.2              splines_4.1.1              
-  [5] BiocParallel_1.27.6         scater_1.21.3              
+  [5] BiocParallel_1.27.7         scater_1.21.3              
   [7] digest_0.6.27               yulab.utils_0.0.2          
   [9] htmltools_0.5.2             viridis_0.6.1              
  [11] fansi_0.5.0                 magrittr_2.0.1             
@@ -322,7 +322,7 @@ loaded via a namespace (and not attached):
  [63] RSQLite_2.2.8               evaluate_0.14              
  [65] stringr_1.4.0               fastmap_1.1.0              
  [67] yaml_2.2.1                  ggtree_3.1.4               
- [69] knitr_1.33                  bit64_4.0.5                
+ [69] knitr_1.34                  bit64_4.0.5                
  [71] tidygraph_1.2.0             purrr_0.3.4                
  [73] nlme_3.1-153                sparseMatrixStats_1.5.3    
  [75] aplot_0.1.0                 compiler_4.1.1             

@@ -134,31 +134,31 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7690 BIC: 8076 AIC: 7948 
+## Laplace: 7748 BIC: 8135 AIC: 8008 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7741 BIC: 8282 AIC: 8112 
+## Laplace: 7751 BIC: 8274 AIC: 8103 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7871 BIC: 8614 AIC: 8401 
+## Laplace: 7846 BIC: 8534 AIC: 8320 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7938 BIC: 8804 AIC: 8548 
+## Laplace: NaN BIC: NaN AIC: NaN 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: NaN BIC: NaN AIC: NaN
+## Laplace: 8065 BIC: 9086 AIC: 8787
 ```
 
 
@@ -224,7 +224,7 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 ```
 ##       pi theta
 ## 1 0.5385 20.60
-## 2 0.4615 15.29
+## 2 0.4615 15.32
 ```
 
 
@@ -238,12 +238,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.076e-17
-## CC1     1.000e+00 3.889e-22
-## SV1     1.000e+00 2.033e-12
-## M31Fcsw 7.328e-26 1.000e+00
-## M11Fcsw 1.063e-16 1.000e+00
-## M31Plmr 9.979e-14 1.000e+00
+## CL3     1.000e+00 4.484e-17
+## CC1     1.000e+00 3.356e-22
+## SV1     1.000e+00 1.775e-12
+## M31Fcsw 6.899e-26 1.000e+00
+## M11Fcsw 1.026e-16 1.000e+00
+## M31Plmr 1.024e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -255,12 +255,12 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 
 ```
 ##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354697
-## Phylum:Euryarchaeota  0.2314 0.1468655
-## Phylum:Actinobacteria 1.2106 1.0600295
-## Phylum:Spirochaetes   0.2141 0.1318450
-## Phylum:MVP-15         0.0299 0.0007687
-## Phylum:Proteobacteria 6.8419 1.8152376
+## Phylum:Crenarchaeota  0.3043 0.1354068
+## Phylum:Euryarchaeota  0.2314 0.1468954
+## Phylum:Actinobacteria 1.2105 1.0580508
+## Phylum:Spirochaetes   0.2141 0.1318090
+## Phylum:MVP-15         0.0299 0.0007659
+## Phylum:Proteobacteria 6.8419 1.8113824
 ```
 Get the assignment probabilities
 

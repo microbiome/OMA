@@ -567,7 +567,7 @@ loaded via a namespace (and not attached):
  [7] bit64_4.0.5                 fansi_0.5.0                
  [9] decontam_1.13.0             splines_4.1.1              
 [11] codetools_0.2-18            sparseMatrixStats_1.5.3    
-[13] cachem_1.0.6                knitr_1.33                 
+[13] cachem_1.0.6                knitr_1.34                 
 [15] scater_1.21.3               jsonlite_1.7.2             
 [17] cluster_2.1.2               graph_1.71.2               
 [19] BiocManager_1.30.16         compiler_4.1.1             
@@ -591,7 +591,7 @@ loaded via a namespace (and not attached):
 [55] sass_0.4.0                  stringi_1.7.4              
 [57] RSQLite_2.2.8               ScaledMatrix_1.1.0         
 [59] tidytree_0.3.5              permute_0.9-5              
-[61] filelock_1.0.2              BiocParallel_1.27.6        
+[61] filelock_1.0.2              BiocParallel_1.27.7        
 [63] rlang_0.4.11                pkgconfig_2.0.3            
 [65] bitops_1.0-7                evaluate_0.14              
 [67] lattice_0.20-44             purrr_0.3.4                

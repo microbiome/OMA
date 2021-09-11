@@ -772,7 +772,7 @@ other attached packages:
  [7] purrr_0.3.4                    readr_2.0.1                   
  [9] tidyr_1.1.3                    tibble_3.1.4                  
 [11] ggplot2_3.3.5                  tidyverse_1.3.1               
-[13] knitr_1.33                     Maaslin2_1.7.2                
+[13] knitr_1.34                     Maaslin2_1.7.2                
 [15] ALDEx2_1.25.1                  zCompositions_1.3.4           
 [17] truncnorm_1.0-8                NADA_1.6-1.1                  
 [19] survival_3.2-13                MASS_7.3-54                   
@@ -795,7 +795,7 @@ loaded via a namespace (and not attached):
   [9] generics_0.1.0                ScaledMatrix_1.1.0           
  [11] microbiome_1.15.0             RSQLite_2.2.8                
  [13] bit_4.0.4                     tzdb_0.1.2                   
- [15] httpuv_1.6.2                  xml2_1.3.2                   
+ [15] httpuv_1.6.3                  xml2_1.3.2                   
  [17] lubridate_1.7.10              assertthat_0.2.1             
  [19] DirichletMultinomial_1.35.0   viridis_0.6.1                
  [21] xfun_0.25                     hms_1.1.0                    
@@ -862,7 +862,7 @@ loaded via a namespace (and not attached):
 [143] R6_2.5.1                      mime_0.11                    
 [145] pillar_1.6.2                  htmltools_0.5.2              
 [147] glue_1.4.2                    fastmap_1.1.0                
-[149] BiocParallel_1.27.6           BiocNeighbors_1.11.0         
+[149] BiocParallel_1.27.7           BiocNeighbors_1.11.0         
 [151] interactiveDisplayBase_1.31.2 codetools_0.2-18             
 [153] pcaPP_1.9-74                  mvtnorm_1.1-2                
 [155] utf8_1.2.2                    lattice_0.20-44              

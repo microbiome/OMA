@@ -498,7 +498,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2727
+## [1] 0.2754
 ```
 
 In this case, the community composition is not significantly different
@@ -616,7 +616,7 @@ loaded via a namespace (and not attached):
   [1] readxl_1.3.1                  backports_1.2.1              
   [3] AnnotationHub_3.1.5           BiocFileCache_2.1.1          
   [5] plyr_1.8.6                    lazyeval_0.2.2               
-  [7] splines_4.1.1                 BiocParallel_1.27.6          
+  [7] splines_4.1.1                 BiocParallel_1.27.7          
   [9] digest_0.6.27                 htmltools_0.5.2              
  [11] viridis_0.6.1                 fansi_0.5.0                  
  [13] magrittr_2.0.1                memoise_2.0.0                
@@ -652,14 +652,14 @@ loaded via a namespace (and not attached):
  [73] RSQLite_2.2.8                 broom_0.7.9                  
  [75] evaluate_0.14                 stringr_1.4.0                
  [77] fastmap_1.1.0                 yaml_2.2.1                   
- [79] knitr_1.33                    bit64_4.0.5                  
+ [79] knitr_1.34                    bit64_4.0.5                  
  [81] zip_2.2.0                     purrr_0.3.4                  
  [83] KEGGREST_1.33.0               nlme_3.1-153                 
  [85] sparseMatrixStats_1.5.3       mime_0.11                    
  [87] compiler_4.1.1                png_0.1-7                    
  [89] interactiveDisplayBase_1.31.2 beeswarm_0.4.0               
  [91] filelock_1.0.2                curl_4.3.2                   
- [93] ggsignif_0.6.2                treeio_1.17.2                
+ [93] ggsignif_0.6.3                treeio_1.17.2                
  [95] tibble_3.1.4                  bslib_0.3.0                  
  [97] stringi_1.7.4                 highr_0.9                    
  [99] forcats_0.5.1                 Matrix_1.3-4                 
@@ -668,7 +668,7 @@ loaded via a namespace (and not attached):
 [105] jquerylib_0.1.4               BiocNeighbors_1.11.0         
 [107] data.table_1.14.0             cowplot_1.1.1                
 [109] bitops_1.0-7                  irlba_2.3.3                  
-[111] httpuv_1.6.2                  R6_2.5.1                     
+[111] httpuv_1.6.3                  R6_2.5.1                     
 [113] promises_1.2.0.1              bookdown_0.24                
 [115] gridExtra_2.3                 rio_0.5.27                   
 [117] vipor_0.4.5                   codetools_0.2-18             

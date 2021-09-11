@@ -316,7 +316,7 @@ loaded via a namespace (and not attached):
   [1] AnnotationHub_3.1.5           BiocFileCache_2.1.1          
   [3] plyr_1.8.6                    igraph_1.2.6                 
   [5] lazyeval_0.2.2                splines_4.1.1                
-  [7] BiocParallel_1.27.6           digest_0.6.27                
+  [7] BiocParallel_1.27.7           digest_0.6.27                
   [9] yulab.utils_0.0.2             htmltools_0.5.2              
  [11] viridis_0.6.1                 fansi_0.5.0                  
  [13] magrittr_2.0.1                memoise_2.0.0                
@@ -350,7 +350,7 @@ loaded via a namespace (and not attached):
  [69] generics_0.1.0                RSQLite_2.2.8                
  [71] evaluate_0.14                 stringr_1.4.0                
  [73] fastmap_1.1.0                 yaml_2.2.1                   
- [75] ggtree_3.1.4                  knitr_1.33                   
+ [75] ggtree_3.1.4                  knitr_1.34                   
  [77] bit64_4.0.5                   tidygraph_1.2.0              
  [79] purrr_0.3.4                   KEGGREST_1.33.0              
  [81] nlme_3.1-153                  sparseMatrixStats_1.5.3      
@@ -367,7 +367,7 @@ loaded via a namespace (and not attached):
 [103] lifecycle_1.0.0               BiocManager_1.30.16          
 [105] jquerylib_0.1.4               BiocNeighbors_1.11.0         
 [107] cowplot_1.1.1                 bitops_1.0-7                 
-[109] irlba_2.3.3                   httpuv_1.6.2                 
+[109] irlba_2.3.3                   httpuv_1.6.3                 
 [111] patchwork_1.1.1               R6_2.5.1                     
 [113] promises_1.2.0.1              bookdown_0.24                
 [115] gridExtra_2.3                 vipor_0.4.5                  

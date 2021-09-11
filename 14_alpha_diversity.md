@@ -311,7 +311,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] ggsignif_0.6.2                 scater_1.21.3                 
+ [1] ggsignif_0.6.3                 scater_1.21.3                 
  [3] ggplot2_3.3.5                  scuttle_1.3.1                 
  [5] mia_1.1.14                     TreeSummarizedExperiment_2.1.4
  [7] Biostrings_2.61.2              XVector_0.33.0                
@@ -325,7 +325,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] readxl_1.3.1                backports_1.2.1            
   [3] plyr_1.8.6                  lazyeval_0.2.2             
-  [5] splines_4.1.1               BiocParallel_1.27.6        
+  [5] splines_4.1.1               BiocParallel_1.27.7        
   [7] digest_0.6.27               htmltools_0.5.2            
   [9] viridis_0.6.1               fansi_0.5.0                
  [11] magrittr_2.0.1              memoise_2.0.0              
@@ -357,7 +357,7 @@ loaded via a namespace (and not attached):
  [63] RSQLite_2.2.8               broom_0.7.9                
  [65] evaluate_0.14               stringr_1.4.0              
  [67] fastmap_1.1.0               yaml_2.2.1                 
- [69] knitr_1.33                  bit64_4.0.5                
+ [69] knitr_1.34                  bit64_4.0.5                
  [71] zip_2.2.0                   purrr_0.3.4                
  [73] nlme_3.1-153                sparseMatrixStats_1.5.3    
  [75] compiler_4.1.1              beeswarm_0.4.0             
