@@ -498,7 +498,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2754
+## [1] 0.2689
 ```
 
 In this case, the community composition is not significantly different
@@ -597,39 +597,39 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] microbiomeDataSets_1.1.5       MultiAssayExperiment_1.19.11  
+ [1] microbiomeDataSets_1.1.5       MultiAssayExperiment_1.19.12  
  [3] DT_0.19                        dplyr_1.0.7                   
- [5] curatedMetagenomicData_3.1.4   scater_1.21.3                 
+ [5] curatedMetagenomicData_3.1.7   scater_1.21.7                 
  [7] scuttle_1.3.1                  ggplot2_3.3.5                 
- [9] vegan_2.5-7                    lattice_0.20-44               
-[11] permute_0.9-5                  mia_1.1.14                    
+ [9] vegan_2.5-7                    lattice_0.20-45               
+[11] permute_0.9-5                  mia_1.1.16                    
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
 [15] XVector_0.33.0                 SingleCellExperiment_1.15.2   
 [17] SummarizedExperiment_1.23.4    Biobase_2.53.0                
 [19] GenomicRanges_1.45.0           GenomeInfoDb_1.29.8           
-[21] IRanges_2.27.2                 S4Vectors_0.31.3              
+[21] IRanges_2.27.2                 S4Vectors_0.31.5              
 [23] BiocGenerics_0.39.2            MatrixGenerics_1.5.4          
-[25] matrixStats_0.60.1-9001        BiocStyle_2.21.3              
+[25] matrixStats_0.61.0-9001        BiocStyle_2.21.3              
 [27] rebook_1.3.1                  
 
 loaded via a namespace (and not attached):
   [1] readxl_1.3.1                  backports_1.2.1              
   [3] AnnotationHub_3.1.5           BiocFileCache_2.1.1          
   [5] plyr_1.8.6                    lazyeval_0.2.2               
-  [7] splines_4.1.1                 BiocParallel_1.27.7          
-  [9] digest_0.6.27                 htmltools_0.5.2              
+  [7] splines_4.1.1                 BiocParallel_1.27.12         
+  [9] digest_0.6.28                 htmltools_0.5.2              
  [11] viridis_0.6.1                 fansi_0.5.0                  
  [13] magrittr_2.0.1                memoise_2.0.0                
  [15] ScaledMatrix_1.1.0            cluster_2.1.2                
  [17] DECIPHER_2.21.0               openxlsx_4.2.4               
  [19] colorspace_2.0-2              rappdirs_0.3.3               
  [21] blob_1.2.2                    ggrepel_0.9.1                
- [23] haven_2.4.3                   xfun_0.25                    
- [25] crayon_1.4.1                  RCurl_1.98-1.4               
+ [23] haven_2.4.3                   xfun_0.26                    
+ [25] crayon_1.4.1                  RCurl_1.98-1.5               
  [27] jsonlite_1.7.2                graph_1.71.2                 
  [29] ape_5.5                       glue_1.4.2                   
  [31] gtable_0.3.0                  zlibbioc_1.39.0              
- [33] DelayedArray_0.19.2           car_3.0-11                   
+ [33] DelayedArray_0.19.4           car_3.0-11                   
  [35] BiocSingular_1.9.1            abind_1.4-5                  
  [37] scales_1.1.1                  DBI_1.1.1                    
  [39] rstatix_0.7.0                 Rcpp_1.0.7                   
@@ -639,7 +639,7 @@ loaded via a namespace (and not attached):
  [47] rsvd_1.0.5                    htmlwidgets_1.5.4            
  [49] httr_1.4.2                    dir.expiry_1.1.0             
  [51] ellipsis_0.3.2                pkgconfig_2.0.3              
- [53] XML_3.99-0.7                  farver_2.1.0                 
+ [53] XML_3.99-0.8                  farver_2.1.0                 
  [55] dbplyr_2.1.1                  CodeDepends_0.6.5            
  [57] sass_0.4.0                    utf8_1.2.2                   
  [59] AnnotationDbi_1.55.1          later_1.3.0                  
@@ -652,34 +652,34 @@ loaded via a namespace (and not attached):
  [73] RSQLite_2.2.8                 broom_0.7.9                  
  [75] evaluate_0.14                 stringr_1.4.0                
  [77] fastmap_1.1.0                 yaml_2.2.1                   
- [79] knitr_1.34                    bit64_4.0.5                  
+ [79] knitr_1.36                    bit64_4.0.5                  
  [81] zip_2.2.0                     purrr_0.3.4                  
  [83] KEGGREST_1.33.0               nlme_3.1-153                 
- [85] sparseMatrixStats_1.5.3       mime_0.11                    
+ [85] sparseMatrixStats_1.5.3       mime_0.12                    
  [87] compiler_4.1.1                png_0.1-7                    
  [89] interactiveDisplayBase_1.31.2 beeswarm_0.4.0               
  [91] filelock_1.0.2                curl_4.3.2                   
  [93] ggsignif_0.6.3                treeio_1.17.2                
- [95] tibble_3.1.4                  bslib_0.3.0                  
- [97] stringi_1.7.4                 highr_0.9                    
+ [95] tibble_3.1.5                  bslib_0.3.0                  
+ [97] stringi_1.7.5                 highr_0.9                    
  [99] forcats_0.5.1                 Matrix_1.3-4                 
-[101] vctrs_0.3.8                   pillar_1.6.2                 
-[103] lifecycle_1.0.0               BiocManager_1.30.16          
+[101] vctrs_0.3.8                   pillar_1.6.3                 
+[103] lifecycle_1.0.1               BiocManager_1.30.16          
 [105] jquerylib_0.1.4               BiocNeighbors_1.11.0         
-[107] data.table_1.14.0             cowplot_1.1.1                
+[107] data.table_1.14.2             cowplot_1.1.1                
 [109] bitops_1.0-7                  irlba_2.3.3                  
 [111] httpuv_1.6.3                  R6_2.5.1                     
 [113] promises_1.2.0.1              bookdown_0.24                
 [115] gridExtra_2.3                 rio_0.5.27                   
 [117] vipor_0.4.5                   codetools_0.2-18             
 [119] MASS_7.3-54                   assertthat_0.2.1             
-[121] withr_2.4.2                   GenomeInfoDbData_1.2.6       
-[123] mgcv_1.8-36                   parallel_4.1.1               
-[125] hms_1.1.0                     grid_4.1.1                   
-[127] beachmat_2.9.1                tidyr_1.1.3                  
-[129] rmarkdown_2.10                DelayedMatrixStats_1.15.4    
+[121] withr_2.4.2                   GenomeInfoDbData_1.2.7       
+[123] mgcv_1.8-37                   parallel_4.1.1               
+[125] hms_1.1.1                     grid_4.1.1                   
+[127] beachmat_2.9.1                tidyr_1.1.4                  
+[129] rmarkdown_2.11                DelayedMatrixStats_1.15.4    
 [131] carData_3.0-4                 Rtsne_0.15                   
-[133] ggpubr_0.4.0                  shiny_1.6.0                  
+[133] ggpubr_0.4.0                  shiny_1.7.1                  
 [135] ggbeeswarm_0.6.0             
 ```
 </div>

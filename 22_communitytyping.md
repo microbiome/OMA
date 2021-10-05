@@ -134,7 +134,7 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7748 BIC: 8135 AIC: 8008 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
@@ -146,19 +146,19 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7846 BIC: 8534 AIC: 8320 
+## Laplace: 7858 BIC: 8578 AIC: 8364 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: NaN BIC: NaN AIC: NaN 
+## Laplace: 7920 BIC: 8785 AIC: 8529 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8065 BIC: 9086 AIC: 8787
+## Laplace: NaN BIC: NaN AIC: NaN
 ```
 
 
@@ -202,8 +202,8 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.14   901.2 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.17   717.0  936.4 1025
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
 ## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
 ## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
 ## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
@@ -223,7 +223,7 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.60
+## 1 0.5385 20.58
 ## 2 0.4615 15.32
 ```
 
@@ -238,12 +238,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 4.484e-17
-## CC1     1.000e+00 3.356e-22
-## SV1     1.000e+00 1.775e-12
-## M31Fcsw 6.899e-26 1.000e+00
-## M11Fcsw 1.026e-16 1.000e+00
-## M31Plmr 1.024e-13 1.000e+00
+## CL3     1.000e+00 4.489e-17
+## CC1     1.000e+00 3.407e-22
+## SV1     1.000e+00 1.712e-12
+## M31Fcsw 7.403e-26 1.000e+00
+## M11Fcsw 1.091e-16 1.000e+00
+## M31Plmr 1.151e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -254,13 +254,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354068
-## Phylum:Euryarchaeota  0.2314 0.1468954
-## Phylum:Actinobacteria 1.2105 1.0580508
-## Phylum:Spirochaetes   0.2141 0.1318090
-## Phylum:MVP-15         0.0299 0.0007659
-## Phylum:Proteobacteria 6.8419 1.8113824
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30385 0.1354019
+## Phylum:Euryarchaeota  0.23115 0.1468855
+## Phylum:Actinobacteria 1.21333 1.0580238
+## Phylum:Spirochaetes   0.21394 0.1318039
+## Phylum:MVP-15         0.02983 0.0007663
+## Phylum:Proteobacteria 6.84576 1.8115586
 ```
 Get the assignment probabilities
 
@@ -408,4 +408,10 @@ res <- lapply(k,ClustDiagPlot)
 
 <img src="22_communitytyping_files/figure-html/unnamed-chunk-15-1.png" width="672" /><img src="22_communitytyping_files/figure-html/unnamed-chunk-15-2.png" width="672" /><img src="22_communitytyping_files/figure-html/unnamed-chunk-15-3.png" width="672" /><img src="22_communitytyping_files/figure-html/unnamed-chunk-15-4.png" width="672" />
 
+## Additional Community Typing
 
+For more community typing techniques applied to the 'SprockettTHData' data set, see the attached .Rmd file.
+
+Link:
+
+   * [Rmd](add-comm-typing.Rmd)

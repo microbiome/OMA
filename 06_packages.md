@@ -90,15 +90,15 @@ other attached packages:
 [1] BiocStyle_2.21.3 rebook_1.3.1    
 
 loaded via a namespace (and not attached):
- [1] graph_1.71.2        knitr_1.34          magrittr_2.0.1     
+ [1] graph_1.71.2        knitr_1.36          magrittr_2.0.1     
  [4] BiocGenerics_0.39.2 R6_2.5.1            rlang_0.4.11       
  [7] fastmap_1.1.0       stringr_1.4.0       tools_4.1.1        
-[10] xfun_0.25           jquerylib_0.1.4     htmltools_0.5.2    
-[13] CodeDepends_0.6.5   yaml_2.2.1          digest_0.6.27      
+[10] xfun_0.26           jquerylib_0.1.4     htmltools_0.5.2    
+[13] CodeDepends_0.6.5   yaml_2.2.1          digest_0.6.28      
 [16] bookdown_0.24       dir.expiry_1.1.0    BiocManager_1.30.16
 [19] codetools_0.2-18    sass_0.4.0          evaluate_0.14      
-[22] rmarkdown_2.10      stringi_1.7.4       compiler_4.1.1     
+[22] rmarkdown_2.11      stringi_1.7.5       compiler_4.1.1     
 [25] bslib_0.3.0         filelock_1.0.2      stats4_4.1.1       
-[28] XML_3.99-0.7        jsonlite_1.7.2     
+[28] XML_3.99-0.8        jsonlite_1.7.2     
 ```
 </div>
