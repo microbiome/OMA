@@ -311,23 +311,23 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] ggsignif_0.6.3                 scater_1.21.7                 
+ [1] ggsignif_0.6.3                 scater_1.21.8                 
  [3] ggplot2_3.3.5                  scuttle_1.3.1                 
- [5] mia_1.1.16                     TreeSummarizedExperiment_2.1.4
+ [5] mia_1.1.17                     TreeSummarizedExperiment_2.1.4
  [7] Biostrings_2.61.2              XVector_0.33.0                
- [9] SingleCellExperiment_1.15.2    SummarizedExperiment_1.23.4   
+ [9] SingleCellExperiment_1.15.2    SummarizedExperiment_1.23.5   
 [11] Biobase_2.53.0                 GenomicRanges_1.45.0          
 [13] GenomeInfoDb_1.29.8            IRanges_2.27.2                
 [15] S4Vectors_0.31.5               BiocGenerics_0.39.2           
 [17] MatrixGenerics_1.5.4           matrixStats_0.61.0-9001       
-[19] BiocStyle_2.21.3               rebook_1.3.1                  
+[19] BiocStyle_2.21.4               rebook_1.3.1                  
 
 loaded via a namespace (and not attached):
   [1] readxl_1.3.1                backports_1.2.1            
   [3] plyr_1.8.6                  lazyeval_0.2.2             
-  [5] splines_4.1.1               BiocParallel_1.27.12       
+  [5] splines_4.1.1               BiocParallel_1.27.17       
   [7] digest_0.6.28               htmltools_0.5.2            
-  [9] viridis_0.6.1               fansi_0.5.0                
+  [9] viridis_0.6.2               fansi_0.5.0                
  [11] magrittr_2.0.1              memoise_2.0.0              
  [13] ScaledMatrix_1.1.0          cluster_2.1.2              
  [15] DECIPHER_2.21.0             openxlsx_4.2.4             
@@ -363,7 +363,7 @@ loaded via a namespace (and not attached):
  [75] compiler_4.1.1              beeswarm_0.4.0             
  [77] filelock_1.0.2              curl_4.3.2                 
  [79] treeio_1.17.2               tibble_3.1.5               
- [81] bslib_0.3.0                 stringi_1.7.5              
+ [81] bslib_0.3.1                 stringi_1.7.5              
  [83] highr_0.9                   forcats_0.5.1              
  [85] lattice_0.20-45             Matrix_1.3-4               
  [87] vegan_2.5-7                 permute_0.9-5              
@@ -377,7 +377,7 @@ loaded via a namespace (and not attached):
 [103] vipor_0.4.5                 codetools_0.2-18           
 [105] MASS_7.3-54                 assertthat_0.2.1           
 [107] withr_2.4.2                 GenomeInfoDbData_1.2.7     
-[109] mgcv_1.8-37                 parallel_4.1.1             
+[109] mgcv_1.8-38                 parallel_4.1.1             
 [111] hms_1.1.1                   grid_4.1.1                 
 [113] beachmat_2.9.1              tidyr_1.1.4                
 [115] rmarkdown_2.11              DelayedMatrixStats_1.15.4  

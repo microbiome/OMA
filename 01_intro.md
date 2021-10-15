@@ -100,6 +100,13 @@ derivatives in the field of single cell sequencing studies. Many
 approaches used in this book have been derived from the OSCA
 framework, with the necessary adjustments for microbiome research.
 
+<<<<<<< HEAD
+- Getting started with R? Try [swirl](https://swirlstats.com/)
+
+- [Orchestrating Microbiome Analysis in R and Bioconductor](microbiome.github.io/OMA)
+
+=======
+>>>>>>> origin/master
 
 
 

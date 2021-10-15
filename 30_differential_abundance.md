@@ -638,7 +638,7 @@ if (!require(fido)){
 ## RcppNumer... (NA -> 0.4-0       ) [CRAN]
 ## tidybayes    (NA -> 3.0.1       ) [CRAN]
 ## 
-##      checking for file ‘/tmp/RtmpomnzBA/remotes131e5e8d8bfb/jsilve24-driver-16e4499/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/RtmpomnzBA/remotes131e5e8d8bfb/jsilve24-driver-16e4499/DESCRIPTION’
+##      checking for file ‘/tmp/RtmpoUo56b/remotes131ab6eb4c32b/jsilve24-driver-16e4499/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/RtmpoUo56b/remotes131ab6eb4c32b/jsilve24-driver-16e4499/DESCRIPTION’
 ##   ─  preparing ‘driver’:
 ##      checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
 ##   ─  checking for LF line-endings in source and make files and shell scripts
@@ -646,17 +646,17 @@ if (!require(fido)){
 ##    Omitted ‘LazyData’ from DESCRIPTION
 ##   ─  building ‘driver_0.1.1.tar.gz’
 ##      
-##      checking for file ‘/tmp/RtmpomnzBA/remotes131e53b3a0f58/jsilve24-fido-c692141/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/RtmpomnzBA/remotes131e53b3a0f58/jsilve24-fido-c692141/DESCRIPTION’
+##      checking for file ‘/tmp/RtmpoUo56b/remotes131abbd67546/jsilve24-fido-c692141/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/RtmpoUo56b/remotes131abbd67546/jsilve24-fido-c692141/DESCRIPTION’
 ##   ─  preparing ‘fido’:
 ##    checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
-##   ─  cleaning src
-## ─  running ‘cleanup’
-##      Warning: /tmp/RtmpVhqUdC/Rbuild1334b3b84d27e/fido/man/loglikPibbleCollapsed.Rd:28: unknown macro '\item'
-##    Warning: /tmp/RtmpVhqUdC/Rbuild1334b3b84d27e/fido/man/loglikPibbleCollapsed.Rd:30: unknown macro '\item'
-##    Warning: /tmp/RtmpVhqUdC/Rbuild1334b3b84d27e/fido/man/loglikPibbleCollapsed.Rd:33: unexpected section header '\value'
-##    Warning: /tmp/RtmpVhqUdC/Rbuild1334b3b84d27e/fido/man/loglikPibbleCollapsed.Rd:41: unexpected section header '\description'
-##      Warning: /tmp/RtmpVhqUdC/Rbuild1334b3b84d27e/fido/man/loglikPibbleCollapsed.Rd:51: unexpected section header '\examples'
-##    Warning: /tmp/RtmpVhqUdC/Rbuild1334b3b84d27e/fido/man/loglikPibbleCollapsed.Rd:83: unexpected END_OF_INPUT '
+## ─  cleaning src
+##   ─  running ‘cleanup’
+##      Warning: /tmp/RtmpH75bze/Rbuild133111d41ccf5/fido/man/loglikPibbleCollapsed.Rd:28: unknown macro '\item'
+##    Warning: /tmp/RtmpH75bze/Rbuild133111d41ccf5/fido/man/loglikPibbleCollapsed.Rd:30: unknown macro '\item'
+##    Warning: /tmp/RtmpH75bze/Rbuild133111d41ccf5/fido/man/loglikPibbleCollapsed.Rd:33: unexpected section header '\value'
+##    Warning: /tmp/RtmpH75bze/Rbuild133111d41ccf5/fido/man/loglikPibbleCollapsed.Rd:41: unexpected section header '\description'
+##      Warning: /tmp/RtmpH75bze/Rbuild133111d41ccf5/fido/man/loglikPibbleCollapsed.Rd:51: unexpected section header '\examples'
+##    Warning: /tmp/RtmpH75bze/Rbuild133111d41ccf5/fido/man/loglikPibbleCollapsed.Rd:83: unexpected END_OF_INPUT '
 ##    '
 ##   ─  checking for LF line-endings in source and make files and shell scripts
 ##   ─  checking for empty or unneeded directories
@@ -806,7 +806,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] microbiomeDataSets_1.1.5       MultiAssayExperiment_1.19.12  
+ [1] microbiomeDataSets_1.1.5       MultiAssayExperiment_1.19.16  
  [3] fido_0.1.13                    forcats_0.5.1                 
  [5] stringr_1.4.0                  dplyr_1.0.7                   
  [7] purrr_0.3.4                    readr_2.0.2                   
@@ -817,14 +817,14 @@ other attached packages:
 [17] truncnorm_1.0-8                NADA_1.6-1.1                  
 [19] survival_3.2-13                MASS_7.3-54                   
 [21] ANCOMBC_1.3.2                  tidySummarizedExperiment_1.3.0
-[23] patchwork_1.1.1                mia_1.1.16                    
+[23] patchwork_1.1.1                mia_1.1.17                    
 [25] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
 [27] XVector_0.33.0                 SingleCellExperiment_1.15.2   
-[29] SummarizedExperiment_1.23.4    Biobase_2.53.0                
+[29] SummarizedExperiment_1.23.5    Biobase_2.53.0                
 [31] GenomicRanges_1.45.0           GenomeInfoDb_1.29.8           
 [33] IRanges_2.27.2                 S4Vectors_0.31.5              
 [35] BiocGenerics_0.39.2            MatrixGenerics_1.5.4          
-[37] matrixStats_0.61.0-9001        BiocStyle_2.21.3              
+[37] matrixStats_0.61.0-9001        BiocStyle_2.21.4              
 [39] rebook_1.3.1                  
 
 loaded via a namespace (and not attached):
@@ -837,8 +837,8 @@ loaded via a namespace (and not attached):
  [13] usethis_2.0.1                 RSQLite_2.2.8                
  [15] bit_4.0.4                     tzdb_0.1.2                   
  [17] httpuv_1.6.3                  xml2_1.3.2                   
- [19] lubridate_1.7.10              assertthat_0.2.1             
- [21] DirichletMultinomial_1.35.0   viridis_0.6.1                
+ [19] lubridate_1.8.0               assertthat_0.2.1             
+ [21] DirichletMultinomial_1.35.0   viridis_0.6.2                
  [23] xfun_0.26                     ggdist_3.0.0                 
  [25] hms_1.1.1                     jquerylib_0.1.4              
  [27] promises_1.2.0.1              evaluate_0.14                
@@ -860,11 +860,11 @@ loaded via a namespace (and not attached):
  [59] lazyeval_0.2.2                crayon_1.4.1                 
  [61] pkgconfig_2.0.3               labeling_0.4.2               
  [63] nlme_3.1-153                  vipor_0.4.5                  
- [65] pkgload_1.2.2                 devtools_2.4.2               
+ [65] pkgload_1.2.3                 devtools_2.4.2               
  [67] rlang_0.4.11                  lifecycle_1.0.1              
  [69] filelock_1.0.2                BiocFileCache_2.1.1          
  [71] phyloseq_1.37.0               modelr_0.1.8                 
- [73] rsvd_1.0.5                    AnnotationHub_3.1.5          
+ [73] rsvd_1.0.5                    AnnotationHub_3.1.6          
  [75] distributional_0.2.2          cellranger_1.1.0             
  [77] rprojroot_2.0.2               graph_1.71.2                 
  [79] Matrix_1.3-4                  lpsymphony_1.21.0            
@@ -880,7 +880,7 @@ loaded via a namespace (and not attached):
  [99] compiler_4.1.1                driver_0.1.1                 
 [101] RColorBrewer_1.1-2            cli_3.0.1                    
 [103] ade4_1.7-18                   pbapply_1.5-0                
-[105] ps_1.6.0                      mgcv_1.8-37                  
+[105] ps_1.6.0                      mgcv_1.8-38                  
 [107] tidyselect_1.1.1              stringi_1.7.5                
 [109] highr_0.9                     yaml_2.2.1                   
 [111] BiocSingular_1.9.1            svUnit_1.0.6                 
@@ -888,7 +888,7 @@ loaded via a namespace (and not attached):
 [115] sass_0.4.0                    tools_4.1.1                  
 [117] parallel_4.1.1                rstudioapi_0.13              
 [119] foreach_1.5.1                 logging_0.10-108             
-[121] optparse_1.6.6                gridExtra_2.3                
+[121] optparse_1.7.1                gridExtra_2.3                
 [123] posterior_1.1.0               farver_2.1.0                 
 [125] Rtsne_0.15                    RcppZiggurat_0.1.6           
 [127] digest_0.6.28                 BiocManager_1.30.16          
@@ -899,26 +899,26 @@ loaded via a namespace (and not attached):
 [137] Rdpack_2.1.2                  colorspace_2.0-2             
 [139] rvest_1.0.1                   XML_3.99-0.8                 
 [141] fs_1.5.0                      splines_4.1.1                
-[143] tidytree_0.3.5                scater_1.21.7                
-[145] multtest_2.49.0               plotly_4.9.4.1               
+[143] tidytree_0.3.5                scater_1.21.8                
+[145] multtest_2.49.0               plotly_4.10.0                
 [147] sessioninfo_1.1.1             xtable_1.8-4                 
 [149] jsonlite_1.7.2                nloptr_1.2.2.2               
 [151] CodeDepends_0.6.5             Rfast_2.0.3                  
 [153] testthat_3.1.0                R6_2.5.1                     
 [155] mime_0.12                     pillar_1.6.3                 
 [157] htmltools_0.5.2               glue_1.4.2                   
-[159] fastmap_1.1.0                 BiocParallel_1.27.12         
+[159] fastmap_1.1.0                 BiocParallel_1.27.17         
 [161] BiocNeighbors_1.11.0          interactiveDisplayBase_1.31.2
 [163] codetools_0.2-18              pkgbuild_1.2.0               
-[165] pcaPP_1.9-74                  mvtnorm_1.1-2                
+[165] pcaPP_1.9-74                  mvtnorm_1.1-3                
 [167] utf8_1.2.2                    lattice_0.20-45              
-[169] bslib_0.3.0                   arrayhelpers_1.1-0           
+[169] bslib_0.3.1                   arrayhelpers_1.1-0           
 [171] curl_4.3.2                    ggbeeswarm_0.6.0             
 [173] biglm_0.9-2.1                 rmarkdown_2.11               
 [175] desc_1.4.0                    biomformat_1.21.0            
-[177] munsell_0.5.0                 rhdf5_2.37.3                 
+[177] munsell_0.5.0                 rhdf5_2.37.4                 
 [179] GenomeInfoDbData_1.2.7        iterators_1.0.13             
 [181] haven_2.4.3                   reshape2_1.4.4               
-[183] gtable_0.3.0                  rbibutils_2.2.3              
+[183] gtable_0.3.0                  rbibutils_2.2.4              
 ```
 </div>

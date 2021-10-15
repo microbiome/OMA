@@ -128,19 +128,19 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7673 BIC: 7927 AIC: 7842 
+## Laplace: 7681 BIC: 7902 AIC: 7818 
 ## 
 ## [[3]]
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7690 BIC: 8076 AIC: 7948 
+## Laplace: 7758 BIC: 8179 AIC: 8051 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7751 BIC: 8274 AIC: 8103 
+## Laplace: 7754 BIC: 8290 AIC: 8120 
 ## 
 ## [[5]]
 ## class: DMN 
@@ -152,13 +152,13 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7920 BIC: 8785 AIC: 8529 
+## Laplace: 7969 BIC: 8812 AIC: 8556 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: NaN BIC: NaN AIC: NaN
+## Laplace: 7998 BIC: 9014 AIC: 8715
 ```
 
 
@@ -183,7 +183,7 @@ getBestDMNFit(tse_dmn, type = "laplace")
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7673 BIC: 7927 AIC: 7842
+## Laplace: 7681 BIC: 7902 AIC: 7818
 ```
 ### PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors
 
@@ -222,9 +222,9 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 ```
 
 ```
-##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.32
+##       pi  theta
+## 1 0.8846  10.76
+## 2 0.1154 349.04
 ```
 
 
@@ -237,13 +237,13 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##              [,1]      [,2]
-## CL3     1.000e+00 4.489e-17
-## CC1     1.000e+00 3.407e-22
-## SV1     1.000e+00 1.712e-12
-## M31Fcsw 7.403e-26 1.000e+00
-## M11Fcsw 1.091e-16 1.000e+00
-## M31Plmr 1.151e-13 1.000e+00
+##         [,1]       [,2]
+## CL3        1  0.000e+00
+## CC1        1  0.000e+00
+## SV1        1 2.687e-281
+## M31Fcsw    1  0.000e+00
+## M11Fcsw    1 3.552e-299
+## M31Plmr    1  0.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -254,13 +254,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30385 0.1354019
-## Phylum:Euryarchaeota  0.23115 0.1468855
-## Phylum:Actinobacteria 1.21333 1.0580238
-## Phylum:Spirochaetes   0.21394 0.1318039
-## Phylum:MVP-15         0.02983 0.0007663
-## Phylum:Proteobacteria 6.84576 1.8115586
+##                           [,1]   [,2]
+## Phylum:Crenarchaeota  0.167451  1.465
+## Phylum:Euryarchaeota  0.155758  2.408
+## Phylum:Actinobacteria 0.882979  6.173
+## Phylum:Spirochaetes   0.144885  1.087
+## Phylum:MVP-15         0.004268  0.216
+## Phylum:Proteobacteria 2.301120 62.385
 ```
 Get the assignment probabilities
 

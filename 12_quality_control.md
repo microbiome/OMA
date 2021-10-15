@@ -275,15 +275,15 @@ attached base packages:
 
 other attached packages:
  [1] patchwork_1.1.1                dplyr_1.0.7                   
- [3] scater_1.21.7                  ggplot2_3.3.5                 
- [5] scuttle_1.3.1                  mia_1.1.16                    
+ [3] scater_1.21.8                  ggplot2_3.3.5                 
+ [5] scuttle_1.3.1                  mia_1.1.17                    
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
  [9] XVector_0.33.0                 SingleCellExperiment_1.15.2   
-[11] SummarizedExperiment_1.23.4    Biobase_2.53.0                
+[11] SummarizedExperiment_1.23.5    Biobase_2.53.0                
 [13] GenomicRanges_1.45.0           GenomeInfoDb_1.29.8           
 [15] IRanges_2.27.2                 S4Vectors_0.31.5              
 [17] BiocGenerics_0.39.2            MatrixGenerics_1.5.4          
-[19] matrixStats_0.61.0-9001        BiocStyle_2.21.3              
+[19] matrixStats_0.61.0-9001        BiocStyle_2.21.4              
 [21] rebook_1.3.1                  
 
 loaded via a namespace (and not attached):
@@ -316,7 +316,7 @@ loaded via a namespace (and not attached):
  [53] stringi_1.7.5               RSQLite_2.2.8              
  [55] highr_0.9                   ScaledMatrix_1.1.0         
  [57] tidytree_0.3.5              permute_0.9-5              
- [59] filelock_1.0.2              BiocParallel_1.27.12       
+ [59] filelock_1.0.2              BiocParallel_1.27.17       
  [61] rlang_0.4.11                pkgconfig_2.0.3            
  [63] bitops_1.0-7                evaluate_0.14              
  [65] lattice_0.20-45             purrr_0.3.4                
@@ -327,15 +327,15 @@ loaded via a namespace (and not attached):
  [75] bookdown_0.24               R6_2.5.1                   
  [77] generics_0.1.0              DelayedArray_0.19.4        
  [79] DBI_1.1.1                   withr_2.4.2                
- [81] mgcv_1.8-37                 pillar_1.6.3               
+ [81] mgcv_1.8-38                 pillar_1.6.3               
  [83] RCurl_1.98-1.5              tibble_3.1.5               
  [85] dir.expiry_1.1.0            crayon_1.4.1               
  [87] utf8_1.2.2                  rmarkdown_2.11             
- [89] viridis_0.6.1               grid_4.1.1                 
+ [89] viridis_0.6.2               grid_4.1.1                 
  [91] blob_1.2.2                  vegan_2.5-7                
  [93] digest_0.6.28               tidyr_1.1.4                
  [95] munsell_0.5.0               DirichletMultinomial_1.35.0
  [97] beeswarm_0.4.0              viridisLite_0.4.0          
- [99] vipor_0.4.5                 bslib_0.3.0                
+ [99] vipor_0.4.5                 bslib_0.3.1                
 ```
 </div>

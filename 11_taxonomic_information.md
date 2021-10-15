@@ -551,14 +551,14 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.1.16                     TreeSummarizedExperiment_2.1.4
+ [1] mia_1.1.17                     TreeSummarizedExperiment_2.1.4
  [3] Biostrings_2.61.2              XVector_0.33.0                
- [5] SingleCellExperiment_1.15.2    SummarizedExperiment_1.23.4   
+ [5] SingleCellExperiment_1.15.2    SummarizedExperiment_1.23.5   
  [7] Biobase_2.53.0                 GenomicRanges_1.45.0          
  [9] GenomeInfoDb_1.29.8            IRanges_2.27.2                
 [11] S4Vectors_0.31.5               BiocGenerics_0.39.2           
 [13] MatrixGenerics_1.5.4           matrixStats_0.61.0-9001       
-[15] BiocStyle_2.21.3               rebook_1.3.1                  
+[15] BiocStyle_2.21.4               rebook_1.3.1                  
 
 loaded via a namespace (and not attached):
  [1] ggbeeswarm_0.6.0            colorspace_2.0-2           
@@ -568,7 +568,7 @@ loaded via a namespace (and not attached):
  [9] decontam_1.13.0             splines_4.1.1              
 [11] codetools_0.2-18            sparseMatrixStats_1.5.3    
 [13] cachem_1.0.6                knitr_1.36                 
-[15] scater_1.21.7               jsonlite_1.7.2             
+[15] scater_1.21.8               jsonlite_1.7.2             
 [17] cluster_2.1.2               graph_1.71.2               
 [19] BiocManager_1.30.16         compiler_4.1.1             
 [21] assertthat_0.2.1            Matrix_1.3-4               
@@ -591,7 +591,7 @@ loaded via a namespace (and not attached):
 [55] sass_0.4.0                  stringi_1.7.5              
 [57] RSQLite_2.2.8               ScaledMatrix_1.1.0         
 [59] tidytree_0.3.5              permute_0.9-5              
-[61] filelock_1.0.2              BiocParallel_1.27.12       
+[61] filelock_1.0.2              BiocParallel_1.27.17       
 [63] rlang_0.4.11                pkgconfig_2.0.3            
 [65] bitops_1.0-7                evaluate_0.14              
 [67] lattice_0.20-45             purrr_0.3.4                
@@ -600,16 +600,16 @@ loaded via a namespace (and not attached):
 [73] plyr_1.8.6                  magrittr_2.0.1             
 [75] bookdown_0.24               R6_2.5.1                   
 [77] generics_0.1.0              DelayedArray_0.19.4        
-[79] DBI_1.1.1                   mgcv_1.8-37                
+[79] DBI_1.1.1                   mgcv_1.8-38                
 [81] pillar_1.6.3                RCurl_1.98-1.5             
 [83] tibble_3.1.5                dir.expiry_1.1.0           
 [85] crayon_1.4.1                utf8_1.2.2                 
-[87] rmarkdown_2.11              viridis_0.6.1              
+[87] rmarkdown_2.11              viridis_0.6.2              
 [89] grid_4.1.1                  blob_1.2.2                 
 [91] vegan_2.5-7                 digest_0.6.28              
 [93] tidyr_1.1.4                 munsell_0.5.0              
 [95] DirichletMultinomial_1.35.0 beeswarm_0.4.0             
 [97] viridisLite_0.4.0           vipor_0.4.5                
-[99] bslib_0.3.0                
+[99] bslib_0.3.1                
 ```
 </div>

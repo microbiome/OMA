@@ -1046,25 +1046,25 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] microbiomeDataSets_1.1.5       MultiAssayExperiment_1.19.12  
- [3] phyloseq_1.37.0                mia_1.1.16                    
+ [1] microbiomeDataSets_1.1.5       MultiAssayExperiment_1.19.16  
+ [3] phyloseq_1.37.0                mia_1.1.17                    
  [5] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
  [7] XVector_0.33.0                 SingleCellExperiment_1.15.2   
- [9] SummarizedExperiment_1.23.4    Biobase_2.53.0                
+ [9] SummarizedExperiment_1.23.5    Biobase_2.53.0                
 [11] GenomicRanges_1.45.0           GenomeInfoDb_1.29.8           
 [13] IRanges_2.27.2                 S4Vectors_0.31.5              
 [15] BiocGenerics_0.39.2            MatrixGenerics_1.5.4          
-[17] matrixStats_0.61.0-9001        BiocStyle_2.21.3              
+[17] matrixStats_0.61.0-9001        BiocStyle_2.21.4              
 [19] rebook_1.3.1                  
 
 loaded via a namespace (and not attached):
-  [1] AnnotationHub_3.1.5           BiocFileCache_2.1.1          
+  [1] AnnotationHub_3.1.6           BiocFileCache_2.1.1          
   [3] plyr_1.8.6                    igraph_1.2.6                 
   [5] lazyeval_0.2.2                splines_4.1.1                
-  [7] BiocParallel_1.27.12          ggplot2_3.3.5                
-  [9] scater_1.21.7                 digest_0.6.28                
+  [7] BiocParallel_1.27.17          ggplot2_3.3.5                
+  [9] scater_1.21.8                 digest_0.6.28                
  [11] foreach_1.5.1                 htmltools_0.5.2              
- [13] viridis_0.6.1                 fansi_0.5.0                  
+ [13] viridis_0.6.2                 fansi_0.5.0                  
  [15] magrittr_2.0.1                memoise_2.0.0                
  [17] ScaledMatrix_1.1.0            cluster_2.1.2                
  [19] DECIPHER_2.21.0               colorspace_2.0-2             
@@ -1103,7 +1103,7 @@ loaded via a namespace (and not attached):
  [85] png_0.1-7                     interactiveDisplayBase_1.31.2
  [87] beeswarm_0.4.0                filelock_1.0.2               
  [89] curl_4.3.2                    treeio_1.17.2                
- [91] tibble_3.1.5                  bslib_0.3.0                  
+ [91] tibble_3.1.5                  bslib_0.3.1                  
  [93] stringi_1.7.5                 lattice_0.20-45              
  [95] Matrix_1.3-4                  vegan_2.5-7                  
  [97] permute_0.9-5                 multtest_2.49.0              
@@ -1116,8 +1116,8 @@ loaded via a namespace (and not attached):
 [111] promises_1.2.0.1              bookdown_0.24                
 [113] gridExtra_2.3                 vipor_0.4.5                  
 [115] codetools_0.2-18              MASS_7.3-54                  
-[117] assertthat_0.2.1              rhdf5_2.37.3                 
-[119] GenomeInfoDbData_1.2.7        mgcv_1.8-37                  
+[117] assertthat_0.2.1              rhdf5_2.37.4                 
+[119] GenomeInfoDbData_1.2.7        mgcv_1.8-38                  
 [121] parallel_4.1.1                grid_4.1.1                   
 [123] beachmat_2.9.1                tidyr_1.1.4                  
 [125] rmarkdown_2.11                DelayedMatrixStats_1.15.4    

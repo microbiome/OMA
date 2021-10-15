@@ -87,7 +87,7 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] BiocStyle_2.21.3 rebook_1.3.1    
+[1] BiocStyle_2.21.4 rebook_1.3.1    
 
 loaded via a namespace (and not attached):
  [1] graph_1.71.2        knitr_1.36          magrittr_2.0.1     
@@ -98,7 +98,7 @@ loaded via a namespace (and not attached):
 [16] bookdown_0.24       dir.expiry_1.1.0    BiocManager_1.30.16
 [19] codetools_0.2-18    sass_0.4.0          evaluate_0.14      
 [22] rmarkdown_2.11      stringi_1.7.5       compiler_4.1.1     
-[25] bslib_0.3.0         filelock_1.0.2      stats4_4.1.1       
+[25] bslib_0.3.1         filelock_1.0.2      stats4_4.1.1       
 [28] XML_3.99-0.8        jsonlite_1.7.2     
 ```
 </div>

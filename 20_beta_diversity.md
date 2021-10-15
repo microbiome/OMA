@@ -498,7 +498,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2689
+## [1] 0.2729
 ```
 
 In this case, the community composition is not significantly different
@@ -597,28 +597,28 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] microbiomeDataSets_1.1.5       MultiAssayExperiment_1.19.12  
+ [1] microbiomeDataSets_1.1.5       MultiAssayExperiment_1.19.16  
  [3] DT_0.19                        dplyr_1.0.7                   
- [5] curatedMetagenomicData_3.1.7   scater_1.21.7                 
+ [5] curatedMetagenomicData_3.1.10  scater_1.21.8                 
  [7] scuttle_1.3.1                  ggplot2_3.3.5                 
  [9] vegan_2.5-7                    lattice_0.20-45               
-[11] permute_0.9-5                  mia_1.1.16                    
+[11] permute_0.9-5                  mia_1.1.17                    
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
 [15] XVector_0.33.0                 SingleCellExperiment_1.15.2   
-[17] SummarizedExperiment_1.23.4    Biobase_2.53.0                
+[17] SummarizedExperiment_1.23.5    Biobase_2.53.0                
 [19] GenomicRanges_1.45.0           GenomeInfoDb_1.29.8           
 [21] IRanges_2.27.2                 S4Vectors_0.31.5              
 [23] BiocGenerics_0.39.2            MatrixGenerics_1.5.4          
-[25] matrixStats_0.61.0-9001        BiocStyle_2.21.3              
+[25] matrixStats_0.61.0-9001        BiocStyle_2.21.4              
 [27] rebook_1.3.1                  
 
 loaded via a namespace (and not attached):
   [1] readxl_1.3.1                  backports_1.2.1              
-  [3] AnnotationHub_3.1.5           BiocFileCache_2.1.1          
+  [3] AnnotationHub_3.1.6           BiocFileCache_2.1.1          
   [5] plyr_1.8.6                    lazyeval_0.2.2               
-  [7] splines_4.1.1                 BiocParallel_1.27.12         
+  [7] splines_4.1.1                 BiocParallel_1.27.17         
   [9] digest_0.6.28                 htmltools_0.5.2              
- [11] viridis_0.6.1                 fansi_0.5.0                  
+ [11] viridis_0.6.2                 fansi_0.5.0                  
  [13] magrittr_2.0.1                memoise_2.0.0                
  [15] ScaledMatrix_1.1.0            cluster_2.1.2                
  [17] DECIPHER_2.21.0               openxlsx_4.2.4               
@@ -660,7 +660,7 @@ loaded via a namespace (and not attached):
  [89] interactiveDisplayBase_1.31.2 beeswarm_0.4.0               
  [91] filelock_1.0.2                curl_4.3.2                   
  [93] ggsignif_0.6.3                treeio_1.17.2                
- [95] tibble_3.1.5                  bslib_0.3.0                  
+ [95] tibble_3.1.5                  bslib_0.3.1                  
  [97] stringi_1.7.5                 highr_0.9                    
  [99] forcats_0.5.1                 Matrix_1.3-4                 
 [101] vctrs_0.3.8                   pillar_1.6.3                 
@@ -674,7 +674,7 @@ loaded via a namespace (and not attached):
 [117] vipor_0.4.5                   codetools_0.2-18             
 [119] MASS_7.3-54                   assertthat_0.2.1             
 [121] withr_2.4.2                   GenomeInfoDbData_1.2.7       
-[123] mgcv_1.8-37                   parallel_4.1.1               
+[123] mgcv_1.8-38                   parallel_4.1.1               
 [125] hms_1.1.1                     grid_4.1.1                   
 [127] beachmat_2.9.1                tidyr_1.1.4                  
 [129] rmarkdown_2.11                DelayedMatrixStats_1.15.4    
