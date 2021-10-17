@@ -46,12 +46,7 @@ sets**, in a separate Chapter on [#example-data], and **online
 tutorials** including this online book as well as the various package
 vignettes and other material.
 
-
-```r
-knitr::include_graphics("https://github.com/microbiome/OMA/general/figures/FigureOverviewV2.png")
-```
-
-![](https://github.com/microbiome/OMA/general/figures/FigureOverviewV2.png)<!-- -->
+<img src="general/figures/FigureOverviewV2.png" width="672" />
 
 
 ## Data containers
@@ -1106,9 +1101,9 @@ loaded via a namespace (and not attached):
  [79] purrr_0.3.4                   KEGGREST_1.33.0              
  [81] nlme_3.1-153                  sparseMatrixStats_1.5.3      
  [83] mime_0.12                     compiler_4.1.1               
- [85] png_0.1-7                     interactiveDisplayBase_1.31.2
- [87] curl_4.3.2                    beeswarm_0.4.0               
- [89] filelock_1.0.2                treeio_1.17.2                
+ [85] interactiveDisplayBase_1.31.2 curl_4.3.2                   
+ [87] beeswarm_0.4.0                filelock_1.0.2               
+ [89] png_0.1-7                     treeio_1.17.2                
  [91] tibble_3.1.5                  bslib_0.3.1                  
  [93] stringi_1.7.5                 highr_0.9                    
  [95] lattice_0.20-45               Matrix_1.3-4                 
