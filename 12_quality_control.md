@@ -276,7 +276,7 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.1                dplyr_1.0.7                   
  [3] scater_1.21.8                  ggplot2_3.3.5                 
- [5] scuttle_1.3.1                  mia_1.1.17                    
+ [5] scuttle_1.3.1                  mia_1.1.19                    
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
  [9] XVector_0.33.0                 SingleCellExperiment_1.15.2   
 [11] SummarizedExperiment_1.23.5    Biobase_2.53.0                

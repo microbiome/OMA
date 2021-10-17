@@ -313,7 +313,7 @@ attached base packages:
 other attached packages:
  [1] ggsignif_0.6.3                 scater_1.21.8                 
  [3] ggplot2_3.3.5                  scuttle_1.3.1                 
- [5] mia_1.1.17                     TreeSummarizedExperiment_2.1.4
+ [5] mia_1.1.19                     TreeSummarizedExperiment_2.1.4
  [7] Biostrings_2.61.2              XVector_0.33.0                
  [9] SingleCellExperiment_1.15.2    SummarizedExperiment_1.23.5   
 [11] Biobase_2.53.0                 GenomicRanges_1.45.0          

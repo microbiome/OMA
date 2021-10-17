@@ -39,16 +39,6 @@ document.addEventListener("click", function (event) {
 ## Loading required package: ecodist
 ```
 
-```
-## Warning in library(package, lib.loc = lib.loc, character.only = TRUE,
-## logical.return = TRUE, : there is no package called 'ecodist'
-```
-
-```
-## Installing package into '/__w/_temp/Library'
-## (as 'lib' is unspecified)
-```
-
 
 ```r
 library(mia)
@@ -287,7 +277,7 @@ attached base packages:
 other attached packages:
  [1] dendextend_1.15.1              pheatmap_1.0.12               
  [3] miaViz_1.1.4                   ggraph_2.0.5                  
- [5] ggplot2_3.3.5                  mia_1.1.17                    
+ [5] ggplot2_3.3.5                  mia_1.1.19                    
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
  [9] XVector_0.33.0                 SingleCellExperiment_1.15.2   
 [11] SummarizedExperiment_1.23.5    Biobase_2.53.0                

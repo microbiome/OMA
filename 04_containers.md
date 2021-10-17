@@ -47,6 +47,12 @@ tutorials** including this online book as well as the various package
 vignettes and other material.
 
 
+```r
+knitr::include_graphics("https://github.com/microbiome/OMA/general/figures/FigureOverviewV2.png")
+```
+
+![](https://github.com/microbiome/OMA/general/figures/FigureOverviewV2.png)<!-- -->
+
 
 ## Data containers
 
@@ -1047,7 +1053,7 @@ attached base packages:
 
 other attached packages:
  [1] microbiomeDataSets_1.1.5       MultiAssayExperiment_1.19.16  
- [3] phyloseq_1.37.0                mia_1.1.17                    
+ [3] phyloseq_1.37.0                mia_1.1.19                    
  [5] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
  [7] XVector_0.33.0                 SingleCellExperiment_1.15.2   
  [9] SummarizedExperiment_1.23.5    Biobase_2.53.0                
@@ -1101,26 +1107,27 @@ loaded via a namespace (and not attached):
  [81] nlme_3.1-153                  sparseMatrixStats_1.5.3      
  [83] mime_0.12                     compiler_4.1.1               
  [85] png_0.1-7                     interactiveDisplayBase_1.31.2
- [87] beeswarm_0.4.0                filelock_1.0.2               
- [89] curl_4.3.2                    treeio_1.17.2                
+ [87] curl_4.3.2                    beeswarm_0.4.0               
+ [89] filelock_1.0.2                treeio_1.17.2                
  [91] tibble_3.1.5                  bslib_0.3.1                  
- [93] stringi_1.7.5                 lattice_0.20-45              
- [95] Matrix_1.3-4                  vegan_2.5-7                  
- [97] permute_0.9-5                 multtest_2.49.0              
- [99] vctrs_0.3.8                   pillar_1.6.3                 
-[101] lifecycle_1.0.1               rhdf5filters_1.5.0           
-[103] BiocManager_1.30.16           jquerylib_0.1.4              
-[105] BiocNeighbors_1.11.0          data.table_1.14.2            
-[107] bitops_1.0-7                  irlba_2.3.3                  
-[109] httpuv_1.6.3                  R6_2.5.1                     
-[111] promises_1.2.0.1              bookdown_0.24                
-[113] gridExtra_2.3                 vipor_0.4.5                  
-[115] codetools_0.2-18              MASS_7.3-54                  
-[117] assertthat_0.2.1              rhdf5_2.37.4                 
-[119] GenomeInfoDbData_1.2.7        mgcv_1.8-38                  
-[121] parallel_4.1.1                grid_4.1.1                   
-[123] beachmat_2.9.1                tidyr_1.1.4                  
-[125] rmarkdown_2.11                DelayedMatrixStats_1.15.4    
-[127] shiny_1.7.1                   ggbeeswarm_0.6.0             
+ [93] stringi_1.7.5                 highr_0.9                    
+ [95] lattice_0.20-45               Matrix_1.3-4                 
+ [97] vegan_2.5-7                   permute_0.9-5                
+ [99] multtest_2.49.0               vctrs_0.3.8                  
+[101] pillar_1.6.3                  lifecycle_1.0.1              
+[103] rhdf5filters_1.5.0            BiocManager_1.30.16          
+[105] jquerylib_0.1.4               BiocNeighbors_1.11.0         
+[107] data.table_1.14.2             bitops_1.0-7                 
+[109] irlba_2.3.3                   httpuv_1.6.3                 
+[111] R6_2.5.1                      promises_1.2.0.1             
+[113] bookdown_0.24                 gridExtra_2.3                
+[115] vipor_0.4.5                   codetools_0.2-18             
+[117] MASS_7.3-54                   assertthat_0.2.1             
+[119] rhdf5_2.37.4                  GenomeInfoDbData_1.2.7       
+[121] mgcv_1.8-38                   parallel_4.1.1               
+[123] grid_4.1.1                    beachmat_2.9.1               
+[125] tidyr_1.1.4                   rmarkdown_2.11               
+[127] DelayedMatrixStats_1.15.4     shiny_1.7.1                  
+[129] ggbeeswarm_0.6.0             
 ```
 </div>

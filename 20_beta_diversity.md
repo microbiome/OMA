@@ -498,7 +498,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2729
+## [1] 0.2721
 ```
 
 In this case, the community composition is not significantly different
@@ -602,7 +602,7 @@ other attached packages:
  [5] curatedMetagenomicData_3.1.10  scater_1.21.8                 
  [7] scuttle_1.3.1                  ggplot2_3.3.5                 
  [9] vegan_2.5-7                    lattice_0.20-45               
-[11] permute_0.9-5                  mia_1.1.17                    
+[11] permute_0.9-5                  mia_1.1.19                    
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
 [15] XVector_0.33.0                 SingleCellExperiment_1.15.2   
 [17] SummarizedExperiment_1.23.5    Biobase_2.53.0                

@@ -551,7 +551,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.1.17                     TreeSummarizedExperiment_2.1.4
+ [1] mia_1.1.19                     TreeSummarizedExperiment_2.1.4
  [3] Biostrings_2.61.2              XVector_0.33.0                
  [5] SingleCellExperiment_1.15.2    SummarizedExperiment_1.23.5   
  [7] Biobase_2.53.0                 GenomicRanges_1.45.0          

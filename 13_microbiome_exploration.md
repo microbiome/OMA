@@ -263,8 +263,9 @@ plotAbundanceDensity(tse, layout = "jitter", abund_values = "relabundance",
 
 <img src="13_microbiome_exploration_files/figure-html/unnamed-chunk-7-1.png" width="672" />
 
-For instance, relative abundance values for the top 5 taxa can be visualized as a
-density plot over a log scaled axis, using "nationality" as an overlaying information:
+For instance, relative abundance values for the top 5 taxa can be
+visualized as a density plot over a log scaled axis, using
+"nationality" as an overlaying information:
 
 
 ```r
@@ -302,7 +303,7 @@ other attached packages:
  [1] microbiomeDataSets_1.1.5       MultiAssayExperiment_1.19.16  
  [3] miaViz_1.1.4                   ggraph_2.0.5                  
  [5] scater_1.21.8                  ggplot2_3.3.5                 
- [7] scuttle_1.3.1                  mia_1.1.17                    
+ [7] scuttle_1.3.1                  mia_1.1.19                    
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
 [11] XVector_0.33.0                 SingleCellExperiment_1.15.2   
 [13] SummarizedExperiment_1.23.5    Biobase_2.53.0                
