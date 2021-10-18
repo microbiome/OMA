@@ -32,6 +32,7 @@ To contribute reports, follow the Git flow procedure:
 
 Please note that chapters should be independent of each other.
 
+
 # Code of conduct
 
 Please note that the OMA project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).
