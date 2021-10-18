@@ -1,3 +1,6 @@
+# (PART) Focus Topics {-}
+
+
 # Data Manipulation {#datamanipulation}
 
 <script>
@@ -34,7 +37,6 @@ document.addEventListener("click", function (event) {
   background-color: #f1f1f1;
 }
 </style>
-
 
 
 ## Tidying and subsetting

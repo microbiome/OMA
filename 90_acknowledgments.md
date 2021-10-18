@@ -1,6 +1,5 @@
-# (PART) Appendix {-}
 
-# Appendix {#appendix}
+# Acknowledgments {#acknowledgments}
 
 <script>
 document.addEventListener("click", function (event) {
@@ -36,9 +35,6 @@ document.addEventListener("click", function (event) {
   background-color: #f1f1f1;
 }
 </style>
-
-
-## Acknowledgments
 
 This work would not have been possible without the countless
 contributions and interactions within the broader research

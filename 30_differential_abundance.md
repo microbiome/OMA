@@ -1,4 +1,4 @@
-# Differential Abundance {#differential-abundance}
+# Differential abundance {#differential-abundance}
 
 <script>
 document.addEventListener("click", function (event) {
@@ -36,27 +36,27 @@ document.addEventListener("click", function (event) {
 </style>
 
 
-## Introduction to differential abundance analysis
+## Differential abundance analysis
 
-*What is differential abundance analysis (DAA) and why do we do it?*
+This section provides an overview and examples of *differential
+abundance analysis (DAA)* based on one of the [openly available
+datasets](https://microbiome.github.io/mia/reference/mia-datasets.html)
+in mia to illustrate how to perform differential abundance analysis
+(DAA). DAA identifies differences in the abundances of individual
+taxonomic groups between two or more groups (e.g. treatment vs
+control). This can be performed at any phylogenetic level.
 
-In this section we will work with one of the 
-[openly available datasets](https://microbiome.github.io/mia/reference/mia-datasets.html) in mia to illustrate how to perform differential abundance
-analysis (DAA). DAA aims to identify differences in taxon abundance between two
-or more groups (e.g. treatment vs control) for each taxon of a sample. This can
-be performed at any phylogenetic level but we will work at Genus level
-abundances in this section. We perform DAA to identify biomarkers and/or gain
-understanding of a complex system by looking at its isolated components. For
-example, identifying that a bacterial taxon is different between e.g. a patient
-group with disease *X* vs a healthy control group might lead to important
-insights into the pathophysiology. Changes in the microbiota might be causal or
-a consequence of the disease. Either way, it can help to understand the system
-as a whole. Be aware that this approach has also been criticized
-[recently](https://arxiv.org/abs/2104.07266).
+We perform DAA to identify biomarkers and/or gain understanding of a
+complex system by looking at its isolated components. For example,
+identifying that a bacterial taxon is different between e.g. a patient
+group with disease *X* vs a healthy control group might lead to
+important insights into the pathophysiology. Changes in the microbiota
+might be causal or a consequence of the disease. Either way, it can
+help to understand the system as a whole. Be aware that this approach
+has also been criticized [recently](https://arxiv.org/abs/2104.07266).
 
 
-
-*How to do DAA*
+### Examples and tools
 
 There are many tools to perform DAA. The most popular tools, without going into
 evaluating whether or not they perform well for this task, are:  
@@ -73,7 +73,7 @@ evaluating whether or not they perform well for this task, are:
 - [Wilcoxon test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/wilcox.test)  
 
 
-We recommend you to have a look at 
+We recommend to have a look at 
 [Nearing et al. (2021)](https://www.biorxiv.org/content/10.1101/2021.05.10.443486v1.full) who compared all these listed methods across 38
 different datasets. Because different methods have different approaches
 (parametric vs non-parametric, different normalization techiniques etc.) to

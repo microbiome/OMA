@@ -1,4 +1,4 @@
-# Alpha Diversity
+# Community diversity
 
 <script>
 document.addEventListener("click", function (event) {
@@ -95,11 +95,12 @@ by species abundances.
   Prevalence and detection thresholds determine rare taxa whose total concentration
   is represented as a rarity index.
   
-## Estimating alpha diversity
+## Estimation 
 
 Alpha diversity can be estimated with wrapper functions that interact
 with other packages implementing the calculation, such as _`vegan`_
 [@R-vegan].
+
 
 ### Richness  
 
@@ -269,7 +270,7 @@ head(colData(se)$log_modulo_skewness)
 ```
 
 
-## Visualize alpha diversities  
+## Visualization
 
 A plot comparing all the diversity measures calculated above and stored in `colData` can then be constructed directly.  
 

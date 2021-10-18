@@ -1,5 +1,3 @@
-# (PART) Focus Topics {-}
-
 # Taxonomic Information {#taxonomic-information}
 
 <script>

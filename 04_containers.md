@@ -42,7 +42,7 @@ document.addEventListener("click", function (event) {
 The building blocks of the framework are **data container**
 (SummarizedExperiment and its derivatives), **packages** from various
 developers using the TreeSE container, open **demonstration data
-sets**, in a separate Chapter on [#example-data], and **online
+sets**, in a separate chapter \@ref(example-data), and **online
 tutorials** including this online book as well as the various package
 vignettes and other material.
 
@@ -88,6 +88,7 @@ on how to represent different varieties of multi-table data within the
 
 The options and recommendations are summarized in Table \@ref(tab:options).
 
+
 ### Assay data
 
 The original count-based taxonomic abundance tables may have different 
@@ -107,7 +108,37 @@ assays(se)
 ## names(1): counts
 ```
 
-As an example, the relative abundance is calculated.
+The `assays` slot contains the experimental data as count matrices. Multiple 
+matrices can be stored the result of `assays` is actually a list of matrices.
+
+
+```r
+assays(se)
+```
+
+```
+## List of length 1
+## names(1): counts
+```
+
+Individual assays can be accessed via `assay`
+
+
+```r
+assay(se, "counts")[1:5,1:7]
+```
+
+```
+##        CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr
+## 549322   0   0   0       0       0       0       0
+## 522457   0   0   0       0       0       0       0
+## 951      0   0   0       0       0       0       1
+## 244423   0   0   0       0       0       0       0
+## 586076   0   0   0       0       0       0       0
+```
+
+To illustrate the use of multiple assays, the relative abundance data can be 
+calcualted and stored along the original count data using `relAbundanceCounts`.
 
 
 ```r
@@ -120,8 +151,174 @@ assays(se)
 ## names(2): counts relabundance
 ```
 
-Here the dimension of the count data remains unchanged. This is
-actually a requirement for any `SummarizedExperiment` object.
+Now there are two assays available in the `se` object, `counts` and 
+`relabundance`.
+
+
+```r
+assay(se, "relabundance")[1:5,1:7]
+```
+
+```
+##        CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr   M11Plmr
+## 549322   0   0   0       0       0       0 0.000e+00
+## 522457   0   0   0       0       0       0 0.000e+00
+## 951      0   0   0       0       0       0 2.305e-06
+## 244423   0   0   0       0       0       0 0.000e+00
+## 586076   0   0   0       0       0       0 0.000e+00
+```
+
+
+Here the dimension of the count data remains unchanged. This is in
+fact a requirement for any `SummarizedExperiment` object.
+
+
+
+### colData
+
+`colData` contains data on the samples.
+
+
+```r
+colData(se)
+```
+
+```
+## DataFrame with 26 rows and 7 columns
+##         X.SampleID   Primer Final_Barcode Barcode_truncated_plus_T
+##           <factor> <factor>      <factor>                 <factor>
+## CL3        CL3      ILBC_01        AACGCA                   TGCGTT
+## CC1        CC1      ILBC_02        AACTCG                   CGAGTT
+## SV1        SV1      ILBC_03        AACTGT                   ACAGTT
+## M31Fcsw    M31Fcsw  ILBC_04        AAGAGA                   TCTCTT
+## M11Fcsw    M11Fcsw  ILBC_05        AAGCTG                   CAGCTT
+## ...            ...      ...           ...                      ...
+## TS28         TS28   ILBC_25        ACCAGA                   TCTGGT
+## TS29         TS29   ILBC_26        ACCAGC                   GCTGGT
+## Even1        Even1  ILBC_27        ACCGCA                   TGCGGT
+## Even2        Even2  ILBC_28        ACCTCG                   CGAGGT
+## Even3        Even3  ILBC_29        ACCTGT                   ACAGGT
+##         Barcode_full_length SampleType
+##                    <factor>   <factor>
+## CL3             CTAGCGTGCGT      Soil 
+## CC1             CATCGACGAGT      Soil 
+## SV1             GTACGCACAGT      Soil 
+## M31Fcsw         TCGACATCTCT      Feces
+## M11Fcsw         CGACTGCAGCT      Feces
+## ...                     ...        ...
+## TS28            GCATCGTCTGG      Feces
+## TS29            CTAGTCGCTGG      Feces
+## Even1           TGACTCTGCGG      Mock 
+## Even2           TCTGATCGAGG      Mock 
+## Even3           AGAGAGACAGG      Mock 
+##                                        Description
+##                                           <factor>
+## CL3     Calhoun South Carolina Pine soil, pH 4.9  
+## CC1     Cedar Creek Minnesota, grassland, pH 6.1  
+## SV1     Sevilleta new Mexico, desert scrub, pH 8.3
+## M31Fcsw M3, Day 1, fecal swab, whole body study   
+## M11Fcsw M1, Day 1, fecal swab, whole body study   
+## ...                                            ...
+## TS28                                       Twin #1
+## TS29                                       Twin #2
+## Even1                                      Even1  
+## Even2                                      Even2  
+## Even3                                      Even3
+```
+
+### rowData
+
+`rowData` contains data on the features of the analyzed samples. Of particular
+interest for the microbiome field this is used to store taxonomic information.
+
+
+```r
+rowData(se)
+```
+
+```
+## DataFrame with 19216 rows and 7 columns
+##            Kingdom        Phylum        Class        Order        Family
+##        <character>   <character>  <character>  <character>   <character>
+## 549322     Archaea Crenarchaeota Thermoprotei           NA            NA
+## 522457     Archaea Crenarchaeota Thermoprotei           NA            NA
+## 951        Archaea Crenarchaeota Thermoprotei Sulfolobales Sulfolobaceae
+## 244423     Archaea Crenarchaeota        Sd-NA           NA            NA
+## 586076     Archaea Crenarchaeota        Sd-NA           NA            NA
+## ...            ...           ...          ...          ...           ...
+## 278222    Bacteria           SR1           NA           NA            NA
+## 463590    Bacteria           SR1           NA           NA            NA
+## 535321    Bacteria           SR1           NA           NA            NA
+## 200359    Bacteria           SR1           NA           NA            NA
+## 271582    Bacteria           SR1           NA           NA            NA
+##              Genus                Species
+##        <character>            <character>
+## 549322          NA                     NA
+## 522457          NA                     NA
+## 951     Sulfolobus Sulfolobusacidocalda..
+## 244423          NA                     NA
+## 586076          NA                     NA
+## ...            ...                    ...
+## 278222          NA                     NA
+## 463590          NA                     NA
+## 535321          NA                     NA
+## 200359          NA                     NA
+## 271582          NA                     NA
+```
+
+### rowTree  
+
+Phylogenetic trees also play an important role for the microbiome field. The 
+`TreeSummarizedExperiment` class is able to keep track of feature and node
+relations via two functions, `rowTree` and `rowLinks`.
+
+A tree can be accessed via `rowTree` as `phylo` object.       
+
+```r
+rowTree(se)
+```
+
+```
+## 
+## Phylogenetic tree with 19216 tips and 19215 internal nodes.
+## 
+## Tip labels:
+##   549322, 522457, 951, 244423, 586076, 246140, ...
+## Node labels:
+##   , 0.858.4, 1.000.154, 0.764.3, 0.995.2, 1.000.2, ...
+## 
+## Rooted; includes branch lengths.
+```
+
+The links to the individual features are available through `rowLinks`.
+
+
+```r
+rowLinks(se)
+```
+
+```
+## LinkDataFrame with 19216 rows and 5 columns
+##           nodeLab   nodeNum nodeLab_alias    isLeaf   whichTree
+##       <character> <integer>   <character> <logical> <character>
+## 1          549322         1       alias_1      TRUE       phylo
+## 2          522457         2       alias_2      TRUE       phylo
+## 3             951         3       alias_3      TRUE       phylo
+## 4          244423         4       alias_4      TRUE       phylo
+## 5          586076         5       alias_5      TRUE       phylo
+## ...           ...       ...           ...       ...         ...
+## 19212      278222     19212   alias_19212      TRUE       phylo
+## 19213      463590     19213   alias_19213      TRUE       phylo
+## 19214      535321     19214   alias_19214      TRUE       phylo
+## 19215      200359     19215   alias_19215      TRUE       phylo
+## 19216      271582     19216   alias_19216      TRUE       phylo
+```
+
+Please note that there can be a 1:1 relationship between tree nodes and 
+features, but this is not a must have. This means there can be features, which
+are not linked to nodes, and nodes, which are not linked to features. To change
+the links in an existing object, the `changeTree` function is available.
+
 
 
 ### Alternative experiments
@@ -644,7 +841,7 @@ GlobalPatterns_phyloseq2
 
 
 
-## Demonstration Data {#example-data}
+## Demonstration data {#example-data}
 
 
 Open demonstration data for testing and benchmarking purposes is
@@ -785,240 +982,7 @@ se <- curatedMetagenomicData("Vatanen*", dryrun = FALSE, counts = TRUE)
 
 
 
-## Microbiome data specific aspects
 
-
-```r
-library(mia)
-data("GlobalPatterns", package = "mia")
-se <- GlobalPatterns 
-se
-```
-
-```
-## class: TreeSummarizedExperiment 
-## dim: 19216 26 
-## metadata(0):
-## assays(1): counts
-## rownames(19216): 549322 522457 ... 200359 271582
-## rowData names(7): Kingdom Phylum ... Genus Species
-## colnames(26): CL3 CC1 ... Even2 Even3
-## colData names(7): X.SampleID Primer ... SampleType Description
-## reducedDimNames(0):
-## mainExpName: NULL
-## altExpNames(0):
-## rowLinks: a LinkDataFrame (19216 rows)
-## rowTree: 1 phylo tree(s) (19216 leaves)
-## colLinks: NULL
-## colTree: NULL
-```
-
-### Assays  
-
-The `assays` slot contains the experimental data as count matrices. Multiple 
-matrices can be stored the result of `assays` is actually a list of matrices.
-
-
-```r
-assays(se)
-```
-
-```
-## List of length 1
-## names(1): counts
-```
-
-Individual assays can be accessed via `assay`
-
-
-```r
-assay(se, "counts")[1:5,1:7]
-```
-
-```
-##        CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr
-## 549322   0   0   0       0       0       0       0
-## 522457   0   0   0       0       0       0       0
-## 951      0   0   0       0       0       0       1
-## 244423   0   0   0       0       0       0       0
-## 586076   0   0   0       0       0       0       0
-```
-
-To illustrate the use of multiple assays, the relative abundance data can be 
-calcualted and stored along the original count data using `relAbundanceCounts`.
-
-
-```r
-se <- relAbundanceCounts(se)
-assays(se)
-```
-
-```
-## List of length 2
-## names(2): counts relabundance
-```
-
-Now there are two assays available in the `se` object, `counts` and 
-`relabundance`.
-
-
-```r
-assay(se, "relabundance")[1:5,1:7]
-```
-
-```
-##        CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr   M11Plmr
-## 549322   0   0   0       0       0       0 0.000e+00
-## 522457   0   0   0       0       0       0 0.000e+00
-## 951      0   0   0       0       0       0 2.305e-06
-## 244423   0   0   0       0       0       0 0.000e+00
-## 586076   0   0   0       0       0       0 0.000e+00
-```
-
-### colData
-
-`colData` contains data on the samples.
-
-
-```r
-colData(se)
-```
-
-```
-## DataFrame with 26 rows and 7 columns
-##         X.SampleID   Primer Final_Barcode Barcode_truncated_plus_T
-##           <factor> <factor>      <factor>                 <factor>
-## CL3        CL3      ILBC_01        AACGCA                   TGCGTT
-## CC1        CC1      ILBC_02        AACTCG                   CGAGTT
-## SV1        SV1      ILBC_03        AACTGT                   ACAGTT
-## M31Fcsw    M31Fcsw  ILBC_04        AAGAGA                   TCTCTT
-## M11Fcsw    M11Fcsw  ILBC_05        AAGCTG                   CAGCTT
-## ...            ...      ...           ...                      ...
-## TS28         TS28   ILBC_25        ACCAGA                   TCTGGT
-## TS29         TS29   ILBC_26        ACCAGC                   GCTGGT
-## Even1        Even1  ILBC_27        ACCGCA                   TGCGGT
-## Even2        Even2  ILBC_28        ACCTCG                   CGAGGT
-## Even3        Even3  ILBC_29        ACCTGT                   ACAGGT
-##         Barcode_full_length SampleType
-##                    <factor>   <factor>
-## CL3             CTAGCGTGCGT      Soil 
-## CC1             CATCGACGAGT      Soil 
-## SV1             GTACGCACAGT      Soil 
-## M31Fcsw         TCGACATCTCT      Feces
-## M11Fcsw         CGACTGCAGCT      Feces
-## ...                     ...        ...
-## TS28            GCATCGTCTGG      Feces
-## TS29            CTAGTCGCTGG      Feces
-## Even1           TGACTCTGCGG      Mock 
-## Even2           TCTGATCGAGG      Mock 
-## Even3           AGAGAGACAGG      Mock 
-##                                        Description
-##                                           <factor>
-## CL3     Calhoun South Carolina Pine soil, pH 4.9  
-## CC1     Cedar Creek Minnesota, grassland, pH 6.1  
-## SV1     Sevilleta new Mexico, desert scrub, pH 8.3
-## M31Fcsw M3, Day 1, fecal swab, whole body study   
-## M11Fcsw M1, Day 1, fecal swab, whole body study   
-## ...                                            ...
-## TS28                                       Twin #1
-## TS29                                       Twin #2
-## Even1                                      Even1  
-## Even2                                      Even2  
-## Even3                                      Even3
-```
-
-### rowData
-
-`rowData` contains data on the features of the analyzed samples. Of particular
-interest for the microbiome field this is used to store taxonomic information.
-
-
-```r
-rowData(se)
-```
-
-```
-## DataFrame with 19216 rows and 7 columns
-##            Kingdom        Phylum        Class        Order        Family
-##        <character>   <character>  <character>  <character>   <character>
-## 549322     Archaea Crenarchaeota Thermoprotei           NA            NA
-## 522457     Archaea Crenarchaeota Thermoprotei           NA            NA
-## 951        Archaea Crenarchaeota Thermoprotei Sulfolobales Sulfolobaceae
-## 244423     Archaea Crenarchaeota        Sd-NA           NA            NA
-## 586076     Archaea Crenarchaeota        Sd-NA           NA            NA
-## ...            ...           ...          ...          ...           ...
-## 278222    Bacteria           SR1           NA           NA            NA
-## 463590    Bacteria           SR1           NA           NA            NA
-## 535321    Bacteria           SR1           NA           NA            NA
-## 200359    Bacteria           SR1           NA           NA            NA
-## 271582    Bacteria           SR1           NA           NA            NA
-##              Genus                Species
-##        <character>            <character>
-## 549322          NA                     NA
-## 522457          NA                     NA
-## 951     Sulfolobus Sulfolobusacidocalda..
-## 244423          NA                     NA
-## 586076          NA                     NA
-## ...            ...                    ...
-## 278222          NA                     NA
-## 463590          NA                     NA
-## 535321          NA                     NA
-## 200359          NA                     NA
-## 271582          NA                     NA
-```
-
-### rowTree  
-
-Phylogenetic trees also play an important role for the microbiome field. The 
-`TreeSummarizedExperiment` class is able to keep track of feature and node
-relations via two functions, `rowTree` and `rowLinks`.
-
-A tree can be accessed via `rowTree` as `phylo` object.       
-
-```r
-rowTree(se)
-```
-
-```
-## 
-## Phylogenetic tree with 19216 tips and 19215 internal nodes.
-## 
-## Tip labels:
-##   549322, 522457, 951, 244423, 586076, 246140, ...
-## Node labels:
-##   , 0.858.4, 1.000.154, 0.764.3, 0.995.2, 1.000.2, ...
-## 
-## Rooted; includes branch lengths.
-```
-
-The links to the individual features are available through `rowLinks`.
-
-
-```r
-rowLinks(se)
-```
-
-```
-## LinkDataFrame with 19216 rows and 5 columns
-##           nodeLab   nodeNum nodeLab_alias    isLeaf   whichTree
-##       <character> <integer>   <character> <logical> <character>
-## 1          549322         1       alias_1      TRUE       phylo
-## 2          522457         2       alias_2      TRUE       phylo
-## 3             951         3       alias_3      TRUE       phylo
-## 4          244423         4       alias_4      TRUE       phylo
-## 5          586076         5       alias_5      TRUE       phylo
-## ...           ...       ...           ...       ...         ...
-## 19212      278222     19212   alias_19212      TRUE       phylo
-## 19213      463590     19213   alias_19213      TRUE       phylo
-## 19214      535321     19214   alias_19214      TRUE       phylo
-## 19215      200359     19215   alias_19215      TRUE       phylo
-## 19216      271582     19216   alias_19216      TRUE       phylo
-```
-
-Please note that there can be a 1:1 relationship between tree nodes and 
-features, but this is not a must have. This means there can be features, which
-are not linked to nodes, and nodes, which are not linked to features. To change
-the links in an existing object, the `changeTree` function is available.
 
 
 

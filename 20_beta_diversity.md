@@ -32,7 +32,7 @@ document.addEventListener("click", function (event) {
   background-color: #f1f1f1;
 }
 </style>
-# Beta Diversity
+# Community similarity
 
 Where alpha diversity focuses on community variation within a
 community (sample), beta diversity quantifies (dis-)similarites
@@ -498,7 +498,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2657
+## [1] 0.2685
 ```
 
 In this case, the community composition is not significantly different

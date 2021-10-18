@@ -1,4 +1,4 @@
-# Microbiome Community {#microbiome-community}
+# Community composition {#microbiome-community}
 
 <script>
 document.addEventListener("click", function (event) {
@@ -46,7 +46,7 @@ data("GlobalPatterns", package="mia")
 tse <- GlobalPatterns
 ```
 
-## Community composition
+## Visualizing taxonomic composition
 
 ### Composition barplot
 
@@ -243,11 +243,382 @@ pheatmap(mat, annotation_row = taxa_clusters,
 
 <img src="21_microbiome_community_files/figure-html/pheatmap5-1.png" width="672" />
 
-In addition to _pheatmap_ package, there are also other packages that provide 
-functions for more complex heatmaps. One example is _iheatmapr_ package. Examples
-of using it you can find from its 
-[vignette](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html).
+In addition to _pheatmap_ package, there are also other packages that
+provide functions for more complex heatmaps, such as [_iheatmapr_](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html).
 
+
+
+# Community typing {#community-typing}
+
+
+
+
+
+### Dirichlet Multinomial Mixtures (DMM)
+
+This section focus on DMM analysis. 
+
+One technique that allows to search for groups of samples that are
+similar to each other is the [Dirichlet-Multinomial Mixture
+Model](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030126). In
+DMM, we first determine the number of clusters (k) that best fit the
+data (model evidence) using Laplace approximation. After fitting the
+model with k clusters, we obtain for each sample k probabilities that
+reflect the probability that a sample belongs to the given cluster.
+
+Let's cluster the data with DMM clustering. 
+
+
+```r
+# Runs model and calculates the most likely number of clusters from 1 to 7.
+# Since this is a large dataset it takes long computational time.
+# For this reason we use only a subset of the data; agglomerated by Phylum as a rank.
+tse <- GlobalPatterns
+tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
+```
+
+
+```r
+# It is stored in metadata
+tse_dmn
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 67 26 
+## metadata(1): DMN
+## assays(1): counts
+## rownames(67): Phylum:Crenarchaeota Phylum:Euryarchaeota ...
+##   Phylum:Synergistetes Phylum:SR1
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(26): CL3 CC1 ... Even2 Even3
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (67 rows)
+## rowTree: 1 phylo tree(s) (66 leaves)
+## colLinks: NULL
+## colTree: NULL
+```
+
+Return information on metadata that the object contains.
+
+
+```r
+names(metadata(tse_dmn))
+```
+
+```
+## [1] "DMN"
+```
+
+This returns a list of DMN objects for a closer investigation.
+
+
+```r
+getDMN(tse_dmn)
+```
+
+```
+## [[1]]
+## class: DMN 
+## k: 1 
+## samples x taxa: 26 x 67 
+## Laplace: 7715 BIC: 7802 AIC: 7760 
+## 
+## [[2]]
+## class: DMN 
+## k: 2 
+## samples x taxa: 26 x 67 
+## Laplace: 7673 BIC: 7927 AIC: 7842 
+## 
+## [[3]]
+## class: DMN 
+## k: 3 
+## samples x taxa: 26 x 67 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
+## 
+## [[4]]
+## class: DMN 
+## k: 4 
+## samples x taxa: 26 x 67 
+## Laplace: 7751 BIC: 8274 AIC: 8103 
+## 
+## [[5]]
+## class: DMN 
+## k: 5 
+## samples x taxa: 26 x 67 
+## Laplace: 7857 BIC: 8578 AIC: 8364 
+## 
+## [[6]]
+## class: DMN 
+## k: 6 
+## samples x taxa: 26 x 67 
+## Laplace: 7952 BIC: 8850 AIC: 8594 
+## 
+## [[7]]
+## class: DMN 
+## k: 7 
+## samples x taxa: 26 x 67 
+## Laplace: 7991 BIC: 9021 AIC: 8722
+```
+
+
+Show Laplace approximation (model evidence) for each model of the k models.
+
+
+```r
+library(miaViz)
+plotDMNFit(tse_dmn, type = "laplace")
+```
+
+<img src="21_microbiome_community_files/figure-html/unnamed-chunk-5-1.png" width="672" />
+
+Return the model that has the best fit.
+
+
+```r
+getBestDMNFit(tse_dmn, type = "laplace")
+```
+
+```
+## class: DMN 
+## k: 2 
+## samples x taxa: 26 x 67 
+## Laplace: 7673 BIC: 7927 AIC: 7842
+```
+### PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors
+
+Group samples and return DMNGroup object that contains a summary.
+Patient status is used for grouping.
+
+
+```r
+dmn_group <- calculateDMNgroup(tse_dmn, variable = "SampleType",  exprs_values = "counts",
+                               k = 2, seed=.Machine$integer.max)
+
+dmn_group
+```
+
+```
+## class: DMNGroup 
+## summary:
+##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
+```
+
+Mixture weights  (rough measure of the cluster size).
+
+
+
+```r
+DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
+```
+
+```
+##       pi theta
+## 1 0.5385 20.65
+## 2 0.4615 15.28
+```
+
+
+Samples-cluster assignment probabilities / how probable it is that sample belongs
+to each cluster
+
+
+```r
+head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
+```
+
+```
+##              [,1]      [,2]
+## CL3     1.000e+00 4.726e-17
+## CC1     1.000e+00 3.588e-22
+## SV1     1.000e+00 2.026e-12
+## M31Fcsw 6.020e-26 1.000e+00
+## M11Fcsw 8.797e-17 1.000e+00
+## M31Plmr 8.830e-14 1.000e+00
+```
+
+Contribution of each taxa to each component
+
+
+```r
+head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
+```
+
+```
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30556 0.1354689
+## Phylum:Euryarchaeota  0.23192 0.1468652
+## Phylum:Actinobacteria 1.20868 1.0599611
+## Phylum:Spirochaetes   0.21449 0.1318461
+## Phylum:MVP-15         0.03001 0.0007652
+## Phylum:Proteobacteria 6.87329 1.8152304
+```
+Get the assignment probabilities
+
+
+
+```r
+prob <- DirichletMultinomial::mixture(getBestDMNFit(tse_dmn))
+# Add column names
+colnames(prob) <- c("comp1", "comp2")
+
+# For each row, finds column that has the highest value. Then extract the column 
+# names of highest values.
+vec <- colnames(prob)[max.col(prob,ties.method = "first")]
+```
+
+Computing the euclidean PCoA and storing it as a data frame
+
+
+```r
+# Does clr transformation. Pseudocount is added, because data contains zeros.
+tse <- transformCounts(tse, method = "clr", pseudocount = 1)
+
+# Gets clr table
+clr_assay <- assays(tse)$clr
+
+# Transposes it to get taxa to columns
+clr_assay <- t(clr_assay)
+
+# Calculates Euclidean distances between samples. Because taxa is in columns,
+# it is used to compare different samples.
+euclidean_dist <- vegan::vegdist(clr_assay, method = "euclidean")
+
+# Does principal coordinate analysis
+euclidean_pcoa <- ecodist::pco(euclidean_dist)
+
+# Creates a data frame from principal coordinates
+euclidean_pcoa_df <- data.frame(pcoa1 = euclidean_pcoa$vectors[,1], 
+                                pcoa2 = euclidean_pcoa$vectors[,2])
+```
+
+
+```r
+# Creates a data frame that contains principal coordinates and DMM information
+euclidean_dmm_pcoa_df <- cbind(euclidean_pcoa_df,
+                               dmm_component = vec)
+# Creates a plot
+euclidean_dmm_plot <- ggplot(data = euclidean_dmm_pcoa_df, 
+                             aes(x=pcoa1, y=pcoa2,
+                                 color = dmm_component)) +
+  geom_point() +
+  labs(x = "Coordinate 1",
+       y = "Coordinate 2",
+       title = "PCoA with Aitchison distances") +  
+  theme(title = element_text(size = 12)) # makes titles smaller
+
+euclidean_dmm_plot
+```
+
+<img src="21_microbiome_community_files/figure-html/unnamed-chunk-13-1.png" width="672" />
+
+## Community Detection
+
+Another approach for discovering communities within the samples of the
+data, is to run community detection algorithms after building a
+graph. The following demonstration builds a graph based on the k
+nearest-neighbors and performs the community detection on the fly.
+
+_`bluster`_ [@R-bluster] package offers several clustering methods,
+among which graph-based are present, enabling the community detection
+task.
+
+Installing package:
+
+
+```r
+if(!require(bluster)){
+  BiocManager::install("bluster")
+}
+```
+
+The algorithm used is "short random walks" [@Pons2006]. Graph is
+constructed using different k values (the number of nearest neighbors
+to consider during graph construction) using the robust centered log
+ratio (rclr) assay data. Then plotting the communities using UMAP
+[@McInnes2018] ordination as a visual exploration aid.  In the
+following demonstration we use the `enterotype` dataset from the
+[@R-mia] package.
+
+
+```r
+library(bluster)
+library(patchwork) # For arranging several plots as a grid
+library(scater)
+
+data("enterotype", package="mia")
+tse <- enterotype
+tse <- transformCounts(tse, method = "rclr")
+
+# Performing and storing UMAP
+tse <- runUMAP(tse, name="UMAP", exprs_values="rclr")
+
+k <- c(2,3,5,10)
+ClustAndPlot <- function(x) {
+  # Creating the graph and running the short random walks algorithm  
+  graph_clusters <- clusterRows(t(assays(tse)$rclr), NNGraphParam(k=x))
+  
+  # Results of the clustering as a color for each sample
+  plotUMAP(tse, colour_by = I(graph_clusters)) +
+    labs(title = paste0("k = ", x))
+}
+
+# Applying the function for different k values
+plots <- lapply(k,ClustAndPlot)
+
+# Displaying plots in a grid
+(plots[[1]] + plots[[2]]) / (plots[[3]] + plots[[4]])
+```
+
+<img src="21_microbiome_community_files/figure-html/unnamed-chunk-15-1.png" width="672" />
+
+Similarly, the _`bluster`_ [@R-bluster] package offers clustering
+diagnostics that can be used for judging the clustering quality (see
+[Assorted clustering
+diagnostics](http://bioconductor.org/packages/release/bioc/vignettes/bluster/inst/doc/diagnostics.html)).
+In the following, Silhouette width as a diagnostic tool is computed
+and results are visualized for each case presented earlier. For more
+about Silhouettes read [@Rousseeuw1987].
+
+
+```r
+ClustDiagPlot <- function(x) {
+  # Getting the clustering results
+  graph_clusters <- clusterRows(t(assays(tse)$rclr), NNGraphParam(k=x))
+  
+  # Computing the diagnostic info
+  sil <- approxSilhouette(t(assays(tse)$rclr), graph_clusters)
+  
+  # Plotting as a boxlpot to observe cluster separation
+  boxplot(split(sil$width, graph_clusters), main=paste0("k = ", x))
+  
+}
+# Applying the function for different k values
+res <- lapply(k,ClustDiagPlot)
+```
+
+<img src="21_microbiome_community_files/figure-html/unnamed-chunk-16-1.png" width="672" /><img src="21_microbiome_community_files/figure-html/unnamed-chunk-16-2.png" width="672" /><img src="21_microbiome_community_files/figure-html/unnamed-chunk-16-3.png" width="672" /><img src="21_microbiome_community_files/figure-html/unnamed-chunk-16-4.png" width="672" />
+
+## Additional Community Typing
+
+For more community typing techniques applied to the 'SprockettTHData' data set, see the attached .Rmd file.
+
+Link:
+
+   * [Rmd](add-comm-typing.Rmd)
 
 
 ## Session Info {-}
@@ -275,44 +646,46 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] dendextend_1.15.1              pheatmap_1.0.12               
- [3] miaViz_1.1.4                   ggraph_2.0.5                  
- [5] ggplot2_3.3.5                  mia_1.1.19                    
- [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
- [9] XVector_0.33.0                 SingleCellExperiment_1.15.2   
-[11] SummarizedExperiment_1.23.5    Biobase_2.53.0                
-[13] GenomicRanges_1.45.0           GenomeInfoDb_1.29.8           
-[15] IRanges_2.27.2                 S4Vectors_0.31.5              
-[17] BiocGenerics_0.39.2            MatrixGenerics_1.5.4          
-[19] matrixStats_0.61.0-9001        ecodist_2.0.7                 
-[21] BiocStyle_2.21.4               rebook_1.3.1                  
+ [1] scater_1.21.8                  scuttle_1.3.1                 
+ [3] patchwork_1.1.1                bluster_1.3.2                 
+ [5] dendextend_1.15.1              pheatmap_1.0.12               
+ [7] miaViz_1.1.4                   ggraph_2.0.5                  
+ [9] ggplot2_3.3.5                  mia_1.1.19                    
+[11] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
+[13] XVector_0.33.0                 SingleCellExperiment_1.15.2   
+[15] SummarizedExperiment_1.23.5    Biobase_2.53.0                
+[17] GenomicRanges_1.45.0           GenomeInfoDb_1.29.8           
+[19] IRanges_2.27.2                 S4Vectors_0.31.5              
+[21] BiocGenerics_0.39.2            MatrixGenerics_1.5.4          
+[23] matrixStats_0.61.0-9001        ecodist_2.0.7                 
+[25] BiocStyle_2.21.4               rebook_1.3.1                  
 
 loaded via a namespace (and not attached):
   [1] plyr_1.8.6                  igraph_1.2.6               
   [3] lazyeval_0.2.2              splines_4.1.1              
-  [5] BiocParallel_1.27.17        scater_1.21.8              
-  [7] digest_0.6.28               yulab.utils_0.0.4          
-  [9] htmltools_0.5.2             viridis_0.6.2              
- [11] fansi_0.5.0                 magrittr_2.0.1             
- [13] memoise_2.0.0               ScaledMatrix_1.1.0         
- [15] cluster_2.1.2               DECIPHER_2.21.0            
- [17] graphlayouts_0.7.1          colorspace_2.0-2           
- [19] blob_1.2.2                  ggrepel_0.9.1              
- [21] xfun_0.26                   dplyr_1.0.7                
- [23] crayon_1.4.1                RCurl_1.98-1.5             
- [25] jsonlite_1.7.2              graph_1.71.2               
- [27] ape_5.5                     glue_1.4.2                 
- [29] polyclip_1.10-0             gtable_0.3.0               
- [31] zlibbioc_1.39.0             DelayedArray_0.19.4        
- [33] BiocSingular_1.9.1          scales_1.1.1               
- [35] DBI_1.1.1                   Rcpp_1.0.7                 
- [37] viridisLite_0.4.0           decontam_1.13.0            
- [39] gridGraphics_0.5-1          tidytree_0.3.5             
- [41] bit_4.0.4                   rsvd_1.0.5                 
+  [5] BiocParallel_1.27.17        digest_0.6.28              
+  [7] yulab.utils_0.0.4           htmltools_0.5.2            
+  [9] viridis_0.6.2               fansi_0.5.0                
+ [11] magrittr_2.0.1              memoise_2.0.0              
+ [13] ScaledMatrix_1.1.0          cluster_2.1.2              
+ [15] DECIPHER_2.21.0             graphlayouts_0.7.1         
+ [17] colorspace_2.0-2            blob_1.2.2                 
+ [19] ggrepel_0.9.1               xfun_0.26                  
+ [21] dplyr_1.0.7                 crayon_1.4.1               
+ [23] RCurl_1.98-1.5              jsonlite_1.7.2             
+ [25] graph_1.71.2                ape_5.5                    
+ [27] glue_1.4.2                  polyclip_1.10-0            
+ [29] gtable_0.3.0                zlibbioc_1.39.0            
+ [31] DelayedArray_0.19.4         BiocSingular_1.9.1         
+ [33] scales_1.1.1                DBI_1.1.1                  
+ [35] Rcpp_1.0.7                  viridisLite_0.4.0          
+ [37] decontam_1.13.0             gridGraphics_0.5-1         
+ [39] tidytree_0.3.5              bit_4.0.4                  
+ [41] rsvd_1.0.5                  FNN_1.1.3                  
  [43] RColorBrewer_1.1-2          dir.expiry_1.1.0           
  [45] ellipsis_0.3.2              pkgconfig_2.0.3            
  [47] XML_3.99-0.8                farver_2.1.0               
- [49] scuttle_1.3.1               CodeDepends_0.6.5          
+ [49] uwot_0.1.10                 CodeDepends_0.6.5          
  [51] sass_0.4.0                  utf8_1.2.2                 
  [53] ggplotify_0.1.0             tidyselect_1.1.1           
  [55] labeling_0.4.2              rlang_0.4.11               
@@ -335,8 +708,8 @@ loaded via a namespace (and not attached):
  [89] vctrs_0.3.8                 pillar_1.6.3               
  [91] lifecycle_1.0.1             BiocManager_1.30.16        
  [93] jquerylib_0.1.4             BiocNeighbors_1.11.0       
- [95] bitops_1.0-7                irlba_2.3.3                
- [97] patchwork_1.1.1             R6_2.5.1                   
+ [95] cowplot_1.1.1               bitops_1.0-7               
+ [97] irlba_2.3.3                 R6_2.5.1                   
  [99] bookdown_0.24               gridExtra_2.3              
 [101] vipor_0.4.5                 codetools_0.2-18           
 [103] MASS_7.3-54                 assertthat_0.2.1           
