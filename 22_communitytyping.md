@@ -134,31 +134,31 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7690 BIC: 8076 AIC: 7948 
+## Laplace: 7689 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7752 BIC: 8274 AIC: 8103 
+## Laplace: 7792 BIC: 8357 AIC: 8187 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7879 BIC: 8549 AIC: 8335 
+## Laplace: 7844 BIC: 8548 AIC: 8335 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7986 BIC: 8881 AIC: 8625 
+## Laplace: 7926 BIC: 8796 AIC: 8540 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: NaN BIC: NaN AIC: NaN
+## Laplace: 8101 BIC: 9161 AIC: 8863
 ```
 
 
@@ -223,8 +223,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.32
+## 1 0.5385 20.60
+## 2 0.4615 15.28
 ```
 
 
@@ -238,12 +238,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 4.538e-17
-## CC1     1.000e+00 3.465e-22
-## SV1     1.000e+00 1.723e-12
-## M31Fcsw 7.432e-26 1.000e+00
-## M11Fcsw 1.093e-16 1.000e+00
-## M31Plmr 1.154e-13 1.000e+00
+## CL3     1.000e+00 5.058e-17
+## CC1     1.000e+00 3.868e-22
+## SV1     1.000e+00 2.033e-12
+## M31Fcsw 7.334e-26 1.000e+00
+## M11Fcsw 1.064e-16 1.000e+00
+## M31Plmr 9.988e-14 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -254,13 +254,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30382 0.1354019
-## Phylum:Euryarchaeota  0.23114 0.1468863
-## Phylum:Actinobacteria 1.21375 1.0581544
-## Phylum:Spirochaetes   0.21393 0.1318039
-## Phylum:MVP-15         0.02982 0.0007686
-## Phylum:Proteobacteria 6.84469 1.8114993
+##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354646
+## Phylum:Euryarchaeota  0.2314 0.1468589
+## Phylum:Actinobacteria 1.2105 1.0601236
+## Phylum:Spirochaetes   0.2141 0.1318401
+## Phylum:MVP-15         0.0299 0.0007676
+## Phylum:Proteobacteria 6.8416 1.8153906
 ```
 Get the assignment probabilities
 
