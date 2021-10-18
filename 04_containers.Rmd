@@ -12,7 +12,7 @@ chapterPreamble()
 The building blocks of the framework are **data container**
 (SummarizedExperiment and its derivatives), **packages** from various
 developers using the TreeSE container, open **demonstration data
-sets**, in a separate Chapter on [#example-data], and **online
+sets**, in a separate chapter \@ref(example-data), and **online
 tutorials** including this online book as well as the various package
 vignettes and other material.
 
@@ -60,6 +60,7 @@ on how to represent different varieties of multi-table data within the
 
 The options and recommendations are summarized in Table \@ref(tab:options).
 
+
 ### Assay data
 
 The original count-based taxonomic abundance tables may have different 
@@ -73,15 +74,79 @@ se <- GlobalPatterns
 assays(se)
 ```
 
-As an example, the relative abundance is calculated.
+The `assays` slot contains the experimental data as count matrices. Multiple 
+matrices can be stored the result of `assays` is actually a list of matrices.
+
+```{r}
+assays(se)
+```
+
+Individual assays can be accessed via `assay`
+
+```{r}
+assay(se, "counts")[1:5,1:7]
+```
+
+To illustrate the use of multiple assays, the relative abundance data can be 
+calcualted and stored along the original count data using `relAbundanceCounts`.
 
 ```{r}
 se <- relAbundanceCounts(se)
 assays(se)
 ```
 
-Here the dimension of the count data remains unchanged. This is
-actually a requirement for any `SummarizedExperiment` object.
+Now there are two assays available in the `se` object, `counts` and 
+`relabundance`.
+
+```{r}
+assay(se, "relabundance")[1:5,1:7]
+```
+
+
+Here the dimension of the count data remains unchanged. This is in
+fact a requirement for any `SummarizedExperiment` object.
+
+
+
+### colData
+
+`colData` contains data on the samples.
+
+```{r coldata}
+colData(se)
+```
+
+### rowData
+
+`rowData` contains data on the features of the analyzed samples. Of particular
+interest for the microbiome field this is used to store taxonomic information.
+
+```{r rowdata}
+rowData(se)
+```
+
+### rowTree  
+
+Phylogenetic trees also play an important role for the microbiome field. The 
+`TreeSummarizedExperiment` class is able to keep track of feature and node
+relations via two functions, `rowTree` and `rowLinks`.
+
+A tree can be accessed via `rowTree` as `phylo` object.       
+```{r rowtree}
+rowTree(se)
+```
+
+The links to the individual features are available through `rowLinks`.
+
+```{r rowlinks}
+rowLinks(se)
+```
+
+Please note that there can be a 1:1 relationship between tree nodes and 
+features, but this is not a must have. This means there can be features, which
+are not linked to nodes, and nodes, which are not linked to features. To change
+the links in an existing object, the `changeTree` function is available.
+
 
 
 ### Alternative experiments
@@ -397,7 +462,7 @@ GlobalPatterns_phyloseq2
 
 
 
-## Demonstration Data {#example-data}
+## Demonstration data {#example-data}
 
 
 Open demonstration data for testing and benchmarking purposes is
@@ -494,83 +559,7 @@ se <- curatedMetagenomicData("Vatanen*", dryrun = FALSE, counts = TRUE)
 
 
 
-## Microbiome data specific aspects
 
-```{r, message=FALSE}
-library(mia)
-data("GlobalPatterns", package = "mia")
-se <- GlobalPatterns 
-se
-```
-
-### Assays  
-
-The `assays` slot contains the experimental data as count matrices. Multiple 
-matrices can be stored the result of `assays` is actually a list of matrices.
-
-```{r}
-assays(se)
-```
-
-Individual assays can be accessed via `assay`
-
-```{r}
-assay(se, "counts")[1:5,1:7]
-```
-
-To illustrate the use of multiple assays, the relative abundance data can be 
-calcualted and stored along the original count data using `relAbundanceCounts`.
-
-```{r}
-se <- relAbundanceCounts(se)
-assays(se)
-```
-
-Now there are two assays available in the `se` object, `counts` and 
-`relabundance`.
-
-```{r}
-assay(se, "relabundance")[1:5,1:7]
-```
-
-### colData
-
-`colData` contains data on the samples.
-
-```{r coldata}
-colData(se)
-```
-
-### rowData
-
-`rowData` contains data on the features of the analyzed samples. Of particular
-interest for the microbiome field this is used to store taxonomic information.
-
-```{r rowdata}
-rowData(se)
-```
-
-### rowTree  
-
-Phylogenetic trees also play an important role for the microbiome field. The 
-`TreeSummarizedExperiment` class is able to keep track of feature and node
-relations via two functions, `rowTree` and `rowLinks`.
-
-A tree can be accessed via `rowTree` as `phylo` object.       
-```{r rowtree}
-rowTree(se)
-```
-
-The links to the individual features are available through `rowLinks`.
-
-```{r rowlinks}
-rowLinks(se)
-```
-
-Please note that there can be a 1:1 relationship between tree nodes and 
-features, but this is not a must have. This means there can be features, which
-are not linked to nodes, and nodes, which are not linked to features. To change
-the links in an existing object, the `changeTree` function is available.
 
 
 
