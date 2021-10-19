@@ -344,25 +344,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7751 BIC: 8274 AIC: 8103 
+## Laplace: 7742 BIC: 8282 AIC: 8112 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7857 BIC: 8578 AIC: 8364 
+## Laplace: 7855 BIC: 8553 AIC: 8340 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7952 BIC: 8850 AIC: 8594 
+## Laplace: 8012 BIC: 8876 AIC: 8620 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 7991 BIC: 9021 AIC: 8722
+## Laplace: 8064 BIC: 9086 AIC: 8787
 ```
 
 
@@ -427,7 +427,7 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.65
+## 1 0.5385 20.60
 ## 2 0.4615 15.28
 ```
 
@@ -442,12 +442,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 4.726e-17
-## CC1     1.000e+00 3.588e-22
-## SV1     1.000e+00 2.026e-12
-## M31Fcsw 6.020e-26 1.000e+00
-## M11Fcsw 8.797e-17 1.000e+00
-## M31Plmr 8.830e-14 1.000e+00
+## CL3     1.000e+00 5.060e-17
+## CC1     1.000e+00 3.867e-22
+## SV1     1.000e+00 2.034e-12
+## M31Fcsw 7.348e-26 1.000e+00
+## M11Fcsw 1.065e-16 1.000e+00
+## M31Plmr 9.990e-14 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -458,13 +458,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30556 0.1354689
-## Phylum:Euryarchaeota  0.23192 0.1468652
-## Phylum:Actinobacteria 1.20868 1.0599611
-## Phylum:Spirochaetes   0.21449 0.1318461
-## Phylum:MVP-15         0.03001 0.0007652
-## Phylum:Proteobacteria 6.87329 1.8152304
+##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354648
+## Phylum:Euryarchaeota  0.2314 0.1468586
+## Phylum:Actinobacteria 1.2105 1.0601699
+## Phylum:Spirochaetes   0.2141 0.1318401
+## Phylum:MVP-15         0.0299 0.0007673
+## Phylum:Proteobacteria 6.8413 1.8154798
 ```
 Get the assignment probabilities
 
