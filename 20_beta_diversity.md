@@ -328,22 +328,22 @@ tse
 
 ```
 ## class: TreeSummarizedExperiment 
-## dim: 1057 780 
+## dim: 1058 780 
 ## metadata(0):
 ## assays(1): relative_abundance
-## rownames(1057):
+## rownames(1058):
 ##   k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Propionibacteriales|f__Propionibacteriaceae|g__Cutibacterium|s__Cutibacterium_acnes
 ##   k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Klebsiella|s__Klebsiella_pneumoniae
 ##   ...
 ##   k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Anaerostipes|s__Anaerostipes_sp_494a
 ##   k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Barnesiellaceae|g__Barnesiella|s__Barnesiella_viscericola
-## rowData names(7): Kingdom Phylum ... Genus Species
+## rowData names(7): superkingdom phylum ... genus species
 ## colnames(780): WBE003 WBE004 ... YSZC12003_37879 YSZC12003_37880
 ## colData names(129): study_name subject_id ... ALT eGFR
 ## reducedDimNames(0):
 ## mainExpName: NULL
 ## altExpNames(0):
-## rowLinks: a LinkDataFrame (1057 rows)
+## rowLinks: a LinkDataFrame (1058 rows)
 ## rowTree: 1 phylo tree(s) (10430 leaves)
 ## colLinks: NULL
 ## colTree: NULL
@@ -353,7 +353,7 @@ Agglomerating the data at a Genus level and getting the dominant taxa per sample
 
 
 ```r
-tse_Genus <- agglomerateByRank(tse, rank="Genus")
+tse_Genus <- agglomerateByRank(tse, rank="genus")
 tse_Genus <- addPerSampleDominantTaxa(tse_Genus,abund_values="relative_abundance", name = "dominant_taxa")
 ```
 
@@ -498,7 +498,7 @@ print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2702
+## [1] 0.2779
 ```
 
 In this case, the community composition is not significantly different
@@ -597,75 +597,75 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] microbiomeDataSets_1.1.5       MultiAssayExperiment_1.19.16  
- [3] DT_0.19                        dplyr_1.0.7                   
- [5] curatedMetagenomicData_3.1.10  scater_1.21.8                 
- [7] scuttle_1.3.1                  ggplot2_3.3.5                 
- [9] vegan_2.5-7                    lattice_0.20-45               
-[11] permute_0.9-5                  mia_1.1.19                    
-[13] TreeSummarizedExperiment_2.1.4 Biostrings_2.61.2             
-[15] XVector_0.33.0                 SingleCellExperiment_1.15.2   
-[17] SummarizedExperiment_1.23.5    Biobase_2.53.0                
-[19] GenomicRanges_1.45.0           GenomeInfoDb_1.29.8           
-[21] IRanges_2.27.2                 S4Vectors_0.31.5              
-[23] BiocGenerics_0.39.2            MatrixGenerics_1.5.4          
-[25] matrixStats_0.61.0-9001        BiocStyle_2.21.4              
-[27] rebook_1.3.1                  
+ [1] microbiomeDataSets_1.1.5       DT_0.19                       
+ [3] dplyr_1.0.7                    curatedMetagenomicData_3.2.0  
+ [5] scater_1.22.0                  scuttle_1.4.0                 
+ [7] ggplot2_3.3.5                  vegan_2.5-7                   
+ [9] lattice_0.20-45                permute_0.9-5                 
+[11] mia_1.3.2                      MultiAssayExperiment_1.20.0   
+[13] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
+[15] XVector_0.34.0                 SingleCellExperiment_1.16.0   
+[17] SummarizedExperiment_1.24.0    Biobase_2.54.0                
+[19] GenomicRanges_1.46.0           GenomeInfoDb_1.30.0           
+[21] IRanges_2.28.0                 S4Vectors_0.32.0              
+[23] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
+[25] matrixStats_0.61.0-9001        BiocStyle_2.22.0              
+[27] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
-  [1] readxl_1.3.1                  backports_1.2.1              
-  [3] AnnotationHub_3.1.6           BiocFileCache_2.1.1          
+  [1] readxl_1.3.1                  backports_1.3.0              
+  [3] AnnotationHub_3.2.0           BiocFileCache_2.2.0          
   [5] plyr_1.8.6                    lazyeval_0.2.2               
-  [7] splines_4.1.1                 BiocParallel_1.27.17         
+  [7] splines_4.1.1                 BiocParallel_1.28.0          
   [9] digest_0.6.28                 htmltools_0.5.2              
  [11] viridis_0.6.2                 fansi_0.5.0                  
  [13] magrittr_2.0.1                memoise_2.0.0                
- [15] ScaledMatrix_1.1.0            cluster_2.1.2                
- [17] DECIPHER_2.21.0               openxlsx_4.2.4               
+ [15] ScaledMatrix_1.2.0            cluster_2.1.2                
+ [17] DECIPHER_2.22.0               openxlsx_4.2.4               
  [19] colorspace_2.0-2              rappdirs_0.3.3               
  [21] blob_1.2.2                    ggrepel_0.9.1                
- [23] haven_2.4.3                   xfun_0.26                    
- [25] crayon_1.4.1                  RCurl_1.98-1.5               
- [27] jsonlite_1.7.2                graph_1.71.2                 
+ [23] haven_2.4.3                   xfun_0.27                    
+ [25] crayon_1.4.2                  RCurl_1.98-1.5               
+ [27] jsonlite_1.7.2                graph_1.72.0                 
  [29] ape_5.5                       glue_1.4.2                   
- [31] gtable_0.3.0                  zlibbioc_1.39.0              
- [33] DelayedArray_0.19.4           car_3.0-11                   
- [35] BiocSingular_1.9.1            abind_1.4-5                  
+ [31] gtable_0.3.0                  zlibbioc_1.40.0              
+ [33] DelayedArray_0.20.0           car_3.0-11                   
+ [35] BiocSingular_1.10.0           abind_1.4-5                  
  [37] scales_1.1.1                  DBI_1.1.1                    
  [39] rstatix_0.7.0                 Rcpp_1.0.7                   
  [41] xtable_1.8-4                  viridisLite_0.4.0            
- [43] decontam_1.13.0               tidytree_0.3.5               
+ [43] decontam_1.14.0               tidytree_0.3.5               
  [45] foreign_0.8-81                bit_4.0.4                    
  [47] rsvd_1.0.5                    htmlwidgets_1.5.4            
- [49] httr_1.4.2                    dir.expiry_1.1.0             
+ [49] httr_1.4.2                    dir.expiry_1.2.0             
  [51] ellipsis_0.3.2                pkgconfig_2.0.3              
  [53] XML_3.99-0.8                  farver_2.1.0                 
  [55] dbplyr_2.1.1                  CodeDepends_0.6.5            
  [57] sass_0.4.0                    utf8_1.2.2                   
- [59] AnnotationDbi_1.55.1          later_1.3.0                  
+ [59] AnnotationDbi_1.56.1          later_1.3.0                  
  [61] tidyselect_1.1.1              labeling_0.4.2               
- [63] rlang_0.4.11                  reshape2_1.4.4               
+ [63] rlang_0.4.12                  reshape2_1.4.4               
  [65] BiocVersion_3.14.0            cellranger_1.1.0             
  [67] munsell_0.5.0                 tools_4.1.1                  
- [69] cachem_1.0.6                  ExperimentHub_2.1.4          
- [71] DirichletMultinomial_1.35.0   generics_0.1.0               
- [73] RSQLite_2.2.8                 broom_0.7.9                  
+ [69] cachem_1.0.6                  ExperimentHub_2.2.0          
+ [71] DirichletMultinomial_1.36.0   generics_0.1.1               
+ [73] RSQLite_2.2.8                 broom_0.7.10                 
  [75] evaluate_0.14                 stringr_1.4.0                
  [77] fastmap_1.1.0                 yaml_2.2.1                   
  [79] knitr_1.36                    bit64_4.0.5                  
  [81] zip_2.2.0                     purrr_0.3.4                  
- [83] KEGGREST_1.33.0               nlme_3.1-153                 
- [85] sparseMatrixStats_1.5.3       mime_0.12                    
+ [83] KEGGREST_1.34.0               nlme_3.1-153                 
+ [85] sparseMatrixStats_1.6.0       mime_0.12                    
  [87] compiler_4.1.1                png_0.1-7                    
- [89] interactiveDisplayBase_1.31.2 beeswarm_0.4.0               
+ [89] interactiveDisplayBase_1.32.0 beeswarm_0.4.0               
  [91] filelock_1.0.2                curl_4.3.2                   
- [93] ggsignif_0.6.3                treeio_1.17.2                
+ [93] ggsignif_0.6.3                treeio_1.18.0                
  [95] tibble_3.1.5                  bslib_0.3.1                  
  [97] stringi_1.7.5                 highr_0.9                    
  [99] forcats_0.5.1                 Matrix_1.3-4                 
-[101] vctrs_0.3.8                   pillar_1.6.3                 
+[101] vctrs_0.3.8                   pillar_1.6.4                 
 [103] lifecycle_1.0.1               BiocManager_1.30.16          
-[105] jquerylib_0.1.4               BiocNeighbors_1.11.0         
+[105] jquerylib_0.1.4               BiocNeighbors_1.12.0         
 [107] data.table_1.14.2             cowplot_1.1.1                
 [109] bitops_1.0-7                  irlba_2.3.3                  
 [111] httpuv_1.6.3                  R6_2.5.1                     
@@ -676,8 +676,8 @@ loaded via a namespace (and not attached):
 [121] withr_2.4.2                   GenomeInfoDbData_1.2.7       
 [123] mgcv_1.8-38                   parallel_4.1.1               
 [125] hms_1.1.1                     grid_4.1.1                   
-[127] beachmat_2.9.1                tidyr_1.1.4                  
-[129] rmarkdown_2.11                DelayedMatrixStats_1.15.4    
+[127] beachmat_2.10.0               tidyr_1.1.4                  
+[129] rmarkdown_2.11                DelayedMatrixStats_1.16.0    
 [131] carData_3.0-4                 Rtsne_0.15                   
 [133] ggpubr_0.4.0                  shiny_1.7.1                  
 [135] ggbeeswarm_0.6.0             
