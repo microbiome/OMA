@@ -77,11 +77,11 @@ library(tidyverse)
 # we use the dmn_se dataset and restrict it to 
 # obese vs lean for easy illustration
 data(dmn_se)
-tse <- dmn_se
-tse <- tse[ ,colData(tse)$pheno != "Overwt"]
-colData(tse)$pheno <- fct_drop(colData(tse)$pheno, "Overwt")
+se <- dmn_se
+se <- se[ ,colData(se)$pheno != "Overwt"]
+colData(se)$pheno <- fct_drop(colData(se)$pheno, "Overwt")
 # how many observations do we have per group?
-count(as.data.frame(colData(tse)), pheno) %>% kable()
+count(as.data.frame(colData(se)), pheno) %>% kable()
 # set a seed because some tools can randomly vary and then produce 
 # different results:
 set.seed(1)
@@ -96,7 +96,7 @@ arguments for that. By applying the threshold to our input data, we can make
 sure it is applied for all tools. Below we show how to do this in `mia`:
 
 ```{r}
-tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 0.1)
+se <- subsetByPrevalentTaxa(se, detection = 0, prevalence = 0.1)
 ```
 
 ### ALDEx2
@@ -123,8 +123,8 @@ example that illustrates the workflow.
 # Convert each instance using the centred log-ratio transform.
 # This is the input for all further analyses.
 x <- aldex.clr(
-  reads = assay(tse),
-  conds = colData(tse)$pheno, 
+  reads = assay(se),
+  conds = colData(se)$pheno, 
   # 128 recommened for ttest, 1000 for rigorous effect size calculation
   mc.samples = 128, 
   denom = "all",
@@ -216,7 +216,7 @@ taxon. It also controls the FDR and it is computationally simple to implement.
 
 As we will see below, to obtain results, all that is needed is to pass 
 a phyloseq object to the `ancombc()` function. Therefore, below we first
-convert our `tse` object to a `phyloseq` object. Then, we specify the formula.
+convert our `se` object to a `phyloseq` object. Then, we specify the formula.
 In this formula, other covariates could potentially be included to adjust for
 confounding. We show this further below. 
 Please check the [function documentation](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html) 
@@ -224,7 +224,7 @@ to learn about the additional arguments that we specify below.
 
 ```{r warning = FALSE}
 # currently, ancombc requires the phyloseq format, but we can easily convert:
-pseq <- makePhyloseqFromTreeSummarizedExperiment(tse)
+pseq <- makePhyloseqFromTreeSummarizedExperiment(se)
 
 # perform the analysis 
 out = ancombc(
@@ -271,8 +271,8 @@ structures. The official package tutorial can be found [here](https://github.com
 ```{r results = "hide"}
 # maaslin expects features as columns and samples as rows 
 # for both the asv/otu table as well as meta data 
-asv <- t(assay(tse))
-meta_data <- data.frame(colData(tse))
+asv <- t(assay(se))
+meta_data <- data.frame(colData(se))
 # you can specifiy different GLMs/normalizations/transforms. We used similar
 # settings as in Nearing et al. (2021) here:
 fit_data <- Maaslin2(
@@ -353,8 +353,8 @@ any method or for those taxa that were identified by all methods:
 
 
 ```{r}
-plot_data <- data.frame(t(assay(tse)))
-plot_data$pheno <- colData(tse)$pheno
+plot_data <- data.frame(t(assay(se)))
+plot_data$pheno <- colData(se)$pheno
 # create a plot for each genus where the score is indicated in the title
 plots <- pmap(select(summ, genus, score), function(genus, score) {
   ggplot(plot_data, aes_string("pheno", genus)) +
@@ -407,18 +407,18 @@ object.
 
 ```{r}
 # to join new data to existing colData we need to put rownames as a column 
-colData(tse)$sample_id <- rownames(colData(tse))
+colData(se)$sample_id <- rownames(colData(se))
 # simulate a covariate that I will add to the colData.
 df_sim <- tibble(
-  sample_id = colData(tse)$sample_id,
-  age = rnorm(n = length(colData(tse)$sample_id))
+  sample_id = colData(se)$sample_id,
+  age = rnorm(n = length(colData(se)$sample_id))
 )
 # an easy way to join data is to use dplyr functions. The package 
 # tidySummarizedExperiment enables this functionality
-tse <- full_join(tse, df_sim, by = "sample_id")
-# now the data from df_sim is in the tse object and we can again repeat
+se <- full_join(se, df_sim, by = "sample_id")
+# now the data from df_sim is in the se object and we can again repeat
 # the steps as above:
-pseq <- makePhyloseqFromTreeSummarizedExperiment(tse)
+pseq <- makePhyloseqFromTreeSummarizedExperiment(se)
 out_cov = ancombc(
   phyloseq = pseq, 
   formula = "pheno + age", # here we add age to the model

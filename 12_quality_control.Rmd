@@ -21,8 +21,6 @@ need to check.
 
 ```{r, message=FALSE}
 library(mia)
-data("GlobalPatterns", package="mia")
-se <- GlobalPatterns 
 ```
 
 
@@ -79,7 +77,7 @@ like this. The low prevalence in this example can be explained by rather
 different sample types as well as the in-depth nature of the data.
 
 ```{r exploration-prevalence}
-head(getPrevalence(se, detection = 1/100, sort = TRUE, as_relative = TRUE))
+head(getPrevalence(tse, detection = 1/100, sort = TRUE, as_relative = TRUE))
 ```
 
 The `detection` and `as_relative` can also be used to access, how many samples
@@ -88,7 +86,7 @@ at the absolute abundance threshold (`as_relative = FALSE`) at read count 1
 (`detection = 1`) is accessed.
 
 ```{r concepts_prevalence2}
-head(getPrevalence(se, detection = 1, sort = TRUE, abund_values = "counts",
+head(getPrevalence(tse, detection = 1, sort = TRUE, abund_values = "counts",
                    as_relative = FALSE))
 ```
 
@@ -104,8 +102,8 @@ First the data can be agglomerated to the taxonomic level and `getPrevalence`
 be used on the result.
 
 ```{r}
-altExp(se,"Phylum") <- agglomerateByRank(se, "Phylum")
-head(getPrevalence(altExp(se,"Phylum"), detection = 1/100, sort = TRUE,
+altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
+head(getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = TRUE,
                    abund_values = "counts", as_relative = TRUE))
 
 ```
@@ -114,8 +112,8 @@ Alternatively, the `rank` argument can be set to perform the agglomeration on
 the fly.
 
 ```{r}
-altExp(se,"Phylum") <- agglomerateByRank(se, "Phylum")
-head(getPrevalence(se, rank = "Phylum", detection = 1/100, sort = TRUE,
+altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
+head(getPrevalence(tse, rank = "Phylum", detection = 1/100, sort = TRUE,
                    abund_values = "counts", as_relative = TRUE))
 ```
 
@@ -128,8 +126,8 @@ available. This returns the taxa that exceed the given prevalence and detection
 thresholds.
 
 ```{r core-members, message=FALSE, warning=FALSE, eval = FALSE}
-getPrevalentTaxa(se, detection = 0, prevalence = 50/100)
-prev <- getPrevalentTaxa(se, detection = 0, prevalence = 50/100,
+getPrevalentTaxa(tse, detection = 0, prevalence = 50/100)
+prev <- getPrevalentTaxa(tse, detection = 0, prevalence = 50/100,
                          rank = "Phylum", sort = TRUE)
 prev
 ```
@@ -147,8 +145,8 @@ See also related functions for the analysis of rare and variable taxa
 To plot the prevalence, the data is first added to the `rowData`.
 
 ```{r}
-rowData(altExp(se,"Phylum"))$prevalence <- 
-    getPrevalence(altExp(se,"Phylum"), detection = 1/100, sort = FALSE,
+rowData(altExp(tse,"Phylum"))$prevalence <- 
+    getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = FALSE,
                   abund_values = "counts", as_relative = TRUE)
 ```
 
@@ -156,31 +154,31 @@ Then it can be plotted via the plotting functions from the `scater` package.
  
 ```{r, message=FALSE, warning=FALSE}
 library(scater)
-plotRowData(altExp(se,"Phylum"), "prevalence", colour_by = "Phylum")
+plotRowData(altExp(tse,"Phylum"), "prevalence", colour_by = "Phylum")
 ```
 
 Additionally, the prevalence can be plotted on the taxonomic tree using the
 `miaViz` package.
 
 ```{r}
-altExps(se) <- splitByRanks(se)
-altExps(se) <-
-   lapply(altExps(se),
+altExps(tse) <- splitByRanks(tse)
+altExps(tse) <-
+   lapply(altExps(tse),
           function(y){
               rowData(y)$prevalence <- 
                   getPrevalence(y, detection = 1/100, sort = FALSE,
                                 abund_values = "counts", as_relative = TRUE)
               y
           })
-top_phyla <- getTopTaxa(altExp(se,"Phylum"),
+top_phyla <- getTopTaxa(altExp(tse,"Phylum"),
                         method="prevalence",
-                        top=10L,
+                        top=5L,
                         abund_values="counts")
-top_phyla_mean <- getTopTaxa(altExp(se,"Phylum"),
+top_phyla_mean <- getTopTaxa(altExp(tse,"Phylum"),
                              method="mean",
-                             top=10L,
+                             top=5L,
                              abund_values="counts")
-x <- unsplitByRanks(se, ranks = taxonomyRanks(se)[1:6])
+x <- unsplitByRanks(tse, ranks = taxonomyRanks(tse)[1:6])
 x <- addTaxonomyTree(x)
 ```
  
@@ -210,7 +208,7 @@ plotRowTree(x[rowData(x)$Phylum %in% top_phyla_mean,],
 ```{r, message=FALSE}
 library(mia)
 data("GlobalPatterns", package="mia")
-se <- GlobalPatterns 
+tse <- GlobalPatterns 
 ```
 
 
@@ -218,8 +216,8 @@ se <- GlobalPatterns
 
 The `getTopTaxa` can be used for identifying top taxa in the data.   
 ```{r top-feature-taxo}
-top_features <- getTopTaxa(se, method="median", top=10)
-tax_data <- rowData(se)[top_features,taxonomyRanks(se)]
+top_features <- getTopTaxa(tse, method="median", top=10)
+tax_data <- rowData(tse)[top_features,taxonomyRanks(tse)]
 tax_data
 ```
 
@@ -233,9 +231,9 @@ just calculates the values, whereas the latter one directly adds them to the
 
 ```{r lib-size}
 library(scater)
-perCellQCMetrics(se)
-se <- addPerCellQC(se)
-colData(se)
+perCellQCMetrics(tse)
+tse <- addPerCellQC(tse)
+colData(tse)
 ```
 
 The distribution of calculated library sizes can be visualized as a
@@ -244,7 +242,7 @@ histogram (left), or by sorting the samples by library size (right).
 ```{r plot-viz-lib-size-1, fig.width=8, fig.height=4, fig.cap="Library size distribution."}
 library(ggplot2)
 
-p1 <- ggplot(as.data.frame(colData(se))) +
+p1 <- ggplot(as.data.frame(colData(tse))) +
         geom_histogram(aes(x = sum), color = "black", fill = "gray", bins = 30) +
         labs(x = "Library size", y = "Frequency (n)") + 
         # scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x), 
@@ -257,7 +255,7 @@ p1 <- ggplot(as.data.frame(colData(se))) +
           axis.line = element_line(colour = "black")) # Adds y-axis
 
 library(dplyr)
-df <- as.data.frame(colData(se)) %>%
+df <- as.data.frame(colData(tse)) %>%
         arrange(sum) %>%
         mutate(index = 1:n())
 p2 <- ggplot(df, aes(y = index, x = sum/1e6)) +
@@ -279,19 +277,19 @@ specified function called `plotColData`.
 
 ```{r plot-viz-lib-size-2, fig.width=8, fig.height=4, fig.cap="Library sizes per sample."}
 library(ggplot2)
-# Sort samples by read count, order the factor levels, and store back to se as DataFrame
+# Sort samples by read count, order the factor levels, and store back to tse as DataFrame
 # TODO: plotColData could include an option for sorting samples based on colData variables
-colData(se) <- as.data.frame(colData(se)) %>%
+colData(tse) <- as.data.frame(colData(tse)) %>%
                  arrange(X.SampleID) %>%
         	 mutate(X.SampleID = factor(X.SampleID, levels=X.SampleID)) %>%
 		 DataFrame
-plotColData(se,"sum","X.SampleID", colour_by = "SampleType") + 
+plotColData(tse,"sum","X.SampleID", colour_by = "SampleType") + 
     theme(axis.text.x = element_text(angle = 45, hjust=1)) +
     labs(y = "Library size (N)", x = "Sample ID") 	    
 ```
 
 ```{r plot-viz-lib-size-3, fig.width=8, fig.height=4, fig.cap="Library sizes per sample type."}
-plotColData(se,"sum","SampleType", colour_by = "SampleType") + 
+plotColData(tse,"sum","SampleType", colour_by = "SampleType") + 
     theme(axis.text.x = element_text(angle = 45, hjust=1))
 ```
 

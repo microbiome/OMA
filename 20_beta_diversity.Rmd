@@ -128,8 +128,8 @@ functions.
 
 ```{r runMDS, message=FALSE}
 library(scater)
-se <- GlobalPatterns
-se <- runMDS(se, FUN = vegan::vegdist, name = "MDS_BC", exprs_values = "counts")
+tse <- GlobalPatterns
+tse <- runMDS(tse, FUN = vegan::vegdist, name = "MDS_BC", exprs_values = "counts")
 ```
 
 Sample similarities can be visualized on a lower-dimensional display
@@ -139,10 +139,10 @@ additional information using variations in color, shape or size.
 
 ```{r plot-mds-bray-curtis, fig.cap="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."}
 # Create ggplot object
-p <- plotReducedDim(se, "MDS_BC", colour_by = "SampleType")
+p <- plotReducedDim(tse, "MDS_BC", colour_by = "SampleType")
 
 # Add explained variance for each axis
-e <- attr(reducedDim(se, "MDS_BC"), "eig");
+e <- attr(reducedDim(tse, "MDS_BC"), "eig");
 rel_eig <- e/sum(e[e>0])		  
 p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]],1), "%", ")", sep = ""),
               y = paste("PCoA 2 (", round(100 * rel_eig[[2]],1), "%", ")", sep = ""))
@@ -156,13 +156,13 @@ performed informing on the applicability to visualize sample similarities in a
 meaningful way.
 
 ```{r plot-mds-nmds-comparison, fig.cap="Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.", message=FALSE}
-se <- runMDS(se, FUN = vegan::vegdist, name = "MDS_euclidean",
+tse <- runMDS(tse, FUN = vegan::vegdist, name = "MDS_euclidean",
              method = "euclidean", exprs_values = "counts")
-se <- runNMDS(se, FUN = vegan::vegdist, name = "NMDS_BC")
-se <- runNMDS(se, FUN = vegan::vegdist, name = "NMDS_euclidean",
-              method = "euclidean")
+tse <- runNMDS(tse, FUN = vegan::vegdist, name = "NMDS_BC")
+tse <- runNMDS(tse, FUN = vegan::vegdist, name = "NMDS_euclidean",
+               method = "euclidean")
 plots <- lapply(c("MDS_BC","MDS_euclidean","NMDS_BC","NMDS_euclidean"),
-                plotReducedDim, object = se, colour_by = "SampleType")
+                plotReducedDim, object = tse, colour_by = "SampleType")
 ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 2, common.legend = TRUE,
                   legend = "right")
 
@@ -175,14 +175,14 @@ used within `runMDS`.
 
 
 ```{r}
-se <- runMDS(se, FUN = calculateUniFrac, name = "UniFrac",
-             tree = rowTree(se),
-             ntop = nrow(se),
+tse <- runMDS(tse, FUN = calculateUniFrac, name = "UniFrac",
+              tree = rowTree(tse),
+              ntop = nrow(tse),
              exprs_values = "counts")
 ```
 
 ```{r plot-unifrac, fig.cap="UniFrac distances scaled by MDS of the GlobalPattern dataset."}
-plotReducedDim(se, "UniFrac", colour_by = "SampleType")
+plotReducedDim(tse, "UniFrac", colour_by = "SampleType")
 ```
 
 ## Other ordination methods
@@ -191,11 +191,11 @@ Other dimension reduction methods, such as `PCA`, `t-SNE` and `UMAP` are
 inherited directly from the `scater` package.
 
 ```{r}
-se <- runPCA(se, name = "PCA", exprs_values = "counts", ncomponents = 10)
+tse <- runPCA(tse, name = "PCA", exprs_values = "counts", ncomponents = 10)
 ```
 
 ```{r plot-pca, fig.cap="PCA plot on the GlobalPatterns data set containing sample from different sources."}
-plotReducedDim(se, "PCA", colour_by = "SampleType")
+plotReducedDim(tse, "PCA", colour_by = "SampleType")
 ```
 
 As mentioned before, applicability of the different methods depends on your
@@ -204,11 +204,11 @@ sample set.
 FIXME: let us switch to UMAP for the examples?
 
 ```{r}
-se <- runTSNE(se, name = "TSNE", exprs_values = "counts", ncomponents = 3)
+tse <- runTSNE(tse, name = "TSNE", exprs_values = "counts", ncomponents = 3)
 ```
 
 ```{r plot-tsne, fig.cap="t-SNE plot on the GlobalPatterns data set containing sample from different sources."}
-plotReducedDim(se, "TSNE", colour_by = "SampleType", ncomponents = c(1:3))
+plotReducedDim(tse, "TSNE", colour_by = "SampleType", ncomponents = c(1:3))
 ```
 
 ## Visualizing the most dominant genus on PCoA
@@ -319,7 +319,7 @@ Let us load an example data set:
 
 ```{r, message=FALSE}
 library(microbiomeDataSets)
-se.lahti <- LahtiMData()
+tse_lahti <- LahtiMData()
 ```
 
 
@@ -329,14 +329,14 @@ results.
 
 
 ```{r}
-se.lahti <- relAbundanceCounts(se.lahti)
-se.lahti <- runNMDS(se.lahti, FUN = vegan::vegdist, name = "BC", nmdsFUN = "monoMDS",
-                    exprs_values = "relabundance",
-                    keep_dist = TRUE)
+tse_lahti <- relAbundanceCounts(tse_lahti)
+tse_lahti <- runNMDS(tse_lahti, FUN = vegan::vegdist, name = "BC", nmdsFUN = "monoMDS",
+                     exprs_values = "relabundance",
+                     keep_dist = TRUE)
 ```
 
 ```{r}
-plotReducedDim(se.lahti, "BC", colour_by = "group")
+plotReducedDim(tse_lahti, "BC", colour_by = "group")
 ```
 
 No clear difference between the groups can be visually observed.
@@ -359,8 +359,8 @@ This method is implemented in the `vegan` package (function `adonis`).
 
 ```{r}
 library(vegan)
-permanova <- vegan::adonis(t(assay(se.lahti,"relabundance")) ~ group,
-                           data = colData(se.lahti),
+permanova <- vegan::adonis(t(assay(tse_lahti,"relabundance")) ~ group,
+                           data = colData(tse_lahti),
                            permutations = 9999)
 
 # P-value
@@ -408,8 +408,8 @@ PERMDISP2 method [@Anderson2006].
 
 
 ```{r}
-anova(vegan::betadisper(attr(reducedDim(se.lahti,"BC"),"dist"),
-                        colData(se.lahti)$group))
+anova(vegan::betadisper(attr(reducedDim(tse_lahti,"BC"),"dist"),
+                        colData(tse_lahti)$group))
 ```
 
 In our example, the groups have similar dispersion, and PERMANOVA is
