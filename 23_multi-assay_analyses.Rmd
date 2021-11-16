@@ -1,0 +1,169 @@
+# Multi-assay analyses {#multi-assay_analyses}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+if(!require(ecodist)){
+    install.packages("ecodist")
+    library(ecodist)
+}
+```
+
+```{r load-pkg-data}
+library(mia)
+```
+
+Multi-omics means that we integrate data from multiple sources. For example, 
+we can integrate microbial abundances in the gut with biomolecular profiling data
+from blood samples. This kind of integrative multi-omic approaches can support the 
+analysis of microbiome dysbiosis and facilitate the discovery of novel biomarkers 
+for health and disease. 
+
+With cross-correlation analysis, we can analyze how strongly and how differently
+variables are associated between each other. For instance, we can analyze if 
+higher presence of a specific taxon equals to higher levels of a biomolecule.
+
+The data containers that the _miaverse_ utilizes are scalable and they can contain
+different types of data in a same container. Because of that, the _miaverse_ is
+well-suitable for multi-assay microbiome data which incorporates different types 
+of complementary data sources in a single reproducible workflow. 
+
+Another experiment can be stored in 
+[altExp](https://microbiome.github.io/OMA/containers.html#alternative-experiments) 
+slot of SE data container or both experiments can be stored side-by-side in
+[MAE](https://microbiome.github.io/OMA/containers.html#multiassayexperiments) 
+data container. 
+
+Different experiments are first imported into SE or TreeSE data container similarly
+to the case when only one experiment is present. After that different experiments are 
+combined into the same data container. Result is one TreeSE object with alternative
+experiment in altExp slot, or MAE object with multiple experiment in its 
+experiment slot. 
+
+As an example data, we use data from following publication: Hintikka L _et al._ (2021) 
+[Xylo-oligosaccharides in prevention of hepatic steatosis and adipose tissue inflammation: 
+associating taxonomic and metabolomic patterns in fecal microbiotas with 
+biclustering](https://doi.org/10.3390/ijerph18084049).
+
+In this article, mice were fed with high-fat and low-fat diets with or without prebiotics.
+The purpose of this was to study if prebiotics would reduce the negative impacts
+of high-fat diet. 
+
+This example data can be loaded from microbiomeDataSets. The data is already in MAE
+format. It includes three different experiments: microbial abundance data, 
+metabolite concentrations, and data about different biomarkers. Help for importing
+data into SE object you can find from [here](https://microbiome.github.io/OMA/containers.html#loading-experimental-microbiome-data).
+
+```{r cross-correlation1}
+# Load the data
+mae <- microbiomeDataSets::HintikkaXOData()
+
+mae
+```
+```{r cross-correlation2}
+if(!require(stringr)){
+    install.packages("stringr")
+    library(stringr)
+}
+# Drop off those bacteria that do not include information in Phylum or lower levels
+mae[[1]] <- mae[[1]][!is.na(rowData(mae[[1]])$Phylum), ]
+# Clean taxonomy data, so that names do not include additional characters
+rowData(mae[[1]]) <- DataFrame(apply(rowData(mae[[1]]), 2, 
+                                     str_remove, pattern = "._[0-9]__"))
+# Microbiome data
+mae[[1]]
+```
+
+```{r cross-correlation3}
+# Metabolite data
+mae[[2]]
+```
+
+```{r cross-correlation4}
+# Biomarker data
+mae[[3]]
+```
+
+Next we can do the cross-correlation analysis. 
+Here we analyse if individual bacteria genera correlates
+with concentrations of individual metabolites. This helps as to answer the question: 
+"If this bacteria is present, is this metabolite's concentration then low or high"?
+
+```{r cross-correlation5}
+# Agglomerate microbiome data at Genus level
+mae[[1]] <- agglomerateByRank(mae[[1]], rank = "Genus")
+# Does log10 transform for microbiome data
+mae[[1]] <- transformSamples(mae[[1]], method = "log10", pseudocount = 1)
+
+# Cross correlates data sets
+correlation_table <- testExperimentCrossCorrelation(mae, 
+                                                    experiment1 = 1,
+                                                    experiment2 = 2,
+                                                    abund_values1 = "log10", 
+                                                    abund_values2 = "nmr",
+                                                    method = "spearman", 
+                                                    p_adj_threshold = 0.05,
+                                                    cor_threshold = 0)
+
+knitr::kable(head(correlation_table))
+```
+
+Reorders the table
+
+```{r cross-correlation6}
+if(!require(reshape2)){
+    install.packages("reshape2")
+}
+
+# Converts data to matrix, correlations as values
+mat <- reshape2::acast(correlation_table, Var2 ~ Var1, value.var = "cor")
+
+# Hierarchical clustering, gets the order of taxa and lipids
+taxa_indices <- hclust(as.dist(1 - cor(mat, use="pairwise.complete.obs")))$order
+order_taxa <- colnames(mat)[taxa_indices]
+lipids_indices <- hclust(as.dist(1 - cor(t(mat), use="pairwise.complete.obs")))$order
+order_lipids <- rownames(mat)[lipids_indices]
+
+# Converts taxa and lipids columns to factor so that they have the desired order
+correlation_table[["Var1"]] <- factor(correlation_table[["Var1"]], levels = order_taxa)
+correlation_table[["Var2"]] <- factor(correlation_table[["Var2"]], levels = order_lipids)
+```
+
+Creates the heatmap
+
+```{r cross-correlation7, fig.width=10, fig.height=8}
+if(!require(ggplot2)){
+    install.packages("ggplot2")
+    library(ggplot2)
+}
+# Determines the scaling of colors
+limits <- c(-1, 1)
+breaks <- seq(from = min(limits), to = max(limits), by = 0.2)
+colours <- c("darkblue", "blue", "white", "red", "darkred")
+
+# Which observation have p-value under 0.05? --> creates a subset
+cor_table_sub <- correlation_table[which(correlation_table[["p_adj"]] < 0.05), ]
+
+# Creates a ggplot object
+ggplot(correlation_table, aes(x = Var1, y = Var2, fill = cor)) +
+  geom_tile() +
+  
+  scale_fill_gradientn(name = "Correlation", 
+                       breaks = breaks, limits = limits, colours = colours) + 
+  
+  # Adds label to those observations that have p-value under 0.05
+  geom_text(data = cor_table_sub, aes(x = Var1, y = Var2, label = "+")) +
+  
+  theme(text = element_text(size=10),
+        axis.text.x = element_text(angle=45, hjust=1),
+        legend.key.size = unit(1, "cm")) +
+  labs(x = "Taxa", y = "Metabolites")
+```
+
+
+## Session Info {-}
+
+```{r sessionInfo, echo=FALSE, results='asis'}
+prettySessionInfo()
+```
+
