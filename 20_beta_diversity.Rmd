@@ -2,6 +2,18 @@
 library(rebook)
 chapterPreamble()
 ```
+
+```{r include=FALSE}
+# global knitr options
+knitr::opts_chunk$set(
+  fig.width=10,
+  dpi=300,
+  dev = "png",
+  dev.args = list(type = "cairo-png")
+)
+```
+
+
 # Community similarity
 
 Where alpha diversity focuses on community variation within a
@@ -74,12 +86,15 @@ library(mia)
 data(GlobalPatterns, package="mia")
 
 # Data matrix (features x samples)
-x <- GlobalPatterns
-x <- transformCounts(x, method = "relabundance")
-x <- assay(x, "relabundance")
+tse <- GlobalPatterns
+tse <- transformCounts(tse, method = "relabundance")
+
+# Add group information Feces yes/no
+colData(tse)$Group <- colData(tse)$SampleType=="Feces"
 
 # Quantify dissimilarities in the original feature space
 library(vegan)
+x <- assay(tse, "relabundance") # Pick relabunance assay separately
 d0 <- as.matrix(vegdist(t(x), "bray"))
 
 # PCoA Ordination
@@ -115,7 +130,14 @@ ggplot(aes(x = d0, y = dmds), data=df) +
 ```
 
 
-## Estimating beta diversity
+## Community comparisons by beta diversity analysis
+
+A typical comparison of community composition starts with a visual
+comparison of the groups on a 2D ordination.
+
+Then we estimate relative abundances and MDS ordination based on
+Bray-Curtis (BC) dissimilarity between the groups, and visualize the
+results.
 
 In the following examples dissimilarities are calculated by 
 functions supplied to the `FUN` argument. This function can be defined by
@@ -128,27 +150,29 @@ functions.
 
 ```{r runMDS, message=FALSE}
 library(scater)
-tse <- GlobalPatterns
-tse <- runMDS(tse, FUN = vegan::vegdist, name = "MDS_BC", exprs_values = "counts")
+tse <- runMDS(tse, FUN = vegan::vegdist, name = "PCoA_BC", exprs_values = "counts")
 ```
 
 Sample similarities can be visualized on a lower-dimensional display
-(typically 2D) using the `plotReducedDim` function in the
-`scater` package. This provides also further tools to incorporate
-additional information using variations in color, shape or size.
+(typically 2D) using the `plotReducedDim` function in the `scater`
+package. This provides also further tools to incorporate additional
+information using variations in color, shape or size. Are there
+visible differences between the groups?
 
 ```{r plot-mds-bray-curtis, fig.cap="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."}
 # Create ggplot object
-p <- plotReducedDim(tse, "MDS_BC", colour_by = "SampleType")
+p <- plotReducedDim(tse, "PCoA_BC", colour_by = "Group")
 
 # Add explained variance for each axis
-e <- attr(reducedDim(tse, "MDS_BC"), "eig");
+e <- attr(reducedDim(tse, "PCoA_BC"), "eig");
 rel_eig <- e/sum(e[e>0])		  
 p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]],1), "%", ")", sep = ""),
               y = paste("PCoA 2 (", round(100 * rel_eig[[2]],1), "%", ")", sep = ""))
 
 print(p)
 ```
+
+
 
 
 With additional tools from the `ggplot2` universe, comparisons can be 
@@ -161,8 +185,8 @@ tse <- runMDS(tse, FUN = vegan::vegdist, name = "MDS_euclidean",
 tse <- runNMDS(tse, FUN = vegan::vegdist, name = "NMDS_BC")
 tse <- runNMDS(tse, FUN = vegan::vegdist, name = "NMDS_euclidean",
                method = "euclidean")
-plots <- lapply(c("MDS_BC","MDS_euclidean","NMDS_BC","NMDS_euclidean"),
-                plotReducedDim, object = tse, colour_by = "SampleType")
+plots <- lapply(c("PCoA_BC","MDS_euclidean","NMDS_BC","NMDS_euclidean"),
+                plotReducedDim, object = tse, colour_by = "Group")
 ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 2, common.legend = TRUE,
                   legend = "right")
 
@@ -175,14 +199,15 @@ used within `runMDS`.
 
 
 ```{r}
-tse <- runMDS(tse, FUN = calculateUniFrac, name = "UniFrac",
+library(scater)
+tse <- runMDS(tse, FUN = mia::calculateUniFrac, name = "UniFrac",
               tree = rowTree(tse),
               ntop = nrow(tse),
              exprs_values = "counts")
 ```
 
 ```{r plot-unifrac, fig.cap="UniFrac distances scaled by MDS of the GlobalPattern dataset."}
-plotReducedDim(tse, "UniFrac", colour_by = "SampleType")
+plotReducedDim(tse, "UniFrac", colour_by = "Group")
 ```
 
 ## Other ordination methods
@@ -195,7 +220,7 @@ tse <- runPCA(tse, name = "PCA", exprs_values = "counts", ncomponents = 10)
 ```
 
 ```{r plot-pca, fig.cap="PCA plot on the GlobalPatterns data set containing sample from different sources."}
-plotReducedDim(tse, "PCA", colour_by = "SampleType")
+plotReducedDim(tse, "PCA", colour_by = "Group")
 ```
 
 As mentioned before, applicability of the different methods depends on your
@@ -208,53 +233,40 @@ tse <- runTSNE(tse, name = "TSNE", exprs_values = "counts", ncomponents = 3)
 ```
 
 ```{r plot-tsne, fig.cap="t-SNE plot on the GlobalPatterns data set containing sample from different sources."}
-plotReducedDim(tse, "TSNE", colour_by = "SampleType", ncomponents = c(1:3))
+plotReducedDim(tse, "TSNE", colour_by = "Group", ncomponents = c(1:3))
 ```
+
+
 
 ## Visualizing the most dominant genus on PCoA
 
-In this section we visualize most dominant genus in the alcohol study dataset from [curatedMetagenomicData](https://bioconductor.org/packages/release/data/experiment/vignettes/curatedMetagenomicData/inst/doc/curatedMetagenomicData.html) on PCoA.
-A similar visualization has been used in [Taxonomic signatures of cause-specific mortality risk in human gut microbiome](https://www.nature.com/articles/s41467-021-22962-y), Salosensaari et al. (2021).
+In this section we visualize most dominant genus on PCoA. A similar visualization was proposed in [Taxonomic signatures of cause-specific mortality risk in human gut microbiome](https://www.nature.com/articles/s41467-021-22962-y), Salosensaari et al. (2021).
 
-```{r, message=FALSE, warning=FALSE}
-# Installing the package
-if (!require(curatedMetagenomicData)){
-  BiocManager::install("curatedMetagenomicData")  
-}
-```
 
-Retrieving data as a TreeSummarizedExperiment object.
-
-```{r, message=FALSE, warning=FALSE}
-library(curatedMetagenomicData)
-library(dplyr)
-library(DT)
-# Querying the data
-tse <- sampleMetadata %>%
-    filter(age >= 18) %>% # taking only data of age 18 or above
-    filter(!is.na(alcohol)) %>% # excluding missing values
-    returnSamples("relative_abundance")
-tse
-```
-
-Agglomerating the data at a Genus level and getting the dominant taxa per sample.
+Let us agglomerate the data at a Genus level and getting the dominant taxa per sample.
 
 ```{r}
-tse_Genus <- agglomerateByRank(tse, rank="genus")
-tse_Genus <- addPerSampleDominantTaxa(tse_Genus,abund_values="relative_abundance", name = "dominant_taxa")
+# Agglomerate to genus level
+tse_Genus <- agglomerateByRank(tse, rank="Genus")
+# Convert to relative abundances
+tse_Genus <- transformSamples(tse, method = "relabundance", abund_values="counts")
+# Add info on dominant genus per sample
+tse_Genus <- addPerSampleDominantTaxa(tse_Genus, abund_values="relabundance", name = "dominant_taxa")
 ```
+
 
 Performing PCoA with Bray-Curtis dissimilarity.
 ```{r}
 tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist,
-              name = "PCoA_BC", exprs_values = "relative_abundance")
+              name = "PCoA_BC", exprs_values = "relabundance")
 ```
+
 
 Getting top taxa and visualizing the abundance on PCoA.
 
 ```{r}
 # Getting the top taxa
-top_taxa <- getTopTaxa(tse_Genus,top = 6, abund_values = "relative_abundance")
+top_taxa <- getTopTaxa(tse_Genus,top = 6, abund_values = "relabundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
@@ -283,63 +295,34 @@ plot
 
 Note: A 3D interactive version of the earlier plot can be found from [here](https://microbiome.github.io/OMA/interactive-3d-plots.html).
 
-Similarly let's visualize and compare the alcohol sub-polulation.
+Similarly let's visualize and compare the sub-population.
+
 ```{r}
 # Calculating the frequencies and percentages for both categories
-freq_yes <- table(as.character(most_abundant[colData(tse_Genus)$alcohol=="yes"]))
-freq_no <- table(as.character(most_abundant[colData(tse_Genus)$alcohol=="no"]))
-percent_yes <- round(freq_yes/sum(freq_yes)*100, 1)
-percent_no <- round(freq_no/sum(freq_no)*100, 1)
+freq_TRUE <- table(as.character(most_abundant[colData(tse_Genus)$Group==TRUE]))
+freq_FALSE <- table(as.character(most_abundant[colData(tse_Genus)$Group==FALSE]))
+percent_TRUE <- round(freq_TRUE/sum(freq_TRUE)*100, 1)
+percent_FALSE <- round(freq_FALSE/sum(freq_FALSE)*100, 1)
 
 # Visualization
-plotReducedDim(tse_Genus[,colData(tse_Genus)$alcohol=="yes"],
+plotReducedDim(tse_Genus[,colData(tse_Genus)$Group==TRUE],
                           "PCoA_BC", colour_by = "most_abundant") +
   scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
-                      labels=paste0(names(percent_yes),"(",percent_yes,"%)"))+
+                      labels=paste0(names(percent_TRUE),"(",percent_TRUE,"%)"))+
   labs(x=paste("PC 1 (",round(var_explained[1],1),"%)"),
        y=paste("PC 2 (",round(var_explained[2],1),"%)"),
-       title = "alcohol = yes", color="")
+       title = "Group = TRUE", color="")
 
-plotReducedDim(tse_Genus[,colData(tse_Genus)$alcohol=="no"],
+plotReducedDim(tse_Genus[,colData(tse_Genus)$Group==FALSE],
                           "PCoA_BC", colour_by = "most_abundant") +
   scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
-                      labels=paste0(names(percent_no),"(",percent_no,"%)"))+
+                      labels=paste0(names(percent_FALSE),"(",percent_FALSE,"%)"))+
   labs(x=paste("PC 1 (",round(var_explained[1],1),"%)"),
        y=paste("PC 2 (",round(var_explained[2],1),"%)"),
-       title = "alcohol = no", color="")
-```
-
-## Community comparisons [TODO combine with the material above for simplicity?]
-
-
-A typical comparison of community composition starts with a visual
-comparison of the groups on a 2D ordination.
-
-Let us load an example data set:
-
-```{r, message=FALSE}
-library(microbiomeDataSets)
-tse_lahti <- LahtiMData()
+       title = "Group = FALSE", color="")
 ```
 
 
-Then we estimate relative abundances and MDS ordination based on
-Bray-Curtis (BC) dissimilarity between the groups, and visualize the
-results.
-
-
-```{r}
-tse_lahti <- relAbundanceCounts(tse_lahti)
-tse_lahti <- runNMDS(tse_lahti, FUN = vegan::vegdist, name = "BC", nmdsFUN = "monoMDS",
-                     exprs_values = "relabundance",
-                     keep_dist = TRUE)
-```
-
-```{r}
-plotReducedDim(tse_lahti, "BC", colour_by = "group")
-```
-
-No clear difference between the groups can be visually observed.
 
 
 ### Testing differences in community composition between sample groups
@@ -359,12 +342,12 @@ This method is implemented in the `vegan` package (function `adonis`).
 
 ```{r}
 library(vegan)
-permanova <- vegan::adonis(t(assay(tse_lahti,"relabundance")) ~ group,
-                           data = colData(tse_lahti),
+permanova <- vegan::adonis(t(assay(tse,"relabundance")) ~ Group,
+                           data = colData(tse),
                            permutations = 9999)
 
 # P-value
-print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
+print(as.data.frame(permanova$aov.tab)["Group", "Pr(>F)"])
 ```
 
 In this case, the community composition is not significantly different
@@ -377,7 +360,7 @@ composition.
 
 
 ```{r}
-coef <- coefficients(permanova)["group1",]
+coef <- coefficients(permanova)["Group1",]
 top.coef <- sort(head(coef[rev(order(abs(coef)))],20))
 ```
 
@@ -404,25 +387,26 @@ group), and many other co-varying species.
 
 It is important to note that the application of PERMANOVA assumes
 homogeneous group dispersions (variances). This can be tested with the
-PERMDISP2 method [@Anderson2006].
+PERMDISP2 method [@Anderson2006] by using the same assay and distance
+method than in PERMANOVA.
 
 
 ```{r}
-anova(vegan::betadisper(attr(reducedDim(tse_lahti,"BC"),"dist"),
-                        colData(tse_lahti)$group))
+anova(vegan::betadisper(vegan::vegdist(t(assay(tse, "counts"))),
+                        colData(tse)$Group))
 ```
 
-In our example, the groups have similar dispersion, and PERMANOVA is
-an appropriate choice for comparing community compositions.
+If the groups have similar dispersion, PERMANOVA can be seen as an
+appropriate choice for comparing community compositions.
 
 
 ## Further reading
 
-In certain settings, beta diversities might be used to group samples without
-prior knowledge. For this we want to point to excellent resources on 
-[how to extract information from the clusters](http://bioconductor.org/books/release/OSCA/clustering.html).
 
-See also [community typing](15-microbiome-community.md).
+ - [How to extract information from clusters](http://bioconductor.org/books/release/OSCA/clustering.html)
+
+ - [Community typing](15-microbiome-community.md)
+
 
 ## Session Info {-}
 
