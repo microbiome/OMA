@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 3 Packages | Orchestrating Microbiome Analysis</title>
-  <meta name="description" content="Chapter 3 Packages | Orchestrating Microbiome Analysis" />
+  <title>Chapter 12 Multi-assay analyses | Orchestrating Microbiome Analysis</title>
+  <meta name="description" content="Chapter 12 Multi-assay analyses | Orchestrating Microbiome Analysis" />
   <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 3 Packages | Orchestrating Microbiome Analysis" />
+  <meta property="og:title" content="Chapter 12 Multi-assay analyses | Orchestrating Microbiome Analysis" />
   <meta property="og:type" content="book" />
   <meta property="og:url" content="https://github.com/microbiome/OMA" />
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="microbiome/OMA" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 3 Packages | Orchestrating Microbiome Analysis" />
+  <meta name="twitter:title" content="Chapter 12 Multi-assay analyses | Orchestrating Microbiome Analysis" />
   
   
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="containers.html"/>
-<link rel="next" href="datamanipulation.html"/>
+<link rel="prev" href="differential-abundance.html"/>
+<link rel="next" href="resources.html"/>
 <script src="libs/header-attrs-2.11/header-attrs.js"></script>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
@@ -349,8 +349,8 @@ div.csl-indent {
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="packages" class="section level1" number="3">
-<h1><span class="header-section-number">Chapter 3</span> Packages</h1>
+<div id="multi-assay_analyses" class="section level1" number="12">
+<h1><span class="header-section-number">Chapter 12</span> Multi-assay analyses</h1>
 <script>
 document.addEventListener("click", function (event) {
     if (event.target.classList.contains("rebook-collapse")) {
@@ -384,27 +384,218 @@ document.addEventListener("click", function (event) {
   background-color: #f1f1f1;
 }
 </style>
-<div id="package-installation" class="section level2" number="3.1">
-<h2><span class="header-section-number">3.1</span> Package installation</h2>
-<p>Several R packages provide methods for the analysis and manipulation
-of <code>SummarizedExperiment</code> and related data containers. One of these is
-<code>mia</code>.</p>
-<p>Install the Biocondcuctor development version with:</p>
-<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="packages.html#cb65-1" aria-hidden="true" tabindex="-1"></a>BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;microbiome/mia&quot;</span>, <span class="at">version=</span><span class="st">&quot;devel&quot;</span>)</span></code></pre></div>
-</div>
-<div id="some-available-packages" class="section level2" number="3.2">
-<h2><span class="header-section-number">3.2</span> Some available packages</h2>
-<p>Some of the R packages supporting the framework include:</p>
-<ul>
-<li><a href="microbiome.github.io/mia">mia</a> : Microbiome analysis tools<br />
-</li>
-<li><a href="microbiome.github.io/miaViz">miaViz</a> : Microbiome analysis specific visualization</li>
-<li><a href="microbiome.github.io/miaSim">miaSim</a> : Microbiome data simulations</li>
-<li><a href="microbiome.github.io/miaTime">miaTime</a> : Microbiome time series analysis</li>
-<li><a href="http://bioconductor.org/packages/devel/bioc/html/philr.html">philr</a> (external)</li>
-</ul>
-</div>
-<div id="session-info-1" class="section level2 unnumbered">
+<pre><code>## Loading required package: ecodist</code></pre>
+<div class="sourceCode" id="cb276"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb276-1"><a href="multi-assay_analyses.html#cb276-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mia)</span></code></pre></div>
+<p>Multi-omics means that we integrate data from multiple sources. For example,
+we can integrate microbial abundances in the gut with biomolecular profiling data
+from blood samples. This kind of integrative multi-omic approaches can support the
+analysis of microbiome dysbiosis and facilitate the discovery of novel biomarkers
+for health and disease.</p>
+<p>With cross-correlation analysis, we can analyze how strongly and how differently
+variables are associated between each other. For instance, we can analyze if
+higher presence of a specific taxon equals to higher levels of a biomolecule.</p>
+<p>The data containers that the <em>miaverse</em> utilizes are scalable and they can contain
+different types of data in a same container. Because of that, the <em>miaverse</em> is
+well-suitable for multi-assay microbiome data which incorporates different types
+of complementary data sources in a single reproducible workflow.</p>
+<p>Another experiment can be stored in
+<a href="https://microbiome.github.io/OMA/containers.html#alternative-experiments">altExp</a>
+slot of SE data container or both experiments can be stored side-by-side in
+<a href="https://microbiome.github.io/OMA/containers.html#multiassayexperiments">MAE</a>
+data container.</p>
+<p>Different experiments are first imported into SE or TreeSE data container similarly
+to the case when only one experiment is present. After that different experiments are
+combined into the same data container. Result is one TreeSE object with alternative
+experiment in altExp slot, or MAE object with multiple experiment in its
+experiment slot.</p>
+<p>As an example data, we use data from following publication: Hintikka L <em>et al.</em> (2021)
+<a href="https://doi.org/10.3390/ijerph18084049">Xylo-oligosaccharides in prevention of hepatic steatosis and adipose tissue inflammation:
+associating taxonomic and metabolomic patterns in fecal microbiotas with
+biclustering</a>.</p>
+<p>In this article, mice were fed with high-fat and low-fat diets with or without prebiotics.
+The purpose of this was to study if prebiotics would reduce the negative impacts
+of high-fat diet.</p>
+<p>This example data can be loaded from microbiomeDataSets. The data is already in MAE
+format. It includes three different experiments: microbial abundance data,
+metabolite concentrations, and data about different biomarkers. Help for importing
+data into SE object you can find from <a href="https://microbiome.github.io/OMA/containers.html#loading-experimental-microbiome-data">here</a>.</p>
+<div class="sourceCode" id="cb277"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb277-1"><a href="multi-assay_analyses.html#cb277-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the data</span></span>
+<span id="cb277-2"><a href="multi-assay_analyses.html#cb277-2" aria-hidden="true" tabindex="-1"></a>mae <span class="ot">&lt;-</span> microbiomeDataSets<span class="sc">::</span><span class="fu">HintikkaXOData</span>()</span>
+<span id="cb277-3"><a href="multi-assay_analyses.html#cb277-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb277-4"><a href="multi-assay_analyses.html#cb277-4" aria-hidden="true" tabindex="-1"></a>mae</span></code></pre></div>
+<pre><code>## A MultiAssayExperiment object of 3 listed
+##  experiments with user-defined names and respective classes.
+##  Containing an ExperimentList class object of length 3:
+##  [1] microbiota: SummarizedExperiment with 12706 rows and 40 columns
+##  [2] metabolites: SummarizedExperiment with 38 rows and 40 columns
+##  [3] biomarkers: SummarizedExperiment with 39 rows and 40 columns
+## Functionality:
+##  experiments() - obtain the ExperimentList instance
+##  colData() - the primary/phenotype DataFrame
+##  sampleMap() - the sample coordination DataFrame
+##  `$`, `[`, `[[` - extract colData columns, subset, or experiment
+##  *Format() - convert into a long or wide DataFrame
+##  assays() - convert ExperimentList to a SimpleList of matrices
+##  exportClass() - save data to flat files</code></pre>
+<div class="sourceCode" id="cb279"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb279-1"><a href="multi-assay_analyses.html#cb279-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(stringr)){</span>
+<span id="cb279-2"><a href="multi-assay_analyses.html#cb279-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;stringr&quot;</span>)</span>
+<span id="cb279-3"><a href="multi-assay_analyses.html#cb279-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(stringr)</span>
+<span id="cb279-4"><a href="multi-assay_analyses.html#cb279-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb279-5"><a href="multi-assay_analyses.html#cb279-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop off those bacteria that do not include information in Phylum or lower levels</span></span>
+<span id="cb279-6"><a href="multi-assay_analyses.html#cb279-6" aria-hidden="true" tabindex="-1"></a>mae[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> mae[[<span class="dv">1</span>]][<span class="sc">!</span><span class="fu">is.na</span>(<span class="fu">rowData</span>(mae[[<span class="dv">1</span>]])<span class="sc">$</span>Phylum), ]</span>
+<span id="cb279-7"><a href="multi-assay_analyses.html#cb279-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean taxonomy data, so that names do not include additional characters</span></span>
+<span id="cb279-8"><a href="multi-assay_analyses.html#cb279-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rowData</span>(mae[[<span class="dv">1</span>]]) <span class="ot">&lt;-</span> <span class="fu">DataFrame</span>(<span class="fu">apply</span>(<span class="fu">rowData</span>(mae[[<span class="dv">1</span>]]), <span class="dv">2</span>, </span>
+<span id="cb279-9"><a href="multi-assay_analyses.html#cb279-9" aria-hidden="true" tabindex="-1"></a>                                     str_remove, <span class="at">pattern =</span> <span class="st">&quot;._[0-9]__&quot;</span>))</span>
+<span id="cb279-10"><a href="multi-assay_analyses.html#cb279-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Microbiome data</span></span>
+<span id="cb279-11"><a href="multi-assay_analyses.html#cb279-11" aria-hidden="true" tabindex="-1"></a>mae[[<span class="dv">1</span>]]</span></code></pre></div>
+<pre><code>## class: SummarizedExperiment 
+## dim: 12613 40 
+## metadata(0):
+## assays(1): counts
+## rownames(12613): GAYR01026362.62.2014 CVJT01000011.50.2173 ...
+##   JRJTB:03787:02429 JRJTB:03787:02478
+## rowData names(7): Phylum Class ... Species OTU
+## colnames(40): C1 C2 ... C39 C40
+## colData names(0):</code></pre>
+<div class="sourceCode" id="cb281"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb281-1"><a href="multi-assay_analyses.html#cb281-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Metabolite data</span></span>
+<span id="cb281-2"><a href="multi-assay_analyses.html#cb281-2" aria-hidden="true" tabindex="-1"></a>mae[[<span class="dv">2</span>]]</span></code></pre></div>
+<pre><code>## class: SummarizedExperiment 
+## dim: 38 40 
+## metadata(0):
+## assays(1): nmr
+## rownames(38): Butyrate Acetate ... Malonate 1,3-dihydroxyacetone
+## rowData names(0):
+## colnames(40): C1 C2 ... C39 C40
+## colData names(0):</code></pre>
+<div class="sourceCode" id="cb283"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb283-1"><a href="multi-assay_analyses.html#cb283-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Biomarker data</span></span>
+<span id="cb283-2"><a href="multi-assay_analyses.html#cb283-2" aria-hidden="true" tabindex="-1"></a>mae[[<span class="dv">3</span>]]</span></code></pre></div>
+<pre><code>## class: SummarizedExperiment 
+## dim: 39 40 
+## metadata(0):
+## assays(1): signals
+## rownames(39): Triglycerides_liver CLSs_epi ... NPY_serum Glycogen_liver
+## rowData names(0):
+## colnames(40): C1 C2 ... C39 C40
+## colData names(0):</code></pre>
+<p>Next we can do the cross-correlation analysis.
+Here we analyse if individual bacteria genera correlates
+with concentrations of individual metabolites. This helps as to answer the question:
+“If this bacteria is present, is this metabolite’s concentration then low or high?”</p>
+<div class="sourceCode" id="cb285"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb285-1"><a href="multi-assay_analyses.html#cb285-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Agglomerate microbiome data at Genus level</span></span>
+<span id="cb285-2"><a href="multi-assay_analyses.html#cb285-2" aria-hidden="true" tabindex="-1"></a>mae[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(mae[[<span class="dv">1</span>]], <span class="at">rank =</span> <span class="st">&quot;Genus&quot;</span>)</span>
+<span id="cb285-3"><a href="multi-assay_analyses.html#cb285-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Does log10 transform for microbiome data</span></span>
+<span id="cb285-4"><a href="multi-assay_analyses.html#cb285-4" aria-hidden="true" tabindex="-1"></a>mae[[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="fu">transformSamples</span>(mae[[<span class="dv">1</span>]], <span class="at">method =</span> <span class="st">&quot;log10&quot;</span>, <span class="at">pseudocount =</span> <span class="dv">1</span>)</span>
+<span id="cb285-5"><a href="multi-assay_analyses.html#cb285-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb285-6"><a href="multi-assay_analyses.html#cb285-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Cross correlates data sets</span></span>
+<span id="cb285-7"><a href="multi-assay_analyses.html#cb285-7" aria-hidden="true" tabindex="-1"></a>correlation_table <span class="ot">&lt;-</span> <span class="fu">testExperimentCrossCorrelation</span>(mae, </span>
+<span id="cb285-8"><a href="multi-assay_analyses.html#cb285-8" aria-hidden="true" tabindex="-1"></a>                                                    <span class="at">experiment1 =</span> <span class="dv">1</span>,</span>
+<span id="cb285-9"><a href="multi-assay_analyses.html#cb285-9" aria-hidden="true" tabindex="-1"></a>                                                    <span class="at">experiment2 =</span> <span class="dv">2</span>,</span>
+<span id="cb285-10"><a href="multi-assay_analyses.html#cb285-10" aria-hidden="true" tabindex="-1"></a>                                                    <span class="at">abund_values1 =</span> <span class="st">&quot;log10&quot;</span>, </span>
+<span id="cb285-11"><a href="multi-assay_analyses.html#cb285-11" aria-hidden="true" tabindex="-1"></a>                                                    <span class="at">abund_values2 =</span> <span class="st">&quot;nmr&quot;</span>,</span>
+<span id="cb285-12"><a href="multi-assay_analyses.html#cb285-12" aria-hidden="true" tabindex="-1"></a>                                                    <span class="at">method =</span> <span class="st">&quot;spearman&quot;</span>, </span>
+<span id="cb285-13"><a href="multi-assay_analyses.html#cb285-13" aria-hidden="true" tabindex="-1"></a>                                                    <span class="at">p_adj_threshold =</span> <span class="fl">0.05</span>,</span>
+<span id="cb285-14"><a href="multi-assay_analyses.html#cb285-14" aria-hidden="true" tabindex="-1"></a>                                                    <span class="at">cor_threshold =</span> <span class="dv">0</span>)</span>
+<span id="cb285-15"><a href="multi-assay_analyses.html#cb285-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb285-16"><a href="multi-assay_analyses.html#cb285-16" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">head</span>(correlation_table))</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Var1</th>
+<th align="left">Var2</th>
+<th align="right">cor</th>
+<th align="right">pval</th>
+<th align="right">p_adj</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Genus:Streptococcus</td>
+<td align="left">Butyrate</td>
+<td align="right">-0.4136</td>
+<td align="right">0.0080</td>
+<td align="right">0.1729</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Ruminiclostridium 5</td>
+<td align="left">Butyrate</td>
+<td align="right">0.6760</td>
+<td align="right">0.0000</td>
+<td align="right">0.0017</td>
+</tr>
+<tr class="odd">
+<td align="left">Genus:Lactococcus</td>
+<td align="left">Butyrate</td>
+<td align="right">-0.3657</td>
+<td align="right">0.0209</td>
+<td align="right">0.2871</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Globicatella</td>
+<td align="left">Butyrate</td>
+<td align="right">-0.4792</td>
+<td align="right">0.0018</td>
+<td align="right">0.0790</td>
+</tr>
+<tr class="odd">
+<td align="left">Genus:Enterobacter</td>
+<td align="left">Butyrate</td>
+<td align="right">-0.6011</td>
+<td align="right">0.0000</td>
+<td align="right">0.0079</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Lachnoclostridium</td>
+<td align="left">Butyrate</td>
+<td align="right">-0.6346</td>
+<td align="right">0.0000</td>
+<td align="right">0.0039</td>
+</tr>
+</tbody>
+</table>
+<p>Reorders the table</p>
+<div class="sourceCode" id="cb286"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb286-1"><a href="multi-assay_analyses.html#cb286-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(reshape2)){</span>
+<span id="cb286-2"><a href="multi-assay_analyses.html#cb286-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;reshape2&quot;</span>)</span>
+<span id="cb286-3"><a href="multi-assay_analyses.html#cb286-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb286-4"><a href="multi-assay_analyses.html#cb286-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb286-5"><a href="multi-assay_analyses.html#cb286-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Converts data to matrix, correlations as values</span></span>
+<span id="cb286-6"><a href="multi-assay_analyses.html#cb286-6" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> reshape2<span class="sc">::</span><span class="fu">acast</span>(correlation_table, Var2 <span class="sc">~</span> Var1, <span class="at">value.var =</span> <span class="st">&quot;cor&quot;</span>)</span>
+<span id="cb286-7"><a href="multi-assay_analyses.html#cb286-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb286-8"><a href="multi-assay_analyses.html#cb286-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Hierarchical clustering, gets the order of taxa and lipids</span></span>
+<span id="cb286-9"><a href="multi-assay_analyses.html#cb286-9" aria-hidden="true" tabindex="-1"></a>taxa_indices <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">as.dist</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">cor</span>(mat, <span class="at">use=</span><span class="st">&quot;pairwise.complete.obs&quot;</span>)))<span class="sc">$</span>order</span>
+<span id="cb286-10"><a href="multi-assay_analyses.html#cb286-10" aria-hidden="true" tabindex="-1"></a>order_taxa <span class="ot">&lt;-</span> <span class="fu">colnames</span>(mat)[taxa_indices]</span>
+<span id="cb286-11"><a href="multi-assay_analyses.html#cb286-11" aria-hidden="true" tabindex="-1"></a>lipids_indices <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">as.dist</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">cor</span>(<span class="fu">t</span>(mat), <span class="at">use=</span><span class="st">&quot;pairwise.complete.obs&quot;</span>)))<span class="sc">$</span>order</span>
+<span id="cb286-12"><a href="multi-assay_analyses.html#cb286-12" aria-hidden="true" tabindex="-1"></a>order_lipids <span class="ot">&lt;-</span> <span class="fu">rownames</span>(mat)[lipids_indices]</span>
+<span id="cb286-13"><a href="multi-assay_analyses.html#cb286-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb286-14"><a href="multi-assay_analyses.html#cb286-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Converts taxa and lipids columns to factor so that they have the desired order</span></span>
+<span id="cb286-15"><a href="multi-assay_analyses.html#cb286-15" aria-hidden="true" tabindex="-1"></a>correlation_table[[<span class="st">&quot;Var1&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">factor</span>(correlation_table[[<span class="st">&quot;Var1&quot;</span>]], <span class="at">levels =</span> order_taxa)</span>
+<span id="cb286-16"><a href="multi-assay_analyses.html#cb286-16" aria-hidden="true" tabindex="-1"></a>correlation_table[[<span class="st">&quot;Var2&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">factor</span>(correlation_table[[<span class="st">&quot;Var2&quot;</span>]], <span class="at">levels =</span> order_lipids)</span></code></pre></div>
+<p>Creates the heatmap</p>
+<div class="sourceCode" id="cb287"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb287-1"><a href="multi-assay_analyses.html#cb287-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb287-2"><a href="multi-assay_analyses.html#cb287-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb287-3"><a href="multi-assay_analyses.html#cb287-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Determines the scaling of colors</span></span>
+<span id="cb287-4"><a href="multi-assay_analyses.html#cb287-4" aria-hidden="true" tabindex="-1"></a>limits <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb287-5"><a href="multi-assay_analyses.html#cb287-5" aria-hidden="true" tabindex="-1"></a>breaks <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="fu">min</span>(limits), <span class="at">to =</span> <span class="fu">max</span>(limits), <span class="at">by =</span> <span class="fl">0.2</span>)</span>
+<span id="cb287-6"><a href="multi-assay_analyses.html#cb287-6" aria-hidden="true" tabindex="-1"></a>colours <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;darkblue&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;white&quot;</span>, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;darkred&quot;</span>)</span>
+<span id="cb287-7"><a href="multi-assay_analyses.html#cb287-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb287-8"><a href="multi-assay_analyses.html#cb287-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Which observation have p-value under 0.05? --&gt; creates a subset</span></span>
+<span id="cb287-9"><a href="multi-assay_analyses.html#cb287-9" aria-hidden="true" tabindex="-1"></a>cor_table_sub <span class="ot">&lt;-</span> correlation_table[<span class="fu">which</span>(correlation_table[[<span class="st">&quot;p_adj&quot;</span>]] <span class="sc">&lt;</span> <span class="fl">0.05</span>), ]</span>
+<span id="cb287-10"><a href="multi-assay_analyses.html#cb287-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb287-11"><a href="multi-assay_analyses.html#cb287-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates a ggplot object</span></span>
+<span id="cb287-12"><a href="multi-assay_analyses.html#cb287-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(correlation_table, <span class="fu">aes</span>(<span class="at">x =</span> Var1, <span class="at">y =</span> Var2, <span class="at">fill =</span> cor)) <span class="sc">+</span></span>
+<span id="cb287-13"><a href="multi-assay_analyses.html#cb287-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>() <span class="sc">+</span></span>
+<span id="cb287-14"><a href="multi-assay_analyses.html#cb287-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb287-15"><a href="multi-assay_analyses.html#cb287-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">name =</span> <span class="st">&quot;Correlation&quot;</span>, </span>
+<span id="cb287-16"><a href="multi-assay_analyses.html#cb287-16" aria-hidden="true" tabindex="-1"></a>                       <span class="at">breaks =</span> breaks, <span class="at">limits =</span> limits, <span class="at">colours =</span> colours) <span class="sc">+</span> </span>
+<span id="cb287-17"><a href="multi-assay_analyses.html#cb287-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb287-18"><a href="multi-assay_analyses.html#cb287-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Adds label to those observations that have p-value under 0.05</span></span>
+<span id="cb287-19"><a href="multi-assay_analyses.html#cb287-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">data =</span> cor_table_sub, <span class="fu">aes</span>(<span class="at">x =</span> Var1, <span class="at">y =</span> Var2, <span class="at">label =</span> <span class="st">&quot;+&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb287-20"><a href="multi-assay_analyses.html#cb287-20" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb287-21"><a href="multi-assay_analyses.html#cb287-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">10</span>),</span>
+<span id="cb287-22"><a href="multi-assay_analyses.html#cb287-22" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle=</span><span class="dv">45</span>, <span class="at">hjust=</span><span class="dv">1</span>),</span>
+<span id="cb287-23"><a href="multi-assay_analyses.html#cb287-23" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.key.size =</span> <span class="fu">unit</span>(<span class="dv">1</span>, <span class="st">&quot;cm&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb287-24"><a href="multi-assay_analyses.html#cb287-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Taxa&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Metabolites&quot;</span>)</span></code></pre></div>
+<p><img src="23_multi-assay_analyses_files/figure-html/cross-correlation7-1.png" width="960" /></p>
+<div id="session-info-8" class="section level2 unnumbered">
 <h2>Session Info</h2>
 <button class="rebook-collapse">
 View session info
@@ -426,22 +617,82 @@ locale:
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
+[1] stats4    stats     graphics  grDevices utils     datasets  methods  
+[8] base     
 
 other attached packages:
-[1] BiocStyle_2.22.0 rebook_1.4.0    
+ [1] ggplot2_3.3.5                  reshape2_1.4.4                
+ [3] stringr_1.4.0                  microbiomeDataSets_1.1.5      
+ [5] mia_1.3.8                      MultiAssayExperiment_1.20.0   
+ [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
+ [9] XVector_0.34.0                 SingleCellExperiment_1.16.0   
+[11] SummarizedExperiment_1.24.0    Biobase_2.54.0                
+[13] GenomicRanges_1.46.0           GenomeInfoDb_1.30.0           
+[15] IRanges_2.28.0                 S4Vectors_0.32.2              
+[17] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
+[19] matrixStats_0.61.0-9001        ecodist_2.0.7                 
+[21] BiocStyle_2.22.0               rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
- [1] graph_1.72.0        knitr_1.36          magrittr_2.0.1     
- [4] BiocGenerics_0.40.0 R6_2.5.1            rlang_0.4.12       
- [7] fastmap_1.1.0       stringr_1.4.0       tools_4.1.2        
-[10] xfun_0.28           jquerylib_0.1.4     htmltools_0.5.2    
-[13] CodeDepends_0.6.5   yaml_2.2.1          digest_0.6.28      
-[16] bookdown_0.24       dir.expiry_1.2.0    BiocManager_1.30.16
-[19] codetools_0.2-18    sass_0.4.0          evaluate_0.14      
-[22] rmarkdown_2.11      stringi_1.7.5       compiler_4.1.2     
-[25] bslib_0.3.1         filelock_1.0.2      stats4_4.1.2       
-[28] XML_3.99-0.8        jsonlite_1.7.2     </code></pre>
+  [1] AnnotationHub_3.2.0           BiocFileCache_2.2.0          
+  [3] plyr_1.8.6                    lazyeval_0.2.2               
+  [5] splines_4.1.2                 BiocParallel_1.28.0          
+  [7] scater_1.22.0                 digest_0.6.28                
+  [9] yulab.utils_0.0.4             htmltools_0.5.2              
+ [11] viridis_0.6.2                 fansi_0.5.0                  
+ [13] magrittr_2.0.1                memoise_2.0.0                
+ [15] ScaledMatrix_1.2.0            cluster_2.1.2                
+ [17] DECIPHER_2.22.0               colorspace_2.0-2             
+ [19] blob_1.2.2                    rappdirs_0.3.3               
+ [21] ggrepel_0.9.1                 xfun_0.28                    
+ [23] dplyr_1.0.7                   crayon_1.4.2                 
+ [25] RCurl_1.98-1.5                jsonlite_1.7.2               
+ [27] graph_1.72.0                  ape_5.5                      
+ [29] glue_1.5.0                    gtable_0.3.0                 
+ [31] zlibbioc_1.40.0               DelayedArray_0.20.0          
+ [33] BiocSingular_1.10.0           scales_1.1.1                 
+ [35] DBI_1.1.1                     Rcpp_1.0.7                   
+ [37] viridisLite_0.4.0             xtable_1.8-4                 
+ [39] decontam_1.14.0               tidytree_0.3.6               
+ [41] bit_4.0.4                     rsvd_1.0.5                   
+ [43] httr_1.4.2                    dir.expiry_1.2.0             
+ [45] ellipsis_0.3.2                farver_2.1.0                 
+ [47] pkgconfig_2.0.3               XML_3.99-0.8                 
+ [49] scuttle_1.4.0                 CodeDepends_0.6.5            
+ [51] sass_0.4.0                    dbplyr_2.1.1                 
+ [53] utf8_1.2.2                    tidyselect_1.1.1             
+ [55] rlang_0.4.12                  later_1.3.0                  
+ [57] AnnotationDbi_1.56.2          munsell_0.5.0                
+ [59] BiocVersion_3.14.0            tools_4.1.2                  
+ [61] cachem_1.0.6                  DirichletMultinomial_1.36.0  
+ [63] generics_0.1.1                RSQLite_2.2.8                
+ [65] ExperimentHub_2.2.0           evaluate_0.14                
+ [67] fastmap_1.1.0                 yaml_2.2.1                   
+ [69] knitr_1.36                    bit64_4.0.5                  
+ [71] purrr_0.3.4                   KEGGREST_1.34.0              
+ [73] nlme_3.1-153                  sparseMatrixStats_1.6.0      
+ [75] mime_0.12                     compiler_4.1.2               
+ [77] png_0.1-7                     beeswarm_0.4.0               
+ [79] filelock_1.0.2                curl_4.3.2                   
+ [81] interactiveDisplayBase_1.32.0 treeio_1.18.1                
+ [83] tibble_3.1.6                  bslib_0.3.1                  
+ [85] stringi_1.7.5                 highr_0.9                    
+ [87] lattice_0.20-45               Matrix_1.3-4                 
+ [89] vegan_2.5-7                   permute_0.9-5                
+ [91] vctrs_0.3.8                   pillar_1.6.4                 
+ [93] lifecycle_1.0.1               BiocManager_1.30.16          
+ [95] jquerylib_0.1.4               BiocNeighbors_1.12.0         
+ [97] bitops_1.0-7                  irlba_2.3.3                  
+ [99] httpuv_1.6.3                  R6_2.5.1                     
+[101] bookdown_0.24                 promises_1.2.0.1             
+[103] gridExtra_2.3                 vipor_0.4.5                  
+[105] codetools_0.2-18              MASS_7.3-54                  
+[107] assertthat_0.2.1              withr_2.4.2                  
+[109] GenomeInfoDbData_1.2.7        mgcv_1.8-38                  
+[111] parallel_4.1.2                grid_4.1.2                   
+[113] beachmat_2.10.0               tidyr_1.1.4                  
+[115] rmarkdown_2.11                DelayedMatrixStats_1.16.0    
+[117] shiny_1.7.1                   ggbeeswarm_0.6.0             </code></pre>
 </div>
 
 </div>
@@ -454,8 +705,8 @@ loaded via a namespace (and not attached):
           </div>
         </div>
       </div>
-<a href="containers.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="datamanipulation.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="differential-abundance.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="resources.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

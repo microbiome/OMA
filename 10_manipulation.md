@@ -52,14 +52,14 @@ For several custom analysis and visualization packages, such as those from the
 ```r
 library(mia)
 data(GlobalPatterns, package="mia")
-se <- GlobalPatterns
-se <- transformSamples(se, method="relabundance")
+tse <- GlobalPatterns
+tse <- transformSamples(tse, method="relabundance")
 
-molten_se <- meltAssay(se,
-                       add_row_data = TRUE,
-                       add_col_data = TRUE,
-                       abund_values = "relabundance")
-molten_se
+molten_tse <- meltAssay(tse,
+                        add_row_data = TRUE,
+                        add_col_data = TRUE,
+                        abund_values = "relabundance")
+molten_tse
 ```
 
 ```
@@ -99,15 +99,15 @@ Load:
 
 
 
-Let us store `GlobalPatterns` into `se` and check its original number of features (rows) and samples (columns). **Note**: when subsetting by sample, expect the number of columns to decrease; when subsetting by feature, expect the number of rows to decrease.
+Let us store `GlobalPatterns` into `tse` and check its original number of features (rows) and samples (columns). **Note**: when subsetting by sample, expect the number of columns to decrease; when subsetting by feature, expect the number of rows to decrease.
 
 
 ```r
 # store data into se and check dimensions
 data("GlobalPatterns", package="mia")
-se <- GlobalPatterns
+tse <- GlobalPatterns
 # show dimensions (features x samples)
-dim(se) 
+dim(tse) 
 ```
 
 ```
@@ -116,14 +116,14 @@ dim(se)
 
 #### Subset by sample (column-wise)
 
-For the sake of demonstration, here we will extract a subset containing only the samples of human origin (feces, skin or tongue), stored as `SampleType` within `colData(se)` and also in `se`.
+For the sake of demonstration, here we will extract a subset containing only the samples of human origin (feces, skin or tongue), stored as `SampleType` within `colData(tse)` and also in `tse`.
 
 First, we would like to see all the possible values that `SampleType` can take on and how frequent those are: 
 
 
 ```r
 # inspect possible values for SampleType
-unique(se$SampleType)
+unique(tse$SampleType)
 ```
 
 ```
@@ -135,7 +135,7 @@ unique(se$SampleType)
 
 ```r
 # show recurrence for each value
-se$SampleType %>% table()
+tse$SampleType %>% table()
 ```
 <div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; "><table class="table table-striped" style="margin-left: auto; margin-right: auto;">
  <thead>
@@ -188,25 +188,25 @@ se$SampleType %>% table()
   sum of the recurrences of the samples that you are interested
   in. For instance, `ncols = Feces + Skin + Tongue = 4 + 3 + 2 = 9`.
 
-Next, we _logical index_ across the columns of `se` (make sure to
+Next, we _logical index_ across the columns of `tse` (make sure to
 leave the first index empty to select all rows) and filter for the
 samples of human origin. For this, we use the information on the
-samples from the meta data `colData(se)`.
+samples from the meta data `colData(tse)`.
 
 
 ```r
 # subset by sample
-se_subset_by_sample <- se[ , se$SampleType %in% c("Feces", "Skin", "Tongue")]
+tse_subset_by_sample <- tse[ , tse$SampleType %in% c("Feces", "Skin", "Tongue")]
 
 # show dimensions
-dim(se_subset_by_sample)
+dim(tse_subset_by_sample)
 ```
 
 ```
 ## [1] 19216     9
 ```
 
-As a sanity check, the new object `se_subset_by_sample` should have
+As a sanity check, the new object `tse_subset_by_sample` should have
 the original number of features (rows) and a number of samples
 (columns) equal to the sum of the samples of interest (in this case
 9).
@@ -223,7 +223,7 @@ Several characteristics can be used to subset by sample:
 
 Similarly, here we will extract a subset containing only the features
 that belong to the Phyla "Actinobacteria" and "Chlamydiae", stored as
-`Phylum` within `rowData(se)`. However, subsetting by feature implies
+`Phylum` within `rowData(tse)`. However, subsetting by feature implies
 a few more obstacles, such as the presence of NA elements and the
 possible need for agglomeration.
 
@@ -233,7 +233,7 @@ As previously, we would first like to see all the possible values that
 
 ```r
 # inspect possible values for Phylum
-unique(rowData(se)$Phylum)
+unique(rowData(tse)$Phylum)
 ```
 
 ```
@@ -258,7 +258,7 @@ unique(rowData(se)$Phylum)
 
 ```r
 # show recurrence for each value
-rowData(se)$Phylum %>% table()
+rowData(tse)$Phylum %>% table()
 ```
 <div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; "><table class="table table-striped" style="margin-left: auto; margin-right: auto;">
  <thead>
@@ -549,11 +549,11 @@ Chlamydiae, agglomeration is recommended.
 
 ##### Non-agglomerated data
 
-Next, we _logical index_ across the rows of `se` (make sure to leave
+Next, we _logical index_ across the rows of `tse` (make sure to leave
 the second index empty to select all columns) and filter for the
 features that fall in either Actinobacteria or Chlamydiae. For this,
 we use the information on the samples from the meta data
-`rowData(se)`.
+`rowData(tse)`.
 
 The first term with the `%in%` operator are includes all the features
 of interest, whereas the second term after the AND operator `&`
@@ -562,17 +562,17 @@ filters out all the features that present a NA in place of Phylum.
 
 ```r
 # subset by feature
-se_subset_by_feature <- se[rowData(se)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(se)$Phylum), ]
+tse_subset_by_feature <- tse[rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(tse)$Phylum), ]
 
 # show dimensions
-dim(se_subset_by_feature)
+dim(tse_subset_by_feature)
 ```
 
 ```
 ## [1] 1652   26
 ```
 
-As a sanity check, the new object `se_subset_by_feature` should have the original number of samples (columns) and a number of features (rows) equal to the sum of the features of interest (in this case 1652).
+As a sanity check, the new object `tse_subset_by_feature` should have the original number of samples (columns) and a number of features (rows) equal to the sum of the features of interest (in this case 1652).
 
 ##### Agglomerated data
 
@@ -581,13 +581,13 @@ When total abundances of certain Phyla are of relevance, the data is initially a
 
 ```r
 # agglomerate by Phylum
-se_phylum <- se %>% agglomerateByRank(rank = "Phylum")
+tse_phylum <- tse %>% agglomerateByRank(rank = "Phylum")
 
 # subset by feature and get rid of NAs
-se_phylum_subset_by_feature <- se_phylum[rowData(se_phylum)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(se_phylum)$Phylum), ]
+tse_phylum_subset_by_feature <- tse_phylum[rowData(tse_phylum)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(tse_phylum)$Phylum), ]
 
 # show dimensions
-dim(se_phylum_subset_by_feature)
+dim(tse_phylum_subset_by_feature)
 ```
 
 ```
@@ -604,9 +604,9 @@ Alternatively:
 # store features of interest into phyla
 phyla <- c("Phylum:Actinobacteria", "Phylum:Chlamydiae")
 # subset by feature
-se_phylum_subset_by_feature <- se_phylum[phyla, ]
+tse_phylum_subset_by_feature <- tse_phylum[phyla, ]
 # show dimensions
-dim(se_subset_by_feature)
+dim(tse_subset_by_feature)
 ```
 
 ```
@@ -632,22 +632,22 @@ features of Phyla "Actinobacteria" or "Chlamydiae".
 
 ```r
 # subset by sample and feature and get rid of NAs
-se_subset_by_sample_feature <- se[rowData(se)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(se)$Phylum), se$SampleType %in% c("Feces", "Skin", "Tongue")]
+tse_subset_by_sample_feature <- tse[rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(tse)$Phylum), tse$SampleType %in% c("Feces", "Skin", "Tongue")]
 
 # show dimensions
-dim(se_subset_by_sample_feature)
+dim(tse_subset_by_sample_feature)
 ```
 
 ```
 ## [1] 1652    9
 ```
 
-**Note**: the dimensions of `se_subset_by_sample_feature` agree with
+**Note**: the dimensions of `tse_subset_by_sample_feature` agree with
   those of the previous subsets (9 columns filtered by sample and 1652
   rows filtered by feature).
 
 If a study was to consider and quantify the presence of Actinobacteria
 as well as Chlamydiae in different sites of the human body,
-`se_subset_by_sample_feature` might be a suitable subset to start
+`tse_subset_by_sample_feature` might be a suitable subset to start
 with.
 

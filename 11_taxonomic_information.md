@@ -39,7 +39,7 @@ document.addEventListener("click", function (event) {
 ```r
 library(mia)
 data("GlobalPatterns", package="mia")
-se <- GlobalPatterns 
+tse <- GlobalPatterns 
 ```
 
 Taxonomic information is a key part of analyzing microbiome data and without
@@ -85,7 +85,7 @@ found on the [DECIPHER website](http://www2.decipher.codes/Classification.html).
 
 
 ```r
-checkTaxonomy(se)
+checkTaxonomy(tse)
 ```
 
 ```
@@ -97,7 +97,7 @@ columns `mia` assumes to contain the taxonomic information.
 
 
 ```r
-taxonomyRanks(se)
+taxonomyRanks(tse)
 ```
 
 ```
@@ -108,7 +108,7 @@ This can then be used to subset the `rowData` to columns needed.
 
 
 ```r
-rowData(se)[,taxonomyRanks(se)]
+rowData(tse)[,taxonomyRanks(tse)]
 ```
 
 ```
@@ -146,7 +146,7 @@ logical vector of `length(x)`.
 
 
 ```r
-all(!taxonomyRankEmpty(se, rank = "Kingdom"))
+all(!taxonomyRankEmpty(tse, rank = "Kingdom"))
 ```
 
 ```
@@ -154,7 +154,7 @@ all(!taxonomyRankEmpty(se, rank = "Kingdom"))
 ```
 
 ```r
-table(taxonomyRankEmpty(se, rank = "Genus"))
+table(taxonomyRankEmpty(tse, rank = "Genus"))
 ```
 
 ```
@@ -164,7 +164,7 @@ table(taxonomyRankEmpty(se, rank = "Genus"))
 ```
 
 ```r
-table(taxonomyRankEmpty(se, rank = "Species"))
+table(taxonomyRankEmpty(tse, rank = "Species"))
 ```
 
 ```
@@ -178,7 +178,7 @@ information into a character vector of `length(x)`
 
 
 ```r
-head(getTaxonomyLabels(se))
+head(getTaxonomyLabels(tse))
 ```
 
 ```
@@ -193,9 +193,9 @@ this part is omitted, but can be added by setting `with_rank = TRUE`.
 
 
 ```r
-phylum <- !is.na(rowData(se)$Phylum) & 
-    vapply(data.frame(apply(rowData(se)[,taxonomyRanks(se)[3:7]],1L,is.na)),all,logical(1))
-head(getTaxonomyLabels(se[phylum,]))
+phylum <- !is.na(rowData(tse)$Phylum) & 
+    vapply(data.frame(apply(rowData(tse)[,taxonomyRanks(tse)[3:7]],1L,is.na)),all,logical(1))
+head(getTaxonomyLabels(tse[phylum,]))
 ```
 
 ```
@@ -204,7 +204,7 @@ head(getTaxonomyLabels(se[phylum,]))
 ```
 
 ```r
-head(getTaxonomyLabels(se[phylum,], with_rank = TRUE))
+head(getTaxonomyLabels(tse[phylum,], with_rank = TRUE))
 ```
 
 ```
@@ -219,7 +219,7 @@ by passing it through `make.unique`. This step can be omitted by setting
 
 
 ```r
-head(getTaxonomyLabels(se[phylum,], with_rank = TRUE, make_unique = FALSE))
+head(getTaxonomyLabels(tse[phylum,], with_rank = TRUE, make_unique = FALSE))
 ```
 
 ```
@@ -238,7 +238,7 @@ To create a taxonomic tree, `taxonomyTree` used the information and returns a
 
 
 ```r
-taxonomyTree(se)
+taxonomyTree(tse)
 ```
 
 ```
@@ -255,8 +255,8 @@ taxonomyTree(se)
 
 
 ```r
-se <- addTaxonomyTree(se)
-se
+tse <- addTaxonomyTree(tse)
+tse
 ```
 
 ```
@@ -291,10 +291,10 @@ is as an alternative experiment.
 
 
 ```r
-se <- relAbundanceCounts(se)
-altExp(se, "Family") <- agglomerateByRank(se, rank = "Family",
-                                          agglomerateTree = TRUE)
-altExp(se, "Family")
+tse <- relAbundanceCounts(tse)
+altExp(tse, "Family") <- agglomerateByRank(tse, rank = "Family",
+                                           agglomerateTree = TRUE)
+altExp(tse, "Family")
 ```
 
 ```
@@ -320,7 +320,7 @@ If multiple assays (counts and relabundance) exist, both will be agglomerated.
 
 
 ```r
-assayNames(se)
+assayNames(tse)
 ```
 
 ```
@@ -328,7 +328,7 @@ assayNames(se)
 ```
 
 ```r
-assayNames(altExp(se, "Family"))
+assayNames(altExp(tse, "Family"))
 ```
 
 ```
@@ -337,7 +337,7 @@ assayNames(altExp(se, "Family"))
 
 
 ```r
-assay(altExp(se, "Family"), "relabundance")[1:5,1:7]
+assay(altExp(tse, "Family"), "relabundance")[1:5,1:7]
 ```
 
 ```
@@ -351,7 +351,7 @@ assay(altExp(se, "Family"), "relabundance")[1:5,1:7]
   
 
 ```r
-assay(altExp(se, "Family"), "counts")[1:5,1:7]
+assay(altExp(tse, "Family"), "counts")[1:5,1:7]
 ```
 
 ```
@@ -384,10 +384,10 @@ For complete list of available transformations and parameters, see function
 
 
 ```r
-se <- transformSamples(x = se, abund_values = "counts", method = "clr", 
-                       pseudocount = 1, name = "clr_transformation")
+tse <- transformSamples(x = tse, abund_values = "counts", method = "clr", 
+                        pseudocount = 1, name = "clr_transformation")
 
-head(assay(se, "clr_transformation"))
+head(assay(tse, "clr_transformation"))
 ```
 
 ```
@@ -433,9 +433,9 @@ be absent or present. By default, it is 0.
 
 
 ```r
-se <- transformFeatures(se, method = "pa", threshold = 10)
+tse <- transformFeatures(tse, method = "pa", threshold = 10)
 
-head(assay(se, "pa"))
+head(assay(tse, "pa"))
 ```
 
 ```
@@ -472,7 +472,7 @@ head(assay(se, "pa"))
 
 ```r
 # list of abundance tables that assays slot contains
-assays(se)
+assays(tse)
 ```
 
 ```
@@ -489,7 +489,7 @@ in one sample.
 ### Abundances of all taxa in specific sample 
 
 ```r
-taxa.abund.cc1 <- getAbundanceSample(se, 
+taxa.abund.cc1 <- getAbundanceSample(tse, 
                                      sample_id = "CC1",
                                      abund_values = "counts")
 taxa.abund.cc1[1:10]
@@ -512,7 +512,7 @@ taxa.abund.cc1[1:10]
 
 
 ```r
-taxa.abundances <- getAbundanceFeature(se, 
+taxa.abundances <- getAbundanceFeature(tse, 
                                       feature_id = "Phylum:Bacteroidetes",
                                       abund_values = "counts")
 taxa.abundances[1:10]
@@ -529,7 +529,7 @@ taxa.abundances[1:10]
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.1.1 (2021-08-10)
+R version 4.1.2 (2021-11-01)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 20.04.3 LTS
 
@@ -549,66 +549,66 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.3.2                      MultiAssayExperiment_1.20.0   
+ [1] mia_1.3.8                      MultiAssayExperiment_1.20.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
  [5] XVector_0.34.0                 SingleCellExperiment_1.16.0   
  [7] SummarizedExperiment_1.24.0    Biobase_2.54.0                
  [9] GenomicRanges_1.46.0           GenomeInfoDb_1.30.0           
-[11] IRanges_2.28.0                 S4Vectors_0.32.0              
+[11] IRanges_2.28.0                 S4Vectors_0.32.2              
 [13] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
 [15] matrixStats_0.61.0-9001        BiocStyle_2.22.0              
 [17] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
- [1] ggbeeswarm_0.6.0            colorspace_2.0-2           
- [3] ellipsis_0.3.2              scuttle_1.4.0              
- [5] BiocNeighbors_1.12.0        ggrepel_0.9.1              
- [7] bit64_4.0.5                 fansi_0.5.0                
- [9] decontam_1.14.0             splines_4.1.1              
-[11] codetools_0.2-18            sparseMatrixStats_1.6.0    
-[13] cachem_1.0.6                knitr_1.36                 
-[15] scater_1.22.0               jsonlite_1.7.2             
-[17] cluster_2.1.2               graph_1.72.0               
-[19] BiocManager_1.30.16         compiler_4.1.1             
-[21] assertthat_0.2.1            Matrix_1.3-4               
-[23] fastmap_1.1.0               lazyeval_0.2.2             
-[25] BiocSingular_1.10.0         htmltools_0.5.2            
-[27] tools_4.1.1                 rsvd_1.0.5                 
-[29] gtable_0.3.0                glue_1.4.2                 
-[31] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
-[33] dplyr_1.0.7                 Rcpp_1.0.7                 
-[35] jquerylib_0.1.4             vctrs_0.3.8                
-[37] ape_5.5                     nlme_3.1-153               
-[39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
-[41] xfun_0.27                   stringr_1.4.0              
-[43] beachmat_2.10.0             lifecycle_1.0.1            
-[45] irlba_2.3.3                 XML_3.99-0.8               
-[47] zlibbioc_1.40.0             MASS_7.3-54                
-[49] scales_1.1.1                parallel_4.1.1             
-[51] yaml_2.2.1                  memoise_2.0.0              
-[53] gridExtra_2.3               ggplot2_3.3.5              
-[55] sass_0.4.0                  stringi_1.7.5              
-[57] RSQLite_2.2.8               ScaledMatrix_1.2.0         
-[59] permute_0.9-5               tidytree_0.3.5             
-[61] filelock_1.0.2              BiocParallel_1.28.0        
-[63] rlang_0.4.12                pkgconfig_2.0.3            
-[65] bitops_1.0-7                evaluate_0.14              
-[67] lattice_0.20-45             purrr_0.3.4                
-[69] treeio_1.18.0               CodeDepends_0.6.5          
-[71] bit_4.0.4                   tidyselect_1.1.1           
-[73] plyr_1.8.6                  magrittr_2.0.1             
-[75] bookdown_0.24               R6_2.5.1                   
-[77] generics_0.1.1              DelayedArray_0.20.0        
-[79] DBI_1.1.1                   mgcv_1.8-38                
-[81] pillar_1.6.4                RCurl_1.98-1.5             
-[83] tibble_3.1.5                dir.expiry_1.2.0           
-[85] crayon_1.4.2                utf8_1.2.2                 
-[87] rmarkdown_2.11              viridis_0.6.2              
-[89] grid_4.1.1                  blob_1.2.2                 
-[91] vegan_2.5-7                 digest_0.6.28              
-[93] tidyr_1.1.4                 munsell_0.5.0              
-[95] DirichletMultinomial_1.36.0 beeswarm_0.4.0             
-[97] viridisLite_0.4.0           vipor_0.4.5                
-[99] bslib_0.3.1                
+  [1] ggbeeswarm_0.6.0            colorspace_2.0-2           
+  [3] ellipsis_0.3.2              scuttle_1.4.0              
+  [5] BiocNeighbors_1.12.0        ggrepel_0.9.1              
+  [7] bit64_4.0.5                 fansi_0.5.0                
+  [9] decontam_1.14.0             splines_4.1.2              
+ [11] codetools_0.2-18            sparseMatrixStats_1.6.0    
+ [13] cachem_1.0.6                knitr_1.36                 
+ [15] scater_1.22.0               jsonlite_1.7.2             
+ [17] cluster_2.1.2               graph_1.72.0               
+ [19] BiocManager_1.30.16         compiler_4.1.2             
+ [21] assertthat_0.2.1            Matrix_1.3-4               
+ [23] fastmap_1.1.0               lazyeval_0.2.2             
+ [25] BiocSingular_1.10.0         htmltools_0.5.2            
+ [27] tools_4.1.2                 rsvd_1.0.5                 
+ [29] gtable_0.3.0                glue_1.5.0                 
+ [31] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
+ [33] dplyr_1.0.7                 Rcpp_1.0.7                 
+ [35] jquerylib_0.1.4             vctrs_0.3.8                
+ [37] ape_5.5                     nlme_3.1-153               
+ [39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
+ [41] xfun_0.28                   stringr_1.4.0              
+ [43] beachmat_2.10.0             lifecycle_1.0.1            
+ [45] irlba_2.3.3                 XML_3.99-0.8               
+ [47] zlibbioc_1.40.0             MASS_7.3-54                
+ [49] scales_1.1.1                parallel_4.1.2             
+ [51] yaml_2.2.1                  memoise_2.0.0              
+ [53] gridExtra_2.3               ggplot2_3.3.5              
+ [55] yulab.utils_0.0.4           sass_0.4.0                 
+ [57] stringi_1.7.5               RSQLite_2.2.8              
+ [59] ScaledMatrix_1.2.0          permute_0.9-5              
+ [61] tidytree_0.3.6              filelock_1.0.2             
+ [63] BiocParallel_1.28.0         rlang_0.4.12               
+ [65] pkgconfig_2.0.3             bitops_1.0-7               
+ [67] evaluate_0.14               lattice_0.20-45            
+ [69] purrr_0.3.4                 treeio_1.18.1              
+ [71] CodeDepends_0.6.5           bit_4.0.4                  
+ [73] tidyselect_1.1.1            plyr_1.8.6                 
+ [75] magrittr_2.0.1              bookdown_0.24              
+ [77] R6_2.5.1                    generics_0.1.1             
+ [79] DelayedArray_0.20.0         DBI_1.1.1                  
+ [81] mgcv_1.8-38                 pillar_1.6.4               
+ [83] RCurl_1.98-1.5              tibble_3.1.6               
+ [85] dir.expiry_1.2.0            crayon_1.4.2               
+ [87] utf8_1.2.2                  rmarkdown_2.11             
+ [89] viridis_0.6.2               grid_4.1.2                 
+ [91] blob_1.2.2                  vegan_2.5-7                
+ [93] digest_0.6.28               tidyr_1.1.4                
+ [95] munsell_0.5.0               DirichletMultinomial_1.36.0
+ [97] beeswarm_0.4.0              viridisLite_0.4.0          
+ [99] vipor_0.4.5                 bslib_0.3.1                
 ```
 </div>

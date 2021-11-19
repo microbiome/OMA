@@ -108,11 +108,11 @@ library(tidyverse)
 # we use the dmn_se dataset and restrict it to 
 # obese vs lean for easy illustration
 data(dmn_se)
-tse <- dmn_se
-tse <- tse[ ,colData(tse)$pheno != "Overwt"]
-colData(tse)$pheno <- fct_drop(colData(tse)$pheno, "Overwt")
+se <- dmn_se
+se <- se[ ,colData(se)$pheno != "Overwt"]
+colData(se)$pheno <- fct_drop(colData(se)$pheno, "Overwt")
 # how many observations do we have per group?
-count(as.data.frame(colData(tse)), pheno) %>% kable()
+count(as.data.frame(colData(se)), pheno) %>% kable()
 ```
 
 
@@ -138,7 +138,7 @@ sure it is applied for all tools. Below we show how to do this in `mia`:
 
 
 ```r
-tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 0.1)
+se <- subsetByPrevalentTaxa(se, detection = 0, prevalence = 0.1)
 ```
 
 ### ALDEx2
@@ -166,8 +166,8 @@ example that illustrates the workflow.
 # Convert each instance using the centred log-ratio transform.
 # This is the input for all further analyses.
 x <- aldex.clr(
-  reads = assay(tse),
-  conds = colData(tse)$pheno, 
+  reads = assay(se),
+  conds = colData(se)$pheno, 
   # 128 recommened for ttest, 1000 for rigorous effect size calculation
   mc.samples = 128, 
   denom = "all",
@@ -277,7 +277,7 @@ taxon. It also controls the FDR and it is computationally simple to implement.
 
 As we will see below, to obtain results, all that is needed is to pass 
 a phyloseq object to the `ancombc()` function. Therefore, below we first
-convert our `tse` object to a `phyloseq` object. Then, we specify the formula.
+convert our `se` object to a `phyloseq` object. Then, we specify the formula.
 In this formula, other covariates could potentially be included to adjust for
 confounding. We show this further below. 
 Please check the [function documentation](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html) 
@@ -286,7 +286,7 @@ to learn about the additional arguments that we specify below.
 
 ```r
 # currently, ancombc requires the phyloseq format, but we can easily convert:
-pseq <- makePhyloseqFromTreeSummarizedExperiment(tse)
+pseq <- makePhyloseqFromTreeSummarizedExperiment(se)
 
 # perform the analysis 
 out = ancombc(
@@ -346,8 +346,8 @@ structures. The official package tutorial can be found [here](https://github.com
 ```r
 # maaslin expects features as columns and samples as rows 
 # for both the asv/otu table as well as meta data 
-asv <- t(assay(tse))
-meta_data <- data.frame(colData(tse))
+asv <- t(assay(se))
+meta_data <- data.frame(colData(se))
 # you can specifiy different GLMs/normalizations/transforms. We used similar
 # settings as in Nearing et al. (2021) here:
 fit_data <- Maaslin2(
@@ -479,8 +479,8 @@ any method or for those taxa that were identified by all methods:
 
 
 ```r
-plot_data <- data.frame(t(assay(tse)))
-plot_data$pheno <- colData(tse)$pheno
+plot_data <- data.frame(t(assay(se)))
+plot_data$pheno <- colData(se)$pheno
 # create a plot for each genus where the score is indicated in the title
 plots <- pmap(select(summ, genus, score), function(genus, score) {
   ggplot(plot_data, aes_string("pheno", genus)) +
@@ -541,18 +541,18 @@ object.
 
 ```r
 # to join new data to existing colData we need to put rownames as a column 
-colData(tse)$sample_id <- rownames(colData(tse))
+colData(se)$sample_id <- rownames(colData(se))
 # simulate a covariate that I will add to the colData.
 df_sim <- tibble(
-  sample_id = colData(tse)$sample_id,
-  age = rnorm(n = length(colData(tse)$sample_id))
+  sample_id = colData(se)$sample_id,
+  age = rnorm(n = length(colData(se)$sample_id))
 )
 # an easy way to join data is to use dplyr functions. The package 
 # tidySummarizedExperiment enables this functionality
-tse <- full_join(tse, df_sim, by = "sample_id")
-# now the data from df_sim is in the tse object and we can again repeat
+se <- full_join(se, df_sim, by = "sample_id")
+# now the data from df_sim is in the se object and we can again repeat
 # the steps as above:
-pseq <- makePhyloseqFromTreeSummarizedExperiment(tse)
+pseq <- makePhyloseqFromTreeSummarizedExperiment(se)
 out_cov = ancombc(
   phyloseq = pseq, 
   formula = "pheno + age", # here we add age to the model
@@ -638,7 +638,7 @@ if (!require(fido)){
 ## RcppNumer... (NA -> 0.4-0       ) [CRAN]
 ## tidybayes    (NA -> 3.0.1       ) [CRAN]
 ## 
-##      checking for file ‘/tmp/RtmpeL8jQM/remotes12ca374a9d423/jsilve24-driver-16e4499/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/RtmpeL8jQM/remotes12ca374a9d423/jsilve24-driver-16e4499/DESCRIPTION’
+##      checking for file ‘/tmp/RtmppXcBjA/remotes12fd4352b949/jsilve24-driver-16e4499/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/RtmppXcBjA/remotes12fd4352b949/jsilve24-driver-16e4499/DESCRIPTION’
 ##   ─  preparing ‘driver’:
 ##   ✔  checking DESCRIPTION meta-information
 ##   ─  checking for LF line-endings in source and make files and shell scripts
@@ -646,17 +646,17 @@ if (!require(fido)){
 ##    Omitted ‘LazyData’ from DESCRIPTION
 ##   ─  building ‘driver_0.1.1.tar.gz’
 ##      
-##      checking for file ‘/tmp/RtmpeL8jQM/remotes12ca360c11331/jsilve24-fido-c692141/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/RtmpeL8jQM/remotes12ca360c11331/jsilve24-fido-c692141/DESCRIPTION’
+##      checking for file ‘/tmp/RtmppXcBjA/remotes12fd47a89e78b/jsilve24-fido-c692141/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/RtmppXcBjA/remotes12fd47a89e78b/jsilve24-fido-c692141/DESCRIPTION’
 ##   ─  preparing ‘fido’:
-##    checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
-## ─  cleaning src
-##   ─  running ‘cleanup’
-##      Warning: /tmp/RtmpS6VlAQ/Rbuild12e095e1e1dcc/fido/man/loglikPibbleCollapsed.Rd:28: unknown macro '\item'
-##    Warning: /tmp/RtmpS6VlAQ/Rbuild12e095e1e1dcc/fido/man/loglikPibbleCollapsed.Rd:30: unknown macro '\item'
-##    Warning: /tmp/RtmpS6VlAQ/Rbuild12e095e1e1dcc/fido/man/loglikPibbleCollapsed.Rd:33: unexpected section header '\value'
-##    Warning: /tmp/RtmpS6VlAQ/Rbuild12e095e1e1dcc/fido/man/loglikPibbleCollapsed.Rd:41: unexpected section header '\description'
-##    Warning: /tmp/RtmpS6VlAQ/Rbuild12e095e1e1dcc/fido/man/loglikPibbleCollapsed.Rd:51: unexpected section header '\examples'
-##    Warning: /tmp/RtmpS6VlAQ/Rbuild12e095e1e1dcc/fido/man/loglikPibbleCollapsed.Rd:83: unexpected END_OF_INPUT '
+##      checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
+##   ─  cleaning src
+## ─  running ‘cleanup’
+##      Warning: /tmp/RtmpVVtMbB/Rbuild1313a10174c18/fido/man/loglikPibbleCollapsed.Rd:28: unknown macro '\item'
+##    Warning: /tmp/RtmpVVtMbB/Rbuild1313a10174c18/fido/man/loglikPibbleCollapsed.Rd:30: unknown macro '\item'
+##    Warning: /tmp/RtmpVVtMbB/Rbuild1313a10174c18/fido/man/loglikPibbleCollapsed.Rd:33: unexpected section header '\value'
+##    Warning: /tmp/RtmpVVtMbB/Rbuild1313a10174c18/fido/man/loglikPibbleCollapsed.Rd:41: unexpected section header '\description'
+##      Warning: /tmp/RtmpVVtMbB/Rbuild1313a10174c18/fido/man/loglikPibbleCollapsed.Rd:51: unexpected section header '\examples'
+##    Warning: /tmp/RtmpVVtMbB/Rbuild1313a10174c18/fido/man/loglikPibbleCollapsed.Rd:83: unexpected END_OF_INPUT '
 ##    '
 ##   ─  checking for LF line-endings in source and make files and shell scripts
 ##   ─  checking for empty or unneeded directories
@@ -786,7 +786,7 @@ fido::plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.1.1 (2021-08-10)
+R version 4.1.2 (2021-11-01)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 20.04.3 LTS
 
@@ -809,20 +809,20 @@ other attached packages:
  [1] microbiomeDataSets_1.1.5       fido_0.1.13                   
  [3] forcats_0.5.1                  stringr_1.4.0                 
  [5] dplyr_1.0.7                    purrr_0.3.4                   
- [7] readr_2.0.2                    tidyr_1.1.4                   
- [9] tibble_3.1.5                   ggplot2_3.3.5                 
+ [7] readr_2.1.0                    tidyr_1.1.4                   
+ [9] tibble_3.1.6                   ggplot2_3.3.5                 
 [11] tidyverse_1.3.1                knitr_1.36                    
 [13] Maaslin2_1.8.0                 ALDEx2_1.26.0                 
 [15] zCompositions_1.3.4            truncnorm_1.0-8               
 [17] NADA_1.6-1.1                   survival_3.2-13               
 [19] MASS_7.3-54                    ANCOMBC_1.4.0                 
 [21] tidySummarizedExperiment_1.4.1 patchwork_1.1.1               
-[23] mia_1.3.2                      MultiAssayExperiment_1.20.0   
+[23] mia_1.3.8                      MultiAssayExperiment_1.20.0   
 [25] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [27] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [29] SummarizedExperiment_1.24.0    Biobase_2.54.0                
 [31] GenomicRanges_1.46.0           GenomeInfoDb_1.30.0           
-[33] IRanges_2.28.0                 S4Vectors_0.32.0              
+[33] IRanges_2.28.0                 S4Vectors_0.32.2              
 [35] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
 [37] matrixStats_0.61.0-9001        BiocStyle_2.22.0              
 [39] rebook_1.4.0                  
@@ -839,12 +839,12 @@ loaded via a namespace (and not attached):
  [17] httpuv_1.6.3                  xml2_1.3.2                   
  [19] lubridate_1.8.0               assertthat_0.2.1             
  [21] DirichletMultinomial_1.36.0   viridis_0.6.2                
- [23] xfun_0.27                     ggdist_3.0.0                 
+ [23] xfun_0.28                     ggdist_3.0.0                 
  [25] hms_1.1.1                     jquerylib_0.1.4              
  [27] promises_1.2.0.1              evaluate_0.14                
  [29] DEoptimR_1.0-9                fansi_0.5.0                  
  [31] dbplyr_2.1.1                  readxl_1.3.1                 
- [33] igraph_1.2.7                  DBI_1.1.1                    
+ [33] igraph_1.2.8                  DBI_1.1.1                    
  [35] htmlwidgets_1.5.4             tensorA_0.36.2               
  [37] hash_2.2.6.1                  ellipsis_0.3.2               
  [39] backports_1.3.0               bookdown_0.24                
@@ -853,7 +853,7 @@ loaded via a namespace (and not attached):
  [45] abind_1.4-5                   tidybayes_3.0.1              
  [47] cachem_1.0.6                  withr_2.4.2                  
  [49] robustbase_0.93-9             checkmate_2.0.0              
- [51] vegan_2.5-7                   treeio_1.18.0                
+ [51] vegan_2.5-7                   treeio_1.18.1                
  [53] prettyunits_1.1.1             getopt_1.20.3                
  [55] cluster_2.1.2                 ExperimentHub_2.2.0          
  [57] ape_5.5                       dir.expiry_1.2.0             
@@ -877,16 +877,16 @@ loaded via a namespace (and not attached):
  [93] beachmat_2.10.0               scales_1.1.1                 
  [95] memoise_2.0.0                 magrittr_2.0.1               
  [97] plyr_1.8.6                    zlibbioc_1.40.0              
- [99] compiler_4.1.1                driver_0.1.1                 
+ [99] compiler_4.1.2                driver_0.1.1                 
 [101] RColorBrewer_1.1-2            cli_3.1.0                    
 [103] ade4_1.7-18                   pbapply_1.5-0                
 [105] ps_1.6.0                      mgcv_1.8-38                  
 [107] tidyselect_1.1.1              stringi_1.7.5                
 [109] highr_0.9                     yaml_2.2.1                   
 [111] BiocSingular_1.10.0           svUnit_1.0.6                 
-[113] ggrepel_0.9.1                 grid_4.1.1                   
-[115] sass_0.4.0                    tools_4.1.1                  
-[117] parallel_4.1.1                rstudioapi_0.13              
+[113] ggrepel_0.9.1                 grid_4.1.2                   
+[115] sass_0.4.0                    tools_4.1.2                  
+[117] parallel_4.1.2                rstudioapi_0.13              
 [119] foreach_1.5.1                 logging_0.10-108             
 [121] optparse_1.7.1                gridExtra_2.3                
 [123] posterior_1.1.0               farver_2.1.0                 
@@ -895,30 +895,31 @@ loaded via a namespace (and not attached):
 [129] shiny_1.7.1                   Rcpp_1.0.7                   
 [131] broom_0.7.10                  scuttle_1.4.0                
 [133] later_1.3.0                   BiocVersion_3.14.0           
-[135] AnnotationDbi_1.56.1          httr_1.4.2                   
+[135] AnnotationDbi_1.56.2          httr_1.4.2                   
 [137] Rdpack_2.1.2                  colorspace_2.0-2             
 [139] rvest_1.0.2                   XML_3.99-0.8                 
-[141] fs_1.5.0                      splines_4.1.1                
-[143] tidytree_0.3.5                scater_1.22.0                
-[145] multtest_2.50.0               plotly_4.10.0                
-[147] sessioninfo_1.2.0             xtable_1.8-4                 
-[149] jsonlite_1.7.2                nloptr_1.2.2.2               
-[151] CodeDepends_0.6.5             Rfast_2.0.3                  
-[153] testthat_3.1.0                R6_2.5.1                     
-[155] mime_0.12                     pillar_1.6.4                 
-[157] htmltools_0.5.2               glue_1.4.2                   
-[159] fastmap_1.1.0                 BiocParallel_1.28.0          
-[161] BiocNeighbors_1.12.0          interactiveDisplayBase_1.32.0
-[163] codetools_0.2-18              pkgbuild_1.2.0               
-[165] pcaPP_1.9-74                  mvtnorm_1.1-3                
-[167] utf8_1.2.2                    lattice_0.20-45              
-[169] bslib_0.3.1                   arrayhelpers_1.1-0           
-[171] curl_4.3.2                    ggbeeswarm_0.6.0             
-[173] biglm_0.9-2.1                 rmarkdown_2.11               
-[175] desc_1.4.0                    biomformat_1.22.0            
-[177] munsell_0.5.0                 rhdf5_2.38.0                 
-[179] GenomeInfoDbData_1.2.7        iterators_1.0.13             
-[181] haven_2.4.3                   reshape2_1.4.4               
-[183] gtable_0.3.0                  rbibutils_2.2.4              
+[141] fs_1.5.0                      splines_4.1.2                
+[143] yulab.utils_0.0.4             tidytree_0.3.6               
+[145] scater_1.22.0                 multtest_2.50.0              
+[147] plotly_4.10.0                 sessioninfo_1.2.1            
+[149] xtable_1.8-4                  jsonlite_1.7.2               
+[151] nloptr_1.2.2.3                CodeDepends_0.6.5            
+[153] Rfast_2.0.3                   testthat_3.1.0               
+[155] R6_2.5.1                      mime_0.12                    
+[157] pillar_1.6.4                  htmltools_0.5.2              
+[159] glue_1.5.0                    fastmap_1.1.0                
+[161] BiocParallel_1.28.0           BiocNeighbors_1.12.0         
+[163] interactiveDisplayBase_1.32.0 codetools_0.2-18             
+[165] pkgbuild_1.2.0                pcaPP_1.9-74                 
+[167] mvtnorm_1.1-3                 utf8_1.2.2                   
+[169] lattice_0.20-45               bslib_0.3.1                  
+[171] arrayhelpers_1.1-0            curl_4.3.2                   
+[173] ggbeeswarm_0.6.0              biglm_0.9-2.1                
+[175] rmarkdown_2.11                desc_1.4.0                   
+[177] biomformat_1.22.0             munsell_0.5.0                
+[179] rhdf5_2.38.0                  GenomeInfoDbData_1.2.7       
+[181] iterators_1.0.13              haven_2.4.3                  
+[183] reshape2_1.4.4                gtable_0.3.0                 
+[185] rbibutils_2.2.4              
 ```
 </div>

@@ -32,6 +32,10 @@ document.addEventListener("click", function (event) {
   background-color: #f1f1f1;
 }
 </style>
+
+
+
+
 # Community similarity
 
 Where alpha diversity focuses on community variation within a
@@ -105,12 +109,15 @@ library(mia)
 data(GlobalPatterns, package="mia")
 
 # Data matrix (features x samples)
-x <- GlobalPatterns
-x <- transformCounts(x, method = "relabundance")
-x <- assay(x, "relabundance")
+tse <- GlobalPatterns
+tse <- transformCounts(tse, method = "relabundance")
+
+# Add group information Feces yes/no
+colData(tse)$Group <- colData(tse)$SampleType=="Feces"
 
 # Quantify dissimilarities in the original feature space
 library(vegan)
+x <- assay(tse, "relabundance") # Pick relabunance assay separately
 d0 <- as.matrix(vegdist(t(x), "bray"))
 
 # PCoA Ordination
@@ -146,10 +153,17 @@ ggplot(aes(x = d0, y = dmds), data=df) +
   theme_bw()
 ```
 
-<img src="20_beta_diversity_files/figure-html/shepard-1.png" width="672" />
+<img src="20_beta_diversity_files/figure-html/shepard-1.png" width="3000" />
 
 
-## Estimating beta diversity
+## Community comparisons by beta diversity analysis
+
+A typical comparison of community composition starts with a visual
+comparison of the groups on a 2D ordination.
+
+Then we estimate relative abundances and MDS ordination based on
+Bray-Curtis (BC) dissimilarity between the groups, and visualize the
+results.
 
 In the following examples dissimilarities are calculated by 
 functions supplied to the `FUN` argument. This function can be defined by
@@ -163,22 +177,22 @@ functions.
 
 ```r
 library(scater)
-se <- GlobalPatterns
-se <- runMDS(se, FUN = vegan::vegdist, name = "MDS_BC", exprs_values = "counts")
+tse <- runMDS(tse, FUN = vegan::vegdist, name = "PCoA_BC", exprs_values = "counts")
 ```
 
 Sample similarities can be visualized on a lower-dimensional display
-(typically 2D) using the `plotReducedDim` function in the
-`scater` package. This provides also further tools to incorporate
-additional information using variations in color, shape or size.
+(typically 2D) using the `plotReducedDim` function in the `scater`
+package. This provides also further tools to incorporate additional
+information using variations in color, shape or size. Are there
+visible differences between the groups?
 
 
 ```r
 # Create ggplot object
-p <- plotReducedDim(se, "MDS_BC", colour_by = "SampleType")
+p <- plotReducedDim(tse, "PCoA_BC", colour_by = "Group")
 
 # Add explained variance for each axis
-e <- attr(reducedDim(se, "MDS_BC"), "eig");
+e <- attr(reducedDim(tse, "PCoA_BC"), "eig");
 rel_eig <- e/sum(e[e>0])		  
 p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]],1), "%", ")", sep = ""),
               y = paste("PCoA 2 (", round(100 * rel_eig[[2]],1), "%", ")", sep = ""))
@@ -187,9 +201,11 @@ print(p)
 ```
 
 <div class="figure">
-<img src="20_beta_diversity_files/figure-html/plot-mds-bray-curtis-1.png" alt="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset." width="672" />
+<img src="20_beta_diversity_files/figure-html/plot-mds-bray-curtis-1.png" alt="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset." width="3000" />
 <p class="caption">(\#fig:plot-mds-bray-curtis)MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset.</p>
 </div>
+
+
 
 
 With additional tools from the `ggplot2` universe, comparisons can be 
@@ -198,9 +214,9 @@ meaningful way.
 
 
 ```r
-se <- runMDS(se, FUN = vegan::vegdist, name = "MDS_euclidean",
+tse <- runMDS(tse, FUN = vegan::vegdist, name = "MDS_euclidean",
              method = "euclidean", exprs_values = "counts")
-se <- runNMDS(se, FUN = vegan::vegdist, name = "NMDS_BC")
+tse <- runNMDS(tse, FUN = vegan::vegdist, name = "NMDS_BC")
 ```
 
 ```
@@ -212,8 +228,8 @@ se <- runNMDS(se, FUN = vegan::vegdist, name = "NMDS_BC")
 ```
 
 ```r
-se <- runNMDS(se, FUN = vegan::vegdist, name = "NMDS_euclidean",
-              method = "euclidean")
+tse <- runNMDS(tse, FUN = vegan::vegdist, name = "NMDS_euclidean",
+               method = "euclidean")
 ```
 
 ```
@@ -223,14 +239,14 @@ se <- runNMDS(se, FUN = vegan::vegdist, name = "NMDS_euclidean",
 ```
 
 ```r
-plots <- lapply(c("MDS_BC","MDS_euclidean","NMDS_BC","NMDS_euclidean"),
-                plotReducedDim, object = se, colour_by = "SampleType")
+plots <- lapply(c("PCoA_BC","MDS_euclidean","NMDS_BC","NMDS_euclidean"),
+                plotReducedDim, object = tse, colour_by = "Group")
 ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 2, common.legend = TRUE,
                   legend = "right")
 ```
 
 <div class="figure">
-<img src="20_beta_diversity_files/figure-html/plot-mds-nmds-comparison-1.png" alt="Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset." width="672" />
+<img src="20_beta_diversity_files/figure-html/plot-mds-nmds-comparison-1.png" alt="Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset." width="3000" />
 <p class="caption">(\#fig:plot-mds-nmds-comparison)Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.</p>
 </div>
 
@@ -242,19 +258,20 @@ used within `runMDS`.
 
 
 ```r
-se <- runMDS(se, FUN = calculateUniFrac, name = "UniFrac",
-             tree = rowTree(se),
-             ntop = nrow(se),
+library(scater)
+tse <- runMDS(tse, FUN = mia::calculateUniFrac, name = "UniFrac",
+              tree = rowTree(tse),
+              ntop = nrow(tse),
              exprs_values = "counts")
 ```
 
 
 ```r
-plotReducedDim(se, "UniFrac", colour_by = "SampleType")
+plotReducedDim(tse, "UniFrac", colour_by = "Group")
 ```
 
 <div class="figure">
-<img src="20_beta_diversity_files/figure-html/plot-unifrac-1.png" alt="UniFrac distances scaled by MDS of the GlobalPattern dataset." width="672" />
+<img src="20_beta_diversity_files/figure-html/plot-unifrac-1.png" alt="UniFrac distances scaled by MDS of the GlobalPattern dataset." width="3000" />
 <p class="caption">(\#fig:plot-unifrac)UniFrac distances scaled by MDS of the GlobalPattern dataset.</p>
 </div>
 
@@ -265,16 +282,16 @@ inherited directly from the `scater` package.
 
 
 ```r
-se <- runPCA(se, name = "PCA", exprs_values = "counts", ncomponents = 10)
+tse <- runPCA(tse, name = "PCA", exprs_values = "counts", ncomponents = 10)
 ```
 
 
 ```r
-plotReducedDim(se, "PCA", colour_by = "SampleType")
+plotReducedDim(tse, "PCA", colour_by = "Group")
 ```
 
 <div class="figure">
-<img src="20_beta_diversity_files/figure-html/plot-pca-1.png" alt="PCA plot on the GlobalPatterns data set containing sample from different sources." width="672" />
+<img src="20_beta_diversity_files/figure-html/plot-pca-1.png" alt="PCA plot on the GlobalPatterns data set containing sample from different sources." width="3000" />
 <p class="caption">(\#fig:plot-pca)PCA plot on the GlobalPatterns data set containing sample from different sources.</p>
 </div>
 
@@ -285,91 +302,53 @@ FIXME: let us switch to UMAP for the examples?
 
 
 ```r
-se <- runTSNE(se, name = "TSNE", exprs_values = "counts", ncomponents = 3)
+tse <- runTSNE(tse, name = "TSNE", exprs_values = "counts", ncomponents = 3)
 ```
 
 
 ```r
-plotReducedDim(se, "TSNE", colour_by = "SampleType", ncomponents = c(1:3))
+plotReducedDim(tse, "TSNE", colour_by = "Group", ncomponents = c(1:3))
 ```
 
 <div class="figure">
-<img src="20_beta_diversity_files/figure-html/plot-tsne-1.png" alt="t-SNE plot on the GlobalPatterns data set containing sample from different sources." width="672" />
+<img src="20_beta_diversity_files/figure-html/plot-tsne-1.png" alt="t-SNE plot on the GlobalPatterns data set containing sample from different sources." width="3000" />
 <p class="caption">(\#fig:plot-tsne)t-SNE plot on the GlobalPatterns data set containing sample from different sources.</p>
 </div>
 
+
+
 ## Visualizing the most dominant genus on PCoA
 
-In this section we visualize most dominant genus in the alcohol study dataset from [curatedMetagenomicData](https://bioconductor.org/packages/release/data/experiment/vignettes/curatedMetagenomicData/inst/doc/curatedMetagenomicData.html) on PCoA.
-A similar visualization has been used in [Taxonomic signatures of cause-specific mortality risk in human gut microbiome](https://www.nature.com/articles/s41467-021-22962-y), Salosensaari et al. (2021).
+In this section we visualize most dominant genus on PCoA. A similar visualization was proposed in [Taxonomic signatures of cause-specific mortality risk in human gut microbiome](https://www.nature.com/articles/s41467-021-22962-y), Salosensaari et al. (2021).
+
+
+Let us agglomerate the data at a Genus level and getting the dominant taxa per sample.
 
 
 ```r
-# Installing the package
-if (!require(curatedMetagenomicData)){
-  BiocManager::install("curatedMetagenomicData")  
-}
+# Agglomerate to genus level
+tse_Genus <- agglomerateByRank(tse, rank="Genus")
+# Convert to relative abundances
+tse_Genus <- transformSamples(tse, method = "relabundance", abund_values="counts")
+# Add info on dominant genus per sample
+tse_Genus <- addPerSampleDominantTaxa(tse_Genus, abund_values="relabundance", name = "dominant_taxa")
 ```
 
-Retrieving data as a TreeSummarizedExperiment object.
-
-
-```r
-library(curatedMetagenomicData)
-library(dplyr)
-library(DT)
-# Querying the data
-tse <- sampleMetadata %>%
-    filter(age >= 18) %>% # taking only data of age 18 or above
-    filter(!is.na(alcohol)) %>% # excluding missing values
-    returnSamples("relative_abundance")
-tse
-```
-
-```
-## class: TreeSummarizedExperiment 
-## dim: 1058 780 
-## metadata(0):
-## assays(1): relative_abundance
-## rownames(1058):
-##   k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Propionibacteriales|f__Propionibacteriaceae|g__Cutibacterium|s__Cutibacterium_acnes
-##   k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Klebsiella|s__Klebsiella_pneumoniae
-##   ...
-##   k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Anaerostipes|s__Anaerostipes_sp_494a
-##   k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Barnesiellaceae|g__Barnesiella|s__Barnesiella_viscericola
-## rowData names(7): superkingdom phylum ... genus species
-## colnames(780): WBE003 WBE004 ... YSZC12003_37879 YSZC12003_37880
-## colData names(129): study_name subject_id ... ALT eGFR
-## reducedDimNames(0):
-## mainExpName: NULL
-## altExpNames(0):
-## rowLinks: a LinkDataFrame (1058 rows)
-## rowTree: 1 phylo tree(s) (10430 leaves)
-## colLinks: NULL
-## colTree: NULL
-```
-
-Agglomerating the data at a Genus level and getting the dominant taxa per sample.
-
-
-```r
-tse_Genus <- agglomerateByRank(tse, rank="genus")
-tse_Genus <- addPerSampleDominantTaxa(tse_Genus,abund_values="relative_abundance", name = "dominant_taxa")
-```
 
 Performing PCoA with Bray-Curtis dissimilarity.
 
 ```r
 tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist,
-              name = "PCoA_BC", exprs_values = "relative_abundance")
+              name = "PCoA_BC", exprs_values = "relabundance")
 ```
+
 
 Getting top taxa and visualizing the abundance on PCoA.
 
 
 ```r
 # Getting the top taxa
-top_taxa <- getTopTaxa(tse_Genus,top = 6, abund_values = "relative_abundance")
+top_taxa <- getTopTaxa(tse_Genus,top = 6, abund_values = "relabundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
@@ -396,79 +375,45 @@ plot <-plotReducedDim(tse_Genus,"PCoA_BC", colour_by = "most_abundant") +
 plot
 ```
 
-<img src="20_beta_diversity_files/figure-html/unnamed-chunk-8-1.png" width="672" />
+<img src="20_beta_diversity_files/figure-html/unnamed-chunk-7-1.png" width="3000" />
 
 Note: A 3D interactive version of the earlier plot can be found from [here](https://microbiome.github.io/OMA/interactive-3d-plots.html).
 
-Similarly let's visualize and compare the alcohol sub-polulation.
+Similarly let's visualize and compare the sub-population.
+
 
 ```r
 # Calculating the frequencies and percentages for both categories
-freq_yes <- table(as.character(most_abundant[colData(tse_Genus)$alcohol=="yes"]))
-freq_no <- table(as.character(most_abundant[colData(tse_Genus)$alcohol=="no"]))
-percent_yes <- round(freq_yes/sum(freq_yes)*100, 1)
-percent_no <- round(freq_no/sum(freq_no)*100, 1)
+freq_TRUE <- table(as.character(most_abundant[colData(tse_Genus)$Group==TRUE]))
+freq_FALSE <- table(as.character(most_abundant[colData(tse_Genus)$Group==FALSE]))
+percent_TRUE <- round(freq_TRUE/sum(freq_TRUE)*100, 1)
+percent_FALSE <- round(freq_FALSE/sum(freq_FALSE)*100, 1)
 
 # Visualization
-plotReducedDim(tse_Genus[,colData(tse_Genus)$alcohol=="yes"],
+plotReducedDim(tse_Genus[,colData(tse_Genus)$Group==TRUE],
                           "PCoA_BC", colour_by = "most_abundant") +
   scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
-                      labels=paste0(names(percent_yes),"(",percent_yes,"%)"))+
+                      labels=paste0(names(percent_TRUE),"(",percent_TRUE,"%)"))+
   labs(x=paste("PC 1 (",round(var_explained[1],1),"%)"),
        y=paste("PC 2 (",round(var_explained[2],1),"%)"),
-       title = "alcohol = yes", color="")
+       title = "Group = TRUE", color="")
 ```
 
-<img src="20_beta_diversity_files/figure-html/unnamed-chunk-9-1.png" width="672" />
+<img src="20_beta_diversity_files/figure-html/unnamed-chunk-8-1.png" width="3000" />
 
 ```r
-plotReducedDim(tse_Genus[,colData(tse_Genus)$alcohol=="no"],
+plotReducedDim(tse_Genus[,colData(tse_Genus)$Group==FALSE],
                           "PCoA_BC", colour_by = "most_abundant") +
   scale_colour_manual(values = c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"),
-                      labels=paste0(names(percent_no),"(",percent_no,"%)"))+
+                      labels=paste0(names(percent_FALSE),"(",percent_FALSE,"%)"))+
   labs(x=paste("PC 1 (",round(var_explained[1],1),"%)"),
        y=paste("PC 2 (",round(var_explained[2],1),"%)"),
-       title = "alcohol = no", color="")
+       title = "Group = FALSE", color="")
 ```
 
-<img src="20_beta_diversity_files/figure-html/unnamed-chunk-9-2.png" width="672" />
-
-## Community comparisons [TODO combine with the material above for simplicity?]
+<img src="20_beta_diversity_files/figure-html/unnamed-chunk-8-2.png" width="3000" />
 
 
-A typical comparison of community composition starts with a visual
-comparison of the groups on a 2D ordination.
-
-Let us load an example data set:
-
-
-```r
-library(microbiomeDataSets)
-se.lahti <- LahtiMData()
-```
-
-
-Then we estimate relative abundances and MDS ordination based on
-Bray-Curtis (BC) dissimilarity between the groups, and visualize the
-results.
-
-
-
-```r
-se.lahti <- relAbundanceCounts(se.lahti)
-se.lahti <- runNMDS(se.lahti, FUN = vegan::vegdist, name = "BC", nmdsFUN = "monoMDS",
-                    exprs_values = "relabundance",
-                    keep_dist = TRUE)
-```
-
-
-```r
-plotReducedDim(se.lahti, "BC", colour_by = "group")
-```
-
-<img src="20_beta_diversity_files/figure-html/unnamed-chunk-12-1.png" width="672" />
-
-No clear difference between the groups can be visually observed.
 
 
 ### Testing differences in community composition between sample groups
@@ -489,16 +434,16 @@ This method is implemented in the `vegan` package (function `adonis`).
 
 ```r
 library(vegan)
-permanova <- vegan::adonis(t(assay(se.lahti,"relabundance")) ~ group,
-                           data = colData(se.lahti),
+permanova <- vegan::adonis(t(assay(tse,"relabundance")) ~ Group,
+                           data = colData(tse),
                            permutations = 9999)
 
 # P-value
-print(as.data.frame(permanova$aov.tab)["group", "Pr(>F)"])
+print(as.data.frame(permanova$aov.tab)["Group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.2779
+## [1] 8e-04
 ```
 
 In this case, the community composition is not significantly different
@@ -512,7 +457,7 @@ composition.
 
 
 ```r
-coef <- coefficients(permanova)["group1",]
+coef <- coefficients(permanova)["Group1",]
 top.coef <- sort(head(coef[rev(order(abs(coef)))],20))
 ```
 
@@ -529,7 +474,7 @@ ggplot(data.frame(x = top.coef,
     theme_bw()
 ```
 
-<img src="20_beta_diversity_files/figure-html/plot-top-coef-anova-1.png" width="672" />
+<img src="20_beta_diversity_files/figure-html/plot-top-coef-anova-1.png" width="3000" />
 
 In the above example, the largest differences between the two groups
 can be attributed to _Bacteroides intestinalis_ (elevated in the first
@@ -542,42 +487,45 @@ group), and many other co-varying species.
 
 It is important to note that the application of PERMANOVA assumes
 homogeneous group dispersions (variances). This can be tested with the
-PERMDISP2 method [@Anderson2006].
+PERMDISP2 method [@Anderson2006] by using the same assay and distance
+method than in PERMANOVA.
 
 
 
 ```r
-anova(vegan::betadisper(attr(reducedDim(se.lahti,"BC"),"dist"),
-                        colData(se.lahti)$group))
+anova(vegan::betadisper(vegan::vegdist(t(assay(tse, "counts"))),
+                        colData(tse)$Group))
 ```
 
 ```
 ## Analysis of Variance Table
 ## 
 ## Response: Distances
-##           Df Sum Sq Mean Sq F value Pr(>F)
-## Groups     1  0.000 0.00002       0   0.95
-## Residuals 42  0.158 0.00376
+##           Df Sum Sq Mean Sq F value  Pr(>F)    
+## Groups     1 0.1607  0.1607     125 5.5e-11 ***
+## Residuals 24 0.0309  0.0013                    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-In our example, the groups have similar dispersion, and PERMANOVA is
-an appropriate choice for comparing community compositions.
+If the groups have similar dispersion, PERMANOVA can be seen as an
+appropriate choice for comparing community compositions.
 
 
 ## Further reading
 
-In certain settings, beta diversities might be used to group samples without
-prior knowledge. For this we want to point to excellent resources on 
-[how to extract information from the clusters](http://bioconductor.org/books/release/OSCA/clustering.html).
 
-See also [community typing](15-microbiome-community.md).
+ - [How to extract information from clusters](http://bioconductor.org/books/release/OSCA/clustering.html)
+
+ - [Community typing](15-microbiome-community.md)
+
 
 ## Session Info {-}
 
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.1.1 (2021-08-10)
+R version 4.1.2 (2021-11-01)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 20.04.3 LTS
 
@@ -597,89 +545,73 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] microbiomeDataSets_1.1.5       DT_0.19                       
- [3] dplyr_1.0.7                    curatedMetagenomicData_3.2.0  
- [5] scater_1.22.0                  scuttle_1.4.0                 
- [7] ggplot2_3.3.5                  vegan_2.5-7                   
- [9] lattice_0.20-45                permute_0.9-5                 
-[11] mia_1.3.2                      MultiAssayExperiment_1.20.0   
-[13] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
-[15] XVector_0.34.0                 SingleCellExperiment_1.16.0   
-[17] SummarizedExperiment_1.24.0    Biobase_2.54.0                
-[19] GenomicRanges_1.46.0           GenomeInfoDb_1.30.0           
-[21] IRanges_2.28.0                 S4Vectors_0.32.0              
-[23] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
-[25] matrixStats_0.61.0-9001        BiocStyle_2.22.0              
-[27] rebook_1.4.0                  
+ [1] scater_1.22.0                  scuttle_1.4.0                 
+ [3] ggplot2_3.3.5                  vegan_2.5-7                   
+ [5] lattice_0.20-45                permute_0.9-5                 
+ [7] mia_1.3.8                      MultiAssayExperiment_1.20.0   
+ [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
+[11] XVector_0.34.0                 SingleCellExperiment_1.16.0   
+[13] SummarizedExperiment_1.24.0    Biobase_2.54.0                
+[15] GenomicRanges_1.46.0           GenomeInfoDb_1.30.0           
+[17] IRanges_2.28.0                 S4Vectors_0.32.2              
+[19] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
+[21] matrixStats_0.61.0-9001        BiocStyle_2.22.0              
+[23] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
-  [1] readxl_1.3.1                  backports_1.3.0              
-  [3] AnnotationHub_3.2.0           BiocFileCache_2.2.0          
-  [5] plyr_1.8.6                    lazyeval_0.2.2               
-  [7] splines_4.1.1                 BiocParallel_1.28.0          
-  [9] digest_0.6.28                 htmltools_0.5.2              
- [11] viridis_0.6.2                 fansi_0.5.0                  
- [13] magrittr_2.0.1                memoise_2.0.0                
- [15] ScaledMatrix_1.2.0            cluster_2.1.2                
- [17] DECIPHER_2.22.0               openxlsx_4.2.4               
- [19] colorspace_2.0-2              rappdirs_0.3.3               
- [21] blob_1.2.2                    ggrepel_0.9.1                
- [23] haven_2.4.3                   xfun_0.27                    
- [25] crayon_1.4.2                  RCurl_1.98-1.5               
- [27] jsonlite_1.7.2                graph_1.72.0                 
- [29] ape_5.5                       glue_1.4.2                   
- [31] gtable_0.3.0                  zlibbioc_1.40.0              
- [33] DelayedArray_0.20.0           car_3.0-11                   
- [35] BiocSingular_1.10.0           abind_1.4-5                  
- [37] scales_1.1.1                  DBI_1.1.1                    
- [39] rstatix_0.7.0                 Rcpp_1.0.7                   
- [41] xtable_1.8-4                  viridisLite_0.4.0            
- [43] decontam_1.14.0               tidytree_0.3.5               
- [45] foreign_0.8-81                bit_4.0.4                    
- [47] rsvd_1.0.5                    htmlwidgets_1.5.4            
- [49] httr_1.4.2                    dir.expiry_1.2.0             
- [51] ellipsis_0.3.2                pkgconfig_2.0.3              
- [53] XML_3.99-0.8                  farver_2.1.0                 
- [55] dbplyr_2.1.1                  CodeDepends_0.6.5            
- [57] sass_0.4.0                    utf8_1.2.2                   
- [59] AnnotationDbi_1.56.1          later_1.3.0                  
- [61] tidyselect_1.1.1              labeling_0.4.2               
- [63] rlang_0.4.12                  reshape2_1.4.4               
- [65] BiocVersion_3.14.0            cellranger_1.1.0             
- [67] munsell_0.5.0                 tools_4.1.1                  
- [69] cachem_1.0.6                  ExperimentHub_2.2.0          
- [71] DirichletMultinomial_1.36.0   generics_0.1.1               
- [73] RSQLite_2.2.8                 broom_0.7.10                 
- [75] evaluate_0.14                 stringr_1.4.0                
- [77] fastmap_1.1.0                 yaml_2.2.1                   
- [79] knitr_1.36                    bit64_4.0.5                  
- [81] zip_2.2.0                     purrr_0.3.4                  
- [83] KEGGREST_1.34.0               nlme_3.1-153                 
- [85] sparseMatrixStats_1.6.0       mime_0.12                    
- [87] compiler_4.1.1                png_0.1-7                    
- [89] interactiveDisplayBase_1.32.0 beeswarm_0.4.0               
- [91] filelock_1.0.2                curl_4.3.2                   
- [93] ggsignif_0.6.3                treeio_1.18.0                
- [95] tibble_3.1.5                  bslib_0.3.1                  
- [97] stringi_1.7.5                 highr_0.9                    
- [99] forcats_0.5.1                 Matrix_1.3-4                 
-[101] vctrs_0.3.8                   pillar_1.6.4                 
-[103] lifecycle_1.0.1               BiocManager_1.30.16          
-[105] jquerylib_0.1.4               BiocNeighbors_1.12.0         
-[107] data.table_1.14.2             cowplot_1.1.1                
-[109] bitops_1.0-7                  irlba_2.3.3                  
-[111] httpuv_1.6.3                  R6_2.5.1                     
-[113] promises_1.2.0.1              bookdown_0.24                
-[115] gridExtra_2.3                 rio_0.5.27                   
-[117] vipor_0.4.5                   codetools_0.2-18             
-[119] MASS_7.3-54                   assertthat_0.2.1             
-[121] withr_2.4.2                   GenomeInfoDbData_1.2.7       
-[123] mgcv_1.8-38                   parallel_4.1.1               
-[125] hms_1.1.1                     grid_4.1.1                   
-[127] beachmat_2.10.0               tidyr_1.1.4                  
-[129] rmarkdown_2.11                DelayedMatrixStats_1.16.0    
-[131] carData_3.0-4                 Rtsne_0.15                   
-[133] ggpubr_0.4.0                  shiny_1.7.1                  
-[135] ggbeeswarm_0.6.0             
+  [1] Rtsne_0.15                  ggbeeswarm_0.6.0           
+  [3] colorspace_2.0-2            ggsignif_0.6.3             
+  [5] ellipsis_0.3.2              BiocNeighbors_1.12.0       
+  [7] ggpubr_0.4.0                farver_2.1.0               
+  [9] ggrepel_0.9.1               bit64_4.0.5                
+ [11] fansi_0.5.0                 decontam_1.14.0            
+ [13] splines_4.1.2               codetools_0.2-18           
+ [15] sparseMatrixStats_1.6.0     cachem_1.0.6               
+ [17] knitr_1.36                  jsonlite_1.7.2             
+ [19] broom_0.7.10                cluster_2.1.2              
+ [21] graph_1.72.0                BiocManager_1.30.16        
+ [23] compiler_4.1.2              backports_1.3.0            
+ [25] assertthat_0.2.1            Matrix_1.3-4               
+ [27] fastmap_1.1.0               lazyeval_0.2.2             
+ [29] BiocSingular_1.10.0         htmltools_0.5.2            
+ [31] tools_4.1.2                 rsvd_1.0.5                 
+ [33] gtable_0.3.0                glue_1.5.0                 
+ [35] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
+ [37] dplyr_1.0.7                 Rcpp_1.0.7                 
+ [39] carData_3.0-4               jquerylib_0.1.4            
+ [41] vctrs_0.3.8                 ape_5.5                    
+ [43] nlme_3.1-153                DECIPHER_2.22.0            
+ [45] DelayedMatrixStats_1.16.0   xfun_0.28                  
+ [47] stringr_1.4.0               beachmat_2.10.0            
+ [49] lifecycle_1.0.1             irlba_2.3.3                
+ [51] rstatix_0.7.0               XML_3.99-0.8               
+ [53] zlibbioc_1.40.0             MASS_7.3-54                
+ [55] scales_1.1.1                parallel_4.1.2             
+ [57] yaml_2.2.1                  memoise_2.0.0              
+ [59] gridExtra_2.3               yulab.utils_0.0.4          
+ [61] sass_0.4.0                  stringi_1.7.5              
+ [63] RSQLite_2.2.8               highr_0.9                  
+ [65] ScaledMatrix_1.2.0          tidytree_0.3.6             
+ [67] filelock_1.0.2              BiocParallel_1.28.0        
+ [69] rlang_0.4.12                pkgconfig_2.0.3            
+ [71] bitops_1.0-7                evaluate_0.14              
+ [73] purrr_0.3.4                 labeling_0.4.2             
+ [75] treeio_1.18.1               CodeDepends_0.6.5          
+ [77] cowplot_1.1.1               bit_4.0.4                  
+ [79] tidyselect_1.1.1            plyr_1.8.6                 
+ [81] magrittr_2.0.1              bookdown_0.24              
+ [83] R6_2.5.1                    generics_0.1.1             
+ [85] DelayedArray_0.20.0         DBI_1.1.1                  
+ [87] withr_2.4.2                 mgcv_1.8-38                
+ [89] pillar_1.6.4                abind_1.4-5                
+ [91] RCurl_1.98-1.5              tibble_3.1.6               
+ [93] dir.expiry_1.2.0            car_3.0-12                 
+ [95] crayon_1.4.2                utf8_1.2.2                 
+ [97] rmarkdown_2.11              viridis_0.6.2              
+ [99] grid_4.1.2                  blob_1.2.2                 
+[101] digest_0.6.28               tidyr_1.1.4                
+[103] munsell_0.5.0               DirichletMultinomial_1.36.0
+[105] beeswarm_0.4.0              viridisLite_0.4.0          
+[107] vipor_0.4.5                 bslib_0.3.1                
 ```
 </div>
