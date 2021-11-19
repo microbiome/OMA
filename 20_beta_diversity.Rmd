@@ -150,7 +150,7 @@ functions.
 
 ```{r runMDS, message=FALSE}
 library(scater)
-tse <- runMDS(tse, FUN = vegan::vegdist, name = "MDS_BC", exprs_values = "counts")
+tse <- runMDS(tse, FUN = vegan::vegdist, name = "PCoA_BC", exprs_values = "counts")
 ```
 
 Sample similarities can be visualized on a lower-dimensional display
@@ -161,10 +161,10 @@ visible differences between the groups?
 
 ```{r plot-mds-bray-curtis, fig.cap="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."}
 # Create ggplot object
-p <- plotReducedDim(tse, "MDS_BC", colour_by = "Group")
+p <- plotReducedDim(tse, "PCoA_BC", colour_by = "Group")
 
 # Add explained variance for each axis
-e <- attr(reducedDim(tse, "MDS_BC"), "eig");
+e <- attr(reducedDim(tse, "PCoA_BC"), "eig");
 rel_eig <- e/sum(e[e>0])		  
 p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]],1), "%", ")", sep = ""),
               y = paste("PCoA 2 (", round(100 * rel_eig[[2]],1), "%", ")", sep = ""))
@@ -185,7 +185,7 @@ tse <- runMDS(tse, FUN = vegan::vegdist, name = "MDS_euclidean",
 tse <- runNMDS(tse, FUN = vegan::vegdist, name = "NMDS_BC")
 tse <- runNMDS(tse, FUN = vegan::vegdist, name = "NMDS_euclidean",
                method = "euclidean")
-plots <- lapply(c("MDS_BC","MDS_euclidean","NMDS_BC","NMDS_euclidean"),
+plots <- lapply(c("PCoA_BC","MDS_euclidean","NMDS_BC","NMDS_euclidean"),
                 plotReducedDim, object = tse, colour_by = "Group")
 ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 2, common.legend = TRUE,
                   legend = "right")
@@ -387,15 +387,16 @@ group), and many other co-varying species.
 
 It is important to note that the application of PERMANOVA assumes
 homogeneous group dispersions (variances). This can be tested with the
-PERMDISP2 method [@Anderson2006].
+PERMDISP2 method [@Anderson2006] by using the same assay and distance
+method than in PERMANOVA.
 
 
 ```{r}
-anova(vegan::betadisper(attr(reducedDim(tse,"PCoA_BC"),"dist"),
+anova(vegan::betadisper(vegan::vegdist(t(assay(tse, "counts"))),
                         colData(tse)$Group))
 ```
 
-If the groups have similar dispersion, and PERMANOVA can be seen as an
+If the groups have similar dispersion, PERMANOVA can be seen as an
 appropriate choice for comparing community compositions.
 
 
