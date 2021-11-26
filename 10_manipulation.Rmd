@@ -236,3 +236,56 @@ as well as Chlamydiae in different sites of the human body,
 `tse_subset_by_sample_feature` might be a suitable subset to start
 with.
 
+#### Remove empty columns and rows
+
+Sometimes data might contain, e.g., features that are not present in any of the  samples.
+This might occur after subsetting for instance. In certain analyses we might want to
+remove those instances.
+
+```{r}
+# Agglomerate data at Genus level 
+tse_genus <- agglomerateByRank(tse, rank = "Genus")
+# List bacteria that we want to include
+genera <- c("Class:Thermoprotei", "Genus:Sulfolobus", "Genus:Sediminicola")
+# Subset data
+tse_genus_sub <- tse_genus[genera, ]
+
+tse_genus_sub
+```
+
+```{r}
+# List total counts of each sample
+colSums(assay(tse_genus_sub, "counts"))
+```
+
+Now we can see that certain samples do not include any bacteria. We can remove those.
+
+```{r}
+# Remove samples that do not have present any bacteria
+tse_genus_sub <- tse_genus_sub[ , colSums(assay(tse_genus_sub, "counts")) != 0 ]
+tse_genus_sub
+```
+
+Same thing can be done for features.
+
+```{r}
+# Take only those samples that are collected from feces, skin, or tongue
+tse_genus_sub <- tse_genus[ , colData(tse_genus)$SampleType %in% c("Feces", "Skin", "Tongue")]
+
+tse_genus_sub
+```
+
+```{r}
+# How many bacteria there are that are not present?
+sum(rowSums(assay(tse_genus_sub, "counts")) == 0)
+```
+
+We can see that there are bacteria that are not present in these samples that we chose.
+We can remove those bacteria from the data. 
+
+```{r}
+# Take only those bacteria that are present
+tse_genus_sub <- tse_genus_sub[rowSums(assay(tse_genus_sub, "counts")) > 0, ]
+
+tse_genus_sub
+```
