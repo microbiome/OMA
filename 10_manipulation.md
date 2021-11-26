@@ -651,3 +651,151 @@ as well as Chlamydiae in different sites of the human body,
 `tse_subset_by_sample_feature` might be a suitable subset to start
 with.
 
+#### Remove empty columns and rows
+
+Sometimes data might contain, e.g., features that are not present in any of the  samples.
+This might occur after subsetting for instance. In certain analyses we might want to
+remove those instances.
+
+
+```r
+# Agglomerate data at Genus level 
+tse_genus <- agglomerateByRank(tse, rank = "Genus")
+# List bacteria that we want to include
+genera <- c("Class:Thermoprotei", "Genus:Sulfolobus", "Genus:Sediminicola")
+# Subset data
+tse_genus_sub <- tse_genus[genera, ]
+
+tse_genus_sub
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 3 26 
+## metadata(0):
+## assays(1): counts
+## rownames(3): Class:Thermoprotei Genus:Sulfolobus Genus:Sediminicola
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(26): CL3 CC1 ... Even2 Even3
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (3 rows)
+## rowTree: 1 phylo tree(s) (19216 leaves)
+## colLinks: NULL
+## colTree: NULL
+```
+
+
+```r
+# List total counts of each sample
+colSums(assay(tse_genus_sub, "counts"))
+```
+
+```
+##      CL3      CC1      SV1  M31Fcsw  M11Fcsw  M31Plmr  M11Plmr  F21Plmr 
+##        1        0        0        1        1        0        4        1 
+##  M31Tong  M11Tong LMEpi24M SLEpi20M   AQC1cm   AQC4cm   AQC7cm      NP2 
+##        7        3        0        2       64      105      136      222 
+##      NP3      NP5  TRRsed1  TRRsed2  TRRsed3     TS28     TS29    Even1 
+##     6433     1154        2        2        2        0        0        0 
+##    Even2    Even3 
+##        2        0
+```
+
+Now we can see that certain samples do not include any bacteria. We can remove those.
+
+
+```r
+# Remove samples that do not have present any bacteria
+tse_genus_sub <- tse_genus_sub[ , colSums(assay(tse_genus_sub, "counts")) != 0 ]
+tse_genus_sub
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 3 18 
+## metadata(0):
+## assays(1): counts
+## rownames(3): Class:Thermoprotei Genus:Sulfolobus Genus:Sediminicola
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(18): CL3 M31Fcsw ... TRRsed3 Even2
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (3 rows)
+## rowTree: 1 phylo tree(s) (19216 leaves)
+## colLinks: NULL
+## colTree: NULL
+```
+
+Same thing can be done for features.
+
+
+```r
+# Take only those samples that are collected from feces, skin, or tongue
+tse_genus_sub <- tse_genus[ , colData(tse_genus)$SampleType %in% c("Feces", "Skin", "Tongue")]
+
+tse_genus_sub
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 1516 9 
+## metadata(0):
+## assays(1): counts
+## rownames(1516): Class:Thermoprotei Genus:Sulfolobus ...
+##   Genus:Coprothermobacter Phylum:SR1
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(9): M31Fcsw M11Fcsw ... TS28 TS29
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (1516 rows)
+## rowTree: 1 phylo tree(s) (19216 leaves)
+## colLinks: NULL
+## colTree: NULL
+```
+
+
+```r
+# How many bacteria there are that are not present?
+sum(rowSums(assay(tse_genus_sub, "counts")) == 0)
+```
+
+```
+## [1] 435
+```
+
+We can see that there are bacteria that are not present in these samples that we chose.
+We can remove those bacteria from the data. 
+
+
+```r
+# Take only those bacteria that are present
+tse_genus_sub <- tse_genus_sub[rowSums(assay(tse_genus_sub, "counts")) > 0, ]
+
+tse_genus_sub
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 1081 9 
+## metadata(0):
+## assays(1): counts
+## rownames(1081): Genus:Sulfolobus Order:NRP-J ...
+##   Genus:Coprothermobacter Phylum:SR1
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(9): M31Fcsw M11Fcsw ... TS28 TS29
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (1081 rows)
+## rowTree: 1 phylo tree(s) (19216 leaves)
+## colLinks: NULL
+## colTree: NULL
+```

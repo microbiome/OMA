@@ -542,22 +542,22 @@ other attached packages:
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [13] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [15] SummarizedExperiment_1.24.0    Biobase_2.54.0                
-[17] GenomicRanges_1.46.0           GenomeInfoDb_1.30.0           
-[19] IRanges_2.28.0                 S4Vectors_0.32.2              
+[17] GenomicRanges_1.46.1           GenomeInfoDb_1.30.0           
+[19] IRanges_2.28.0                 S4Vectors_0.32.3              
 [21] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
 [23] matrixStats_0.61.0-9001        BiocStyle_2.22.0              
 [25] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.2.0           BiocFileCache_2.2.0          
-  [3] igraph_1.2.8                  plyr_1.8.6                   
+  [3] igraph_1.2.9                  plyr_1.8.6                   
   [5] lazyeval_0.2.2                splines_4.1.2                
-  [7] BiocParallel_1.28.0           digest_0.6.28                
+  [7] BiocParallel_1.28.1           digest_0.6.28                
   [9] yulab.utils_0.0.4             htmltools_0.5.2              
  [11] viridis_0.6.2                 fansi_0.5.0                  
  [13] magrittr_2.0.1                memoise_2.0.0                
  [15] ScaledMatrix_1.2.0            cluster_2.1.2                
- [17] DECIPHER_2.22.0               graphlayouts_0.7.1           
+ [17] DECIPHER_2.22.0               graphlayouts_0.7.2           
  [19] colorspace_2.0-2              blob_1.2.2                   
  [21] rappdirs_0.3.3                ggrepel_0.9.1                
  [23] xfun_0.28                     crayon_1.4.2                 

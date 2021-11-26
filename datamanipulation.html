@@ -1217,6 +1217,110 @@ rows filtered by feature).</p>
 as well as Chlamydiae in different sites of the human body,
 <code>tse_subset_by_sample_feature</code> might be a suitable subset to start
 with.</p>
+</div>
+<div id="remove-empty-columns-and-rows" class="section level4" number="4.1.2.4">
+<h4><span class="header-section-number">4.1.2.4</span> Remove empty columns and rows</h4>
+<p>Sometimes data might contain, e.g., features that are not present in any of the samples.
+This might occur after subsetting for instance. In certain analyses we might want to
+remove those instances.</p>
+<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb87-1"><a href="datamanipulation.html#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Agglomerate data at Genus level </span></span>
+<span id="cb87-2"><a href="datamanipulation.html#cb87-2" aria-hidden="true" tabindex="-1"></a>tse_genus <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(tse, <span class="at">rank =</span> <span class="st">&quot;Genus&quot;</span>)</span>
+<span id="cb87-3"><a href="datamanipulation.html#cb87-3" aria-hidden="true" tabindex="-1"></a><span class="co"># List bacteria that we want to include</span></span>
+<span id="cb87-4"><a href="datamanipulation.html#cb87-4" aria-hidden="true" tabindex="-1"></a>genera <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Class:Thermoprotei&quot;</span>, <span class="st">&quot;Genus:Sulfolobus&quot;</span>, <span class="st">&quot;Genus:Sediminicola&quot;</span>)</span>
+<span id="cb87-5"><a href="datamanipulation.html#cb87-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Subset data</span></span>
+<span id="cb87-6"><a href="datamanipulation.html#cb87-6" aria-hidden="true" tabindex="-1"></a>tse_genus_sub <span class="ot">&lt;-</span> tse_genus[genera, ]</span>
+<span id="cb87-7"><a href="datamanipulation.html#cb87-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-8"><a href="datamanipulation.html#cb87-8" aria-hidden="true" tabindex="-1"></a>tse_genus_sub</span></code></pre></div>
+<pre><code>## class: TreeSummarizedExperiment 
+## dim: 3 26 
+## metadata(0):
+## assays(1): counts
+## rownames(3): Class:Thermoprotei Genus:Sulfolobus Genus:Sediminicola
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(26): CL3 CC1 ... Even2 Even3
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (3 rows)
+## rowTree: 1 phylo tree(s) (19216 leaves)
+## colLinks: NULL
+## colTree: NULL</code></pre>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="datamanipulation.html#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List total counts of each sample</span></span>
+<span id="cb89-2"><a href="datamanipulation.html#cb89-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="fu">assay</span>(tse_genus_sub, <span class="st">&quot;counts&quot;</span>))</span></code></pre></div>
+<pre><code>##      CL3      CC1      SV1  M31Fcsw  M11Fcsw  M31Plmr  M11Plmr  F21Plmr 
+##        1        0        0        1        1        0        4        1 
+##  M31Tong  M11Tong LMEpi24M SLEpi20M   AQC1cm   AQC4cm   AQC7cm      NP2 
+##        7        3        0        2       64      105      136      222 
+##      NP3      NP5  TRRsed1  TRRsed2  TRRsed3     TS28     TS29    Even1 
+##     6433     1154        2        2        2        0        0        0 
+##    Even2    Even3 
+##        2        0</code></pre>
+<p>Now we can see that certain samples do not include any bacteria. We can remove those.</p>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="datamanipulation.html#cb91-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove samples that do not have present any bacteria</span></span>
+<span id="cb91-2"><a href="datamanipulation.html#cb91-2" aria-hidden="true" tabindex="-1"></a>tse_genus_sub <span class="ot">&lt;-</span> tse_genus_sub[ , <span class="fu">colSums</span>(<span class="fu">assay</span>(tse_genus_sub, <span class="st">&quot;counts&quot;</span>)) <span class="sc">!=</span> <span class="dv">0</span> ]</span>
+<span id="cb91-3"><a href="datamanipulation.html#cb91-3" aria-hidden="true" tabindex="-1"></a>tse_genus_sub</span></code></pre></div>
+<pre><code>## class: TreeSummarizedExperiment 
+## dim: 3 18 
+## metadata(0):
+## assays(1): counts
+## rownames(3): Class:Thermoprotei Genus:Sulfolobus Genus:Sediminicola
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(18): CL3 M31Fcsw ... TRRsed3 Even2
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (3 rows)
+## rowTree: 1 phylo tree(s) (19216 leaves)
+## colLinks: NULL
+## colTree: NULL</code></pre>
+<p>Same thing can be done for features.</p>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="datamanipulation.html#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Take only those samples that are collected from feces, skin, or tongue</span></span>
+<span id="cb93-2"><a href="datamanipulation.html#cb93-2" aria-hidden="true" tabindex="-1"></a>tse_genus_sub <span class="ot">&lt;-</span> tse_genus[ , <span class="fu">colData</span>(tse_genus)<span class="sc">$</span>SampleType <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;Feces&quot;</span>, <span class="st">&quot;Skin&quot;</span>, <span class="st">&quot;Tongue&quot;</span>)]</span>
+<span id="cb93-3"><a href="datamanipulation.html#cb93-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb93-4"><a href="datamanipulation.html#cb93-4" aria-hidden="true" tabindex="-1"></a>tse_genus_sub</span></code></pre></div>
+<pre><code>## class: TreeSummarizedExperiment 
+## dim: 1516 9 
+## metadata(0):
+## assays(1): counts
+## rownames(1516): Class:Thermoprotei Genus:Sulfolobus ...
+##   Genus:Coprothermobacter Phylum:SR1
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(9): M31Fcsw M11Fcsw ... TS28 TS29
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (1516 rows)
+## rowTree: 1 phylo tree(s) (19216 leaves)
+## colLinks: NULL
+## colTree: NULL</code></pre>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="datamanipulation.html#cb95-1" aria-hidden="true" tabindex="-1"></a><span class="co"># How many bacteria there are that are not present?</span></span>
+<span id="cb95-2"><a href="datamanipulation.html#cb95-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">rowSums</span>(<span class="fu">assay</span>(tse_genus_sub, <span class="st">&quot;counts&quot;</span>)) <span class="sc">==</span> <span class="dv">0</span>)</span></code></pre></div>
+<pre><code>## [1] 435</code></pre>
+<p>We can see that there are bacteria that are not present in these samples that we chose.
+We can remove those bacteria from the data.</p>
+<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="datamanipulation.html#cb97-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Take only those bacteria that are present</span></span>
+<span id="cb97-2"><a href="datamanipulation.html#cb97-2" aria-hidden="true" tabindex="-1"></a>tse_genus_sub <span class="ot">&lt;-</span> tse_genus_sub[<span class="fu">rowSums</span>(<span class="fu">assay</span>(tse_genus_sub, <span class="st">&quot;counts&quot;</span>)) <span class="sc">&gt;</span> <span class="dv">0</span>, ]</span>
+<span id="cb97-3"><a href="datamanipulation.html#cb97-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-4"><a href="datamanipulation.html#cb97-4" aria-hidden="true" tabindex="-1"></a>tse_genus_sub</span></code></pre></div>
+<pre><code>## class: TreeSummarizedExperiment 
+## dim: 1081 9 
+## metadata(0):
+## assays(1): counts
+## rownames(1081): Genus:Sulfolobus Order:NRP-J ...
+##   Genus:Coprothermobacter Phylum:SR1
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(9): M31Fcsw M11Fcsw ... TS28 TS29
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (1081 rows)
+## rowTree: 1 phylo tree(s) (19216 leaves)
+## colLinks: NULL
+## colTree: NULL</code></pre>
 
 </div>
 </div>

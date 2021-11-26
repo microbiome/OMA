@@ -39,16 +39,6 @@ document.addEventListener("click", function (event) {
 ## Loading required package: ecodist
 ```
 
-```
-## Warning in library(package, lib.loc = lib.loc, character.only = TRUE,
-## logical.return = TRUE, : there is no package called 'ecodist'
-```
-
-```
-## Installing package into '/__w/_temp/Library'
-## (as 'lib' is unspecified)
-```
-
 
 ```r
 library(mia)
@@ -354,25 +344,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7751 BIC: 8274 AIC: 8103 
+## Laplace: 7741 BIC: 8282 AIC: 8112 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7858 BIC: 8578 AIC: 8364 
+## Laplace: 7854 BIC: 8553 AIC: 8340 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7899 BIC: 8753 AIC: 8497 
+## Laplace: 7898 BIC: 8753 AIC: 8497 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 7991 BIC: 9021 AIC: 8722
+## Laplace: 8039 BIC: 9073 AIC: 8775
 ```
 
 
@@ -416,10 +406,10 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.14   901.2 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.17   717.0  936.4 1025
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
 ## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
-## Mock               2       3   67  998.6  -70.60   839.3 1072.8 1134
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
 ## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
 ## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
@@ -437,8 +427,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.28
+## 1 0.5385 20.60
+## 2 0.4615 15.32
 ```
 
 
@@ -452,12 +442,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.015e-17
-## CC1     1.000e+00 3.864e-22
-## SV1     1.000e+00 1.946e-12
-## M31Fcsw 7.875e-26 1.000e+00
-## M11Fcsw 1.133e-16 1.000e+00
-## M31Plmr 1.123e-13 1.000e+00
+## CL3     1.000e+00 4.492e-17
+## CC1     1.000e+00 3.365e-22
+## SV1     1.000e+00 1.778e-12
+## M31Fcsw 6.911e-26 1.000e+00
+## M11Fcsw 1.027e-16 1.000e+00
+## M31Plmr 1.025e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -468,13 +458,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30381 0.1354661
-## Phylum:Euryarchaeota  0.23114 0.1468621
-## Phylum:Actinobacteria 1.21364 1.0601012
-## Phylum:Spirochaetes   0.21393 0.1318418
-## Phylum:MVP-15         0.02982 0.0007658
-## Phylum:Proteobacteria 6.84499 1.8153496
+##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354053
+## Phylum:Euryarchaeota  0.2314 0.1468912
+## Phylum:Actinobacteria 1.2104 1.0580663
+## Phylum:Spirochaetes   0.2141 0.1318074
+## Phylum:MVP-15         0.0299 0.0007662
+## Phylum:Proteobacteria 6.8415 1.8115829
 ```
 Get the assignment probabilities
 
@@ -664,22 +654,22 @@ other attached packages:
 [11] MultiAssayExperiment_1.20.0    TreeSummarizedExperiment_2.1.4
 [13] Biostrings_2.62.0              XVector_0.34.0                
 [15] SingleCellExperiment_1.16.0    SummarizedExperiment_1.24.0   
-[17] Biobase_2.54.0                 GenomicRanges_1.46.0          
+[17] Biobase_2.54.0                 GenomicRanges_1.46.1          
 [19] GenomeInfoDb_1.30.0            IRanges_2.28.0                
-[21] S4Vectors_0.32.2               BiocGenerics_0.40.0           
+[21] S4Vectors_0.32.3               BiocGenerics_0.40.0           
 [23] MatrixGenerics_1.6.0           matrixStats_0.61.0-9001       
 [25] ecodist_2.0.7                  BiocStyle_2.22.0              
 [27] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
-  [1] plyr_1.8.6                  igraph_1.2.8               
+  [1] plyr_1.8.6                  igraph_1.2.9               
   [3] lazyeval_0.2.2              splines_4.1.2              
-  [5] BiocParallel_1.28.0         digest_0.6.28              
+  [5] BiocParallel_1.28.1         digest_0.6.28              
   [7] yulab.utils_0.0.4           htmltools_0.5.2            
   [9] viridis_0.6.2               fansi_0.5.0                
  [11] magrittr_2.0.1              memoise_2.0.0              
  [13] ScaledMatrix_1.2.0          cluster_2.1.2              
- [15] DECIPHER_2.22.0             graphlayouts_0.7.1         
+ [15] DECIPHER_2.22.0             graphlayouts_0.7.2         
  [17] colorspace_2.0-2            blob_1.2.2                 
  [19] ggrepel_0.9.1               xfun_0.28                  
  [21] dplyr_1.0.7                 crayon_1.4.2               

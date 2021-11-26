@@ -1016,17 +1016,17 @@ other attached packages:
  [5] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
  [7] XVector_0.34.0                 SingleCellExperiment_1.16.0   
  [9] SummarizedExperiment_1.24.0    Biobase_2.54.0                
-[11] GenomicRanges_1.46.0           GenomeInfoDb_1.30.0           
-[13] IRanges_2.28.0                 S4Vectors_0.32.2              
+[11] GenomicRanges_1.46.1           GenomeInfoDb_1.30.0           
+[13] IRanges_2.28.0                 S4Vectors_0.32.3              
 [15] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
 [17] matrixStats_0.61.0-9001        BiocStyle_2.22.0              
 [19] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.2.0           BiocFileCache_2.2.0          
-  [3] plyr_1.8.6                    igraph_1.2.8                 
+  [3] plyr_1.8.6                    igraph_1.2.9                 
   [5] lazyeval_0.2.2                splines_4.1.2                
-  [7] BiocParallel_1.28.0           ggplot2_3.3.5                
+  [7] BiocParallel_1.28.1           ggplot2_3.3.5                
   [9] scater_1.22.0                 digest_0.6.28                
  [11] foreach_1.5.1                 yulab.utils_0.0.4            
  [13] htmltools_0.5.2               viridis_0.6.2                

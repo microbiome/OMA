@@ -553,8 +553,8 @@ other attached packages:
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
  [5] XVector_0.34.0                 SingleCellExperiment_1.16.0   
  [7] SummarizedExperiment_1.24.0    Biobase_2.54.0                
- [9] GenomicRanges_1.46.0           GenomeInfoDb_1.30.0           
-[11] IRanges_2.28.0                 S4Vectors_0.32.2              
+ [9] GenomicRanges_1.46.1           GenomeInfoDb_1.30.0           
+[11] IRanges_2.28.0                 S4Vectors_0.32.3              
 [13] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
 [15] matrixStats_0.61.0-9001        BiocStyle_2.22.0              
 [17] rebook_1.4.0                  
@@ -591,7 +591,7 @@ loaded via a namespace (and not attached):
  [57] stringi_1.7.5               RSQLite_2.2.8              
  [59] ScaledMatrix_1.2.0          permute_0.9-5              
  [61] tidytree_0.3.6              filelock_1.0.2             
- [63] BiocParallel_1.28.0         rlang_0.4.12               
+ [63] BiocParallel_1.28.1         rlang_0.4.12               
  [65] pkgconfig_2.0.3             bitops_1.0-7               
  [67] evaluate_0.14               lattice_0.20-45            
  [69] purrr_0.3.4                 treeio_1.18.1              
