@@ -47,16 +47,13 @@ document.addEventListener("click", function (event) {
 ### Resources for TreeSummarizedExperiment
 
  * SingleCellExperiment [@R-SingleCellExperiment]
-   + [Online tutorial](https://bioconductor.org/packages/release/bioc/vignettes/
-   SingleCellExperiment/inst/doc/intro.html)
+   + [Online tutorial](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html)
    + [Project page](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html)
  * SummarizedExperiment [@R-SummarizedExperiment]
-   + [Online tutorial](https://bioconductor.org/packages/release/bioc/vignettes/
-   SummarizedExperiment/inst/doc/SummarizedExperiment.html)
+   + [Online tutorial](https://bioconductor.org/packages/release/bioc/vignettes/SummarizedExperiment/inst/doc/SummarizedExperiment.html)
    + [Project page](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)
  * TreeSummarizedExperiment [@R-TreeSummarizedExperiment]
-   + [Online tutorial](https://bioconductor.org/packages/release/bioc/vignettes/
-   TreeSummarizedExperiment/inst/doc/Introduction_to_treeSummarizedExperiment.html)
+   + [Online tutorial](https://bioconductor.org/packages/release/bioc/vignettes/TreeSummarizedExperiment/inst/doc/Introduction_to_treeSummarizedExperiment.html)
    + [Project page](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html)
    
 
