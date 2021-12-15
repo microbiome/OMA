@@ -536,9 +536,9 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.1                dplyr_1.0.7                   
  [3] scater_1.22.0                  scuttle_1.4.0                 
- [5] miaViz_1.1.4                   ggraph_2.0.5                  
+ [5] miaViz_1.3.2                   ggraph_2.0.5                  
  [7] ggplot2_3.3.5                  microbiomeDataSets_1.1.5      
- [9] mia_1.3.8                      MultiAssayExperiment_1.20.0   
+ [9] mia_1.3.9                      MultiAssayExperiment_1.20.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [13] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [15] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -552,18 +552,18 @@ loaded via a namespace (and not attached):
   [1] AnnotationHub_3.2.0           BiocFileCache_2.2.0          
   [3] igraph_1.2.9                  plyr_1.8.6                   
   [5] lazyeval_0.2.2                splines_4.1.2                
-  [7] BiocParallel_1.28.1           digest_0.6.28                
+  [7] BiocParallel_1.28.3           digest_0.6.29                
   [9] yulab.utils_0.0.4             htmltools_0.5.2              
  [11] viridis_0.6.2                 fansi_0.5.0                  
- [13] magrittr_2.0.1                memoise_2.0.0                
+ [13] magrittr_2.0.1                memoise_2.0.1                
  [15] ScaledMatrix_1.2.0            cluster_2.1.2                
  [17] DECIPHER_2.22.0               graphlayouts_0.7.2           
  [19] colorspace_2.0-2              blob_1.2.2                   
  [21] rappdirs_0.3.3                ggrepel_0.9.1                
- [23] xfun_0.28                     crayon_1.4.2                 
+ [23] xfun_0.29                     crayon_1.4.2                 
  [25] RCurl_1.98-1.5                jsonlite_1.7.2               
  [27] graph_1.72.0                  ape_5.5                      
- [29] glue_1.5.0                    polyclip_1.10-0              
+ [29] glue_1.5.1                    polyclip_1.10-0              
  [31] gtable_0.3.0                  zlibbioc_1.40.0              
  [33] DelayedArray_0.20.0           BiocSingular_1.10.0          
  [35] scales_1.1.1                  DBI_1.1.1                    
@@ -582,7 +582,7 @@ loaded via a namespace (and not attached):
  [61] AnnotationDbi_1.56.2          munsell_0.5.0                
  [63] BiocVersion_3.14.0            tools_4.1.2                  
  [65] cachem_1.0.6                  DirichletMultinomial_1.36.0  
- [67] generics_0.1.1                RSQLite_2.2.8                
+ [67] generics_0.1.1                RSQLite_2.2.9                
  [69] ExperimentHub_2.2.0           evaluate_0.14                
  [71] stringr_1.4.0                 fastmap_1.1.0                
  [73] yaml_2.2.1                    ggtree_3.2.1                 
@@ -595,19 +595,19 @@ loaded via a namespace (and not attached):
  [87] curl_4.3.2                    png_0.1-7                    
  [89] interactiveDisplayBase_1.32.0 treeio_1.18.1                
  [91] tweenr_1.0.2                  tibble_3.1.6                 
- [93] bslib_0.3.1                   stringi_1.7.5                
+ [93] bslib_0.3.1                   stringi_1.7.6                
  [95] highr_0.9                     lattice_0.20-45              
- [97] Matrix_1.3-4                  vegan_2.5-7                  
+ [97] Matrix_1.4-0                  vegan_2.5-7                  
  [99] permute_0.9-5                 vctrs_0.3.8                  
 [101] pillar_1.6.4                  lifecycle_1.0.1              
 [103] BiocManager_1.30.16           jquerylib_0.1.4              
 [105] BiocNeighbors_1.12.0          cowplot_1.1.1                
-[107] bitops_1.0-7                  irlba_2.3.3                  
-[109] httpuv_1.6.3                  R6_2.5.1                     
+[107] bitops_1.0-7                  irlba_2.3.5                  
+[109] httpuv_1.6.4                  R6_2.5.1                     
 [111] bookdown_0.24                 promises_1.2.0.1             
 [113] gridExtra_2.3                 vipor_0.4.5                  
 [115] codetools_0.2-18              MASS_7.3-54                  
-[117] assertthat_0.2.1              withr_2.4.2                  
+[117] assertthat_0.2.1              withr_2.4.3                  
 [119] GenomeInfoDbData_1.2.7        mgcv_1.8-38                  
 [121] parallel_4.1.2                ggfun_0.0.4                  
 [123] grid_4.1.2                    beachmat_2.10.0              

@@ -548,7 +548,7 @@ other attached packages:
  [1] scater_1.22.0                  scuttle_1.4.0                 
  [3] ggplot2_3.3.5                  vegan_2.5-7                   
  [5] lattice_0.20-45                permute_0.9-5                 
- [7] mia_1.3.8                      MultiAssayExperiment_1.20.0   
+ [7] mia_1.3.9                      MultiAssayExperiment_1.20.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [11] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [13] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -570,29 +570,29 @@ loaded via a namespace (and not attached):
  [17] knitr_1.36                  jsonlite_1.7.2             
  [19] broom_0.7.10                cluster_2.1.2              
  [21] graph_1.72.0                BiocManager_1.30.16        
- [23] compiler_4.1.2              backports_1.4.0            
- [25] assertthat_0.2.1            Matrix_1.3-4               
+ [23] compiler_4.1.2              backports_1.4.1            
+ [25] assertthat_0.2.1            Matrix_1.4-0               
  [27] fastmap_1.1.0               lazyeval_0.2.2             
  [29] BiocSingular_1.10.0         htmltools_0.5.2            
  [31] tools_4.1.2                 rsvd_1.0.5                 
- [33] gtable_0.3.0                glue_1.5.0                 
+ [33] gtable_0.3.0                glue_1.5.1                 
  [35] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
  [37] dplyr_1.0.7                 Rcpp_1.0.7                 
  [39] carData_3.0-4               jquerylib_0.1.4            
  [41] vctrs_0.3.8                 ape_5.5                    
  [43] nlme_3.1-153                DECIPHER_2.22.0            
- [45] DelayedMatrixStats_1.16.0   xfun_0.28                  
+ [45] DelayedMatrixStats_1.16.0   xfun_0.29                  
  [47] stringr_1.4.0               beachmat_2.10.0            
- [49] lifecycle_1.0.1             irlba_2.3.3                
+ [49] lifecycle_1.0.1             irlba_2.3.5                
  [51] rstatix_0.7.0               XML_3.99-0.8               
  [53] zlibbioc_1.40.0             MASS_7.3-54                
  [55] scales_1.1.1                parallel_4.1.2             
- [57] yaml_2.2.1                  memoise_2.0.0              
+ [57] yaml_2.2.1                  memoise_2.0.1              
  [59] gridExtra_2.3               yulab.utils_0.0.4          
- [61] sass_0.4.0                  stringi_1.7.5              
- [63] RSQLite_2.2.8               highr_0.9                  
+ [61] sass_0.4.0                  stringi_1.7.6              
+ [63] RSQLite_2.2.9               highr_0.9                  
  [65] ScaledMatrix_1.2.0          tidytree_0.3.6             
- [67] filelock_1.0.2              BiocParallel_1.28.1        
+ [67] filelock_1.0.2              BiocParallel_1.28.3        
  [69] rlang_0.4.12                pkgconfig_2.0.3            
  [71] bitops_1.0-7                evaluate_0.14              
  [73] purrr_0.3.4                 labeling_0.4.2             
@@ -602,14 +602,14 @@ loaded via a namespace (and not attached):
  [81] magrittr_2.0.1              bookdown_0.24              
  [83] R6_2.5.1                    generics_0.1.1             
  [85] DelayedArray_0.20.0         DBI_1.1.1                  
- [87] withr_2.4.2                 mgcv_1.8-38                
+ [87] withr_2.4.3                 mgcv_1.8-38                
  [89] pillar_1.6.4                abind_1.4-5                
  [91] RCurl_1.98-1.5              tibble_3.1.6               
  [93] dir.expiry_1.2.0            car_3.0-12                 
  [95] crayon_1.4.2                utf8_1.2.2                 
  [97] rmarkdown_2.11              viridis_0.6.2              
  [99] grid_4.1.2                  blob_1.2.2                 
-[101] digest_0.6.28               tidyr_1.1.4                
+[101] digest_0.6.29               tidyr_1.1.4                
 [103] munsell_0.5.0               DirichletMultinomial_1.36.0
 [105] beeswarm_0.4.0              viridisLite_0.4.0          
 [107] vipor_0.4.5                 bslib_0.3.1                

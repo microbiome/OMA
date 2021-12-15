@@ -41,14 +41,34 @@ document.addEventListener("click", function (event) {
 
 Several R packages provide methods for the analysis and manipulation
 of `SummarizedExperiment` and related data containers. One of these is
-`mia`.
+`mia`. The installation for this and other packages has the following
+procedure.
 
-Install the Biocondcuctor development version with:
+Stable Biocondcuctor release version can be installed with:
+
+
+```r
+BiocManager::install("microbiome/mia")
+```
+
+Biocondcuctor development version requires the installation of the
+latest R beta version, and this is primarily recommended for those who
+already have solid experience with R/Bioconductor and need access to
+the latest experimental updates.
 
 
 ```r
 BiocManager::install("microbiome/mia", version="devel")
 ```
+
+The bleeding edge (and potentially unstable) development version lives
+in Github:
+
+
+```r
+devtools::install_github("microbiome/mia")
+```
+
 
 
 ## Some available packages
@@ -94,11 +114,11 @@ loaded via a namespace (and not attached):
  [1] graph_1.72.0        knitr_1.36          magrittr_2.0.1     
  [4] BiocGenerics_0.40.0 R6_2.5.1            rlang_0.4.12       
  [7] fastmap_1.1.0       stringr_1.4.0       tools_4.1.2        
-[10] xfun_0.28           jquerylib_0.1.4     htmltools_0.5.2    
-[13] CodeDepends_0.6.5   yaml_2.2.1          digest_0.6.28      
+[10] xfun_0.29           jquerylib_0.1.4     htmltools_0.5.2    
+[13] CodeDepends_0.6.5   yaml_2.2.1          digest_0.6.29      
 [16] bookdown_0.24       dir.expiry_1.2.0    BiocManager_1.30.16
 [19] codetools_0.2-18    sass_0.4.0          evaluate_0.14      
-[22] rmarkdown_2.11      stringi_1.7.5       compiler_4.1.2     
+[22] rmarkdown_2.11      stringi_1.7.6       compiler_4.1.2     
 [25] bslib_0.3.1         filelock_1.0.2      stats4_4.1.2       
 [28] XML_3.99-0.8        jsonlite_1.7.2     
 ```
