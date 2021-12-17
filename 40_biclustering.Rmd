@@ -1,0 +1,231 @@
+# Biclustering
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+Load example data
+```{r load-pkg-data}
+library(mia)
+data("dmn_se", package="mia")
+tse <- dmn_se
+
+tse <- tse[1:30, 1:20]
+
+tse
+```
+
+Load required package
+
+```{r}
+if(!require(biclust)){
+    install.packages("biclust")
+    library(biclust)
+}
+```
+
+Find biclusters
+```{r}
+# Get assay
+assay <- assay(tse, "counts")
+
+# # Generate random example data matrix
+# set.seed(233452)
+# cmat <- matrix(rnorm(600), 30, 50)
+# cmat[2:20, 3:6] <- 10 # artifical bicluster
+# cmat[10:12, 11:13] <- 20 # artifical bicluster
+# cmat[20:24, 11:13] <- 20 # artifical bicluster
+# colnames(cmat) <- paste0("Sample", 1:ncol(cmat))
+# rownames(cmat) <- paste0("Feature", 1:nrow(cmat))
+# 
+# assay <- cmat
+
+# Find biclusters
+bc <- biclust(assay, method=BCPlaid(), fit.model = y ~ m,
+              background = TRUE, shuffle = 100, back.fit = 0, max.layers = 10,
+              iter.startup = 10, iter.layer = 100, verbose = FALSE)
+```
+
+```{r}
+# Get cluster info for features
+bicluster_features <- bc@RowxNumber
+bicluster_features <- data.frame(bicluster_features)
+# If no clusters were found, create one
+if( nrow(bicluster_features) != nrow(assay) ){
+    bicluster_features <- data.frame(cluster = rep(TRUE, nrow(assay)))
+} else {
+    vec <- ifelse(rowSums(bicluster_features) > 0, FALSE, TRUE)
+         
+     if ( any(vec) ){
+         bicluster_features <- cbind(bicluster_features, vec)
+     }
+}
+rownames(bicluster_features) <- rownames(assay)
+colnames(bicluster_features) <- paste0("cluster_", 1:ncol(bicluster_features))
+
+```
+
+```{r}
+# Get cluster information for samples
+bicluster_samples <- t(bc@NumberxCol)
+bicluster_samples <- data.frame(bicluster_samples)
+# If no clusters were found, create one
+if( nrow(bicluster_samples) != ncol(assay) ){
+    bicluster_samples <- data.frame(cluster = rep(TRUE, ncol(assay)))
+} else {
+     vec <- ifelse(rowSums(bicluster_samples) > 0, FALSE, TRUE)
+         
+     if ( any(vec) ){
+         bicluster_samples <- cbind(bicluster_samples, vec)
+     }
+
+}
+rownames(bicluster_samples) <- colnames(assay)
+colnames(bicluster_samples) <- paste0("cluster_", 1:ncol(bicluster_samples))
+
+
+```
+
+```{r}
+if(!require(ggplot2)){
+    install.packages("ggplot2")
+    library(ggplot2)
+}
+```
+
+```{r}
+
+df <- t(data.frame(values = colnames(bicluster_features)))
+
+df <- df[rep(seq_len(nrow(df)), each = nrow(bicluster_features)), , drop = FALSE]
+colnames(df) <- paste0(colnames(bicluster_features), "_name")
+
+bicluster_features <- cbind(bicluster_features, df)
+
+bicluster_features$feature <- factor(rownames(bicluster_features), levels = rownames(bicluster_features))
+
+row_annotation <- ggplot(bicluster_features) + coord_equal(ratio = 1) + 
+    scale_fill_manual(breaks = c(TRUE, FALSE), values=c("black", "white"))
+
+
+for( cluster in colnames(bicluster_features) ){
+  if (cluster != "feature" && !grepl("_name", cluster)){
+    row_annotation <- row_annotation + geom_tile(aes_string(paste0(cluster, "_name"), "feature", fill = cluster)) +
+      theme(
+        # axis.title.y=element_blank(),
+        #     axis.text.y=element_blank(),
+        #     axis.ticks.y=element_blank(),
+             axis.title.x=element_blank(),
+             axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        #     axis.text.x=element_blank(),
+        #     axis.ticks.x=element_blank(),
+            
+            plot.margin=margin(0,0,0,0),
+            # legend.position = "none"
+            ) +
+      labs(fill = "Clusters")
+  }
+}
+
+row_annotation
+```
+
+
+```{r}
+
+df <- t(data.frame(values = colnames(bicluster_samples)))
+
+df <- df[rep(seq_len(nrow(df)), each = nrow(bicluster_samples)), , drop = FALSE]
+colnames(df) <- paste0(colnames(bicluster_samples), "_name")
+
+bicluster_samples <- cbind(bicluster_samples, df)
+
+bicluster_samples$sample <- factor(rownames(bicluster_samples), levels = rownames(bicluster_samples))
+
+col_annotation <- ggplot(bicluster_samples) + coord_equal(ratio = 1) + 
+    scale_y_discrete(position = "right") + 
+    scale_fill_manual(breaks = c(TRUE, FALSE), values=c("black", "white"))
+
+for( cluster in colnames(bicluster_samples) ){
+  if (cluster != "sample" && !grepl("_name", cluster)){
+    col_annotation <- col_annotation + geom_tile(aes_string("sample", paste0(cluster, "_name"), fill = cluster)) +
+      theme(
+        axis.title.y=element_blank(),
+        #     axis.text.y=element_blank(),
+        #     axis.ticks.y=element_blank(),
+            axis.title.x=element_blank(),
+            axis.text.x=element_blank(),
+            axis.ticks.x=element_blank(),
+            
+            plot.margin=margin(0,0,0,0),
+            legend.position = "none") +
+      labs(fill = "Clusters") 
+    
+    
+  }
+}
+
+col_annotation
+```
+
+```{r}
+if(!require(reshape2)){
+    install.packages("reshape2")
+    library(reshape2)
+}
+```
+
+```{r}
+data <- melt(assay)
+colnames(data) <- c("Feature", "Sample", "Value")
+
+heatmap <- ggplot(data) + geom_tile(aes(Sample, Feature, fill = Value)) + 
+  theme(
+    axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        # axis.title.x=element_blank(),
+        # axis.text.x=element_blank(),
+        # axis.ticks.x=element_blank(),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        
+        plot.margin=margin(0,0,0,0),
+       # legend.position = "none"
+        )
+
+heatmap
+```
+
+```{r}
+if(!require(patchwork)){
+    install.packages("patchwork")
+    library(patchwork)
+}
+```
+
+```{r}
+design <- c(
+  area(2, 1, 3, 1),
+  area(2, 2, 3, 3),
+  area(1, 2, 1, 3)
+)
+
+plot(design)
+```
+
+```{r, fig.width=10, fig.height=8}
+bicluster_plot <- row_annotation + heatmap + col_annotation + 
+    plot_layout(design = design, 
+                widths = c(0.1, 0.1, 0.1), # Adjust widths to align plots
+                heights = c(0.1, 1, 0.1), 
+                guides = "collect")
+
+bicluster_plot
+```
+
+## Session Info {-}
+
+```{r sessionInfo, echo=FALSE, results='asis'}
+prettySessionInfo()
+```
