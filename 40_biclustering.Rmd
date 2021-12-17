@@ -8,10 +8,14 @@ chapterPreamble()
 Load example data
 ```{r load-pkg-data}
 library(mia)
-data("dmn_se", package="mia")
-tse <- dmn_se
+data("enterotype", package="mia")
+tse <- enterotype
 
-tse <- tse[1:30, 1:20]
+tse <- subsetByPrevalentTaxa(tse, rank = "Genus", prevalence = 0.2, detection = 0.001)
+
+# tse <- tse[, tse$ClinicalStatus %in% c("healthy", "obese")]
+
+tse <- tse[, tse$Age > 18 & tse$Age < 60 & !is.na(tse$Age)]
 
 tse
 ```
@@ -32,7 +36,7 @@ tse <- transformSamples(tse, method = "clr", pseudocount = 1)
 tse <- transformFeatures(tse, abund_values = "clr", method = "z", name = "clr_z")
 
 assay <- assay(tse, "clr_z")
-assay_couns <- assay(tse, "counts")
+assay_clr <- assay(tse, "clr")
 
 # # Generate random example data matrix
 # set.seed(233452)
@@ -49,6 +53,8 @@ assay_couns <- assay(tse, "counts")
 bc <- biclust(assay_clr, method=BCPlaid(), fit.model = y ~ m,
               background = TRUE, shuffle = 100, back.fit = 0, max.layers = 10,
               iter.startup = 10, iter.layer = 100, verbose = FALSE)
+
+bc
 ```
 
 ```{r}
@@ -110,7 +116,7 @@ bicluster_features <- cbind(bicluster_features, df)
 bicluster_features$feature <- factor(rownames(bicluster_features), levels = rownames(bicluster_features))
 
 row_annotation <- ggplot(bicluster_features) + coord_equal(ratio = 1) + 
-    scale_fill_manual(breaks = c(TRUE, FALSE), values=c("black", "white"))
+    scale_fill_manual(breaks = c(TRUE, FALSE), values=c("red", "white"))
 
 
 for( cluster in colnames(bicluster_features) ){
@@ -149,7 +155,7 @@ bicluster_samples$sample <- factor(rownames(bicluster_samples), levels = rowname
 
 col_annotation <- ggplot(bicluster_samples) + coord_equal(ratio = 1) + 
     scale_y_discrete(position = "right") + 
-    scale_fill_manual(breaks = c(TRUE, FALSE), values=c("black", "white"))
+    scale_fill_manual(breaks = c(TRUE, FALSE), values=c("red", "white"))
 
 for( cluster in colnames(bicluster_samples) ){
   if (cluster != "sample" && !grepl("_name", cluster)){
