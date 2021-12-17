@@ -28,7 +28,11 @@ if(!require(biclust)){
 Find biclusters
 ```{r}
 # Get assay
-assay <- assay(tse, "counts")
+tse <- transformSamples(tse, method = "clr", pseudocount = 1)
+tse <- transformFeatures(tse, abund_values = "clr", method = "z", name = "clr_z")
+
+assay <- assay(tse, "clr_z")
+assay_couns <- assay(tse, "counts")
 
 # # Generate random example data matrix
 # set.seed(233452)
@@ -42,7 +46,7 @@ assay <- assay(tse, "counts")
 # assay <- cmat
 
 # Find biclusters
-bc <- biclust(assay, method=BCPlaid(), fit.model = y ~ m,
+bc <- biclust(assay_clr, method=BCPlaid(), fit.model = y ~ m,
               background = TRUE, shuffle = 100, back.fit = 0, max.layers = 10,
               iter.startup = 10, iter.layer = 100, verbose = FALSE)
 ```
@@ -180,6 +184,12 @@ if(!require(reshape2)){
 data <- melt(assay)
 colnames(data) <- c("Feature", "Sample", "Value")
 
+# Determines the scaling of colours
+maxval <- round(max(abs(data$Value)))
+limits <- c(-maxval, maxval)
+breaks <- seq(from = min(limits), to = max(limits), by = 0.5)
+colours <- c("darkblue", "blue", "white", "red", "darkred")
+
 heatmap <- ggplot(data) + geom_tile(aes(Sample, Feature, fill = Value)) + 
   theme(
     axis.title.y=element_blank(),
@@ -192,7 +202,11 @@ heatmap <- ggplot(data) + geom_tile(aes(Sample, Feature, fill = Value)) +
         
         plot.margin=margin(0,0,0,0),
        # legend.position = "none"
-        )
+    legend.key.height= unit(1, 'cm')
+        ) +
+  scale_fill_gradientn(name = "CLR + Z transform", 
+                       breaks = breaks, limits = limits, colours = colours)
+
 
 heatmap
 ```
@@ -217,8 +231,8 @@ plot(design)
 ```{r, fig.width=10, fig.height=8}
 bicluster_plot <- row_annotation + heatmap + col_annotation + 
     plot_layout(design = design, 
-                widths = c(0.1, 0.1, 0.1), # Adjust widths to align plots
-                heights = c(0.1, 1, 0.1), 
+                widths = c(1, 1, 1), # Adjust widths to align plots
+                heights = c(1, 1, 1), 
                 guides = "collect")
 
 bicluster_plot
