@@ -26,7 +26,7 @@ tse
 
 Subset data so that it does not include that many features and samples. 
 
-```{r biclusering_1}
+```{r biclustering_1}
 # Subset data so that rarest taxa re filtered out
 tse <- subsetByPrevalentTaxa(tse, rank = "Genus", prevalence = 0.2, detection = 0.001)
 # Subset data so that only adult patients are included
@@ -37,7 +37,7 @@ tse
 
 Load required package
 
-```{r biclusering_2}
+```{r biclustering_2}
 # Load package
 if(!require(biclust)){
     install.packages("biclust")
@@ -47,7 +47,7 @@ if(!require(biclust)){
 
 Find biclusters using _biclust_.
 
-```{r biclusering_3}
+```{r biclustering_3}
 # Transform assay, Z-transformed assay is for heatmap
 tse <- transformSamples(tse, method = "clr", pseudocount = 1)
 tse <- transformFeatures(tse, abund_values = "clr", method = "z", name = "clr_z")
@@ -67,7 +67,7 @@ bc
 Create data frames which includes information about which cluster each feature/sample
 belongs.
 
-```{r biclusering_4}
+```{r biclustering_4}
 # Get cluster info for features and convert it into data frame
 bicluster_features <- bc@RowxNumber
 bicluster_features <- data.frame(bicluster_features)
@@ -93,7 +93,7 @@ colnames(bicluster_features) <- paste0("cluster_", 1:ncol(bicluster_features))
 head(bicluster_features)
 ```
 
-```{r biclusering_5}
+```{r biclustering_5}
 # Get cluster information for samples
 bicluster_samples <- t(bc@NumberxCol)
 bicluster_samples <- data.frame(bicluster_samples)
@@ -123,7 +123,7 @@ head(bicluster_samples)
 For plotting, we use _ggplot2_. If you want to use for example _pheatmap_, you can find
 example from [here](https://microbiome.github.io/OMA/microbiome-community.html#composition-heatmap).
 
-```{r biclusering_6}
+```{r biclustering_6}
 if(!require(ggplot2)){
     install.packages("ggplot2")
     library(ggplot2)
@@ -132,7 +132,7 @@ if(!require(ggplot2)){
 
 Create an annotation plot for features.
 
-```{r biclusering_7}
+```{r biclustering_7}
 # Get information about clusters; which clusters data contains
 df <- t(data.frame(values = colnames(bicluster_features)))
 # Repeat cluster names nrow times
@@ -169,7 +169,7 @@ row_annotation
 
 Create an annotation plot for samples. 
 
-```{r biclusering_8}
+```{r biclustering_8}
 # Similarly to features, create additional information which includes only the cluster name.
 # These cluster names are used to get right y-axis value, e.g., "cluster_1"
 df <- t(data.frame(values = colnames(bicluster_samples)))
@@ -205,7 +205,7 @@ for( cluster in colnames(bicluster_samples) ){
 col_annotation 
 ```
 
-```{r biclusering_9}
+```{r biclustering_9}
 if(!require(reshape2)){
     install.packages("reshape2")
     library(reshape2)
@@ -214,7 +214,7 @@ if(!require(reshape2)){
 
 Create a heatmap.
 
-```{r biclusering_11}
+```{r biclustering_11}
 # Melt assay
 data <- melt(assay)
 colnames(data) <- c("Feature", "Sample", "Value")
@@ -244,7 +244,7 @@ heatmap
 
 We are using _patchwork_ to combine individual plots together.
 
-```{r biclusering_12}
+```{r biclustering_12}
 if(!require(patchwork)){
     install.packages("patchwork")
     library(patchwork)
@@ -253,7 +253,7 @@ if(!require(patchwork)){
 
 We can adjust position of each plot. 
 
-```{r biclusering_13}
+```{r biclustering_13}
 # Create layout
 design <- c(
   area(2, 1, 3, 1),
@@ -264,9 +264,9 @@ design <- c(
 plot(design)
 ```
 
-Lastly, we cna combine plots using specified layout. 
+Lastly, we can combine plots using specified layout. 
 
-```{r biclusering_14, fig.width=10, fig.height=8}
+```{r biclustering_14, fig.width=10, fig.height=8}
 # Combine plots
 bicluster_plot <- row_annotation + heatmap + col_annotation + 
     plot_layout(design = design, guides = "collect", # Specify layout, collect legends
@@ -286,6 +286,30 @@ bicluster_plot <- row_annotation + heatmap + col_annotation +
 
 bicluster_plot
 ```
+
+Visualize most strongly correlated pairs from cluster 1
+
+```{r}
+bicluster_features$cluster_1 
+
+highest_cor <- unique(cor_table[ cor_table$cor > 0.75, "Var1"])
+
+highest_cor_tse <- tse[ unfactor(highest_cor), ]
+
+highest_cor_clusters <- bicluster_features[ rownames(bicluster_features) %in% rownames(highest_cor_tse), ]
+
+rowData(highest_cor_tse) <- cbind(rowData(highest_cor_tse), 
+                                  data.frame(cluster = apply(highest_cor_clusters, 1, 
+                                                  function(x) names((which(x == TRUE))) )))
+
+assay_melt <- meltAssay(highest_cor_tse, abund_values = "clr", add_row_data = TRUE)
+
+ggplot(data.frame(assay_melt), aes(x = FeatureID, y = clr)) + 
+  geom_boxplot(aes(fill = cluster), size = 0.5, outlier.shape = NA, alpha = 0.5) +
+  geom_point(aes(color = cluster), position=position_jitterdodge(jitter.width = 0.25), size = 1.5)
+
+```
+
 
 
 ## Session Info {-}
