@@ -5,16 +5,31 @@ library(rebook)
 chapterPreamble()
 ```
 
+Biclustering is a clustering method, which simultaneously clusters rows and columns.
+The idea is to find clusters where subset of features share similar pattern 
+over subset of samples. 
+
+There are multiple biclustering packages available, In this example, we use
+-   [biclust](https://cran.r-project.org/web/packages/biclust/index.html).
+
+Other available packages include, for example:
+-   [cobiclust](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13582).
+
 Load example data
 ```{r load-pkg-data}
 library(mia)
 data("enterotype", package="mia")
 tse <- enterotype
 
+tse
+```
+
+Subset data so that it does not include that many features and samples. 
+
+```{r biclusering_1}
+# Subset data so that rarest taxa re filtered out
 tse <- subsetByPrevalentTaxa(tse, rank = "Genus", prevalence = 0.2, detection = 0.001)
-
-# tse <- tse[, tse$ClinicalStatus %in% c("healthy", "obese")]
-
+# Subset data so that only adult patients are included
 tse <- tse[, tse$Age > 18 & tse$Age < 60 & !is.na(tse$Age)]
 
 tse
@@ -22,32 +37,24 @@ tse
 
 Load required package
 
-```{r}
+```{r biclusering_2}
+# Load package
 if(!require(biclust)){
     install.packages("biclust")
     library(biclust)
 }
 ```
 
-Find biclusters
-```{r}
-# Get assay
+Find biclusters using _biclust_.
+
+```{r biclusering_3}
+# Transform assay, Z-transformed assay is for heatmap
 tse <- transformSamples(tse, method = "clr", pseudocount = 1)
 tse <- transformFeatures(tse, abund_values = "clr", method = "z", name = "clr_z")
 
-assay <- assay(tse, "clr_z")
+# Get assays
 assay_clr <- assay(tse, "clr")
-
-# # Generate random example data matrix
-# set.seed(233452)
-# cmat <- matrix(rnorm(600), 30, 50)
-# cmat[2:20, 3:6] <- 10 # artifical bicluster
-# cmat[10:12, 11:13] <- 20 # artifical bicluster
-# cmat[20:24, 11:13] <- 20 # artifical bicluster
-# colnames(cmat) <- paste0("Sample", 1:ncol(cmat))
-# rownames(cmat) <- paste0("Feature", 1:nrow(cmat))
-# 
-# assay <- cmat
+assay <- assay(tse, "clr_z")
 
 # Find biclusters
 bc <- biclust(assay_clr, method=BCPlaid(), fit.model = y ~ m,
@@ -57,7 +64,10 @@ bc <- biclust(assay_clr, method=BCPlaid(), fit.model = y ~ m,
 bc
 ```
 
-```{r}
+Create data frames which includes information about which cluster each feature/sample
+belongs.
+
+```{r biclusering_4}
 # Get cluster info for features
 bicluster_features <- bc@RowxNumber
 bicluster_features <- data.frame(bicluster_features)
@@ -74,9 +84,10 @@ if( nrow(bicluster_features) != nrow(assay) ){
 rownames(bicluster_features) <- rownames(assay)
 colnames(bicluster_features) <- paste0("cluster_", 1:ncol(bicluster_features))
 
+head(bicluster_features)
 ```
 
-```{r}
+```{r biclusering_5}
 # Get cluster information for samples
 bicluster_samples <- t(bc@NumberxCol)
 bicluster_samples <- data.frame(bicluster_samples)
@@ -94,17 +105,22 @@ if( nrow(bicluster_samples) != ncol(assay) ){
 rownames(bicluster_samples) <- colnames(assay)
 colnames(bicluster_samples) <- paste0("cluster_", 1:ncol(bicluster_samples))
 
-
+head(bicluster_samples)
 ```
 
-```{r}
+For plotting, we use _ggplot2_. If you want to use for example _pheatmap_, you can find
+example from [here](https://microbiome.github.io/OMA/microbiome-community.html#composition-heatmap).
+
+```{r biclusering_6}
 if(!require(ggplot2)){
     install.packages("ggplot2")
     library(ggplot2)
 }
 ```
 
-```{r}
+Create an annotation plot for features.
+
+```{r biclusering_7}
 
 df <- t(data.frame(values = colnames(bicluster_features)))
 
@@ -141,8 +157,8 @@ for( cluster in colnames(bicluster_features) ){
 row_annotation
 ```
 
-
-```{r}
+Create an annotation plot for samples. 
+```{r biclusering_8}
 
 df <- t(data.frame(values = colnames(bicluster_samples)))
 
@@ -179,14 +195,16 @@ for( cluster in colnames(bicluster_samples) ){
 col_annotation 
 ```
 
-```{r}
+```{r biclusering_9}
 if(!require(reshape2)){
     install.packages("reshape2")
     library(reshape2)
 }
 ```
 
-```{r}
+Create a heatmap.
+
+```{r biclusering_11}
 data <- melt(assay)
 colnames(data) <- c("Feature", "Sample", "Value")
 
@@ -217,14 +235,17 @@ heatmap <- ggplot(data) + geom_tile(aes(Sample, Feature, fill = Value)) +
 heatmap
 ```
 
-```{r}
+We are using _patchwork_ to combine individual plots together.
+```{r biclusering_12}
 if(!require(patchwork)){
     install.packages("patchwork")
     library(patchwork)
 }
 ```
 
-```{r}
+We can adjust position of each plot. 
+
+```{r biclusering_13}
 design <- c(
   area(2, 1, 3, 1),
   area(2, 2, 3, 3),
@@ -234,12 +255,9 @@ design <- c(
 plot(design)
 ```
 
+Lastly, we cna combine plots using specified layout. 
 
-Annotaatioplottien korkeuden säätäminen näytteiden ja piirteiden suhteen perusteella?
-Esim. sarakkeiden annotaatioplotin korkeus pienemmäksi???? (Luultavasti täytyy
-säätää siinä kohtaa, kun kuvaajaa luodaan eikä vasta patchwork-kohdassa)
-
-```{r, fig.width=10, fig.height=8}
+```{r biclusering_14, fig.width=10, fig.height=8}
 bicluster_plot <- row_annotation + heatmap + col_annotation + 
     plot_layout(design = design, guides = "collect",
                 # Adjust widths and heights to align plots.
