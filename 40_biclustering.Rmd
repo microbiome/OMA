@@ -68,19 +68,25 @@ Create data frames which includes information about which cluster each feature/s
 belongs.
 
 ```{r biclusering_4}
-# Get cluster info for features
+# Get cluster info for features and convert it into data frame
 bicluster_features <- bc@RowxNumber
 bicluster_features <- data.frame(bicluster_features)
-# If no clusters were found, create one
+
+# If no clusters were found, create one. Otherwise create additional cluster which
+# contain those features that are not included in clusters that were found.
 if( nrow(bicluster_features) != nrow(assay) ){
     bicluster_features <- data.frame(cluster = rep(TRUE, nrow(assay)))
 } else {
-    vec <- ifelse(rowSums(bicluster_features) > 0, FALSE, TRUE)
-         
-     if ( any(vec) ){
-         bicluster_features <- cbind(bicluster_features, vec)
-     }
+  # Create additional cluster that includes those features that
+  # are not included in other clusters.
+  vec <- ifelse(rowSums(bicluster_features) > 0, FALSE, TRUE)
+  # If additional cluster contains features, then add it
+  if ( any(vec) ){
+    bicluster_features <- cbind(bicluster_features, vec)
+  }
 }
+
+# Give row and column names
 rownames(bicluster_features) <- rownames(assay)
 colnames(bicluster_features) <- paste0("cluster_", 1:ncol(bicluster_features))
 
@@ -91,17 +97,23 @@ head(bicluster_features)
 # Get cluster information for samples
 bicluster_samples <- t(bc@NumberxCol)
 bicluster_samples <- data.frame(bicluster_samples)
-# If no clusters were found, create one
+
+# If no clusters were found, create one. Otherwise create additional cluster which
+# contain those samples that are not included in clusters that were found.
 if( nrow(bicluster_samples) != ncol(assay) ){
     bicluster_samples <- data.frame(cluster = rep(TRUE, ncol(assay)))
 } else {
-     vec <- ifelse(rowSums(bicluster_samples) > 0, FALSE, TRUE)
-         
-     if ( any(vec) ){
-         bicluster_samples <- cbind(bicluster_samples, vec)
-     }
+  # Create additional cluster that includes those samples that
+  # are not included in other clusters.
+  vec <- ifelse(rowSums(bicluster_samples) > 0, FALSE, TRUE)
+  # If additional cluster contains samples, then add it
+  if ( any(vec) ){
+    bicluster_samples <- cbind(bicluster_samples, vec)
+  }
 
 }
+
+# Give row and column names
 rownames(bicluster_samples) <- colnames(assay)
 colnames(bicluster_samples) <- paste0("cluster_", 1:ncol(bicluster_samples))
 
@@ -121,35 +133,33 @@ if(!require(ggplot2)){
 Create an annotation plot for features.
 
 ```{r biclusering_7}
-
+# Get information about clusters; which clusters data contains
 df <- t(data.frame(values = colnames(bicluster_features)))
-
+# Repeat cluster names nrow times
 df <- df[rep(seq_len(nrow(df)), each = nrow(bicluster_features)), , drop = FALSE]
+# Give name for these columns
 colnames(df) <- paste0(colnames(bicluster_features), "_name")
 
+# Add additional cluster info to data. It will be in plotting. --> x-axis value
 bicluster_features <- cbind(bicluster_features, df)
 
+# Convert taxa into factors
 bicluster_features$feature <- factor(rownames(bicluster_features), levels = rownames(bicluster_features))
 
+# Initialize plot
 row_annotation <- ggplot(bicluster_features) + coord_equal(ratio = 1) + 
     scale_fill_manual(breaks = c(TRUE, FALSE), values=c("red", "white"), expand = c(0,0))
 
-
+# Loop through clusters
 for( cluster in colnames(bicluster_features) ){
+  # If column includes information whether feature is included in cluster
   if (cluster != "feature" && !grepl("_name", cluster)){
     row_annotation <- row_annotation + geom_tile(aes_string(paste0(cluster, "_name"), "feature", fill = cluster)) +
       theme(
-        # axis.title.y=element_blank(),
-        #     axis.text.y=element_blank(),
-        #     axis.ticks.y=element_blank(),
-             axis.title.x=element_blank(),
-             axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-        #     axis.text.x=element_blank(),
-        #     axis.ticks.x=element_blank(),
-            
-            plot.margin=margin(0,0,0,0),
-            # legend.position = "none"
-            ) +
+        axis.title.x=element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        plot.margin=margin(0,0,0,0),
+        ) +
       labs(fill = "Clusters")
   }
 }
@@ -158,8 +168,10 @@ row_annotation
 ```
 
 Create an annotation plot for samples. 
-```{r biclusering_8}
 
+```{r biclusering_8}
+# Similarly to features, create additional information which includes only the cluster name.
+# These cluster names are used to get right y-axis value, e.g., "cluster_1"
 df <- t(data.frame(values = colnames(bicluster_samples)))
 
 df <- df[rep(seq_len(nrow(df)), each = nrow(bicluster_samples)), , drop = FALSE]
@@ -169,26 +181,24 @@ bicluster_samples <- cbind(bicluster_samples, df)
 
 bicluster_samples$sample <- factor(rownames(bicluster_samples), levels = rownames(bicluster_samples))
 
+# Initialize the plot
 col_annotation <- ggplot(bicluster_samples) + coord_equal(ratio = 1) + 
     scale_y_discrete(position = "right", expand = c(0,0)) + 
     scale_fill_manual(breaks = c(TRUE, FALSE), values=c("red", "white"))
 
+# Add information to plot
 for( cluster in colnames(bicluster_samples) ){
   if (cluster != "sample" && !grepl("_name", cluster)){
     col_annotation <- col_annotation + geom_tile(aes_string("sample", paste0(cluster, "_name"), fill = cluster)) +
       theme(
         axis.title.y=element_blank(),
-        #     axis.text.y=element_blank(),
-        #     axis.ticks.y=element_blank(),
-            axis.title.x=element_blank(),
-            axis.text.x=element_blank(),
-            axis.ticks.x=element_blank(),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
             
-            plot.margin=margin(0,0,0,0),
-            legend.position = "none") +
+        plot.margin=margin(0,0,0,0),
+        legend.position = "none") +
       labs(fill = "Clusters") 
-    
-    
   }
 }
 
@@ -205,37 +215,35 @@ if(!require(reshape2)){
 Create a heatmap.
 
 ```{r biclusering_11}
+# Melt assay
 data <- melt(assay)
 colnames(data) <- c("Feature", "Sample", "Value")
 
-# Determines the scaling of colours
+# Determines the scaling of colorss
 maxval <- round(max(abs(data$Value)))
 limits <- c(-maxval, maxval)
 breaks <- seq(from = min(limits), to = max(limits), by = 0.5)
 colours <- c("darkblue", "blue", "white", "red", "darkred")
 
+# Create a heatmap
 heatmap <- ggplot(data) + geom_tile(aes(Sample, Feature, fill = Value)) + 
   theme(
     axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank(),
-        # axis.title.x=element_blank(),
-        # axis.text.x=element_blank(),
-        # axis.ticks.x=element_blank(),
+    axis.text.y=element_blank(),
+    axis.ticks.y=element_blank(),
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-        
-        plot.margin=margin(0,0,0,0),
-       # legend.position = "none"
+    
+    plot.margin=margin(0,0,0,0),
     legend.key.height= unit(1, 'cm')
-        ) +
+    ) +
   scale_fill_gradientn(name = "CLR + Z transform", 
                        breaks = breaks, limits = limits, colours = colours)
-
 
 heatmap
 ```
 
 We are using _patchwork_ to combine individual plots together.
+
 ```{r biclusering_12}
 if(!require(patchwork)){
     install.packages("patchwork")
@@ -246,6 +254,7 @@ if(!require(patchwork)){
 We can adjust position of each plot. 
 
 ```{r biclusering_13}
+# Create layout
 design <- c(
   area(2, 1, 3, 1),
   area(2, 2, 3, 3),
@@ -258,8 +267,10 @@ plot(design)
 Lastly, we cna combine plots using specified layout. 
 
 ```{r biclusering_14, fig.width=10, fig.height=8}
+# Combine plots
 bicluster_plot <- row_annotation + heatmap + col_annotation + 
-    plot_layout(design = design, guides = "collect",
+    plot_layout(design = design, guides = "collect", # Specify layout, collect legends
+                
                 # Adjust widths and heights to align plots.
                 # When annotation plot is larger, it might not fit into its column/row.
                 # Then you need to make column/row larger.
