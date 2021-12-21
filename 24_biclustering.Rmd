@@ -18,17 +18,39 @@ Other available packages include, for example:
 Load example data
 ```{r load-pkg-data}
 library(mia)
-data("enterotype", package="mia")
-tse <- enterotype
+if(!require(microbiomeDataSets)){
+    BiocManager::install("microbiomeDataSets")
+    library(microbiomeDataSets)
+}
 
-tse
+mae <- HintikkaXOData()
+
+mae
 ```
+
+```{r}
+tse_microbiome <- mae[[1]]
+assay <- assay(tse_microbiome, "counts")
+
+if(!require(cobiclust)){
+    install.packages("cobiclust")
+    library(cobiclust)
+}
+
+assay <- assay[1:100,]
+
+cobiclust(assay)
+
+
+```
+
+
 
 Subset data so that it does not include that many features and samples. 
 
 ```{r biclustering_1}
 # Subset data so that rarest taxa re filtered out
-tse <- subsetByPrevalentTaxa(tse, rank = "Genus", prevalence = 0.2, detection = 0.001)
+tse <- subsetByPrevalentTaxa(tse, rank = "Genus", prevalence = 0.1, detection = 0.001)
 # Subset data so that only adult patients are included
 tse <- tse[, tse$Age > 18 & tse$Age < 60 & !is.na(tse$Age)]
 
@@ -288,6 +310,18 @@ bicluster_plot
 ```
 
 Visualize most strongly correlated pairs from cluster 1
+
+```{r}
+# Find correlations
+cor_table <- getExperimentCrossCorrelation(tse, method = "spearman", 
+                                       filter_self_correlations = TRUE, 
+                                       cor_threshold = 0.2)
+
+# Subset by including only those taxa which have correlation > 0.2 at least once
+tse <- tse[ unfactor(unique(cor_table$Var1)), ]
+
+tse
+```
 
 ```{r}
 bicluster_features$cluster_1 
