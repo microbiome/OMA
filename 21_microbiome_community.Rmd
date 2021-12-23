@@ -118,12 +118,6 @@ We can create clusters by hierarchical clustering and
 visualize them with dendrogram.
 
 ```{r pheatmap2}
-# Package for creating dendrograms
-if(!require(dendextend)){
-  install.packages("dendextend")
-  library(dendextend)
-}
-
 # Hierarchical clustering
 taxa_clusters <- hclust(dist(mat), method = "complete")
 
@@ -145,7 +139,8 @@ taxa_clusters <- data.frame(clusters = taxa_clusters)
 taxa_clusters$clusters <- factor(taxa_clusters$clusters)
 
 # Order data so that it's same as in dendogram
-taxa_clusters <- taxa_clusters[order(match(rownames(taxa_clusters), labels(taxa_dendrogram))), , drop = FALSE] 
+taxa_clusters <- taxa_clusters[order(match(rownames(taxa_clusters), 
+                                           labels(taxa_dendrogram))), , drop = FALSE] 
 
 # Prints taxa and their clusters
 taxa_clusters
@@ -187,9 +182,15 @@ provide functions for more complex heatmaps, such as [_iheatmapr_](https://docs.
 It is also possible to create similar heatmap by just using _ggplot2_.
 
 ```{r}
+# We already created clusters and dendogram for features
+# taxa_clusters
+# taxa_dendogram
+
+# Add feature names to column as a factor
 taxa_clusters$Feature <- rownames(taxa_clusters)
 taxa_clusters$Feature <- factor(taxa_clusters$Feature, levels = taxa_clusters$Feature)
-# Initialize plot
+
+# Create annotation plot
 row_annotation <- ggplot(taxa_clusters) + 
   geom_tile(aes(x = NA, y = Feature, fill = clusters)) + coord_equal(ratio = 1) +
   theme(
@@ -212,33 +213,30 @@ sample_clusters <- hclust(dist(t(mat)), method = "complete")
 # Creates a dendrogram
 sample_dendrogram <- as.dendrogram(sample_clusters)
 
-# Plots it
-plot(sample_dendrogram)
-
 # Creates clusters
 sample_clusters <- cutree(tree = sample_dendrogram, k = 3)
 
 # Converts into data frame
 sample_clusters <- data.frame(clusters = sample_clusters)
-sample_clusters$clusters <- factor(sample_clusters$clusters)
 
 # Order data so that it's same as in dendogram
-sample_clusters <- sample_clusters[order(match(rownames(sample_clusters), labels(sample_dendrogram))), , drop = FALSE] 
+sample_clusters <- sample_clusters[order(match(rownames(sample_clusters), 
+                                               labels(sample_dendrogram))), , drop = FALSE] 
 
 # Order data based on 
-tse_phylum_subset <- tse_phylum_subset[ , order(match(colnames(tse_phylum_subset), 
-                                                      rownames(sample_clusters)))]
+tse_phylum_subset <- tse_phylum_subset[ , rownames(sample_clusters)]
 
 # Prints taxa and their clusters
 sample_clusters
 ```
 
 ```{r}
-sample_types <- sample_types[rownames(sample_clusters), ]
+# Add clusters to sample_types 
+sample_types <- sample_types[rownames(sample_clusters), , drop = FALSE]
+# Add sample names and convert them into factors
 sample_types$Sample <- factor(rownames(sample_types), levels = rownames(sample_types))
-sample_types <- sample_types[order(sample_types$sample_types), ]
 
-# Initialize plot
+# Create annotation plot
 col_annotation <- ggplot(sample_types) + scale_y_discrete(position = "right", expand = c(0,0)) +
   geom_tile(aes(y = NA, x = Sample, fill = sample_types)) + coord_equal(ratio = 1) +
   theme(
@@ -343,8 +341,10 @@ if(!require(ggtree)){
     library(ggtree)
 }
 
+# Create a phylogenetic tree from dendrogram data
 dendro_data <- as.phylo(taxa_dendrogram) 
 
+# Plot dendogram
 taxa_dendrogram <- ggtree(dendro_data) + 
   theme(plot.margin=margin(0,0,0,0)) # removes margins
 
@@ -352,8 +352,10 @@ taxa_dendrogram
 ```
 
 ```{r}
+# Create a phylogenetic tree from dendrogram data
 dendro_data <- as.phylo(sample_dendrogram)
 
+# Plot dendogram
 sample_dendrogram <- ggtree(dendro_data) + layout_dendrogram() + 
   theme(plot.margin=margin(0,0,0,0)) # removes margins
 
@@ -382,17 +384,6 @@ plot <- taxa_dendrogram +
   col_annotation + 
   heatmap +
     plot_layout(design = design, guides = "collect", # Specify layout, collect legends
-                
-                # Adjust widths and heights to align plots.
-                # When annotation plot is larger, it might not fit into its column/row.
-                # Then you need to make column/row larger.
-                
-                # Relative widths and heights of each column and row:
-                # Currently, the width of the first column is 15 % and the height of the 
-                # first row is 25 % the size of others
-                
-                # To get this work most of the times, you can adjust all sizes to be 1, i.e. equal, 
-                # but then the gaps between plots are larger.
                 widths = c(0.2, 0.15, 1, 1, 1),
                 heights = c(0.1, 0.15, 0.25, 1, 1))
 
