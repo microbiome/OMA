@@ -119,10 +119,10 @@ visualize them with dendrogram.
 
 ```{r pheatmap2}
 # Hierarchical clustering
-taxa_clusters <- hclust(dist(mat), method = "complete")
+taxa_hclust <- hclust(dist(mat), method = "complete")
 
 # Creates a dendrogram
-taxa_dendrogram <- as.dendrogram(taxa_clusters)
+taxa_dendrogram <- as.dendrogram(taxa_hclust)
 
 # Plots it
 plot(taxa_dendrogram)
@@ -132,7 +132,7 @@ Based on dendrogram, we decide to create three clusters.
 
 ```{r pheatmap3}
 # Creates clusters
-taxa_clusters <- cutree(tree = taxa_dendrogram, k = 3)
+taxa_clusters <- cutree(tree = taxa_hclust, k = 3)
 
 # Converts into data frame
 taxa_clusters <- data.frame(clusters = taxa_clusters)
@@ -155,9 +155,36 @@ rowData(tse_phylum_subset)$clusters <- taxa_clusters[order(match(rownames(taxa_c
 rowData(tse_phylum_subset)$clusters
 ```
 
+```{r more_complex_heatmap2}
+# Hierarchical clustering
+sample_hclust <- hclust(dist(t(mat)), method = "complete")
+
+# Creates a dendrogram
+sample_dendrogram <- as.dendrogram(sample_hclust)
+
+```
+
+```{r more_complex_heatmap3}
+# Creates clusters
+sample_clusters <- cutree(tree = sample_hclust, k = 3)
+
+# Converts into data frame
+sample_clusters <- data.frame(clusters = sample_clusters)
+
+# Order data so that it's same as in dendogram
+sample_clusters <- sample_clusters[order(match(rownames(sample_clusters), 
+                                               labels(sample_dendrogram))), , drop = FALSE] 
+
+# Order data based on 
+tse_phylum_subset <- tse_phylum_subset[ , rownames(sample_clusters)]
+
+# Prints taxa and their clusters
+sample_clusters
+```
+
 Now we can create heatmap with additional annotations.
 
-```{r pheatmap5}
+```{r pheatmap4}
 # Creates data frame that includes data on sample type
 sample_types <- unfactor(colData(tse_phylum_subset)$SampleType)
 sample_types <- data.frame(sample_types = sample_types)
@@ -182,10 +209,6 @@ provide functions for more complex heatmaps, such as [_iheatmapr_](https://docs.
 It is also possible to create similar heatmap by just using _ggplot2_.
 
 ```{r more_complex_heatmap1}
-# We already created clusters and dendogram for features
-# taxa_clusters
-# taxa_dendogram
-
 # Add feature names to column as a factor
 taxa_clusters$Feature <- rownames(taxa_clusters)
 taxa_clusters$Feature <- factor(taxa_clusters$Feature, levels = taxa_clusters$Feature)
@@ -206,38 +229,16 @@ row_annotation <- ggplot(taxa_clusters) +
 row_annotation
 ```
 
-```{r more_complex_heatmap2}
-# Hierarchical clustering
-sample_clusters <- hclust(dist(t(mat)), method = "complete")
-
-# Creates a dendrogram
-sample_dendrogram <- as.dendrogram(sample_clusters)
-
-# Creates clusters
-sample_clusters <- cutree(tree = sample_dendrogram, k = 3)
-
-# Converts into data frame
-sample_clusters <- data.frame(clusters = sample_clusters)
-
-# Order data so that it's same as in dendogram
-sample_clusters <- sample_clusters[order(match(rownames(sample_clusters), 
-                                               labels(sample_dendrogram))), , drop = FALSE] 
-
-# Order data based on 
-tse_phylum_subset <- tse_phylum_subset[ , rownames(sample_clusters)]
-
-# Prints taxa and their clusters
-sample_clusters
-```
-
 ```{r more_complex_heatmap3}
 # Add clusters to sample_types 
 sample_types <- sample_types[rownames(sample_clusters), , drop = FALSE]
+sample_types$clusters <- factor(sample_clusters$clusters)
 # Add sample names and convert them into factors
 sample_types$Sample <- factor(rownames(sample_types), levels = rownames(sample_types))
 
+
 # Create annotation plot
-col_annotation <- ggplot(sample_types) + scale_y_discrete(position = "right", expand = c(0,0)) +
+sample_types_annotation <- ggplot(sample_types) + scale_y_discrete(position = "right", expand = c(0,0)) +
   geom_tile(aes(y = NA, x = Sample, fill = sample_types)) + coord_equal(ratio = 1) +
   theme(
         axis.text.x=element_blank(),
@@ -249,11 +250,29 @@ col_annotation <- ggplot(sample_types) + scale_y_discrete(position = "right", ex
         ) +
       labs(fill = "Sample types", y = "Sample types")
 
-col_annotation
+sample_types_annotation
 
 ```
 
 ```{r more_complex_heatmap4}
+# Create annotation plot
+sample_clusters_annotation <- ggplot(sample_types) + scale_y_discrete(position = "right", expand = c(0,0)) +
+  geom_tile(aes(y = NA, x = Sample, fill = clusters)) + coord_equal(ratio = 1) +
+  theme(
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        plot.margin=margin(0,0,0,0),
+        axis.title.y.right = element_text(angle=0, vjust = 0.5)
+        ) +
+      labs(fill = "Clusters", y = "Clusters")
+
+sample_clusters_annotation
+
+```
+
+```{r more_complex_heatmap5}
 if(!require(reshape2)){
     install.packages("reshape2")
     library(reshape2)
@@ -292,7 +311,7 @@ heatmap
 ```
 
 
-```{r more_complex_heatmap5}
+```{r more_complex_heatmap6}
 if(!require(patchwork)){
     install.packages("patchwork")
     library(patchwork)
@@ -300,17 +319,18 @@ if(!require(patchwork)){
 
 # Create layout
 design <- c(
-  area(2, 1, 3, 1),
-  area(2, 2, 3, 3),
-  area(1, 2, 1, 3)
+  area(3, 1, 4, 1),
+  area(1, 2, 1, 3),
+  area(2, 2, 2, 3),
+  area(3, 2, 4, 3)
 )
 
 plot(design)
 ```
 
-```{r more_complex_heatmap6, fig.width=10, fig.height=8}
+```{r more_complex_heatmap7, fig.width=10, fig.height=8}
 # Combine plots
-plot <- row_annotation + heatmap + col_annotation + 
+plot <- row_annotation + sample_clusters_annotation + sample_types_annotation + heatmap  +
     plot_layout(design = design, guides = "collect", # Specify layout, collect legends
                 
                 # Adjust widths and heights to align plots.
@@ -324,13 +344,13 @@ plot <- row_annotation + heatmap + col_annotation +
                 # To get this work most of the times, you can adjust all sizes to be 1, i.e. equal, 
                 # but then the gaps between plots are larger.
                 widths = c(0.15, 1, 1),
-                heights = c(0.25, 1, 1))
+                heights = c(0.3, 0.3, 1, 1))
 
 plot
 
 ```
 
-```{r more_complex_heatmap7}
+```{r more_complex_heatmap8}
 if(!require(ape)){
     install.packages("ape")
     library(ape)
@@ -341,8 +361,8 @@ if(!require(ggtree)){
     library(ggtree)
 }
 
-# Create a phylogenetic tree from dendrogram data
-dendro_data <- as.phylo(taxa_dendrogram) 
+# Create a phylogenetic tree from hiearchical clustering data
+dendro_data <- as.phylo(taxa_hclust) 
 
 # Plot dendogram
 taxa_dendrogram <- ggtree(dendro_data) + 
@@ -351,9 +371,9 @@ taxa_dendrogram <- ggtree(dendro_data) +
 taxa_dendrogram
 ```
 
-```{r more_complex_heatmap8}
-# Create a phylogenetic tree from dendrogram data
-dendro_data <- as.phylo(sample_dendrogram)
+```{r more_complex_heatmap9}
+# Create a phylogenetic tree from hiearchical clustering data
+dendro_data <- as.phylo(sample_hclust)
 
 # Plot dendogram
 sample_dendrogram <- ggtree(dendro_data) + layout_dendrogram() + 
@@ -363,29 +383,31 @@ sample_dendrogram
 ```
 
 
-```{r more_complex_heatmap9}
+```{r more_complex_heatmap10}
 # Create layout
 design <- c(
-  area(3, 1, 4, 1),
-  area(3, 2, 4, 2),
+  area(4, 1, 5, 1),
+  area(4, 2, 5, 2),
   area(1, 3, 1, 4),
   area(2, 3, 2, 4),
-  area(3, 3, 4, 4)
+  area(3, 3, 3, 4),
+  area(4, 3, 5, 4)
 )
 
 plot(design)
 ```
 
-```{r more_complex_heatmap10, fig.width=10, fig.height=8}
+```{r more_complex_heatmap11, fig.width=10, fig.height=8}
 # Combine plots
 plot <- taxa_dendrogram + 
   row_annotation +
   sample_dendrogram + 
-  col_annotation + 
+  sample_clusters_annotation +
+  sample_types_annotation +
   heatmap +
     plot_layout(design = design, guides = "collect", # Specify layout, collect legends
                 widths = c(0.2, 0.15, 1, 1, 1),
-                heights = c(0.1, 0.15, 0.25, 1, 1))
+                heights = c(0.1, 0.15, 0.15, 0.25, 1, 1))
 
 plot
 ```
