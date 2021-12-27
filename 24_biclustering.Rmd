@@ -15,9 +15,91 @@ There are multiple biclustering packages available, In this example, we use
 Other available packages include, for example:
 -   [cobiclust](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13582).
 
+
+# Option A ################################################################################################
 Load example data
 ```{r load-pkg-data}
 library(mia)
+# if(!require(microbiomeDataSets)){
+#     BiocManager::install("microbiomeDataSets")
+#     library(microbiomeDataSets)
+# }
+# 
+# mae <- HintikkaXOData()
+# 
+# mae
+
+data("GlobalPatterns", package = "mia")
+
+tse <- GlobalPatterns
+
+tse 
+```
+
+```{r biclustering_1}
+# Subset data so that rarest taxa re filtered out
+tse <- subsetByPrevalentTaxa(tse, rank = "Phylum", prevalence = 0.1, detection = 0.001)
+
+tse
+```
+
+```{r}
+if(!require(cobiclust)){
+    install.packages("cobiclust")
+    library(cobiclust)
+}
+
+clusters <- cobiclust(assay(tse, "counts"))
+
+# Get clusters
+row_clusters <- clusters$classification$rowclass
+col_clusters <- clusters$classification$colclass
+
+# Add clusters to rowdata and coldata
+rowData(tse)$clusters <- factor(row_clusters)
+colData(tse)$clusters <- factor(col_clusters)
+
+# Order data based on clusters
+tse <- tse[order(rowData(tse)$clusters), order(colData(tse)$clusters)]
+
+# Print clusters
+clusters$classification
+```
+
+
+```{r}
+tse <- transformSamples(tse, method = "clr", pseudocount = 1)
+
+pheatmap(assay(tse, "clr"), cluster_rows = F, cluster_cols = F, 
+         annotation_col = data.frame(colData(tse)[, "col_clusters", drop = F]),
+         annotation_row = data.frame(rowData(tse)[, "row_clusters", drop = F]))
+
+```
+
+```{r}
+if(!require(ggplot2)){
+    install.packages("ggplot2")
+    library(ggplot2)
+}
+if(!require(gridExtra)){
+    install.packages("gridExtra")
+    library(gridExtra)
+}
+
+
+melt_assay <- meltAssay(tse, abund_values = "clr", add_col_data = T, add_row_data = T)
+
+grid.arrange(
+  
+ggplot(melt_assay) + geom_boxplot(aes(x = clusters.x, y = clr)) + labs(x = "Taxa clusters"),
+ggplot(melt_assay) + geom_boxplot(aes(x = clusters.y, y = clr)) + labs(x = "Sample clusters"),
+
+
+nrow = 1)
+```
+
+# Option B ################################################################################################
+```{r}
 if(!require(microbiomeDataSets)){
     BiocManager::install("microbiomeDataSets")
     library(microbiomeDataSets)
@@ -28,36 +110,24 @@ mae <- HintikkaXOData()
 mae
 ```
 
-```{r}
-tse_microbiome <- mae[[1]]
-assay <- assay(tse_microbiome, "counts")
-
-if(!require(cobiclust)){
-    install.packages("cobiclust")
-    library(cobiclust)
-}
-
-assay <- assay[1:100,]
-
-cobiclust(assay)
-
-
-```
-
-
 
 Subset data so that it does not include that many features and samples. 
 
-```{r biclustering_1}
-# Subset data so that rarest taxa re filtered out
-tse <- subsetByPrevalentTaxa(tse, rank = "Genus", prevalence = 0.1, detection = 0.001)
-# Subset data so that only adult patients are included
-tse <- tse[, tse$Age > 18 & tse$Age < 60 & !is.na(tse$Age)]
 
-tse
-```
 
 Load required package
+
+```{r}
+mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
+mae[[1]] <- transformSamples(mae[[1]], method = "clr", pseudocount = 1)
+# mae[[2]] <- transformSamples(mae[[2]], abund_values = "nmr", method = "log10")
+
+rownames(mae[[1]]) <- make.unique(rownames(mae[[1]]))
+
+corr <- getExperimentCrossCorrelation(mae, 1, 3, abund_values1 = "clr", abund_values2 = "signals", mode = "matrix")
+head(corr)
+```
+
 
 ```{r biclustering_2}
 # Load package
@@ -65,7 +135,193 @@ if(!require(biclust)){
     install.packages("biclust")
     library(biclust)
 }
+
+# Find biclusters
+bc <- biclust(corr, method=BCPlaid(), fit.model = y ~ m,
+              background = TRUE, shuffle = 100, back.fit = 0, max.layers = 10,
+              iter.startup = 10, iter.layer = 100, verbose = FALSE)
+
+bc
 ```
+
+```{r biclustering_4}
+# Get cluster info for features and convert it into data frame
+bicluster_features <- bc@RowxNumber
+bicluster_features <- data.frame(bicluster_features)
+
+# If no clusters were found, create one. Otherwise create additional cluster which
+# contain those features that are not included in clusters that were found.
+if( nrow(bicluster_features) != nrow(corr) ){
+    bicluster_features <- data.frame(cluster = rep(TRUE, nrow(corr)))
+} else {
+  # Create additional cluster that includes those features that
+  # are not included in other clusters.
+  vec <- ifelse(rowSums(bicluster_features) > 0, FALSE, TRUE)
+  # If additional cluster contains features, then add it
+  if ( any(vec) ){
+    bicluster_features <- cbind(bicluster_features, vec)
+  }
+}
+
+# Give row and column names
+rownames(bicluster_features) <- rownames(corr)
+colnames(bicluster_features) <- paste0("cluster_", 1:ncol(bicluster_features))
+
+head(bicluster_features)
+```
+
+```{r biclustering_5}
+# Get cluster information for samples
+bicluster_samples <- t(bc@NumberxCol)
+bicluster_samples <- data.frame(bicluster_samples)
+
+# If no clusters were found, create one. Otherwise create additional cluster which
+# contain those samples that are not included in clusters that were found.
+if( nrow(bicluster_samples) != ncol(corr) ){
+    bicluster_samples <- data.frame(cluster = rep(TRUE, ncol(corr)))
+} else {
+  # Create additional cluster that includes those samples that
+  # are not included in other clusters.
+  vec <- ifelse(rowSums(bicluster_samples) > 0, FALSE, TRUE)
+  # If additional cluster contains samples, then add it
+  if ( any(vec) ){
+    bicluster_samples <- cbind(bicluster_samples, vec)
+  }
+
+}
+
+# Give row and column names
+rownames(bicluster_samples) <- colnames(corr)
+colnames(bicluster_samples) <- paste0("cluster_", 1:ncol(bicluster_samples))
+
+head(bicluster_samples)
+```
+
+```{r}
+bicluster_samples <- apply(bicluster_samples, 2, as.factor)
+bicluster_features <- apply(bicluster_features, 2, as.factor)
+
+bicluster_features <- data.frame(bicluster_features)
+bicluster_samples <- data.frame(bicluster_samples)
+```
+
+```{r biclustering_14, fig.width=10, fig.height=8}
+# Adjust colors for all clusters
+if( ncol(bicluster_features) > ncol(bicluster_samples) ){
+  cluster_names <- colnames(bicluster_features)
+} else {
+  cluster_names <- colnames(bicluster_samples)
+}
+annotation_colors <- list()
+for(name in cluster_names){
+  annotation_colors[[name]] <- c("TRUE" = "red", "FALSE" = "white")
+}
+
+pheatmap(corr, cluster_cols = F, cluster_rows = F,
+         annotation_col = bicluster_samples, 
+         annotation_row = bicluster_features,
+         annotation_colors = annotation_colors)
+```
+
+# Option C ################################################################################################
+
+
+```{r biclustering_14, fig.width=12, fig.height=8}
+corr <- getExperimentCrossCorrelation(mae, 1, 1, abund_values1 = "clr", abund_values2 = "clr", mode = "matrix")
+##########################
+# Find biclusters
+bc <- biclust(corr, method=BCPlaid(), fit.model = y ~ m,
+              background = TRUE, shuffle = 100, back.fit = 0, max.layers = 10,
+              iter.startup = 10, iter.layer = 100, verbose = FALSE)
+#################################3
+# Get cluster info for features and convert it into data frame
+bicluster_features <- bc@RowxNumber
+bicluster_features <- data.frame(bicluster_features)
+
+# If no clusters were found, create one. Otherwise create additional cluster which
+# contain those features that are not included in clusters that were found.
+if( nrow(bicluster_features) != nrow(corr) ){
+    bicluster_features <- data.frame(cluster = rep(TRUE, nrow(corr)))
+} else {
+  # Create additional cluster that includes those features that
+  # are not included in other clusters.
+  vec <- ifelse(rowSums(bicluster_features) > 0, FALSE, TRUE)
+  # If additional cluster contains features, then add it
+  if ( any(vec) ){
+    bicluster_features <- cbind(bicluster_features, vec)
+  }
+}
+
+# Give row and column names
+rownames(bicluster_features) <- rownames(corr)
+colnames(bicluster_features) <- paste0("cluster_", 1:ncol(bicluster_features))
+##################################
+# Get cluster information for samples
+bicluster_samples <- t(bc@NumberxCol)
+bicluster_samples <- data.frame(bicluster_samples)
+
+# If no clusters were found, create one. Otherwise create additional cluster which
+# contain those samples that are not included in clusters that were found.
+if( nrow(bicluster_samples) != ncol(corr) ){
+    bicluster_samples <- data.frame(cluster = rep(TRUE, ncol(corr)))
+} else {
+  # Create additional cluster that includes those samples that
+  # are not included in other clusters.
+  vec <- ifelse(rowSums(bicluster_samples) > 0, FALSE, TRUE)
+  # If additional cluster contains samples, then add it
+  if ( any(vec) ){
+    bicluster_samples <- cbind(bicluster_samples, vec)
+  }
+
+}
+
+# Give row and column names
+rownames(bicluster_samples) <- colnames(corr)
+colnames(bicluster_samples) <- paste0("cluster_", 1:ncol(bicluster_samples))
+###########################################
+bicluster_samples <- apply(bicluster_samples, 2, as.factor)
+bicluster_features <- apply(bicluster_features, 2, as.factor)
+
+bicluster_features <- data.frame(bicluster_features)
+bicluster_samples <- data.frame(bicluster_samples)
+############################################
+# Adjust colors for all clusters
+if( ncol(bicluster_features) > ncol(bicluster_samples) ){
+  cluster_names <- colnames(bicluster_features)
+} else {
+  cluster_names <- colnames(bicluster_samples)
+}
+annotation_colors <- list()
+for(name in cluster_names){
+  annotation_colors[[name]] <- c("TRUE" = "red", "FALSE" = "white")
+}
+
+pheatmap(corr, cluster_cols = F, cluster_rows = F,
+         annotation_col = bicluster_samples, 
+         annotation_row = bicluster_features,
+         annotation_colors = annotation_colors)
+
+
+```
+
+
+
+
+
+
+END
+
+
+
+
+
+
+################################################################################
+
+
+
+
+
 
 Find biclusters using _biclust_.
 
