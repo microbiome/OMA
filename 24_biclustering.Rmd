@@ -35,29 +35,25 @@ designed for microbial data.
 Load example data
 ```{r load-pkg-data}
 library(mia)
-# if(!require(microbiomeDataSets)){
-#     BiocManager::install("microbiomeDataSets")
-#     library(microbiomeDataSets)
-# }
-# 
-# mae <- HintikkaXOData()
-# 
-# mae
+if(!require(microbiomeDataSets)){
+    BiocManager::install("microbiomeDataSets")
+    library(microbiomeDataSets)
+}
 
-data("GlobalPatterns", package = "mia")
+mae <- HintikkaXOData()
 
-tse <- GlobalPatterns
-
-tse 
+mae
 ```
 
 Only the most prevalent taxa are included in analysis to make analysis quicker. 
 
 ```{r cobiclust_1}
-# Subset data so that rarest taxa a´re filtered out
-tse <- subsetByPrevalentTaxa(tse, rank = "Phylum", prevalence = 0.1, detection = 0.001)
+# Subser data
+mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
+# clr-transforma
+mae[[1]] <- transformSamples(mae[[1]], method = "clr", pseudocount = 1)
 
-tse
+mae[[1]]
 ```
 
 _cobiclust_ takes counts table as an input and gives _cobiclust_ object as an output.
@@ -70,18 +66,18 @@ if(!require(cobiclust)){
 }
 
 # Do clustering; use counts table´
-clusters <- cobiclust(assay(tse, "counts"))
+clusters <- cobiclust(assay(mae[[1]], "counts"))
 
 # Get clusters
 row_clusters <- clusters$classification$rowclass
 col_clusters <- clusters$classification$colclass
 
 # Add clusters to rowdata and coldata
-rowData(tse)$clusters <- factor(row_clusters)
-colData(tse)$clusters <- factor(col_clusters)
+rowData(mae[[1]])$clusters <- factor(row_clusters)
+colData(mae[[1]])$clusters <- factor(col_clusters)
 
 # Order data based on clusters
-tse <- tse[order(rowData(tse)$clusters), order(colData(tse)$clusters)]
+mae[[1]] <- mae[[1]][order(rowData(mae[[1]])$clusters), order(colData(mae[[1]])$clusters)]
 
 # Print clusters
 clusters$classification
@@ -89,27 +85,25 @@ clusters$classification
 
 Next we can plot clusters. Commonly used plot is heatmap with annotations. 
 
-```{r cobiclust_3}
+```{r cobiclust_3, fig.width=14, fig.height=12}
 if(!require(pheatmap)){
     install.packages("pheatmap")
     library(pheatmap)
 }
-# clr-transform
-tse <- transformSamples(tse, method = "clr", pseudocount = 1)
 # z-transgorm for heatmap
-tse <- transformFeatures(tse, abund_values = "clr", method = "z", name = "clr_z")
+mae[[1]] <- transformFeatures(mae[[1]], abund_values = "clr", method = "z", name = "clr_z")
 
 # Creates annotations. Levels should be same if column names are the same. 
 # Here samples include 3 clusters, and taxa 2. That is why we have to make 
 # name unique. 
-annotation_col <- data.frame(colData(tse)[, "clusters", drop = F])
+annotation_col <- data.frame(colData(mae[[1]])[, "clusters", drop = F])
 colnames(annotation_col) <- "col_clusters"
 
-annotation_row <- data.frame(rowData(tse)[, "clusters", drop = F])
+annotation_row <- data.frame(rowData(mae[[1]])[, "clusters", drop = F])
 colnames(annotation_row) <- "row_clusters"
 
 # Create a heatmap
-pheatmap(assay(tse, "clr_z"), cluster_rows = F, cluster_cols = F, 
+pheatmap(assay(mae[[1]], "clr_z"), cluster_rows = F, cluster_cols = F, 
          annotation_col = annotation_col,
          annotation_row = annotation_row)
 
@@ -128,7 +122,7 @@ if(!require(gridExtra)){
 }
 
 # ggplot requries data in melted format
-melt_assay <- meltAssay(tse, abund_values = "clr", add_col_data = T, add_row_data = T)
+melt_assay <- meltAssay(mae[[1]], abund_values = "clr", add_col_data = T, add_row_data = T)
 
 # Use grid.arrange to arrange two plots side-by-side
 grid.arrange(
@@ -139,46 +133,27 @@ ggplot(melt_assay) + geom_boxplot(aes(x = clusters.y, y = clr)) + labs(x = "Samp
 nrow = 1)
 ```
 
-## Taxa vs biomarker
+## Taxa vs biomolecules
 
-Here, we analyze cross-correlation between taxa and biomarkers. This is a case, where
+Here, we analyze cross-correlation between taxa and metabolites. This is a case, where
 we use _biclust_ method which is suitable for numeric matrices in general.
 
-
-Load data
-
 ```{r biclust_1}
-if(!require(microbiomeDataSets)){
-    BiocManager::install("microbiomeDataSets")
-    library(microbiomeDataSets)
-}
-
-mae <- HintikkaXOData()
-
-mae
-```
-
-We analyze correlation between taxa and biomarkers. First, rarest taxa are filtered out.
-Then cross-correlation matrix is calculated. 
-
-```{r biclust_2}
-# Subser data
-mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
-# clr-transforma
-mae[[1]] <- transformSamples(mae[[1]], method = "clr", pseudocount = 1)
-
 ############################ REMOVE THIS WHEN BUG IN GETEXPERIMENTCROSSCORR IS FIXED
 rownames(mae[[1]]) <- make.unique(rownames(mae[[1]]))
 
 # Calculate correlations
-corr <- getExperimentCrossCorrelation(mae, 1, 3, abund_values1 = "clr", abund_values2 = "signals", mode = "matrix", 
+corr <- getExperimentCrossCorrelation(mae, 1, 2, 
+                                      abund_values1 = "clr", 
+                                      abund_values2 = "nmr", 
+                                      mode = "matrix", 
                                       cor_threshold = 0.2)
 head(corr)
 ```
 
 _biclust_ takes correlation matrix as an input and returns _biclust object. 
 
-```{r biclust_3}
+```{r biclust_2}
 # Load package
 if(!require(biclust)){
     install.packages("biclust")
@@ -197,10 +172,10 @@ The object includes cluster information. However compared to _cobiclust_,
 _biclust_ object includes only information about found clusters, not general cluster.
 
 Meaning that if one cluster size of 5 features was found out of 20 features, 
-those 15 features do not include to any cluster. That is why we have to create an
+those 15 features do not belong to any cluster. That is why we have to create an
 additional cluster for features/samples that are not assigned into any cluster.
 
-```{r biclust_4}
+```{r biclust_3}
 # Functions for obtaining biclust information
 
 
@@ -251,7 +226,7 @@ additional cluster for features/samples that are not assigned into any cluster.
 ```
 
 
-```{r biclust_5}
+```{r biclust_4}
 # Get biclusters
 bcs <- .get_biclusters_from_biclust(bc, corr)
 
@@ -262,7 +237,7 @@ bicluster_rows
 bicluster_columns
 ```
 
-```{r biclust_6}
+```{r biclust_5}
 # Function for obtaining sum, mean, median, and mean variance
 .sum_mean_median_var <- function(tse, abund_values = "counts", clusters){
   # Create a data frame that includes all the information
@@ -289,7 +264,7 @@ bicluster_columns
 
 # Calculate info
 col_biclust_info <- .sum_mean_median_var(mae[[1]], "clr", bicluster_rows)
-row_biclust_info <- .sum_mean_median_var(mae[[3]], "signals", bicluster_columns)
+row_biclust_info <- .sum_mean_median_var(mae[[2]], "nmr", bicluster_columns)
 
 col_biclust_info 
 row_biclust_info 
@@ -297,28 +272,29 @@ row_biclust_info
 
 Now we can create a scatter plot to check if clusters differs from each others.
 
-```{r biclust_7}
-df <- cbind(col_biclust_info[, "sum"], row_biclust_info[, "sum"])
-colnames(df) <- c("sum_col", "sum_row")
+```{r biclust_6}
+# Combines medians into one data.frame
+df <- cbind(col_biclust_info[, "median"], row_biclust_info[, "median"])
+colnames(df) <- c("median_col", "median_row")
+# Adds sum of variance and clusters
 df <- cbind(df, data.frame(variance = col_biclust_info$variance + row_biclust_info$variance),
             cluster = rownames(col_biclust_info))
 
 ggplot(df)  +
-    geom_point(aes(x = sum_row, y = sum_col, color = cluster, size = variance))
+    geom_point(aes(x = median_row, y = median_col, color = cluster, size = variance))
 
 ```
 
-_pheatmap_ do not allow boolean values, so they must be converted into factors.
+_pheatmap_ does not allow boolean values, so they must be converted into factors.
 
-```{r biclust_8}
+```{r biclust_7}
 bicluster_columns <- data.frame(apply(bicluster_columns, 2, as.factor))
 bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
 ```
 
-
 Again, we can plot clusters with heatmap.
 
-```{r biclust_9, fig.width=10, fig.height=8}
+```{r biclust_8, fig.width=10, fig.height=8}
 # Adjust colors for all clusters
 if( ncol(bicluster_rows) > ncol(bicluster_columns) ){
   cluster_names <- colnames(bicluster_rows)
@@ -342,7 +318,7 @@ pheatmap(corr, cluster_cols = F, cluster_rows = F,
 Third and final example deals with situation where we want to analyze correlation
 between taxa. _biclust_ is suitable for this. 
 
-```{r biclust_10}
+```{r biclust_9}
 # Calculate cross-correlation
 corr <- getExperimentCrossCorrelation(mae, 1, 1, 
                                       abund_values1 = "clr", abund_values2 = "clr", 
@@ -356,7 +332,7 @@ bc <- biclust(corr, method=BCPlaid(), fit.model = y ~ m,
 bc
 ```
 
-```{r biclust_11}
+```{r biclust_10}
 # Get biclusters
 bcs <- .get_biclusters_from_biclust(bc, corr)
 
@@ -367,26 +343,27 @@ bicluster_rows
 bicluster_columns
 ```
 
+
+```{r biclust_11}
+# Create a column that combines information
+# If row/column includes in multiple clusters, cluster numbers are separated with "_&_"
+bicluster_columns$clusters <- apply(bicluster_columns, 1, 
+                                    function(x){paste(paste(which(x)), collapse = "_&_") })
+bicluster_columns <- bicluster_columns[, "clusters", drop = FALSE]
+
+bicluster_rows$clusters <- apply(bicluster_rows, 1, 
+                                 function(x){paste(paste(which(x)), collapse = "_&_") })
+bicluster_rows <- bicluster_rows[, "clusters", drop = FALSE]
+```
+
 ```{r biclust_12, fig.width=14, fig.height=12}
 # Convert boolean values into factor
 bicluster_columns <- data.frame(apply(bicluster_columns, 2, as.factor))
 bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
 
-# Adjust colors for all clusters
-if( ncol(bicluster_rows) > ncol(bicluster_columns) ){
-  cluster_names <- colnames(bicluster_rows)
-} else {
-  cluster_names <- colnames(bicluster_columns)
-}
-annotation_colors <- list()
-for(name in cluster_names){
-  annotation_colors[[name]] <- c("TRUE" = "red", "FALSE" = "white")
-}
-
 pheatmap(corr, cluster_cols = F, cluster_rows = F,
          annotation_col = bicluster_columns, 
-         annotation_row = bicluster_rows,
-         annotation_colors = annotation_colors)
+         annotation_row = bicluster_rows)
 ```
 
 ## Session Info {-}
