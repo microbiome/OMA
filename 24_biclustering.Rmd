@@ -21,7 +21,9 @@ solutions to apply biclustering to them.
 2.   Taxa vs biomolecule/biomarker...
 3.   Taxa vs taxa
 
-Biclusters can be visualized using hetamap or boxplot, for instance. 
+Biclusters can be visualized using heatmap or boxplot, for instance. For checking purposes, 
+also scatter plot might be valid choice. 
+
 Check more ideas for heatmaps from 
 [here](https://microbiome.github.io/OMA/microbiome-community.html#composition-heatmap).
 
@@ -88,6 +90,10 @@ clusters$classification
 Next we can plot clusters. Commonly used plot is heatmap with annotations. 
 
 ```{r cobiclust_3}
+if(!require(pheatmap)){
+    install.packages("pheatmap")
+    library(pheatmap)
+}
 # clr-transform
 tse <- transformSamples(tse, method = "clr", pseudocount = 1)
 # z-transgorm for heatmap
@@ -195,90 +201,124 @@ those 15 features do not include to any cluster. That is why we have to create a
 additional cluster for features/samples that are not assigned into any cluster.
 
 ```{r biclust_4}
-# Get cluster info for features and convert it into data frame
-bicluster_rows <- bc@RowxNumber
-bicluster_rows <- data.frame(bicluster_rows)
+# Functions for obtaining biclust information
 
-# If no clusters were found, create one. Otherwise create additional cluster which
-# contain those features that are not included in clusters that were found.
-if( nrow(bicluster_rows) != nrow(corr) ){
-    bicluster_rows <- data.frame(cluster = rep(TRUE, nrow(corr)))
-} else {
-  # Create additional cluster that includes those features that
-  # are not included in other clusters.
-  vec <- ifelse(rowSums(bicluster_rows) > 0, FALSE, TRUE)
-  # If additional cluster contains features, then add it
-  if ( any(vec) ){
-    bicluster_rows <- cbind(bicluster_rows, vec)
-  }
+
+# Get clusters for rows and columns
+.get_biclusters_from_biclust <- function(bc, assay){
+  # Get cluster information for columns and rows
+  bc_columns <- t(bc@NumberxCol)
+  bc_columns <- data.frame(bc_columns)
+  bc_rows <- bc@RowxNumber
+  bc_rows <- data.frame(bc_rows)
+  
+  # Get data into right format
+  bc_columns <- .manipulate_bc_data(bc_columns, assay, "col")
+  bc_rows <- .manipulate_bc_data(bc_rows, assay, "row")
+  
+  return(list(bc_columns = bc_columns, bc_rows = bc_rows))
 }
 
-# Give row and column names
-rownames(bicluster_rows) <- rownames(corr)
-colnames(bicluster_rows) <- paste0("cluster_", 1:ncol(bicluster_rows))
-
-head(bicluster_rows)
+# Input clusters, and how many observations there should be, i.e., the number of samples or features
+.manipulate_bc_data <- function(bc_clusters, assay, row_col){
+  # Get right dimension
+  dim <- ifelse(row_col == "col", ncol(assay), nrow(assay))
+  # Get column/row names
+  if( row_col == "col" ){
+    names <- colnames(assay)
+  } else{
+    names <- rownames(assay)
+  }
+  
+  # If no clusters were found, create one. Otherwise create additional cluster which
+  # contain those samples that are not included in clusters that were found.
+  if( nrow(bc_clusters) != dim ){
+      bc_clusters <- data.frame(cluster = rep(TRUE, dim))
+  } else {
+      # Create additional cluster that includes those samples/features that
+      # are not included in other clusters.
+      vec <- ifelse(rowSums(bc_clusters) > 0, FALSE, TRUE)
+      # If additional cluster contains samples, then add it
+      if ( any(vec) ){
+          bc_clusters <- cbind(bc_clusters, vec)
+      }
+  }
+  # Adjust row and column names
+  rownames(bc_clusters) <- names
+  colnames(bc_clusters) <- paste("cluster_", 1:ncol(bc_clusters))
+  return(bc_clusters)
+}
 ```
+
 
 ```{r biclust_5}
-# Get cluster information for columns
-bicluster_columns <- t(bc@NumberxCol)
-bicluster_columns <- data.frame(bicluster_columns)
+# Get biclusters
+bcs <- .get_biclusters_from_biclust(bc, corr)
 
-# If no clusters were found, create one. Otherwise create additional cluster which
-# contain those samples that are not included in clusters that were found.
-if( nrow(bicluster_columns) != ncol(corr) ){
-    bicluster_columns <- data.frame(cluster = rep(TRUE, ncol(corr)))
-} else {
-  # Create additional cluster that includes those samples that
-  # are not included in other clusters.
-  vec <- ifelse(rowSums(bicluster_columns) > 0, FALSE, TRUE)
-  # If additional cluster contains samples, then add it
-  if ( any(vec) ){
-    bicluster_columns <- cbind(bicluster_columns, vec)
-  }
+bicluster_rows <- bcs$bc_rows
+bicluster_columns <- bcs$bc_columns
 
-}
-
-# Give row and column names
-rownames(bicluster_columns) <- colnames(corr)
-colnames(bicluster_columns) <- paste0("cluster_", 1:ncol(bicluster_columns))
-
-head(bicluster_columns)
+bicluster_rows
+bicluster_columns
 ```
 
-JATKA TÄSTÄ
-```{r}
-.get_mean_and_var <- function(tse, abund_values = "counts", clusters){
-    df <- data.frame(lapply(clusters, function(x){
-        tse_subset <- tse[x, ]
-        assay <- assay(tse_subset, abund_values)
-        mean <- mean(rowMeans2(assay, na.rm = T))
-        var <- mean(rowVars(assay, na.rm = T))
-        return(c(mean, var))
-    }))
-    rownames(df) <- c("mean", "variance")
-    
-    return(t(df))
+```{r biclust_6}
+# Function for obtaining sum, mean, median, and mean variance
+.sum_mean_median_var <- function(tse, abund_values = "counts", clusters){
+  # Create a data frame that includes all the information
+  df <- data.frame(lapply(clusters, function(x){
+    # Subset data based on cluster
+    tse_subset <- tse[x, ]
+    # Get assay
+    assay <- assay(tse_subset, abund_values)
+    # Calculate sum, mean, median, and mean variance
+    sum <- sum(assay, na.rm = T)
+    mean <- mean(assay, na.rm = T)
+    median <- median(assay, na.rm = T)
+    var <- mean(rowVars(assay, na.rm = T))
+    return(c(sum, mean, median, var))
+  }))
+  # Add right rownames
+  rownames(df) <- c("sum", "mean", "median", "variance")
+  # Transpose
+  df <- t(df)
+  # Convert into data.frame
+  df <- data.frame(df)
+  return(df)
 }
 
+# Calculate info
+col_biclust_info <- .sum_mean_median_var(mae[[1]], "clr", bicluster_rows)
+row_biclust_info <- .sum_mean_median_var(mae[[3]], "signals", bicluster_columns)
 
-.get_mean_and_var(mae[[1]], "clr", bicluster_features)
-.get_mean_and_var(mae[[3]], "signals", bicluster_samples)
+col_biclust_info 
+row_biclust_info 
 ```
 
+Now we can create a scatter plot to check if clusters really differs from each others.
+
+```{r biclust_7}
+df <- cbind(col_biclust_info[, "sum"], row_biclust_info[, "sum"])
+colnames(df) <- c("sum_col", "sum_row")
+df <- cbind(df, data.frame(variance = col_biclust_info$variance + row_biclust_info$variance),
+            cluster = rownames(col_biclust_info))
+
+ggplot(df)  +
+    geom_point(aes(x = sum_row, y = sum_col, color = cluster, size = variance))
+
+```
 
 _pheatmap_ do not allow boolean values, so they must be converted into factors.
 
-```{r biclust_6}
-# bicluster_columns <- data.frame(apply(bicluster_columns, 2, as.factor))
-# bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
+```{r biclust_8}
+bicluster_columns <- data.frame(apply(bicluster_columns, 2, as.factor))
+bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
 ```
 
 
 Again, we can plot clusters with heatmap.
 
-```{r biclust_7, fig.width=10, fig.height=8}
+```{r biclust_9, fig.width=10, fig.height=8}
 # Adjust colors for all clusters
 if( ncol(bicluster_rows) > ncol(bicluster_columns) ){
   cluster_names <- colnames(bicluster_rows)
@@ -302,7 +342,7 @@ pheatmap(corr, cluster_cols = F, cluster_rows = F,
 Third and final example deals with situation where we want to analyze correlation
 between taxa. _biclust_ is suitable for this. 
 
-```{r biclust_8}
+```{r biclust_10}
 # Calculate cross-correlation
 corr <- getExperimentCrossCorrelation(mae, 1, 1, 
                                       abund_values1 = "clr", abund_values2 = "clr", 
@@ -316,61 +356,18 @@ bc <- biclust(corr, method=BCPlaid(), fit.model = y ~ m,
 bc
 ```
 
-```{r biclust_9}
-# Get cluster info for features and convert it into data frame
-bicluster_rows <- bc@RowxNumber
-bicluster_rows <- data.frame(bicluster_rows)
+```{r biclust_11}
+# Get biclusters
+bcs <- .get_biclusters_from_biclust(bc, corr)
 
-# If no clusters were found, create one. Otherwise create additional cluster which
-# contain those features that are not included in clusters that were found.
-if( nrow(bicluster_rows) != nrow(corr) ){
-    bicluster_rows <- data.frame(cluster = rep(TRUE, nrow(corr)))
-} else {
-  # Create additional cluster that includes those features that
-  # are not included in other clusters.
-  vec <- ifelse(rowSums(bicluster_rows) > 0, FALSE, TRUE)
-  # If additional cluster contains features, then add it
-  if ( any(vec) ){
-    bicluster_rows <- cbind(bicluster_rows, vec)
-  }
-}
+bicluster_rows <- bcs$bc_rows
+bicluster_columns <- bcs$bc_columns
 
-# Give row and column names
-rownames(bicluster_rows) <- rownames(corr)
-colnames(bicluster_rows) <- paste0("cluster_", 1:ncol(bicluster_rows))
-
-head(bicluster_rows)
+bicluster_rows
+bicluster_columns
 ```
 
-
-```{r biclust_10}
-# Get cluster information for samples
-bicluster_columns <- t(bc@NumberxCol)
-bicluster_columns <- data.frame(bicluster_columns)
-
-# If no clusters were found, create one. Otherwise create additional cluster which
-# contain those samples that are not included in clusters that were found.
-if( nrow(bicluster_columns) != ncol(corr) ){
-    bicluster_columns <- data.frame(cluster = rep(TRUE, ncol(corr)))
-} else {
-  # Create additional cluster that includes those samples that
-  # are not included in other clusters.
-  vec <- ifelse(rowSums(bicluster_columns) > 0, FALSE, TRUE)
-  # If additional cluster contains samples, then add it
-  if ( any(vec) ){
-    bicluster_columns <- cbind(bicluster_columns, vec)
-  }
-
-}
-
-# Give row and column names
-rownames(bicluster_columns) <- colnames(corr)
-colnames(bicluster_columns) <- paste0("cluster_", 1:ncol(bicluster_columns))
-
-head(bicluster_columns)
-```
-
-```{r biclust_11, fig.width=14, fig.height=12}
+```{r biclust_12, fig.width=14, fig.height=12}
 # Convert boolean values into factor
 bicluster_columns <- data.frame(apply(bicluster_columns, 2, as.factor))
 bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
