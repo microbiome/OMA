@@ -45,12 +45,12 @@ mae <- HintikkaXOData()
 mae
 ```
 
-Only the most prevalent taxa are included in analysis to make analysis quicker. 
+Only the most prevalent taxa are included in analysis. 
 
 ```{r cobiclust_1}
-# Subser data
+# Subset data
 mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
-# clr-transforma
+# clr-transform
 mae[[1]] <- transformSamples(mae[[1]], method = "clr", pseudocount = 1)
 
 mae[[1]]
@@ -90,12 +90,12 @@ if(!require(pheatmap)){
     install.packages("pheatmap")
     library(pheatmap)
 }
-# z-transgorm for heatmap
+# z-transform for heatmap
 mae[[1]] <- transformFeatures(mae[[1]], abund_values = "clr", method = "z", name = "clr_z")
 
-# Creates annotations. Levels should be same if column names are the same. 
+# Create annotations. When column names are equal, they should share levels. 
 # Here samples include 3 clusters, and taxa 2. That is why we have to make 
-# name unique. 
+# column names unique. 
 annotation_col <- data.frame(colData(mae[[1]])[, "clusters", drop = F])
 colnames(annotation_col) <- "col_clusters"
 
@@ -109,7 +109,7 @@ pheatmap(assay(mae[[1]], "clr_z"), cluster_rows = F, cluster_cols = F,
 
 ```
 
-Other common plot is boxplot, where clusters are plotted separately. 
+Other common plot is boxplot. 
 
 ```{r cobiclust_4}
 if(!require(ggplot2)){
@@ -121,15 +121,13 @@ if(!require(gridExtra)){
     library(gridExtra)
 }
 
-# ggplot requries data in melted format
+# ggplot requires data in melted format
 melt_assay <- meltAssay(mae[[1]], abund_values = "clr", add_col_data = T, add_row_data = T)
 
 # Use grid.arrange to arrange two plots side-by-side
 grid.arrange(
-  
 ggplot(melt_assay) + geom_boxplot(aes(x = clusters.x, y = clr)) + labs(x = "Taxa clusters"),
 ggplot(melt_assay) + geom_boxplot(aes(x = clusters.y, y = clr)) + labs(x = "Sample clusters"),
-
 nrow = 1)
 ```
 
@@ -148,10 +146,11 @@ corr <- getExperimentCrossCorrelation(mae, 1, 2,
                                       abund_values2 = "nmr", 
                                       mode = "matrix", 
                                       cor_threshold = 0.2)
-head(corr)
+# Show first three correlations
+corr[1:3, 1:3]
 ```
 
-_biclust_ takes correlation matrix as an input and returns _biclust object. 
+_biclust_ takes correlation matrix as an input and returns _biclust_ object. 
 
 ```{r biclust_2}
 # Load package
@@ -169,7 +168,7 @@ bc
 ```
 
 The object includes cluster information. However compared to _cobiclust_, 
-_biclust_ object includes only information about found clusters, not general cluster.
+_biclust_ object includes only information about clusters that were found, not general cluster.
 
 Meaning that if one cluster size of 5 features was found out of 20 features, 
 those 15 features do not belong to any cluster. That is why we have to create an
@@ -177,7 +176,6 @@ additional cluster for features/samples that are not assigned into any cluster.
 
 ```{r biclust_3}
 # Functions for obtaining biclust information
-
 
 # Get clusters for rows and columns
 .get_biclusters_from_biclust <- function(bc, assay){
@@ -233,55 +231,66 @@ bcs <- .get_biclusters_from_biclust(bc, corr)
 bicluster_rows <- bcs$bc_rows
 bicluster_columns <- bcs$bc_columns
 
-bicluster_rows
-bicluster_columns
+# Print biclusters for rows
+head(bicluster_rows)
 ```
 
 ```{r biclust_5}
-# Function for obtaining sum, mean, median, and mean variance
-.sum_mean_median_var <- function(tse, abund_values = "counts", clusters){
+# Function for obtaining sample-wise sum, mean, median, and mean variance for each cluster
+.sum_mean_median_var <- function(tse1, tse2, abund_values1, abund_values2, clusters1, clusters2){
+  
+  list <- list()
   # Create a data frame that includes all the information
-  df <- data.frame(lapply(clusters, function(x){
+  for(i in 1:ncol(clusters1) ){
     # Subset data based on cluster
-    tse_subset <- tse[x, ]
+    tse_subset1 <- tse1[clusters1[,i], ]
+    tse_subset2 <- tse2[clusters2[,i], ]
     # Get assay
-    assay <- assay(tse_subset, abund_values)
+    assay1 <- assay(tse_subset1, abund_values1)
+    assay2 <- assay(tse_subset2, abund_values2)
     # Calculate sum, mean, median, and mean variance
-    sum <- sum(assay, na.rm = T)
-    mean <- mean(assay, na.rm = T)
-    median <- median(assay, na.rm = T)
-    var <- mean(rowVars(assay, na.rm = T))
-    return(c(sum, mean, median, var))
-  }))
-  # Add right rownames
-  rownames(df) <- c("sum", "mean", "median", "variance")
-  # Transpose
-  df <- t(df)
-  # Convert into data.frame
-  df <- data.frame(df)
-  return(df)
+    sum1 <- colSums2(assay1, na.rm = T)
+    mean1 <- colMeans2(assay1, na.rm = T)
+    median1 <- colMedians(assay1, na.rm = T)
+    var1 <- colVars(assay1, na.rm = T)
+    
+    sum2 <- colSums2(assay2, na.rm = T)
+    mean2 <- colMeans2(assay2, na.rm = T)
+    median2 <- colMedians(assay2, na.rm = T)
+    var2 <- colVars(assay2, na.rm = T)
+    
+    list[[i]] <- data.frame(sample = colnames(tse1), sum1, sum2, mean1, mean2, 
+                     median1, median2, var1, var2)
+  }
+
+  return(list)
 }
 
 # Calculate info
-col_biclust_info <- .sum_mean_median_var(mae[[1]], "clr", bicluster_rows)
-row_biclust_info <- .sum_mean_median_var(mae[[2]], "nmr", bicluster_columns)
+df <- .sum_mean_median_var(mae[[1]], mae[[2]], "clr", "nmr", bicluster_rows, bicluster_columns)
 
-col_biclust_info 
-row_biclust_info 
 ```
 
-Now we can create a scatter plot to check if clusters differs from each others.
+Now we can create a scatter plot. X-axis includes median clr abundance of microbiome
+and y-axis median absolute concentration of each metabolite. Each data point represents
+a single sample. 
 
-```{r biclust_6}
-# Combines medians into one data.frame
-df <- cbind(col_biclust_info[, "median"], row_biclust_info[, "median"])
-colnames(df) <- c("median_col", "median_row")
-# Adds sum of variance and clusters
-df <- cbind(df, data.frame(variance = col_biclust_info$variance + row_biclust_info$variance),
-            cluster = rownames(col_biclust_info))
+From the plots, we can see that there is low negative correlation in both cluster 1 and 3.
+This means that when abundance of bacteria belonging to cluster 1 or 3 is higher, 
+the concentration of metabolites of cluster 1 or 3 is lower, and vice versa. 
 
-ggplot(df)  +
-    geom_point(aes(x = median_row, y = median_col, color = cluster, size = variance))
+```{r biclust_6, fig.width=14, fig.height=6}
+plot_list <- list()
+
+i <- 0
+for( data in df ){
+  i <- i +1
+  plot_list[[i]] <- ggplot(data)  +
+      geom_point(aes(x = median1, y = median2)) + 
+    labs(title = paste0("Cluster ", i), x = "Taxa (clr median)", y = "Metabolites (abs. median)")
+}
+
+do.call(grid.arrange, c(plot_list, nrow = 1))
 
 ```
 
@@ -294,7 +303,7 @@ bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
 
 Again, we can plot clusters with heatmap.
 
-```{r biclust_8, fig.width=10, fig.height=8}
+```{r biclust_8, fig.width=10, fig.height=10}
 # Adjust colors for all clusters
 if( ncol(bicluster_rows) > ncol(bicluster_columns) ){
   cluster_names <- colnames(bicluster_rows)
@@ -323,13 +332,12 @@ between taxa. _biclust_ is suitable for this.
 corr <- getExperimentCrossCorrelation(mae, 1, 1, 
                                       abund_values1 = "clr", abund_values2 = "clr", 
                                       mode = "matrix",
-                                      cor_threshold = 0.2)
+                                      cor_threshold = 0.2, verbose = F, show_warning = F)
 
 # Find biclusters
 bc <- biclust(corr, method=BCPlaid(), fit.model = y ~ m,
               background = TRUE, shuffle = 100, back.fit = 0, max.layers = 10,
               iter.startup = 10, iter.layer = 100, verbose = FALSE)
-bc
 ```
 
 ```{r biclust_10}
@@ -338,9 +346,6 @@ bcs <- .get_biclusters_from_biclust(bc, corr)
 
 bicluster_rows <- bcs$bc_rows
 bicluster_columns <- bcs$bc_columns
-
-bicluster_rows
-bicluster_columns
 ```
 
 
