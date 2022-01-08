@@ -250,8 +250,8 @@ ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 2, common.legend = TRUE,
 <p class="caption">(\#fig:plot-mds-nmds-comparison)Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.</p>
 </div>
 
-The _UniFrac_ method is a special case, as it requires data on the
-relationship of features in form on a `phylo` tree. `calculateUniFrac`
+The _Unifrac_ method is a special case, as it requires data on the
+relationship of features in form on a `phylo` tree. `calculateUnifrac`
 performs the calculation to return a `dist` object, which can again be
 used within `runMDS`.
 
@@ -259,7 +259,7 @@ used within `runMDS`.
 
 ```r
 library(scater)
-tse <- runMDS(tse, FUN = mia::calculateUniFrac, name = "UniFrac",
+tse <- runMDS(tse, FUN = mia::calculateUnifrac, name = "Unifrac",
               tree = rowTree(tse),
               ntop = nrow(tse),
              exprs_values = "counts")
@@ -267,12 +267,12 @@ tse <- runMDS(tse, FUN = mia::calculateUniFrac, name = "UniFrac",
 
 
 ```r
-plotReducedDim(tse, "UniFrac", colour_by = "Group")
+plotReducedDim(tse, "Unifrac", colour_by = "Group")
 ```
 
 <div class="figure">
-<img src="20_beta_diversity_files/figure-html/plot-unifrac-1.png" alt="UniFrac distances scaled by MDS of the GlobalPattern dataset." width="3000" />
-<p class="caption">(\#fig:plot-unifrac)UniFrac distances scaled by MDS of the GlobalPattern dataset.</p>
+<img src="20_beta_diversity_files/figure-html/plot-unifrac-1.png" alt="Unifrac distances scaled by MDS of the GlobalPattern dataset." width="3000" />
+<p class="caption">(\#fig:plot-unifrac)Unifrac distances scaled by MDS of the GlobalPattern dataset.</p>
 </div>
 
 ## Other ordination methods
@@ -443,7 +443,7 @@ print(as.data.frame(permanova$aov.tab)["Group", "Pr(>F)"])
 ```
 
 ```
-## [1] 8e-04
+## [1] 6e-04
 ```
 
 In this case, the community composition is not significantly different
@@ -548,7 +548,7 @@ other attached packages:
  [1] scater_1.22.0                  scuttle_1.4.0                 
  [3] ggplot2_3.3.5                  vegan_2.5-7                   
  [5] lattice_0.20-45                permute_0.9-5                 
- [7] mia_1.3.9                      MultiAssayExperiment_1.20.0   
+ [7] mia_1.3.13                     MultiAssayExperiment_1.20.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [11] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [13] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -567,19 +567,19 @@ loaded via a namespace (and not attached):
  [11] fansi_0.5.0                 decontam_1.14.0            
  [13] splines_4.1.2               codetools_0.2-18           
  [15] sparseMatrixStats_1.6.0     cachem_1.0.6               
- [17] knitr_1.36                  jsonlite_1.7.2             
- [19] broom_0.7.10                cluster_2.1.2              
+ [17] knitr_1.37                  jsonlite_1.7.2             
+ [19] broom_0.7.11                cluster_2.1.2              
  [21] graph_1.72.0                BiocManager_1.30.16        
  [23] compiler_4.1.2              backports_1.4.1            
  [25] assertthat_0.2.1            Matrix_1.4-0               
  [27] fastmap_1.1.0               lazyeval_0.2.2             
  [29] BiocSingular_1.10.0         htmltools_0.5.2            
  [31] tools_4.1.2                 rsvd_1.0.5                 
- [33] gtable_0.3.0                glue_1.5.1                 
+ [33] gtable_0.3.0                glue_1.6.0                 
  [35] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
  [37] dplyr_1.0.7                 Rcpp_1.0.7                 
- [39] carData_3.0-4               jquerylib_0.1.4            
- [41] vctrs_0.3.8                 ape_5.5                    
+ [39] carData_3.0-5               jquerylib_0.1.4            
+ [41] vctrs_0.3.8                 ape_5.6                    
  [43] nlme_3.1-153                DECIPHER_2.22.0            
  [45] DelayedMatrixStats_1.16.0   xfun_0.29                  
  [47] stringr_1.4.0               beachmat_2.10.0            
@@ -601,7 +601,7 @@ loaded via a namespace (and not attached):
  [79] tidyselect_1.1.1            plyr_1.8.6                 
  [81] magrittr_2.0.1              bookdown_0.24              
  [83] R6_2.5.1                    generics_0.1.1             
- [85] DelayedArray_0.20.0         DBI_1.1.1                  
+ [85] DelayedArray_0.20.0         DBI_1.1.2                  
  [87] withr_2.4.3                 mgcv_1.8-38                
  [89] pillar_1.6.4                abind_1.4-5                
  [91] RCurl_1.98-1.5              tibble_3.1.6               

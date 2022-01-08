@@ -288,7 +288,7 @@ attached base packages:
 other attached packages:
  [1] ggplot2_3.3.5                  reshape2_1.4.4                
  [3] stringr_1.4.0                  microbiomeDataSets_1.1.5      
- [5] mia_1.3.9                      MultiAssayExperiment_1.20.0   
+ [5] mia_1.3.13                     MultiAssayExperiment_1.20.0   
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
  [9] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [11] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -312,11 +312,11 @@ loaded via a namespace (and not attached):
  [21] ggrepel_0.9.1                 xfun_0.29                    
  [23] dplyr_1.0.7                   crayon_1.4.2                 
  [25] RCurl_1.98-1.5                jsonlite_1.7.2               
- [27] graph_1.72.0                  ape_5.5                      
- [29] glue_1.5.1                    gtable_0.3.0                 
+ [27] graph_1.72.0                  ape_5.6                      
+ [29] glue_1.6.0                    gtable_0.3.0                 
  [31] zlibbioc_1.40.0               DelayedArray_0.20.0          
  [33] BiocSingular_1.10.0           scales_1.1.1                 
- [35] DBI_1.1.1                     Rcpp_1.0.7                   
+ [35] DBI_1.1.2                     Rcpp_1.0.7                   
  [37] viridisLite_0.4.0             xtable_1.8-4                 
  [39] decontam_1.14.0               tidytree_0.3.6               
  [41] bit_4.0.4                     rsvd_1.0.5                   
@@ -333,7 +333,7 @@ loaded via a namespace (and not attached):
  [63] generics_0.1.1                RSQLite_2.2.9                
  [65] ExperimentHub_2.2.0           evaluate_0.14                
  [67] fastmap_1.1.0                 yaml_2.2.1                   
- [69] knitr_1.36                    bit64_4.0.5                  
+ [69] knitr_1.37                    bit64_4.0.5                  
  [71] purrr_0.3.4                   KEGGREST_1.34.0              
  [73] nlme_3.1-153                  sparseMatrixStats_1.6.0      
  [75] mime_0.12                     compiler_4.1.2               
@@ -348,7 +348,7 @@ loaded via a namespace (and not attached):
  [93] lifecycle_1.0.1               BiocManager_1.30.16          
  [95] jquerylib_0.1.4               BiocNeighbors_1.12.0         
  [97] bitops_1.0-7                  irlba_2.3.5                  
- [99] httpuv_1.6.4                  R6_2.5.1                     
+ [99] httpuv_1.6.5                  R6_2.5.1                     
 [101] bookdown_0.24                 promises_1.2.0.1             
 [103] gridExtra_2.3                 vipor_0.4.5                  
 [105] codetools_0.2-18              MASS_7.3-54                  

@@ -538,7 +538,7 @@ other attached packages:
  [3] scater_1.22.0                  scuttle_1.4.0                 
  [5] miaViz_1.3.2                   ggraph_2.0.5                  
  [7] ggplot2_3.3.5                  microbiomeDataSets_1.1.5      
- [9] mia_1.3.9                      MultiAssayExperiment_1.20.0   
+ [9] mia_1.3.13                     MultiAssayExperiment_1.20.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [13] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [15] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -550,23 +550,23 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.2.0           BiocFileCache_2.2.0          
-  [3] igraph_1.2.9                  plyr_1.8.6                   
+  [3] igraph_1.2.11                 plyr_1.8.6                   
   [5] lazyeval_0.2.2                splines_4.1.2                
   [7] BiocParallel_1.28.3           digest_0.6.29                
   [9] yulab.utils_0.0.4             htmltools_0.5.2              
  [11] viridis_0.6.2                 fansi_0.5.0                  
  [13] magrittr_2.0.1                memoise_2.0.1                
  [15] ScaledMatrix_1.2.0            cluster_2.1.2                
- [17] DECIPHER_2.22.0               graphlayouts_0.7.2           
+ [17] DECIPHER_2.22.0               graphlayouts_0.8.0           
  [19] colorspace_2.0-2              blob_1.2.2                   
  [21] rappdirs_0.3.3                ggrepel_0.9.1                
  [23] xfun_0.29                     crayon_1.4.2                 
  [25] RCurl_1.98-1.5                jsonlite_1.7.2               
- [27] graph_1.72.0                  ape_5.5                      
- [29] glue_1.5.1                    polyclip_1.10-0              
+ [27] graph_1.72.0                  ape_5.6                      
+ [29] glue_1.6.0                    polyclip_1.10-0              
  [31] gtable_0.3.0                  zlibbioc_1.40.0              
  [33] DelayedArray_0.20.0           BiocSingular_1.10.0          
- [35] scales_1.1.1                  DBI_1.1.1                    
+ [35] scales_1.1.1                  DBI_1.1.2                    
  [37] Rcpp_1.0.7                    viridisLite_0.4.0            
  [39] xtable_1.8-4                  decontam_1.14.0              
  [41] gridGraphics_0.5-1            tidytree_0.3.6               
@@ -586,7 +586,7 @@ loaded via a namespace (and not attached):
  [69] ExperimentHub_2.2.0           evaluate_0.14                
  [71] stringr_1.4.0                 fastmap_1.1.0                
  [73] yaml_2.2.1                    ggtree_3.2.1                 
- [75] knitr_1.36                    bit64_4.0.5                  
+ [75] knitr_1.37                    bit64_4.0.5                  
  [77] tidygraph_1.2.0               purrr_0.3.4                  
  [79] KEGGREST_1.34.0               nlme_3.1-153                 
  [81] sparseMatrixStats_1.6.0       mime_0.12                    
@@ -603,7 +603,7 @@ loaded via a namespace (and not attached):
 [103] BiocManager_1.30.16           jquerylib_0.1.4              
 [105] BiocNeighbors_1.12.0          cowplot_1.1.1                
 [107] bitops_1.0-7                  irlba_2.3.5                  
-[109] httpuv_1.6.4                  R6_2.5.1                     
+[109] httpuv_1.6.5                  R6_2.5.1                     
 [111] bookdown_0.24                 promises_1.2.0.1             
 [113] gridExtra_2.3                 vipor_0.4.5                  
 [115] codetools_0.2-18              MASS_7.3-54                  

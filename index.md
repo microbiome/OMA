@@ -14,7 +14,7 @@ github-repo: microbiome/OMA
 date: "**Authors:** Leo Lahti [aut], Sudarshan Shetty [aut], Felix GM Ernst [aut, cre]<br/>
   **Version:** 0.98.9<br/>
   **Modified:** 2021-09-10<br/>
-  **Compiled:** 2021-12-15<br/>
+  **Compiled:** 2022-01-08<br/>
   **Environment:** R version 4.1.2 (2021-11-01), Bioconductor 3.14<br/>
   **License:** CC BY-NC-SA 3.0 US<br/>
   **Copyright:** <br/>
