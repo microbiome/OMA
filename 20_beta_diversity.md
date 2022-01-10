@@ -443,7 +443,7 @@ print(as.data.frame(permanova$aov.tab)["Group", "Pr(>F)"])
 ```
 
 ```
-## [1] 6e-04
+## [1] 9e-04
 ```
 
 In this case, the community composition is not significantly different
@@ -517,8 +517,7 @@ appropriate choice for comparing community compositions.
 
  - [How to extract information from clusters](http://bioconductor.org/books/release/OSCA/clustering.html)
 
- - [Community typing](15-microbiome-community.md)
-
+ - Chapter \@ref(community-typing) on community typing
 
 ## Session Info {-}
 
