@@ -633,25 +633,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7791 BIC: 8354 AIC: 8183 
+## Laplace: 7752 BIC: 8274 AIC: 8103 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7855 BIC: 8553 AIC: 8340 
+## Laplace: 7849 BIC: 8554 AIC: 8341 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7942 BIC: 8822 AIC: 8566 
+## Laplace: 7929 BIC: 8810 AIC: 8554 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8031 BIC: 9100 AIC: 8801
+## Laplace: 8002 BIC: 9054 AIC: 8755
 ```
 
 
@@ -716,8 +716,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.59
-## 2 0.4615 15.32
+## 1 0.5385 20.58
+## 2 0.4615 15.28
 ```
 
 
@@ -731,12 +731,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 4.539e-17
-## CC1     1.000e+00 3.468e-22
-## SV1     1.000e+00 1.718e-12
-## M31Fcsw 7.428e-26 1.000e+00
-## M11Fcsw 1.094e-16 1.000e+00
-## M31Plmr 1.153e-13 1.000e+00
+## CL3     1.000e+00 5.046e-17
+## CC1     1.000e+00 3.903e-22
+## SV1     1.000e+00 1.951e-12
+## M31Fcsw 7.907e-26 1.000e+00
+## M11Fcsw 1.136e-16 1.000e+00
+## M31Plmr 1.126e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -748,12 +748,12 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 
 ```
 ##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30378 0.1354050
-## Phylum:Euryarchaeota  0.23113 0.1468897
-## Phylum:Actinobacteria 1.21357 1.0581168
-## Phylum:Spirochaetes   0.21392 0.1318070
-## Phylum:MVP-15         0.02981 0.0007695
-## Phylum:Proteobacteria 6.84559 1.8114443
+## Phylum:Crenarchaeota  0.30385 0.1354657
+## Phylum:Euryarchaeota  0.23116 0.1468628
+## Phylum:Actinobacteria 1.21397 1.0600551
+## Phylum:Spirochaetes   0.21394 0.1318417
+## Phylum:MVP-15         0.02983 0.0007669
+## Phylum:Proteobacteria 6.84361 1.8155075
 ```
 Get the assignment probabilities
 
