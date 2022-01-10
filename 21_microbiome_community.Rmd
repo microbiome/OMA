@@ -89,9 +89,9 @@ _pheatmap_ is a package that provides methods to plot clustered heatmaps.
 
 ```{r pheatmap1}
 if(!require(pheatmap)){
-    install.packages("pheatmap")
+  install.packages("pheatmap")
+  library(pheatmap)
 }
-library(pheatmap)
 
 # Takes subset: only samples from feces, skin, or tongue
 tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces", "Skin", "Tongue") ]
@@ -222,7 +222,31 @@ pheatmap(mat, annotation_row = taxa_clusters,
 ```
 
 In addition to _pheatmap_ package, there are also other packages that
-provide functions for more complex heatmaps, such as [_iheatmapr_](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html).
+provide functions for more complex heatmaps, such as [_iheatmapr_](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html)
+and 
+[ComplexHeatmap](https://academic.oup.com/bioinformatics/article/32/18/2847/1743594?login=true).
+
+[sechm](http://www.bioconductor.org/packages/release/bioc/vignettes/sechm/inst/doc/sechm.html)
+package provides wrapper for _ComplexHeatmap_.
+
+```{r}
+if(!require(sechm)){
+  BiocManager::install("sechm")
+  library(sechm)
+}
+# Stores annotation colros to metadata
+metadata(tse_phylum_subset)$anno_colors$SampleType <- c(Feces = "blue", 
+                                                        Skin = "red", 
+                                                        Tongue = "gray")
+
+# Create a plot
+sechm(tse_phylum_subset, 
+      genes = rownames(tse_phylum_subset), 
+      assayName = "clr", 
+      do.scale = TRUE, 
+      top_annotation = c("SampleType"), 
+      cluster_cols = TRUE, cluster_rows = TRUE)
+```
 
 It is also possible to create similar heatmap by just using _ggplot2_.
 
