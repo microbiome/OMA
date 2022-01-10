@@ -438,7 +438,7 @@ pheatmap(corr, cluster_cols = F, cluster_rows = F,
 
 <img src="24_biclustering_files/figure-html/biclust_8-1.png" width="960" />
 
-# Taxa vs taxa
+## Taxa vs taxa
 
 Third and final example deals with situation where we want to analyze correlation
 between taxa. _biclust_ is suitable for this. 
