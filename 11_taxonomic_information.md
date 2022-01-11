@@ -563,7 +563,7 @@ loaded via a namespace (and not attached):
   [1] ggbeeswarm_0.6.0            colorspace_2.0-2           
   [3] ellipsis_0.3.2              scuttle_1.4.0              
   [5] BiocNeighbors_1.12.0        ggrepel_0.9.1              
-  [7] bit64_4.0.5                 fansi_0.5.0                
+  [7] bit64_4.0.5                 fansi_1.0.0                
   [9] decontam_1.14.0             splines_4.1.2              
  [11] codetools_0.2-18            sparseMatrixStats_1.6.0    
  [13] cachem_1.0.6                knitr_1.37                 
@@ -578,7 +578,7 @@ loaded via a namespace (and not attached):
  [31] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
  [33] dplyr_1.0.7                 Rcpp_1.0.7                 
  [35] jquerylib_0.1.4             vctrs_0.3.8                
- [37] ape_5.6                     nlme_3.1-153               
+ [37] ape_5.6-1                   nlme_3.1-153               
  [39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
  [41] xfun_0.29                   stringr_1.4.0              
  [43] beachmat_2.10.0             lifecycle_1.0.1            

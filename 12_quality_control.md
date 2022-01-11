@@ -554,7 +554,7 @@ loaded via a namespace (and not attached):
   [5] lazyeval_0.2.2                splines_4.1.2                
   [7] BiocParallel_1.28.3           digest_0.6.29                
   [9] yulab.utils_0.0.4             htmltools_0.5.2              
- [11] viridis_0.6.2                 fansi_0.5.0                  
+ [11] viridis_0.6.2                 fansi_1.0.0                  
  [13] magrittr_2.0.1                memoise_2.0.1                
  [15] ScaledMatrix_1.2.0            cluster_2.1.2                
  [17] DECIPHER_2.22.0               graphlayouts_0.8.0           
@@ -562,7 +562,7 @@ loaded via a namespace (and not attached):
  [21] rappdirs_0.3.3                ggrepel_0.9.1                
  [23] xfun_0.29                     crayon_1.4.2                 
  [25] RCurl_1.98-1.5                jsonlite_1.7.2               
- [27] graph_1.72.0                  ape_5.6                      
+ [27] graph_1.72.0                  ape_5.6-1                    
  [29] glue_1.6.0                    polyclip_1.10-0              
  [31] gtable_0.3.0                  zlibbioc_1.40.0              
  [33] DelayedArray_0.20.0           BiocSingular_1.10.0          

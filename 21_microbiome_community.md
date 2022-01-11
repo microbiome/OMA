@@ -543,7 +543,7 @@ plot
 
 
 
-### Dirichlet Multinomial Mixtures (DMM)
+## Dirichlet Multinomial Mixtures (DMM)
 
 This section focus on DMM analysis. 
 
@@ -627,31 +627,31 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7690 BIC: 8076 AIC: 7948 
+## Laplace: 7689 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7741 BIC: 8282 AIC: 8112 
+## Laplace: 7792 BIC: 8357 AIC: 8187 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7859 BIC: 8582 AIC: 8368 
+## Laplace: 7854 BIC: 8553 AIC: 8340 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7942 BIC: 8822 AIC: 8566 
+## Laplace: 8005 BIC: 8887 AIC: 8631 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: NaN BIC: NaN AIC: NaN
+## Laplace: 7991 BIC: 9021 AIC: 8722
 ```
 
 
@@ -678,6 +678,7 @@ getBestDMNFit(tse_dmn, type = "laplace")
 ## samples x taxa: 26 x 67 
 ## Laplace: 7673 BIC: 7927 AIC: 7842
 ```
+
 ### PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors
 
 Group samples and return DMNGroup object that contains a summary.
@@ -695,15 +696,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.23   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  793.17  1872.8 1674.5 1735
+## Mock               2       3   67  998.6  -70.65   839.2 1072.8 1134
+## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
-## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
+## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
+## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -716,8 +717,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.60
-## 2 0.4615 15.28
+## 1 0.5385 20.58
+## 2 0.4615 15.29
 ```
 
 
@@ -731,12 +732,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.032e-17
-## CC1     1.000e+00 3.839e-22
-## SV1     1.000e+00 2.026e-12
-## M31Fcsw 7.327e-26 1.000e+00
-## M11Fcsw 1.063e-16 1.000e+00
-## M31Plmr 9.991e-14 1.000e+00
+## CL3     1.000e+00 5.054e-17
+## CC1     1.000e+00 3.900e-22
+## SV1     1.000e+00 1.954e-12
+## M31Fcsw 7.899e-26 1.000e+00
+## M11Fcsw 1.133e-16 1.000e+00
+## M31Plmr 1.122e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -747,13 +748,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354647
-## Phylum:Euryarchaeota  0.2314 0.1468619
-## Phylum:Actinobacteria 1.2105 1.0600060
-## Phylum:Spirochaetes   0.2141 0.1318408
-## Phylum:MVP-15         0.0299 0.0007667
-## Phylum:Proteobacteria 6.8415 1.8151469
+##                          [,1]     [,2]
+## Phylum:Crenarchaeota  0.30384 0.135469
+## Phylum:Euryarchaeota  0.23115 0.146865
+## Phylum:Actinobacteria 1.21366 1.060035
+## Phylum:Spirochaetes   0.21394 0.131845
+## Phylum:MVP-15         0.02982 0.000767
+## Phylum:Proteobacteria 6.84391 1.815223
 ```
 Get the assignment probabilities
 
@@ -938,7 +939,7 @@ other attached packages:
  [1] scater_1.22.0                  scuttle_1.4.0                 
  [3] bluster_1.4.0                  patchwork_1.1.1               
  [5] reshape2_1.4.4                 sechm_1.2.0                   
- [7] ggtree_3.2.1                   ape_5.6                       
+ [7] ggtree_3.2.1                   ape_5.6-1                     
  [9] pheatmap_1.0.12                miaViz_1.3.2                  
 [11] ggraph_2.0.5                   ggplot2_3.3.5                 
 [13] mia_1.3.13                     MultiAssayExperiment_1.20.0   
@@ -957,7 +958,7 @@ loaded via a namespace (and not attached):
   [5] splines_4.1.2               BiocParallel_1.28.3        
   [7] digest_0.6.29               foreach_1.5.1              
   [9] yulab.utils_0.0.4           htmltools_0.5.2            
- [11] viridis_0.6.2               fansi_0.5.0                
+ [11] viridis_0.6.2               fansi_1.0.0                
  [13] magrittr_2.0.1              memoise_2.0.1              
  [15] ScaledMatrix_1.2.0          doParallel_1.0.16          
  [17] cluster_2.1.2               DECIPHER_2.22.0            

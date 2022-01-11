@@ -443,7 +443,7 @@ print(as.data.frame(permanova$aov.tab)["Group", "Pr(>F)"])
 ```
 
 ```
-## [1] 6e-04
+## [1] 5e-04
 ```
 
 In this case, the community composition is not significantly different
@@ -563,7 +563,7 @@ loaded via a namespace (and not attached):
   [5] ellipsis_0.3.2              BiocNeighbors_1.12.0       
   [7] ggpubr_0.4.0                farver_2.1.0               
   [9] ggrepel_0.9.1               bit64_4.0.5                
- [11] fansi_0.5.0                 decontam_1.14.0            
+ [11] fansi_1.0.0                 decontam_1.14.0            
  [13] splines_4.1.2               codetools_0.2-18           
  [15] sparseMatrixStats_1.6.0     cachem_1.0.6               
  [17] knitr_1.37                  jsonlite_1.7.2             
@@ -578,7 +578,7 @@ loaded via a namespace (and not attached):
  [35] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
  [37] dplyr_1.0.7                 Rcpp_1.0.7                 
  [39] carData_3.0-5               jquerylib_0.1.4            
- [41] vctrs_0.3.8                 ape_5.6                    
+ [41] vctrs_0.3.8                 ape_5.6-1                  
  [43] nlme_3.1-153                DECIPHER_2.22.0            
  [45] DelayedMatrixStats_1.16.0   xfun_0.29                  
  [47] stringr_1.4.0               beachmat_2.10.0            

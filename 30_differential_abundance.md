@@ -719,7 +719,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.998
+## Proportions of Observations within 95% Credible Interval: 0.9981
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
@@ -801,7 +801,7 @@ loaded via a namespace (and not attached):
  [21] xfun_0.29                     hms_1.1.1                    
  [23] ggdist_3.0.1                  jquerylib_0.1.4              
  [25] promises_1.2.0.1              evaluate_0.14                
- [27] DEoptimR_1.0-10               fansi_0.5.0                  
+ [27] DEoptimR_1.0-10               fansi_1.0.0                  
  [29] dbplyr_2.1.1                  readxl_1.3.1                 
  [31] igraph_1.2.11                 DBI_1.1.2                    
  [33] htmlwidgets_1.5.4             tensorA_0.36.2               
@@ -814,7 +814,7 @@ loaded via a namespace (and not attached):
  [47] checkmate_2.0.0               vegan_2.5-7                  
  [49] treeio_1.18.1                 getopt_1.20.3                
  [51] cluster_2.1.2                 ExperimentHub_2.2.0          
- [53] ape_5.6                       dir.expiry_1.2.0             
+ [53] ape_5.6-1                     dir.expiry_1.2.0             
  [55] lazyeval_0.2.2                crayon_1.4.2                 
  [57] pkgconfig_2.0.3               labeling_0.4.2               
  [59] nlme_3.1-153                  vipor_0.4.5                  

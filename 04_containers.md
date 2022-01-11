@@ -1030,7 +1030,7 @@ loaded via a namespace (and not attached):
   [9] scater_1.22.0                 digest_0.6.29                
  [11] foreach_1.5.1                 yulab.utils_0.0.4            
  [13] htmltools_0.5.2               viridis_0.6.2                
- [15] fansi_0.5.0                   magrittr_2.0.1               
+ [15] fansi_1.0.0                   magrittr_2.0.1               
  [17] memoise_2.0.1                 ScaledMatrix_1.2.0           
  [19] cluster_2.1.2                 DECIPHER_2.22.0              
  [21] colorspace_2.0-2              rappdirs_0.3.3               
@@ -1039,7 +1039,7 @@ loaded via a namespace (and not attached):
  [27] crayon_1.4.2                  RCurl_1.98-1.5               
  [29] jsonlite_1.7.2                graph_1.72.0                 
  [31] survival_3.2-13               iterators_1.0.13             
- [33] ape_5.6                       glue_1.6.0                   
+ [33] ape_5.6-1                     glue_1.6.0                   
  [35] gtable_0.3.0                  zlibbioc_1.40.0              
  [37] DelayedArray_0.20.0           BiocSingular_1.10.0          
  [39] Rhdf5lib_1.16.0               scales_1.1.1                 
