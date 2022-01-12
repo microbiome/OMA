@@ -146,20 +146,37 @@ ggplot(df, aes(x = SampleType, y = shannon)) +
   theme(text = element_text(size = 10))
 ```
 
-**Phylogenetic diversity**  
+### Faith phylogenetic diversity
 
-The phylogenetic diversity is calculated by `mia::estimateDiversity`. This is a faster re-implementation of   
+The Faith index is returned by the function `estimateFaith`.
+
+```{r phylo-div-1}
+tse <- mia::estimateFaith(tse,
+                          abund_values = "counts")
+head(colData(tse)$faith)
+```
+
+**Note**: because `tse` is a `TreeSummarizedExperiment` object, its phylogenetic tree is used by default. However, the optional argument `tree` must be provided if `tse` does not contain one.
+
+Below a visual comparison between shannon and faith indices is shown with a violin plot.
+
+```{r phylo-div-2}
+plots <- lapply(c("shannon", "faith"),
+                plotColData,
+                object = tse)
+ggpubr::ggarrange(plotlist = plots, nrow = 1, ncol = 2)
+```
+ 
+Alternatively, the phylogenetic diversity can be calculated by `mia::estimateDiversity`. This is a faster re-implementation of   
 the widely used function in _`picante`_ [@R-picante, @Kembel2010].  
 
-Load `picante` R package and get the `phylo` stored in `rowTree`. 
-```{r phylo-div-1}
+Load `picante` R package and get the `phylo` stored in `rowTree`.
 
+```{r phylo-div-3}
 tse <- mia::estimateDiversity(tse, 
                               abund_values = "counts",
                               index = "faith", 
                               name = "faith")
-head(colData(tse)$faith)
-
 ```
 
 ### Evenness  
@@ -199,10 +216,10 @@ tse <- mia::estimateDiversity(tse,
 head(colData(tse)$log_modulo_skewness)
 ```
 
-
 ## Visualization
 
-A plot comparing all the diversity measures calculated above and stored in `colData` can then be constructed directly.  
+A plot comparing all the diversity measures calculated above and stored in `colData` can then be constructed directly.
+
 ```{r plot-all-diversities}
 plots <- lapply(c("observed", "shannon","simpson", "relative", "faith","log_modulo_skewness"),
                 plotColData,
