@@ -538,7 +538,7 @@ other attached packages:
  [3] scater_1.22.0                  scuttle_1.4.0                 
  [5] miaViz_1.3.2                   ggraph_2.0.5                  
  [7] ggplot2_3.3.5                  microbiomeDataSets_1.1.5      
- [9] mia_1.3.13                     MultiAssayExperiment_1.20.0   
+ [9] mia_1.3.14                     MultiAssayExperiment_1.20.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [13] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [15] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -569,7 +569,7 @@ loaded via a namespace (and not attached):
  [35] scales_1.1.1                  DBI_1.1.2                    
  [37] Rcpp_1.0.7                    viridisLite_0.4.0            
  [39] xtable_1.8-4                  decontam_1.14.0              
- [41] gridGraphics_0.5-1            tidytree_0.3.6               
+ [41] gridGraphics_0.5-1            tidytree_0.3.7               
  [43] bit_4.0.4                     rsvd_1.0.5                   
  [45] httr_1.4.2                    dir.expiry_1.2.0             
  [47] ellipsis_0.3.2                farver_2.1.0                 
@@ -590,7 +590,7 @@ loaded via a namespace (and not attached):
  [77] tidygraph_1.2.0               purrr_0.3.4                  
  [79] KEGGREST_1.34.0               nlme_3.1-153                 
  [81] sparseMatrixStats_1.6.0       mime_0.12                    
- [83] aplot_0.1.1                   compiler_4.1.2               
+ [83] aplot_0.1.2                   compiler_4.1.2               
  [85] beeswarm_0.4.0                filelock_1.0.2               
  [87] curl_4.3.2                    png_0.1-7                    
  [89] interactiveDisplayBase_1.32.0 treeio_1.18.1                

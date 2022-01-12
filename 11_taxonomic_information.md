@@ -549,7 +549,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.3.13                     MultiAssayExperiment_1.20.0   
+ [1] mia_1.3.14                     MultiAssayExperiment_1.20.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
  [5] XVector_0.34.0                 SingleCellExperiment_1.16.0   
  [7] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -590,7 +590,7 @@ loaded via a namespace (and not attached):
  [55] yulab.utils_0.0.4           sass_0.4.0                 
  [57] stringi_1.7.6               RSQLite_2.2.9              
  [59] ScaledMatrix_1.2.0          permute_0.9-5              
- [61] tidytree_0.3.6              filelock_1.0.2             
+ [61] tidytree_0.3.7              filelock_1.0.2             
  [63] BiocParallel_1.28.3         rlang_0.4.12               
  [65] pkgconfig_2.0.3             bitops_1.0-7               
  [67] evaluate_0.14               lattice_0.20-45            

@@ -197,23 +197,46 @@ ggplot(df, aes(x = SampleType, y = shannon)) +
 
 <img src="14_alpha_diversity_files/figure-html/visualize-shannon-1.png" width="672" />
 
-**Phylogenetic diversity**  
+### Faith phylogenetic diversity
 
-The phylogenetic diversity is calculated by `mia::estimateDiversity`. This is a faster re-implementation of   
+The Faith index is returned by the function `estimateFaith`.
+
+
+```r
+tse <- mia::estimateFaith(tse,
+                          abund_values = "counts")
+head(colData(tse)$faith)
+```
+
+```
+## [1] 250.5 262.3 208.5 117.9 119.8 135.8
+```
+
+**Note**: because `tse` is a `TreeSummarizedExperiment` object, its phylogenetic tree is used by default. However, the optional argument `tree` must be provided if `tse` does not contain one.
+
+Below a visual comparison between shannon and faith indices is shown with a violin plot.
+
+
+```r
+plots <- lapply(c("shannon", "faith"),
+                plotColData,
+                object = tse)
+ggpubr::ggarrange(plotlist = plots, nrow = 1, ncol = 2)
+```
+
+<img src="14_alpha_diversity_files/figure-html/phylo-div-2-1.png" width="672" />
+ 
+Alternatively, the phylogenetic diversity can be calculated by `mia::estimateDiversity`. This is a faster re-implementation of   
 the widely used function in _`picante`_ [@R-picante, @Kembel2010].  
 
-Load `picante` R package and get the `phylo` stored in `rowTree`. 
+Load `picante` R package and get the `phylo` stored in `rowTree`.
+
 
 ```r
 tse <- mia::estimateDiversity(tse, 
                               abund_values = "counts",
                               index = "faith", 
                               name = "faith")
-head(colData(tse)$faith)
-```
-
-```
-## [1] 250.5 262.3 208.5 117.9 119.8 135.8
 ```
 
 ### Evenness  
@@ -269,10 +292,10 @@ head(colData(tse)$log_modulo_skewness)
 ## [1] 2.061 2.061 2.061 2.061 2.061 2.061
 ```
 
-
 ## Visualization
 
-A plot comparing all the diversity measures calculated above and stored in `colData` can then be constructed directly.  
+A plot comparing all the diversity measures calculated above and stored in `colData` can then be constructed directly.
+
 
 ```r
 plots <- lapply(c("observed", "shannon","simpson", "relative", "faith","log_modulo_skewness"),
@@ -314,7 +337,7 @@ attached base packages:
 other attached packages:
  [1] ggsignif_0.6.3                 scater_1.22.0                 
  [3] ggplot2_3.3.5                  scuttle_1.4.0                 
- [5] mia_1.3.13                     MultiAssayExperiment_1.20.0   
+ [5] mia_1.3.14                     MultiAssayExperiment_1.20.0   
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
  [9] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [11] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -357,7 +380,7 @@ loaded via a namespace (and not attached):
  [59] sass_0.4.0                  stringi_1.7.6              
  [61] RSQLite_2.2.9               highr_0.9                  
  [63] ScaledMatrix_1.2.0          permute_0.9-5              
- [65] tidytree_0.3.6              filelock_1.0.2             
+ [65] tidytree_0.3.7              filelock_1.0.2             
  [67] BiocParallel_1.28.3         rlang_0.4.12               
  [69] pkgconfig_2.0.3             bitops_1.0-7               
  [71] evaluate_0.14               lattice_0.20-45            

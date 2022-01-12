@@ -443,7 +443,7 @@ print(as.data.frame(permanova$aov.tab)["Group", "Pr(>F)"])
 ```
 
 ```
-## [1] 5e-04
+## [1] 0.001
 ```
 
 In this case, the community composition is not significantly different
@@ -547,7 +547,7 @@ other attached packages:
  [1] scater_1.22.0                  scuttle_1.4.0                 
  [3] ggplot2_3.3.5                  vegan_2.5-7                   
  [5] lattice_0.20-45                permute_0.9-5                 
- [7] mia_1.3.13                     MultiAssayExperiment_1.20.0   
+ [7] mia_1.3.14                     MultiAssayExperiment_1.20.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [11] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [13] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -590,7 +590,7 @@ loaded via a namespace (and not attached):
  [59] gridExtra_2.3               yulab.utils_0.0.4          
  [61] sass_0.4.0                  stringi_1.7.6              
  [63] RSQLite_2.2.9               highr_0.9                  
- [65] ScaledMatrix_1.2.0          tidytree_0.3.6             
+ [65] ScaledMatrix_1.2.0          tidytree_0.3.7             
  [67] filelock_1.0.2              BiocParallel_1.28.3        
  [69] rlang_0.4.12                pkgconfig_2.0.3            
  [71] bitops_1.0-7                evaluate_0.14              

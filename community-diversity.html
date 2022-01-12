@@ -250,9 +250,10 @@ div.csl-indent {
 <ul>
 <li class="chapter" data-level="7.1.1" data-path="community-diversity.html"><a href="community-diversity.html#richness"><i class="fa fa-check"></i><b>7.1.1</b> Richness</a></li>
 <li class="chapter" data-level="7.1.2" data-path="community-diversity.html"><a href="community-diversity.html#diversity"><i class="fa fa-check"></i><b>7.1.2</b> Diversity</a></li>
-<li class="chapter" data-level="7.1.3" data-path="community-diversity.html"><a href="community-diversity.html#evenness"><i class="fa fa-check"></i><b>7.1.3</b> Evenness</a></li>
-<li class="chapter" data-level="7.1.4" data-path="community-diversity.html"><a href="community-diversity.html#dominance"><i class="fa fa-check"></i><b>7.1.4</b> Dominance</a></li>
-<li class="chapter" data-level="7.1.5" data-path="community-diversity.html"><a href="community-diversity.html#rarity"><i class="fa fa-check"></i><b>7.1.5</b> Rarity</a></li>
+<li class="chapter" data-level="7.1.3" data-path="community-diversity.html"><a href="community-diversity.html#faith-phylogenetic-diversity"><i class="fa fa-check"></i><b>7.1.3</b> Faith phylogenetic diversity</a></li>
+<li class="chapter" data-level="7.1.4" data-path="community-diversity.html"><a href="community-diversity.html#evenness"><i class="fa fa-check"></i><b>7.1.4</b> Evenness</a></li>
+<li class="chapter" data-level="7.1.5" data-path="community-diversity.html"><a href="community-diversity.html#dominance"><i class="fa fa-check"></i><b>7.1.5</b> Dominance</a></li>
+<li class="chapter" data-level="7.1.6" data-path="community-diversity.html"><a href="community-diversity.html#rarity"><i class="fa fa-check"></i><b>7.1.6</b> Rarity</a></li>
 </ul></li>
 <li class="chapter" data-level="7.2" data-path="community-diversity.html"><a href="community-diversity.html#visualization"><i class="fa fa-check"></i><b>7.2</b> Visualization</a></li>
 <li class="chapter" data-level="" data-path="community-diversity.html"><a href="community-diversity.html#session-info-4"><i class="fa fa-check"></i>Session Info</a></li>
@@ -513,60 +514,72 @@ It adds p-values to plot.</p>
 <span id="cb181-24"><a href="community-diversity.html#cb181-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_signif</span>(<span class="at">comparisons =</span> comb, <span class="at">map_signif_level =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
 <span id="cb181-25"><a href="community-diversity.html#cb181-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>))</span></code></pre></div>
 <p><img src="14_alpha_diversity_files/figure-html/visualize-shannon-1.png" width="672" /></p>
-<p><strong>Phylogenetic diversity</strong></p>
-<p>The phylogenetic diversity is calculated by <code>mia::estimateDiversity</code>. This is a faster re-implementation of<br />
+</div>
+<div id="faith-phylogenetic-diversity" class="section level3" number="7.1.3">
+<h3><span class="header-section-number">7.1.3</span> Faith phylogenetic diversity</h3>
+<p>The Faith index is returned by the function <code>estimateFaith</code>.</p>
+<div class="sourceCode" id="cb182"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb182-1"><a href="community-diversity.html#cb182-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> mia<span class="sc">::</span><span class="fu">estimateFaith</span>(tse,</span>
+<span id="cb182-2"><a href="community-diversity.html#cb182-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">abund_values =</span> <span class="st">&quot;counts&quot;</span>)</span>
+<span id="cb182-3"><a href="community-diversity.html#cb182-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">colData</span>(tse)<span class="sc">$</span>faith)</span></code></pre></div>
+<pre><code>## [1] 250.5 262.3 208.5 117.9 119.8 135.8</code></pre>
+<p><strong>Note</strong>: because <code>tse</code> is a <code>TreeSummarizedExperiment</code> object, its phylogenetic tree is used by default. However, the optional argument <code>tree</code> must be provided if <code>tse</code> does not contain one.</p>
+<p>Below a visual comparison between shannon and faith indices is shown with a violin plot.</p>
+<div class="sourceCode" id="cb184"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb184-1"><a href="community-diversity.html#cb184-1" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="st">&quot;shannon&quot;</span>, <span class="st">&quot;faith&quot;</span>),</span>
+<span id="cb184-2"><a href="community-diversity.html#cb184-2" aria-hidden="true" tabindex="-1"></a>                plotColData,</span>
+<span id="cb184-3"><a href="community-diversity.html#cb184-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">object =</span> tse)</span>
+<span id="cb184-4"><a href="community-diversity.html#cb184-4" aria-hidden="true" tabindex="-1"></a>ggpubr<span class="sc">::</span><span class="fu">ggarrange</span>(<span class="at">plotlist =</span> plots, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img src="14_alpha_diversity_files/figure-html/phylo-div-2-1.png" width="672" /></p>
+<p>Alternatively, the phylogenetic diversity can be calculated by <code>mia::estimateDiversity</code>. This is a faster re-implementation of<br />
 the widely used function in <em><code>picante</code></em> <span class="citation"><a href="#ref-Kembel2010" role="doc-biblioref">W et al.</a> (<a href="#ref-Kembel2010" role="doc-biblioref">2010</a>)</span>.</p>
 <p>Load <code>picante</code> R package and get the <code>phylo</code> stored in <code>rowTree</code>.</p>
-<div class="sourceCode" id="cb182"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb182-1"><a href="community-diversity.html#cb182-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> mia<span class="sc">::</span><span class="fu">estimateDiversity</span>(tse, </span>
-<span id="cb182-2"><a href="community-diversity.html#cb182-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">abund_values =</span> <span class="st">&quot;counts&quot;</span>,</span>
-<span id="cb182-3"><a href="community-diversity.html#cb182-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">index =</span> <span class="st">&quot;faith&quot;</span>, </span>
-<span id="cb182-4"><a href="community-diversity.html#cb182-4" aria-hidden="true" tabindex="-1"></a>                              <span class="at">name =</span> <span class="st">&quot;faith&quot;</span>)</span>
-<span id="cb182-5"><a href="community-diversity.html#cb182-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">colData</span>(tse)<span class="sc">$</span>faith)</span></code></pre></div>
-<pre><code>## [1] 250.5 262.3 208.5 117.9 119.8 135.8</code></pre>
+<div class="sourceCode" id="cb185"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb185-1"><a href="community-diversity.html#cb185-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> mia<span class="sc">::</span><span class="fu">estimateDiversity</span>(tse, </span>
+<span id="cb185-2"><a href="community-diversity.html#cb185-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">abund_values =</span> <span class="st">&quot;counts&quot;</span>,</span>
+<span id="cb185-3"><a href="community-diversity.html#cb185-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">index =</span> <span class="st">&quot;faith&quot;</span>, </span>
+<span id="cb185-4"><a href="community-diversity.html#cb185-4" aria-hidden="true" tabindex="-1"></a>                              <span class="at">name =</span> <span class="st">&quot;faith&quot;</span>)</span></code></pre></div>
 </div>
-<div id="evenness" class="section level3" number="7.1.3">
-<h3><span class="header-section-number">7.1.3</span> Evenness</h3>
+<div id="evenness" class="section level3" number="7.1.4">
+<h3><span class="header-section-number">7.1.4</span> Evenness</h3>
 <p>Evenness can be calculated with <code>estimateEvenness</code>.</p>
-<div class="sourceCode" id="cb184"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb184-1"><a href="community-diversity.html#cb184-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">estimateEvenness</span>(tse, </span>
-<span id="cb184-2"><a href="community-diversity.html#cb184-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">abund_values =</span> <span class="st">&quot;counts&quot;</span>, </span>
-<span id="cb184-3"><a href="community-diversity.html#cb184-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">index=</span><span class="st">&quot;simpson&quot;</span>)</span>
-<span id="cb184-4"><a href="community-diversity.html#cb184-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">colData</span>(tse)<span class="sc">$</span>simpson)</span></code></pre></div>
+<div class="sourceCode" id="cb186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb186-1"><a href="community-diversity.html#cb186-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">estimateEvenness</span>(tse, </span>
+<span id="cb186-2"><a href="community-diversity.html#cb186-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">abund_values =</span> <span class="st">&quot;counts&quot;</span>, </span>
+<span id="cb186-3"><a href="community-diversity.html#cb186-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">index=</span><span class="st">&quot;simpson&quot;</span>)</span>
+<span id="cb186-4"><a href="community-diversity.html#cb186-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">colData</span>(tse)<span class="sc">$</span>simpson)</span></code></pre></div>
 <pre><code>## [1] 0.026871 0.027197 0.047049 0.005179 0.004304 0.005011</code></pre>
 </div>
-<div id="dominance" class="section level3" number="7.1.4">
-<h3><span class="header-section-number">7.1.4</span> Dominance</h3>
+<div id="dominance" class="section level3" number="7.1.5">
+<h3><span class="header-section-number">7.1.5</span> Dominance</h3>
 <p>Dominance can be calculated with <code>estimateDominance</code>. Here, the <code>Relative index</code> is calculated which is the relative abundance of the most dominant species in the sample.</p>
-<div class="sourceCode" id="cb186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb186-1"><a href="community-diversity.html#cb186-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">estimateDominance</span>(tse, </span>
-<span id="cb186-2"><a href="community-diversity.html#cb186-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">abund_values =</span> <span class="st">&quot;counts&quot;</span>, </span>
-<span id="cb186-3"><a href="community-diversity.html#cb186-3" aria-hidden="true" tabindex="-1"></a>                         <span class="at">index=</span><span class="st">&quot;relative&quot;</span>)</span>
-<span id="cb186-4"><a href="community-diversity.html#cb186-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb186-5"><a href="community-diversity.html#cb186-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">colData</span>(tse)<span class="sc">$</span>relative)</span></code></pre></div>
+<div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb188-1"><a href="community-diversity.html#cb188-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">estimateDominance</span>(tse, </span>
+<span id="cb188-2"><a href="community-diversity.html#cb188-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">abund_values =</span> <span class="st">&quot;counts&quot;</span>, </span>
+<span id="cb188-3"><a href="community-diversity.html#cb188-3" aria-hidden="true" tabindex="-1"></a>                         <span class="at">index=</span><span class="st">&quot;relative&quot;</span>)</span>
+<span id="cb188-4"><a href="community-diversity.html#cb188-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb188-5"><a href="community-diversity.html#cb188-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">colData</span>(tse)<span class="sc">$</span>relative)</span></code></pre></div>
 <pre><code>##     CL3     CC1     SV1 M31Fcsw M11Fcsw M31Plmr 
 ## 0.03910 0.03226 0.01690 0.22981 0.21778 0.22329</code></pre>
 </div>
-<div id="rarity" class="section level3" number="7.1.5">
-<h3><span class="header-section-number">7.1.5</span> Rarity</h3>
+<div id="rarity" class="section level3" number="7.1.6">
+<h3><span class="header-section-number">7.1.6</span> Rarity</h3>
 <p><code>mia</code> package provides one rarity index called log-modulo skewness. It can be
 calculated with <code>estimateDiversity</code>.</p>
-<div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb188-1"><a href="community-diversity.html#cb188-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> mia<span class="sc">::</span><span class="fu">estimateDiversity</span>(tse, </span>
-<span id="cb188-2"><a href="community-diversity.html#cb188-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">abund_values =</span> <span class="st">&quot;counts&quot;</span>,</span>
-<span id="cb188-3"><a href="community-diversity.html#cb188-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">index =</span> <span class="st">&quot;log_modulo_skewness&quot;</span>)</span>
-<span id="cb188-4"><a href="community-diversity.html#cb188-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb188-5"><a href="community-diversity.html#cb188-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">colData</span>(tse)<span class="sc">$</span>log_modulo_skewness)</span></code></pre></div>
+<div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb190-1"><a href="community-diversity.html#cb190-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> mia<span class="sc">::</span><span class="fu">estimateDiversity</span>(tse, </span>
+<span id="cb190-2"><a href="community-diversity.html#cb190-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">abund_values =</span> <span class="st">&quot;counts&quot;</span>,</span>
+<span id="cb190-3"><a href="community-diversity.html#cb190-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">index =</span> <span class="st">&quot;log_modulo_skewness&quot;</span>)</span>
+<span id="cb190-4"><a href="community-diversity.html#cb190-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb190-5"><a href="community-diversity.html#cb190-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">colData</span>(tse)<span class="sc">$</span>log_modulo_skewness)</span></code></pre></div>
 <pre><code>## [1] 2.061 2.061 2.061 2.061 2.061 2.061</code></pre>
 </div>
 </div>
 <div id="visualization" class="section level2" number="7.2">
 <h2><span class="header-section-number">7.2</span> Visualization</h2>
 <p>A plot comparing all the diversity measures calculated above and stored in <code>colData</code> can then be constructed directly.</p>
-<div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb190-1"><a href="community-diversity.html#cb190-1" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="st">&quot;observed&quot;</span>, <span class="st">&quot;shannon&quot;</span>,<span class="st">&quot;simpson&quot;</span>, <span class="st">&quot;relative&quot;</span>, <span class="st">&quot;faith&quot;</span>,<span class="st">&quot;log_modulo_skewness&quot;</span>),</span>
-<span id="cb190-2"><a href="community-diversity.html#cb190-2" aria-hidden="true" tabindex="-1"></a>                plotColData,</span>
-<span id="cb190-3"><a href="community-diversity.html#cb190-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">object =</span> tse,</span>
-<span id="cb190-4"><a href="community-diversity.html#cb190-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">&quot;SampleType&quot;</span>,</span>
-<span id="cb190-5"><a href="community-diversity.html#cb190-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">colour_by =</span> <span class="st">&quot;SampleType&quot;</span>)</span>
-<span id="cb190-6"><a href="community-diversity.html#cb190-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb190-7"><a href="community-diversity.html#cb190-7" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">lapply</span>(plots,<span class="st">&quot;+&quot;</span>, <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle=</span><span class="dv">45</span>,<span class="at">hjust=</span><span class="dv">1</span>)))</span>
-<span id="cb190-8"><a href="community-diversity.html#cb190-8" aria-hidden="true" tabindex="-1"></a>ggpubr<span class="sc">::</span><span class="fu">ggarrange</span>(<span class="at">plotlist =</span> plots, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">common.legend =</span> <span class="cn">TRUE</span>, <span class="at">legend =</span> <span class="st">&quot;right&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb192"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb192-1"><a href="community-diversity.html#cb192-1" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">c</span>(<span class="st">&quot;observed&quot;</span>, <span class="st">&quot;shannon&quot;</span>,<span class="st">&quot;simpson&quot;</span>, <span class="st">&quot;relative&quot;</span>, <span class="st">&quot;faith&quot;</span>,<span class="st">&quot;log_modulo_skewness&quot;</span>),</span>
+<span id="cb192-2"><a href="community-diversity.html#cb192-2" aria-hidden="true" tabindex="-1"></a>                plotColData,</span>
+<span id="cb192-3"><a href="community-diversity.html#cb192-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">object =</span> tse,</span>
+<span id="cb192-4"><a href="community-diversity.html#cb192-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> <span class="st">&quot;SampleType&quot;</span>,</span>
+<span id="cb192-5"><a href="community-diversity.html#cb192-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">colour_by =</span> <span class="st">&quot;SampleType&quot;</span>)</span>
+<span id="cb192-6"><a href="community-diversity.html#cb192-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb192-7"><a href="community-diversity.html#cb192-7" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">lapply</span>(plots,<span class="st">&quot;+&quot;</span>, <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle=</span><span class="dv">45</span>,<span class="at">hjust=</span><span class="dv">1</span>)))</span>
+<span id="cb192-8"><a href="community-diversity.html#cb192-8" aria-hidden="true" tabindex="-1"></a>ggpubr<span class="sc">::</span><span class="fu">ggarrange</span>(<span class="at">plotlist =</span> plots, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">common.legend =</span> <span class="cn">TRUE</span>, <span class="at">legend =</span> <span class="st">&quot;right&quot;</span>)</span></code></pre></div>
 <p><img src="14_alpha_diversity_files/figure-html/plot-all-diversities-1.png" width="672" /></p>
 </div>
 <div id="session-info-4" class="section level2 unnumbered">
@@ -597,7 +610,7 @@ attached base packages:
 other attached packages:
  [1] ggsignif_0.6.3                 scater_1.22.0                 
  [3] ggplot2_3.3.5                  scuttle_1.4.0                 
- [5] mia_1.3.13                     MultiAssayExperiment_1.20.0   
+ [5] mia_1.3.14                     MultiAssayExperiment_1.20.0   
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
  [9] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [11] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -640,7 +653,7 @@ loaded via a namespace (and not attached):
  [59] sass_0.4.0                  stringi_1.7.6              
  [61] RSQLite_2.2.9               highr_0.9                  
  [63] ScaledMatrix_1.2.0          permute_0.9-5              
- [65] tidytree_0.3.6              filelock_1.0.2             
+ [65] tidytree_0.3.7              filelock_1.0.2             
  [67] BiocParallel_1.28.3         rlang_0.4.12               
  [69] pkgconfig_2.0.3             bitops_1.0-7               
  [71] evaluate_0.14               lattice_0.20-45            

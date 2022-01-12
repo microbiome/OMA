@@ -522,7 +522,7 @@ other attached packages:
  [3] colorspace_2.0-2               MASS_7.3-54                   
  [5] gridExtra_2.3                  ggplot2_3.3.5                 
  [7] pheatmap_1.0.12                cobiclust_0.1.0               
- [9] microbiomeDataSets_1.1.5       mia_1.3.13                    
+ [9] microbiomeDataSets_1.1.5       mia_1.3.14                    
 [11] MultiAssayExperiment_1.20.0    TreeSummarizedExperiment_2.1.4
 [13] Biostrings_2.62.0              XVector_0.34.0                
 [15] SingleCellExperiment_1.16.0    SummarizedExperiment_1.24.0   
@@ -552,7 +552,7 @@ loaded via a namespace (and not attached):
  [33] BiocSingular_1.10.0           scales_1.1.1                 
  [35] DBI_1.1.2                     Rcpp_1.0.7                   
  [37] viridisLite_0.4.0             xtable_1.8-4                 
- [39] decontam_1.14.0               tidytree_0.3.6               
+ [39] decontam_1.14.0               tidytree_0.3.7               
  [41] bit_4.0.4                     rsvd_1.0.5                   
  [43] httr_1.4.2                    RColorBrewer_1.1-2           
  [45] dir.expiry_1.2.0              modeltools_0.2-23            

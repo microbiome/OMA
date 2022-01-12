@@ -627,13 +627,13 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7689 BIC: 8076 AIC: 7948 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7792 BIC: 8357 AIC: 8187 
+## Laplace: 7753 BIC: 8276 AIC: 8105 
 ## 
 ## [[5]]
 ## class: DMN 
@@ -645,13 +645,13 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 8005 BIC: 8887 AIC: 8631 
+## Laplace: 7952 BIC: 8850 AIC: 8594 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 7991 BIC: 9021 AIC: 8722
+## Laplace: 8016 BIC: 9020 AIC: 8721
 ```
 
 
@@ -696,15 +696,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.23   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  793.17  1872.8 1674.5 1735
-## Mock               2       3   67  998.6  -70.65   839.2 1072.8 1134
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -717,8 +717,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.29
+## 1 0.5385 20.63
+## 2 0.4615 15.28
 ```
 
 
@@ -732,12 +732,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.054e-17
-## CC1     1.000e+00 3.900e-22
-## SV1     1.000e+00 1.954e-12
-## M31Fcsw 7.899e-26 1.000e+00
-## M11Fcsw 1.133e-16 1.000e+00
-## M31Plmr 1.122e-13 1.000e+00
+## CL3     1.000e+00 4.846e-17
+## CC1     1.000e+00 3.709e-22
+## SV1     1.000e+00 2.027e-12
+## M31Fcsw 6.559e-26 1.000e+00
+## M11Fcsw 9.534e-17 1.000e+00
+## M31Plmr 9.285e-14 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -748,13 +748,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]     [,2]
-## Phylum:Crenarchaeota  0.30384 0.135469
-## Phylum:Euryarchaeota  0.23115 0.146865
-## Phylum:Actinobacteria 1.21366 1.060035
-## Phylum:Spirochaetes   0.21394 0.131845
-## Phylum:MVP-15         0.02982 0.000767
-## Phylum:Proteobacteria 6.84391 1.815223
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30505 0.1354666
+## Phylum:Euryarchaeota  0.23175 0.1468627
+## Phylum:Actinobacteria 1.20937 1.0600198
+## Phylum:Spirochaetes   0.21436 0.1318428
+## Phylum:MVP-15         0.02997 0.0007651
+## Phylum:Proteobacteria 6.85897 1.8152966
 ```
 Get the assignment probabilities
 
@@ -942,7 +942,7 @@ other attached packages:
  [7] ggtree_3.2.1                   ape_5.6-1                     
  [9] pheatmap_1.0.12                miaViz_1.3.2                  
 [11] ggraph_2.0.5                   ggplot2_3.3.5                 
-[13] mia_1.3.13                     MultiAssayExperiment_1.20.0   
+[13] mia_1.3.14                     MultiAssayExperiment_1.20.0   
 [15] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [17] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [19] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -977,7 +977,7 @@ loaded via a namespace (and not attached):
  [43] randomcoloR_1.1.0.1         Rcpp_1.0.7                 
  [45] viridisLite_0.4.0           clue_0.3-60                
  [47] decontam_1.14.0             gridGraphics_0.5-1         
- [49] tidytree_0.3.6              bit_4.0.4                  
+ [49] tidytree_0.3.7              bit_4.0.4                  
  [51] rsvd_1.0.5                  FNN_1.1.3                  
  [53] RColorBrewer_1.1-2          dir.expiry_1.2.0           
  [55] ellipsis_0.3.2              pkgconfig_2.0.3            
@@ -994,7 +994,7 @@ loaded via a namespace (and not attached):
  [77] knitr_1.37                  bit64_4.0.5                
  [79] tidygraph_1.2.0             purrr_0.3.4                
  [81] nlme_3.1-153                sparseMatrixStats_1.6.0    
- [83] aplot_0.1.1                 compiler_4.1.2             
+ [83] aplot_0.1.2                 compiler_4.1.2             
  [85] curl_4.3.2                  png_0.1-7                  
  [87] beeswarm_0.4.0              filelock_1.0.2             
  [89] treeio_1.18.1               tibble_3.1.6               

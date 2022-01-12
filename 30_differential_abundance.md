@@ -719,7 +719,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.9981
+## Proportions of Observations within 95% Credible Interval: 0.998
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
@@ -777,7 +777,7 @@ other attached packages:
 [17] NADA_1.6-1.1                   survival_3.2-13               
 [19] MASS_7.3-54                    ANCOMBC_1.4.0                 
 [21] tidySummarizedExperiment_1.4.1 patchwork_1.1.1               
-[23] mia_1.3.13                     MultiAssayExperiment_1.20.0   
+[23] mia_1.3.14                     MultiAssayExperiment_1.20.0   
 [25] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [27] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [29] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -855,7 +855,7 @@ loaded via a namespace (and not attached):
 [129] colorspace_2.0-2              rvest_1.0.2                  
 [131] XML_3.99-0.8                  fs_1.5.2                     
 [133] splines_4.1.2                 yulab.utils_0.0.4            
-[135] tidytree_0.3.6                scater_1.22.0                
+[135] tidytree_0.3.7                scater_1.22.0                
 [137] multtest_2.50.0               plotly_4.10.0                
 [139] xtable_1.8-4                  jsonlite_1.7.2               
 [141] nloptr_1.2.2.3                CodeDepends_0.6.5            
