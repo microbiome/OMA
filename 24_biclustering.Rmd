@@ -116,19 +116,23 @@ if(!require(ggplot2)){
     install.packages("ggplot2")
     library(ggplot2)
 }
-if(!require(gridExtra)){
-    install.packages("gridExtra")
-    library(gridExtra)
+if(!require(patchwork)){
+    install.packages("patchwork")
+    library(patchwork)
 }
 
 # ggplot requires data in melted format
 melt_assay <- meltAssay(mae[[1]], abund_values = "clr", add_col_data = T, add_row_data = T)
 
-# Use grid.arrange to arrange two plots side-by-side
-grid.arrange(
-ggplot(melt_assay) + geom_boxplot(aes(x = clusters.x, y = clr)) + labs(x = "Taxa clusters"),
-ggplot(melt_assay) + geom_boxplot(aes(x = clusters.y, y = clr)) + labs(x = "Sample clusters"),
-nrow = 1)
+# patchwork two plots side-by-side
+p1 <- ggplot(melt_assay) +
+  geom_boxplot(aes(x = clusters.x, y = clr)) +
+  labs(x = "Taxa clusters")
+p2 <- ggplot(melt_assay) +
+  geom_boxplot(aes(x = clusters.y, y = clr)) +
+  labs(x = "Sample clusters")
+
+p1 + p2
 ```
 
 ## Taxa vs biomolecules
@@ -291,8 +295,7 @@ for( data in df ){
     labs(title = paste0("Cluster ", i), x = "Taxa (clr median)", y = "Metabolites (abs. median)")
 }
 
-do.call(grid.arrange, c(plot_list, nrow = 1))
-
+plot_list[[1]] + plot_list[[2]] + plot_list[[3]]
 ```
 
 _pheatmap_ does not allow boolean values, so they must be converted into factors.
