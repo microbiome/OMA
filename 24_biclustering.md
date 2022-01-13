@@ -193,19 +193,23 @@ if(!require(ggplot2)){
     install.packages("ggplot2")
     library(ggplot2)
 }
-if(!require(gridExtra)){
-    install.packages("gridExtra")
-    library(gridExtra)
+if(!require(patchwork)){
+    install.packages("patchwork")
+    library(patchwork)
 }
 
 # ggplot requires data in melted format
 melt_assay <- meltAssay(mae[[1]], abund_values = "clr", add_col_data = T, add_row_data = T)
 
-# Use grid.arrange to arrange two plots side-by-side
-grid.arrange(
-ggplot(melt_assay) + geom_boxplot(aes(x = clusters.x, y = clr)) + labs(x = "Taxa clusters"),
-ggplot(melt_assay) + geom_boxplot(aes(x = clusters.y, y = clr)) + labs(x = "Sample clusters"),
-nrow = 1)
+# patchwork two plots side-by-side
+p1 <- ggplot(melt_assay) +
+  geom_boxplot(aes(x = clusters.x, y = clr)) +
+  labs(x = "Taxa clusters")
+p2 <- ggplot(melt_assay) +
+  geom_boxplot(aes(x = clusters.y, y = clr)) +
+  labs(x = "Sample clusters")
+
+p1 + p2
 ```
 
 <img src="24_biclustering_files/figure-html/cobiclust_4-1.png" width="672" />
@@ -401,7 +405,7 @@ for( data in df ){
     labs(title = paste0("Cluster ", i), x = "Taxa (clr median)", y = "Metabolites (abs. median)")
 }
 
-do.call(grid.arrange, c(plot_list, nrow = 1))
+plot_list[[1]] + plot_list[[2]] + plot_list[[3]]
 ```
 
 <img src="24_biclustering_files/figure-html/biclust_6-1.png" width="1344" />
@@ -520,7 +524,7 @@ attached base packages:
 other attached packages:
  [1] biclust_2.0.3                  lattice_0.20-45               
  [3] colorspace_2.0-2               MASS_7.3-54                   
- [5] gridExtra_2.3                  ggplot2_3.3.5                 
+ [5] patchwork_1.1.1                ggplot2_3.3.5                 
  [7] pheatmap_1.0.12                cobiclust_0.1.0               
  [9] microbiomeDataSets_1.1.5       mia_1.3.14                    
 [11] MultiAssayExperiment_1.20.0    TreeSummarizedExperiment_2.1.4
@@ -586,13 +590,13 @@ loaded via a namespace (and not attached):
 [101] BiocNeighbors_1.12.0          bitops_1.0-7                 
 [103] irlba_2.3.5                   httpuv_1.6.5                 
 [105] R6_2.5.1                      bookdown_0.24                
-[107] promises_1.2.0.1              vipor_0.4.5                  
-[109] codetools_0.2-18              assertthat_0.2.1             
-[111] withr_2.4.3                   GenomeInfoDbData_1.2.7       
-[113] mgcv_1.8-38                   parallel_4.1.2               
-[115] beachmat_2.10.0               class_7.3-19                 
-[117] tidyr_1.1.4                   rmarkdown_2.11               
-[119] DelayedMatrixStats_1.16.0     shiny_1.7.1                  
-[121] ggbeeswarm_0.6.0             
+[107] promises_1.2.0.1              gridExtra_2.3                
+[109] vipor_0.4.5                   codetools_0.2-18             
+[111] assertthat_0.2.1              withr_2.4.3                  
+[113] GenomeInfoDbData_1.2.7        mgcv_1.8-38                  
+[115] parallel_4.1.2                beachmat_2.10.0              
+[117] class_7.3-19                  tidyr_1.1.4                  
+[119] rmarkdown_2.11                DelayedMatrixStats_1.16.0    
+[121] shiny_1.7.1                   ggbeeswarm_0.6.0             
 ```
 </div>
