@@ -170,9 +170,6 @@ shared among the mutliple (-omics) data sets in hand.
 We use the R [MOFA2](https://biofam.github.io/MOFA2/index.html) package
 for the analysis, and [install](https://biofam.github.io/MOFA2/installation.html) the corresponding dependencies.
 
-**Note:** Comment out the line for installing `miniconda` if it has been installed earlier.
-Similarly for `mofapy2` if it was so.
-
 ```{r, message=FALSE, warning=FALSE}
 if(!require(MOFA2)){
     BiocManager::install("MOFA2")
@@ -189,7 +186,9 @@ reticulate::use_miniconda()
 reticulate::py_install(packages = c("mofapy2"), pip = TRUE)
 ```
 
-The `mae` object could be used straight to create the MOFA model:
+The `mae` object could be used straight to create the MOFA model. Yet, we transform 
+our assays since the model assumes normality per default. Other distributions that
+can be used, include Poisson or Bernoulli.
 
 ```{r, message=FALSE, warning=FALSE}
 library(MOFA2)
@@ -203,17 +202,20 @@ colData(mae)$Diet <- ifelse(colData(mae)$Diet == "High-fat" |
 # which are also in form e.g. "Ambiguous" and "uncultured" taxa
 mae[[1]] <- mae[[1]][!duplicated(rownames(assay(mae[[1]]))), ]
 
-# Transforming microbiome data with clr
-mae[[1]] <- transformCounts(mae[[1]], abund_values = "counts", method = "clr",
-                            pseudocount = 1)
+# Transforming microbiome data with rclr
+mae[[1]] <- transformCounts(mae[[1]], abund_values = "counts", method = "rclr")
 
 # Transforming metabolomic data with log10
 mae[[2]] <- transformSamples(mae[[2]], abund_values = "nmr", method = "log10")
+
+# Transforming biomarker data with z-transform
+mae[[3]] <- transformFeatures(mae[[3]], abund_values = "signals", method = "z", pseudocount = 1)
 
 # Removing assays no longer needed
 assay(mae[[1]], "counts") <- NULL
 assay(mae[[1]], "log10") <- NULL
 assay(mae[[2]], "nmr") <- NULL
+assay(mae[[3]], "signals") <- NULL
 
 # Building our mofa model
 model <- create_mofa_from_MultiAssayExperiment(mae,
@@ -254,14 +256,14 @@ library(patchwork)
 wrap_plots(
     plot_variance_explained(model.trained, x="view", y="factor", plot_total = T),
     nrow = 2
-) + plot_annotation(title = "Varience Explained per factor and assay",
+) + plot_annotation(title = "Variance Explained per factor and assay",
                     theme = theme(plot.title = element_text(hjust = 0.5)))
 ```
 
 The top weights for each assay using the three first factors:
 
 ```{r, warning=FALSE, message=FALSE, fig.height=10, fig.width=10}
-plots <- lapply(c("metabolites","microbiota","biomarkers"), function(name) {
+plots <- lapply(c("microbiota", "metabolites","biomarkers"), function(name) {
     plot_top_weights(model.trained,
                      view = name,
                      factors = 1:3,
