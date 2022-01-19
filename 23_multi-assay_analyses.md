@@ -170,6 +170,8 @@ mae[[3]]
 ## colData names(0):
 ```
 
+## Cross-correlation Analysis
+
 Next we can do the cross-correlation analysis. 
 Here we analyse if individual bacteria genera correlates
 with concentrations of individual metabolites. This helps as to answer the question: 
@@ -260,6 +262,192 @@ ggplot(correlation_table, aes(x = Var1, y = Var2, fill = cor)) +
 
 <img src="23_multi-assay_analyses_files/figure-html/cross-correlation7-1.png" width="960" />
 
+## Multi-Omics Factor Analysis
+
+Multi-Omics Factor Analysis [@Argelaguet2018] (MOFA) is
+an unsupervised method for integrating multi-omic data sets in a downstream analysis.
+It could be seen as a generalization of principal component analysis. Yet, with the ability to infer a latent (low-dimensional) representation, 
+shared among the mutliple (-omics) data sets in hand.
+
+We use the R [MOFA2](https://biofam.github.io/MOFA2/index.html) package
+for the analysis, and [install](https://biofam.github.io/MOFA2/installation.html) the corresponding dependencies.
+
+
+```r
+if(!require(MOFA2)){
+    BiocManager::install("MOFA2")
+}
+
+# For inter-operability between Python and R, and setting Python dependencies,
+# reticulate package is needed
+if(!require(reticulate)){
+    install.packages("reticulate")
+}
+
+reticulate::install_miniconda(force = TRUE)
+```
+
+```
+## [1] "/github/home/.local/share/r-miniconda"
+```
+
+```r
+reticulate::use_miniconda()
+reticulate::py_install(packages = c("mofapy2"), pip = TRUE)
+```
+
+The `mae` object could be used straight to create the MOFA model. Yet, we transform 
+our assays since the model assumes normality per default. Other distributions that
+can be used, include Poisson or Bernoulli.
+
+
+```r
+library(MOFA2)
+# For simplicity, classify all high-fat diets as high-fat, and all the low-fat 
+# diets as low-fat diets
+colData(mae)$Diet <- ifelse(colData(mae)$Diet == "High-fat" | 
+                              colData(mae)$Diet == "High-fat + XOS", 
+                            "High-fat", "Low-fat")
+
+# Removing duplicates at the microbiome data
+# which are also in form e.g. "Ambiguous" and "uncultured" taxa
+mae[[1]] <- mae[[1]][!duplicated(rownames(assay(mae[[1]]))), ]
+
+# Transforming microbiome data with rclr
+mae[[1]] <- transformCounts(mae[[1]], abund_values = "counts", method = "rclr")
+
+# Transforming metabolomic data with log10
+mae[[2]] <- transformSamples(mae[[2]], abund_values = "nmr", method = "log10")
+
+# Transforming biomarker data with z-transform
+mae[[3]] <- transformFeatures(mae[[3]], abund_values = "signals", method = "z", pseudocount = 1)
+
+# Removing assays no longer needed
+assay(mae[[1]], "counts") <- NULL
+assay(mae[[1]], "log10") <- NULL
+assay(mae[[2]], "nmr") <- NULL
+assay(mae[[3]], "signals") <- NULL
+
+# Building our mofa model
+model <- create_mofa_from_MultiAssayExperiment(mae,
+                                               groups = "Diet", 
+                                               extract_metadata = TRUE)
+model
+```
+
+```
+## Untrained MOFA model with the following characteristics: 
+##  Number of views: 3 
+##  Views names: microbiota metabolites biomarkers 
+##  Number of features (per view): 239 38 39 
+##  Number of groups: 2 
+##  Groups names: High-fat Low-fat 
+##  Number of samples (per group): 20 20 
+## 
+```
+
+Model options could be defined as follows:
+
+
+```r
+model_opts <- get_default_model_options(model)
+model_opts$num_factors <- 15
+head(model_opts)
+```
+
+```
+## $likelihoods
+##  microbiota metabolites  biomarkers 
+##  "gaussian"  "gaussian"  "gaussian" 
+## 
+## $num_factors
+## [1] 15
+## 
+## $spikeslab_factors
+## [1] FALSE
+## 
+## $spikeslab_weights
+## [1] TRUE
+## 
+## $ard_factors
+## [1] TRUE
+## 
+## $ard_weights
+## [1] TRUE
+```
+
+Model's training options are defined with the following:
+
+
+```r
+train_opts <- get_default_training_options(model)
+head(train_opts)
+```
+
+```
+## $maxiter
+## [1] 1000
+## 
+## $convergence_mode
+## [1] "fast"
+## 
+## $drop_factor_threshold
+## [1] -1
+## 
+## $verbose
+## [1] FALSE
+## 
+## $startELBO
+## [1] 1
+## 
+## $freqELBO
+## [1] 5
+```
+
+Preparing and training the model:
+
+
+```r
+model.prepared <- prepare_mofa(
+  object = model,
+  model_options = model_opts
+)
+model.trained <- run_mofa(model.prepared)
+```
+
+Visualizing the variance explained:
+
+
+```r
+library(patchwork)
+wrap_plots(
+    plot_variance_explained(model.trained, x="view", y="factor", plot_total = T),
+    nrow = 2
+) + plot_annotation(title = "Variance Explained per factor and assay",
+                    theme = theme(plot.title = element_text(hjust = 0.5)))
+```
+
+<img src="23_multi-assay_analyses_files/figure-html/unnamed-chunk-6-1.png" width="960" />
+
+The top weights for each assay using the three first factors:
+
+
+```r
+plots <- lapply(c("microbiota", "metabolites","biomarkers"), function(name) {
+    plot_top_weights(model.trained,
+                     view = name,
+                     factors = 1:3,
+                     nfeatures = 10) +
+        labs(title = paste0("Top weights of the ", name," assay"))
+})
+wrap_plots(plots, nrow = 3) & theme(text = element_text(size = 8))
+```
+
+<img src="23_multi-assay_analyses_files/figure-html/unnamed-chunk-7-1.png" width="960" />
+
+More tutorials and examples of using the package are found at: [link](https://biofam.github.io/MOFA2/tutorials.html)
+
+
 
 ## Session Info {-}
 
@@ -286,78 +474,88 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] ggplot2_3.3.5                  reshape2_1.4.4                
- [3] stringr_1.4.0                  microbiomeDataSets_1.1.5      
- [5] mia_1.3.14                     MultiAssayExperiment_1.20.0   
- [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
- [9] XVector_0.34.0                 SingleCellExperiment_1.16.0   
-[11] SummarizedExperiment_1.24.0    Biobase_2.54.0                
-[13] GenomicRanges_1.46.1           GenomeInfoDb_1.30.0           
-[15] IRanges_2.28.0                 S4Vectors_0.32.3              
-[17] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
-[19] matrixStats_0.61.0-9001        ecodist_2.0.7                 
-[21] BiocStyle_2.22.0               rebook_1.4.0                  
+ [1] patchwork_1.1.1                MOFA2_1.4.0                   
+ [3] reticulate_1.22                ggplot2_3.3.5                 
+ [5] reshape2_1.4.4                 stringr_1.4.0                 
+ [7] microbiomeDataSets_1.1.5       mia_1.3.14                    
+ [9] MultiAssayExperiment_1.20.0    TreeSummarizedExperiment_2.1.4
+[11] Biostrings_2.62.0              XVector_0.34.0                
+[13] SingleCellExperiment_1.16.0    SummarizedExperiment_1.24.0   
+[15] Biobase_2.54.0                 GenomicRanges_1.46.1          
+[17] GenomeInfoDb_1.30.0            IRanges_2.28.0                
+[19] S4Vectors_0.32.3               BiocGenerics_0.40.0           
+[21] MatrixGenerics_1.6.0           matrixStats_0.61.0-9001       
+[23] ecodist_2.0.7                  BiocStyle_2.22.0              
+[25] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
-  [1] AnnotationHub_3.2.0           BiocFileCache_2.2.0          
-  [3] plyr_1.8.6                    lazyeval_0.2.2               
-  [5] splines_4.1.2                 BiocParallel_1.28.3          
-  [7] scater_1.22.0                 digest_0.6.29                
-  [9] yulab.utils_0.0.4             htmltools_0.5.2              
- [11] viridis_0.6.2                 fansi_1.0.0                  
- [13] magrittr_2.0.1                memoise_2.0.1                
- [15] ScaledMatrix_1.2.0            cluster_2.1.2                
- [17] DECIPHER_2.22.0               colorspace_2.0-2             
- [19] blob_1.2.2                    rappdirs_0.3.3               
- [21] ggrepel_0.9.1                 xfun_0.29                    
- [23] dplyr_1.0.7                   crayon_1.4.2                 
- [25] RCurl_1.98-1.5                jsonlite_1.7.2               
- [27] graph_1.72.0                  ape_5.6-1                    
- [29] glue_1.6.0                    gtable_0.3.0                 
- [31] zlibbioc_1.40.0               DelayedArray_0.20.0          
- [33] BiocSingular_1.10.0           scales_1.1.1                 
- [35] DBI_1.1.2                     Rcpp_1.0.7                   
- [37] viridisLite_0.4.0             xtable_1.8-4                 
- [39] decontam_1.14.0               tidytree_0.3.7               
- [41] bit_4.0.4                     rsvd_1.0.5                   
- [43] httr_1.4.2                    dir.expiry_1.2.0             
- [45] ellipsis_0.3.2                farver_2.1.0                 
- [47] pkgconfig_2.0.3               XML_3.99-0.8                 
- [49] scuttle_1.4.0                 CodeDepends_0.6.5            
- [51] sass_0.4.0                    dbplyr_2.1.1                 
- [53] utf8_1.2.2                    tidyselect_1.1.1             
- [55] rlang_0.4.12                  later_1.3.0                  
- [57] AnnotationDbi_1.56.2          munsell_0.5.0                
- [59] BiocVersion_3.14.0            tools_4.1.2                  
- [61] cachem_1.0.6                  DirichletMultinomial_1.36.0  
- [63] generics_0.1.1                RSQLite_2.2.9                
- [65] ExperimentHub_2.2.0           evaluate_0.14                
- [67] fastmap_1.1.0                 yaml_2.2.1                   
- [69] knitr_1.37                    bit64_4.0.5                  
- [71] purrr_0.3.4                   KEGGREST_1.34.0              
- [73] nlme_3.1-153                  sparseMatrixStats_1.6.0      
- [75] mime_0.12                     compiler_4.1.2               
- [77] png_0.1-7                     beeswarm_0.4.0               
- [79] filelock_1.0.2                curl_4.3.2                   
- [81] interactiveDisplayBase_1.32.0 treeio_1.18.1                
- [83] tibble_3.1.6                  bslib_0.3.1                  
- [85] stringi_1.7.6                 highr_0.9                    
- [87] lattice_0.20-45               Matrix_1.4-0                 
- [89] vegan_2.5-7                   permute_0.9-5                
- [91] vctrs_0.3.8                   pillar_1.6.4                 
- [93] lifecycle_1.0.1               BiocManager_1.30.16          
- [95] jquerylib_0.1.4               BiocNeighbors_1.12.0         
- [97] bitops_1.0-7                  irlba_2.3.5                  
- [99] httpuv_1.6.5                  R6_2.5.1                     
-[101] bookdown_0.24                 promises_1.2.0.1             
-[103] gridExtra_2.3                 vipor_0.4.5                  
-[105] codetools_0.2-18              MASS_7.3-54                  
-[107] assertthat_0.2.1              withr_2.4.3                  
-[109] GenomeInfoDbData_1.2.7        mgcv_1.8-38                  
-[111] parallel_4.1.2                grid_4.1.2                   
-[113] beachmat_2.10.0               tidyr_1.1.4                  
-[115] rmarkdown_2.11                DelayedMatrixStats_1.16.0    
-[117] shiny_1.7.1                   ggbeeswarm_0.6.0             
+  [1] AnnotationHub_3.2.0           corrplot_0.92                
+  [3] BiocFileCache_2.2.0           plyr_1.8.6                   
+  [5] lazyeval_0.2.2                splines_4.1.2                
+  [7] BiocParallel_1.28.3           scater_1.22.0                
+  [9] digest_0.6.29                 yulab.utils_0.0.4            
+ [11] htmltools_0.5.2               viridis_0.6.2                
+ [13] fansi_1.0.0                   magrittr_2.0.1               
+ [15] memoise_2.0.1                 ScaledMatrix_1.2.0           
+ [17] cluster_2.1.2                 DECIPHER_2.22.0              
+ [19] colorspace_2.0-2              blob_1.2.2                   
+ [21] rappdirs_0.3.3                ggrepel_0.9.1                
+ [23] xfun_0.29                     dplyr_1.0.7                  
+ [25] crayon_1.4.2                  RCurl_1.98-1.5               
+ [27] jsonlite_1.7.2                graph_1.72.0                 
+ [29] ape_5.6-1                     glue_1.6.0                   
+ [31] gtable_0.3.0                  zlibbioc_1.40.0              
+ [33] DelayedArray_0.20.0           BiocSingular_1.10.0          
+ [35] Rhdf5lib_1.16.0               HDF5Array_1.22.1             
+ [37] scales_1.1.1                  pheatmap_1.0.12              
+ [39] DBI_1.1.2                     Rcpp_1.0.7                   
+ [41] viridisLite_0.4.0             xtable_1.8-4                 
+ [43] decontam_1.14.0               tidytree_0.3.7               
+ [45] bit_4.0.4                     rsvd_1.0.5                   
+ [47] httr_1.4.2                    RColorBrewer_1.1-2           
+ [49] dir.expiry_1.2.0              ellipsis_0.3.2               
+ [51] farver_2.1.0                  pkgconfig_2.0.3              
+ [53] XML_3.99-0.8                  scuttle_1.4.0                
+ [55] uwot_0.1.11                   CodeDepends_0.6.5            
+ [57] sass_0.4.0                    dbplyr_2.1.1                 
+ [59] here_1.0.1                    utf8_1.2.2                   
+ [61] labeling_0.4.2                tidyselect_1.1.1             
+ [63] rlang_0.4.12                  later_1.3.0                  
+ [65] AnnotationDbi_1.56.2          munsell_0.5.0                
+ [67] BiocVersion_3.14.0            tools_4.1.2                  
+ [69] cachem_1.0.6                  DirichletMultinomial_1.36.0  
+ [71] generics_0.1.1                RSQLite_2.2.9                
+ [73] ExperimentHub_2.2.0           evaluate_0.14                
+ [75] fastmap_1.1.0                 yaml_2.2.1                   
+ [77] knitr_1.37                    bit64_4.0.5                  
+ [79] purrr_0.3.4                   KEGGREST_1.34.0              
+ [81] nlme_3.1-153                  sparseMatrixStats_1.6.0      
+ [83] mime_0.12                     compiler_4.1.2               
+ [85] png_0.1-7                     beeswarm_0.4.0               
+ [87] filelock_1.0.2                curl_4.3.2                   
+ [89] interactiveDisplayBase_1.32.0 treeio_1.18.1                
+ [91] tibble_3.1.6                  bslib_0.3.1                  
+ [93] stringi_1.7.6                 basilisk.utils_1.6.0         
+ [95] highr_0.9                     forcats_0.5.1                
+ [97] lattice_0.20-45               Matrix_1.4-0                 
+ [99] vegan_2.5-7                   permute_0.9-5                
+[101] vctrs_0.3.8                   rhdf5filters_1.6.0           
+[103] pillar_1.6.4                  lifecycle_1.0.1              
+[105] BiocManager_1.30.16           jquerylib_0.1.4              
+[107] BiocNeighbors_1.12.0          cowplot_1.1.1                
+[109] bitops_1.0-7                  irlba_2.3.5                  
+[111] httpuv_1.6.5                  R6_2.5.1                     
+[113] bookdown_0.24                 promises_1.2.0.1             
+[115] gridExtra_2.3                 vipor_0.4.5                  
+[117] codetools_0.2-18              MASS_7.3-54                  
+[119] assertthat_0.2.1              rhdf5_2.38.0                 
+[121] rprojroot_2.0.2               withr_2.4.3                  
+[123] GenomeInfoDbData_1.2.7        mgcv_1.8-38                  
+[125] parallel_4.1.2                grid_4.1.2                   
+[127] beachmat_2.10.0               basilisk_1.6.0               
+[129] tidyr_1.1.4                   rmarkdown_2.11               
+[131] DelayedMatrixStats_1.16.0     Rtsne_0.15                   
+[133] shiny_1.7.1                   ggbeeswarm_0.6.0             
 ```
 </div>
 

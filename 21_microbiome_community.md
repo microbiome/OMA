@@ -621,37 +621,37 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7689 BIC: 7932 AIC: 7847 
+## Laplace: 7673 BIC: 7927 AIC: 7842 
 ## 
 ## [[3]]
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7728 BIC: 8124 AIC: 7996 
+## Laplace: 7682 BIC: 8069 AIC: 7942 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7751 BIC: 8274 AIC: 8103 
+## Laplace: 7752 BIC: 8274 AIC: 8103 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7863 BIC: 8553 AIC: 8340 
+## Laplace: 7848 BIC: 8565 AIC: 8352 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7943 BIC: 8822 AIC: 8566 
+## Laplace: 7952 BIC: 8850 AIC: 8594 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: NaN BIC: NaN AIC: NaN
+## Laplace: 8023 BIC: 9070 AIC: 8771
 ```
 
 
@@ -676,7 +676,7 @@ getBestDMNFit(tse_dmn, type = "laplace")
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7689 BIC: 7932 AIC: 7847
+## Laplace: 7673 BIC: 7927 AIC: 7842
 ```
 
 ### PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors
@@ -696,15 +696,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Feces              2       4   67 1078.3 -106.22   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.21   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.38  1906.4 1674.5 1735
+## Mock               2       3   67  980.2  110.61   911.4 1054.4 1115
+## Ocean              2       3   67 1096.7  -56.93   944.2 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
-## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
+## Skin               2       3   67  992.6  -84.93   826.1 1066.8 1128
+## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.77   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -716,9 +716,9 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 ```
 
 ```
-##       pi  theta
-## 1 0.5769  9.926
-## 2 0.4231 23.760
+##       pi theta
+## 1 0.5385 20.60
+## 2 0.4615 15.27
 ```
 
 
@@ -732,12 +732,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     3.139e-13 1.000e+00
-## CC1     1.084e-15 1.000e+00
-## SV1     2.581e-06 1.000e+00
-## M31Fcsw 1.000e+00 4.251e-32
-## M11Fcsw 1.000e+00 5.146e-25
-## M31Plmr 1.000e+00 1.188e-16
+## CL3     1.000e+00 5.140e-17
+## CC1     1.000e+00 4.008e-22
+## SV1     1.000e+00 2.082e-12
+## M31Fcsw 7.308e-26 1.000e+00
+## M11Fcsw 1.054e-16 1.000e+00
+## M31Plmr 1.001e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -748,13 +748,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                            [,1]   [,2]
-## Phylum:Crenarchaeota  0.1335130 0.3841
-## Phylum:Euryarchaeota  0.1544894 0.2165
-## Phylum:Actinobacteria 0.8579863 1.2065
-## Phylum:Spirochaetes   0.1239763 0.2636
-## Phylum:MVP-15         0.0005771 0.0404
-## Phylum:Proteobacteria 1.5144095 8.3255
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30431 0.1354578
+## Phylum:Euryarchaeota  0.23144 0.1468453
+## Phylum:Actinobacteria 1.21044 1.0596720
+## Phylum:Spirochaetes   0.21410 0.1318362
+## Phylum:MVP-15         0.02991 0.0007691
+## Phylum:Proteobacteria 6.84238 1.8139921
 ```
 Get the assignment probabilities
 
