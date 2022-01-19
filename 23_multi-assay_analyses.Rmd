@@ -84,6 +84,8 @@ mae[[2]]
 mae[[3]]
 ```
 
+## Cross-correlation Analysis
+
 Next we can do the cross-correlation analysis. 
 Here we analyse if individual bacteria genera correlates
 with concentrations of individual metabolites. This helps as to answer the question: 
@@ -157,6 +159,122 @@ ggplot(correlation_table, aes(x = Var1, y = Var2, fill = cor)) +
         legend.key.size = unit(1, "cm")) +
   labs(x = "Taxa", y = "Metabolites")
 ```
+
+## Multi-Omics Factor Analysis
+
+Multi-Omics Factor Analysis [@Argelaguet2018] (MOFA) is
+an unsupervised method for integrating multi-omic data sets in a downstream analysis.
+It could be seen as a generalization of principal component analysis. Yet, with the ability to infer a latent (low-dimensional) representation, 
+shared among the mutliple (-omics) data sets in hand.
+
+We use the R [MOFA2](https://biofam.github.io/MOFA2/index.html) package
+for the analysis, and [install](https://biofam.github.io/MOFA2/installation.html) the corresponding dependencies.
+
+```{r, message=FALSE, warning=FALSE}
+if(!require(MOFA2)){
+    BiocManager::install("MOFA2")
+}
+
+# For inter-operability between Python and R, and setting Python dependencies,
+# reticulate package is needed
+if(!require(reticulate)){
+    install.packages("reticulate")
+}
+
+reticulate::install_miniconda(force = TRUE)
+reticulate::use_miniconda()
+reticulate::py_install(packages = c("mofapy2"), pip = TRUE)
+```
+
+The `mae` object could be used straight to create the MOFA model. Yet, we transform 
+our assays since the model assumes normality per default. Other distributions that
+can be used, include Poisson or Bernoulli.
+
+```{r, message=FALSE, warning=FALSE}
+library(MOFA2)
+# For simplicity, classify all high-fat diets as high-fat, and all the low-fat 
+# diets as low-fat diets
+colData(mae)$Diet <- ifelse(colData(mae)$Diet == "High-fat" | 
+                              colData(mae)$Diet == "High-fat + XOS", 
+                            "High-fat", "Low-fat")
+
+# Removing duplicates at the microbiome data
+# which are also in form e.g. "Ambiguous" and "uncultured" taxa
+mae[[1]] <- mae[[1]][!duplicated(rownames(assay(mae[[1]]))), ]
+
+# Transforming microbiome data with rclr
+mae[[1]] <- transformCounts(mae[[1]], abund_values = "counts", method = "rclr")
+
+# Transforming metabolomic data with log10
+mae[[2]] <- transformSamples(mae[[2]], abund_values = "nmr", method = "log10")
+
+# Transforming biomarker data with z-transform
+mae[[3]] <- transformFeatures(mae[[3]], abund_values = "signals", method = "z", pseudocount = 1)
+
+# Removing assays no longer needed
+assay(mae[[1]], "counts") <- NULL
+assay(mae[[1]], "log10") <- NULL
+assay(mae[[2]], "nmr") <- NULL
+assay(mae[[3]], "signals") <- NULL
+
+# Building our mofa model
+model <- create_mofa_from_MultiAssayExperiment(mae,
+                                               groups = "Diet", 
+                                               extract_metadata = TRUE)
+model
+```
+
+Model options could be defined as follows:
+
+```{r, message=FALSE, warning=FALSE}
+model_opts <- get_default_model_options(model)
+model_opts$num_factors <- 15
+head(model_opts)
+```
+
+Model's training options are defined with the following:
+
+```{r, message=FALSE, warning=FALSE}
+train_opts <- get_default_training_options(model)
+head(train_opts)
+```
+
+Preparing and training the model:
+
+```{r, message=FALSE, warning=FALSE}
+model.prepared <- prepare_mofa(
+  object = model,
+  model_options = model_opts
+)
+model.trained <- run_mofa(model.prepared)
+```
+
+Visualizing the variance explained:
+
+```{r, message=FALSE, warning=FALSE, fig.height=8, fig.width=10}
+library(patchwork)
+wrap_plots(
+    plot_variance_explained(model.trained, x="view", y="factor", plot_total = T),
+    nrow = 2
+) + plot_annotation(title = "Variance Explained per factor and assay",
+                    theme = theme(plot.title = element_text(hjust = 0.5)))
+```
+
+The top weights for each assay using the three first factors:
+
+```{r, warning=FALSE, message=FALSE, fig.height=10, fig.width=10}
+plots <- lapply(c("microbiota", "metabolites","biomarkers"), function(name) {
+    plot_top_weights(model.trained,
+                     view = name,
+                     factors = 1:3,
+                     nfeatures = 10) +
+        labs(title = paste0("Top weights of the ", name," assay"))
+})
+wrap_plots(plots, nrow = 3) & theme(text = element_text(size = 8))
+```
+
+More tutorials and examples of using the package are found at: [link](https://biofam.github.io/MOFA2/tutorials.html)
+
 
 
 ## Session Info {-}
