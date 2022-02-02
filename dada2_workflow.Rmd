@@ -4,7 +4,10 @@ output: html_notebook
 ---
 
 Example of DADA2 tutorial can be found from [here](https://benjjneb.github.io/dada2/tutorial.html).
-This example include only the code. The pipelines ends to _TreeSummarizedExperiment_.
+This example include only the code. The pipeline ends to _TreeSummarizedExperiment_.
+
+We recommend to use the most recent reference database. You can find it from
+[here](https://benjjneb.github.io/dada2/training.html).
 
 ```{r dada2_1}
 # GETTING READY
@@ -13,7 +16,7 @@ library(dada2); packageVersion("dada2")
 ```
 
 ```{r dada2_2}
-path <- "~/Desktop/dada2_example/MiSeq_SOP" # CHANGE ME to the directory containing the fastq files after unzipping.
+path <- "data/MiSeq_SOP" # CHANGE ME to the directory containing the fastq files after unzipping.
 list.files(path)
 ```
 
@@ -125,13 +128,16 @@ head(track)
 ```{r dada_20}
 # ASSIGN TAXONOMY
 
+# You can find updated reference databases from 
+# https://benjjneb.github.io/dada2/training.html
+
 # Change path
-taxa <- assignTaxonomy(seqtab.nochim, "~/Desktop/dada2_example/tax/silva_nr_v132_train_set.fa.gz", multithread=TRUE)
+taxa <- assignTaxonomy(seqtab.nochim, "data/silva_nr_v132_train_set.fa.gz", multithread=TRUE)
 ```
 
 ```{r dada2_21}
 # Change path
-taxa <- addSpecies(taxa, "~/Desktop/dada2_example/tax/silva_species_assignment_v132.fa.gz")
+taxa <- addSpecies(taxa, "data/silva_species_assignment_v132.fa.gz")
 ```
 
 ```{r dada2_22}
@@ -154,7 +160,7 @@ match.ref <- sum(sapply(names(unqs.mock), function(x) any(grepl(x, mock.ref))))
 cat("Of those,", sum(match.ref), "were exact matches to the expected reference sequences.\n")
 ```
 
-## Create a TreeSE from the data
+## Create a TreeSE data object
 
 ```{r dada2_25}
 library(mia)
@@ -185,16 +191,12 @@ rownames(samdf) <- samples.out
 ```
 
 ```{r dada2_27}
-counts <- t(seqtab.nochim)
-assays <- SimpleList(counts = counts)
-
-samdf <- DataFrame(samdf)
-taxa <- DataFrame(taxa)
-
-tse <- TreeSummarizedExperiment(assays = assays,
-                                colData = samdf,
-                                rowData = taxa
+tse <- TreeSummarizedExperiment(assays = SimpleList(counts = t(seqtab.nochim)),
+                                colData = DataFrame(samdf),
+                                rowData = DataFrame(taxa)
                                 )
+
+# Remove mock sample like it is also done in DADA2 pipeline tutorial
 tse <- tse[ , colnames(tse) != "mock"]
 ```
 
