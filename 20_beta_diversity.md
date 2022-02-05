@@ -153,7 +153,7 @@ ggplot(aes(x = d0, y = dmds), data=df) +
   theme_bw()
 ```
 
-<img src="20_beta_diversity_files/figure-html/shepard-1.png" width="3000" />
+![](20_beta_diversity_files/figure-latex/shepard-1.png)<!-- --> 
 
 
 ## Community comparisons by beta diversity analysis
@@ -200,10 +200,7 @@ p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]],1), "%", ")", sep =
 print(p)
 ```
 
-<div class="figure">
-<img src="20_beta_diversity_files/figure-html/plot-mds-bray-curtis-1.png" alt="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset." width="3000" />
-<p class="caption">(\#fig:plot-mds-bray-curtis)MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset.</p>
-</div>
+![(\#fig:plot-mds-bray-curtis)MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset.](20_beta_diversity_files/figure-latex/plot-mds-bray-curtis-1.png) 
 
 
 
@@ -249,10 +246,7 @@ plots[[1]] + plots[[2]] + plots[[3]] + plots[[4]] +
   plot_layout(guides = "collect")
 ```
 
-<div class="figure">
-<img src="20_beta_diversity_files/figure-html/plot-mds-nmds-comparison-1.png" alt="Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset." width="3000" />
-<p class="caption">(\#fig:plot-mds-nmds-comparison)Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.</p>
-</div>
+![(\#fig:plot-mds-nmds-comparison)Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.](20_beta_diversity_files/figure-latex/plot-mds-nmds-comparison-1.png) 
 
 The _Unifrac_ method is a special case, as it requires data on the
 relationship of features in form on a `phylo` tree. `calculateUnifrac`
@@ -274,10 +268,7 @@ tse <- runMDS(tse, FUN = mia::calculateUnifrac, name = "Unifrac",
 plotReducedDim(tse, "Unifrac", colour_by = "Group")
 ```
 
-<div class="figure">
-<img src="20_beta_diversity_files/figure-html/plot-unifrac-1.png" alt="Unifrac distances scaled by MDS of the GlobalPattern dataset." width="3000" />
-<p class="caption">(\#fig:plot-unifrac)Unifrac distances scaled by MDS of the GlobalPattern dataset.</p>
-</div>
+![(\#fig:plot-unifrac)Unifrac distances scaled by MDS of the GlobalPattern dataset.](20_beta_diversity_files/figure-latex/plot-unifrac-1.png) 
 
 ## Other ordination methods
 
@@ -294,10 +285,7 @@ tse <- runPCA(tse, name = "PCA", exprs_values = "counts", ncomponents = 10)
 plotReducedDim(tse, "PCA", colour_by = "Group")
 ```
 
-<div class="figure">
-<img src="20_beta_diversity_files/figure-html/plot-pca-1.png" alt="PCA plot on the GlobalPatterns data set containing sample from different sources." width="3000" />
-<p class="caption">(\#fig:plot-pca)PCA plot on the GlobalPatterns data set containing sample from different sources.</p>
-</div>
+![(\#fig:plot-pca)PCA plot on the GlobalPatterns data set containing sample from different sources.](20_beta_diversity_files/figure-latex/plot-pca-1.png) 
 
 As mentioned before, applicability of the different methods depends on your
 sample set.
@@ -314,10 +302,7 @@ tse <- runTSNE(tse, name = "TSNE", exprs_values = "counts", ncomponents = 3)
 plotReducedDim(tse, "TSNE", colour_by = "Group", ncomponents = c(1:3))
 ```
 
-<div class="figure">
-<img src="20_beta_diversity_files/figure-html/plot-tsne-1.png" alt="t-SNE plot on the GlobalPatterns data set containing sample from different sources." width="3000" />
-<p class="caption">(\#fig:plot-tsne)t-SNE plot on the GlobalPatterns data set containing sample from different sources.</p>
-</div>
+![(\#fig:plot-tsne)t-SNE plot on the GlobalPatterns data set containing sample from different sources.](20_beta_diversity_files/figure-latex/plot-tsne-1.png) 
 
 
 
@@ -379,7 +364,7 @@ plot <-plotReducedDim(tse_Genus,"PCoA_BC", colour_by = "most_abundant") +
 plot
 ```
 
-<img src="20_beta_diversity_files/figure-html/unnamed-chunk-7-1.png" width="3000" />
+![](20_beta_diversity_files/figure-latex/unnamed-chunk-7-1.png)<!-- --> 
 
 Note: A 3D interactive version of the earlier plot can be found from [here](https://microbiome.github.io/OMA/interactive-3d-plots.html).
 
@@ -403,7 +388,7 @@ plotReducedDim(tse_Genus[,colData(tse_Genus)$Group==TRUE],
        title = "Group = TRUE", color="")
 ```
 
-<img src="20_beta_diversity_files/figure-html/unnamed-chunk-8-1.png" width="3000" />
+![](20_beta_diversity_files/figure-latex/unnamed-chunk-8-1.png)<!-- --> 
 
 ```r
 plotReducedDim(tse_Genus[,colData(tse_Genus)$Group==FALSE],
@@ -415,7 +400,7 @@ plotReducedDim(tse_Genus[,colData(tse_Genus)$Group==FALSE],
        title = "Group = FALSE", color="")
 ```
 
-<img src="20_beta_diversity_files/figure-html/unnamed-chunk-8-2.png" width="3000" />
+![](20_beta_diversity_files/figure-latex/unnamed-chunk-8-2.png)<!-- --> 
 
 
 
@@ -447,7 +432,7 @@ print(as.data.frame(permanova$aov.tab)["Group", "Pr(>F)"])
 ```
 
 ```
-## [1] 0.0011
+## [1] 8e-04
 ```
 
 In this case, the community composition is not significantly different
@@ -478,7 +463,7 @@ ggplot(data.frame(x = top.coef,
     theme_bw()
 ```
 
-<img src="20_beta_diversity_files/figure-html/plot-top-coef-anova-1.png" width="3000" />
+![](20_beta_diversity_files/figure-latex/plot-top-coef-anova-1.png)<!-- --> 
 
 In the above example, the largest differences between the two groups
 can be attributed to _Bacteroides intestinalis_ (elevated in the first
@@ -538,7 +523,7 @@ BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
 locale:
  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
- [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=C             
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
@@ -551,66 +536,65 @@ other attached packages:
  [1] patchwork_1.1.1                scater_1.22.0                 
  [3] scuttle_1.4.0                  ggplot2_3.3.5                 
  [5] vegan_2.5-7                    lattice_0.20-45               
- [7] permute_0.9-5                  mia_1.3.14                    
+ [7] permute_0.9-7                  mia_1.3.14                    
  [9] MultiAssayExperiment_1.20.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.62.0              XVector_0.34.0                
 [13] SingleCellExperiment_1.16.0    SummarizedExperiment_1.24.0   
 [15] Biobase_2.54.0                 GenomicRanges_1.46.1          
-[17] GenomeInfoDb_1.30.0            IRanges_2.28.0                
+[17] GenomeInfoDb_1.30.1            IRanges_2.28.0                
 [19] S4Vectors_0.32.3               BiocGenerics_0.40.0           
 [21] MatrixGenerics_1.6.0           matrixStats_0.61.0-9001       
 [23] BiocStyle_2.22.0               rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
-  [1] Rtsne_0.15                  ggbeeswarm_0.6.0           
-  [3] colorspace_2.0-2            ellipsis_0.3.2             
-  [5] BiocNeighbors_1.12.0        farver_2.1.0               
-  [7] ggrepel_0.9.1               bit64_4.0.5                
-  [9] fansi_1.0.0                 decontam_1.14.0            
- [11] splines_4.1.2               codetools_0.2-18           
- [13] sparseMatrixStats_1.6.0     cachem_1.0.6               
- [15] knitr_1.37                  jsonlite_1.7.2             
- [17] cluster_2.1.2               graph_1.72.0               
- [19] BiocManager_1.30.16         compiler_4.1.2             
- [21] assertthat_0.2.1            Matrix_1.4-0               
- [23] fastmap_1.1.0               lazyeval_0.2.2             
- [25] BiocSingular_1.10.0         htmltools_0.5.2            
- [27] tools_4.1.2                 rsvd_1.0.5                 
- [29] gtable_0.3.0                glue_1.6.0                 
- [31] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
- [33] dplyr_1.0.7                 Rcpp_1.0.7                 
- [35] jquerylib_0.1.4             vctrs_0.3.8                
- [37] ape_5.6-1                   nlme_3.1-153               
- [39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
- [41] xfun_0.29                   stringr_1.4.0              
- [43] beachmat_2.10.0             lifecycle_1.0.1            
- [45] irlba_2.3.5                 XML_3.99-0.8               
- [47] zlibbioc_1.40.0             MASS_7.3-54                
- [49] scales_1.1.1                parallel_4.1.2             
- [51] yaml_2.2.1                  memoise_2.0.1              
- [53] gridExtra_2.3               yulab.utils_0.0.4          
- [55] sass_0.4.0                  stringi_1.7.6              
- [57] RSQLite_2.2.9               highr_0.9                  
- [59] ScaledMatrix_1.2.0          tidytree_0.3.7             
- [61] filelock_1.0.2              BiocParallel_1.28.3        
- [63] rlang_0.4.12                pkgconfig_2.0.3            
- [65] bitops_1.0-7                evaluate_0.14              
- [67] purrr_0.3.4                 labeling_0.4.2             
- [69] treeio_1.18.1               CodeDepends_0.6.5          
- [71] cowplot_1.1.1               bit_4.0.4                  
- [73] tidyselect_1.1.1            plyr_1.8.6                 
- [75] magrittr_2.0.1              bookdown_0.24              
- [77] R6_2.5.1                    generics_0.1.1             
- [79] DelayedArray_0.20.0         DBI_1.1.2                  
- [81] withr_2.4.3                 mgcv_1.8-38                
- [83] pillar_1.6.4                RCurl_1.98-1.5             
- [85] tibble_3.1.6                dir.expiry_1.2.0           
- [87] crayon_1.4.2                utf8_1.2.2                 
- [89] rmarkdown_2.11              viridis_0.6.2              
- [91] grid_4.1.2                  blob_1.2.2                 
- [93] digest_0.6.29               tidyr_1.1.4                
- [95] munsell_0.5.0               DirichletMultinomial_1.36.0
- [97] beeswarm_0.4.0              viridisLite_0.4.0          
- [99] vipor_0.4.5                 bslib_0.3.1                
+ [1] Rtsne_0.15                  ggbeeswarm_0.6.0           
+ [3] colorspace_2.0-2            ellipsis_0.3.2             
+ [5] BiocNeighbors_1.12.0        farver_2.1.0               
+ [7] ggrepel_0.9.1               bit64_4.0.5                
+ [9] fansi_1.0.2                 decontam_1.14.0            
+[11] splines_4.1.2               codetools_0.2-18           
+[13] sparseMatrixStats_1.6.0     cachem_1.0.6               
+[15] knitr_1.37                  jsonlite_1.7.3             
+[17] cluster_2.1.2               graph_1.72.0               
+[19] BiocManager_1.30.16         compiler_4.1.2             
+[21] assertthat_0.2.1            Matrix_1.4-0               
+[23] fastmap_1.1.0               lazyeval_0.2.2             
+[25] cli_3.1.1                   BiocSingular_1.10.0        
+[27] htmltools_0.5.2             tools_4.1.2                
+[29] rsvd_1.0.5                  gtable_0.3.0               
+[31] glue_1.6.1                  GenomeInfoDbData_1.2.7     
+[33] reshape2_1.4.4              dplyr_1.0.7                
+[35] Rcpp_1.0.8                  vctrs_0.3.8                
+[37] ape_5.6-1                   nlme_3.1-155               
+[39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
+[41] xfun_0.29                   stringr_1.4.0              
+[43] beachmat_2.10.0             lifecycle_1.0.1            
+[45] irlba_2.3.5                 XML_3.99-0.8               
+[47] zlibbioc_1.40.0             MASS_7.3-55                
+[49] scales_1.1.1                parallel_4.1.2             
+[51] yaml_2.2.2                  memoise_2.0.1              
+[53] gridExtra_2.3               yulab.utils_0.0.4          
+[55] stringi_1.7.6               RSQLite_2.2.9              
+[57] highr_0.9                   ScaledMatrix_1.2.0         
+[59] tidytree_0.3.7              filelock_1.0.2             
+[61] BiocParallel_1.28.3         rlang_1.0.0                
+[63] pkgconfig_2.0.3             bitops_1.0-7               
+[65] evaluate_0.14               purrr_0.3.4                
+[67] labeling_0.4.2              treeio_1.18.1              
+[69] CodeDepends_0.6.5           cowplot_1.1.1              
+[71] bit_4.0.4                   tidyselect_1.1.1           
+[73] plyr_1.8.6                  magrittr_2.0.2             
+[75] bookdown_0.24               R6_2.5.1                   
+[77] generics_0.1.2              DelayedArray_0.20.0        
+[79] DBI_1.1.2                   withr_2.4.3                
+[81] mgcv_1.8-38                 pillar_1.7.0               
+[83] RCurl_1.98-1.5              tibble_3.1.6               
+[85] dir.expiry_1.2.0            crayon_1.4.2               
+[87] utf8_1.2.2                  rmarkdown_2.11             
+[89] viridis_0.6.2               grid_4.1.2                 
+[91] blob_1.2.2                  digest_0.6.29              
+[93] tidyr_1.2.0                 munsell_0.5.0              
+[95] DirichletMultinomial_1.36.0 beeswarm_0.4.0             
+[97] viridisLite_0.4.0           vipor_0.4.5                
 ```
 </div>

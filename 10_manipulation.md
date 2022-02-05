@@ -63,20 +63,20 @@ molten_tse
 ```
 
 ```
-## # A tibble: 499,616 × 17
-##    FeatureID SampleID relabundance Kingdom Phylum    Class    Order Family Genus
-##    <fct>     <fct>           <dbl> <chr>   <chr>     <chr>    <chr> <chr>  <chr>
-##  1 549322    CL3                 0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  2 549322    CC1                 0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  3 549322    SV1                 0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  4 549322    M31Fcsw             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  5 549322    M11Fcsw             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  6 549322    M31Plmr             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  7 549322    M11Plmr             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  8 549322    F21Plmr             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-##  9 549322    M31Tong             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-## 10 549322    M11Tong             0 Archaea Crenarch… Thermop… <NA>  <NA>   <NA> 
-## # … with 499,606 more rows, and 8 more variables: Species <chr>,
+## # A tibble: 499,616 x 17
+##    FeatureID SampleID relabundance Kingdom Phylum       Class Order Family Genus
+##    <fct>     <fct>           <dbl> <chr>   <chr>        <chr> <chr> <chr>  <chr>
+##  1 549322    CL3                 0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  2 549322    CC1                 0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  3 549322    SV1                 0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  4 549322    M31Fcsw             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  5 549322    M11Fcsw             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  6 549322    M31Plmr             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  7 549322    M11Plmr             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  8 549322    F21Plmr             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  9 549322    M31Tong             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+## 10 549322    M11Tong             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+## # ... with 499,606 more rows, and 8 more variables: Species <chr>,
 ## #   X.SampleID <fct>, Primer <fct>, Final_Barcode <fct>,
 ## #   Barcode_truncated_plus_T <fct>, Barcode_full_length <fct>,
 ## #   SampleType <fct>, Description <fct>
@@ -137,52 +137,33 @@ unique(tse$SampleType)
 # show recurrence for each value
 tse$SampleType %>% table()
 ```
-<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; "><table class="table table-striped" style="margin-left: auto; margin-right: auto;">
- <thead>
-  <tr>
-   <th style="text-align:left;"> . </th>
-   <th style="text-align:right;"> Freq </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> Feces </td>
-   <td style="text-align:right;"> 4 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Freshwater </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Freshwater (creek) </td>
-   <td style="text-align:right;"> 3 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Mock </td>
-   <td style="text-align:right;"> 3 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Ocean </td>
-   <td style="text-align:right;"> 3 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Sediment (estuary) </td>
-   <td style="text-align:right;"> 3 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Skin </td>
-   <td style="text-align:right;"> 3 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Soil </td>
-   <td style="text-align:right;"> 3 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Tongue </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-</tbody>
-</table></div>
+\begin{table}
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}{l|r}
+\hline
+. & Freq\\
+\hline
+Feces & 4\\
+\hline
+Freshwater & 2\\
+\hline
+Freshwater (creek) & 3\\
+\hline
+Mock & 3\\
+\hline
+Ocean & 3\\
+\hline
+Sediment (estuary) & 3\\
+\hline
+Skin & 3\\
+\hline
+Soil & 3\\
+\hline
+Tongue & 2\\
+\hline
+\end{tabular}}
+\end{table}
 
 **Note**: after subsetting, expect the number of columns to equal the
   sum of the recurrences of the samples that you are interested
@@ -260,280 +241,147 @@ unique(rowData(tse)$Phylum)
 # show recurrence for each value
 rowData(tse)$Phylum %>% table()
 ```
-<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; "><table class="table table-striped" style="margin-left: auto; margin-right: auto;">
- <thead>
-  <tr>
-   <th style="text-align:left;"> . </th>
-   <th style="text-align:right;"> Freq </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> ABY1_OD1 </td>
-   <td style="text-align:right;"> 7 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> AC1 </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Acidobacteria </td>
-   <td style="text-align:right;"> 1021 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Actinobacteria </td>
-   <td style="text-align:right;"> 1631 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> AD3 </td>
-   <td style="text-align:right;"> 9 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Armatimonadetes </td>
-   <td style="text-align:right;"> 61 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Bacteroidetes </td>
-   <td style="text-align:right;"> 2382 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> BRC1 </td>
-   <td style="text-align:right;"> 13 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Caldiserica </td>
-   <td style="text-align:right;"> 3 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Caldithrix </td>
-   <td style="text-align:right;"> 10 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> CCM11b </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Chlamydiae </td>
-   <td style="text-align:right;"> 21 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Chlorobi </td>
-   <td style="text-align:right;"> 64 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Chloroflexi </td>
-   <td style="text-align:right;"> 437 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Crenarchaeota </td>
-   <td style="text-align:right;"> 106 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Cyanobacteria </td>
-   <td style="text-align:right;"> 393 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Elusimicrobia </td>
-   <td style="text-align:right;"> 31 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Euryarchaeota </td>
-   <td style="text-align:right;"> 102 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Fibrobacteres </td>
-   <td style="text-align:right;"> 7 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Firmicutes </td>
-   <td style="text-align:right;"> 4356 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Fusobacteria </td>
-   <td style="text-align:right;"> 37 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> GAL15 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Gemmatimonadetes </td>
-   <td style="text-align:right;"> 191 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> GN02 </td>
-   <td style="text-align:right;"> 8 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> GN04 </td>
-   <td style="text-align:right;"> 7 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> GN06 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> GN12 </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> GOUTA4 </td>
-   <td style="text-align:right;"> 11 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Hyd24-12 </td>
-   <td style="text-align:right;"> 4 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> KSB1 </td>
-   <td style="text-align:right;"> 6 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> LCP-89 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> LD1 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Lentisphaerae </td>
-   <td style="text-align:right;"> 21 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> MVP-15 </td>
-   <td style="text-align:right;"> 5 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> NC10 </td>
-   <td style="text-align:right;"> 9 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Nitrospirae </td>
-   <td style="text-align:right;"> 74 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> NKB19 </td>
-   <td style="text-align:right;"> 16 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> OP11 </td>
-   <td style="text-align:right;"> 6 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> OP3 </td>
-   <td style="text-align:right;"> 30 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> OP8 </td>
-   <td style="text-align:right;"> 27 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> OP9 </td>
-   <td style="text-align:right;"> 4 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> PAUC34f </td>
-   <td style="text-align:right;"> 3 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Planctomycetes </td>
-   <td style="text-align:right;"> 638 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Proteobacteria </td>
-   <td style="text-align:right;"> 6416 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> SAR406 </td>
-   <td style="text-align:right;"> 21 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> SBR1093 </td>
-   <td style="text-align:right;"> 9 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> SC3 </td>
-   <td style="text-align:right;"> 8 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> SC4 </td>
-   <td style="text-align:right;"> 8 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> SM2F11 </td>
-   <td style="text-align:right;"> 5 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> SPAM </td>
-   <td style="text-align:right;"> 22 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Spirochaetes </td>
-   <td style="text-align:right;"> 124 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> SR1 </td>
-   <td style="text-align:right;"> 5 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Synergistetes </td>
-   <td style="text-align:right;"> 7 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Tenericutes </td>
-   <td style="text-align:right;"> 143 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> TG3 </td>
-   <td style="text-align:right;"> 5 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Thermi </td>
-   <td style="text-align:right;"> 46 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Thermotogae </td>
-   <td style="text-align:right;"> 1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> TM6 </td>
-   <td style="text-align:right;"> 27 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> TM7 </td>
-   <td style="text-align:right;"> 32 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Verrucomicrobia </td>
-   <td style="text-align:right;"> 470 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> WPS-2 </td>
-   <td style="text-align:right;"> 20 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> WS1 </td>
-   <td style="text-align:right;"> 5 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> WS2 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> WS3 </td>
-   <td style="text-align:right;"> 70 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> ZB2 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> ZB3 </td>
-   <td style="text-align:right;"> 2 </td>
-  </tr>
-</tbody>
-</table></div>
+\begin{table}
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}{l|r}
+\hline
+. & Freq\\
+\hline
+ABY1\_OD1 & 7\\
+\hline
+AC1 & 1\\
+\hline
+Acidobacteria & 1021\\
+\hline
+Actinobacteria & 1631\\
+\hline
+AD3 & 9\\
+\hline
+Armatimonadetes & 61\\
+\hline
+Bacteroidetes & 2382\\
+\hline
+BRC1 & 13\\
+\hline
+Caldiserica & 3\\
+\hline
+Caldithrix & 10\\
+\hline
+CCM11b & 2\\
+\hline
+Chlamydiae & 21\\
+\hline
+Chlorobi & 64\\
+\hline
+Chloroflexi & 437\\
+\hline
+Crenarchaeota & 106\\
+\hline
+Cyanobacteria & 393\\
+\hline
+Elusimicrobia & 31\\
+\hline
+Euryarchaeota & 102\\
+\hline
+Fibrobacteres & 7\\
+\hline
+Firmicutes & 4356\\
+\hline
+Fusobacteria & 37\\
+\hline
+GAL15 & 2\\
+\hline
+Gemmatimonadetes & 191\\
+\hline
+GN02 & 8\\
+\hline
+GN04 & 7\\
+\hline
+GN06 & 2\\
+\hline
+GN12 & 1\\
+\hline
+GOUTA4 & 11\\
+\hline
+Hyd24-12 & 4\\
+\hline
+KSB1 & 6\\
+\hline
+LCP-89 & 2\\
+\hline
+LD1 & 2\\
+\hline
+Lentisphaerae & 21\\
+\hline
+MVP-15 & 5\\
+\hline
+NC10 & 9\\
+\hline
+Nitrospirae & 74\\
+\hline
+NKB19 & 16\\
+\hline
+OP11 & 6\\
+\hline
+OP3 & 30\\
+\hline
+OP8 & 27\\
+\hline
+OP9 & 4\\
+\hline
+PAUC34f & 3\\
+\hline
+Planctomycetes & 638\\
+\hline
+Proteobacteria & 6416\\
+\hline
+SAR406 & 21\\
+\hline
+SBR1093 & 9\\
+\hline
+SC3 & 8\\
+\hline
+SC4 & 8\\
+\hline
+SM2F11 & 5\\
+\hline
+SPAM & 22\\
+\hline
+Spirochaetes & 124\\
+\hline
+SR1 & 5\\
+\hline
+Synergistetes & 7\\
+\hline
+Tenericutes & 143\\
+\hline
+TG3 & 5\\
+\hline
+Thermi & 46\\
+\hline
+Thermotogae & 1\\
+\hline
+TM6 & 27\\
+\hline
+TM7 & 32\\
+\hline
+Verrucomicrobia & 470\\
+\hline
+WPS-2 & 20\\
+\hline
+WS1 & 5\\
+\hline
+WS2 & 2\\
+\hline
+WS3 & 70\\
+\hline
+ZB2 & 2\\
+\hline
+ZB3 & 2\\
+\hline
+\end{tabular}}
+\end{table}
 
 **Note**: after subsetting, expect the number of columns to equal the
   sum of the recurrences of the feature(s) that you are interested

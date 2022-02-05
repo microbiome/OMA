@@ -116,11 +116,15 @@ count(as.data.frame(colData(se)), pheno) %>% kable()
 ```
 
 
-
-|pheno |   n|
-|:-----|---:|
-|Lean  |  61|
-|Obese | 193|
+\begin{tabular}{l|r}
+\hline
+pheno & n\\
+\hline
+Lean & 61\\
+\hline
+Obese & 193\\
+\hline
+\end{tabular}
 
 ```r
 # set a seed because some tools can randomly vary and then produce 
@@ -216,7 +220,7 @@ par(mfrow = c(1, 2))
   )
 ```
 
-<img src="30_differential_abundance_files/figure-html/unnamed-chunk-3-1.png" width="672" />
+![](30_differential_abundance_files/figure-latex/unnamed-chunk-3-1.pdf)<!-- --> 
 
 The evaluation as differential abundant in above plots is based on the
 corrected pvalue. According to the ALDEx2 developers, the safest approach is to
@@ -238,18 +242,29 @@ rownames_to_column(aldex_out, "genus") %>%
 ```
 
 
-
-|genus                 | we.eBH| wi.eBH|  effect| overlap|
-|:---------------------|------:|------:|-------:|-------:|
-|Alistipes             | 0.0009| 0.0001| -0.3823|  0.2979|
-|Barnesiella           | 0.0442| 0.0066| -0.3229|  0.3489|
-|Catenibacterium       | 0.0266| 0.0330|  0.2713|  0.3718|
-|Lactobacillus         | 0.0282| 0.0183|  0.2983|  0.3537|
-|Megasphaera           | 0.0000| 0.0001|  0.5249|  0.2758|
-|Oscillibacter         | 0.0004| 0.0014| -0.3681|  0.3291|
-|Parabacteroides       | 0.0541| 0.0133| -0.2832|  0.3509|
-|Phascolarctobacterium | 0.0238| 0.0077| -0.3491|  0.3404|
-|Uknown                | 0.0786| 0.0439| -0.2474|  0.3852|
+\begin{tabular}{l|r|r|r|r}
+\hline
+genus & we.eBH & wi.eBH & effect & overlap\\
+\hline
+Alistipes & 0.0009 & 0.0001 & -0.3823 & 0.2979\\
+\hline
+Barnesiella & 0.0442 & 0.0066 & -0.3229 & 0.3489\\
+\hline
+Catenibacterium & 0.0266 & 0.0330 & 0.2713 & 0.3718\\
+\hline
+Lactobacillus & 0.0282 & 0.0183 & 0.2983 & 0.3537\\
+\hline
+Megasphaera & 0.0000 & 0.0001 & 0.5249 & 0.2758\\
+\hline
+Oscillibacter & 0.0004 & 0.0014 & -0.3681 & 0.3291\\
+\hline
+Parabacteroides & 0.0541 & 0.0133 & -0.2832 & 0.3509\\
+\hline
+Phascolarctobacterium & 0.0238 & 0.0077 & -0.3491 & 0.3404\\
+\hline
+Uknown & 0.0786 & 0.0439 & -0.2474 & 0.3852\\
+\hline
+\end{tabular}
 
 
 
@@ -324,15 +339,23 @@ kable(head(res$diff_abn))
 ```
 
 
-
-|                    |phenoObese |
-|:-------------------|:----------|
-|Acetanaerobacterium |TRUE       |
-|Acetivibrio         |FALSE      |
-|Acidaminococcus     |TRUE       |
-|Akkermansia         |FALSE      |
-|Alistipes           |TRUE       |
-|Allisonella         |FALSE      |
+\begin{tabular}{l|l}
+\hline
+  & phenoObese\\
+\hline
+Acetanaerobacterium & TRUE\\
+\hline
+Acetivibrio & FALSE\\
+\hline
+Acidaminococcus & TRUE\\
+\hline
+Akkermansia & FALSE\\
+\hline
+Alistipes & TRUE\\
+\hline
+Allisonella & FALSE\\
+\hline
+\end{tabular}
 
 
 
@@ -373,15 +396,23 @@ kable(head(filter(fit_data$results, qval <= 0.05)))
 ```
 
 
-
-|feature               |metadata |value |    coef| stderr| pval|name       |  qval|   N| N.not.zero|
-|:---------------------|:--------|:-----|-------:|------:|----:|:----------|-----:|---:|----------:|
-|Megasphaera           |pheno    |Obese |  0.0489| 0.0093|    0|phenoObese | 0e+00| 254|         78|
-|Barnesiella           |pheno    |Obese | -0.0297| 0.0068|    0|phenoObese | 2e-04| 254|        111|
-|Parabacteroides       |pheno    |Obese | -0.0219| 0.0050|    0|phenoObese | 2e-04| 254|        163|
-|Phascolarctobacterium |pheno    |Obese | -0.0325| 0.0072|    0|phenoObese | 2e-04| 254|         99|
-|Alistipes             |pheno    |Obese | -0.0523| 0.0123|    0|phenoObese | 3e-04| 254|        227|
-|Desulfovibrio         |pheno    |Obese | -0.0134| 0.0032|    0|phenoObese | 3e-04| 254|         72|
+\begin{tabular}{l|l|l|r|r|r|l|r|r|r}
+\hline
+feature & metadata & value & coef & stderr & pval & name & qval & N & N.not.zero\\
+\hline
+Megasphaera & pheno & Obese & 0.0489 & 0.0093 & 0 & phenoObese & 0e+00 & 254 & 78\\
+\hline
+Barnesiella & pheno & Obese & -0.0297 & 0.0068 & 0 & phenoObese & 2e-04 & 254 & 111\\
+\hline
+Parabacteroides & pheno & Obese & -0.0219 & 0.0050 & 0 & phenoObese & 2e-04 & 254 & 163\\
+\hline
+Phascolarctobacterium & pheno & Obese & -0.0325 & 0.0072 & 0 & phenoObese & 2e-04 & 254 & 99\\
+\hline
+Alistipes & pheno & Obese & -0.0523 & 0.0123 & 0 & phenoObese & 3e-04 & 254 & 227\\
+\hline
+Desulfovibrio & pheno & Obese & -0.0134 & 0.0032 & 0 & phenoObese & 3e-04 & 254 & 72\\
+\hline
+\end{tabular}
 
 ```r
 # A folder will be created that is called like the above specified output.
@@ -427,15 +458,23 @@ kable(head(summ))
 ```
 
 
-
-|genus               |aldex2 |ancombc |maaslin2 | score|
-|:-------------------|:------|:-------|:--------|-----:|
-|Acetanaerobacterium |FALSE  |TRUE    |TRUE     |     2|
-|Acetivibrio         |FALSE  |FALSE   |FALSE    |     0|
-|Acidaminococcus     |FALSE  |TRUE    |TRUE     |     2|
-|Akkermansia         |FALSE  |FALSE   |FALSE    |     0|
-|Alistipes           |TRUE   |TRUE    |TRUE     |     3|
-|Allisonella         |FALSE  |FALSE   |FALSE    |     0|
+\begin{tabular}{l|l|l|l|r}
+\hline
+genus & aldex2 & ancombc & maaslin2 & score\\
+\hline
+Acetanaerobacterium & FALSE & TRUE & TRUE & 2\\
+\hline
+Acetivibrio & FALSE & FALSE & FALSE & 0\\
+\hline
+Acidaminococcus & FALSE & TRUE & TRUE & 2\\
+\hline
+Akkermansia & FALSE & FALSE & FALSE & 0\\
+\hline
+Alistipes & TRUE & TRUE & TRUE & 3\\
+\hline
+Allisonella & FALSE & FALSE & FALSE & 0\\
+\hline
+\end{tabular}
 
 Now we can answer our questions:
 
@@ -447,10 +486,13 @@ summarise(summ, across(where(is.logical), sum)) %>%
 ```
 
 
-
-| aldex2| ancombc| maaslin2|
-|------:|-------:|--------:|
-|      9|      22|       16|
+\begin{tabular}{r|r|r}
+\hline
+aldex2 & ancombc & maaslin2\\
+\hline
+9 & 22 & 16\\
+\hline
+\end{tabular}
 
 ```r
 # which genera are identified by all methods?
@@ -458,17 +500,27 @@ filter(summ, score == 3) %>% kable()
 ```
 
 
-
-|genus                 |aldex2 |ancombc |maaslin2 | score|
-|:---------------------|:------|:-------|:--------|-----:|
-|Alistipes             |TRUE   |TRUE    |TRUE     |     3|
-|Barnesiella           |TRUE   |TRUE    |TRUE     |     3|
-|Catenibacterium       |TRUE   |TRUE    |TRUE     |     3|
-|Lactobacillus         |TRUE   |TRUE    |TRUE     |     3|
-|Megasphaera           |TRUE   |TRUE    |TRUE     |     3|
-|Oscillibacter         |TRUE   |TRUE    |TRUE     |     3|
-|Parabacteroides       |TRUE   |TRUE    |TRUE     |     3|
-|Phascolarctobacterium |TRUE   |TRUE    |TRUE     |     3|
+\begin{tabular}{l|l|l|l|r}
+\hline
+genus & aldex2 & ancombc & maaslin2 & score\\
+\hline
+Alistipes & TRUE & TRUE & TRUE & 3\\
+\hline
+Barnesiella & TRUE & TRUE & TRUE & 3\\
+\hline
+Catenibacterium & TRUE & TRUE & TRUE & 3\\
+\hline
+Lactobacillus & TRUE & TRUE & TRUE & 3\\
+\hline
+Megasphaera & TRUE & TRUE & TRUE & 3\\
+\hline
+Oscillibacter & TRUE & TRUE & TRUE & 3\\
+\hline
+Parabacteroides & TRUE & TRUE & TRUE & 3\\
+\hline
+Phascolarctobacterium & TRUE & TRUE & TRUE & 3\\
+\hline
+\end{tabular}
 
 We see that each method identified at least 9 genera as differentially
 abundant. Eight of those that were identified by ALDEx2,
@@ -508,7 +560,7 @@ robust_plots[[1]] +
   plot_layout(nrow = 2)
 ```
 
-<img src="30_differential_abundance_files/figure-html/unnamed-chunk-11-1.png" width="672" />
+![](30_differential_abundance_files/figure-latex/unnamed-chunk-11-1.pdf)<!-- --> 
 
 ```r
 # or if we have most trust in any specific method we can show genera that 
@@ -523,7 +575,7 @@ ancombc_plots[[1]] +
   ancombc_plots[[6]] 
 ```
 
-<img src="30_differential_abundance_files/figure-html/unnamed-chunk-11-2.png" width="672" />
+![](30_differential_abundance_files/figure-latex/unnamed-chunk-11-2.pdf)<!-- --> 
 
 
 
@@ -576,15 +628,23 @@ kable(head(out_cov$res$diff_abn))
 ```
 
 
-
-|                    |phenoObese |age   |
-|:-------------------|:----------|:-----|
-|Acetanaerobacterium |TRUE       |FALSE |
-|Acetivibrio         |FALSE      |FALSE |
-|Acidaminococcus     |TRUE       |FALSE |
-|Akkermansia         |FALSE      |FALSE |
-|Alistipes           |TRUE       |FALSE |
-|Allisonella         |FALSE      |FALSE |
+\begin{tabular}{l|l|l}
+\hline
+  & phenoObese & age\\
+\hline
+Acetanaerobacterium & TRUE & FALSE\\
+\hline
+Acetivibrio & FALSE & FALSE\\
+\hline
+Acidaminococcus & TRUE & FALSE\\
+\hline
+Akkermansia & FALSE & FALSE\\
+\hline
+Alistipes & TRUE & FALSE\\
+\hline
+Allisonella & FALSE & FALSE\\
+\hline
+\end{tabular}
 
 In the next section of this book chapter we cover methods that can also take
 into account the phylogenetic information of bacterial taxa to perform 
@@ -696,10 +756,10 @@ Automatically initializing the priors and visualizing their distributions:
 ```r
 priors <- pibble(NULL, X, upsilon, Theta, Gamma, Xi)
 names_covariates(priors) <- rownames(X)
-fido::plot(priors, pars="Lambda") + ggplot2::xlim(c(-5, 5))
+plot(priors, pars="Lambda") + ggplot2::xlim(c(-5, 5))
 ```
 
-<img src="30_differential_abundance_files/figure-html/unnamed-chunk-20-1.png" width="672" />
+![](30_differential_abundance_files/figure-latex/unnamed-chunk-20-1.pdf)<!-- --> 
 
 Estimating the posterior by including the data at `Y`.
 Note: Some computational failures could occur (see [discussion](https://github-wiki-see.page/m/jsilve24/fido/wiki/Frequently-Asked-Questions))
@@ -719,27 +779,27 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.998
+## Proportions of Observations within 95% Credible Interval: 0.9981
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
 
 ```r
 names_categories(posterior) <- rownames(Y)
-fido::plot(posterior,par="Lambda",focus.cov=rownames(X)[2:4])
+plot(posterior,par="Lambda",focus.cov=rownames(X)[2:4])
 ```
 
-<img src="30_differential_abundance_files/figure-html/unnamed-chunk-23-1.png" width="672" />
+![](30_differential_abundance_files/figure-latex/unnamed-chunk-23-1.pdf)<!-- --> 
 
 Seemingly the covariate "Age_Years" does not have effect on the model as "Delivery_Mode" would,
 and "Sex" to some extent. Let's take a closer look at the two latter ones:
 
 
 ```r
-fido::plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
+plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
 ```
 
-<img src="30_differential_abundance_files/figure-html/unnamed-chunk-24-1.png" width="672" />
+![](30_differential_abundance_files/figure-latex/unnamed-chunk-24-1.pdf)<!-- --> 
 
 ## Session Info {-}
 
@@ -756,7 +816,7 @@ BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
 locale:
  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
- [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=C             
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
@@ -766,22 +826,22 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] microbiomeDataSets_1.1.5       fido_0.1.13                   
+ [1] microbiomeDataSets_1.1.5       fido_0.1.14                   
  [3] forcats_0.5.1                  stringr_1.4.0                 
  [5] dplyr_1.0.7                    purrr_0.3.4                   
- [7] readr_2.1.1                    tidyr_1.1.4                   
+ [7] readr_2.1.2                    tidyr_1.2.0                   
  [9] tibble_3.1.6                   ggplot2_3.3.5                 
 [11] tidyverse_1.3.1                knitr_1.37                    
 [13] Maaslin2_1.8.0                 ALDEx2_1.26.0                 
-[15] zCompositions_1.3.4            truncnorm_1.0-8               
+[15] zCompositions_1.4.0            truncnorm_1.0-8               
 [17] NADA_1.6-1.1                   survival_3.2-13               
-[19] MASS_7.3-54                    ANCOMBC_1.4.0                 
+[19] MASS_7.3-55                    ANCOMBC_1.4.0                 
 [21] tidySummarizedExperiment_1.4.1 patchwork_1.1.1               
 [23] mia_1.3.14                     MultiAssayExperiment_1.20.0   
 [25] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [27] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [29] SummarizedExperiment_1.24.0    Biobase_2.54.0                
-[31] GenomicRanges_1.46.1           GenomeInfoDb_1.30.0           
+[31] GenomicRanges_1.46.1           GenomeInfoDb_1.30.1           
 [33] IRanges_2.28.0                 S4Vectors_0.32.3              
 [35] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
 [37] matrixStats_0.61.0-9001        BiocStyle_2.22.0              
@@ -792,87 +852,86 @@ loaded via a namespace (and not attached):
   [3] bit64_4.0.5                   irlba_2.3.5                  
   [5] DelayedArray_0.20.0           data.table_1.14.2            
   [7] KEGGREST_1.34.0               RCurl_1.98-1.5               
-  [9] generics_0.1.1                ScaledMatrix_1.2.0           
+  [9] generics_0.1.2                ScaledMatrix_1.2.0           
  [11] microbiome_1.16.0             RSQLite_2.2.9                
  [13] bit_4.0.4                     tzdb_0.2.0                   
  [15] httpuv_1.6.5                  xml2_1.3.3                   
  [17] lubridate_1.8.0               assertthat_0.2.1             
  [19] DirichletMultinomial_1.36.0   viridis_0.6.2                
  [21] xfun_0.29                     hms_1.1.1                    
- [23] ggdist_3.0.1                  jquerylib_0.1.4              
- [25] promises_1.2.0.1              evaluate_0.14                
- [27] DEoptimR_1.0-10               fansi_1.0.0                  
- [29] dbplyr_2.1.1                  readxl_1.3.1                 
- [31] igraph_1.2.11                 DBI_1.1.2                    
- [33] htmlwidgets_1.5.4             tensorA_0.36.2               
- [35] hash_2.2.6.1                  ellipsis_0.3.2               
- [37] backports_1.4.1               bookdown_0.24                
- [39] permute_0.9-5                 sparseMatrixStats_1.6.0      
- [41] vctrs_0.3.8                   abind_1.4-5                  
- [43] tidybayes_3.0.2               cachem_1.0.6                 
- [45] withr_2.4.3                   robustbase_0.93-9            
- [47] checkmate_2.0.0               vegan_2.5-7                  
- [49] treeio_1.18.1                 getopt_1.20.3                
- [51] cluster_2.1.2                 ExperimentHub_2.2.0          
- [53] ape_5.6-1                     dir.expiry_1.2.0             
- [55] lazyeval_0.2.2                crayon_1.4.2                 
- [57] pkgconfig_2.0.3               labeling_0.4.2               
- [59] nlme_3.1-153                  vipor_0.4.5                  
- [61] rlang_0.4.12                  lifecycle_1.0.1              
- [63] filelock_1.0.2                BiocFileCache_2.2.0          
- [65] phyloseq_1.38.0               modelr_0.1.8                 
- [67] rsvd_1.0.5                    AnnotationHub_3.2.0          
- [69] cellranger_1.1.0              distributional_0.3.0         
- [71] graph_1.72.0                  Matrix_1.4-0                 
- [73] lpsymphony_1.22.0             Rhdf5lib_1.16.0              
- [75] reprex_2.0.1                  beeswarm_0.4.0               
- [77] png_0.1-7                     viridisLite_0.4.0            
- [79] bitops_1.0-7                  rhdf5filters_1.6.0           
- [81] blob_1.2.2                    DelayedMatrixStats_1.16.0    
- [83] decontam_1.14.0               DECIPHER_2.22.0              
- [85] beachmat_2.10.0               scales_1.1.1                 
- [87] memoise_2.0.1                 magrittr_2.0.1               
- [89] plyr_1.8.6                    zlibbioc_1.40.0              
- [91] compiler_4.1.2                driver_0.1.1                 
- [93] RColorBrewer_1.1-2            cli_3.1.0                    
- [95] ade4_1.7-18                   pbapply_1.5-0                
- [97] mgcv_1.8-38                   tidyselect_1.1.1             
- [99] stringi_1.7.6                 highr_0.9                    
-[101] yaml_2.2.1                    BiocSingular_1.10.0          
-[103] svUnit_1.0.6                  ggrepel_0.9.1                
-[105] grid_4.1.2                    sass_0.4.0                   
-[107] tools_4.1.2                   parallel_4.1.2               
-[109] rstudioapi_0.13               foreach_1.5.1                
-[111] logging_0.10-108              optparse_1.7.1               
-[113] gridExtra_2.3                 posterior_1.2.0              
-[115] farver_2.1.0                  Rtsne_0.15                   
-[117] RcppZiggurat_0.1.6            digest_0.6.29                
-[119] BiocManager_1.30.16           shiny_1.7.1                  
-[121] Rcpp_1.0.7                    broom_0.7.11                 
-[123] scuttle_1.4.0                 later_1.3.0                  
-[125] BiocVersion_3.14.0            AnnotationDbi_1.56.2         
-[127] httr_1.4.2                    Rdpack_2.1.3                 
-[129] colorspace_2.0-2              rvest_1.0.2                  
-[131] XML_3.99-0.8                  fs_1.5.2                     
-[133] splines_4.1.2                 yulab.utils_0.0.4            
-[135] tidytree_0.3.7                scater_1.22.0                
-[137] multtest_2.50.0               plotly_4.10.0                
-[139] xtable_1.8-4                  jsonlite_1.7.2               
-[141] nloptr_1.2.2.3                CodeDepends_0.6.5            
-[143] Rfast_2.0.4                   R6_2.5.1                     
-[145] mime_0.12                     pillar_1.6.4                 
-[147] htmltools_0.5.2               glue_1.6.0                   
-[149] fastmap_1.1.0                 BiocParallel_1.28.3          
-[151] BiocNeighbors_1.12.0          interactiveDisplayBase_1.32.0
-[153] codetools_0.2-18              pcaPP_1.9-74                 
-[155] mvtnorm_1.1-3                 utf8_1.2.2                   
-[157] lattice_0.20-45               bslib_0.3.1                  
-[159] arrayhelpers_1.1-0            curl_4.3.2                   
-[161] ggbeeswarm_0.6.0              biglm_0.9-2.1                
-[163] rmarkdown_2.11                biomformat_1.22.0            
-[165] munsell_0.5.0                 rhdf5_2.38.0                 
-[167] GenomeInfoDbData_1.2.7        iterators_1.0.13             
-[169] haven_2.4.3                   reshape2_1.4.4               
-[171] gtable_0.3.0                  rbibutils_2.2.7              
+ [23] ggdist_3.0.1                  promises_1.2.0.1             
+ [25] evaluate_0.14                 DEoptimR_1.0-10              
+ [27] fansi_1.0.2                   dbplyr_2.1.1                 
+ [29] readxl_1.3.1                  igraph_1.2.11                
+ [31] DBI_1.1.2                     htmlwidgets_1.5.4            
+ [33] tensorA_0.36.2                hash_2.2.6.1                 
+ [35] ellipsis_0.3.2                backports_1.4.1              
+ [37] bookdown_0.24                 permute_0.9-7                
+ [39] sparseMatrixStats_1.6.0       vctrs_0.3.8                  
+ [41] abind_1.4-5                   tidybayes_3.0.2              
+ [43] cachem_1.0.6                  withr_2.4.3                  
+ [45] robustbase_0.93-9             checkmate_2.0.0              
+ [47] vegan_2.5-7                   treeio_1.18.1                
+ [49] getopt_1.20.3                 cluster_2.1.2                
+ [51] ExperimentHub_2.2.1           ape_5.6-1                    
+ [53] dir.expiry_1.2.0              lazyeval_0.2.2               
+ [55] crayon_1.4.2                  pkgconfig_2.0.3              
+ [57] labeling_0.4.2                nlme_3.1-155                 
+ [59] vipor_0.4.5                   rlang_1.0.0                  
+ [61] lifecycle_1.0.1               filelock_1.0.2               
+ [63] BiocFileCache_2.2.1           phyloseq_1.38.0              
+ [65] modelr_0.1.8                  rsvd_1.0.5                   
+ [67] AnnotationHub_3.2.1           cellranger_1.1.0             
+ [69] distributional_0.3.0          graph_1.72.0                 
+ [71] Matrix_1.4-0                  lpsymphony_1.22.0            
+ [73] Rhdf5lib_1.16.0               reprex_2.0.1                 
+ [75] beeswarm_0.4.0                png_0.1-7                    
+ [77] viridisLite_0.4.0             bitops_1.0-7                 
+ [79] rhdf5filters_1.6.0            blob_1.2.2                   
+ [81] DelayedMatrixStats_1.16.0     decontam_1.14.0              
+ [83] DECIPHER_2.22.0               beachmat_2.10.0              
+ [85] scales_1.1.1                  memoise_2.0.1                
+ [87] magrittr_2.0.2                plyr_1.8.6                   
+ [89] zlibbioc_1.40.0               compiler_4.1.2               
+ [91] driver_0.1.1                  RColorBrewer_1.1-2           
+ [93] cli_3.1.1                     ade4_1.7-18                  
+ [95] pbapply_1.5-0                 mgcv_1.8-38                  
+ [97] tidyselect_1.1.1              stringi_1.7.6                
+ [99] highr_0.9                     yaml_2.2.2                   
+[101] BiocSingular_1.10.0           svUnit_1.0.6                 
+[103] ggrepel_0.9.1                 grid_4.1.2                   
+[105] tools_4.1.2                   parallel_4.1.2               
+[107] rstudioapi_0.13               foreach_1.5.2                
+[109] logging_0.10-108              optparse_1.7.1               
+[111] gridExtra_2.3                 posterior_1.2.0              
+[113] farver_2.1.0                  Rtsne_0.15                   
+[115] RcppZiggurat_0.1.6            digest_0.6.29                
+[117] BiocManager_1.30.16           shiny_1.7.1                  
+[119] Rcpp_1.0.8                    broom_0.7.12                 
+[121] scuttle_1.4.0                 later_1.3.0                  
+[123] BiocVersion_3.14.0            AnnotationDbi_1.56.2         
+[125] httr_1.4.2                    Rdpack_2.1.3                 
+[127] colorspace_2.0-2              rvest_1.0.2                  
+[129] XML_3.99-0.8                  fs_1.5.2                     
+[131] splines_4.1.2                 yulab.utils_0.0.4            
+[133] tidytree_0.3.7                scater_1.22.0                
+[135] multtest_2.50.0               plotly_4.10.0                
+[137] xtable_1.8-4                  jsonlite_1.7.3               
+[139] nloptr_2.0.0                  CodeDepends_0.6.5            
+[141] Rfast_2.0.4                   R6_2.5.1                     
+[143] mime_0.12                     pillar_1.7.0                 
+[145] htmltools_0.5.2               glue_1.6.1                   
+[147] fastmap_1.1.0                 BiocParallel_1.28.3          
+[149] BiocNeighbors_1.12.0          interactiveDisplayBase_1.32.0
+[151] codetools_0.2-18              pcaPP_1.9-74                 
+[153] mvtnorm_1.1-3                 utf8_1.2.2                   
+[155] lattice_0.20-45               arrayhelpers_1.1-0           
+[157] curl_4.3.2                    ggbeeswarm_0.6.0             
+[159] biglm_0.9-2.1                 rmarkdown_2.11               
+[161] biomformat_1.22.0             munsell_0.5.0                
+[163] rhdf5_2.38.0                  GenomeInfoDbData_1.2.7       
+[165] iterators_1.0.13              haven_2.4.3                  
+[167] reshape2_1.4.4                gtable_0.3.0                 
+[169] rbibutils_2.2.7              
 ```
 </div>

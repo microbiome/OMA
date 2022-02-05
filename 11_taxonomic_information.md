@@ -539,7 +539,7 @@ BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
 locale:
  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
- [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=C             
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
@@ -553,62 +553,61 @@ other attached packages:
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
  [5] XVector_0.34.0                 SingleCellExperiment_1.16.0   
  [7] SummarizedExperiment_1.24.0    Biobase_2.54.0                
- [9] GenomicRanges_1.46.1           GenomeInfoDb_1.30.0           
+ [9] GenomicRanges_1.46.1           GenomeInfoDb_1.30.1           
 [11] IRanges_2.28.0                 S4Vectors_0.32.3              
 [13] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
 [15] matrixStats_0.61.0-9001        BiocStyle_2.22.0              
 [17] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
-  [1] ggbeeswarm_0.6.0            colorspace_2.0-2           
-  [3] ellipsis_0.3.2              scuttle_1.4.0              
-  [5] BiocNeighbors_1.12.0        ggrepel_0.9.1              
-  [7] bit64_4.0.5                 fansi_1.0.0                
-  [9] decontam_1.14.0             splines_4.1.2              
- [11] codetools_0.2-18            sparseMatrixStats_1.6.0    
- [13] cachem_1.0.6                knitr_1.37                 
- [15] scater_1.22.0               jsonlite_1.7.2             
- [17] cluster_2.1.2               graph_1.72.0               
- [19] BiocManager_1.30.16         compiler_4.1.2             
- [21] assertthat_0.2.1            Matrix_1.4-0               
- [23] fastmap_1.1.0               lazyeval_0.2.2             
- [25] BiocSingular_1.10.0         htmltools_0.5.2            
- [27] tools_4.1.2                 rsvd_1.0.5                 
- [29] gtable_0.3.0                glue_1.6.0                 
- [31] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
- [33] dplyr_1.0.7                 Rcpp_1.0.7                 
- [35] jquerylib_0.1.4             vctrs_0.3.8                
- [37] ape_5.6-1                   nlme_3.1-153               
- [39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
- [41] xfun_0.29                   stringr_1.4.0              
- [43] beachmat_2.10.0             lifecycle_1.0.1            
- [45] irlba_2.3.5                 XML_3.99-0.8               
- [47] zlibbioc_1.40.0             MASS_7.3-54                
- [49] scales_1.1.1                parallel_4.1.2             
- [51] yaml_2.2.1                  memoise_2.0.1              
- [53] gridExtra_2.3               ggplot2_3.3.5              
- [55] yulab.utils_0.0.4           sass_0.4.0                 
- [57] stringi_1.7.6               RSQLite_2.2.9              
- [59] ScaledMatrix_1.2.0          permute_0.9-5              
- [61] tidytree_0.3.7              filelock_1.0.2             
- [63] BiocParallel_1.28.3         rlang_0.4.12               
- [65] pkgconfig_2.0.3             bitops_1.0-7               
- [67] evaluate_0.14               lattice_0.20-45            
- [69] purrr_0.3.4                 treeio_1.18.1              
- [71] CodeDepends_0.6.5           bit_4.0.4                  
- [73] tidyselect_1.1.1            plyr_1.8.6                 
- [75] magrittr_2.0.1              bookdown_0.24              
- [77] R6_2.5.1                    generics_0.1.1             
- [79] DelayedArray_0.20.0         DBI_1.1.2                  
- [81] mgcv_1.8-38                 pillar_1.6.4               
- [83] RCurl_1.98-1.5              tibble_3.1.6               
- [85] dir.expiry_1.2.0            crayon_1.4.2               
- [87] utf8_1.2.2                  rmarkdown_2.11             
- [89] viridis_0.6.2               grid_4.1.2                 
- [91] blob_1.2.2                  vegan_2.5-7                
- [93] digest_0.6.29               tidyr_1.1.4                
- [95] munsell_0.5.0               DirichletMultinomial_1.36.0
- [97] beeswarm_0.4.0              viridisLite_0.4.0          
- [99] vipor_0.4.5                 bslib_0.3.1                
+ [1] ggbeeswarm_0.6.0            colorspace_2.0-2           
+ [3] ellipsis_0.3.2              scuttle_1.4.0              
+ [5] BiocNeighbors_1.12.0        ggrepel_0.9.1              
+ [7] bit64_4.0.5                 fansi_1.0.2                
+ [9] decontam_1.14.0             splines_4.1.2              
+[11] codetools_0.2-18            sparseMatrixStats_1.6.0    
+[13] cachem_1.0.6                knitr_1.37                 
+[15] scater_1.22.0               jsonlite_1.7.3             
+[17] cluster_2.1.2               graph_1.72.0               
+[19] BiocManager_1.30.16         compiler_4.1.2             
+[21] assertthat_0.2.1            Matrix_1.4-0               
+[23] fastmap_1.1.0               lazyeval_0.2.2             
+[25] cli_3.1.1                   BiocSingular_1.10.0        
+[27] htmltools_0.5.2             tools_4.1.2                
+[29] rsvd_1.0.5                  gtable_0.3.0               
+[31] glue_1.6.1                  GenomeInfoDbData_1.2.7     
+[33] reshape2_1.4.4              dplyr_1.0.7                
+[35] Rcpp_1.0.8                  vctrs_0.3.8                
+[37] ape_5.6-1                   nlme_3.1-155               
+[39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
+[41] xfun_0.29                   stringr_1.4.0              
+[43] beachmat_2.10.0             lifecycle_1.0.1            
+[45] irlba_2.3.5                 XML_3.99-0.8               
+[47] zlibbioc_1.40.0             MASS_7.3-55                
+[49] scales_1.1.1                parallel_4.1.2             
+[51] yaml_2.2.2                  memoise_2.0.1              
+[53] gridExtra_2.3               ggplot2_3.3.5              
+[55] yulab.utils_0.0.4           stringi_1.7.6              
+[57] RSQLite_2.2.9               ScaledMatrix_1.2.0         
+[59] tidytree_0.3.7              permute_0.9-7              
+[61] filelock_1.0.2              BiocParallel_1.28.3        
+[63] rlang_1.0.0                 pkgconfig_2.0.3            
+[65] bitops_1.0-7                evaluate_0.14              
+[67] lattice_0.20-45             purrr_0.3.4                
+[69] treeio_1.18.1               CodeDepends_0.6.5          
+[71] bit_4.0.4                   tidyselect_1.1.1           
+[73] plyr_1.8.6                  magrittr_2.0.2             
+[75] bookdown_0.24               R6_2.5.1                   
+[77] generics_0.1.2              DelayedArray_0.20.0        
+[79] DBI_1.1.2                   mgcv_1.8-38                
+[81] pillar_1.7.0                RCurl_1.98-1.5             
+[83] tibble_3.1.6                dir.expiry_1.2.0           
+[85] crayon_1.4.2                utf8_1.2.2                 
+[87] rmarkdown_2.11              viridis_0.6.2              
+[89] grid_4.1.2                  blob_1.2.2                 
+[91] vegan_2.5-7                 digest_0.6.29              
+[93] tidyr_1.2.0                 munsell_0.5.0              
+[95] DirichletMultinomial_1.36.0 beeswarm_0.4.0             
+[97] viridisLite_0.4.0           vipor_0.4.5                
 ```
 </div>

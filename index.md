@@ -6,6 +6,7 @@ bibliography: [book.bib]
 biblio-style: apalike
 link-citations: yes
 github-repo: microbiome/OMA
+always_allow_html: yes
 ---
 
 
@@ -14,7 +15,7 @@ github-repo: microbiome/OMA
 date: "**Authors:** Leo Lahti [aut], Sudarshan Shetty [aut], Felix GM Ernst [aut, cre]<br/>
   **Version:** 0.98.9<br/>
   **Modified:** 2021-09-10<br/>
-  **Compiled:** 2022-01-19<br/>
+  **Compiled:** 2022-02-05<br/>
   **Environment:** R version 4.1.2 (2021-11-01), Bioconductor 3.14<br/>
   **License:** CC BY-NC-SA 3.0 US<br/>
   **Copyright:** <br/>
@@ -77,16 +78,4 @@ Attribution-NonCommercial
 
 
 
-<script type="text/javascript">
-// This block adds image to the front page
-title=document.getElementById('header');
-title.innerHTML = title.innerHTML + 
 
-'<img src="https://user-images.githubusercontent.com/60338854/128359392\
--6feef8df-30e9-4ea0-ae3b-4bb619d746ed.png" alt="Microbiome" width="50%"/>' +
-
-'<p style="font-size:12px">Figure source: Moreno-Indias <i>et al</i>. (2021) \
-<a href="https://doi.org/10.3389/fmicb.2021.635781">Statistical and \
-Machine Learning Techniques in Human Microbiome Studies: Contemporary \
-Challenges and Solutions</a>. Frontiers in Microbiology 12:11.</p>'
-</script>
