@@ -627,31 +627,31 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7728 BIC: 8122 AIC: 7995 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7752 BIC: 8276 AIC: 8105 
+## Laplace: 7741 BIC: 8282 AIC: 8112 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7909 BIC: 8599 AIC: 8386 
+## Laplace: 7849 BIC: 8565 AIC: 8352 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7976 BIC: 8823 AIC: 8567 
+## Laplace: 7952 BIC: 8850 AIC: 8594 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8064 BIC: 9093 AIC: 8795
+## Laplace: 8038 BIC: 9084 AIC: 8785
 ```
 
 
@@ -698,12 +698,12 @@ dmn_group
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
 ## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
 ## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  793.17  1872.8 1674.5 1735
+## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
 ## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
 ## Ocean              2       3   67 1100.0  -44.82   953.6 1174.2 1235
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
 ## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
 ## Tongue             2       2   67  783.0 -107.78   605.0  829.8  918
 ```
 
@@ -717,8 +717,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.28
+## 1 0.5385 20.60
+## 2 0.4615 15.32
 ```
 
 
@@ -732,12 +732,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 4.984e-17
-## CC1     1.000e+00 3.836e-22
-## SV1     1.000e+00 1.936e-12
-## M31Fcsw 7.900e-26 1.000e+00
-## M11Fcsw 1.135e-16 1.000e+00
-## M31Plmr 1.125e-13 1.000e+00
+## CL3     1.000e+00 4.562e-17
+## CC1     1.000e+00 3.451e-22
+## SV1     1.000e+00 1.794e-12
+## M31Fcsw 6.916e-26 1.000e+00
+## M11Fcsw 1.027e-16 1.000e+00
+## M31Plmr 1.026e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -748,13 +748,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30388 0.1354665
-## Phylum:Euryarchaeota  0.23117 0.1468621
-## Phylum:Actinobacteria 1.21339 1.0601263
-## Phylum:Spirochaetes   0.21395 0.1318421
-## Phylum:MVP-15         0.02982 0.0007648
-## Phylum:Proteobacteria 6.84357 1.8152992
+##                         [,1]    [,2]
+## Phylum:Crenarchaeota  0.3043 0.13540
+## Phylum:Euryarchaeota  0.2314 0.14688
+## Phylum:Actinobacteria 1.2105 1.05820
+## Phylum:Spirochaetes   0.2141 0.13181
+## Phylum:MVP-15         0.0299 0.00077
+## Phylum:Proteobacteria 6.8416 1.81134
 ```
 Get the assignment probabilities
 
