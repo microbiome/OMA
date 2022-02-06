@@ -523,7 +523,7 @@ other attached packages:
  [3] scater_1.22.0                  scuttle_1.4.0                 
  [5] miaViz_1.3.2                   ggraph_2.0.5                  
  [7] ggplot2_3.3.5                  microbiomeDataSets_1.1.5      
- [9] mia_1.3.14                     MultiAssayExperiment_1.20.0   
+ [9] mia_1.3.15                     MultiAssayExperiment_1.20.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [13] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [15] SummarizedExperiment_1.24.0    Biobase_2.54.0                

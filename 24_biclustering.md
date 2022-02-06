@@ -529,7 +529,7 @@ other attached packages:
  [3] colorspace_2.0-2               MASS_7.3-55                   
  [5] patchwork_1.1.1                ggplot2_3.3.5                 
  [7] pheatmap_1.0.12                cobiclust_0.1.0               
- [9] microbiomeDataSets_1.1.5       mia_1.3.14                    
+ [9] microbiomeDataSets_1.1.5       mia_1.3.15                    
 [11] MultiAssayExperiment_1.20.0    TreeSummarizedExperiment_2.1.4
 [13] Biostrings_2.62.0              XVector_0.34.0                
 [15] SingleCellExperiment_1.16.0    SummarizedExperiment_1.24.0   

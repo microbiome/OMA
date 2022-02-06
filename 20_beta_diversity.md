@@ -432,7 +432,7 @@ print(as.data.frame(permanova$aov.tab)["Group", "Pr(>F)"])
 ```
 
 ```
-## [1] 8e-04
+## [1] 6e-04
 ```
 
 In this case, the community composition is not significantly different
@@ -536,7 +536,7 @@ other attached packages:
  [1] patchwork_1.1.1                scater_1.22.0                 
  [3] scuttle_1.4.0                  ggplot2_3.3.5                 
  [5] vegan_2.5-7                    lattice_0.20-45               
- [7] permute_0.9-7                  mia_1.3.14                    
+ [7] permute_0.9-7                  mia_1.3.15                    
  [9] MultiAssayExperiment_1.20.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.62.0              XVector_0.34.0                
 [13] SingleCellExperiment_1.16.0    SummarizedExperiment_1.24.0   
