@@ -43,33 +43,50 @@ theme_set(theme_classic())
 library(mia)
 library(ggplot2)
 library(scater)
+
 data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
+tse <- addPerCellQC(tse)
+tse <- addPerFeatureQC(tse)
 ```
 
 ## Accessing row and column data
 
-`SCE` and `TSE` objects contain multiple layers of information in the form of rows, columns and meta data. The `scater` package supports in accessing and visualizing the meta data related to features as well as samples.
-
-
-
-
+`SCE` and `TSE` objects contain multiple layers of information in the form of rows, columns and meta data. The `scater` package supports in accessing, modifying and visualizing the meta data related to features as well as samples.
 
 ```{r}
+# list row meta data
+names(rowData(tse))
+# list column meta data
+names(colData(tse))
+```
+
+Such meta data can be directly plotted with the functions `plotRowData` and `plotColData`.
+
+```{r, warning = FALSE}
+# plot QC Mean against Sample ID, colur-labeled by Sample Type
+plotRowData(tse, "mean", "Species") +
+  theme(axis.text.x = element_blank()) +
+  labs(x = "Species", y = "QC Mean")
+
+plotColData(tse, "sum", "X.SampleID", colour_by = "SampleType") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Sample ID", y = "QC Sum")
+```
+
+Alternatively, they can be converted to a `data.frame` object and passed to `ggplot`.
+
+```{r}
+coldata <- as.data.frame(colData(tse))
+
 ggplot(coldata, aes(x = SampleType)) +
   geom_bar(width = 0.5) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Sampling Site",
        y = "Number of Samples")
-  
 ```
 
-```{r}
-plotColData(tse,"sum","X.SampleID", colour_by = "SampleType") + 
-    theme(axis.text.x = element_text(angle = 45, hjust=1)) +
-    labs(y = "Library size (N)", x = "Sample ID")       
-```
-
+Further methods of usage and examples can be found in the chapters \@ref(qc) and \@ref(richness).
 
 ## Session Info {-}
 
