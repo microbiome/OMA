@@ -21,7 +21,7 @@ This chapter introduces the reader to a number of visualization techniques found
 * heat maps
 * ordination charts
 * regression charts
-* tree charts
+* trees
 
 The toolkit which provides the essential plotting functionality includes the following packages:
 
@@ -39,15 +39,24 @@ For systematic and extensive tutorials on the visual tools available in `phylose
 * [microbiome tutorials](https://microbiome.github.io/tutorials/)
 
 ```{r, include = FALSE}
+library(ggplot2)
 theme_set(theme_classic())
 library(mia)
-library(ggplot2)
 library(scater)
-
+library(patchwork)
+# essential data
 data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
+# additional data for pre-analysis exploration
 tse <- addPerCellQC(tse)
 tse <- addPerFeatureQC(tse)
+# additional data for diversity estimation
+tse <- mia::estimateDiversity(tse, 
+                              abund_values = "counts",
+                              index = "shannon", 
+                              name = "shannon")
+tse <- mia::estimateFaith(tse,
+                          abund_values = "counts")
 ```
 
 ## Pre-analysis exploration
@@ -89,23 +98,52 @@ ggplot(coldata, aes(x = SampleType)) +
        y = "Number of Samples")
 ```
 
-Further methods of usage can be found in the chapters \@ref(qc) and \@ref(richness) and in a few [external tutorials](https://github.com/davismcc/scater_tutorials_open_data) with open data.
+Further methods of application can be found in the chapters \@ref(qc) and \@ref(richness) and in a few [external tutorials](https://github.com/davismcc/scater_tutorials_open_data) with open data. Additionally, `rowData` and `colData` allow manipulation and subsetting of large data sets into smaller units, as explained in chapter \@ref(datamanipulation).
 
 ### Viewing abundance and prevalence patterns
 
 Prior-to-analysis exploration may involve questions such as how microorganisms are distributed across samples (abundance) and what microorganisms are present in most of the samples (prevalence). The information on abundance and prevalence can be summarized into a **jitter** or **density plot** and a **tree**, respectively, with the `miaViz` package.
 
-Specifically, the functions `plotAbundance`, `plotAbundanceDensity` and `plotRowTree` are used, and examples on their applications are discussed throughout chapter \@ref(quality-control).
+Specifically, the functions `plotAbundance`, `plotAbundanceDensity` and `plotRowTree` are used, and examples on their usage are discussed throughout chapter \@ref(quality-control).
 
 ## Diversity estimation
 
-Visualization techniques for alpha and beta diversity greatly differ from one another.
+Alpha diversity is commonly measured as one of the diversity indices explained in chapter \@ref(community-diversity). Because the focus lies on each sample separately, one-dimensional plots, such as **scatter**, **violin** and **box plots**, are suitable. 
 
-### Alpha diversity with violin and box plots
+Beta diversity is generally evaluated as one of the dissimilarity indices reported in chapter \@ref(community-similarity). Unlike alpha diversity, samples are compared collectively to estimate the heterogeneity across them, therefore multidimensional plots, such as **Shepard** and **ordination plots** are suitable.
 
-The several indices available for the evaluation of alpha diversity often return slightly divergent estimates, which can be visually compared with a multiple violin or box plot.
+|                         | alpha diversity            | beta diversity            |
+|:-----------------------:|:--------------------------:|:-------------------------:|
+| used metrics            | diversity indices          | dissimilarity indices     |
+|                         |                            |                           | 
+| metric dimensionality   | one-dimensional            | multidimensional          |
+|                         |                            |                           | 
+| suitable visualization  | scatter, violin, box plots | Shepard, ordination plots |
 
-### Beta diversity with regression and coordination plots
+As a conclusion, visualization techniques for alpha and beta diversity significantly differ from one another.
+
+### Alpha diversity with scatter, violin and box plots
+
+```{r}
+plotColData(tse, "shannon", colour_by = "SampleType")
+```
+
+The several indices available for the evaluation of alpha diversity often return slightly divergent estimates, which can be visually compared with a multiple violin or box plot. For this purpose, `plotColData` (for violin plots) or `ggplot` (for box plots) are recursively applied to a number of diversity indices with the function `lapply` and the multi-panel plotting functionality of the `patchwork` package is then exploited.
+
+```{r}
+coldata <- as.data.frame(colData(tse))
+
+plots <- lapply(c("shannon", "faith"),
+                function(i) ggplot(coldata, aes_string(y = i)) +
+                  geom_boxplot() +
+                  theme(axis.text.x = element_blank(),
+                        axis.ticks.x = element_blank()))
+
+plots[[1]] + plots[[2]]
+```
+The analogous output in the form of a violin plot is obtained in chapter \@ref(faith-diversity).
+
+### Beta diversity with Shepard and coordination plots
 
 ## Statistical analysis
 
