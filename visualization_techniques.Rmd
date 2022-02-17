@@ -50,13 +50,23 @@ tse <- GlobalPatterns
 # additional data for pre-analysis exploration
 tse <- addPerCellQC(tse)
 tse <- addPerFeatureQC(tse)
-# additional data for diversity estimation
+# additional data for alpha diversity
 tse <- mia::estimateDiversity(tse, 
                               abund_values = "counts",
                               index = "shannon", 
                               name = "shannon")
 tse <- mia::estimateFaith(tse,
                           abund_values = "counts")
+# additional data for beta diversity
+tse <- runMDS(tse,
+              FUN = vegan::vegdist,
+              method = "bray",
+              name = "MDS",
+              exprs_values = "counts",
+              ncomponents = 3)
+tse <- runNMDS(tse,
+               FUN = vegan::vegdist,
+               name = "NMDS")
 ```
 
 ## Pre-analysis exploration
@@ -149,6 +159,33 @@ plots[[1]] + plots[[2]]
 The analogous output in the form of a violin plot is obtained in chapter \@ref(faith-diversity). In addition, box plots that group samples according to certain information, such as origin, sex, age and health condition, can be labeled with p-values for significant differences with the package `ggsignif` package, as shown in chapter \@ref(estimate-diversity).
 
 ### Beta diversity with Shepard and coordination plots
+
+The `scater` package offers the general function `plotReducedDim`, which is able to produce plots from the following coordination methods:
+
+* `runMDS`
+* `runNMDS`
+* `runPCA`
+* `runTSNE`
+* `runUMAP`
+
+```{r}
+p1 <- plotReducedDim(tse, "NMDS", colour_by = "SampleType")
+```
+
+Multiple combinations of coordinates or dimensions can also be integrated into a multi-panel arrangement.
+
+```{r}
+p2 <- plotReducedDim(tse, "MDS", ncomponents = c(1:3), colour_by = "SampleType")
+```
+
+Similarly to iterating `plotColData` over indices of alpha diversity, `lapply` and `patchwork` can be used in combination to recursively apply `plotReducedDim` and visually compare results among various coordination methods.
+
+```{r}
+plots <- lapply(c("MDS", "NMDS"),
+                plotReducedDim,
+                object = tse)
+plots[[1]] + plots[[2]]
+```
 
 ## Statistical analysis
 
