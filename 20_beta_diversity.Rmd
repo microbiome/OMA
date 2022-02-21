@@ -341,16 +341,44 @@ of the community are equivalent between the compared groups. A small
 p-value indicates that the compared groups have, on average, a
 different community composition.
 
-This method is implemented in the `vegan` package (function `adonis`).
+This method is implemented in the `vegan` package in the function
+[`adonis2`](https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis).
+
+We can get equal result by first performing distance-based redundancy analysis (dbRDA),
+and then applying permutational test for result of redundancy analysis. Advantage is 
+that by doing so, we can get coefficients: how much each taxa affect to the result.
+
 
 ```{r}
-library(vegan)
-permanova <- vegan::adonis(t(assay(tse,"relabundance")) ~ Group,
-                           data = colData(tse),
-                           permutations = 9999)
+if( !require(vegan) ){
+    BiocManager::install("vegan")
+    library("vegan")
+}
+# Set seed for reproducibility
+set.seed(1576)
+# We choose 99 random permutations. Consider applying more (999 or 9999) in your
+# analysis. 
+permanova <- adonis2(t(assay(tse,"relabundance")) ~ Group,
+                     data = colData(tse),
+                     method = "euclidean",
+                     by = NULL,
+                     permutations = 99)
 
-# P-value
-print(as.data.frame(permanova$aov.tab)["Group", "Pr(>F)"])
+# Set seed for reproducibility
+set.seed(1576)
+# Perform dbRDA
+dbrda <- dbrda(t(assay(tse,"relabundance")) ~ Group, 
+               data = colData(tse))
+# Perform permutational analysis
+permanova2 <- anova.cca(dbrda,
+                        method = "euclidean",
+                        permutations = 99)
+
+# Get p-values
+p_values <- c( permanova["Model", "Pr(>F)"], permanova2["Model", "Pr(>F)"] )
+p_values <-as.data.frame(p_values)
+rownames(p_values) <- c("adonis2", "dbRDA+anova.cca")
+p_values
 ```
 
 In this case, the community composition is not significantly different
@@ -363,8 +391,14 @@ composition.
 
 
 ```{r}
-coef <- coefficients(permanova)["Group1",]
-top.coef <- sort(head(coef[rev(order(abs(coef)))],20))
+# Add taxa info
+sppscores(dbrda) <- t(assay(tse,"relabundance"))
+# Get coefficients
+coef <- dbrda$CCA$v
+# Get the taxa with biggest weights
+top.coef <- head(coef[rev(order(abs(coef))), , drop = FALSE], 20)
+# Sort weight from in increasing order
+top.coef <- top.coef[ order(top.coef), ]
 ```
 
 
