@@ -3,7 +3,7 @@ title: ""
 output: html_notebook
 ---
 
-# Visualization
+# Visualization {#viz-chapter}
 
 ```{r setup, echo=FALSE, results="asis"}
 #library(rebook)
@@ -239,7 +239,7 @@ plotAbundance(tse_order,
               order_sample_by = "Clostridiales")
 ```
 
-For more sophisticated visualizations than those produced with `plotAbundance` and `ggplot2`, the package `pheatmap` provides methods to include clusters in a heat map.
+For more sophisticated visualizations than those produced with `plotAbundance` and `ggplot2`, the packages `pheatmap` and `sechm` provide methods to include feature and sample clusters in a heat map, along with further functionality.
 
 ```{r pheatmap1}
 # Takes subset: only samples from feces, skin, or tongue
@@ -262,7 +262,7 @@ mat <- assay(tse_phylum_subset, "clr_z")
 pheatmap(mat)
 ```
 
-We can create clusters by hierarchical clustering and add them to the plot.
+We can cluster both samples and features hierarchically and add them to the x and y axes of the heat map, respectively.
 
 ```{r pheatmap2}
 # Hierarchical clustering
@@ -270,9 +270,7 @@ taxa_hclust <- hclust(dist(mat), method = "complete")
 
 # Creates a phylogenetic tree
 taxa_tree <- as.phylo(taxa_hclust)
-```
 
-```{r pheatmap3}
 # Plot taxa tree
 taxa_tree <- ggtree(taxa_tree) + 
   theme(plot.margin=margin(0,0,0,0)) # removes margins
@@ -280,12 +278,13 @@ taxa_tree <- ggtree(taxa_tree) +
 # Get order of taxa in plot
 taxa_ordered <- get_taxa_name(taxa_tree)
 
-taxa_tree
+# to view the tree, run
+# taxa_tree
 ```
 
 Based on phylo tree, we decide to create three clusters. 
 
-```{r pheatmap4}
+```{r pheatmap3}
 # Creates clusters
 taxa_clusters <- cutree(tree = taxa_hclust, k = 3)
 
@@ -300,7 +299,9 @@ taxa_clusters <- taxa_clusters[taxa_ordered, , drop = FALSE]
 taxa_clusters
 ```
 
-```{r pheatmap5}
+The information on the clusters is then added to the feature meta data.
+
+```{r pheatmap4}
 # Adds information to rowData
 rowData(tse_phylum_subset)$clusters <- taxa_clusters[order(match(rownames(taxa_clusters), 
                                                                  rownames(tse_phylum_subset))), ]
@@ -309,7 +310,9 @@ rowData(tse_phylum_subset)$clusters <- taxa_clusters[order(match(rownames(taxa_c
 rowData(tse_phylum_subset)$clusters
 ```
 
-```{r pheatmap6}
+Similarly, samples are hierarchically grouped into clusters, the most suitable number of clusters for the plot is selected and the new information is stored into the sample meta data.
+
+```{r pheatmap5}
 # Hierarchical clustering
 sample_hclust <- hclust(dist(t(mat)), method = "complete")
 
@@ -323,10 +326,9 @@ sample_tree <- ggtree(sample_tree) + layout_dendrogram() +
 # Get order of samples in plot
 samples_ordered <- rev(get_taxa_name(sample_tree))
 
-sample_tree
-```
+# to view the tree, run
+# sample_tree
 
-```{r pheatmap7}
 # Creates clusters
 sample_clusters <- factor(cutree(tree = sample_hclust, k = 3))
 
@@ -347,7 +349,7 @@ sample_data
 
 Now we can create heatmap with additional annotations.
 
-```{r pheatmap8}
+```{r pheatmap6}
 # Determines the scaling of colorss
 # Scale colors
 breaks <- seq(-ceiling(max(abs(mat))), ceiling(max(abs(mat))), 
@@ -360,13 +362,7 @@ pheatmap(mat, annotation_row = taxa_clusters,
          color = colors)
 ```
 
-In addition to _pheatmap_ package, there are also other packages that
-provide functions for more complex heatmaps, such as [_iheatmapr_](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html)
-and 
-[ComplexHeatmap](https://academic.oup.com/bioinformatics/article/32/18/2847/1743594?login=true).
-
-[sechm](http://www.bioconductor.org/packages/release/bioc/vignettes/sechm/inst/doc/sechm.html)
-package provides wrapper for _ComplexHeatmap_.
+The package `sechm` allows for further visual capabilities and flexibility. In this case, the clustering step is automatically performed by the plotting function and does not need to be executed in advance.
 
 ```{r sechm}
 # Stores annotation colros to metadata
@@ -384,8 +380,7 @@ sechm(tse_phylum_subset,
       cluster_cols = TRUE, cluster_rows = TRUE)
 ```
 
-
-It is also possible to create similar heatmap by just using _ggplot2_.
+It is also possible to create an analogous heat map by just using the `ggplot2` package. However, a relatively long code is required to generate an identical output.
 
 ```{r more_complex_heatmap1}
 # Add feature names to column as a factor
@@ -405,7 +400,8 @@ row_annotation <- ggplot(taxa_clusters) +
         ) +
       labs(fill = "Clusters", x = "Clusters")
 
-row_annotation
+# to view the notation, run
+# row_annotation
 ```
 
 ```{r more_complex_heatmap2}
@@ -424,9 +420,8 @@ sample_types_annotation <- ggplot(sample_data) + scale_y_discrete(position = "ri
         axis.title.y.right = element_text(angle=0, vjust = 0.5)
         ) +
       labs(fill = "Sample types", y = "Sample types")
-
-sample_types_annotation
-
+# to view the notation, run
+# sample_types_annotation
 ```
 
 ```{r more_complex_heatmap3}
@@ -442,9 +437,8 @@ sample_clusters_annotation <- ggplot(sample_data) + scale_y_discrete(position = 
         axis.title.y.right = element_text(angle=0, vjust = 0.5)
         ) +
       labs(fill = "Clusters", y = "Clusters")
-
-sample_clusters_annotation
-
+# to view the notation, run
+# sample_clusters_annotation
 ```
 
 ```{r more_complex_heatmap4}
@@ -481,7 +475,6 @@ heatmap <- ggplot(melted_mat) +
 heatmap
 ```
 
-
 ```{r more_complex_heatmap5}
 # Create layout
 design <- c(
@@ -490,8 +483,8 @@ design <- c(
   area(2, 2, 2, 3),
   area(3, 2, 4, 3)
 )
-
-plot(design)
+# to view the design, run
+# plot(design)
 ```
 
 ```{r more_complex_heatmap6, fig.width=10, fig.height=8}
@@ -512,8 +505,7 @@ plot <- row_annotation + sample_clusters_annotation + sample_types_annotation + 
                 widths = c(0.15, 1, 1),
                 heights = c(0.3, 0.3, 1, 1))
 
-plot
-
+# plot
 ```
 
 ```{r more_complex_heatmap7}
@@ -527,7 +519,8 @@ design <- c(
   area(4, 3, 5, 4)
 )
 
-plot(design)
+# to view the design, run
+# plot(design)
 ```
 
 ```{r more_complex_heatmap8, fig.width=10, fig.height=8}
@@ -544,6 +537,8 @@ plot <- taxa_tree +
 
 plot
 ```
+
+Heat maps find several other applications in biclustering and multi-assay analyses, that are discussed in chapters \@ref(biclustering) and \@ref(multi-assay_analyses), where the packages `cobiclust` and `MOFA2` are of interest.
 
 ## Session Info {-}
 
