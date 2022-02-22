@@ -519,11 +519,11 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] patchwork_1.1.1                dplyr_1.0.7                   
+ [1] patchwork_1.1.1                dplyr_1.0.8                   
  [3] scater_1.22.0                  scuttle_1.4.0                 
- [5] miaViz_1.3.2                   ggraph_2.0.5                  
+ [5] miaViz_1.3.3                   ggraph_2.0.5                  
  [7] ggplot2_3.3.5                  microbiomeDataSets_1.1.5      
- [9] mia_1.3.15                     MultiAssayExperiment_1.20.0   
+ [9] mia_1.3.19                     MultiAssayExperiment_1.20.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [13] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [15] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -545,8 +545,8 @@ loaded via a namespace (and not attached):
  [17] DECIPHER_2.22.0               graphlayouts_0.8.0           
  [19] colorspace_2.0-2              blob_1.2.2                   
  [21] rappdirs_0.3.3                ggrepel_0.9.1                
- [23] xfun_0.29                     crayon_1.4.2                 
- [25] RCurl_1.98-1.5                jsonlite_1.7.3               
+ [23] xfun_0.29                     crayon_1.5.0                 
+ [25] RCurl_1.98-1.6                jsonlite_1.7.3               
  [27] graph_1.72.0                  ape_5.6-1                    
  [29] glue_1.6.1                    polyclip_1.10-0              
  [31] gtable_0.3.0                  zlibbioc_1.40.0              
@@ -562,11 +562,11 @@ loaded via a namespace (and not attached):
  [51] CodeDepends_0.6.5             dbplyr_2.1.1                 
  [53] utf8_1.2.2                    labeling_0.4.2               
  [55] ggplotify_0.1.0               tidyselect_1.1.1             
- [57] rlang_1.0.0                   reshape2_1.4.4               
+ [57] rlang_1.0.1                   reshape2_1.4.4               
  [59] later_1.3.0                   AnnotationDbi_1.56.2         
  [61] munsell_0.5.0                 BiocVersion_3.14.0           
  [63] tools_4.1.2                   cachem_1.0.6                 
- [65] cli_3.1.1                     DirichletMultinomial_1.36.0  
+ [65] cli_3.2.0                     DirichletMultinomial_1.36.0  
  [67] generics_0.1.2                RSQLite_2.2.9                
  [69] ExperimentHub_2.2.1           evaluate_0.14                
  [71] stringr_1.4.0                 fastmap_1.1.0                
@@ -596,7 +596,7 @@ loaded via a namespace (and not attached):
 [119] parallel_4.1.2                ggfun_0.0.5                  
 [121] grid_4.1.2                    beachmat_2.10.0              
 [123] tidyr_1.2.0                   rmarkdown_2.11               
-[125] DelayedMatrixStats_1.16.0     ggnewscale_0.4.5             
+[125] DelayedMatrixStats_1.16.0     ggnewscale_0.4.6             
 [127] ggforce_0.3.3                 shiny_1.7.1                  
 [129] ggbeeswarm_0.6.0             
 ```

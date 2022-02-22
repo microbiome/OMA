@@ -300,7 +300,7 @@ altExp(tse, "Family")
 ```
 ## class: TreeSummarizedExperiment 
 ## dim: 603 26 
-## metadata(0):
+## metadata(1): agglomerated_by_rank
 ## assays(2): counts relabundance
 ## rownames(603): Class:Thermoprotei Family:Sulfolobaceae ...
 ##   Family:Thermodesulfobiaceae Phylum:SR1
@@ -549,7 +549,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.3.15                     MultiAssayExperiment_1.20.0   
+ [1] mia_1.3.19                     MultiAssayExperiment_1.20.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
  [5] XVector_0.34.0                 SingleCellExperiment_1.16.0   
  [7] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -572,11 +572,11 @@ loaded via a namespace (and not attached):
 [19] BiocManager_1.30.16         compiler_4.1.2             
 [21] assertthat_0.2.1            Matrix_1.4-0               
 [23] fastmap_1.1.0               lazyeval_0.2.2             
-[25] cli_3.1.1                   BiocSingular_1.10.0        
+[25] cli_3.2.0                   BiocSingular_1.10.0        
 [27] htmltools_0.5.2             tools_4.1.2                
 [29] rsvd_1.0.5                  gtable_0.3.0               
 [31] glue_1.6.1                  GenomeInfoDbData_1.2.7     
-[33] reshape2_1.4.4              dplyr_1.0.7                
+[33] reshape2_1.4.4              dplyr_1.0.8                
 [35] Rcpp_1.0.8                  vctrs_0.3.8                
 [37] ape_5.6-1                   nlme_3.1-155               
 [39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
@@ -591,7 +591,7 @@ loaded via a namespace (and not attached):
 [57] RSQLite_2.2.9               ScaledMatrix_1.2.0         
 [59] tidytree_0.3.7              permute_0.9-7              
 [61] filelock_1.0.2              BiocParallel_1.28.3        
-[63] rlang_1.0.0                 pkgconfig_2.0.3            
+[63] rlang_1.0.1                 pkgconfig_2.0.3            
 [65] bitops_1.0-7                evaluate_0.14              
 [67] lattice_0.20-45             purrr_0.3.4                
 [69] treeio_1.18.1               CodeDepends_0.6.5          
@@ -600,9 +600,9 @@ loaded via a namespace (and not attached):
 [75] bookdown_0.24               R6_2.5.1                   
 [77] generics_0.1.2              DelayedArray_0.20.0        
 [79] DBI_1.1.2                   mgcv_1.8-38                
-[81] pillar_1.7.0                RCurl_1.98-1.5             
+[81] pillar_1.7.0                RCurl_1.98-1.6             
 [83] tibble_3.1.6                dir.expiry_1.2.0           
-[85] crayon_1.4.2                utf8_1.2.2                 
+[85] crayon_1.5.0                utf8_1.2.2                 
 [87] rmarkdown_2.11              viridis_0.6.2              
 [89] grid_4.1.2                  blob_1.2.2                 
 [91] vegan_2.5-7                 digest_0.6.29              

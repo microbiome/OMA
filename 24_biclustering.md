@@ -108,7 +108,7 @@ mae[[1]]
 ```
 ## class: SummarizedExperiment 
 ## dim: 57 40 
-## metadata(0):
+## metadata(1): agglomerated_by_rank
 ## assays(2): counts clr
 ## rownames(57): D_5__Escherichia-Shigella D_5__Ruminiclostridium 5 ...
 ##   D_5__[Ruminococcus] gauvreauii group D_5__Defluviitaleaceae UCG-011
@@ -529,7 +529,7 @@ other attached packages:
  [3] colorspace_2.0-2               MASS_7.3-55                   
  [5] patchwork_1.1.1                ggplot2_3.3.5                 
  [7] pheatmap_1.0.12                cobiclust_0.1.0               
- [9] microbiomeDataSets_1.1.5       mia_1.3.15                    
+ [9] microbiomeDataSets_1.1.5       mia_1.3.19                    
 [11] MultiAssayExperiment_1.20.0    TreeSummarizedExperiment_2.1.4
 [13] Biostrings_2.62.0              XVector_0.34.0                
 [15] SingleCellExperiment_1.16.0    SummarizedExperiment_1.24.0   
@@ -550,8 +550,8 @@ loaded via a namespace (and not attached):
  [15] ScaledMatrix_1.2.0            cluster_2.1.2                
  [17] DECIPHER_2.22.0               blob_1.2.2                   
  [19] rappdirs_0.3.3                ggrepel_0.9.1                
- [21] xfun_0.29                     dplyr_1.0.7                  
- [23] crayon_1.4.2                  RCurl_1.98-1.5               
+ [21] xfun_0.29                     dplyr_1.0.8                  
+ [23] crayon_1.5.0                  RCurl_1.98-1.6               
  [25] jsonlite_1.7.3                graph_1.72.0                 
  [27] ape_5.6-1                     glue_1.6.1                   
  [29] gtable_0.3.0                  zlibbioc_1.40.0              
@@ -568,11 +568,11 @@ loaded via a namespace (and not attached):
  [51] scuttle_1.4.0                 CodeDepends_0.6.5            
  [53] dbplyr_2.1.1                  utf8_1.2.2                   
  [55] labeling_0.4.2                tidyselect_1.1.1             
- [57] rlang_1.0.0                   reshape2_1.4.4               
+ [57] rlang_1.0.1                   reshape2_1.4.4               
  [59] later_1.3.0                   AnnotationDbi_1.56.2         
  [61] munsell_0.5.0                 BiocVersion_3.14.0           
  [63] tools_4.1.2                   cachem_1.0.6                 
- [65] cli_3.1.1                     DirichletMultinomial_1.36.0  
+ [65] cli_3.2.0                     DirichletMultinomial_1.36.0  
  [67] generics_0.1.2                RSQLite_2.2.9                
  [69] ExperimentHub_2.2.1           evaluate_0.14                
  [71] stringr_1.4.0                 fastmap_1.1.0                

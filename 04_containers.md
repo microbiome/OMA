@@ -1013,7 +1013,7 @@ attached base packages:
 
 other attached packages:
  [1] microbiomeDataSets_1.1.5       phyloseq_1.38.0               
- [3] mia_1.3.15                     MultiAssayExperiment_1.20.0   
+ [3] mia_1.3.19                     MultiAssayExperiment_1.20.0   
  [5] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
  [7] XVector_0.34.0                 SingleCellExperiment_1.16.0   
  [9] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -1036,10 +1036,10 @@ loaded via a namespace (and not attached):
  [19] cluster_2.1.2                 DECIPHER_2.22.0              
  [21] colorspace_2.0-2              blob_1.2.2                   
  [23] rappdirs_0.3.3                ggrepel_0.9.1                
- [25] xfun_0.29                     dplyr_1.0.7                  
- [27] crayon_1.4.2                  RCurl_1.98-1.5               
+ [25] xfun_0.29                     dplyr_1.0.8                  
+ [27] crayon_1.5.0                  RCurl_1.98-1.6               
  [29] jsonlite_1.7.3                graph_1.72.0                 
- [31] survival_3.2-13               iterators_1.0.13             
+ [31] survival_3.2-13               iterators_1.0.14             
  [33] ape_5.6-1                     glue_1.6.1                   
  [35] gtable_0.3.0                  zlibbioc_1.40.0              
  [37] DelayedArray_0.20.0           BiocSingular_1.10.0          
@@ -1054,10 +1054,10 @@ loaded via a namespace (and not attached):
  [55] CodeDepends_0.6.5             dbplyr_2.1.1                 
  [57] utf8_1.2.2                    AnnotationDbi_1.56.2         
  [59] later_1.3.0                   tidyselect_1.1.1             
- [61] rlang_1.0.0                   reshape2_1.4.4               
+ [61] rlang_1.0.1                   reshape2_1.4.4               
  [63] munsell_0.5.0                 BiocVersion_3.14.0           
  [65] tools_4.1.2                   cachem_1.0.6                 
- [67] cli_3.1.1                     DirichletMultinomial_1.36.0  
+ [67] cli_3.2.0                     DirichletMultinomial_1.36.0  
  [69] generics_0.1.2                RSQLite_2.2.9                
  [71] ExperimentHub_2.2.1           ade4_1.7-18                  
  [73] evaluate_0.14                 biomformat_1.22.0            

@@ -520,7 +520,7 @@ tse_genus_sub
 ```
 ## class: TreeSummarizedExperiment 
 ## dim: 3 26 
-## metadata(0):
+## metadata(1): agglomerated_by_rank
 ## assays(1): counts
 ## rownames(3): Class:Thermoprotei Genus:Sulfolobus Genus:Sediminicola
 ## rowData names(7): Kingdom Phylum ... Genus Species
@@ -564,7 +564,7 @@ tse_genus_sub
 ```
 ## class: TreeSummarizedExperiment 
 ## dim: 3 18 
-## metadata(0):
+## metadata(1): agglomerated_by_rank
 ## assays(1): counts
 ## rownames(3): Class:Thermoprotei Genus:Sulfolobus Genus:Sediminicola
 ## rowData names(7): Kingdom Phylum ... Genus Species
@@ -592,7 +592,7 @@ tse_genus_sub
 ```
 ## class: TreeSummarizedExperiment 
 ## dim: 1516 9 
-## metadata(0):
+## metadata(1): agglomerated_by_rank
 ## assays(1): counts
 ## rownames(1516): Class:Thermoprotei Genus:Sulfolobus ...
 ##   Genus:Coprothermobacter Phylum:SR1
@@ -632,7 +632,7 @@ tse_genus_sub
 ```
 ## class: TreeSummarizedExperiment 
 ## dim: 1081 9 
-## metadata(0):
+## metadata(1): agglomerated_by_rank
 ## assays(1): counts
 ## rownames(1081): Genus:Sulfolobus Order:NRP-J ...
 ##   Genus:Coprothermobacter Phylum:SR1

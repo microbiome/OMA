@@ -341,7 +341,7 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.1                ggsignif_0.6.3                
  [3] scater_1.22.0                  ggplot2_3.3.5                 
- [5] scuttle_1.4.0                  mia_1.3.15                    
+ [5] scuttle_1.4.0                  mia_1.3.19                    
  [7] MultiAssayExperiment_1.20.0    TreeSummarizedExperiment_2.1.4
  [9] Biostrings_2.62.0              XVector_0.34.0                
 [11] SingleCellExperiment_1.16.0    SummarizedExperiment_1.24.0   
@@ -363,12 +363,12 @@ loaded via a namespace (and not attached):
  [17] graph_1.72.0                BiocManager_1.30.16        
  [19] compiler_4.1.2              assertthat_0.2.1           
  [21] Matrix_1.4-0                fastmap_1.1.0              
- [23] lazyeval_0.2.2              cli_3.1.1                  
+ [23] lazyeval_0.2.2              cli_3.2.0                  
  [25] BiocSingular_1.10.0         htmltools_0.5.2            
  [27] tools_4.1.2                 rsvd_1.0.5                 
  [29] gtable_0.3.0                glue_1.6.1                 
  [31] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
- [33] dplyr_1.0.7                 Rcpp_1.0.8                 
+ [33] dplyr_1.0.8                 Rcpp_1.0.8                 
  [35] vctrs_0.3.8                 ape_5.6-1                  
  [37] nlme_3.1-155                DECIPHER_2.22.0            
  [39] DelayedMatrixStats_1.16.0   xfun_0.29                  
@@ -382,7 +382,7 @@ loaded via a namespace (and not attached):
  [55] RSQLite_2.2.9               highr_0.9                  
  [57] ScaledMatrix_1.2.0          tidytree_0.3.7             
  [59] permute_0.9-7               filelock_1.0.2             
- [61] BiocParallel_1.28.3         rlang_1.0.0                
+ [61] BiocParallel_1.28.3         rlang_1.0.1                
  [63] pkgconfig_2.0.3             bitops_1.0-7               
  [65] evaluate_0.14               lattice_0.20-45            
  [67] purrr_0.3.4                 labeling_0.4.2             
@@ -393,9 +393,9 @@ loaded via a namespace (and not attached):
  [77] R6_2.5.1                    generics_0.1.2             
  [79] DelayedArray_0.20.0         DBI_1.1.2                  
  [81] withr_2.4.3                 mgcv_1.8-38                
- [83] pillar_1.7.0                RCurl_1.98-1.5             
+ [83] pillar_1.7.0                RCurl_1.98-1.6             
  [85] tibble_3.1.6                dir.expiry_1.2.0           
- [87] crayon_1.4.2                utf8_1.2.2                 
+ [87] crayon_1.5.0                utf8_1.2.2                 
  [89] rmarkdown_2.11              viridis_0.6.2              
  [91] grid_4.1.2                  blob_1.2.2                 
  [93] vegan_2.5-7                 digest_0.6.29              

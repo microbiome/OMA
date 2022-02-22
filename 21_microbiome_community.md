@@ -576,7 +576,7 @@ tse_dmn
 ```
 ## class: TreeSummarizedExperiment 
 ## dim: 67 26 
-## metadata(1): DMN
+## metadata(2): agglomerated_by_rank DMN
 ## assays(1): counts
 ## rownames(67): Phylum:Crenarchaeota Phylum:Euryarchaeota ...
 ##   Phylum:Synergistetes Phylum:SR1
@@ -600,7 +600,7 @@ names(metadata(tse_dmn))
 ```
 
 ```
-## [1] "DMN"
+## [1] "agglomerated_by_rank" "DMN"
 ```
 
 This returns a list of DMN objects for a closer investigation.
@@ -627,7 +627,7 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7690 BIC: 8076 AIC: 7948 
+## Laplace: 7689 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
@@ -639,19 +639,19 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7855 BIC: 8553 AIC: 8340 
+## Laplace: 7907 BIC: 8615 AIC: 8401 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: NaN BIC: NaN AIC: NaN 
+## Laplace: 7907 BIC: 8754 AIC: 8498 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: NaN BIC: NaN AIC: NaN
+## Laplace: 7998 BIC: 9014 AIC: 8715
 ```
 
 
@@ -696,15 +696,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.23   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.14   901.2 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -732,11 +732,11 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 4.975e-17
-## CC1     1.000e+00 3.806e-22
-## SV1     1.000e+00 1.937e-12
-## M31Fcsw 7.857e-26 1.000e+00
-## M11Fcsw 1.129e-16 1.000e+00
+## CL3     1.000e+00 5.009e-17
+## CC1     1.000e+00 3.849e-22
+## SV1     1.000e+00 1.941e-12
+## M31Fcsw 7.843e-26 1.000e+00
+## M11Fcsw 1.131e-16 1.000e+00
 ## M31Plmr 1.123e-13 1.000e+00
 ```
 
@@ -749,12 +749,12 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 
 ```
 ##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30378 0.1354657
-## Phylum:Euryarchaeota  0.23112 0.1468629
-## Phylum:Actinobacteria 1.21394 1.0600722
-## Phylum:Spirochaetes   0.21392 0.1318416
-## Phylum:MVP-15         0.02982 0.0007634
-## Phylum:Proteobacteria 6.84521 1.8154005
+## Phylum:Crenarchaeota  0.30384 0.1354650
+## Phylum:Euryarchaeota  0.23116 0.1468586
+## Phylum:Actinobacteria 1.21379 1.0601343
+## Phylum:Spirochaetes   0.21394 0.1318403
+## Phylum:MVP-15         0.02982 0.0007647
+## Phylum:Proteobacteria 6.84500 1.8153379
 ```
 Get the assignment probabilities
 
@@ -940,9 +940,9 @@ other attached packages:
  [3] bluster_1.4.0                  patchwork_1.1.1               
  [5] reshape2_1.4.4                 sechm_1.2.0                   
  [7] ggtree_3.2.1                   ape_5.6-1                     
- [9] pheatmap_1.0.12                miaViz_1.3.2                  
+ [9] pheatmap_1.0.12                miaViz_1.3.3                  
 [11] ggraph_2.0.5                   ggplot2_3.3.5                 
-[13] mia_1.3.15                     MultiAssayExperiment_1.20.0   
+[13] mia_1.3.19                     MultiAssayExperiment_1.20.0   
 [15] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [17] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [19] SummarizedExperiment_1.24.0    Biobase_2.54.0                
@@ -953,24 +953,24 @@ other attached packages:
 [29] BiocStyle_2.22.0               rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
-  [1] circlize_0.4.13             plyr_1.8.6                 
+  [1] circlize_0.4.14             plyr_1.8.6                 
   [3] igraph_1.2.11               lazyeval_0.2.2             
   [5] splines_4.1.2               BiocParallel_1.28.3        
   [7] digest_0.6.29               foreach_1.5.2              
   [9] yulab.utils_0.0.4           htmltools_0.5.2            
  [11] viridis_0.6.2               fansi_1.0.2                
  [13] magrittr_2.0.2              memoise_2.0.1              
- [15] ScaledMatrix_1.2.0          doParallel_1.0.16          
+ [15] ScaledMatrix_1.2.0          doParallel_1.0.17          
  [17] cluster_2.1.2               DECIPHER_2.22.0            
  [19] ComplexHeatmap_2.10.0       graphlayouts_0.8.0         
  [21] colorspace_2.0-2            blob_1.2.2                 
  [23] ggrepel_0.9.1               xfun_0.29                  
- [25] dplyr_1.0.7                 crayon_1.4.2               
- [27] RCurl_1.98-1.5              jsonlite_1.7.3             
- [29] graph_1.72.0                iterators_1.0.13           
+ [25] dplyr_1.0.8                 crayon_1.5.0               
+ [27] RCurl_1.98-1.6              jsonlite_1.7.3             
+ [29] graph_1.72.0                iterators_1.0.14           
  [31] glue_1.6.1                  polyclip_1.10-0            
  [33] registry_0.5-1              gtable_0.3.0               
- [35] zlibbioc_1.40.0             V8_4.0.0                   
+ [35] zlibbioc_1.40.0             V8_4.1.0                   
  [37] GetoptLong_1.0.5            DelayedArray_0.20.0        
  [39] BiocSingular_1.10.0         shape_1.4.6                
  [41] scales_1.1.1                DBI_1.1.2                  
@@ -985,9 +985,9 @@ loaded via a namespace (and not attached):
  [59] uwot_0.1.11                 CodeDepends_0.6.5          
  [61] utf8_1.2.2                  ggplotify_0.1.0            
  [63] tidyselect_1.1.1            labeling_0.4.2             
- [65] rlang_1.0.0                 munsell_0.5.0              
+ [65] rlang_1.0.1                 munsell_0.5.0              
  [67] tools_4.1.2                 cachem_1.0.6               
- [69] cli_3.1.1                   DirichletMultinomial_1.36.0
+ [69] cli_3.2.0                   DirichletMultinomial_1.36.0
  [71] generics_0.1.2              RSQLite_2.2.9              
  [73] evaluate_0.14               stringr_1.4.0              
  [75] fastmap_1.1.0               yaml_2.2.2                 
@@ -1006,7 +1006,7 @@ loaded via a namespace (and not attached):
 [101] BiocManager_1.30.16         GlobalOptions_0.1.2        
 [103] BiocNeighbors_1.12.0        cowplot_1.1.1              
 [105] bitops_1.0-7                irlba_2.3.5                
-[107] seriation_1.3.1             R6_2.5.1                   
+[107] seriation_1.3.2             R6_2.5.1                   
 [109] TSP_1.1-11                  bookdown_0.24              
 [111] gridExtra_2.3               vipor_0.4.5                
 [113] codetools_0.2-18            MASS_7.3-55                
@@ -1016,7 +1016,7 @@ loaded via a namespace (and not attached):
 [121] grid_4.1.2                  ggfun_0.0.5                
 [123] beachmat_2.10.0             tidyr_1.2.0                
 [125] rmarkdown_2.11              DelayedMatrixStats_1.16.0  
-[127] Rtsne_0.15                  ggnewscale_0.4.5           
+[127] Rtsne_0.15                  ggnewscale_0.4.6           
 [129] ggforce_0.3.3               ggbeeswarm_0.6.0           
 ```
 </div>

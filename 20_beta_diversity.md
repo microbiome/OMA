@@ -432,7 +432,7 @@ print(as.data.frame(permanova$aov.tab)["Group", "Pr(>F)"])
 ```
 
 ```
-## [1] 6e-04
+## [1] 9e-04
 ```
 
 In this case, the community composition is not significantly different
@@ -536,7 +536,7 @@ other attached packages:
  [1] patchwork_1.1.1                scater_1.22.0                 
  [3] scuttle_1.4.0                  ggplot2_3.3.5                 
  [5] vegan_2.5-7                    lattice_0.20-45               
- [7] permute_0.9-7                  mia_1.3.15                    
+ [7] permute_0.9-7                  mia_1.3.19                    
  [9] MultiAssayExperiment_1.20.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.62.0              XVector_0.34.0                
 [13] SingleCellExperiment_1.16.0    SummarizedExperiment_1.24.0   
@@ -559,11 +559,11 @@ loaded via a namespace (and not attached):
 [19] BiocManager_1.30.16         compiler_4.1.2             
 [21] assertthat_0.2.1            Matrix_1.4-0               
 [23] fastmap_1.1.0               lazyeval_0.2.2             
-[25] cli_3.1.1                   BiocSingular_1.10.0        
+[25] cli_3.2.0                   BiocSingular_1.10.0        
 [27] htmltools_0.5.2             tools_4.1.2                
 [29] rsvd_1.0.5                  gtable_0.3.0               
 [31] glue_1.6.1                  GenomeInfoDbData_1.2.7     
-[33] reshape2_1.4.4              dplyr_1.0.7                
+[33] reshape2_1.4.4              dplyr_1.0.8                
 [35] Rcpp_1.0.8                  vctrs_0.3.8                
 [37] ape_5.6-1                   nlme_3.1-155               
 [39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
@@ -577,7 +577,7 @@ loaded via a namespace (and not attached):
 [55] stringi_1.7.6               RSQLite_2.2.9              
 [57] highr_0.9                   ScaledMatrix_1.2.0         
 [59] tidytree_0.3.7              filelock_1.0.2             
-[61] BiocParallel_1.28.3         rlang_1.0.0                
+[61] BiocParallel_1.28.3         rlang_1.0.1                
 [63] pkgconfig_2.0.3             bitops_1.0-7               
 [65] evaluate_0.14               purrr_0.3.4                
 [67] labeling_0.4.2              treeio_1.18.1              
@@ -588,8 +588,8 @@ loaded via a namespace (and not attached):
 [77] generics_0.1.2              DelayedArray_0.20.0        
 [79] DBI_1.1.2                   withr_2.4.3                
 [81] mgcv_1.8-38                 pillar_1.7.0               
-[83] RCurl_1.98-1.5              tibble_3.1.6               
-[85] dir.expiry_1.2.0            crayon_1.4.2               
+[83] RCurl_1.98-1.6              tibble_3.1.6               
+[85] dir.expiry_1.2.0            crayon_1.5.0               
 [87] utf8_1.2.2                  rmarkdown_2.11             
 [89] viridis_0.6.2               grid_4.1.2                 
 [91] blob_1.2.2                  digest_0.6.29              
