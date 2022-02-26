@@ -99,7 +99,6 @@ plotColData(tse,
 
 ### Diversity  
 
-**Non-Phylogenetic measures**  
 The main function, `estimateDiversity`, calculates the selected
 diversity index based on the selected assay data.  
 
@@ -123,6 +122,7 @@ if( !require(ggsignif) ){
   install.packages(ggsignif)
 }
 library(ggplot2)
+library(patchwork)
 library(ggsignif)
 
 # Subsets the data. Takes only those samples that are from feces, skin, or tongue,
@@ -146,20 +146,37 @@ ggplot(df, aes(x = SampleType, y = shannon)) +
   theme(text = element_text(size = 10))
 ```
 
-**Phylogenetic diversity**  
+### Faith phylogenetic diversity
 
-The phylogenetic diversity is calculated by `mia::estimateDiversity`. This is a faster re-implementation of   
+The Faith index is returned by the function `estimateFaith`.
+
+```{r phylo-div-1}
+tse <- mia::estimateFaith(tse,
+                          abund_values = "counts")
+head(colData(tse)$faith)
+```
+
+**Note**: because `tse` is a `TreeSummarizedExperiment` object, its phylogenetic tree is used by default. However, the optional argument `tree` must be provided if `tse` does not contain one.
+
+Below a visual comparison between shannon and faith indices is shown with a violin plot.
+
+```{r phylo-div-2}
+plots <- lapply(c("shannon", "faith"),
+                plotColData,
+                object = tse)
+plots[[1]] + plots[[2]]
+```
+ 
+Alternatively, the phylogenetic diversity can be calculated by `mia::estimateDiversity`. This is a faster re-implementation of   
 the widely used function in _`picante`_ [@R-picante, @Kembel2010].  
 
-Load `picante` R package and get the `phylo` stored in `rowTree`. 
-```{r phylo-div-1}
+Load `picante` R package and get the `phylo` stored in `rowTree`.
 
+```{r phylo-div-3}
 tse <- mia::estimateDiversity(tse, 
                               abund_values = "counts",
                               index = "faith", 
                               name = "faith")
-head(colData(tse)$faith)
-
 ```
 
 ### Evenness  
@@ -213,16 +230,23 @@ tse <- mia::estimateDivergence(tse,
 
 ## Visualization
 
-A plot comparing all the diversity measures calculated above and stored in `colData` can then be constructed directly.  
+A plot comparing all the diversity measures calculated above and stored in `colData` can then be constructed directly.
+
 ```{r plot-all-diversities}
-plots <- lapply(c("observed", "shannon","simpson", "relative", "faith","log_modulo_skewness"),
+plots <- lapply(c("observed", "shannon", "simpson", "relative", "faith", "log_modulo_skewness"),
                 plotColData,
                 object = tse,
                 x = "SampleType",
                 colour_by = "SampleType")
 
-plots <- lapply(plots,"+", theme(axis.text.x = element_text(angle=45,hjust=1)))
-ggpubr::ggarrange(plotlist = plots, nrow = 2, ncol = 3, common.legend = TRUE, legend = "right")
+plots <- lapply(plots, "+", 
+                theme(axis.text.x = element_blank(),
+                      axis.title.x = element_blank(),
+                      axis.ticks.x = element_blank()))
+
+((plots[[1]] | plots[[2]] | plots[[3]]) / 
+(plots[[4]] | plots[[5]] | plots[[6]])) +
+  plot_layout(guides = "collect")
 ```
 
 ## Session Info {-}
