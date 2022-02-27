@@ -79,7 +79,7 @@ library(plotly)
 reduced_data  <- as.data.frame(reducedDim(tse_Genus)[,])
 names(reduced_data) <- c("PC1","PC2","PC3")
 plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3)%>%
-  add_markers(color=colData(tse_Genus)$most_abundant, size=5,
+  add_markers(color=sapply(strsplit(colData(tse_Genus)$most_abundant, "_"), tail, 1), size=5,
               colors=c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red")) %>%
   layout(scene=list(xaxis=list(title = paste("PC1 (",round(var_explained[1],1),"%)")),
                     yaxis=list(title = paste("PC2 (",round(var_explained[2],1),"%)")),

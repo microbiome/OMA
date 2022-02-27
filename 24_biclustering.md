@@ -526,7 +526,7 @@ attached base packages:
 
 other attached packages:
  [1] biclust_2.0.3                  lattice_0.20-45               
- [3] colorspace_2.0-2               MASS_7.3-55                   
+ [3] colorspace_2.0-3               MASS_7.3-55                   
  [5] patchwork_1.1.1                ggplot2_3.3.5                 
  [7] pheatmap_1.0.12                cobiclust_0.1.0               
  [9] microbiomeDataSets_1.1.5       mia_1.3.19                    
@@ -552,31 +552,31 @@ loaded via a namespace (and not attached):
  [19] rappdirs_0.3.3                ggrepel_0.9.1                
  [21] xfun_0.29                     dplyr_1.0.8                  
  [23] crayon_1.5.0                  RCurl_1.98-1.6               
- [25] jsonlite_1.7.3                graph_1.72.0                 
- [27] ape_5.6-1                     glue_1.6.1                   
+ [25] jsonlite_1.8.0                graph_1.72.0                 
+ [27] ape_5.6-1                     glue_1.6.2                   
  [29] gtable_0.3.0                  zlibbioc_1.40.0              
  [31] DelayedArray_0.20.0           additivityTests_1.1-4        
  [33] BiocSingular_1.10.0           scales_1.1.1                 
  [35] DBI_1.1.2                     Rcpp_1.0.8                   
  [37] viridisLite_0.4.0             xtable_1.8-4                 
- [39] decontam_1.14.0               tidytree_0.3.7               
+ [39] decontam_1.14.0               tidytree_0.3.8               
  [41] bit_4.0.4                     rsvd_1.0.5                   
  [43] httr_1.4.2                    RColorBrewer_1.1-2           
  [45] dir.expiry_1.2.0              modeltools_0.2-23            
  [47] ellipsis_0.3.2                farver_2.1.0                 
- [49] pkgconfig_2.0.3               XML_3.99-0.8                 
+ [49] pkgconfig_2.0.3               XML_3.99-0.9                 
  [51] scuttle_1.4.0                 CodeDepends_0.6.5            
  [53] dbplyr_2.1.1                  utf8_1.2.2                   
- [55] labeling_0.4.2                tidyselect_1.1.1             
+ [55] labeling_0.4.2                tidyselect_1.1.2             
  [57] rlang_1.0.1                   reshape2_1.4.4               
  [59] later_1.3.0                   AnnotationDbi_1.56.2         
  [61] munsell_0.5.0                 BiocVersion_3.14.0           
  [63] tools_4.1.2                   cachem_1.0.6                 
  [65] cli_3.2.0                     DirichletMultinomial_1.36.0  
- [67] generics_0.1.2                RSQLite_2.2.9                
- [69] ExperimentHub_2.2.1           evaluate_0.14                
+ [67] generics_0.1.2                RSQLite_2.2.10               
+ [69] ExperimentHub_2.2.1           evaluate_0.15                
  [71] stringr_1.4.0                 fastmap_1.1.0                
- [73] yaml_2.2.2                    knitr_1.37                   
+ [73] yaml_2.3.5                    knitr_1.37                   
  [75] bit64_4.0.5                   purrr_0.3.4                  
  [77] KEGGREST_1.34.0               nlme_3.1-155                 
  [79] sparseMatrixStats_1.6.0       mime_0.12                    
@@ -595,7 +595,7 @@ loaded via a namespace (and not attached):
 [105] promises_1.2.0.1              gridExtra_2.3                
 [107] vipor_0.4.5                   codetools_0.2-18             
 [109] assertthat_0.2.1              withr_2.4.3                  
-[111] GenomeInfoDbData_1.2.7        mgcv_1.8-38                  
+[111] GenomeInfoDbData_1.2.7        mgcv_1.8-39                  
 [113] parallel_4.1.2                beachmat_2.10.0              
 [115] class_7.3-20                  tidyr_1.2.0                  
 [117] rmarkdown_2.11                DelayedMatrixStats_1.16.0    

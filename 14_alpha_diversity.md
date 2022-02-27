@@ -129,12 +129,12 @@ library(scater)
 plotColData(tse, 
             "observed", 
             "SampleType", 
-            colour_by = "SampleType") +
+            colour_by = "Final_Barcode") +
     theme(axis.text.x = element_text(angle=45,hjust=1)) + 
   ylab(expression(Richness[Observed]))
 ```
 
-![(\#fig:plot-div-shannon)Shannon diversity estimates plotted grouped by sample type.](14_alpha_diversity_files/figure-latex/plot-div-shannon-1.pdf) 
+![(\#fig:plot-div-shannon)Shannon diversity estimates plotted grouped by sample type with colour-labeled barcode.](14_alpha_diversity_files/figure-latex/plot-div-shannon-1.pdf) 
 
 ### Diversity  
 
@@ -218,8 +218,9 @@ Below a visual comparison between shannon and faith indices is shown with a viol
 ```r
 plots <- lapply(c("shannon", "faith"),
                 plotColData,
-                object = tse)
-plots[[1]] + plots[[2]]
+                object = tse, colour_by = "SampleType")
+plots[[1]] + plots[[2]] +
+  plot_layout(guides = "collect")
 ```
 
 ![](14_alpha_diversity_files/figure-latex/phylo-div-2-1.pdf)<!-- --> 
@@ -352,21 +353,21 @@ other attached packages:
 [21] BiocStyle_2.22.0               rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
-  [1] ggbeeswarm_0.6.0            colorspace_2.0-2           
+  [1] ggbeeswarm_0.6.0            colorspace_2.0-3           
   [3] ellipsis_0.3.2              BiocNeighbors_1.12.0       
   [5] farver_2.1.0                ggrepel_0.9.1              
   [7] bit64_4.0.5                 fansi_1.0.2                
   [9] decontam_1.14.0             splines_4.1.2              
  [11] codetools_0.2-18            sparseMatrixStats_1.6.0    
  [13] cachem_1.0.6                knitr_1.37                 
- [15] jsonlite_1.7.3              cluster_2.1.2              
+ [15] jsonlite_1.8.0              cluster_2.1.2              
  [17] graph_1.72.0                BiocManager_1.30.16        
  [19] compiler_4.1.2              assertthat_0.2.1           
  [21] Matrix_1.4-0                fastmap_1.1.0              
  [23] lazyeval_0.2.2              cli_3.2.0                  
  [25] BiocSingular_1.10.0         htmltools_0.5.2            
  [27] tools_4.1.2                 rsvd_1.0.5                 
- [29] gtable_0.3.0                glue_1.6.1                 
+ [29] gtable_0.3.0                glue_1.6.2                 
  [31] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
  [33] dplyr_1.0.8                 Rcpp_1.0.8                 
  [35] vctrs_0.3.8                 ape_5.6-1                  
@@ -374,25 +375,25 @@ loaded via a namespace (and not attached):
  [39] DelayedMatrixStats_1.16.0   xfun_0.29                  
  [41] stringr_1.4.0               beachmat_2.10.0            
  [43] lifecycle_1.0.1             irlba_2.3.5                
- [45] XML_3.99-0.8                zlibbioc_1.40.0            
+ [45] XML_3.99-0.9                zlibbioc_1.40.0            
  [47] MASS_7.3-55                 scales_1.1.1               
- [49] parallel_4.1.2              yaml_2.2.2                 
+ [49] parallel_4.1.2              yaml_2.3.5                 
  [51] memoise_2.0.1               gridExtra_2.3              
  [53] yulab.utils_0.0.4           stringi_1.7.6              
- [55] RSQLite_2.2.9               highr_0.9                  
- [57] ScaledMatrix_1.2.0          tidytree_0.3.7             
+ [55] RSQLite_2.2.10              highr_0.9                  
+ [57] ScaledMatrix_1.2.0          tidytree_0.3.8             
  [59] permute_0.9-7               filelock_1.0.2             
  [61] BiocParallel_1.28.3         rlang_1.0.1                
  [63] pkgconfig_2.0.3             bitops_1.0-7               
- [65] evaluate_0.14               lattice_0.20-45            
+ [65] evaluate_0.15               lattice_0.20-45            
  [67] purrr_0.3.4                 labeling_0.4.2             
  [69] treeio_1.18.1               CodeDepends_0.6.5          
  [71] cowplot_1.1.1               bit_4.0.4                  
- [73] tidyselect_1.1.1            plyr_1.8.6                 
+ [73] tidyselect_1.1.2            plyr_1.8.6                 
  [75] magrittr_2.0.2              bookdown_0.24              
  [77] R6_2.5.1                    generics_0.1.2             
  [79] DelayedArray_0.20.0         DBI_1.1.2                  
- [81] withr_2.4.3                 mgcv_1.8-38                
+ [81] withr_2.4.3                 mgcv_1.8-39                
  [83] pillar_1.7.0                RCurl_1.98-1.6             
  [85] tibble_3.1.6                dir.expiry_1.2.0           
  [87] crayon_1.5.0                utf8_1.2.2                 

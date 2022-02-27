@@ -1034,35 +1034,35 @@ loaded via a namespace (and not attached):
  [15] fansi_1.0.2                   magrittr_2.0.2               
  [17] memoise_2.0.1                 ScaledMatrix_1.2.0           
  [19] cluster_2.1.2                 DECIPHER_2.22.0              
- [21] colorspace_2.0-2              blob_1.2.2                   
+ [21] colorspace_2.0-3              blob_1.2.2                   
  [23] rappdirs_0.3.3                ggrepel_0.9.1                
  [25] xfun_0.29                     dplyr_1.0.8                  
  [27] crayon_1.5.0                  RCurl_1.98-1.6               
- [29] jsonlite_1.7.3                graph_1.72.0                 
+ [29] jsonlite_1.8.0                graph_1.72.0                 
  [31] survival_3.2-13               iterators_1.0.14             
- [33] ape_5.6-1                     glue_1.6.1                   
+ [33] ape_5.6-1                     glue_1.6.2                   
  [35] gtable_0.3.0                  zlibbioc_1.40.0              
  [37] DelayedArray_0.20.0           BiocSingular_1.10.0          
  [39] Rhdf5lib_1.16.0               scales_1.1.1                 
  [41] DBI_1.1.2                     Rcpp_1.0.8                   
  [43] xtable_1.8-4                  viridisLite_0.4.0            
- [45] decontam_1.14.0               tidytree_0.3.7               
+ [45] decontam_1.14.0               tidytree_0.3.8               
  [47] bit_4.0.4                     rsvd_1.0.5                   
  [49] httr_1.4.2                    dir.expiry_1.2.0             
  [51] ellipsis_0.3.2                pkgconfig_2.0.3              
- [53] XML_3.99-0.8                  scuttle_1.4.0                
+ [53] XML_3.99-0.9                  scuttle_1.4.0                
  [55] CodeDepends_0.6.5             dbplyr_2.1.1                 
  [57] utf8_1.2.2                    AnnotationDbi_1.56.2         
- [59] later_1.3.0                   tidyselect_1.1.1             
+ [59] later_1.3.0                   tidyselect_1.1.2             
  [61] rlang_1.0.1                   reshape2_1.4.4               
  [63] munsell_0.5.0                 BiocVersion_3.14.0           
  [65] tools_4.1.2                   cachem_1.0.6                 
  [67] cli_3.2.0                     DirichletMultinomial_1.36.0  
- [69] generics_0.1.2                RSQLite_2.2.9                
+ [69] generics_0.1.2                RSQLite_2.2.10               
  [71] ExperimentHub_2.2.1           ade4_1.7-18                  
- [73] evaluate_0.14                 biomformat_1.22.0            
+ [73] evaluate_0.15                 biomformat_1.22.0            
  [75] stringr_1.4.0                 fastmap_1.1.0                
- [77] yaml_2.2.2                    knitr_1.37                   
+ [77] yaml_2.3.5                    knitr_1.37                   
  [79] bit64_4.0.5                   purrr_0.3.4                  
  [81] KEGGREST_1.34.0               nlme_3.1-155                 
  [83] sparseMatrixStats_1.6.0       mime_0.12                    
@@ -1083,7 +1083,7 @@ loaded via a namespace (and not attached):
 [113] vipor_0.4.5                   codetools_0.2-18             
 [115] MASS_7.3-55                   assertthat_0.2.1             
 [117] rhdf5_2.38.0                  GenomeInfoDbData_1.2.7       
-[119] mgcv_1.8-38                   parallel_4.1.2               
+[119] mgcv_1.8-39                   parallel_4.1.2               
 [121] grid_4.1.2                    beachmat_2.10.0              
 [123] tidyr_1.2.0                   rmarkdown_2.11               
 [125] DelayedMatrixStats_1.16.0     shiny_1.7.1                  

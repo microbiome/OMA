@@ -853,14 +853,14 @@ loaded via a namespace (and not attached):
   [5] DelayedArray_0.20.0           data.table_1.14.2            
   [7] KEGGREST_1.34.0               RCurl_1.98-1.6               
   [9] generics_0.1.2                ScaledMatrix_1.2.0           
- [11] microbiome_1.16.0             RSQLite_2.2.9                
+ [11] microbiome_1.16.0             RSQLite_2.2.10               
  [13] bit_4.0.4                     tzdb_0.2.0                   
  [15] httpuv_1.6.5                  xml2_1.3.3                   
  [17] lubridate_1.8.0               assertthat_0.2.1             
  [19] DirichletMultinomial_1.36.0   viridis_0.6.2                
  [21] xfun_0.29                     hms_1.1.1                    
  [23] ggdist_3.1.0                  promises_1.2.0.1             
- [25] evaluate_0.14                 DEoptimR_1.0-10              
+ [25] evaluate_0.15                 DEoptimR_1.0-10              
  [27] fansi_1.0.2                   dbplyr_2.1.1                 
  [29] readxl_1.3.1                  igraph_1.2.11                
  [31] DBI_1.1.2                     htmlwidgets_1.5.4            
@@ -895,9 +895,9 @@ loaded via a namespace (and not attached):
  [89] zlibbioc_1.40.0               compiler_4.1.2               
  [91] RColorBrewer_1.1-2            cli_3.2.0                    
  [93] ade4_1.7-18                   pbapply_1.5-0                
- [95] mgcv_1.8-38                   tidyselect_1.1.1             
+ [95] mgcv_1.8-39                   tidyselect_1.1.2             
  [97] stringi_1.7.6                 highr_0.9                    
- [99] yaml_2.2.2                    BiocSingular_1.10.0          
+ [99] yaml_2.3.5                    BiocSingular_1.10.0          
 [101] svUnit_1.0.6                  ggrepel_0.9.1                
 [103] grid_4.1.2                    tools_4.1.2                  
 [105] parallel_4.1.2                rstudioapi_0.13              
@@ -910,17 +910,17 @@ loaded via a namespace (and not attached):
 [119] broom_0.7.12                  scuttle_1.4.0                
 [121] later_1.3.0                   BiocVersion_3.14.0           
 [123] AnnotationDbi_1.56.2          httr_1.4.2                   
-[125] Rdpack_2.1.3                  colorspace_2.0-2             
-[127] rvest_1.0.2                   XML_3.99-0.8                 
+[125] Rdpack_2.1.4                  colorspace_2.0-3             
+[127] rvest_1.0.2                   XML_3.99-0.9                 
 [129] fs_1.5.2                      splines_4.1.2                
-[131] yulab.utils_0.0.4             tidytree_0.3.7               
+[131] yulab.utils_0.0.4             tidytree_0.3.8               
 [133] scater_1.22.0                 multtest_2.50.0              
 [135] plotly_4.10.0                 xtable_1.8-4                 
-[137] jsonlite_1.7.3                nloptr_2.0.0                 
+[137] jsonlite_1.8.0                nloptr_2.0.0                 
 [139] CodeDepends_0.6.5             Rfast_2.0.6                  
 [141] R6_2.5.1                      mime_0.12                    
 [143] pillar_1.7.0                  htmltools_0.5.2              
-[145] glue_1.6.1                    fastmap_1.1.0                
+[145] glue_1.6.2                    fastmap_1.1.0                
 [147] BiocParallel_1.28.3           BiocNeighbors_1.12.0         
 [149] interactiveDisplayBase_1.32.0 codetools_0.2-18             
 [151] pcaPP_1.9-74                  mvtnorm_1.1-3                
