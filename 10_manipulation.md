@@ -647,3 +647,7 @@ tse_genus_sub
 ## colLinks: NULL
 ## colTree: NULL
 ```
+
+### Additional functions
+* [mapTaxonomy](https://microbiome.github.io/mia/reference/taxonomy-methods.html)
+* [mergeRows/mergeCols](https://microbiome.github.io/mia/reference/merge-methods.html)

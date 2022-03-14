@@ -839,7 +839,11 @@ GlobalPatterns_phyloseq2
 ```
 
 
-
+Conversion is possible between other data formats. Interested readers can refer to the following functions:
+* [makeTreeSummarizedExperimentFromDADA2](https://microbiome.github.io/mia/reference/makeTreeSummarizedExperimentFromDADA2.html)
+* [makeSummarizedExperimentFromBiom](https://microbiome.github.io/mia/reference/makeSummarizedExperimentFromBiom.html)
+* [loadFromMetaphlan](https://microbiome.github.io/mia/reference/loadFromMetaphlan.html)
+* [readQZA](https://microbiome.github.io/mia/reference/loadFromQIIME2.html)
 
 
 ## Demonstration data {#example-data}
@@ -1024,7 +1028,7 @@ other attached packages:
 [19] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
-  [1] AnnotationHub_3.2.1           BiocFileCache_2.2.1          
+  [1] AnnotationHub_3.2.2           BiocFileCache_2.2.1          
   [3] plyr_1.8.6                    igraph_1.2.11                
   [5] lazyeval_0.2.2                splines_4.1.2                
   [7] BiocParallel_1.28.3           ggplot2_3.3.5                
@@ -1036,17 +1040,17 @@ loaded via a namespace (and not attached):
  [19] cluster_2.1.2                 DECIPHER_2.22.0              
  [21] colorspace_2.0-3              blob_1.2.2                   
  [23] rappdirs_0.3.3                ggrepel_0.9.1                
- [25] xfun_0.29                     dplyr_1.0.8                  
+ [25] xfun_0.30                     dplyr_1.0.8                  
  [27] crayon_1.5.0                  RCurl_1.98-1.6               
  [29] jsonlite_1.8.0                graph_1.72.0                 
- [31] survival_3.2-13               iterators_1.0.14             
- [33] ape_5.6-1                     glue_1.6.2                   
+ [31] survival_3.3-1                iterators_1.0.14             
+ [33] ape_5.6-2                     glue_1.6.2                   
  [35] gtable_0.3.0                  zlibbioc_1.40.0              
  [37] DelayedArray_0.20.0           BiocSingular_1.10.0          
  [39] Rhdf5lib_1.16.0               scales_1.1.1                 
  [41] DBI_1.1.2                     Rcpp_1.0.8                   
  [43] xtable_1.8-4                  viridisLite_0.4.0            
- [45] decontam_1.14.0               tidytree_0.3.8               
+ [45] decontam_1.14.0               tidytree_0.3.9               
  [47] bit_4.0.4                     rsvd_1.0.5                   
  [49] httr_1.4.2                    dir.expiry_1.2.0             
  [51] ellipsis_0.3.2                pkgconfig_2.0.3              
@@ -1054,7 +1058,7 @@ loaded via a namespace (and not attached):
  [55] CodeDepends_0.6.5             dbplyr_2.1.1                 
  [57] utf8_1.2.2                    AnnotationDbi_1.56.2         
  [59] later_1.3.0                   tidyselect_1.1.2             
- [61] rlang_1.0.1                   reshape2_1.4.4               
+ [61] rlang_1.0.2                   reshape2_1.4.4               
  [63] munsell_0.5.0                 BiocVersion_3.14.0           
  [65] tools_4.1.2                   cachem_1.0.6                 
  [67] cli_3.2.0                     DirichletMultinomial_1.36.0  
@@ -1082,10 +1086,10 @@ loaded via a namespace (and not attached):
 [111] bookdown_0.24                 gridExtra_2.3                
 [113] vipor_0.4.5                   codetools_0.2-18             
 [115] MASS_7.3-55                   assertthat_0.2.1             
-[117] rhdf5_2.38.0                  GenomeInfoDbData_1.2.7       
+[117] rhdf5_2.38.1                  GenomeInfoDbData_1.2.7       
 [119] mgcv_1.8-39                   parallel_4.1.2               
 [121] grid_4.1.2                    beachmat_2.10.0              
-[123] tidyr_1.2.0                   rmarkdown_2.11               
+[123] tidyr_1.2.0                   rmarkdown_2.13               
 [125] DelayedMatrixStats_1.16.0     shiny_1.7.1                  
 [127] ggbeeswarm_0.6.0             
 ```

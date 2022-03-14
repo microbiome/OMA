@@ -564,7 +564,11 @@ Let's cluster the data with DMM clustering.
 # For this reason we use only a subset of the data; agglomerated by Phylum as a rank.
 tse <- GlobalPatterns
 tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
-tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
+```
+
+
+```r
+tse_dmn <- mia::runDMN(tse, name = "DMN", k = 1:7)
 ```
 
 
@@ -639,19 +643,19 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7858 BIC: 8578 AIC: 8364 
+## Laplace: 7859 BIC: 8582 AIC: 8368 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7943 BIC: 8813 AIC: 8557 
+## Laplace: NaN BIC: NaN AIC: NaN 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8064 BIC: 9086 AIC: 8787
+## Laplace: NaN BIC: NaN AIC: NaN
 ```
 
 
@@ -696,15 +700,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.14   901.2 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.17   717.0  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
-## Mock               2       3   67  998.6  -70.60   839.3 1072.8 1134
-## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
-## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
+## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
+## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -732,12 +736,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 4.483e-17
-## CC1     1.000e+00 3.385e-22
-## SV1     1.000e+00 1.708e-12
-## M31Fcsw 7.412e-26 1.000e+00
+## CL3     1.000e+00 4.505e-17
+## CC1     1.000e+00 3.419e-22
+## SV1     1.000e+00 1.712e-12
+## M31Fcsw 7.423e-26 1.000e+00
 ## M11Fcsw 1.092e-16 1.000e+00
-## M31Plmr 1.150e-13 1.000e+00
+## M31Plmr 1.152e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -749,12 +753,12 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 
 ```
 ##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30381 0.1354051
-## Phylum:Euryarchaeota  0.23114 0.1468894
-## Phylum:Actinobacteria 1.21365 1.0581690
-## Phylum:Spirochaetes   0.21393 0.1318068
-## Phylum:MVP-15         0.02982 0.0007649
-## Phylum:Proteobacteria 6.84506 1.8114241
+## Phylum:Crenarchaeota  0.30380 0.1354048
+## Phylum:Euryarchaeota  0.23114 0.1468882
+## Phylum:Actinobacteria 1.21372 1.0580858
+## Phylum:Spirochaetes   0.21392 0.1318067
+## Phylum:MVP-15         0.02982 0.0007668
+## Phylum:Proteobacteria 6.84510 1.8114861
 ```
 Get the assignment probabilities
 
@@ -939,7 +943,7 @@ other attached packages:
  [1] scater_1.22.0                  scuttle_1.4.0                 
  [3] bluster_1.4.0                  patchwork_1.1.1               
  [5] reshape2_1.4.4                 sechm_1.2.0                   
- [7] ggtree_3.2.1                   ape_5.6-1                     
+ [7] ggtree_3.2.1                   ape_5.6-2                     
  [9] pheatmap_1.0.12                miaViz_1.3.3                  
 [11] ggraph_2.0.5                   ggplot2_3.3.5                 
 [13] mia_1.3.19                     MultiAssayExperiment_1.20.0   
@@ -964,7 +968,7 @@ loaded via a namespace (and not attached):
  [17] cluster_2.1.2               DECIPHER_2.22.0            
  [19] ComplexHeatmap_2.10.0       graphlayouts_0.8.0         
  [21] colorspace_2.0-3            blob_1.2.2                 
- [23] ggrepel_0.9.1               xfun_0.29                  
+ [23] ggrepel_0.9.1               xfun_0.30                  
  [25] dplyr_1.0.8                 crayon_1.5.0               
  [27] RCurl_1.98-1.6              jsonlite_1.8.0             
  [29] graph_1.72.0                iterators_1.0.14           
@@ -977,7 +981,7 @@ loaded via a namespace (and not attached):
  [43] randomcoloR_1.1.0.1         Rcpp_1.0.8                 
  [45] viridisLite_0.4.0           clue_0.3-60                
  [47] decontam_1.14.0             gridGraphics_0.5-1         
- [49] tidytree_0.3.8              bit_4.0.4                  
+ [49] tidytree_0.3.9              bit_4.0.4                  
  [51] rsvd_1.0.5                  FNN_1.1.3                  
  [53] RColorBrewer_1.1-2          dir.expiry_1.2.0           
  [55] ellipsis_0.3.2              pkgconfig_2.0.3            
@@ -985,7 +989,7 @@ loaded via a namespace (and not attached):
  [59] uwot_0.1.11                 CodeDepends_0.6.5          
  [61] utf8_1.2.2                  ggplotify_0.1.0            
  [63] tidyselect_1.1.2            labeling_0.4.2             
- [65] rlang_1.0.1                 munsell_0.5.0              
+ [65] rlang_1.0.2                 munsell_0.5.0              
  [67] tools_4.1.2                 cachem_1.0.6               
  [69] cli_3.2.0                   DirichletMultinomial_1.36.0
  [71] generics_0.1.2              RSQLite_2.2.10             
@@ -1006,16 +1010,16 @@ loaded via a namespace (and not attached):
 [101] BiocManager_1.30.16         GlobalOptions_0.1.2        
 [103] BiocNeighbors_1.12.0        cowplot_1.1.1              
 [105] bitops_1.0-7                irlba_2.3.5                
-[107] seriation_1.3.2             R6_2.5.1                   
-[109] TSP_1.1-11                  bookdown_0.24              
+[107] seriation_1.3.3             R6_2.5.1                   
+[109] TSP_1.2-0                   bookdown_0.24              
 [111] gridExtra_2.3               vipor_0.4.5                
 [113] codetools_0.2-18            MASS_7.3-55                
 [115] assertthat_0.2.1            rjson_0.2.21               
-[117] withr_2.4.3                 GenomeInfoDbData_1.2.7     
+[117] withr_2.5.0                 GenomeInfoDbData_1.2.7     
 [119] mgcv_1.8-39                 parallel_4.1.2             
 [121] grid_4.1.2                  ggfun_0.0.5                
 [123] beachmat_2.10.0             tidyr_1.2.0                
-[125] rmarkdown_2.11              DelayedMatrixStats_1.16.0  
+[125] rmarkdown_2.13              DelayedMatrixStats_1.16.0  
 [127] Rtsne_0.15                  ggnewscale_0.4.6           
 [129] ggforce_0.3.3               ggbeeswarm_0.6.0           
 ```

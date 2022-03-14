@@ -138,7 +138,6 @@ plotColData(tse,
 
 ### Diversity  
 
-**Non-Phylogenetic measures**  
 The main function, `estimateDiversity`, calculates the selected
 diversity index based on the selected assay data.  
 
@@ -291,6 +290,19 @@ head(colData(tse)$log_modulo_skewness)
 ## [1] 2.061 2.061 2.061 2.061 2.061 2.061
 ```
 
+### Divergence
+
+Divergence can be evaluated with `estimateDivergence`. Reference and algorithm for the calculation of divergence can be specified as `reference` and `FUN`, respectively. 
+
+
+```r
+tse <- mia::estimateDivergence(tse,
+                               abund_values = "counts",
+                               reference = "median",
+                               FUN = vegan::vegdist)
+```
+
+
 ## Visualization
 
 A plot comparing all the diversity measures calculated above and stored in `colData` can then be constructed directly.
@@ -370,9 +382,9 @@ loaded via a namespace (and not attached):
  [29] gtable_0.3.0                glue_1.6.2                 
  [31] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
  [33] dplyr_1.0.8                 Rcpp_1.0.8                 
- [35] vctrs_0.3.8                 ape_5.6-1                  
+ [35] vctrs_0.3.8                 ape_5.6-2                  
  [37] nlme_3.1-155                DECIPHER_2.22.0            
- [39] DelayedMatrixStats_1.16.0   xfun_0.29                  
+ [39] DelayedMatrixStats_1.16.0   xfun_0.30                  
  [41] stringr_1.4.0               beachmat_2.10.0            
  [43] lifecycle_1.0.1             irlba_2.3.5                
  [45] XML_3.99-0.9                zlibbioc_1.40.0            
@@ -381,9 +393,9 @@ loaded via a namespace (and not attached):
  [51] memoise_2.0.1               gridExtra_2.3              
  [53] yulab.utils_0.0.4           stringi_1.7.6              
  [55] RSQLite_2.2.10              highr_0.9                  
- [57] ScaledMatrix_1.2.0          tidytree_0.3.8             
+ [57] ScaledMatrix_1.2.0          tidytree_0.3.9             
  [59] permute_0.9-7               filelock_1.0.2             
- [61] BiocParallel_1.28.3         rlang_1.0.1                
+ [61] BiocParallel_1.28.3         rlang_1.0.2                
  [63] pkgconfig_2.0.3             bitops_1.0-7               
  [65] evaluate_0.15               lattice_0.20-45            
  [67] purrr_0.3.4                 labeling_0.4.2             
@@ -393,11 +405,11 @@ loaded via a namespace (and not attached):
  [75] magrittr_2.0.2              bookdown_0.24              
  [77] R6_2.5.1                    generics_0.1.2             
  [79] DelayedArray_0.20.0         DBI_1.1.2                  
- [81] withr_2.4.3                 mgcv_1.8-39                
+ [81] withr_2.5.0                 mgcv_1.8-39                
  [83] pillar_1.7.0                RCurl_1.98-1.6             
  [85] tibble_3.1.6                dir.expiry_1.2.0           
  [87] crayon_1.5.0                utf8_1.2.2                 
- [89] rmarkdown_2.11              viridis_0.6.2              
+ [89] rmarkdown_2.13              viridis_0.6.2              
  [91] grid_4.1.2                  blob_1.2.2                 
  [93] vegan_2.5-7                 digest_0.6.29              
  [95] tidyr_1.2.0                 munsell_0.5.0              

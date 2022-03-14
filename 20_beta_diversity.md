@@ -304,7 +304,13 @@ plotReducedDim(tse, "TSNE", colour_by = "Group", ncomponents = c(1:3))
 
 ![(\#fig:plot-tsne)t-SNE plot on the GlobalPatterns data set containing sample from different sources.](20_beta_diversity_files/figure-latex/plot-tsne-1.png) 
 
-
+As a final note, `mia` provides functions for the evaluation of additional dissimilarity indices, such as:
+* `calculateJSD`, `runJSD` (Jensen-Shannon divergence)
+* `calculateNMDS`, `plotNMDS` (non-metric multi-dimensional scaling)
+* `calculateCCA`, `runCCA` (Canonical Correspondence Analysis)
+* `calculateRDA`, `runRDA` (Redundancy Analysis)
+* `calculateOverlap`, `runOverlap` ()
+* `calculateDPCoA`, `runDPCoA` (Double Principal Coordinate Analysis)
 
 ## Visualizing the most dominant genus on PCoA
 
@@ -565,9 +571,9 @@ loaded via a namespace (and not attached):
 [31] glue_1.6.2                  GenomeInfoDbData_1.2.7     
 [33] reshape2_1.4.4              dplyr_1.0.8                
 [35] Rcpp_1.0.8                  vctrs_0.3.8                
-[37] ape_5.6-1                   nlme_3.1-155               
+[37] ape_5.6-2                   nlme_3.1-155               
 [39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
-[41] xfun_0.29                   stringr_1.4.0              
+[41] xfun_0.30                   stringr_1.4.0              
 [43] beachmat_2.10.0             lifecycle_1.0.1            
 [45] irlba_2.3.5                 XML_3.99-0.9               
 [47] zlibbioc_1.40.0             MASS_7.3-55                
@@ -576,8 +582,8 @@ loaded via a namespace (and not attached):
 [53] gridExtra_2.3               yulab.utils_0.0.4          
 [55] stringi_1.7.6               RSQLite_2.2.10             
 [57] highr_0.9                   ScaledMatrix_1.2.0         
-[59] tidytree_0.3.8              filelock_1.0.2             
-[61] BiocParallel_1.28.3         rlang_1.0.1                
+[59] tidytree_0.3.9              filelock_1.0.2             
+[61] BiocParallel_1.28.3         rlang_1.0.2                
 [63] pkgconfig_2.0.3             bitops_1.0-7               
 [65] evaluate_0.15               purrr_0.3.4                
 [67] labeling_0.4.2              treeio_1.18.1              
@@ -586,11 +592,11 @@ loaded via a namespace (and not attached):
 [73] plyr_1.8.6                  magrittr_2.0.2             
 [75] bookdown_0.24               R6_2.5.1                   
 [77] generics_0.1.2              DelayedArray_0.20.0        
-[79] DBI_1.1.2                   withr_2.4.3                
+[79] DBI_1.1.2                   withr_2.5.0                
 [81] mgcv_1.8-39                 pillar_1.7.0               
 [83] RCurl_1.98-1.6              tibble_3.1.6               
 [85] dir.expiry_1.2.0            crayon_1.5.0               
-[87] utf8_1.2.2                  rmarkdown_2.11             
+[87] utf8_1.2.2                  rmarkdown_2.13             
 [89] viridis_0.6.2               grid_4.1.2                 
 [91] blob_1.2.2                  digest_0.6.29              
 [93] tidyr_1.2.0                 munsell_0.5.0              

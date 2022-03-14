@@ -210,8 +210,10 @@ Note that the `detection` and `prevalence` thresholds are not the same, since
 whether `as_relative` is set `TRUE` or `FALSE`
 
 TODO
-See also related functions for the analysis of rare and variable taxa
-(rareMembers; rareAbundance; lowAbundance). 
+See also related functions for the analysis of rare and variable taxa (`rareMembers`; `rareAbundance`; `lowAbundance`).
+
+Additional functions are available for abundance evaluation of prevalent taxa (`getPrevalentAbundance`) and analysis focused on rare taxa (`getRareTaxa`, `subsetByRareTaxa`).
+
 
 ### Plotting prevalence
 
@@ -282,9 +284,6 @@ plotRowTree(x[rowData(x)$Phylum %in% top_phyla_mean,],
 ```
 
 ![(\#fig:plot-prev-mean)Prevalence of top phyla as judged by mean abundance](12_quality_control_files/figure-latex/plot-prev-mean-1.pdf) 
-
-
-
 
 
 ## Quality control
@@ -493,6 +492,16 @@ plotColData(tse,"sum","SampleType", colour_by = "SampleType") +
 
 ![(\#fig:plot-viz-lib-size-3)Library sizes per sample type.](12_quality_control_files/figure-latex/plot-viz-lib-size-3-1.pdf) 
 
+In addition, data can be rarefied with [subsampleCounts](https://microbiome.github.io/mia/reference/subsampleCounts.html), which normalises the samples to an equal number of reads. However, this practice is discouraged for the analysis of differentially abundant microorganisms (see [@mcmurdie2014waste]).
+  
+### Contaminant sequences
+
+Samples might be contaminated with exogenous sequences. The impact of each contaminant can be estimated based on their frequencies and concentrations across the samples.
+
+The following [decontam functions](https://microbiome.github.io/mia/reference/isContaminant.html) are based on the [@davis2018simple] and support such functionality:
+* `isContaminant`, `isNotContaminant`
+* `addContaminantQC`, `addNotContaminantQC`
+
 
 ## Session Info {-}
 
@@ -534,7 +543,7 @@ other attached packages:
 [25] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
-  [1] AnnotationHub_3.2.1           BiocFileCache_2.2.1          
+  [1] AnnotationHub_3.2.2           BiocFileCache_2.2.1          
   [3] igraph_1.2.11                 plyr_1.8.6                   
   [5] lazyeval_0.2.2                splines_4.1.2                
   [7] BiocParallel_1.28.3           digest_0.6.29                
@@ -545,16 +554,16 @@ loaded via a namespace (and not attached):
  [17] DECIPHER_2.22.0               graphlayouts_0.8.0           
  [19] colorspace_2.0-3              blob_1.2.2                   
  [21] rappdirs_0.3.3                ggrepel_0.9.1                
- [23] xfun_0.29                     crayon_1.5.0                 
+ [23] xfun_0.30                     crayon_1.5.0                 
  [25] RCurl_1.98-1.6                jsonlite_1.8.0               
- [27] graph_1.72.0                  ape_5.6-1                    
+ [27] graph_1.72.0                  ape_5.6-2                    
  [29] glue_1.6.2                    polyclip_1.10-0              
  [31] gtable_0.3.0                  zlibbioc_1.40.0              
  [33] DelayedArray_0.20.0           BiocSingular_1.10.0          
  [35] scales_1.1.1                  DBI_1.1.2                    
  [37] Rcpp_1.0.8                    viridisLite_0.4.0            
  [39] xtable_1.8-4                  decontam_1.14.0              
- [41] gridGraphics_0.5-1            tidytree_0.3.8               
+ [41] gridGraphics_0.5-1            tidytree_0.3.9               
  [43] bit_4.0.4                     rsvd_1.0.5                   
  [45] httr_1.4.2                    dir.expiry_1.2.0             
  [47] ellipsis_0.3.2                farver_2.1.0                 
@@ -562,7 +571,7 @@ loaded via a namespace (and not attached):
  [51] CodeDepends_0.6.5             dbplyr_2.1.1                 
  [53] utf8_1.2.2                    labeling_0.4.2               
  [55] ggplotify_0.1.0               tidyselect_1.1.2             
- [57] rlang_1.0.1                   reshape2_1.4.4               
+ [57] rlang_1.0.2                   reshape2_1.4.4               
  [59] later_1.3.0                   AnnotationDbi_1.56.2         
  [61] munsell_0.5.0                 BiocVersion_3.14.0           
  [63] tools_4.1.2                   cachem_1.0.6                 
@@ -591,11 +600,11 @@ loaded via a namespace (and not attached):
 [109] bookdown_0.24                 promises_1.2.0.1             
 [111] gridExtra_2.3                 vipor_0.4.5                  
 [113] codetools_0.2-18              MASS_7.3-55                  
-[115] assertthat_0.2.1              withr_2.4.3                  
+[115] assertthat_0.2.1              withr_2.5.0                  
 [117] GenomeInfoDbData_1.2.7        mgcv_1.8-39                  
 [119] parallel_4.1.2                ggfun_0.0.5                  
 [121] grid_4.1.2                    beachmat_2.10.0              
-[123] tidyr_1.2.0                   rmarkdown_2.11               
+[123] tidyr_1.2.0                   rmarkdown_2.13               
 [125] DelayedMatrixStats_1.16.0     ggnewscale_0.4.6             
 [127] ggforce_0.3.3                 shiny_1.7.1                  
 [129] ggbeeswarm_0.6.0             

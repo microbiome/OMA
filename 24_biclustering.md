@@ -540,7 +540,7 @@ other attached packages:
 [25] BiocStyle_2.22.0               rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
-  [1] AnnotationHub_3.2.1           BiocFileCache_2.2.1          
+  [1] AnnotationHub_3.2.2           BiocFileCache_2.2.1          
   [3] plyr_1.8.6                    lazyeval_0.2.2               
   [5] splines_4.1.2                 BiocParallel_1.28.3          
   [7] scater_1.22.0                 digest_0.6.29                
@@ -550,16 +550,16 @@ loaded via a namespace (and not attached):
  [15] ScaledMatrix_1.2.0            cluster_2.1.2                
  [17] DECIPHER_2.22.0               blob_1.2.2                   
  [19] rappdirs_0.3.3                ggrepel_0.9.1                
- [21] xfun_0.29                     dplyr_1.0.8                  
+ [21] xfun_0.30                     dplyr_1.0.8                  
  [23] crayon_1.5.0                  RCurl_1.98-1.6               
  [25] jsonlite_1.8.0                graph_1.72.0                 
- [27] ape_5.6-1                     glue_1.6.2                   
+ [27] ape_5.6-2                     glue_1.6.2                   
  [29] gtable_0.3.0                  zlibbioc_1.40.0              
  [31] DelayedArray_0.20.0           additivityTests_1.1-4        
  [33] BiocSingular_1.10.0           scales_1.1.1                 
  [35] DBI_1.1.2                     Rcpp_1.0.8                   
  [37] viridisLite_0.4.0             xtable_1.8-4                 
- [39] decontam_1.14.0               tidytree_0.3.8               
+ [39] decontam_1.14.0               tidytree_0.3.9               
  [41] bit_4.0.4                     rsvd_1.0.5                   
  [43] httr_1.4.2                    RColorBrewer_1.1-2           
  [45] dir.expiry_1.2.0              modeltools_0.2-23            
@@ -568,7 +568,7 @@ loaded via a namespace (and not attached):
  [51] scuttle_1.4.0                 CodeDepends_0.6.5            
  [53] dbplyr_2.1.1                  utf8_1.2.2                   
  [55] labeling_0.4.2                tidyselect_1.1.2             
- [57] rlang_1.0.1                   reshape2_1.4.4               
+ [57] rlang_1.0.2                   reshape2_1.4.4               
  [59] later_1.3.0                   AnnotationDbi_1.56.2         
  [61] munsell_0.5.0                 BiocVersion_3.14.0           
  [63] tools_4.1.2                   cachem_1.0.6                 
@@ -594,11 +594,11 @@ loaded via a namespace (and not attached):
 [103] R6_2.5.1                      bookdown_0.24                
 [105] promises_1.2.0.1              gridExtra_2.3                
 [107] vipor_0.4.5                   codetools_0.2-18             
-[109] assertthat_0.2.1              withr_2.4.3                  
+[109] assertthat_0.2.1              withr_2.5.0                  
 [111] GenomeInfoDbData_1.2.7        mgcv_1.8-39                  
 [113] parallel_4.1.2                beachmat_2.10.0              
 [115] class_7.3-20                  tidyr_1.2.0                  
-[117] rmarkdown_2.11                DelayedMatrixStats_1.16.0    
+[117] rmarkdown_2.13                DelayedMatrixStats_1.16.0    
 [119] shiny_1.7.1                   ggbeeswarm_0.6.0             
 ```
 </div>

@@ -779,7 +779,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.998
+## Proportions of Observations within 95% Credible Interval: 0.9981
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
@@ -834,7 +834,7 @@ other attached packages:
 [11] tidyverse_1.3.1                knitr_1.37                    
 [13] Maaslin2_1.8.0                 ALDEx2_1.26.0                 
 [15] zCompositions_1.4.0            truncnorm_1.0-8               
-[17] NADA_1.6-1.1                   survival_3.2-13               
+[17] NADA_1.6-1.1                   survival_3.3-1                
 [19] MASS_7.3-55                    ANCOMBC_1.4.0                 
 [21] tidySummarizedExperiment_1.4.1 patchwork_1.1.1               
 [23] mia_1.3.19                     MultiAssayExperiment_1.20.0   
@@ -858,8 +858,8 @@ loaded via a namespace (and not attached):
  [15] httpuv_1.6.5                  xml2_1.3.3                   
  [17] lubridate_1.8.0               assertthat_0.2.1             
  [19] DirichletMultinomial_1.36.0   viridis_0.6.2                
- [21] xfun_0.29                     hms_1.1.1                    
- [23] ggdist_3.1.0                  promises_1.2.0.1             
+ [21] xfun_0.30                     hms_1.1.1                    
+ [23] ggdist_3.1.1                  promises_1.2.0.1             
  [25] evaluate_0.15                 DEoptimR_1.0-10              
  [27] fansi_1.0.2                   dbplyr_2.1.1                 
  [29] readxl_1.3.1                  igraph_1.2.11                
@@ -869,19 +869,19 @@ loaded via a namespace (and not attached):
  [37] bookdown_0.24                 permute_0.9-7                
  [39] sparseMatrixStats_1.6.0       vctrs_0.3.8                  
  [41] abind_1.4-5                   tidybayes_3.0.2              
- [43] cachem_1.0.6                  withr_2.4.3                  
+ [43] cachem_1.0.6                  withr_2.5.0                  
  [45] robustbase_0.93-9             checkmate_2.0.0              
  [47] vegan_2.5-7                   treeio_1.18.1                
  [49] getopt_1.20.3                 cluster_2.1.2                
- [51] ExperimentHub_2.2.1           ape_5.6-1                    
+ [51] ExperimentHub_2.2.1           ape_5.6-2                    
  [53] dir.expiry_1.2.0              lazyeval_0.2.2               
  [55] crayon_1.5.0                  pkgconfig_2.0.3              
  [57] labeling_0.4.2                nlme_3.1-155                 
- [59] vipor_0.4.5                   rlang_1.0.1                  
+ [59] vipor_0.4.5                   rlang_1.0.2                  
  [61] lifecycle_1.0.1               filelock_1.0.2               
  [63] BiocFileCache_2.2.1           phyloseq_1.38.0              
  [65] modelr_0.1.8                  rsvd_1.0.5                   
- [67] AnnotationHub_3.2.1           cellranger_1.1.0             
+ [67] AnnotationHub_3.2.2           cellranger_1.1.0             
  [69] distributional_0.3.0          graph_1.72.0                 
  [71] Matrix_1.4-0                  lpsymphony_1.22.0            
  [73] Rhdf5lib_1.16.0               reprex_2.0.1                 
@@ -903,7 +903,7 @@ loaded via a namespace (and not attached):
 [105] parallel_4.1.2                rstudioapi_0.13              
 [107] foreach_1.5.2                 logging_0.10-108             
 [109] optparse_1.7.1                gridExtra_2.3                
-[111] posterior_1.2.0               farver_2.1.0                 
+[111] posterior_1.2.1               farver_2.1.0                 
 [113] Rtsne_0.15                    RcppZiggurat_0.1.6           
 [115] digest_0.6.29                 BiocManager_1.30.16          
 [117] shiny_1.7.1                   Rcpp_1.0.8                   
@@ -913,7 +913,7 @@ loaded via a namespace (and not attached):
 [125] Rdpack_2.1.4                  colorspace_2.0-3             
 [127] rvest_1.0.2                   XML_3.99-0.9                 
 [129] fs_1.5.2                      splines_4.1.2                
-[131] yulab.utils_0.0.4             tidytree_0.3.8               
+[131] yulab.utils_0.0.4             tidytree_0.3.9               
 [133] scater_1.22.0                 multtest_2.50.0              
 [135] plotly_4.10.0                 xtable_1.8-4                 
 [137] jsonlite_1.8.0                nloptr_2.0.0                 
@@ -927,8 +927,8 @@ loaded via a namespace (and not attached):
 [153] utf8_1.2.2                    lattice_0.20-45              
 [155] arrayhelpers_1.1-0            curl_4.3.2                   
 [157] ggbeeswarm_0.6.0              biglm_0.9-2.1                
-[159] rmarkdown_2.11                biomformat_1.22.0            
-[161] munsell_0.5.0                 rhdf5_2.38.0                 
+[159] rmarkdown_2.13                biomformat_1.22.0            
+[161] munsell_0.5.0                 rhdf5_2.38.1                 
 [163] GenomeInfoDbData_1.2.7        iterators_1.0.14             
 [165] haven_2.4.3                   reshape2_1.4.4               
 [167] gtable_0.3.0                  rbibutils_2.2.7              

@@ -231,6 +231,19 @@ To apply the loop resolving function `resolveLoop` from the
 `TreeSummarizedExperiment` package [@R-TreeSummarizedExperiment] within
 `getTaxonomyLabels`, set `resolve_loops = TRUE`.
 
+The function `getUniqueTaxa` gives a list of unique taxa for the specified taxonomic rank.
+
+
+```r
+head(getUniqueTaxa(tse, rank = "Phylum"))
+```
+
+```
+## [1] "Crenarchaeota"  "Euryarchaeota"  "Actinobacteria" "Spirochaetes"  
+## [5] "MVP-15"         "Proteobacteria"
+```
+
+
 ### Generate a taxonomic tree on the fly
 
 To create a taxonomic tree, `taxonomyTree` used the information and returns a
@@ -578,9 +591,9 @@ loaded via a namespace (and not attached):
 [31] glue_1.6.2                  GenomeInfoDbData_1.2.7     
 [33] reshape2_1.4.4              dplyr_1.0.8                
 [35] Rcpp_1.0.8                  vctrs_0.3.8                
-[37] ape_5.6-1                   nlme_3.1-155               
+[37] ape_5.6-2                   nlme_3.1-155               
 [39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
-[41] xfun_0.29                   stringr_1.4.0              
+[41] xfun_0.30                   stringr_1.4.0              
 [43] beachmat_2.10.0             lifecycle_1.0.1            
 [45] irlba_2.3.5                 XML_3.99-0.9               
 [47] zlibbioc_1.40.0             MASS_7.3-55                
@@ -589,9 +602,9 @@ loaded via a namespace (and not attached):
 [53] gridExtra_2.3               ggplot2_3.3.5              
 [55] yulab.utils_0.0.4           stringi_1.7.6              
 [57] RSQLite_2.2.10              ScaledMatrix_1.2.0         
-[59] tidytree_0.3.8              permute_0.9-7              
+[59] tidytree_0.3.9              permute_0.9-7              
 [61] filelock_1.0.2              BiocParallel_1.28.3        
-[63] rlang_1.0.1                 pkgconfig_2.0.3            
+[63] rlang_1.0.2                 pkgconfig_2.0.3            
 [65] bitops_1.0-7                evaluate_0.15              
 [67] lattice_0.20-45             purrr_0.3.4                
 [69] treeio_1.18.1               CodeDepends_0.6.5          
@@ -603,7 +616,7 @@ loaded via a namespace (and not attached):
 [81] pillar_1.7.0                RCurl_1.98-1.6             
 [83] tibble_3.1.6                dir.expiry_1.2.0           
 [85] crayon_1.5.0                utf8_1.2.2                 
-[87] rmarkdown_2.11              viridis_0.6.2              
+[87] rmarkdown_2.13              viridis_0.6.2              
 [89] grid_4.1.2                  blob_1.2.2                 
 [91] vegan_2.5-7                 digest_0.6.29              
 [93] tidyr_1.2.0                 munsell_0.5.0              
