@@ -184,6 +184,9 @@ mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Genus")
 # Does log10 transform for microbiome data
 mae[[1]] <- transformSamples(mae[[1]], method = "log10", pseudocount = 1)
 
+# Give unique names so that we do not have problems when we are creating a plot
+rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]])
+
 # Cross correlates data sets
 correlations <- testExperimentCrossCorrelation(mae, 
                                                experiment1 = 1,
@@ -327,7 +330,7 @@ model
 ## Untrained MOFA model with the following characteristics: 
 ##  Number of views: 3 
 ##  Views names: microbiota metabolites biomarkers 
-##  Number of features (per view): 99 38 39 
+##  Number of features (per view): 136 38 39 
 ##  Number of groups: 2 
 ##  Groups names: High-fat Low-fat 
 ##  Number of samples (per group): 20 20 
@@ -442,9 +445,9 @@ More tutorials and examples of using the package are found at: [link](https://bi
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -478,7 +481,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.2.2           corrplot_0.92                
   [3] BiocFileCache_2.2.1           plyr_1.8.6                   
-  [5] lazyeval_0.2.2                splines_4.1.2                
+  [5] lazyeval_0.2.2                splines_4.1.3                
   [7] BiocParallel_1.28.3           scater_1.22.0                
   [9] digest_0.6.29                 yulab.utils_0.0.4            
  [11] htmltools_0.5.2               viridis_0.6.2                
@@ -509,7 +512,7 @@ loaded via a namespace (and not attached):
  [61] tidyselect_1.1.2              rlang_1.0.2                  
  [63] reshape2_1.4.4                later_1.3.0                  
  [65] AnnotationDbi_1.56.2          munsell_0.5.0                
- [67] BiocVersion_3.14.0            tools_4.1.2                  
+ [67] BiocVersion_3.14.0            tools_4.1.3                  
  [69] cachem_1.0.6                  cli_3.2.0                    
  [71] DirichletMultinomial_1.36.0   generics_0.1.2               
  [73] RSQLite_2.2.10                ExperimentHub_2.2.1          
@@ -518,7 +521,7 @@ loaded via a namespace (and not attached):
  [79] bit64_4.0.5                   purrr_0.3.4                  
  [81] KEGGREST_1.34.0               nlme_3.1-155                 
  [83] sparseMatrixStats_1.6.0       mime_0.12                    
- [85] compiler_4.1.2                beeswarm_0.4.0               
+ [85] compiler_4.1.3                beeswarm_0.4.0               
  [87] filelock_1.0.2                curl_4.3.2                   
  [89] png_0.1-7                     interactiveDisplayBase_1.32.0
  [91] treeio_1.18.1                 tibble_3.1.6                 
@@ -537,8 +540,8 @@ loaded via a namespace (and not attached):
 [117] MASS_7.3-55                   assertthat_0.2.1             
 [119] rhdf5_2.38.1                  rprojroot_2.0.2              
 [121] withr_2.5.0                   GenomeInfoDbData_1.2.7       
-[123] mgcv_1.8-39                   parallel_4.1.2               
-[125] grid_4.1.2                    beachmat_2.10.0              
+[123] mgcv_1.8-39                   parallel_4.1.3               
+[125] grid_4.1.3                    beachmat_2.10.0              
 [127] basilisk_1.6.0                tidyr_1.2.0                  
 [129] rmarkdown_2.13                DelayedMatrixStats_1.16.0    
 [131] Rtsne_0.15                    shiny_1.7.1                  

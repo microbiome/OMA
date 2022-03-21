@@ -806,9 +806,9 @@ plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -892,15 +892,15 @@ loaded via a namespace (and not attached):
  [83] DECIPHER_2.22.0               beachmat_2.10.0              
  [85] scales_1.1.1                  memoise_2.0.1                
  [87] magrittr_2.0.2                plyr_1.8.6                   
- [89] zlibbioc_1.40.0               compiler_4.1.2               
+ [89] zlibbioc_1.40.0               compiler_4.1.3               
  [91] RColorBrewer_1.1-2            cli_3.2.0                    
  [93] ade4_1.7-18                   pbapply_1.5-0                
  [95] mgcv_1.8-39                   tidyselect_1.1.2             
  [97] stringi_1.7.6                 highr_0.9                    
  [99] yaml_2.3.5                    BiocSingular_1.10.0          
 [101] svUnit_1.0.6                  ggrepel_0.9.1                
-[103] grid_4.1.2                    tools_4.1.2                  
-[105] parallel_4.1.2                rstudioapi_0.13              
+[103] grid_4.1.3                    tools_4.1.3                  
+[105] parallel_4.1.3                rstudioapi_0.13              
 [107] foreach_1.5.2                 logging_0.10-108             
 [109] optparse_1.7.1                gridExtra_2.3                
 [111] posterior_1.2.1               farver_2.1.0                 
@@ -910,9 +910,9 @@ loaded via a namespace (and not attached):
 [119] broom_0.7.12                  scuttle_1.4.0                
 [121] later_1.3.0                   BiocVersion_3.14.0           
 [123] AnnotationDbi_1.56.2          httr_1.4.2                   
-[125] Rdpack_2.1.4                  colorspace_2.0-3             
+[125] Rdpack_2.2                    colorspace_2.0-3             
 [127] rvest_1.0.2                   XML_3.99-0.9                 
-[129] fs_1.5.2                      splines_4.1.2                
+[129] fs_1.5.2                      splines_4.1.3                
 [131] yulab.utils_0.0.4             tidytree_0.3.9               
 [133] scater_1.22.0                 multtest_2.50.0              
 [135] plotly_4.10.0                 xtable_1.8-4                 

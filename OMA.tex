@@ -135,7 +135,7 @@
 
 \title{Orchestrating Microbiome Analysis}
 \author{}
-\date{\vspace{-2.5em}\textbf{Authors:} Leo Lahti {[}aut{]}, Sudarshan Shetty {[}aut{]}, Felix GM Ernst {[}aut, cre{]} \textbf{Version:} 0.98.9 \textbf{Modified:} 2021-09-10 \textbf{Compiled:} 2022-03-21 \textbf{Environment:} R version 4.1.2 (2021-11-01), Bioconductor 3.14 \textbf{License:} CC BY-NC-SA 3.0 US \textbf{Copyright:} \textbf{Source:} \url{https://github.com/microbiome/OMA}}
+\date{\vspace{-2.5em}\textbf{Authors:} Leo Lahti {[}aut{]}, Sudarshan Shetty {[}aut{]}, Felix GM Ernst {[}aut, cre{]} \textbf{Version:} 0.98.9 \textbf{Modified:} 2021-09-10 \textbf{Compiled:} 2022-03-21 \textbf{Environment:} R version 4.1.3 (2022-03-10), Bioconductor 3.14 \textbf{License:} CC BY-NC-SA 3.0 US \textbf{Copyright:} \textbf{Source:} \url{https://github.com/microbiome/OMA}}
 
 \begin{document}
 \maketitle
@@ -687,6 +687,116 @@ MultiAssay & free & free (mapping) & Multi-omic experiments \\
 
 \hypertarget{loading-experimental-microbiome-data}{%
 \section{Loading experimental microbiome data}\label{loading-experimental-microbiome-data}}
+
+\hypertarget{s-workflow}{%
+\subsection{16S workflow}\label{s-workflow}}
+
+Result of amplicon sequencing is large number of files that include all the sequences
+that were read from samples. Those sequences need to be matched with taxa. Additionally,
+we need to know how many times each taxa were found from each sample.
+
+There are several algorithms to do that, and DADA2 is one of the most common.
+You can find DADA2 pipeline tutorial for example from
+\href{https://benjjneb.github.io/dada2/tutorial.html}{here}.
+After DADA2 portion of the tutorial is the data is stored into \emph{phyloseq} object
+(Bonus: Handoff to phyloseq). To store the data to \emph{TreeSummarizedExperiment},
+follow the example below.
+
+You can find full workflow script without further explanations and comments from
+\href{https://github.com/microbiome/OMA/blob/master/dada2_workflow.Rmd}{here}
+
+Load required packages.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mia)}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+
+\ControlFlowTok{if}\NormalTok{( }\SpecialCharTok{!}\FunctionTok{require}\NormalTok{(}\StringTok{"BiocManager"}\NormalTok{) )\{}
+    \FunctionTok{install.packages}\NormalTok{(}\StringTok{"BiocManager"}\NormalTok{)}
+    \FunctionTok{library}\NormalTok{(}\StringTok{"BiocManager"}\NormalTok{)}
+\NormalTok{\}}
+
+\ControlFlowTok{if}\NormalTok{( }\SpecialCharTok{!}\FunctionTok{require}\NormalTok{(}\StringTok{"Biostrings"}\NormalTok{) )\{}
+\NormalTok{    BiocManager}\SpecialCharTok{::}\FunctionTok{install}\NormalTok{(}\StringTok{"Biostrings"}\NormalTok{)}
+    \FunctionTok{library}\NormalTok{(}\StringTok{"Biostrings"}\NormalTok{)}
+\NormalTok{\}}
+\FunctionTok{library}\NormalTok{(Biostrings)}
+\end{Highlighting}
+\end{Shaded}
+
+Create arbitrary example sample metadata like it was done in tutorial. Usually,
+sample metadata is imported as a file.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{samples.out }\OtherTok{\textless{}{-}} \FunctionTok{rownames}\NormalTok{(seqtab.nochim)}
+\NormalTok{subject }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(}\FunctionTok{strsplit}\NormalTok{(samples.out, }\StringTok{"D"}\NormalTok{), }\StringTok{\textasciigrave{}}\AttributeTok{[}\StringTok{\textasciigrave{}}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+\NormalTok{gender }\OtherTok{\textless{}{-}} \FunctionTok{substr}\NormalTok{(subject,}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{)}
+\NormalTok{subject }\OtherTok{\textless{}{-}} \FunctionTok{substr}\NormalTok{(subject,}\DecValTok{2}\NormalTok{,}\DecValTok{999}\NormalTok{)}
+\NormalTok{day }\OtherTok{\textless{}{-}} \FunctionTok{as.integer}\NormalTok{(}\FunctionTok{sapply}\NormalTok{(}\FunctionTok{strsplit}\NormalTok{(samples.out, }\StringTok{"D"}\NormalTok{), }\StringTok{\textasciigrave{}}\AttributeTok{[}\StringTok{\textasciigrave{}}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+\NormalTok{samdf }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{Subject=}\NormalTok{subject, }\AttributeTok{Gender=}\NormalTok{gender, }\AttributeTok{Day=}\NormalTok{day)}
+\NormalTok{samdf}\SpecialCharTok{$}\NormalTok{When }\OtherTok{\textless{}{-}} \StringTok{"Early"}
+\NormalTok{samdf}\SpecialCharTok{$}\NormalTok{When[samdf}\SpecialCharTok{$}\NormalTok{Day}\SpecialCharTok{\textgreater{}}\DecValTok{100}\NormalTok{] }\OtherTok{\textless{}{-}} \StringTok{"Late"}
+\FunctionTok{rownames}\NormalTok{(samdf) }\OtherTok{\textless{}{-}}\NormalTok{ samples.out}
+\end{Highlighting}
+\end{Shaded}
+
+Convert data into right format and create \emph{TreeSE} object.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create a list that contains assays}
+\NormalTok{counts }\OtherTok{\textless{}{-}} \FunctionTok{t}\NormalTok{(seqtab.nochim)}
+\NormalTok{assays }\OtherTok{\textless{}{-}} \FunctionTok{SimpleList}\NormalTok{(}\AttributeTok{counts =}\NormalTok{ counts)}
+
+\CommentTok{\# Convert colData and rowData into DataFrame}
+\NormalTok{samdf }\OtherTok{\textless{}{-}} \FunctionTok{DataFrame}\NormalTok{(samdf)}
+\NormalTok{taxa }\OtherTok{\textless{}{-}} \FunctionTok{DataFrame}\NormalTok{(taxa)}
+
+\CommentTok{\# Create TreeSE}
+\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{TreeSummarizedExperiment}\NormalTok{(}\AttributeTok{assays =}\NormalTok{ assays,}
+                                \AttributeTok{colData =}\NormalTok{ samdf,}
+                                \AttributeTok{rowData =}\NormalTok{ taxa}
+\NormalTok{                                )}
+
+\CommentTok{\# Remove mock sample like it is also done in DADA2 pipeline tutorial}
+\NormalTok{tse }\OtherTok{\textless{}{-}}\NormalTok{ tse[ , }\FunctionTok{colnames}\NormalTok{(tse) }\SpecialCharTok{!=} \StringTok{"mock"}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+Add sequences into \emph{referenceSeq} slot and convert rownames into simpler format.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Convert sequences into right format}
+\NormalTok{dna }\OtherTok{\textless{}{-}}\NormalTok{ Biostrings}\SpecialCharTok{::}\FunctionTok{DNAStringSet}\NormalTok{( }\FunctionTok{rownames}\NormalTok{(tse) )}
+\CommentTok{\# Add sequences into referenceSeq slot}
+\FunctionTok{referenceSeq}\NormalTok{(tse) }\OtherTok{\textless{}{-}}\NormalTok{ dna}
+\CommentTok{\# Convert rownames into ASV\_number format}
+\FunctionTok{rownames}\NormalTok{(tse) }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"ASV"}\NormalTok{, }\FunctionTok{seq}\NormalTok{( }\FunctionTok{nrow}\NormalTok{(tse) ))}
+\NormalTok{tse}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## class: TreeSummarizedExperiment 
+## dim: 232 20 
+## metadata(0):
+## assays(1): counts
+## rownames(232): ASV1 ASV2 ... ASV231 ASV232
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(20): F3D0 F3D1 ... F3D9 Mock
+## colData names(4): Subject Gender Day When
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: NULL
+## rowTree: NULL
+## colLinks: NULL
+## colTree: NULL
+## referenceSeq: a DNAStringSet (232 sequences)
+\end{verbatim}
 
 \hypertarget{import-from-external-files}{%
 \subsection{Import from external files}\label{import-from-external-files}}
@@ -1250,9 +1360,9 @@ set. This is a larger collection with a bit longer download time.
 View session info
 
 \begin{verbatim}
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -1271,81 +1381,81 @@ attached base packages:
 
 other attached packages:
  [1] microbiomeDataSets_1.1.5       phyloseq_1.38.0               
- [3] mia_1.3.19                     MultiAssayExperiment_1.20.0   
- [5] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
- [7] XVector_0.34.0                 SingleCellExperiment_1.16.0   
- [9] SummarizedExperiment_1.24.0    Biobase_2.54.0                
-[11] GenomicRanges_1.46.1           GenomeInfoDb_1.30.1           
-[13] IRanges_2.28.0                 S4Vectors_0.32.3              
-[15] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
-[17] matrixStats_0.61.0-9001        BiocStyle_2.22.0              
-[19] rebook_1.4.0                  
+ [3] BiocManager_1.30.16            ggplot2_3.3.5                 
+ [5] mia_1.3.19                     MultiAssayExperiment_1.20.0   
+ [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
+ [9] XVector_0.34.0                 SingleCellExperiment_1.16.0   
+[11] SummarizedExperiment_1.24.0    Biobase_2.54.0                
+[13] GenomicRanges_1.46.1           GenomeInfoDb_1.30.1           
+[15] IRanges_2.28.0                 S4Vectors_0.32.3              
+[17] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
+[19] matrixStats_0.61.0-9001        BiocStyle_2.22.0              
+[21] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.2.2           BiocFileCache_2.2.1          
   [3] plyr_1.8.6                    igraph_1.2.11                
-  [5] lazyeval_0.2.2                splines_4.1.2                
-  [7] BiocParallel_1.28.3           ggplot2_3.3.5                
-  [9] scater_1.22.0                 digest_0.6.29                
- [11] foreach_1.5.2                 yulab.utils_0.0.4            
- [13] htmltools_0.5.2               viridis_0.6.2                
- [15] fansi_1.0.2                   magrittr_2.0.2               
- [17] memoise_2.0.1                 ScaledMatrix_1.2.0           
- [19] cluster_2.1.2                 DECIPHER_2.22.0              
- [21] colorspace_2.0-3              blob_1.2.2                   
- [23] rappdirs_0.3.3                ggrepel_0.9.1                
- [25] xfun_0.30                     dplyr_1.0.8                  
- [27] crayon_1.5.0                  RCurl_1.98-1.6               
- [29] jsonlite_1.8.0                graph_1.72.0                 
- [31] survival_3.3-1                iterators_1.0.14             
- [33] ape_5.6-2                     glue_1.6.2                   
- [35] gtable_0.3.0                  zlibbioc_1.40.0              
- [37] DelayedArray_0.20.0           BiocSingular_1.10.0          
- [39] Rhdf5lib_1.16.0               scales_1.1.1                 
- [41] DBI_1.1.2                     Rcpp_1.0.8.3                 
- [43] xtable_1.8-4                  viridisLite_0.4.0            
- [45] decontam_1.14.0               tidytree_0.3.9               
- [47] bit_4.0.4                     rsvd_1.0.5                   
- [49] httr_1.4.2                    dir.expiry_1.2.0             
- [51] ellipsis_0.3.2                pkgconfig_2.0.3              
- [53] XML_3.99-0.9                  scuttle_1.4.0                
- [55] CodeDepends_0.6.5             dbplyr_2.1.1                 
- [57] utf8_1.2.2                    AnnotationDbi_1.56.2         
- [59] later_1.3.0                   tidyselect_1.1.2             
- [61] rlang_1.0.2                   reshape2_1.4.4               
- [63] munsell_0.5.0                 BiocVersion_3.14.0           
- [65] tools_4.1.2                   cachem_1.0.6                 
- [67] cli_3.2.0                     DirichletMultinomial_1.36.0  
- [69] generics_0.1.2                RSQLite_2.2.10               
- [71] ExperimentHub_2.2.1           ade4_1.7-18                  
- [73] evaluate_0.15                 biomformat_1.22.0            
- [75] stringr_1.4.0                 fastmap_1.1.0                
- [77] yaml_2.3.5                    knitr_1.37                   
- [79] bit64_4.0.5                   purrr_0.3.4                  
- [81] KEGGREST_1.34.0               nlme_3.1-155                 
- [83] sparseMatrixStats_1.6.0       mime_0.12                    
- [85] compiler_4.1.2                interactiveDisplayBase_1.32.0
- [87] beeswarm_0.4.0                filelock_1.0.2               
- [89] curl_4.3.2                    png_0.1-7                    
- [91] treeio_1.18.1                 tibble_3.1.6                 
- [93] stringi_1.7.6                 lattice_0.20-45              
- [95] Matrix_1.4-0                  vegan_2.5-7                  
- [97] permute_0.9-7                 multtest_2.50.0              
- [99] vctrs_0.3.8                   pillar_1.7.0                 
-[101] lifecycle_1.0.1               rhdf5filters_1.6.0           
-[103] BiocManager_1.30.16           BiocNeighbors_1.12.0         
-[105] data.table_1.14.2             bitops_1.0-7                 
-[107] irlba_2.3.5                   httpuv_1.6.5                 
-[109] R6_2.5.1                      promises_1.2.0.1             
-[111] bookdown_0.25                 gridExtra_2.3                
-[113] vipor_0.4.5                   codetools_0.2-18             
-[115] MASS_7.3-55                   assertthat_0.2.1             
-[117] rhdf5_2.38.1                  GenomeInfoDbData_1.2.7       
-[119] mgcv_1.8-39                   parallel_4.1.2               
-[121] grid_4.1.2                    beachmat_2.10.0              
-[123] tidyr_1.2.0                   rmarkdown_2.13               
-[125] DelayedMatrixStats_1.16.0     shiny_1.7.1                  
-[127] ggbeeswarm_0.6.0             
+  [5] lazyeval_0.2.2                splines_4.1.3                
+  [7] BiocParallel_1.28.3           scater_1.22.0                
+  [9] digest_0.6.29                 foreach_1.5.2                
+ [11] yulab.utils_0.0.4             htmltools_0.5.2              
+ [13] viridis_0.6.2                 fansi_1.0.2                  
+ [15] magrittr_2.0.2                memoise_2.0.1                
+ [17] ScaledMatrix_1.2.0            cluster_2.1.2                
+ [19] DECIPHER_2.22.0               colorspace_2.0-3             
+ [21] rappdirs_0.3.3                blob_1.2.2                   
+ [23] ggrepel_0.9.1                 xfun_0.30                    
+ [25] dplyr_1.0.8                   crayon_1.5.0                 
+ [27] RCurl_1.98-1.6                jsonlite_1.8.0               
+ [29] graph_1.72.0                  survival_3.3-1               
+ [31] iterators_1.0.14              ape_5.6-2                    
+ [33] glue_1.6.2                    gtable_0.3.0                 
+ [35] zlibbioc_1.40.0               DelayedArray_0.20.0          
+ [37] BiocSingular_1.10.0           Rhdf5lib_1.16.0              
+ [39] scales_1.1.1                  DBI_1.1.2                    
+ [41] Rcpp_1.0.8.3                  xtable_1.8-4                 
+ [43] viridisLite_0.4.0             decontam_1.14.0              
+ [45] tidytree_0.3.9                bit_4.0.4                    
+ [47] rsvd_1.0.5                    httr_1.4.2                   
+ [49] dir.expiry_1.2.0              ellipsis_0.3.2               
+ [51] pkgconfig_2.0.3               XML_3.99-0.9                 
+ [53] scuttle_1.4.0                 CodeDepends_0.6.5            
+ [55] dbplyr_2.1.1                  utf8_1.2.2                   
+ [57] AnnotationDbi_1.56.2          later_1.3.0                  
+ [59] tidyselect_1.1.2              rlang_1.0.2                  
+ [61] reshape2_1.4.4                munsell_0.5.0                
+ [63] BiocVersion_3.14.0            tools_4.1.3                  
+ [65] cachem_1.0.6                  cli_3.2.0                    
+ [67] DirichletMultinomial_1.36.0   generics_0.1.2               
+ [69] RSQLite_2.2.10                ExperimentHub_2.2.1          
+ [71] ade4_1.7-18                   evaluate_0.15                
+ [73] biomformat_1.22.0             stringr_1.4.0                
+ [75] fastmap_1.1.0                 yaml_2.3.5                   
+ [77] knitr_1.37                    bit64_4.0.5                  
+ [79] purrr_0.3.4                   KEGGREST_1.34.0              
+ [81] nlme_3.1-155                  sparseMatrixStats_1.6.0      
+ [83] mime_0.12                     compiler_4.1.3               
+ [85] interactiveDisplayBase_1.32.0 beeswarm_0.4.0               
+ [87] filelock_1.0.2                curl_4.3.2                   
+ [89] png_0.1-7                     treeio_1.18.1                
+ [91] tibble_3.1.6                  stringi_1.7.6                
+ [93] lattice_0.20-45               Matrix_1.4-0                 
+ [95] vegan_2.5-7                   permute_0.9-7                
+ [97] multtest_2.50.0               vctrs_0.3.8                  
+ [99] pillar_1.7.0                  lifecycle_1.0.1              
+[101] rhdf5filters_1.6.0            BiocNeighbors_1.12.0         
+[103] data.table_1.14.2             bitops_1.0-7                 
+[105] irlba_2.3.5                   httpuv_1.6.5                 
+[107] R6_2.5.1                      promises_1.2.0.1             
+[109] bookdown_0.25                 gridExtra_2.3                
+[111] vipor_0.4.5                   codetools_0.2-18             
+[113] MASS_7.3-55                   assertthat_0.2.1             
+[115] rhdf5_2.38.1                  withr_2.5.0                  
+[117] GenomeInfoDbData_1.2.7        mgcv_1.8-39                  
+[119] parallel_4.1.3                grid_4.1.3                   
+[121] beachmat_2.10.0               tidyr_1.2.0                  
+[123] rmarkdown_2.13                DelayedMatrixStats_1.16.0    
+[125] shiny_1.7.1                   ggbeeswarm_0.6.0             
 \end{verbatim}
 
 \hypertarget{packages}{%
@@ -1413,9 +1523,9 @@ Some of the R packages supporting the framework include:
 View session info
 
 \begin{verbatim}
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -1436,12 +1546,12 @@ other attached packages:
 
 loaded via a namespace (and not attached):
  [1] bookdown_0.25       dir.expiry_1.2.0    codetools_0.2-18   
- [4] XML_3.99-0.9        digest_0.6.29       stats4_4.1.2       
+ [4] XML_3.99-0.9        digest_0.6.29       stats4_4.1.3       
  [7] magrittr_2.0.2      evaluate_0.15       graph_1.72.0       
 [10] rlang_1.0.2         stringi_1.7.6       cli_3.2.0          
-[13] filelock_1.0.2      rmarkdown_2.13      tools_4.1.2        
+[13] filelock_1.0.2      rmarkdown_2.13      tools_4.1.3        
 [16] stringr_1.4.0       xfun_0.30           yaml_2.3.5         
-[19] fastmap_1.1.0       compiler_4.1.2      BiocGenerics_0.40.0
+[19] fastmap_1.1.0       compiler_4.1.3      BiocGenerics_0.40.0
 [22] BiocManager_1.30.16 CodeDepends_0.6.5   htmltools_0.5.2    
 [25] knitr_1.37         
 \end{verbatim}
@@ -2638,9 +2748,9 @@ The following \href{https://microbiome.github.io/mia/reference/isContaminant.htm
 View session info
 
 \begin{verbatim}
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -2675,7 +2785,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.2.2           BiocFileCache_2.2.1          
   [3] igraph_1.2.11                 plyr_1.8.6                   
-  [5] lazyeval_0.2.2                splines_4.1.2                
+  [5] lazyeval_0.2.2                splines_4.1.3                
   [7] BiocParallel_1.28.3           digest_0.6.29                
   [9] yulab.utils_0.0.4             htmltools_0.5.2              
  [11] viridis_0.6.2                 fansi_1.0.2                  
@@ -2704,7 +2814,7 @@ loaded via a namespace (and not attached):
  [57] rlang_1.0.2                   reshape2_1.4.4               
  [59] later_1.3.0                   AnnotationDbi_1.56.2         
  [61] munsell_0.5.0                 BiocVersion_3.14.0           
- [63] tools_4.1.2                   cachem_1.0.6                 
+ [63] tools_4.1.3                   cachem_1.0.6                 
  [65] cli_3.2.0                     DirichletMultinomial_1.36.0  
  [67] generics_0.1.2                RSQLite_2.2.10               
  [69] ExperimentHub_2.2.1           evaluate_0.15                
@@ -2714,7 +2824,7 @@ loaded via a namespace (and not attached):
  [77] tidygraph_1.2.0               purrr_0.3.4                  
  [79] KEGGREST_1.34.0               nlme_3.1-155                 
  [81] sparseMatrixStats_1.6.0       mime_0.12                    
- [83] aplot_0.1.2                   compiler_4.1.2               
+ [83] aplot_0.1.2                   compiler_4.1.3               
  [85] beeswarm_0.4.0                filelock_1.0.2               
  [87] curl_4.3.2                    png_0.1-7                    
  [89] interactiveDisplayBase_1.32.0 treeio_1.18.1                
@@ -2732,8 +2842,8 @@ loaded via a namespace (and not attached):
 [113] codetools_0.2-18              MASS_7.3-55                  
 [115] assertthat_0.2.1              withr_2.5.0                  
 [117] GenomeInfoDbData_1.2.7        mgcv_1.8-39                  
-[119] parallel_4.1.2                ggfun_0.0.5                  
-[121] grid_4.1.2                    beachmat_2.10.0              
+[119] parallel_4.1.3                ggfun_0.0.5                  
+[121] grid_4.1.3                    beachmat_2.10.0              
 [123] tidyr_1.2.0                   rmarkdown_2.13               
 [125] DelayedMatrixStats_1.16.0     ggnewscale_0.4.6             
 [127] ggforce_0.3.3                 shiny_1.7.1                  
@@ -3300,9 +3410,9 @@ in one sample.
 View session info
 
 \begin{verbatim}
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -3335,16 +3445,16 @@ loaded via a namespace (and not attached):
  [3] ellipsis_0.3.2              scuttle_1.4.0              
  [5] BiocNeighbors_1.12.0        ggrepel_0.9.1              
  [7] bit64_4.0.5                 fansi_1.0.2                
- [9] decontam_1.14.0             splines_4.1.2              
+ [9] decontam_1.14.0             splines_4.1.3              
 [11] codetools_0.2-18            sparseMatrixStats_1.6.0    
 [13] cachem_1.0.6                knitr_1.37                 
 [15] scater_1.22.0               jsonlite_1.8.0             
 [17] cluster_2.1.2               graph_1.72.0               
-[19] BiocManager_1.30.16         compiler_4.1.2             
+[19] BiocManager_1.30.16         compiler_4.1.3             
 [21] assertthat_0.2.1            Matrix_1.4-0               
 [23] fastmap_1.1.0               lazyeval_0.2.2             
 [25] cli_3.2.0                   BiocSingular_1.10.0        
-[27] htmltools_0.5.2             tools_4.1.2                
+[27] htmltools_0.5.2             tools_4.1.3                
 [29] rsvd_1.0.5                  gtable_0.3.0               
 [31] glue_1.6.2                  GenomeInfoDbData_1.2.7     
 [33] reshape2_1.4.4              dplyr_1.0.8                
@@ -3355,7 +3465,7 @@ loaded via a namespace (and not attached):
 [43] beachmat_2.10.0             lifecycle_1.0.1            
 [45] irlba_2.3.5                 XML_3.99-0.9               
 [47] zlibbioc_1.40.0             MASS_7.3-55                
-[49] scales_1.1.1                parallel_4.1.2             
+[49] scales_1.1.1                parallel_4.1.3             
 [51] yaml_2.3.5                  memoise_2.0.1              
 [53] gridExtra_2.3               ggplot2_3.3.5              
 [55] yulab.utils_0.0.4           stringi_1.7.6              
@@ -3375,7 +3485,7 @@ loaded via a namespace (and not attached):
 [83] tibble_3.1.6                dir.expiry_1.2.0           
 [85] crayon_1.5.0                utf8_1.2.2                 
 [87] rmarkdown_2.13              viridis_0.6.2              
-[89] grid_4.1.2                  blob_1.2.2                 
+[89] grid_4.1.3                  blob_1.2.2                 
 [91] vegan_2.5-7                 digest_0.6.29              
 [93] tidyr_1.2.0                 munsell_0.5.0              
 [95] DirichletMultinomial_1.36.0 beeswarm_0.4.0             
@@ -3706,9 +3816,9 @@ A plot comparing all the diversity measures calculated above and stored in \text
 View session info
 
 \begin{verbatim}
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -3743,16 +3853,16 @@ loaded via a namespace (and not attached):
   [3] ellipsis_0.3.2              BiocNeighbors_1.12.0       
   [5] farver_2.1.0                ggrepel_0.9.1              
   [7] bit64_4.0.5                 fansi_1.0.2                
-  [9] decontam_1.14.0             splines_4.1.2              
+  [9] decontam_1.14.0             splines_4.1.3              
  [11] codetools_0.2-18            sparseMatrixStats_1.6.0    
  [13] cachem_1.0.6                knitr_1.37                 
  [15] jsonlite_1.8.0              cluster_2.1.2              
  [17] graph_1.72.0                BiocManager_1.30.16        
- [19] compiler_4.1.2              assertthat_0.2.1           
+ [19] compiler_4.1.3              assertthat_0.2.1           
  [21] Matrix_1.4-0                fastmap_1.1.0              
  [23] lazyeval_0.2.2              cli_3.2.0                  
  [25] BiocSingular_1.10.0         htmltools_0.5.2            
- [27] tools_4.1.2                 rsvd_1.0.5                 
+ [27] tools_4.1.3                 rsvd_1.0.5                 
  [29] gtable_0.3.0                glue_1.6.2                 
  [31] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
  [33] dplyr_1.0.8                 Rcpp_1.0.8.3               
@@ -3763,7 +3873,7 @@ loaded via a namespace (and not attached):
  [43] lifecycle_1.0.1             irlba_2.3.5                
  [45] XML_3.99-0.9                zlibbioc_1.40.0            
  [47] MASS_7.3-55                 scales_1.1.1               
- [49] parallel_4.1.2              yaml_2.3.5                 
+ [49] parallel_4.1.3              yaml_2.3.5                 
  [51] memoise_2.0.1               gridExtra_2.3              
  [53] yulab.utils_0.0.4           stringi_1.7.6              
  [55] RSQLite_2.2.10              highr_0.9                  
@@ -3784,7 +3894,7 @@ loaded via a namespace (and not attached):
  [85] tibble_3.1.6                dir.expiry_1.2.0           
  [87] crayon_1.5.0                utf8_1.2.2                 
  [89] rmarkdown_2.13              viridis_0.6.2              
- [91] grid_4.1.2                  blob_1.2.2                 
+ [91] grid_4.1.3                  blob_1.2.2                 
  [93] vegan_2.5-7                 digest_0.6.29              
  [95] tidyr_1.2.0                 munsell_0.5.0              
  [97] DirichletMultinomial_1.36.0 beeswarm_0.4.0             
@@ -4350,9 +4460,9 @@ appropriate choice for comparing community compositions.
 View session info
 
 \begin{verbatim}
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -4389,15 +4499,15 @@ loaded via a namespace (and not attached):
  [5] BiocNeighbors_1.12.0        farver_2.1.0               
  [7] ggrepel_0.9.1               bit64_4.0.5                
  [9] fansi_1.0.2                 decontam_1.14.0            
-[11] splines_4.1.2               codetools_0.2-18           
+[11] splines_4.1.3               codetools_0.2-18           
 [13] sparseMatrixStats_1.6.0     cachem_1.0.6               
 [15] knitr_1.37                  jsonlite_1.8.0             
 [17] cluster_2.1.2               graph_1.72.0               
-[19] BiocManager_1.30.16         compiler_4.1.2             
+[19] BiocManager_1.30.16         compiler_4.1.3             
 [21] assertthat_0.2.1            Matrix_1.4-0               
 [23] fastmap_1.1.0               lazyeval_0.2.2             
 [25] cli_3.2.0                   BiocSingular_1.10.0        
-[27] htmltools_0.5.2             tools_4.1.2                
+[27] htmltools_0.5.2             tools_4.1.3                
 [29] rsvd_1.0.5                  gtable_0.3.0               
 [31] glue_1.6.2                  GenomeInfoDbData_1.2.7     
 [33] reshape2_1.4.4              dplyr_1.0.8                
@@ -4408,7 +4518,7 @@ loaded via a namespace (and not attached):
 [43] beachmat_2.10.0             lifecycle_1.0.1            
 [45] irlba_2.3.5                 XML_3.99-0.9               
 [47] zlibbioc_1.40.0             MASS_7.3-55                
-[49] scales_1.1.1                parallel_4.1.2             
+[49] scales_1.1.1                parallel_4.1.3             
 [51] yaml_2.3.5                  memoise_2.0.1              
 [53] gridExtra_2.3               yulab.utils_0.0.4          
 [55] stringi_1.7.6               RSQLite_2.2.10             
@@ -4428,7 +4538,7 @@ loaded via a namespace (and not attached):
 [83] RCurl_1.98-1.6              tibble_3.1.6               
 [85] dir.expiry_1.2.0            crayon_1.5.0               
 [87] utf8_1.2.2                  rmarkdown_2.13             
-[89] viridis_0.6.2               grid_4.1.2                 
+[89] viridis_0.6.2               grid_4.1.3                 
 [91] blob_1.2.2                  digest_0.6.29              
 [93] tidyr_1.2.0                 munsell_0.5.0              
 [95] DirichletMultinomial_1.36.0 beeswarm_0.4.0             
@@ -5059,31 +5169,31 @@ This returns a list of DMN objects for a closer investigation.
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7689 BIC: 8076 AIC: 7948 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7751 BIC: 8274 AIC: 8103 
+## Laplace: 7793 BIC: 8357 AIC: 8187 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7859 BIC: 8582 AIC: 8368 
+## Laplace: 7850 BIC: 8554 AIC: 8341 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: NaN BIC: NaN AIC: NaN 
+## Laplace: 7923 BIC: 8797 AIC: 8541 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8065 BIC: 9139 AIC: 8840
+## Laplace: 8087 BIC: 9113 AIC: 8814
 \end{verbatim}
 
 Show Laplace approximation (model evidence) for each model of the k models.
@@ -5152,8 +5262,8 @@ Mixture weights (rough measure of the cluster size).
 
 \begin{verbatim}
 ##       pi theta
-## 1 0.5385 20.60
-## 2 0.4615 15.28
+## 1 0.5385 20.58
+## 2 0.4615 15.29
 \end{verbatim}
 
 Samples-cluster assignment probabilities / how probable it is that sample belongs
@@ -5167,12 +5277,12 @@ to each cluster
 
 \begin{verbatim}
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.031e-17
-## CC1     1.000e+00 3.834e-22
-## SV1     1.000e+00 2.025e-12
-## M31Fcsw 7.325e-26 1.000e+00
-## M11Fcsw 1.064e-16 1.000e+00
-## M31Plmr 9.983e-14 1.000e+00
+## CL3     1.000e+00 5.047e-17
+## CC1     1.000e+00 3.896e-22
+## SV1     1.000e+00 1.956e-12
+## M31Fcsw 7.878e-26 1.000e+00
+## M11Fcsw 1.133e-16 1.000e+00
+## M31Plmr 1.118e-13 1.000e+00
 \end{verbatim}
 
 Contribution of each taxa to each component
@@ -5184,13 +5294,13 @@ Contribution of each taxa to each component
 \end{Shaded}
 
 \begin{verbatim}
-##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354648
-## Phylum:Euryarchaeota  0.2314 0.1468610
-## Phylum:Actinobacteria 1.2104 1.0600602
-## Phylum:Spirochaetes   0.2141 0.1318406
-## Phylum:MVP-15         0.0299 0.0007664
-## Phylum:Proteobacteria 6.8415 1.8151903
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30380 0.1354661
+## Phylum:Euryarchaeota  0.23114 0.1468607
+## Phylum:Actinobacteria 1.21371 1.0601356
+## Phylum:Spirochaetes   0.21392 0.1318414
+## Phylum:MVP-15         0.02983 0.0007668
+## Phylum:Proteobacteria 6.84374 1.8153680
 \end{verbatim}
 
 Get the assignment probabilities
@@ -5365,9 +5475,9 @@ Link:
 View session info
 
 \begin{verbatim}
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -5404,7 +5514,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] circlize_0.4.14             plyr_1.8.6                 
   [3] igraph_1.2.11               lazyeval_0.2.2             
-  [5] splines_4.1.2               BiocParallel_1.28.3        
+  [5] splines_4.1.3               BiocParallel_1.28.3        
   [7] digest_0.6.29               foreach_1.5.2              
   [9] yulab.utils_0.0.4           htmltools_0.5.2            
  [11] viridis_0.6.2               fansi_1.0.2                
@@ -5435,7 +5545,7 @@ loaded via a namespace (and not attached):
  [61] utf8_1.2.2                  ggplotify_0.1.0            
  [63] tidyselect_1.1.2            labeling_0.4.2             
  [65] rlang_1.0.2                 munsell_0.5.0              
- [67] tools_4.1.2                 cachem_1.0.6               
+ [67] tools_4.1.3                 cachem_1.0.6               
  [69] cli_3.2.0                   DirichletMultinomial_1.36.0
  [71] generics_0.1.2              RSQLite_2.2.10             
  [73] evaluate_0.15               stringr_1.4.0              
@@ -5443,7 +5553,7 @@ loaded via a namespace (and not attached):
  [77] knitr_1.37                  bit64_4.0.5                
  [79] tidygraph_1.2.0             purrr_0.3.4                
  [81] nlme_3.1-155                sparseMatrixStats_1.6.0    
- [83] aplot_0.1.2                 compiler_4.1.2             
+ [83] aplot_0.1.2                 compiler_4.1.3             
  [85] curl_4.3.2                  png_0.1-7                  
  [87] beeswarm_0.4.0              filelock_1.0.2             
  [89] treeio_1.18.1               tibble_3.1.6               
@@ -5461,8 +5571,8 @@ loaded via a namespace (and not attached):
 [113] codetools_0.2-18            MASS_7.3-55                
 [115] assertthat_0.2.1            rjson_0.2.21               
 [117] withr_2.5.0                 GenomeInfoDbData_1.2.7     
-[119] mgcv_1.8-39                 parallel_4.1.2             
-[121] grid_4.1.2                  ggfun_0.0.5                
+[119] mgcv_1.8-39                 parallel_4.1.3             
+[121] grid_4.1.3                  ggfun_0.0.5                
 [123] beachmat_2.10.0             tidyr_1.2.0                
 [125] rmarkdown_2.13              DelayedMatrixStats_1.16.0  
 [127] Rtsne_0.15                  ggnewscale_0.4.6           
@@ -5970,9 +6080,9 @@ between taxa. \emph{biclust} is suitable for this.
 View session info
 
 \begin{verbatim}
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -6007,7 +6117,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.2.2           BiocFileCache_2.2.1          
   [3] plyr_1.8.6                    lazyeval_0.2.2               
-  [5] splines_4.1.2                 BiocParallel_1.28.3          
+  [5] splines_4.1.3                 BiocParallel_1.28.3          
   [7] scater_1.22.0                 digest_0.6.29                
   [9] yulab.utils_0.0.4             htmltools_0.5.2              
  [11] viridis_0.6.2                 fansi_1.0.2                  
@@ -6036,7 +6146,7 @@ loaded via a namespace (and not attached):
  [57] rlang_1.0.2                   reshape2_1.4.4               
  [59] later_1.3.0                   AnnotationDbi_1.56.2         
  [61] munsell_0.5.0                 BiocVersion_3.14.0           
- [63] tools_4.1.2                   cachem_1.0.6                 
+ [63] tools_4.1.3                   cachem_1.0.6                 
  [65] cli_3.2.0                     DirichletMultinomial_1.36.0  
  [67] generics_0.1.2                RSQLite_2.2.10               
  [69] ExperimentHub_2.2.1           evaluate_0.15                
@@ -6045,7 +6155,7 @@ loaded via a namespace (and not attached):
  [75] bit64_4.0.5                   purrr_0.3.4                  
  [77] KEGGREST_1.34.0               nlme_3.1-155                 
  [79] sparseMatrixStats_1.6.0       mime_0.12                    
- [81] flexclust_1.4-0               compiler_4.1.2               
+ [81] flexclust_1.4-0               compiler_4.1.3               
  [83] beeswarm_0.4.0                filelock_1.0.2               
  [85] curl_4.3.2                    png_0.1-7                    
  [87] interactiveDisplayBase_1.32.0 treeio_1.18.1                
@@ -6061,7 +6171,7 @@ loaded via a namespace (and not attached):
 [107] vipor_0.4.5                   codetools_0.2-18             
 [109] assertthat_0.2.1              withr_2.5.0                  
 [111] GenomeInfoDbData_1.2.7        mgcv_1.8-39                  
-[113] parallel_4.1.2                beachmat_2.10.0              
+[113] parallel_4.1.3                beachmat_2.10.0              
 [115] class_7.3-20                  tidyr_1.2.0                  
 [117] rmarkdown_2.13                DelayedMatrixStats_1.16.0    
 [119] shiny_1.7.1                   ggbeeswarm_0.6.0             
@@ -6845,9 +6955,9 @@ and ``Sex'' to some extent. Let's take a closer look at the two latter ones:
 View session info
 
 \begin{verbatim}
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -6931,15 +7041,15 @@ loaded via a namespace (and not attached):
  [83] DECIPHER_2.22.0               beachmat_2.10.0              
  [85] scales_1.1.1                  memoise_2.0.1                
  [87] magrittr_2.0.2                plyr_1.8.6                   
- [89] zlibbioc_1.40.0               compiler_4.1.2               
+ [89] zlibbioc_1.40.0               compiler_4.1.3               
  [91] RColorBrewer_1.1-2            cli_3.2.0                    
  [93] ade4_1.7-18                   pbapply_1.5-0                
  [95] mgcv_1.8-39                   tidyselect_1.1.2             
  [97] stringi_1.7.6                 highr_0.9                    
  [99] yaml_2.3.5                    BiocSingular_1.10.0          
 [101] svUnit_1.0.6                  ggrepel_0.9.1                
-[103] grid_4.1.2                    tools_4.1.2                  
-[105] parallel_4.1.2                rstudioapi_0.13              
+[103] grid_4.1.3                    tools_4.1.3                  
+[105] parallel_4.1.3                rstudioapi_0.13              
 [107] foreach_1.5.2                 logging_0.10-108             
 [109] optparse_1.7.1                gridExtra_2.3                
 [111] posterior_1.2.1               farver_2.1.0                 
@@ -6949,9 +7059,9 @@ loaded via a namespace (and not attached):
 [119] broom_0.7.12                  scuttle_1.4.0                
 [121] later_1.3.0                   BiocVersion_3.14.0           
 [123] AnnotationDbi_1.56.2          httr_1.4.2                   
-[125] Rdpack_2.1.4                  colorspace_2.0-3             
+[125] Rdpack_2.2                    colorspace_2.0-3             
 [127] rvest_1.0.2                   XML_3.99-0.9                 
-[129] fs_1.5.2                      splines_4.1.2                
+[129] fs_1.5.2                      splines_4.1.3                
 [131] yulab.utils_0.0.4             tidytree_0.3.9               
 [133] scater_1.22.0                 multtest_2.50.0              
 [135] plotly_4.10.0                 xtable_1.8-4                 
@@ -7132,6 +7242,9 @@ with concentrations of individual metabolites. This helps as to answer the quest
 \CommentTok{\# Does log10 transform for microbiome data}
 \NormalTok{mae[[}\DecValTok{1}\NormalTok{]] }\OtherTok{\textless{}{-}} \FunctionTok{transformSamples}\NormalTok{(mae[[}\DecValTok{1}\NormalTok{]], }\AttributeTok{method =} \StringTok{"log10"}\NormalTok{, }\AttributeTok{pseudocount =} \DecValTok{1}\NormalTok{)}
 
+\CommentTok{\# Give unique names so that we do not have problems when we are creating a plot}
+\FunctionTok{rownames}\NormalTok{(mae[[}\DecValTok{1}\NormalTok{]]) }\OtherTok{\textless{}{-}} \FunctionTok{getTaxonomyLabels}\NormalTok{(mae[[}\DecValTok{1}\NormalTok{]])}
+
 \CommentTok{\# Cross correlates data sets}
 \NormalTok{correlations }\OtherTok{\textless{}{-}} \FunctionTok{testExperimentCrossCorrelation}\NormalTok{(mae, }
                                                \AttributeTok{experiment1 =} \DecValTok{1}\NormalTok{,}
@@ -7282,7 +7395,7 @@ can be used, include Poisson or Bernoulli.
 ## Untrained MOFA model with the following characteristics: 
 ##  Number of views: 3 
 ##  Views names: microbiota metabolites biomarkers 
-##  Number of features (per view): 99 38 39 
+##  Number of features (per view): 136 38 39 
 ##  Number of groups: 2 
 ##  Groups names: High-fat Low-fat 
 ##  Number of samples (per group): 20 20 
@@ -7402,9 +7515,9 @@ More tutorials and examples of using the package are found at: \href{https://bio
 View session info
 
 \begin{verbatim}
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -7438,7 +7551,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.2.2           corrplot_0.92                
   [3] BiocFileCache_2.2.1           plyr_1.8.6                   
-  [5] lazyeval_0.2.2                splines_4.1.2                
+  [5] lazyeval_0.2.2                splines_4.1.3                
   [7] BiocParallel_1.28.3           scater_1.22.0                
   [9] digest_0.6.29                 yulab.utils_0.0.4            
  [11] htmltools_0.5.2               viridis_0.6.2                
@@ -7469,7 +7582,7 @@ loaded via a namespace (and not attached):
  [61] tidyselect_1.1.2              rlang_1.0.2                  
  [63] reshape2_1.4.4                later_1.3.0                  
  [65] AnnotationDbi_1.56.2          munsell_0.5.0                
- [67] BiocVersion_3.14.0            tools_4.1.2                  
+ [67] BiocVersion_3.14.0            tools_4.1.3                  
  [69] cachem_1.0.6                  cli_3.2.0                    
  [71] DirichletMultinomial_1.36.0   generics_0.1.2               
  [73] RSQLite_2.2.10                ExperimentHub_2.2.1          
@@ -7478,7 +7591,7 @@ loaded via a namespace (and not attached):
  [79] bit64_4.0.5                   purrr_0.3.4                  
  [81] KEGGREST_1.34.0               nlme_3.1-155                 
  [83] sparseMatrixStats_1.6.0       mime_0.12                    
- [85] compiler_4.1.2                beeswarm_0.4.0               
+ [85] compiler_4.1.3                beeswarm_0.4.0               
  [87] filelock_1.0.2                curl_4.3.2                   
  [89] png_0.1-7                     interactiveDisplayBase_1.32.0
  [91] treeio_1.18.1                 tibble_3.1.6                 
@@ -7497,8 +7610,8 @@ loaded via a namespace (and not attached):
 [117] MASS_7.3-55                   assertthat_0.2.1             
 [119] rhdf5_2.38.1                  rprojroot_2.0.2              
 [121] withr_2.5.0                   GenomeInfoDbData_1.2.7       
-[123] mgcv_1.8-39                   parallel_4.1.2               
-[125] grid_4.1.2                    beachmat_2.10.0              
+[123] mgcv_1.8-39                   parallel_4.1.3               
+[125] grid_4.1.3                    beachmat_2.10.0              
 [127] basilisk_1.6.0                tidyr_1.2.0                  
 [129] rmarkdown_2.13                DelayedMatrixStats_1.16.0    
 [131] Rtsne_0.15                    shiny_1.7.1                  

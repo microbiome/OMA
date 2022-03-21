@@ -505,9 +505,9 @@ pheatmap(corr, cluster_cols = F, cluster_rows = F,
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -542,7 +542,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.2.2           BiocFileCache_2.2.1          
   [3] plyr_1.8.6                    lazyeval_0.2.2               
-  [5] splines_4.1.2                 BiocParallel_1.28.3          
+  [5] splines_4.1.3                 BiocParallel_1.28.3          
   [7] scater_1.22.0                 digest_0.6.29                
   [9] yulab.utils_0.0.4             htmltools_0.5.2              
  [11] viridis_0.6.2                 fansi_1.0.2                  
@@ -571,7 +571,7 @@ loaded via a namespace (and not attached):
  [57] rlang_1.0.2                   reshape2_1.4.4               
  [59] later_1.3.0                   AnnotationDbi_1.56.2         
  [61] munsell_0.5.0                 BiocVersion_3.14.0           
- [63] tools_4.1.2                   cachem_1.0.6                 
+ [63] tools_4.1.3                   cachem_1.0.6                 
  [65] cli_3.2.0                     DirichletMultinomial_1.36.0  
  [67] generics_0.1.2                RSQLite_2.2.10               
  [69] ExperimentHub_2.2.1           evaluate_0.15                
@@ -580,7 +580,7 @@ loaded via a namespace (and not attached):
  [75] bit64_4.0.5                   purrr_0.3.4                  
  [77] KEGGREST_1.34.0               nlme_3.1-155                 
  [79] sparseMatrixStats_1.6.0       mime_0.12                    
- [81] flexclust_1.4-0               compiler_4.1.2               
+ [81] flexclust_1.4-0               compiler_4.1.3               
  [83] beeswarm_0.4.0                filelock_1.0.2               
  [85] curl_4.3.2                    png_0.1-7                    
  [87] interactiveDisplayBase_1.32.0 treeio_1.18.1                
@@ -596,7 +596,7 @@ loaded via a namespace (and not attached):
 [107] vipor_0.4.5                   codetools_0.2-18             
 [109] assertthat_0.2.1              withr_2.5.0                  
 [111] GenomeInfoDbData_1.2.7        mgcv_1.8-39                  
-[113] parallel_4.1.2                beachmat_2.10.0              
+[113] parallel_4.1.3                beachmat_2.10.0              
 [115] class_7.3-20                  tidyr_1.2.0                  
 [117] rmarkdown_2.13                DelayedMatrixStats_1.16.0    
 [119] shiny_1.7.1                   ggbeeswarm_0.6.0             

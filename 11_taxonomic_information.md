@@ -542,9 +542,9 @@ taxa.abundances[1:10]
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -577,16 +577,16 @@ loaded via a namespace (and not attached):
  [3] ellipsis_0.3.2              scuttle_1.4.0              
  [5] BiocNeighbors_1.12.0        ggrepel_0.9.1              
  [7] bit64_4.0.5                 fansi_1.0.2                
- [9] decontam_1.14.0             splines_4.1.2              
+ [9] decontam_1.14.0             splines_4.1.3              
 [11] codetools_0.2-18            sparseMatrixStats_1.6.0    
 [13] cachem_1.0.6                knitr_1.37                 
 [15] scater_1.22.0               jsonlite_1.8.0             
 [17] cluster_2.1.2               graph_1.72.0               
-[19] BiocManager_1.30.16         compiler_4.1.2             
+[19] BiocManager_1.30.16         compiler_4.1.3             
 [21] assertthat_0.2.1            Matrix_1.4-0               
 [23] fastmap_1.1.0               lazyeval_0.2.2             
 [25] cli_3.2.0                   BiocSingular_1.10.0        
-[27] htmltools_0.5.2             tools_4.1.2                
+[27] htmltools_0.5.2             tools_4.1.3                
 [29] rsvd_1.0.5                  gtable_0.3.0               
 [31] glue_1.6.2                  GenomeInfoDbData_1.2.7     
 [33] reshape2_1.4.4              dplyr_1.0.8                
@@ -597,7 +597,7 @@ loaded via a namespace (and not attached):
 [43] beachmat_2.10.0             lifecycle_1.0.1            
 [45] irlba_2.3.5                 XML_3.99-0.9               
 [47] zlibbioc_1.40.0             MASS_7.3-55                
-[49] scales_1.1.1                parallel_4.1.2             
+[49] scales_1.1.1                parallel_4.1.3             
 [51] yaml_2.3.5                  memoise_2.0.1              
 [53] gridExtra_2.3               ggplot2_3.3.5              
 [55] yulab.utils_0.0.4           stringi_1.7.6              
@@ -617,7 +617,7 @@ loaded via a namespace (and not attached):
 [83] tibble_3.1.6                dir.expiry_1.2.0           
 [85] crayon_1.5.0                utf8_1.2.2                 
 [87] rmarkdown_2.13              viridis_0.6.2              
-[89] grid_4.1.2                  blob_1.2.2                 
+[89] grid_4.1.3                  blob_1.2.2                 
 [91] vegan_2.5-7                 digest_0.6.29              
 [93] tidyr_1.2.0                 munsell_0.5.0              
 [95] DirichletMultinomial_1.36.0 beeswarm_0.4.0             

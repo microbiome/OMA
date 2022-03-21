@@ -16,7 +16,7 @@ date: "**Authors:** Leo Lahti [aut], Sudarshan Shetty [aut], Felix GM Ernst [aut
   **Version:** 0.98.9<br/>
   **Modified:** 2021-09-10<br/>
   **Compiled:** 2022-03-21<br/>
-  **Environment:** R version 4.1.2 (2021-11-01), Bioconductor 3.14<br/>
+  **Environment:** R version 4.1.3 (2022-03-10), Bioconductor 3.14<br/>
   **License:** CC BY-NC-SA 3.0 US<br/>
   **Copyright:** <br/>
   **Source:** https://github.com/microbiome/OMA"

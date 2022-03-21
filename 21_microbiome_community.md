@@ -631,31 +631,31 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7689 BIC: 8076 AIC: 7948 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7751 BIC: 8274 AIC: 8103 
+## Laplace: 7793 BIC: 8357 AIC: 8187 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7859 BIC: 8582 AIC: 8368 
+## Laplace: 7850 BIC: 8554 AIC: 8341 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: NaN BIC: NaN AIC: NaN 
+## Laplace: 7923 BIC: 8797 AIC: 8541 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8065 BIC: 9139 AIC: 8840
+## Laplace: 8087 BIC: 9113 AIC: 8814
 ```
 
 
@@ -721,8 +721,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.60
-## 2 0.4615 15.28
+## 1 0.5385 20.58
+## 2 0.4615 15.29
 ```
 
 
@@ -736,12 +736,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.031e-17
-## CC1     1.000e+00 3.834e-22
-## SV1     1.000e+00 2.025e-12
-## M31Fcsw 7.325e-26 1.000e+00
-## M11Fcsw 1.064e-16 1.000e+00
-## M31Plmr 9.983e-14 1.000e+00
+## CL3     1.000e+00 5.047e-17
+## CC1     1.000e+00 3.896e-22
+## SV1     1.000e+00 1.956e-12
+## M31Fcsw 7.878e-26 1.000e+00
+## M11Fcsw 1.133e-16 1.000e+00
+## M31Plmr 1.118e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -752,13 +752,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354648
-## Phylum:Euryarchaeota  0.2314 0.1468610
-## Phylum:Actinobacteria 1.2104 1.0600602
-## Phylum:Spirochaetes   0.2141 0.1318406
-## Phylum:MVP-15         0.0299 0.0007664
-## Phylum:Proteobacteria 6.8415 1.8151903
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30380 0.1354661
+## Phylum:Euryarchaeota  0.23114 0.1468607
+## Phylum:Actinobacteria 1.21371 1.0601356
+## Phylum:Spirochaetes   0.21392 0.1318414
+## Phylum:MVP-15         0.02983 0.0007668
+## Phylum:Proteobacteria 6.84374 1.8153680
 ```
 Get the assignment probabilities
 
@@ -920,9 +920,9 @@ Link:
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -959,7 +959,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] circlize_0.4.14             plyr_1.8.6                 
   [3] igraph_1.2.11               lazyeval_0.2.2             
-  [5] splines_4.1.2               BiocParallel_1.28.3        
+  [5] splines_4.1.3               BiocParallel_1.28.3        
   [7] digest_0.6.29               foreach_1.5.2              
   [9] yulab.utils_0.0.4           htmltools_0.5.2            
  [11] viridis_0.6.2               fansi_1.0.2                
@@ -990,7 +990,7 @@ loaded via a namespace (and not attached):
  [61] utf8_1.2.2                  ggplotify_0.1.0            
  [63] tidyselect_1.1.2            labeling_0.4.2             
  [65] rlang_1.0.2                 munsell_0.5.0              
- [67] tools_4.1.2                 cachem_1.0.6               
+ [67] tools_4.1.3                 cachem_1.0.6               
  [69] cli_3.2.0                   DirichletMultinomial_1.36.0
  [71] generics_0.1.2              RSQLite_2.2.10             
  [73] evaluate_0.15               stringr_1.4.0              
@@ -998,7 +998,7 @@ loaded via a namespace (and not attached):
  [77] knitr_1.37                  bit64_4.0.5                
  [79] tidygraph_1.2.0             purrr_0.3.4                
  [81] nlme_3.1-155                sparseMatrixStats_1.6.0    
- [83] aplot_0.1.2                 compiler_4.1.2             
+ [83] aplot_0.1.2                 compiler_4.1.3             
  [85] curl_4.3.2                  png_0.1-7                  
  [87] beeswarm_0.4.0              filelock_1.0.2             
  [89] treeio_1.18.1               tibble_3.1.6               
@@ -1016,8 +1016,8 @@ loaded via a namespace (and not attached):
 [113] codetools_0.2-18            MASS_7.3-55                
 [115] assertthat_0.2.1            rjson_0.2.21               
 [117] withr_2.5.0                 GenomeInfoDbData_1.2.7     
-[119] mgcv_1.8-39                 parallel_4.1.2             
-[121] grid_4.1.2                  ggfun_0.0.5                
+[119] mgcv_1.8-39                 parallel_4.1.3             
+[121] grid_4.1.3                  ggfun_0.0.5                
 [123] beachmat_2.10.0             tidyr_1.2.0                
 [125] rmarkdown_2.13              DelayedMatrixStats_1.16.0  
 [127] Rtsne_0.15                  ggnewscale_0.4.6           

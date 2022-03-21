@@ -89,9 +89,9 @@ Some of the R packages supporting the framework include:
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.1.2 (2021-11-01)
+R version 4.1.3 (2022-03-10)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.3 LTS
+Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
 BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
@@ -112,12 +112,12 @@ other attached packages:
 
 loaded via a namespace (and not attached):
  [1] bookdown_0.25       dir.expiry_1.2.0    codetools_0.2-18   
- [4] XML_3.99-0.9        digest_0.6.29       stats4_4.1.2       
+ [4] XML_3.99-0.9        digest_0.6.29       stats4_4.1.3       
  [7] magrittr_2.0.2      evaluate_0.15       graph_1.72.0       
 [10] rlang_1.0.2         stringi_1.7.6       cli_3.2.0          
-[13] filelock_1.0.2      rmarkdown_2.13      tools_4.1.2        
+[13] filelock_1.0.2      rmarkdown_2.13      tools_4.1.3        
 [16] stringr_1.4.0       xfun_0.30           yaml_2.3.5         
-[19] fastmap_1.1.0       compiler_4.1.2      BiocGenerics_0.40.0
+[19] fastmap_1.1.0       compiler_4.1.3      BiocGenerics_0.40.0
 [22] BiocManager_1.30.16 CodeDepends_0.6.5   htmltools_0.5.2    
 [25] knitr_1.37         
 ```
