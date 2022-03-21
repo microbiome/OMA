@@ -474,8 +474,8 @@ p_values
 ## dbRDA+anova.cca     0.02
 ```
 
-In this case, the community composition is not significantly different
-between the groups.
+As we can see, the community composition is significantly different
+between the groups (p < 0.05), and these two methods give equal p-values.
 
 Let us visualize the model coefficients for species that exhibit the
 largest differences between the groups. This gives some insights into
