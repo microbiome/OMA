@@ -631,7 +631,7 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7689 BIC: 8076 AIC: 7948 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
@@ -643,19 +643,19 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7859 BIC: 8582 AIC: 8368 
+## Laplace: 7860 BIC: 8604 AIC: 8391 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: NaN BIC: NaN AIC: NaN 
+## Laplace: 7943 BIC: 8822 AIC: 8566 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: NaN BIC: NaN AIC: NaN
+## Laplace: 8055 BIC: 9123 AIC: 8824
 ```
 
 
@@ -700,15 +700,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -722,7 +722,7 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 ```
 ##       pi theta
 ## 1 0.5385 20.58
-## 2 0.4615 15.32
+## 2 0.4615 15.28
 ```
 
 
@@ -736,12 +736,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 4.505e-17
-## CC1     1.000e+00 3.419e-22
-## SV1     1.000e+00 1.712e-12
-## M31Fcsw 7.423e-26 1.000e+00
-## M11Fcsw 1.092e-16 1.000e+00
-## M31Plmr 1.152e-13 1.000e+00
+## CL3     1.000e+00 5.024e-17
+## CC1     1.000e+00 3.871e-22
+## SV1     1.000e+00 1.946e-12
+## M31Fcsw 7.904e-26 1.000e+00
+## M11Fcsw 1.135e-16 1.000e+00
+## M31Plmr 1.126e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -753,12 +753,12 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 
 ```
 ##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30380 0.1354048
-## Phylum:Euryarchaeota  0.23114 0.1468882
-## Phylum:Actinobacteria 1.21372 1.0580858
-## Phylum:Spirochaetes   0.21392 0.1318067
-## Phylum:MVP-15         0.02982 0.0007668
-## Phylum:Proteobacteria 6.84510 1.8114861
+## Phylum:Crenarchaeota  0.30385 0.1354653
+## Phylum:Euryarchaeota  0.23116 0.1468628
+## Phylum:Actinobacteria 1.21385 1.0600329
+## Phylum:Spirochaetes   0.21394 0.1318413
+## Phylum:MVP-15         0.02982 0.0007654
+## Phylum:Proteobacteria 6.84333 1.8153087
 ```
 Get the assignment probabilities
 
@@ -978,7 +978,7 @@ loaded via a namespace (and not attached):
  [37] GetoptLong_1.0.5            DelayedArray_0.20.0        
  [39] BiocSingular_1.10.0         shape_1.4.6                
  [41] scales_1.1.1                DBI_1.1.2                  
- [43] randomcoloR_1.1.0.1         Rcpp_1.0.8                 
+ [43] randomcoloR_1.1.0.1         Rcpp_1.0.8.3               
  [45] viridisLite_0.4.0           clue_0.3-60                
  [47] decontam_1.14.0             gridGraphics_0.5-1         
  [49] tidytree_0.3.9              bit_4.0.4                  
@@ -1011,7 +1011,7 @@ loaded via a namespace (and not attached):
 [103] BiocNeighbors_1.12.0        cowplot_1.1.1              
 [105] bitops_1.0-7                irlba_2.3.5                
 [107] seriation_1.3.3             R6_2.5.1                   
-[109] TSP_1.2-0                   bookdown_0.24              
+[109] TSP_1.2-0                   bookdown_0.25              
 [111] gridExtra_2.3               vipor_0.4.5                
 [113] codetools_0.2-18            MASS_7.3-55                
 [115] assertthat_0.2.1            rjson_0.2.21               

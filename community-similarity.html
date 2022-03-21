@@ -6,11 +6,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 8 Community similarity | Orchestrating Microbiome Analysis</title>
   <meta name="description" content="Chapter 8 Community similarity | Orchestrating Microbiome Analysis" />
-  <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.25 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 8 Community similarity | Orchestrating Microbiome Analysis" />
   <meta property="og:type" content="book" />
-  <meta property="og:url" content="https://github.com/microbiome/OMA" />
   
   
   <meta name="github-repo" content="microbiome/OMA" />
@@ -31,7 +30,6 @@
   
 <link rel="prev" href="community-diversity.html"/>
 <link rel="next" href="microbiome-community.html"/>
-<script src="libs/header-attrs-2.13/header-attrs.js"></script>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -657,23 +655,62 @@ samples.</p>
 of the community are equivalent between the compared groups. A small
 p-value indicates that the compared groups have, on average, a
 different community composition.</p>
-<p>This method is implemented in the <code>vegan</code> package (function <code>adonis</code>).</p>
-<div class="sourceCode" id="cb217"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb217-1"><a href="community-similarity.html#cb217-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vegan)</span>
-<span id="cb217-2"><a href="community-similarity.html#cb217-2" aria-hidden="true" tabindex="-1"></a>permanova <span class="ot">&lt;-</span> vegan<span class="sc">::</span><span class="fu">adonis</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse,<span class="st">&quot;relabundance&quot;</span>)) <span class="sc">~</span> Group,</span>
-<span id="cb217-3"><a href="community-similarity.html#cb217-3" aria-hidden="true" tabindex="-1"></a>                           <span class="at">data =</span> <span class="fu">colData</span>(tse),</span>
-<span id="cb217-4"><a href="community-similarity.html#cb217-4" aria-hidden="true" tabindex="-1"></a>                           <span class="at">permutations =</span> <span class="dv">9999</span>)</span>
-<span id="cb217-5"><a href="community-similarity.html#cb217-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb217-6"><a href="community-similarity.html#cb217-6" aria-hidden="true" tabindex="-1"></a><span class="co"># P-value</span></span>
-<span id="cb217-7"><a href="community-similarity.html#cb217-7" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">as.data.frame</span>(permanova<span class="sc">$</span>aov.tab)[<span class="st">&quot;Group&quot;</span>, <span class="st">&quot;Pr(&gt;F)&quot;</span>])</span></code></pre></div>
-<pre><code>## [1] 0.0011</code></pre>
+<p>This method is implemented in the <code>vegan</code> package in the function
+<a href="https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis"><code>adonis2</code></a>.</p>
+<p>We can get equal result by first performing distance-based redundancy analysis (dbRDA),
+and then applying permutational test for result of redundancy analysis. Advantage is
+that by doing so we can get coefficients: how much each taxa affect to the result.</p>
+<div class="sourceCode" id="cb217"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb217-1"><a href="community-similarity.html#cb217-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>( <span class="sc">!</span><span class="fu">require</span>(vegan) ){</span>
+<span id="cb217-2"><a href="community-similarity.html#cb217-2" aria-hidden="true" tabindex="-1"></a>    BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;vegan&quot;</span>)</span>
+<span id="cb217-3"><a href="community-similarity.html#cb217-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(<span class="st">&quot;vegan&quot;</span>)</span>
+<span id="cb217-4"><a href="community-similarity.html#cb217-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb217-5"><a href="community-similarity.html#cb217-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Agglomerate data to Species level</span></span>
+<span id="cb217-6"><a href="community-similarity.html#cb217-6" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(tse, <span class="at">rank =</span> <span class="st">&quot;Species&quot;</span>)</span>
+<span id="cb217-7"><a href="community-similarity.html#cb217-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb217-8"><a href="community-similarity.html#cb217-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Set seed for reproducibility</span></span>
+<span id="cb217-9"><a href="community-similarity.html#cb217-9" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1576</span>)</span>
+<span id="cb217-10"><a href="community-similarity.html#cb217-10" aria-hidden="true" tabindex="-1"></a><span class="co"># We choose 99 random permutations. Consider applying more (999 or 9999) in your</span></span>
+<span id="cb217-11"><a href="community-similarity.html#cb217-11" aria-hidden="true" tabindex="-1"></a><span class="co"># analysis. </span></span>
+<span id="cb217-12"><a href="community-similarity.html#cb217-12" aria-hidden="true" tabindex="-1"></a>permanova <span class="ot">&lt;-</span> <span class="fu">adonis2</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse,<span class="st">&quot;relabundance&quot;</span>)) <span class="sc">~</span> Group,</span>
+<span id="cb217-13"><a href="community-similarity.html#cb217-13" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> <span class="fu">colData</span>(tse),</span>
+<span id="cb217-14"><a href="community-similarity.html#cb217-14" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>,</span>
+<span id="cb217-15"><a href="community-similarity.html#cb217-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">by =</span> <span class="cn">NULL</span>,</span>
+<span id="cb217-16"><a href="community-similarity.html#cb217-16" aria-hidden="true" tabindex="-1"></a>                     <span class="at">permutations =</span> <span class="dv">99</span>)</span>
+<span id="cb217-17"><a href="community-similarity.html#cb217-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb217-18"><a href="community-similarity.html#cb217-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Set seed for reproducibility</span></span>
+<span id="cb217-19"><a href="community-similarity.html#cb217-19" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1576</span>)</span>
+<span id="cb217-20"><a href="community-similarity.html#cb217-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform dbRDA</span></span>
+<span id="cb217-21"><a href="community-similarity.html#cb217-21" aria-hidden="true" tabindex="-1"></a>dbrda <span class="ot">&lt;-</span> <span class="fu">dbrda</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse,<span class="st">&quot;relabundance&quot;</span>)) <span class="sc">~</span> Group, </span>
+<span id="cb217-22"><a href="community-similarity.html#cb217-22" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> <span class="fu">colData</span>(tse))</span>
+<span id="cb217-23"><a href="community-similarity.html#cb217-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform permutational analysis</span></span>
+<span id="cb217-24"><a href="community-similarity.html#cb217-24" aria-hidden="true" tabindex="-1"></a>permanova2 <span class="ot">&lt;-</span> <span class="fu">anova.cca</span>(dbrda,</span>
+<span id="cb217-25"><a href="community-similarity.html#cb217-25" aria-hidden="true" tabindex="-1"></a>                        <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>,</span>
+<span id="cb217-26"><a href="community-similarity.html#cb217-26" aria-hidden="true" tabindex="-1"></a>                        <span class="at">permutations =</span> <span class="dv">99</span>)</span>
+<span id="cb217-27"><a href="community-similarity.html#cb217-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb217-28"><a href="community-similarity.html#cb217-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Get p-values</span></span>
+<span id="cb217-29"><a href="community-similarity.html#cb217-29" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">c</span>( permanova[<span class="st">&quot;Model&quot;</span>, <span class="st">&quot;Pr(&gt;F)&quot;</span>], permanova2[<span class="st">&quot;Model&quot;</span>, <span class="st">&quot;Pr(&gt;F)&quot;</span>] )</span>
+<span id="cb217-30"><a href="community-similarity.html#cb217-30" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(p_values)</span>
+<span id="cb217-31"><a href="community-similarity.html#cb217-31" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(p_values) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;adonis2&quot;</span>, <span class="st">&quot;dbRDA+anova.cca&quot;</span>)</span>
+<span id="cb217-32"><a href="community-similarity.html#cb217-32" aria-hidden="true" tabindex="-1"></a>p_values</span></code></pre></div>
+<pre><code>##                 p_values
+## adonis2             0.02
+## dbRDA+anova.cca     0.02</code></pre>
 <p>In this case, the community composition is not significantly different
 between the groups.</p>
 <p>Let us visualize the model coefficients for species that exhibit the
 largest differences between the groups. This gives some insights into
 how the groups tend to differ from each other in terms of community
 composition.</p>
-<div class="sourceCode" id="cb219"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb219-1"><a href="community-similarity.html#cb219-1" aria-hidden="true" tabindex="-1"></a>coef <span class="ot">&lt;-</span> <span class="fu">coefficients</span>(permanova)[<span class="st">&quot;Group1&quot;</span>,]</span>
-<span id="cb219-2"><a href="community-similarity.html#cb219-2" aria-hidden="true" tabindex="-1"></a>top.coef <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">head</span>(coef[<span class="fu">rev</span>(<span class="fu">order</span>(<span class="fu">abs</span>(coef)))],<span class="dv">20</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb219"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb219-1"><a href="community-similarity.html#cb219-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add taxa info</span></span>
+<span id="cb219-2"><a href="community-similarity.html#cb219-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sppscores</span>(dbrda) <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">assay</span>(tse,<span class="st">&quot;relabundance&quot;</span>))</span>
+<span id="cb219-3"><a href="community-similarity.html#cb219-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Get coefficients</span></span>
+<span id="cb219-4"><a href="community-similarity.html#cb219-4" aria-hidden="true" tabindex="-1"></a>coef <span class="ot">&lt;-</span> dbrda<span class="sc">$</span>CCA<span class="sc">$</span>v</span>
+<span id="cb219-5"><a href="community-similarity.html#cb219-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the taxa with biggest weights</span></span>
+<span id="cb219-6"><a href="community-similarity.html#cb219-6" aria-hidden="true" tabindex="-1"></a>top.coef <span class="ot">&lt;-</span> <span class="fu">head</span>( coef[<span class="fu">rev</span>(<span class="fu">order</span>(<span class="fu">abs</span>(coef))), , <span class="at">drop =</span> <span class="cn">FALSE</span>], <span class="dv">20</span>)</span>
+<span id="cb219-7"><a href="community-similarity.html#cb219-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort weights in increasing order</span></span>
+<span id="cb219-8"><a href="community-similarity.html#cb219-8" aria-hidden="true" tabindex="-1"></a>top.coef <span class="ot">&lt;-</span> top.coef[ <span class="fu">order</span>(top.coef), ]</span>
+<span id="cb219-9"><a href="community-similarity.html#cb219-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Get top names</span></span>
+<span id="cb219-10"><a href="community-similarity.html#cb219-10" aria-hidden="true" tabindex="-1"></a>top_names <span class="ot">&lt;-</span> <span class="fu">names</span>(top.coef)[ <span class="fu">order</span>(<span class="fu">abs</span>(top.coef), <span class="at">decreasing =</span> <span class="cn">TRUE</span>) ]</span></code></pre></div>
 <div class="sourceCode" id="cb220"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb220-1"><a href="community-similarity.html#cb220-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">data.frame</span>(<span class="at">x =</span> top.coef,</span>
 <span id="cb220-2"><a href="community-similarity.html#cb220-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">y =</span> <span class="fu">factor</span>(<span class="fu">names</span>(top.coef),</span>
 <span id="cb220-3"><a href="community-similarity.html#cb220-3" aria-hidden="true" tabindex="-1"></a>                                      <span class="fu">unique</span>(<span class="fu">names</span>(top.coef)))),</span>
@@ -683,8 +720,8 @@ composition.</p>
 <span id="cb220-7"><a href="community-similarity.html#cb220-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_bw</span>()</span></code></pre></div>
 <p><img src="20_beta_diversity_files/figure-html/plot-top-coef-anova-1.png" width="3000" /></p>
 <p>In the above example, the largest differences between the two groups
-can be attributed to <em>Bacteroides intestinalis</em> (elevated in the first
-group) and <em>Faecalibacterium prausnitzii</em> (elevated in the second
+can be attributed to <em>Genus:Bacteroides</em> (elevated in the first
+group) and <em>Family:Ruminococcaceae</em> (elevated in the second
 group), and many other co-varying species.</p>
 </div>
 <div id="checking-the-homogeneity-condition" class="section level3 hasAnchor" number="8.4.2">
@@ -693,14 +730,13 @@ group), and many other co-varying species.</p>
 homogeneous group dispersions (variances). This can be tested with the
 PERMDISP2 method <span class="citation">(<a href="#ref-Anderson2006" role="doc-biblioref">Anderson 2006</a>)</span> by using the same assay and distance
 method than in PERMANOVA.</p>
-<div class="sourceCode" id="cb221"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb221-1"><a href="community-similarity.html#cb221-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(vegan<span class="sc">::</span><span class="fu">betadisper</span>(vegan<span class="sc">::</span><span class="fu">vegdist</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;counts&quot;</span>))),</span>
-<span id="cb221-2"><a href="community-similarity.html#cb221-2" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">colData</span>(tse)<span class="sc">$</span>Group))</span></code></pre></div>
+<div class="sourceCode" id="cb221"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb221-1"><a href="community-similarity.html#cb221-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>( <span class="fu">betadisper</span>(<span class="fu">vegdist</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;counts&quot;</span>))), <span class="fu">colData</span>(tse)<span class="sc">$</span>Group) )</span></code></pre></div>
 <pre><code>## Analysis of Variance Table
 ## 
 ## Response: Distances
 ##           Df Sum Sq Mean Sq F value  Pr(&gt;F)    
-## Groups     1 0.1607  0.1607     125 5.5e-11 ***
-## Residuals 24 0.0309  0.0013                    
+## Groups     1 0.2385  0.2385     103 3.6e-10 ***
+## Residuals 24 0.0554  0.0023                    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>If the groups have similar dispersion, PERMANOVA can be seen as an
@@ -771,7 +807,7 @@ loaded via a namespace (and not attached):
  [29] rsvd_1.0.5                  gtable_0.3.0               
  [31] glue_1.6.2                  GenomeInfoDbData_1.2.7     
  [33] reshape2_1.4.4              dplyr_1.0.8                
- [35] Rcpp_1.0.8                  jquerylib_0.1.4            
+ [35] Rcpp_1.0.8.3                jquerylib_0.1.4            
  [37] vctrs_0.3.8                 ape_5.6-2                  
  [39] nlme_3.1-155                DECIPHER_2.22.0            
  [41] DelayedMatrixStats_1.16.0   xfun_0.30                  
@@ -792,7 +828,7 @@ loaded via a namespace (and not attached):
  [71] CodeDepends_0.6.5           cowplot_1.1.1              
  [73] bit_4.0.4                   tidyselect_1.1.2           
  [75] plyr_1.8.6                  magrittr_2.0.2             
- [77] bookdown_0.24               R6_2.5.1                   
+ [77] bookdown_0.25               R6_2.5.1                   
  [79] generics_0.1.2              DelayedArray_0.20.0        
  [81] DBI_1.1.2                   withr_2.5.0                
  [83] mgcv_1.8-39                 pillar_1.7.0               

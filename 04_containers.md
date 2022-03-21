@@ -1048,7 +1048,7 @@ loaded via a namespace (and not attached):
  [35] gtable_0.3.0                  zlibbioc_1.40.0              
  [37] DelayedArray_0.20.0           BiocSingular_1.10.0          
  [39] Rhdf5lib_1.16.0               scales_1.1.1                 
- [41] DBI_1.1.2                     Rcpp_1.0.8                   
+ [41] DBI_1.1.2                     Rcpp_1.0.8.3                 
  [43] xtable_1.8-4                  viridisLite_0.4.0            
  [45] decontam_1.14.0               tidytree_0.3.9               
  [47] bit_4.0.4                     rsvd_1.0.5                   
@@ -1083,7 +1083,7 @@ loaded via a namespace (and not attached):
 [105] data.table_1.14.2             bitops_1.0-7                 
 [107] irlba_2.3.5                   httpuv_1.6.5                 
 [109] R6_2.5.1                      promises_1.2.0.1             
-[111] bookdown_0.24                 gridExtra_2.3                
+[111] bookdown_0.25                 gridExtra_2.3                
 [113] vipor_0.4.5                   codetools_0.2-18             
 [115] MASS_7.3-55                   assertthat_0.2.1             
 [117] rhdf5_2.38.1                  GenomeInfoDbData_1.2.7       

@@ -779,7 +779,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.9981
+## Proportions of Observations within 95% Credible Interval: 0.998
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
@@ -866,7 +866,7 @@ loaded via a namespace (and not attached):
  [31] DBI_1.1.2                     htmlwidgets_1.5.4            
  [33] tensorA_0.36.2                hash_2.2.6.1                 
  [35] ellipsis_0.3.2                backports_1.4.1              
- [37] bookdown_0.24                 permute_0.9-7                
+ [37] bookdown_0.25                 permute_0.9-7                
  [39] sparseMatrixStats_1.6.0       vctrs_0.3.8                  
  [41] abind_1.4-5                   tidybayes_3.0.2              
  [43] cachem_1.0.6                  withr_2.5.0                  
@@ -906,7 +906,7 @@ loaded via a namespace (and not attached):
 [111] posterior_1.2.1               farver_2.1.0                 
 [113] Rtsne_0.15                    RcppZiggurat_0.1.6           
 [115] digest_0.6.29                 BiocManager_1.30.16          
-[117] shiny_1.7.1                   Rcpp_1.0.8                   
+[117] shiny_1.7.1                   Rcpp_1.0.8.3                 
 [119] broom_0.7.12                  scuttle_1.4.0                
 [121] later_1.3.0                   BiocVersion_3.14.0           
 [123] AnnotationDbi_1.56.2          httr_1.4.2                   

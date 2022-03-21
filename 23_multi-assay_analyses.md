@@ -495,7 +495,7 @@ loaded via a namespace (and not attached):
  [33] DelayedArray_0.20.0           BiocSingular_1.10.0          
  [35] Rhdf5lib_1.16.0               HDF5Array_1.22.1             
  [37] scales_1.1.1                  pheatmap_1.0.12              
- [39] DBI_1.1.2                     Rcpp_1.0.8                   
+ [39] DBI_1.1.2                     Rcpp_1.0.8.3                 
  [41] viridisLite_0.4.0             xtable_1.8-4                 
  [43] decontam_1.14.0               tidytree_0.3.9               
  [45] bit_4.0.4                     rsvd_1.0.5                   
@@ -531,7 +531,7 @@ loaded via a namespace (and not attached):
 [105] BiocManager_1.30.16           BiocNeighbors_1.12.0         
 [107] cowplot_1.1.1                 bitops_1.0-7                 
 [109] irlba_2.3.5                   httpuv_1.6.5                 
-[111] R6_2.5.1                      bookdown_0.24                
+[111] R6_2.5.1                      bookdown_0.25                
 [113] promises_1.2.0.1              gridExtra_2.3                
 [115] vipor_0.4.5                   codetools_0.2-18             
 [117] MASS_7.3-55                   assertthat_0.2.1             

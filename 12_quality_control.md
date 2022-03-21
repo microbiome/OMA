@@ -561,7 +561,7 @@ loaded via a namespace (and not attached):
  [31] gtable_0.3.0                  zlibbioc_1.40.0              
  [33] DelayedArray_0.20.0           BiocSingular_1.10.0          
  [35] scales_1.1.1                  DBI_1.1.2                    
- [37] Rcpp_1.0.8                    viridisLite_0.4.0            
+ [37] Rcpp_1.0.8.3                  viridisLite_0.4.0            
  [39] xtable_1.8-4                  decontam_1.14.0              
  [41] gridGraphics_0.5-1            tidytree_0.3.9               
  [43] bit_4.0.4                     rsvd_1.0.5                   
@@ -597,7 +597,7 @@ loaded via a namespace (and not attached):
 [103] BiocNeighbors_1.12.0          cowplot_1.1.1                
 [105] bitops_1.0-7                  irlba_2.3.5                  
 [107] httpuv_1.6.5                  R6_2.5.1                     
-[109] bookdown_0.24                 promises_1.2.0.1             
+[109] bookdown_0.25                 promises_1.2.0.1             
 [111] gridExtra_2.3                 vipor_0.4.5                  
 [113] codetools_0.2-18              MASS_7.3-55                  
 [115] assertthat_0.2.1              withr_2.5.0                  

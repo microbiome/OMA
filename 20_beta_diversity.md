@@ -424,21 +424,54 @@ of the community are equivalent between the compared groups. A small
 p-value indicates that the compared groups have, on average, a
 different community composition.
 
-This method is implemented in the `vegan` package (function `adonis`).
+This method is implemented in the `vegan` package in the function
+[`adonis2`](https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis).
+
+We can get equal result by first performing distance-based redundancy analysis (dbRDA),
+and then applying permutational test for result of redundancy analysis. Advantage is 
+that by doing so we can get coefficients: how much each taxa affect to the result.
+
 
 
 ```r
-library(vegan)
-permanova <- vegan::adonis(t(assay(tse,"relabundance")) ~ Group,
-                           data = colData(tse),
-                           permutations = 9999)
+if( !require(vegan) ){
+    BiocManager::install("vegan")
+    library("vegan")
+}
+# Agglomerate data to Species level
+tse <- agglomerateByRank(tse, rank = "Species")
 
-# P-value
-print(as.data.frame(permanova$aov.tab)["Group", "Pr(>F)"])
+# Set seed for reproducibility
+set.seed(1576)
+# We choose 99 random permutations. Consider applying more (999 or 9999) in your
+# analysis. 
+permanova <- adonis2(t(assay(tse,"relabundance")) ~ Group,
+                     data = colData(tse),
+                     method = "euclidean",
+                     by = NULL,
+                     permutations = 99)
+
+# Set seed for reproducibility
+set.seed(1576)
+# Perform dbRDA
+dbrda <- dbrda(t(assay(tse,"relabundance")) ~ Group, 
+               data = colData(tse))
+# Perform permutational analysis
+permanova2 <- anova.cca(dbrda,
+                        method = "euclidean",
+                        permutations = 99)
+
+# Get p-values
+p_values <- c( permanova["Model", "Pr(>F)"], permanova2["Model", "Pr(>F)"] )
+p_values <-as.data.frame(p_values)
+rownames(p_values) <- c("adonis2", "dbRDA+anova.cca")
+p_values
 ```
 
 ```
-## [1] 4e-04
+##                 p_values
+## adonis2             0.02
+## dbRDA+anova.cca     0.02
 ```
 
 In this case, the community composition is not significantly different
@@ -450,10 +483,17 @@ how the groups tend to differ from each other in terms of community
 composition.
 
 
-
 ```r
-coef <- coefficients(permanova)["Group1",]
-top.coef <- sort(head(coef[rev(order(abs(coef)))],20))
+# Add taxa info
+sppscores(dbrda) <- t(assay(tse,"relabundance"))
+# Get coefficients
+coef <- dbrda$CCA$v
+# Get the taxa with biggest weights
+top.coef <- head( coef[rev(order(abs(coef))), , drop = FALSE], 20)
+# Sort weights in increasing order
+top.coef <- top.coef[ order(top.coef), ]
+# Get top names
+top_names <- names(top.coef)[ order(abs(top.coef), decreasing = TRUE) ]
 ```
 
 
@@ -472,8 +512,8 @@ ggplot(data.frame(x = top.coef,
 ![](20_beta_diversity_files/figure-latex/plot-top-coef-anova-1.png)<!-- --> 
 
 In the above example, the largest differences between the two groups
-can be attributed to _Bacteroides intestinalis_ (elevated in the first
-group) and _Faecalibacterium prausnitzii_ (elevated in the second
+can be attributed to _Genus:Bacteroides_ (elevated in the first
+group) and _Family:Ruminococcaceae_ (elevated in the second
 group), and many other co-varying species.
 
 
@@ -486,10 +526,8 @@ PERMDISP2 method [@Anderson2006] by using the same assay and distance
 method than in PERMANOVA.
 
 
-
 ```r
-anova(vegan::betadisper(vegan::vegdist(t(assay(tse, "counts"))),
-                        colData(tse)$Group))
+anova( betadisper(vegdist(t(assay(tse, "counts"))), colData(tse)$Group) )
 ```
 
 ```
@@ -497,8 +535,8 @@ anova(vegan::betadisper(vegan::vegdist(t(assay(tse, "counts"))),
 ## 
 ## Response: Distances
 ##           Df Sum Sq Mean Sq F value  Pr(>F)    
-## Groups     1 0.1607  0.1607     125 5.5e-11 ***
-## Residuals 24 0.0309  0.0013                    
+## Groups     1 0.2385  0.2385     103 3.6e-10 ***
+## Residuals 24 0.0554  0.0023                    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
@@ -570,7 +608,7 @@ loaded via a namespace (and not attached):
 [29] rsvd_1.0.5                  gtable_0.3.0               
 [31] glue_1.6.2                  GenomeInfoDbData_1.2.7     
 [33] reshape2_1.4.4              dplyr_1.0.8                
-[35] Rcpp_1.0.8                  vctrs_0.3.8                
+[35] Rcpp_1.0.8.3                vctrs_0.3.8                
 [37] ape_5.6-2                   nlme_3.1-155               
 [39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
 [41] xfun_0.30                   stringr_1.4.0              
@@ -590,7 +628,7 @@ loaded via a namespace (and not attached):
 [69] CodeDepends_0.6.5           cowplot_1.1.1              
 [71] bit_4.0.4                   tidyselect_1.1.2           
 [73] plyr_1.8.6                  magrittr_2.0.2             
-[75] bookdown_0.24               R6_2.5.1                   
+[75] bookdown_0.25               R6_2.5.1                   
 [77] generics_0.1.2              DelayedArray_0.20.0        
 [79] DBI_1.1.2                   withr_2.5.0                
 [81] mgcv_1.8-39                 pillar_1.7.0               

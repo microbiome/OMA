@@ -381,7 +381,7 @@ loaded via a namespace (and not attached):
  [27] tools_4.1.2                 rsvd_1.0.5                 
  [29] gtable_0.3.0                glue_1.6.2                 
  [31] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
- [33] dplyr_1.0.8                 Rcpp_1.0.8                 
+ [33] dplyr_1.0.8                 Rcpp_1.0.8.3               
  [35] vctrs_0.3.8                 ape_5.6-2                  
  [37] nlme_3.1-155                DECIPHER_2.22.0            
  [39] DelayedMatrixStats_1.16.0   xfun_0.30                  
@@ -402,7 +402,7 @@ loaded via a namespace (and not attached):
  [69] treeio_1.18.1               CodeDepends_0.6.5          
  [71] cowplot_1.1.1               bit_4.0.4                  
  [73] tidyselect_1.1.2            plyr_1.8.6                 
- [75] magrittr_2.0.2              bookdown_0.24              
+ [75] magrittr_2.0.2              bookdown_0.25              
  [77] R6_2.5.1                    generics_0.1.2             
  [79] DelayedArray_0.20.0         DBI_1.1.2                  
  [81] withr_2.5.0                 mgcv_1.8-39                
