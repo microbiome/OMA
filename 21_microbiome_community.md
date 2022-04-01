@@ -625,7 +625,7 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7673 BIC: 7927 AIC: 7842 
+## Laplace: 7685 BIC: 7933 AIC: 7848 
 ## 
 ## [[3]]
 ## class: DMN 
@@ -637,25 +637,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7793 BIC: 8357 AIC: 8187 
+## Laplace: 7741 BIC: 8282 AIC: 8112 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7850 BIC: 8554 AIC: 8341 
+## Laplace: 7854 BIC: 8553 AIC: 8340 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7923 BIC: 8797 AIC: 8541 
+## Laplace: 7952 BIC: 8850 AIC: 8594 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8087 BIC: 9113 AIC: 8814
+## Laplace: NaN BIC: NaN AIC: NaN
 ```
 
 
@@ -680,7 +680,7 @@ getBestDMNFit(tse_dmn, type = "laplace")
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7673 BIC: 7927 AIC: 7842
+## Laplace: 7685 BIC: 7933 AIC: 7848
 ```
 
 ### PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors
@@ -701,7 +701,7 @@ dmn_group
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
 ## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater         2       2   67  889.6  -97.17   717.0  936.4 1025
 ## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
 ## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
 ## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
@@ -721,8 +721,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.29
+## 1 0.5385 10.49
+## 2 0.4615 22.64
 ```
 
 
@@ -736,12 +736,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.047e-17
-## CC1     1.000e+00 3.896e-22
-## SV1     1.000e+00 1.956e-12
-## M31Fcsw 7.878e-26 1.000e+00
-## M11Fcsw 1.133e-16 1.000e+00
-## M31Plmr 1.118e-13 1.000e+00
+## CL3     1.798e-13 1.000e+00
+## CC1     2.113e-16 1.000e+00
+## SV1     5.059e-07 1.000e+00
+## M31Fcsw 1.000e+00 3.540e-29
+## M11Fcsw 1.000e+00 9.800e-22
+## M31Plmr 1.000e+00 1.281e-15
 ```
 
 Contribution of each taxa to each component
@@ -752,13 +752,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30380 0.1354661
-## Phylum:Euryarchaeota  0.23114 0.1468607
-## Phylum:Actinobacteria 1.21371 1.0601356
-## Phylum:Spirochaetes   0.21392 0.1318414
-## Phylum:MVP-15         0.02983 0.0007668
-## Phylum:Proteobacteria 6.84374 1.8153680
+##                            [,1]   [,2]
+## Phylum:Crenarchaeota  0.1328110 0.3493
+## Phylum:Euryarchaeota  0.1469584 0.2320
+## Phylum:Actinobacteria 0.9319930 1.1150
+## Phylum:Spirochaetes   0.1248173 0.2431
+## Phylum:MVP-15         0.0006288 0.0362
+## Phylum:Proteobacteria 1.4839734 7.9915
 ```
 Get the assignment probabilities
 
@@ -951,25 +951,25 @@ other attached packages:
 [17] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [19] SummarizedExperiment_1.24.0    Biobase_2.54.0                
 [21] GenomicRanges_1.46.1           GenomeInfoDb_1.30.1           
-[23] IRanges_2.28.0                 S4Vectors_0.32.3              
+[23] IRanges_2.28.0                 S4Vectors_0.32.4              
 [25] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
-[27] matrixStats_0.61.0-9001        ecodist_2.0.7                 
+[27] matrixStats_0.61.0-9003        ecodist_2.0.7                 
 [29] BiocStyle_2.22.0               rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
-  [1] circlize_0.4.14             plyr_1.8.6                 
+  [1] circlize_0.4.14             plyr_1.8.7                 
   [3] igraph_1.2.11               lazyeval_0.2.2             
   [5] splines_4.1.3               BiocParallel_1.28.3        
   [7] digest_0.6.29               foreach_1.5.2              
   [9] yulab.utils_0.0.4           htmltools_0.5.2            
- [11] viridis_0.6.2               fansi_1.0.2                
- [13] magrittr_2.0.2              memoise_2.0.1              
+ [11] viridis_0.6.2               fansi_1.0.3                
+ [13] magrittr_2.0.3              memoise_2.0.1              
  [15] ScaledMatrix_1.2.0          doParallel_1.0.17          
- [17] cluster_2.1.2               DECIPHER_2.22.0            
+ [17] cluster_2.1.3               DECIPHER_2.22.0            
  [19] ComplexHeatmap_2.10.0       graphlayouts_0.8.0         
  [21] colorspace_2.0-3            blob_1.2.2                 
  [23] ggrepel_0.9.1               xfun_0.30                  
- [25] dplyr_1.0.8                 crayon_1.5.0               
+ [25] dplyr_1.0.8                 crayon_1.5.1               
  [27] RCurl_1.98-1.6              jsonlite_1.8.0             
  [29] graph_1.72.0                iterators_1.0.14           
  [31] glue_1.6.2                  polyclip_1.10-0            
@@ -992,35 +992,35 @@ loaded via a namespace (and not attached):
  [65] rlang_1.0.2                 munsell_0.5.0              
  [67] tools_4.1.3                 cachem_1.0.6               
  [69] cli_3.2.0                   DirichletMultinomial_1.36.0
- [71] generics_0.1.2              RSQLite_2.2.10             
+ [71] generics_0.1.2              RSQLite_2.2.11             
  [73] evaluate_0.15               stringr_1.4.0              
  [75] fastmap_1.1.0               yaml_2.3.5                 
- [77] knitr_1.37                  bit64_4.0.5                
+ [77] knitr_1.38                  bit64_4.0.5                
  [79] tidygraph_1.2.0             purrr_0.3.4                
- [81] nlme_3.1-155                sparseMatrixStats_1.6.0    
+ [81] nlme_3.1-157                sparseMatrixStats_1.6.0    
  [83] aplot_0.1.2                 compiler_4.1.3             
  [85] curl_4.3.2                  png_0.1-7                  
  [87] beeswarm_0.4.0              filelock_1.0.2             
  [89] treeio_1.18.1               tibble_3.1.6               
  [91] tweenr_1.0.2                stringi_1.7.6              
  [93] highr_0.9                   lattice_0.20-45            
- [95] Matrix_1.4-0                vegan_2.5-7                
- [97] permute_0.9-7               vctrs_0.3.8                
+ [95] Matrix_1.4-1                vegan_2.5-7                
+ [97] permute_0.9-7               vctrs_0.4.0                
  [99] pillar_1.7.0                lifecycle_1.0.1            
 [101] BiocManager_1.30.16         GlobalOptions_0.1.2        
 [103] BiocNeighbors_1.12.0        cowplot_1.1.1              
 [105] bitops_1.0-7                irlba_2.3.5                
-[107] seriation_1.3.3             R6_2.5.1                   
+[107] seriation_1.3.5             R6_2.5.1                   
 [109] TSP_1.2-0                   bookdown_0.25              
 [111] gridExtra_2.3               vipor_0.4.5                
-[113] codetools_0.2-18            MASS_7.3-55                
+[113] codetools_0.2-18            MASS_7.3-56                
 [115] assertthat_0.2.1            rjson_0.2.21               
 [117] withr_2.5.0                 GenomeInfoDbData_1.2.7     
-[119] mgcv_1.8-39                 parallel_4.1.3             
+[119] mgcv_1.8-40                 parallel_4.1.3             
 [121] grid_4.1.3                  ggfun_0.0.5                
 [123] beachmat_2.10.0             tidyr_1.2.0                
 [125] rmarkdown_2.13              DelayedMatrixStats_1.16.0  
-[127] Rtsne_0.15                  ggnewscale_0.4.6           
+[127] Rtsne_0.15                  ggnewscale_0.4.7           
 [129] ggforce_0.3.3               ggbeeswarm_0.6.0           
 ```
 </div>

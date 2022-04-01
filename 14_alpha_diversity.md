@@ -360,39 +360,39 @@ other attached packages:
 [11] SingleCellExperiment_1.16.0    SummarizedExperiment_1.24.0   
 [13] Biobase_2.54.0                 GenomicRanges_1.46.1          
 [15] GenomeInfoDb_1.30.1            IRanges_2.28.0                
-[17] S4Vectors_0.32.3               BiocGenerics_0.40.0           
-[19] MatrixGenerics_1.6.0           matrixStats_0.61.0-9001       
+[17] S4Vectors_0.32.4               BiocGenerics_0.40.0           
+[19] MatrixGenerics_1.6.0           matrixStats_0.61.0-9003       
 [21] BiocStyle_2.22.0               rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
   [1] ggbeeswarm_0.6.0            colorspace_2.0-3           
   [3] ellipsis_0.3.2              BiocNeighbors_1.12.0       
   [5] farver_2.1.0                ggrepel_0.9.1              
-  [7] bit64_4.0.5                 fansi_1.0.2                
+  [7] bit64_4.0.5                 fansi_1.0.3                
   [9] decontam_1.14.0             splines_4.1.3              
  [11] codetools_0.2-18            sparseMatrixStats_1.6.0    
- [13] cachem_1.0.6                knitr_1.37                 
- [15] jsonlite_1.8.0              cluster_2.1.2              
+ [13] cachem_1.0.6                knitr_1.38                 
+ [15] jsonlite_1.8.0              cluster_2.1.3              
  [17] graph_1.72.0                BiocManager_1.30.16        
  [19] compiler_4.1.3              assertthat_0.2.1           
- [21] Matrix_1.4-0                fastmap_1.1.0              
+ [21] Matrix_1.4-1                fastmap_1.1.0              
  [23] lazyeval_0.2.2              cli_3.2.0                  
  [25] BiocSingular_1.10.0         htmltools_0.5.2            
  [27] tools_4.1.3                 rsvd_1.0.5                 
  [29] gtable_0.3.0                glue_1.6.2                 
  [31] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
  [33] dplyr_1.0.8                 Rcpp_1.0.8.3               
- [35] vctrs_0.3.8                 ape_5.6-2                  
- [37] nlme_3.1-155                DECIPHER_2.22.0            
+ [35] vctrs_0.4.0                 ape_5.6-2                  
+ [37] nlme_3.1-157                DECIPHER_2.22.0            
  [39] DelayedMatrixStats_1.16.0   xfun_0.30                  
  [41] stringr_1.4.0               beachmat_2.10.0            
  [43] lifecycle_1.0.1             irlba_2.3.5                
  [45] XML_3.99-0.9                zlibbioc_1.40.0            
- [47] MASS_7.3-55                 scales_1.1.1               
+ [47] MASS_7.3-56                 scales_1.1.1               
  [49] parallel_4.1.3              yaml_2.3.5                 
  [51] memoise_2.0.1               gridExtra_2.3              
  [53] yulab.utils_0.0.4           stringi_1.7.6              
- [55] RSQLite_2.2.10              highr_0.9                  
+ [55] RSQLite_2.2.11              highr_0.9                  
  [57] ScaledMatrix_1.2.0          tidytree_0.3.9             
  [59] permute_0.9-7               filelock_1.0.2             
  [61] BiocParallel_1.28.3         rlang_1.0.2                
@@ -401,14 +401,14 @@ loaded via a namespace (and not attached):
  [67] purrr_0.3.4                 labeling_0.4.2             
  [69] treeio_1.18.1               CodeDepends_0.6.5          
  [71] cowplot_1.1.1               bit_4.0.4                  
- [73] tidyselect_1.1.2            plyr_1.8.6                 
- [75] magrittr_2.0.2              bookdown_0.25              
+ [73] tidyselect_1.1.2            plyr_1.8.7                 
+ [75] magrittr_2.0.3              bookdown_0.25              
  [77] R6_2.5.1                    generics_0.1.2             
  [79] DelayedArray_0.20.0         DBI_1.1.2                  
- [81] withr_2.5.0                 mgcv_1.8-39                
+ [81] withr_2.5.0                 mgcv_1.8-40                
  [83] pillar_1.7.0                RCurl_1.98-1.6             
  [85] tibble_3.1.6                dir.expiry_1.2.0           
- [87] crayon_1.5.0                utf8_1.2.2                 
+ [87] crayon_1.5.1                utf8_1.2.2                 
  [89] rmarkdown_2.13              viridis_0.6.2              
  [91] grid_4.1.3                  blob_1.2.2                 
  [93] vegan_2.5-7                 digest_0.6.29              

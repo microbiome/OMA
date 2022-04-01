@@ -831,20 +831,20 @@ other attached packages:
  [5] dplyr_1.0.8                    purrr_0.3.4                   
  [7] readr_2.1.2                    tidyr_1.2.0                   
  [9] tibble_3.1.6                   ggplot2_3.3.5                 
-[11] tidyverse_1.3.1                knitr_1.37                    
+[11] tidyverse_1.3.1                knitr_1.38                    
 [13] Maaslin2_1.8.0                 ALDEx2_1.26.0                 
-[15] zCompositions_1.4.0            truncnorm_1.0-8               
+[15] zCompositions_1.4.0-1          truncnorm_1.0-8               
 [17] NADA_1.6-1.1                   survival_3.3-1                
-[19] MASS_7.3-55                    ANCOMBC_1.4.0                 
+[19] MASS_7.3-56                    ANCOMBC_1.4.0                 
 [21] tidySummarizedExperiment_1.4.1 patchwork_1.1.1               
 [23] mia_1.3.19                     MultiAssayExperiment_1.20.0   
 [25] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
 [27] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [29] SummarizedExperiment_1.24.0    Biobase_2.54.0                
 [31] GenomicRanges_1.46.1           GenomeInfoDb_1.30.1           
-[33] IRanges_2.28.0                 S4Vectors_0.32.3              
+[33] IRanges_2.28.0                 S4Vectors_0.32.4              
 [35] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
-[37] matrixStats_0.61.0-9001        BiocStyle_2.22.0              
+[37] matrixStats_0.61.0-9003        BiocStyle_2.22.0              
 [39] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
@@ -853,37 +853,37 @@ loaded via a namespace (and not attached):
   [5] DelayedArray_0.20.0           data.table_1.14.2            
   [7] KEGGREST_1.34.0               RCurl_1.98-1.6               
   [9] generics_0.1.2                ScaledMatrix_1.2.0           
- [11] microbiome_1.16.0             RSQLite_2.2.10               
- [13] bit_4.0.4                     tzdb_0.2.0                   
+ [11] microbiome_1.16.0             RSQLite_2.2.11               
+ [13] bit_4.0.4                     tzdb_0.3.0                   
  [15] httpuv_1.6.5                  xml2_1.3.3                   
  [17] lubridate_1.8.0               assertthat_0.2.1             
  [19] DirichletMultinomial_1.36.0   viridis_0.6.2                
  [21] xfun_0.30                     hms_1.1.1                    
  [23] ggdist_3.1.1                  promises_1.2.0.1             
  [25] evaluate_0.15                 DEoptimR_1.0-10              
- [27] fansi_1.0.2                   dbplyr_2.1.1                 
- [29] readxl_1.3.1                  igraph_1.2.11                
+ [27] fansi_1.0.3                   dbplyr_2.1.1                 
+ [29] readxl_1.4.0                  igraph_1.2.11                
  [31] DBI_1.1.2                     htmlwidgets_1.5.4            
- [33] tensorA_0.36.2                hash_2.2.6.1                 
+ [33] tensorA_0.36.2                hash_2.2.6.2                 
  [35] ellipsis_0.3.2                backports_1.4.1              
  [37] bookdown_0.25                 permute_0.9-7                
- [39] sparseMatrixStats_1.6.0       vctrs_0.3.8                  
+ [39] sparseMatrixStats_1.6.0       vctrs_0.4.0                  
  [41] abind_1.4-5                   tidybayes_3.0.2              
  [43] cachem_1.0.6                  withr_2.5.0                  
  [45] robustbase_0.93-9             checkmate_2.0.0              
  [47] vegan_2.5-7                   treeio_1.18.1                
- [49] getopt_1.20.3                 cluster_2.1.2                
+ [49] getopt_1.20.3                 cluster_2.1.3                
  [51] ExperimentHub_2.2.1           ape_5.6-2                    
  [53] dir.expiry_1.2.0              lazyeval_0.2.2               
- [55] crayon_1.5.0                  pkgconfig_2.0.3              
- [57] labeling_0.4.2                nlme_3.1-155                 
+ [55] crayon_1.5.1                  pkgconfig_2.0.3              
+ [57] labeling_0.4.2                nlme_3.1-157                 
  [59] vipor_0.4.5                   rlang_1.0.2                  
  [61] lifecycle_1.0.1               filelock_1.0.2               
  [63] BiocFileCache_2.2.1           phyloseq_1.38.0              
  [65] modelr_0.1.8                  rsvd_1.0.5                   
  [67] AnnotationHub_3.2.2           cellranger_1.1.0             
  [69] distributional_0.3.0          graph_1.72.0                 
- [71] Matrix_1.4-0                  lpsymphony_1.22.0            
+ [71] Matrix_1.4-1                  lpsymphony_1.22.0            
  [73] Rhdf5lib_1.16.0               reprex_2.0.1                 
  [75] beeswarm_0.4.0                png_0.1-7                    
  [77] viridisLite_0.4.0             bitops_1.0-7                 
@@ -891,11 +891,11 @@ loaded via a namespace (and not attached):
  [81] DelayedMatrixStats_1.16.0     decontam_1.14.0              
  [83] DECIPHER_2.22.0               beachmat_2.10.0              
  [85] scales_1.1.1                  memoise_2.0.1                
- [87] magrittr_2.0.2                plyr_1.8.6                   
+ [87] magrittr_2.0.3                plyr_1.8.7                   
  [89] zlibbioc_1.40.0               compiler_4.1.3               
  [91] RColorBrewer_1.1-2            cli_3.2.0                    
  [93] ade4_1.7-18                   pbapply_1.5-0                
- [95] mgcv_1.8-39                   tidyselect_1.1.2             
+ [95] mgcv_1.8-40                   tidyselect_1.1.2             
  [97] stringi_1.7.6                 highr_0.9                    
  [99] yaml_2.3.5                    BiocSingular_1.10.0          
 [101] svUnit_1.0.6                  ggrepel_0.9.1                
@@ -910,7 +910,7 @@ loaded via a namespace (and not attached):
 [119] broom_0.7.12                  scuttle_1.4.0                
 [121] later_1.3.0                   BiocVersion_3.14.0           
 [123] AnnotationDbi_1.56.2          httr_1.4.2                   
-[125] Rdpack_2.2                    colorspace_2.0-3             
+[125] Rdpack_2.3                    colorspace_2.0-3             
 [127] rvest_1.0.2                   XML_3.99-0.9                 
 [129] fs_1.5.2                      splines_4.1.3                
 [131] yulab.utils_0.0.4             tidytree_0.3.9               

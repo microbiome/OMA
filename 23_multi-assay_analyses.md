@@ -473,25 +473,25 @@ other attached packages:
 [11] XVector_0.34.0                 SingleCellExperiment_1.16.0   
 [13] SummarizedExperiment_1.24.0    Biobase_2.54.0                
 [15] GenomicRanges_1.46.1           GenomeInfoDb_1.30.1           
-[17] IRanges_2.28.0                 S4Vectors_0.32.3              
+[17] IRanges_2.28.0                 S4Vectors_0.32.4              
 [19] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
-[21] matrixStats_0.61.0-9001        ecodist_2.0.7                 
+[21] matrixStats_0.61.0-9003        ecodist_2.0.7                 
 [23] BiocStyle_2.22.0               rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.2.2           corrplot_0.92                
-  [3] BiocFileCache_2.2.1           plyr_1.8.6                   
+  [3] BiocFileCache_2.2.1           plyr_1.8.7                   
   [5] lazyeval_0.2.2                splines_4.1.3                
   [7] BiocParallel_1.28.3           scater_1.22.0                
   [9] digest_0.6.29                 yulab.utils_0.0.4            
  [11] htmltools_0.5.2               viridis_0.6.2                
- [13] fansi_1.0.2                   magrittr_2.0.2               
+ [13] fansi_1.0.3                   magrittr_2.0.3               
  [15] memoise_2.0.1                 ScaledMatrix_1.2.0           
- [17] cluster_2.1.2                 DECIPHER_2.22.0              
+ [17] cluster_2.1.3                 DECIPHER_2.22.0              
  [19] colorspace_2.0-3              blob_1.2.2                   
  [21] rappdirs_0.3.3                ggrepel_0.9.1                
  [23] xfun_0.30                     dplyr_1.0.8                  
- [25] crayon_1.5.0                  RCurl_1.98-1.6               
+ [25] crayon_1.5.1                  RCurl_1.98-1.6               
  [27] jsonlite_1.8.0                graph_1.72.0                 
  [29] ape_5.6-2                     glue_1.6.2                   
  [31] gtable_0.3.0                  zlibbioc_1.40.0              
@@ -515,11 +515,11 @@ loaded via a namespace (and not attached):
  [67] BiocVersion_3.14.0            tools_4.1.3                  
  [69] cachem_1.0.6                  cli_3.2.0                    
  [71] DirichletMultinomial_1.36.0   generics_0.1.2               
- [73] RSQLite_2.2.10                ExperimentHub_2.2.1          
+ [73] RSQLite_2.2.11                ExperimentHub_2.2.1          
  [75] evaluate_0.15                 fastmap_1.1.0                
- [77] yaml_2.3.5                    knitr_1.37                   
+ [77] yaml_2.3.5                    knitr_1.38                   
  [79] bit64_4.0.5                   purrr_0.3.4                  
- [81] KEGGREST_1.34.0               nlme_3.1-155                 
+ [81] KEGGREST_1.34.0               nlme_3.1-157                 
  [83] sparseMatrixStats_1.6.0       mime_0.12                    
  [85] compiler_4.1.3                beeswarm_0.4.0               
  [87] filelock_1.0.2                curl_4.3.2                   
@@ -527,9 +527,9 @@ loaded via a namespace (and not attached):
  [91] treeio_1.18.1                 tibble_3.1.6                 
  [93] stringi_1.7.6                 basilisk.utils_1.6.0         
  [95] highr_0.9                     forcats_0.5.1                
- [97] lattice_0.20-45               Matrix_1.4-0                 
+ [97] lattice_0.20-45               Matrix_1.4-1                 
  [99] vegan_2.5-7                   permute_0.9-7                
-[101] vctrs_0.3.8                   rhdf5filters_1.6.0           
+[101] vctrs_0.4.0                   rhdf5filters_1.6.0           
 [103] pillar_1.7.0                  lifecycle_1.0.1              
 [105] BiocManager_1.30.16           BiocNeighbors_1.12.0         
 [107] cowplot_1.1.1                 bitops_1.0-7                 
@@ -537,10 +537,10 @@ loaded via a namespace (and not attached):
 [111] R6_2.5.1                      bookdown_0.25                
 [113] promises_1.2.0.1              gridExtra_2.3                
 [115] vipor_0.4.5                   codetools_0.2-18             
-[117] MASS_7.3-55                   assertthat_0.2.1             
+[117] MASS_7.3-56                   assertthat_0.2.1             
 [119] rhdf5_2.38.1                  rprojroot_2.0.2              
 [121] withr_2.5.0                   GenomeInfoDbData_1.2.7       
-[123] mgcv_1.8-39                   parallel_4.1.3               
+[123] mgcv_1.8-40                   parallel_4.1.3               
 [125] grid_4.1.3                    beachmat_2.10.0              
 [127] basilisk_1.6.0                tidyr_1.2.0                  
 [129] rmarkdown_2.13                DelayedMatrixStats_1.16.0    

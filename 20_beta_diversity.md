@@ -177,7 +177,7 @@ functions.
 
 ```r
 library(scater)
-tse <- runMDS(tse, FUN = vegan::vegdist, name = "PCoA_BC", exprs_values = "counts")
+tse <- runMDS(tse, FUN = vegan::vegdist, method = "bray", name = "PCoA_BC", exprs_values = "counts")
 ```
 
 Sample similarities can be visualized on a lower-dimensional display
@@ -586,8 +586,8 @@ other attached packages:
 [13] SingleCellExperiment_1.16.0    SummarizedExperiment_1.24.0   
 [15] Biobase_2.54.0                 GenomicRanges_1.46.1          
 [17] GenomeInfoDb_1.30.1            IRanges_2.28.0                
-[19] S4Vectors_0.32.3               BiocGenerics_0.40.0           
-[21] MatrixGenerics_1.6.0           matrixStats_0.61.0-9001       
+[19] S4Vectors_0.32.4               BiocGenerics_0.40.0           
+[21] MatrixGenerics_1.6.0           matrixStats_0.61.0-9003       
 [23] BiocStyle_2.22.0               rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
@@ -595,30 +595,30 @@ loaded via a namespace (and not attached):
  [3] colorspace_2.0-3            ellipsis_0.3.2             
  [5] BiocNeighbors_1.12.0        farver_2.1.0               
  [7] ggrepel_0.9.1               bit64_4.0.5                
- [9] fansi_1.0.2                 decontam_1.14.0            
+ [9] fansi_1.0.3                 decontam_1.14.0            
 [11] splines_4.1.3               codetools_0.2-18           
 [13] sparseMatrixStats_1.6.0     cachem_1.0.6               
-[15] knitr_1.37                  jsonlite_1.8.0             
-[17] cluster_2.1.2               graph_1.72.0               
+[15] knitr_1.38                  jsonlite_1.8.0             
+[17] cluster_2.1.3               graph_1.72.0               
 [19] BiocManager_1.30.16         compiler_4.1.3             
-[21] assertthat_0.2.1            Matrix_1.4-0               
+[21] assertthat_0.2.1            Matrix_1.4-1               
 [23] fastmap_1.1.0               lazyeval_0.2.2             
 [25] cli_3.2.0                   BiocSingular_1.10.0        
 [27] htmltools_0.5.2             tools_4.1.3                
 [29] rsvd_1.0.5                  gtable_0.3.0               
 [31] glue_1.6.2                  GenomeInfoDbData_1.2.7     
 [33] reshape2_1.4.4              dplyr_1.0.8                
-[35] Rcpp_1.0.8.3                vctrs_0.3.8                
-[37] ape_5.6-2                   nlme_3.1-155               
+[35] Rcpp_1.0.8.3                vctrs_0.4.0                
+[37] ape_5.6-2                   nlme_3.1-157               
 [39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
 [41] xfun_0.30                   stringr_1.4.0              
 [43] beachmat_2.10.0             lifecycle_1.0.1            
 [45] irlba_2.3.5                 XML_3.99-0.9               
-[47] zlibbioc_1.40.0             MASS_7.3-55                
+[47] zlibbioc_1.40.0             MASS_7.3-56                
 [49] scales_1.1.1                parallel_4.1.3             
 [51] yaml_2.3.5                  memoise_2.0.1              
 [53] gridExtra_2.3               yulab.utils_0.0.4          
-[55] stringi_1.7.6               RSQLite_2.2.10             
+[55] stringi_1.7.6               RSQLite_2.2.11             
 [57] highr_0.9                   ScaledMatrix_1.2.0         
 [59] tidytree_0.3.9              filelock_1.0.2             
 [61] BiocParallel_1.28.3         rlang_1.0.2                
@@ -627,13 +627,13 @@ loaded via a namespace (and not attached):
 [67] labeling_0.4.2              treeio_1.18.1              
 [69] CodeDepends_0.6.5           cowplot_1.1.1              
 [71] bit_4.0.4                   tidyselect_1.1.2           
-[73] plyr_1.8.6                  magrittr_2.0.2             
+[73] plyr_1.8.7                  magrittr_2.0.3             
 [75] bookdown_0.25               R6_2.5.1                   
 [77] generics_0.1.2              DelayedArray_0.20.0        
 [79] DBI_1.1.2                   withr_2.5.0                
-[81] mgcv_1.8-39                 pillar_1.7.0               
+[81] mgcv_1.8-40                 pillar_1.7.0               
 [83] RCurl_1.98-1.6              tibble_3.1.6               
-[85] dir.expiry_1.2.0            crayon_1.5.0               
+[85] dir.expiry_1.2.0            crayon_1.5.1               
 [87] utf8_1.2.2                  rmarkdown_2.13             
 [89] viridis_0.6.2               grid_4.1.3                 
 [91] blob_1.2.2                  digest_0.6.29              
