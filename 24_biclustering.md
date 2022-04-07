@@ -561,7 +561,7 @@ loaded via a namespace (and not attached):
  [37] viridisLite_0.4.0             xtable_1.8-4                 
  [39] decontam_1.14.0               tidytree_0.3.9               
  [41] bit_4.0.4                     rsvd_1.0.5                   
- [43] httr_1.4.2                    RColorBrewer_1.1-2           
+ [43] httr_1.4.2                    RColorBrewer_1.1-3           
  [45] dir.expiry_1.2.0              modeltools_0.2-23            
  [47] ellipsis_0.3.2                farver_2.1.0                 
  [49] pkgconfig_2.0.3               XML_3.99-0.9                 
@@ -573,7 +573,7 @@ loaded via a namespace (and not attached):
  [61] munsell_0.5.0                 BiocVersion_3.14.0           
  [63] tools_4.1.3                   cachem_1.0.6                 
  [65] cli_3.2.0                     DirichletMultinomial_1.36.0  
- [67] generics_0.1.2                RSQLite_2.2.11               
+ [67] generics_0.1.2                RSQLite_2.2.12               
  [69] ExperimentHub_2.2.1           evaluate_0.15                
  [71] stringr_1.4.0                 fastmap_1.1.0                
  [73] yaml_2.3.5                    knitr_1.38                   

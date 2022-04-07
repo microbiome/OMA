@@ -461,10 +461,12 @@ sample data. We simplify the analysis by only including 2 of the 3 groups.</p>
 <span id="cb302-11"><a href="differential-abundance.html#cb302-11" aria-hidden="true" tabindex="-1"></a><span class="co"># obese vs lean for easy illustration</span></span>
 <span id="cb302-12"><a href="differential-abundance.html#cb302-12" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(dmn_se)</span>
 <span id="cb302-13"><a href="differential-abundance.html#cb302-13" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> dmn_se</span>
-<span id="cb302-14"><a href="differential-abundance.html#cb302-14" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> se[ ,<span class="fu">colData</span>(se)<span class="sc">$</span>pheno <span class="sc">!=</span> <span class="st">&quot;Overwt&quot;</span>]</span>
-<span id="cb302-15"><a href="differential-abundance.html#cb302-15" aria-hidden="true" tabindex="-1"></a><span class="fu">colData</span>(se)<span class="sc">$</span>pheno <span class="ot">&lt;-</span> <span class="fu">fct_drop</span>(<span class="fu">colData</span>(se)<span class="sc">$</span>pheno, <span class="st">&quot;Overwt&quot;</span>)</span>
-<span id="cb302-16"><a href="differential-abundance.html#cb302-16" aria-hidden="true" tabindex="-1"></a><span class="co"># how many observations do we have per group?</span></span>
-<span id="cb302-17"><a href="differential-abundance.html#cb302-17" aria-hidden="true" tabindex="-1"></a><span class="fu">count</span>(<span class="fu">as.data.frame</span>(<span class="fu">colData</span>(se)), pheno) <span class="sc">%&gt;%</span> <span class="fu">kable</span>()</span></code></pre></div>
+<span id="cb302-14"><a href="differential-abundance.html#cb302-14" aria-hidden="true" tabindex="-1"></a><span class="co"># To enable all features and advantages of TreeSE, we convert the object from SE to TreeSE</span></span>
+<span id="cb302-15"><a href="differential-abundance.html#cb302-15" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">as</span>(se, <span class="st">&quot;TreeSummarizedExperiment&quot;</span>)</span>
+<span id="cb302-16"><a href="differential-abundance.html#cb302-16" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> tse[ ,<span class="fu">colData</span>(tse)<span class="sc">$</span>pheno <span class="sc">!=</span> <span class="st">&quot;Overwt&quot;</span>]</span>
+<span id="cb302-17"><a href="differential-abundance.html#cb302-17" aria-hidden="true" tabindex="-1"></a><span class="fu">colData</span>(tse)<span class="sc">$</span>pheno <span class="ot">&lt;-</span> <span class="fu">fct_drop</span>(<span class="fu">colData</span>(tse)<span class="sc">$</span>pheno, <span class="st">&quot;Overwt&quot;</span>)</span>
+<span id="cb302-18"><a href="differential-abundance.html#cb302-18" aria-hidden="true" tabindex="-1"></a><span class="co"># how many observations do we have per group?</span></span>
+<span id="cb302-19"><a href="differential-abundance.html#cb302-19" aria-hidden="true" tabindex="-1"></a><span class="fu">count</span>(<span class="fu">as.data.frame</span>(<span class="fu">colData</span>(tse)), pheno) <span class="sc">%&gt;%</span> <span class="fu">kable</span>()</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -494,7 +496,7 @@ sample data. We simplify the analysis by only including 2 of the 3 groups.</p>
 the taxa generally resulted in more robust results. Some tools have builtin
 arguments for that. By applying the threshold to our input data, we can make
 sure it is applied for all tools. Below we show how to do this in <code>mia</code>:</p>
-<div class="sourceCode" id="cb304"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb304-1"><a href="differential-abundance.html#cb304-1" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">subsetByPrevalentTaxa</span>(se, <span class="at">detection =</span> <span class="dv">0</span>, <span class="at">prevalence =</span> <span class="fl">0.1</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb304"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb304-1"><a href="differential-abundance.html#cb304-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">subsetByPrevalentTaxa</span>(tse, <span class="at">detection =</span> <span class="dv">0</span>, <span class="at">prevalence =</span> <span class="fl">0.1</span>)</span></code></pre></div>
 </div>
 <div id="aldex2" class="section level3 hasAnchor" number="12.1.3">
 <h3><span class="header-section-number">12.1.3</span> ALDEx2<a href="differential-abundance.html#aldex2" class="anchor-section" aria-label="Anchor link to header"></a></h3>
@@ -517,8 +519,8 @@ example that illustrates the workflow.</p>
 <span id="cb305-2"><a href="differential-abundance.html#cb305-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert each instance using the centred log-ratio transform.</span></span>
 <span id="cb305-3"><a href="differential-abundance.html#cb305-3" aria-hidden="true" tabindex="-1"></a><span class="co"># This is the input for all further analyses.</span></span>
 <span id="cb305-4"><a href="differential-abundance.html#cb305-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">aldex.clr</span>(</span>
-<span id="cb305-5"><a href="differential-abundance.html#cb305-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">reads =</span> <span class="fu">assay</span>(se),</span>
-<span id="cb305-6"><a href="differential-abundance.html#cb305-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">conds =</span> <span class="fu">colData</span>(se)<span class="sc">$</span>pheno, </span>
+<span id="cb305-5"><a href="differential-abundance.html#cb305-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">reads =</span> <span class="fu">assay</span>(tse),</span>
+<span id="cb305-6"><a href="differential-abundance.html#cb305-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">conds =</span> <span class="fu">colData</span>(tse)<span class="sc">$</span>pheno, </span>
 <span id="cb305-7"><a href="differential-abundance.html#cb305-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 128 recommened for ttest, 1000 for rigorous effect size calculation</span></span>
 <span id="cb305-8"><a href="differential-abundance.html#cb305-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">mc.samples =</span> <span class="dv">128</span>, </span>
 <span id="cb305-9"><a href="differential-abundance.html#cb305-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">denom =</span> <span class="st">&quot;all&quot;</span>,</span>
@@ -671,13 +673,13 @@ Furthermore, this method provides p-values, and confidence intervals for each
 taxon. It also controls the FDR and it is computationally simple to implement.</p>
 <p>As we will see below, to obtain results, all that is needed is to pass
 a phyloseq object to the <code>ancombc()</code> function. Therefore, below we first
-convert our <code>se</code> object to a <code>phyloseq</code> object. Then, we specify the formula.
+convert our <code>TreeSE</code> object to a <code>phyloseq</code> object. Then, we specify the formula.
 In this formula, other covariates could potentially be included to adjust for
 confounding. We show this further below.
 Please check the <a href="https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html">function documentation</a>
 to learn about the additional arguments that we specify below.</p>
 <div class="sourceCode" id="cb308"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb308-1"><a href="differential-abundance.html#cb308-1" aria-hidden="true" tabindex="-1"></a><span class="co"># currently, ancombc requires the phyloseq format, but we can easily convert:</span></span>
-<span id="cb308-2"><a href="differential-abundance.html#cb308-2" aria-hidden="true" tabindex="-1"></a>pseq <span class="ot">&lt;-</span> <span class="fu">makePhyloseqFromTreeSummarizedExperiment</span>(se)</span>
+<span id="cb308-2"><a href="differential-abundance.html#cb308-2" aria-hidden="true" tabindex="-1"></a>pseq <span class="ot">&lt;-</span> <span class="fu">makePhyloseqFromTreeSummarizedExperiment</span>(tse)</span>
 <span id="cb308-3"><a href="differential-abundance.html#cb308-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb308-4"><a href="differential-abundance.html#cb308-4" aria-hidden="true" tabindex="-1"></a><span class="co"># perform the analysis </span></span>
 <span id="cb308-5"><a href="differential-abundance.html#cb308-5" aria-hidden="true" tabindex="-1"></a>out <span class="ot">=</span> <span class="fu">ancombc</span>(</span>
@@ -749,8 +751,8 @@ MaAsLin. As it is based on generalized linear models, it is flexible for differe
 structures. The official package tutorial can be found <a href="https://github.com/biobakery/biobakery/wiki/maaslin2">here</a>.</p>
 <div class="sourceCode" id="cb310"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb310-1"><a href="differential-abundance.html#cb310-1" aria-hidden="true" tabindex="-1"></a><span class="co"># maaslin expects features as columns and samples as rows </span></span>
 <span id="cb310-2"><a href="differential-abundance.html#cb310-2" aria-hidden="true" tabindex="-1"></a><span class="co"># for both the asv/otu table as well as meta data </span></span>
-<span id="cb310-3"><a href="differential-abundance.html#cb310-3" aria-hidden="true" tabindex="-1"></a>asv <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">assay</span>(se))</span>
-<span id="cb310-4"><a href="differential-abundance.html#cb310-4" aria-hidden="true" tabindex="-1"></a>meta_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">colData</span>(se))</span>
+<span id="cb310-3"><a href="differential-abundance.html#cb310-3" aria-hidden="true" tabindex="-1"></a>asv <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">assay</span>(tse))</span>
+<span id="cb310-4"><a href="differential-abundance.html#cb310-4" aria-hidden="true" tabindex="-1"></a>meta_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">colData</span>(tse))</span>
 <span id="cb310-5"><a href="differential-abundance.html#cb310-5" aria-hidden="true" tabindex="-1"></a><span class="co"># you can specifiy different GLMs/normalizations/transforms. We used similar</span></span>
 <span id="cb310-6"><a href="differential-abundance.html#cb310-6" aria-hidden="true" tabindex="-1"></a><span class="co"># settings as in Nearing et al. (2021) here:</span></span>
 <span id="cb310-7"><a href="differential-abundance.html#cb310-7" aria-hidden="true" tabindex="-1"></a>fit_data <span class="ot">&lt;-</span> <span class="fu">Maaslin2</span>(</span>
@@ -1054,8 +1056,8 @@ taxon.</p>
 abundant. Eight of those that were identified by ALDEx2,
 were also identified by both of the other methods. We could plot the data for
 any method or for those taxa that were identified by all methods:</p>
-<div class="sourceCode" id="cb316"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb316-1"><a href="differential-abundance.html#cb316-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">t</span>(<span class="fu">assay</span>(se)))</span>
-<span id="cb316-2"><a href="differential-abundance.html#cb316-2" aria-hidden="true" tabindex="-1"></a>plot_data<span class="sc">$</span>pheno <span class="ot">&lt;-</span> <span class="fu">colData</span>(se)<span class="sc">$</span>pheno</span>
+<div class="sourceCode" id="cb316"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb316-1"><a href="differential-abundance.html#cb316-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse)))</span>
+<span id="cb316-2"><a href="differential-abundance.html#cb316-2" aria-hidden="true" tabindex="-1"></a>plot_data<span class="sc">$</span>pheno <span class="ot">&lt;-</span> <span class="fu">colData</span>(tse)<span class="sc">$</span>pheno</span>
 <span id="cb316-3"><a href="differential-abundance.html#cb316-3" aria-hidden="true" tabindex="-1"></a><span class="co"># create a plot for each genus where the score is indicated in the title</span></span>
 <span id="cb316-4"><a href="differential-abundance.html#cb316-4" aria-hidden="true" tabindex="-1"></a>plots <span class="ot">&lt;-</span> <span class="fu">pmap</span>(<span class="fu">select</span>(summ, genus, score), <span class="cf">function</span>(genus, score) {</span>
 <span id="cb316-5"><a href="differential-abundance.html#cb316-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(plot_data, <span class="fu">aes_string</span>(<span class="st">&quot;pheno&quot;</span>, genus)) <span class="sc">+</span></span>
@@ -1104,18 +1106,18 @@ It is very similar for all the methods that allow this. Since in this dataset
 there are no covariates, I first simulate a new variable and add it to the TSE
 object.</p>
 <div class="sourceCode" id="cb318"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb318-1"><a href="differential-abundance.html#cb318-1" aria-hidden="true" tabindex="-1"></a><span class="co"># to join new data to existing colData we need to put rownames as a column </span></span>
-<span id="cb318-2"><a href="differential-abundance.html#cb318-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colData</span>(se)<span class="sc">$</span>sample_id <span class="ot">&lt;-</span> <span class="fu">rownames</span>(<span class="fu">colData</span>(se))</span>
+<span id="cb318-2"><a href="differential-abundance.html#cb318-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colData</span>(tse)<span class="sc">$</span>sample_id <span class="ot">&lt;-</span> <span class="fu">rownames</span>(<span class="fu">colData</span>(tse))</span>
 <span id="cb318-3"><a href="differential-abundance.html#cb318-3" aria-hidden="true" tabindex="-1"></a><span class="co"># simulate a covariate that I will add to the colData.</span></span>
 <span id="cb318-4"><a href="differential-abundance.html#cb318-4" aria-hidden="true" tabindex="-1"></a>df_sim <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb318-5"><a href="differential-abundance.html#cb318-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_id =</span> <span class="fu">colData</span>(se)<span class="sc">$</span>sample_id,</span>
-<span id="cb318-6"><a href="differential-abundance.html#cb318-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="fu">length</span>(<span class="fu">colData</span>(se)<span class="sc">$</span>sample_id))</span>
+<span id="cb318-5"><a href="differential-abundance.html#cb318-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_id =</span> <span class="fu">colData</span>(tse)<span class="sc">$</span>sample_id,</span>
+<span id="cb318-6"><a href="differential-abundance.html#cb318-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">age =</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="fu">length</span>(<span class="fu">colData</span>(tse)<span class="sc">$</span>sample_id))</span>
 <span id="cb318-7"><a href="differential-abundance.html#cb318-7" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb318-8"><a href="differential-abundance.html#cb318-8" aria-hidden="true" tabindex="-1"></a><span class="co"># an easy way to join data is to use dplyr functions. The package </span></span>
 <span id="cb318-9"><a href="differential-abundance.html#cb318-9" aria-hidden="true" tabindex="-1"></a><span class="co"># tidySummarizedExperiment enables this functionality</span></span>
-<span id="cb318-10"><a href="differential-abundance.html#cb318-10" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">full_join</span>(se, df_sim, <span class="at">by =</span> <span class="st">&quot;sample_id&quot;</span>)</span>
-<span id="cb318-11"><a href="differential-abundance.html#cb318-11" aria-hidden="true" tabindex="-1"></a><span class="co"># now the data from df_sim is in the se object and we can again repeat</span></span>
+<span id="cb318-10"><a href="differential-abundance.html#cb318-10" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">full_join</span>(tse, df_sim, <span class="at">by =</span> <span class="st">&quot;sample_id&quot;</span>)</span>
+<span id="cb318-11"><a href="differential-abundance.html#cb318-11" aria-hidden="true" tabindex="-1"></a><span class="co"># now the data from df_sim is in the tse object and we can again repeat</span></span>
 <span id="cb318-12"><a href="differential-abundance.html#cb318-12" aria-hidden="true" tabindex="-1"></a><span class="co"># the steps as above:</span></span>
-<span id="cb318-13"><a href="differential-abundance.html#cb318-13" aria-hidden="true" tabindex="-1"></a>pseq <span class="ot">&lt;-</span> <span class="fu">makePhyloseqFromTreeSummarizedExperiment</span>(se)</span>
+<span id="cb318-13"><a href="differential-abundance.html#cb318-13" aria-hidden="true" tabindex="-1"></a>pseq <span class="ot">&lt;-</span> <span class="fu">makePhyloseqFromTreeSummarizedExperiment</span>(tse)</span>
 <span id="cb318-14"><a href="differential-abundance.html#cb318-14" aria-hidden="true" tabindex="-1"></a>out_cov <span class="ot">=</span> <span class="fu">ancombc</span>(</span>
 <span id="cb318-15"><a href="differential-abundance.html#cb318-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">phyloseq =</span> pseq, </span>
 <span id="cb318-16"><a href="differential-abundance.html#cb318-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> <span class="st">&quot;pheno + age&quot;</span>, <span class="co"># here we add age to the model</span></span>
@@ -1309,7 +1311,7 @@ loaded via a namespace (and not attached):
   [5] DelayedArray_0.20.0           data.table_1.14.2            
   [7] KEGGREST_1.34.0               RCurl_1.98-1.6               
   [9] generics_0.1.2                ScaledMatrix_1.2.0           
- [11] microbiome_1.16.0             RSQLite_2.2.11               
+ [11] microbiome_1.16.0             RSQLite_2.2.12               
  [13] bit_4.0.4                     tzdb_0.3.0                   
  [15] httpuv_1.6.5                  xml2_1.3.3                   
  [17] lubridate_1.8.0               assertthat_0.2.1             
@@ -1317,16 +1319,16 @@ loaded via a namespace (and not attached):
  [21] xfun_0.30                     hms_1.1.1                    
  [23] ggdist_3.1.1                  jquerylib_0.1.4              
  [25] promises_1.2.0.1              evaluate_0.15                
- [27] DEoptimR_1.0-10               fansi_1.0.3                  
+ [27] DEoptimR_1.0-11               fansi_1.0.3                  
  [29] dbplyr_2.1.1                  readxl_1.4.0                 
- [31] igraph_1.2.11                 DBI_1.1.2                    
+ [31] igraph_1.3.0                  DBI_1.1.2                    
  [33] htmlwidgets_1.5.4             tensorA_0.36.2               
  [35] hash_2.2.6.2                  ellipsis_0.3.2               
  [37] backports_1.4.1               bookdown_0.25                
  [39] permute_0.9-7                 sparseMatrixStats_1.6.0      
  [41] vctrs_0.4.0                   abind_1.4-5                  
  [43] tidybayes_3.0.2               cachem_1.0.6                 
- [45] withr_2.5.0                   robustbase_0.93-9            
+ [45] withr_2.5.0                   robustbase_0.95-0            
  [47] checkmate_2.0.0               vegan_2.5-7                  
  [49] treeio_1.18.1                 getopt_1.20.3                
  [51] cluster_2.1.3                 ExperimentHub_2.2.1          
@@ -1349,7 +1351,7 @@ loaded via a namespace (and not attached):
  [85] beachmat_2.10.0               scales_1.1.1                 
  [87] memoise_2.0.1                 magrittr_2.0.3               
  [89] plyr_1.8.7                    zlibbioc_1.40.0              
- [91] compiler_4.1.3                RColorBrewer_1.1-2           
+ [91] compiler_4.1.3                RColorBrewer_1.1-3           
  [93] cli_3.2.0                     ade4_1.7-18                  
  [95] pbapply_1.5-0                 mgcv_1.8-40                  
  [97] tidyselect_1.1.2              stringi_1.7.6                

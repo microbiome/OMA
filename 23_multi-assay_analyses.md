@@ -502,7 +502,7 @@ loaded via a namespace (and not attached):
  [41] viridisLite_0.4.0             xtable_1.8-4                 
  [43] decontam_1.14.0               tidytree_0.3.9               
  [45] bit_4.0.4                     rsvd_1.0.5                   
- [47] httr_1.4.2                    RColorBrewer_1.1-2           
+ [47] httr_1.4.2                    RColorBrewer_1.1-3           
  [49] dir.expiry_1.2.0              ellipsis_0.3.2               
  [51] farver_2.1.0                  pkgconfig_2.0.3              
  [53] XML_3.99-0.9                  scuttle_1.4.0                
@@ -515,7 +515,7 @@ loaded via a namespace (and not attached):
  [67] BiocVersion_3.14.0            tools_4.1.3                  
  [69] cachem_1.0.6                  cli_3.2.0                    
  [71] DirichletMultinomial_1.36.0   generics_0.1.2               
- [73] RSQLite_2.2.11                ExperimentHub_2.2.1          
+ [73] RSQLite_2.2.12                ExperimentHub_2.2.1          
  [75] evaluate_0.15                 fastmap_1.1.0                
  [77] yaml_2.3.5                    knitr_1.38                   
  [79] bit64_4.0.5                   purrr_0.3.4                  
@@ -538,7 +538,7 @@ loaded via a namespace (and not attached):
 [113] promises_1.2.0.1              gridExtra_2.3                
 [115] vipor_0.4.5                   codetools_0.2-18             
 [117] MASS_7.3-56                   assertthat_0.2.1             
-[119] rhdf5_2.38.1                  rprojroot_2.0.2              
+[119] rhdf5_2.38.1                  rprojroot_2.0.3              
 [121] withr_2.5.0                   GenomeInfoDbData_1.2.7       
 [123] mgcv_1.8-40                   parallel_4.1.3               
 [125] grid_4.1.3                    beachmat_2.10.0              

@@ -580,9 +580,9 @@ format. Here, we provide examples for common formats.
 counts  <- read.csv(count_file)   # Abundance table (e.g. ASV data; to assay data)
 tax     <- read.csv(tax_file)     # Taxonomy table (to rowData)
 samples <- read.csv(sample_file)  # Sample data (to colData)
-se <- SummarizedExperiment(assays = list(counts = counts),
-                           colData = samples,
-                           rowData = tax)
+tse <- TreeSummarizedExperiment(assays = list(counts = counts),
+                                colData = samples,
+                                rowData = tax)
 ```
 
 Specific import functions are provided for:
@@ -803,6 +803,9 @@ The current data object, se, is a SummarizedExperiment object. This
 does not include a slot for adding a phylogenetic tree. In order to do
 this, we can convert the SE object to an extended TreeSummarizedExperiment
 object which includes also a `rowTree` slot.
+
+TreeSummarizedExperiment contains also other additional slots and features which
+is why we recommend to use `TreeSE`.
 
 
 ```r
@@ -1137,7 +1140,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.2.2           BiocFileCache_2.2.1          
-  [3] plyr_1.8.7                    igraph_1.2.11                
+  [3] plyr_1.8.7                    igraph_1.3.0                 
   [5] lazyeval_0.2.2                splines_4.1.3                
   [7] BiocParallel_1.28.3           scater_1.22.0                
   [9] digest_0.6.29                 foreach_1.5.2                
@@ -1170,7 +1173,7 @@ loaded via a namespace (and not attached):
  [63] BiocVersion_3.14.0            tools_4.1.3                  
  [65] cachem_1.0.6                  cli_3.2.0                    
  [67] DirichletMultinomial_1.36.0   generics_0.1.2               
- [69] RSQLite_2.2.11                ExperimentHub_2.2.1          
+ [69] RSQLite_2.2.12                ExperimentHub_2.2.1          
  [71] ade4_1.7-18                   evaluate_0.15                
  [73] biomformat_1.22.0             stringr_1.4.0                
  [75] fastmap_1.1.0                 yaml_2.3.5                   

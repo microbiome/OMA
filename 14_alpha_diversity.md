@@ -392,7 +392,7 @@ loaded via a namespace (and not attached):
  [49] parallel_4.1.3              yaml_2.3.5                 
  [51] memoise_2.0.1               gridExtra_2.3              
  [53] yulab.utils_0.0.4           stringi_1.7.6              
- [55] RSQLite_2.2.11              highr_0.9                  
+ [55] RSQLite_2.2.12              highr_0.9                  
  [57] ScaledMatrix_1.2.0          tidytree_0.3.9             
  [59] permute_0.9-7               filelock_1.0.2             
  [61] BiocParallel_1.28.3         rlang_1.0.2                

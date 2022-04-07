@@ -544,7 +544,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.2.2           BiocFileCache_2.2.1          
-  [3] igraph_1.2.11                 plyr_1.8.7                   
+  [3] igraph_1.3.0                  plyr_1.8.7                   
   [5] lazyeval_0.2.2                splines_4.1.3                
   [7] BiocParallel_1.28.3           digest_0.6.29                
   [9] yulab.utils_0.0.4             htmltools_0.5.2              
@@ -576,15 +576,15 @@ loaded via a namespace (and not attached):
  [61] munsell_0.5.0                 BiocVersion_3.14.0           
  [63] tools_4.1.3                   cachem_1.0.6                 
  [65] cli_3.2.0                     DirichletMultinomial_1.36.0  
- [67] generics_0.1.2                RSQLite_2.2.11               
+ [67] generics_0.1.2                RSQLite_2.2.12               
  [69] ExperimentHub_2.2.1           evaluate_0.15                
  [71] stringr_1.4.0                 fastmap_1.1.0                
  [73] yaml_2.3.5                    ggtree_3.2.1                 
  [75] knitr_1.38                    bit64_4.0.5                  
- [77] tidygraph_1.2.0               purrr_0.3.4                  
+ [77] tidygraph_1.2.1               purrr_0.3.4                  
  [79] KEGGREST_1.34.0               nlme_3.1-157                 
  [81] sparseMatrixStats_1.6.0       mime_0.12                    
- [83] aplot_0.1.2                   compiler_4.1.3               
+ [83] aplot_0.1.3                   compiler_4.1.3               
  [85] beeswarm_0.4.0                filelock_1.0.2               
  [87] curl_4.3.2                    png_0.1-7                    
  [89] interactiveDisplayBase_1.32.0 treeio_1.18.1                
@@ -602,7 +602,7 @@ loaded via a namespace (and not attached):
 [113] codetools_0.2-18              MASS_7.3-56                  
 [115] assertthat_0.2.1              withr_2.5.0                  
 [117] GenomeInfoDbData_1.2.7        mgcv_1.8-40                  
-[119] parallel_4.1.3                ggfun_0.0.5                  
+[119] parallel_4.1.3                ggfun_0.0.6                  
 [121] grid_4.1.3                    beachmat_2.10.0              
 [123] tidyr_1.2.0                   rmarkdown_2.13               
 [125] DelayedMatrixStats_1.16.0     ggnewscale_0.4.7             

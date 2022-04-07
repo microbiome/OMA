@@ -601,7 +601,7 @@ loaded via a namespace (and not attached):
 [51] yaml_2.3.5                  memoise_2.0.1              
 [53] gridExtra_2.3               ggplot2_3.3.5              
 [55] yulab.utils_0.0.4           stringi_1.7.6              
-[57] RSQLite_2.2.11              ScaledMatrix_1.2.0         
+[57] RSQLite_2.2.12              ScaledMatrix_1.2.0         
 [59] tidytree_0.3.9              permute_0.9-7              
 [61] filelock_1.0.2              BiocParallel_1.28.3        
 [63] rlang_1.0.2                 pkgconfig_2.0.3            

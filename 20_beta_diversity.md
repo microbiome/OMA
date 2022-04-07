@@ -618,7 +618,7 @@ loaded via a namespace (and not attached):
 [49] scales_1.1.1                parallel_4.1.3             
 [51] yaml_2.3.5                  memoise_2.0.1              
 [53] gridExtra_2.3               yulab.utils_0.0.4          
-[55] stringi_1.7.6               RSQLite_2.2.11             
+[55] stringi_1.7.6               RSQLite_2.2.12             
 [57] highr_0.9                   ScaledMatrix_1.2.0         
 [59] tidytree_0.3.9              filelock_1.0.2             
 [61] BiocParallel_1.28.3         rlang_1.0.2                

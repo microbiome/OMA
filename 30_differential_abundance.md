@@ -109,10 +109,12 @@ library(tidyverse)
 # obese vs lean for easy illustration
 data(dmn_se)
 se <- dmn_se
-se <- se[ ,colData(se)$pheno != "Overwt"]
-colData(se)$pheno <- fct_drop(colData(se)$pheno, "Overwt")
+# To enable all features and advantages of TreeSE, we convert the object from SE to TreeSE
+tse <- as(se, "TreeSummarizedExperiment")
+tse <- tse[ ,colData(tse)$pheno != "Overwt"]
+colData(tse)$pheno <- fct_drop(colData(tse)$pheno, "Overwt")
 # how many observations do we have per group?
-count(as.data.frame(colData(se)), pheno) %>% kable()
+count(as.data.frame(colData(tse)), pheno) %>% kable()
 ```
 
 
@@ -142,7 +144,7 @@ sure it is applied for all tools. Below we show how to do this in `mia`:
 
 
 ```r
-se <- subsetByPrevalentTaxa(se, detection = 0, prevalence = 0.1)
+tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 0.1)
 ```
 
 ### ALDEx2
@@ -170,8 +172,8 @@ example that illustrates the workflow.
 # Convert each instance using the centred log-ratio transform.
 # This is the input for all further analyses.
 x <- aldex.clr(
-  reads = assay(se),
-  conds = colData(se)$pheno, 
+  reads = assay(tse),
+  conds = colData(tse)$pheno, 
   # 128 recommened for ttest, 1000 for rigorous effect size calculation
   mc.samples = 128, 
   denom = "all",
@@ -292,7 +294,7 @@ taxon. It also controls the FDR and it is computationally simple to implement.
 
 As we will see below, to obtain results, all that is needed is to pass 
 a phyloseq object to the `ancombc()` function. Therefore, below we first
-convert our `se` object to a `phyloseq` object. Then, we specify the formula.
+convert our `TreeSE` object to a `phyloseq` object. Then, we specify the formula.
 In this formula, other covariates could potentially be included to adjust for
 confounding. We show this further below. 
 Please check the [function documentation](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html) 
@@ -301,7 +303,7 @@ to learn about the additional arguments that we specify below.
 
 ```r
 # currently, ancombc requires the phyloseq format, but we can easily convert:
-pseq <- makePhyloseqFromTreeSummarizedExperiment(se)
+pseq <- makePhyloseqFromTreeSummarizedExperiment(tse)
 
 # perform the analysis 
 out = ancombc(
@@ -369,8 +371,8 @@ structures. The official package tutorial can be found [here](https://github.com
 ```r
 # maaslin expects features as columns and samples as rows 
 # for both the asv/otu table as well as meta data 
-asv <- t(assay(se))
-meta_data <- data.frame(colData(se))
+asv <- t(assay(tse))
+meta_data <- data.frame(colData(tse))
 # you can specifiy different GLMs/normalizations/transforms. We used similar
 # settings as in Nearing et al. (2021) here:
 fit_data <- Maaslin2(
@@ -531,8 +533,8 @@ any method or for those taxa that were identified by all methods:
 
 
 ```r
-plot_data <- data.frame(t(assay(se)))
-plot_data$pheno <- colData(se)$pheno
+plot_data <- data.frame(t(assay(tse)))
+plot_data$pheno <- colData(tse)$pheno
 # create a plot for each genus where the score is indicated in the title
 plots <- pmap(select(summ, genus, score), function(genus, score) {
   ggplot(plot_data, aes_string("pheno", genus)) +
@@ -593,18 +595,18 @@ object.
 
 ```r
 # to join new data to existing colData we need to put rownames as a column 
-colData(se)$sample_id <- rownames(colData(se))
+colData(tse)$sample_id <- rownames(colData(tse))
 # simulate a covariate that I will add to the colData.
 df_sim <- tibble(
-  sample_id = colData(se)$sample_id,
-  age = rnorm(n = length(colData(se)$sample_id))
+  sample_id = colData(tse)$sample_id,
+  age = rnorm(n = length(colData(tse)$sample_id))
 )
 # an easy way to join data is to use dplyr functions. The package 
 # tidySummarizedExperiment enables this functionality
-se <- full_join(se, df_sim, by = "sample_id")
-# now the data from df_sim is in the se object and we can again repeat
+tse <- full_join(tse, df_sim, by = "sample_id")
+# now the data from df_sim is in the tse object and we can again repeat
 # the steps as above:
-pseq <- makePhyloseqFromTreeSummarizedExperiment(se)
+pseq <- makePhyloseqFromTreeSummarizedExperiment(tse)
 out_cov = ancombc(
   phyloseq = pseq, 
   formula = "pheno + age", # here we add age to the model
@@ -853,16 +855,16 @@ loaded via a namespace (and not attached):
   [5] DelayedArray_0.20.0           data.table_1.14.2            
   [7] KEGGREST_1.34.0               RCurl_1.98-1.6               
   [9] generics_0.1.2                ScaledMatrix_1.2.0           
- [11] microbiome_1.16.0             RSQLite_2.2.11               
+ [11] microbiome_1.16.0             RSQLite_2.2.12               
  [13] bit_4.0.4                     tzdb_0.3.0                   
  [15] httpuv_1.6.5                  xml2_1.3.3                   
  [17] lubridate_1.8.0               assertthat_0.2.1             
  [19] DirichletMultinomial_1.36.0   viridis_0.6.2                
  [21] xfun_0.30                     hms_1.1.1                    
  [23] ggdist_3.1.1                  promises_1.2.0.1             
- [25] evaluate_0.15                 DEoptimR_1.0-10              
+ [25] evaluate_0.15                 DEoptimR_1.0-11              
  [27] fansi_1.0.3                   dbplyr_2.1.1                 
- [29] readxl_1.4.0                  igraph_1.2.11                
+ [29] readxl_1.4.0                  igraph_1.3.0                 
  [31] DBI_1.1.2                     htmlwidgets_1.5.4            
  [33] tensorA_0.36.2                hash_2.2.6.2                 
  [35] ellipsis_0.3.2                backports_1.4.1              
@@ -870,7 +872,7 @@ loaded via a namespace (and not attached):
  [39] sparseMatrixStats_1.6.0       vctrs_0.4.0                  
  [41] abind_1.4-5                   tidybayes_3.0.2              
  [43] cachem_1.0.6                  withr_2.5.0                  
- [45] robustbase_0.93-9             checkmate_2.0.0              
+ [45] robustbase_0.95-0             checkmate_2.0.0              
  [47] vegan_2.5-7                   treeio_1.18.1                
  [49] getopt_1.20.3                 cluster_2.1.3                
  [51] ExperimentHub_2.2.1           ape_5.6-2                    
@@ -893,7 +895,7 @@ loaded via a namespace (and not attached):
  [85] scales_1.1.1                  memoise_2.0.1                
  [87] magrittr_2.0.3                plyr_1.8.7                   
  [89] zlibbioc_1.40.0               compiler_4.1.3               
- [91] RColorBrewer_1.1-2            cli_3.2.0                    
+ [91] RColorBrewer_1.1-3            cli_3.2.0                    
  [93] ade4_1.7-18                   pbapply_1.5-0                
  [95] mgcv_1.8-40                   tidyselect_1.1.2             
  [97] stringi_1.7.6                 highr_0.9                    
