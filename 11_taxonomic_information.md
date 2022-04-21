@@ -569,7 +569,7 @@ other attached packages:
  [9] GenomicRanges_1.46.1           GenomeInfoDb_1.30.1           
 [11] IRanges_2.28.0                 S4Vectors_0.32.4              
 [13] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
-[15] matrixStats_0.61.0-9003        BiocStyle_2.22.0              
+[15] matrixStats_0.62.0-9000        BiocStyle_2.22.0              
 [17] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
@@ -590,14 +590,14 @@ loaded via a namespace (and not attached):
 [29] rsvd_1.0.5                  gtable_0.3.0               
 [31] glue_1.6.2                  GenomeInfoDbData_1.2.7     
 [33] reshape2_1.4.4              dplyr_1.0.8                
-[35] Rcpp_1.0.8.3                vctrs_0.4.0                
+[35] Rcpp_1.0.8.3                vctrs_0.4.1                
 [37] ape_5.6-2                   nlme_3.1-157               
 [39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
 [41] xfun_0.30                   stringr_1.4.0              
 [43] beachmat_2.10.0             lifecycle_1.0.1            
 [45] irlba_2.3.5                 XML_3.99-0.9               
 [47] zlibbioc_1.40.0             MASS_7.3-56                
-[49] scales_1.1.1                parallel_4.1.3             
+[49] scales_1.2.0                parallel_4.1.3             
 [51] yaml_2.3.5                  memoise_2.0.1              
 [53] gridExtra_2.3               ggplot2_3.3.5              
 [55] yulab.utils_0.0.4           stringi_1.7.6              
@@ -610,15 +610,15 @@ loaded via a namespace (and not attached):
 [69] treeio_1.18.1               CodeDepends_0.6.5          
 [71] bit_4.0.4                   tidyselect_1.1.2           
 [73] plyr_1.8.7                  magrittr_2.0.3             
-[75] bookdown_0.25               R6_2.5.1                   
+[75] bookdown_0.26               R6_2.5.1                   
 [77] generics_0.1.2              DelayedArray_0.20.0        
 [79] DBI_1.1.2                   mgcv_1.8-40                
 [81] pillar_1.7.0                RCurl_1.98-1.6             
 [83] tibble_3.1.6                dir.expiry_1.2.0           
 [85] crayon_1.5.1                utf8_1.2.2                 
 [87] rmarkdown_2.13              viridis_0.6.2              
-[89] grid_4.1.3                  blob_1.2.2                 
-[91] vegan_2.5-7                 digest_0.6.29              
+[89] grid_4.1.3                  blob_1.2.3                 
+[91] vegan_2.6-2                 digest_0.6.29              
 [93] tidyr_1.2.0                 munsell_0.5.0              
 [95] DirichletMultinomial_1.36.0 beeswarm_0.4.0             
 [97] viridisLite_0.4.0           vipor_0.4.5                

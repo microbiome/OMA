@@ -781,7 +781,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.998
+## Proportions of Observations within 95% Credible Interval: 0.9981
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
@@ -846,7 +846,7 @@ other attached packages:
 [31] GenomicRanges_1.46.1           GenomeInfoDb_1.30.1           
 [33] IRanges_2.28.0                 S4Vectors_0.32.4              
 [35] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
-[37] matrixStats_0.61.0-9003        BiocStyle_2.22.0              
+[37] matrixStats_0.62.0-9000        BiocStyle_2.22.0              
 [39] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
@@ -868,12 +868,12 @@ loaded via a namespace (and not attached):
  [31] DBI_1.1.2                     htmlwidgets_1.5.4            
  [33] tensorA_0.36.2                hash_2.2.6.2                 
  [35] ellipsis_0.3.2                backports_1.4.1              
- [37] bookdown_0.25                 permute_0.9-7                
- [39] sparseMatrixStats_1.6.0       vctrs_0.4.0                  
+ [37] bookdown_0.26                 permute_0.9-7                
+ [39] sparseMatrixStats_1.6.0       vctrs_0.4.1                  
  [41] abind_1.4-5                   tidybayes_3.0.2              
  [43] cachem_1.0.6                  withr_2.5.0                  
  [45] robustbase_0.95-0             checkmate_2.0.0              
- [47] vegan_2.5-7                   treeio_1.18.1                
+ [47] vegan_2.6-2                   treeio_1.18.1                
  [49] getopt_1.20.3                 cluster_2.1.3                
  [51] ExperimentHub_2.2.1           ape_5.6-2                    
  [53] dir.expiry_1.2.0              lazyeval_0.2.2               
@@ -889,14 +889,14 @@ loaded via a namespace (and not attached):
  [73] Rhdf5lib_1.16.0               reprex_2.0.1                 
  [75] beeswarm_0.4.0                png_0.1-7                    
  [77] viridisLite_0.4.0             bitops_1.0-7                 
- [79] rhdf5filters_1.6.0            blob_1.2.2                   
+ [79] rhdf5filters_1.6.0            blob_1.2.3                   
  [81] DelayedMatrixStats_1.16.0     decontam_1.14.0              
  [83] DECIPHER_2.22.0               beachmat_2.10.0              
- [85] scales_1.1.1                  memoise_2.0.1                
+ [85] scales_1.2.0                  memoise_2.0.1                
  [87] magrittr_2.0.3                plyr_1.8.7                   
  [89] zlibbioc_1.40.0               compiler_4.1.3               
  [91] RColorBrewer_1.1-3            cli_3.2.0                    
- [93] ade4_1.7-18                   pbapply_1.5-0                
+ [93] ade4_1.7-19                   pbapply_1.5-0                
  [95] mgcv_1.8-40                   tidyselect_1.1.2             
  [97] stringi_1.7.6                 highr_0.9                    
  [99] yaml_2.3.5                    BiocSingular_1.10.0          
@@ -906,10 +906,10 @@ loaded via a namespace (and not attached):
 [107] foreach_1.5.2                 logging_0.10-108             
 [109] optparse_1.7.1                gridExtra_2.3                
 [111] posterior_1.2.1               farver_2.1.0                 
-[113] Rtsne_0.15                    RcppZiggurat_0.1.6           
+[113] Rtsne_0.16                    RcppZiggurat_0.1.6           
 [115] digest_0.6.29                 BiocManager_1.30.16          
 [117] shiny_1.7.1                   Rcpp_1.0.8.3                 
-[119] broom_0.7.12                  scuttle_1.4.0                
+[119] broom_0.8.0                   scuttle_1.4.0                
 [121] later_1.3.0                   BiocVersion_3.14.0           
 [123] AnnotationDbi_1.56.2          httr_1.4.2                   
 [125] Rdpack_2.3                    colorspace_2.0-3             
@@ -932,7 +932,7 @@ loaded via a namespace (and not attached):
 [159] rmarkdown_2.13                biomformat_1.22.0            
 [161] munsell_0.5.0                 rhdf5_2.38.1                 
 [163] GenomeInfoDbData_1.2.7        iterators_1.0.14             
-[165] haven_2.4.3                   reshape2_1.4.4               
-[167] gtable_0.3.0                  rbibutils_2.2.7              
+[165] haven_2.5.0                   reshape2_1.4.4               
+[167] gtable_0.3.0                  rbibutils_2.2.8              
 ```
 </div>

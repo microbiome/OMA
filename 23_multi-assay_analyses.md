@@ -475,7 +475,7 @@ other attached packages:
 [15] GenomicRanges_1.46.1           GenomeInfoDb_1.30.1           
 [17] IRanges_2.28.0                 S4Vectors_0.32.4              
 [19] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
-[21] matrixStats_0.61.0-9003        ecodist_2.0.7                 
+[21] matrixStats_0.62.0-9000        ecodist_2.0.7                 
 [23] BiocStyle_2.22.0               rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
@@ -488,7 +488,7 @@ loaded via a namespace (and not attached):
  [13] fansi_1.0.3                   magrittr_2.0.3               
  [15] memoise_2.0.1                 ScaledMatrix_1.2.0           
  [17] cluster_2.1.3                 DECIPHER_2.22.0              
- [19] colorspace_2.0-3              blob_1.2.2                   
+ [19] colorspace_2.0-3              blob_1.2.3                   
  [21] rappdirs_0.3.3                ggrepel_0.9.1                
  [23] xfun_0.30                     dplyr_1.0.8                  
  [25] crayon_1.5.1                  RCurl_1.98-1.6               
@@ -497,7 +497,7 @@ loaded via a namespace (and not attached):
  [31] gtable_0.3.0                  zlibbioc_1.40.0              
  [33] DelayedArray_0.20.0           BiocSingular_1.10.0          
  [35] Rhdf5lib_1.16.0               HDF5Array_1.22.1             
- [37] scales_1.1.1                  pheatmap_1.0.12              
+ [37] scales_1.2.0                  pheatmap_1.0.12              
  [39] DBI_1.1.2                     Rcpp_1.0.8.3                 
  [41] viridisLite_0.4.0             xtable_1.8-4                 
  [43] decontam_1.14.0               tidytree_0.3.9               
@@ -528,13 +528,13 @@ loaded via a namespace (and not attached):
  [93] stringi_1.7.6                 basilisk.utils_1.6.0         
  [95] highr_0.9                     forcats_0.5.1                
  [97] lattice_0.20-45               Matrix_1.4-1                 
- [99] vegan_2.5-7                   permute_0.9-7                
-[101] vctrs_0.4.0                   rhdf5filters_1.6.0           
+ [99] vegan_2.6-2                   permute_0.9-7                
+[101] vctrs_0.4.1                   rhdf5filters_1.6.0           
 [103] pillar_1.7.0                  lifecycle_1.0.1              
 [105] BiocManager_1.30.16           BiocNeighbors_1.12.0         
 [107] cowplot_1.1.1                 bitops_1.0-7                 
 [109] irlba_2.3.5                   httpuv_1.6.5                 
-[111] R6_2.5.1                      bookdown_0.25                
+[111] R6_2.5.1                      bookdown_0.26                
 [113] promises_1.2.0.1              gridExtra_2.3                
 [115] vipor_0.4.5                   codetools_0.2-18             
 [117] MASS_7.3-56                   assertthat_0.2.1             
@@ -544,7 +544,7 @@ loaded via a namespace (and not attached):
 [125] grid_4.1.3                    beachmat_2.10.0              
 [127] basilisk_1.6.0                tidyr_1.2.0                  
 [129] rmarkdown_2.13                DelayedMatrixStats_1.16.0    
-[131] Rtsne_0.15                    shiny_1.7.1                  
+[131] Rtsne_0.16                    shiny_1.7.1                  
 [133] ggbeeswarm_0.6.0             
 ```
 </div>

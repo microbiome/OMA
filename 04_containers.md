@@ -1135,7 +1135,7 @@ other attached packages:
 [13] GenomicRanges_1.46.1           GenomeInfoDb_1.30.1           
 [15] IRanges_2.28.0                 S4Vectors_0.32.4              
 [17] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
-[19] matrixStats_0.61.0-9003        BiocStyle_2.22.0              
+[19] matrixStats_0.62.0-9000        BiocStyle_2.22.0              
 [21] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
@@ -1149,7 +1149,7 @@ loaded via a namespace (and not attached):
  [15] magrittr_2.0.3                memoise_2.0.1                
  [17] ScaledMatrix_1.2.0            cluster_2.1.3                
  [19] DECIPHER_2.22.0               colorspace_2.0-3             
- [21] rappdirs_0.3.3                blob_1.2.2                   
+ [21] rappdirs_0.3.3                blob_1.2.3                   
  [23] ggrepel_0.9.1                 xfun_0.30                    
  [25] dplyr_1.0.8                   crayon_1.5.1                 
  [27] RCurl_1.98-1.6                jsonlite_1.8.0               
@@ -1158,7 +1158,7 @@ loaded via a namespace (and not attached):
  [33] glue_1.6.2                    gtable_0.3.0                 
  [35] zlibbioc_1.40.0               DelayedArray_0.20.0          
  [37] BiocSingular_1.10.0           Rhdf5lib_1.16.0              
- [39] scales_1.1.1                  DBI_1.1.2                    
+ [39] scales_1.2.0                  DBI_1.1.2                    
  [41] Rcpp_1.0.8.3                  xtable_1.8-4                 
  [43] viridisLite_0.4.0             decontam_1.14.0              
  [45] tidytree_0.3.9                bit_4.0.4                    
@@ -1174,7 +1174,7 @@ loaded via a namespace (and not attached):
  [65] cachem_1.0.6                  cli_3.2.0                    
  [67] DirichletMultinomial_1.36.0   generics_0.1.2               
  [69] RSQLite_2.2.12                ExperimentHub_2.2.1          
- [71] ade4_1.7-18                   evaluate_0.15                
+ [71] ade4_1.7-19                   evaluate_0.15                
  [73] biomformat_1.22.0             stringr_1.4.0                
  [75] fastmap_1.1.0                 yaml_2.3.5                   
  [77] knitr_1.38                    bit64_4.0.5                  
@@ -1186,14 +1186,14 @@ loaded via a namespace (and not attached):
  [89] png_0.1-7                     treeio_1.18.1                
  [91] tibble_3.1.6                  stringi_1.7.6                
  [93] lattice_0.20-45               Matrix_1.4-1                 
- [95] vegan_2.5-7                   permute_0.9-7                
- [97] multtest_2.50.0               vctrs_0.4.0                  
+ [95] vegan_2.6-2                   permute_0.9-7                
+ [97] multtest_2.50.0               vctrs_0.4.1                  
  [99] pillar_1.7.0                  lifecycle_1.0.1              
 [101] rhdf5filters_1.6.0            BiocNeighbors_1.12.0         
 [103] data.table_1.14.2             bitops_1.0-7                 
 [105] irlba_2.3.5                   httpuv_1.6.5                 
 [107] R6_2.5.1                      promises_1.2.0.1             
-[109] bookdown_0.25                 gridExtra_2.3                
+[109] bookdown_0.26                 gridExtra_2.3                
 [111] vipor_0.4.5                   codetools_0.2-18             
 [113] MASS_7.3-56                   assertthat_0.2.1             
 [115] rhdf5_2.38.1                  withr_2.5.0                  

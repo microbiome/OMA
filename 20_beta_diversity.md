@@ -312,6 +312,170 @@ As a final note, `mia` provides functions for the evaluation of additional dissi
 * `calculateOverlap`, `runOverlap` ()
 * `calculateDPCoA`, `runDPCoA` (Double Principal Coordinate Analysis)
 
+Redundancy analysis is similar to PCA, however, it takes into account covariates. 
+It aims to maximize the variance in respect of covariates. The results shows how much
+each covariate affects.
+
+
+```r
+# Load required packages
+if(!require("vegan")){
+    install.packages("vegan")
+    library("vegan")
+}
+if(!require("stringr")){
+    install.packages("stringr")
+    library("stringr")
+}
+if(!require("knitr")){
+    install.packages("knitr")
+    library("knitr")
+}
+# Load data
+data(enterotype)
+# Covariates that are being analyzed
+variable_names <- c("ClinicalStatus", "Gender", "Age")
+
+# Apply relative transform
+enterotype <- transformSamples(enterotype, method = "relabundance")
+
+# Get assay
+assay <- t(assay(enterotype, "relabundance"))
+# Get colData
+coldata <- colData(enterotype)
+
+# Create a formula
+formula <- as.formula(paste0("assay ~ ", str_c(variable_names, collapse = " + ")) )
+
+# # Perform RDA
+rda <- rda(formula, data = coldata, scale = TRUE, na.action = na.exclude)
+
+# Initialize list for p-values
+rda_info <- list()
+# Name for storing the result
+variable_name <- "all"
+# Calculate and store p-value, and other information
+rda_info[[variable_name]] <- c(constrained = rda$CCA$tot.chi, 
+                               unconstrainded = rda$CA$tot.chi, 
+                               proportion = rda$CCA$tot.chi/rda$CA$tot.chi, 
+                               p_value = anova.cca(rda)["Model", "Pr(>F)"] )
+
+# Loop through variables
+permutations <- 999
+for( variable_name in variable_names ){
+    # Create a formula
+    formula <- as.formula(paste0("assay ~ ", variable_name) )
+    # Perform RDA
+    rda_temp <- rda(formula, data = coldata, scale = TRUE, na.action = na.exclude)
+    # Add Info to list
+    rda_info[[variable_name]] <- c(constrained = rda_temp$CCA$tot.chi, 
+                                   unconstrainded = rda_temp$CA$tot.chi, 
+                                   proportion = rda_temp$CCA$tot.chi/rda$CA$tot.chi, 
+                                   p_value = anova.cca(rda_temp, permutations = permutations
+                                                       )["Model", "Pr(>F)"] )
+}  
+# Convert into data.frame
+rda_info <- t(as.data.frame(rda_info))
+rda_info_clean <- rda_info
+# Adjust names
+colnames(rda_info_clean) <- 
+    c("Explained by variables", "Unexplained by variables", "Proportion expl by vars", 
+      paste0("P-value (PERMANOVA ", permutations, " permutations)") )
+# Print info
+kable(rda_info_clean)
+```
+
+
+\begin{tabular}{l|r|r|r|r}
+\hline
+  & Explained by variables & Unexplained by variables & Proportion expl by vars & P-value (PERMANOVA 999 permutations)\\
+\hline
+all & 35.30 & 191.7 & 0.1842 & 0.675\\
+\hline
+ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.825\\
+\hline
+Gender & 5.31 & 223.7 & 0.0277 & 0.930\\
+\hline
+Age & 10.59 & 216.4 & 0.0552 & 0.001\\
+\hline
+\end{tabular}
+
+
+```r
+# Load ggord for plotting
+if(!require("ggord")){
+    if(!require("devtools")){
+        install.packages("devtools")
+        library("devtools")
+    }
+    install_github("https://github.com/fawda123/ggord/")
+    library("ggord")
+}
+if(!require("ggplot2")){
+    install.packages("ggplot2")
+    library("ggplot2")
+}
+# Since na.exclude was used, if there were rows missing information, they were 
+# dropped off. Subset coldata so that it matches with rda.
+coldata <- coldata[ rownames(rda$CCA$wa), ]
+
+# Adjust names
+# Get labels of vectors
+vec_lab_old <- rownames(rda$CCA$biplot)
+
+# Loop through vector labels
+vec_lab <- sapply(vec_lab_old, FUN = function(name){
+    # Get the variable name
+    variable_name <- variable_names[ str_detect(name, variable_names) ]
+    # If the vector label includes also group name
+    if( !any(name %in% variable_names) ){
+        # Get the group names
+        group_name <- unique( coldata[[variable_name]] )[ 
+        which( paste0(variable_name, unique( coldata[[variable_name]] )) == name ) ]
+        # Modify vector so that group is separated from variable name
+        new_name <- paste0(variable_name, " \U2012 ", group_name)
+    } else{
+        new_name <- name
+    }
+    # Add percentage how much this variable explains, and p-value
+    new_name <- expr(paste(!!new_name, " (", 
+                           !!format(round( rda_info[variable_name, "proportion"]*100, 1), nsmall = 1), 
+                           "%, ",italic("P"), " = ", 
+                           !!gsub("0\\.","\\.", format(round( rda_info[variable_name, "p_value"], 3), 
+                                                       nsmall = 3)), ")"))
+
+    return(new_name)
+})
+# Add names
+names(vec_lab) <- vec_lab_old
+
+# Create labels for axis
+xlab <- paste0("RDA1 (", format(round( rda$CCA$eig[[1]]/rda$CCA$tot.chi*100, 1), nsmall = 1 ), "%)")
+ylab <- paste0("RDA2 (", format(round( rda$CCA$eig[[2]]/rda$CCA$tot.chi*100, 1), nsmall = 1 ), "%)")
+
+# Create a plot        
+plot <- ggord(rda, grp_in = coldata[["ClinicalStatus"]], vec_lab = vec_lab,
+              alpha = 0.5,
+              size = 4, addsize = -4,
+              #ext= 0.7, 
+              txt = 3.5, repel = TRUE, 
+              #coord_fix = FALSE
+          ) + 
+    # Adjust titles and labels
+    guides(colour = guide_legend("ClinicalStatus"),
+           fill = guide_legend("ClinicalStatus"),
+           group = guide_legend("ClinicalStatus"),
+           shape = guide_legend("ClinicalStatus"),
+           x = guide_axis(xlab),
+           y = guide_axis(ylab)) +
+    theme( axis.title = element_text(size = 10) )
+plot
+```
+
+![](20_beta_diversity_files/figure-latex/microbiome_RDA2-1.png)<!-- --> 
+
+From RDA plto, we can see that only age has significant affect on microbial profile. 
+
 ## Visualizing the most dominant genus on PCoA
 
 In this section we visualize most dominant genus on PCoA. A similar visualization was proposed in [Taxonomic signatures of cause-specific mortality risk in human gut microbiome](https://www.nature.com/articles/s41467-021-22962-y), Salosensaari et al. (2021).
@@ -407,7 +571,6 @@ plotReducedDim(tse_Genus[,colData(tse_Genus)$Group==FALSE],
 ```
 
 ![](20_beta_diversity_files/figure-latex/unnamed-chunk-8-2.png)<!-- --> 
-
 
 
 
@@ -577,68 +740,69 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] patchwork_1.1.1                scater_1.22.0                 
- [3] scuttle_1.4.0                  ggplot2_3.3.5                 
- [5] vegan_2.5-7                    lattice_0.20-45               
- [7] permute_0.9-7                  mia_1.3.19                    
- [9] MultiAssayExperiment_1.20.0    TreeSummarizedExperiment_2.1.4
-[11] Biostrings_2.62.0              XVector_0.34.0                
-[13] SingleCellExperiment_1.16.0    SummarizedExperiment_1.24.0   
-[15] Biobase_2.54.0                 GenomicRanges_1.46.1          
-[17] GenomeInfoDb_1.30.1            IRanges_2.28.0                
-[19] S4Vectors_0.32.4               BiocGenerics_0.40.0           
-[21] MatrixGenerics_1.6.0           matrixStats_0.61.0-9003       
-[23] BiocStyle_2.22.0               rebook_1.4.0                  
+ [1] ggord_1.1.7                    knitr_1.38                    
+ [3] stringr_1.4.0                  patchwork_1.1.1               
+ [5] scater_1.22.0                  scuttle_1.4.0                 
+ [7] ggplot2_3.3.5                  vegan_2.6-2                   
+ [9] lattice_0.20-45                permute_0.9-7                 
+[11] mia_1.3.19                     MultiAssayExperiment_1.20.0   
+[13] TreeSummarizedExperiment_2.1.4 Biostrings_2.62.0             
+[15] XVector_0.34.0                 SingleCellExperiment_1.16.0   
+[17] SummarizedExperiment_1.24.0    Biobase_2.54.0                
+[19] GenomicRanges_1.46.1           GenomeInfoDb_1.30.1           
+[21] IRanges_2.28.0                 S4Vectors_0.32.4              
+[23] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
+[25] matrixStats_0.62.0-9000        BiocStyle_2.22.0              
+[27] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
- [1] Rtsne_0.15                  ggbeeswarm_0.6.0           
+ [1] Rtsne_0.16                  ggbeeswarm_0.6.0           
  [3] colorspace_2.0-3            ellipsis_0.3.2             
  [5] BiocNeighbors_1.12.0        farver_2.1.0               
  [7] ggrepel_0.9.1               bit64_4.0.5                
  [9] fansi_1.0.3                 decontam_1.14.0            
 [11] splines_4.1.3               codetools_0.2-18           
 [13] sparseMatrixStats_1.6.0     cachem_1.0.6               
-[15] knitr_1.38                  jsonlite_1.8.0             
-[17] cluster_2.1.3               graph_1.72.0               
-[19] BiocManager_1.30.16         compiler_4.1.3             
-[21] assertthat_0.2.1            Matrix_1.4-1               
-[23] fastmap_1.1.0               lazyeval_0.2.2             
-[25] cli_3.2.0                   BiocSingular_1.10.0        
-[27] htmltools_0.5.2             tools_4.1.3                
-[29] rsvd_1.0.5                  gtable_0.3.0               
-[31] glue_1.6.2                  GenomeInfoDbData_1.2.7     
-[33] reshape2_1.4.4              dplyr_1.0.8                
-[35] Rcpp_1.0.8.3                vctrs_0.4.0                
-[37] ape_5.6-2                   nlme_3.1-157               
-[39] DECIPHER_2.22.0             DelayedMatrixStats_1.16.0  
-[41] xfun_0.30                   stringr_1.4.0              
-[43] beachmat_2.10.0             lifecycle_1.0.1            
-[45] irlba_2.3.5                 XML_3.99-0.9               
-[47] zlibbioc_1.40.0             MASS_7.3-56                
-[49] scales_1.1.1                parallel_4.1.3             
-[51] yaml_2.3.5                  memoise_2.0.1              
-[53] gridExtra_2.3               yulab.utils_0.0.4          
-[55] stringi_1.7.6               RSQLite_2.2.12             
-[57] highr_0.9                   ScaledMatrix_1.2.0         
-[59] tidytree_0.3.9              filelock_1.0.2             
-[61] BiocParallel_1.28.3         rlang_1.0.2                
-[63] pkgconfig_2.0.3             bitops_1.0-7               
-[65] evaluate_0.15               purrr_0.3.4                
-[67] labeling_0.4.2              treeio_1.18.1              
-[69] CodeDepends_0.6.5           cowplot_1.1.1              
-[71] bit_4.0.4                   tidyselect_1.1.2           
-[73] plyr_1.8.7                  magrittr_2.0.3             
-[75] bookdown_0.25               R6_2.5.1                   
-[77] generics_0.1.2              DelayedArray_0.20.0        
-[79] DBI_1.1.2                   withr_2.5.0                
-[81] mgcv_1.8-40                 pillar_1.7.0               
-[83] RCurl_1.98-1.6              tibble_3.1.6               
-[85] dir.expiry_1.2.0            crayon_1.5.1               
-[87] utf8_1.2.2                  rmarkdown_2.13             
-[89] viridis_0.6.2               grid_4.1.3                 
-[91] blob_1.2.2                  digest_0.6.29              
-[93] tidyr_1.2.0                 munsell_0.5.0              
-[95] DirichletMultinomial_1.36.0 beeswarm_0.4.0             
-[97] viridisLite_0.4.0           vipor_0.4.5                
+[15] jsonlite_1.8.0              cluster_2.1.3              
+[17] graph_1.72.0                BiocManager_1.30.16        
+[19] compiler_4.1.3              assertthat_0.2.1           
+[21] Matrix_1.4-1                fastmap_1.1.0              
+[23] lazyeval_0.2.2              cli_3.2.0                  
+[25] BiocSingular_1.10.0         htmltools_0.5.2            
+[27] tools_4.1.3                 rsvd_1.0.5                 
+[29] gtable_0.3.0                glue_1.6.2                 
+[31] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
+[33] dplyr_1.0.8                 Rcpp_1.0.8.3               
+[35] vctrs_0.4.1                 ape_5.6-2                  
+[37] nlme_3.1-157                DECIPHER_2.22.0            
+[39] DelayedMatrixStats_1.16.0   xfun_0.30                  
+[41] beachmat_2.10.0             lifecycle_1.0.1            
+[43] irlba_2.3.5                 XML_3.99-0.9               
+[45] zlibbioc_1.40.0             MASS_7.3-56                
+[47] scales_1.2.0                parallel_4.1.3             
+[49] yaml_2.3.5                  memoise_2.0.1              
+[51] gridExtra_2.3               yulab.utils_0.0.4          
+[53] stringi_1.7.6               RSQLite_2.2.12             
+[55] highr_0.9                   ScaledMatrix_1.2.0         
+[57] tidytree_0.3.9              filelock_1.0.2             
+[59] BiocParallel_1.28.3         rlang_1.0.2                
+[61] pkgconfig_2.0.3             bitops_1.0-7               
+[63] evaluate_0.15               purrr_0.3.4                
+[65] labeling_0.4.2              treeio_1.18.1              
+[67] CodeDepends_0.6.5           cowplot_1.1.1              
+[69] bit_4.0.4                   tidyselect_1.1.2           
+[71] plyr_1.8.7                  magrittr_2.0.3             
+[73] bookdown_0.26               R6_2.5.1                   
+[75] generics_0.1.2              DelayedArray_0.20.0        
+[77] DBI_1.1.2                   withr_2.5.0                
+[79] mgcv_1.8-40                 pillar_1.7.0               
+[81] RCurl_1.98-1.6              tibble_3.1.6               
+[83] dir.expiry_1.2.0            crayon_1.5.1               
+[85] utf8_1.2.2                  rmarkdown_2.13             
+[87] viridis_0.6.2               grid_4.1.3                 
+[89] blob_1.2.3                  digest_0.6.29              
+[91] tidyr_1.2.0                 munsell_0.5.0              
+[93] DirichletMultinomial_1.36.0 beeswarm_0.4.0             
+[95] viridisLite_0.4.0           vipor_0.4.5                
 ```
 </div>

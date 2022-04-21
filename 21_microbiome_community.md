@@ -631,31 +631,31 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7690 BIC: 8076 AIC: 7948 
+## Laplace: 7689 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7793 BIC: 8357 AIC: 8187 
+## Laplace: 7819 BIC: 8347 AIC: 8177 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7850 BIC: 8554 AIC: 8341 
+## Laplace: 7849 BIC: 8548 AIC: 8335 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7943 BIC: 8840 AIC: 8584 
+## Laplace: 7942 BIC: 8840 AIC: 8584 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8016 BIC: 9020 AIC: 8721
+## Laplace: 8023 BIC: 9070 AIC: 8771
 ```
 
 
@@ -700,15 +700,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  787.33  1869.9 1674.5 1735
-## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.23   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
+## Mock               2       3   67  998.6  -70.65   839.2 1072.8 1134
+## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
-## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
+## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
+## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -721,7 +721,7 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.60
+## 1 0.5385 20.58
 ## 2 0.4615 15.28
 ```
 
@@ -736,12 +736,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.026e-17
-## CC1     1.000e+00 3.827e-22
-## SV1     1.000e+00 2.026e-12
-## M31Fcsw 7.316e-26 1.000e+00
-## M11Fcsw 1.062e-16 1.000e+00
-## M31Plmr 9.983e-14 1.000e+00
+## CL3     1.000e+00 5.068e-17
+## CC1     1.000e+00 3.924e-22
+## SV1     1.000e+00 1.957e-12
+## M31Fcsw 7.911e-26 1.000e+00
+## M11Fcsw 1.136e-16 1.000e+00
+## M31Plmr 1.125e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -752,13 +752,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354647
-## Phylum:Euryarchaeota  0.2314 0.1468601
-## Phylum:Actinobacteria 1.2105 1.0600838
-## Phylum:Spirochaetes   0.2141 0.1318403
-## Phylum:MVP-15         0.0299 0.0007659
-## Phylum:Proteobacteria 6.8419 1.8152342
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30380 0.1354647
+## Phylum:Euryarchaeota  0.23114 0.1468585
+## Phylum:Actinobacteria 1.21371 1.0601626
+## Phylum:Spirochaetes   0.21392 0.1318400
+## Phylum:MVP-15         0.02982 0.0007678
+## Phylum:Proteobacteria 6.84431 1.8154958
 ```
 Get the assignment probabilities
 
@@ -953,7 +953,7 @@ other attached packages:
 [21] GenomicRanges_1.46.1           GenomeInfoDb_1.30.1           
 [23] IRanges_2.28.0                 S4Vectors_0.32.4              
 [25] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
-[27] matrixStats_0.61.0-9003        ecodist_2.0.7                 
+[27] matrixStats_0.62.0-9000        ecodist_2.0.7                 
 [29] BiocStyle_2.22.0               rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
@@ -967,7 +967,7 @@ loaded via a namespace (and not attached):
  [15] ScaledMatrix_1.2.0          doParallel_1.0.17          
  [17] cluster_2.1.3               DECIPHER_2.22.0            
  [19] ComplexHeatmap_2.10.0       graphlayouts_0.8.0         
- [21] colorspace_2.0-3            blob_1.2.2                 
+ [21] colorspace_2.0-3            blob_1.2.3                 
  [23] ggrepel_0.9.1               xfun_0.30                  
  [25] dplyr_1.0.8                 crayon_1.5.1               
  [27] RCurl_1.98-1.6              jsonlite_1.8.0             
@@ -977,7 +977,7 @@ loaded via a namespace (and not attached):
  [35] zlibbioc_1.40.0             V8_4.1.0                   
  [37] GetoptLong_1.0.5            DelayedArray_0.20.0        
  [39] BiocSingular_1.10.0         shape_1.4.6                
- [41] scales_1.1.1                DBI_1.1.2                  
+ [41] scales_1.2.0                DBI_1.1.2                  
  [43] randomcoloR_1.1.0.1         Rcpp_1.0.8.3               
  [45] viridisLite_0.4.0           clue_0.3-60                
  [47] decontam_1.14.0             gridGraphics_0.5-1         
@@ -1004,14 +1004,14 @@ loaded via a namespace (and not attached):
  [89] treeio_1.18.1               tibble_3.1.6               
  [91] tweenr_1.0.2                stringi_1.7.6              
  [93] highr_0.9                   lattice_0.20-45            
- [95] Matrix_1.4-1                vegan_2.5-7                
- [97] permute_0.9-7               vctrs_0.4.0                
+ [95] Matrix_1.4-1                vegan_2.6-2                
+ [97] permute_0.9-7               vctrs_0.4.1                
  [99] pillar_1.7.0                lifecycle_1.0.1            
 [101] BiocManager_1.30.16         GlobalOptions_0.1.2        
 [103] BiocNeighbors_1.12.0        cowplot_1.1.1              
 [105] bitops_1.0-7                irlba_2.3.5                
 [107] seriation_1.3.5             R6_2.5.1                   
-[109] TSP_1.2-0                   bookdown_0.25              
+[109] TSP_1.2-0                   bookdown_0.26              
 [111] gridExtra_2.3               vipor_0.4.5                
 [113] codetools_0.2-18            MASS_7.3-56                
 [115] assertthat_0.2.1            rjson_0.2.21               
@@ -1020,7 +1020,7 @@ loaded via a namespace (and not attached):
 [121] grid_4.1.3                  ggfun_0.0.6                
 [123] beachmat_2.10.0             tidyr_1.2.0                
 [125] rmarkdown_2.13              DelayedMatrixStats_1.16.0  
-[127] Rtsne_0.15                  ggnewscale_0.4.7           
+[127] Rtsne_0.16                  ggnewscale_0.4.7           
 [129] ggforce_0.3.3               ggbeeswarm_0.6.0           
 ```
 </div>

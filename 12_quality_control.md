@@ -539,7 +539,7 @@ other attached packages:
 [17] GenomicRanges_1.46.1           GenomeInfoDb_1.30.1           
 [19] IRanges_2.28.0                 S4Vectors_0.32.4              
 [21] BiocGenerics_0.40.0            MatrixGenerics_1.6.0          
-[23] matrixStats_0.61.0-9003        BiocStyle_2.22.0              
+[23] matrixStats_0.62.0-9000        BiocStyle_2.22.0              
 [25] rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
@@ -552,7 +552,7 @@ loaded via a namespace (and not attached):
  [13] magrittr_2.0.3                memoise_2.0.1                
  [15] ScaledMatrix_1.2.0            cluster_2.1.3                
  [17] DECIPHER_2.22.0               graphlayouts_0.8.0           
- [19] colorspace_2.0-3              blob_1.2.2                   
+ [19] colorspace_2.0-3              blob_1.2.3                   
  [21] rappdirs_0.3.3                ggrepel_0.9.1                
  [23] xfun_0.30                     crayon_1.5.1                 
  [25] RCurl_1.98-1.6                jsonlite_1.8.0               
@@ -560,7 +560,7 @@ loaded via a namespace (and not attached):
  [29] glue_1.6.2                    polyclip_1.10-0              
  [31] gtable_0.3.0                  zlibbioc_1.40.0              
  [33] DelayedArray_0.20.0           BiocSingular_1.10.0          
- [35] scales_1.1.1                  DBI_1.1.2                    
+ [35] scales_1.2.0                  DBI_1.1.2                    
  [37] Rcpp_1.0.8.3                  viridisLite_0.4.0            
  [39] xtable_1.8-4                  decontam_1.14.0              
  [41] gridGraphics_0.5-1            tidytree_0.3.9               
@@ -591,13 +591,13 @@ loaded via a namespace (and not attached):
  [91] tweenr_1.0.2                  tibble_3.1.6                 
  [93] stringi_1.7.6                 highr_0.9                    
  [95] lattice_0.20-45               Matrix_1.4-1                 
- [97] vegan_2.5-7                   permute_0.9-7                
- [99] vctrs_0.4.0                   pillar_1.7.0                 
+ [97] vegan_2.6-2                   permute_0.9-7                
+ [99] vctrs_0.4.1                   pillar_1.7.0                 
 [101] lifecycle_1.0.1               BiocManager_1.30.16          
 [103] BiocNeighbors_1.12.0          cowplot_1.1.1                
 [105] bitops_1.0-7                  irlba_2.3.5                  
 [107] httpuv_1.6.5                  R6_2.5.1                     
-[109] bookdown_0.25                 promises_1.2.0.1             
+[109] bookdown_0.26                 promises_1.2.0.1             
 [111] gridExtra_2.3                 vipor_0.4.5                  
 [113] codetools_0.2-18              MASS_7.3-56                  
 [115] assertthat_0.2.1              withr_2.5.0                  

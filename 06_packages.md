@@ -111,7 +111,7 @@ other attached packages:
 [1] BiocStyle_2.22.0 rebook_1.4.0    
 
 loaded via a namespace (and not attached):
- [1] bookdown_0.25       dir.expiry_1.2.0    codetools_0.2-18   
+ [1] bookdown_0.26       dir.expiry_1.2.0    codetools_0.2-18   
  [4] XML_3.99-0.9        digest_0.6.29       stats4_4.1.3       
  [7] magrittr_2.0.3      evaluate_0.15       graph_1.72.0       
 [10] rlang_1.0.2         stringi_1.7.6       cli_3.2.0          

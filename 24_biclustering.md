@@ -35,11 +35,10 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
-Biclustering is a clustering method, which simultaneously clusters rows and columns.
-The idea is to find clusters where subset of features/samples share similar pattern 
-over samples/features. 
+Biclustering methods cluster rows and columns simultaneously in order
+to find subsets of correlated features/samples.
 
-There are multiple biclustering packages available, In this example, we use following methods
+Here, we use following packages:
 -   [biclust](https://cran.r-project.org/web/packages/biclust/index.html)
 -   [cobiclust](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13582)
 
@@ -52,10 +51,11 @@ solutions to apply biclustering to them.
 3.   Taxa vs taxa
 
 Biclusters can be visualized using heatmap or boxplot, for instance. For checking purposes, 
-also scatter plot might be valid choice. 
+also scatter plot might be valid choice.
 
-Check more ideas for heatmaps from 
+Check more ideas for heatmaps from
 [here](https://microbiome.github.io/OMA/microbiome-community.html#composition-heatmap).
+
 
 ## Taxa vs samples
 
@@ -72,49 +72,16 @@ if(!require(microbiomeDataSets)){
 }
 
 mae <- HintikkaXOData()
-
-mae
-```
-
-```
-## A MultiAssayExperiment object of 3 listed
-##  experiments with user-defined names and respective classes.
-##  Containing an ExperimentList class object of length 3:
-##  [1] microbiota: SummarizedExperiment with 12706 rows and 40 columns
-##  [2] metabolites: SummarizedExperiment with 38 rows and 40 columns
-##  [3] biomarkers: SummarizedExperiment with 39 rows and 40 columns
-## Functionality:
-##  experiments() - obtain the ExperimentList instance
-##  colData() - the primary/phenotype DataFrame
-##  sampleMap() - the sample coordination DataFrame
-##  `$`, `[`, `[[` - extract colData columns, subset, or experiment
-##  *Format() - convert into a long or wide DataFrame
-##  assays() - convert ExperimentList to a SimpleList of matrices
-##  exportClass() - save data to flat files
 ```
 
 Only the most prevalent taxa are included in analysis. 
 
 
 ```r
-# Subset data
+# Subset data in the first experiment
 mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
-# clr-transform
+# clr-transform in the first experiment
 mae[[1]] <- transformSamples(mae[[1]], method = "clr", pseudocount = 1)
-
-mae[[1]]
-```
-
-```
-## class: SummarizedExperiment 
-## dim: 57 40 
-## metadata(1): agglomerated_by_rank
-## assays(2): counts clr
-## rownames(57): D_5__Escherichia-Shigella D_5__Ruminiclostridium 5 ...
-##   D_5__[Ruminococcus] gauvreauii group D_5__Defluviitaleaceae UCG-011
-## rowData names(7): Phylum Class ... Species OTU
-## colnames(40): C1 C2 ... C39 C40
-## colData names(0):
 ```
 
 _cobiclust_ takes counts table as an input and gives _cobiclust_ object as an output.
@@ -185,7 +152,7 @@ pheatmap(assay(mae[[1]], "clr_z"), cluster_rows = F, cluster_cols = F,
 
 ![](24_biclustering_files/figure-latex/cobiclust_3-1.pdf)<!-- --> 
 
-Another common plot is a boxplot. 
+Boxplot is commonly used to summarize the results:
 
 
 ```r
@@ -205,6 +172,7 @@ melt_assay <- meltAssay(mae[[1]], abund_values = "clr", add_col_data = T, add_ro
 p1 <- ggplot(melt_assay) +
   geom_boxplot(aes(x = clusters.x, y = clr)) +
   labs(x = "Taxa clusters")
+
 p2 <- ggplot(melt_assay) +
   geom_boxplot(aes(x = clusters.y, y = clr)) +
   labs(x = "Sample clusters")
@@ -231,6 +199,7 @@ corr <- getExperimentCrossCorrelation(mae, 1, 2,
                                       mode = "matrix", 
                                       cor_threshold = 0.2)
 ```
+
 
 _biclust_ takes matrix as an input and returns _biclust_ object. 
 
@@ -262,12 +231,7 @@ bc
 ## 	    shuffle = 100, back.fit = 0, max.layers = 10, iter.startup = 10, 
 ## 	    iter.layer = 100, verbose = FALSE)
 ## 
-## Number of Clusters found:  2 
-## 
-## First  2  Cluster sizes:
-##                    BC 1 BC 2
-## Number of Rows:       8    3
-## Number of Columns:    7    8
+## There was no cluster found
 ```
 
 The object includes cluster information. However compared to _cobiclust_, 
@@ -341,13 +305,13 @@ head(bicluster_rows)
 ```
 
 ```
-##                           cluster_1 cluster_2 cluster_3
-## D_5__Escherichia-Shigella     FALSE     FALSE      TRUE
-## D_5__Ruminiclostridium 5       TRUE     FALSE     FALSE
-## D_5__Lactobacillus            FALSE     FALSE      TRUE
-## D_5__uncultured               FALSE     FALSE      TRUE
-## D_5__uncultured bacterium     FALSE     FALSE      TRUE
-## D_5__Lactococcus              FALSE     FALSE      TRUE
+##                           cluster_1
+## D_5__Ruminiclostridium 5       TRUE
+## D_5__Lactobacillus             TRUE
+## D_5__uncultured                TRUE
+## D_5__uncultured bacterium      TRUE
+## D_5__Lactococcus               TRUE
+## D_5__Lachnoclostridium         TRUE
 ```
 
 Let's collect information for the scatter plot. 
@@ -398,20 +362,20 @@ the concentration of metabolites of cluster 1 or 3 is lower, and vice versa.
 
 
 ```r
-plot_list <- list()
+pics <- list()
 
 i <- 0
 for( data in df ){
   i <- i +1
-  plot_list[[i]] <- ggplot(data)  +
+  pics[[i]] <- ggplot(data)  +
       geom_point(aes(x = median1, y = median2)) + 
-    labs(title = paste0("Cluster ", i), x = "Taxa (clr median)", y = "Metabolites (abs. median)")
+      labs(title = paste0("Cluster ", i),
+      x = "Taxa (clr median)",
+      y = "Metabolites (abs. median)")
 }
 
-plot_list[[1]] + plot_list[[2]] + plot_list[[3]]
+pics[[1]] + pics[[2]] + pics[[3]]
 ```
-
-![](24_biclustering_files/figure-latex/biclust_6-1.pdf)<!-- --> 
 
 _pheatmap_ does not allow boolean values, so they must be converted into factors.
 
@@ -536,7 +500,7 @@ other attached packages:
 [17] Biobase_2.54.0                 GenomicRanges_1.46.1          
 [19] GenomeInfoDb_1.30.1            IRanges_2.28.0                
 [21] S4Vectors_0.32.4               BiocGenerics_0.40.0           
-[23] MatrixGenerics_1.6.0           matrixStats_0.61.0-9003       
+[23] MatrixGenerics_1.6.0           matrixStats_0.62.0-9000       
 [25] BiocStyle_2.22.0               rebook_1.4.0                  
 
 loaded via a namespace (and not attached):
@@ -548,7 +512,7 @@ loaded via a namespace (and not attached):
  [11] viridis_0.6.2                 fansi_1.0.3                  
  [13] magrittr_2.0.3                memoise_2.0.1                
  [15] ScaledMatrix_1.2.0            cluster_2.1.3                
- [17] DECIPHER_2.22.0               blob_1.2.2                   
+ [17] DECIPHER_2.22.0               blob_1.2.3                   
  [19] rappdirs_0.3.3                ggrepel_0.9.1                
  [21] xfun_0.30                     dplyr_1.0.8                  
  [23] crayon_1.5.1                  RCurl_1.98-1.6               
@@ -556,7 +520,7 @@ loaded via a namespace (and not attached):
  [27] ape_5.6-2                     glue_1.6.2                   
  [29] gtable_0.3.0                  zlibbioc_1.40.0              
  [31] DelayedArray_0.20.0           additivityTests_1.1-4        
- [33] BiocSingular_1.10.0           scales_1.1.1                 
+ [33] BiocSingular_1.10.0           scales_1.2.0                 
  [35] DBI_1.1.2                     Rcpp_1.0.8.3                 
  [37] viridisLite_0.4.0             xtable_1.8-4                 
  [39] decontam_1.14.0               tidytree_0.3.9               
@@ -580,18 +544,18 @@ loaded via a namespace (and not attached):
  [75] bit64_4.0.5                   purrr_0.3.4                  
  [77] KEGGREST_1.34.0               nlme_3.1-157                 
  [79] sparseMatrixStats_1.6.0       mime_0.12                    
- [81] flexclust_1.4-0               compiler_4.1.3               
+ [81] flexclust_1.4-1               compiler_4.1.3               
  [83] beeswarm_0.4.0                filelock_1.0.2               
  [85] curl_4.3.2                    png_0.1-7                    
  [87] interactiveDisplayBase_1.32.0 treeio_1.18.1                
  [89] tibble_3.1.6                  stringi_1.7.6                
  [91] highr_0.9                     Matrix_1.4-1                 
- [93] vegan_2.5-7                   permute_0.9-7                
- [95] vctrs_0.4.0                   pillar_1.7.0                 
+ [93] vegan_2.6-2                   permute_0.9-7                
+ [95] vctrs_0.4.1                   pillar_1.7.0                 
  [97] lifecycle_1.0.1               BiocManager_1.30.16          
  [99] BiocNeighbors_1.12.0          bitops_1.0-7                 
 [101] irlba_2.3.5                   httpuv_1.6.5                 
-[103] R6_2.5.1                      bookdown_0.25                
+[103] R6_2.5.1                      bookdown_0.26                
 [105] promises_1.2.0.1              gridExtra_2.3                
 [107] vipor_0.4.5                   codetools_0.2-18             
 [109] assertthat_0.2.1              withr_2.5.0                  
