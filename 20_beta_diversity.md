@@ -390,11 +390,11 @@ kable(rda_info_clean)
 \hline
   & Explained by variables & Unexplained by variables & Proportion expl by vars & P-value (PERMANOVA 999 permutations)\\
 \hline
-all & 35.30 & 191.7 & 0.1842 & 0.675\\
+all & 35.30 & 191.7 & 0.1842 & 0.679\\
 \hline
-ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.825\\
+ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.847\\
 \hline
-Gender & 5.31 & 223.7 & 0.0277 & 0.930\\
+Gender & 5.31 & 223.7 & 0.0277 & 0.923\\
 \hline
 Age & 10.59 & 216.4 & 0.0552 & 0.001\\
 \hline

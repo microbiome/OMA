@@ -625,37 +625,37 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7673 BIC: 7927 AIC: 7842 
+## Laplace: 7681 BIC: 7902 AIC: 7818 
 ## 
 ## [[3]]
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7689 BIC: 8076 AIC: 7948 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7819 BIC: 8347 AIC: 8177 
+## Laplace: 7790 BIC: 8354 AIC: 8183 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7849 BIC: 8548 AIC: 8335 
+## Laplace: 7849 BIC: 8554 AIC: 8341 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7942 BIC: 8840 AIC: 8584 
+## Laplace: 7927 BIC: 8797 AIC: 8541 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8023 BIC: 9070 AIC: 8771
+## Laplace: 7997 BIC: 9014 AIC: 8715
 ```
 
 
@@ -680,7 +680,7 @@ getBestDMNFit(tse_dmn, type = "laplace")
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7673 BIC: 7927 AIC: 7842
+## Laplace: 7681 BIC: 7902 AIC: 7818
 ```
 
 ### PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors
@@ -700,15 +700,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.23   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
-## Mock               2       3   67  998.6  -70.65   839.2 1072.8 1134
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.14   901.2 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  787.33  1869.9 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -720,9 +720,9 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 ```
 
 ```
-##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.28
+##       pi  theta
+## 1 0.8846  10.76
+## 2 0.1154 349.00
 ```
 
 
@@ -735,13 +735,13 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##              [,1]      [,2]
-## CL3     1.000e+00 5.068e-17
-## CC1     1.000e+00 3.924e-22
-## SV1     1.000e+00 1.957e-12
-## M31Fcsw 7.911e-26 1.000e+00
-## M11Fcsw 1.136e-16 1.000e+00
-## M31Plmr 1.125e-13 1.000e+00
+##         [,1]       [,2]
+## CL3        1  0.000e+00
+## CC1        1  0.000e+00
+## SV1        1 2.938e-281
+## M31Fcsw    1  0.000e+00
+## M11Fcsw    1 3.902e-299
+## M31Plmr    1  0.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -752,13 +752,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30380 0.1354647
-## Phylum:Euryarchaeota  0.23114 0.1468585
-## Phylum:Actinobacteria 1.21371 1.0601626
-## Phylum:Spirochaetes   0.21392 0.1318400
-## Phylum:MVP-15         0.02982 0.0007678
-## Phylum:Proteobacteria 6.84431 1.8154958
+##                           [,1]    [,2]
+## Phylum:Crenarchaeota  0.167446  1.4648
+## Phylum:Euryarchaeota  0.155766  2.4076
+## Phylum:Actinobacteria 0.882684  6.1715
+## Phylum:Spirochaetes   0.144895  1.0871
+## Phylum:MVP-15         0.004283  0.2159
+## Phylum:Proteobacteria 2.300469 62.3813
 ```
 Get the assignment probabilities
 
@@ -958,7 +958,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] circlize_0.4.14             plyr_1.8.7                 
-  [3] igraph_1.3.0                lazyeval_0.2.2             
+  [3] igraph_1.3.1                lazyeval_0.2.2             
   [5] splines_4.1.3               BiocParallel_1.28.3        
   [7] digest_0.6.29               foreach_1.5.2              
   [9] yulab.utils_0.0.4           htmltools_0.5.2            

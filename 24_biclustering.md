@@ -363,18 +363,21 @@ the concentration of metabolites of cluster 1 or 3 is lower, and vice versa.
 
 ```r
 pics <- list()
-
-i <- 0
-for( data in df ){
-  i <- i +1
-  pics[[i]] <- ggplot(data)  +
+for(i in seq_along(df)){
+  pics[[i]] <- ggplot(df[[i]])  +
       geom_point(aes(x = median1, y = median2)) + 
       labs(title = paste0("Cluster ", i),
-      x = "Taxa (clr median)",
-      y = "Metabolites (abs. median)")
+           x = "Taxa (clr median)",
+           y = "Metabolites (abs. median)")
+  print(pics[[i]])
 }
+```
 
-pics[[1]] + pics[[2]] + pics[[3]]
+
+\includegraphics[width=0.33\linewidth]{24_biclustering_files/figure-latex/biclust_6-1} 
+
+```r
+# pics[[1]] + pics[[2]] + pics[[3]]
 ```
 
 _pheatmap_ does not allow boolean values, so they must be converted into factors.

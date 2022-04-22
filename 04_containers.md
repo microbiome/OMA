@@ -1140,7 +1140,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.2.2           BiocFileCache_2.2.1          
-  [3] plyr_1.8.7                    igraph_1.3.0                 
+  [3] plyr_1.8.7                    igraph_1.3.1                 
   [5] lazyeval_0.2.2                splines_4.1.3                
   [7] BiocParallel_1.28.3           scater_1.22.0                
   [9] digest_0.6.29                 foreach_1.5.2                

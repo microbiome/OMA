@@ -781,7 +781,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.9981
+## Proportions of Observations within 95% Credible Interval: 0.998
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
@@ -864,7 +864,7 @@ loaded via a namespace (and not attached):
  [23] ggdist_3.1.1                  promises_1.2.0.1             
  [25] evaluate_0.15                 DEoptimR_1.0-11              
  [27] fansi_1.0.3                   dbplyr_2.1.1                 
- [29] readxl_1.4.0                  igraph_1.3.0                 
+ [29] readxl_1.4.0                  igraph_1.3.1                 
  [31] DBI_1.1.2                     htmlwidgets_1.5.4            
  [33] tensorA_0.36.2                hash_2.2.6.2                 
  [35] ellipsis_0.3.2                backports_1.4.1              
