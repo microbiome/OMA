@@ -5,11 +5,10 @@ library(rebook)
 chapterPreamble()
 ```
 
-Biclustering is a clustering method, which simultaneously clusters rows and columns.
-The idea is to find clusters where subset of features/samples share similar pattern 
-over samples/features. 
+Biclustering methods cluster rows and columns simultaneously in order
+to find subsets of correlated features/samples.
 
-There are multiple biclustering packages available, In this example, we use following methods
+Here, we use following packages:
 -   [biclust](https://cran.r-project.org/web/packages/biclust/index.html)
 -   [cobiclust](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13582)
 
@@ -22,7 +21,7 @@ solutions to apply biclustering to them.
 3.   Taxa vs taxa
 
 Biclusters can be visualized using heatmap or boxplot, for instance. For checking purposes, 
-also scatter plot might be valid choice. 
+also scatter plot might be valid choice.
 
 Check more ideas for heatmaps from chapters \@ref(viz-chapter) and \@ref(microbiome-community.
 
@@ -40,19 +39,15 @@ if(!require(microbiomeDataSets)){
 }
 
 mae <- HintikkaXOData()
-
-mae
 ```
 
 Only the most prevalent taxa are included in analysis. 
 
 ```{r cobiclust_1}
-# Subset data
+# Subset data in the first experiment
 mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
-# clr-transform
+# clr-transform in the first experiment
 mae[[1]] <- transformSamples(mae[[1]], method = "clr", pseudocount = 1)
-
-mae[[1]]
 ```
 
 _cobiclust_ takes counts table as an input and gives _cobiclust_ object as an output.
@@ -108,7 +103,7 @@ pheatmap(assay(mae[[1]], "clr_z"), cluster_rows = F, cluster_cols = F,
 
 ```
 
-Another common plot is a boxplot. 
+Boxplot is commonly used to summarize the results:
 
 ```{r cobiclust_4}
 if(!require(ggplot2)){
@@ -127,6 +122,7 @@ melt_assay <- meltAssay(mae[[1]], abund_values = "clr", add_col_data = T, add_ro
 p1 <- ggplot(melt_assay) +
   geom_boxplot(aes(x = clusters.x, y = clr)) +
   labs(x = "Taxa clusters")
+
 p2 <- ggplot(melt_assay) +
   geom_boxplot(aes(x = clusters.y, y = clr)) +
   labs(x = "Sample clusters")
@@ -151,6 +147,7 @@ corr <- getExperimentCrossCorrelation(mae, 1, 2,
                                       cor_threshold = 0.2)
 
 ```
+
 
 _biclust_ takes matrix as an input and returns _biclust_ object. 
 
@@ -275,7 +272,6 @@ Let's collect information for the scatter plot.
 
 # Calculate info
 df <- .sum_mean_median_var(mae[[1]], mae[[2]], "clr", "nmr", bicluster_rows, bicluster_columns)
-
 ```
 
 Now we can create a scatter plot. X-axis includes median clr abundance of microbiome
@@ -286,18 +282,17 @@ From the plots, we can see that there is low negative correlation in both cluste
 This means that when abundance of bacteria belonging to cluster 1 or 3 is higher, 
 the concentration of metabolites of cluster 1 or 3 is lower, and vice versa. 
 
-```{r biclust_6, fig.width=14, fig.height=6}
-plot_list <- list()
-
-i <- 0
-for( data in df ){
-  i <- i +1
-  plot_list[[i]] <- ggplot(data)  +
+```{r biclust_6, fig.width=14, fig.height=6, fig.show="keep", out.width="33%"}
+pics <- list()
+for(i in seq_along(df)){
+  pics[[i]] <- ggplot(df[[i]])  +
       geom_point(aes(x = median1, y = median2)) + 
-    labs(title = paste0("Cluster ", i), x = "Taxa (clr median)", y = "Metabolites (abs. median)")
+      labs(title = paste0("Cluster ", i),
+           x = "Taxa (clr median)",
+           y = "Metabolites (abs. median)")
+  print(pics[[i]])
 }
-
-plot_list[[1]] + plot_list[[2]] + plot_list[[3]]
+# pics[[1]] + pics[[2]] + pics[[3]]
 ```
 
 _pheatmap_ does not allow boolean values, so they must be converted into factors.

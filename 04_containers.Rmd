@@ -233,6 +233,94 @@ Table: (\#tab:options) **Recommended options for storing multiple data tables in
 
 ## Loading experimental microbiome data
 
+### 16S workflow
+
+Result of amplicon sequencing is large number of files that include all the sequences
+that were read from samples. Those sequences need to be matched with taxa. Additionally,
+we need to know how many times each taxa were found from each sample. 
+
+There are several algorithms to do that, and DADA2 is one of the most common. 
+You can find DADA2 pipeline tutorial for example from 
+[here](https://benjjneb.github.io/dada2/tutorial.html).
+After DADA2 portion of the tutorial is the data is stored into _phyloseq_ object 
+(Bonus: Handoff to phyloseq). To store the data to _TreeSummarizedExperiment_,
+follow the example below. 
+
+You can find full workflow script without further explanations and comments from 
+[here](https://github.com/microbiome/OMA/blob/master/dada2_workflow.Rmd)
+
+```{r dada2_1, include=FALSE}
+# Load objects
+seqtab.nochim <- readRDS("data/dada2_seqtab.nochim")
+taxa <- readRDS("data/dada2_taxa")
+```
+
+Load required packages.
+
+```{r dada2_2}
+library(mia)
+library(ggplot2)
+
+if( !require("BiocManager") ){
+    install.packages("BiocManager")
+    library("BiocManager")
+}
+
+if( !require("Biostrings") ){
+    BiocManager::install("Biostrings")
+    library("Biostrings")
+}
+library(Biostrings)
+```
+
+Create arbitrary example sample metadata like it was done in tutorial. Usually, 
+sample metadata is imported as a file.
+
+```{r dada2_3}
+samples.out <- rownames(seqtab.nochim)
+subject <- sapply(strsplit(samples.out, "D"), `[`, 1)
+gender <- substr(subject,1,1)
+subject <- substr(subject,2,999)
+day <- as.integer(sapply(strsplit(samples.out, "D"), `[`, 2))
+samdf <- data.frame(Subject=subject, Gender=gender, Day=day)
+samdf$When <- "Early"
+samdf$When[samdf$Day>100] <- "Late"
+rownames(samdf) <- samples.out
+```
+
+Convert data into right format and create _TreeSE_ object.
+
+```{r dada2_4}
+# Create a list that contains assays
+counts <- t(seqtab.nochim)
+assays <- SimpleList(counts = counts)
+
+# Convert colData and rowData into DataFrame
+samdf <- DataFrame(samdf)
+taxa <- DataFrame(taxa)
+
+# Create TreeSE
+tse <- TreeSummarizedExperiment(assays = assays,
+                                colData = samdf,
+                                rowData = taxa
+                                )
+
+# Remove mock sample like it is also done in DADA2 pipeline tutorial
+tse <- tse[ , colnames(tse) != "mock"]
+```
+
+Add sequences into _referenceSeq_ slot and convert rownames into simpler format.
+
+```{r dada2_5}
+# Convert sequences into right format
+dna <- Biostrings::DNAStringSet( rownames(tse) )
+# Add sequences into referenceSeq slot
+referenceSeq(tse) <- dna
+# Convert rownames into ASV_number format
+rownames(tse) <- paste0("ASV", seq( nrow(tse) ))
+tse
+```
+
 ### Import from external files
 
 Microbiome (taxonomic) profiling data is commonly distributed in
@@ -253,9 +341,9 @@ format. Here, we provide examples for common formats.
 counts  <- read.csv(count_file)   # Abundance table (e.g. ASV data; to assay data)
 tax     <- read.csv(tax_file)     # Taxonomy table (to rowData)
 samples <- read.csv(sample_file)  # Sample data (to colData)
-se <- SummarizedExperiment(assays = list(counts = counts),
-                           colData = samples,
-                           rowData = tax)
+tse <- TreeSummarizedExperiment(assays = list(counts = counts),
+                                colData = samples,
+                                rowData = tax)
 ```
 
 Specific import functions are provided for:
@@ -395,6 +483,9 @@ does not include a slot for adding a phylogenetic tree. In order to do
 this, we can convert the SE object to an extended TreeSummarizedExperiment
 object which includes also a `rowTree` slot.
 
+TreeSummarizedExperiment contains also other additional slots and features which
+is why we recommend to use `TreeSE`.
+
 ```{r}
 tse <- as(se, "TreeSummarizedExperiment")
 
@@ -459,7 +550,11 @@ GlobalPatterns_phyloseq2
 ```
 
 
-
+Conversion is possible between other data formats. Interested readers can refer to the following functions:
+* [makeTreeSummarizedExperimentFromDADA2](https://microbiome.github.io/mia/reference/makeTreeSummarizedExperimentFromDADA2.html)
+* [makeSummarizedExperimentFromBiom](https://microbiome.github.io/mia/reference/makeSummarizedExperimentFromBiom.html)
+* [loadFromMetaphlan](https://microbiome.github.io/mia/reference/loadFromMetaphlan.html)
+* [readQZA](https://microbiome.github.io/mia/reference/loadFromQIIME2.html)
 
 
 ## Demonstration data {#example-data}

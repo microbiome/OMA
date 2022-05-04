@@ -93,47 +93,50 @@ with concentrations of individual metabolites. This helps as to answer the quest
 
 ```{r cross-correlation5}
 # Agglomerate microbiome data at Genus level
-mae[[1]] <- agglomerateByRank(mae[[1]], rank = "Genus")
+mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Genus")
 # Does log10 transform for microbiome data
 mae[[1]] <- transformSamples(mae[[1]], method = "log10", pseudocount = 1)
 
+# Give unique names so that we do not have problems when we are creating a plot
+rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]])
+
 # Cross correlates data sets
-correlation_table <- testExperimentCrossCorrelation(mae, 
-                                                    experiment1 = 1,
-                                                    experiment2 = 2,
-                                                    abund_values1 = "log10", 
-                                                    abund_values2 = "nmr",
-                                                    method = "spearman", 
-                                                    p_adj_threshold = 0.05,
-                                                    cor_threshold = 0)
-
-knitr::kable(head(correlation_table))
-```
-
-Reorders the table
-
-```{r cross-correlation6}
-if(!require(reshape2)){
-    install.packages("reshape2")
-}
-
-# Converts data to matrix, correlations as values
-mat <- reshape2::acast(correlation_table, Var2 ~ Var1, value.var = "cor")
-
-# Hierarchical clustering, gets the order of taxa and lipids
-taxa_indices <- hclust(as.dist(1 - cor(mat, use="pairwise.complete.obs")))$order
-order_taxa <- colnames(mat)[taxa_indices]
-lipids_indices <- hclust(as.dist(1 - cor(t(mat), use="pairwise.complete.obs")))$order
-order_lipids <- rownames(mat)[lipids_indices]
-
-# Converts taxa and lipids columns to factor so that they have the desired order
-correlation_table[["Var1"]] <- factor(correlation_table[["Var1"]], levels = order_taxa)
-correlation_table[["Var2"]] <- factor(correlation_table[["Var2"]], levels = order_lipids)
+correlations <- testExperimentCrossCorrelation(mae, 
+                                               experiment1 = 1,
+                                               experiment2 = 2,
+                                               abund_values1 = "log10", 
+                                               abund_values2 = "nmr",
+                                               method = "spearman", 
+                                               p_adj_threshold = 0.05,
+                                               cor_threshold = 0,
+                                               # Remove when mia is fixed
+                                               # mode = "matrix",
+                                               # sort = TRUE,
+                                               show_warnings = FALSE)
 ```
 
 Creates the heatmap
 
-```{r cross-correlation7, fig.width=10, fig.height=8}
+```{r cross-correlation6, fig.width=10, fig.height=8}
+# if( !require("ComplexHeatmap") ){
+#     BiocManager::install("ComplexHeatmap")
+#     library("ComplexHeatmap")
+# }
+#
+# # Create a heatmap and store it
+# plot <- Heatmap(correlations$cor, 
+#                 # Print values to cells
+#                 cell_fun = function(j, i, x, y, width, height, fill) {
+#                     # If the p-value is under threshold
+#                     if( correlations$p_adj[i, j] < 0.05 )
+#                         # Print "X"
+#                         grid.text(sprintf("%s", "X"), x, y, gp = gpar(fontsize = 8, col = "black"))
+#                     },
+#                 heatmap_legend_param = list(title = "", legend_height = unit(5, "cm"))
+#                 )
+# plot
+
+
 library(ggplot2)
 
 # Determines the scaling of colors
@@ -142,18 +145,18 @@ breaks <- seq(from = min(limits), to = max(limits), by = 0.2)
 colours <- c("darkblue", "blue", "white", "red", "darkred")
 
 # Which observation have p-value under 0.05? --> creates a subset
-cor_table_sub <- correlation_table[which(correlation_table[["p_adj"]] < 0.05), ]
+cor_table_sub <- correlations[which(correlations[["p_adj"]] < 0.05), ]
 
 # Creates a ggplot object
-ggplot(correlation_table, aes(x = Var1, y = Var2, fill = cor)) +
+ggplot(correlations, aes(x = Var1, y = Var2, fill = cor)) +
   geom_tile() +
-  
-  scale_fill_gradientn(name = "Correlation", 
-                       breaks = breaks, limits = limits, colours = colours) + 
-  
+
+  scale_fill_gradientn(name = "Correlation",
+                       breaks = breaks, limits = limits, colours = colours) +
+
   # Adds label to those observations that have p-value under 0.05
   geom_text(data = cor_table_sub, aes(x = Var1, y = Var2, label = "+")) +
-  
+
   theme(text = element_text(size=10),
         axis.text.x = element_text(angle=45, hjust=1),
         legend.key.size = unit(1, "cm")) +

@@ -6,18 +6,17 @@ library(rebook)
 chapterPreamble()
 ```
 
-This chapter focuses on the exploration and quality control of
-microbiome data and establishes commonly used descriptors of a
-microbiome. The main difference to quality control is that the
-exploration assumes that technical aspects of the dataset have been
-investigated to your satisfaction. Generally speaking, at this point
-you should be quite certain that the dataset does not suffer from
-severe technical biases, or you should at least be aware of potential
-problems.
+This chapter focuses on the quality control and exploration of
+microbiome data and establishes commonly used descriptive
+summaries. Familiarizing with the peculiarities of a given data set is
+the essential basis for any data analysis and model building.
 
-In reality you might need to go back and forth between QC and exploration, 
-since you discover through exploration of your dataset technical aspects you 
-need to check.
+The dataset should not suffer from severe technical biases, and you
+should at least be aware of potential challenges, such as outliers,
+biases, unexpected patterns and so forth. Standard summaries and
+visualizations can help, and the rest comes with experience. The
+exploration and quality control can be iterative processes.
+
 
 ```{r, message=FALSE}
 library(mia)
@@ -26,22 +25,21 @@ library(mia)
 
 ## Abundance
 
-One initial approach for exploring data is by visualizing abundance. `miaViz` offers
-the function `plotAbundanceDensity` where most abundant taxa can be plotted 
-including several options.
+Abundance visualization is an important data exploration
+approach. `miaViz` offers the function `plotAbundanceDensity` to plot
+the most abundant taxa with several options.
 
-In the following few demonstrations are shown, using the 
-[@Lahti2014] dataset.
-
-A Jitter plot based on relative abundance data, similar to the one presented at 
-[@Salosensaari2021] supplementary figure 1, could be visualized as follows: 
+In the following few demonstrations are shown, using the [@Lahti2014]
+dataset. A Jitter plot based on relative abundance data, similar to
+the one presented at [@Salosensaari2021] supplementary figure 1, could
+be visualized as follows:
 
 ```{r, warning=FALSE, message=FALSE}
 # Loading data
 library(microbiomeDataSets)
 tse <- atlas1006()
 
-# Counts relative abundances
+# Add relative abundances
 tse <- transformSamples(tse, method = "relabundance")
 
 library(miaViz)
@@ -50,13 +48,13 @@ plotAbundanceDensity(tse, layout = "jitter", abund_values = "relabundance",
     scale_x_log10(label=scales::percent)
 ```
 
-For instance, relative abundance values for the top 5 taxa can be
-visualized as a density plot over a log scaled axis, using
-"nationality" as an overlaying information:
+The relative abundance values for the top-5 taxonomic features can be
+visualized as a density plot over a log scaled axis, with
+"nationality" indicated by colors:
 
 ```{r, warning=FALSE, message=FALSE}
 plotAbundanceDensity(tse, layout = "density", abund_values = "relabundance",
-                     n = 5, colour_by="nationality", point_alpha=1/10 ) +
+                     n = 5, colour_by="nationality", point_alpha=1/10) +
     scale_x_log10()
 ```
 
@@ -64,66 +62,70 @@ plotAbundanceDensity(tse, layout = "density", abund_values = "relabundance",
 
 ## Prevalence
 
-Prevalence is a measurement which describes in how many samples certain
-microbes were detected.
+Prevalence quantifies the frequency of samples where certain microbes
+were detected (above a given detection threshold). The prevalence can
+be given as sample size (N) or percentage (unit interval).
 
-Investigating the prevalence of microbes allows you either to focus on changes,
-which pertain to most of the samples, or to focus on less often found microbes,
-which are nonetheless abundantly found in a small number of samples.
+Investigating prevalence allows you either to focus on changes which
+pertain to the majority of the samples, or identify rare microbes,
+which may be _conditionally abundant_ in a small number of samples,
+however.
 
-On the raw data, the population prevalence (frequency) at a 1% relative
-abundance threshold (`detection = 1/100` and `as_relative = TRUE`), can look
-like this. The low prevalence in this example can be explained by rather
-different sample types as well as the in-depth nature of the data.
+The population prevalence (frequency) at a 1% relative abundance
+threshold (`detection = 1/100` and `as_relative = TRUE`), can look
+like this. 
 
 ```{r exploration-prevalence}
 head(getPrevalence(tse, detection = 1/100, sort = TRUE, as_relative = TRUE))
 ```
 
-The `detection` and `as_relative` can also be used to access, how many samples
-do pass a threshold for raw counts. Here the population prevalence (frequency) 
-at the absolute abundance threshold (`as_relative = FALSE`) at read count 1
-(`detection = 1`) is accessed.
+The function arguments `detection` and `as_relative` can also be used
+to access, how many samples do pass a threshold for raw counts. Here
+the population prevalence (frequency) at the absolute abundance
+threshold (`as_relative = FALSE`) at read count 1 (`detection = 1`) is
+accessed.
 
 ```{r concepts_prevalence2}
 head(getPrevalence(tse, detection = 1, sort = TRUE, abund_values = "counts",
                    as_relative = FALSE))
 ```
 
-Note that, if the output should be used for subsetting or storing the data in 
-the `rowData`, set `sort = FALSE`.
+If the output should be used for subsetting or storing the data in the
+`rowData`, set `sort = FALSE`.
 
-### Prevalent microbiota analysis
 
-To investigate the microbiome data at a selected taxonomic level, two 
+### Prevalence analysis
+
+To investigate microbiome prevalence at a selected taxonomic level, two 
 approaches are available.
 
 First the data can be agglomerated to the taxonomic level and `getPrevalence` 
-be used on the result.
+applied on the resulting object.
 
 ```{r}
+# Agglomerate taxa abundances to Phylum level, and add the new table to the altExp slot
 altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
+# Check prevalence for the Phylum abundance table from the altExp slot
 head(getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = TRUE,
                    abund_values = "counts", as_relative = TRUE))
-
 ```
 
-Alternatively, the `rank` argument can be set to perform the agglomeration on
+
+Alternatively, the `rank` argument could be set to perform the agglomeration on
 the fly.
 
 ```{r}
-altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
 head(getPrevalence(tse, rank = "Phylum", detection = 1/100, sort = TRUE,
                    abund_values = "counts", as_relative = TRUE))
 ```
 
-The difference in the naming scheme is that, by default, `na.rm = TRUE` is used
-for agglomeration in `getPrevalence`, whereas the default for 
-`agglomerateByRank` is `FALSE` to prevent accidental data loss.
+Note that, by default, `na.rm = TRUE` is used for agglomeration in
+`getPrevalence`, whereas the default for `agglomerateByRank` is
+`FALSE` to prevent accidental data loss.
 
-If you only need the names of the prevalent taxa, `getPrevalentTaxa` is
-available. This returns the taxa that exceed the given prevalence and detection
-thresholds.
+If you only need the names of the prevalent taxa, `getPrevalentTaxa`
+is available. This returns the taxa that exceed the given prevalence
+and detection thresholds.
 
 ```{r core-members, message=FALSE, warning=FALSE, eval = FALSE}
 getPrevalentTaxa(tse, detection = 0, prevalence = 50/100)
@@ -136,13 +138,23 @@ Note that the `detection` and `prevalence` thresholds are not the same, since
 `detection` can be applied to relative counts or absolute counts depending on 
 whether `as_relative` is set `TRUE` or `FALSE`
 
-TODO
-See also related functions for the analysis of rare and variable taxa
-(rareMembers; rareAbundance; lowAbundance). 
+
+The function ‘getPrevalentAbundance’ can be used to check the total
+relative abundance of the prevalent taxa (between 0 and 1).
+
+
+### Rare taxa
+
+Related functions are available for the analysis of rare taxa
+(`rareMembers`; `rareAbundance`; `lowAbundance`, `getRareTaxa`,
+`subsetByRareTaxa`).
+
 
 ### Plotting prevalence
 
-To plot the prevalence, the data is first added to the `rowData`.
+To plot the prevalence, add the prevalence of each taxa to the
+`rowData`. Here, we are analysing the Phylum level abundances, which
+are stored in the altExp slot.
 
 ```{r}
 rowData(altExp(tse,"Phylum"))$prevalence <- 
@@ -150,14 +162,15 @@ rowData(altExp(tse,"Phylum"))$prevalence <-
                   abund_values = "counts", as_relative = TRUE)
 ```
 
-Then it can be plotted via the plotting functions from the `scater` package.
+The prevalences can be then plotted via the plotting functions from
+the `scater` package.
  
 ```{r, message=FALSE, warning=FALSE}
 library(scater)
 plotRowData(altExp(tse,"Phylum"), "prevalence", colour_by = "Phylum")
 ```
 
-Additionally, the prevalence can be plotted on the taxonomic tree using the
+The prevalence can be also visualized on the taxonomic tree with the
 `miaViz` package.
 
 ```{r}
@@ -200,7 +213,10 @@ plotRowTree(x[rowData(x)$Phylum %in% top_phyla_mean,],
 ```
 
 
+## Quality control
 
+Next, let us load the `GlobalPatterns` data set to illustrate standard
+microbiome data summaries.
 
 
 ## Quality control {#qc}
@@ -214,15 +230,18 @@ tse <- GlobalPatterns
 
 ### Top taxa  
 
-The `getTopTaxa` can be used for identifying top taxa in the data.   
+The `getTopTaxa` identifies top taxa in the data.   
+
 ```{r top-feature-taxo}
+# Pick the top taxa
 top_features <- getTopTaxa(tse, method="median", top=10)
-tax_data <- rowData(tse)[top_features,taxonomyRanks(tse)]
-tax_data
+
+# Check the information for these
+rowData(tse)[top_features, taxonomyRanks(tse)]
 ```
 
 
-### Library size   
+### Library size / read count  
 
 The total counts/sample can be calculated using the
 `perCellQCMetrics`/`addPerCellQC` from the `scater` package. The former one 
@@ -292,6 +311,25 @@ plotColData(tse,"sum","X.SampleID", colour_by = "SampleType") +
 plotColData(tse,"sum","SampleType", colour_by = "SampleType") + 
     theme(axis.text.x = element_text(angle = 45, hjust=1))
 ```
+
+In addition, data can be rarefied with
+[subsampleCounts](https://microbiome.github.io/mia/reference/subsampleCounts.html),
+which normalises the samples to an equal number of reads. However,
+this practice has been discouraged for the analysis of differentially
+abundant microorganisms (see [@mcmurdie2014waste]).
+  
+
+### Contaminant sequences
+
+Samples might be contaminated with exogenous sequences. The impact of
+each contaminant can be estimated based on their frequencies and
+concentrations across the samples.
+
+The following [decontam functions](https://microbiome.github.io/mia/reference/isContaminant.html)
+are based on the [@davis2018simple] and support such functionality:
+
+* `isContaminant`, `isNotContaminant`
+* `addContaminantQC`, `addNotContaminantQC`
 
 
 ## Session Info {-}
