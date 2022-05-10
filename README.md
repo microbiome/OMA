@@ -15,7 +15,15 @@ The book can also be built locally:
 bookdown::render_book("index.Rmd", "bookdown::gitbook")
 ```
 
-To install the necessary dependencies to build to book, please run
+You can view the book also with:
+
+```
+bookdown::serve_book()
+```
+
+
+To install the necessary dependencies to build to book, run
+
 ```
 BiocManager::install(remotes::local_package_deps(dependencies=TRUE))
 ```
@@ -31,6 +39,11 @@ To contribute reports, follow the Git flow procedure:
 5. Fix and discuss issues in the review process
 
 Please note that chapters should be independent of each other.
+
+### Adding new sections
+
+- Create the relevant Rmd file; follow the numbering logic
+- Add it also to the list in file [_bookdown.yml](_bookdown.yml). 
 
 
 # Code of conduct
