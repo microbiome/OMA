@@ -1,4 +1,4 @@
-# Community diversity
+# Community diversity {#community-diversity}
 
 <script>
 document.addEventListener("click", function (event) {
@@ -102,7 +102,7 @@ with other packages implementing the calculation, such as _`vegan`_
 [@R-vegan].
 
 
-### Richness  
+### Richness {#richness}
 
 Richness gives the number of features present within a community and can be calculated with `estimateRichness`. Each of the estimate diversity/richness/evenness/dominance functions adds the calculated measure(s) to the `colData` of the `SummarizedExperiment` under the given column `name`. Here, we calculate `observed` features as a measure of richness.     
 
@@ -136,7 +136,7 @@ plotColData(tse,
 
 ![(\#fig:plot-div-shannon)Shannon diversity estimates plotted grouped by sample type with colour-labeled barcode.](14_alpha_diversity_files/figure-latex/plot-div-shannon-1.pdf) 
 
-### Diversity  
+### Diversity {#estimate-diversity}  
 
 The main function, `estimateDiversity`, calculates the selected
 diversity index based on the selected assay data.  
@@ -194,7 +194,7 @@ ggplot(df, aes(x = SampleType, y = shannon)) +
 
 ![](14_alpha_diversity_files/figure-latex/visualize-shannon-1.pdf)<!-- --> 
 
-### Faith phylogenetic diversity
+### Faith phylogenetic diversity {#faith-diversity}
 
 The Faith index is returned by the function `estimateFaith`.
 
@@ -332,12 +332,13 @@ plots <- lapply(plots, "+",
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.1.3 (2022-03-10)
+R version 4.2.0 (2022-04-22)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 20.04.4 LTS
 
 Matrix products: default
-BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.8.so
+BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
+LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/liblapack.so.3
 
 locale:
  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
@@ -353,67 +354,67 @@ attached base packages:
 
 other attached packages:
  [1] patchwork_1.1.1                ggsignif_0.6.3                
- [3] scater_1.22.0                  ggplot2_3.3.5                 
- [5] scuttle_1.4.0                  mia_1.3.19                    
- [7] MultiAssayExperiment_1.20.0    TreeSummarizedExperiment_2.1.4
- [9] Biostrings_2.62.0              XVector_0.34.0                
-[11] SingleCellExperiment_1.16.0    SummarizedExperiment_1.24.0   
-[13] Biobase_2.54.0                 GenomicRanges_1.46.1          
-[15] GenomeInfoDb_1.30.1            IRanges_2.28.0                
-[17] S4Vectors_0.32.4               BiocGenerics_0.40.0           
-[19] MatrixGenerics_1.6.0           matrixStats_0.62.0-9000       
-[21] BiocStyle_2.22.0               rebook_1.4.0                  
+ [3] scater_1.24.0                  ggplot2_3.3.6                 
+ [5] scuttle_1.6.2                  mia_1.3.22                    
+ [7] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
+ [9] Biostrings_2.64.0              XVector_0.36.0                
+[11] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
+[13] Biobase_2.56.0                 GenomicRanges_1.48.0          
+[15] GenomeInfoDb_1.32.2            IRanges_2.30.0                
+[17] S4Vectors_0.34.0               BiocGenerics_0.42.0           
+[19] MatrixGenerics_1.8.0           matrixStats_0.62.0-9000       
+[21] BiocStyle_2.24.0               rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
   [1] ggbeeswarm_0.6.0            colorspace_2.0-3           
-  [3] ellipsis_0.3.2              BiocNeighbors_1.12.0       
+  [3] ellipsis_0.3.2              BiocNeighbors_1.14.0       
   [5] farver_2.1.0                ggrepel_0.9.1              
   [7] bit64_4.0.5                 fansi_1.0.3                
-  [9] decontam_1.14.0             splines_4.1.3              
- [11] codetools_0.2-18            sparseMatrixStats_1.6.0    
- [13] cachem_1.0.6                knitr_1.38                 
+  [9] decontam_1.16.0             splines_4.2.0              
+ [11] codetools_0.2-18            sparseMatrixStats_1.8.0    
+ [13] cachem_1.0.6                knitr_1.39                 
  [15] jsonlite_1.8.0              cluster_2.1.3              
- [17] graph_1.72.0                BiocManager_1.30.16        
- [19] compiler_4.1.3              assertthat_0.2.1           
+ [17] graph_1.74.0                BiocManager_1.30.17        
+ [19] compiler_4.2.0              assertthat_0.2.1           
  [21] Matrix_1.4-1                fastmap_1.1.0              
- [23] lazyeval_0.2.2              cli_3.2.0                  
- [25] BiocSingular_1.10.0         htmltools_0.5.2            
- [27] tools_4.1.3                 rsvd_1.0.5                 
+ [23] lazyeval_0.2.2              cli_3.3.0                  
+ [25] BiocSingular_1.12.0         htmltools_0.5.2            
+ [27] tools_4.2.0                 rsvd_1.0.5                 
  [29] gtable_0.3.0                glue_1.6.2                 
- [31] GenomeInfoDbData_1.2.7      reshape2_1.4.4             
- [33] dplyr_1.0.8                 Rcpp_1.0.8.3               
+ [31] GenomeInfoDbData_1.2.8      reshape2_1.4.4             
+ [33] dplyr_1.0.9                 Rcpp_1.0.8.3               
  [35] vctrs_0.4.1                 ape_5.6-2                  
- [37] nlme_3.1-157                DECIPHER_2.22.0            
- [39] DelayedMatrixStats_1.16.0   xfun_0.30                  
- [41] stringr_1.4.0               beachmat_2.10.0            
+ [37] nlme_3.1-157                DECIPHER_2.24.0            
+ [39] DelayedMatrixStats_1.18.0   xfun_0.31                  
+ [41] stringr_1.4.0               beachmat_2.12.0            
  [43] lifecycle_1.0.1             irlba_2.3.5                
- [45] XML_3.99-0.9                zlibbioc_1.40.0            
- [47] MASS_7.3-56                 scales_1.2.0               
- [49] parallel_4.1.3              yaml_2.3.5                 
+ [45] XML_3.99-0.9                zlibbioc_1.42.0            
+ [47] MASS_7.3-57                 scales_1.2.0               
+ [49] parallel_4.2.0              yaml_2.3.5                 
  [51] memoise_2.0.1               gridExtra_2.3              
  [53] yulab.utils_0.0.4           stringi_1.7.6              
- [55] RSQLite_2.2.12              highr_0.9                  
- [57] ScaledMatrix_1.2.0          tidytree_0.3.9             
+ [55] RSQLite_2.2.14              highr_0.9                  
+ [57] ScaledMatrix_1.4.0          tidytree_0.3.9             
  [59] permute_0.9-7               filelock_1.0.2             
- [61] BiocParallel_1.28.3         rlang_1.0.2                
+ [61] BiocParallel_1.30.2         rlang_1.0.2                
  [63] pkgconfig_2.0.3             bitops_1.0-7               
  [65] evaluate_0.15               lattice_0.20-45            
  [67] purrr_0.3.4                 labeling_0.4.2             
- [69] treeio_1.18.1               CodeDepends_0.6.5          
+ [69] treeio_1.20.0               CodeDepends_0.6.5          
  [71] cowplot_1.1.1               bit_4.0.4                  
  [73] tidyselect_1.1.2            plyr_1.8.7                 
  [75] magrittr_2.0.3              bookdown_0.26              
  [77] R6_2.5.1                    generics_0.1.2             
- [79] DelayedArray_0.20.0         DBI_1.1.2                  
+ [79] DelayedArray_0.22.0         DBI_1.1.2                  
  [81] withr_2.5.0                 mgcv_1.8-40                
  [83] pillar_1.7.0                RCurl_1.98-1.6             
- [85] tibble_3.1.6                dir.expiry_1.2.0           
+ [85] tibble_3.1.7                dir.expiry_1.4.0           
  [87] crayon_1.5.1                utf8_1.2.2                 
- [89] rmarkdown_2.13              viridis_0.6.2              
- [91] grid_4.1.3                  blob_1.2.3                 
+ [89] rmarkdown_2.14              viridis_0.6.2              
+ [91] grid_4.2.0                  blob_1.2.3                 
  [93] vegan_2.6-2                 digest_0.6.29              
  [95] tidyr_1.2.0                 munsell_0.5.0              
- [97] DirichletMultinomial_1.36.0 beeswarm_0.4.0             
+ [97] DirichletMultinomial_1.38.0 beeswarm_0.4.0             
  [99] viridisLite_0.4.0           vipor_0.4.5                
 ```
 </div>

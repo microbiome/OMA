@@ -15,8 +15,8 @@ always_allow_html: yes
 date: "**Authors:** Leo Lahti [aut], Sudarshan Shetty [aut], Felix GM Ernst [aut, cre]<br/>
   **Version:** 0.98.9<br/>
   **Modified:** 2021-09-10<br/>
-  **Compiled:** 2022-04-22<br/>
-  **Environment:** R version 4.1.3 (2022-03-10), Bioconductor 3.14<br/>
+  **Compiled:** 2022-05-17<br/>
+  **Environment:** R version 4.2.0 (2022-04-22), Bioconductor 3.15<br/>
   **License:** CC BY-NC-SA 3.0 US<br/>
   **Copyright:** <br/>
   **Source:** https://github.com/microbiome/OMA"
