@@ -15,7 +15,7 @@ data("GlobalPatterns", package="mia")
 tse <- GlobalPatterns
 ```
 
-## Visualizing taxonomic composition
+## Visualizing taxonomic composition {#visual-composition}
 
 ### Composition barplot
 
@@ -84,6 +84,7 @@ ggplot(df, aes(x = SampleID, y = FeatureID, fill = clr_z)) +
         legend.key.size = unit(1, "cm")) +
   labs(x = "Samples", y = "Taxa")
 ```
+
 
 _pheatmap_ is a package that provides methods to plot clustered heatmaps. 
 
@@ -221,201 +222,12 @@ pheatmap(mat, annotation_row = taxa_clusters,
          color = colors)
 ```
 
-In addition to _pheatmap_ package, there are also other packages that
-provide functions for more complex heatmaps, such as _iheatmapr_
-and ComplexHeatmap [@Schep2017; @Gu2016].
-
+In addition, there are also other packages that provide functions for more complex heatmaps,
+such as [_iheatmapr_](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html)
+and [ComplexHeatmap](https://academic.oup.com/bioinformatics/article/32/18/2847/1743594?login=true).
 [sechm](http://www.bioconductor.org/packages/release/bioc/vignettes/sechm/inst/doc/sechm.html)
-package provides wrapper for _ComplexHeatmap_.
-
-```{r sechm}
-if(!require(sechm)){
-  BiocManager::install("sechm")
-  library(sechm)
-}
-# Stores annotation colros to metadata
-metadata(tse_phylum_subset)$anno_colors$SampleType <- c(Feces = "blue", 
-                                                        Skin = "red", 
-                                                        Tongue = "gray")
-
-# Create a plot
-sechm(tse_phylum_subset, 
-      features = rownames(tse_phylum_subset), 
-      assayName = "clr", 
-      do.scale = TRUE, 
-      top_annotation = c("SampleType"), 
-      gaps_at = "SampleType",
-      cluster_cols = TRUE, cluster_rows = TRUE)
-```
-
-It is also possible to create similar heatmap by just using _ggplot2_.
-
-```{r more_complex_heatmap1}
-# Add feature names to column as a factor
-taxa_clusters$Feature <- rownames(taxa_clusters)
-taxa_clusters$Feature <- factor(taxa_clusters$Feature, levels = taxa_clusters$Feature)
-
-# Create annotation plot
-row_annotation <- ggplot(taxa_clusters) + 
-  geom_tile(aes(x = NA, y = Feature, fill = clusters)) + coord_equal(ratio = 1) +
-  theme(
-        axis.text.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank(),
-        axis.title.y=element_blank(),
-        axis.title.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-        plot.margin=margin(0,0,0,0),
-        ) +
-      labs(fill = "Clusters", x = "Clusters")
-
-row_annotation
-```
-
-```{r more_complex_heatmap2}
-# Add sample names to one of the columns
-sample_data$sample <- factor(rownames(sample_data), levels = rownames(sample_data))
-
-# Create annotation plot
-sample_types_annotation <- ggplot(sample_data) + scale_y_discrete(position = "right", expand = c(0,0)) +
-  geom_tile(aes(y = NA, x = sample, fill = sample_types)) + coord_equal(ratio = 1) +
-  theme(
-        axis.text.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.title.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        plot.margin=margin(0,0,0,0),
-        axis.title.y.right = element_text(angle=0, vjust = 0.5)
-        ) +
-      labs(fill = "Sample types", y = "Sample types")
-
-sample_types_annotation
-
-```
-
-```{r more_complex_heatmap3}
-# Create annotation plot
-sample_clusters_annotation <- ggplot(sample_data) + scale_y_discrete(position = "right", expand = c(0,0)) +
-  geom_tile(aes(y = NA, x = sample, fill = clusters)) + coord_equal(ratio = 1) +
-  theme(
-        axis.text.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.title.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        plot.margin=margin(0,0,0,0),
-        axis.title.y.right = element_text(angle=0, vjust = 0.5)
-        ) +
-      labs(fill = "Clusters", y = "Clusters")
-
-sample_clusters_annotation
-
-```
-
-```{r more_complex_heatmap4}
-if(!require(reshape2)){
-    install.packages("reshape2")
-    library(reshape2)
-}
-# Order data based on clusters and sample types
-mat <- mat[unfactor(taxa_clusters$Feature), unfactor(sample_data$sample)]
-
-# ggplot requires data in melted format
-melted_mat <- melt(mat)
-colnames(melted_mat) <- c("Taxa", "Sample", "clr_z")
-
-# Determines the scaling of colorss
-maxval <- round(max(abs(melted_mat$clr_z)))
-limits <- c(-maxval, maxval)
-breaks <- seq(from = min(limits), to = max(limits), by = 0.5)
-colours <- c("darkblue", "blue", "white", "red", "darkred")
-
-heatmap <- ggplot(melted_mat) + 
-  geom_tile(aes(x = Sample, y = Taxa, fill = clr_z)) +
-  theme(
-    axis.title.y=element_blank(),
-    axis.title.x=element_blank(),
-    axis.ticks.y=element_blank(),
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-    
-    plot.margin=margin(0,0,0,0), # removes margins
-    legend.key.height= unit(1, 'cm')
-    ) +
-  scale_fill_gradientn(name = "CLR + Z transform", 
-                       breaks = breaks, 
-                       limits = limits, 
-                       colours = colours) + 
-  scale_y_discrete(position = "right")
-
-heatmap
-```
-
-
-```{r more_complex_heatmap5}
-if(!require(patchwork)){
-    install.packages("patchwork")
-    library(patchwork)
-}
-
-# Create layout
-design <- c(
-  area(3, 1, 4, 1),
-  area(1, 2, 1, 3),
-  area(2, 2, 2, 3),
-  area(3, 2, 4, 3)
-)
-
-plot(design)
-```
-
-```{r more_complex_heatmap6, fig.width=10, fig.height=8}
-# Combine plots
-plot <- row_annotation + sample_clusters_annotation + sample_types_annotation + heatmap  +
-    plot_layout(design = design, guides = "collect", # Specify layout, collect legends
-                
-                # Adjust widths and heights to align plots.
-                # When annotation plot is larger, it might not fit into its column/row.
-                # Then you need to make column/row larger.
-                
-                # Relative widths and heights of each column and row:
-                # Currently, the width of the first column is 15 % and the height of
-                # first two rows are 30 % the size of others
-                
-                # To get this work most of the times, you can adjust all sizes to be 1, i.e. equal, 
-                # but then the gaps between plots are larger.
-                widths = c(0.15, 1, 1),
-                heights = c(0.3, 0.3, 1, 1))
-
-plot
-
-```
-
-```{r more_complex_heatmap7}
-# Create layout
-design <- c(
-  area(4, 1, 5, 1),
-  area(4, 2, 5, 2),
-  area(1, 3, 1, 4),
-  area(2, 3, 2, 4),
-  area(3, 3, 3, 4),
-  area(4, 3, 5, 4)
-)
-
-plot(design)
-```
-
-```{r more_complex_heatmap8, fig.width=10, fig.height=8}
-# Combine plots
-plot <- taxa_tree + 
-  row_annotation +
-  sample_tree + 
-  sample_clusters_annotation +
-  sample_types_annotation +
-  heatmap +
-    plot_layout(design = design, guides = "collect", # Specify layout, collect legends
-                widths = c(0.2, 0.15, 1, 1, 1),
-                heights = c(0.1, 0.15, 0.15, 0.25, 1, 1))
-
-plot
-```
+package provides wrapper for _ComplexHeatmap_ and its usage is explained in chapter \@ref(viz-chapter)
+along with the `pheatmap` package for clustered heatmaps.
 
 # Community typing {#community-typing}
 
