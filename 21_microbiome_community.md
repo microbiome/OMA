@@ -223,19 +223,19 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7689 BIC: 8076 AIC: 7948 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7741 BIC: 8282 AIC: 8112 
+## Laplace: 7792 BIC: 8357 AIC: 8187 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7849 BIC: 8565 AIC: 8352 
+## Laplace: 7855 BIC: 8553 AIC: 8340 
 ## 
 ## [[6]]
 ## class: DMN 
@@ -292,15 +292,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -314,7 +314,7 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 ```
 ##       pi theta
 ## 1 0.5385 20.60
-## 2 0.4615 15.32
+## 2 0.4615 15.28
 ```
 
 
@@ -328,12 +328,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 4.541e-17
-## CC1     1.000e+00 3.422e-22
-## SV1     1.000e+00 1.788e-12
-## M31Fcsw 6.861e-26 1.000e+00
-## M11Fcsw 1.022e-16 1.000e+00
-## M31Plmr 1.022e-13 1.000e+00
+## CL3     1.000e+00 5.003e-17
+## CC1     1.000e+00 3.868e-22
+## SV1     1.000e+00 2.017e-12
+## M31Fcsw 7.307e-26 1.000e+00
+## M11Fcsw 1.063e-16 1.000e+00
+## M31Plmr 9.984e-14 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -345,12 +345,12 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 
 ```
 ##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354047
-## Phylum:Euryarchaeota  0.2314 0.1468883
-## Phylum:Actinobacteria 1.2107 1.0580940
-## Phylum:Spirochaetes   0.2141 0.1318067
-## Phylum:MVP-15         0.0299 0.0007686
-## Phylum:Proteobacteria 6.8431 1.8113931
+## Phylum:Crenarchaeota  0.3043 0.1354674
+## Phylum:Euryarchaeota  0.2314 0.1468648
+## Phylum:Actinobacteria 1.2103 1.0602180
+## Phylum:Spirochaetes   0.2141 0.1318444
+## Phylum:MVP-15         0.0299 0.0007658
+## Phylum:Proteobacteria 6.8426 1.8152613
 ```
 Get the assignment probabilities
 
@@ -536,7 +536,7 @@ other attached packages:
  [1] scater_1.24.0                  scuttle_1.6.2                 
  [3] patchwork_1.1.1                bluster_1.6.0                 
  [5] miaViz_1.3.3                   ggraph_2.0.5                  
- [7] ggplot2_3.3.6                  mia_1.3.22                    
+ [7] ggplot2_3.3.6                  mia_1.3.24                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.64.0              XVector_0.36.0                
 [13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
@@ -568,7 +568,7 @@ loaded via a namespace (and not attached):
  [35] Rcpp_1.0.8.3                viridisLite_0.4.0          
  [37] decontam_1.16.0             gridGraphics_0.5-1         
  [39] tidytree_0.3.9              bit_4.0.4                  
- [41] rsvd_1.0.5                  FNN_1.1.3                  
+ [41] rsvd_1.0.5                  FNN_1.1.3.1                
  [43] dir.expiry_1.4.0            ellipsis_0.3.2             
  [45] pkgconfig_2.0.3             XML_3.99-0.9               
  [47] farver_2.1.0                uwot_0.1.11                
@@ -584,7 +584,7 @@ loaded via a namespace (and not attached):
  [67] ggtree_3.4.0                knitr_1.39                 
  [69] bit64_4.0.5                 tidygraph_1.2.1            
  [71] purrr_0.3.4                 nlme_3.1-157               
- [73] sparseMatrixStats_1.8.0     aplot_0.1.4                
+ [73] sparseMatrixStats_1.8.0     aplot_0.1.5                
  [75] compiler_4.2.0              beeswarm_0.4.0             
  [77] filelock_1.0.2              treeio_1.20.0              
  [79] tibble_3.1.7                tweenr_1.0.2               
@@ -592,7 +592,7 @@ loaded via a namespace (and not attached):
  [83] lattice_0.20-45             Matrix_1.4-1               
  [85] vegan_2.6-2                 permute_0.9-7              
  [87] vctrs_0.4.1                 pillar_1.7.0               
- [89] lifecycle_1.0.1             BiocManager_1.30.17        
+ [89] lifecycle_1.0.1             BiocManager_1.30.18        
  [91] BiocNeighbors_1.14.0        cowplot_1.1.1              
  [93] bitops_1.0-7                irlba_2.3.5                
  [95] R6_2.5.1                    bookdown_0.26              

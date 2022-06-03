@@ -511,6 +511,7 @@ Convert data into right format and create _TreeSE_ object.
 ```r
 # Create a list that contains assays
 counts <- t(seqtab.nochim)
+counts <- as.matrix(counts)
 assays <- SimpleList(counts = counts)
 
 # Convert colData and rowData into DataFrame
@@ -577,12 +578,166 @@ format. Here, we provide examples for common formats.
 
 
 ```r
+count_file <- "data/assay_taxa.csv"
+tax_file <- "data/rowdata_taxa.csv"
+sample_file <- "data/coldata.csv"
+
+# Load files
 counts  <- read.csv(count_file)   # Abundance table (e.g. ASV data; to assay data)
 tax     <- read.csv(tax_file)     # Taxonomy table (to rowData)
 samples <- read.csv(sample_file)  # Sample data (to colData)
-tse <- TreeSummarizedExperiment(assays = list(counts = counts),
-                                colData = samples,
-                                rowData = tax)
+```
+
+**Always ensure that the tables have rownames!** The _TreeSE_ constructor compares 
+rownames and makes sure that, for example, right samples are linked with right patient.
+
+
+```r
+# Add rownames and remove an additional column
+rownames(counts) <- counts$X
+counts$X <- NULL
+
+# Add rownames and remove an additional column
+rownames(samples) <- samples$X
+samples$X <- NULL
+
+# Add rownames and remove an additional column
+rownames(tax) <- tax$X
+tax$X <- NULL
+
+# As an example:
+# If e.g. samples do not match between colData and counts table, you must order 
+# counts based on colData
+if( any( colnames(counts) != rownames(samples) ) ){
+    counts <- counts[ , rownames(samples) ]
+}
+
+# And same with rowData and counts...
+if( any( rownames(counts) != rownames(tax) ) ){
+    counts <- counts[ rownames(tax), ]
+}
+```
+
+The tables must be in correct format:
+
+   - counts --> matrix
+   - rowData --> DataFrame
+   - colData --> DataFrame
+   
+
+```r
+# Ensure that the data is in correct format
+
+# counts should be in matrix format
+counts <- as.matrix(counts)
+# And it should be added to a SimpleList
+assays <-  SimpleList(counts = counts)
+
+# colData and rowData should be in DataFrame format
+colData <- DataFrame(colData)
+rowData <- DataFrame(rowData)
+
+# Create a TreeSE
+tse_taxa <- TreeSummarizedExperiment(assays = assays,
+                                     colData = samples,
+                                     rowData = tax)
+
+tse_taxa
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 12706 40 
+## metadata(0):
+## assays(1): counts
+## rownames(12706): GAYR01026362.62.2014 CVJT01000011.50.2173 ...
+##   JRJTB:03787:02429 JRJTB:03787:02478
+## rowData names(7): Phylum Class ... Species OTU
+## colnames(40): C1 C2 ... C39 C40
+## colData names(6): Sample Rat ... Fat XOS
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: NULL
+## rowTree: NULL
+## colLinks: NULL
+## colTree: NULL
+```
+To construct a _MultiAssayExperiment_ object, just combine multiple _TreeSE_ data containers. 
+Here we import metabolite data from the same study.
+
+
+```r
+count_file <- "data/assay_metabolites.csv"
+sample_file <- "data/coldata.csv"
+
+# Load files
+counts  <- read.csv(count_file)  
+samples <- read.csv(sample_file)
+
+# Add rownames and remove an additional column
+rownames(counts) <- counts$X
+counts$X <- NULL
+rownames(samples) <- samples$X
+samples$X <- NULL
+
+# Convert into right format
+counts <- as.matrix(counts)
+assays <-  SimpleList(concs = counts)
+colData <- DataFrame(colData)
+
+# Create a TreeSE
+tse_metabolite <- TreeSummarizedExperiment(assays = assays,
+                                           colData = samples)
+tse_metabolite
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 38 40 
+## metadata(0):
+## assays(1): concs
+## rownames(38): Butyrate Acetate ... Malonate 1,3-dihydroxyacetone
+## rowData names(0):
+## colnames(40): C1 C2 ... C39 C40
+## colData names(6): Sample Rat ... Fat XOS
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: NULL
+## rowTree: NULL
+## colLinks: NULL
+## colTree: NULL
+```
+
+Now we can combine these two experiments into _MAE_.
+
+
+```r
+# Create an ExperimentList that includes experiments
+experiments <- ExperimentList(microbiome = tse_taxa, 
+                              metabolite = tse_metabolite)
+
+# Create a MAE
+mae <- MultiAssayExperiment(experiments = experiments)
+
+mae
+```
+
+```
+## A MultiAssayExperiment object of 2 listed
+##  experiments with user-defined names and respective classes.
+##  Containing an ExperimentList class object of length 2:
+##  [1] microbiome: TreeSummarizedExperiment with 12706 rows and 40 columns
+##  [2] metabolite: TreeSummarizedExperiment with 38 rows and 40 columns
+## Functionality:
+##  experiments() - obtain the ExperimentList instance
+##  colData() - the primary/phenotype DataFrame
+##  sampleMap() - the sample coordination DataFrame
+##  `$`, `[`, `[[` - extract colData columns, subset, or experiment
+##  *Format() - convert into a long or wide DataFrame
+##  assays() - convert ExperimentList to a SimpleList of matrices
+##  exportClass() - save data to flat files
 ```
 
 Specific import functions are provided for:
@@ -1128,8 +1283,8 @@ attached base packages:
 
 other attached packages:
  [1] microbiomeDataSets_1.1.5       phyloseq_1.40.0               
- [3] BiocManager_1.30.17            ggplot2_3.3.6                 
- [5] mia_1.3.22                     MultiAssayExperiment_1.22.0   
+ [3] BiocManager_1.30.18            ggplot2_3.3.6                 
+ [5] mia_1.3.24                     MultiAssayExperiment_1.22.0   
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
  [9] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [11] SummarizedExperiment_1.26.1    Biobase_2.56.0                

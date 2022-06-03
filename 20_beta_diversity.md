@@ -390,11 +390,11 @@ kable(rda_info_clean)
 \hline
   & Explained by variables & Unexplained by variables & Proportion expl by vars & P-value (PERMANOVA 999 permutations)\\
 \hline
-all & 35.30 & 191.7 & 0.1842 & 0.667\\
+all & 35.30 & 191.7 & 0.1842 & 0.646\\
 \hline
-ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.832\\
+ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.840\\
 \hline
-Gender & 5.31 & 223.7 & 0.0277 & 0.936\\
+Gender & 5.31 & 223.7 & 0.0277 & 0.943\\
 \hline
 Age & 10.59 & 216.4 & 0.0552 & 0.001\\
 \hline
@@ -746,7 +746,7 @@ other attached packages:
  [5] scater_1.24.0                  scuttle_1.6.2                 
  [7] ggplot2_3.3.6                  vegan_2.6-2                   
  [9] lattice_0.20-45                permute_0.9-7                 
-[11] mia_1.3.22                     MultiAssayExperiment_1.22.0   
+[11] mia_1.3.24                     MultiAssayExperiment_1.22.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [15] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [17] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -765,7 +765,7 @@ loaded via a namespace (and not attached):
 [11] splines_4.2.0               codetools_0.2-18           
 [13] sparseMatrixStats_1.8.0     cachem_1.0.6               
 [15] jsonlite_1.8.0              cluster_2.1.3              
-[17] graph_1.74.0                BiocManager_1.30.17        
+[17] graph_1.74.0                BiocManager_1.30.18        
 [19] compiler_4.2.0              assertthat_0.2.1           
 [21] Matrix_1.4-1                fastmap_1.1.0              
 [23] lazyeval_0.2.2              cli_3.3.0                  

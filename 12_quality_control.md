@@ -297,14 +297,10 @@ plotRowTree(x[rowData(x)$Phylum %in% top_phyla_mean,],
 
 ![(\#fig:plot-prev-mean)Prevalence of top phyla as judged by mean abundance](12_quality_control_files/figure-latex/plot-prev-mean-1.pdf) 
 
-
-## Quality control
+## Quality control {#qc}
 
 Next, let us load the `GlobalPatterns` data set to illustrate standard
 microbiome data summaries.
-
-
-## Quality control {#qc}
 
 
 ```r
@@ -563,7 +559,7 @@ other attached packages:
  [3] scater_1.24.0                  scuttle_1.6.2                 
  [5] miaViz_1.3.3                   ggraph_2.0.5                  
  [7] ggplot2_3.3.6                  microbiomeDataSets_1.1.5      
- [9] mia_1.3.22                     MultiAssayExperiment_1.22.0   
+ [9] mia_1.3.24                     MultiAssayExperiment_1.22.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [13] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [15] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -615,7 +611,7 @@ loaded via a namespace (and not attached):
  [77] tidygraph_1.2.1               purrr_0.3.4                  
  [79] KEGGREST_1.36.0               nlme_3.1-157                 
  [81] sparseMatrixStats_1.8.0       mime_0.12                    
- [83] aplot_0.1.4                   compiler_4.2.0               
+ [83] aplot_0.1.5                   compiler_4.2.0               
  [85] beeswarm_0.4.0                filelock_1.0.2               
  [87] curl_4.3.2                    png_0.1-7                    
  [89] interactiveDisplayBase_1.34.0 treeio_1.20.0                
@@ -624,7 +620,7 @@ loaded via a namespace (and not attached):
  [95] lattice_0.20-45               Matrix_1.4-1                 
  [97] vegan_2.6-2                   permute_0.9-7                
  [99] vctrs_0.4.1                   pillar_1.7.0                 
-[101] lifecycle_1.0.1               BiocManager_1.30.17          
+[101] lifecycle_1.0.1               BiocManager_1.30.18          
 [103] BiocNeighbors_1.14.0          cowplot_1.1.1                
 [105] bitops_1.0-7                  irlba_2.3.5                  
 [107] httpuv_1.6.5                  R6_2.5.1                     

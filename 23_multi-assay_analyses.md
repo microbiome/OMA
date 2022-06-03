@@ -469,7 +469,7 @@ other attached packages:
  [1] patchwork_1.1.1                reticulate_1.25               
  [3] MOFA2_1.6.0                    ggplot2_3.3.6                 
  [5] stringr_1.4.0                  microbiomeDataSets_1.1.5      
- [7] mia_1.3.22                     MultiAssayExperiment_1.22.0   
+ [7] mia_1.3.24                     MultiAssayExperiment_1.22.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [11] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [13] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -497,7 +497,7 @@ loaded via a namespace (and not attached):
  [29] ape_5.6-2                     glue_1.6.2                   
  [31] gtable_0.3.0                  zlibbioc_1.42.0              
  [33] DelayedArray_0.22.0           BiocSingular_1.12.0          
- [35] Rhdf5lib_1.18.2               HDF5Array_1.24.0             
+ [35] Rhdf5lib_1.18.2               HDF5Array_1.24.1             
  [37] scales_1.2.0                  pheatmap_1.0.12              
  [39] DBI_1.1.2                     Rcpp_1.0.8.3                 
  [41] viridisLite_0.4.0             xtable_1.8-4                 
@@ -532,7 +532,7 @@ loaded via a namespace (and not attached):
  [99] vegan_2.6-2                   permute_0.9-7                
 [101] vctrs_0.4.1                   rhdf5filters_1.8.0           
 [103] pillar_1.7.0                  lifecycle_1.0.1              
-[105] BiocManager_1.30.17           BiocNeighbors_1.14.0         
+[105] BiocManager_1.30.18           BiocNeighbors_1.14.0         
 [107] cowplot_1.1.1                 bitops_1.0-7                 
 [109] irlba_2.3.5                   httpuv_1.6.5                 
 [111] R6_2.5.1                      bookdown_0.26                

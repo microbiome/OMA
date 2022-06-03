@@ -355,7 +355,7 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.1                ggsignif_0.6.3                
  [3] scater_1.24.0                  ggplot2_3.3.6                 
- [5] scuttle_1.6.2                  mia_1.3.22                    
+ [5] scuttle_1.6.2                  mia_1.3.24                    
  [7] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
  [9] Biostrings_2.64.0              XVector_0.36.0                
 [11] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
@@ -374,7 +374,7 @@ loaded via a namespace (and not attached):
  [11] codetools_0.2-18            sparseMatrixStats_1.8.0    
  [13] cachem_1.0.6                knitr_1.39                 
  [15] jsonlite_1.8.0              cluster_2.1.3              
- [17] graph_1.74.0                BiocManager_1.30.17        
+ [17] graph_1.74.0                BiocManager_1.30.18        
  [19] compiler_4.2.0              assertthat_0.2.1           
  [21] Matrix_1.4-1                fastmap_1.1.0              
  [23] lazyeval_0.2.2              cli_3.3.0                  

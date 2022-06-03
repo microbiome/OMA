@@ -563,7 +563,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.3.22                     MultiAssayExperiment_1.22.0   
+ [1] mia_1.3.24                     MultiAssayExperiment_1.22.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
  [5] XVector_0.36.0                 SingleCellExperiment_1.18.0   
  [7] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -583,7 +583,7 @@ loaded via a namespace (and not attached):
 [13] cachem_1.0.6                knitr_1.39                 
 [15] scater_1.24.0               jsonlite_1.8.0             
 [17] cluster_2.1.3               graph_1.74.0               
-[19] BiocManager_1.30.17         compiler_4.2.0             
+[19] BiocManager_1.30.18         compiler_4.2.0             
 [21] assertthat_0.2.1            Matrix_1.4-1               
 [23] fastmap_1.1.0               lazyeval_0.2.2             
 [25] cli_3.3.0                   BiocSingular_1.12.0        

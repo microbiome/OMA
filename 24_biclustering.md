@@ -495,7 +495,7 @@ other attached packages:
  [3] colorspace_2.0-3               MASS_7.3-57                   
  [5] patchwork_1.1.1                ggplot2_3.3.6                 
  [7] pheatmap_1.0.12                cobiclust_0.1.0               
- [9] microbiomeDataSets_1.1.5       mia_1.3.22                    
+ [9] microbiomeDataSets_1.1.5       mia_1.3.24                    
 [11] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [13] Biostrings_2.64.0              XVector_0.36.0                
 [15] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
@@ -554,7 +554,7 @@ loaded via a namespace (and not attached):
  [91] highr_0.9                     Matrix_1.4-1                 
  [93] vegan_2.6-2                   permute_0.9-7                
  [95] vctrs_0.4.1                   pillar_1.7.0                 
- [97] lifecycle_1.0.1               BiocManager_1.30.17          
+ [97] lifecycle_1.0.1               BiocManager_1.30.18          
  [99] BiocNeighbors_1.14.0          bitops_1.0-7                 
 [101] irlba_2.3.5                   httpuv_1.6.5                 
 [103] R6_2.5.1                      bookdown_0.26                

@@ -752,7 +752,7 @@ other attached packages:
  [5] sechm_1.4.1                    miaViz_1.3.3                  
  [7] ggraph_2.0.5                   patchwork_1.1.1               
  [9] scater_1.24.0                  scuttle_1.6.2                 
-[11] mia_1.3.22                     MultiAssayExperiment_1.22.0   
+[11] mia_1.3.24                     MultiAssayExperiment_1.22.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [15] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [17] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -780,12 +780,12 @@ loaded via a namespace (and not attached):
  [29] graph_1.74.0                iterators_1.0.14           
  [31] glue_1.6.2                  polyclip_1.10-0            
  [33] registry_0.5-1              gtable_0.3.0               
- [35] zlibbioc_1.42.0             V8_4.1.0                   
+ [35] zlibbioc_1.42.0             V8_4.2.0                   
  [37] GetoptLong_1.0.5            DelayedArray_0.22.0        
  [39] BiocSingular_1.12.0         shape_1.4.6                
  [41] scales_1.2.0                DBI_1.1.2                  
  [43] randomcoloR_1.1.0.1         Rcpp_1.0.8.3               
- [45] viridisLite_0.4.0           clue_0.3-60                
+ [45] viridisLite_0.4.0           clue_0.3-61                
  [47] decontam_1.16.0             gridGraphics_0.5-1         
  [49] tidytree_0.3.9              bit_4.0.4                  
  [51] rsvd_1.0.5                  RColorBrewer_1.1-3         
@@ -803,7 +803,7 @@ loaded via a namespace (and not attached):
  [75] knitr_1.39                  bit64_4.0.5                
  [77] tidygraph_1.2.1             purrr_0.3.4                
  [79] nlme_3.1-157                sparseMatrixStats_1.8.0    
- [81] aplot_0.1.4                 compiler_4.2.0             
+ [81] aplot_0.1.5                 compiler_4.2.0             
  [83] curl_4.3.2                  png_0.1-7                  
  [85] beeswarm_0.4.0              filelock_1.0.2             
  [87] treeio_1.20.0               tibble_3.1.7               
@@ -812,7 +812,7 @@ loaded via a namespace (and not attached):
  [93] Matrix_1.4-1                vegan_2.6-2                
  [95] permute_0.9-7               vctrs_0.4.1                
  [97] pillar_1.7.0                lifecycle_1.0.1            
- [99] BiocManager_1.30.17         GlobalOptions_0.1.2        
+ [99] BiocManager_1.30.18         GlobalOptions_0.1.2        
 [101] BiocNeighbors_1.14.0        cowplot_1.1.1              
 [103] bitops_1.0-7                irlba_2.3.5                
 [105] seriation_1.3.5             R6_2.5.1                   

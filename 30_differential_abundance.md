@@ -838,8 +838,8 @@ other attached packages:
 [15] zCompositions_1.4.0-1          truncnorm_1.0-8               
 [17] NADA_1.6-1.1                   survival_3.3-1                
 [19] MASS_7.3-57                    ANCOMBC_1.6.0                 
-[21] tidySummarizedExperiment_1.6.0 patchwork_1.1.1               
-[23] mia_1.3.22                     MultiAssayExperiment_1.22.0   
+[21] tidySummarizedExperiment_1.6.1 patchwork_1.1.1               
+[23] mia_1.3.24                     MultiAssayExperiment_1.22.0   
 [25] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [27] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [29] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -907,7 +907,7 @@ loaded via a namespace (and not attached):
 [109] optparse_1.7.1                gridExtra_2.3                
 [111] posterior_1.2.1               farver_2.1.0                 
 [113] Rtsne_0.16                    RcppZiggurat_0.1.6           
-[115] digest_0.6.29                 BiocManager_1.30.17          
+[115] digest_0.6.29                 BiocManager_1.30.18          
 [117] shiny_1.7.1                   Rcpp_1.0.8.3                 
 [119] broom_0.8.0                   scuttle_1.6.2                
 [121] later_1.3.0                   BiocVersion_3.15.2           
@@ -918,7 +918,7 @@ loaded via a namespace (and not attached):
 [131] yulab.utils_0.0.4             tidytree_0.3.9               
 [133] scater_1.24.0                 multtest_2.52.0              
 [135] plotly_4.10.0                 xtable_1.8-4                 
-[137] jsonlite_1.8.0                nloptr_2.0.1                 
+[137] jsonlite_1.8.0                nloptr_2.0.3                 
 [139] CodeDepends_0.6.5             Rfast_2.0.6                  
 [141] R6_2.5.1                      mime_0.12                    
 [143] pillar_1.7.0                  htmltools_0.5.2              
