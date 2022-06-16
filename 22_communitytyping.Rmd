@@ -116,6 +116,8 @@ colnames(prob) <- c("comp1", "comp2")
 # names of highest values.
 vec <- colnames(prob)[max.col(prob,ties.method = "first")]
 
+# Add info to colData
+colData(tse)$dmm_component <- vec 
 ```
 
 Computing the euclidean PCoA and storing it as a data frame
@@ -124,35 +126,16 @@ Computing the euclidean PCoA and storing it as a data frame
 # Does clr transformation. Pseudocount is added, because data contains zeros.
 tse <- transformCounts(tse, method = "clr", pseudocount = 1)
 
-# Gets clr table
-clr_assay <- assays(tse)$clr
-
-# Transposes it to get taxa to columns
-clr_assay <- t(clr_assay)
-
-# Calculates Euclidean distances between samples. Because taxa is in columns,
-# it is used to compare different samples.
-euclidean_dist <- vegan::vegdist(clr_assay, method = "euclidean")
-
-# Does principal coordinate analysis
-euclidean_pcoa <- ecodist::pco(euclidean_dist)
-
-# Creates a data frame from principal coordinates
-euclidean_pcoa_df <- data.frame(pcoa1 = euclidean_pcoa$vectors[,1], 
-                                pcoa2 = euclidean_pcoa$vectors[,2])
+library(scater)
+# Calculate PCoA
+tse <- runMDS(tse, exprs_values = "clr", method = "euclidean")
 
 ```
 
 ```{r}
-# Creates a data frame that contains principal coordinates and DMM information
-euclidean_dmm_pcoa_df <- cbind(euclidean_pcoa_df,
-                               dmm_component = vec)
-# Creates a plot
-euclidean_dmm_plot <- ggplot(data = euclidean_dmm_pcoa_df, 
-                             aes(x=pcoa1, y=pcoa2,
-                                 color = dmm_component)) +
-  geom_point() +
-  labs(x = "Coordinate 1",
+# Create a plot
+euclidean_dmm_plot <- plotReducedDim(tse, "MDS", colour_by = "dmm_component") +
+    labs(x = "Coordinate 1",
        y = "Coordinate 2",
        title = "PCoA with Aitchison distances") +  
   theme(title = element_text(size = 12)) # makes titles smaller
