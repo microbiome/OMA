@@ -355,7 +355,7 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.1                ggsignif_0.6.3                
  [3] scater_1.24.0                  ggplot2_3.3.6                 
- [5] scuttle_1.6.2                  mia_1.3.24                    
+ [5] scuttle_1.6.2                  mia_1.3.25                    
  [7] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
  [9] Biostrings_2.64.0              XVector_0.36.0                
 [11] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
@@ -384,11 +384,11 @@ loaded via a namespace (and not attached):
  [31] GenomeInfoDbData_1.2.8      reshape2_1.4.4             
  [33] dplyr_1.0.9                 Rcpp_1.0.8.3               
  [35] vctrs_0.4.1                 ape_5.6-2                  
- [37] nlme_3.1-157                DECIPHER_2.24.0            
+ [37] nlme_3.1-158                DECIPHER_2.24.0            
  [39] DelayedMatrixStats_1.18.0   xfun_0.31                  
  [41] stringr_1.4.0               beachmat_2.12.0            
  [43] lifecycle_1.0.1             irlba_2.3.5                
- [45] XML_3.99-0.9                zlibbioc_1.42.0            
+ [45] XML_3.99-0.10               zlibbioc_1.42.0            
  [47] MASS_7.3-57                 scales_1.2.0               
  [49] parallel_4.2.0              yaml_2.3.5                 
  [51] memoise_2.0.1               gridExtra_2.3              
@@ -396,18 +396,18 @@ loaded via a namespace (and not attached):
  [55] RSQLite_2.2.14              highr_0.9                  
  [57] ScaledMatrix_1.4.0          tidytree_0.3.9             
  [59] permute_0.9-7               filelock_1.0.2             
- [61] BiocParallel_1.30.2         rlang_1.0.2                
+ [61] BiocParallel_1.30.3         rlang_1.0.2                
  [63] pkgconfig_2.0.3             bitops_1.0-7               
  [65] evaluate_0.15               lattice_0.20-45            
  [67] purrr_0.3.4                 labeling_0.4.2             
  [69] treeio_1.20.0               CodeDepends_0.6.5          
  [71] cowplot_1.1.1               bit_4.0.4                  
  [73] tidyselect_1.1.2            plyr_1.8.7                 
- [75] magrittr_2.0.3              bookdown_0.26              
+ [75] magrittr_2.0.3              bookdown_0.27              
  [77] R6_2.5.1                    generics_0.1.2             
  [79] DelayedArray_0.22.0         DBI_1.1.2                  
  [81] withr_2.5.0                 mgcv_1.8-40                
- [83] pillar_1.7.0                RCurl_1.98-1.6             
+ [83] pillar_1.7.0                RCurl_1.98-1.7             
  [85] tibble_3.1.7                dir.expiry_1.4.0           
  [87] crayon_1.5.1                utf8_1.2.2                 
  [89] rmarkdown_2.14              viridis_0.6.2              

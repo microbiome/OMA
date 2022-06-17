@@ -752,7 +752,7 @@ other attached packages:
  [5] sechm_1.4.1                    miaViz_1.3.3                  
  [7] ggraph_2.0.5                   patchwork_1.1.1               
  [9] scater_1.24.0                  scuttle_1.6.2                 
-[11] mia_1.3.24                     MultiAssayExperiment_1.22.0   
+[11] mia_1.3.25                     MultiAssayExperiment_1.22.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [15] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [17] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -764,8 +764,8 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] circlize_0.4.15             plyr_1.8.7                 
-  [3] igraph_1.3.1                lazyeval_0.2.2             
-  [5] splines_4.2.0               BiocParallel_1.30.2        
+  [3] igraph_1.3.2                lazyeval_0.2.2             
+  [5] splines_4.2.0               BiocParallel_1.30.3        
   [7] digest_0.6.29               foreach_1.5.2              
   [9] yulab.utils_0.0.4           htmltools_0.5.2            
  [11] viridis_0.6.2               fansi_1.0.3                
@@ -776,7 +776,7 @@ loaded via a namespace (and not attached):
  [21] colorspace_2.0-3            blob_1.2.3                 
  [23] ggrepel_0.9.1               xfun_0.31                  
  [25] dplyr_1.0.9                 crayon_1.5.1               
- [27] RCurl_1.98-1.6              jsonlite_1.8.0             
+ [27] RCurl_1.98-1.7              jsonlite_1.8.0             
  [29] graph_1.74.0                iterators_1.0.14           
  [31] glue_1.6.2                  polyclip_1.10-0            
  [33] registry_0.5-1              gtable_0.3.0               
@@ -790,7 +790,7 @@ loaded via a namespace (and not attached):
  [49] tidytree_0.3.9              bit_4.0.4                  
  [51] rsvd_1.0.5                  RColorBrewer_1.1-3         
  [53] dir.expiry_1.4.0            ellipsis_0.3.2             
- [55] pkgconfig_2.0.3             XML_3.99-0.9               
+ [55] pkgconfig_2.0.3             XML_3.99-0.10              
  [57] farver_2.1.0                CodeDepends_0.6.5          
  [59] utf8_1.2.2                  labeling_0.4.2             
  [61] ggplotify_0.1.0             tidyselect_1.1.2           
@@ -802,8 +802,8 @@ loaded via a namespace (and not attached):
  [73] fastmap_1.1.0               yaml_2.3.5                 
  [75] knitr_1.39                  bit64_4.0.5                
  [77] tidygraph_1.2.1             purrr_0.3.4                
- [79] nlme_3.1-157                sparseMatrixStats_1.8.0    
- [81] aplot_0.1.5                 compiler_4.2.0             
+ [79] nlme_3.1-158                sparseMatrixStats_1.8.0    
+ [81] aplot_0.1.6                 compiler_4.2.0             
  [83] curl_4.3.2                  png_0.1-7                  
  [85] beeswarm_0.4.0              filelock_1.0.2             
  [87] treeio_1.20.0               tibble_3.1.7               
@@ -816,7 +816,7 @@ loaded via a namespace (and not attached):
 [101] BiocNeighbors_1.14.0        cowplot_1.1.1              
 [103] bitops_1.0-7                irlba_2.3.5                
 [105] seriation_1.3.5             R6_2.5.1                   
-[107] TSP_1.2-0                   bookdown_0.26              
+[107] TSP_1.2-0                   bookdown_0.27              
 [109] gridExtra_2.3               vipor_0.4.5                
 [111] codetools_0.2-18            MASS_7.3-57                
 [113] assertthat_0.2.1            rjson_0.2.21               

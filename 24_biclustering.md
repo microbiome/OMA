@@ -495,7 +495,7 @@ other attached packages:
  [3] colorspace_2.0-3               MASS_7.3-57                   
  [5] patchwork_1.1.1                ggplot2_3.3.6                 
  [7] pheatmap_1.0.12                cobiclust_0.1.0               
- [9] microbiomeDataSets_1.1.5       mia_1.3.24                    
+ [9] microbiomeDataSets_1.1.5       mia_1.3.25                    
 [11] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [13] Biostrings_2.64.0              XVector_0.36.0                
 [15] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
@@ -508,7 +508,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.4.0           BiocFileCache_2.4.0          
   [3] plyr_1.8.7                    lazyeval_0.2.2               
-  [5] splines_4.2.0                 BiocParallel_1.30.2          
+  [5] splines_4.2.0                 BiocParallel_1.30.3          
   [7] scater_1.24.0                 digest_0.6.29                
   [9] yulab.utils_0.0.4             htmltools_0.5.2              
  [11] viridis_0.6.2                 fansi_1.0.3                  
@@ -517,7 +517,7 @@ loaded via a namespace (and not attached):
  [17] DECIPHER_2.24.0               blob_1.2.3                   
  [19] rappdirs_0.3.3                ggrepel_0.9.1                
  [21] xfun_0.31                     dplyr_1.0.9                  
- [23] crayon_1.5.1                  RCurl_1.98-1.6               
+ [23] crayon_1.5.1                  RCurl_1.98-1.7               
  [25] jsonlite_1.8.0                graph_1.74.0                 
  [27] ape_5.6-2                     glue_1.6.2                   
  [29] gtable_0.3.0                  zlibbioc_1.42.0              
@@ -530,9 +530,9 @@ loaded via a namespace (and not attached):
  [43] httr_1.4.3                    RColorBrewer_1.1-3           
  [45] dir.expiry_1.4.0              modeltools_0.2-23            
  [47] ellipsis_0.3.2                farver_2.1.0                 
- [49] pkgconfig_2.0.3               XML_3.99-0.9                 
+ [49] pkgconfig_2.0.3               XML_3.99-0.10                
  [51] scuttle_1.6.2                 CodeDepends_0.6.5            
- [53] dbplyr_2.1.1                  utf8_1.2.2                   
+ [53] dbplyr_2.2.0                  utf8_1.2.2                   
  [55] labeling_0.4.2                tidyselect_1.1.2             
  [57] rlang_1.0.2                   reshape2_1.4.4               
  [59] later_1.3.0                   AnnotationDbi_1.58.0         
@@ -544,7 +544,7 @@ loaded via a namespace (and not attached):
  [71] stringr_1.4.0                 fastmap_1.1.0                
  [73] yaml_2.3.5                    knitr_1.39                   
  [75] bit64_4.0.5                   purrr_0.3.4                  
- [77] KEGGREST_1.36.0               nlme_3.1-157                 
+ [77] KEGGREST_1.36.2               nlme_3.1-158                 
  [79] sparseMatrixStats_1.8.0       mime_0.12                    
  [81] flexclust_1.4-1               compiler_4.2.0               
  [83] beeswarm_0.4.0                filelock_1.0.2               
@@ -557,7 +557,7 @@ loaded via a namespace (and not attached):
  [97] lifecycle_1.0.1               BiocManager_1.30.18          
  [99] BiocNeighbors_1.14.0          bitops_1.0-7                 
 [101] irlba_2.3.5                   httpuv_1.6.5                 
-[103] R6_2.5.1                      bookdown_0.26                
+[103] R6_2.5.1                      bookdown_0.27                
 [105] promises_1.2.0.1              gridExtra_2.3                
 [107] vipor_0.4.5                   codetools_0.2-18             
 [109] assertthat_0.2.1              withr_2.5.0                  

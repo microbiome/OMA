@@ -37,13 +37,14 @@ library(mia)
 library(scater)
 
 # Querying the data
-tse <- sampleMetadata %>%
-    filter(age >= 18) %>% # taking only data of age 18 or above
-    filter(!is.na(alcohol)) %>% # excluding missing values
+tse <- sampleMetadata |>
+    filter(age >= 18) |> # taking only data of age 18 or above
+    filter(!is.na(alcohol)) |> # excluding missing values
+    select(where(~ !all(is.na(.x)))) |>
     returnSamples("relative_abundance")
 
 tse_Genus <- agglomerateByRank(tse, rank="genus")
-tse_Genus <- addPerSampleDominantTaxa(tse_Genus,abund_values="relative_abundance", name = "dominant_taxa")
+tse_Genus <- addPerSampleDominantTaxa(tse_Genus, abund_values="relative_abundance", name = "dominant_taxa")
 
 # Performing PCoA with Bray-Curtis dissimilarity.
 tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist, ncomponents = 3,

@@ -563,7 +563,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.3.24                     MultiAssayExperiment_1.22.0   
+ [1] mia_1.3.25                     MultiAssayExperiment_1.22.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
  [5] XVector_0.36.0                 SingleCellExperiment_1.18.0   
  [7] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -592,11 +592,11 @@ loaded via a namespace (and not attached):
 [31] glue_1.6.2                  GenomeInfoDbData_1.2.8     
 [33] reshape2_1.4.4              dplyr_1.0.9                
 [35] Rcpp_1.0.8.3                vctrs_0.4.1                
-[37] ape_5.6-2                   nlme_3.1-157               
+[37] ape_5.6-2                   nlme_3.1-158               
 [39] DECIPHER_2.24.0             DelayedMatrixStats_1.18.0  
 [41] xfun_0.31                   stringr_1.4.0              
 [43] beachmat_2.12.0             lifecycle_1.0.1            
-[45] irlba_2.3.5                 XML_3.99-0.9               
+[45] irlba_2.3.5                 XML_3.99-0.10              
 [47] zlibbioc_1.42.0             MASS_7.3-57                
 [49] scales_1.2.0                parallel_4.2.0             
 [51] yaml_2.3.5                  memoise_2.0.1              
@@ -604,17 +604,17 @@ loaded via a namespace (and not attached):
 [55] yulab.utils_0.0.4           stringi_1.7.6              
 [57] RSQLite_2.2.14              ScaledMatrix_1.4.0         
 [59] tidytree_0.3.9              permute_0.9-7              
-[61] filelock_1.0.2              BiocParallel_1.30.2        
+[61] filelock_1.0.2              BiocParallel_1.30.3        
 [63] rlang_1.0.2                 pkgconfig_2.0.3            
 [65] bitops_1.0-7                evaluate_0.15              
 [67] lattice_0.20-45             purrr_0.3.4                
 [69] treeio_1.20.0               CodeDepends_0.6.5          
 [71] bit_4.0.4                   tidyselect_1.1.2           
 [73] plyr_1.8.7                  magrittr_2.0.3             
-[75] bookdown_0.26               R6_2.5.1                   
+[75] bookdown_0.27               R6_2.5.1                   
 [77] generics_0.1.2              DelayedArray_0.22.0        
 [79] DBI_1.1.2                   mgcv_1.8-40                
-[81] pillar_1.7.0                RCurl_1.98-1.6             
+[81] pillar_1.7.0                RCurl_1.98-1.7             
 [83] tibble_3.1.7                dir.expiry_1.4.0           
 [85] crayon_1.5.1                utf8_1.2.2                 
 [87] rmarkdown_2.14              viridis_0.6.2              

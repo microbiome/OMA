@@ -559,7 +559,7 @@ other attached packages:
  [3] scater_1.24.0                  scuttle_1.6.2                 
  [5] miaViz_1.3.3                   ggraph_2.0.5                  
  [7] ggplot2_3.3.6                  microbiomeDataSets_1.1.5      
- [9] mia_1.3.24                     MultiAssayExperiment_1.22.0   
+ [9] mia_1.3.25                     MultiAssayExperiment_1.22.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [13] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [15] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -571,9 +571,9 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.4.0           BiocFileCache_2.4.0          
-  [3] igraph_1.3.1                  plyr_1.8.7                   
+  [3] igraph_1.3.2                  plyr_1.8.7                   
   [5] lazyeval_0.2.2                splines_4.2.0                
-  [7] BiocParallel_1.30.2           digest_0.6.29                
+  [7] BiocParallel_1.30.3           digest_0.6.29                
   [9] yulab.utils_0.0.4             htmltools_0.5.2              
  [11] viridis_0.6.2                 fansi_1.0.3                  
  [13] magrittr_2.0.3                memoise_2.0.1                
@@ -582,7 +582,7 @@ loaded via a namespace (and not attached):
  [19] colorspace_2.0-3              blob_1.2.3                   
  [21] rappdirs_0.3.3                ggrepel_0.9.1                
  [23] xfun_0.31                     crayon_1.5.1                 
- [25] RCurl_1.98-1.6                jsonlite_1.8.0               
+ [25] RCurl_1.98-1.7                jsonlite_1.8.0               
  [27] graph_1.74.0                  ape_5.6-2                    
  [29] glue_1.6.2                    polyclip_1.10-0              
  [31] gtable_0.3.0                  zlibbioc_1.42.0              
@@ -594,8 +594,8 @@ loaded via a namespace (and not attached):
  [43] bit_4.0.4                     rsvd_1.0.5                   
  [45] httr_1.4.3                    dir.expiry_1.4.0             
  [47] ellipsis_0.3.2                farver_2.1.0                 
- [49] pkgconfig_2.0.3               XML_3.99-0.9                 
- [51] CodeDepends_0.6.5             dbplyr_2.1.1                 
+ [49] pkgconfig_2.0.3               XML_3.99-0.10                
+ [51] CodeDepends_0.6.5             dbplyr_2.2.0                 
  [53] utf8_1.2.2                    labeling_0.4.2               
  [55] ggplotify_0.1.0               tidyselect_1.1.2             
  [57] rlang_1.0.2                   reshape2_1.4.4               
@@ -609,9 +609,9 @@ loaded via a namespace (and not attached):
  [73] yaml_2.3.5                    ggtree_3.4.0                 
  [75] knitr_1.39                    bit64_4.0.5                  
  [77] tidygraph_1.2.1               purrr_0.3.4                  
- [79] KEGGREST_1.36.0               nlme_3.1-157                 
+ [79] KEGGREST_1.36.2               nlme_3.1-158                 
  [81] sparseMatrixStats_1.8.0       mime_0.12                    
- [83] aplot_0.1.5                   compiler_4.2.0               
+ [83] aplot_0.1.6                   compiler_4.2.0               
  [85] beeswarm_0.4.0                filelock_1.0.2               
  [87] curl_4.3.2                    png_0.1-7                    
  [89] interactiveDisplayBase_1.34.0 treeio_1.20.0                
@@ -624,7 +624,7 @@ loaded via a namespace (and not attached):
 [103] BiocNeighbors_1.14.0          cowplot_1.1.1                
 [105] bitops_1.0-7                  irlba_2.3.5                  
 [107] httpuv_1.6.5                  R6_2.5.1                     
-[109] bookdown_0.26                 promises_1.2.0.1             
+[109] bookdown_0.27                 promises_1.2.0.1             
 [111] gridExtra_2.3                 vipor_0.4.5                  
 [113] codetools_0.2-18              MASS_7.3-57                  
 [115] assertthat_0.2.1              withr_2.5.0                  
