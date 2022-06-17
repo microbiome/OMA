@@ -1,7 +1,4 @@
----
-title: "Exercises"
-output: html_notebook
----
+# Exercises {#exercises}
 
 Here you can find assignments on different topics. 
 
