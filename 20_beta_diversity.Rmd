@@ -516,9 +516,9 @@ set.seed(1576)
 # We choose 99 random permutations. Consider applying more (999 or 9999) in your
 # analysis. 
 permanova <- adonis2(t(assay(tse,"relabundance")) ~ Group,
+                     by = "margin", # each term (here only 'Group') analyzed individually
                      data = colData(tse),
                      method = "euclidean",
-                     by = NULL,
                      permutations = 99)
 
 # Set seed for reproducibility
@@ -528,11 +528,12 @@ dbrda <- dbrda(t(assay(tse,"relabundance")) ~ Group,
                data = colData(tse))
 # Perform permutational analysis
 permanova2 <- anova.cca(dbrda,
+                        by = "margin", # each term (here only 'Group') analyzed individually
                         method = "euclidean",
                         permutations = 99)
 
 # Get p-values
-p_values <- c( permanova["Model", "Pr(>F)"], permanova2["Model", "Pr(>F)"] )
+p_values <- c( permanova["Group", "Pr(>F)"], permanova2["Group", "Pr(>F)"] )
 p_values <-as.data.frame(p_values)
 rownames(p_values) <- c("adonis2", "dbRDA+anova.cca")
 p_values
