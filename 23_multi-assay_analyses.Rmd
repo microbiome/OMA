@@ -92,8 +92,8 @@ with concentrations of individual metabolites. This helps as to answer the quest
 "If this bacteria is present, is this metabolite's concentration then low or high"?
 
 ```{r cross-correlation5}
-# Agglomerate microbiome data at Genus level
-mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Genus")
+# Agglomerate microbiome data at family level
+mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family")
 # Does log10 transform for microbiome data
 mae[[1]] <- transformSamples(mae[[1]], method = "log10", pseudocount = 1)
 
@@ -107,60 +107,35 @@ correlations <- testExperimentCrossCorrelation(mae,
                                                abund_values1 = "log10", 
                                                abund_values2 = "nmr",
                                                method = "spearman", 
-                                               p_adj_threshold = 0.05,
-                                               cor_threshold = 0,
+                                               p_adj_threshold = NULL,
+                                               cor_threshold = NULL,
                                                # Remove when mia is fixed
-                                               # mode = "matrix",
-                                               # sort = TRUE,
+                                               mode = "matrix",
+                                               sort = TRUE,
                                                show_warnings = FALSE)
 ```
 
 Creates the heatmap
 
 ```{r cross-correlation6, fig.width=10, fig.height=8}
-# if( !require("ComplexHeatmap") ){
-#     BiocManager::install("ComplexHeatmap")
-#     library("ComplexHeatmap")
-# }
-#
-# # Create a heatmap and store it
-# plot <- Heatmap(correlations$cor, 
-#                 # Print values to cells
-#                 cell_fun = function(j, i, x, y, width, height, fill) {
-#                     # If the p-value is under threshold
-#                     if( correlations$p_adj[i, j] < 0.05 )
-#                         # Print "X"
-#                         grid.text(sprintf("%s", "X"), x, y, gp = gpar(fontsize = 8, col = "black"))
-#                     },
-#                 heatmap_legend_param = list(title = "", legend_height = unit(5, "cm"))
-#                 )
-# plot
+if( !require("ComplexHeatmap") ){
+    BiocManager::install("ComplexHeatmap")
+    library("ComplexHeatmap")
+}
 
-
-library(ggplot2)
-
-# Determines the scaling of colors
-limits <- c(-1, 1)
-breaks <- seq(from = min(limits), to = max(limits), by = 0.2)
-colours <- c("darkblue", "blue", "white", "red", "darkred")
-
-# Which observation have p-value under 0.05? --> creates a subset
-cor_table_sub <- correlations[which(correlations[["p_adj"]] < 0.05), ]
-
-# Creates a ggplot object
-ggplot(correlations, aes(x = Var1, y = Var2, fill = cor)) +
-  geom_tile() +
-
-  scale_fill_gradientn(name = "Correlation",
-                       breaks = breaks, limits = limits, colours = colours) +
-
-  # Adds label to those observations that have p-value under 0.05
-  geom_text(data = cor_table_sub, aes(x = Var1, y = Var2, label = "+")) +
-
-  theme(text = element_text(size=10),
-        axis.text.x = element_text(angle=45, hjust=1),
-        legend.key.size = unit(1, "cm")) +
-  labs(x = "Taxa", y = "Metabolites")
+# Create a heatmap and store it
+plot <- Heatmap(correlations$cor,
+                # Print values to cells
+                cell_fun = function(j, i, x, y, width, height, fill) {
+                    # If the p-value is under threshold
+                    if( !is.na(correlations$p_adj[i, j]) & correlations$p_adj[i, j] < 0.05 ){
+                        # Print "X"
+                        grid.text(sprintf("%s", "X"), x, y, gp = gpar(fontsize = 8, col = "black"))
+                        }
+                    },
+                heatmap_legend_param = list(title = "", legend_height = unit(5, "cm"))
+                )
+plot
 ```
 
 ## Multi-Omics Factor Analysis
@@ -256,6 +231,7 @@ Visualizing the variance explained:
 
 ```{r, message=FALSE, warning=FALSE, fig.height=8, fig.width=10}
 library(patchwork)
+library(ggplot2)
 wrap_plots(
     plot_variance_explained(model.trained, x="view", y="factor", plot_total = T),
     nrow = 2
