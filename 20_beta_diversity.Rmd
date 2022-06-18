@@ -503,55 +503,20 @@ This method is implemented in the `vegan` package in the function
 It is recommended to `by = "margin"`. It specifies that each variable's marginal
 effect is analyzed individually. 
 
-When `by = "terms"`  the order of variables matters;
+When `by = "terms"` (the default)  the order of variables matters;
 each variable is analyzed sequentially, and the result is different when more than 1 variable is
-introduced and their order is differs.
+introduced and their order is differs. (Check [comparison](https://microbiome.github.io/OMA/extras.html#permanova-comparison))
+
+We can perform PERMANOVA with `adonis2` function or by first performing distance-based 
+redundancy analysis (dbRDA), and then applying permutational test for result of 
+redundancy analysis. Advantage of the latter approach is that by doing so we can get 
+coefficients: how much each taxa affect to the result.
 
 ```{r}
 if( !require(vegan) ){
     BiocManager::install("vegan")
     library("vegan")
 }
-data("enterotype")
-enterotype <- transformSamples(enterotype, method = "relabundance")
-# Drop those samples that do not have meta dtaa
-enterotype <- 
-    enterotype[ , !rowSums(is.na(colData(enterotype)[, c("Nationality", "Gender","ClinicalStatus")]) > 0 ) ]
-
-# Multiple variables, by = "margin"
-set.seed(75)
-adonis2(t(assay(enterotype ,"relabundance")) ~ Nationality + Gender + ClinicalStatus,
-        by = "margin",
-        data = colData(enterotype),
-        permutations = 99)
-
-# Multiple variables, by = "margin"
-set.seed(75)
-adonis2(t(assay(enterotype ,"relabundance")) ~ ClinicalStatus + Nationality + Gender,
-        by = "margin",
-        data = colData(enterotype ),
-        permutations = 99)
-
-
-# Multiple variables, default: by = "terms"
-set.seed(75)
-adonis2(t(assay(enterotype ,"relabundance"))  ~ Nationality + Gender + ClinicalStatus,
-        data = colData(enterotype ),
-        permutations = 99)
-
-# Multiple variables, default: by = "terms"
-set.seed(75)
-adonis2(t(assay(enterotype ,"relabundance"))  ~ ClinicalStatus + Nationality + Gender,
-        data = colData(enterotype),
-        permutations = 99)
-```
-
-We can perform PERMANVA with `adonis2` function or by first performing distance-based 
-redundancy analysis (dbRDA), and then applying permutational test for result of 
-redundancy analysis. Advantage ot hthe latter approach is that by doing so we can get 
-coefficients: how much each taxa affect to the result.
-
-```{r}
 # Agglomerate data to Species level
 tse <- agglomerateByRank(tse, rank = "Species")
 
