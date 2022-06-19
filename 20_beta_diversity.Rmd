@@ -498,10 +498,19 @@ different community composition.
 This method is implemented in the `vegan` package in the function
 [`adonis2`](https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis).
 
-We can get equal result by first performing distance-based redundancy analysis (dbRDA),
-and then applying permutational test for result of redundancy analysis. Advantage is 
-that by doing so we can get coefficients: how much each taxa affect to the result.
+**Note:**
 
+It is recommended to `by = "margin"`. It specifies that each variable's marginal
+effect is analyzed individually. 
+
+When `by = "terms"` (the default)  the order of variables matters;
+each variable is analyzed sequentially, and the result is different when more than 1 variable is
+introduced and their order is differs. (Check [comparison](https://microbiome.github.io/OMA/extras.html#permanova-comparison))
+
+We can perform PERMANOVA with `adonis2` function or by first performing distance-based 
+redundancy analysis (dbRDA), and then applying permutational test for result of 
+redundancy analysis. Advantage of the latter approach is that by doing so we can get 
+coefficients: how much each taxa affect to the result.
 
 ```{r}
 if( !require(vegan) ){
@@ -516,9 +525,9 @@ set.seed(1576)
 # We choose 99 random permutations. Consider applying more (999 or 9999) in your
 # analysis. 
 permanova <- adonis2(t(assay(tse,"relabundance")) ~ Group,
+                     by = "margin", # each term (here only 'Group') analyzed individually
                      data = colData(tse),
                      method = "euclidean",
-                     by = NULL,
                      permutations = 99)
 
 # Set seed for reproducibility
@@ -528,11 +537,12 @@ dbrda <- dbrda(t(assay(tse,"relabundance")) ~ Group,
                data = colData(tse))
 # Perform permutational analysis
 permanova2 <- anova.cca(dbrda,
+                        by = "margin", # each term (here only 'Group') analyzed individually
                         method = "euclidean",
                         permutations = 99)
 
 # Get p-values
-p_values <- c( permanova["Model", "Pr(>F)"], permanova2["Model", "Pr(>F)"] )
+p_values <- c( permanova["Group", "Pr(>F)"], permanova2["Group", "Pr(>F)"] )
 p_values <-as.data.frame(p_values)
 rownames(p_values) <- c("adonis2", "dbRDA+anova.cca")
 p_values
