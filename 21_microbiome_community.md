@@ -96,7 +96,8 @@ techniques, we can visualize the abundances at Phylum level.
 ```r
 library(ggplot2)
 # Add clr-transformation on samples
-tse_phylum <- transformSamples(tse_phylum, method = "clr", pseudocount = 1)
+tse_phylum <- transformSamples(tse_phylum, method = "relabundance", pseudocount = 1)
+tse_phylum <- transformSamples(tse_phylum, abund_values = "relabundance", method = "clr")
 # Add z-transformation on features (taxa)
 tse_phylum <- transformFeatures(tse_phylum, abund_values = "clr", 
                                 method = "z", name = "clr_z")
@@ -217,7 +218,7 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7681 BIC: 7902 AIC: 7818 
+## Laplace: 7673 BIC: 7927 AIC: 7842 
 ## 
 ## [[3]]
 ## class: DMN 
@@ -229,25 +230,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7792 BIC: 8357 AIC: 8187 
+## Laplace: 7781 BIC: 8343 AIC: 8173 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7859 BIC: 8582 AIC: 8368 
+## Laplace: 7850 BIC: 8548 AIC: 8335 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7952 BIC: 8850 AIC: 8594 
+## Laplace: 7935 BIC: 8816 AIC: 8560 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 7991 BIC: 9021 AIC: 8722
+## Laplace: 8064 BIC: 9086 AIC: 8787
 ```
 
 
@@ -272,7 +273,7 @@ getBestDMNFit(tse_dmn, type = "laplace")
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7681 BIC: 7902 AIC: 7818
+## Laplace: 7673 BIC: 7927 AIC: 7842
 ```
 
 ### PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors
@@ -292,15 +293,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
-## Mock               2       3   67  998.6  -70.65   839.2 1072.8 1134
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.22   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.21   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.38  1906.4 1674.5 1735
+## Mock               2       3   67  980.2  110.61   911.4 1054.4 1115
+## Ocean              2       3   67 1100.0  -44.83   953.6 1174.2 1235
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
 ## Skin               2       3   67  992.6  -84.98   826.1 1066.8 1128
 ## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Tongue             2       2   67  783.0 -107.77   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -312,9 +313,9 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 ```
 
 ```
-##       pi  theta
-## 1 0.8846  10.76
-## 2 0.1154 349.04
+##       pi theta
+## 1 0.5385 20.60
+## 2 0.4615 15.28
 ```
 
 
@@ -327,13 +328,13 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##         [,1]       [,2]
-## CL3        1  0.000e+00
-## CC1        1  0.000e+00
-## SV1        1 2.757e-281
-## M31Fcsw    1  0.000e+00
-## M11Fcsw    1 3.670e-299
-## M31Plmr    1  0.000e+00
+##              [,1]      [,2]
+## CL3     1.000e+00 5.029e-17
+## CC1     1.000e+00 3.831e-22
+## SV1     1.000e+00 2.027e-12
+## M31Fcsw 7.329e-26 1.000e+00
+## M11Fcsw 1.064e-16 1.000e+00
+## M31Plmr 9.989e-14 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -344,13 +345,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                           [,1]    [,2]
-## Phylum:Crenarchaeota  0.167455  1.4649
-## Phylum:Euryarchaeota  0.155772  2.4076
-## Phylum:Actinobacteria 0.882915  6.1721
-## Phylum:Spirochaetes   0.144900  1.0870
-## Phylum:MVP-15         0.004272  0.2159
-## Phylum:Proteobacteria 2.301478 62.3903
+##                          [,1]     [,2]
+## Phylum:Crenarchaeota  0.30432 0.135465
+## Phylum:Euryarchaeota  0.23143 0.146863
+## Phylum:Actinobacteria 1.21041 1.060021
+## Phylum:Spirochaetes   0.21410 0.131841
+## Phylum:MVP-15         0.02991 0.000766
+## Phylum:Proteobacteria 6.84161 1.815413
 ```
 Get the assignment probabilities
 
@@ -371,24 +372,17 @@ Computing the euclidean PCoA and storing it as a data frame
 
 ```r
 # Does clr transformation. Pseudocount is added, because data contains zeros.
-tse <- transformCounts(tse, method = "clr", pseudocount = 1)
+tse <- transformCounts(tse, method = "relabundance", pseudocount = 1)
+tse <- transformCounts(tse, "relabundance", method = "clr")
 
-# Gets clr table
-clr_assay <- assays(tse)$clr
-
-# Transposes it to get taxa to columns
-clr_assay <- t(clr_assay)
-
-# Calculates Euclidean distances between samples. Because taxa is in columns,
-# it is used to compare different samples.
-euclidean_dist <- vegan::vegdist(clr_assay, method = "euclidean")
+library(scater)
 
 # Does principal coordinate analysis
-euclidean_pcoa <- ecodist::pco(euclidean_dist)
+df <- calculateMDS(tse, exprs_values = "clr", method = "euclidean")
 
 # Creates a data frame from principal coordinates
-euclidean_pcoa_df <- data.frame(pcoa1 = euclidean_pcoa$vectors[,1], 
-                                pcoa2 = euclidean_pcoa$vectors[,2])
+euclidean_pcoa_df <- data.frame(pcoa1 = df[,1], 
+                                pcoa2 = df[,2])
 ```
 
 
@@ -533,10 +527,10 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] scater_1.24.0                  scuttle_1.6.2                 
- [3] patchwork_1.1.1                bluster_1.6.0                 
+ [1] patchwork_1.1.1                bluster_1.6.0                 
+ [3] scater_1.24.0                  scuttle_1.6.2                 
  [5] miaViz_1.3.3                   ggraph_2.0.5                  
- [7] ggplot2_3.3.6                  mia_1.3.25                    
+ [7] ggplot2_3.3.6                  mia_1.3.26                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.64.0              XVector_0.36.0                
 [13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   

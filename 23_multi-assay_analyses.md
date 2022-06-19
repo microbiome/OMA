@@ -280,7 +280,8 @@ colData(mae)$Diet <- ifelse(colData(mae)$Diet == "High-fat" |
 mae[[1]] <- mae[[1]][!duplicated(rownames(assay(mae[[1]]))), ]
 
 # Transforming microbiome data with rclr
-mae[[1]] <- transformCounts(mae[[1]], abund_values = "counts", method = "rclr")
+mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
+mae[[1]] <- transformCounts(mae[[1]], abund_values = "relabundance", method = "rclr")
 
 # Transforming metabolomic data with log10
 mae[[2]] <- transformSamples(mae[[2]], abund_values = "nmr", method = "log10")
@@ -317,7 +318,7 @@ Model options could be defined as follows:
 
 ```r
 model_opts <- get_default_model_options(model)
-model_opts$num_factors <- 15
+model_opts$num_factors <- 5
 head(model_opts)
 ```
 
@@ -327,7 +328,7 @@ head(model_opts)
 ##  "gaussian"  "gaussian"  "gaussian" 
 ## 
 ## $num_factors
-## [1] 15
+## [1] 5
 ## 
 ## $spikeslab_factors
 ## [1] FALSE
@@ -396,14 +397,14 @@ wrap_plots(
 
 ![](23_multi-assay_analyses_files/figure-latex/unnamed-chunk-6-1.pdf)<!-- --> 
 
-The top weights for each assay using the three first factors:
+The top weights for each assay using all 5 factors:
 
 
 ```r
 plots <- lapply(c("microbiota", "metabolites","biomarkers"), function(name) {
     plot_top_weights(model.trained,
                      view = name,
-                     factors = 1:3,
+                     factors = "all",
                      nfeatures = 10) +
         labs(title = paste0("Top weights of the ", name," assay"))
 })
@@ -445,7 +446,7 @@ other attached packages:
  [1] ggplot2_3.3.6                  patchwork_1.1.1               
  [3] reticulate_1.25                MOFA2_1.6.0                   
  [5] ComplexHeatmap_2.12.0          stringr_1.4.0                 
- [7] microbiomeDataSets_1.1.5       mia_1.3.25                    
+ [7] microbiomeDataSets_1.1.5       mia_1.3.26                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.64.0              XVector_0.36.0                
 [13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   

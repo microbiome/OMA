@@ -360,17 +360,10 @@ div.csl-indent {
 <li class="chapter" data-level="16" data-path="extras.html"><a href="extras.html"><i class="fa fa-check"></i><b>16</b> Extra material</a>
 <ul>
 <li class="chapter" data-level="16.1" data-path="extras.html"><a href="extras.html#interactive-3d-plots"><i class="fa fa-check"></i><b>16.1</b> Interactive 3D Plots</a></li>
+<li class="chapter" data-level="16.2" data-path="extras.html"><a href="extras.html#permanova-comparison"><i class="fa fa-check"></i><b>16.2</b> PERMANOVA comparison</a></li>
 </ul></li>
 <li class="chapter" data-level="17" data-path="acknowledgments.html"><a href="acknowledgments.html"><i class="fa fa-check"></i><b>17</b> Acknowledgments</a></li>
-<li class="chapter" data-level="18" data-path="exercises.html"><a href="exercises.html"><i class="fa fa-check"></i><b>18</b> Exercises</a>
-<ul>
-<li class="chapter" data-level="18.1" data-path="exercises.html"><a href="exercises.html#introduction-to-treese"><i class="fa fa-check"></i><b>18.1</b> Introduction to TreeSE</a></li>
-<li class="chapter" data-level="18.2" data-path="exercises.html"><a href="exercises.html#data-exploration"><i class="fa fa-check"></i><b>18.2</b> Data exploration</a></li>
-<li class="chapter" data-level="18.3" data-path="exercises.html"><a href="exercises.html#differential-abundance-analysis-1"><i class="fa fa-check"></i><b>18.3</b> Differential abundance analysis</a></li>
-<li class="chapter" data-level="18.4" data-path="exercises.html"><a href="exercises.html#basics-of-community-composition"><i class="fa fa-check"></i><b>18.4</b> Basics of community composition</a></li>
-<li class="chapter" data-level="18.5" data-path="exercises.html"><a href="exercises.html#introduction-to-mae"><i class="fa fa-check"></i><b>18.5</b> Introduction to MAE</a></li>
-<li class="chapter" data-level="18.6" data-path="exercises.html"><a href="exercises.html#introduction-to-multiomics"><i class="fa fa-check"></i><b>18.6</b> Introduction to multiomics</a></li>
-</ul></li>
+<li class="chapter" data-level="18" data-path="exercises.html"><a href="exercises.html"><i class="fa fa-check"></i><b>18</b> Exercises</a></li>
 <li class="chapter" data-level="" data-path="bibliography.html"><a href="bibliography.html"><i class="fa fa-check"></i>Bibliography</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -701,21 +694,21 @@ each covariate affects.</p>
 <td align="right">35.30</td>
 <td align="right">191.7</td>
 <td align="right">0.1842</td>
-<td align="right">0.661</td>
+<td align="right">0.673</td>
 </tr>
 <tr class="even">
 <td align="left">ClinicalStatus</td>
 <td align="right">19.08</td>
 <td align="right">209.9</td>
 <td align="right">0.0996</td>
-<td align="right">0.843</td>
+<td align="right">0.814</td>
 </tr>
 <tr class="odd">
 <td align="left">Gender</td>
 <td align="right">5.31</td>
 <td align="right">223.7</td>
 <td align="right">0.0277</td>
-<td align="right">0.930</td>
+<td align="right">0.928</td>
 </tr>
 <tr class="even">
 <td align="left">Age</td>
@@ -876,9 +869,16 @@ p-value indicates that the compared groups have, on average, a
 different community composition.</p>
 <p>This method is implemented in the <code>vegan</code> package in the function
 <a href="https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis"><code>adonis2</code></a>.</p>
-<p>We can get equal result by first performing distance-based redundancy analysis (dbRDA),
-and then applying permutational test for result of redundancy analysis. Advantage is
-that by doing so we can get coefficients: how much each taxa affect to the result.</p>
+<p><strong>Note:</strong></p>
+<p>It is recommended to <code>by = "margin"</code>. It specifies that each variable’s marginal
+effect is analyzed individually.</p>
+<p>When <code>by = "terms"</code> (the default) the order of variables matters;
+each variable is analyzed sequentially, and the result is different when more than 1 variable is
+introduced and their order is differs. (Check <a href="https://microbiome.github.io/OMA/extras.html#permanova-comparison">comparison</a>)</p>
+<p>We can perform PERMANOVA with <code>adonis2</code> function or by first performing distance-based
+redundancy analysis (dbRDA), and then applying permutational test for result of
+redundancy analysis. Advantage of the latter approach is that by doing so we can get
+coefficients: how much each taxa affect to the result.</p>
 <div class="sourceCode" id="cb231"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb231-1"><a href="community-similarity.html#cb231-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>( <span class="sc">!</span><span class="fu">require</span>(vegan) ){</span>
 <span id="cb231-2"><a href="community-similarity.html#cb231-2" aria-hidden="true" tabindex="-1"></a>    BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;vegan&quot;</span>)</span>
 <span id="cb231-3"><a href="community-similarity.html#cb231-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(<span class="st">&quot;vegan&quot;</span>)</span>
@@ -891,9 +891,9 @@ that by doing so we can get coefficients: how much each taxa affect to the resul
 <span id="cb231-10"><a href="community-similarity.html#cb231-10" aria-hidden="true" tabindex="-1"></a><span class="co"># We choose 99 random permutations. Consider applying more (999 or 9999) in your</span></span>
 <span id="cb231-11"><a href="community-similarity.html#cb231-11" aria-hidden="true" tabindex="-1"></a><span class="co"># analysis. </span></span>
 <span id="cb231-12"><a href="community-similarity.html#cb231-12" aria-hidden="true" tabindex="-1"></a>permanova <span class="ot">&lt;-</span> <span class="fu">adonis2</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse,<span class="st">&quot;relabundance&quot;</span>)) <span class="sc">~</span> Group,</span>
-<span id="cb231-13"><a href="community-similarity.html#cb231-13" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> <span class="fu">colData</span>(tse),</span>
-<span id="cb231-14"><a href="community-similarity.html#cb231-14" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>,</span>
-<span id="cb231-15"><a href="community-similarity.html#cb231-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">by =</span> <span class="cn">NULL</span>,</span>
+<span id="cb231-13"><a href="community-similarity.html#cb231-13" aria-hidden="true" tabindex="-1"></a>                     <span class="at">by =</span> <span class="st">&quot;margin&quot;</span>, <span class="co"># each term (here only &#39;Group&#39;) analyzed individually</span></span>
+<span id="cb231-14"><a href="community-similarity.html#cb231-14" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> <span class="fu">colData</span>(tse),</span>
+<span id="cb231-15"><a href="community-similarity.html#cb231-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>,</span>
 <span id="cb231-16"><a href="community-similarity.html#cb231-16" aria-hidden="true" tabindex="-1"></a>                     <span class="at">permutations =</span> <span class="dv">99</span>)</span>
 <span id="cb231-17"><a href="community-similarity.html#cb231-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb231-18"><a href="community-similarity.html#cb231-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Set seed for reproducibility</span></span>
@@ -903,14 +903,15 @@ that by doing so we can get coefficients: how much each taxa affect to the resul
 <span id="cb231-22"><a href="community-similarity.html#cb231-22" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> <span class="fu">colData</span>(tse))</span>
 <span id="cb231-23"><a href="community-similarity.html#cb231-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform permutational analysis</span></span>
 <span id="cb231-24"><a href="community-similarity.html#cb231-24" aria-hidden="true" tabindex="-1"></a>permanova2 <span class="ot">&lt;-</span> <span class="fu">anova.cca</span>(dbrda,</span>
-<span id="cb231-25"><a href="community-similarity.html#cb231-25" aria-hidden="true" tabindex="-1"></a>                        <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>,</span>
-<span id="cb231-26"><a href="community-similarity.html#cb231-26" aria-hidden="true" tabindex="-1"></a>                        <span class="at">permutations =</span> <span class="dv">99</span>)</span>
-<span id="cb231-27"><a href="community-similarity.html#cb231-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb231-28"><a href="community-similarity.html#cb231-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Get p-values</span></span>
-<span id="cb231-29"><a href="community-similarity.html#cb231-29" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">c</span>( permanova[<span class="st">&quot;Model&quot;</span>, <span class="st">&quot;Pr(&gt;F)&quot;</span>], permanova2[<span class="st">&quot;Model&quot;</span>, <span class="st">&quot;Pr(&gt;F)&quot;</span>] )</span>
-<span id="cb231-30"><a href="community-similarity.html#cb231-30" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(p_values)</span>
-<span id="cb231-31"><a href="community-similarity.html#cb231-31" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(p_values) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;adonis2&quot;</span>, <span class="st">&quot;dbRDA+anova.cca&quot;</span>)</span>
-<span id="cb231-32"><a href="community-similarity.html#cb231-32" aria-hidden="true" tabindex="-1"></a>p_values</span></code></pre></div>
+<span id="cb231-25"><a href="community-similarity.html#cb231-25" aria-hidden="true" tabindex="-1"></a>                        <span class="at">by =</span> <span class="st">&quot;margin&quot;</span>, <span class="co"># each term (here only &#39;Group&#39;) analyzed individually</span></span>
+<span id="cb231-26"><a href="community-similarity.html#cb231-26" aria-hidden="true" tabindex="-1"></a>                        <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>,</span>
+<span id="cb231-27"><a href="community-similarity.html#cb231-27" aria-hidden="true" tabindex="-1"></a>                        <span class="at">permutations =</span> <span class="dv">99</span>)</span>
+<span id="cb231-28"><a href="community-similarity.html#cb231-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb231-29"><a href="community-similarity.html#cb231-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Get p-values</span></span>
+<span id="cb231-30"><a href="community-similarity.html#cb231-30" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">c</span>( permanova[<span class="st">&quot;Group&quot;</span>, <span class="st">&quot;Pr(&gt;F)&quot;</span>], permanova2[<span class="st">&quot;Group&quot;</span>, <span class="st">&quot;Pr(&gt;F)&quot;</span>] )</span>
+<span id="cb231-31"><a href="community-similarity.html#cb231-31" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(p_values)</span>
+<span id="cb231-32"><a href="community-similarity.html#cb231-32" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(p_values) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;adonis2&quot;</span>, <span class="st">&quot;dbRDA+anova.cca&quot;</span>)</span>
+<span id="cb231-33"><a href="community-similarity.html#cb231-33" aria-hidden="true" tabindex="-1"></a>p_values</span></code></pre></div>
 <pre><code>##                 p_values
 ## adonis2             0.02
 ## dbRDA+anova.cca     0.02</code></pre>
@@ -1001,7 +1002,7 @@ other attached packages:
  [5] scater_1.24.0                  scuttle_1.6.2                 
  [7] ggplot2_3.3.6                  vegan_2.6-2                   
  [9] lattice_0.20-45                permute_0.9-7                 
-[11] mia_1.3.25                     MultiAssayExperiment_1.22.0   
+[11] mia_1.3.26                     MultiAssayExperiment_1.22.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [15] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [17] SummarizedExperiment_1.26.1    Biobase_2.56.0                

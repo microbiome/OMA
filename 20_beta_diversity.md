@@ -394,11 +394,11 @@ kable(rda_info_clean)
 \hline
   & Explained by variables & Unexplained by variables & Proportion expl by vars & P-value (PERMANOVA 999 permutations)\\
 \hline
-all & 35.30 & 191.7 & 0.1842 & 0.662\\
+all & 35.30 & 191.7 & 0.1842 & 0.621\\
 \hline
-ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.816\\
+ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.815\\
 \hline
-Gender & 5.31 & 223.7 & 0.0277 & 0.920\\
+Gender & 5.31 & 223.7 & 0.0277 & 0.934\\
 \hline
 Age & 10.59 & 216.4 & 0.0552 & 0.001\\
 \hline
@@ -594,10 +594,19 @@ different community composition.
 This method is implemented in the `vegan` package in the function
 [`adonis2`](https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis).
 
-We can get equal result by first performing distance-based redundancy analysis (dbRDA),
-and then applying permutational test for result of redundancy analysis. Advantage is 
-that by doing so we can get coefficients: how much each taxa affect to the result.
+**Note:**
 
+It is recommended to `by = "margin"`. It specifies that each variable's marginal
+effect is analyzed individually. 
+
+When `by = "terms"` (the default)  the order of variables matters;
+each variable is analyzed sequentially, and the result is different when more than 1 variable is
+introduced and their order is differs. (Check [comparison](https://microbiome.github.io/OMA/extras.html#permanova-comparison))
+
+We can perform PERMANOVA with `adonis2` function or by first performing distance-based 
+redundancy analysis (dbRDA), and then applying permutational test for result of 
+redundancy analysis. Advantage of the latter approach is that by doing so we can get 
+coefficients: how much each taxa affect to the result.
 
 
 ```r
@@ -613,9 +622,9 @@ set.seed(1576)
 # We choose 99 random permutations. Consider applying more (999 or 9999) in your
 # analysis. 
 permanova <- adonis2(t(assay(tse,"relabundance")) ~ Group,
+                     by = "margin", # each term (here only 'Group') analyzed individually
                      data = colData(tse),
                      method = "euclidean",
-                     by = NULL,
                      permutations = 99)
 
 # Set seed for reproducibility
@@ -625,11 +634,12 @@ dbrda <- dbrda(t(assay(tse,"relabundance")) ~ Group,
                data = colData(tse))
 # Perform permutational analysis
 permanova2 <- anova.cca(dbrda,
+                        by = "margin", # each term (here only 'Group') analyzed individually
                         method = "euclidean",
                         permutations = 99)
 
 # Get p-values
-p_values <- c( permanova["Model", "Pr(>F)"], permanova2["Model", "Pr(>F)"] )
+p_values <- c( permanova["Group", "Pr(>F)"], permanova2["Group", "Pr(>F)"] )
 p_values <-as.data.frame(p_values)
 rownames(p_values) <- c("adonis2", "dbRDA+anova.cca")
 p_values
@@ -750,7 +760,7 @@ other attached packages:
  [5] scater_1.24.0                  scuttle_1.6.2                 
  [7] ggplot2_3.3.6                  vegan_2.6-2                   
  [9] lattice_0.20-45                permute_0.9-7                 
-[11] mia_1.3.25                     MultiAssayExperiment_1.22.0   
+[11] mia_1.3.26                     MultiAssayExperiment_1.22.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [15] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [17] SummarizedExperiment_1.26.1    Biobase_2.56.0                

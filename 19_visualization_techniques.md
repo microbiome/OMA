@@ -358,7 +358,8 @@ tse_phylum <- agglomerateByRank(tse,
                                 rank = "Phylum",
                                 onRankOnly = TRUE)
 # Add clr-transformation on samples
-tse_phylum <- transformSamples(tse_phylum, method = "clr", pseudocount = 1)
+tse_phylum <- transformSamples(tse_phylum, method = "relabundance", pseudocount = 1)
+tse_phylum <- transformSamples(tse_phylum, method = "clr", abund_values = "relabundance")
 # Add z-transformation on features (taxa)
 tse_phylum <- transformFeatures(tse_phylum, abund_values = "clr", 
                                 method = "z", name = "clr_z")
@@ -367,7 +368,8 @@ tse_phylum <- transformFeatures(tse_phylum, abund_values = "clr",
 tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces", "Skin", "Tongue") ]
 
 # Does clr-transformation
-tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "clr", pseudocount = 1)
+tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "relabundance", pseudocount = 1)
+tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "clr", abund_values = "relabundance")
 # Does z-transformation
 tse_phylum_subset <- transformFeatures(tse_phylum_subset, abund_values = "clr", 
                                        method = "z", name = "clr_z")
@@ -752,7 +754,7 @@ other attached packages:
  [5] sechm_1.4.1                    miaViz_1.3.3                  
  [7] ggraph_2.0.5                   patchwork_1.1.1               
  [9] scater_1.24.0                  scuttle_1.6.2                 
-[11] mia_1.3.25                     MultiAssayExperiment_1.22.0   
+[11] mia_1.3.26                     MultiAssayExperiment_1.22.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [15] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [17] SummarizedExperiment_1.26.1    Biobase_2.56.0                

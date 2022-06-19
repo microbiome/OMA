@@ -79,7 +79,8 @@ Only the most prevalent taxa are included in analysis.
 # Subset data in the first experiment
 mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
 # clr-transform in the first experiment
-mae[[1]] <- transformSamples(mae[[1]], method = "clr", pseudocount = 1)
+mae[[1]] <- transformSamples(mae[[1]], method = "relabundance", pseudocount = 1)
+mae[[1]] <- transformSamples(mae[[1]], "relabundance", method = "clr")
 ```
 
 _cobiclust_ takes counts table as an input and gives _cobiclust_ object as an output.
@@ -495,7 +496,7 @@ other attached packages:
  [3] colorspace_2.0-3               MASS_7.3-57                   
  [5] patchwork_1.1.1                ggplot2_3.3.6                 
  [7] pheatmap_1.0.12                cobiclust_0.1.0               
- [9] microbiomeDataSets_1.1.5       mia_1.3.25                    
+ [9] microbiomeDataSets_1.1.5       mia_1.3.26                    
 [11] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [13] Biostrings_2.64.0              XVector_0.36.0                
 [15] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   

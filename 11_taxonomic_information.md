@@ -397,48 +397,63 @@ For complete list of available transformations and parameters, see function
 
 
 ```r
-tse <- transformSamples(x = tse, abund_values = "counts", method = "clr", 
+tse <- transformSamples(tse, method = "relabundance")
+tse <- transformSamples(x = tse, abund_values = "relabundance", method = "clr", 
                         pseudocount = 1, name = "clr_transformation")
 
 head(assay(tse, "clr_transformation"))
 ```
 
 ```
-##                                      CL3    CC1     SV1 M31Fcsw M11Fcsw M31Plmr
-## Class:Thermoprotei               -0.9552 -1.124 -0.7435 -0.2916 -0.2652  -0.356
-## Class:Thermoprotei               -0.9552 -1.124 -0.7435 -0.2916 -0.2652  -0.356
-## Species:Sulfolobusacidocaldarius -0.9552 -1.124 -0.7435 -0.2916 -0.2652  -0.356
-## Class:Sd-NA                      -0.9552 -1.124 -0.7435 -0.2916 -0.2652  -0.356
-## Class:Sd-NA                      -0.9552 -1.124 -0.7435 -0.2916 -0.2652  -0.356
-## Class:Sd-NA                      -0.9552 -1.124 -0.7435 -0.2916 -0.2652  -0.356
-##                                  M11Plmr F21Plmr M31Tong M11Tong LMEpi24M
-## Class:Thermoprotei               -0.4713 -0.2645 -0.2547 -0.1572   -0.359
-## Class:Thermoprotei               -0.4713 -0.2645 -0.2547 -0.1572   -0.359
-## Species:Sulfolobusacidocaldarius  0.2219 -0.2645 -0.2547 -0.1572   -0.359
-## Class:Sd-NA                      -0.4713 -0.2645 -0.2547 -0.1572   -0.359
-## Class:Sd-NA                      -0.4713 -0.2645 -0.2547 -0.1572   -0.359
-## Class:Sd-NA                      -0.4713 -0.2645 -0.2547 -0.1572   -0.359
-##                                  SLEpi20M  AQC1cm  AQC4cm  AQC7cm     NP2
-## Class:Thermoprotei                 0.3704  2.6250  3.7862  4.0751  0.4502
-## Class:Thermoprotei                -0.3228 -0.7072  0.2697  1.1459 -0.2429
-## Species:Sulfolobusacidocaldarius  -0.3228 -0.7072 -0.8289 -0.8001 -0.2429
-## Class:Sd-NA                       -0.3228 -0.7072  2.3066  2.6011 -0.2429
-## Class:Sd-NA                       -0.3228 -0.7072  0.2697 -0.1069 -0.2429
-## Class:Sd-NA                       -0.3228 -0.7072 -0.1357  0.5862 -0.2429
-##                                     NP3     NP5 TRRsed1 TRRsed2 TRRsed3    TS28
-## Class:Thermoprotei               -0.433 -0.3606 -0.2677 -0.4828 -0.4384 -0.2691
-## Class:Thermoprotei               -0.433 -0.3606 -0.2677 -0.4828 -0.4384 -0.2691
-## Species:Sulfolobusacidocaldarius -0.433 -0.3606 -0.2677 -0.4828 -0.4384 -0.2691
-## Class:Sd-NA                      -0.433 -0.3606 -0.2677 -0.4828 -0.4384 -0.2691
-## Class:Sd-NA                      -0.433 -0.3606 -0.2677 -0.4828 -0.4384 -0.2691
-## Class:Sd-NA                      -0.433 -0.3606 -0.2677 -0.4828 -0.4384 -0.2691
-##                                     TS29   Even1   Even2   Even3
-## Class:Thermoprotei               -0.2569 -0.3481 -0.2534 -0.2382
-## Class:Thermoprotei               -0.2569 -0.3481 -0.2534 -0.2382
-## Species:Sulfolobusacidocaldarius -0.2569 -0.3481 -0.2534 -0.2382
-## Class:Sd-NA                      -0.2569 -0.3481 -0.2534 -0.2382
-## Class:Sd-NA                      -0.2569 -0.3481 -0.2534 -0.2382
-## Class:Sd-NA                      -0.2569 -0.3481 -0.2534 -0.2382
+##                                        CL3        CC1        SV1    M31Fcsw
+## Class:Thermoprotei               -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
+## Class:Thermoprotei               -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
+## Species:Sulfolobusacidocaldarius -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
+## Class:Sd-NA                      -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
+## Class:Sd-NA                      -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
+## Class:Sd-NA                      -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
+##                                     M11Fcsw   M31Plmr    M11Plmr    F21Plmr
+## Class:Thermoprotei               -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
+## Class:Thermoprotei               -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
+## Species:Sulfolobusacidocaldarius -4.991e-05 -5.06e-05 -4.860e-05 -5.148e-05
+## Class:Sd-NA                      -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
+## Class:Sd-NA                      -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
+## Class:Sd-NA                      -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
+##                                    M31Tong   M11Tong   LMEpi24M   SLEpi20M
+## Class:Thermoprotei               -4.89e-05 -5.05e-05 -4.796e-05 -4.910e-05
+## Class:Thermoprotei               -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
+## Species:Sulfolobusacidocaldarius -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
+## Class:Sd-NA                      -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
+## Class:Sd-NA                      -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
+## Class:Sd-NA                      -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
+##                                      AQC1cm     AQC4cm     AQC7cm        NP2
+## Class:Thermoprotei               -2.419e-05 -4.442e-06  2.822e-05 -4.900e-05
+## Class:Thermoprotei               -4.731e-05 -4.602e-05 -4.475e-05 -5.091e-05
+## Species:Sulfolobusacidocaldarius -4.731e-05 -4.686e-05 -4.828e-05 -5.091e-05
+## Class:Sd-NA                      -4.731e-05 -3.753e-05 -3.121e-05 -5.091e-05
+## Class:Sd-NA                      -4.731e-05 -4.602e-05 -4.769e-05 -5.091e-05
+## Class:Sd-NA                      -4.731e-05 -4.644e-05 -4.651e-05 -5.091e-05
+##                                         NP3        NP5    TRRsed1    TRRsed2
+## Class:Thermoprotei               -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
+## Class:Thermoprotei               -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
+## Species:Sulfolobusacidocaldarius -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
+## Class:Sd-NA                      -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
+## Class:Sd-NA                      -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
+## Class:Sd-NA                      -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
+##                                     TRRsed3       TS28      TS29      Even1
+## Class:Thermoprotei               -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
+## Class:Thermoprotei               -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
+## Species:Sulfolobusacidocaldarius -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
+## Class:Sd-NA                      -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
+## Class:Sd-NA                      -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
+## Class:Sd-NA                      -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
+##                                       Even2      Even3
+## Class:Thermoprotei               -5.114e-05 -5.122e-05
+## Class:Thermoprotei               -5.114e-05 -5.122e-05
+## Species:Sulfolobusacidocaldarius -5.114e-05 -5.122e-05
+## Class:Sd-NA                      -5.114e-05 -5.122e-05
+## Class:Sd-NA                      -5.114e-05 -5.122e-05
+## Class:Sd-NA                      -5.114e-05 -5.122e-05
 ```
 
 -   In 'pa' transformation, 'threshold' specifies the value that divides observations to
@@ -563,7 +578,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.3.25                     MultiAssayExperiment_1.22.0   
+ [1] mia_1.3.26                     MultiAssayExperiment_1.22.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
  [5] XVector_0.36.0                 SingleCellExperiment_1.18.0   
  [7] SummarizedExperiment_1.26.1    Biobase_2.56.0                

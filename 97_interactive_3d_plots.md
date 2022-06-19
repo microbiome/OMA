@@ -89,3 +89,137 @@ plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3)%>%
 
 ![](97_interactive_3d_plots_files/figure-latex/test-rgl-1.pdf)<!-- --> 
 
+
+## PERMANOVA comparison
+
+
+```r
+if( !require(vegan) ){
+    BiocManager::install("vegan")
+    library("vegan")
+}
+```
+
+```
+## Loading required package: vegan
+```
+
+```
+## Loading required package: permute
+```
+
+```
+## Loading required package: lattice
+```
+
+```
+## This is vegan 2.6-2
+```
+
+```r
+data("enterotype")
+enterotype <- transformSamples(enterotype, method = "relabundance")
+# Drop those samples that do not have meta dtaa
+enterotype <- 
+    enterotype[ , !rowSums(is.na(colData(enterotype)[, c("Nationality", "Gender","ClinicalStatus")]) > 0 ) ]
+
+# Multiple variables, by = "margin"
+set.seed(75)
+adonis2(t(assay(enterotype ,"relabundance")) ~ Nationality + Gender + ClinicalStatus,
+        by = "margin",
+        data = colData(enterotype),
+        permutations = 99)
+```
+
+```
+## Permutation test for adonis under reduced model
+## Marginal effects of terms
+## Permutation: free
+## Number of permutations: 99
+## 
+## adonis2(formula = t(assay(enterotype, "relabundance")) ~ Nationality + Gender + ClinicalStatus, data = colData(enterotype), permutations = 99, by = "margin")
+##                Df SumOfSqs      R2      F Pr(>F)  
+## Nationality     4   0.7933 0.19338 2.0894   0.04 *
+## Gender          1   0.1230 0.02999 1.2963   0.29  
+## ClinicalStatus  3   0.2412 0.05879 0.8469   0.53  
+## Residual       29   2.7527 0.67101                
+## Total          38   4.1023 1.00000                
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```r
+# Multiple variables, by = "margin"
+set.seed(75)
+adonis2(t(assay(enterotype ,"relabundance")) ~ ClinicalStatus + Nationality + Gender,
+        by = "margin",
+        data = colData(enterotype ),
+        permutations = 99)
+```
+
+```
+## Permutation test for adonis under reduced model
+## Marginal effects of terms
+## Permutation: free
+## Number of permutations: 99
+## 
+## adonis2(formula = t(assay(enterotype, "relabundance")) ~ ClinicalStatus + Nationality + Gender, data = colData(enterotype), permutations = 99, by = "margin")
+##                Df SumOfSqs      R2      F Pr(>F)  
+## ClinicalStatus  3   0.2412 0.05879 0.8469   0.53  
+## Nationality     4   0.7933 0.19338 2.0894   0.04 *
+## Gender          1   0.1230 0.02999 1.2963   0.29  
+## Residual       29   2.7527 0.67101                
+## Total          38   4.1023 1.00000                
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```r
+# Multiple variables, default: by = "terms"
+set.seed(75)
+adonis2(t(assay(enterotype ,"relabundance"))  ~ Nationality + Gender + ClinicalStatus,
+        data = colData(enterotype ),
+        permutations = 99)
+```
+
+```
+## Permutation test for adonis under reduced model
+## Terms added sequentially (first to last)
+## Permutation: free
+## Number of permutations: 99
+## 
+## adonis2(formula = t(assay(enterotype, "relabundance")) ~ Nationality + Gender + ClinicalStatus, data = colData(enterotype), permutations = 99)
+##                Df SumOfSqs      R2      F Pr(>F)  
+## Nationality     5   1.0046 0.24490 2.1168   0.04 *
+## Gender          1   0.1038 0.02530 1.0934   0.39  
+## ClinicalStatus  3   0.2412 0.05879 0.8469   0.53  
+## Residual       29   2.7527 0.67101                
+## Total          38   4.1023 1.00000                
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```r
+# Multiple variables, default: by = "terms"
+set.seed(75)
+adonis2(t(assay(enterotype ,"relabundance"))  ~ ClinicalStatus + Nationality + Gender,
+        data = colData(enterotype),
+        permutations = 99)
+```
+
+```
+## Permutation test for adonis under reduced model
+## Terms added sequentially (first to last)
+## Permutation: free
+## Number of permutations: 99
+## 
+## adonis2(formula = t(assay(enterotype, "relabundance")) ~ ClinicalStatus + Nationality + Gender, data = colData(enterotype), permutations = 99)
+##                Df SumOfSqs      R2      F Pr(>F)  
+## ClinicalStatus  4   0.5000 0.12189 1.3169   0.20  
+## Nationality     4   0.7265 0.17710 1.9135   0.05 *
+## Gender          1   0.1230 0.02999 1.2963   0.29  
+## Residual       29   2.7527 0.67101                
+## Total          38   4.1023 1.00000                
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```

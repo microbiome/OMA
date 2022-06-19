@@ -839,7 +839,7 @@ other attached packages:
 [17] NADA_1.6-1.1                   survival_3.3-1                
 [19] MASS_7.3-57                    ANCOMBC_1.6.1                 
 [21] tidySummarizedExperiment_1.6.1 patchwork_1.1.1               
-[23] mia_1.3.25                     MultiAssayExperiment_1.22.0   
+[23] mia_1.3.26                     MultiAssayExperiment_1.22.0   
 [25] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [27] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [29] SummarizedExperiment_1.26.1    Biobase_2.56.0                
