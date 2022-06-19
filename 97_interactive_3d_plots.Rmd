@@ -84,3 +84,44 @@ plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3)%>%
 
 ```
 
+
+## PERMANOVA comparison
+
+```{r}
+if( !require(vegan) ){
+    BiocManager::install("vegan")
+    library("vegan")
+}
+data("enterotype")
+enterotype <- transformSamples(enterotype, method = "relabundance")
+# Drop those samples that do not have meta dtaa
+enterotype <- 
+    enterotype[ , !rowSums(is.na(colData(enterotype)[, c("Nationality", "Gender","ClinicalStatus")]) > 0 ) ]
+
+# Multiple variables, by = "margin"
+set.seed(75)
+adonis2(t(assay(enterotype ,"relabundance")) ~ Nationality + Gender + ClinicalStatus,
+        by = "margin",
+        data = colData(enterotype),
+        permutations = 99)
+
+# Multiple variables, by = "margin"
+set.seed(75)
+adonis2(t(assay(enterotype ,"relabundance")) ~ ClinicalStatus + Nationality + Gender,
+        by = "margin",
+        data = colData(enterotype ),
+        permutations = 99)
+
+
+# Multiple variables, default: by = "terms"
+set.seed(75)
+adonis2(t(assay(enterotype ,"relabundance"))  ~ Nationality + Gender + ClinicalStatus,
+        data = colData(enterotype ),
+        permutations = 99)
+
+# Multiple variables, default: by = "terms"
+set.seed(75)
+adonis2(t(assay(enterotype ,"relabundance"))  ~ ClinicalStatus + Nationality + Gender,
+        data = colData(enterotype),
+        permutations = 99)
+```

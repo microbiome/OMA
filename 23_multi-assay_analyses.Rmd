@@ -181,7 +181,8 @@ colData(mae)$Diet <- ifelse(colData(mae)$Diet == "High-fat" |
 mae[[1]] <- mae[[1]][!duplicated(rownames(assay(mae[[1]]))), ]
 
 # Transforming microbiome data with rclr
-mae[[1]] <- transformCounts(mae[[1]], abund_values = "counts", method = "rclr")
+mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
+mae[[1]] <- transformCounts(mae[[1]], abund_values = "relabundance", method = "rclr")
 
 # Transforming metabolomic data with log10
 mae[[2]] <- transformSamples(mae[[2]], abund_values = "nmr", method = "log10")
@@ -206,7 +207,7 @@ Model options could be defined as follows:
 
 ```{r, message=FALSE, warning=FALSE}
 model_opts <- get_default_model_options(model)
-model_opts$num_factors <- 15
+model_opts$num_factors <- 5
 head(model_opts)
 ```
 
@@ -239,13 +240,13 @@ wrap_plots(
                     theme = theme(plot.title = element_text(hjust = 0.5)))
 ```
 
-The top weights for each assay using the three first factors:
+The top weights for each assay using all 5 factors:
 
 ```{r, warning=FALSE, message=FALSE, fig.height=10, fig.width=10}
 plots <- lapply(c("microbiota", "metabolites","biomarkers"), function(name) {
     plot_top_weights(model.trained,
                      view = name,
-                     factors = 1:3,
+                     factors = "all",
                      nfeatures = 10) +
         labs(title = paste0("Top weights of the ", name," assay"))
 })
