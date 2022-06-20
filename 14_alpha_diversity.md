@@ -405,7 +405,7 @@ loaded via a namespace (and not attached):
  [73] tidyselect_1.1.2            plyr_1.8.7                 
  [75] magrittr_2.0.3              bookdown_0.27              
  [77] R6_2.5.1                    generics_0.1.2             
- [79] DelayedArray_0.22.0         DBI_1.1.2                  
+ [79] DelayedArray_0.22.0         DBI_1.1.3                  
  [81] withr_2.5.0                 mgcv_1.8-40                
  [83] pillar_1.7.0                RCurl_1.98-1.7             
  [85] tibble_3.1.7                dir.expiry_1.4.0           

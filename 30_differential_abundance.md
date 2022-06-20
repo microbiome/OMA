@@ -866,7 +866,7 @@ loaded via a namespace (and not attached):
  [27] promises_1.2.0.1              evaluate_0.15                
  [29] DEoptimR_1.0-11               fansi_1.0.3                  
  [31] dbplyr_2.2.0                  readxl_1.4.0                 
- [33] igraph_1.3.2                  DBI_1.1.2                    
+ [33] igraph_1.3.2                  DBI_1.1.3                    
  [35] htmlwidgets_1.5.4             tensorA_0.36.2               
  [37] hash_2.2.6.2                  ellipsis_0.3.2               
  [39] backports_1.4.1               energy_1.7-10                

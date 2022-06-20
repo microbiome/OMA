@@ -628,7 +628,7 @@ loaded via a namespace (and not attached):
 [73] plyr_1.8.7                  magrittr_2.0.3             
 [75] bookdown_0.27               R6_2.5.1                   
 [77] generics_0.1.2              DelayedArray_0.22.0        
-[79] DBI_1.1.2                   mgcv_1.8-40                
+[79] DBI_1.1.3                   mgcv_1.8-40                
 [81] pillar_1.7.0                RCurl_1.98-1.7             
 [83] tibble_3.1.7                dir.expiry_1.4.0           
 [85] crayon_1.5.1                utf8_1.2.2                 

@@ -394,11 +394,11 @@ kable(rda_info_clean)
 \hline
   & Explained by variables & Unexplained by variables & Proportion expl by vars & P-value (PERMANOVA 999 permutations)\\
 \hline
-all & 35.30 & 191.7 & 0.1842 & 0.621\\
+all & 35.30 & 191.7 & 0.1842 & 0.659\\
 \hline
-ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.815\\
+ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.820\\
 \hline
-Gender & 5.31 & 223.7 & 0.0277 & 0.934\\
+Gender & 5.31 & 223.7 & 0.0277 & 0.924\\
 \hline
 Age & 10.59 & 216.4 & 0.0552 & 0.001\\
 \hline
@@ -809,7 +809,7 @@ loaded via a namespace (and not attached):
 [71] plyr_1.8.7                  magrittr_2.0.3             
 [73] bookdown_0.27               R6_2.5.1                   
 [75] generics_0.1.2              DelayedArray_0.22.0        
-[77] DBI_1.1.2                   withr_2.5.0                
+[77] DBI_1.1.3                   withr_2.5.0                
 [79] mgcv_1.8-40                 pillar_1.7.0               
 [81] RCurl_1.98-1.7              tibble_3.1.7               
 [83] dir.expiry_1.4.0            crayon_1.5.1               

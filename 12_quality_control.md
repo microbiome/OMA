@@ -587,7 +587,7 @@ loaded via a namespace (and not attached):
  [29] glue_1.6.2                    polyclip_1.10-0              
  [31] gtable_0.3.0                  zlibbioc_1.42.0              
  [33] DelayedArray_0.22.0           BiocSingular_1.12.0          
- [35] scales_1.2.0                  DBI_1.1.2                    
+ [35] scales_1.2.0                  DBI_1.1.3                    
  [37] Rcpp_1.0.8.3                  viridisLite_0.4.0            
  [39] xtable_1.8-4                  decontam_1.16.0              
  [41] gridGraphics_0.5-1            tidytree_0.3.9               

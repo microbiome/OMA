@@ -524,7 +524,7 @@ loaded via a namespace (and not attached):
  [29] gtable_0.3.0                  zlibbioc_1.42.0              
  [31] DelayedArray_0.22.0           additivityTests_1.1-4        
  [33] BiocSingular_1.12.0           scales_1.2.0                 
- [35] DBI_1.1.2                     Rcpp_1.0.8.3                 
+ [35] DBI_1.1.3                     Rcpp_1.0.8.3                 
  [37] viridisLite_0.4.0             xtable_1.8-4                 
  [39] decontam_1.16.0               tidytree_0.3.9               
  [41] bit_4.0.4                     rsvd_1.0.5                   

@@ -55,6 +55,7 @@ document.addEventListener("click", function (event) {
  * TreeSummarizedExperiment [@R-TreeSummarizedExperiment]
    + [Online tutorial](https://bioconductor.org/packages/release/bioc/vignettes/TreeSummarizedExperiment/inst/doc/Introduction_to_treeSummarizedExperiment.html)
    + [Project page](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html)
+   + Publication: [@Huang2021]
    
 
 ### Other relevant containers

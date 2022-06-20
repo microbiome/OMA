@@ -1314,7 +1314,7 @@ loaded via a namespace (and not attached):
  [33] glue_1.6.2                    gtable_0.3.0                 
  [35] zlibbioc_1.42.0               DelayedArray_0.22.0          
  [37] BiocSingular_1.12.0           Rhdf5lib_1.18.2              
- [39] scales_1.2.0                  DBI_1.1.2                    
+ [39] scales_1.2.0                  DBI_1.1.3                    
  [41] Rcpp_1.0.8.3                  xtable_1.8-4                 
  [43] viridisLite_0.4.0             decontam_1.16.0              
  [45] tidytree_0.3.9                bit_4.0.4                    

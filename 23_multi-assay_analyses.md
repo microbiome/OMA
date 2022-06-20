@@ -501,7 +501,7 @@ loaded via a namespace (and not attached):
  [81] tibble_3.1.7                  crayon_1.5.1                 
  [83] htmltools_0.5.2               mgcv_1.8-40                  
  [85] later_1.3.0                   tidyr_1.2.0                  
- [87] DBI_1.1.2                     ExperimentHub_2.4.0          
+ [87] DBI_1.1.3                     ExperimentHub_2.4.0          
  [89] corrplot_0.92                 dbplyr_2.2.0                 
  [91] MASS_7.3-57                   rappdirs_0.3.3               
  [93] Matrix_1.4-1                  permute_0.9-7                

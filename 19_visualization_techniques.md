@@ -785,7 +785,7 @@ loaded via a namespace (and not attached):
  [35] zlibbioc_1.42.0             V8_4.2.0                   
  [37] GetoptLong_1.0.5            DelayedArray_0.22.0        
  [39] BiocSingular_1.12.0         shape_1.4.6                
- [41] scales_1.2.0                DBI_1.1.2                  
+ [41] scales_1.2.0                DBI_1.1.3                  
  [43] randomcoloR_1.1.0.1         Rcpp_1.0.8.3               
  [45] viridisLite_0.4.0           clue_0.3-61                
  [47] decontam_1.16.0             gridGraphics_0.5-1         
