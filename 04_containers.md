@@ -1284,13 +1284,13 @@ attached base packages:
 other attached packages:
  [1] microbiomeDataSets_1.1.5       phyloseq_1.40.0               
  [3] BiocManager_1.30.18            ggplot2_3.3.6                 
- [5] mia_1.3.26                     MultiAssayExperiment_1.22.0   
+ [5] mia_1.3.27                     MultiAssayExperiment_1.22.0   
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
  [9] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [11] SummarizedExperiment_1.26.1    Biobase_2.56.0                
 [13] GenomicRanges_1.48.0           GenomeInfoDb_1.32.2           
 [15] IRanges_2.30.0                 S4Vectors_0.34.0              
-[17] BiocGenerics_0.42.0            MatrixGenerics_1.8.0          
+[17] BiocGenerics_0.42.0            MatrixGenerics_1.8.1          
 [19] matrixStats_0.62.0-9000        BiocStyle_2.24.0              
 [21] rebook_1.6.0                  
 
@@ -1300,7 +1300,7 @@ loaded via a namespace (and not attached):
   [5] lazyeval_0.2.2                splines_4.2.0                
   [7] BiocParallel_1.30.3           scater_1.24.0                
   [9] digest_0.6.29                 foreach_1.5.2                
- [11] yulab.utils_0.0.4             htmltools_0.5.2              
+ [11] yulab.utils_0.0.5             htmltools_0.5.2              
  [13] viridis_0.6.2                 fansi_1.0.3                  
  [15] magrittr_2.0.3                memoise_2.0.1                
  [17] ScaledMatrix_1.4.0            cluster_2.1.3                
@@ -1322,9 +1322,9 @@ loaded via a namespace (and not attached):
  [49] dir.expiry_1.4.0              ellipsis_0.3.2               
  [51] pkgconfig_2.0.3               XML_3.99-0.10                
  [53] scuttle_1.6.2                 CodeDepends_0.6.5            
- [55] dbplyr_2.2.0                  utf8_1.2.2                   
+ [55] dbplyr_2.2.1                  utf8_1.2.2                   
  [57] AnnotationDbi_1.58.0          later_1.3.0                  
- [59] tidyselect_1.1.2              rlang_1.0.2                  
+ [59] tidyselect_1.1.2              rlang_1.0.3                  
  [61] reshape2_1.4.4                munsell_0.5.0                
  [63] BiocVersion_3.15.2            tools_4.2.0                  
  [65] cachem_1.0.6                  cli_3.3.0                    

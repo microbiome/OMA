@@ -496,14 +496,14 @@ other attached packages:
  [3] colorspace_2.0-3               MASS_7.3-57                   
  [5] patchwork_1.1.1                ggplot2_3.3.6                 
  [7] pheatmap_1.0.12                cobiclust_0.1.0               
- [9] microbiomeDataSets_1.1.5       mia_1.3.26                    
+ [9] microbiomeDataSets_1.1.5       mia_1.3.27                    
 [11] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [13] Biostrings_2.64.0              XVector_0.36.0                
 [15] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
 [17] Biobase_2.56.0                 GenomicRanges_1.48.0          
 [19] GenomeInfoDb_1.32.2            IRanges_2.30.0                
 [21] S4Vectors_0.34.0               BiocGenerics_0.42.0           
-[23] MatrixGenerics_1.8.0           matrixStats_0.62.0-9000       
+[23] MatrixGenerics_1.8.1           matrixStats_0.62.0-9000       
 [25] BiocStyle_2.24.0               rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
@@ -511,7 +511,7 @@ loaded via a namespace (and not attached):
   [3] plyr_1.8.7                    lazyeval_0.2.2               
   [5] splines_4.2.0                 BiocParallel_1.30.3          
   [7] scater_1.24.0                 digest_0.6.29                
-  [9] yulab.utils_0.0.4             htmltools_0.5.2              
+  [9] yulab.utils_0.0.5             htmltools_0.5.2              
  [11] viridis_0.6.2                 fansi_1.0.3                  
  [13] magrittr_2.0.3                memoise_2.0.1                
  [15] ScaledMatrix_1.4.0            cluster_2.1.3                
@@ -522,7 +522,7 @@ loaded via a namespace (and not attached):
  [25] jsonlite_1.8.0                graph_1.74.0                 
  [27] ape_5.6-2                     glue_1.6.2                   
  [29] gtable_0.3.0                  zlibbioc_1.42.0              
- [31] DelayedArray_0.22.0           additivityTests_1.1-4        
+ [31] DelayedArray_0.22.0           additivityTests_1.1-4.1      
  [33] BiocSingular_1.12.0           scales_1.2.0                 
  [35] DBI_1.1.3                     Rcpp_1.0.8.3                 
  [37] viridisLite_0.4.0             xtable_1.8-4                 
@@ -533,9 +533,9 @@ loaded via a namespace (and not attached):
  [47] ellipsis_0.3.2                farver_2.1.0                 
  [49] pkgconfig_2.0.3               XML_3.99-0.10                
  [51] scuttle_1.6.2                 CodeDepends_0.6.5            
- [53] dbplyr_2.2.0                  utf8_1.2.2                   
+ [53] dbplyr_2.2.1                  utf8_1.2.2                   
  [55] labeling_0.4.2                tidyselect_1.1.2             
- [57] rlang_1.0.2                   reshape2_1.4.4               
+ [57] rlang_1.0.3                   reshape2_1.4.4               
  [59] later_1.3.0                   AnnotationDbi_1.58.0         
  [61] munsell_0.5.0                 BiocVersion_3.15.2           
  [63] tools_4.2.0                   cachem_1.0.6                 

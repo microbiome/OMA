@@ -394,11 +394,11 @@ kable(rda_info_clean)
 \hline
   & Explained by variables & Unexplained by variables & Proportion expl by vars & P-value (PERMANOVA 999 permutations)\\
 \hline
-all & 35.30 & 191.7 & 0.1842 & 0.659\\
+all & 35.30 & 191.7 & 0.1842 & 0.668\\
 \hline
-ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.820\\
+ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.833\\
 \hline
-Gender & 5.31 & 223.7 & 0.0277 & 0.924\\
+Gender & 5.31 & 223.7 & 0.0277 & 0.923\\
 \hline
 Age & 10.59 & 216.4 & 0.0552 & 0.001\\
 \hline
@@ -760,13 +760,13 @@ other attached packages:
  [5] scater_1.24.0                  scuttle_1.6.2                 
  [7] ggplot2_3.3.6                  vegan_2.6-2                   
  [9] lattice_0.20-45                permute_0.9-7                 
-[11] mia_1.3.26                     MultiAssayExperiment_1.22.0   
+[11] mia_1.3.27                     MultiAssayExperiment_1.22.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [15] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [17] SummarizedExperiment_1.26.1    Biobase_2.56.0                
 [19] GenomicRanges_1.48.0           GenomeInfoDb_1.32.2           
 [21] IRanges_2.30.0                 S4Vectors_0.34.0              
-[23] BiocGenerics_0.42.0            MatrixGenerics_1.8.0          
+[23] BiocGenerics_0.42.0            MatrixGenerics_1.8.1          
 [25] matrixStats_0.62.0-9000        BiocStyle_2.24.0              
 [27] rebook_1.6.0                  
 
@@ -796,11 +796,11 @@ loaded via a namespace (and not attached):
 [45] zlibbioc_1.42.0             MASS_7.3-57                
 [47] scales_1.2.0                parallel_4.2.0             
 [49] yaml_2.3.5                  memoise_2.0.1              
-[51] gridExtra_2.3               yulab.utils_0.0.4          
+[51] gridExtra_2.3               yulab.utils_0.0.5          
 [53] stringi_1.7.6               RSQLite_2.2.14             
 [55] highr_0.9                   ScaledMatrix_1.4.0         
 [57] tidytree_0.3.9              filelock_1.0.2             
-[59] BiocParallel_1.30.3         rlang_1.0.2                
+[59] BiocParallel_1.30.3         rlang_1.0.3                
 [61] pkgconfig_2.0.3             bitops_1.0-7               
 [63] evaluate_0.15               purrr_0.3.4                
 [65] labeling_0.4.2              treeio_1.20.0              

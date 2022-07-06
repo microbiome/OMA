@@ -578,13 +578,13 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.3.26                     MultiAssayExperiment_1.22.0   
+ [1] mia_1.3.27                     MultiAssayExperiment_1.22.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
  [5] XVector_0.36.0                 SingleCellExperiment_1.18.0   
  [7] SummarizedExperiment_1.26.1    Biobase_2.56.0                
  [9] GenomicRanges_1.48.0           GenomeInfoDb_1.32.2           
 [11] IRanges_2.30.0                 S4Vectors_0.34.0              
-[13] BiocGenerics_0.42.0            MatrixGenerics_1.8.0          
+[13] BiocGenerics_0.42.0            MatrixGenerics_1.8.1          
 [15] matrixStats_0.62.0-9000        BiocStyle_2.24.0              
 [17] rebook_1.6.0                  
 
@@ -616,11 +616,11 @@ loaded via a namespace (and not attached):
 [49] scales_1.2.0                parallel_4.2.0             
 [51] yaml_2.3.5                  memoise_2.0.1              
 [53] gridExtra_2.3               ggplot2_3.3.6              
-[55] yulab.utils_0.0.4           stringi_1.7.6              
+[55] yulab.utils_0.0.5           stringi_1.7.6              
 [57] RSQLite_2.2.14              ScaledMatrix_1.4.0         
 [59] tidytree_0.3.9              permute_0.9-7              
 [61] filelock_1.0.2              BiocParallel_1.30.3        
-[63] rlang_1.0.2                 pkgconfig_2.0.3            
+[63] rlang_1.0.3                 pkgconfig_2.0.3            
 [65] bitops_1.0-7                evaluate_0.15              
 [67] lattice_0.20-45             purrr_0.3.4                
 [69] treeio_1.20.0               CodeDepends_0.6.5          

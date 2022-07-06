@@ -110,7 +110,14 @@ Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::H
 
 ## Alpha diversity
 
-### Alpha diversity analyses
+### Alpha diversity basics
+
+1. Calculate alpha diversity indices
+2. Test if data agglomeration to higher taxonomic ranks affects the indices
+3. Look for differences in alpha diversity between groups or correlation with a continuous variable
+
+
+### Alpha diversity 
 
 1. Estimate Shannon diversity for the data
 2. Try also another diversity index and compare the results with a scatterplot
@@ -121,7 +128,20 @@ Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::H
 Useful functions: estimateDiversity, colSums, geom_point, geom_boxplot
 
 
+
+
+
 ## Community composition
+
+### Beta diversity
+
+1. Visualize community variation with different methods (PCA, MDS, NMDS, etc.) with plotReduceDim and with different dissimilarities and transformations,plot also other than the first two axes.
+2. Use PERMANOVA to test differences in beta diversity. You can also try including continuous and/or categorical covariates
+3. If there are statistical differences in PERMANOVA, test PERMDISP2 (betadisper function)
+4. Do DMM clustering
+5. Try RDA to test the variance explained by external variables
+
+
 
 ### Basics of community composition
 

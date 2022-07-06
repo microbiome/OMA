@@ -559,13 +559,13 @@ other attached packages:
  [3] scater_1.24.0                  scuttle_1.6.2                 
  [5] miaViz_1.3.3                   ggraph_2.0.5                  
  [7] ggplot2_3.3.6                  microbiomeDataSets_1.1.5      
- [9] mia_1.3.26                     MultiAssayExperiment_1.22.0   
+ [9] mia_1.3.27                     MultiAssayExperiment_1.22.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [13] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [15] SummarizedExperiment_1.26.1    Biobase_2.56.0                
 [17] GenomicRanges_1.48.0           GenomeInfoDb_1.32.2           
 [19] IRanges_2.30.0                 S4Vectors_0.34.0              
-[21] BiocGenerics_0.42.0            MatrixGenerics_1.8.0          
+[21] BiocGenerics_0.42.0            MatrixGenerics_1.8.1          
 [23] matrixStats_0.62.0-9000        BiocStyle_2.24.0              
 [25] rebook_1.6.0                  
 
@@ -574,7 +574,7 @@ loaded via a namespace (and not attached):
   [3] igraph_1.3.2                  plyr_1.8.7                   
   [5] lazyeval_0.2.2                splines_4.2.0                
   [7] BiocParallel_1.30.3           digest_0.6.29                
-  [9] yulab.utils_0.0.4             htmltools_0.5.2              
+  [9] yulab.utils_0.0.5             htmltools_0.5.2              
  [11] viridis_0.6.2                 fansi_1.0.3                  
  [13] magrittr_2.0.3                memoise_2.0.1                
  [15] ScaledMatrix_1.4.0            cluster_2.1.3                
@@ -595,10 +595,10 @@ loaded via a namespace (and not attached):
  [45] httr_1.4.3                    dir.expiry_1.4.0             
  [47] ellipsis_0.3.2                farver_2.1.0                 
  [49] pkgconfig_2.0.3               XML_3.99-0.10                
- [51] CodeDepends_0.6.5             dbplyr_2.2.0                 
+ [51] CodeDepends_0.6.5             dbplyr_2.2.1                 
  [53] utf8_1.2.2                    labeling_0.4.2               
  [55] ggplotify_0.1.0               tidyselect_1.1.2             
- [57] rlang_1.0.2                   reshape2_1.4.4               
+ [57] rlang_1.0.3                   reshape2_1.4.4               
  [59] later_1.3.0                   AnnotationDbi_1.58.0         
  [61] munsell_0.5.0                 BiocVersion_3.15.2           
  [63] tools_4.2.0                   cachem_1.0.6                 

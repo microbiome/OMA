@@ -446,14 +446,14 @@ other attached packages:
  [1] ggplot2_3.3.6                  patchwork_1.1.1               
  [3] reticulate_1.25                MOFA2_1.6.0                   
  [5] ComplexHeatmap_2.12.0          stringr_1.4.0                 
- [7] microbiomeDataSets_1.1.5       mia_1.3.26                    
+ [7] microbiomeDataSets_1.1.5       mia_1.3.27                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.64.0              XVector_0.36.0                
 [13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
 [15] Biobase_2.56.0                 GenomicRanges_1.48.0          
 [17] GenomeInfoDb_1.32.2            IRanges_2.30.0                
 [19] S4Vectors_0.34.0               BiocGenerics_0.42.0           
-[21] MatrixGenerics_1.8.0           matrixStats_0.62.0-9000       
+[21] MatrixGenerics_1.8.1           matrixStats_0.62.0-9000       
 [23] ecodist_2.0.9                  BiocStyle_2.24.0              
 [25] rebook_1.6.0                  
 
@@ -479,7 +479,7 @@ loaded via a namespace (and not attached):
  [37] assertthat_0.2.1              promises_1.2.0.1             
  [39] scales_1.2.0                  beeswarm_0.4.0               
  [41] gtable_0.3.0                  beachmat_2.12.0              
- [43] Cairo_1.5-15                  rlang_1.0.2                  
+ [43] Cairo_1.5-15                  rlang_1.0.3                  
  [45] GlobalOptions_0.1.2           splines_4.2.0                
  [47] lazyeval_0.2.2                BiocManager_1.30.18          
  [49] yaml_2.3.5                    reshape2_1.4.4               
@@ -502,14 +502,14 @@ loaded via a namespace (and not attached):
  [83] htmltools_0.5.2               mgcv_1.8-40                  
  [85] later_1.3.0                   tidyr_1.2.0                  
  [87] DBI_1.1.3                     ExperimentHub_2.4.0          
- [89] corrplot_0.92                 dbplyr_2.2.0                 
+ [89] corrplot_0.92                 dbplyr_2.2.1                 
  [91] MASS_7.3-57                   rappdirs_0.3.3               
  [93] Matrix_1.4-1                  permute_0.9-7                
  [95] cli_3.3.0                     parallel_4.2.0               
  [97] forcats_0.5.1                 pkgconfig_2.0.3              
  [99] dir.expiry_1.4.0              scuttle_1.6.2                
 [101] foreach_1.5.2                 vipor_0.4.5                  
-[103] DirichletMultinomial_1.38.0   yulab.utils_0.0.4            
+[103] DirichletMultinomial_1.38.0   yulab.utils_0.0.5            
 [105] digest_0.6.29                 vegan_2.6-2                  
 [107] graph_1.74.0                  rmarkdown_2.14               
 [109] tidytree_0.3.9                uwot_0.1.11                  

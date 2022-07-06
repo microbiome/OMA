@@ -218,7 +218,7 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7673 BIC: 7927 AIC: 7842 
+## Laplace: 7681 BIC: 7902 AIC: 7818 
 ## 
 ## [[3]]
 ## class: DMN 
@@ -230,25 +230,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7741 BIC: 8282 AIC: 8112 
+## Laplace: 7792 BIC: 8357 AIC: 8187 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7857 BIC: 8578 AIC: 8364 
+## Laplace: 7849 BIC: 8554 AIC: 8341 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7942 BIC: 8822 AIC: 8566 
+## Laplace: 7942 BIC: 8811 AIC: 8555 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8039 BIC: 9073 AIC: 8775
+## Laplace: 8087 BIC: 9113 AIC: 8814
 ```
 
 
@@ -273,7 +273,7 @@ getBestDMNFit(tse_dmn, type = "laplace")
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7673 BIC: 7927 AIC: 7842
+## Laplace: 7681 BIC: 7902 AIC: 7818
 ```
 
 ### PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors
@@ -293,15 +293,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  793.17  1872.8 1674.5 1735
-## Mock               2       3   67  998.6  -70.65   839.2 1072.8 1134
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -313,9 +313,9 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 ```
 
 ```
-##       pi theta
-## 1 0.5385 20.59
-## 2 0.4615 15.32
+##       pi  theta
+## 1 0.8846  10.76
+## 2 0.1154 349.01
 ```
 
 
@@ -328,13 +328,13 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##              [,1]      [,2]
-## CL3     1.000e+00 4.444e-17
-## CC1     1.000e+00 3.348e-22
-## SV1     1.000e+00 1.703e-12
-## M31Fcsw 7.367e-26 1.000e+00
-## M11Fcsw 1.086e-16 1.000e+00
-## M31Plmr 1.150e-13 1.000e+00
+##         [,1]       [,2]
+## CL3        1  0.000e+00
+## CC1        1  0.000e+00
+## SV1        1 2.935e-281
+## M31Fcsw    1  0.000e+00
+## M11Fcsw    1 3.916e-299
+## M31Plmr    1  0.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -345,13 +345,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30381 0.1354040
-## Phylum:Euryarchaeota  0.23114 0.1468866
-## Phylum:Actinobacteria 1.21370 1.0581361
-## Phylum:Spirochaetes   0.21393 0.1318059
-## Phylum:MVP-15         0.02983 0.0007634
-## Phylum:Proteobacteria 6.84617 1.8113341
+##                         [,1]   [,2]
+## Phylum:Crenarchaeota  0.1675  1.465
+## Phylum:Euryarchaeota  0.1558  2.407
+## Phylum:Actinobacteria 0.8831  6.172
+## Phylum:Spirochaetes   0.1449  1.087
+## Phylum:MVP-15         0.0043  0.216
+## Phylum:Proteobacteria 2.3022 62.386
 ```
 Get the assignment probabilities
 
@@ -530,14 +530,14 @@ other attached packages:
  [1] patchwork_1.1.1                bluster_1.6.0                 
  [3] scater_1.24.0                  scuttle_1.6.2                 
  [5] miaViz_1.3.3                   ggraph_2.0.5                  
- [7] ggplot2_3.3.6                  mia_1.3.26                    
+ [7] ggplot2_3.3.6                  mia_1.3.27                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.64.0              XVector_0.36.0                
 [13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
 [15] Biobase_2.56.0                 GenomicRanges_1.48.0          
 [17] GenomeInfoDb_1.32.2            IRanges_2.30.0                
 [19] S4Vectors_0.34.0               BiocGenerics_0.42.0           
-[21] MatrixGenerics_1.8.0           matrixStats_0.62.0-9000       
+[21] MatrixGenerics_1.8.1           matrixStats_0.62.0-9000       
 [23] ecodist_2.0.9                  BiocStyle_2.24.0              
 [25] rebook_1.6.0                  
 
@@ -545,7 +545,7 @@ loaded via a namespace (and not attached):
   [1] plyr_1.8.7                  igraph_1.3.2               
   [3] lazyeval_0.2.2              splines_4.2.0              
   [5] BiocParallel_1.30.3         digest_0.6.29              
-  [7] yulab.utils_0.0.4           htmltools_0.5.2            
+  [7] yulab.utils_0.0.5           htmltools_0.5.2            
   [9] viridis_0.6.2               fansi_1.0.3                
  [11] magrittr_2.0.3              memoise_2.0.1              
  [13] ScaledMatrix_1.4.0          cluster_2.1.3              
@@ -568,7 +568,7 @@ loaded via a namespace (and not attached):
  [47] farver_2.1.0                uwot_0.1.11                
  [49] CodeDepends_0.6.5           utf8_1.2.2                 
  [51] ggplotify_0.1.0             tidyselect_1.1.2           
- [53] labeling_0.4.2              rlang_1.0.2                
+ [53] labeling_0.4.2              rlang_1.0.3                
  [55] reshape2_1.4.4              munsell_0.5.0              
  [57] tools_4.2.0                 cachem_1.0.6               
  [59] cli_3.3.0                   DirichletMultinomial_1.38.0

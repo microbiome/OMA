@@ -115,7 +115,7 @@ loaded via a namespace (and not attached):
  [1] bookdown_0.27       dir.expiry_1.4.0    codetools_0.2-18   
  [4] XML_3.99-0.10       digest_0.6.29       stats4_4.2.0       
  [7] magrittr_2.0.3      evaluate_0.15       graph_1.74.0       
-[10] rlang_1.0.2         stringi_1.7.6       cli_3.3.0          
+[10] rlang_1.0.3         stringi_1.7.6       cli_3.3.0          
 [13] filelock_1.0.2      rmarkdown_2.14      tools_4.2.0        
 [16] stringr_1.4.0       xfun_0.31           yaml_2.3.5         
 [19] fastmap_1.1.0       compiler_4.2.0      BiocGenerics_0.42.0
