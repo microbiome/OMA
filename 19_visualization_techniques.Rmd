@@ -252,7 +252,7 @@ in terms of relative abundances (y axis) for the top 10 taxa at the Order rank.
 Bar plots and heatmaps with analogous information at the Phylum level are
 available in the aforementioned chapter.
 
-```{r}
+```{r plotAbundance1}
 # agglomerate tse by Order
 tse_order <- agglomerateByRank(tse,
                                 rank = "Order",
@@ -275,6 +275,53 @@ plotAbundance(tse_order,
               rank = "Order",
               order_rank_by = "abund",
               order_sample_by = "Clostridiales")
+```
+
+To add a sample annotation, you can combine plots that you get from the output
+pf _plotAbundance_.
+
+```{r plotAbundance2}
+# Create plots
+plots <- plotAbundance(tse_order, abund_values = "relabundance", rank = "Order",
+                       order_rank_by = "abund", order_sample_by = "Clostridiales",
+                       features = "SampleType")
+
+# Modify the legend of the first plot to be smaller 
+plots[[1]] <- plots[[1]] +
+    theme(legend.key.size = unit(0.3, 'cm'),
+          legend.text = element_text(size = 6),
+          legend.title = element_text(size = 8))
+
+# Modify the legend of the second plot to be smaller 
+plots[[2]] <- plots[[2]] +
+    theme(legend.key.height = unit(0.3, 'cm'),
+          legend.key.width = unit(0.3, 'cm'),
+          legend.text = element_text(size = 6),
+          legend.title = element_text(size = 8),
+          legend.direction = "vertical")
+
+# Load required packages
+if( !require("ggpubr") ){
+    install.packages("ggpubr")
+    library("ggpubr")
+}
+# Load required packages
+if( !require("patchwork") ){
+    install.packages("patchwork")
+    library("patchwork")
+}
+
+# Combine legends
+legend <- wrap_plots(as_ggplot(get_legend(plots[[1]])), as_ggplot(get_legend(plots[[2]])), ncol = 1) 
+
+# Remove legends from the plots
+plots[[1]] <- plots[[1]] + theme(legend.position = "none")
+plots[[2]] <- plots[[2]] + theme(legend.position = "none", axis.title.x=element_blank()) 
+
+# Combine plots
+plot <- wrap_plots(plots[[2]], plots[[1]], ncol = 1, heights = c(2, 10))
+# Combine the plot with the legend
+wrap_plots(plot, legend, nrow = 1, widths = c(2, 1))
 ```
 
 For more sophisticated visualizations than those produced with `plotAbundance`
