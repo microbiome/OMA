@@ -530,7 +530,7 @@ loaded via a namespace (and not attached):
  [41] bit_4.0.4                     rsvd_1.0.5                   
  [43] httr_1.4.3                    RColorBrewer_1.1-3           
  [45] dir.expiry_1.4.0              modeltools_0.2-23            
- [47] ellipsis_0.3.2                farver_2.1.0                 
+ [47] ellipsis_0.3.2                farver_2.1.1                 
  [49] pkgconfig_2.0.3               XML_3.99-0.10                
  [51] scuttle_1.6.2                 CodeDepends_0.6.5            
  [53] dbplyr_2.2.1                  utf8_1.2.2                   
@@ -540,7 +540,7 @@ loaded via a namespace (and not attached):
  [61] munsell_0.5.0                 BiocVersion_3.15.2           
  [63] tools_4.2.0                   cachem_1.0.6                 
  [65] cli_3.3.0                     DirichletMultinomial_1.38.0  
- [67] generics_0.1.2                RSQLite_2.2.14               
+ [67] generics_0.1.3                RSQLite_2.2.14               
  [69] ExperimentHub_2.4.0           evaluate_0.15                
  [71] stringr_1.4.0                 fastmap_1.1.0                
  [73] yaml_2.3.5                    knitr_1.39                   

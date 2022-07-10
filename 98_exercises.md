@@ -2,7 +2,7 @@
 
 Here you can find assignments on different topics. 
 
-TIPS:
+**Tips for exercises:**
 
    - Add comments that explain what each line or lines of code do. This helps you and others to understand your code and find bugs. Furthermore, it is easier for you to reuse the code, and it promotes transparency.
    - Interpret results by comparing them to literature. List main findings, so that results can easily be understood by others without advanced data analytics knowledge.
@@ -21,22 +21,13 @@ TIPS:
 7. Add an R command within the text.
 8. Create an HTML file from the Rmd file.
 
+For tips on Rmarkdown, see [Rmarkdown cheat sheet](https://raw.githubusercontent.com/rstudio/cheatsheets/main/rmarkdown-2.0.pdf)
+
 ## Data containers
 
-### Introduction to TreeSummarizedExperiment (TreeSE)
+### TreeSummarizedExperiment data exploration
 
-Import data from CSV files to TreeSE.
-
-1. Import data.
-2. Construct a TreeSE.
-3. Check that importing is done correctly. E.g., you can choose random samples and features,
-and check that their values equal between raw files and TreeSE.
-
-Useful functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colnames, SimpleList
-
-### TreeSummarizedExperiment Data exploration
-
-1. install the latest development version of mia from GitHub.
+1. (Install the latest development version of mia from GitHub)
 2. Load experimental dataset from mia.
 3. What are the dimensions? (How many samples there are, and how many taxa in each taxonomic rank)?
 4. Calculate library size.
@@ -44,9 +35,18 @@ Useful functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colname
 6. Create two histograms. Another shows the distribution of absolute counts, another shows how CLR transformed values are distributed.
 7. Visualize how relative abundances are distributed between taxa in samples.
 
-
 Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformSamples, ggplot, wilcox.test, addPerCellQC, agglomerateByRank, plotAbundance
 
+### TreeSummarizedExperiment (TreeSE) data import
+
+Import data from CSV files to TreeSE.
+
+1. Import the data files in R
+2. Construct a TreeSE data object
+3. Check that importing is done correctly. E.g., choose random samples and features,
+and check that their values equal between raw files and TreeSE.
+
+Useful functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colnames, SimpleList
 
 
 ### Introduction to MultiAssayExperient (MAE)
@@ -116,8 +116,10 @@ Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::H
 2. Test if data agglomeration to higher taxonomic ranks affects the indices
 3. Look for differences in alpha diversity between groups or correlation with a continuous variable
 
+Useful functions: estimateDiversity, colSums, agglomerateByRank, kruskal.test, cor
 
-### Alpha diversity 
+
+### Alpha diversity extra
 
 1. Estimate Shannon diversity for the data
 2. Try also another diversity index and compare the results with a scatterplot
@@ -130,10 +132,9 @@ Useful functions: estimateDiversity, colSums, geom_point, geom_boxplot
 
 
 
-
 ## Community composition
 
-### Beta diversity
+### Beta diversity basics
 
 1. Visualize community variation with different methods (PCA, MDS, NMDS, etc.) with plotReduceDim and with different dissimilarities and transformations,plot also other than the first two axes.
 2. Use PERMANOVA to test differences in beta diversity. You can also try including continuous and/or categorical covariates
@@ -142,8 +143,7 @@ Useful functions: estimateDiversity, colSums, geom_point, geom_boxplot
 5. Try RDA to test the variance explained by external variables
 
 
-
-### Basics of community composition
+### Beta diversity extra
 
 1. Install the latest development version of mia from GitHub.
 2. Load experimental dataset from mia.

@@ -394,11 +394,11 @@ kable(rda_info_clean)
 \hline
   & Explained by variables & Unexplained by variables & Proportion expl by vars & P-value (PERMANOVA 999 permutations)\\
 \hline
-all & 35.30 & 191.7 & 0.1842 & 0.668\\
+all & 35.30 & 191.7 & 0.1842 & 0.662\\
 \hline
-ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.833\\
+ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.836\\
 \hline
-Gender & 5.31 & 223.7 & 0.0277 & 0.923\\
+Gender & 5.31 & 223.7 & 0.0277 & 0.934\\
 \hline
 Age & 10.59 & 216.4 & 0.0552 & 0.001\\
 \hline
@@ -773,7 +773,7 @@ other attached packages:
 loaded via a namespace (and not attached):
  [1] Rtsne_0.16                  ggbeeswarm_0.6.0           
  [3] colorspace_2.0-3            ellipsis_0.3.2             
- [5] BiocNeighbors_1.14.0        farver_2.1.0               
+ [5] BiocNeighbors_1.14.0        farver_2.1.1               
  [7] ggrepel_0.9.1               bit64_4.0.5                
  [9] fansi_1.0.3                 decontam_1.16.0            
 [11] splines_4.2.0               codetools_0.2-18           
@@ -808,7 +808,7 @@ loaded via a namespace (and not attached):
 [69] bit_4.0.4                   tidyselect_1.1.2           
 [71] plyr_1.8.7                  magrittr_2.0.3             
 [73] bookdown_0.27               R6_2.5.1                   
-[75] generics_0.1.2              DelayedArray_0.22.0        
+[75] generics_0.1.3              DelayedArray_0.22.0        
 [77] DBI_1.1.3                   withr_2.5.0                
 [79] mgcv_1.8-40                 pillar_1.7.0               
 [81] RCurl_1.98-1.7              tibble_3.1.7               

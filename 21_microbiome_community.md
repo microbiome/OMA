@@ -218,37 +218,37 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7681 BIC: 7902 AIC: 7818 
+## Laplace: 7673 BIC: 7927 AIC: 7842 
 ## 
 ## [[3]]
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7690 BIC: 8076 AIC: 7948 
+## Laplace: 7689 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7792 BIC: 8357 AIC: 8187 
+## Laplace: 7751 BIC: 8274 AIC: 8103 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7849 BIC: 8554 AIC: 8341 
+## Laplace: 7849 BIC: 8548 AIC: 8335 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7942 BIC: 8811 AIC: 8555 
+## Laplace: 7986 BIC: 8881 AIC: 8625 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8087 BIC: 9113 AIC: 8814
+## Laplace: 8064 BIC: 9086 AIC: 8787
 ```
 
 
@@ -273,7 +273,7 @@ getBestDMNFit(tse_dmn, type = "laplace")
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7681 BIC: 7902 AIC: 7818
+## Laplace: 7673 BIC: 7927 AIC: 7842
 ```
 
 ### PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors
@@ -293,15 +293,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Feces              2       4   67 1078.3 -106.22   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.21   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.38  1906.4 1674.5 1735
+## Mock               2       3   67  980.2  110.61   911.4 1054.4 1115
+## Ocean              2       3   67 1096.7  -56.93   944.2 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
-## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
+## Skin               2       3   67  992.6  -84.93   826.1 1066.8 1128
+## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.77   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -313,9 +313,9 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 ```
 
 ```
-##       pi  theta
-## 1 0.8846  10.76
-## 2 0.1154 349.01
+##       pi theta
+## 1 0.5385 20.58
+## 2 0.4615 15.28
 ```
 
 
@@ -328,13 +328,13 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##         [,1]       [,2]
-## CL3        1  0.000e+00
-## CC1        1  0.000e+00
-## SV1        1 2.935e-281
-## M31Fcsw    1  0.000e+00
-## M11Fcsw    1 3.916e-299
-## M31Plmr    1  0.000e+00
+##              [,1]      [,2]
+## CL3     1.000e+00 5.052e-17
+## CC1     1.000e+00 3.915e-22
+## SV1     1.000e+00 1.955e-12
+## M31Fcsw 7.856e-26 1.000e+00
+## M11Fcsw 1.132e-16 1.000e+00
+## M31Plmr 1.122e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -345,13 +345,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                         [,1]   [,2]
-## Phylum:Crenarchaeota  0.1675  1.465
-## Phylum:Euryarchaeota  0.1558  2.407
-## Phylum:Actinobacteria 0.8831  6.172
-## Phylum:Spirochaetes   0.1449  1.087
-## Phylum:MVP-15         0.0043  0.216
-## Phylum:Proteobacteria 2.3022 62.386
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30383 0.1354664
+## Phylum:Euryarchaeota  0.23115 0.1468637
+## Phylum:Actinobacteria 1.21354 1.0600466
+## Phylum:Spirochaetes   0.21394 0.1318423
+## Phylum:MVP-15         0.02982 0.0007678
+## Phylum:Proteobacteria 6.84505 1.8154022
 ```
 Get the assignment probabilities
 
@@ -565,14 +565,14 @@ loaded via a namespace (and not attached):
  [41] rsvd_1.0.5                  FNN_1.1.3.1                
  [43] dir.expiry_1.4.0            ellipsis_0.3.2             
  [45] pkgconfig_2.0.3             XML_3.99-0.10              
- [47] farver_2.1.0                uwot_0.1.11                
+ [47] farver_2.1.1                uwot_0.1.11                
  [49] CodeDepends_0.6.5           utf8_1.2.2                 
  [51] ggplotify_0.1.0             tidyselect_1.1.2           
  [53] labeling_0.4.2              rlang_1.0.3                
  [55] reshape2_1.4.4              munsell_0.5.0              
  [57] tools_4.2.0                 cachem_1.0.6               
  [59] cli_3.3.0                   DirichletMultinomial_1.38.0
- [61] generics_0.1.2              RSQLite_2.2.14             
+ [61] generics_0.1.3              RSQLite_2.2.14             
  [63] evaluate_0.15               stringr_1.4.0              
  [65] fastmap_1.1.0               yaml_2.3.5                 
  [67] ggtree_3.4.0                knitr_1.39                 

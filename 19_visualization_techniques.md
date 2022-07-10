@@ -826,8 +826,8 @@ loaded via a namespace (and not attached):
  [15] knitr_1.39                  ggsignif_0.6.3             
  [17] labeling_0.4.2              GenomeInfoDbData_1.2.8     
  [19] polyclip_1.10-0             bit64_4.0.5                
- [21] farver_2.1.0                vctrs_0.4.1                
- [23] treeio_1.20.0               generics_0.1.2             
+ [21] farver_2.1.1                vctrs_0.4.1                
+ [23] treeio_1.20.0               generics_0.1.3             
  [25] xfun_0.31                   R6_2.5.1                   
  [27] doParallel_1.0.17           ggbeeswarm_0.6.0           
  [29] clue_0.3-61                 graphlayouts_0.8.0         
@@ -836,7 +836,7 @@ loaded via a namespace (and not attached):
  [35] gridGraphics_0.5-1          DelayedArray_0.22.0        
  [37] assertthat_0.2.1            scales_1.2.0               
  [39] beeswarm_0.4.0              gtable_0.3.0               
- [41] beachmat_2.12.0             Cairo_1.5-15               
+ [41] beachmat_2.12.0             Cairo_1.6-0                
  [43] tidygraph_1.2.1             rlang_1.0.3                
  [45] GlobalOptions_0.1.2         splines_4.2.0              
  [47] rstatix_0.7.0               lazyeval_0.2.2             

@@ -368,7 +368,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] ggbeeswarm_0.6.0            colorspace_2.0-3           
   [3] ellipsis_0.3.2              BiocNeighbors_1.14.0       
-  [5] farver_2.1.0                ggrepel_0.9.1              
+  [5] farver_2.1.1                ggrepel_0.9.1              
   [7] bit64_4.0.5                 fansi_1.0.3                
   [9] decontam_1.16.0             splines_4.2.0              
  [11] codetools_0.2-18            sparseMatrixStats_1.8.0    
@@ -404,7 +404,7 @@ loaded via a namespace (and not attached):
  [71] cowplot_1.1.1               bit_4.0.4                  
  [73] tidyselect_1.1.2            plyr_1.8.7                 
  [75] magrittr_2.0.3              bookdown_0.27              
- [77] R6_2.5.1                    generics_0.1.2             
+ [77] R6_2.5.1                    generics_0.1.3             
  [79] DelayedArray_0.22.0         DBI_1.1.3                  
  [81] withr_2.5.0                 mgcv_1.8-40                
  [83] pillar_1.7.0                RCurl_1.98-1.7             

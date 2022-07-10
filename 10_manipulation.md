@@ -648,6 +648,39 @@ tse_genus_sub
 ## colTree: NULL
 ```
 
+### Splitting
+
+You can split data base on variables. There are available functions `splitByRanks` 
+and `splitOn`.
+
+`splitByRanks` splits the data based on rank. Since the elements of the output list
+share columns, they can be stored into `altExp`. 
+
+
+```r
+altExps(tse) <- splitByRanks(tse)
+altExps(tse)
+```
+
+```
+## List of length 7
+## names(7): Kingdom Phylum Class Order Family Genus Species
+```
+
+If you want to split the data based on other variable than taxonomy rank, use 
+`splitOn`. It works for row-wise and column-wise splitting.
+
+
+```r
+splitOn(tse, "SampleType")
+```
+
+```
+## List of length 9
+## names(9): Soil Feces Skin Tongue ... Ocean Sediment (estuary) Mock
+```
+
+
 ### Additional functions
 * [mapTaxonomy](https://microbiome.github.io/mia/reference/taxonomy-methods.html)
 * [mergeRows/mergeCols](https://microbiome.github.io/mia/reference/merge-methods.html)

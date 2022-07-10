@@ -466,11 +466,11 @@ loaded via a namespace (and not attached):
  [11] colorspace_2.0-3              filelock_1.0.2               
  [13] highr_0.9                     knitr_1.39                   
  [15] labeling_0.4.2                GenomeInfoDbData_1.2.8       
- [17] bit64_4.0.5                   farver_2.1.0                 
+ [17] bit64_4.0.5                   farver_2.1.1                 
  [19] pheatmap_1.0.12               rhdf5_2.40.0                 
  [21] rprojroot_2.0.3               basilisk_1.8.0               
  [23] vctrs_0.4.1                   treeio_1.20.0                
- [25] generics_0.1.2                xfun_0.31                    
+ [25] generics_0.1.3                xfun_0.31                    
  [27] BiocFileCache_2.4.0           R6_2.5.1                     
  [29] doParallel_1.0.17             ggbeeswarm_0.6.0             
  [31] clue_0.3-61                   rsvd_1.0.5                   
@@ -479,7 +479,7 @@ loaded via a namespace (and not attached):
  [37] assertthat_0.2.1              promises_1.2.0.1             
  [39] scales_1.2.0                  beeswarm_0.4.0               
  [41] gtable_0.3.0                  beachmat_2.12.0              
- [43] Cairo_1.5-15                  rlang_1.0.3                  
+ [43] Cairo_1.6-0                   rlang_1.0.3                  
  [45] GlobalOptions_0.1.2           splines_4.2.0                
  [47] lazyeval_0.2.2                BiocManager_1.30.18          
  [49] yaml_2.3.5                    reshape2_1.4.4               

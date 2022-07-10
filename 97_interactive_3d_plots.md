@@ -25,10 +25,6 @@ In this section we make a 3D version of the earlier [ Visualizing the most domin
 
 
 ```r
-# Installing the package
-if (!require(curatedMetagenomicData)){
-  BiocManager::install("curatedMetagenomicData")  
-}
 # Importing necessary libraries
 library(curatedMetagenomicData)
 library(dplyr)
@@ -70,7 +66,10 @@ var_explained <- e/sum(e[e>0])*100
 ```
 
 Interactive 3D visualization of the most dominant genus on PCoA.
-Note that labels at legend can be used to visualize one or more Genus separately (double click to isolate one from the others, or toggle to select multiple ones).
+
+Note that labels at legend can be used to visualize one or more Genus
+separately (double click to isolate one from the others, or toggle to
+select multiple ones).
 
 
 ```r
@@ -79,7 +78,7 @@ library(plotly)
 # 3D Visualization
 reduced_data  <- as.data.frame(reducedDim(tse_Genus)[,])
 names(reduced_data) <- c("PC1","PC2","PC3")
-plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3)%>%
+plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3) %>%
   add_markers(color=sapply(strsplit(colData(tse_Genus)$most_abundant, "_"), tail, 1), size=5,
               colors=c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red")) %>%
   layout(scene=list(xaxis=list(title = paste("PC1 (",round(var_explained[1],1),"%)")),
@@ -94,14 +93,7 @@ plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3)%>%
 
 
 ```r
-if( !require(vegan) ){
-    BiocManager::install("vegan")
-    library("vegan")
-}
-```
-
-```
-## Loading required package: vegan
+library("vegan")
 ```
 
 ```
