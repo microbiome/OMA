@@ -64,11 +64,7 @@ Load example data
 
 ```r
 library(mia)
-if(!require(microbiomeDataSets)){
-    BiocManager::install("microbiomeDataSets")
-    library(microbiomeDataSets)
-}
-
+library(microbiomeDataSets)
 mae <- HintikkaXOData()
 ```
 

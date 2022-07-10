@@ -230,25 +230,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7751 BIC: 8274 AIC: 8103 
+## Laplace: 7790 BIC: 8354 AIC: 8183 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7849 BIC: 8548 AIC: 8335 
+## Laplace: 7850 BIC: 8554 AIC: 8341 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7986 BIC: 8881 AIC: 8625 
+## Laplace: 7926 BIC: 8796 AIC: 8540 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8064 BIC: 9086 AIC: 8787
+## Laplace: 8015 BIC: 9058 AIC: 8759
 ```
 
 
@@ -329,12 +329,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.052e-17
-## CC1     1.000e+00 3.915e-22
-## SV1     1.000e+00 1.955e-12
-## M31Fcsw 7.856e-26 1.000e+00
+## CL3     1.000e+00 5.007e-17
+## CC1     1.000e+00 3.845e-22
+## SV1     1.000e+00 1.944e-12
+## M31Fcsw 7.890e-26 1.000e+00
 ## M11Fcsw 1.132e-16 1.000e+00
-## M31Plmr 1.122e-13 1.000e+00
+## M31Plmr 1.124e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -346,12 +346,12 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 
 ```
 ##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30383 0.1354664
-## Phylum:Euryarchaeota  0.23115 0.1468637
-## Phylum:Actinobacteria 1.21354 1.0600466
-## Phylum:Spirochaetes   0.21394 0.1318423
-## Phylum:MVP-15         0.02982 0.0007678
-## Phylum:Proteobacteria 6.84505 1.8154022
+## Phylum:Crenarchaeota  0.30381 0.1354648
+## Phylum:Euryarchaeota  0.23114 0.1468588
+## Phylum:Actinobacteria 1.21383 1.0601189
+## Phylum:Spirochaetes   0.21393 0.1318402
+## Phylum:MVP-15         0.02982 0.0007645
+## Phylum:Proteobacteria 6.84472 1.8154288
 ```
 Get the assignment probabilities
 
