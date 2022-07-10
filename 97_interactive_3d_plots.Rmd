@@ -22,10 +22,6 @@ knitr::knit_hooks$set(webgl = hook_webgl)
 In this section we make a 3D version of the earlier [ Visualizing the most dominant genus on PCoA](https://microbiome.github.io/OMA/microbiome-exploration.html#visualizing-the-most-dominant-genus-on-pcoa), with the help of the [plotly](https://plotly.com/r/) R package.
 
 ```{r, message=FALSE, warning=FALSE}
-# Installing the package
-if (!require(curatedMetagenomicData)){
-  BiocManager::install("curatedMetagenomicData")  
-}
 # Importing necessary libraries
 library(curatedMetagenomicData)
 library(dplyr)
@@ -67,7 +63,10 @@ var_explained <- e/sum(e[e>0])*100
 ```
 
 Interactive 3D visualization of the most dominant genus on PCoA.
-Note that labels at legend can be used to visualize one or more Genus separately (double click to isolate one from the others, or toggle to select multiple ones).
+
+Note that labels at legend can be used to visualize one or more Genus
+separately (double click to isolate one from the others, or toggle to
+select multiple ones).
 
 ```{r, test-rgl,webgl=TRUE, warning=FALSE, message=FALSE}
 library(plotly)
@@ -75,23 +74,19 @@ library(plotly)
 # 3D Visualization
 reduced_data  <- as.data.frame(reducedDim(tse_Genus)[,])
 names(reduced_data) <- c("PC1","PC2","PC3")
-plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3)%>%
+plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3) %>%
   add_markers(color=sapply(strsplit(colData(tse_Genus)$most_abundant, "_"), tail, 1), size=5,
               colors=c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red")) %>%
   layout(scene=list(xaxis=list(title = paste("PC1 (",round(var_explained[1],1),"%)")),
                     yaxis=list(title = paste("PC2 (",round(var_explained[2],1),"%)")),
                     zaxis=list(title = paste("PC3 (",round(var_explained[3],1),"%)"))))
-
 ```
 
 
 ## PERMANOVA comparison
 
 ```{r}
-if( !require(vegan) ){
-    BiocManager::install("vegan")
-    library("vegan")
-}
+library("vegan")
 data("enterotype")
 enterotype <- transformSamples(enterotype, method = "relabundance")
 # Drop those samples that do not have meta dtaa
