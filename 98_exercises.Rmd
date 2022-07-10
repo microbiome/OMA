@@ -12,14 +12,15 @@ Here you can find assignments on different topics.
 
 ### Reproducible reporting
 
-1. Create an R Markdown file.
+1. Create an Rmarkdown file (e.g. Rstudio has ready-made templates for this).
 2. Add a code chunk and give a name for it.
-3. Import e.g., iris dataset, and create a dotplot with a title.
-4. Create another code chunk and plot. 
-5. Adjust the size of the figure, and choose from the options that the code chunk will not be shown in the report.
-6. Add some text.
-7. Add an R command within the text.
-8. Create an HTML file from the Rmd file.
+3. Render (or knit) the file into pdf or html format
+4. Import e.g., iris dataset, and add a dotplot with a title.
+5. Create another code chunk and plot. 
+6. Adjust the size of the figure, and choose from the options that the code chunk will not be shown in the report.
+7. Add some text.
+8. Add an R command within the text.
+9. Update HTML file from the Rmd file.
 
 For tips on Rmarkdown, see [Rmarkdown cheat sheet](https://raw.githubusercontent.com/rstudio/cheatsheets/main/rmarkdown-2.0.pdf)
 
