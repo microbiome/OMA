@@ -40,14 +40,14 @@ tse <- sampleMetadata |>
     returnSamples("relative_abundance")
 
 tse_Genus <- agglomerateByRank(tse, rank="genus")
-tse_Genus <- addPerSampleDominantTaxa(tse_Genus, abund_values="relative_abundance", name = "dominant_taxa")
+tse_Genus <- addPerSampleDominantTaxa(tse_Genus, assay_name="relative_abundance", name = "dominant_taxa")
 
 # Performing PCoA with Bray-Curtis dissimilarity.
 tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist, ncomponents = 3,
               name = "PCoA_BC", exprs_values = "relative_abundance")
 
 # Getting the 6 top taxa
-top_taxa <- getTopTaxa(tse_Genus,top = 6, abund_values = "relative_abundance")
+top_taxa <- getTopTaxa(tse_Genus,top = 6, assay_name = "relative_abundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,

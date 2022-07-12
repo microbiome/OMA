@@ -398,7 +398,7 @@ For complete list of available transformations and parameters, see function
 
 ```r
 tse <- transformSamples(tse, method = "relabundance")
-tse <- transformSamples(x = tse, abund_values = "relabundance", method = "clr", 
+tse <- transformSamples(x = tse, assay_name = "relabundance", method = "clr", 
                         pseudocount = 1, name = "clr_transformation")
 
 head(assay(tse, "clr_transformation"))
@@ -519,7 +519,7 @@ in one sample.
 ```r
 taxa.abund.cc1 <- getAbundanceSample(tse, 
                                      sample_id = "CC1",
-                                     abund_values = "counts")
+                                     assay_name = "counts")
 taxa.abund.cc1[1:10]
 ```
 
@@ -542,7 +542,7 @@ taxa.abund.cc1[1:10]
 ```r
 taxa.abundances <- getAbundanceFeature(tse, 
                                       feature_id = "Phylum:Bacteroidetes",
-                                      abund_values = "counts")
+                                      assay_name = "counts")
 taxa.abundances[1:10]
 ```
 
@@ -578,7 +578,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.3.27                     MultiAssayExperiment_1.22.0   
+ [1] mia_1.3.29                     MultiAssayExperiment_1.22.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
  [5] XVector_0.36.0                 SingleCellExperiment_1.18.0   
  [7] SummarizedExperiment_1.26.1    Biobase_2.56.0                

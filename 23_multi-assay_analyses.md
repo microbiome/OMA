@@ -191,8 +191,8 @@ rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]])
 correlations <- testExperimentCrossCorrelation(mae, 
                                                experiment1 = 1,
                                                experiment2 = 2,
-                                               abund_values1 = "log10", 
-                                               abund_values2 = "nmr",
+                                               assay_name1 = "log10", 
+                                               assay_name2 = "nmr",
                                                method = "spearman", 
                                                p_adj_threshold = NULL,
                                                cor_threshold = NULL,
@@ -281,13 +281,13 @@ mae[[1]] <- mae[[1]][!duplicated(rownames(assay(mae[[1]]))), ]
 
 # Transforming microbiome data with rclr
 mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
-mae[[1]] <- transformCounts(mae[[1]], abund_values = "relabundance", method = "rclr")
+mae[[1]] <- transformCounts(mae[[1]], assay_name = "relabundance", method = "rclr")
 
 # Transforming metabolomic data with log10
-mae[[2]] <- transformSamples(mae[[2]], abund_values = "nmr", method = "log10")
+mae[[2]] <- transformSamples(mae[[2]], assay_name = "nmr", method = "log10")
 
 # Transforming biomarker data with z-transform
-mae[[3]] <- transformFeatures(mae[[3]], abund_values = "signals", method = "z", pseudocount = 1)
+mae[[3]] <- transformFeatures(mae[[3]], assay_name = "signals", method = "z", pseudocount = 1)
 
 # Removing assays no longer needed
 assay(mae[[1]], "counts") <- NULL
@@ -446,7 +446,7 @@ other attached packages:
  [1] ggplot2_3.3.6                  patchwork_1.1.1               
  [3] reticulate_1.25                MOFA2_1.6.0                   
  [5] ComplexHeatmap_2.12.0          stringr_1.4.0                 
- [7] microbiomeDataSets_1.1.5       mia_1.3.27                    
+ [7] microbiomeDataSets_1.1.5       mia_1.3.29                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.64.0              XVector_0.36.0                
 [13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   

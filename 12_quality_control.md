@@ -78,7 +78,7 @@ tse <- hitchip1006
 tse <- transformSamples(tse, method = "relabundance")
 
 library(miaViz)
-plotAbundanceDensity(tse, layout = "jitter", abund_values = "relabundance",
+plotAbundanceDensity(tse, layout = "jitter", assay_name = "relabundance",
                      n = 40, point_size=1, point_shape=19, point_alpha=0.1) + 
     scale_x_log10(label=scales::percent)
 ```
@@ -91,7 +91,7 @@ visualized as a density plot over a log scaled axis, with
 
 
 ```r
-plotAbundanceDensity(tse, layout = "density", abund_values = "relabundance",
+plotAbundanceDensity(tse, layout = "density", assay_name = "relabundance",
                      n = 5, colour_by="nationality", point_alpha=1/10) +
     scale_x_log10()
 ```
@@ -137,7 +137,7 @@ accessed.
 
 
 ```r
-head(getPrevalence(tse, detection = 1, sort = TRUE, abund_values = "counts",
+head(getPrevalence(tse, detection = 1, sort = TRUE, assay_name = "counts",
                    as_relative = FALSE))
 ```
 
@@ -168,7 +168,7 @@ applied on the resulting object.
 altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
 # Check prevalence for the Phylum abundance table from the altExp slot
 head(getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = TRUE,
-                   abund_values = "counts", as_relative = TRUE))
+                   assay_name = "counts", as_relative = TRUE))
 ```
 
 ```
@@ -185,7 +185,7 @@ the fly.
 
 ```r
 head(getPrevalence(tse, rank = "Phylum", detection = 1/100, sort = TRUE,
-                   abund_values = "counts", as_relative = TRUE))
+                   assay_name = "counts", as_relative = TRUE))
 ```
 
 ```
@@ -237,7 +237,7 @@ are stored in the altExp slot.
 ```r
 rowData(altExp(tse,"Phylum"))$prevalence <- 
     getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = FALSE,
-                  abund_values = "counts", as_relative = TRUE)
+                  assay_name = "counts", as_relative = TRUE)
 ```
 
 The prevalences can be then plotted via the plotting functions from
@@ -262,17 +262,17 @@ altExps(tse) <-
           function(y){
               rowData(y)$prevalence <- 
                   getPrevalence(y, detection = 1/100, sort = FALSE,
-                                abund_values = "counts", as_relative = TRUE)
+                                assay_name = "counts", as_relative = TRUE)
               y
           })
 top_phyla <- getTopTaxa(altExp(tse,"Phylum"),
                         method="prevalence",
                         top=5L,
-                        abund_values="counts")
+                        assay_name="counts")
 top_phyla_mean <- getTopTaxa(altExp(tse,"Phylum"),
                              method="mean",
                              top=5L,
-                             abund_values="counts")
+                             assay_name="counts")
 x <- unsplitByRanks(tse, ranks = taxonomyRanks(tse)[1:6])
 x <- addTaxonomyTree(x)
 ```
@@ -560,9 +560,9 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.1                dplyr_1.0.9                   
  [3] scater_1.24.0                  scuttle_1.6.2                 
- [5] miaViz_1.3.3                   ggraph_2.0.5                  
+ [5] miaViz_1.3.4                   ggraph_2.0.5                  
  [7] ggplot2_3.3.6                  miaTime_0.1.8                 
- [9] mia_1.3.27                     MultiAssayExperiment_1.22.0   
+ [9] mia_1.3.29                     MultiAssayExperiment_1.22.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [13] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [15] SummarizedExperiment_1.26.1    Biobase_2.56.0                

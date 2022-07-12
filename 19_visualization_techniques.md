@@ -183,7 +183,7 @@ samples in a `TSE` object includes the following, where each data point represen
 ```r
 # estimate shannon diversity index
 tse <- mia::estimateDiversity(tse, 
-                              abund_values = "counts",
+                              assay_name = "counts",
                               index = "shannon", 
                               name = "shannon")
 # plot shannon diversity index, colour-labeled by Sample Type
@@ -203,7 +203,7 @@ _patchwork_ package is then exploited.
 ```r
 # estimate faith diversity index
 tse <- mia::estimateFaith(tse,
-                          abund_values = "counts")
+                          assay_name = "counts")
 # store colData into a data frame
 coldata <- as.data.frame(colData(tse))
 # generate plots for shannon and faith indices
@@ -327,19 +327,19 @@ tse_order <- agglomerateByRank(tse,
                                 onRankOnly = TRUE)
 # transform counts into relative abundance
 tse_order <- transformCounts(tse_order,
-                              abund_values = "counts",
+                              assay_name = "counts",
                               method = "relabundance")
 # get top orders
 top_taxa <- getTopTaxa(tse_order,
                        top = 10,
-                       abund_values = "relabundance")
+                       assay_name = "relabundance")
 # leave only names for top 10 orders and label the rest with "Other"
 order_renamed <- lapply(rowData(tse_order)$Order,
                    function(x){if (x %in% top_taxa) {x} else {"Other"}})
 rowData(tse_order)$Order <- as.character(order_renamed)
 # plot composition as a bar plot
 plotAbundance(tse_order,
-              abund_values = "relabundance",
+              assay_name = "relabundance",
               rank = "Order",
               order_rank_by = "abund",
               order_sample_by = "Clostridiales")
@@ -353,7 +353,7 @@ pf _plotAbundance_.
 
 ```r
 # Create plots
-plots <- plotAbundance(tse_order, abund_values = "relabundance", rank = "Order",
+plots <- plotAbundance(tse_order, assay_name = "relabundance", rank = "Order",
                        order_rank_by = "abund", order_sample_by = "Clostridiales",
                        features = "SampleType")
 
@@ -409,9 +409,9 @@ tse_phylum <- agglomerateByRank(tse,
                                 onRankOnly = TRUE)
 # Add clr-transformation on samples
 tse_phylum <- transformSamples(tse_phylum, method = "relabundance", pseudocount = 1)
-tse_phylum <- transformSamples(tse_phylum, method = "clr", abund_values = "relabundance")
+tse_phylum <- transformSamples(tse_phylum, method = "clr", assay_name = "relabundance")
 # Add z-transformation on features (taxa)
-tse_phylum <- transformFeatures(tse_phylum, abund_values = "clr", 
+tse_phylum <- transformFeatures(tse_phylum, assay_name = "clr", 
                                 method = "z", name = "clr_z")
 
 # Takes subset: only samples from feces, skin, or tongue
@@ -419,9 +419,9 @@ tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces"
 
 # Does clr-transformation
 tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "relabundance", pseudocount = 1)
-tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "clr", abund_values = "relabundance")
+tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "clr", assay_name = "relabundance")
 # Does z-transformation
-tse_phylum_subset <- transformFeatures(tse_phylum_subset, abund_values = "clr", 
+tse_phylum_subset <- transformFeatures(tse_phylum_subset, assay_name = "clr", 
                                        method = "z", name = "clr_z")
 
 # Get n most abundant taxa, and subsets the data by them
@@ -802,9 +802,9 @@ other attached packages:
  [1] ggpubr_0.4.0                   ggtree_3.4.0                  
  [3] ape_5.6-2                      pheatmap_1.0.12               
  [5] reshape2_1.4.4                 sechm_1.4.1                   
- [7] miaViz_1.3.3                   ggraph_2.0.5                  
+ [7] miaViz_1.3.4                   ggraph_2.0.5                  
  [9] patchwork_1.1.1                scater_1.24.0                 
-[11] scuttle_1.6.2                  mia_1.3.27                    
+[11] scuttle_1.6.2                  mia_1.3.29                    
 [13] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [15] Biostrings_2.64.0              XVector_0.36.0                
 [17] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   

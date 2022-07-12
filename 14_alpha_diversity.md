@@ -109,7 +109,7 @@ Richness gives the number of features present within a community and can be calc
 
 ```r
 tse <- mia::estimateRichness(tse, 
-                             abund_values = "counts", 
+                             assay_name = "counts", 
                              index = "observed", 
                              name="observed")
 
@@ -144,7 +144,7 @@ diversity index based on the selected assay data.
 
 ```r
 tse <- mia::estimateDiversity(tse, 
-                              abund_values = "counts",
+                              assay_name = "counts",
                               index = "shannon", 
                               name = "shannon")
 head(colData(tse)$shannon)
@@ -201,7 +201,7 @@ The Faith index is returned by the function `estimateFaith`.
 
 ```r
 tse <- mia::estimateFaith(tse,
-                          abund_values = "counts")
+                          assay_name = "counts")
 head(colData(tse)$faith)
 ```
 
@@ -232,7 +232,7 @@ Load `picante` R package and get the `phylo` stored in `rowTree`.
 
 ```r
 tse <- mia::estimateDiversity(tse, 
-                              abund_values = "counts",
+                              assay_name = "counts",
                               index = "faith", 
                               name = "faith")
 ```
@@ -244,7 +244,7 @@ Evenness can be calculated with `estimateEvenness`.
 
 ```r
 tse <- estimateEvenness(tse, 
-                        abund_values = "counts", 
+                        assay_name = "counts", 
                         index="simpson")
 head(colData(tse)$simpson)
 ```
@@ -261,7 +261,7 @@ Dominance can be calculated with `estimateDominance`. Here, the `Relative index`
 
 ```r
 tse <- estimateDominance(tse, 
-                         abund_values = "counts", 
+                         assay_name = "counts", 
                          index="relative")
 
 head(colData(tse)$relative)
@@ -280,7 +280,7 @@ calculated with `estimateDiversity`.
 
 ```r
 tse <- mia::estimateDiversity(tse, 
-                              abund_values = "counts",
+                              assay_name = "counts",
                               index = "log_modulo_skewness")
 
 head(colData(tse)$log_modulo_skewness)
@@ -297,7 +297,7 @@ Divergence can be evaluated with `estimateDivergence`. Reference and algorithm f
 
 ```r
 tse <- mia::estimateDivergence(tse,
-                               abund_values = "counts",
+                               assay_name = "counts",
                                reference = "median",
                                FUN = vegan::vegdist)
 ```
@@ -355,7 +355,7 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.1                ggsignif_0.6.3                
  [3] scater_1.24.0                  ggplot2_3.3.6                 
- [5] scuttle_1.6.2                  mia_1.3.27                    
+ [5] scuttle_1.6.2                  mia_1.3.29                    
  [7] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
  [9] Biostrings_2.64.0              XVector_0.36.0                
 [11] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   

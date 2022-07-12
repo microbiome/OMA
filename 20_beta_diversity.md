@@ -394,11 +394,11 @@ kable(rda_info_clean)
 \hline
   & Explained by variables & Unexplained by variables & Proportion expl by vars & P-value (PERMANOVA 999 permutations)\\
 \hline
-all & 35.30 & 191.7 & 0.1842 & 0.669\\
+all & 35.30 & 191.7 & 0.1842 & 0.653\\
 \hline
-ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.833\\
+ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.832\\
 \hline
-Gender & 5.31 & 223.7 & 0.0277 & 0.936\\
+Gender & 5.31 & 223.7 & 0.0277 & 0.933\\
 \hline
 Age & 10.59 & 216.4 & 0.0552 & 0.001\\
 \hline
@@ -492,9 +492,9 @@ Let us agglomerate the data at a Genus level and getting the dominant taxa per s
 # Agglomerate to genus level
 tse_Genus <- agglomerateByRank(tse, rank="Genus")
 # Convert to relative abundances
-tse_Genus <- transformSamples(tse, method = "relabundance", abund_values="counts")
+tse_Genus <- transformSamples(tse, method = "relabundance", assay_name="counts")
 # Add info on dominant genus per sample
-tse_Genus <- addPerSampleDominantTaxa(tse_Genus, abund_values="relabundance", name = "dominant_taxa")
+tse_Genus <- addPerSampleDominantTaxa(tse_Genus, assay_name="relabundance", name = "dominant_taxa")
 ```
 
 
@@ -511,7 +511,7 @@ Getting top taxa and visualizing the abundance on PCoA.
 
 ```r
 # Getting the top taxa
-top_taxa <- getTopTaxa(tse_Genus,top = 6, abund_values = "relabundance")
+top_taxa <- getTopTaxa(tse_Genus,top = 6, assay_name = "relabundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
@@ -760,7 +760,7 @@ other attached packages:
  [5] scater_1.24.0                  scuttle_1.6.2                 
  [7] ggplot2_3.3.6                  vegan_2.6-2                   
  [9] lattice_0.20-45                permute_0.9-7                 
-[11] mia_1.3.27                     MultiAssayExperiment_1.22.0   
+[11] mia_1.3.29                     MultiAssayExperiment_1.22.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [15] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [17] SummarizedExperiment_1.26.1    Biobase_2.56.0                

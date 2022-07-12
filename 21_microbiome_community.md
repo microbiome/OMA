@@ -64,7 +64,7 @@ tse <- relAbundanceCounts(tse)
 
 # Getting top taxa on a Phylum level
 tse_phylum <- agglomerateByRank(tse, rank ="Phylum", onRankOnly=TRUE)
-top_taxa <- getTopTaxa(tse_phylum,top = 5, abund_values = "relabundance")
+top_taxa <- getTopTaxa(tse_phylum,top = 5, assay_name = "relabundance")
 
 # Renaming the "Phylum" rank to keep only top taxa and the rest to "Other"
 phylum_renamed <- lapply(rowData(tse)$Phylum,
@@ -72,7 +72,7 @@ phylum_renamed <- lapply(rowData(tse)$Phylum,
 rowData(tse)$Phylum <- as.character(phylum_renamed)
 
 # Visualizing the composition barplot, with samples order by "Bacteroidetes"
-plotAbundance(tse, abund_values="relabundance", rank = "Phylum",
+plotAbundance(tse, assay_name="relabundance", rank = "Phylum",
               order_rank_by="abund", order_sample_by = "Bacteroidetes")
 ```
 
@@ -97,12 +97,12 @@ techniques, we can visualize the abundances at Phylum level.
 library(ggplot2)
 # Add clr-transformation on samples
 tse_phylum <- transformSamples(tse_phylum, method = "relabundance", pseudocount = 1)
-tse_phylum <- transformSamples(tse_phylum, abund_values = "relabundance", method = "clr")
+tse_phylum <- transformSamples(tse_phylum, assay_name = "relabundance", method = "clr")
 # Add z-transformation on features (taxa)
-tse_phylum <- transformFeatures(tse_phylum, abund_values = "clr", 
+tse_phylum <- transformFeatures(tse_phylum, assay_name = "clr", 
                                 method = "z", name = "clr_z")
 # Melts the assay
-df <- meltAssay(tse_phylum, abund_values = "clr_z")
+df <- meltAssay(tse_phylum, assay_name = "clr_z")
 
 # Determines the scaling of colours
 maxval <- round(max(abs(df$clr_z)))
@@ -230,25 +230,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7790 BIC: 8354 AIC: 8183 
+## Laplace: 7792 BIC: 8357 AIC: 8187 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7850 BIC: 8554 AIC: 8341 
+## Laplace: 7909 BIC: 8599 AIC: 8386 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7926 BIC: 8796 AIC: 8540 
+## Laplace: 7943 BIC: 8813 AIC: 8557 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8015 BIC: 9058 AIC: 8759
+## Laplace: 8099 BIC: 9099 AIC: 8800
 ```
 
 
@@ -293,15 +293,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.22   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.21   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  860.38  1906.4 1674.5 1735
-## Mock               2       3   67  980.2  110.61   911.4 1054.4 1115
-## Ocean              2       3   67 1096.7  -56.93   944.2 1170.9 1232
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.93   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.77   605.1  829.8  918
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -314,8 +314,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.28
+## 1 0.5385 20.60
+## 2 0.4615 15.29
 ```
 
 
@@ -329,12 +329,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.007e-17
-## CC1     1.000e+00 3.845e-22
-## SV1     1.000e+00 1.944e-12
-## M31Fcsw 7.890e-26 1.000e+00
-## M11Fcsw 1.132e-16 1.000e+00
-## M31Plmr 1.124e-13 1.000e+00
+## CL3     1.000e+00 5.069e-17
+## CC1     1.000e+00 3.877e-22
+## SV1     1.000e+00 2.035e-12
+## M31Fcsw 7.332e-26 1.000e+00
+## M11Fcsw 1.063e-16 1.000e+00
+## M31Plmr 9.984e-14 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -345,13 +345,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30381 0.1354648
-## Phylum:Euryarchaeota  0.23114 0.1468588
-## Phylum:Actinobacteria 1.21383 1.0601189
-## Phylum:Spirochaetes   0.21393 0.1318402
-## Phylum:MVP-15         0.02982 0.0007645
-## Phylum:Proteobacteria 6.84472 1.8154288
+##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354694
+## Phylum:Euryarchaeota  0.2314 0.1468644
+## Phylum:Actinobacteria 1.2105 1.0600255
+## Phylum:Spirochaetes   0.2141 0.1318446
+## Phylum:MVP-15         0.0299 0.0007677
+## Phylum:Proteobacteria 6.8418 1.8153690
 ```
 Get the assignment probabilities
 
@@ -529,8 +529,8 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.1                bluster_1.6.0                 
  [3] scater_1.24.0                  scuttle_1.6.2                 
- [5] miaViz_1.3.3                   ggraph_2.0.5                  
- [7] ggplot2_3.3.6                  mia_1.3.27                    
+ [5] miaViz_1.3.4                   ggraph_2.0.5                  
+ [7] ggplot2_3.3.6                  mia_1.3.29                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.64.0              XVector_0.36.0                
 [13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   

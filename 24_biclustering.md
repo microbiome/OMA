@@ -128,7 +128,7 @@ if(!require(pheatmap)){
     library(pheatmap)
 }
 # z-transform for heatmap
-mae[[1]] <- transformFeatures(mae[[1]], abund_values = "clr", method = "z", name = "clr_z")
+mae[[1]] <- transformFeatures(mae[[1]], assay_name = "clr", method = "z", name = "clr_z")
 
 # Create annotations. When column names are equal, they should share levels. 
 # Here samples include 3 clusters, and taxa 2. That is why we have to make 
@@ -161,7 +161,7 @@ if(!require(patchwork)){
 }
 
 # ggplot requires data in melted format
-melt_assay <- meltAssay(mae[[1]], abund_values = "clr", add_col_data = T, add_row_data = T)
+melt_assay <- meltAssay(mae[[1]], assay_name = "clr", add_col_data = T, add_row_data = T)
 
 # patchwork two plots side-by-side
 p1 <- ggplot(melt_assay) +
@@ -189,8 +189,8 @@ rownames(mae[[1]]) <- make.unique(rownames(mae[[1]]))
 
 # Calculate correlations
 corr <- getExperimentCrossCorrelation(mae, 1, 2, 
-                                      abund_values1 = "clr", 
-                                      abund_values2 = "nmr", 
+                                      assay_name1 = "clr", 
+                                      assay_name2 = "nmr", 
                                       mode = "matrix", 
                                       cor_threshold = 0.2)
 ```
@@ -314,7 +314,7 @@ Let's collect information for the scatter plot.
 
 ```r
 # Function for obtaining sample-wise sum, mean, median, and mean variance for each cluster
-.sum_mean_median_var <- function(tse1, tse2, abund_values1, abund_values2, clusters1, clusters2){
+.sum_mean_median_var <- function(tse1, tse2, assay_name1, assay_name2, clusters1, clusters2){
   
   list <- list()
   # Create a data frame that includes all the information
@@ -323,8 +323,8 @@ Let's collect information for the scatter plot.
     tse_subset1 <- tse1[clusters1[,i], ]
     tse_subset2 <- tse2[clusters2[,i], ]
     # Get assay
-    assay1 <- assay(tse_subset1, abund_values1)
-    assay2 <- assay(tse_subset2, abund_values2)
+    assay1 <- assay(tse_subset1, assay_name1)
+    assay2 <- assay(tse_subset2, assay_name2)
     # Calculate sum, mean, median, and mean variance
     sum1 <- colSums2(assay1, na.rm = T)
     mean1 <- colMeans2(assay1, na.rm = T)
@@ -416,7 +416,7 @@ between taxa. _biclust_ is suitable for this.
 ```r
 # Calculate cross-correlation
 corr <- getExperimentCrossCorrelation(mae, 1, 1, 
-                                      abund_values1 = "clr", abund_values2 = "clr", 
+                                      assay_name1 = "clr", assay_name2 = "clr", 
                                       mode = "matrix",
                                       cor_threshold = 0.2, verbose = F, show_warning = F)
 
@@ -492,7 +492,7 @@ other attached packages:
  [3] colorspace_2.0-3               MASS_7.3-57                   
  [5] patchwork_1.1.1                ggplot2_3.3.6                 
  [7] pheatmap_1.0.12                cobiclust_0.1.0               
- [9] microbiomeDataSets_1.1.5       mia_1.3.27                    
+ [9] microbiomeDataSets_1.1.5       mia_1.3.29                    
 [11] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [13] Biostrings_2.64.0              XVector_0.36.0                
 [15] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
