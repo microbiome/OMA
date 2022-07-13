@@ -6,6 +6,7 @@ chapterPreamble()
 ```
 
 
+
 ## Differential abundance analysis
 
 This section provides an overview and examples of *differential
@@ -18,12 +19,12 @@ control). This can be performed at any phylogenetic level.
 
 We perform DAA to identify biomarkers and/or gain understanding of a
 complex system by looking at its isolated components. For example,
-identifying that a bacterial taxon is different between e.g. a patient
+identifying that a bacterial taxon is different between a patient
 group with disease *X* vs a healthy control group might lead to
 important insights into the pathophysiology. Changes in the microbiota
-might be causal or a consequence of the disease. Either way, it can
+might be cause or a consequence of a disease. Either way, it can
 help to understand the system as a whole. Be aware that this approach
-has also been criticized recently [@quinnCritiqueDifferentialAbundance2021].
+has also been criticized recently [@Quinn2021].
 
 
 ### Examples and tools
@@ -36,30 +37,34 @@ evaluating whether or not they perform well for this task, are:
 - [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)  
 - [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html)  
 - [LEFse](https://bioconductor.org/packages/release/bioc/html/lefser.html)  
+- [limma voom](https://bioconductor.org/packages/release/bioc/html/limma.html)  
+- [LinDA](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-022-02655-5)  
 - [MaAsLin2](https://www.bioconductor.org/packages/release/bioc/html/Maaslin2.html)  
 - [metagenomeSeq](https://www.bioconductor.org/packages/release/bioc/html/metagenomeSeq.html)  
-- [limma voom](https://bioconductor.org/packages/release/bioc/html/limma.html)  
 - [t-test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/t.test)  
 - [Wilcoxon test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/wilcox.test)  
 
 
-We recommend to have a look at @nearingMicrobiomeDifferentialAbundance2021 who compared all these listed methods across 38
-different datasets. Because different methods have different approaches
-(parametric vs non-parametric, different normalization techiniques etc.) to
-perform the same task (test differential abundance), results can differ between
-methods. Unfortunately, as @nearingMicrobiomeDifferentialAbundance2021 point out, they differ disturbingly
-much. Therefore, it is highly recommended to pick several methods to get an
-idea about how robust and potentially reproducible your findings are depending
-on the method. In this section we demonstrate 3 methods that can be recommended
-based on this recent review (ANCOM-BC, ALDEx2 and Maaslin2) and we will compare
-the results between them.
+We recommend to have a look at @Nearing2022
+who compared all these listed methods across 38
+different datasets. Because different methods use different approaches
+(parametric vs non-parametric, different normalization techiniques, assumptions
+etc.), results can differ between methods. 
+Unfortunately, as @Nearing2022 point out, they
+can differ substantially. Therefore, it is highly recommended to pick several
+methods to get an idea about how robust and potentially reproducible your
+findings are depending on the method. In this section we demonstrate 4 methods
+that can be recommended based on recent literature (ANCOM-BC, ALDEx2, Maaslin2
+and LinDA) and we will compare the results between them.
 Note that the purpose of this section is to show how to perform DAA in R, not
-how to correctly do causal inference. E.g. there might be confounding factors
-that might drive (the absence of) differences between the shown groups that we
-ignore for simplicity. However, we will show how you could include covariates
-in those models. Furthermore, we picked a dataset that merely has
-microbial abundances in a TSE object as well as a grouping variable in the
-sample data. We simplify the analysis by only including 2 of the 3 groups. 
+how to correctly do causal inference. Depending on your experimental setup
+and your theory, you must determine how to specify any model exactly. 
+E.g., there might be confounding factors that might drive (the absence of)
+differences between the shown groups that we ignore here for simplicity.
+However, we will show how you could include covariates in those models.
+Furthermore, we picked a dataset that merely has microbial abundances in a TSE
+object as well as a grouping variable in the sample data. We simplify the
+analysis by only including 2 of the 3 groups. 
 
 
 
@@ -71,6 +76,7 @@ library(tidySummarizedExperiment)
 library(ANCOMBC)
 library(ALDEx2)
 library(Maaslin2)
+library(MicrobiomeStat)
 library(knitr)
 library(tidyverse)
 
@@ -92,10 +98,11 @@ set.seed(1)
 ### Prevalence Filtering 
 
 Before we jump to our analyses, we may want to perform prevalence filtering.
-@nearingMicrobiomeDifferentialAbundance2021 found that applying a 10% threshold for the prevalence of
-the taxa generally resulted in more robust results. Some tools have builtin
-arguments for that. By applying the threshold to our input data, we can make
-sure it is applied for all tools. Below we show how to do this in `mia`:
+@Nearing2022 found that applying a 10% threshold
+for the prevalence of the taxa generally resulted in more robust results. 
+Some tools have builtin arguments for that. By applying the threshold to our
+input data, we can make sure it is applied for all tools. Below we show how to
+do this in `mia`:
 
 ```{r}
 tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 0.1)
@@ -103,11 +110,13 @@ tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 0.1)
 
 ### ALDEx2
 
-In this section, we will show how to perform a simple ALDEx2 analysis. If you wanted to pick a single method, this method could be recommended to use.
+In this section, we will show how to perform a simple ALDEx2 analysis. 
+If you wanted to pick a single method, this method could be recommended to use.
 According to the developers experience, it tends to identify the common
 features identified by other methods. This statement is in line with a recent
-independent evaluation by @nearingMicrobiomeDifferentialAbundance2021.  Please also have a look at
-the more extensive [vignette](https://bioconductor.org/packages/release/bioc/vignettes/ALDEx2/inst/doc/ALDEx2_vignette.html) 
+independent evaluation by @Nearing2022.  
+Please also have a look at the more extensive 
+[vignette](https://bioconductor.org/packages/release/bioc/vignettes/ALDEx2/inst/doc/ALDEx2_vignette.html) 
 that covers this flexible tool in more depth. ALDEx2 estimates technical
 variation within each sample per taxon by utilizing the Dirichlet distribution.
 It furthermore applies the centered-log-ratio transformation (or closely
@@ -151,7 +160,8 @@ association between the relative abundance and the magnitude of the difference
 per sample. Next to that, we can also create a plot that shows the dispersion
 on the x-axis instead of log-ratio abundance. Red dots represent genera that are
 differentially abundant ($q \leq 0.1$) between the 2 groups. Black points are
-rare taxa and grey ones are abundant taxa.
+rare taxa and grey ones are abundant taxa. The dashed line represent an effect
+size of 1. See @Gloor2016 to learn more about these plots.
 
 ```{r}
 par(mfrow = c(1, 2))
@@ -179,9 +189,11 @@ identify those features where the 95% CI of the
 effect size does not cross 0. As we can see in below table, this is not the
 case for any of the identified 
 genera (see overlap column, which indicates the proportion of overlap). Also,
-the authors recommend an effect 
-size cutoff of 1 rather than only interpreting the pvalue. Again, this is not 
-the case for any feature.
+the authors recommend to focus on effect sizes and CIs rather than interpreting
+the pvalue. To keep the comparison simple, we will here use the pvalue as 
+decision criterion. But please be aware that the effect size together with the
+CI is a better answer to the question we are typically interested in
+(see also [this article](https://www.nature.com/articles/d41586-019-00857-9)).
 
 
 ```{r}
@@ -196,13 +208,13 @@ rownames_to_column(aldex_out, "genus") %>%
 ### ANCOM-BC
 
 The analysis of composition of microbiomes with bias correction 
-(ANCOM-BC) [@linAnalysisCompositionsMicrobiomes2020] 
+(ANCOM-BC) [@Huang2020] 
 is a recently developed method for differential abundance testing. It is based
 on an 
-earlier published approach [@mandalAnalysisCompositionMicrobiomes2015]. 
+earlier published approach [@Mandal2015]. 
 The previous version of ANCOM was among the methods that produced the 
 most consistent results and is probably a conservative approach
-[@nearingMicrobiomeDifferentialAbundance2021]. 
+[@Nearing2022]. 
 However, the new ANCOM-BC method operates quite differently compared to the
 former ANCOM method.
 
@@ -216,20 +228,17 @@ taxon. It also controls the FDR and it is computationally simple to implement.
 
 
 As we will see below, to obtain results, all that is needed is to pass 
-a phyloseq object to the `ancombc()` function. Therefore, below we first
-convert our `TreeSE` object to a `phyloseq` object. Then, we specify the formula.
+a tse object to the `ancombc()` function. Below, we first specify a formula.
 In this formula, other covariates could potentially be included to adjust for
 confounding. We show this further below. 
-Please check the [function documentation](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html) 
+Please check the
+[function documentation](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html) 
 to learn about the additional arguments that we specify below.
 
 ```{r warning = FALSE}
-# currently, ancombc requires the phyloseq format, but we can easily convert:
-pseq <- makePhyloseqFromTreeSummarizedExperiment(tse)
-
 # perform the analysis 
 out = ancombc(
-  phyloseq = pseq, 
+  x = tse, 
   formula = "pheno", 
   p_adj_method = "fdr", 
   prv_cut = 0, # no prev filtering necessary anymore 
@@ -241,7 +250,7 @@ out = ancombc(
   max_iter = 100, 
   conserve = TRUE, 
   alpha = 0.05, 
-  global = TRUE
+  global = TRUE # multi group comparison will be deactivated automatically 
 )
 # store the results in res 
 res <- out$res
@@ -254,8 +263,8 @@ whether taxa are differentially abundant can be answered by looking at the
 `res` object, which now contains dataframes with the coefficients, 
 standard errors, p-values and q-values. Conveniently, there is a dataframe
 `diff_abn`. Here, for each taxon it is indicated whether it is differentially
-abundant between the groups. Below we show the first 6 entries of this
-dataframe:  
+abundant between the groups (again, keep in mind that the answer is not 
+black-white). Below we show the first 6 entries of this dataframe:  
 
 ```{r}
 kable(head(res$diff_abn))
@@ -265,7 +274,7 @@ kable(head(res$diff_abn))
 
 ### MaAsLin2 
 
-Lastly, we will illustrate how to use MaAsLin2, which is the next generation of
+Next, we will illustrate how to use MaAsLin2, which is the next generation of
 MaAsLin. As it is based on generalized linear models, it is flexible for different study designs and covariate
 structures. The official package tutorial can be found [here](https://github.com/biobakery/biobakery/wiki/maaslin2). 
 
@@ -300,6 +309,36 @@ kable(head(filter(fit_data$results, qval <= 0.05)))
 # for the significant ones.
 ```
 
+### LinDA 
+
+Lastly, we cover linear models for differential abundance analysis of
+microbiome compositional data (@Zhou2022). This tool is very
+similar to ANCOMBC with few differences: 1) LinDA correct for the compositional
+bias differently 
+using the mode of all regression coefficients. 2) The authors claim that it 
+runs 100-1000x faster than ANCOMBC and 3) it support hierarchical models.
+The latter could be ignored as ANCOMBC will be supporting hierarchical models
+with the next release. Nevertheless, LinDA seems a promising tool that achieves 
+the best power/fdr trade-off together with ANCOMBC according to the authors. The
+speed might make it the choice for bigger datasets or datasets with a very high
+number of features.
+
+
+```{r}
+otu.tab <- as.data.frame(assay(tse))
+meta <- as.data.frame(colData(tse)) %>% select(pheno)
+res <- linda(
+  otu.tab, 
+  meta, 
+  formula = '~pheno', 
+  alpha = 0.05, 
+  prev.filter = 0, 
+  mean.abund.filter = 0)
+
+# to scan the table for genera where H0 could be rejected:
+kable(head(filter(as.data.frame(res$output), phenoObese.reject)))
+```
+
 
 ### Comparison of the methods
 
@@ -324,12 +363,16 @@ summ <- full_join(
   full_join(
     select(fit_data$results, genus = feature, maaslin2 = qval), 
     by = "genus") %>%
+    full_join(
+      rownames_to_column(as.data.frame(res$output), "genus") %>%
+        select(genus, LinDA = phenoObese.reject), 
+      by = "genus") %>%
   mutate(
     across(c(aldex2, maaslin2), ~ .x <= 0.05),
     # the following line would be necessary without prevalence filtering 
     # as some methods output NA
     #across(-genus, function(x) ifelse(is.na(x), FALSE, x)),
-    score = rowSums(across(c(aldex2, ancombc, maaslin2)))
+    score = rowSums(across(c(aldex2, ancombc, maaslin2, LinDA)))
   )
 
 # This is how it looks like:
@@ -343,12 +386,12 @@ Now we can answer our questions:
 summarise(summ, across(where(is.logical), sum)) %>%
   kable()
 # which genera are identified by all methods?
-filter(summ, score == 3) %>% kable()
+filter(summ, score == 4) %>% kable()
 ```
 
 We see that each method identified at least 9 genera as differentially
 abundant. Eight of those that were identified by ALDEx2,
-were also identified by both of the other methods. We could plot the data for 
+were also identified by the other methods. We could plot the data for
 any method or for those taxa that were identified by all methods:
 
 
@@ -361,14 +404,13 @@ plots <- pmap(select(summ, genus, score), function(genus, score) {
   ggplot(plot_data, aes_string("pheno", genus)) +
     geom_boxplot(aes(fill = pheno), outlier.shape = NA) +
     geom_jitter(width = 0.2, alpha = 0.5) +
-    ggtitle(glue::glue("Robustness score {score}")) +
+    ggtitle(glue::glue("Score {score}")) +
     theme_bw() +
     theme(legend.position = "none")
 })
 
 # now we can show only those genera that have at least score 3 (or 2 or 1)
-robust_plots <- plots[summ$score == 3] 
-
+robust_plots <- plots[summ$score == 4] 
 
 # to display this nicely in the book we use patchwork here:
 # (we show first 8)
@@ -399,7 +441,7 @@ ancombc_plots[[1]] +
 
 To perform causal inference, it is crucial that the method is able to include
 covariates in the model. This is not possible with e.g. the Wilcoxon test.
-Other methods such as both ANCOM methods, ALDEx2, DESeq2, MaAsLin2 and others
+Other methods such as both ANCOM methods, ALDEx2, LinDA, MaAsLin2 and others
 allow this. Below we show how to include a covariate in ANCOM-BC.
 It is very similar for all the methods that allow this. Since in this dataset
 there are no covariates, I first simulate a new variable and add it to the TSE
@@ -419,12 +461,12 @@ df_sim <- tibble(
 tse <- full_join(tse, df_sim, by = "sample_id")
 # now the data from df_sim is in the tse object and we can again repeat
 # the steps as above:
-pseq <- makePhyloseqFromTreeSummarizedExperiment(tse)
+assay(tse)
 out_cov = ancombc(
-  phyloseq = pseq, 
+  x = tse, 
   formula = "pheno + age", # here we add age to the model
   p_adj_method = "fdr", 
-  prv_cut = 0.9, 
+  prv_cut = 0,  # we did that already
   lib_cut = 0, 
   group = "pheno", 
   struc_zero = TRUE, 
@@ -469,7 +511,7 @@ package, that offers a Multinomial Logistic-Normal Linear Regression model; see
 
 
 The following presents such an exemplary analysis based on the 
-data of @sprockettMicrobiotaAssemblyStructure2020 available
+data of @Sprockett2020 available
 through `microbiomeDataSets` package.
 
 
