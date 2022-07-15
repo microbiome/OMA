@@ -578,7 +578,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.3.29                     MultiAssayExperiment_1.22.0   
+ [1] mia_1.3.31                     MultiAssayExperiment_1.22.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
  [5] XVector_0.36.0                 SingleCellExperiment_1.18.0   
  [7] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -606,7 +606,7 @@ loaded via a namespace (and not attached):
 [29] rsvd_1.0.5                  gtable_0.3.0               
 [31] glue_1.6.2                  GenomeInfoDbData_1.2.8     
 [33] reshape2_1.4.4              dplyr_1.0.9                
-[35] Rcpp_1.0.8.3                vctrs_0.4.1                
+[35] Rcpp_1.0.9                  vctrs_0.4.1                
 [37] ape_5.6-2                   nlme_3.1-158               
 [39] DECIPHER_2.24.0             DelayedMatrixStats_1.18.0  
 [41] xfun_0.31                   stringr_1.4.0              
@@ -616,14 +616,14 @@ loaded via a namespace (and not attached):
 [49] scales_1.2.0                parallel_4.2.0             
 [51] yaml_2.3.5                  memoise_2.0.1              
 [53] gridExtra_2.3               ggplot2_3.3.6              
-[55] yulab.utils_0.0.5           stringi_1.7.6              
+[55] yulab.utils_0.0.5           stringi_1.7.8              
 [57] RSQLite_2.2.14              ScaledMatrix_1.4.0         
 [59] tidytree_0.3.9              permute_0.9-7              
 [61] filelock_1.0.2              BiocParallel_1.30.3        
-[63] rlang_1.0.3                 pkgconfig_2.0.3            
+[63] rlang_1.0.4                 pkgconfig_2.0.3            
 [65] bitops_1.0-7                evaluate_0.15              
 [67] lattice_0.20-45             purrr_0.3.4                
-[69] treeio_1.20.0               CodeDepends_0.6.5          
+[69] treeio_1.20.1               CodeDepends_0.6.5          
 [71] bit_4.0.4                   tidyselect_1.1.2           
 [73] plyr_1.8.7                  magrittr_2.0.3             
 [75] bookdown_0.27               R6_2.5.1                   

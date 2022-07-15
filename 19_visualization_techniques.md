@@ -799,12 +799,12 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] ggpubr_0.4.0                   ggtree_3.4.0                  
+ [1] ggpubr_0.4.0                   ggtree_3.4.1                  
  [3] ape_5.6-2                      pheatmap_1.0.12               
  [5] reshape2_1.4.4                 sechm_1.4.1                   
  [7] miaViz_1.3.4                   ggraph_2.0.5                  
  [9] patchwork_1.1.1                scater_1.24.0                 
-[11] scuttle_1.6.2                  mia_1.3.29                    
+[11] scuttle_1.6.2                  mia_1.3.31                    
 [13] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [15] Biostrings_2.64.0              XVector_0.36.0                
 [17] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
@@ -827,7 +827,7 @@ loaded via a namespace (and not attached):
  [17] labeling_0.4.2              GenomeInfoDbData_1.2.8     
  [19] polyclip_1.10-0             bit64_4.0.5                
  [21] farver_2.1.1                vctrs_0.4.1                
- [23] treeio_1.20.0               generics_0.1.3             
+ [23] treeio_1.20.1               generics_0.1.3             
  [25] xfun_0.31                   R6_2.5.1                   
  [27] doParallel_1.0.17           ggbeeswarm_0.6.0           
  [29] clue_0.3-61                 graphlayouts_0.8.0         
@@ -837,7 +837,7 @@ loaded via a namespace (and not attached):
  [37] assertthat_0.2.1            scales_1.2.0               
  [39] beeswarm_0.4.0              gtable_0.3.0               
  [41] beachmat_2.12.0             Cairo_1.6-0                
- [43] tidygraph_1.2.1             rlang_1.0.3                
+ [43] tidygraph_1.2.1             rlang_1.0.4                
  [45] GlobalOptions_0.1.2         splines_4.2.0              
  [47] rstatix_0.7.0               lazyeval_0.2.2             
  [49] broom_1.0.0                 BiocManager_1.30.18        
@@ -845,7 +845,7 @@ loaded via a namespace (and not attached):
  [53] backports_1.4.1             tools_4.2.0                
  [55] bookdown_0.27               ggplotify_0.1.0            
  [57] ellipsis_0.3.2              decontam_1.16.0            
- [59] RColorBrewer_1.1-3          Rcpp_1.0.8.3               
+ [59] RColorBrewer_1.1-3          Rcpp_1.0.9                 
  [61] plyr_1.8.7                  sparseMatrixStats_1.8.0    
  [63] zlibbioc_1.42.0             purrr_0.3.4                
  [65] RCurl_1.98-1.7              GetoptLong_1.0.5           
@@ -881,7 +881,7 @@ loaded via a namespace (and not attached):
 [125] fastmap_1.1.0               glue_1.6.2                 
 [127] png_0.1-7                   iterators_1.0.14           
 [129] bit_4.0.4                   ggforce_0.3.3              
-[131] stringi_1.7.6               blob_1.2.3                 
+[131] stringi_1.7.8               blob_1.2.3                 
 [133] BiocSingular_1.12.0         memoise_2.0.1              
 [135] dplyr_1.0.9                 irlba_2.3.5                
 ```

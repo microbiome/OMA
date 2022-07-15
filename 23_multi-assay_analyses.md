@@ -446,7 +446,7 @@ other attached packages:
  [1] ggplot2_3.3.6                  patchwork_1.1.1               
  [3] reticulate_1.25                MOFA2_1.6.0                   
  [5] ComplexHeatmap_2.12.0          stringr_1.4.0                 
- [7] microbiomeDataSets_1.1.5       mia_1.3.29                    
+ [7] microbiomeDataSets_1.1.5       mia_1.3.31                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.64.0              XVector_0.36.0                
 [13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
@@ -469,7 +469,7 @@ loaded via a namespace (and not attached):
  [17] bit64_4.0.5                   farver_2.1.1                 
  [19] pheatmap_1.0.12               rhdf5_2.40.0                 
  [21] rprojroot_2.0.3               basilisk_1.8.0               
- [23] vctrs_0.4.1                   treeio_1.20.0                
+ [23] vctrs_0.4.1                   treeio_1.20.1                
  [25] generics_0.1.3                xfun_0.31                    
  [27] BiocFileCache_2.4.0           R6_2.5.1                     
  [29] doParallel_1.0.17             ggbeeswarm_0.6.0             
@@ -479,14 +479,14 @@ loaded via a namespace (and not attached):
  [37] assertthat_0.2.1              promises_1.2.0.1             
  [39] scales_1.2.0                  beeswarm_0.4.0               
  [41] gtable_0.3.0                  beachmat_2.12.0              
- [43] Cairo_1.6-0                   rlang_1.0.3                  
+ [43] Cairo_1.6-0                   rlang_1.0.4                  
  [45] GlobalOptions_0.1.2           splines_4.2.0                
  [47] lazyeval_0.2.2                BiocManager_1.30.18          
  [49] yaml_2.3.5                    reshape2_1.4.4               
  [51] httpuv_1.6.5                  tools_4.2.0                  
  [53] bookdown_0.27                 ellipsis_0.3.2               
  [55] decontam_1.16.0               RColorBrewer_1.1-3           
- [57] Rcpp_1.0.8.3                  plyr_1.8.7                   
+ [57] Rcpp_1.0.9                    plyr_1.8.7                   
  [59] sparseMatrixStats_1.8.0       zlibbioc_1.42.0              
  [61] purrr_0.3.4                   RCurl_1.98-1.7               
  [63] basilisk.utils_1.8.0          GetoptLong_1.0.5             
@@ -520,11 +520,11 @@ loaded via a namespace (and not attached):
 [119] BiocNeighbors_1.14.0          CodeDepends_0.6.5            
 [121] viridisLite_0.4.0             fansi_1.0.3                  
 [123] pillar_1.7.0                  lattice_0.20-45              
-[125] KEGGREST_1.36.2               fastmap_1.1.0                
+[125] KEGGREST_1.36.3               fastmap_1.1.0                
 [127] httr_1.4.3                    interactiveDisplayBase_1.34.0
 [129] glue_1.6.2                    png_0.1-7                    
 [131] iterators_1.0.14              BiocVersion_3.15.2           
-[133] bit_4.0.4                     stringi_1.7.6                
+[133] bit_4.0.4                     stringi_1.7.8                
 [135] HDF5Array_1.24.1              blob_1.2.3                   
 [137] BiocSingular_1.12.0           AnnotationHub_3.4.0          
 [139] memoise_2.0.1                 dplyr_1.0.9                  

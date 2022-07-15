@@ -230,25 +230,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7792 BIC: 8357 AIC: 8187 
+## Laplace: 7793 BIC: 8357 AIC: 8187 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7909 BIC: 8599 AIC: 8386 
+## Laplace: 7854 BIC: 8553 AIC: 8340 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7943 BIC: 8813 AIC: 8557 
+## Laplace: 7952 BIC: 8850 AIC: 8594 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8099 BIC: 9099 AIC: 8800
+## Laplace: NaN BIC: NaN AIC: NaN
 ```
 
 
@@ -296,7 +296,7 @@ dmn_group
 ## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
 ## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
 ## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Mock               2       3   67  998.6  -70.60   839.3 1072.8 1134
 ## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
 ## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
@@ -315,7 +315,7 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 ```
 ##       pi theta
 ## 1 0.5385 20.60
-## 2 0.4615 15.29
+## 2 0.4615 15.28
 ```
 
 
@@ -329,12 +329,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.069e-17
-## CC1     1.000e+00 3.877e-22
-## SV1     1.000e+00 2.035e-12
-## M31Fcsw 7.332e-26 1.000e+00
+## CL3     1.000e+00 5.017e-17
+## CC1     1.000e+00 3.817e-22
+## SV1     1.000e+00 2.023e-12
+## M31Fcsw 7.326e-26 1.000e+00
 ## M11Fcsw 1.063e-16 1.000e+00
-## M31Plmr 9.984e-14 1.000e+00
+## M31Plmr 9.978e-14 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -346,12 +346,12 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 
 ```
 ##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354694
-## Phylum:Euryarchaeota  0.2314 0.1468644
-## Phylum:Actinobacteria 1.2105 1.0600255
-## Phylum:Spirochaetes   0.2141 0.1318446
-## Phylum:MVP-15         0.0299 0.0007677
-## Phylum:Proteobacteria 6.8418 1.8153690
+## Phylum:Crenarchaeota  0.3043 0.1354649
+## Phylum:Euryarchaeota  0.2314 0.1468592
+## Phylum:Actinobacteria 1.2105 1.0601247
+## Phylum:Spirochaetes   0.2141 0.1318403
+## Phylum:MVP-15         0.0299 0.0007656
+## Phylum:Proteobacteria 6.8420 1.8153987
 ```
 Get the assignment probabilities
 
@@ -530,7 +530,7 @@ other attached packages:
  [1] patchwork_1.1.1                bluster_1.6.0                 
  [3] scater_1.24.0                  scuttle_1.6.2                 
  [5] miaViz_1.3.4                   ggraph_2.0.5                  
- [7] ggplot2_3.3.6                  mia_1.3.29                    
+ [7] ggplot2_3.3.6                  mia_1.3.31                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.64.0              XVector_0.36.0                
 [13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
@@ -559,7 +559,7 @@ loaded via a namespace (and not attached):
  [29] gtable_0.3.0                zlibbioc_1.42.0            
  [31] DelayedArray_0.22.0         BiocSingular_1.12.0        
  [33] scales_1.2.0                DBI_1.1.3                  
- [35] Rcpp_1.0.8.3                viridisLite_0.4.0          
+ [35] Rcpp_1.0.9                  viridisLite_0.4.0          
  [37] decontam_1.16.0             gridGraphics_0.5-1         
  [39] tidytree_0.3.9              bit_4.0.4                  
  [41] rsvd_1.0.5                  FNN_1.1.3.1                
@@ -568,21 +568,21 @@ loaded via a namespace (and not attached):
  [47] farver_2.1.1                uwot_0.1.11                
  [49] CodeDepends_0.6.5           utf8_1.2.2                 
  [51] ggplotify_0.1.0             tidyselect_1.1.2           
- [53] labeling_0.4.2              rlang_1.0.3                
+ [53] labeling_0.4.2              rlang_1.0.4                
  [55] reshape2_1.4.4              munsell_0.5.0              
  [57] tools_4.2.0                 cachem_1.0.6               
  [59] cli_3.3.0                   DirichletMultinomial_1.38.0
  [61] generics_0.1.3              RSQLite_2.2.14             
  [63] evaluate_0.15               stringr_1.4.0              
  [65] fastmap_1.1.0               yaml_2.3.5                 
- [67] ggtree_3.4.0                knitr_1.39                 
+ [67] ggtree_3.4.1                knitr_1.39                 
  [69] bit64_4.0.5                 tidygraph_1.2.1            
  [71] purrr_0.3.4                 nlme_3.1-158               
  [73] sparseMatrixStats_1.8.0     aplot_0.1.6                
  [75] compiler_4.2.0              beeswarm_0.4.0             
- [77] filelock_1.0.2              treeio_1.20.0              
+ [77] filelock_1.0.2              treeio_1.20.1              
  [79] tibble_3.1.7                tweenr_1.0.2               
- [81] stringi_1.7.6               highr_0.9                  
+ [81] stringi_1.7.8               highr_0.9                  
  [83] lattice_0.20-45             Matrix_1.4-1               
  [85] vegan_2.6-2                 permute_0.9-7              
  [87] vctrs_0.4.1                 pillar_1.7.0               

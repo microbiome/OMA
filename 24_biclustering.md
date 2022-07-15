@@ -492,7 +492,7 @@ other attached packages:
  [3] colorspace_2.0-3               MASS_7.3-57                   
  [5] patchwork_1.1.1                ggplot2_3.3.6                 
  [7] pheatmap_1.0.12                cobiclust_0.1.0               
- [9] microbiomeDataSets_1.1.5       mia_1.3.29                    
+ [9] microbiomeDataSets_1.1.5       mia_1.3.31                    
 [11] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [13] Biostrings_2.64.0              XVector_0.36.0                
 [15] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
@@ -520,7 +520,7 @@ loaded via a namespace (and not attached):
  [29] gtable_0.3.0                  zlibbioc_1.42.0              
  [31] DelayedArray_0.22.0           additivityTests_1.1-4.1      
  [33] BiocSingular_1.12.0           scales_1.2.0                 
- [35] DBI_1.1.3                     Rcpp_1.0.8.3                 
+ [35] DBI_1.1.3                     Rcpp_1.0.9                   
  [37] viridisLite_0.4.0             xtable_1.8-4                 
  [39] decontam_1.16.0               tidytree_0.3.9               
  [41] bit_4.0.4                     rsvd_1.0.5                   
@@ -531,7 +531,7 @@ loaded via a namespace (and not attached):
  [51] scuttle_1.6.2                 CodeDepends_0.6.5            
  [53] dbplyr_2.2.1                  utf8_1.2.2                   
  [55] labeling_0.4.2                tidyselect_1.1.2             
- [57] rlang_1.0.3                   reshape2_1.4.4               
+ [57] rlang_1.0.4                   reshape2_1.4.4               
  [59] later_1.3.0                   AnnotationDbi_1.58.0         
  [61] munsell_0.5.0                 BiocVersion_3.15.2           
  [63] tools_4.2.0                   cachem_1.0.6                 
@@ -541,13 +541,13 @@ loaded via a namespace (and not attached):
  [71] stringr_1.4.0                 fastmap_1.1.0                
  [73] yaml_2.3.5                    knitr_1.39                   
  [75] bit64_4.0.5                   purrr_0.3.4                  
- [77] KEGGREST_1.36.2               nlme_3.1-158                 
+ [77] KEGGREST_1.36.3               nlme_3.1-158                 
  [79] sparseMatrixStats_1.8.0       mime_0.12                    
  [81] flexclust_1.4-1               compiler_4.2.0               
  [83] beeswarm_0.4.0                filelock_1.0.2               
  [85] curl_4.3.2                    png_0.1-7                    
- [87] interactiveDisplayBase_1.34.0 treeio_1.20.0                
- [89] tibble_3.1.7                  stringi_1.7.6                
+ [87] interactiveDisplayBase_1.34.0 treeio_1.20.1                
+ [89] tibble_3.1.7                  stringi_1.7.8                
  [91] highr_0.9                     Matrix_1.4-1                 
  [93] vegan_2.6-2                   permute_0.9-7                
  [95] vctrs_0.4.1                   pillar_1.7.0                 

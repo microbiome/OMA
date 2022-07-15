@@ -788,7 +788,7 @@ se
 ```
 
 ```
-## class: SummarizedExperiment 
+## class: TreeSummarizedExperiment 
 ## dim: 151 27 
 ## metadata(0):
 ## assays(1): counts
@@ -796,6 +796,13 @@ se
 ## rowData names(6): taxonomy1 taxonomy2 ... taxonomy5 taxonomy6
 ## colnames(27): A110 A111 ... A38 A39
 ## colData names(0):
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: NULL
+## rowTree: NULL
+## colLinks: NULL
+## colTree: NULL
 ```
 
 The `assays` slot includes a list of abundance tables. The imported
@@ -1284,7 +1291,7 @@ attached base packages:
 other attached packages:
  [1] microbiomeDataSets_1.1.5       phyloseq_1.40.0               
  [3] BiocManager_1.30.18            ggplot2_3.3.6                 
- [5] mia_1.3.29                     MultiAssayExperiment_1.22.0   
+ [5] mia_1.3.31                     MultiAssayExperiment_1.22.0   
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
  [9] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [11] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -1315,7 +1322,7 @@ loaded via a namespace (and not attached):
  [35] zlibbioc_1.42.0               DelayedArray_0.22.0          
  [37] BiocSingular_1.12.0           Rhdf5lib_1.18.2              
  [39] scales_1.2.0                  DBI_1.1.3                    
- [41] Rcpp_1.0.8.3                  xtable_1.8-4                 
+ [41] Rcpp_1.0.9                    xtable_1.8-4                 
  [43] viridisLite_0.4.0             decontam_1.16.0              
  [45] tidytree_0.3.9                bit_4.0.4                    
  [47] rsvd_1.0.5                    httr_1.4.3                   
@@ -1324,7 +1331,7 @@ loaded via a namespace (and not attached):
  [53] scuttle_1.6.2                 CodeDepends_0.6.5            
  [55] dbplyr_2.2.1                  utf8_1.2.2                   
  [57] AnnotationDbi_1.58.0          later_1.3.0                  
- [59] tidyselect_1.1.2              rlang_1.0.3                  
+ [59] tidyselect_1.1.2              rlang_1.0.4                  
  [61] reshape2_1.4.4                munsell_0.5.0                
  [63] BiocVersion_3.15.2            tools_4.2.0                  
  [65] cachem_1.0.6                  cli_3.3.0                    
@@ -1334,13 +1341,13 @@ loaded via a namespace (and not attached):
  [73] biomformat_1.24.0             stringr_1.4.0                
  [75] fastmap_1.1.0                 yaml_2.3.5                   
  [77] knitr_1.39                    bit64_4.0.5                  
- [79] purrr_0.3.4                   KEGGREST_1.36.2              
+ [79] purrr_0.3.4                   KEGGREST_1.36.3              
  [81] nlme_3.1-158                  sparseMatrixStats_1.8.0      
  [83] mime_0.12                     compiler_4.2.0               
  [85] interactiveDisplayBase_1.34.0 beeswarm_0.4.0               
  [87] filelock_1.0.2                curl_4.3.2                   
- [89] png_0.1-7                     treeio_1.20.0                
- [91] tibble_3.1.7                  stringi_1.7.6                
+ [89] png_0.1-7                     treeio_1.20.1                
+ [91] tibble_3.1.7                  stringi_1.7.8                
  [93] lattice_0.20-45               Matrix_1.4-1                 
  [95] vegan_2.6-2                   permute_0.9-7                
  [97] multtest_2.52.0               vctrs_0.4.1                  

@@ -394,11 +394,11 @@ kable(rda_info_clean)
 \hline
   & Explained by variables & Unexplained by variables & Proportion expl by vars & P-value (PERMANOVA 999 permutations)\\
 \hline
-all & 35.30 & 191.7 & 0.1842 & 0.653\\
+all & 35.30 & 191.7 & 0.1842 & 0.671\\
 \hline
-ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.832\\
+ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.831\\
 \hline
-Gender & 5.31 & 223.7 & 0.0277 & 0.933\\
+Gender & 5.31 & 223.7 & 0.0277 & 0.926\\
 \hline
 Age & 10.59 & 216.4 & 0.0552 & 0.001\\
 \hline
@@ -760,7 +760,7 @@ other attached packages:
  [5] scater_1.24.0                  scuttle_1.6.2                 
  [7] ggplot2_3.3.6                  vegan_2.6-2                   
  [9] lattice_0.20-45                permute_0.9-7                 
-[11] mia_1.3.29                     MultiAssayExperiment_1.22.0   
+[11] mia_1.3.31                     MultiAssayExperiment_1.22.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [15] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [17] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -787,7 +787,7 @@ loaded via a namespace (and not attached):
 [27] tools_4.2.0                 rsvd_1.0.5                 
 [29] gtable_0.3.0                glue_1.6.2                 
 [31] GenomeInfoDbData_1.2.8      reshape2_1.4.4             
-[33] dplyr_1.0.9                 Rcpp_1.0.8.3               
+[33] dplyr_1.0.9                 Rcpp_1.0.9                 
 [35] vctrs_0.4.1                 ape_5.6-2                  
 [37] nlme_3.1-158                DECIPHER_2.24.0            
 [39] DelayedMatrixStats_1.18.0   xfun_0.31                  
@@ -797,13 +797,13 @@ loaded via a namespace (and not attached):
 [47] scales_1.2.0                parallel_4.2.0             
 [49] yaml_2.3.5                  memoise_2.0.1              
 [51] gridExtra_2.3               yulab.utils_0.0.5          
-[53] stringi_1.7.6               RSQLite_2.2.14             
+[53] stringi_1.7.8               RSQLite_2.2.14             
 [55] highr_0.9                   ScaledMatrix_1.4.0         
 [57] tidytree_0.3.9              filelock_1.0.2             
-[59] BiocParallel_1.30.3         rlang_1.0.3                
+[59] BiocParallel_1.30.3         rlang_1.0.4                
 [61] pkgconfig_2.0.3             bitops_1.0-7               
 [63] evaluate_0.15               purrr_0.3.4                
-[65] labeling_0.4.2              treeio_1.20.0              
+[65] labeling_0.4.2              treeio_1.20.1              
 [67] CodeDepends_0.6.5           cowplot_1.1.1              
 [69] bit_4.0.4                   tidyselect_1.1.2           
 [71] plyr_1.8.7                  magrittr_2.0.3             
