@@ -578,7 +578,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.3.31                     MultiAssayExperiment_1.22.0   
+ [1] mia_1.3.33                     MultiAssayExperiment_1.22.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
  [5] XVector_0.36.0                 SingleCellExperiment_1.18.0   
  [7] SummarizedExperiment_1.26.1    Biobase_2.56.0                

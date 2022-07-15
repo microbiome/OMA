@@ -804,7 +804,7 @@ other attached packages:
  [5] reshape2_1.4.4                 sechm_1.4.1                   
  [7] miaViz_1.3.4                   ggraph_2.0.5                  
  [9] patchwork_1.1.1                scater_1.24.0                 
-[11] scuttle_1.6.2                  mia_1.3.31                    
+[11] scuttle_1.6.2                  mia_1.3.33                    
 [13] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [15] Biostrings_2.64.0              XVector_0.36.0                
 [17] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   

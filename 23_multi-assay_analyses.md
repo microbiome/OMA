@@ -446,7 +446,7 @@ other attached packages:
  [1] ggplot2_3.3.6                  patchwork_1.1.1               
  [3] reticulate_1.25                MOFA2_1.6.0                   
  [5] ComplexHeatmap_2.12.0          stringr_1.4.0                 
- [7] microbiomeDataSets_1.1.5       mia_1.3.31                    
+ [7] microbiomeDataSets_1.1.5       mia_1.3.33                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.64.0              XVector_0.36.0                
 [13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
