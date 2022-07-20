@@ -446,7 +446,7 @@ other attached packages:
  [1] ggplot2_3.3.6                  patchwork_1.1.1               
  [3] reticulate_1.25                MOFA2_1.6.0                   
  [5] ComplexHeatmap_2.12.0          stringr_1.4.0                 
- [7] microbiomeDataSets_1.1.5       mia_1.3.33                    
+ [7] microbiomeDataSets_1.1.5       mia_1.3.34                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.64.0              XVector_0.36.0                
 [13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
@@ -459,7 +459,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] utf8_1.2.2                    tidyselect_1.1.2             
-  [3] RSQLite_2.2.14                AnnotationDbi_1.58.0         
+  [3] RSQLite_2.2.15                AnnotationDbi_1.58.0         
   [5] BiocParallel_1.30.3           Rtsne_0.16                   
   [7] munsell_0.5.0                 ScaledMatrix_1.4.0           
   [9] codetools_0.2-18              withr_2.5.0                  
@@ -499,11 +499,11 @@ loaded via a namespace (and not attached):
  [77] gridExtra_2.3                 shape_1.4.6                  
  [79] compiler_4.2.0                scater_1.24.0                
  [81] tibble_3.1.7                  crayon_1.5.1                 
- [83] htmltools_0.5.2               mgcv_1.8-40                  
+ [83] htmltools_0.5.3               mgcv_1.8-40                  
  [85] later_1.3.0                   tidyr_1.2.0                  
  [87] DBI_1.1.3                     ExperimentHub_2.4.0          
  [89] corrplot_0.92                 dbplyr_2.2.1                 
- [91] MASS_7.3-57                   rappdirs_0.3.3               
+ [91] MASS_7.3-58                   rappdirs_0.3.3               
  [93] Matrix_1.4-1                  permute_0.9-7                
  [95] cli_3.3.0                     parallel_4.2.0               
  [97] forcats_0.5.1                 pkgconfig_2.0.3              
@@ -519,7 +519,7 @@ loaded via a namespace (and not attached):
 [117] jsonlite_1.8.0                Rhdf5lib_1.18.2              
 [119] BiocNeighbors_1.14.0          CodeDepends_0.6.5            
 [121] viridisLite_0.4.0             fansi_1.0.3                  
-[123] pillar_1.7.0                  lattice_0.20-45              
+[123] pillar_1.8.0                  lattice_0.20-45              
 [125] KEGGREST_1.36.3               fastmap_1.1.0                
 [127] httr_1.4.3                    interactiveDisplayBase_1.34.0
 [129] glue_1.6.2                    png_0.1-7                    

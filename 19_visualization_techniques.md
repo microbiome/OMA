@@ -804,7 +804,7 @@ other attached packages:
  [5] reshape2_1.4.4                 sechm_1.4.1                   
  [7] miaViz_1.3.4                   ggraph_2.0.5                  
  [9] patchwork_1.1.1                scater_1.24.0                 
-[11] scuttle_1.6.2                  mia_1.3.33                    
+[11] scuttle_1.6.2                  mia_1.3.34                    
 [13] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [15] Biostrings_2.64.0              XVector_0.36.0                
 [17] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
@@ -817,7 +817,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] utf8_1.2.2                  tidyselect_1.1.2           
-  [3] RSQLite_2.2.14              grid_4.2.0                 
+  [3] RSQLite_2.2.15              grid_4.2.0                 
   [5] TSP_1.2-0                   BiocParallel_1.30.3        
   [7] Rtsne_0.16                  munsell_0.5.0              
   [9] ScaledMatrix_1.4.0          codetools_0.2-18           
@@ -857,14 +857,14 @@ loaded via a namespace (and not attached):
  [77] XML_3.99-0.10               gridExtra_2.3              
  [79] shape_1.4.6                 compiler_4.2.0             
  [81] tibble_3.1.7                V8_4.2.0                   
- [83] crayon_1.5.1                htmltools_0.5.2            
+ [83] crayon_1.5.1                htmltools_0.5.3            
  [85] ggfun_0.0.6                 mgcv_1.8-40                
  [87] tidyr_1.2.0                 aplot_0.1.6                
  [89] DBI_1.1.3                   tweenr_1.0.2               
- [91] ComplexHeatmap_2.12.0       MASS_7.3-57                
+ [91] ComplexHeatmap_2.12.0       MASS_7.3-58                
  [93] Matrix_1.4-1                car_3.1-0                  
  [95] permute_0.9-7               cli_3.3.0                  
- [97] parallel_4.2.0              igraph_1.3.2               
+ [97] parallel_4.2.0              igraph_1.3.3               
  [99] pkgconfig_2.0.3             dir.expiry_1.4.0           
 [101] registry_0.5-1              foreach_1.5.2              
 [103] vipor_0.4.5                 DirichletMultinomial_1.38.0
@@ -877,7 +877,7 @@ loaded via a namespace (and not attached):
 [117] jsonlite_1.8.0              carData_3.0-5              
 [119] BiocNeighbors_1.14.0        CodeDepends_0.6.5          
 [121] viridisLite_0.4.0           fansi_1.0.3                
-[123] pillar_1.7.0                lattice_0.20-45            
+[123] pillar_1.8.0                lattice_0.20-45            
 [125] fastmap_1.1.0               glue_1.6.2                 
 [127] png_0.1-7                   iterators_1.0.14           
 [129] bit_4.0.4                   ggforce_0.3.3              

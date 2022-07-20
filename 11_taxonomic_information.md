@@ -578,7 +578,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.3.33                     MultiAssayExperiment_1.22.0   
+ [1] mia_1.3.34                     MultiAssayExperiment_1.22.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
  [5] XVector_0.36.0                 SingleCellExperiment_1.18.0   
  [7] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -602,7 +602,7 @@ loaded via a namespace (and not attached):
 [21] assertthat_0.2.1            Matrix_1.4-1               
 [23] fastmap_1.1.0               lazyeval_0.2.2             
 [25] cli_3.3.0                   BiocSingular_1.12.0        
-[27] htmltools_0.5.2             tools_4.2.0                
+[27] htmltools_0.5.3             tools_4.2.0                
 [29] rsvd_1.0.5                  gtable_0.3.0               
 [31] glue_1.6.2                  GenomeInfoDbData_1.2.8     
 [33] reshape2_1.4.4              dplyr_1.0.9                
@@ -612,12 +612,12 @@ loaded via a namespace (and not attached):
 [41] xfun_0.31                   stringr_1.4.0              
 [43] beachmat_2.12.0             lifecycle_1.0.1            
 [45] irlba_2.3.5                 XML_3.99-0.10              
-[47] zlibbioc_1.42.0             MASS_7.3-57                
+[47] zlibbioc_1.42.0             MASS_7.3-58                
 [49] scales_1.2.0                parallel_4.2.0             
 [51] yaml_2.3.5                  memoise_2.0.1              
 [53] gridExtra_2.3               ggplot2_3.3.6              
 [55] yulab.utils_0.0.5           stringi_1.7.8              
-[57] RSQLite_2.2.14              ScaledMatrix_1.4.0         
+[57] RSQLite_2.2.15              ScaledMatrix_1.4.0         
 [59] tidytree_0.3.9              permute_0.9-7              
 [61] filelock_1.0.2              BiocParallel_1.30.3        
 [63] rlang_1.0.4                 pkgconfig_2.0.3            
@@ -629,7 +629,7 @@ loaded via a namespace (and not attached):
 [75] bookdown_0.27               R6_2.5.1                   
 [77] generics_0.1.3              DelayedArray_0.22.0        
 [79] DBI_1.1.3                   mgcv_1.8-40                
-[81] pillar_1.7.0                RCurl_1.98-1.7             
+[81] pillar_1.8.0                RCurl_1.98-1.7             
 [83] tibble_3.1.7                dir.expiry_1.4.0           
 [85] crayon_1.5.1                utf8_1.2.2                 
 [87] rmarkdown_2.14              viridis_0.6.2              

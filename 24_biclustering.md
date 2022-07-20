@@ -489,10 +489,10 @@ attached base packages:
 
 other attached packages:
  [1] biclust_2.0.3                  lattice_0.20-45               
- [3] colorspace_2.0-3               MASS_7.3-57                   
+ [3] colorspace_2.0-3               MASS_7.3-58                   
  [5] patchwork_1.1.1                ggplot2_3.3.6                 
  [7] pheatmap_1.0.12                cobiclust_0.1.0               
- [9] microbiomeDataSets_1.1.5       mia_1.3.33                    
+ [9] microbiomeDataSets_1.1.5       mia_1.3.34                    
 [11] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [13] Biostrings_2.64.0              XVector_0.36.0                
 [15] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
@@ -507,7 +507,7 @@ loaded via a namespace (and not attached):
   [3] plyr_1.8.7                    lazyeval_0.2.2               
   [5] splines_4.2.0                 BiocParallel_1.30.3          
   [7] scater_1.24.0                 digest_0.6.29                
-  [9] yulab.utils_0.0.5             htmltools_0.5.2              
+  [9] yulab.utils_0.0.5             htmltools_0.5.3              
  [11] viridis_0.6.2                 fansi_1.0.3                  
  [13] magrittr_2.0.3                memoise_2.0.1                
  [15] ScaledMatrix_1.4.0            cluster_2.1.3                
@@ -536,7 +536,7 @@ loaded via a namespace (and not attached):
  [61] munsell_0.5.0                 BiocVersion_3.15.2           
  [63] tools_4.2.0                   cachem_1.0.6                 
  [65] cli_3.3.0                     DirichletMultinomial_1.38.0  
- [67] generics_0.1.3                RSQLite_2.2.14               
+ [67] generics_0.1.3                RSQLite_2.2.15               
  [69] ExperimentHub_2.4.0           evaluate_0.15                
  [71] stringr_1.4.0                 fastmap_1.1.0                
  [73] yaml_2.3.5                    knitr_1.39                   
@@ -550,7 +550,7 @@ loaded via a namespace (and not attached):
  [89] tibble_3.1.7                  stringi_1.7.8                
  [91] highr_0.9                     Matrix_1.4-1                 
  [93] vegan_2.6-2                   permute_0.9-7                
- [95] vctrs_0.4.1                   pillar_1.7.0                 
+ [95] vctrs_0.4.1                   pillar_1.8.0                 
  [97] lifecycle_1.0.1               BiocManager_1.30.18          
  [99] BiocNeighbors_1.14.0          bitops_1.0-7                 
 [101] irlba_2.3.5                   httpuv_1.6.5                 

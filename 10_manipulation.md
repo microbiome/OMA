@@ -49,6 +49,7 @@ For several custom analysis and visualization packages, such as those from the
 
 
 
+
 ```r
 library(mia)
 data(GlobalPatterns, package="mia")
@@ -64,22 +65,23 @@ molten_tse
 
 ```
 ## # A tibble: 499,616 x 17
-##    FeatureID SampleID relabundance Kingdom Phylum       Class Order Family Genus
-##    <fct>     <fct>           <dbl> <chr>   <chr>        <chr> <chr> <chr>  <chr>
-##  1 549322    CL3                 0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
-##  2 549322    CC1                 0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
-##  3 549322    SV1                 0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
-##  4 549322    M31Fcsw             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
-##  5 549322    M11Fcsw             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
-##  6 549322    M31Plmr             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
-##  7 549322    M11Plmr             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
-##  8 549322    F21Plmr             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
-##  9 549322    M31Tong             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
-## 10 549322    M11Tong             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
-## # ... with 499,606 more rows, and 8 more variables: Species <chr>,
-## #   X.SampleID <fct>, Primer <fct>, Final_Barcode <fct>,
-## #   Barcode_truncated_plus_T <fct>, Barcode_full_length <fct>,
-## #   SampleType <fct>, Description <fct>
+##    FeatureID SampleID relabund~1 Kingdom Phylum Class Order Family Genus Species
+##    <fct>     <fct>         <dbl> <chr>   <chr>  <chr> <chr> <chr>  <chr> <chr>  
+##  1 549322    CL3               0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
+##  2 549322    CC1               0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
+##  3 549322    SV1               0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
+##  4 549322    M31Fcsw           0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
+##  5 549322    M11Fcsw           0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
+##  6 549322    M31Plmr           0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
+##  7 549322    M11Plmr           0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
+##  8 549322    F21Plmr           0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
+##  9 549322    M31Tong           0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
+## 10 549322    M11Tong           0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
+## # ... with 499,606 more rows, 7 more variables: X.SampleID <fct>, Primer <fct>,
+## #   Final_Barcode <fct>, Barcode_truncated_plus_T <fct>,
+## #   Barcode_full_length <fct>, SampleType <fct>, Description <fct>, and
+## #   abbreviated variable name 1: relabundance
+## # i Use `print(n = ...)` to see more rows, and `colnames()` to see all variable names
 ```
 
 ### Subsetting
@@ -680,6 +682,74 @@ splitOn(tse, "SampleType")
 ## names(9): Soil Feces Skin Tongue ... Ocean Sediment (estuary) Mock
 ```
 
+## Merge data
+
+`mia` package has `mergeSEs` function that merges multiple `SummarizedExperiment`
+objects. For example, it is possible to combine multiple `TreeSE` objects which each
+includes one sample. 
+
+`mergeSEs` works like `dplyr` joining functions. In fact, there are available
+`dplyr-like` aliases of `mergeSEs`, such as `full_join`.
+
+
+```r
+# Take subsets for demonstrative purpose
+tse1 <- tse[, 1]
+tse2 <- tse[, 2]
+tse3 <- tse[, 3]
+tse4 <- tse[1:100, 4]
+```
+
+
+```r
+# With inner join, we want to include all shared rows. When using mergeSEs function
+# all the samples are always preserved.
+tse <- mergeSEs(list(tse1, tse2, tse3, tse4), join = "inner")
+tse
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 100 4 
+## metadata(0):
+## assays(1): counts
+## rownames(100): 100679 101071 ... 71074 951
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(4): CC1 CL3 M31Fcsw SV1
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (100 rows)
+## rowTree: 1 phylo tree(s) (19216 leaves)
+## colLinks: NULL
+## colTree: NULL
+```
+
+
+```r
+# left join preserves all the rows of the 1st object
+tse <- mia::left_join(tse1, tse4, missing_values = 0)
+tse
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 19216 2 
+## metadata(0):
+## assays(1): counts
+## rownames(19216): 100011 100015 ... 99953 99956
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(2): CL3 M31Fcsw
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (19216 rows)
+## rowTree: 1 phylo tree(s) (19216 leaves)
+## colLinks: NULL
+## colTree: NULL
+```
 
 ### Additional functions
 * [mapTaxonomy](https://microbiome.github.io/mia/reference/taxonomy-methods.html)

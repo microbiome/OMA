@@ -355,7 +355,7 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.1                ggsignif_0.6.3                
  [3] scater_1.24.0                  ggplot2_3.3.6                 
- [5] scuttle_1.6.2                  mia_1.3.33                    
+ [5] scuttle_1.6.2                  mia_1.3.34                    
  [7] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
  [9] Biostrings_2.64.0              XVector_0.36.0                
 [11] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
@@ -378,7 +378,7 @@ loaded via a namespace (and not attached):
  [19] compiler_4.2.0              assertthat_0.2.1           
  [21] Matrix_1.4-1                fastmap_1.1.0              
  [23] lazyeval_0.2.2              cli_3.3.0                  
- [25] BiocSingular_1.12.0         htmltools_0.5.2            
+ [25] BiocSingular_1.12.0         htmltools_0.5.3            
  [27] tools_4.2.0                 rsvd_1.0.5                 
  [29] gtable_0.3.0                glue_1.6.2                 
  [31] GenomeInfoDbData_1.2.8      reshape2_1.4.4             
@@ -389,11 +389,11 @@ loaded via a namespace (and not attached):
  [41] stringr_1.4.0               beachmat_2.12.0            
  [43] lifecycle_1.0.1             irlba_2.3.5                
  [45] XML_3.99-0.10               zlibbioc_1.42.0            
- [47] MASS_7.3-57                 scales_1.2.0               
+ [47] MASS_7.3-58                 scales_1.2.0               
  [49] parallel_4.2.0              yaml_2.3.5                 
  [51] memoise_2.0.1               gridExtra_2.3              
  [53] yulab.utils_0.0.5           stringi_1.7.8              
- [55] RSQLite_2.2.14              highr_0.9                  
+ [55] RSQLite_2.2.15              highr_0.9                  
  [57] ScaledMatrix_1.4.0          tidytree_0.3.9             
  [59] permute_0.9-7               filelock_1.0.2             
  [61] BiocParallel_1.30.3         rlang_1.0.4                
@@ -407,7 +407,7 @@ loaded via a namespace (and not attached):
  [77] R6_2.5.1                    generics_0.1.3             
  [79] DelayedArray_0.22.0         DBI_1.1.3                  
  [81] withr_2.5.0                 mgcv_1.8-40                
- [83] pillar_1.7.0                RCurl_1.98-1.7             
+ [83] pillar_1.8.0                RCurl_1.98-1.7             
  [85] tibble_3.1.7                dir.expiry_1.4.0           
  [87] crayon_1.5.1                utf8_1.2.2                 
  [89] rmarkdown_2.14              viridis_0.6.2              

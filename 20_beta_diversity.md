@@ -394,11 +394,11 @@ kable(rda_info_clean)
 \hline
   & Explained by variables & Unexplained by variables & Proportion expl by vars & P-value (PERMANOVA 999 permutations)\\
 \hline
-all & 35.30 & 191.7 & 0.1842 & 0.674\\
+all & 35.30 & 191.7 & 0.1842 & 0.638\\
 \hline
-ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.831\\
+ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.838\\
 \hline
-Gender & 5.31 & 223.7 & 0.0277 & 0.914\\
+Gender & 5.31 & 223.7 & 0.0277 & 0.916\\
 \hline
 Age & 10.59 & 216.4 & 0.0552 & 0.001\\
 \hline
@@ -760,7 +760,7 @@ other attached packages:
  [5] scater_1.24.0                  scuttle_1.6.2                 
  [7] ggplot2_3.3.6                  vegan_2.6-2                   
  [9] lattice_0.20-45                permute_0.9-7                 
-[11] mia_1.3.33                     MultiAssayExperiment_1.22.0   
+[11] mia_1.3.34                     MultiAssayExperiment_1.22.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [15] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [17] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -783,7 +783,7 @@ loaded via a namespace (and not attached):
 [19] compiler_4.2.0              assertthat_0.2.1           
 [21] Matrix_1.4-1                fastmap_1.1.0              
 [23] lazyeval_0.2.2              cli_3.3.0                  
-[25] BiocSingular_1.12.0         htmltools_0.5.2            
+[25] BiocSingular_1.12.0         htmltools_0.5.3            
 [27] tools_4.2.0                 rsvd_1.0.5                 
 [29] gtable_0.3.0                glue_1.6.2                 
 [31] GenomeInfoDbData_1.2.8      reshape2_1.4.4             
@@ -793,11 +793,11 @@ loaded via a namespace (and not attached):
 [39] DelayedMatrixStats_1.18.0   xfun_0.31                  
 [41] beachmat_2.12.0             lifecycle_1.0.1            
 [43] irlba_2.3.5                 XML_3.99-0.10              
-[45] zlibbioc_1.42.0             MASS_7.3-57                
+[45] zlibbioc_1.42.0             MASS_7.3-58                
 [47] scales_1.2.0                parallel_4.2.0             
 [49] yaml_2.3.5                  memoise_2.0.1              
 [51] gridExtra_2.3               yulab.utils_0.0.5          
-[53] stringi_1.7.8               RSQLite_2.2.14             
+[53] stringi_1.7.8               RSQLite_2.2.15             
 [55] highr_0.9                   ScaledMatrix_1.4.0         
 [57] tidytree_0.3.9              filelock_1.0.2             
 [59] BiocParallel_1.30.3         rlang_1.0.4                
@@ -810,7 +810,7 @@ loaded via a namespace (and not attached):
 [73] bookdown_0.27               R6_2.5.1                   
 [75] generics_0.1.3              DelayedArray_0.22.0        
 [77] DBI_1.1.3                   withr_2.5.0                
-[79] mgcv_1.8-40                 pillar_1.7.0               
+[79] mgcv_1.8-40                 pillar_1.8.0               
 [81] RCurl_1.98-1.7              tibble_3.1.7               
 [83] dir.expiry_1.4.0            crayon_1.5.1               
 [85] utf8_1.2.2                  rmarkdown_2.14             

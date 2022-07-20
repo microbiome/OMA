@@ -230,25 +230,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7790 BIC: 8354 AIC: 8183 
+## Laplace: 7781 BIC: 8343 AIC: 8173 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7844 BIC: 8548 AIC: 8335 
+## Laplace: 7850 BIC: 8548 AIC: 8335 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7986 BIC: 8881 AIC: 8625 
+## Laplace: 7907 BIC: 8754 AIC: 8498 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8059 BIC: 9088 AIC: 8789
+## Laplace: 7991 BIC: 9021 AIC: 8722
 ```
 
 
@@ -293,15 +293,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.22   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.21   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.38  1906.4 1674.5 1735
+## Mock               2       3   67  980.2  110.61   911.4 1054.4 1115
+## Ocean              2       3   67 1096.7  -56.93   944.2 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
+## Skin               2       3   67  992.6  -84.93   826.1 1066.8 1128
 ## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Tongue             2       2   67  783.0 -107.77   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -314,7 +314,7 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.60
+## 1 0.5385 20.58
 ## 2 0.4615 15.28
 ```
 
@@ -329,12 +329,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.008e-17
-## CC1     1.000e+00 3.810e-22
-## SV1     1.000e+00 2.021e-12
-## M31Fcsw 7.327e-26 1.000e+00
-## M11Fcsw 1.063e-16 1.000e+00
-## M31Plmr 9.977e-14 1.000e+00
+## CL3     1.000e+00 5.051e-17
+## CC1     1.000e+00 3.902e-22
+## SV1     1.000e+00 1.961e-12
+## M31Fcsw 7.844e-26 1.000e+00
+## M11Fcsw 1.129e-16 1.000e+00
+## M31Plmr 1.119e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -345,13 +345,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354661
-## Phylum:Euryarchaeota  0.2314 0.1468625
-## Phylum:Actinobacteria 1.2105 1.0600772
-## Phylum:Spirochaetes   0.2141 0.1318418
-## Phylum:MVP-15         0.0299 0.0007655
-## Phylum:Proteobacteria 6.8418 1.8154222
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30382 0.1354659
+## Phylum:Euryarchaeota  0.23115 0.1468630
+## Phylum:Actinobacteria 1.21356 1.0600494
+## Phylum:Spirochaetes   0.21393 0.1318418
+## Phylum:MVP-15         0.02982 0.0007667
+## Phylum:Proteobacteria 6.84491 1.8154389
 ```
 Get the assignment probabilities
 
@@ -530,7 +530,7 @@ other attached packages:
  [1] patchwork_1.1.1                bluster_1.6.0                 
  [3] scater_1.24.0                  scuttle_1.6.2                 
  [5] miaViz_1.3.4                   ggraph_2.0.5                  
- [7] ggplot2_3.3.6                  mia_1.3.33                    
+ [7] ggplot2_3.3.6                  mia_1.3.34                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.64.0              XVector_0.36.0                
 [13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
@@ -542,10 +542,10 @@ other attached packages:
 [25] rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
-  [1] plyr_1.8.7                  igraph_1.3.2               
+  [1] plyr_1.8.7                  igraph_1.3.3               
   [3] lazyeval_0.2.2              splines_4.2.0              
   [5] BiocParallel_1.30.3         digest_0.6.29              
-  [7] yulab.utils_0.0.5           htmltools_0.5.2            
+  [7] yulab.utils_0.0.5           htmltools_0.5.3            
   [9] viridis_0.6.2               fansi_1.0.3                
  [11] magrittr_2.0.3              memoise_2.0.1              
  [13] ScaledMatrix_1.4.0          cluster_2.1.3              
@@ -572,7 +572,7 @@ loaded via a namespace (and not attached):
  [55] reshape2_1.4.4              munsell_0.5.0              
  [57] tools_4.2.0                 cachem_1.0.6               
  [59] cli_3.3.0                   DirichletMultinomial_1.38.0
- [61] generics_0.1.3              RSQLite_2.2.14             
+ [61] generics_0.1.3              RSQLite_2.2.15             
  [63] evaluate_0.15               stringr_1.4.0              
  [65] fastmap_1.1.0               yaml_2.3.5                 
  [67] ggtree_3.4.1                knitr_1.39                 
@@ -585,13 +585,13 @@ loaded via a namespace (and not attached):
  [81] stringi_1.7.8               highr_0.9                  
  [83] lattice_0.20-45             Matrix_1.4-1               
  [85] vegan_2.6-2                 permute_0.9-7              
- [87] vctrs_0.4.1                 pillar_1.7.0               
+ [87] vctrs_0.4.1                 pillar_1.8.0               
  [89] lifecycle_1.0.1             BiocManager_1.30.18        
  [91] BiocNeighbors_1.14.0        cowplot_1.1.1              
  [93] bitops_1.0-7                irlba_2.3.5                
  [95] R6_2.5.1                    bookdown_0.27              
  [97] gridExtra_2.3               vipor_0.4.5                
- [99] codetools_0.2-18            MASS_7.3-57                
+ [99] codetools_0.2-18            MASS_7.3-58                
 [101] assertthat_0.2.1            withr_2.5.0                
 [103] GenomeInfoDbData_1.2.8      mgcv_1.8-40                
 [105] parallel_4.2.0              grid_4.2.0                 

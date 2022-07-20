@@ -562,7 +562,7 @@ other attached packages:
  [3] scater_1.24.0                  scuttle_1.6.2                 
  [5] miaViz_1.3.4                   ggraph_2.0.5                  
  [7] ggplot2_3.3.6                  miaTime_0.1.8                 
- [9] mia_1.3.33                     MultiAssayExperiment_1.22.0   
+ [9] mia_1.3.34                     MultiAssayExperiment_1.22.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
 [13] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [15] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -574,7 +574,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] utf8_1.2.2                  tidyselect_1.1.2           
-  [3] RSQLite_2.2.14              AnnotationDbi_1.58.0       
+  [3] RSQLite_2.2.15              AnnotationDbi_1.58.0       
   [5] grid_4.2.0                  TSP_1.2-0                  
   [7] BiocParallel_1.30.3         Rtsne_0.16                 
   [9] munsell_0.5.0               ScaledMatrix_1.4.0         
@@ -616,14 +616,14 @@ loaded via a namespace (and not attached):
  [81] gridExtra_2.3               shape_1.4.6                
  [83] compiler_4.2.0              tibble_3.1.7               
  [85] V8_4.2.0                    crayon_1.5.1               
- [87] htmltools_0.5.2             ggfun_0.0.6                
+ [87] htmltools_0.5.3             ggfun_0.0.6                
  [89] mgcv_1.8-40                 tidyr_1.2.0                
  [91] geneplotter_1.74.0          aplot_0.1.6                
  [93] DBI_1.1.3                   tweenr_1.0.2               
- [95] ComplexHeatmap_2.12.0       MASS_7.3-57                
+ [95] ComplexHeatmap_2.12.0       MASS_7.3-58                
  [97] Matrix_1.4-1                permute_0.9-7              
  [99] cli_3.3.0                   parallel_4.2.0             
-[101] igraph_1.3.2                pkgconfig_2.0.3            
+[101] igraph_1.3.3                pkgconfig_2.0.3            
 [103] dir.expiry_1.4.0            registry_0.5-1             
 [105] foreach_1.5.2               ggtree_3.4.1               
 [107] annotate_1.74.0             vipor_0.4.5                
@@ -637,7 +637,7 @@ loaded via a namespace (and not attached):
 [123] jsonlite_1.8.0              BiocNeighbors_1.14.0       
 [125] CodeDepends_0.6.5           viridisLite_0.4.0          
 [127] limma_3.52.2                fansi_1.0.3                
-[129] pillar_1.7.0                lattice_0.20-45            
+[129] pillar_1.8.0                lattice_0.20-45            
 [131] KEGGREST_1.36.3             fastmap_1.1.0              
 [133] httr_1.4.3                  survival_3.3-1             
 [135] glue_1.6.2                  zip_2.2.0                  

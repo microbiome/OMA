@@ -119,7 +119,7 @@ loaded via a namespace (and not attached):
 [13] filelock_1.0.2      rmarkdown_2.14      tools_4.2.0        
 [16] stringr_1.4.0       xfun_0.31           yaml_2.3.5         
 [19] fastmap_1.1.0       compiler_4.2.0      BiocGenerics_0.42.0
-[22] BiocManager_1.30.18 CodeDepends_0.6.5   htmltools_0.5.2    
+[22] BiocManager_1.30.18 CodeDepends_0.6.5   htmltools_0.5.3    
 [25] knitr_1.39         
 ```
 </div>

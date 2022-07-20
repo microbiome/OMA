@@ -1291,7 +1291,7 @@ attached base packages:
 other attached packages:
  [1] microbiomeDataSets_1.1.5       phyloseq_1.40.0               
  [3] BiocManager_1.30.18            ggplot2_3.3.6                 
- [5] mia_1.3.33                     MultiAssayExperiment_1.22.0   
+ [5] mia_1.3.34                     MultiAssayExperiment_1.22.0   
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
  [9] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [11] SummarizedExperiment_1.26.1    Biobase_2.56.0                
@@ -1303,11 +1303,11 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.4.0           BiocFileCache_2.4.0          
-  [3] plyr_1.8.7                    igraph_1.3.2                 
+  [3] plyr_1.8.7                    igraph_1.3.3                 
   [5] lazyeval_0.2.2                splines_4.2.0                
   [7] BiocParallel_1.30.3           scater_1.24.0                
   [9] digest_0.6.29                 foreach_1.5.2                
- [11] yulab.utils_0.0.5             htmltools_0.5.2              
+ [11] yulab.utils_0.0.5             htmltools_0.5.3              
  [13] viridis_0.6.2                 fansi_1.0.3                  
  [15] magrittr_2.0.3                memoise_2.0.1                
  [17] ScaledMatrix_1.4.0            cluster_2.1.3                
@@ -1336,7 +1336,7 @@ loaded via a namespace (and not attached):
  [63] BiocVersion_3.15.2            tools_4.2.0                  
  [65] cachem_1.0.6                  cli_3.3.0                    
  [67] DirichletMultinomial_1.38.0   generics_0.1.3               
- [69] RSQLite_2.2.14                ExperimentHub_2.4.0          
+ [69] RSQLite_2.2.15                ExperimentHub_2.4.0          
  [71] ade4_1.7-19                   evaluate_0.15                
  [73] biomformat_1.24.0             stringr_1.4.0                
  [75] fastmap_1.1.0                 yaml_2.3.5                   
@@ -1351,14 +1351,14 @@ loaded via a namespace (and not attached):
  [93] lattice_0.20-45               Matrix_1.4-1                 
  [95] vegan_2.6-2                   permute_0.9-7                
  [97] multtest_2.52.0               vctrs_0.4.1                  
- [99] pillar_1.7.0                  lifecycle_1.0.1              
+ [99] pillar_1.8.0                  lifecycle_1.0.1              
 [101] rhdf5filters_1.8.0            BiocNeighbors_1.14.0         
 [103] data.table_1.14.2             bitops_1.0-7                 
 [105] irlba_2.3.5                   httpuv_1.6.5                 
 [107] R6_2.5.1                      promises_1.2.0.1             
 [109] bookdown_0.27                 gridExtra_2.3                
 [111] vipor_0.4.5                   codetools_0.2-18             
-[113] MASS_7.3-57                   assertthat_0.2.1             
+[113] MASS_7.3-58                   assertthat_0.2.1             
 [115] rhdf5_2.40.0                  withr_2.5.0                  
 [117] GenomeInfoDbData_1.2.8        mgcv_1.8-40                  
 [119] parallel_4.2.0                grid_4.2.0                   
