@@ -17,6 +17,17 @@ For several custom analysis and visualization packages, such as those from the
 `tidyverse`, the `SE` data can be converted to long data.frame format with 
 `meltAssay`.    
 
+```{r include=FALSE}
+# REMOVE THIS CHUNK ################################################################
+# when bioc devel version has mergeSE 
+if( !require(devtools) ){
+    install.packages("devtools")
+    library(devtools)
+}
+devtools::install_github("microbiome/mia", upgrade = "never")
+library(mia)
+####################################
+```
 
 ```{r}
 library(mia)
@@ -310,6 +321,35 @@ If you want to split the data based on other variable than taxonomy rank, use
 splitOn(tse, "SampleType")
 ```
 
+## Merge data
+
+`mia` package has `mergeSEs` function that merges multiple `SummarizedExperiment`
+objects. For example, it is possible to combine multiple `TreeSE` objects which each
+includes one sample. 
+
+`mergeSEs` works like `dplyr` joining functions. In fact, there are available
+`dplyr-like` aliases of `mergeSEs`, such as `full_join`.
+
+```{r merge1}
+# Take subsets for demonstrative purpose
+tse1 <- tse[, 1]
+tse2 <- tse[, 2]
+tse3 <- tse[, 3]
+tse4 <- tse[1:100, 4]
+```
+
+```{r merge2}
+# With inner join, we want to include all shared rows. When using mergeSEs function
+# all the samples are always preserved.
+tse <- mergeSEs(list(tse1, tse2, tse3, tse4), join = "inner")
+tse
+```
+
+```{r merge3}
+# left join preserves all the rows of the 1st object
+tse <- mia::left_join(tse1, tse4, missing_values = 0)
+tse
+```
 
 ### Additional functions
 * [mapTaxonomy](https://microbiome.github.io/mia/reference/taxonomy-methods.html)
