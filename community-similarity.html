@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 8 Community similarity | Orchestrating Microbiome Analysis</title>
   <meta name="description" content="Chapter 8 Community similarity | Orchestrating Microbiome Analysis" />
-  <meta name="generator" content="bookdown 0.27 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.28 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 8 Community similarity | Orchestrating Microbiome Analysis" />
   <meta property="og:type" content="book" />
@@ -741,21 +741,21 @@ each covariate affects.</p>
 <td align="right">35.30</td>
 <td align="right">191.7</td>
 <td align="right">0.1842</td>
-<td align="right">0.672</td>
+<td align="right">0.661</td>
 </tr>
 <tr class="even">
 <td align="left">ClinicalStatus</td>
 <td align="right">19.08</td>
 <td align="right">209.9</td>
 <td align="right">0.0996</td>
-<td align="right">0.825</td>
+<td align="right">0.826</td>
 </tr>
 <tr class="odd">
 <td align="left">Gender</td>
 <td align="right">5.31</td>
 <td align="right">223.7</td>
 <td align="right">0.0277</td>
-<td align="right">0.921</td>
+<td align="right">0.931</td>
 </tr>
 <tr class="even">
 <td align="left">Age</td>
@@ -774,66 +774,74 @@ each covariate affects.</p>
 <span id="cb234-6"><a href="community-similarity.html#cb234-6" aria-hidden="true" tabindex="-1"></a>    }</span>
 <span id="cb234-7"><a href="community-similarity.html#cb234-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install_github</span>(<span class="st">&quot;https://github.com/fawda123/ggord/&quot;</span>)</span>
 <span id="cb234-8"><a href="community-similarity.html#cb234-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(<span class="st">&quot;ggord&quot;</span>)</span>
-<span id="cb234-9"><a href="community-similarity.html#cb234-9" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb234-10"><a href="community-similarity.html#cb234-10" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(<span class="st">&quot;ggplot2&quot;</span>)){</span>
-<span id="cb234-11"><a href="community-similarity.html#cb234-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;ggplot2&quot;</span>)</span>
-<span id="cb234-12"><a href="community-similarity.html#cb234-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(<span class="st">&quot;ggplot2&quot;</span>)</span>
-<span id="cb234-13"><a href="community-similarity.html#cb234-13" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb234-14"><a href="community-similarity.html#cb234-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Since na.exclude was used, if there were rows missing information, they were </span></span>
-<span id="cb234-15"><a href="community-similarity.html#cb234-15" aria-hidden="true" tabindex="-1"></a><span class="co"># dropped off. Subset coldata so that it matches with rda.</span></span>
-<span id="cb234-16"><a href="community-similarity.html#cb234-16" aria-hidden="true" tabindex="-1"></a>coldata <span class="ot">&lt;-</span> coldata[ <span class="fu">rownames</span>(rda<span class="sc">$</span>CCA<span class="sc">$</span>wa), ]</span>
-<span id="cb234-17"><a href="community-similarity.html#cb234-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb234-18"><a href="community-similarity.html#cb234-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Adjust names</span></span>
-<span id="cb234-19"><a href="community-similarity.html#cb234-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Get labels of vectors</span></span>
-<span id="cb234-20"><a href="community-similarity.html#cb234-20" aria-hidden="true" tabindex="-1"></a>vec_lab_old <span class="ot">&lt;-</span> <span class="fu">rownames</span>(rda<span class="sc">$</span>CCA<span class="sc">$</span>biplot)</span>
-<span id="cb234-21"><a href="community-similarity.html#cb234-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb234-22"><a href="community-similarity.html#cb234-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop through vector labels</span></span>
-<span id="cb234-23"><a href="community-similarity.html#cb234-23" aria-hidden="true" tabindex="-1"></a>vec_lab <span class="ot">&lt;-</span> <span class="fu">sapply</span>(vec_lab_old, <span class="at">FUN =</span> <span class="cf">function</span>(name){</span>
-<span id="cb234-24"><a href="community-similarity.html#cb234-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get the variable name</span></span>
-<span id="cb234-25"><a href="community-similarity.html#cb234-25" aria-hidden="true" tabindex="-1"></a>    variable_name <span class="ot">&lt;-</span> variable_names[ <span class="fu">str_detect</span>(name, variable_names) ]</span>
-<span id="cb234-26"><a href="community-similarity.html#cb234-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If the vector label includes also group name</span></span>
-<span id="cb234-27"><a href="community-similarity.html#cb234-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>( <span class="sc">!</span><span class="fu">any</span>(name <span class="sc">%in%</span> variable_names) ){</span>
-<span id="cb234-28"><a href="community-similarity.html#cb234-28" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Get the group names</span></span>
-<span id="cb234-29"><a href="community-similarity.html#cb234-29" aria-hidden="true" tabindex="-1"></a>        group_name <span class="ot">&lt;-</span> <span class="fu">unique</span>( coldata[[variable_name]] )[ </span>
-<span id="cb234-30"><a href="community-similarity.html#cb234-30" aria-hidden="true" tabindex="-1"></a>        <span class="fu">which</span>( <span class="fu">paste0</span>(variable_name, <span class="fu">unique</span>( coldata[[variable_name]] )) <span class="sc">==</span> name ) ]</span>
-<span id="cb234-31"><a href="community-similarity.html#cb234-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Modify vector so that group is separated from variable name</span></span>
-<span id="cb234-32"><a href="community-similarity.html#cb234-32" aria-hidden="true" tabindex="-1"></a>        new_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(variable_name, <span class="st">&quot; \U2012 &quot;</span>, group_name)</span>
-<span id="cb234-33"><a href="community-similarity.html#cb234-33" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span>{</span>
-<span id="cb234-34"><a href="community-similarity.html#cb234-34" aria-hidden="true" tabindex="-1"></a>        new_name <span class="ot">&lt;-</span> name</span>
-<span id="cb234-35"><a href="community-similarity.html#cb234-35" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb234-36"><a href="community-similarity.html#cb234-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add percentage how much this variable explains, and p-value</span></span>
-<span id="cb234-37"><a href="community-similarity.html#cb234-37" aria-hidden="true" tabindex="-1"></a>    new_name <span class="ot">&lt;-</span> <span class="fu">expr</span>(<span class="fu">paste</span>(<span class="sc">!!</span>new_name, <span class="st">&quot; (&quot;</span>, </span>
-<span id="cb234-38"><a href="community-similarity.html#cb234-38" aria-hidden="true" tabindex="-1"></a>                           <span class="sc">!!</span><span class="fu">format</span>(<span class="fu">round</span>( rda_info[variable_name, <span class="st">&quot;proportion&quot;</span>]<span class="sc">*</span><span class="dv">100</span>, <span class="dv">1</span>), <span class="at">nsmall =</span> <span class="dv">1</span>), </span>
-<span id="cb234-39"><a href="community-similarity.html#cb234-39" aria-hidden="true" tabindex="-1"></a>                           <span class="st">&quot;%, &quot;</span>,<span class="fu">italic</span>(<span class="st">&quot;P&quot;</span>), <span class="st">&quot; = &quot;</span>, </span>
-<span id="cb234-40"><a href="community-similarity.html#cb234-40" aria-hidden="true" tabindex="-1"></a>                           <span class="sc">!!</span><span class="fu">gsub</span>(<span class="st">&quot;0</span><span class="sc">\\</span><span class="st">.&quot;</span>,<span class="st">&quot;</span><span class="sc">\\</span><span class="st">.&quot;</span>, <span class="fu">format</span>(<span class="fu">round</span>( rda_info[variable_name, <span class="st">&quot;p_value&quot;</span>], <span class="dv">3</span>), </span>
-<span id="cb234-41"><a href="community-similarity.html#cb234-41" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">nsmall =</span> <span class="dv">3</span>)), <span class="st">&quot;)&quot;</span>))</span>
-<span id="cb234-42"><a href="community-similarity.html#cb234-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb234-43"><a href="community-similarity.html#cb234-43" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(new_name)</span>
-<span id="cb234-44"><a href="community-similarity.html#cb234-44" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb234-45"><a href="community-similarity.html#cb234-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Add names</span></span>
-<span id="cb234-46"><a href="community-similarity.html#cb234-46" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(vec_lab) <span class="ot">&lt;-</span> vec_lab_old</span>
-<span id="cb234-47"><a href="community-similarity.html#cb234-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb234-48"><a href="community-similarity.html#cb234-48" aria-hidden="true" tabindex="-1"></a><span class="co"># Create labels for axis</span></span>
-<span id="cb234-49"><a href="community-similarity.html#cb234-49" aria-hidden="true" tabindex="-1"></a>xlab <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;RDA1 (&quot;</span>, <span class="fu">format</span>(<span class="fu">round</span>( rda<span class="sc">$</span>CCA<span class="sc">$</span>eig[[<span class="dv">1</span>]]<span class="sc">/</span>rda<span class="sc">$</span>CCA<span class="sc">$</span>tot.chi<span class="sc">*</span><span class="dv">100</span>, <span class="dv">1</span>), <span class="at">nsmall =</span> <span class="dv">1</span> ), <span class="st">&quot;%)&quot;</span>)</span>
-<span id="cb234-50"><a href="community-similarity.html#cb234-50" aria-hidden="true" tabindex="-1"></a>ylab <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;RDA2 (&quot;</span>, <span class="fu">format</span>(<span class="fu">round</span>( rda<span class="sc">$</span>CCA<span class="sc">$</span>eig[[<span class="dv">2</span>]]<span class="sc">/</span>rda<span class="sc">$</span>CCA<span class="sc">$</span>tot.chi<span class="sc">*</span><span class="dv">100</span>, <span class="dv">1</span>), <span class="at">nsmall =</span> <span class="dv">1</span> ), <span class="st">&quot;%)&quot;</span>)</span>
-<span id="cb234-51"><a href="community-similarity.html#cb234-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb234-52"><a href="community-similarity.html#cb234-52" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a plot        </span></span>
-<span id="cb234-53"><a href="community-similarity.html#cb234-53" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span> <span class="fu">ggord</span>(rda, <span class="at">grp_in =</span> coldata[[<span class="st">&quot;ClinicalStatus&quot;</span>]], <span class="at">vec_lab =</span> vec_lab,</span>
-<span id="cb234-54"><a href="community-similarity.html#cb234-54" aria-hidden="true" tabindex="-1"></a>              <span class="at">alpha =</span> <span class="fl">0.5</span>,</span>
-<span id="cb234-55"><a href="community-similarity.html#cb234-55" aria-hidden="true" tabindex="-1"></a>              <span class="at">size =</span> <span class="dv">4</span>, <span class="at">addsize =</span> <span class="sc">-</span><span class="dv">4</span>,</span>
-<span id="cb234-56"><a href="community-similarity.html#cb234-56" aria-hidden="true" tabindex="-1"></a>              <span class="co">#ext= 0.7, </span></span>
-<span id="cb234-57"><a href="community-similarity.html#cb234-57" aria-hidden="true" tabindex="-1"></a>              <span class="at">txt =</span> <span class="fl">3.5</span>, <span class="at">repel =</span> <span class="cn">TRUE</span>, </span>
-<span id="cb234-58"><a href="community-similarity.html#cb234-58" aria-hidden="true" tabindex="-1"></a>              <span class="co">#coord_fix = FALSE</span></span>
-<span id="cb234-59"><a href="community-similarity.html#cb234-59" aria-hidden="true" tabindex="-1"></a>          ) <span class="sc">+</span> </span>
-<span id="cb234-60"><a href="community-similarity.html#cb234-60" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Adjust titles and labels</span></span>
-<span id="cb234-61"><a href="community-similarity.html#cb234-61" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">colour =</span> <span class="fu">guide_legend</span>(<span class="st">&quot;ClinicalStatus&quot;</span>),</span>
-<span id="cb234-62"><a href="community-similarity.html#cb234-62" aria-hidden="true" tabindex="-1"></a>           <span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="st">&quot;ClinicalStatus&quot;</span>),</span>
-<span id="cb234-63"><a href="community-similarity.html#cb234-63" aria-hidden="true" tabindex="-1"></a>           <span class="at">group =</span> <span class="fu">guide_legend</span>(<span class="st">&quot;ClinicalStatus&quot;</span>),</span>
-<span id="cb234-64"><a href="community-similarity.html#cb234-64" aria-hidden="true" tabindex="-1"></a>           <span class="at">shape =</span> <span class="fu">guide_legend</span>(<span class="st">&quot;ClinicalStatus&quot;</span>),</span>
-<span id="cb234-65"><a href="community-similarity.html#cb234-65" aria-hidden="true" tabindex="-1"></a>           <span class="at">x =</span> <span class="fu">guide_axis</span>(xlab),</span>
-<span id="cb234-66"><a href="community-similarity.html#cb234-66" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> <span class="fu">guide_axis</span>(ylab)) <span class="sc">+</span></span>
-<span id="cb234-67"><a href="community-similarity.html#cb234-67" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>( <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>) )</span>
-<span id="cb234-68"><a href="community-similarity.html#cb234-68" aria-hidden="true" tabindex="-1"></a>plot</span></code></pre></div>
+<span id="cb234-9"><a href="community-similarity.html#cb234-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<pre><code>## 
+## * checking for file ‘/tmp/RtmpvbaCQ6/remotes20486825dcf9/fawda123-ggord-e3ef3be/DESCRIPTION’ ... OK
+## * preparing ‘ggord’:
+## * checking DESCRIPTION meta-information ... OK
+## * checking for LF line-endings in source and make files and shell scripts
+## * checking for empty or unneeded directories
+## Omitted ‘LazyData’ from DESCRIPTION
+## * building ‘ggord_1.1.7.tar.gz’</code></pre>
+<div class="sourceCode" id="cb236"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb236-1"><a href="community-similarity.html#cb236-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(<span class="st">&quot;ggplot2&quot;</span>)){</span>
+<span id="cb236-2"><a href="community-similarity.html#cb236-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;ggplot2&quot;</span>)</span>
+<span id="cb236-3"><a href="community-similarity.html#cb236-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(<span class="st">&quot;ggplot2&quot;</span>)</span>
+<span id="cb236-4"><a href="community-similarity.html#cb236-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb236-5"><a href="community-similarity.html#cb236-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Since na.exclude was used, if there were rows missing information, they were </span></span>
+<span id="cb236-6"><a href="community-similarity.html#cb236-6" aria-hidden="true" tabindex="-1"></a><span class="co"># dropped off. Subset coldata so that it matches with rda.</span></span>
+<span id="cb236-7"><a href="community-similarity.html#cb236-7" aria-hidden="true" tabindex="-1"></a>coldata <span class="ot">&lt;-</span> coldata[ <span class="fu">rownames</span>(rda<span class="sc">$</span>CCA<span class="sc">$</span>wa), ]</span>
+<span id="cb236-8"><a href="community-similarity.html#cb236-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb236-9"><a href="community-similarity.html#cb236-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Adjust names</span></span>
+<span id="cb236-10"><a href="community-similarity.html#cb236-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Get labels of vectors</span></span>
+<span id="cb236-11"><a href="community-similarity.html#cb236-11" aria-hidden="true" tabindex="-1"></a>vec_lab_old <span class="ot">&lt;-</span> <span class="fu">rownames</span>(rda<span class="sc">$</span>CCA<span class="sc">$</span>biplot)</span>
+<span id="cb236-12"><a href="community-similarity.html#cb236-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb236-13"><a href="community-similarity.html#cb236-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop through vector labels</span></span>
+<span id="cb236-14"><a href="community-similarity.html#cb236-14" aria-hidden="true" tabindex="-1"></a>vec_lab <span class="ot">&lt;-</span> <span class="fu">sapply</span>(vec_lab_old, <span class="at">FUN =</span> <span class="cf">function</span>(name){</span>
+<span id="cb236-15"><a href="community-similarity.html#cb236-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get the variable name</span></span>
+<span id="cb236-16"><a href="community-similarity.html#cb236-16" aria-hidden="true" tabindex="-1"></a>    variable_name <span class="ot">&lt;-</span> variable_names[ <span class="fu">str_detect</span>(name, variable_names) ]</span>
+<span id="cb236-17"><a href="community-similarity.html#cb236-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If the vector label includes also group name</span></span>
+<span id="cb236-18"><a href="community-similarity.html#cb236-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>( <span class="sc">!</span><span class="fu">any</span>(name <span class="sc">%in%</span> variable_names) ){</span>
+<span id="cb236-19"><a href="community-similarity.html#cb236-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Get the group names</span></span>
+<span id="cb236-20"><a href="community-similarity.html#cb236-20" aria-hidden="true" tabindex="-1"></a>        group_name <span class="ot">&lt;-</span> <span class="fu">unique</span>( coldata[[variable_name]] )[ </span>
+<span id="cb236-21"><a href="community-similarity.html#cb236-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">which</span>( <span class="fu">paste0</span>(variable_name, <span class="fu">unique</span>( coldata[[variable_name]] )) <span class="sc">==</span> name ) ]</span>
+<span id="cb236-22"><a href="community-similarity.html#cb236-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Modify vector so that group is separated from variable name</span></span>
+<span id="cb236-23"><a href="community-similarity.html#cb236-23" aria-hidden="true" tabindex="-1"></a>        new_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(variable_name, <span class="st">&quot; \U2012 &quot;</span>, group_name)</span>
+<span id="cb236-24"><a href="community-similarity.html#cb236-24" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span>{</span>
+<span id="cb236-25"><a href="community-similarity.html#cb236-25" aria-hidden="true" tabindex="-1"></a>        new_name <span class="ot">&lt;-</span> name</span>
+<span id="cb236-26"><a href="community-similarity.html#cb236-26" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb236-27"><a href="community-similarity.html#cb236-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add percentage how much this variable explains, and p-value</span></span>
+<span id="cb236-28"><a href="community-similarity.html#cb236-28" aria-hidden="true" tabindex="-1"></a>    new_name <span class="ot">&lt;-</span> <span class="fu">expr</span>(<span class="fu">paste</span>(<span class="sc">!!</span>new_name, <span class="st">&quot; (&quot;</span>, </span>
+<span id="cb236-29"><a href="community-similarity.html#cb236-29" aria-hidden="true" tabindex="-1"></a>                           <span class="sc">!!</span><span class="fu">format</span>(<span class="fu">round</span>( rda_info[variable_name, <span class="st">&quot;proportion&quot;</span>]<span class="sc">*</span><span class="dv">100</span>, <span class="dv">1</span>), <span class="at">nsmall =</span> <span class="dv">1</span>), </span>
+<span id="cb236-30"><a href="community-similarity.html#cb236-30" aria-hidden="true" tabindex="-1"></a>                           <span class="st">&quot;%, &quot;</span>,<span class="fu">italic</span>(<span class="st">&quot;P&quot;</span>), <span class="st">&quot; = &quot;</span>, </span>
+<span id="cb236-31"><a href="community-similarity.html#cb236-31" aria-hidden="true" tabindex="-1"></a>                           <span class="sc">!!</span><span class="fu">gsub</span>(<span class="st">&quot;0</span><span class="sc">\\</span><span class="st">.&quot;</span>,<span class="st">&quot;</span><span class="sc">\\</span><span class="st">.&quot;</span>, <span class="fu">format</span>(<span class="fu">round</span>( rda_info[variable_name, <span class="st">&quot;p_value&quot;</span>], <span class="dv">3</span>), </span>
+<span id="cb236-32"><a href="community-similarity.html#cb236-32" aria-hidden="true" tabindex="-1"></a>                                                       <span class="at">nsmall =</span> <span class="dv">3</span>)), <span class="st">&quot;)&quot;</span>))</span>
+<span id="cb236-33"><a href="community-similarity.html#cb236-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb236-34"><a href="community-similarity.html#cb236-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(new_name)</span>
+<span id="cb236-35"><a href="community-similarity.html#cb236-35" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb236-36"><a href="community-similarity.html#cb236-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Add names</span></span>
+<span id="cb236-37"><a href="community-similarity.html#cb236-37" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(vec_lab) <span class="ot">&lt;-</span> vec_lab_old</span>
+<span id="cb236-38"><a href="community-similarity.html#cb236-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb236-39"><a href="community-similarity.html#cb236-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Create labels for axis</span></span>
+<span id="cb236-40"><a href="community-similarity.html#cb236-40" aria-hidden="true" tabindex="-1"></a>xlab <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;RDA1 (&quot;</span>, <span class="fu">format</span>(<span class="fu">round</span>( rda<span class="sc">$</span>CCA<span class="sc">$</span>eig[[<span class="dv">1</span>]]<span class="sc">/</span>rda<span class="sc">$</span>CCA<span class="sc">$</span>tot.chi<span class="sc">*</span><span class="dv">100</span>, <span class="dv">1</span>), <span class="at">nsmall =</span> <span class="dv">1</span> ), <span class="st">&quot;%)&quot;</span>)</span>
+<span id="cb236-41"><a href="community-similarity.html#cb236-41" aria-hidden="true" tabindex="-1"></a>ylab <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;RDA2 (&quot;</span>, <span class="fu">format</span>(<span class="fu">round</span>( rda<span class="sc">$</span>CCA<span class="sc">$</span>eig[[<span class="dv">2</span>]]<span class="sc">/</span>rda<span class="sc">$</span>CCA<span class="sc">$</span>tot.chi<span class="sc">*</span><span class="dv">100</span>, <span class="dv">1</span>), <span class="at">nsmall =</span> <span class="dv">1</span> ), <span class="st">&quot;%)&quot;</span>)</span>
+<span id="cb236-42"><a href="community-similarity.html#cb236-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb236-43"><a href="community-similarity.html#cb236-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a plot        </span></span>
+<span id="cb236-44"><a href="community-similarity.html#cb236-44" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span> <span class="fu">ggord</span>(rda, <span class="at">grp_in =</span> coldata[[<span class="st">&quot;ClinicalStatus&quot;</span>]], <span class="at">vec_lab =</span> vec_lab,</span>
+<span id="cb236-45"><a href="community-similarity.html#cb236-45" aria-hidden="true" tabindex="-1"></a>              <span class="at">alpha =</span> <span class="fl">0.5</span>,</span>
+<span id="cb236-46"><a href="community-similarity.html#cb236-46" aria-hidden="true" tabindex="-1"></a>              <span class="at">size =</span> <span class="dv">4</span>, <span class="at">addsize =</span> <span class="sc">-</span><span class="dv">4</span>,</span>
+<span id="cb236-47"><a href="community-similarity.html#cb236-47" aria-hidden="true" tabindex="-1"></a>              <span class="co">#ext= 0.7, </span></span>
+<span id="cb236-48"><a href="community-similarity.html#cb236-48" aria-hidden="true" tabindex="-1"></a>              <span class="at">txt =</span> <span class="fl">3.5</span>, <span class="at">repel =</span> <span class="cn">TRUE</span>, </span>
+<span id="cb236-49"><a href="community-similarity.html#cb236-49" aria-hidden="true" tabindex="-1"></a>              <span class="co">#coord_fix = FALSE</span></span>
+<span id="cb236-50"><a href="community-similarity.html#cb236-50" aria-hidden="true" tabindex="-1"></a>          ) <span class="sc">+</span> </span>
+<span id="cb236-51"><a href="community-similarity.html#cb236-51" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Adjust titles and labels</span></span>
+<span id="cb236-52"><a href="community-similarity.html#cb236-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">guides</span>(<span class="at">colour =</span> <span class="fu">guide_legend</span>(<span class="st">&quot;ClinicalStatus&quot;</span>),</span>
+<span id="cb236-53"><a href="community-similarity.html#cb236-53" aria-hidden="true" tabindex="-1"></a>           <span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="st">&quot;ClinicalStatus&quot;</span>),</span>
+<span id="cb236-54"><a href="community-similarity.html#cb236-54" aria-hidden="true" tabindex="-1"></a>           <span class="at">group =</span> <span class="fu">guide_legend</span>(<span class="st">&quot;ClinicalStatus&quot;</span>),</span>
+<span id="cb236-55"><a href="community-similarity.html#cb236-55" aria-hidden="true" tabindex="-1"></a>           <span class="at">shape =</span> <span class="fu">guide_legend</span>(<span class="st">&quot;ClinicalStatus&quot;</span>),</span>
+<span id="cb236-56"><a href="community-similarity.html#cb236-56" aria-hidden="true" tabindex="-1"></a>           <span class="at">x =</span> <span class="fu">guide_axis</span>(xlab),</span>
+<span id="cb236-57"><a href="community-similarity.html#cb236-57" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> <span class="fu">guide_axis</span>(ylab)) <span class="sc">+</span></span>
+<span id="cb236-58"><a href="community-similarity.html#cb236-58" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>( <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>) )</span>
+<span id="cb236-59"><a href="community-similarity.html#cb236-59" aria-hidden="true" tabindex="-1"></a>plot</span></code></pre></div>
 <p><img src="20_beta_diversity_files/figure-html/microbiome_RDA2-1.png" width="3000" /></p>
 <p>From RDA plot, we can see that only age has significant affect on microbial profile.</p>
 </div>
@@ -841,67 +849,67 @@ each covariate affects.</p>
 <h2><span class="header-section-number">8.4</span> Visualizing the most dominant genus on PCoA<a href="community-similarity.html#visualizing-the-most-dominant-genus-on-pcoa" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>In this section we visualize most dominant genus on PCoA. A similar visualization was proposed in <a href="https://www.nature.com/articles/s41467-021-22962-y">Taxonomic signatures of cause-specific mortality risk in human gut microbiome</a>, Salosensaari et al. (2021).</p>
 <p>Let us agglomerate the data at a Genus level and getting the dominant taxa per sample.</p>
-<div class="sourceCode" id="cb235"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb235-1"><a href="community-similarity.html#cb235-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Agglomerate to genus level</span></span>
-<span id="cb235-2"><a href="community-similarity.html#cb235-2" aria-hidden="true" tabindex="-1"></a>tse_Genus <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(tse, <span class="at">rank=</span><span class="st">&quot;Genus&quot;</span>)</span>
-<span id="cb235-3"><a href="community-similarity.html#cb235-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to relative abundances</span></span>
-<span id="cb235-4"><a href="community-similarity.html#cb235-4" aria-hidden="true" tabindex="-1"></a>tse_Genus <span class="ot">&lt;-</span> <span class="fu">transformSamples</span>(tse, <span class="at">method =</span> <span class="st">&quot;relabundance&quot;</span>, <span class="at">assay_name=</span><span class="st">&quot;counts&quot;</span>)</span>
-<span id="cb235-5"><a href="community-similarity.html#cb235-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Add info on dominant genus per sample</span></span>
-<span id="cb235-6"><a href="community-similarity.html#cb235-6" aria-hidden="true" tabindex="-1"></a>tse_Genus <span class="ot">&lt;-</span> <span class="fu">addPerSampleDominantTaxa</span>(tse_Genus, <span class="at">assay_name=</span><span class="st">&quot;relabundance&quot;</span>, <span class="at">name =</span> <span class="st">&quot;dominant_taxa&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb237"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb237-1"><a href="community-similarity.html#cb237-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Agglomerate to genus level</span></span>
+<span id="cb237-2"><a href="community-similarity.html#cb237-2" aria-hidden="true" tabindex="-1"></a>tse_Genus <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(tse, <span class="at">rank=</span><span class="st">&quot;Genus&quot;</span>)</span>
+<span id="cb237-3"><a href="community-similarity.html#cb237-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to relative abundances</span></span>
+<span id="cb237-4"><a href="community-similarity.html#cb237-4" aria-hidden="true" tabindex="-1"></a>tse_Genus <span class="ot">&lt;-</span> <span class="fu">transformSamples</span>(tse, <span class="at">method =</span> <span class="st">&quot;relabundance&quot;</span>, <span class="at">assay_name=</span><span class="st">&quot;counts&quot;</span>)</span>
+<span id="cb237-5"><a href="community-similarity.html#cb237-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Add info on dominant genus per sample</span></span>
+<span id="cb237-6"><a href="community-similarity.html#cb237-6" aria-hidden="true" tabindex="-1"></a>tse_Genus <span class="ot">&lt;-</span> <span class="fu">addPerSampleDominantTaxa</span>(tse_Genus, <span class="at">assay_name=</span><span class="st">&quot;relabundance&quot;</span>, <span class="at">name =</span> <span class="st">&quot;dominant_taxa&quot;</span>)</span></code></pre></div>
 <p>Performing PCoA with Bray-Curtis dissimilarity.</p>
-<div class="sourceCode" id="cb236"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb236-1"><a href="community-similarity.html#cb236-1" aria-hidden="true" tabindex="-1"></a>tse_Genus <span class="ot">&lt;-</span> <span class="fu">runMDS</span>(tse_Genus, <span class="at">FUN =</span> vegan<span class="sc">::</span>vegdist,</span>
-<span id="cb236-2"><a href="community-similarity.html#cb236-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">name =</span> <span class="st">&quot;PCoA_BC&quot;</span>, <span class="at">exprs_values =</span> <span class="st">&quot;relabundance&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb238"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb238-1"><a href="community-similarity.html#cb238-1" aria-hidden="true" tabindex="-1"></a>tse_Genus <span class="ot">&lt;-</span> <span class="fu">runMDS</span>(tse_Genus, <span class="at">FUN =</span> vegan<span class="sc">::</span>vegdist,</span>
+<span id="cb238-2"><a href="community-similarity.html#cb238-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">name =</span> <span class="st">&quot;PCoA_BC&quot;</span>, <span class="at">exprs_values =</span> <span class="st">&quot;relabundance&quot;</span>)</span></code></pre></div>
 <p>Getting top taxa and visualizing the abundance on PCoA.</p>
-<div class="sourceCode" id="cb237"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb237-1"><a href="community-similarity.html#cb237-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Getting the top taxa</span></span>
-<span id="cb237-2"><a href="community-similarity.html#cb237-2" aria-hidden="true" tabindex="-1"></a>top_taxa <span class="ot">&lt;-</span> <span class="fu">getTopTaxa</span>(tse_Genus,<span class="at">top =</span> <span class="dv">6</span>, <span class="at">assay_name =</span> <span class="st">&quot;relabundance&quot;</span>)</span>
-<span id="cb237-3"><a href="community-similarity.html#cb237-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb237-4"><a href="community-similarity.html#cb237-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Naming all the rest of non top-taxa as &quot;Other&quot;</span></span>
-<span id="cb237-5"><a href="community-similarity.html#cb237-5" aria-hidden="true" tabindex="-1"></a>most_abundant <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">colData</span>(tse_Genus)<span class="sc">$</span>dominant_taxa,</span>
-<span id="cb237-6"><a href="community-similarity.html#cb237-6" aria-hidden="true" tabindex="-1"></a>                   <span class="cf">function</span>(x){<span class="cf">if</span> (x <span class="sc">%in%</span> top_taxa) {x} <span class="cf">else</span> {<span class="st">&quot;Other&quot;</span>}})</span>
-<span id="cb237-7"><a href="community-similarity.html#cb237-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb237-8"><a href="community-similarity.html#cb237-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Storing the previous results as a new column within colData</span></span>
-<span id="cb237-9"><a href="community-similarity.html#cb237-9" aria-hidden="true" tabindex="-1"></a><span class="fu">colData</span>(tse_Genus)<span class="sc">$</span>most_abundant <span class="ot">&lt;-</span> <span class="fu">as.character</span>(most_abundant)</span>
-<span id="cb237-10"><a href="community-similarity.html#cb237-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb237-11"><a href="community-similarity.html#cb237-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculating percentage of the most abundant</span></span>
-<span id="cb237-12"><a href="community-similarity.html#cb237-12" aria-hidden="true" tabindex="-1"></a>most_abundant_freq <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="fu">as.character</span>(most_abundant))</span>
-<span id="cb237-13"><a href="community-similarity.html#cb237-13" aria-hidden="true" tabindex="-1"></a>most_abundant_percent <span class="ot">&lt;-</span> <span class="fu">round</span>(most_abundant_freq<span class="sc">/</span><span class="fu">sum</span>(most_abundant_freq)<span class="sc">*</span><span class="dv">100</span>, <span class="dv">1</span>)</span>
-<span id="cb237-14"><a href="community-similarity.html#cb237-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb237-15"><a href="community-similarity.html#cb237-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Retrieving the explained variance</span></span>
-<span id="cb237-16"><a href="community-similarity.html#cb237-16" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> <span class="fu">attr</span>(<span class="fu">reducedDim</span>(tse_Genus, <span class="st">&quot;PCoA_BC&quot;</span>), <span class="st">&quot;eig&quot;</span>);</span>
-<span id="cb237-17"><a href="community-similarity.html#cb237-17" aria-hidden="true" tabindex="-1"></a>var_explained <span class="ot">&lt;-</span> e<span class="sc">/</span><span class="fu">sum</span>(e[e<span class="sc">&gt;</span><span class="dv">0</span>])<span class="sc">*</span><span class="dv">100</span></span>
-<span id="cb237-18"><a href="community-similarity.html#cb237-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb237-19"><a href="community-similarity.html#cb237-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualization</span></span>
-<span id="cb237-20"><a href="community-similarity.html#cb237-20" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span><span class="fu">plotReducedDim</span>(tse_Genus,<span class="st">&quot;PCoA_BC&quot;</span>, <span class="at">colour_by =</span> <span class="st">&quot;most_abundant&quot;</span>) <span class="sc">+</span></span>
-<span id="cb237-21"><a href="community-similarity.html#cb237-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;lightblue&quot;</span>, <span class="st">&quot;darkgray&quot;</span>, <span class="st">&quot;magenta&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>, <span class="st">&quot;red&quot;</span>),</span>
-<span id="cb237-22"><a href="community-similarity.html#cb237-22" aria-hidden="true" tabindex="-1"></a>                      <span class="at">labels=</span><span class="fu">paste0</span>(<span class="fu">names</span>(most_abundant_percent),<span class="st">&quot;(&quot;</span>,most_abundant_percent,<span class="st">&quot;%)&quot;</span>))<span class="sc">+</span></span>
-<span id="cb237-23"><a href="community-similarity.html#cb237-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="fu">paste</span>(<span class="st">&quot;PC 1 (&quot;</span>,<span class="fu">round</span>(var_explained[<span class="dv">1</span>],<span class="dv">1</span>),<span class="st">&quot;%)&quot;</span>),</span>
-<span id="cb237-24"><a href="community-similarity.html#cb237-24" aria-hidden="true" tabindex="-1"></a>       <span class="at">y=</span><span class="fu">paste</span>(<span class="st">&quot;PC 2 (&quot;</span>,<span class="fu">round</span>(var_explained[<span class="dv">2</span>],<span class="dv">1</span>),<span class="st">&quot;%)&quot;</span>),</span>
-<span id="cb237-25"><a href="community-similarity.html#cb237-25" aria-hidden="true" tabindex="-1"></a>       <span class="at">color=</span><span class="st">&quot;&quot;</span>)</span>
-<span id="cb237-26"><a href="community-similarity.html#cb237-26" aria-hidden="true" tabindex="-1"></a>plot</span></code></pre></div>
+<div class="sourceCode" id="cb239"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb239-1"><a href="community-similarity.html#cb239-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Getting the top taxa</span></span>
+<span id="cb239-2"><a href="community-similarity.html#cb239-2" aria-hidden="true" tabindex="-1"></a>top_taxa <span class="ot">&lt;-</span> <span class="fu">getTopTaxa</span>(tse_Genus,<span class="at">top =</span> <span class="dv">6</span>, <span class="at">assay_name =</span> <span class="st">&quot;relabundance&quot;</span>)</span>
+<span id="cb239-3"><a href="community-similarity.html#cb239-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb239-4"><a href="community-similarity.html#cb239-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Naming all the rest of non top-taxa as &quot;Other&quot;</span></span>
+<span id="cb239-5"><a href="community-similarity.html#cb239-5" aria-hidden="true" tabindex="-1"></a>most_abundant <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">colData</span>(tse_Genus)<span class="sc">$</span>dominant_taxa,</span>
+<span id="cb239-6"><a href="community-similarity.html#cb239-6" aria-hidden="true" tabindex="-1"></a>                   <span class="cf">function</span>(x){<span class="cf">if</span> (x <span class="sc">%in%</span> top_taxa) {x} <span class="cf">else</span> {<span class="st">&quot;Other&quot;</span>}})</span>
+<span id="cb239-7"><a href="community-similarity.html#cb239-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb239-8"><a href="community-similarity.html#cb239-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Storing the previous results as a new column within colData</span></span>
+<span id="cb239-9"><a href="community-similarity.html#cb239-9" aria-hidden="true" tabindex="-1"></a><span class="fu">colData</span>(tse_Genus)<span class="sc">$</span>most_abundant <span class="ot">&lt;-</span> <span class="fu">as.character</span>(most_abundant)</span>
+<span id="cb239-10"><a href="community-similarity.html#cb239-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb239-11"><a href="community-similarity.html#cb239-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculating percentage of the most abundant</span></span>
+<span id="cb239-12"><a href="community-similarity.html#cb239-12" aria-hidden="true" tabindex="-1"></a>most_abundant_freq <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="fu">as.character</span>(most_abundant))</span>
+<span id="cb239-13"><a href="community-similarity.html#cb239-13" aria-hidden="true" tabindex="-1"></a>most_abundant_percent <span class="ot">&lt;-</span> <span class="fu">round</span>(most_abundant_freq<span class="sc">/</span><span class="fu">sum</span>(most_abundant_freq)<span class="sc">*</span><span class="dv">100</span>, <span class="dv">1</span>)</span>
+<span id="cb239-14"><a href="community-similarity.html#cb239-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb239-15"><a href="community-similarity.html#cb239-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Retrieving the explained variance</span></span>
+<span id="cb239-16"><a href="community-similarity.html#cb239-16" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> <span class="fu">attr</span>(<span class="fu">reducedDim</span>(tse_Genus, <span class="st">&quot;PCoA_BC&quot;</span>), <span class="st">&quot;eig&quot;</span>);</span>
+<span id="cb239-17"><a href="community-similarity.html#cb239-17" aria-hidden="true" tabindex="-1"></a>var_explained <span class="ot">&lt;-</span> e<span class="sc">/</span><span class="fu">sum</span>(e[e<span class="sc">&gt;</span><span class="dv">0</span>])<span class="sc">*</span><span class="dv">100</span></span>
+<span id="cb239-18"><a href="community-similarity.html#cb239-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb239-19"><a href="community-similarity.html#cb239-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualization</span></span>
+<span id="cb239-20"><a href="community-similarity.html#cb239-20" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span><span class="fu">plotReducedDim</span>(tse_Genus,<span class="st">&quot;PCoA_BC&quot;</span>, <span class="at">colour_by =</span> <span class="st">&quot;most_abundant&quot;</span>) <span class="sc">+</span></span>
+<span id="cb239-21"><a href="community-similarity.html#cb239-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;lightblue&quot;</span>, <span class="st">&quot;darkgray&quot;</span>, <span class="st">&quot;magenta&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>, <span class="st">&quot;red&quot;</span>),</span>
+<span id="cb239-22"><a href="community-similarity.html#cb239-22" aria-hidden="true" tabindex="-1"></a>                      <span class="at">labels=</span><span class="fu">paste0</span>(<span class="fu">names</span>(most_abundant_percent),<span class="st">&quot;(&quot;</span>,most_abundant_percent,<span class="st">&quot;%)&quot;</span>))<span class="sc">+</span></span>
+<span id="cb239-23"><a href="community-similarity.html#cb239-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="fu">paste</span>(<span class="st">&quot;PC 1 (&quot;</span>,<span class="fu">round</span>(var_explained[<span class="dv">1</span>],<span class="dv">1</span>),<span class="st">&quot;%)&quot;</span>),</span>
+<span id="cb239-24"><a href="community-similarity.html#cb239-24" aria-hidden="true" tabindex="-1"></a>       <span class="at">y=</span><span class="fu">paste</span>(<span class="st">&quot;PC 2 (&quot;</span>,<span class="fu">round</span>(var_explained[<span class="dv">2</span>],<span class="dv">1</span>),<span class="st">&quot;%)&quot;</span>),</span>
+<span id="cb239-25"><a href="community-similarity.html#cb239-25" aria-hidden="true" tabindex="-1"></a>       <span class="at">color=</span><span class="st">&quot;&quot;</span>)</span>
+<span id="cb239-26"><a href="community-similarity.html#cb239-26" aria-hidden="true" tabindex="-1"></a>plot</span></code></pre></div>
 <p><img src="20_beta_diversity_files/figure-html/unnamed-chunk-7-1.png" width="3000" /></p>
 <p>Note: A 3D interactive version of the earlier plot can be found from <a href="https://microbiome.github.io/OMA/interactive-3d-plots.html">here</a>.</p>
 <p>Similarly let’s visualize and compare the sub-population.</p>
-<div class="sourceCode" id="cb238"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb238-1"><a href="community-similarity.html#cb238-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculating the frequencies and percentages for both categories</span></span>
-<span id="cb238-2"><a href="community-similarity.html#cb238-2" aria-hidden="true" tabindex="-1"></a>freq_TRUE <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="fu">as.character</span>(most_abundant[<span class="fu">colData</span>(tse_Genus)<span class="sc">$</span>Group<span class="sc">==</span><span class="cn">TRUE</span>]))</span>
-<span id="cb238-3"><a href="community-similarity.html#cb238-3" aria-hidden="true" tabindex="-1"></a>freq_FALSE <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="fu">as.character</span>(most_abundant[<span class="fu">colData</span>(tse_Genus)<span class="sc">$</span>Group<span class="sc">==</span><span class="cn">FALSE</span>]))</span>
-<span id="cb238-4"><a href="community-similarity.html#cb238-4" aria-hidden="true" tabindex="-1"></a>percent_TRUE <span class="ot">&lt;-</span> <span class="fu">round</span>(freq_TRUE<span class="sc">/</span><span class="fu">sum</span>(freq_TRUE)<span class="sc">*</span><span class="dv">100</span>, <span class="dv">1</span>)</span>
-<span id="cb238-5"><a href="community-similarity.html#cb238-5" aria-hidden="true" tabindex="-1"></a>percent_FALSE <span class="ot">&lt;-</span> <span class="fu">round</span>(freq_FALSE<span class="sc">/</span><span class="fu">sum</span>(freq_FALSE)<span class="sc">*</span><span class="dv">100</span>, <span class="dv">1</span>)</span>
-<span id="cb238-6"><a href="community-similarity.html#cb238-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb238-7"><a href="community-similarity.html#cb238-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualization</span></span>
-<span id="cb238-8"><a href="community-similarity.html#cb238-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plotReducedDim</span>(tse_Genus[,<span class="fu">colData</span>(tse_Genus)<span class="sc">$</span>Group<span class="sc">==</span><span class="cn">TRUE</span>],</span>
-<span id="cb238-9"><a href="community-similarity.html#cb238-9" aria-hidden="true" tabindex="-1"></a>                          <span class="st">&quot;PCoA_BC&quot;</span>, <span class="at">colour_by =</span> <span class="st">&quot;most_abundant&quot;</span>) <span class="sc">+</span></span>
-<span id="cb238-10"><a href="community-similarity.html#cb238-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;lightblue&quot;</span>, <span class="st">&quot;darkgray&quot;</span>, <span class="st">&quot;magenta&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>, <span class="st">&quot;red&quot;</span>),</span>
-<span id="cb238-11"><a href="community-similarity.html#cb238-11" aria-hidden="true" tabindex="-1"></a>                      <span class="at">labels=</span><span class="fu">paste0</span>(<span class="fu">names</span>(percent_TRUE),<span class="st">&quot;(&quot;</span>,percent_TRUE,<span class="st">&quot;%)&quot;</span>))<span class="sc">+</span></span>
-<span id="cb238-12"><a href="community-similarity.html#cb238-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="fu">paste</span>(<span class="st">&quot;PC 1 (&quot;</span>,<span class="fu">round</span>(var_explained[<span class="dv">1</span>],<span class="dv">1</span>),<span class="st">&quot;%)&quot;</span>),</span>
-<span id="cb238-13"><a href="community-similarity.html#cb238-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">y=</span><span class="fu">paste</span>(<span class="st">&quot;PC 2 (&quot;</span>,<span class="fu">round</span>(var_explained[<span class="dv">2</span>],<span class="dv">1</span>),<span class="st">&quot;%)&quot;</span>),</span>
-<span id="cb238-14"><a href="community-similarity.html#cb238-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">&quot;Group = TRUE&quot;</span>, <span class="at">color=</span><span class="st">&quot;&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb240"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb240-1"><a href="community-similarity.html#cb240-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculating the frequencies and percentages for both categories</span></span>
+<span id="cb240-2"><a href="community-similarity.html#cb240-2" aria-hidden="true" tabindex="-1"></a>freq_TRUE <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="fu">as.character</span>(most_abundant[<span class="fu">colData</span>(tse_Genus)<span class="sc">$</span>Group<span class="sc">==</span><span class="cn">TRUE</span>]))</span>
+<span id="cb240-3"><a href="community-similarity.html#cb240-3" aria-hidden="true" tabindex="-1"></a>freq_FALSE <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="fu">as.character</span>(most_abundant[<span class="fu">colData</span>(tse_Genus)<span class="sc">$</span>Group<span class="sc">==</span><span class="cn">FALSE</span>]))</span>
+<span id="cb240-4"><a href="community-similarity.html#cb240-4" aria-hidden="true" tabindex="-1"></a>percent_TRUE <span class="ot">&lt;-</span> <span class="fu">round</span>(freq_TRUE<span class="sc">/</span><span class="fu">sum</span>(freq_TRUE)<span class="sc">*</span><span class="dv">100</span>, <span class="dv">1</span>)</span>
+<span id="cb240-5"><a href="community-similarity.html#cb240-5" aria-hidden="true" tabindex="-1"></a>percent_FALSE <span class="ot">&lt;-</span> <span class="fu">round</span>(freq_FALSE<span class="sc">/</span><span class="fu">sum</span>(freq_FALSE)<span class="sc">*</span><span class="dv">100</span>, <span class="dv">1</span>)</span>
+<span id="cb240-6"><a href="community-similarity.html#cb240-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb240-7"><a href="community-similarity.html#cb240-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualization</span></span>
+<span id="cb240-8"><a href="community-similarity.html#cb240-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plotReducedDim</span>(tse_Genus[,<span class="fu">colData</span>(tse_Genus)<span class="sc">$</span>Group<span class="sc">==</span><span class="cn">TRUE</span>],</span>
+<span id="cb240-9"><a href="community-similarity.html#cb240-9" aria-hidden="true" tabindex="-1"></a>                          <span class="st">&quot;PCoA_BC&quot;</span>, <span class="at">colour_by =</span> <span class="st">&quot;most_abundant&quot;</span>) <span class="sc">+</span></span>
+<span id="cb240-10"><a href="community-similarity.html#cb240-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;lightblue&quot;</span>, <span class="st">&quot;darkgray&quot;</span>, <span class="st">&quot;magenta&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>, <span class="st">&quot;red&quot;</span>),</span>
+<span id="cb240-11"><a href="community-similarity.html#cb240-11" aria-hidden="true" tabindex="-1"></a>                      <span class="at">labels=</span><span class="fu">paste0</span>(<span class="fu">names</span>(percent_TRUE),<span class="st">&quot;(&quot;</span>,percent_TRUE,<span class="st">&quot;%)&quot;</span>))<span class="sc">+</span></span>
+<span id="cb240-12"><a href="community-similarity.html#cb240-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="fu">paste</span>(<span class="st">&quot;PC 1 (&quot;</span>,<span class="fu">round</span>(var_explained[<span class="dv">1</span>],<span class="dv">1</span>),<span class="st">&quot;%)&quot;</span>),</span>
+<span id="cb240-13"><a href="community-similarity.html#cb240-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">y=</span><span class="fu">paste</span>(<span class="st">&quot;PC 2 (&quot;</span>,<span class="fu">round</span>(var_explained[<span class="dv">2</span>],<span class="dv">1</span>),<span class="st">&quot;%)&quot;</span>),</span>
+<span id="cb240-14"><a href="community-similarity.html#cb240-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">&quot;Group = TRUE&quot;</span>, <span class="at">color=</span><span class="st">&quot;&quot;</span>)</span></code></pre></div>
 <p><img src="20_beta_diversity_files/figure-html/unnamed-chunk-8-1.png" width="3000" /></p>
-<div class="sourceCode" id="cb239"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb239-1"><a href="community-similarity.html#cb239-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotReducedDim</span>(tse_Genus[,<span class="fu">colData</span>(tse_Genus)<span class="sc">$</span>Group<span class="sc">==</span><span class="cn">FALSE</span>],</span>
-<span id="cb239-2"><a href="community-similarity.html#cb239-2" aria-hidden="true" tabindex="-1"></a>                          <span class="st">&quot;PCoA_BC&quot;</span>, <span class="at">colour_by =</span> <span class="st">&quot;most_abundant&quot;</span>) <span class="sc">+</span></span>
-<span id="cb239-3"><a href="community-similarity.html#cb239-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;lightblue&quot;</span>, <span class="st">&quot;darkgray&quot;</span>, <span class="st">&quot;magenta&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>, <span class="st">&quot;red&quot;</span>),</span>
-<span id="cb239-4"><a href="community-similarity.html#cb239-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">labels=</span><span class="fu">paste0</span>(<span class="fu">names</span>(percent_FALSE),<span class="st">&quot;(&quot;</span>,percent_FALSE,<span class="st">&quot;%)&quot;</span>))<span class="sc">+</span></span>
-<span id="cb239-5"><a href="community-similarity.html#cb239-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="fu">paste</span>(<span class="st">&quot;PC 1 (&quot;</span>,<span class="fu">round</span>(var_explained[<span class="dv">1</span>],<span class="dv">1</span>),<span class="st">&quot;%)&quot;</span>),</span>
-<span id="cb239-6"><a href="community-similarity.html#cb239-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y=</span><span class="fu">paste</span>(<span class="st">&quot;PC 2 (&quot;</span>,<span class="fu">round</span>(var_explained[<span class="dv">2</span>],<span class="dv">1</span>),<span class="st">&quot;%)&quot;</span>),</span>
-<span id="cb239-7"><a href="community-similarity.html#cb239-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">&quot;Group = FALSE&quot;</span>, <span class="at">color=</span><span class="st">&quot;&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb241"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb241-1"><a href="community-similarity.html#cb241-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotReducedDim</span>(tse_Genus[,<span class="fu">colData</span>(tse_Genus)<span class="sc">$</span>Group<span class="sc">==</span><span class="cn">FALSE</span>],</span>
+<span id="cb241-2"><a href="community-similarity.html#cb241-2" aria-hidden="true" tabindex="-1"></a>                          <span class="st">&quot;PCoA_BC&quot;</span>, <span class="at">colour_by =</span> <span class="st">&quot;most_abundant&quot;</span>) <span class="sc">+</span></span>
+<span id="cb241-3"><a href="community-similarity.html#cb241-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;lightblue&quot;</span>, <span class="st">&quot;darkgray&quot;</span>, <span class="st">&quot;magenta&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>, <span class="st">&quot;red&quot;</span>),</span>
+<span id="cb241-4"><a href="community-similarity.html#cb241-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">labels=</span><span class="fu">paste0</span>(<span class="fu">names</span>(percent_FALSE),<span class="st">&quot;(&quot;</span>,percent_FALSE,<span class="st">&quot;%)&quot;</span>))<span class="sc">+</span></span>
+<span id="cb241-5"><a href="community-similarity.html#cb241-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="fu">paste</span>(<span class="st">&quot;PC 1 (&quot;</span>,<span class="fu">round</span>(var_explained[<span class="dv">1</span>],<span class="dv">1</span>),<span class="st">&quot;%)&quot;</span>),</span>
+<span id="cb241-6"><a href="community-similarity.html#cb241-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y=</span><span class="fu">paste</span>(<span class="st">&quot;PC 2 (&quot;</span>,<span class="fu">round</span>(var_explained[<span class="dv">2</span>],<span class="dv">1</span>),<span class="st">&quot;%)&quot;</span>),</span>
+<span id="cb241-7"><a href="community-similarity.html#cb241-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">&quot;Group = FALSE&quot;</span>, <span class="at">color=</span><span class="st">&quot;&quot;</span>)</span></code></pre></div>
 <p><img src="20_beta_diversity_files/figure-html/unnamed-chunk-8-2.png" width="3000" /></p>
 <div id="testing-differences-in-community-composition-between-sample-groups" class="section level3 hasAnchor" number="8.4.1">
 <h3><span class="header-section-number">8.4.1</span> Testing differences in community composition between sample groups<a href="community-similarity.html#testing-differences-in-community-composition-between-sample-groups" class="anchor-section" aria-label="Anchor link to header"></a></h3>
@@ -926,39 +934,39 @@ introduced and their order is differs. (Check <a href="https://microbiome.github
 redundancy analysis (dbRDA), and then applying permutational test for result of
 redundancy analysis. Advantage of the latter approach is that by doing so we can get
 coefficients: how much each taxa affect to the result.</p>
-<div class="sourceCode" id="cb240"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb240-1"><a href="community-similarity.html#cb240-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>( <span class="sc">!</span><span class="fu">require</span>(vegan) ){</span>
-<span id="cb240-2"><a href="community-similarity.html#cb240-2" aria-hidden="true" tabindex="-1"></a>    BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;vegan&quot;</span>)</span>
-<span id="cb240-3"><a href="community-similarity.html#cb240-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(<span class="st">&quot;vegan&quot;</span>)</span>
-<span id="cb240-4"><a href="community-similarity.html#cb240-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb240-5"><a href="community-similarity.html#cb240-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Agglomerate data to Species level</span></span>
-<span id="cb240-6"><a href="community-similarity.html#cb240-6" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(tse, <span class="at">rank =</span> <span class="st">&quot;Species&quot;</span>)</span>
-<span id="cb240-7"><a href="community-similarity.html#cb240-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb240-8"><a href="community-similarity.html#cb240-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Set seed for reproducibility</span></span>
-<span id="cb240-9"><a href="community-similarity.html#cb240-9" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1576</span>)</span>
-<span id="cb240-10"><a href="community-similarity.html#cb240-10" aria-hidden="true" tabindex="-1"></a><span class="co"># We choose 99 random permutations. Consider applying more (999 or 9999) in your</span></span>
-<span id="cb240-11"><a href="community-similarity.html#cb240-11" aria-hidden="true" tabindex="-1"></a><span class="co"># analysis. </span></span>
-<span id="cb240-12"><a href="community-similarity.html#cb240-12" aria-hidden="true" tabindex="-1"></a>permanova <span class="ot">&lt;-</span> <span class="fu">adonis2</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse,<span class="st">&quot;relabundance&quot;</span>)) <span class="sc">~</span> Group,</span>
-<span id="cb240-13"><a href="community-similarity.html#cb240-13" aria-hidden="true" tabindex="-1"></a>                     <span class="at">by =</span> <span class="st">&quot;margin&quot;</span>, <span class="co"># each term (here only &#39;Group&#39;) analyzed individually</span></span>
-<span id="cb240-14"><a href="community-similarity.html#cb240-14" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> <span class="fu">colData</span>(tse),</span>
-<span id="cb240-15"><a href="community-similarity.html#cb240-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>,</span>
-<span id="cb240-16"><a href="community-similarity.html#cb240-16" aria-hidden="true" tabindex="-1"></a>                     <span class="at">permutations =</span> <span class="dv">99</span>)</span>
-<span id="cb240-17"><a href="community-similarity.html#cb240-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb240-18"><a href="community-similarity.html#cb240-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Set seed for reproducibility</span></span>
-<span id="cb240-19"><a href="community-similarity.html#cb240-19" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1576</span>)</span>
-<span id="cb240-20"><a href="community-similarity.html#cb240-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform dbRDA</span></span>
-<span id="cb240-21"><a href="community-similarity.html#cb240-21" aria-hidden="true" tabindex="-1"></a>dbrda <span class="ot">&lt;-</span> <span class="fu">dbrda</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse,<span class="st">&quot;relabundance&quot;</span>)) <span class="sc">~</span> Group, </span>
-<span id="cb240-22"><a href="community-similarity.html#cb240-22" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> <span class="fu">colData</span>(tse))</span>
-<span id="cb240-23"><a href="community-similarity.html#cb240-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform permutational analysis</span></span>
-<span id="cb240-24"><a href="community-similarity.html#cb240-24" aria-hidden="true" tabindex="-1"></a>permanova2 <span class="ot">&lt;-</span> <span class="fu">anova.cca</span>(dbrda,</span>
-<span id="cb240-25"><a href="community-similarity.html#cb240-25" aria-hidden="true" tabindex="-1"></a>                        <span class="at">by =</span> <span class="st">&quot;margin&quot;</span>, <span class="co"># each term (here only &#39;Group&#39;) analyzed individually</span></span>
-<span id="cb240-26"><a href="community-similarity.html#cb240-26" aria-hidden="true" tabindex="-1"></a>                        <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>,</span>
-<span id="cb240-27"><a href="community-similarity.html#cb240-27" aria-hidden="true" tabindex="-1"></a>                        <span class="at">permutations =</span> <span class="dv">99</span>)</span>
-<span id="cb240-28"><a href="community-similarity.html#cb240-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb240-29"><a href="community-similarity.html#cb240-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Get p-values</span></span>
-<span id="cb240-30"><a href="community-similarity.html#cb240-30" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">c</span>( permanova[<span class="st">&quot;Group&quot;</span>, <span class="st">&quot;Pr(&gt;F)&quot;</span>], permanova2[<span class="st">&quot;Group&quot;</span>, <span class="st">&quot;Pr(&gt;F)&quot;</span>] )</span>
-<span id="cb240-31"><a href="community-similarity.html#cb240-31" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(p_values)</span>
-<span id="cb240-32"><a href="community-similarity.html#cb240-32" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(p_values) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;adonis2&quot;</span>, <span class="st">&quot;dbRDA+anova.cca&quot;</span>)</span>
-<span id="cb240-33"><a href="community-similarity.html#cb240-33" aria-hidden="true" tabindex="-1"></a>p_values</span></code></pre></div>
+<div class="sourceCode" id="cb242"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb242-1"><a href="community-similarity.html#cb242-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>( <span class="sc">!</span><span class="fu">require</span>(vegan) ){</span>
+<span id="cb242-2"><a href="community-similarity.html#cb242-2" aria-hidden="true" tabindex="-1"></a>    BiocManager<span class="sc">::</span><span class="fu">install</span>(<span class="st">&quot;vegan&quot;</span>)</span>
+<span id="cb242-3"><a href="community-similarity.html#cb242-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(<span class="st">&quot;vegan&quot;</span>)</span>
+<span id="cb242-4"><a href="community-similarity.html#cb242-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb242-5"><a href="community-similarity.html#cb242-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Agglomerate data to Species level</span></span>
+<span id="cb242-6"><a href="community-similarity.html#cb242-6" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(tse, <span class="at">rank =</span> <span class="st">&quot;Species&quot;</span>)</span>
+<span id="cb242-7"><a href="community-similarity.html#cb242-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb242-8"><a href="community-similarity.html#cb242-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Set seed for reproducibility</span></span>
+<span id="cb242-9"><a href="community-similarity.html#cb242-9" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1576</span>)</span>
+<span id="cb242-10"><a href="community-similarity.html#cb242-10" aria-hidden="true" tabindex="-1"></a><span class="co"># We choose 99 random permutations. Consider applying more (999 or 9999) in your</span></span>
+<span id="cb242-11"><a href="community-similarity.html#cb242-11" aria-hidden="true" tabindex="-1"></a><span class="co"># analysis. </span></span>
+<span id="cb242-12"><a href="community-similarity.html#cb242-12" aria-hidden="true" tabindex="-1"></a>permanova <span class="ot">&lt;-</span> <span class="fu">adonis2</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse,<span class="st">&quot;relabundance&quot;</span>)) <span class="sc">~</span> Group,</span>
+<span id="cb242-13"><a href="community-similarity.html#cb242-13" aria-hidden="true" tabindex="-1"></a>                     <span class="at">by =</span> <span class="st">&quot;margin&quot;</span>, <span class="co"># each term (here only &#39;Group&#39;) analyzed individually</span></span>
+<span id="cb242-14"><a href="community-similarity.html#cb242-14" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> <span class="fu">colData</span>(tse),</span>
+<span id="cb242-15"><a href="community-similarity.html#cb242-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>,</span>
+<span id="cb242-16"><a href="community-similarity.html#cb242-16" aria-hidden="true" tabindex="-1"></a>                     <span class="at">permutations =</span> <span class="dv">99</span>)</span>
+<span id="cb242-17"><a href="community-similarity.html#cb242-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb242-18"><a href="community-similarity.html#cb242-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Set seed for reproducibility</span></span>
+<span id="cb242-19"><a href="community-similarity.html#cb242-19" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1576</span>)</span>
+<span id="cb242-20"><a href="community-similarity.html#cb242-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform dbRDA</span></span>
+<span id="cb242-21"><a href="community-similarity.html#cb242-21" aria-hidden="true" tabindex="-1"></a>dbrda <span class="ot">&lt;-</span> <span class="fu">dbrda</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse,<span class="st">&quot;relabundance&quot;</span>)) <span class="sc">~</span> Group, </span>
+<span id="cb242-22"><a href="community-similarity.html#cb242-22" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> <span class="fu">colData</span>(tse))</span>
+<span id="cb242-23"><a href="community-similarity.html#cb242-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform permutational analysis</span></span>
+<span id="cb242-24"><a href="community-similarity.html#cb242-24" aria-hidden="true" tabindex="-1"></a>permanova2 <span class="ot">&lt;-</span> <span class="fu">anova.cca</span>(dbrda,</span>
+<span id="cb242-25"><a href="community-similarity.html#cb242-25" aria-hidden="true" tabindex="-1"></a>                        <span class="at">by =</span> <span class="st">&quot;margin&quot;</span>, <span class="co"># each term (here only &#39;Group&#39;) analyzed individually</span></span>
+<span id="cb242-26"><a href="community-similarity.html#cb242-26" aria-hidden="true" tabindex="-1"></a>                        <span class="at">method =</span> <span class="st">&quot;euclidean&quot;</span>,</span>
+<span id="cb242-27"><a href="community-similarity.html#cb242-27" aria-hidden="true" tabindex="-1"></a>                        <span class="at">permutations =</span> <span class="dv">99</span>)</span>
+<span id="cb242-28"><a href="community-similarity.html#cb242-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb242-29"><a href="community-similarity.html#cb242-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Get p-values</span></span>
+<span id="cb242-30"><a href="community-similarity.html#cb242-30" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">c</span>( permanova[<span class="st">&quot;Group&quot;</span>, <span class="st">&quot;Pr(&gt;F)&quot;</span>], permanova2[<span class="st">&quot;Group&quot;</span>, <span class="st">&quot;Pr(&gt;F)&quot;</span>] )</span>
+<span id="cb242-31"><a href="community-similarity.html#cb242-31" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(p_values)</span>
+<span id="cb242-32"><a href="community-similarity.html#cb242-32" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(p_values) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;adonis2&quot;</span>, <span class="st">&quot;dbRDA+anova.cca&quot;</span>)</span>
+<span id="cb242-33"><a href="community-similarity.html#cb242-33" aria-hidden="true" tabindex="-1"></a>p_values</span></code></pre></div>
 <pre><code>##                 p_values
 ## adonis2             0.02
 ## dbRDA+anova.cca     0.02</code></pre>
@@ -968,23 +976,23 @@ between the groups (p &lt; 0.05), and these two methods give equal p-values.</p>
 largest differences between the groups. This gives some insights into
 how the groups tend to differ from each other in terms of community
 composition.</p>
-<div class="sourceCode" id="cb242"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb242-1"><a href="community-similarity.html#cb242-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add taxa info</span></span>
-<span id="cb242-2"><a href="community-similarity.html#cb242-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sppscores</span>(dbrda) <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">assay</span>(tse,<span class="st">&quot;relabundance&quot;</span>))</span>
-<span id="cb242-3"><a href="community-similarity.html#cb242-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Get coefficients</span></span>
-<span id="cb242-4"><a href="community-similarity.html#cb242-4" aria-hidden="true" tabindex="-1"></a>coef <span class="ot">&lt;-</span> dbrda<span class="sc">$</span>CCA<span class="sc">$</span>v</span>
-<span id="cb242-5"><a href="community-similarity.html#cb242-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the taxa with biggest weights</span></span>
-<span id="cb242-6"><a href="community-similarity.html#cb242-6" aria-hidden="true" tabindex="-1"></a>top.coef <span class="ot">&lt;-</span> <span class="fu">head</span>( coef[<span class="fu">rev</span>(<span class="fu">order</span>(<span class="fu">abs</span>(coef))), , <span class="at">drop =</span> <span class="cn">FALSE</span>], <span class="dv">20</span>)</span>
-<span id="cb242-7"><a href="community-similarity.html#cb242-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort weights in increasing order</span></span>
-<span id="cb242-8"><a href="community-similarity.html#cb242-8" aria-hidden="true" tabindex="-1"></a>top.coef <span class="ot">&lt;-</span> top.coef[ <span class="fu">order</span>(top.coef), ]</span>
-<span id="cb242-9"><a href="community-similarity.html#cb242-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Get top names</span></span>
-<span id="cb242-10"><a href="community-similarity.html#cb242-10" aria-hidden="true" tabindex="-1"></a>top_names <span class="ot">&lt;-</span> <span class="fu">names</span>(top.coef)[ <span class="fu">order</span>(<span class="fu">abs</span>(top.coef), <span class="at">decreasing =</span> <span class="cn">TRUE</span>) ]</span></code></pre></div>
-<div class="sourceCode" id="cb243"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb243-1"><a href="community-similarity.html#cb243-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">data.frame</span>(<span class="at">x =</span> top.coef,</span>
-<span id="cb243-2"><a href="community-similarity.html#cb243-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">y =</span> <span class="fu">factor</span>(<span class="fu">names</span>(top.coef),</span>
-<span id="cb243-3"><a href="community-similarity.html#cb243-3" aria-hidden="true" tabindex="-1"></a>                                      <span class="fu">unique</span>(<span class="fu">names</span>(top.coef)))),</span>
-<span id="cb243-4"><a href="community-similarity.html#cb243-4" aria-hidden="true" tabindex="-1"></a>        <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span></span>
-<span id="cb243-5"><a href="community-similarity.html#cb243-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="at">stat=</span><span class="st">&quot;identity&quot;</span>) <span class="sc">+</span></span>
-<span id="cb243-6"><a href="community-similarity.html#cb243-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x=</span><span class="st">&quot;&quot;</span>,<span class="at">y=</span><span class="st">&quot;&quot;</span>,<span class="at">title=</span><span class="st">&quot;Top Taxa&quot;</span>) <span class="sc">+</span></span>
-<span id="cb243-7"><a href="community-similarity.html#cb243-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_bw</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb244"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb244-1"><a href="community-similarity.html#cb244-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add taxa info</span></span>
+<span id="cb244-2"><a href="community-similarity.html#cb244-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sppscores</span>(dbrda) <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">assay</span>(tse,<span class="st">&quot;relabundance&quot;</span>))</span>
+<span id="cb244-3"><a href="community-similarity.html#cb244-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Get coefficients</span></span>
+<span id="cb244-4"><a href="community-similarity.html#cb244-4" aria-hidden="true" tabindex="-1"></a>coef <span class="ot">&lt;-</span> dbrda<span class="sc">$</span>CCA<span class="sc">$</span>v</span>
+<span id="cb244-5"><a href="community-similarity.html#cb244-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the taxa with biggest weights</span></span>
+<span id="cb244-6"><a href="community-similarity.html#cb244-6" aria-hidden="true" tabindex="-1"></a>top.coef <span class="ot">&lt;-</span> <span class="fu">head</span>( coef[<span class="fu">rev</span>(<span class="fu">order</span>(<span class="fu">abs</span>(coef))), , <span class="at">drop =</span> <span class="cn">FALSE</span>], <span class="dv">20</span>)</span>
+<span id="cb244-7"><a href="community-similarity.html#cb244-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort weights in increasing order</span></span>
+<span id="cb244-8"><a href="community-similarity.html#cb244-8" aria-hidden="true" tabindex="-1"></a>top.coef <span class="ot">&lt;-</span> top.coef[ <span class="fu">order</span>(top.coef), ]</span>
+<span id="cb244-9"><a href="community-similarity.html#cb244-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Get top names</span></span>
+<span id="cb244-10"><a href="community-similarity.html#cb244-10" aria-hidden="true" tabindex="-1"></a>top_names <span class="ot">&lt;-</span> <span class="fu">names</span>(top.coef)[ <span class="fu">order</span>(<span class="fu">abs</span>(top.coef), <span class="at">decreasing =</span> <span class="cn">TRUE</span>) ]</span></code></pre></div>
+<div class="sourceCode" id="cb245"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb245-1"><a href="community-similarity.html#cb245-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">data.frame</span>(<span class="at">x =</span> top.coef,</span>
+<span id="cb245-2"><a href="community-similarity.html#cb245-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">y =</span> <span class="fu">factor</span>(<span class="fu">names</span>(top.coef),</span>
+<span id="cb245-3"><a href="community-similarity.html#cb245-3" aria-hidden="true" tabindex="-1"></a>                                      <span class="fu">unique</span>(<span class="fu">names</span>(top.coef)))),</span>
+<span id="cb245-4"><a href="community-similarity.html#cb245-4" aria-hidden="true" tabindex="-1"></a>        <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb245-5"><a href="community-similarity.html#cb245-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="at">stat=</span><span class="st">&quot;identity&quot;</span>) <span class="sc">+</span></span>
+<span id="cb245-6"><a href="community-similarity.html#cb245-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x=</span><span class="st">&quot;&quot;</span>,<span class="at">y=</span><span class="st">&quot;&quot;</span>,<span class="at">title=</span><span class="st">&quot;Top Taxa&quot;</span>) <span class="sc">+</span></span>
+<span id="cb245-7"><a href="community-similarity.html#cb245-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_bw</span>()</span></code></pre></div>
 <p><img src="20_beta_diversity_files/figure-html/plot-top-coef-anova-1.png" width="3000" /></p>
 <p>In the above example, the largest differences between the two groups
 can be attributed to <em>Genus:Bacteroides</em> (elevated in the first
@@ -997,7 +1005,7 @@ group), and many other co-varying species.</p>
 homogeneous group dispersions (variances). This can be tested with the
 PERMDISP2 method <span class="citation">(<a href="#ref-Anderson2006" role="doc-biblioref">Anderson 2006</a>)</span> by using the same assay and distance
 method than in PERMANOVA.</p>
-<div class="sourceCode" id="cb244"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb244-1"><a href="community-similarity.html#cb244-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>( <span class="fu">betadisper</span>(<span class="fu">vegdist</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;counts&quot;</span>))), <span class="fu">colData</span>(tse)<span class="sc">$</span>Group) )</span></code></pre></div>
+<div class="sourceCode" id="cb246"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb246-1"><a href="community-similarity.html#cb246-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>( <span class="fu">betadisper</span>(<span class="fu">vegdist</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;counts&quot;</span>))), <span class="fu">colData</span>(tse)<span class="sc">$</span>Group) )</span></code></pre></div>
 <pre><code>## Analysis of Variance Table
 ## 
 ## Response: Distances
@@ -1023,7 +1031,7 @@ appropriate choice for comparing community compositions.</p>
 View session info
 </button>
 <div class="rebook-content">
-<pre><code>R version 4.2.0 (2022-04-22)
+<pre><code>R version 4.2.1 (2022-06-23)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 20.04.4 LTS
 
@@ -1044,72 +1052,83 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] ggord_1.1.7                    knitr_1.39                    
- [3] stringr_1.4.0                  patchwork_1.1.1               
- [5] scater_1.24.0                  scuttle_1.6.2                 
- [7] ggplot2_3.3.6                  vegan_2.6-2                   
- [9] lattice_0.20-45                permute_0.9-7                 
-[11] mia_1.3.34                     MultiAssayExperiment_1.22.0   
-[13] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.0             
-[15] XVector_0.36.0                 SingleCellExperiment_1.18.0   
-[17] SummarizedExperiment_1.26.1    Biobase_2.56.0                
-[19] GenomicRanges_1.48.0           GenomeInfoDb_1.32.2           
-[21] IRanges_2.30.0                 S4Vectors_0.34.0              
-[23] BiocGenerics_0.42.0            MatrixGenerics_1.8.1          
-[25] matrixStats_0.62.0-9000        BiocStyle_2.24.0              
-[27] rebook_1.6.0                  
+ [1] ggord_1.1.7                    devtools_2.4.4                
+ [3] usethis_2.1.6                  knitr_1.40                    
+ [5] stringr_1.4.1                  patchwork_1.1.2               
+ [7] scater_1.24.0                  scuttle_1.6.3                 
+ [9] ggplot2_3.3.6                  vegan_2.6-2                   
+[11] lattice_0.20-45                permute_0.9-7                 
+[13] mia_1.5.12                     MultiAssayExperiment_1.22.0   
+[15] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.1             
+[17] XVector_0.36.0                 SingleCellExperiment_1.18.0   
+[19] SummarizedExperiment_1.26.1    Biobase_2.56.0                
+[21] GenomicRanges_1.48.0           GenomeInfoDb_1.32.3           
+[23] IRanges_2.30.1                 S4Vectors_0.34.0              
+[25] BiocGenerics_0.42.0            MatrixGenerics_1.8.1          
+[27] matrixStats_0.62.0-9003        BiocStyle_2.24.0              
+[29] rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
- [1] Rtsne_0.16                  ggbeeswarm_0.6.0           
- [3] colorspace_2.0-3            ellipsis_0.3.2             
- [5] BiocNeighbors_1.14.0        farver_2.1.1               
- [7] ggrepel_0.9.1               bit64_4.0.5                
- [9] fansi_1.0.3                 decontam_1.16.0            
-[11] splines_4.2.0               codetools_0.2-18           
-[13] sparseMatrixStats_1.8.0     cachem_1.0.6               
-[15] jsonlite_1.8.0              cluster_2.1.3              
-[17] graph_1.74.0                BiocManager_1.30.18        
-[19] compiler_4.2.0              assertthat_0.2.1           
-[21] Matrix_1.4-1                fastmap_1.1.0              
-[23] lazyeval_0.2.2              cli_3.3.0                  
-[25] BiocSingular_1.12.0         htmltools_0.5.3            
-[27] tools_4.2.0                 rsvd_1.0.5                 
-[29] gtable_0.3.0                glue_1.6.2                 
-[31] GenomeInfoDbData_1.2.8      reshape2_1.4.4             
-[33] dplyr_1.0.9                 Rcpp_1.0.9                 
-[35] jquerylib_0.1.4             vctrs_0.4.1                
-[37] ape_5.6-2                   nlme_3.1-158               
-[39] DECIPHER_2.24.0             DelayedMatrixStats_1.18.0  
-[41] xfun_0.31                   beachmat_2.12.0            
-[43] lifecycle_1.0.1             irlba_2.3.5                
-[45] XML_3.99-0.10               zlibbioc_1.42.0            
-[47] MASS_7.3-58                 scales_1.2.0               
-[49] parallel_4.2.0              yaml_2.3.5                 
-[51] memoise_2.0.1               gridExtra_2.3              
-[53] yulab.utils_0.0.5           sass_0.4.2                 
-[55] stringi_1.7.8               RSQLite_2.2.15             
-[57] highr_0.9                   ScaledMatrix_1.4.0         
-[59] tidytree_0.3.9              filelock_1.0.2             
-[61] BiocParallel_1.30.3         rlang_1.0.4                
-[63] pkgconfig_2.0.3             bitops_1.0-7               
-[65] evaluate_0.15               purrr_0.3.4                
-[67] labeling_0.4.2              treeio_1.20.1              
-[69] CodeDepends_0.6.5           cowplot_1.1.1              
-[71] bit_4.0.4                   tidyselect_1.1.2           
-[73] plyr_1.8.7                  magrittr_2.0.3             
-[75] bookdown_0.27               R6_2.5.1                   
-[77] generics_0.1.3              DelayedArray_0.22.0        
-[79] DBI_1.1.3                   withr_2.5.0                
-[81] mgcv_1.8-40                 pillar_1.8.0               
-[83] RCurl_1.98-1.7              tibble_3.1.7               
-[85] dir.expiry_1.4.0            crayon_1.5.1               
-[87] utf8_1.2.2                  rmarkdown_2.14             
-[89] viridis_0.6.2               grid_4.2.0                 
-[91] blob_1.2.3                  digest_0.6.29              
-[93] tidyr_1.2.0                 munsell_0.5.0              
-[95] DirichletMultinomial_1.38.0 beeswarm_0.4.0             
-[97] viridisLite_0.4.0           vipor_0.4.5                
-[99] bslib_0.4.0                </code></pre>
+  [1] plyr_1.8.7                  lazyeval_0.2.2             
+  [3] splines_4.2.1               BiocParallel_1.30.3        
+  [5] digest_0.6.29               yulab.utils_0.0.5          
+  [7] htmltools_0.5.3             viridis_0.6.2              
+  [9] fansi_1.0.3                 magrittr_2.0.3             
+ [11] memoise_2.0.1               ScaledMatrix_1.4.0         
+ [13] cluster_2.1.4               DECIPHER_2.24.0            
+ [15] remotes_2.4.2               prettyunits_1.1.1          
+ [17] colorspace_2.0-3            blob_1.2.3                 
+ [19] ggrepel_0.9.1               xfun_0.32                  
+ [21] dplyr_1.0.10                callr_3.7.2                
+ [23] crayon_1.5.1                RCurl_1.98-1.8             
+ [25] jsonlite_1.8.0              graph_1.74.0               
+ [27] ape_5.6-2                   glue_1.6.2                 
+ [29] gtable_0.3.1                zlibbioc_1.42.0            
+ [31] DelayedArray_0.22.0         pkgbuild_1.3.1             
+ [33] BiocSingular_1.12.0         scales_1.2.1               
+ [35] DBI_1.1.3                   miniUI_0.1.1.1             
+ [37] Rcpp_1.0.9                  viridisLite_0.4.1          
+ [39] xtable_1.8-4                decontam_1.16.0            
+ [41] tidytree_0.4.0              bit_4.0.4                  
+ [43] rsvd_1.0.5                  profvis_0.3.7              
+ [45] htmlwidgets_1.5.4           dir.expiry_1.4.0           
+ [47] ellipsis_0.3.2              urlchecker_1.0.1           
+ [49] pkgconfig_2.0.3             XML_3.99-0.10              
+ [51] farver_2.1.1                CodeDepends_0.6.5          
+ [53] sass_0.4.2                  utf8_1.2.2                 
+ [55] tidyselect_1.1.2            labeling_0.4.2             
+ [57] rlang_1.0.5                 reshape2_1.4.4             
+ [59] later_1.3.0                 munsell_0.5.0              
+ [61] tools_4.2.1                 cachem_1.0.6               
+ [63] cli_3.3.0                   DirichletMultinomial_1.38.0
+ [65] generics_0.1.3              RSQLite_2.2.16             
+ [67] evaluate_0.16               fastmap_1.1.0              
+ [69] yaml_2.3.5                  processx_3.7.0             
+ [71] bit64_4.0.5                 fs_1.5.2                   
+ [73] purrr_0.3.4                 nlme_3.1-159               
+ [75] sparseMatrixStats_1.8.0     mime_0.12                  
+ [77] compiler_4.2.1              curl_4.3.2                 
+ [79] beeswarm_0.4.0              filelock_1.0.2             
+ [81] treeio_1.20.2               tibble_3.1.8               
+ [83] bslib_0.4.0                 stringi_1.7.8              
+ [85] ps_1.7.1                    highr_0.9                  
+ [87] Matrix_1.4-1                vctrs_0.4.1                
+ [89] pillar_1.8.1                lifecycle_1.0.1            
+ [91] BiocManager_1.30.18         jquerylib_0.1.4            
+ [93] BiocNeighbors_1.14.0        cowplot_1.1.1              
+ [95] bitops_1.0-7                irlba_2.3.5                
+ [97] httpuv_1.6.5                R6_2.5.1                   
+ [99] bookdown_0.28               promises_1.2.0.1           
+[101] gridExtra_2.3               vipor_0.4.5                
+[103] sessioninfo_1.2.2           codetools_0.2-18           
+[105] pkgload_1.3.0               MASS_7.3-58.1              
+[107] assertthat_0.2.1            rprojroot_2.0.3            
+[109] withr_2.5.0                 GenomeInfoDbData_1.2.8     
+[111] mgcv_1.8-40                 parallel_4.2.1             
+[113] grid_4.2.1                  beachmat_2.12.0            
+[115] tidyr_1.2.0                 rmarkdown_2.16             
+[117] DelayedMatrixStats_1.18.0   Rtsne_0.16                 
+[119] shiny_1.7.2                 ggbeeswarm_0.6.0           </code></pre>
 </div>
 
 </div>
@@ -1189,7 +1208,7 @@ gitbook.start({
     var script = document.createElement("script");
     script.type = "text/javascript";
     var src = "true";
-    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
     if (location.protocol !== "file:")
       if (/^https?:/.test(src))
         src = src.replace(/^https?:/, '');

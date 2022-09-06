@@ -12,11 +12,11 @@ always_allow_html: yes
 
 
 ---
-date: "**Authors:** Leo Lahti [aut], Sudarshan Shetty [aut], Felix GM Ernst [aut, cre]<br/>
+date: "**Authors:** Leo Lahti [aut], Sudarshan Shetty [aut], Tuomas Borman [aut, cre], Felix GM Ernst [aut]<br/>
   **Version:** 0.98.10<br/>
   **Modified:** 2022-06-19<br/>
-  **Compiled:** 2022-07-20<br/>
-  **Environment:** R version 4.2.0 (2022-04-22), Bioconductor 3.15<br/>
+  **Compiled:** 2022-09-06<br/>
+  **Environment:** R version 4.2.1 (2022-06-23), Bioconductor 3.15<br/>
   **License:** CC BY-NC-SA 3.0 US<br/>
   **Copyright:** <br/>
   **Source:** https://github.com/microbiome/OMA"

@@ -81,7 +81,6 @@ molten_tse
 ## #   Final_Barcode <fct>, Barcode_truncated_plus_T <fct>,
 ## #   Barcode_full_length <fct>, SampleType <fct>, Description <fct>, and
 ## #   abbreviated variable name 1: relabundance
-## # i Use `print(n = ...)` to see more rows, and `colnames()` to see all variable names
 ```
 
 ### Subsetting

@@ -224,31 +224,31 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7689 BIC: 8076 AIC: 7948 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7781 BIC: 8343 AIC: 8173 
+## Laplace: 7792 BIC: 8357 AIC: 8187 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7850 BIC: 8548 AIC: 8335 
+## Laplace: 7818 BIC: 8529 AIC: 8316 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7907 BIC: 8754 AIC: 8498 
+## Laplace: 7935 BIC: 8816 AIC: 8560 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 7991 BIC: 9021 AIC: 8722
+## Laplace: 8039 BIC: 9073 AIC: 8775
 ```
 
 
@@ -293,15 +293,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.22   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.21   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  860.38  1906.4 1674.5 1735
-## Mock               2       3   67  980.2  110.61   911.4 1054.4 1115
-## Ocean              2       3   67 1096.7  -56.93   944.2 1170.9 1232
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.93   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.77   605.1  829.8  918
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -314,8 +314,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.28
+## 1 0.5385 20.60
+## 2 0.4615 15.32
 ```
 
 
@@ -329,12 +329,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.051e-17
-## CC1     1.000e+00 3.902e-22
-## SV1     1.000e+00 1.961e-12
-## M31Fcsw 7.844e-26 1.000e+00
-## M11Fcsw 1.129e-16 1.000e+00
-## M31Plmr 1.119e-13 1.000e+00
+## CL3     1.000e+00 4.452e-17
+## CC1     1.000e+00 3.311e-22
+## SV1     1.000e+00 1.768e-12
+## M31Fcsw 6.910e-26 1.000e+00
+## M11Fcsw 1.026e-16 1.000e+00
+## M31Plmr 1.024e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -345,13 +345,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30382 0.1354659
-## Phylum:Euryarchaeota  0.23115 0.1468630
-## Phylum:Actinobacteria 1.21356 1.0600494
-## Phylum:Spirochaetes   0.21393 0.1318418
-## Phylum:MVP-15         0.02982 0.0007667
-## Phylum:Proteobacteria 6.84491 1.8154389
+##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354044
+## Phylum:Euryarchaeota  0.2314 0.1468862
+## Phylum:Actinobacteria 1.2105 1.0582011
+## Phylum:Spirochaetes   0.2141 0.1318061
+## Phylum:MVP-15         0.0299 0.0007634
+## Phylum:Proteobacteria 6.8419 1.8115735
 ```
 Get the assignment probabilities
 
@@ -506,7 +506,7 @@ Link:
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.2.0 (2022-04-22)
+R version 4.2.1 (2022-06-23)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 20.04.4 LTS
 
@@ -527,78 +527,78 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] patchwork_1.1.1                bluster_1.6.0                 
- [3] scater_1.24.0                  scuttle_1.6.2                 
- [5] miaViz_1.3.4                   ggraph_2.0.5                  
- [7] ggplot2_3.3.6                  mia_1.3.34                    
+ [1] patchwork_1.1.2                bluster_1.6.0                 
+ [3] scater_1.24.0                  scuttle_1.6.3                 
+ [5] miaViz_1.5.1                   ggraph_2.0.6                  
+ [7] ggplot2_3.3.6                  mia_1.5.12                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
-[11] Biostrings_2.64.0              XVector_0.36.0                
+[11] Biostrings_2.64.1              XVector_0.36.0                
 [13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
 [15] Biobase_2.56.0                 GenomicRanges_1.48.0          
-[17] GenomeInfoDb_1.32.2            IRanges_2.30.0                
+[17] GenomeInfoDb_1.32.3            IRanges_2.30.1                
 [19] S4Vectors_0.34.0               BiocGenerics_0.42.0           
-[21] MatrixGenerics_1.8.1           matrixStats_0.62.0-9000       
+[21] MatrixGenerics_1.8.1           matrixStats_0.62.0-9003       
 [23] ecodist_2.0.9                  BiocStyle_2.24.0              
 [25] rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
-  [1] plyr_1.8.7                  igraph_1.3.3               
-  [3] lazyeval_0.2.2              splines_4.2.0              
+  [1] plyr_1.8.7                  igraph_1.3.4               
+  [3] lazyeval_0.2.2              splines_4.2.1              
   [5] BiocParallel_1.30.3         digest_0.6.29              
   [7] yulab.utils_0.0.5           htmltools_0.5.3            
   [9] viridis_0.6.2               fansi_1.0.3                
  [11] magrittr_2.0.3              memoise_2.0.1              
- [13] ScaledMatrix_1.4.0          cluster_2.1.3              
- [15] DECIPHER_2.24.0             graphlayouts_0.8.0         
+ [13] ScaledMatrix_1.4.0          cluster_2.1.4              
+ [15] DECIPHER_2.24.0             graphlayouts_0.8.1         
  [17] colorspace_2.0-3            blob_1.2.3                 
- [19] ggrepel_0.9.1               xfun_0.31                  
- [21] dplyr_1.0.9                 crayon_1.5.1               
- [23] RCurl_1.98-1.7              jsonlite_1.8.0             
+ [19] ggrepel_0.9.1               xfun_0.32                  
+ [21] dplyr_1.0.10                crayon_1.5.1               
+ [23] RCurl_1.98-1.8              jsonlite_1.8.0             
  [25] graph_1.74.0                ape_5.6-2                  
  [27] glue_1.6.2                  polyclip_1.10-0            
- [29] gtable_0.3.0                zlibbioc_1.42.0            
+ [29] gtable_0.3.1                zlibbioc_1.42.0            
  [31] DelayedArray_0.22.0         BiocSingular_1.12.0        
- [33] scales_1.2.0                DBI_1.1.3                  
- [35] Rcpp_1.0.9                  viridisLite_0.4.0          
+ [33] scales_1.2.1                DBI_1.1.3                  
+ [35] Rcpp_1.0.9                  viridisLite_0.4.1          
  [37] decontam_1.16.0             gridGraphics_0.5-1         
- [39] tidytree_0.3.9              bit_4.0.4                  
+ [39] tidytree_0.4.0              bit_4.0.4                  
  [41] rsvd_1.0.5                  FNN_1.1.3.1                
  [43] dir.expiry_1.4.0            ellipsis_0.3.2             
  [45] pkgconfig_2.0.3             XML_3.99-0.10              
- [47] farver_2.1.1                uwot_0.1.11                
- [49] CodeDepends_0.6.5           utf8_1.2.2                 
+ [47] farver_2.1.1                CodeDepends_0.6.5          
+ [49] uwot_0.1.14                 utf8_1.2.2                 
  [51] ggplotify_0.1.0             tidyselect_1.1.2           
- [53] labeling_0.4.2              rlang_1.0.4                
+ [53] labeling_0.4.2              rlang_1.0.5                
  [55] reshape2_1.4.4              munsell_0.5.0              
- [57] tools_4.2.0                 cachem_1.0.6               
+ [57] tools_4.2.1                 cachem_1.0.6               
  [59] cli_3.3.0                   DirichletMultinomial_1.38.0
- [61] generics_0.1.3              RSQLite_2.2.15             
- [63] evaluate_0.15               stringr_1.4.0              
+ [61] generics_0.1.3              RSQLite_2.2.16             
+ [63] evaluate_0.16               stringr_1.4.1              
  [65] fastmap_1.1.0               yaml_2.3.5                 
- [67] ggtree_3.4.1                knitr_1.39                 
- [69] bit64_4.0.5                 tidygraph_1.2.1            
- [71] purrr_0.3.4                 nlme_3.1-158               
+ [67] ggtree_3.4.2                knitr_1.40                 
+ [69] bit64_4.0.5                 tidygraph_1.2.2            
+ [71] purrr_0.3.4                 nlme_3.1-159               
  [73] sparseMatrixStats_1.8.0     aplot_0.1.6                
- [75] compiler_4.2.0              beeswarm_0.4.0             
- [77] filelock_1.0.2              treeio_1.20.1              
- [79] tibble_3.1.7                tweenr_1.0.2               
+ [75] compiler_4.2.1              beeswarm_0.4.0             
+ [77] filelock_1.0.2              treeio_1.20.2              
+ [79] tibble_3.1.8                tweenr_2.0.1               
  [81] stringi_1.7.8               highr_0.9                  
  [83] lattice_0.20-45             Matrix_1.4-1               
  [85] vegan_2.6-2                 permute_0.9-7              
- [87] vctrs_0.4.1                 pillar_1.8.0               
+ [87] vctrs_0.4.1                 pillar_1.8.1               
  [89] lifecycle_1.0.1             BiocManager_1.30.18        
  [91] BiocNeighbors_1.14.0        cowplot_1.1.1              
  [93] bitops_1.0-7                irlba_2.3.5                
- [95] R6_2.5.1                    bookdown_0.27              
+ [95] R6_2.5.1                    bookdown_0.28              
  [97] gridExtra_2.3               vipor_0.4.5                
- [99] codetools_0.2-18            MASS_7.3-58                
+ [99] codetools_0.2-18            MASS_7.3-58.1              
 [101] assertthat_0.2.1            withr_2.5.0                
 [103] GenomeInfoDbData_1.2.8      mgcv_1.8-40                
-[105] parallel_4.2.0              grid_4.2.0                 
-[107] ggfun_0.0.6                 beachmat_2.12.0            
-[109] tidyr_1.2.0                 rmarkdown_2.14             
+[105] parallel_4.2.1              grid_4.2.1                 
+[107] ggfun_0.0.7                 beachmat_2.12.0            
+[109] tidyr_1.2.0                 rmarkdown_2.16             
 [111] DelayedMatrixStats_1.18.0   ggnewscale_0.4.7           
-[113] ggforce_0.3.3               ggbeeswarm_0.6.0           
+[113] ggforce_0.3.4               ggbeeswarm_0.6.0           
 ```
 </div>
 

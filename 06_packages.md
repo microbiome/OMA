@@ -89,7 +89,7 @@ Some of the R packages supporting the framework include:
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.2.0 (2022-04-22)
+R version 4.2.1 (2022-06-23)
 Platform: x86_64-pc-linux-gnu (64-bit)
 Running under: Ubuntu 20.04.4 LTS
 
@@ -112,14 +112,14 @@ other attached packages:
 [1] BiocStyle_2.24.0 rebook_1.6.0    
 
 loaded via a namespace (and not attached):
- [1] bookdown_0.27       dir.expiry_1.4.0    codetools_0.2-18   
- [4] XML_3.99-0.10       digest_0.6.29       stats4_4.2.0       
- [7] magrittr_2.0.3      evaluate_0.15       graph_1.74.0       
-[10] rlang_1.0.4         stringi_1.7.8       cli_3.3.0          
-[13] filelock_1.0.2      rmarkdown_2.14      tools_4.2.0        
-[16] stringr_1.4.0       xfun_0.31           yaml_2.3.5         
-[19] fastmap_1.1.0       compiler_4.2.0      BiocGenerics_0.42.0
+ [1] bookdown_0.28       dir.expiry_1.4.0    codetools_0.2-18   
+ [4] XML_3.99-0.10       digest_0.6.29       stats4_4.2.1       
+ [7] magrittr_2.0.3      evaluate_0.16       graph_1.74.0       
+[10] rlang_1.0.5         stringi_1.7.8       cli_3.3.0          
+[13] filelock_1.0.2      rmarkdown_2.16      tools_4.2.1        
+[16] stringr_1.4.1       xfun_0.32           yaml_2.3.5         
+[19] fastmap_1.1.0       compiler_4.2.1      BiocGenerics_0.42.0
 [22] BiocManager_1.30.18 CodeDepends_0.6.5   htmltools_0.5.3    
-[25] knitr_1.39         
+[25] knitr_1.40         
 ```
 </div>
