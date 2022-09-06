@@ -33,8 +33,8 @@ designed for microbial data.
 Load example data
 ```{r load-pkg-data}
 library(mia)
-library(microbiomeDataSets)
-mae <- HintikkaXOData()
+data("HintikkaXOData")
+mae <- HintikkaXOData
 ```
 
 Only the most prevalent taxa are included in analysis. 
@@ -133,9 +133,12 @@ Here, we analyze cross-correlation between taxa and metabolites. This is a case,
 we use _biclust_ method which is suitable for numeric matrices in general.
 
 ```{r biclust_1}
-############################ REMOVE THIS WHEN BUG IN GETEXPERIMENTCROSSCORR IS FIXED
-rownames(mae[[1]]) <- make.unique(rownames(mae[[1]]))
+# Samples must be in equal order 
+# (Only 1st experiment  was ordered in cobiclust step leading to unequal order)
+mae[[1]] <- mae[[1]][ , colnames(mae[[2]]) ]
 
+# Make rownames unique since it is require by other steps
+rownames(mae[[1]]) <- make.unique(rownames(mae[[1]]))
 # Calculate correlations
 corr <- getExperimentCrossCorrelation(mae, 1, 2, 
                                       assay_name1 = "clr", 
