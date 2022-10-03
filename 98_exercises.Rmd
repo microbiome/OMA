@@ -12,7 +12,7 @@ Here you can find assignments on different topics.
 
 ### Reproducible reporting
 
-1. Create an Rmarkdown file (e.g. Rstudio has ready-made templates for this).
+1. Create a Quarto file (e.g. Rstudio has ready-made templates for this).
 2. Add a code chunk and give a name for it.
 3. Render (or knit) the file into pdf or html format
 4. Import e.g., iris dataset, and add a dotplot with a title.
@@ -20,9 +20,9 @@ Here you can find assignments on different topics.
 6. Adjust the size of the figure, and choose from the options that the code chunk will not be shown in the report.
 7. Add some text.
 8. Add an R command within the text.
-9. Update HTML file from the Rmd file.
+9. Update HTML file from the qmd file.
 
-For tips on Rmarkdown, see [Rmarkdown cheat sheet](https://raw.githubusercontent.com/rstudio/cheatsheets/main/rmarkdown-2.0.pdf)
+For tips on Quarto, see [Quarto tutorial](https://quarto.org/docs/authoring/markdown-basics.html)
 
 ## Data containers
 
@@ -140,7 +140,7 @@ Useful functions: estimateDiversity, colSums, geom_point, geom_boxplot
 1. Visualize community variation with different methods (PCA, MDS, NMDS, etc.) with plotReduceDim and with different dissimilarities and transformations,plot also other than the first two axes.
 2. Use PERMANOVA to test differences in beta diversity. You can also try including continuous and/or categorical covariates
 3. If there are statistical differences in PERMANOVA, test PERMDISP2 (betadisper function)
-4. Do DMM clustering
+4. Do clustering
 5. Try RDA to test the variance explained by external variables
 
 
