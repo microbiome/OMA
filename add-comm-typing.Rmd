@@ -347,29 +347,22 @@ vec <- colnames(prob)[max.col(prob,ties.method = "first")]
 Computing the bray PCoA and storing it as a dataframe
 
 ```{r}
-# Gets counts table
-count_assay <- assays(tse)$counts
-
-# Transposes it to get taxa to columns
-count_assay <- t(count_assay)
-
-# Calculates Euclidean distances between samples. Because taxa is in columns,
-# it is used to compare different samples.
-bray_dist <- vegan::vegdist(count_assay, method = "bray")
-
+# Calculate relative abundances
+tse_dmn <- transformSamples(tse_dmn, method = "relabundance")
 # Does principal coordinate analysis
-bray_pcoa <- ecodist::pco(bray_dist)
+bray_pcoa_df <- calculateMDS(tse_dmn, FUN = vegan::vegdist, method = "bray", 
+                             exprs_values = "relabundance")
 
-# Creates a data frame from principal coordinates
-bray_pcoa_df <- data.frame(pcoa1 = bray_pcoa$vectors[,1], 
-                                pcoa2 = bray_pcoa$vectors[,2])
-
+# Convert to data.frame
+bray_pcoa_df <- as.data.frame(bray_pcoa_df)
+colnames(bray_pcoa_df) <- c("pcoa1", "pcoa2")
+head(bray_pcoa_df)
 ```
 
 ```{r}
 # Creates a data frame that contains principal coordinates and DMM information
-bray_dmm_pcoa_df <- cbind(bray_pcoa_df,
-                               dmm_component = vec)
+bray_dmm_pcoa_df <- bray_pcoa_df 
+bray_dmm_pcoa_df$dmm_component <- vec
 # Creates a plot
 bray_dmm_plot <- ggplot(data = bray_dmm_pcoa_df, 
                              aes(x=pcoa1, y=pcoa2,
