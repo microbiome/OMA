@@ -53,10 +53,10 @@ assay <- assay(tse, "relabundance")
 assay <- t(assay)
 
 # Calculate distances
-dist <- vegdist(assay, method = "bray")
+diss <- vegdist(assay, method = "bray")
 
 # Perform hierarchical clustering
-hc <- hclust(dist, method = "complete")
+hc <- hclust(diss, method = "complete")
 
 # To visualize, convert hclust object into dendrogram object
 dendro <- as.dendrogram(hc)
@@ -66,13 +66,39 @@ plot(dendro)
 We can use dendrogram to determine the number of clusters. Usually, the tree is splitted 
 where the length of branches are the longest.
 
-However, as we can see from the dendrogram, there are not that distinct clusters, 
-and determining the number of cluster cannot be justified based on the dendrogram.
-As an example, below, observations are splitted into 5 clusters. 
+However, as we can see from the dendrogram, clusters are no clear. Let's use an algorithm to 
+solve the best number of clusters.
 
 ```{r hclust3}
+if( !require(NbClust) ){
+    install.packages("NbClust")
+    library(NbClust)
+}
+# Determine the optimal number of clusters
+res <- NbClust(diss = diss, distance = NULL, method = "ward.D2",
+               index = "silhouette")
+
+res$Best.nc
+```
+
+Based on the result, let's divide observations into 15 clusters.
+
+```{r hclust4}
+if( !require(dendextend) ){
+    install.packages("dendextend")
+    library(dendextend)
+}
+
 # Find clusters
-cutree(hc, k = 5) 
+cutree(hc, k = 15) 
+
+# Making colors for 6 clusters
+col_val_map <- randomcoloR::distinctColorPalette(15) %>%
+     as.list() %>% setNames(paste0("clust_",seq(15)))
+
+dend <- color_branches(dendro, k=15, col=unlist(col_val_map))
+labels(dend) <- NULL
+plot(dend)
 ```
 
 ## K-means clustering
@@ -97,9 +123,9 @@ if( !require(factoextra) ){
 }
 
 # Convert dist object into matrix
-dist <- as.matrix(dist)
+diss <- as.matrix(diss)
 # Perform silhouette analysis and plot the result
-fviz_nbclust(dist, kmeans, method = "silhouette")
+fviz_nbclust(diss, kmeans, method = "silhouette")
 ```
 
 Based on the result of silhouette analysis, we choose 3 to be the number of clusters
@@ -111,7 +137,7 @@ library(scater)
 # The first step is random, add seed for reproducibility
 set.seed(15463)
 # Perform k-means clustering with 3 clusters
-km <- kmeans(dist, 3, nstart = 25)
+km <- kmeans(diss, 3, nstart = 25)
 # Add the result to colData
 colData(tse)$clusters <- as.factor(km$cluster)
 
