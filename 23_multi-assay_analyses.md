@@ -35,10 +35,6 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
-```
-## Loading required package: ecodist
-```
-
 
 ```r
 library(mia)
@@ -306,7 +302,7 @@ model
 ## Untrained MOFA model with the following characteristics: 
 ##  Number of views: 3 
 ##  Views names: microbiota metabolites biomarkers 
-##  Number of features (per view): 45 38 39 
+##  Number of features (per view): 38 38 39 
 ##  Number of groups: 2 
 ##  Groups names: High-fat Low-fat 
 ##  Number of samples (per group): 20 20 
@@ -446,16 +442,15 @@ other attached packages:
  [1] ggplot2_3.3.6                  patchwork_1.1.2               
  [3] reticulate_1.26                MOFA2_1.6.0                   
  [5] ComplexHeatmap_2.12.1          stringr_1.4.1                 
- [7] microbiomeDataSets_1.1.7       mia_1.5.12                    
+ [7] microbiomeDataSets_1.1.7       mia_1.5.16                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.64.1              XVector_0.36.0                
 [13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
 [15] Biobase_2.56.0                 GenomicRanges_1.48.0          
-[17] GenomeInfoDb_1.32.3            IRanges_2.30.1                
+[17] GenomeInfoDb_1.32.4            IRanges_2.30.1                
 [19] S4Vectors_0.34.0               BiocGenerics_0.42.0           
 [21] MatrixGenerics_1.8.1           matrixStats_0.62.0-9003       
-[23] ecodist_2.0.9                  BiocStyle_2.24.0              
-[25] rebook_1.6.0                  
+[23] BiocStyle_2.24.0               rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
   [1] circlize_0.4.15               AnnotationHub_3.4.0          
@@ -466,12 +461,12 @@ loaded via a namespace (and not attached):
  [11] foreach_1.5.2                 yulab.utils_0.0.5            
  [13] htmltools_0.5.3               viridis_0.6.2                
  [15] fansi_1.0.3                   magrittr_2.0.3               
- [17] memoise_2.0.1                 ScaledMatrix_1.4.0           
+ [17] memoise_2.0.1                 ScaledMatrix_1.4.1           
  [19] cluster_2.1.4                 doParallel_1.0.17            
  [21] DECIPHER_2.24.0               colorspace_2.0-3             
  [23] blob_1.2.3                    rappdirs_0.3.3               
- [25] ggrepel_0.9.1                 xfun_0.32                    
- [27] dplyr_1.0.10                  crayon_1.5.1                 
+ [25] ggrepel_0.9.1                 xfun_0.33                    
+ [27] dplyr_1.0.10                  crayon_1.5.2                 
  [29] RCurl_1.98-1.8                jsonlite_1.8.0               
  [31] graph_1.74.0                  iterators_1.0.14             
  [33] ape_5.6-2                     glue_1.6.2                   
@@ -483,7 +478,7 @@ loaded via a namespace (and not attached):
  [45] DBI_1.1.3                     Rcpp_1.0.9                   
  [47] viridisLite_0.4.1             xtable_1.8-4                 
  [49] clue_0.3-61                   decontam_1.16.0              
- [51] tidytree_0.4.0                bit_4.0.4                    
+ [51] tidytree_0.4.1                bit_4.0.4                    
  [53] rsvd_1.0.5                    httr_1.4.4                   
  [55] RColorBrewer_1.1-3            dir.expiry_1.4.0             
  [57] ellipsis_0.3.2                farver_2.1.1                 
@@ -492,12 +487,12 @@ loaded via a namespace (and not attached):
  [63] CodeDepends_0.6.5             dbplyr_2.2.1                 
  [65] here_1.0.1                    utf8_1.2.2                   
  [67] labeling_0.4.2                tidyselect_1.1.2             
- [69] rlang_1.0.5                   reshape2_1.4.4               
+ [69] rlang_1.0.6                   reshape2_1.4.4               
  [71] later_1.3.0                   AnnotationDbi_1.58.0         
  [73] munsell_0.5.0                 BiocVersion_3.15.2           
  [75] tools_4.2.1                   cachem_1.0.6                 
- [77] cli_3.3.0                     DirichletMultinomial_1.38.0  
- [79] generics_0.1.3                RSQLite_2.2.16               
+ [77] cli_3.4.1                     DirichletMultinomial_1.38.0  
+ [79] generics_0.1.3                RSQLite_2.2.17               
  [81] ExperimentHub_2.4.0           evaluate_0.16                
  [83] fastmap_1.1.0                 yaml_2.3.5                   
  [85] knitr_1.40                    bit64_4.0.5                  
@@ -510,14 +505,14 @@ loaded via a namespace (and not attached):
  [99] tibble_3.1.8                  stringi_1.7.8                
 [101] basilisk.utils_1.8.0          highr_0.9                    
 [103] forcats_0.5.2                 lattice_0.20-45              
-[105] Matrix_1.4-1                  vegan_2.6-2                  
-[107] permute_0.9-7                 vctrs_0.4.1                  
+[105] Matrix_1.5-1                  vegan_2.6-2                  
+[107] permute_0.9-7                 vctrs_0.4.2                  
 [109] rhdf5filters_1.8.0            pillar_1.8.1                 
-[111] lifecycle_1.0.1               BiocManager_1.30.18          
+[111] lifecycle_1.0.2               BiocManager_1.30.18          
 [113] GlobalOptions_0.1.2           BiocNeighbors_1.14.0         
 [115] cowplot_1.1.1                 bitops_1.0-7                 
-[117] irlba_2.3.5                   httpuv_1.6.5                 
-[119] R6_2.5.1                      bookdown_0.28                
+[117] irlba_2.3.5                   httpuv_1.6.6                 
+[119] R6_2.5.1                      bookdown_0.29                
 [121] promises_1.2.0.1              gridExtra_2.3                
 [123] vipor_0.4.5                   codetools_0.2-18             
 [125] MASS_7.3-58.1                 assertthat_0.2.1             
@@ -525,8 +520,8 @@ loaded via a namespace (and not attached):
 [129] rjson_0.2.21                  withr_2.5.0                  
 [131] GenomeInfoDbData_1.2.8        mgcv_1.8-40                  
 [133] parallel_4.2.1                beachmat_2.12.0              
-[135] basilisk_1.8.1                tidyr_1.2.0                  
-[137] rmarkdown_2.16                DelayedMatrixStats_1.18.0    
+[135] basilisk_1.8.1                tidyr_1.2.1                  
+[137] rmarkdown_2.16                DelayedMatrixStats_1.18.1    
 [139] Rtsne_0.16                    Cairo_1.6-0                  
 [141] shiny_1.7.2                   ggbeeswarm_0.6.0             
 ```

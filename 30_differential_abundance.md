@@ -910,7 +910,7 @@ other attached packages:
  [1] fido_1.0.3                     ANCOMBC_1.99.1                
  [3] forcats_0.5.2                  stringr_1.4.1                 
  [5] dplyr_1.0.10                   purrr_0.3.4                   
- [7] readr_2.1.2                    tidyr_1.2.0                   
+ [7] readr_2.1.2                    tidyr_1.2.1                   
  [9] tibble_3.1.8                   ggplot2_3.3.6                 
 [11] tidyverse_1.3.2                knitr_1.40                    
 [13] MicrobiomeStat_1.1             Maaslin2_1.10.0               
@@ -918,11 +918,11 @@ other attached packages:
 [17] truncnorm_1.0-8                NADA_1.6-1.1                  
 [19] survival_3.4-0                 MASS_7.3-58.1                 
 [21] tidySummarizedExperiment_1.6.1 patchwork_1.1.2               
-[23] mia_1.5.12                     MultiAssayExperiment_1.22.0   
+[23] mia_1.5.16                     MultiAssayExperiment_1.22.0   
 [25] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.1             
 [27] XVector_0.36.0                 SingleCellExperiment_1.18.0   
 [29] SummarizedExperiment_1.26.1    Biobase_2.56.0                
-[31] GenomicRanges_1.48.0           GenomeInfoDb_1.32.3           
+[31] GenomicRanges_1.48.0           GenomeInfoDb_1.32.4           
 [33] IRanges_2.30.1                 S4Vectors_0.34.0              
 [35] BiocGenerics_0.42.0            MatrixGenerics_1.8.1          
 [37] matrixStats_0.62.0-9003        BiocStyle_2.24.0              
@@ -933,48 +933,48 @@ loaded via a namespace (and not attached):
   [3] irlba_2.3.5                 DelayedArray_0.22.0        
   [5] data.table_1.14.2           rpart_4.1.16               
   [7] doParallel_1.0.17           RCurl_1.98-1.8             
-  [9] generics_0.1.3              ScaledMatrix_1.4.0         
+  [9] generics_0.1.3              ScaledMatrix_1.4.1         
  [11] microbiome_1.18.0           timeSeries_4021.104        
- [13] RSQLite_2.2.16              proxy_0.4-27               
+ [13] RSQLite_2.2.17              proxy_0.4-27               
  [15] bit_4.0.4                   tzdb_0.3.0                 
  [17] xml2_1.3.3                  lubridate_1.8.0            
  [19] assertthat_0.2.1            DirichletMultinomial_1.38.0
- [21] viridis_0.6.2               gargle_1.2.0               
- [23] xfun_0.32                   fBasics_4021.92            
+ [21] viridis_0.6.2               gargle_1.2.1               
+ [23] xfun_0.33                   fBasics_4021.92            
  [25] ggdist_3.2.0                hms_1.1.2                  
  [27] evaluate_0.16               DEoptimR_1.0-11            
  [29] fansi_1.0.3                 dbplyr_2.2.1               
- [31] readxl_1.4.1                igraph_1.3.4               
+ [31] readxl_1.4.1                igraph_1.3.5               
  [33] DBI_1.1.3                   htmlwidgets_1.5.4          
  [35] tensorA_0.36.2              googledrive_2.0.0          
  [37] hash_2.2.6.2                ellipsis_0.3.2             
  [39] energy_1.7-10               backports_1.4.1            
- [41] bookdown_0.28               permute_0.9-7              
+ [41] bookdown_0.29               permute_0.9-7              
  [43] deldir_1.0-6                sparseMatrixStats_1.8.0    
- [45] vctrs_0.4.1                 abind_1.4-5                
+ [45] vctrs_0.4.2                 abind_1.4-5                
  [47] tidybayes_3.0.2             cachem_1.0.6               
  [49] withr_2.5.0                 robustbase_0.95-0          
  [51] checkmate_2.1.0             vegan_2.6-2                
  [53] treeio_1.20.2               getopt_1.20.3              
  [55] cluster_2.1.4               gsl_2.1-7.1                
  [57] ape_5.6-2                   dir.expiry_1.4.0           
- [59] lazyeval_0.2.2              crayon_1.5.1               
+ [59] lazyeval_0.2.2              crayon_1.5.2               
  [61] labeling_0.4.2              pkgconfig_2.0.3            
  [63] nlme_3.1-159                vipor_0.4.5                
- [65] nnet_7.3-17                 rlang_1.0.5                
- [67] spatial_7.3-15              lifecycle_1.0.1            
+ [65] nnet_7.3-18                 rlang_1.0.6                
+ [67] spatial_7.3-15              lifecycle_1.0.2            
  [69] filelock_1.0.2              phyloseq_1.40.0            
  [71] modelr_0.1.9                rsvd_1.0.5                 
- [73] distributional_0.3.0        cellranger_1.1.0           
+ [73] distributional_0.3.1        cellranger_1.1.0           
  [75] rngtools_1.5.2              graph_1.74.0               
- [77] Matrix_1.4-1                lpsymphony_1.24.0          
+ [77] Matrix_1.5-1                lpsymphony_1.24.0          
  [79] Rhdf5lib_1.18.2             boot_1.3-28                
  [81] base64enc_0.1-3             reprex_2.0.2               
  [83] beeswarm_0.4.0              googlesheets4_1.0.1        
  [85] png_0.1-7                   viridisLite_0.4.1          
  [87] stabledist_0.7-1            rootSolve_1.8.2.3          
  [89] bitops_1.0-7                rhdf5filters_1.8.0         
- [91] blob_1.2.3                  DelayedMatrixStats_1.18.0  
+ [91] blob_1.2.3                  DelayedMatrixStats_1.18.1  
  [93] doRNG_1.8.2                 decontam_1.16.0            
  [95] jpeg_0.1-9                  DECIPHER_2.24.0            
  [97] beachmat_2.12.0             scales_1.2.1               
@@ -982,7 +982,7 @@ loaded via a namespace (and not attached):
 [101] plyr_1.8.7                  zlibbioc_1.42.0            
 [103] compiler_4.2.1              RColorBrewer_1.1-3         
 [105] clue_0.3-61                 lme4_1.1-30                
-[107] cli_3.3.0                   ade4_1.7-19                
+[107] cli_3.4.1                   ade4_1.7-19                
 [109] lmerTest_3.1-3              pbapply_1.5-0              
 [111] htmlTable_2.4.1             Formula_1.2-4              
 [113] mgcv_1.8-40                 tidyselect_1.1.2           
@@ -992,10 +992,10 @@ loaded via a namespace (and not attached):
 [121] ggrepel_0.9.1               grid_4.2.1                 
 [123] tools_4.2.1                 lmom_2.9                   
 [125] parallel_4.2.1              rstudioapi_0.14            
-[127] logging_0.10-108            foreign_0.8-82             
+[127] logging_0.10-108            foreign_0.8-83             
 [129] foreach_1.5.2               statip_0.2.3               
 [131] optparse_1.7.3              gridExtra_2.3              
-[133] gld_2.6.5                   posterior_1.3.0            
+[133] gld_2.6.5                   posterior_1.3.1            
 [135] farver_2.1.1                Rtsne_0.16                 
 [137] stable_1.1.6                RcppZiggurat_0.1.6         
 [139] digest_0.6.29               BiocManager_1.30.18        
@@ -1006,8 +1006,8 @@ loaded via a namespace (and not attached):
 [149] fs_1.5.2                    modeest_2.4.0              
 [151] splines_4.2.1               yulab.utils_0.0.5          
 [153] rmutil_1.1.9                statmod_1.4.37             
-[155] expm_0.999-6                tidytree_0.4.0             
-[157] scater_1.24.0               Exact_3.1                  
+[155] expm_0.999-6                tidytree_0.4.1             
+[157] scater_1.24.0               Exact_3.2                  
 [159] multtest_2.52.0             plotly_4.10.0              
 [161] jsonlite_1.8.0              nloptr_2.0.3               
 [163] CodeDepends_0.6.5           timeDate_4021.104          
