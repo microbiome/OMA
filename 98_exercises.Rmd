@@ -70,7 +70,7 @@ Useful functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colname
 3. Report the thresholds and the dimensionality of the data before and after subsetting
 4. Visualize prevalence
 
-Useful functions: getPrevalence, getPrevalentTaxa
+Useful functions: getPrevalence, getPrevalentTaxa, subsetByPrevalentTaxa
 
 
 ### Taxonomic levels
