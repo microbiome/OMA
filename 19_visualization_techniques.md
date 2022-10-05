@@ -807,7 +807,7 @@ other attached packages:
 [11] scuttle_1.6.3                  mia_1.5.16                    
 [13] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [15] Biostrings_2.64.1              XVector_0.36.0                
-[17] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
+[17] SingleCellExperiment_1.18.1    SummarizedExperiment_1.26.1   
 [19] Biobase_2.56.0                 GenomicRanges_1.48.0          
 [21] GenomeInfoDb_1.32.4            IRanges_2.30.1                
 [23] S4Vectors_0.34.0               BiocGenerics_0.42.0           
@@ -829,8 +829,8 @@ loaded via a namespace (and not attached):
  [21] graphlayouts_0.8.2          colorspace_2.0-3           
  [23] blob_1.2.3                  ggrepel_0.9.1              
  [25] xfun_0.33                   dplyr_1.0.10               
- [27] crayon_1.5.2                RCurl_1.98-1.8             
- [29] jsonlite_1.8.0              graph_1.74.0               
+ [27] crayon_1.5.2                RCurl_1.98-1.9             
+ [29] jsonlite_1.8.2              graph_1.74.0               
  [31] iterators_1.0.14            glue_1.6.2                 
  [33] polyclip_1.10-0             registry_0.5-1             
  [35] gtable_0.3.1                zlibbioc_1.42.0            
@@ -845,7 +845,7 @@ loaded via a namespace (and not attached):
  [53] tidytree_0.4.1              bit_4.0.4                  
  [55] rsvd_1.0.5                  RColorBrewer_1.1-3         
  [57] dir.expiry_1.4.0            ellipsis_0.3.2             
- [59] pkgconfig_2.0.3             XML_3.99-0.10              
+ [59] pkgconfig_2.0.3             XML_3.99-0.11              
  [61] farver_2.1.1                CodeDepends_0.6.5          
  [63] utf8_1.2.2                  labeling_0.4.2             
  [65] ggplotify_0.1.0             tidyselect_1.1.2           
@@ -870,7 +870,7 @@ loaded via a namespace (and not attached):
 [103] pillar_1.8.1                lifecycle_1.0.2            
 [105] BiocManager_1.30.18         GlobalOptions_0.1.2        
 [107] BiocNeighbors_1.14.0        cowplot_1.1.1              
-[109] bitops_1.0-7                irlba_2.3.5                
+[109] bitops_1.0-7                irlba_2.3.5.1              
 [111] seriation_1.3.6             R6_2.5.1                   
 [113] TSP_1.2-1                   bookdown_0.29              
 [115] gridExtra_2.3               vipor_0.4.5                

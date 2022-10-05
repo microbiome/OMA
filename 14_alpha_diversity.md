@@ -358,7 +358,7 @@ other attached packages:
  [5] scuttle_1.6.3                  mia_1.5.16                    
  [7] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
  [9] Biostrings_2.64.1              XVector_0.36.0                
-[11] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
+[11] SingleCellExperiment_1.18.1    SummarizedExperiment_1.26.1   
 [13] Biobase_2.56.0                 GenomicRanges_1.48.0          
 [15] GenomeInfoDb_1.32.4            IRanges_2.30.1                
 [17] S4Vectors_0.34.0               BiocGenerics_0.42.0           
@@ -372,7 +372,7 @@ loaded via a namespace (and not attached):
  [7] fansi_1.0.3                 decontam_1.16.0            
  [9] codetools_0.2-18            splines_4.2.1              
 [11] sparseMatrixStats_1.8.0     cachem_1.0.6               
-[13] knitr_1.40                  jsonlite_1.8.0             
+[13] knitr_1.40                  jsonlite_1.8.2             
 [15] cluster_2.1.4               graph_1.74.0               
 [17] BiocManager_1.30.18         compiler_4.2.1             
 [19] assertthat_0.2.1            Matrix_1.5-1               
@@ -387,7 +387,7 @@ loaded via a namespace (and not attached):
 [37] DECIPHER_2.24.0             DelayedMatrixStats_1.18.1  
 [39] xfun_0.33                   stringr_1.4.1              
 [41] beachmat_2.12.0             lifecycle_1.0.2            
-[43] irlba_2.3.5                 XML_3.99-0.10              
+[43] irlba_2.3.5.1               XML_3.99-0.11              
 [45] zlibbioc_1.42.0             MASS_7.3-58.1              
 [47] scales_1.2.1                parallel_4.2.1             
 [49] yaml_2.3.5                  memoise_2.0.1              
@@ -407,7 +407,7 @@ loaded via a namespace (and not attached):
 [77] generics_0.1.3              DelayedArray_0.22.0        
 [79] DBI_1.1.3                   withr_2.5.0                
 [81] pillar_1.8.1                mgcv_1.8-40                
-[83] RCurl_1.98-1.8              tibble_3.1.8               
+[83] RCurl_1.98-1.9              tibble_3.1.8               
 [85] dir.expiry_1.4.0            crayon_1.5.2               
 [87] utf8_1.2.2                  rmarkdown_2.16             
 [89] viridis_0.6.2               grid_4.2.1                 

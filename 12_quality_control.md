@@ -564,7 +564,7 @@ other attached packages:
  [7] ggplot2_3.3.6                  miaTime_0.1.15                
  [9] mia_1.5.16                     MultiAssayExperiment_1.22.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.1             
-[13] XVector_0.36.0                 SingleCellExperiment_1.18.0   
+[13] XVector_0.36.0                 SingleCellExperiment_1.18.1   
 [15] SummarizedExperiment_1.26.1    Biobase_2.56.0                
 [17] GenomicRanges_1.48.0           GenomeInfoDb_1.32.4           
 [19] IRanges_2.30.1                 S4Vectors_0.34.0              
@@ -605,14 +605,14 @@ loaded via a namespace (and not attached):
  [59] RColorBrewer_1.1-3          Rcpp_1.0.9                 
  [61] plyr_1.8.7                  sparseMatrixStats_1.8.0    
  [63] zlibbioc_1.42.0             purrr_0.3.4                
- [65] RCurl_1.98-1.8              GetoptLong_1.0.5           
+ [65] RCurl_1.98-1.9              GetoptLong_1.0.5           
  [67] viridis_0.6.2               cowplot_1.1.1              
  [69] ggrepel_0.9.1               cluster_2.1.4              
  [71] DECIPHER_2.24.0             magrittr_2.0.3             
  [73] data.table_1.14.2           openxlsx_4.2.5             
  [75] circlize_0.4.15             ggnewscale_0.4.7           
  [77] randomcoloR_1.1.0.1         evaluate_0.16              
- [79] xtable_1.8-4                XML_3.99-0.10              
+ [79] xtable_1.8-4                XML_3.99-0.11              
  [81] gridExtra_2.3               shape_1.4.6                
  [83] compiler_4.2.1              tibble_3.1.8               
  [85] V8_4.2.1                    crayon_1.5.2               
@@ -634,7 +634,7 @@ loaded via a namespace (and not attached):
 [117] edgeR_3.38.4                DelayedMatrixStats_1.18.1  
 [119] curl_4.3.2                  rjson_0.2.21               
 [121] lifecycle_1.0.2             nlme_3.1-159               
-[123] jsonlite_1.8.0              BiocNeighbors_1.14.0       
+[123] jsonlite_1.8.2              BiocNeighbors_1.14.0       
 [125] CodeDepends_0.6.5           viridisLite_0.4.1          
 [127] limma_3.52.4                fansi_1.0.3                
 [129] pillar_1.8.1                lattice_0.20-45            
@@ -646,7 +646,7 @@ loaded via a namespace (and not attached):
 [141] ggforce_0.4.0               stringi_1.7.8              
 [143] blob_1.2.3                  DESeq2_1.36.0              
 [145] BiocSingular_1.12.0         memoise_2.0.1              
-[147] irlba_2.3.5                 ape_5.6-2                  
+[147] irlba_2.3.5.1               ape_5.6-2                  
 ```
 </div>
 

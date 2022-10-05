@@ -910,7 +910,7 @@ other attached packages:
  [1] fido_1.0.3                     ANCOMBC_1.99.1                
  [3] forcats_0.5.2                  stringr_1.4.1                 
  [5] dplyr_1.0.10                   purrr_0.3.4                   
- [7] readr_2.1.2                    tidyr_1.2.1                   
+ [7] readr_2.1.3                    tidyr_1.2.1                   
  [9] tibble_3.1.8                   ggplot2_3.3.6                 
 [11] tidyverse_1.3.2                knitr_1.40                    
 [13] MicrobiomeStat_1.1             Maaslin2_1.10.0               
@@ -920,7 +920,7 @@ other attached packages:
 [21] tidySummarizedExperiment_1.6.1 patchwork_1.1.2               
 [23] mia_1.5.16                     MultiAssayExperiment_1.22.0   
 [25] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.1             
-[27] XVector_0.36.0                 SingleCellExperiment_1.18.0   
+[27] XVector_0.36.0                 SingleCellExperiment_1.18.1   
 [29] SummarizedExperiment_1.26.1    Biobase_2.56.0                
 [31] GenomicRanges_1.48.0           GenomeInfoDb_1.32.4           
 [33] IRanges_2.30.1                 S4Vectors_0.34.0              
@@ -930,9 +930,9 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] coda_0.19-4                 bit64_4.0.5                
-  [3] irlba_2.3.5                 DelayedArray_0.22.0        
+  [3] irlba_2.3.5.1               DelayedArray_0.22.0        
   [5] data.table_1.14.2           rpart_4.1.16               
-  [7] doParallel_1.0.17           RCurl_1.98-1.8             
+  [7] doParallel_1.0.17           RCurl_1.98-1.9             
   [9] generics_0.1.3              ScaledMatrix_1.4.1         
  [11] microbiome_1.18.0           timeSeries_4021.104        
  [13] RSQLite_2.2.17              proxy_0.4-27               
@@ -1002,15 +1002,15 @@ loaded via a namespace (and not attached):
 [141] Rcpp_1.0.9                  broom_1.0.1                
 [143] scuttle_1.6.3               httr_1.4.4                 
 [145] Rdpack_2.4                  colorspace_2.0-3           
-[147] rvest_1.0.3                 XML_3.99-0.10              
+[147] rvest_1.0.3                 XML_3.99-0.11              
 [149] fs_1.5.2                    modeest_2.4.0              
 [151] splines_4.2.1               yulab.utils_0.0.5          
 [153] rmutil_1.1.9                statmod_1.4.37             
 [155] expm_0.999-6                tidytree_0.4.1             
 [157] scater_1.24.0               Exact_3.2                  
 [159] multtest_2.52.0             plotly_4.10.0              
-[161] jsonlite_1.8.0              nloptr_2.0.3               
-[163] CodeDepends_0.6.5           timeDate_4021.104          
+[161] jsonlite_1.8.2              nloptr_2.0.3               
+[163] CodeDepends_0.6.5           timeDate_4021.106          
 [165] Rfast_2.0.6                 R6_2.5.1                   
 [167] Hmisc_4.7-1                 pillar_1.8.1               
 [169] htmltools_0.5.3             glue_1.6.2                 

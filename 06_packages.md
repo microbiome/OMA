@@ -113,7 +113,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
  [1] bookdown_0.29       dir.expiry_1.4.0    codetools_0.2-18   
- [4] XML_3.99-0.10       digest_0.6.29       stats4_4.2.1       
+ [4] XML_3.99-0.11       digest_0.6.29       stats4_4.2.1       
  [7] magrittr_2.0.3      evaluate_0.16       graph_1.74.0       
 [10] rlang_1.0.6         stringi_1.7.8       cli_3.4.1          
 [13] filelock_1.0.2      rmarkdown_2.16      tools_4.2.1        

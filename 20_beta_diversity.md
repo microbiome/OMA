@@ -394,11 +394,11 @@ kable(rda_info_clean)
 \hline
   & Explained by variables & Unexplained by variables & Proportion expl by vars & P-value (PERMANOVA 999 permutations)\\
 \hline
-all & 35.30 & 191.7 & 0.1842 & 0.692\\
+all & 35.30 & 191.7 & 0.1842 & 0.663\\
 \hline
-ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.822\\
+ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.847\\
 \hline
-Gender & 5.31 & 223.7 & 0.0277 & 0.939\\
+Gender & 5.31 & 223.7 & 0.0277 & 0.924\\
 \hline
 Age & 10.59 & 216.4 & 0.0552 & 0.001\\
 \hline
@@ -762,7 +762,7 @@ other attached packages:
  [9] lattice_0.20-45                permute_0.9-7                 
 [11] mia_1.5.16                     MultiAssayExperiment_1.22.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.1             
-[15] XVector_0.36.0                 SingleCellExperiment_1.18.0   
+[15] XVector_0.36.0                 SingleCellExperiment_1.18.1   
 [17] SummarizedExperiment_1.26.1    Biobase_2.56.0                
 [19] GenomicRanges_1.48.0           GenomeInfoDb_1.32.4           
 [21] IRanges_2.30.1                 S4Vectors_0.34.0              
@@ -777,7 +777,7 @@ loaded via a namespace (and not attached):
  [7] bit64_4.0.5                 fansi_1.0.3                
  [9] decontam_1.16.0             codetools_0.2-18           
 [11] splines_4.2.1               sparseMatrixStats_1.8.0    
-[13] cachem_1.0.6                jsonlite_1.8.0             
+[13] cachem_1.0.6                jsonlite_1.8.2             
 [15] cluster_2.1.4               graph_1.74.0               
 [17] BiocManager_1.30.18         compiler_4.2.1             
 [19] assertthat_0.2.1            Matrix_1.5-1               
@@ -791,8 +791,8 @@ loaded via a namespace (and not attached):
 [35] ape_5.6-2                   nlme_3.1-159               
 [37] DECIPHER_2.24.0             DelayedMatrixStats_1.18.1  
 [39] xfun_0.33                   beachmat_2.12.0            
-[41] lifecycle_1.0.2             irlba_2.3.5                
-[43] XML_3.99-0.10               zlibbioc_1.42.0            
+[41] lifecycle_1.0.2             irlba_2.3.5.1              
+[43] XML_3.99-0.11               zlibbioc_1.42.0            
 [45] MASS_7.3-58.1               scales_1.2.1               
 [47] parallel_4.2.1              yaml_2.3.5                 
 [49] memoise_2.0.1               gridExtra_2.3              
@@ -810,7 +810,7 @@ loaded via a namespace (and not attached):
 [73] R6_2.5.1                    generics_0.1.3             
 [75] DelayedArray_0.22.0         DBI_1.1.3                  
 [77] withr_2.5.0                 pillar_1.8.1               
-[79] mgcv_1.8-40                 RCurl_1.98-1.8             
+[79] mgcv_1.8-40                 RCurl_1.98-1.9             
 [81] tibble_3.1.8                dir.expiry_1.4.0           
 [83] crayon_1.5.2                utf8_1.2.2                 
 [85] rmarkdown_2.16              viridis_0.6.2              

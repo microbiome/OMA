@@ -309,26 +309,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    14   9
-##      Veg       9  15
+##      Mixed    12   9
+##      Veg      11  15
 ##                                         
-##                Accuracy : 0.617         
-##                  95% CI : (0.464, 0.755)
+##                Accuracy : 0.574         
+##                  95% CI : (0.422, 0.717)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.0942        
+##     P-Value [Acc > NIR] : 0.233         
 ##                                         
-##                   Kappa : 0.234         
+##                   Kappa : 0.147         
 ##                                         
-##  Mcnemar's Test P-Value : 1.0000        
+##  Mcnemar's Test P-Value : 0.823         
 ##                                         
-##             Sensitivity : 0.609         
+##             Sensitivity : 0.522         
 ##             Specificity : 0.625         
-##          Pos Pred Value : 0.609         
-##          Neg Pred Value : 0.625         
+##          Pos Pred Value : 0.571         
+##          Neg Pred Value : 0.577         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.298         
-##    Detection Prevalence : 0.489         
-##       Balanced Accuracy : 0.617         
+##          Detection Rate : 0.255         
+##    Detection Prevalence : 0.447         
+##       Balanced Accuracy : 0.573         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -445,7 +445,7 @@ other attached packages:
  [5] mikropml_1.3.0                 mia_1.5.16                    
  [7] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
  [9] Biostrings_2.64.1              XVector_0.36.0                
-[11] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
+[11] SingleCellExperiment_1.18.1    SummarizedExperiment_1.26.1   
 [13] Biobase_2.56.0                 GenomicRanges_1.48.0          
 [15] GenomeInfoDb_1.32.4            IRanges_2.30.1                
 [17] S4Vectors_0.34.0               BiocGenerics_0.42.0           
@@ -467,8 +467,8 @@ loaded via a namespace (and not attached):
  [23] hardhat_1.2.0               colorspace_2.0-3           
  [25] blob_1.2.3                  ggrepel_0.9.1              
  [27] xfun_0.33                   dplyr_1.0.10               
- [29] crayon_1.5.2                RCurl_1.98-1.8             
- [31] jsonlite_1.8.0              graph_1.74.0               
+ [29] crayon_1.5.2                RCurl_1.98-1.9             
+ [31] jsonlite_1.8.2              graph_1.74.0               
  [33] survival_3.4-0              iterators_1.0.14           
  [35] ape_5.6-2                   glue_1.6.2                 
  [37] gtable_0.3.1                ipred_0.9-13               
@@ -483,7 +483,7 @@ loaded via a namespace (and not attached):
  [55] prodlim_2019.11.13          glmnet_4.1-4               
  [57] dir.expiry_1.4.0            ellipsis_0.3.2             
  [59] farver_2.1.1                pkgconfig_2.0.3            
- [61] XML_3.99-0.10               scuttle_1.6.3              
+ [61] XML_3.99-0.11               scuttle_1.6.3              
  [63] nnet_7.3-18                 CodeDepends_0.6.5          
  [65] utf8_1.2.2                  labeling_0.4.2             
  [67] tidyselect_1.1.2            rlang_1.0.6                
@@ -506,7 +506,7 @@ loaded via a namespace (and not attached):
 [101] vctrs_0.4.2                 pillar_1.8.1               
 [103] lifecycle_1.0.2             BiocManager_1.30.18        
 [105] BiocNeighbors_1.14.0        data.table_1.14.2          
-[107] bitops_1.0-7                irlba_2.3.5                
+[107] bitops_1.0-7                irlba_2.3.5.1              
 [109] R6_2.5.1                    bookdown_0.29              
 [111] gridExtra_2.3               vipor_0.4.5                
 [113] parallelly_1.32.1           codetools_0.2-18           
@@ -514,7 +514,7 @@ loaded via a namespace (and not attached):
 [117] withr_2.5.0                 GenomeInfoDbData_1.2.8     
 [119] mgcv_1.8-40                 parallel_4.2.1             
 [121] grid_4.2.1                  rpart_4.1.16               
-[123] beachmat_2.12.0             timeDate_4021.104          
+[123] beachmat_2.12.0             timeDate_4021.106          
 [125] tidyr_1.2.1                 class_7.3-20               
 [127] rmarkdown_2.16              DelayedMatrixStats_1.18.1  
 [129] pROC_1.18.0                 lubridate_1.8.0            

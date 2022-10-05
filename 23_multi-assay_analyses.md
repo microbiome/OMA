@@ -445,7 +445,7 @@ other attached packages:
  [7] microbiomeDataSets_1.1.7       mia_1.5.16                    
  [9] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
 [11] Biostrings_2.64.1              XVector_0.36.0                
-[13] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
+[13] SingleCellExperiment_1.18.1    SummarizedExperiment_1.26.1   
 [15] Biobase_2.56.0                 GenomicRanges_1.48.0          
 [17] GenomeInfoDb_1.32.4            IRanges_2.30.1                
 [19] S4Vectors_0.34.0               BiocGenerics_0.42.0           
@@ -467,7 +467,7 @@ loaded via a namespace (and not attached):
  [23] blob_1.2.3                    rappdirs_0.3.3               
  [25] ggrepel_0.9.1                 xfun_0.33                    
  [27] dplyr_1.0.10                  crayon_1.5.2                 
- [29] RCurl_1.98-1.8                jsonlite_1.8.0               
+ [29] RCurl_1.98-1.9                jsonlite_1.8.2               
  [31] graph_1.74.0                  iterators_1.0.14             
  [33] ape_5.6-2                     glue_1.6.2                   
  [35] gtable_0.3.1                  zlibbioc_1.42.0              
@@ -482,7 +482,7 @@ loaded via a namespace (and not attached):
  [53] rsvd_1.0.5                    httr_1.4.4                   
  [55] RColorBrewer_1.1-3            dir.expiry_1.4.0             
  [57] ellipsis_0.3.2                farver_2.1.1                 
- [59] pkgconfig_2.0.3               XML_3.99-0.10                
+ [59] pkgconfig_2.0.3               XML_3.99-0.11                
  [61] scuttle_1.6.3                 uwot_0.1.14                  
  [63] CodeDepends_0.6.5             dbplyr_2.2.1                 
  [65] here_1.0.1                    utf8_1.2.2                   
@@ -511,7 +511,7 @@ loaded via a namespace (and not attached):
 [111] lifecycle_1.0.2               BiocManager_1.30.18          
 [113] GlobalOptions_0.1.2           BiocNeighbors_1.14.0         
 [115] cowplot_1.1.1                 bitops_1.0-7                 
-[117] irlba_2.3.5                   httpuv_1.6.6                 
+[117] irlba_2.3.5.1                 httpuv_1.6.6                 
 [119] R6_2.5.1                      bookdown_0.29                
 [121] promises_1.2.0.1              gridExtra_2.3                
 [123] vipor_0.4.5                   codetools_0.2-18             

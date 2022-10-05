@@ -157,7 +157,7 @@ other attached packages:
  [3] ggplot2_3.3.6                  mia_1.5.16                    
  [5] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
  [7] Biostrings_2.64.1              XVector_0.36.0                
- [9] SingleCellExperiment_1.18.0    SummarizedExperiment_1.26.1   
+ [9] SingleCellExperiment_1.18.1    SummarizedExperiment_1.26.1   
 [11] Biobase_2.56.0                 GenomicRanges_1.48.0          
 [13] GenomeInfoDb_1.32.4            IRanges_2.30.1                
 [15] S4Vectors_0.34.0               BiocGenerics_0.42.0           
@@ -175,7 +175,7 @@ loaded via a namespace (and not attached):
  [15] codetools_0.2-18            splines_4.2.1              
  [17] sparseMatrixStats_1.8.0     cachem_1.0.6               
  [19] knitr_1.40                  scater_1.24.0              
- [21] polyclip_1.10-0             jsonlite_1.8.0             
+ [21] polyclip_1.10-0             jsonlite_1.8.2             
  [23] cluster_2.1.4               graph_1.74.0               
  [25] ggforce_0.4.0               BiocManager_1.30.18        
  [27] compiler_4.2.1              assertthat_0.2.1           
@@ -191,8 +191,8 @@ loaded via a namespace (and not attached):
  [47] nlme_3.1-159                DECIPHER_2.24.0            
  [49] DelayedMatrixStats_1.18.1   xfun_0.33                  
  [51] stringr_1.4.1               beachmat_2.12.0            
- [53] lifecycle_1.0.2             irlba_2.3.5                
- [55] XML_3.99-0.10               zlibbioc_1.42.0            
+ [53] lifecycle_1.0.2             irlba_2.3.5.1              
+ [55] XML_3.99-0.11               zlibbioc_1.42.0            
  [57] MASS_7.3-58.1               scales_1.2.1               
  [59] tidygraph_1.2.2             parallel_4.2.1             
  [61] yaml_2.3.5                  memoise_2.0.1              
@@ -212,7 +212,7 @@ loaded via a namespace (and not attached):
  [89] R6_2.5.1                    generics_0.1.3             
  [91] DelayedArray_0.22.0         DBI_1.1.3                  
  [93] withr_2.5.0                 pillar_1.8.1               
- [95] mgcv_1.8-40                 RCurl_1.98-1.8             
+ [95] mgcv_1.8-40                 RCurl_1.98-1.9             
  [97] tibble_3.1.8                dir.expiry_1.4.0           
  [99] crayon_1.5.2                utf8_1.2.2                 
 [101] rmarkdown_2.16              viridis_0.6.2              
