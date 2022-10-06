@@ -105,184 +105,11 @@ labels <- colData(tse)$Diet
 labels <- as.factor(labels)
 df$diet <- labels 
 
-head(df, 5)
+df[5, 5]
 ```
 
 ```
-##     Lactobacillales Bacillales Clostridiales Selenomonadales Acholeplasmatales
-## ID1         3.71440      9.359         2.616          1.2295           -0.5623
-## ID2         1.87823     10.238         2.616          0.8666           -0.5197
-## ID3         0.07201      4.052         5.631         -0.6211           -0.6211
-## ID4         1.25738      6.462         5.444          0.3411           -0.3521
-## ID5         6.62219      8.639         1.841          0.2320           -0.4612
-##     Burkholderiales Acidaminococcales Rhodospirillales Acidimicrobiales 
-## ID1         -0.5623           -0.5623          -0.5623           -0.5623
-## ID2         -0.5197            0.1735          -0.5197            0.1735
-## ID3         -0.6211           -0.6211          -0.6211           -0.6211
-## ID4         -0.3521           -0.3521          -0.3521           -0.3521
-## ID5         -0.4612           -0.4612          -0.4612            0.9251
-##     AcidithioBacillales Pseudomonadales      NA Actinomycetales
-## ID1             -0.5623           5.986 -0.5623          0.1309
-## ID2             -0.5197           3.144 -0.5197          0.1735
-## ID3             -0.6211           5.454 -0.6211         -0.6211
-## ID4             -0.3521           2.538 -0.3521         -0.3521
-## ID5             -0.4612           4.765 -0.4612          0.2320
-##     Micromonosporales Streptosporangiales Pseudonocardiales Actinopolysporales
-## ID1           -0.5623            -0.56226            0.1309            -0.5623
-## ID2            0.1735            -0.51966            0.1735            -0.5197
-## ID3           -0.6211             0.07201            0.7652            -0.6211
-## ID4           -0.3521             0.34109            0.3411            -0.3521
-## ID5           -0.4612            -0.46120            0.6374            -0.4612
-##     Micrococcales Propionibacteriales Aeromonadales Alteromonadales 
-## ID1         5.097               2.146       -0.5623           0.1309
-## ID2         5.223               1.965        0.5790           1.0898
-## ID3         1.864               1.576        2.7801           1.1706
-## ID4         2.739               6.307       -0.3521          -0.3521
-## ID5         2.104               1.148        1.6182           0.9251
-##     Pasteurellales  Rhizobiales Rhodobacterales Oceanospirillales
-## ID1         -0.5623      0.8240          2.9931           -0.5623
-## ID2          0.1735      0.1735          0.5790            0.5790
-## ID3         -0.6211      0.7652          1.8638            2.0179
-## ID4         -0.3521     -0.3521          0.3411           -0.3521
-## ID5         -0.4612      0.2320          0.9251            0.2320
-##     Bifidobacteriales  Sphingomonadales Synergistales Tissierellales    NA_1
-## ID1            -0.5623           0.1309       -0.5623          5.724 -0.5623
-## ID2            -0.5197          -0.5197       -0.5197          2.119  0.1735
-## ID3            -0.6211          -0.6211       -0.6211          8.315 -0.6211
-## ID4            -0.3521          -0.3521       -0.3521          3.312 -0.3521
-## ID5            -0.4612          -0.4612       -0.4612          1.331 -0.4612
-##     Myxococcales Kineosporiales Frankiales Neisseriales  Xanthomonadales
-## ID1       0.5364        0.13089    -0.5623       -0.5623          0.1309
-## ID2       1.0898       -0.51966    -0.5197       -0.5197          0.1735
-## ID3       0.9883        0.07201    -0.6211       -0.6211          3.7483
-## ID4      -0.3521       -0.35205    -0.3521       -0.3521         -0.3521
-## ID5      -0.4612        0.23195    -0.4612       -0.4612         -0.4612
-##     Chromatiales Anaeroplasmatales  Caulobacterales Pseudomonadales_1
-## ID1       0.8240           -0.56226         -0.5623           -0.5623
-## ID2       1.2721           -0.51966          0.1735           -0.5197
-## ID3       2.2121            0.07201         -0.6211           -0.6211
-## ID4      -0.3521           -0.35205         -0.3521           -0.3521
-## ID5       0.9251           -0.46120         -0.4612           -0.4612
-##     Bacteriovoracales Verrucomicrobiales Bacteroidales Bdellovibrionales
-## ID1           -0.5623            -0.5623       -0.5623            0.1309
-## ID2           -0.5197            -0.5197       -0.5197           -0.5197
-## ID3           -0.6211            -0.6211       -0.6211           -0.6211
-## ID4           -0.3521            -0.3521       -0.3521            0.7466
-## ID5           -0.4612            -0.4612       -0.4612           -0.4612
-##     Enterobacterales  Flavobacteriales Erysipelotrichales Pirellulales
-## ID1            1.2295         -0.56226            -0.5623      -0.5623
-## ID2            0.5790          2.91433            -0.5197      -0.5197
-## ID3            6.6036          0.07201            -0.6211      -0.6211
-## ID4            0.7466         -0.35205            -0.3521      -0.3521
-## ID5            6.7112         -0.46120            -0.4612      -0.4612
-##     Holosporales Thermoanaerobacterales Caldisericales Campylobacterales
-## ID1      -0.5623                 0.1309        -0.5623           -0.5623
-## ID2      -0.5197                 0.1735        -0.5197           -0.5197
-## ID3      -0.6211                -0.6211        -0.6211           -0.6211
-## ID4      -0.3521                -0.3521        -0.3521           -0.3521
-## ID5      -0.4612                -0.4612        -0.4612           -0.4612
-##     Cardiobacteriales  Vibrionales  Catenulisporales      NA_2 CellVibrionales
-## ID1           -0.56226       0.1309           -0.5623  0.13089        -0.56226
-## ID2           -0.51966       0.1735           -0.5197  0.57895        -0.51966
-## ID3            0.07201       1.1706           -0.6211  0.07201         0.07201
-## ID4           -0.35205      -0.3521           -0.3521 -0.35205        -0.35205
-## ID5           -0.46120      -0.4612           -0.4612 -0.46120         0.23195
-##     Chitinispirillales  Chlorobiales Chroococcidiopsidales Cytophagales
-## ID1             -0.5623      -0.5623               -0.5623      -0.5623
-## ID2              0.1735      -0.5197               -0.5197      -0.5197
-## ID3             -0.6211       0.4775               -0.6211      -0.6211
-## ID4             -0.3521      -0.3521               -0.3521      -0.3521
-## ID5             -0.4612      -0.4612               -0.4612      -0.4612
-##     Coprothermobacterales Corynebacteriales Legionellales Parachlamydiales
-## ID1               -0.5623             6.858       -0.5623          -0.5623
-## ID2               -0.5197             5.177       -0.5197          -0.5197
-## ID3               -0.6211             4.936       -0.6211          -0.6211
-## ID4               -0.3521             6.326       -0.3521          -0.3521
-## ID5               -0.4612             4.968       -0.4612          -0.4612
-##     Cucurbitales Thiotrichales    NA_3 Dehalococcoidales Deinococcales 
-## ID1      -0.5623        0.1309 -0.5623           -0.5623        -0.5623
-## ID2      -0.5197       -0.5197 -0.5197           -0.5197        -0.5197
-## ID3      -0.6211       -0.6211 -0.6211           -0.6211        -0.6211
-## ID4      -0.3521       -0.3521 -0.3521            0.3411        -0.3521
-## ID5      -0.4612       -0.4612 -0.4612           -0.4612        -0.4612
-##     Burkholderiales  Syntrophobacterales DesulfoVibrionales Desulfobacterales 
-## ID1          -0.5623              0.1309            -0.5623            -0.5623
-## ID2           0.1735             -0.5197             0.1735            -0.5197
-## ID3          -0.6211             -0.6211             0.7652            -0.6211
-## ID4          -0.3521             -0.3521            -0.3521            -0.3521
-## ID5          -0.4612             -0.4612            -0.4612            -0.4612
-##     Desulfuromonadales Veillonellales Egibacterales Entomoplasmatales     NA_4
-## ID1             0.1309        -0.5623       -0.5623           -0.5623 -0.56226
-## ID2            -0.5197        -0.5197       -0.5197           -0.5197 -0.51966
-## ID3            -0.6211        -0.6211       -0.6211           -0.6211  0.07201
-## ID4             1.8452        -0.3521       -0.3521           -0.3521 -0.35205
-## ID5            -0.4612        -0.4612       -0.4612            0.2320 -0.46120
-##     Chitinophagales Cryptosporangiales Gaiellales  Gemmatimonadales
-## ID1         -0.5623            -0.5623     -0.5623          -0.5623
-## ID2         -0.5197            -0.5197      0.1735          -0.5197
-## ID3         -0.6211            -0.6211     -0.6211          -0.6211
-## ID4         -0.3521            -0.3521     -0.3521          -0.3521
-## ID5         -0.4612            -0.4612     -0.4612          -0.4612
-##     Geodermatophilales Micrococcales_1 Clostridiales  Rickettsiales
-## ID1             0.5364         -0.5623        -0.5623       0.13089
-## ID2            -0.5197         -0.5197        -0.5197      -0.51966
-## ID3            -0.6211         -0.6211        -0.6211       0.07201
-## ID4            -0.3521         -0.3521        -0.3521      -0.35205
-## ID5            -0.4612         -0.4612        -0.4612      -0.46120
-##     CellVibrionales  Glycomycetales Pasteurellales Halanaerobiales Jiangellales
-## ID1          -0.5623        -0.5623        -0.5623         -0.5623      -0.5623
-## ID2          -0.5197        -0.5197        -0.5197         -0.5197      -0.5197
-## ID3          -0.6211        -0.6211        -0.6211         -0.6211      -0.6211
-## ID4          -0.3521        -0.3521        -0.3521         -0.3521      -0.3521
-## ID5          -0.4612        -0.4612        -0.4612         -0.4612      -0.4612
-##     Synechococcales Haloplasmatales Holophagales    NA_5 Ignavibacteriales 
-## ID1         -0.5623         -0.5623      -0.5623 -0.5623            -0.5623
-## ID2         -0.5197         -0.5197      -0.5197 -0.5197            -0.5197
-## ID3         -0.6211         -0.6211      -0.6211 -0.6211            -0.6211
-## ID4         -0.3521         -0.3521      -0.3521 -0.3521            -0.3521
-## ID5          0.2320         -0.4612      -0.4612 -0.4612            -0.4612
-##     Kiloniellales Streptomycetales  Nautiliales  Limnochordales Mariprofundales
-## ID1       -0.5623           -0.5623      -0.5623        -0.5623         -0.5623
-## ID2       -0.5197           -0.5197      -0.5197        -0.5197         -0.5197
-## ID3       -0.6211           -0.6211      -0.6211        -0.6211         -0.6211
-## ID4       -0.3521           -0.3521      -0.3521        -0.3521         -0.3521
-## ID5       -0.4612           -0.4612      -0.4612        -0.4612         -0.4612
-##     Nitrosomonadales Methylococcales Mycoplasmatales Thermales Oligosphaerales
-## ID1          0.13089         -0.5623         0.82403   -0.5623         -0.5623
-## ID2         -0.51966          0.1735         0.57895   -0.5197         -0.5197
-## ID3          0.07201         -0.6211         0.07201   -0.6211         -0.6211
-## ID4         -0.35205         -0.3521        -0.35205   -0.3521         -0.3521
-## ID5         -0.46120         -0.4612         0.92510   -0.4612         -0.4612
-##     Coriobacteriales Anaerolineales Sphingobacteriales Puniceicoccales
-## ID1          -0.5623        -0.5623             0.1309         -0.5623
-## ID2          -0.5197        -0.5197            -0.5197         -0.5197
-## ID3          -0.6211        -0.6211            -0.6211         -0.6211
-## ID4          -0.3521        -0.3521            -0.3521         -0.3521
-## ID5          -0.4612        -0.4612            -0.4612         -0.4612
-##     Arenicellales Bacteroidia    NA_6 Eggerthellales Rubrobacterales
-## ID1       -0.5623     -0.5623 -0.5623        -0.5623          0.1309
-## ID2       -0.5197     -0.5197 -0.5197        -0.5197         -0.5197
-## ID3       -0.6211     -0.6211 -0.6211        -0.6211         -0.6211
-## ID4       -0.3521     -0.3521 -0.3521        -0.3521         -0.3521
-## ID5       -0.4612     -0.4612 -0.4612        -0.4612         -0.4612
-##     Sorangiineae Sphaeropleales Planctomycetales Spirochaetales Sporichthyales
-## ID1      -0.5623        -0.5623          -0.5623        -0.5623        -0.5623
-## ID2      -0.5197        -0.5197          -0.5197        -0.5197        -0.5197
-## ID3      -0.6211         0.9883          -0.6211        -0.6211        -0.6211
-## ID4      -0.3521        -0.3521          -0.3521        -0.3521        -0.3521
-## ID5      -0.4612        -0.4612          -0.4612        -0.4612        -0.4612
-##     Nevskiales Thermoanaerobaculales Nitrospirales Thermoflexales
-## ID1    -0.5623               -0.5623       -0.5623        -0.5623
-## ID2    -0.5197               -0.5197        0.1735        -0.5197
-## ID3    -0.6211               -0.6211       -0.6211        -0.6211
-## ID4    -0.3521               -0.3521       -0.3521        -0.3521
-## ID5    -0.4612               -0.4612       -0.4612        -0.4612
-##     Thermoleophilales Micrococcales_2 VampiroVibrionales Cystobacterineae diet
-## ID1           -0.5623         -0.5623            -0.5623           0.1309  Veg
-## ID2           -0.5197         -0.5197            -0.5197           0.5790  Veg
-## ID3           -0.6211         -0.6211            -0.6211          -0.6211  Veg
-## ID4           -0.3521         -0.3521            -0.3521          -0.3521  Veg
-## ID5           -0.4612         -0.4612            -0.4612           0.6374  Veg
+## [1] -0.4612
 ```
 
 In the example below, we use [mikropml](https://journals.asm.org/doi/10.1128/mBio.00434-20)
@@ -309,26 +136,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    12   9
-##      Veg      11  15
+##      Mixed    10   9
+##      Veg      13  15
 ##                                         
-##                Accuracy : 0.574         
-##                  95% CI : (0.422, 0.717)
+##                Accuracy : 0.532         
+##                  95% CI : (0.381, 0.679)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.233         
+##     P-Value [Acc > NIR] : 0.443         
 ##                                         
-##                   Kappa : 0.147         
+##                   Kappa : 0.06          
 ##                                         
-##  Mcnemar's Test P-Value : 0.823         
+##  Mcnemar's Test P-Value : 0.522         
 ##                                         
-##             Sensitivity : 0.522         
+##             Sensitivity : 0.435         
 ##             Specificity : 0.625         
-##          Pos Pred Value : 0.571         
-##          Neg Pred Value : 0.577         
+##          Pos Pred Value : 0.526         
+##          Neg Pred Value : 0.536         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.255         
-##    Detection Prevalence : 0.447         
-##       Balanced Accuracy : 0.573         
+##          Detection Rate : 0.213         
+##    Detection Prevalence : 0.404         
+##       Balanced Accuracy : 0.530         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -351,13 +178,13 @@ train_control <- trainControl(method = "cv", number = 5,
                               allowParallel = TRUE)
 
 # Specify hyperparameter tuning grid
-tune_grid <- expand.grid(nrounds = c(100, 200),
-                         max_depth = 6,
-                         colsample_bytree = c(0.8, 1),
+tune_grid <- expand.grid(nrounds = c(50, 100, 200),
+                         max_depth = c(6, 8, 10),
+                         colsample_bytree = c(0.6, 0.8, 1),
                          eta = c(0.1, 0.3),
                          gamma = 0,
-                         min_child_weight = c(4, 5),
-                         subsample = 0.8
+                         min_child_weight = c(3, 4, 5),
+                         subsample = c(0.6, 0.8)
                          )
 
 # Train the model, use LOOCV to evaluate performance
@@ -388,7 +215,7 @@ model$pred$obs_binary <- ifelse(model$pred$obs == "Mixed", 1, 0)
 predictions <- model$pred
 
 # Plot roc plot
-plot_roc <- ggplot(predictions, aes_string(m = "pred_binary", d = "obs_binary")) + 
+plot_roc <- ggplot(predictions, aes_string(m = "Mixed", d = "obs_binary")) +
     geom_roc(labels = FALSE, n.cuts = 0)
 
 # Create additional aesthetics and calculate AUC
@@ -491,7 +318,7 @@ loaded via a namespace (and not attached):
  [71] tools_4.2.1                 cachem_1.0.6               
  [73] xgboost_1.6.0.1             cli_3.4.1                  
  [75] DirichletMultinomial_1.38.0 generics_0.1.3             
- [77] RSQLite_2.2.17              evaluate_0.16              
+ [77] RSQLite_2.2.18              evaluate_0.16              
  [79] stringr_1.4.1               fastmap_1.1.0              
  [81] yaml_2.3.5                  ModelMetrics_1.2.2.2       
  [83] knitr_1.40                  bit64_4.0.5                

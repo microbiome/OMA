@@ -616,7 +616,7 @@ loaded via a namespace (and not attached):
 [49] parallel_4.2.1              yaml_2.3.5                 
 [51] memoise_2.0.1               gridExtra_2.3              
 [53] ggplot2_3.3.6               yulab.utils_0.0.5          
-[55] stringi_1.7.8               RSQLite_2.2.17             
+[55] stringi_1.7.8               RSQLite_2.2.18             
 [57] ScaledMatrix_1.4.1          tidytree_0.4.1             
 [59] permute_0.9-7               filelock_1.0.2             
 [61] BiocParallel_1.30.3         rlang_1.0.6                

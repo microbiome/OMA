@@ -1336,7 +1336,7 @@ loaded via a namespace (and not attached):
  [63] BiocVersion_3.15.2            tools_4.2.1                  
  [65] cachem_1.0.6                  cli_3.4.1                    
  [67] DirichletMultinomial_1.38.0   generics_0.1.3               
- [69] RSQLite_2.2.17                ExperimentHub_2.4.0          
+ [69] RSQLite_2.2.18                ExperimentHub_2.4.0          
  [71] ade4_1.7-19                   evaluate_0.16                
  [73] biomformat_1.24.0             stringr_1.4.1                
  [75] fastmap_1.1.0                 yaml_2.3.5                   

@@ -574,7 +574,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] utf8_1.2.2                  tidyselect_1.1.2           
-  [3] RSQLite_2.2.17              AnnotationDbi_1.58.0       
+  [3] RSQLite_2.2.18              AnnotationDbi_1.58.0       
   [5] grid_4.2.1                  TSP_1.2-1                  
   [7] BiocParallel_1.30.3         Rtsne_0.16                 
   [9] munsell_0.5.0               ScaledMatrix_1.4.1         
@@ -643,7 +643,7 @@ loaded via a namespace (and not attached):
 [135] glue_1.6.2                  zip_2.2.1                  
 [137] sechm_1.4.1                 png_0.1-7                  
 [139] iterators_1.0.14            bit_4.0.4                  
-[141] ggforce_0.4.0               stringi_1.7.8              
+[141] ggforce_0.4.1               stringi_1.7.8              
 [143] blob_1.2.3                  DESeq2_1.36.0              
 [145] BiocSingular_1.12.0         memoise_2.0.1              
 [147] irlba_2.3.5.1               ape_5.6-2                  

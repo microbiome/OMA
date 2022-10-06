@@ -394,11 +394,11 @@ kable(rda_info_clean)
 \hline
   & Explained by variables & Unexplained by variables & Proportion expl by vars & P-value (PERMANOVA 999 permutations)\\
 \hline
-all & 35.30 & 191.7 & 0.1842 & 0.663\\
+all & 35.30 & 191.7 & 0.1842 & 0.670\\
 \hline
-ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.847\\
+ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.821\\
 \hline
-Gender & 5.31 & 223.7 & 0.0277 & 0.924\\
+Gender & 5.31 & 223.7 & 0.0277 & 0.933\\
 \hline
 Age & 10.59 & 216.4 & 0.0552 & 0.001\\
 \hline
@@ -797,7 +797,7 @@ loaded via a namespace (and not attached):
 [47] parallel_4.2.1              yaml_2.3.5                 
 [49] memoise_2.0.1               gridExtra_2.3              
 [51] yulab.utils_0.0.5           stringi_1.7.8              
-[53] RSQLite_2.2.17              highr_0.9                  
+[53] RSQLite_2.2.18              highr_0.9                  
 [55] ScaledMatrix_1.4.1          tidytree_0.4.1             
 [57] filelock_1.0.2              BiocParallel_1.30.3        
 [59] rlang_1.0.6                 pkgconfig_2.0.3            

@@ -177,7 +177,7 @@ loaded via a namespace (and not attached):
  [19] knitr_1.40                  scater_1.24.0              
  [21] polyclip_1.10-0             jsonlite_1.8.2             
  [23] cluster_2.1.4               graph_1.74.0               
- [25] ggforce_0.4.0               BiocManager_1.30.18        
+ [25] ggforce_0.4.1               BiocManager_1.30.18        
  [27] compiler_4.2.1              assertthat_0.2.1           
  [29] Matrix_1.5-1                fastmap_1.1.0              
  [31] lazyeval_0.2.2              cli_3.4.1                  
@@ -198,7 +198,7 @@ loaded via a namespace (and not attached):
  [61] yaml_2.3.5                  memoise_2.0.1              
  [63] gridExtra_2.3               ggfun_0.0.7                
  [65] yulab.utils_0.0.5           stringi_1.7.8              
- [67] RSQLite_2.2.17              highr_0.9                  
+ [67] RSQLite_2.2.18              highr_0.9                  
  [69] ScaledMatrix_1.4.1          tidytree_0.4.1             
  [71] permute_0.9-7               filelock_1.0.2             
  [73] BiocParallel_1.30.3         rlang_1.0.6                

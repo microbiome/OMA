@@ -935,7 +935,7 @@ loaded via a namespace (and not attached):
   [7] doParallel_1.0.17           RCurl_1.98-1.9             
   [9] generics_0.1.3              ScaledMatrix_1.4.1         
  [11] microbiome_1.18.0           timeSeries_4021.104        
- [13] RSQLite_2.2.17              proxy_0.4-27               
+ [13] RSQLite_2.2.18              proxy_0.4-27               
  [15] bit_4.0.4                   tzdb_0.3.0                 
  [17] xml2_1.3.3                  lubridate_1.8.0            
  [19] assertthat_0.2.1            DirichletMultinomial_1.38.0

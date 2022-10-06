@@ -492,7 +492,7 @@ loaded via a namespace (and not attached):
  [73] munsell_0.5.0                 BiocVersion_3.15.2           
  [75] tools_4.2.1                   cachem_1.0.6                 
  [77] cli_3.4.1                     DirichletMultinomial_1.38.0  
- [79] generics_0.1.3                RSQLite_2.2.17               
+ [79] generics_0.1.3                RSQLite_2.2.18               
  [81] ExperimentHub_2.4.0           evaluate_0.16                
  [83] fastmap_1.1.0                 yaml_2.3.5                   
  [85] knitr_1.40                    bit64_4.0.5                  

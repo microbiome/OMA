@@ -852,7 +852,7 @@ loaded via a namespace (and not attached):
  [67] rlang_1.0.6                 munsell_0.5.0              
  [69] tools_4.2.1                 cachem_1.0.6               
  [71] cli_3.4.1                   DirichletMultinomial_1.38.0
- [73] generics_0.1.3              RSQLite_2.2.17             
+ [73] generics_0.1.3              RSQLite_2.2.18             
  [75] broom_1.0.1                 evaluate_0.16              
  [77] stringr_1.4.1               fastmap_1.1.0              
  [79] yaml_2.3.5                  knitr_1.40                 
@@ -883,6 +883,6 @@ loaded via a namespace (and not attached):
 [129] rmarkdown_2.16              DelayedMatrixStats_1.18.1  
 [131] carData_3.0-5               Cairo_1.6-0                
 [133] Rtsne_0.16                  ggnewscale_0.4.7           
-[135] ggforce_0.4.0               ggbeeswarm_0.6.0           
+[135] ggforce_0.4.1               ggbeeswarm_0.6.0           
 ```
 </div>
