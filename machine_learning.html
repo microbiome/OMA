@@ -550,26 +550,26 @@ package. We try to predict the diet type based on the data.</p>
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    12  10
-##      Veg      11  14
+##      Mixed    10  11
+##      Veg      13  13
 ##                                         
-##                Accuracy : 0.553         
-##                  95% CI : (0.401, 0.698)
+##                Accuracy : 0.489         
+##                  95% CI : (0.341, 0.639)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc &gt; NIR] : 0.331         
+##     P-Value [Acc &gt; NIR] : 0.669         
 ##                                         
-##                   Kappa : 0.105         
+##                   Kappa : -0.024        
 ##                                         
-##  Mcnemar&#39;s Test P-Value : 1.000         
+##  Mcnemar&#39;s Test P-Value : 0.838         
 ##                                         
-##             Sensitivity : 0.522         
-##             Specificity : 0.583         
-##          Pos Pred Value : 0.545         
-##          Neg Pred Value : 0.560         
+##             Sensitivity : 0.435         
+##             Specificity : 0.542         
+##          Pos Pred Value : 0.476         
+##          Neg Pred Value : 0.500         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.255         
-##    Detection Prevalence : 0.468         
-##       Balanced Accuracy : 0.553         
+##          Detection Rate : 0.213         
+##    Detection Prevalence : 0.447         
+##       Balanced Accuracy : 0.488         
 ##                                         
 ##        &#39;Positive&#39; Class : Mixed         
 ## </code></pre>
@@ -605,29 +605,20 @@ package. However, we can also use it directly.</p>
 <span id="cb351-27"><a href="machine_learning.html#cb351-27" aria-hidden="true" tabindex="-1"></a>               <span class="at">metric =</span> <span class="st">&quot;AUC&quot;</span>,</span>
 <span id="cb351-28"><a href="machine_learning.html#cb351-28" aria-hidden="true" tabindex="-1"></a>               <span class="at">verbosity =</span> <span class="dv">0</span></span>
 <span id="cb351-29"><a href="machine_learning.html#cb351-29" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<p>Let’s create ROC curve which is a commonly used method in binary classification.</p>
-<div class="sourceCode" id="cb352"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb352-1"><a href="machine_learning.html#cb352-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>( <span class="sc">!</span><span class="fu">require</span>(plotROC) ){</span>
-<span id="cb352-2"><a href="machine_learning.html#cb352-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;plotROC&quot;</span>)</span>
-<span id="cb352-3"><a href="machine_learning.html#cb352-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(plotROC)</span>
+<p>Let’s create ROC curve which is a commonly used method in binary classification.
+For unbalanced data, you might want to plot precision-recall curve.</p>
+<div class="sourceCode" id="cb352"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb352-1"><a href="machine_learning.html#cb352-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>( <span class="sc">!</span><span class="fu">require</span>(MLeval) ){</span>
+<span id="cb352-2"><a href="machine_learning.html#cb352-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;MLeval&quot;</span>)</span>
+<span id="cb352-3"><a href="machine_learning.html#cb352-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(MLeval)</span>
 <span id="cb352-4"><a href="machine_learning.html#cb352-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb352-5"><a href="machine_learning.html#cb352-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert diets forms into binary</span></span>
-<span id="cb352-6"><a href="machine_learning.html#cb352-6" aria-hidden="true" tabindex="-1"></a>model<span class="sc">$</span>pred<span class="sc">$</span>pred_binary <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(model<span class="sc">$</span>pred<span class="sc">$</span>pred <span class="sc">==</span> <span class="st">&quot;Mixed&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
-<span id="cb352-7"><a href="machine_learning.html#cb352-7" aria-hidden="true" tabindex="-1"></a>model<span class="sc">$</span>pred<span class="sc">$</span>obs_binary <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(model<span class="sc">$</span>pred<span class="sc">$</span>obs <span class="sc">==</span> <span class="st">&quot;Mixed&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
-<span id="cb352-8"><a href="machine_learning.html#cb352-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb352-9"><a href="machine_learning.html#cb352-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Predictions</span></span>
-<span id="cb352-10"><a href="machine_learning.html#cb352-10" aria-hidden="true" tabindex="-1"></a>predictions <span class="ot">&lt;-</span> model<span class="sc">$</span>pred</span>
-<span id="cb352-11"><a href="machine_learning.html#cb352-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb352-12"><a href="machine_learning.html#cb352-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot roc plot</span></span>
-<span id="cb352-13"><a href="machine_learning.html#cb352-13" aria-hidden="true" tabindex="-1"></a>plot_roc <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(predictions, <span class="fu">aes_string</span>(<span class="at">m =</span> <span class="st">&quot;Mixed&quot;</span>, <span class="at">d =</span> <span class="st">&quot;obs_binary&quot;</span>)) <span class="sc">+</span></span>
-<span id="cb352-14"><a href="machine_learning.html#cb352-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_roc</span>(<span class="at">labels =</span> <span class="cn">FALSE</span>, <span class="at">n.cuts =</span> <span class="dv">0</span>)</span>
-<span id="cb352-15"><a href="machine_learning.html#cb352-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb352-16"><a href="machine_learning.html#cb352-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Create additional aesthetics and calculate AUC</span></span>
-<span id="cb352-17"><a href="machine_learning.html#cb352-17" aria-hidden="true" tabindex="-1"></a>plot <span class="ot">&lt;-</span> plot_roc <span class="sc">+</span> </span>
-<span id="cb352-18"><a href="machine_learning.html#cb352-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">style_roc</span>() <span class="sc">+</span> </span>
-<span id="cb352-19"><a href="machine_learning.html#cb352-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">&quot;AUC = &quot;</span>, <span class="fu">round</span>(<span class="fu">calc_auc</span>(plot_roc)<span class="sc">$</span>AUC, <span class="dv">3</span>) ) )) <span class="sc">+</span></span>
-<span id="cb352-20"><a href="machine_learning.html#cb352-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position=</span><span class="st">&quot;none&quot;</span>)</span>
-<span id="cb352-21"><a href="machine_learning.html#cb352-21" aria-hidden="true" tabindex="-1"></a>plot</span></code></pre></div>
-<p><img src="40_machine_learning_files/figure-html/super5-1.png" width="672" /></p>
+<span id="cb352-5"><a href="machine_learning.html#cb352-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate different evaluation metrics</span></span>
+<span id="cb352-6"><a href="machine_learning.html#cb352-6" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">evalm</span>(model)</span></code></pre></div>
+<p><img src="40_machine_learning_files/figure-html/super5-1.png" width="672" /><img src="40_machine_learning_files/figure-html/super5-2.png" width="672" /><img src="40_machine_learning_files/figure-html/super5-3.png" width="672" /><img src="40_machine_learning_files/figure-html/super5-4.png" width="672" /></p>
+<div class="sourceCode" id="cb353"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb353-1"><a href="machine_learning.html#cb353-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use patchwork to plot ROC and precision-recall curve side-by-side</span></span>
+<span id="cb353-2"><a href="machine_learning.html#cb353-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb353-3"><a href="machine_learning.html#cb353-3" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>roc <span class="sc">+</span> res<span class="sc">$</span>proc <span class="sc">+</span> </span>
+<span id="cb353-4"><a href="machine_learning.html#cb353-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">&quot;collect&quot;</span>) <span class="sc">&amp;</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;bottom&#39;</span>)</span></code></pre></div>
+<p><img src="40_machine_learning_files/figure-html/super5-5.png" width="672" /></p>
 </div>
 <div id="unsupervised-machine-learning" class="section level2 hasAnchor" number="12.2">
 <h2><span class="header-section-number">12.2</span> Unsupervised machine learning<a href="machine_learning.html#unsupervised-machine-learning" class="anchor-section" aria-label="Anchor link to header"></a></h2>
@@ -637,8 +628,8 @@ Unsupervised ML is also known as a data mining where patterns are extracted
 from big datasets.</p>
 <p>For unsupervised machine learning, please refer to chapters that are listed below:</p>
 <ul>
-<li><a href="clustering.html#clustering">10</a></li>
-<li><a href="community-similarity.html#community-similarity">8</a></li>
+<li>Chapter <a href="clustering.html#clustering">10</a></li>
+<li>Chapter <a href="community-similarity.html#community-similarity">8</a></li>
 </ul>
 </div>
 <div id="session-info-8" class="section level2 unnumbered hasAnchor">
@@ -668,17 +659,18 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] plotROC_2.3.0                  caret_6.0-93                  
- [3] lattice_0.20-45                ggplot2_3.3.6                 
- [5] mikropml_1.3.0                 mia_1.5.16                    
- [7] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
- [9] Biostrings_2.64.1              XVector_0.36.0                
-[11] SingleCellExperiment_1.18.1    SummarizedExperiment_1.26.1   
-[13] Biobase_2.56.0                 GenomicRanges_1.48.0          
-[15] GenomeInfoDb_1.32.4            IRanges_2.30.1                
-[17] S4Vectors_0.34.0               BiocGenerics_0.42.0           
-[19] MatrixGenerics_1.8.1           matrixStats_0.62.0-9003       
-[21] BiocStyle_2.24.0               rebook_1.6.0                  
+ [1] patchwork_1.1.2                MLeval_0.3                    
+ [3] caret_6.0-93                   lattice_0.20-45               
+ [5] ggplot2_3.3.6                  mikropml_1.3.0                
+ [7] mia_1.5.16                     MultiAssayExperiment_1.22.0   
+ [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.1             
+[11] XVector_0.36.0                 SingleCellExperiment_1.18.1   
+[13] SummarizedExperiment_1.26.1    Biobase_2.56.0                
+[15] GenomicRanges_1.48.0           GenomeInfoDb_1.32.4           
+[17] IRanges_2.30.1                 S4Vectors_0.34.0              
+[19] BiocGenerics_0.42.0            MatrixGenerics_1.8.1          
+[21] matrixStats_0.62.0-9003        BiocStyle_2.24.0              
+[23] rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
   [1] plyr_1.8.7                  lazyeval_0.2.2             

@@ -136,26 +136,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    10   9
-##      Veg      13  15
+##      Mixed    14  10
+##      Veg       9  14
 ##                                         
-##                Accuracy : 0.532         
-##                  95% CI : (0.381, 0.679)
+##                Accuracy : 0.596         
+##                  95% CI : (0.443, 0.736)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.443         
+##     P-Value [Acc > NIR] : 0.154         
 ##                                         
-##                   Kappa : 0.06          
+##                   Kappa : 0.192         
 ##                                         
-##  Mcnemar's Test P-Value : 0.522         
+##  Mcnemar's Test P-Value : 1.000         
 ##                                         
-##             Sensitivity : 0.435         
-##             Specificity : 0.625         
-##          Pos Pred Value : 0.526         
-##          Neg Pred Value : 0.536         
+##             Sensitivity : 0.609         
+##             Specificity : 0.583         
+##          Pos Pred Value : 0.583         
+##          Neg Pred Value : 0.609         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.213         
-##    Detection Prevalence : 0.404         
-##       Balanced Accuracy : 0.530         
+##          Detection Rate : 0.298         
+##    Detection Prevalence : 0.511         
+##       Balanced Accuracy : 0.596         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -200,34 +200,28 @@ model <- train(x = assay,
 ```
 
 Let's create ROC curve which is a commonly used method in binary classification.
+For unbalanced data, you might want to plot precision-recall curve. 
 
 
 ```r
-if( !require(plotROC) ){
-    install.packages("plotROC")
-    library(plotROC)
+if( !require(MLeval) ){
+    install.packages("MLeval")
+    library(MLeval)
 }
-# Convert diets forms into binary
-model$pred$pred_binary <- ifelse(model$pred$pred == "Mixed", 1, 0)
-model$pred$obs_binary <- ifelse(model$pred$obs == "Mixed", 1, 0)
-
-# Predictions
-predictions <- model$pred
-
-# Plot roc plot
-plot_roc <- ggplot(predictions, aes_string(m = "Mixed", d = "obs_binary")) +
-    geom_roc(labels = FALSE, n.cuts = 0)
-
-# Create additional aesthetics and calculate AUC
-plot <- plot_roc + 
-    style_roc() + 
-    geom_text(aes(0.5, 0.5, label = paste0("AUC = ", round(calc_auc(plot_roc)$AUC, 3) ) )) +
-    theme(legend.position="none")
-plot
+# Calculate different evaluation metrics
+res <- evalm(model)
 ```
 
-![](40_machine_learning_files/figure-latex/super5-1.pdf)<!-- --> 
+![](40_machine_learning_files/figure-latex/super5-1.pdf)<!-- --> ![](40_machine_learning_files/figure-latex/super5-2.pdf)<!-- --> ![](40_machine_learning_files/figure-latex/super5-3.pdf)<!-- --> ![](40_machine_learning_files/figure-latex/super5-4.pdf)<!-- --> 
 
+```r
+# Use patchwork to plot ROC and precision-recall curve side-by-side
+library(patchwork)
+res$roc + res$proc + 
+    plot_layout(guides = "collect") & theme(legend.position = 'bottom')
+```
+
+![](40_machine_learning_files/figure-latex/super5-5.pdf)<!-- --> 
 
 ## Unsupervised machine learning
 
@@ -238,8 +232,8 @@ from big datasets.
 
 For unsupervised machine learning, please refer to chapters that are listed below:
 
-- \@ref(clustering)
-- \@ref(community-similarity) 
+- Chapter \@ref(clustering)
+- Chapter \@ref(community-similarity) 
 
 ## Session Info {-}
 
@@ -267,17 +261,18 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] plotROC_2.3.0                  caret_6.0-93                  
- [3] lattice_0.20-45                ggplot2_3.3.6                 
- [5] mikropml_1.3.0                 mia_1.5.16                    
- [7] MultiAssayExperiment_1.22.0    TreeSummarizedExperiment_2.1.4
- [9] Biostrings_2.64.1              XVector_0.36.0                
-[11] SingleCellExperiment_1.18.1    SummarizedExperiment_1.26.1   
-[13] Biobase_2.56.0                 GenomicRanges_1.48.0          
-[15] GenomeInfoDb_1.32.4            IRanges_2.30.1                
-[17] S4Vectors_0.34.0               BiocGenerics_0.42.0           
-[19] MatrixGenerics_1.8.1           matrixStats_0.62.0-9003       
-[21] BiocStyle_2.24.0               rebook_1.6.0                  
+ [1] patchwork_1.1.2                MLeval_0.3                    
+ [3] caret_6.0-93                   lattice_0.20-45               
+ [5] ggplot2_3.3.6                  mikropml_1.3.0                
+ [7] mia_1.5.16                     MultiAssayExperiment_1.22.0   
+ [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.64.1             
+[11] XVector_0.36.0                 SingleCellExperiment_1.18.1   
+[13] SummarizedExperiment_1.26.1    Biobase_2.56.0                
+[15] GenomicRanges_1.48.0           GenomeInfoDb_1.32.4           
+[17] IRanges_2.30.1                 S4Vectors_0.34.0              
+[19] BiocGenerics_0.42.0            MatrixGenerics_1.8.1          
+[21] matrixStats_0.62.0-9003        BiocStyle_2.24.0              
+[23] rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
   [1] plyr_1.8.7                  lazyeval_0.2.2             
