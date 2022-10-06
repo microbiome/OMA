@@ -136,26 +136,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    14  10
-##      Veg       9  14
+##      Mixed    10  14
+##      Veg      13  10
 ##                                         
-##                Accuracy : 0.596         
-##                  95% CI : (0.443, 0.736)
+##                Accuracy : 0.426         
+##                  95% CI : (0.283, 0.578)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.154         
+##     P-Value [Acc > NIR] : 0.906         
 ##                                         
-##                   Kappa : 0.192         
+##                   Kappa : -0.148        
 ##                                         
 ##  Mcnemar's Test P-Value : 1.000         
 ##                                         
-##             Sensitivity : 0.609         
-##             Specificity : 0.583         
-##          Pos Pred Value : 0.583         
-##          Neg Pred Value : 0.609         
+##             Sensitivity : 0.435         
+##             Specificity : 0.417         
+##          Pos Pred Value : 0.417         
+##          Neg Pred Value : 0.435         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.298         
+##          Detection Rate : 0.213         
 ##    Detection Prevalence : 0.511         
-##       Balanced Accuracy : 0.596         
+##       Balanced Accuracy : 0.426         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -209,19 +209,15 @@ if( !require(MLeval) ){
     library(MLeval)
 }
 # Calculate different evaluation metrics
-res <- evalm(model)
-```
+res <- evalm(model, showplots = FALSE)
 
-![](40_machine_learning_files/figure-latex/super5-1.pdf)<!-- --> ![](40_machine_learning_files/figure-latex/super5-2.pdf)<!-- --> ![](40_machine_learning_files/figure-latex/super5-3.pdf)<!-- --> ![](40_machine_learning_files/figure-latex/super5-4.pdf)<!-- --> 
-
-```r
 # Use patchwork to plot ROC and precision-recall curve side-by-side
 library(patchwork)
 res$roc + res$proc + 
     plot_layout(guides = "collect") & theme(legend.position = 'bottom')
 ```
 
-![](40_machine_learning_files/figure-latex/super5-5.pdf)<!-- --> 
+![](40_machine_learning_files/figure-latex/super5-1.pdf)<!-- --> 
 
 ## Unsupervised machine learning
 
