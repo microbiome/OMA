@@ -115,31 +115,21 @@ model <- train(x = assay,
 ```
 
 Let's create ROC curve which is a commonly used method in binary classification.
+For unbalanced data, you might want to plot precision-recall curve. 
 
 ```{r super5}
-if( !require(plotROC) ){
-    install.packages("plotROC")
-    library(plotROC)
+if( !require(MLeval) ){
+    install.packages("MLeval")
+    library(MLeval)
 }
-# Convert diets forms into binary
-model$pred$pred_binary <- ifelse(model$pred$pred == "Mixed", 1, 0)
-model$pred$obs_binary <- ifelse(model$pred$obs == "Mixed", 1, 0)
+# Calculate different evaluation metrics
+res <- evalm(model)
 
-# Predictions
-predictions <- model$pred
-
-# Plot roc plot
-plot_roc <- ggplot(predictions, aes_string(m = "Mixed", d = "obs_binary")) +
-    geom_roc(labels = FALSE, n.cuts = 0)
-
-# Create additional aesthetics and calculate AUC
-plot <- plot_roc + 
-    style_roc() + 
-    geom_text(aes(0.5, 0.5, label = paste0("AUC = ", round(calc_auc(plot_roc)$AUC, 3) ) )) +
-    theme(legend.position="none")
-plot
+# Use patchwork to plot ROC and precision-recall curve side-by-side
+library(patchwork)
+res$roc + res$proc + 
+    plot_layout(guides = "collect") & theme(legend.position = 'bottom')
 ```
-
 
 ## Unsupervised machine learning
 
