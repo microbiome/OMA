@@ -1,4 +1,4 @@
-# Orchestrating Microbiome Analysis Book
+# Orchestrating Microbiome Analysis Book <img src="general/figures/mia_logo.png" align="right" width="120" />
 
 ## Overview
 
