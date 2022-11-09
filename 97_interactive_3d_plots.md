@@ -105,7 +105,7 @@ library("vegan")
 ```
 
 ```
-## This is vegan 2.6-2
+## This is vegan 2.6-4
 ```
 
 ```r

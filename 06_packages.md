@@ -1,6 +1,5 @@
 # Packages {#packages}
 
-
 <script>
 document.addEventListener("click", function (event) {
     if (event.target.classList.contains("rebook-collapse")) {
@@ -36,6 +35,7 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
+<img src="general/figures/mia_logo.png" width="100" alt="mia logo" align="right" style="margin: 0 1em 0 1em" />
 
 ## Package installation
 
@@ -44,7 +44,7 @@ of `SummarizedExperiment` and related data containers. One of these is
 `mia`. The installation for this and other packages has the following
 procedure.
 
-Stable Biocondcuctor release version can be installed with:
+Stable Bioconductor release version can be installed with:
 
 
 ```r
@@ -113,13 +113,13 @@ other attached packages:
 
 loaded via a namespace (and not attached):
  [1] bookdown_0.29       dir.expiry_1.4.0    codetools_0.2-18   
- [4] XML_3.99-0.11       digest_0.6.29       stats4_4.2.1       
- [7] magrittr_2.0.3      evaluate_0.16       graph_1.74.0       
+ [4] XML_3.99-0.12       digest_0.6.30       stats4_4.2.1       
+ [7] magrittr_2.0.3      evaluate_0.18       graph_1.74.0       
 [10] rlang_1.0.6         stringi_1.7.8       cli_3.4.1          
-[13] filelock_1.0.2      rmarkdown_2.16      tools_4.2.1        
-[16] stringr_1.4.1       xfun_0.33           yaml_2.3.5         
-[19] fastmap_1.1.0       compiler_4.2.1      BiocGenerics_0.42.0
-[22] BiocManager_1.30.18 CodeDepends_0.6.5   htmltools_0.5.3    
+[13] filelock_1.0.2      rmarkdown_2.17      tools_4.2.1        
+[16] stringr_1.4.1       xfun_0.34           yaml_2.3.6         
+[19] fastmap_1.1.0       compiler_4.2.1      BiocGenerics_0.44.0
+[22] BiocManager_1.30.19 CodeDepends_0.6.5   htmltools_0.5.3    
 [25] knitr_1.40         
 ```
 </div>
