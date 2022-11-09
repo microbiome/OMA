@@ -358,10 +358,13 @@ taxon.
 
 
 ```{r}
+# Rename "taxon" column from ancombc results  so that it match with others
+colnames(out$res$diff_abn)[colnames(out$res$diff_abn) == "taxon"] <- "genus"
+
 summ <- full_join(
     rownames_to_column(aldex_out, "genus") %>%
       select(genus, aldex2 = wi.eBH),
-    rownames_to_column(out$res$diff_abn, "genus") %>%
+    out$res$diff_abn %>%
       select(genus, ancombc = phenoObese),
     by = "genus") %>%
   full_join(
@@ -453,18 +456,11 @@ object.
 
 
 ```{r}
-# to join new data to existing colData we need to put rownames as a column 
-colData(tse)$sample_id <- rownames(colData(tse))
-# simulate a covariate that I will add to the colData.
-df_sim <- tibble(
-  sample_id = colData(tse)$sample_id,
-  age = rnorm(n = length(colData(tse)$sample_id))
-)
-# an easy way to join data is to use dplyr functions. The package 
-# tidySummarizedExperiment enables this functionality
-tse <- full_join(tse, df_sim, by = "sample_id")
+# Add random age variable for demonstration
+colData(tse)$age <- sample(18:64, ncol(tse), replace = TRUE)
+
 out_cov = ancombc(
-  x = tse, 
+  data = tse, 
   formula = "pheno + age", # here we add age to the model
   p_adj_method = "fdr", 
   prv_cut = 0,  # we did that already
