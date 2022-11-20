@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 11 Differential abundance | Orchestrating Microbiome Analysis</title>
   <meta name="description" content="Chapter 11 Differential abundance | Orchestrating Microbiome Analysis" />
-  <meta name="generator" content="bookdown 0.29 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.30 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 11 Differential abundance | Orchestrating Microbiome Analysis" />
   <meta property="og:type" content="book" />
@@ -320,7 +320,7 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="11.2" data-path="differential-abundance.html"><a href="differential-abundance.html#tree-based-methods"><i class="fa fa-check"></i><b>11.2</b> Tree-based methods</a>
 <ul>
-<li class="chapter" data-level="11.2.1" data-path="differential-abundance.html"><a href="differential-abundance.html#group-wise-associations-testing-based-on-balances-with-fido"><i class="fa fa-check"></i><b>11.2.1</b> Group-wise associations testing based on balances with fido</a></li>
+<li class="chapter" data-level="11.2.1" data-path="differential-abundance.html"><a href="differential-abundance.html#group-wise-associations-testing-based-on-balances"><i class="fa fa-check"></i><b>11.2.1</b> Group-wise associations testing based on balances</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="differential-abundance.html"><a href="differential-abundance.html#session-info-7"><i class="fa fa-check"></i>Session Info</a></li>
 </ul></li>
@@ -374,6 +374,7 @@ div.csl-indent {
 <ul>
 <li class="chapter" data-level="16.1" data-path="extras.html"><a href="extras.html#interactive-3d-plots"><i class="fa fa-check"></i><b>16.1</b> Interactive 3D Plots</a></li>
 <li class="chapter" data-level="16.2" data-path="extras.html"><a href="extras.html#permanova-comparison"><i class="fa fa-check"></i><b>16.2</b> PERMANOVA comparison</a></li>
+<li class="chapter" data-level="16.3" data-path="extras.html"><a href="extras.html#bayesian-multinomial-logistic-normal-models"><i class="fa fa-check"></i><b>16.3</b> Bayesian Multinomial Logistic-Normal Models</a></li>
 </ul></li>
 <li class="chapter" data-level="17" data-path="acknowledgments.html"><a href="acknowledgments.html"><i class="fa fa-check"></i><b>17</b> Acknowledgments</a></li>
 <li class="chapter" data-level="18" data-path="exercises.html"><a href="exercises.html"><i class="fa fa-check"></i><b>18</b> Exercises</a>
@@ -1424,92 +1425,9 @@ group-wise associations.</p>
 </div>
 <div id="tree-based-methods" class="section level2 hasAnchor" number="11.2">
 <h2><span class="header-section-number">11.2</span> Tree-based methods<a href="differential-abundance.html#tree-based-methods" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<div id="group-wise-associations-testing-based-on-balances-with-fido" class="section level3 hasAnchor" number="11.2.1">
-<h3><span class="header-section-number">11.2.1</span> Group-wise associations testing based on balances with fido<a href="differential-abundance.html#group-wise-associations-testing-based-on-balances-with-fido" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p><a href="https://bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html">TreeSummarizedExperiment</a>
-frequently includes a Phylogenetic tree along with associated data about the
-experiment (at <code>colData</code>), that holds covariates which can be used for
-analyzing group-wise associations.</p>
-<p>Such an analysis could be performed with the function <code>pibble</code> from the <code>fido</code>
-package, that offers a Multinomial Logistic-Normal Linear Regression model; see
-<a href="https://jsilve24.github.io/fido/articles/introduction-to-fido.html">vignette</a> of package.</p>
-<p>The following presents such an exemplary analysis based on the
-data of <span class="citation">Sprockett et al. (<a href="#ref-Sprockett2020" role="doc-biblioref">2020</a>)</span> available
-through <code>microbiomeDataSets</code> package.</p>
-<div class="sourceCode" id="cb332"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb332-1"><a href="differential-abundance.html#cb332-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(fido)){</span>
-<span id="cb332-2"><a href="differential-abundance.html#cb332-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># installing the fido package</span></span>
-<span id="cb332-3"><a href="differential-abundance.html#cb332-3" aria-hidden="true" tabindex="-1"></a>  devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;jsilve24/fido&quot;</span>)</span>
-<span id="cb332-4"><a href="differential-abundance.html#cb332-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<pre><code>## distribut... (NA -&gt; 0.3.1 ) [CRAN]
-## tensorA      (NA -&gt; 0.36.2) [CRAN]
-## svUnit       (NA -&gt; 1.0.6 ) [CRAN]
-## HDInterval   (NA -&gt; 0.2.2 ) [CRAN]
-## posterior    (NA -&gt; 1.3.1 ) [CRAN]
-## arrayhelpers (NA -&gt; 1.1-0 ) [CRAN]
-## ggdist       (NA -&gt; 3.2.0 ) [CRAN]
-## RcppNumer... (NA -&gt; 0.4-0 ) [CRAN]
-## tidybayes    (NA -&gt; 3.0.2 ) [CRAN]
-## * checking for file ‘/tmp/RtmpkK4QPs/remotes2fe7574bd5fe/jsilve24-fido-260856d/DESCRIPTION’ ... OK
-## * preparing ‘fido’:
-## * checking DESCRIPTION meta-information ... OK
-## * cleaning src
-## * running ‘cleanup’
-## * checking for LF line-endings in source and make files and shell scripts
-## * checking for empty or unneeded directories
-## * building ‘fido_1.0.3.tar.gz’</code></pre>
-<p>Loading the libraries and importing data:</p>
-<div class="sourceCode" id="cb334"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb334-1"><a href="differential-abundance.html#cb334-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fido)</span>
-<span id="cb334-2"><a href="differential-abundance.html#cb334-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mia)</span></code></pre></div>
-<div class="sourceCode" id="cb335"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb335-1"><a href="differential-abundance.html#cb335-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(microbiomeDataSets)</span>
-<span id="cb335-2"><a href="differential-abundance.html#cb335-2" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">SprockettTHData</span>()</span></code></pre></div>
-<p>We pick three covariates (“Sex”,“Age_Years”,“Delivery_Mode”) during this
-analysis as an example, and beforehand we check for missing data:</p>
-<div class="sourceCode" id="cb336"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb336-1"><a href="differential-abundance.html#cb336-1" aria-hidden="true" tabindex="-1"></a>cov_names <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Sex&quot;</span>,<span class="st">&quot;Age_Years&quot;</span>,<span class="st">&quot;Delivery_Mode&quot;</span>)</span>
-<span id="cb336-2"><a href="differential-abundance.html#cb336-2" aria-hidden="true" tabindex="-1"></a>na_counts <span class="ot">&lt;-</span> <span class="fu">apply</span>(<span class="fu">is.na</span>(<span class="fu">colData</span>(tse)[,cov_names]), <span class="dv">2</span>, sum)</span>
-<span id="cb336-3"><a href="differential-abundance.html#cb336-3" aria-hidden="true" tabindex="-1"></a>na_summary<span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(na_counts,<span class="at">row.names=</span>cov_names)</span></code></pre></div>
-<p>We drop samples with na values at the covariates (features) under analysis:</p>
-<div class="sourceCode" id="cb337"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb337-1"><a href="differential-abundance.html#cb337-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> tse[ , <span class="sc">!</span><span class="fu">is.na</span>(<span class="fu">colData</span>(tse)<span class="sc">$</span>Delivery_Mode) ]</span>
-<span id="cb337-2"><a href="differential-abundance.html#cb337-2" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> tse[ , <span class="sc">!</span><span class="fu">is.na</span>(<span class="fu">colData</span>(tse)<span class="sc">$</span>Age_Years) ]</span></code></pre></div>
-<p>We agglomerate the data at a Phylum rank.
-Note: Large assay data (along with the covariates/features data) could prevent the analysis later,
-since the computation will construct matrices that would not always fit memory.</p>
-<div class="sourceCode" id="cb338"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb338-1"><a href="differential-abundance.html#cb338-1" aria-hidden="true" tabindex="-1"></a>tse_phylum <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(tse, <span class="st">&quot;Phylum&quot;</span>)</span></code></pre></div>
-<p>We extract the counts assay and feature data to build the model matrix having
-an extra row of ones presenting the intercept for the regression task later:</p>
-<div class="sourceCode" id="cb339"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb339-1"><a href="differential-abundance.html#cb339-1" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">assays</span>(tse_phylum)<span class="sc">$</span>counts</span>
-<span id="cb339-2"><a href="differential-abundance.html#cb339-2" aria-hidden="true" tabindex="-1"></a><span class="co"># design matrix</span></span>
-<span id="cb339-3"><a href="differential-abundance.html#cb339-3" aria-hidden="true" tabindex="-1"></a><span class="co"># taking 3 covariates</span></span>
-<span id="cb339-4"><a href="differential-abundance.html#cb339-4" aria-hidden="true" tabindex="-1"></a>sample_data<span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(<span class="fu">colData</span>(tse_phylum)[,cov_names])</span>
-<span id="cb339-5"><a href="differential-abundance.html#cb339-5" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">model.matrix</span>(<span class="sc">~</span>Sex<span class="sc">+</span>Age_Years<span class="sc">+</span>Delivery_Mode,<span class="at">data=</span>sample_data))</span></code></pre></div>
-<p>Building the parameters for the <code>pibble</code> call to build the model; see more at <a href="https://jsilve24.github.io/fido/articles/introduction-to-fido.html">vignette</a>:</p>
-<div class="sourceCode" id="cb340"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb340-1"><a href="differential-abundance.html#cb340-1" aria-hidden="true" tabindex="-1"></a>n_taxa<span class="ot">&lt;-</span><span class="fu">nrow</span>(Y)</span>
-<span id="cb340-2"><a href="differential-abundance.html#cb340-2" aria-hidden="true" tabindex="-1"></a>upsilon <span class="ot">&lt;-</span> n_taxa<span class="sc">+</span><span class="dv">3</span></span>
-<span id="cb340-3"><a href="differential-abundance.html#cb340-3" aria-hidden="true" tabindex="-1"></a>Omega <span class="ot">&lt;-</span> <span class="fu">diag</span>(n_taxa)</span>
-<span id="cb340-4"><a href="differential-abundance.html#cb340-4" aria-hidden="true" tabindex="-1"></a>G <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="fu">diag</span>(n_taxa<span class="dv">-1</span>), <span class="sc">-</span><span class="dv">1</span>)</span>
-<span id="cb340-5"><a href="differential-abundance.html#cb340-5" aria-hidden="true" tabindex="-1"></a>Xi <span class="ot">&lt;-</span> (upsilon<span class="sc">-</span>n_taxa)<span class="sc">*</span>G<span class="sc">%*%</span>Omega<span class="sc">%*%</span><span class="fu">t</span>(G)</span>
-<span id="cb340-6"><a href="differential-abundance.html#cb340-6" aria-hidden="true" tabindex="-1"></a>Theta <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, n_taxa<span class="dv">-1</span>, <span class="fu">nrow</span>(X))</span>
-<span id="cb340-7"><a href="differential-abundance.html#cb340-7" aria-hidden="true" tabindex="-1"></a>Gamma <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">nrow</span>(X))</span></code></pre></div>
-<p>Automatically initializing the priors and visualizing their distributions:</p>
-<div class="sourceCode" id="cb341"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb341-1"><a href="differential-abundance.html#cb341-1" aria-hidden="true" tabindex="-1"></a>priors <span class="ot">&lt;-</span> <span class="fu">pibble</span>(<span class="cn">NULL</span>, X, upsilon, Theta, Gamma, Xi)</span>
-<span id="cb341-2"><a href="differential-abundance.html#cb341-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names_covariates</span>(priors) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(X)</span>
-<span id="cb341-3"><a href="differential-abundance.html#cb341-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(priors, <span class="at">pars=</span><span class="st">&quot;Lambda&quot;</span>) <span class="sc">+</span> ggplot2<span class="sc">::</span><span class="fu">xlim</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>))</span></code></pre></div>
-<p><img src="30_differential_abundance_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
-<p>Estimating the posterior by including the data at <code>Y</code>.
-Note: Some computational failures could occur (see <a href="https://github-wiki-see.page/m/jsilve24/fido/wiki/Frequently-Asked-Questions">discussion</a>)
-the arguments <code>multDirichletBoot</code> <code>calcGradHess</code> could be passed in such case.</p>
-<div class="sourceCode" id="cb342"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb342-1"><a href="differential-abundance.html#cb342-1" aria-hidden="true" tabindex="-1"></a>priors<span class="sc">$</span>Y <span class="ot">&lt;-</span> Y </span>
-<span id="cb342-2"><a href="differential-abundance.html#cb342-2" aria-hidden="true" tabindex="-1"></a>posterior <span class="ot">&lt;-</span> <span class="fu">refit</span>(priors, <span class="at">optim_method=</span><span class="st">&quot;adam&quot;</span>, <span class="at">multDirichletBoot=</span><span class="fl">0.5</span>) <span class="co"># ,, calcGradHess=FALSE</span></span></code></pre></div>
-<p>Printing a summary about the posterior predictive distribution:</p>
-<div class="sourceCode" id="cb343"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb343-1"><a href="differential-abundance.html#cb343-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_summary</span>(posterior)</span></code></pre></div>
-<pre><code>## Proportions of Observations within 95% Credible Interval: 0.998</code></pre>
-<p>Plotting the summary of the posterior distributions of the regression parameters:</p>
-<div class="sourceCode" id="cb345"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb345-1"><a href="differential-abundance.html#cb345-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names_categories</span>(posterior) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(Y)</span>
-<span id="cb345-2"><a href="differential-abundance.html#cb345-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(posterior,<span class="at">par=</span><span class="st">&quot;Lambda&quot;</span>,<span class="at">focus.cov=</span><span class="fu">rownames</span>(X)[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])</span></code></pre></div>
-<p><img src="30_differential_abundance_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
-<p>Seemingly the covariate “Age_Years” does not have effect on the model as “Delivery_Mode” would,
-and “Sex” to some extent. Let’s take a closer look at the two latter ones:</p>
-<div class="sourceCode" id="cb346"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb346-1"><a href="differential-abundance.html#cb346-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(posterior, <span class="at">par=</span><span class="st">&quot;Lambda&quot;</span>, <span class="at">focus.cov =</span> <span class="fu">rownames</span>(X)[<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">4</span>)])</span></code></pre></div>
-<p><img src="30_differential_abundance_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<div id="group-wise-associations-testing-based-on-balances" class="section level3 hasAnchor" number="11.2.1">
+<h3><span class="header-section-number">11.2.1</span> Group-wise associations testing based on balances<a href="differential-abundance.html#group-wise-associations-testing-based-on-balances" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>TO DO!!!</p>
 </div>
 </div>
 <div id="session-info-7" class="section level2 unnumbered hasAnchor">
@@ -1539,141 +1457,126 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] fido_1.0.3                     ANCOMBC_2.1.1                 
- [3] forcats_0.5.2                  stringr_1.4.1                 
- [5] dplyr_1.0.10                   purrr_0.3.5                   
- [7] readr_2.1.3                    tidyr_1.2.1                   
- [9] tibble_3.1.8                   ggplot2_3.4.0                 
-[11] tidyverse_1.3.2                knitr_1.40                    
-[13] MicrobiomeStat_1.1             Maaslin2_1.10.0               
-[15] ALDEx2_1.28.1                  zCompositions_1.4.0-1         
-[17] truncnorm_1.0-8                NADA_1.6-1.1                  
-[19] survival_3.4-0                 MASS_7.3-58.1                 
-[21] tidySummarizedExperiment_1.6.1 patchwork_1.1.2               
-[23] mia_1.5.17                     MultiAssayExperiment_1.24.0   
-[25] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
-[27] XVector_0.38.0                 SingleCellExperiment_1.20.0   
-[29] SummarizedExperiment_1.28.0    Biobase_2.58.0                
-[31] GenomicRanges_1.50.1           GenomeInfoDb_1.34.2           
-[33] IRanges_2.32.0                 S4Vectors_0.36.0              
-[35] BiocGenerics_0.44.0            MatrixGenerics_1.10.0         
-[37] matrixStats_0.62.0-9005        BiocStyle_2.24.0              
-[39] rebook_1.6.0                  
+ [1] ANCOMBC_2.1.1                  forcats_0.5.2                 
+ [3] stringr_1.4.1                  dplyr_1.0.10                  
+ [5] purrr_0.3.5                    readr_2.1.3                   
+ [7] tidyr_1.2.1                    tibble_3.1.8                  
+ [9] ggplot2_3.4.0                  tidyverse_1.3.2               
+[11] knitr_1.40                     MicrobiomeStat_1.1            
+[13] Maaslin2_1.10.0                ALDEx2_1.28.1                 
+[15] zCompositions_1.4.0-1          truncnorm_1.0-8               
+[17] NADA_1.6-1.1                   survival_3.4-0                
+[19] MASS_7.3-58.1                  tidySummarizedExperiment_1.6.1
+[21] patchwork_1.1.2                mia_1.5.17                    
+[23] MultiAssayExperiment_1.24.0    TreeSummarizedExperiment_2.1.4
+[25] Biostrings_2.66.0              XVector_0.38.0                
+[27] SingleCellExperiment_1.20.0    SummarizedExperiment_1.28.0   
+[29] Biobase_2.58.0                 GenomicRanges_1.50.1          
+[31] GenomeInfoDb_1.34.3            IRanges_2.32.0                
+[33] S4Vectors_0.36.0               BiocGenerics_0.44.0           
+[35] MatrixGenerics_1.10.0          matrixStats_0.63.0-9003       
+[37] BiocStyle_2.24.0               rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
-  [1] rsvd_1.0.5                  Hmisc_4.7-1                
-  [3] ps_1.7.2                    class_7.3-20               
-  [5] rprojroot_2.0.3             foreach_1.5.2              
-  [7] crayon_1.5.2                rbibutils_2.2.9            
-  [9] rhdf5filters_1.8.0          nlme_3.1-160               
- [11] backports_1.4.1             fBasics_4021.93            
- [13] posterior_1.3.1             reprex_2.0.2               
- [15] rlang_1.0.6                 readxl_1.4.1               
- [17] irlba_2.3.5.1               callr_3.7.3                
- [19] nloptr_2.0.3                optparse_1.7.3             
- [21] scater_1.26.0               filelock_1.0.2             
- [23] BiocParallel_1.32.1         bit64_4.0.5                
- [25] glue_1.6.2                  rngtools_1.5.2             
- [27] processx_3.8.0              parallel_4.2.1             
- [29] vipor_0.4.5                 haven_2.5.1                
- [31] tidyselect_1.2.0            usethis_2.1.6              
- [33] phyloseq_1.40.0             XML_3.99-0.12              
- [35] distributional_0.3.1        xtable_1.8-4               
- [37] magrittr_2.0.3              evaluate_0.18              
- [39] Rdpack_2.4                  scuttle_1.8.0              
- [41] cli_3.4.1                   zlibbioc_1.44.0            
- [43] rstudioapi_0.14             doRNG_1.8.2                
- [45] miniUI_0.1.1.1              bslib_0.4.1                
- [47] rpart_4.1.19                treeio_1.22.0              
- [49] svUnit_1.0.6                shiny_1.7.3                
- [51] BiocSingular_1.14.0         xfun_0.34                  
- [53] clue_0.3-62                 pkgbuild_1.3.1             
- [55] multtest_2.52.0             cluster_2.1.4              
- [57] stable_1.1.6                biomformat_1.24.0          
- [59] expm_0.999-6                ggrepel_0.9.2              
- [61] logging_0.10-108            ape_5.6-2                  
- [63] stabledist_0.7-1            png_0.1-7                  
- [65] permute_0.9-7               withr_2.5.0                
- [67] bitops_1.0-7                plyr_1.8.7                 
- [69] cellranger_1.1.0            pcaPP_2.0-3                
- [71] RcppZiggurat_0.1.6          e1071_1.7-12               
- [73] coda_0.19-4                 pillar_1.8.1               
- [75] cachem_1.0.6                Rmpfr_0.8-9                
- [77] fs_1.5.2                    rmutil_1.1.10              
- [79] hash_2.2.6.2                DelayedMatrixStats_1.20.0  
- [81] vctrs_0.5.0                 ellipsis_0.3.2             
- [83] generics_0.1.3              devtools_2.4.5             
- [85] tools_4.2.1                 foreign_0.8-83             
- [87] beeswarm_0.4.0              munsell_0.5.0              
- [89] emmeans_1.8.2               proxy_0.4-27               
- [91] DelayedArray_0.24.0         abind_1.4-5                
- [93] pkgload_1.3.1               fastmap_1.1.0              
- [95] compiler_4.2.1              httpuv_1.6.6               
- [97] sessioninfo_1.2.2           DescTools_0.99.47          
- [99] plotly_4.10.1               decontam_1.18.0            
-[101] GenomeInfoDbData_1.2.9      gridExtra_2.3              
-[103] arrayhelpers_1.1-0          lattice_0.20-45            
-[105] dir.expiry_1.4.0            deldir_1.0-6               
-[107] utf8_1.2.2                  later_1.3.0                
-[109] jsonlite_1.8.3              scales_1.2.1               
-[111] gld_2.6.6                   statip_0.2.3               
-[113] graph_1.74.0                ScaledMatrix_1.6.0         
-[115] tidytree_0.4.1              pbapply_1.5-0              
-[117] sparseMatrixStats_1.10.0    estimability_1.4.1         
-[119] lazyeval_0.2.2              promises_1.2.0.1           
-[121] doParallel_1.0.17           latticeExtra_0.6-30        
-[123] checkmate_2.1.0             rmarkdown_2.17             
-[125] statmod_1.4.37              igraph_1.3.5               
-[127] numDeriv_2016.8-1.1         yaml_2.3.6                 
-[129] htmltools_0.5.3             memoise_2.0.1              
-[131] profvis_0.3.7               viridisLite_0.4.1          
-[133] gmp_0.6-7                   digest_0.6.30              
-[135] assertthat_0.2.1            mime_0.12                  
-[137] RSQLite_2.2.18              Rfast_2.0.6                
-[139] yulab.utils_0.0.5           Exact_3.2                  
-[141] remotes_2.4.2               data.table_1.14.4          
-[143] urlchecker_1.0.1            blob_1.2.3                 
-[145] vegan_2.6-4                 lpsymphony_1.24.0          
-[147] modeest_2.4.0               splines_4.2.1              
-[149] Formula_1.2-4               labeling_0.4.2             
-[151] DECIPHER_2.26.0             Rhdf5lib_1.18.2            
-[153] googledrive_2.0.0           RCurl_1.98-1.9             
-[155] broom_1.0.1                 hms_1.1.2                  
-[157] modelr_0.1.9                rhdf5_2.40.0               
-[159] colorspace_2.0-3            base64enc_0.1-3            
-[161] BiocManager_1.30.19         ggbeeswarm_0.6.0           
-[163] nnet_7.3-18                 sass_0.4.2                 
-[165] Rcpp_1.0.9                  bookdown_0.29              
-[167] mvtnorm_1.1-3               fansi_1.0.3                
-[169] tzdb_0.3.0                  R6_2.5.1                   
-[171] grid_4.2.1                  lifecycle_1.0.3            
-[173] rootSolve_1.8.2.3           curl_4.3.3                 
-[175] googlesheets4_1.0.1         minqa_1.2.5                
-[177] getopt_1.20.3               jquerylib_0.1.4            
-[179] robustbase_0.95-0           Matrix_1.5-1               
-[181] RColorBrewer_1.1-3          iterators_1.0.14           
-[183] htmlwidgets_1.5.4           beachmat_2.14.0            
-[185] timechange_0.1.1            timeSeries_4021.105        
-[187] rvest_1.0.3                 mgcv_1.8-41                
-[189] CVXR_1.0-11                 tensorA_0.36.2             
-[191] lmom_2.9                    htmlTable_2.4.1            
-[193] codetools_0.2-18            lubridate_1.9.0            
-[195] prettyunits_1.1.1           dbplyr_2.2.1               
-[197] ggdist_3.2.0                gtable_0.3.1               
-[199] DBI_1.1.3                   httr_1.4.4                 
-[201] highr_0.9                   tidybayes_3.0.2            
-[203] stringi_1.7.8               reshape2_1.4.4             
-[205] farver_2.1.1                spatial_7.3-15             
-[207] viridis_0.6.2               timeDate_4021.106          
-[209] xml2_1.3.3                  boot_1.3-28                
-[211] BiocNeighbors_1.16.0        lme4_1.1-31                
-[213] interp_1.1-3                ade4_1.7-20                
-[215] energy_1.7-10               DEoptimR_1.0-11            
-[217] bit_4.0.4                   jpeg_0.1-9                 
-[219] pkgconfig_2.0.3             gargle_1.2.1               
-[221] lmerTest_3.1-3              gsl_2.1-7.1                
-[223] DirichletMultinomial_1.40.0 biglm_0.9-2.1              
-[225] CodeDepends_0.6.5          </code></pre>
+  [1] estimability_1.4.1          coda_0.19-4                
+  [3] bit64_4.0.5                 irlba_2.3.5.1              
+  [5] DelayedArray_0.24.0         data.table_1.14.6          
+  [7] rpart_4.1.19                doParallel_1.0.17          
+  [9] RCurl_1.98-1.9              generics_0.1.3             
+ [11] ScaledMatrix_1.6.0          timeSeries_4021.105        
+ [13] RSQLite_2.2.18              proxy_0.4-27               
+ [15] bit_4.0.5                   tzdb_0.3.0                 
+ [17] xml2_1.3.3                  lubridate_1.9.0            
+ [19] assertthat_0.2.1            DirichletMultinomial_1.40.0
+ [21] viridis_0.6.2               gargle_1.2.1               
+ [23] xfun_0.35                   fBasics_4021.93            
+ [25] hms_1.1.2                   jquerylib_0.1.4            
+ [27] evaluate_0.18               DEoptimR_1.0-11            
+ [29] fansi_1.0.3                 dbplyr_2.2.1               
+ [31] readxl_1.4.1                igraph_1.3.5               
+ [33] DBI_1.1.3                   htmlwidgets_1.5.4          
+ [35] googledrive_2.0.0           hash_2.2.6.2               
+ [37] Rmpfr_0.8-9                 CVXR_1.0-11                
+ [39] ellipsis_0.3.2              energy_1.7-10              
+ [41] backports_1.4.1             bookdown_0.30              
+ [43] permute_0.9-7               deldir_1.0-6               
+ [45] sparseMatrixStats_1.10.0    vctrs_0.5.1                
+ [47] cachem_1.0.6                withr_2.5.0                
+ [49] robustbase_0.95-0           emmeans_1.8.2              
+ [51] checkmate_2.1.0             vegan_2.6-4                
+ [53] treeio_1.22.0               getopt_1.20.3              
+ [55] cluster_2.1.4               gsl_2.1-7.1                
+ [57] ape_5.6-2                   dir.expiry_1.4.0           
+ [59] lazyeval_0.2.2              crayon_1.5.2               
+ [61] labeling_0.4.2              pkgconfig_2.0.3            
+ [63] nlme_3.1-160                vipor_0.4.5                
+ [65] nnet_7.3-18                 rlang_1.0.6                
+ [67] spatial_7.3-15              lifecycle_1.0.3            
+ [69] filelock_1.0.2              phyloseq_1.40.0            
+ [71] modelr_0.1.10               rsvd_1.0.5                 
+ [73] cellranger_1.1.0            rngtools_1.5.2             
+ [75] graph_1.74.0                Matrix_1.5-3               
+ [77] lpsymphony_1.24.0           Rhdf5lib_1.18.2            
+ [79] boot_1.3-28                 base64enc_0.1-3            
+ [81] reprex_2.0.2                beeswarm_0.4.0             
+ [83] googlesheets4_1.0.1         png_0.1-7                  
+ [85] viridisLite_0.4.1           stabledist_0.7-1           
+ [87] rootSolve_1.8.2.3           bitops_1.0-7               
+ [89] rhdf5filters_1.8.0          blob_1.2.3                 
+ [91] DelayedMatrixStats_1.20.0   doRNG_1.8.2                
+ [93] decontam_1.18.0             jpeg_0.1-9                 
+ [95] DECIPHER_2.26.0             beachmat_2.14.0            
+ [97] scales_1.2.1                memoise_2.0.1              
+ [99] magrittr_2.0.3              plyr_1.8.8                 
+[101] zlibbioc_1.44.0             compiler_4.2.1             
+[103] RColorBrewer_1.1-3          clue_0.3-62                
+[105] lme4_1.1-31                 cli_3.4.1                  
+[107] ade4_1.7-20                 lmerTest_3.1-3             
+[109] pbapply_1.6-0               htmlTable_2.4.1            
+[111] Formula_1.2-4               mgcv_1.8-41                
+[113] tidyselect_1.2.0            stringi_1.7.8              
+[115] highr_0.9                   yaml_2.3.6                 
+[117] BiocSingular_1.14.0         latticeExtra_0.6-30        
+[119] ggrepel_0.9.2               grid_4.2.1                 
+[121] sass_0.4.2                  lmom_2.9                   
+[123] tools_4.2.1                 timechange_0.1.1           
+[125] parallel_4.2.1              rstudioapi_0.14            
+[127] logging_0.10-108            foreign_0.8-83             
+[129] foreach_1.5.2               statip_0.2.3               
+[131] optparse_1.7.3              gridExtra_2.3              
+[133] gld_2.6.6                   farver_2.1.1               
+[135] stable_1.1.6                RcppZiggurat_0.1.6         
+[137] digest_0.6.30               BiocManager_1.30.19        
+[139] Rcpp_1.0.9                  broom_1.0.1                
+[141] scuttle_1.8.0               httr_1.4.4                 
+[143] Rdpack_2.4                  colorspace_2.0-3           
+[145] rvest_1.0.3                 XML_3.99-0.12              
+[147] fs_1.5.2                    modeest_2.4.0              
+[149] splines_4.2.1               yulab.utils_0.0.5          
+[151] rmutil_1.1.10               statmod_1.4.37             
+[153] expm_0.999-6                tidytree_0.4.1             
+[155] scater_1.26.1               Exact_3.2                  
+[157] multtest_2.52.0             plotly_4.10.1              
+[159] xtable_1.8-4                gmp_0.6-8                  
+[161] jsonlite_1.8.3              nloptr_2.0.3               
+[163] CodeDepends_0.6.5           timeDate_4021.106          
+[165] Rfast_2.0.6                 R6_2.5.1                   
+[167] Hmisc_4.7-1                 pillar_1.8.1               
+[169] htmltools_0.5.3             glue_1.6.2                 
+[171] fastmap_1.1.0               minqa_1.2.5                
+[173] BiocParallel_1.32.1         BiocNeighbors_1.16.0       
+[175] class_7.3-20                codetools_0.2-18           
+[177] pcaPP_2.0-3                 mvtnorm_1.1-3              
+[179] utf8_1.2.2                  lattice_0.20-45            
+[181] bslib_0.4.1                 numDeriv_2016.8-1.1        
+[183] ggbeeswarm_0.6.0            DescTools_0.99.47          
+[185] interp_1.1-3                biglm_0.9-2.1              
+[187] rmarkdown_2.18              biomformat_1.24.0          
+[189] munsell_0.5.0               e1071_1.7-12               
+[191] rhdf5_2.40.0                GenomeInfoDbData_1.2.9     
+[193] iterators_1.0.14            haven_2.5.1                
+[195] reshape2_1.4.4              gtable_0.3.1               
+[197] rbibutils_2.2.10           </code></pre>
 </div>
 
 </div>
@@ -1694,9 +1597,6 @@ Nearing, Jacob T., Gavin M. Douglas, Molly G. Hayes, Jocelyn MacDonald, Dhwani K
 </div>
 <div id="ref-Quinn2021" class="csl-entry">
 Quinn, Thomas P., Elliott Gordon-Rodriguez, and Ionas Erb. 2021. <span>“A <span>Critique</span> of <span>Differential Abundance Analysis</span>, and <span>Advocacy</span> for an <span>Alternative</span>.”</span> <em>arXiv:2104.07266 [q-Bio, Stat]</em>, April. <a href="https://arxiv.org/abs/2104.07266">https://arxiv.org/abs/2104.07266</a>.
-</div>
-<div id="ref-Sprockett2020" class="csl-entry">
-Sprockett, Daniel D., Melanie Martin, Elizabeth K. Costello, Adam R. Burns, Susan P. Holmes, Michael D. Gurven, and David A. Relman. 2020. <span>“Microbiota Assembly, Structure, and Dynamics Among <span>Tsimane</span> Horticulturalists of the <span>Bolivian Amazon</span>.”</span> <em>Nat Commun</em> 11 (1): 3772. <a href="https://doi.org/10.1038/s41467-020-17541-6">https://doi.org/10.1038/s41467-020-17541-6</a>.
 </div>
 <div id="ref-Zhou2022" class="csl-entry">
 Zhou, Huijuan, Kejun He, Jun Chen, and Xianyang Zhang. 2022. <span>“<span>LinDA</span>: Linear Models for Differential Abundance Analysis of Microbiome Compositional Data.”</span> <em>Genome Biology</em> 23 (1): 95. <a href="https://doi.org/10.1186/s13059-022-02655-5">https://doi.org/10.1186/s13059-022-02655-5</a>.

@@ -447,17 +447,17 @@ other attached packages:
 [11] Biostrings_2.66.0              XVector_0.38.0                
 [13] SingleCellExperiment_1.20.0    SummarizedExperiment_1.28.0   
 [15] Biobase_2.58.0                 GenomicRanges_1.50.1          
-[17] GenomeInfoDb_1.34.2            IRanges_2.32.0                
+[17] GenomeInfoDb_1.34.3            IRanges_2.32.0                
 [19] S4Vectors_0.36.0               BiocGenerics_0.44.0           
-[21] MatrixGenerics_1.10.0          matrixStats_0.62.0-9005       
+[21] MatrixGenerics_1.10.0          matrixStats_0.63.0-9003       
 [23] BiocStyle_2.24.0               rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
   [1] circlize_0.4.15               AnnotationHub_3.4.0          
   [3] corrplot_0.92                 BiocBaseUtils_1.0.0          
-  [5] BiocFileCache_2.4.0           plyr_1.8.7                   
+  [5] BiocFileCache_2.4.0           plyr_1.8.8                   
   [7] lazyeval_0.2.2                splines_4.2.1                
-  [9] BiocParallel_1.32.1           scater_1.26.0                
+  [9] BiocParallel_1.32.1           scater_1.26.1                
  [11] digest_0.6.30                 foreach_1.5.2                
  [13] yulab.utils_0.0.5             htmltools_0.5.3              
  [15] viridis_0.6.2                 fansi_1.0.3                  
@@ -466,7 +466,7 @@ loaded via a namespace (and not attached):
  [21] doParallel_1.0.17             DECIPHER_2.26.0              
  [23] colorspace_2.0-3              blob_1.2.3                   
  [25] rappdirs_0.3.3                ggrepel_0.9.2                
- [27] xfun_0.34                     dplyr_1.0.10                 
+ [27] xfun_0.35                     dplyr_1.0.10                 
  [29] crayon_1.5.2                  RCurl_1.98-1.9               
  [31] jsonlite_1.8.3                graph_1.74.0                 
  [33] iterators_1.0.14              ape_5.6-2                    
@@ -479,7 +479,7 @@ loaded via a namespace (and not attached):
  [47] Rcpp_1.0.9                    viridisLite_0.4.1            
  [49] xtable_1.8-4                  clue_0.3-62                  
  [51] decontam_1.18.0               tidytree_0.4.1               
- [53] bit_4.0.4                     rsvd_1.0.5                   
+ [53] bit_4.0.5                     rsvd_1.0.5                   
  [55] httr_1.4.4                    RColorBrewer_1.1-3           
  [57] dir.expiry_1.4.0              ellipsis_0.3.2               
  [59] farver_2.1.1                  pkgconfig_2.0.3              
@@ -505,15 +505,15 @@ loaded via a namespace (and not attached):
  [99] treeio_1.22.0                 tibble_3.1.8                 
 [101] stringi_1.7.8                 basilisk.utils_1.8.0         
 [103] highr_0.9                     forcats_0.5.2                
-[105] lattice_0.20-45               Matrix_1.5-1                 
+[105] lattice_0.20-45               Matrix_1.5-3                 
 [107] vegan_2.6-4                   permute_0.9-7                
-[109] vctrs_0.5.0                   rhdf5filters_1.8.0           
+[109] vctrs_0.5.1                   rhdf5filters_1.8.0           
 [111] pillar_1.8.1                  lifecycle_1.0.3              
 [113] BiocManager_1.30.19           GlobalOptions_0.1.2          
 [115] BiocNeighbors_1.16.0          cowplot_1.1.1                
 [117] bitops_1.0-7                  irlba_2.3.5.1                
 [119] httpuv_1.6.6                  R6_2.5.1                     
-[121] bookdown_0.29                 promises_1.2.0.1             
+[121] bookdown_0.30                 promises_1.2.0.1             
 [123] gridExtra_2.3                 vipor_0.4.5                  
 [125] codetools_0.2-18              MASS_7.3-58.1                
 [127] assertthat_0.2.1              rhdf5_2.40.0                 
@@ -521,7 +521,7 @@ loaded via a namespace (and not attached):
 [131] withr_2.5.0                   GenomeInfoDbData_1.2.9       
 [133] mgcv_1.8-41                   parallel_4.2.1               
 [135] beachmat_2.14.0               basilisk_1.8.1               
-[137] tidyr_1.2.1                   rmarkdown_2.17               
+[137] tidyr_1.2.1                   rmarkdown_2.18               
 [139] DelayedMatrixStats_1.20.0     Rtsne_0.16                   
 [141] Cairo_1.6-0                   shiny_1.7.3                  
 [143] ggbeeswarm_0.6.0             

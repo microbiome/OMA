@@ -136,26 +136,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    14  11
-##      Veg       9  13
+##      Mixed    10  12
+##      Veg      13  12
 ##                                         
-##                Accuracy : 0.574         
-##                  95% CI : (0.422, 0.717)
+##                Accuracy : 0.468         
+##                  95% CI : (0.321, 0.619)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.233         
+##     P-Value [Acc > NIR] : 0.767         
 ##                                         
-##                   Kappa : 0.15          
+##                   Kappa : -0.065        
 ##                                         
-##  Mcnemar's Test P-Value : 0.823         
+##  Mcnemar's Test P-Value : 1.000         
 ##                                         
-##             Sensitivity : 0.609         
-##             Specificity : 0.542         
-##          Pos Pred Value : 0.560         
-##          Neg Pred Value : 0.591         
+##             Sensitivity : 0.435         
+##             Specificity : 0.500         
+##          Pos Pred Value : 0.455         
+##          Neg Pred Value : 0.480         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.298         
-##    Detection Prevalence : 0.532         
-##       Balanced Accuracy : 0.575         
+##          Detection Rate : 0.213         
+##    Detection Prevalence : 0.468         
+##       Balanced Accuracy : 0.467         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -264,27 +264,27 @@ other attached packages:
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [11] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [13] SummarizedExperiment_1.28.0    Biobase_2.58.0                
-[15] GenomicRanges_1.50.1           GenomeInfoDb_1.34.2           
+[15] GenomicRanges_1.50.1           GenomeInfoDb_1.34.3           
 [17] IRanges_2.32.0                 S4Vectors_0.36.0              
 [19] BiocGenerics_0.44.0            MatrixGenerics_1.10.0         
-[21] matrixStats_0.62.0-9005        BiocStyle_2.24.0              
+[21] matrixStats_0.63.0-9003        BiocStyle_2.24.0              
 [23] rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
-  [1] plyr_1.8.7                  lazyeval_0.2.2             
+  [1] plyr_1.8.8                  lazyeval_0.2.2             
   [3] splines_4.2.1               BiocParallel_1.32.1        
-  [5] listenv_0.8.0               scater_1.26.0              
+  [5] listenv_0.8.0               scater_1.26.1              
   [7] digest_0.6.30               foreach_1.5.2              
   [9] yulab.utils_0.0.5           htmltools_0.5.3            
  [11] viridis_0.6.2               fansi_1.0.3                
  [13] magrittr_2.0.3              memoise_2.0.1              
  [15] MLmetrics_1.1.1             ScaledMatrix_1.6.0         
  [17] cluster_2.1.4               ROCR_1.0-11                
- [19] DECIPHER_2.26.0             recipes_1.0.2              
+ [19] DECIPHER_2.26.0             recipes_1.0.3              
  [21] globals_0.16.1              gower_1.0.0                
  [23] hardhat_1.2.0               timechange_0.1.1           
  [25] colorspace_2.0-3            blob_1.2.3                 
- [27] ggrepel_0.9.2               xfun_0.34                  
+ [27] ggrepel_0.9.2               xfun_0.35                  
  [29] dplyr_1.0.10                crayon_1.5.2               
  [31] RCurl_1.98-1.9              jsonlite_1.8.3             
  [33] graph_1.74.0                survival_3.4-0             
@@ -297,7 +297,7 @@ loaded via a namespace (and not attached):
  [47] DBI_1.1.3                   Rcpp_1.0.9                 
  [49] viridisLite_0.4.1           decontam_1.18.0            
  [51] tidytree_0.4.1              proxy_0.4-27               
- [53] bit_4.0.4                   rsvd_1.0.5                 
+ [53] bit_4.0.5                   rsvd_1.0.5                 
  [55] lava_1.7.0                  prodlim_2019.11.13         
  [57] glmnet_4.1-4                dir.expiry_1.4.0           
  [59] farver_2.1.1                pkgconfig_2.0.3            
@@ -319,13 +319,13 @@ loaded via a namespace (and not attached):
  [91] beeswarm_0.4.0              filelock_1.0.2             
  [93] e1071_1.7-12                treeio_1.22.0              
  [95] tibble_3.1.8                stringi_1.7.8              
- [97] highr_0.9                   Matrix_1.5-1               
+ [97] highr_0.9                   Matrix_1.5-3               
  [99] vegan_2.6-4                 permute_0.9-7              
-[101] vctrs_0.5.0                 pillar_1.8.1               
+[101] vctrs_0.5.1                 pillar_1.8.1               
 [103] lifecycle_1.0.3             BiocManager_1.30.19        
-[105] BiocNeighbors_1.16.0        data.table_1.14.4          
+[105] BiocNeighbors_1.16.0        data.table_1.14.6          
 [107] bitops_1.0-7                irlba_2.3.5.1              
-[109] R6_2.5.1                    bookdown_0.29              
+[109] R6_2.5.1                    bookdown_0.30              
 [111] gridExtra_2.3               vipor_0.4.5                
 [113] parallelly_1.32.1           codetools_0.2-18           
 [115] MASS_7.3-58.1               assertthat_0.2.1           
@@ -334,7 +334,7 @@ loaded via a namespace (and not attached):
 [121] grid_4.2.1                  rpart_4.1.19               
 [123] beachmat_2.14.0             timeDate_4021.106          
 [125] tidyr_1.2.1                 class_7.3-20               
-[127] rmarkdown_2.17              DelayedMatrixStats_1.20.0  
+[127] rmarkdown_2.18              DelayedMatrixStats_1.20.0  
 [129] pROC_1.18.0                 lubridate_1.9.0            
 [131] ggbeeswarm_0.6.0           
 ```

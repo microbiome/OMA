@@ -354,15 +354,15 @@ attached base packages:
 
 other attached packages:
  [1] patchwork_1.1.2                ggsignif_0.6.4                
- [3] scater_1.26.0                  ggplot2_3.4.0                 
+ [3] scater_1.26.1                  ggplot2_3.4.0                 
  [5] scuttle_1.8.0                  mia_1.5.17                    
  [7] MultiAssayExperiment_1.24.0    TreeSummarizedExperiment_2.1.4
  [9] Biostrings_2.66.0              XVector_0.38.0                
 [11] SingleCellExperiment_1.20.0    SummarizedExperiment_1.28.0   
 [13] Biobase_2.58.0                 GenomicRanges_1.50.1          
-[15] GenomeInfoDb_1.34.2            IRanges_2.32.0                
+[15] GenomeInfoDb_1.34.3            IRanges_2.32.0                
 [17] S4Vectors_0.36.0               BiocGenerics_0.44.0           
-[19] MatrixGenerics_1.10.0          matrixStats_0.62.0-9005       
+[19] MatrixGenerics_1.10.0          matrixStats_0.63.0-9003       
 [21] BiocStyle_2.24.0               rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
@@ -375,17 +375,17 @@ loaded via a namespace (and not attached):
 [13] knitr_1.40                  jsonlite_1.8.3             
 [15] cluster_2.1.4               graph_1.74.0               
 [17] BiocManager_1.30.19         compiler_4.2.1             
-[19] assertthat_0.2.1            Matrix_1.5-1               
+[19] assertthat_0.2.1            Matrix_1.5-3               
 [21] fastmap_1.1.0               lazyeval_0.2.2             
 [23] cli_3.4.1                   BiocSingular_1.14.0        
 [25] htmltools_0.5.3             tools_4.2.1                
 [27] rsvd_1.0.5                  gtable_0.3.1               
 [29] glue_1.6.2                  GenomeInfoDbData_1.2.9     
 [31] reshape2_1.4.4              dplyr_1.0.10               
-[33] Rcpp_1.0.9                  vctrs_0.5.0                
+[33] Rcpp_1.0.9                  vctrs_0.5.1                
 [35] ape_5.6-2                   nlme_3.1-160               
 [37] DECIPHER_2.26.0             DelayedMatrixStats_1.20.0  
-[39] xfun_0.34                   stringr_1.4.1              
+[39] xfun_0.35                   stringr_1.4.1              
 [41] beachmat_2.14.0             lifecycle_1.0.3            
 [43] irlba_2.3.5.1               XML_3.99-0.12              
 [45] zlibbioc_1.44.0             MASS_7.3-58.1              
@@ -401,15 +401,15 @@ loaded via a namespace (and not attached):
 [65] lattice_0.20-45             purrr_0.3.5                
 [67] labeling_0.4.2              treeio_1.22.0              
 [69] CodeDepends_0.6.5           cowplot_1.1.1              
-[71] bit_4.0.4                   tidyselect_1.2.0           
-[73] plyr_1.8.7                  magrittr_2.0.3             
-[75] bookdown_0.29               R6_2.5.1                   
+[71] bit_4.0.5                   tidyselect_1.2.0           
+[73] plyr_1.8.8                  magrittr_2.0.3             
+[75] bookdown_0.30               R6_2.5.1                   
 [77] generics_0.1.3              DelayedArray_0.24.0        
 [79] DBI_1.1.3                   withr_2.5.0                
 [81] pillar_1.8.1                mgcv_1.8-41                
 [83] RCurl_1.98-1.9              tibble_3.1.8               
 [85] dir.expiry_1.4.0            crayon_1.5.2               
-[87] utf8_1.2.2                  rmarkdown_2.17             
+[87] utf8_1.2.2                  rmarkdown_2.18             
 [89] viridis_0.6.2               grid_4.2.1                 
 [91] blob_1.2.3                  vegan_2.6-4                
 [93] digest_0.6.30               tidyr_1.2.1                
