@@ -394,11 +394,11 @@ kable(rda_info_clean)
 \hline
   & Explained by variables & Unexplained by variables & Proportion expl by vars & P-value (PERMANOVA 999 permutations)\\
 \hline
-all & 35.30 & 191.7 & 0.1842 & 0.658\\
+all & 35.30 & 191.7 & 0.1842 & 0.699\\
 \hline
-ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.822\\
+ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.818\\
 \hline
-Gender & 5.31 & 223.7 & 0.0277 & 0.924\\
+Gender & 5.31 & 223.7 & 0.0277 & 0.932\\
 \hline
 Age & 10.59 & 216.4 & 0.0552 & 0.001\\
 \hline
@@ -540,7 +540,7 @@ plot
 
 ![](20_beta_diversity_files/figure-latex/unnamed-chunk-7-1.png)<!-- --> 
 
-Note: A 3D interactive version of the earlier plot can be found from [here](https://microbiome.github.io/OMA/extra-materials.html).
+Note: A 3D interactive version of the earlier plot can be found from [here](https://microbiome.github.io/OMA/extras.html#interactive-3d-plots).
 
 Similarly let's visualize and compare the sub-population.
 
