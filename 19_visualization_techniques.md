@@ -826,7 +826,7 @@ loaded via a namespace (and not attached):
  [15] magrittr_2.0.3              memoise_2.0.1              
  [17] ScaledMatrix_1.6.0          cluster_2.1.4              
  [19] doParallel_1.0.17           DECIPHER_2.26.0            
- [21] ComplexHeatmap_2.12.1       graphlayouts_0.8.3         
+ [21] ComplexHeatmap_2.12.1       graphlayouts_0.8.4         
  [23] colorspace_2.0-3            blob_1.2.3                 
  [25] ggrepel_0.9.2               xfun_0.35                  
  [27] dplyr_1.0.10                crayon_1.5.2               
@@ -841,7 +841,7 @@ loaded via a namespace (and not attached):
  [45] scales_1.2.1                DBI_1.1.3                  
  [47] rstatix_0.7.1               randomcoloR_1.1.0.1        
  [49] Rcpp_1.0.9                  viridisLite_0.4.1          
- [51] clue_0.3-62                 decontam_1.18.0            
+ [51] clue_0.3-63                 decontam_1.18.0            
  [53] gridGraphics_0.5-1          tidytree_0.4.1             
  [55] bit_4.0.5                   rsvd_1.0.5                 
  [57] RColorBrewer_1.1-3          dir.expiry_1.4.0           
@@ -853,13 +853,13 @@ loaded via a namespace (and not attached):
  [69] munsell_0.5.0               tools_4.2.1                
  [71] cachem_1.0.6                cli_3.4.1                  
  [73] DirichletMultinomial_1.40.0 generics_0.1.3             
- [75] RSQLite_2.2.18              broom_1.0.1                
+ [75] RSQLite_2.2.19              broom_1.0.1                
  [77] evaluate_0.18               stringr_1.4.1              
  [79] fastmap_1.1.0               yaml_2.3.6                 
- [81] knitr_1.40                  bit64_4.0.5                
+ [81] knitr_1.41                  bit64_4.0.5                
  [83] tidygraph_1.2.2             purrr_0.3.5                
  [85] nlme_3.1-160                sparseMatrixStats_1.10.0   
- [87] aplot_0.1.8                 compiler_4.2.1             
+ [87] aplot_0.1.9                 compiler_4.2.1             
  [89] curl_4.3.3                  beeswarm_0.4.0             
  [91] filelock_1.0.2              png_0.1-7                  
  [93] ggsignif_0.6.4              treeio_1.22.0              
@@ -879,7 +879,7 @@ loaded via a namespace (and not attached):
 [121] rjson_0.2.21                withr_2.5.0                
 [123] GenomeInfoDbData_1.2.9      mgcv_1.8-41                
 [125] parallel_4.2.1              grid_4.2.1                 
-[127] ggfun_0.0.8                 beachmat_2.14.0            
+[127] ggfun_0.0.9                 beachmat_2.14.0            
 [129] tidyr_1.2.1                 rmarkdown_2.18             
 [131] DelayedMatrixStats_1.20.0   carData_3.0-5              
 [133] Cairo_1.6-0                 Rtsne_0.16                 

@@ -595,7 +595,7 @@ loaded via a namespace (and not attached):
  [7] fansi_1.0.3                 decontam_1.18.0            
  [9] codetools_0.2-18            splines_4.2.1              
 [11] sparseMatrixStats_1.10.0    cachem_1.0.6               
-[13] knitr_1.40                  scater_1.26.1              
+[13] knitr_1.41                  scater_1.26.1              
 [15] jsonlite_1.8.3              cluster_2.1.4              
 [17] graph_1.74.0                BiocManager_1.30.19        
 [19] compiler_4.2.1              assertthat_0.2.1           
@@ -616,7 +616,7 @@ loaded via a namespace (and not attached):
 [49] parallel_4.2.1              yaml_2.3.6                 
 [51] memoise_2.0.1               gridExtra_2.3              
 [53] ggplot2_3.4.0               yulab.utils_0.0.5          
-[55] stringi_1.7.8               RSQLite_2.2.18             
+[55] stringi_1.7.8               RSQLite_2.2.19             
 [57] ScaledMatrix_1.6.0          tidytree_0.4.1             
 [59] permute_0.9-7               filelock_1.0.2             
 [61] BiocParallel_1.32.1         rlang_1.0.6                

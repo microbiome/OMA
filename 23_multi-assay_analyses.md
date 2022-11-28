@@ -477,7 +477,7 @@ loaded via a namespace (and not attached):
  [43] HDF5Array_1.24.2              scales_1.2.1                 
  [45] pheatmap_1.0.12               DBI_1.1.3                    
  [47] Rcpp_1.0.9                    viridisLite_0.4.1            
- [49] xtable_1.8-4                  clue_0.3-62                  
+ [49] xtable_1.8-4                  clue_0.3-63                  
  [51] decontam_1.18.0               tidytree_0.4.1               
  [53] bit_4.0.5                     rsvd_1.0.5                   
  [55] httr_1.4.4                    RColorBrewer_1.1-3           
@@ -493,9 +493,9 @@ loaded via a namespace (and not attached):
  [75] BiocVersion_3.15.2            tools_4.2.1                  
  [77] cachem_1.0.6                  cli_3.4.1                    
  [79] DirichletMultinomial_1.40.0   generics_0.1.3               
- [81] RSQLite_2.2.18                ExperimentHub_2.4.0          
+ [81] RSQLite_2.2.19                ExperimentHub_2.4.0          
  [83] evaluate_0.18                 fastmap_1.1.0                
- [85] yaml_2.3.6                    knitr_1.40                   
+ [85] yaml_2.3.6                    knitr_1.41                   
  [87] bit64_4.0.5                   purrr_0.3.5                  
  [89] KEGGREST_1.36.3               nlme_3.1-160                 
  [91] sparseMatrixStats_1.10.0      mime_0.12                    

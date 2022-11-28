@@ -136,26 +136,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    12  11
-##      Veg      11  13
+##      Mixed    12   9
+##      Veg      11  15
 ##                                         
-##                Accuracy : 0.532         
-##                  95% CI : (0.381, 0.679)
+##                Accuracy : 0.574         
+##                  95% CI : (0.422, 0.717)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.443         
+##     P-Value [Acc > NIR] : 0.233         
 ##                                         
-##                   Kappa : 0.063         
+##                   Kappa : 0.147         
 ##                                         
-##  Mcnemar's Test P-Value : 1.000         
+##  Mcnemar's Test P-Value : 0.823         
 ##                                         
 ##             Sensitivity : 0.522         
-##             Specificity : 0.542         
-##          Pos Pred Value : 0.522         
-##          Neg Pred Value : 0.542         
+##             Specificity : 0.625         
+##          Pos Pred Value : 0.571         
+##          Neg Pred Value : 0.577         
 ##              Prevalence : 0.489         
 ##          Detection Rate : 0.255         
-##    Detection Prevalence : 0.489         
-##       Balanced Accuracy : 0.532         
+##    Detection Prevalence : 0.447         
+##       Balanced Accuracy : 0.573         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -309,10 +309,10 @@ loaded via a namespace (and not attached):
  [71] tools_4.2.1                 cachem_1.0.6               
  [73] xgboost_1.6.0.1             cli_3.4.1                  
  [75] DirichletMultinomial_1.40.0 generics_0.1.3             
- [77] RSQLite_2.2.18              evaluate_0.18              
+ [77] RSQLite_2.2.19              evaluate_0.18              
  [79] stringr_1.4.1               fastmap_1.1.0              
  [81] yaml_2.3.6                  ModelMetrics_1.2.2.2       
- [83] knitr_1.40                  bit64_4.0.5                
+ [83] knitr_1.41                  bit64_4.0.5                
  [85] randomForest_4.7-1.1        purrr_0.3.5                
  [87] future_1.29.0               nlme_3.1-160               
  [89] sparseMatrixStats_1.10.0    compiler_4.2.1             

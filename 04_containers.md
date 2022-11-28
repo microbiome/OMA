@@ -1336,11 +1336,11 @@ loaded via a namespace (and not attached):
  [63] BiocVersion_3.15.2            tools_4.2.1                  
  [65] cachem_1.0.6                  cli_3.4.1                    
  [67] DirichletMultinomial_1.40.0   generics_0.1.3               
- [69] RSQLite_2.2.18                ExperimentHub_2.4.0          
+ [69] RSQLite_2.2.19                ExperimentHub_2.4.0          
  [71] ade4_1.7-20                   evaluate_0.18                
  [73] biomformat_1.24.0             stringr_1.4.1                
  [75] fastmap_1.1.0                 yaml_2.3.6                   
- [77] knitr_1.40                    bit64_4.0.5                  
+ [77] knitr_1.41                    bit64_4.0.5                  
  [79] purrr_0.3.5                   KEGGREST_1.36.3              
  [81] nlme_3.1-160                  sparseMatrixStats_1.10.0     
  [83] mime_0.12                     compiler_4.2.1               

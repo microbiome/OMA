@@ -168,13 +168,13 @@ loaded via a namespace (and not attached):
   [1] ggtree_3.4.4                ggnewscale_0.4.8           
   [3] ggbeeswarm_0.6.0            colorspace_2.0-3           
   [5] ellipsis_0.3.2              scuttle_1.8.0              
-  [7] BiocNeighbors_1.16.0        aplot_0.1.8                
-  [9] farver_2.1.1                graphlayouts_0.8.3         
+  [7] BiocNeighbors_1.16.0        aplot_0.1.9                
+  [9] farver_2.1.1                graphlayouts_0.8.4         
  [11] ggrepel_0.9.2               bit64_4.0.5                
  [13] fansi_1.0.3                 decontam_1.18.0            
  [15] codetools_0.2-18            splines_4.2.1              
  [17] sparseMatrixStats_1.10.0    cachem_1.0.6               
- [19] knitr_1.40                  scater_1.26.1              
+ [19] knitr_1.41                  scater_1.26.1              
  [21] polyclip_1.10-4             jsonlite_1.8.3             
  [23] cluster_2.1.4               graph_1.74.0               
  [25] ggforce_0.4.1               BiocManager_1.30.19        
@@ -196,9 +196,9 @@ loaded via a namespace (and not attached):
  [57] MASS_7.3-58.1               scales_1.2.1               
  [59] tidygraph_1.2.2             parallel_4.2.1             
  [61] yaml_2.3.6                  memoise_2.0.1              
- [63] gridExtra_2.3               ggfun_0.0.8                
+ [63] gridExtra_2.3               ggfun_0.0.9                
  [65] yulab.utils_0.0.5           stringi_1.7.8              
- [67] RSQLite_2.2.18              highr_0.9                  
+ [67] RSQLite_2.2.19              highr_0.9                  
  [69] ScaledMatrix_1.6.0          tidytree_0.4.1             
  [71] permute_0.9-7               filelock_1.0.2             
  [73] BiocParallel_1.32.1         rlang_1.0.6                

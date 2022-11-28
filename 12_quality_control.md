@@ -574,21 +574,21 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] utf8_1.2.2                  tidyselect_1.2.0           
-  [3] RSQLite_2.2.18              AnnotationDbi_1.58.0       
+  [3] RSQLite_2.2.19              AnnotationDbi_1.58.0       
   [5] grid_4.2.1                  TSP_1.2-1                  
   [7] BiocParallel_1.32.1         Rtsne_0.16                 
   [9] munsell_0.5.0               ScaledMatrix_1.6.0         
  [11] codetools_0.2-18            withr_2.5.0                
  [13] colorspace_2.0-3            filelock_1.0.2             
- [15] highr_0.9                   knitr_1.40                 
+ [15] highr_0.9                   knitr_1.41                 
  [17] ca_0.71.1                   labeling_0.4.2             
  [19] GenomeInfoDbData_1.2.9      polyclip_1.10-4            
  [21] bit64_4.0.5                 farver_2.1.1               
  [23] vctrs_0.5.1                 treeio_1.22.0              
  [25] generics_0.1.3              xfun_0.35                  
  [27] R6_2.5.1                    doParallel_1.0.17          
- [29] ggbeeswarm_0.6.0            clue_0.3-62                
- [31] graphlayouts_0.8.3          rsvd_1.0.5                 
+ [29] ggbeeswarm_0.6.0            clue_0.3-63                
+ [31] graphlayouts_0.8.4          rsvd_1.0.5                 
  [33] seriation_1.4.0             locfit_1.5-9.6             
  [35] bitops_1.0-7                cachem_1.0.6               
  [37] gridGraphics_0.5-1          DelayedArray_0.24.0        
@@ -617,9 +617,9 @@ loaded via a namespace (and not attached):
  [83] shape_1.4.6                 compiler_4.2.1             
  [85] tibble_3.1.8                V8_4.2.2                   
  [87] crayon_1.5.2                htmltools_0.5.3            
- [89] ggfun_0.0.8                 mgcv_1.8-41                
+ [89] ggfun_0.0.9                 mgcv_1.8-41                
  [91] tidyr_1.2.1                 geneplotter_1.74.0         
- [93] aplot_0.1.8                 DBI_1.1.3                  
+ [93] aplot_0.1.9                 DBI_1.1.3                  
  [95] tweenr_2.0.2                ComplexHeatmap_2.12.1      
  [97] MASS_7.3-58.1               Matrix_1.5-3               
  [99] permute_0.9-7               cli_3.4.1                  

@@ -765,7 +765,7 @@ other attached packages:
  [5] purrr_0.3.5                    readr_2.1.3                   
  [7] tidyr_1.2.1                    tibble_3.1.8                  
  [9] ggplot2_3.4.0                  tidyverse_1.3.2               
-[11] knitr_1.40                     MicrobiomeStat_1.1            
+[11] knitr_1.41                     MicrobiomeStat_1.1            
 [13] Maaslin2_1.10.0                ALDEx2_1.28.1                 
 [15] zCompositions_1.4.0-1          truncnorm_1.0-8               
 [17] NADA_1.6-1.1                   survival_3.4-0                
@@ -787,7 +787,7 @@ loaded via a namespace (and not attached):
   [7] rpart_4.1.19                doParallel_1.0.17          
   [9] RCurl_1.98-1.9              generics_0.1.3             
  [11] ScaledMatrix_1.6.0          timeSeries_4021.105        
- [13] RSQLite_2.2.18              proxy_0.4-27               
+ [13] RSQLite_2.2.19              proxy_0.4-27               
  [15] bit_4.0.5                   tzdb_0.3.0                 
  [17] xml2_1.3.3                  lubridate_1.9.0            
  [19] assertthat_0.2.1            DirichletMultinomial_1.40.0
@@ -819,7 +819,7 @@ loaded via a namespace (and not attached):
  [71] rsvd_1.0.5                  cellranger_1.1.0           
  [73] rngtools_1.5.2              graph_1.74.0               
  [75] Matrix_1.5-3                lpsymphony_1.24.0          
- [77] Rhdf5lib_1.18.2             boot_1.3-28                
+ [77] Rhdf5lib_1.18.2             boot_1.3-28.1              
  [79] base64enc_0.1-3             reprex_2.0.2               
  [81] beeswarm_0.4.0              googlesheets4_1.0.1        
  [83] png_0.1-7                   viridisLite_0.4.1          
@@ -832,7 +832,7 @@ loaded via a namespace (and not attached):
  [97] memoise_2.0.1               magrittr_2.0.3             
  [99] plyr_1.8.8                  zlibbioc_1.44.0            
 [101] compiler_4.2.1              RColorBrewer_1.1-3         
-[103] clue_0.3-62                 lme4_1.1-31                
+[103] clue_0.3-63                 lme4_1.1-31                
 [105] cli_3.4.1                   ade4_1.7-20                
 [107] lmerTest_3.1-3              pbapply_1.6-0              
 [109] htmlTable_2.4.1             Formula_1.2-4              
@@ -863,7 +863,7 @@ loaded via a namespace (and not attached):
 [159] jsonlite_1.8.3              nloptr_2.0.3               
 [161] CodeDepends_0.6.5           timeDate_4021.106          
 [163] Rfast_2.0.6                 R6_2.5.1                   
-[165] Hmisc_4.7-1                 pillar_1.8.1               
+[165] Hmisc_4.7-2                 pillar_1.8.1               
 [167] htmltools_0.5.3             glue_1.6.2                 
 [169] fastmap_1.1.0               minqa_1.2.5                
 [171] BiocParallel_1.32.1         BiocNeighbors_1.16.0       

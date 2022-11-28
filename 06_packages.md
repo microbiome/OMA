@@ -120,6 +120,6 @@ loaded via a namespace (and not attached):
 [16] stringr_1.4.1       xfun_0.35           yaml_2.3.6         
 [19] fastmap_1.1.0       compiler_4.2.1      BiocGenerics_0.44.0
 [22] BiocManager_1.30.19 CodeDepends_0.6.5   htmltools_0.5.3    
-[25] knitr_1.40         
+[25] knitr_1.41         
 ```
 </div>
