@@ -285,40 +285,29 @@ coldata <- colData(enterotype)
 # Create a formula
 formula <- as.formula(paste0("assay ~ ", str_c(variable_names, collapse = " + ")) )
 
-# # Perform RDA
+# Perform RDA
 rda <- rda(formula, data = coldata, scale = TRUE, na.action = na.exclude)
 
-# Initialize list for p-values
-rda_info <- list()
-# Name for storing the result
-variable_name <- "all"
-# Calculate and store p-value, and other information
-rda_info[[variable_name]] <- c(constrained = rda$CCA$tot.chi, 
-                               unconstrainded = rda$CA$tot.chi, 
-                               proportion = rda$CCA$tot.chi/rda$CA$tot.chi, 
-                               p_value = anova.cca(rda)["Model", "Pr(>F)"] )
-
-# Loop through variables
+# retrieving variances explained and p-values for the whole model and for each variable
 permutations <- 999
-for( variable_name in variable_names ){
-    # Create a formula
-    formula <- as.formula(paste0("assay ~ ", variable_name) )
-    # Perform RDA
-    rda_temp <- rda(formula, data = coldata, scale = TRUE, na.action = na.exclude)
-    # Add Info to list
-    rda_info[[variable_name]] <- c(constrained = rda_temp$CCA$tot.chi, 
-                                   unconstrainded = rda_temp$CA$tot.chi, 
-                                   proportion = rda_temp$CCA$tot.chi/rda$CA$tot.chi, 
-                                   p_value = anova.cca(rda_temp, permutations = permutations
-                                                       )["Model", "Pr(>F)"] )
-}  
-# Convert into data.frame
-rda_info <- t(as.data.frame(rda_info))
-rda_info_clean <- rda_info
+set.seed(123)
+rda_info <- anova.cca(rda, by="margin", permutations = permutations) %>% 
+    as.data.frame()
+
+# gathering info needed
+rda_info_clean <- data.frame(
+    round(rda_info$Variance[1:3], 4),
+    round(rda_info$Variance[1:3]/rda_info$Variance[4], 4),
+    rda_info$`Pr(>F)`[1:3],
+    check.names=FALSE, row.names = variable_names
+)
+
 # Adjust names
 colnames(rda_info_clean) <- 
-    c("Explained by variables", "Unexplained by variables", "Proportion expl by vars", 
+    c(paste0("Explained by variables (out of ",round(rda_info$Variance[4],4)," unexplained)"),
+      "Proportion expl by vars", 
       paste0("P-value (PERMANOVA ", permutations, " permutations)") )
+
 # Print info
 kable(rda_info_clean)
 ```
@@ -361,9 +350,9 @@ vec_lab <- sapply(vec_lab_old, FUN = function(name){
     }
     # Add percentage how much this variable explains, and p-value
     new_name <- expr(paste(!!new_name, " (", 
-                           !!format(round( rda_info[variable_name, "proportion"]*100, 1), nsmall = 1), 
+                           !!format(round( rda_info_clean[variable_name, 2]*100, 1), nsmall = 1), 
                            "%, ",italic("P"), " = ", 
-                           !!gsub("0\\.","\\.", format(round( rda_info[variable_name, "p_value"], 3), 
+                           !!gsub("0\\.","\\.", format(round( rda_info_clean[variable_name, 3], 3), 
                                                        nsmall = 3)), ")"))
 
     return(new_name)
