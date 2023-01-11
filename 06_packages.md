@@ -112,14 +112,15 @@ other attached packages:
 [1] BiocStyle_2.24.0 rebook_1.6.0    
 
 loaded via a namespace (and not attached):
- [1] bookdown_0.30       dir.expiry_1.4.0    codetools_0.2-18   
- [4] XML_3.99-0.12       digest_0.6.30       stats4_4.2.1       
- [7] magrittr_2.0.3      evaluate_0.18       graph_1.74.0       
-[10] rlang_1.0.6         stringi_1.7.8       cli_3.4.1          
-[13] filelock_1.0.2      rmarkdown_2.18      tools_4.2.1        
-[16] stringr_1.4.1       xfun_0.35           yaml_2.3.6         
-[19] fastmap_1.1.0       compiler_4.2.1      BiocGenerics_0.44.0
-[22] BiocManager_1.30.19 CodeDepends_0.6.5   htmltools_0.5.3    
-[25] knitr_1.41         
+ [1] graph_1.74.0        knitr_1.41          magrittr_2.0.3     
+ [4] BiocGenerics_0.44.0 rlang_1.0.6         fastmap_1.1.0      
+ [7] stringr_1.5.0       tools_4.2.1         xfun_0.36          
+[10] cli_3.6.0           htmltools_0.5.4     CodeDepends_0.6.5  
+[13] yaml_2.3.6          digest_0.6.31       lifecycle_1.0.3    
+[16] bookdown_0.31       dir.expiry_1.4.0    BiocManager_1.30.19
+[19] vctrs_0.5.1         codetools_0.2-18    glue_1.6.2         
+[22] evaluate_0.19       rmarkdown_2.19      stringi_1.7.8      
+[25] compiler_4.2.1      filelock_1.0.2      stats4_4.2.1       
+[28] XML_3.99-0.13      
 ```
 </div>

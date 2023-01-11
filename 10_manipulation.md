@@ -712,7 +712,7 @@ tse
 ## dim: 100 4 
 ## metadata(0):
 ## assays(1): counts
-## rownames(100): 100679 101071 ... 71074 951
+## rownames(100): 239672 243675 ... 549322 951
 ## rowData names(7): Kingdom Phylum ... Genus Species
 ## colnames(4): CC1 CL3 M31Fcsw SV1
 ## colData names(7): X.SampleID Primer ... SampleType Description
@@ -737,7 +737,7 @@ tse
 ## dim: 19216 2 
 ## metadata(0):
 ## assays(1): counts
-## rownames(19216): 100011 100015 ... 99953 99956
+## rownames(19216): 239672 243675 ... 146168 594324
 ## rowData names(7): Kingdom Phylum ... Genus Species
 ## colnames(2): CL3 M31Fcsw
 ## colData names(7): X.SampleID Primer ... SampleType Description

@@ -136,26 +136,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    12   9
-##      Veg      11  15
+##      Mixed    13   8
+##      Veg      10  16
 ##                                         
-##                Accuracy : 0.574         
-##                  95% CI : (0.422, 0.717)
+##                Accuracy : 0.617         
+##                  95% CI : (0.464, 0.755)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.233         
+##     P-Value [Acc > NIR] : 0.0942        
 ##                                         
-##                   Kappa : 0.147         
+##                   Kappa : 0.232         
 ##                                         
-##  Mcnemar's Test P-Value : 0.823         
+##  Mcnemar's Test P-Value : 0.8137        
 ##                                         
-##             Sensitivity : 0.522         
-##             Specificity : 0.625         
-##          Pos Pred Value : 0.571         
-##          Neg Pred Value : 0.577         
+##             Sensitivity : 0.565         
+##             Specificity : 0.667         
+##          Pos Pred Value : 0.619         
+##          Neg Pred Value : 0.615         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.255         
+##          Detection Rate : 0.277         
 ##    Detection Prevalence : 0.447         
-##       Balanced Accuracy : 0.573         
+##       Balanced Accuracy : 0.616         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -260,34 +260,34 @@ other attached packages:
  [1] patchwork_1.1.2                MLeval_0.3                    
  [3] caret_6.0-93                   lattice_0.20-45               
  [5] ggplot2_3.4.0                  mikropml_1.4.0                
- [7] mia_1.5.17                     MultiAssayExperiment_1.24.0   
+ [7] mia_1.7.4                      MultiAssayExperiment_1.24.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [11] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [13] SummarizedExperiment_1.28.0    Biobase_2.58.0                
-[15] GenomicRanges_1.50.1           GenomeInfoDb_1.34.3           
-[17] IRanges_2.32.0                 S4Vectors_0.36.0              
+[15] GenomicRanges_1.50.2           GenomeInfoDb_1.34.6           
+[17] IRanges_2.32.0                 S4Vectors_0.36.1              
 [19] BiocGenerics_0.44.0            MatrixGenerics_1.10.0         
 [21] matrixStats_0.63.0-9003        BiocStyle_2.24.0              
 [23] rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
   [1] plyr_1.8.8                  lazyeval_0.2.2             
-  [3] splines_4.2.1               BiocParallel_1.32.1        
-  [5] listenv_0.8.0               scater_1.26.1              
-  [7] digest_0.6.30               foreach_1.5.2              
-  [9] yulab.utils_0.0.5           htmltools_0.5.3            
+  [3] splines_4.2.1               BiocParallel_1.32.5        
+  [5] listenv_0.9.0               scater_1.26.1              
+  [7] digest_0.6.31               foreach_1.5.2              
+  [9] yulab.utils_0.0.6           htmltools_0.5.4            
  [11] viridis_0.6.2               fansi_1.0.3                
  [13] magrittr_2.0.3              memoise_2.0.1              
  [15] MLmetrics_1.1.1             ScaledMatrix_1.6.0         
  [17] cluster_2.1.4               ROCR_1.0-11                
  [19] DECIPHER_2.26.0             recipes_1.0.3              
- [21] globals_0.16.1              gower_1.0.0                
+ [21] globals_0.16.2              gower_1.0.1                
  [23] hardhat_1.2.0               timechange_0.1.1           
  [25] colorspace_2.0-3            blob_1.2.3                 
- [27] ggrepel_0.9.2               xfun_0.35                  
+ [27] ggrepel_0.9.2               xfun_0.36                  
  [29] dplyr_1.0.10                crayon_1.5.2               
- [31] RCurl_1.98-1.9              jsonlite_1.8.3             
- [33] graph_1.74.0                survival_3.4-0             
+ [31] RCurl_1.98-1.9              jsonlite_1.8.4             
+ [33] graph_1.74.0                survival_3.5-0             
  [35] iterators_1.0.14            ape_5.6-2                  
  [37] glue_1.6.2                  gtable_0.3.1               
  [39] ipred_0.9-13                zlibbioc_1.44.0            
@@ -296,47 +296,47 @@ loaded via a namespace (and not attached):
  [45] future.apply_1.10.0         scales_1.2.1               
  [47] DBI_1.1.3                   Rcpp_1.0.9                 
  [49] viridisLite_0.4.1           decontam_1.18.0            
- [51] tidytree_0.4.1              proxy_0.4-27               
+ [51] tidytree_0.4.2              proxy_0.4-27               
  [53] bit_4.0.5                   rsvd_1.0.5                 
- [55] lava_1.7.0                  prodlim_2019.11.13         
- [57] glmnet_4.1-4                dir.expiry_1.4.0           
+ [55] lava_1.7.1                  prodlim_2019.11.13         
+ [57] glmnet_4.1-6                dir.expiry_1.4.0           
  [59] farver_2.1.1                pkgconfig_2.0.3            
- [61] XML_3.99-0.12               scuttle_1.8.0              
+ [61] XML_3.99-0.13               scuttle_1.8.3              
  [63] nnet_7.3-18                 CodeDepends_0.6.5          
  [65] utf8_1.2.2                  labeling_0.4.2             
  [67] tidyselect_1.2.0            rlang_1.0.6                
  [69] reshape2_1.4.4              munsell_0.5.0              
  [71] tools_4.2.1                 cachem_1.0.6               
- [73] xgboost_1.6.0.1             cli_3.4.1                  
+ [73] xgboost_1.6.0.1             cli_3.6.0                  
  [75] DirichletMultinomial_1.40.0 generics_0.1.3             
- [77] RSQLite_2.2.19              evaluate_0.18              
- [79] stringr_1.4.1               fastmap_1.1.0              
+ [77] RSQLite_2.2.20              evaluate_0.19              
+ [79] stringr_1.5.0               fastmap_1.1.0              
  [81] yaml_2.3.6                  ModelMetrics_1.2.2.2       
  [83] knitr_1.41                  bit64_4.0.5                
- [85] randomForest_4.7-1.1        purrr_0.3.5                
- [87] future_1.29.0               nlme_3.1-160               
+ [85] randomForest_4.7-1.1        purrr_1.0.0                
+ [87] future_1.30.0               nlme_3.1-161               
  [89] sparseMatrixStats_1.10.0    compiler_4.2.1             
  [91] beeswarm_0.4.0              filelock_1.0.2             
  [93] e1071_1.7-12                treeio_1.22.0              
  [95] tibble_3.1.8                stringi_1.7.8              
- [97] highr_0.9                   Matrix_1.5-3               
+ [97] highr_0.10                  Matrix_1.5-3               
  [99] vegan_2.6-4                 permute_0.9-7              
 [101] vctrs_0.5.1                 pillar_1.8.1               
 [103] lifecycle_1.0.3             BiocManager_1.30.19        
 [105] BiocNeighbors_1.16.0        data.table_1.14.6          
 [107] bitops_1.0-7                irlba_2.3.5.1              
-[109] R6_2.5.1                    bookdown_0.30              
+[109] R6_2.5.1                    bookdown_0.31              
 [111] gridExtra_2.3               vipor_0.4.5                
-[113] parallelly_1.32.1           codetools_0.2-18           
+[113] parallelly_1.33.0           codetools_0.2-18           
 [115] MASS_7.3-58.1               assertthat_0.2.1           
 [117] withr_2.5.0                 GenomeInfoDbData_1.2.9     
 [119] mgcv_1.8-41                 parallel_4.2.1             
 [121] grid_4.2.1                  rpart_4.1.19               
-[123] beachmat_2.14.0             timeDate_4021.106          
+[123] beachmat_2.14.0             timeDate_4022.108          
 [125] tidyr_1.2.1                 class_7.3-20               
-[127] rmarkdown_2.18              DelayedMatrixStats_1.20.0  
+[127] rmarkdown_2.19              DelayedMatrixStats_1.20.0  
 [129] pROC_1.18.0                 lubridate_1.9.0            
-[131] ggbeeswarm_0.6.0           
+[131] ggbeeswarm_0.7.1           
 ```
 </div>
 

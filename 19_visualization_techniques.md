@@ -802,15 +802,15 @@ other attached packages:
  [1] ggpubr_0.5.0                   ggtree_3.4.4                  
  [3] ape_5.6-2                      pheatmap_1.0.12               
  [5] reshape2_1.4.4                 sechm_1.4.1                   
- [7] miaViz_1.5.4                   ggraph_2.1.0                  
+ [7] miaViz_1.7.1                   ggraph_2.1.0                  
  [9] patchwork_1.1.2                scater_1.26.1                 
-[11] scuttle_1.8.0                  mia_1.5.17                    
+[11] scuttle_1.8.3                  mia_1.7.4                     
 [13] MultiAssayExperiment_1.24.0    TreeSummarizedExperiment_2.1.4
 [15] Biostrings_2.66.0              XVector_0.38.0                
 [17] SingleCellExperiment_1.20.0    SummarizedExperiment_1.28.0   
-[19] Biobase_2.58.0                 GenomicRanges_1.50.1          
-[21] GenomeInfoDb_1.34.3            IRanges_2.32.0                
-[23] S4Vectors_0.36.0               BiocGenerics_0.44.0           
+[19] Biobase_2.58.0                 GenomicRanges_1.50.2          
+[21] GenomeInfoDb_1.34.6            IRanges_2.32.0                
+[23] S4Vectors_0.36.1               BiocGenerics_0.44.0           
 [25] MatrixGenerics_1.10.0          matrixStats_0.63.0-9003       
 [27] ggplot2_3.4.0                  BiocStyle_2.24.0              
 [29] rebook_1.6.0                  
@@ -819,18 +819,18 @@ loaded via a namespace (and not attached):
   [1] backports_1.4.1             circlize_0.4.15            
   [3] plyr_1.8.8                  igraph_1.3.5               
   [5] lazyeval_0.2.2              splines_4.2.1              
-  [7] BiocParallel_1.32.1         digest_0.6.30              
+  [7] BiocParallel_1.32.5         digest_0.6.31              
   [9] ca_0.71.1                   foreach_1.5.2              
- [11] yulab.utils_0.0.5           htmltools_0.5.3            
+ [11] yulab.utils_0.0.6           htmltools_0.5.4            
  [13] viridis_0.6.2               fansi_1.0.3                
  [15] magrittr_2.0.3              memoise_2.0.1              
  [17] ScaledMatrix_1.6.0          cluster_2.1.4              
  [19] doParallel_1.0.17           DECIPHER_2.26.0            
  [21] ComplexHeatmap_2.12.1       graphlayouts_0.8.4         
  [23] colorspace_2.0-3            blob_1.2.3                 
- [25] ggrepel_0.9.2               xfun_0.35                  
+ [25] ggrepel_0.9.2               xfun_0.36                  
  [27] dplyr_1.0.10                crayon_1.5.2               
- [29] RCurl_1.98-1.9              jsonlite_1.8.3             
+ [29] RCurl_1.98-1.9              jsonlite_1.8.4             
  [31] graph_1.74.0                iterators_1.0.14           
  [33] glue_1.6.2                  polyclip_1.10-4            
  [35] registry_0.5-1              gtable_0.3.1               
@@ -842,48 +842,48 @@ loaded via a namespace (and not attached):
  [47] rstatix_0.7.1               randomcoloR_1.1.0.1        
  [49] Rcpp_1.0.9                  viridisLite_0.4.1          
  [51] clue_0.3-63                 decontam_1.18.0            
- [53] gridGraphics_0.5-1          tidytree_0.4.1             
+ [53] gridGraphics_0.5-1          tidytree_0.4.2             
  [55] bit_4.0.5                   rsvd_1.0.5                 
  [57] RColorBrewer_1.1-3          dir.expiry_1.4.0           
  [59] ellipsis_0.3.2              pkgconfig_2.0.3            
- [61] XML_3.99-0.12               farver_2.1.1               
+ [61] XML_3.99-0.13               farver_2.1.1               
  [63] CodeDepends_0.6.5           utf8_1.2.2                 
  [65] labeling_0.4.2              ggplotify_0.1.0            
  [67] tidyselect_1.2.0            rlang_1.0.6                
  [69] munsell_0.5.0               tools_4.2.1                
- [71] cachem_1.0.6                cli_3.4.1                  
+ [71] cachem_1.0.6                cli_3.6.0                  
  [73] DirichletMultinomial_1.40.0 generics_0.1.3             
- [75] RSQLite_2.2.19              broom_1.0.1                
- [77] evaluate_0.18               stringr_1.4.1              
+ [75] RSQLite_2.2.20              broom_1.0.2                
+ [77] evaluate_0.19               stringr_1.5.0              
  [79] fastmap_1.1.0               yaml_2.3.6                 
  [81] knitr_1.41                  bit64_4.0.5                
- [83] tidygraph_1.2.2             purrr_0.3.5                
- [85] nlme_3.1-160                sparseMatrixStats_1.10.0   
+ [83] tidygraph_1.2.2             purrr_1.0.0                
+ [85] nlme_3.1-161                sparseMatrixStats_1.10.0   
  [87] aplot_0.1.9                 compiler_4.2.1             
  [89] curl_4.3.3                  beeswarm_0.4.0             
- [91] filelock_1.0.2              png_0.1-7                  
+ [91] filelock_1.0.2              png_0.1-8                  
  [93] ggsignif_0.6.4              treeio_1.22.0              
  [95] tibble_3.1.8                tweenr_2.0.2               
- [97] stringi_1.7.8               highr_0.9                  
+ [97] stringi_1.7.8               highr_0.10                 
  [99] lattice_0.20-45             Matrix_1.5-3               
 [101] vegan_2.6-4                 permute_0.9-7              
 [103] vctrs_0.5.1                 pillar_1.8.1               
 [105] lifecycle_1.0.3             BiocManager_1.30.19        
 [107] GlobalOptions_0.1.2         BiocNeighbors_1.16.0       
 [109] cowplot_1.1.1               bitops_1.0-7               
-[111] irlba_2.3.5.1               seriation_1.4.0            
+[111] irlba_2.3.5.1               seriation_1.4.1            
 [113] R6_2.5.1                    TSP_1.2-1                  
-[115] bookdown_0.30               gridExtra_2.3              
+[115] bookdown_0.31               gridExtra_2.3              
 [117] vipor_0.4.5                 codetools_0.2-18           
 [119] MASS_7.3-58.1               assertthat_0.2.1           
 [121] rjson_0.2.21                withr_2.5.0                
 [123] GenomeInfoDbData_1.2.9      mgcv_1.8-41                
 [125] parallel_4.2.1              grid_4.2.1                 
 [127] ggfun_0.0.9                 beachmat_2.14.0            
-[129] tidyr_1.2.1                 rmarkdown_2.18             
+[129] tidyr_1.2.1                 rmarkdown_2.19             
 [131] DelayedMatrixStats_1.20.0   carData_3.0-5              
 [133] Cairo_1.6-0                 Rtsne_0.16                 
 [135] ggnewscale_0.4.8            ggforce_0.4.1              
-[137] ggbeeswarm_0.6.0           
+[137] ggbeeswarm_0.7.1           
 ```
 </div>
