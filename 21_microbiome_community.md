@@ -197,14 +197,14 @@ loaded via a namespace (and not attached):
  [59] tidygraph_1.2.2             parallel_4.2.1             
  [61] yaml_2.3.6                  memoise_2.0.1              
  [63] gridExtra_2.3               ggfun_0.0.9                
- [65] yulab.utils_0.0.6           stringi_1.7.8              
+ [65] yulab.utils_0.0.6           stringi_1.7.12             
  [67] RSQLite_2.2.20              highr_0.10                 
  [69] ScaledMatrix_1.6.0          tidytree_0.4.2             
  [71] permute_0.9-7               filelock_1.0.2             
  [73] BiocParallel_1.32.5         rlang_1.0.6                
  [75] pkgconfig_2.0.3             bitops_1.0-7               
  [77] evaluate_0.19               lattice_0.20-45            
- [79] purrr_1.0.0                 labeling_0.4.2             
+ [79] purrr_1.0.1                 labeling_0.4.2             
  [81] patchwork_1.1.2             treeio_1.22.0              
  [83] CodeDepends_0.6.5           bit_4.0.5                  
  [85] tidyselect_1.2.0            plyr_1.8.8                 

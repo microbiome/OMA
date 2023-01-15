@@ -561,7 +561,7 @@ other attached packages:
  [1] patchwork_1.1.2                dplyr_1.0.10                  
  [3] scater_1.26.1                  scuttle_1.8.3                 
  [5] miaViz_1.7.1                   ggraph_2.1.0                  
- [7] ggplot2_3.4.0                  miaTime_0.1.17                
+ [7] ggplot2_3.4.0                  miaTime_0.1.18                
  [9] mia_1.7.4                      MultiAssayExperiment_1.24.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [13] XVector_0.38.0                 SingleCellExperiment_1.20.0   
@@ -605,7 +605,7 @@ loaded via a namespace (and not attached):
  [59] decontam_1.18.0             RColorBrewer_1.1-3         
  [61] Rcpp_1.0.9                  plyr_1.8.8                 
  [63] sparseMatrixStats_1.10.0    zlibbioc_1.44.0            
- [65] purrr_1.0.0                 RCurl_1.98-1.9             
+ [65] purrr_1.0.1                 RCurl_1.98-1.9             
  [67] GetoptLong_1.0.5            viridis_0.6.2              
  [69] cowplot_1.1.1               ggrepel_0.9.2              
  [71] cluster_2.1.4               DECIPHER_2.26.0            
@@ -632,7 +632,7 @@ loaded via a namespace (and not attached):
 [113] digest_0.6.31               vegan_2.6-4                
 [115] graph_1.74.0                rmarkdown_2.19             
 [117] tidytree_0.4.2              edgeR_3.38.4               
-[119] DelayedMatrixStats_1.20.0   curl_4.3.3                 
+[119] DelayedMatrixStats_1.20.0   curl_5.0.0                 
 [121] rjson_0.2.21                lifecycle_1.0.3            
 [123] nlme_3.1-161                jsonlite_1.8.4             
 [125] BiocNeighbors_1.16.0        CodeDepends_0.6.5          
@@ -644,7 +644,7 @@ loaded via a namespace (and not attached):
 [137] zip_2.2.2                   sechm_1.4.1                
 [139] png_0.1-8                   iterators_1.0.14           
 [141] bit_4.0.5                   ggforce_0.4.1              
-[143] stringi_1.7.8               blob_1.2.3                 
+[143] stringi_1.7.12              blob_1.2.3                 
 [145] DESeq2_1.36.0               BiocSingular_1.14.0        
 [147] memoise_2.0.1               irlba_2.3.5.1              
 [149] ape_5.6-2                  

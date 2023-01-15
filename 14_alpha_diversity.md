@@ -392,13 +392,13 @@ loaded via a namespace (and not attached):
 [47] scales_1.2.1                parallel_4.2.1             
 [49] yaml_2.3.6                  memoise_2.0.1              
 [51] gridExtra_2.3               yulab.utils_0.0.6          
-[53] stringi_1.7.8               RSQLite_2.2.20             
+[53] stringi_1.7.12              RSQLite_2.2.20             
 [55] highr_0.10                  ScaledMatrix_1.6.0         
 [57] tidytree_0.4.2              permute_0.9-7              
 [59] filelock_1.0.2              BiocParallel_1.32.5        
 [61] rlang_1.0.6                 pkgconfig_2.0.3            
 [63] bitops_1.0-7                evaluate_0.19              
-[65] lattice_0.20-45             purrr_1.0.0                
+[65] lattice_0.20-45             purrr_1.0.1                
 [67] labeling_0.4.2              treeio_1.22.0              
 [69] CodeDepends_0.6.5           cowplot_1.1.1              
 [71] bit_4.0.5                   tidyselect_1.2.0           

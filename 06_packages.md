@@ -119,7 +119,7 @@ loaded via a namespace (and not attached):
 [13] yaml_2.3.6          digest_0.6.31       lifecycle_1.0.3    
 [16] bookdown_0.31       dir.expiry_1.4.0    BiocManager_1.30.19
 [19] vctrs_0.5.1         codetools_0.2-18    glue_1.6.2         
-[22] evaluate_0.19       rmarkdown_2.19      stringi_1.7.8      
+[22] evaluate_0.19       rmarkdown_2.19      stringi_1.7.12     
 [25] compiler_4.2.1      filelock_1.0.2      stats4_4.2.1       
 [28] XML_3.99-0.13      
 ```

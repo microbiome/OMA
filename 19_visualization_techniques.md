@@ -857,14 +857,14 @@ loaded via a namespace (and not attached):
  [77] evaluate_0.19               stringr_1.5.0              
  [79] fastmap_1.1.0               yaml_2.3.6                 
  [81] knitr_1.41                  bit64_4.0.5                
- [83] tidygraph_1.2.2             purrr_1.0.0                
+ [83] tidygraph_1.2.2             purrr_1.0.1                
  [85] nlme_3.1-161                sparseMatrixStats_1.10.0   
  [87] aplot_0.1.9                 compiler_4.2.1             
- [89] curl_4.3.3                  beeswarm_0.4.0             
+ [89] curl_5.0.0                  beeswarm_0.4.0             
  [91] filelock_1.0.2              png_0.1-8                  
  [93] ggsignif_0.6.4              treeio_1.22.0              
  [95] tibble_3.1.8                tweenr_2.0.2               
- [97] stringi_1.7.8               highr_0.10                 
+ [97] stringi_1.7.12              highr_0.10                 
  [99] lattice_0.20-45             Matrix_1.5-3               
 [101] vegan_2.6-4                 permute_0.9-7              
 [103] vctrs_0.5.1                 pillar_1.8.1               

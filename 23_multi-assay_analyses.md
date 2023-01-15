@@ -496,14 +496,14 @@ loaded via a namespace (and not attached):
  [81] RSQLite_2.2.20                ExperimentHub_2.4.0          
  [83] evaluate_0.19                 fastmap_1.1.0                
  [85] yaml_2.3.6                    knitr_1.41                   
- [87] bit64_4.0.5                   purrr_1.0.0                  
+ [87] bit64_4.0.5                   purrr_1.0.1                  
  [89] KEGGREST_1.36.3               nlme_3.1-161                 
  [91] sparseMatrixStats_1.10.0      mime_0.12                    
  [93] compiler_4.2.1                beeswarm_0.4.0               
- [95] filelock_1.0.2                curl_4.3.3                   
+ [95] filelock_1.0.2                curl_5.0.0                   
  [97] png_0.1-8                     interactiveDisplayBase_1.34.0
  [99] treeio_1.22.0                 tibble_3.1.8                 
-[101] stringi_1.7.8                 basilisk.utils_1.8.0         
+[101] stringi_1.7.12                basilisk.utils_1.8.0         
 [103] highr_0.10                    forcats_0.5.2                
 [105] lattice_0.20-45               Matrix_1.5-3                 
 [107] vegan_2.6-4                   permute_0.9-7                
@@ -512,7 +512,7 @@ loaded via a namespace (and not attached):
 [113] BiocManager_1.30.19           GlobalOptions_0.1.2          
 [115] BiocNeighbors_1.16.0          cowplot_1.1.1                
 [117] bitops_1.0-7                  irlba_2.3.5.1                
-[119] httpuv_1.6.7                  R6_2.5.1                     
+[119] httpuv_1.6.8                  R6_2.5.1                     
 [121] bookdown_0.31                 promises_1.2.0.1             
 [123] gridExtra_2.3                 vipor_0.4.5                  
 [125] codetools_0.2-18              MASS_7.3-58.1                

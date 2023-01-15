@@ -343,64 +343,83 @@ variable_names <- c("ClinicalStatus", "Gender", "Age")
 # Apply relative transform
 enterotype <- transformSamples(enterotype, method = "relabundance")
 
-# Get assay
-assay <- t(assay(enterotype, "relabundance"))
-# Get colData
-coldata <- colData(enterotype)
-
 # Create a formula
 formula <- as.formula(paste0("assay ~ ", str_c(variable_names, collapse = " + ")) )
 
 # # Perform RDA
-rda <- rda(formula, data = coldata, scale = TRUE, na.action = na.exclude)
+rda <- calculateRDA(enterotype, assay_name = "relabundance",
+                    formula = formula, distance = "bray", na.action = na.exclude)
+# Get the rda object
+rda <- attr(rda, "rda")
+# Calculate p-value and variance for whole model
+# Recommendation: use 999 permutations instead of 99
+set.seed(436)
+permanova <- anova.cca(rda, permutations = 99)
+# Create a data.frame for results
+rda_info <- as.data.frame(permanova)["Model", ]
 
-# Initialize list for p-values
-rda_info <- list()
-# Name for storing the result
-variable_name <- "all"
-# Calculate and store p-value, and other information
-rda_info[[variable_name]] <- c(constrained = rda$CCA$tot.chi, 
-                               unconstrainded = rda$CA$tot.chi, 
-                               proportion = rda$CCA$tot.chi/rda$CA$tot.chi, 
-                               p_value = anova.cca(rda)["Model", "Pr(>F)"] )
+# Calculate p-value and variance for each variable
+# by = "margin" --> the order or variables does not matter
+set.seed(4585)
+permanova <- anova.cca(rda, by = "margin",  permutations = 99)
+# Add results to data.frame
+rda_info <- rbind(rda_info, permanova)
 
-# Loop through variables
-permutations <- 999
-for( variable_name in variable_names ){
-    # Create a formula
-    formula <- as.formula(paste0("assay ~ ", variable_name) )
-    # Perform RDA
-    rda_temp <- rda(formula, data = coldata, scale = TRUE, na.action = na.exclude)
-    # Add Info to list
-    rda_info[[variable_name]] <- c(constrained = rda_temp$CCA$tot.chi, 
-                                   unconstrainded = rda_temp$CA$tot.chi, 
-                                   proportion = rda_temp$CCA$tot.chi/rda$CA$tot.chi, 
-                                   p_value = anova.cca(rda_temp, permutations = permutations
-                                                       )["Model", "Pr(>F)"] )
-}  
-# Convert into data.frame
-rda_info <- t(as.data.frame(rda_info))
-rda_info_clean <- rda_info
-# Adjust names
-colnames(rda_info_clean) <- 
-    c("Explained by variables", "Unexplained by variables", "Proportion expl by vars", 
-      paste0("P-value (PERMANOVA ", permutations, " permutations)") )
-# Print info
-kable(rda_info_clean)
+# Add info about total variance
+rda_info[ , "Total variance"] <- rda_info["Model", 2] +
+    rda_info["Residual", 2]
+
+# Add info about explained variance
+rda_info[ , "Explained variance"] <- rda_info[ , 2] / 
+    rda_info[ , "Total variance"]
+
+# Loop through variables, calculate homogeneity
+homogeneity <- list()
+# Get colDtaa
+coldata <- colData(enterotype)
+# Get assay
+assay <- t(assay(enterotype, "relabundance"))
+for( variable_name in rownames(rda_info) ){
+    # If data is continuous or discrete
+    if( variable_name %in% c("Model", "Residual") ||
+        length(unique(coldata[[variable_name]])) /
+        length(coldata[[variable_name]]) > 0.2 ){
+        # Do not calculate homogeneity for continuous data
+        temp <- NA
+    } else{
+        # Calculate homogeneity for discrete data
+        # Calculate homogeneity
+        set.seed(413)
+        temp <- anova(
+            betadisper( 
+                vegdist(assay, method = "bray"),
+                group = coldata[[variable_name]] ),
+            permutations = permutations )["Groups", "Pr(>F)"]
+    }
+    # Add info to the list
+    homogeneity[[variable_name]] <- temp
+}
+# Add homogeneity to information
+rda_info[["Homogeneity p-value (NULL hyp: distinct/homogeneous --> permanova suitable)"]] <-
+    homogeneity
+
+kable(rda_info)
 ```
 
 
-\begin{tabular}{l|r|r|r|r}
+\begin{tabular}{l|r|r|r|r|r|r|l}
 \hline
-  & Explained by variables & Unexplained by variables & Proportion expl by vars & P-value (PERMANOVA 999 permutations)\\
+  & Df & SumOfSqs & F & Pr(>F) & Total variance & Explained variance & Homogeneity p-value (NULL hyp: distinct/homogeneous --> permanova suitable)\\
 \hline
-all & 35.30 & 191.7 & 0.1842 & 0.685\\
+Model & 6 & 1.1157 & 1.940 & 0.05 & 3.991 & 0.2795 & NA\\
 \hline
-ClinicalStatus & 19.08 & 209.9 & 0.0996 & 0.820\\
+ClinicalStatus & 4 & 0.5837 & 1.522 & 0.15 & 3.991 & 0.1463 & 0.044277....\\
 \hline
-Gender & 5.31 & 223.7 & 0.0277 & 0.935\\
+Gender & 1 & 0.1679 & 1.751 & 0.10 & 3.991 & 0.0421 & 0.522999....\\
 \hline
-Age & 10.59 & 216.4 & 0.0552 & 0.001\\
+Age & 1 & 0.5245 & 5.471 & 0.01 & 3.991 & 0.1314 & 0.000369....\\
+\hline
+Residual & 30 & 2.8757 & NA & NA & 3.991 & 0.7205 & NA\\
 \hline
 \end{tabular}
 
@@ -443,9 +462,9 @@ vec_lab <- sapply(vec_lab_old, FUN = function(name){
     }
     # Add percentage how much this variable explains, and p-value
     new_name <- expr(paste(!!new_name, " (", 
-                           !!format(round( rda_info[variable_name, "proportion"]*100, 1), nsmall = 1), 
+                           !!format(round( rda_info[variable_name, "Explained variance"]*100, 1), nsmall = 1), 
                            "%, ",italic("P"), " = ", 
-                           !!gsub("0\\.","\\.", format(round( rda_info[variable_name, "p_value"], 3), 
+                           !!gsub("0\\.","\\.", format(round( rda_info[variable_name, "Pr(>F)"], 3), 
                                                        nsmall = 3)), ")"))
 
     return(new_name)
@@ -796,13 +815,13 @@ loaded via a namespace (and not attached):
 [45] MASS_7.3-58.1               scales_1.2.1               
 [47] parallel_4.2.1              yaml_2.3.6                 
 [49] memoise_2.0.1               gridExtra_2.3              
-[51] yulab.utils_0.0.6           stringi_1.7.8              
+[51] yulab.utils_0.0.6           stringi_1.7.12             
 [53] RSQLite_2.2.20              highr_0.10                 
 [55] ScaledMatrix_1.6.0          tidytree_0.4.2             
 [57] filelock_1.0.2              BiocParallel_1.32.5        
 [59] rlang_1.0.6                 pkgconfig_2.0.3            
 [61] bitops_1.0-7                evaluate_0.19              
-[63] purrr_1.0.0                 labeling_0.4.2             
+[63] purrr_1.0.1                 labeling_0.4.2             
 [65] treeio_1.22.0               CodeDepends_0.6.5          
 [67] cowplot_1.1.1               bit_4.0.5                  
 [69] tidyselect_1.2.0            plyr_1.8.8                 

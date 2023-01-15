@@ -1341,20 +1341,20 @@ loaded via a namespace (and not attached):
  [73] biomformat_1.24.0             stringr_1.5.0                
  [75] fastmap_1.1.0                 yaml_2.3.6                   
  [77] knitr_1.41                    bit64_4.0.5                  
- [79] purrr_1.0.0                   KEGGREST_1.36.3              
+ [79] purrr_1.0.1                   KEGGREST_1.36.3              
  [81] nlme_3.1-161                  sparseMatrixStats_1.10.0     
  [83] mime_0.12                     compiler_4.2.1               
  [85] beeswarm_0.4.0                filelock_1.0.2               
- [87] curl_4.3.3                    png_0.1-8                    
+ [87] curl_5.0.0                    png_0.1-8                    
  [89] interactiveDisplayBase_1.34.0 treeio_1.22.0                
- [91] tibble_3.1.8                  stringi_1.7.8                
+ [91] tibble_3.1.8                  stringi_1.7.12               
  [93] lattice_0.20-45               Matrix_1.5-3                 
  [95] vegan_2.6-4                   permute_0.9-7                
  [97] multtest_2.52.0               vctrs_0.5.1                  
  [99] pillar_1.8.1                  lifecycle_1.0.3              
 [101] rhdf5filters_1.8.0            BiocNeighbors_1.16.0         
 [103] data.table_1.14.6             bitops_1.0-7                 
-[105] irlba_2.3.5.1                 httpuv_1.6.7                 
+[105] irlba_2.3.5.1                 httpuv_1.6.8                 
 [107] R6_2.5.1                      promises_1.2.0.1             
 [109] bookdown_0.31                 gridExtra_2.3                
 [111] vipor_0.4.5                   codetools_0.2-18             

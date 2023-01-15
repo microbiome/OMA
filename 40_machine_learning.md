@@ -136,26 +136,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    13   8
-##      Veg      10  16
+##      Mixed    10  11
+##      Veg      13  13
 ##                                         
-##                Accuracy : 0.617         
-##                  95% CI : (0.464, 0.755)
+##                Accuracy : 0.489         
+##                  95% CI : (0.341, 0.639)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.0942        
+##     P-Value [Acc > NIR] : 0.669         
 ##                                         
-##                   Kappa : 0.232         
+##                   Kappa : -0.024        
 ##                                         
-##  Mcnemar's Test P-Value : 0.8137        
+##  Mcnemar's Test P-Value : 0.838         
 ##                                         
-##             Sensitivity : 0.565         
-##             Specificity : 0.667         
-##          Pos Pred Value : 0.619         
-##          Neg Pred Value : 0.615         
+##             Sensitivity : 0.435         
+##             Specificity : 0.542         
+##          Pos Pred Value : 0.476         
+##          Neg Pred Value : 0.500         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.277         
+##          Detection Rate : 0.213         
 ##    Detection Prevalence : 0.447         
-##       Balanced Accuracy : 0.616         
+##       Balanced Accuracy : 0.488         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -282,7 +282,7 @@ loaded via a namespace (and not attached):
  [17] cluster_2.1.4               ROCR_1.0-11                
  [19] DECIPHER_2.26.0             recipes_1.0.3              
  [21] globals_0.16.2              gower_1.0.1                
- [23] hardhat_1.2.0               timechange_0.1.1           
+ [23] hardhat_1.2.0               timechange_0.2.0           
  [25] colorspace_2.0-3            blob_1.2.3                 
  [27] ggrepel_0.9.2               xfun_0.36                  
  [29] dplyr_1.0.10                crayon_1.5.2               
@@ -313,12 +313,12 @@ loaded via a namespace (and not attached):
  [79] stringr_1.5.0               fastmap_1.1.0              
  [81] yaml_2.3.6                  ModelMetrics_1.2.2.2       
  [83] knitr_1.41                  bit64_4.0.5                
- [85] randomForest_4.7-1.1        purrr_1.0.0                
+ [85] randomForest_4.7-1.1        purrr_1.0.1                
  [87] future_1.30.0               nlme_3.1-161               
  [89] sparseMatrixStats_1.10.0    compiler_4.2.1             
  [91] beeswarm_0.4.0              filelock_1.0.2             
  [93] e1071_1.7-12                treeio_1.22.0              
- [95] tibble_3.1.8                stringi_1.7.8              
+ [95] tibble_3.1.8                stringi_1.7.12             
  [97] highr_0.10                  Matrix_1.5-3               
  [99] vegan_2.6-4                 permute_0.9-7              
 [101] vctrs_0.5.1                 pillar_1.8.1               

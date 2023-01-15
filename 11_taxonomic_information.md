@@ -616,13 +616,13 @@ loaded via a namespace (and not attached):
 [49] parallel_4.2.1              yaml_2.3.6                 
 [51] memoise_2.0.1               gridExtra_2.3              
 [53] ggplot2_3.4.0               yulab.utils_0.0.6          
-[55] stringi_1.7.8               RSQLite_2.2.20             
+[55] stringi_1.7.12              RSQLite_2.2.20             
 [57] ScaledMatrix_1.6.0          tidytree_0.4.2             
 [59] permute_0.9-7               filelock_1.0.2             
 [61] BiocParallel_1.32.5         rlang_1.0.6                
 [63] pkgconfig_2.0.3             bitops_1.0-7               
 [65] evaluate_0.19               lattice_0.20-45            
-[67] purrr_1.0.0                 treeio_1.22.0              
+[67] purrr_1.0.1                 treeio_1.22.0              
 [69] CodeDepends_0.6.5           bit_4.0.5                  
 [71] tidyselect_1.2.0            plyr_1.8.8                 
 [73] magrittr_2.0.3              bookdown_0.31              

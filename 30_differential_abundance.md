@@ -762,7 +762,7 @@ attached base packages:
 other attached packages:
  [1] ANCOMBC_2.1.2                  forcats_0.5.2                 
  [3] stringr_1.5.0                  dplyr_1.0.10                  
- [5] purrr_1.0.0                    readr_2.1.3                   
+ [5] purrr_1.0.1                    readr_2.1.3                   
  [7] tidyr_1.2.1                    tibble_3.1.8                  
  [9] ggplot2_3.4.0                  tidyverse_1.3.2               
 [11] knitr_1.41                     MicrobiomeStat_1.1            
@@ -837,11 +837,11 @@ loaded via a namespace (and not attached):
 [107] lmerTest_3.1-3              pbapply_1.6-0              
 [109] htmlTable_2.4.1             Formula_1.2-4              
 [111] mgcv_1.8-41                 tidyselect_1.2.0           
-[113] stringi_1.7.8               highr_0.10                 
+[113] stringi_1.7.12              highr_0.10                 
 [115] yaml_2.3.6                  BiocSingular_1.14.0        
 [117] latticeExtra_0.6-30         ggrepel_0.9.2              
 [119] grid_4.2.1                  lmom_2.9                   
-[121] tools_4.2.1                 timechange_0.1.1           
+[121] tools_4.2.1                 timechange_0.2.0           
 [123] parallel_4.2.1              rstudioapi_0.14            
 [125] logging_0.10-108            foreign_0.8-84             
 [127] foreach_1.5.2               statip_0.2.3               
@@ -877,6 +877,6 @@ loaded via a namespace (and not attached):
 [187] e1071_1.7-12                rhdf5_2.40.0               
 [189] GenomeInfoDbData_1.2.9      iterators_1.0.14           
 [191] haven_2.5.1                 reshape2_1.4.4             
-[193] gtable_0.3.1                rbibutils_2.2.11           
+[193] gtable_0.3.1                rbibutils_2.2.12           
 ```
 </div>
