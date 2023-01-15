@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 ```
 
 
-# Community similarity
+# Community similarity {#community-similarity}
 
 Where alpha diversity focuses on community variation within a
 community (sample), beta diversity quantifies (dis-)similarites
@@ -150,7 +150,11 @@ functions.
 
 ```{r runMDS, message=FALSE}
 library(scater)
-tse <- runMDS(tse, FUN = vegan::vegdist, method = "bray", name = "PCoA_BC", exprs_values = "counts")
+
+# Bray-Curtis is usually applied to relative abundances
+tse <- transformSamples(tse, method = "relabundance")
+# Perform PCoA
+tse <- runMDS(tse, FUN = vegan::vegdist, method = "bray", name = "PCoA_BC", exprs_values = "relabundance")
 ```
 
 Sample similarities can be visualized on a lower-dimensional display
@@ -407,7 +411,7 @@ plot <- ggord(rda, grp_in = coldata[["ClinicalStatus"]], vec_lab = vec_lab,
 plot
 ```
 
-From RDA plto, we can see that only age has significant affect on microbial profile. 
+From RDA plot, we can see that only age has significant affect on microbial profile. 
 
 ## Visualizing the most dominant genus on PCoA
 
@@ -420,9 +424,9 @@ Let us agglomerate the data at a Genus level and getting the dominant taxa per s
 # Agglomerate to genus level
 tse_Genus <- agglomerateByRank(tse, rank="Genus")
 # Convert to relative abundances
-tse_Genus <- transformSamples(tse, method = "relabundance", abund_values="counts")
+tse_Genus <- transformSamples(tse, method = "relabundance", assay_name="counts")
 # Add info on dominant genus per sample
-tse_Genus <- addPerSampleDominantTaxa(tse_Genus, abund_values="relabundance", name = "dominant_taxa")
+tse_Genus <- addPerSampleDominantTaxa(tse_Genus, assay_name="relabundance", name = "dominant_taxa")
 ```
 
 
@@ -437,7 +441,7 @@ Getting top taxa and visualizing the abundance on PCoA.
 
 ```{r}
 # Getting the top taxa
-top_taxa <- getTopTaxa(tse_Genus,top = 6, abund_values = "relabundance")
+top_taxa <- getTopTaxa(tse_Genus,top = 6, assay_name = "relabundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
@@ -464,7 +468,7 @@ plot <-plotReducedDim(tse_Genus,"PCoA_BC", colour_by = "most_abundant") +
 plot
 ```
 
-Note: A 3D interactive version of the earlier plot can be found from [here](https://microbiome.github.io/OMA/interactive-3d-plots.html).
+Note: A 3D interactive version of the earlier plot can be found from [here](https://microbiome.github.io/OMA/extras.html#interactive-3d-plots).
 
 Similarly let's visualize and compare the sub-population.
 
@@ -511,10 +515,19 @@ different community composition.
 This method is implemented in the `vegan` package in the function
 [`adonis2`](https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis).
 
-We can get equal result by first performing distance-based redundancy analysis (dbRDA),
-and then applying permutational test for result of redundancy analysis. Advantage is 
-that by doing so we can get coefficients: how much each taxa affect to the result.
+**Note:**
 
+It is recommended to `by = "margin"`. It specifies that each variable's marginal
+effect is analyzed individually. 
+
+When `by = "terms"` (the default)  the order of variables matters;
+each variable is analyzed sequentially, and the result is different when more than 1 variable is
+introduced and their order is differs. (Check [comparison](https://microbiome.github.io/OMA/extras.html#permanova-comparison))
+
+We can perform PERMANOVA with `adonis2` function or by first performing distance-based 
+redundancy analysis (dbRDA), and then applying permutational test for result of 
+redundancy analysis. Advantage of the latter approach is that by doing so we can get 
+coefficients: how much each taxa affect to the result.
 
 ```{r}
 if( !require(vegan) ){
@@ -529,9 +542,9 @@ set.seed(1576)
 # We choose 99 random permutations. Consider applying more (999 or 9999) in your
 # analysis. 
 permanova <- adonis2(t(assay(tse,"relabundance")) ~ Group,
+                     by = "margin", # each term (here only 'Group') analyzed individually
                      data = colData(tse),
                      method = "euclidean",
-                     by = NULL,
                      permutations = 99)
 
 # Set seed for reproducibility
@@ -541,11 +554,12 @@ dbrda <- dbrda(t(assay(tse,"relabundance")) ~ Group,
                data = colData(tse))
 # Perform permutational analysis
 permanova2 <- anova.cca(dbrda,
+                        by = "margin", # each term (here only 'Group') analyzed individually
                         method = "euclidean",
                         permutations = 99)
 
 # Get p-values
-p_values <- c( permanova["Model", "Pr(>F)"], permanova2["Model", "Pr(>F)"] )
+p_values <- c( permanova["Group", "Pr(>F)"], permanova2["Group", "Pr(>F)"] )
 p_values <-as.data.frame(p_values)
 rownames(p_values) <- c("adonis2", "dbRDA+anova.cca")
 p_values
@@ -611,7 +625,7 @@ appropriate choice for comparing community compositions.
 
  - [How to extract information from clusters](http://bioconductor.org/books/release/OSCA/clustering.html)
 
- - Chapter \@ref(community-typing) on community typing
+ - Chapter \@ref(clustering) on community typing
 
 ## Session Info {-}
 
