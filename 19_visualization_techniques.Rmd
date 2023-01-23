@@ -141,7 +141,7 @@ samples in a `TSE` object includes the following, where each data point represen
 ```{r}
 # estimate shannon diversity index
 tse <- mia::estimateDiversity(tse, 
-                              abund_values = "counts",
+                              assay_name = "counts",
                               index = "shannon", 
                               name = "shannon")
 # plot shannon diversity index, colour-labeled by Sample Type
@@ -158,7 +158,7 @@ _patchwork_ package is then exploited.
 ```{r}
 # estimate faith diversity index
 tse <- mia::estimateFaith(tse,
-                          abund_values = "counts")
+                          assay_name = "counts")
 # store colData into a data frame
 coldata <- as.data.frame(colData(tse))
 # generate plots for shannon and faith indices
@@ -252,29 +252,76 @@ in terms of relative abundances (y axis) for the top 10 taxa at the Order rank.
 Bar plots and heatmaps with analogous information at the Phylum level are
 available in the aforementioned chapter.
 
-```{r}
+```{r plotAbundance1}
 # agglomerate tse by Order
 tse_order <- agglomerateByRank(tse,
                                 rank = "Order",
                                 onRankOnly = TRUE)
 # transform counts into relative abundance
 tse_order <- transformCounts(tse_order,
-                              abund_values = "counts",
+                              assay_name = "counts",
                               method = "relabundance")
 # get top orders
 top_taxa <- getTopTaxa(tse_order,
                        top = 10,
-                       abund_values = "relabundance")
+                       assay_name = "relabundance")
 # leave only names for top 10 orders and label the rest with "Other"
 order_renamed <- lapply(rowData(tse_order)$Order,
                    function(x){if (x %in% top_taxa) {x} else {"Other"}})
 rowData(tse_order)$Order <- as.character(order_renamed)
 # plot composition as a bar plot
 plotAbundance(tse_order,
-              abund_values = "relabundance",
+              assay_name = "relabundance",
               rank = "Order",
               order_rank_by = "abund",
               order_sample_by = "Clostridiales")
+```
+
+To add a sample annotation, you can combine plots that you get from the output
+pf _plotAbundance_.
+
+```{r plotAbundance2}
+# Create plots
+plots <- plotAbundance(tse_order, assay_name = "relabundance", rank = "Order",
+                       order_rank_by = "abund", order_sample_by = "Clostridiales",
+                       features = "SampleType")
+
+# Modify the legend of the first plot to be smaller 
+plots[[1]] <- plots[[1]] +
+    theme(legend.key.size = unit(0.3, 'cm'),
+          legend.text = element_text(size = 6),
+          legend.title = element_text(size = 8))
+
+# Modify the legend of the second plot to be smaller 
+plots[[2]] <- plots[[2]] +
+    theme(legend.key.height = unit(0.3, 'cm'),
+          legend.key.width = unit(0.3, 'cm'),
+          legend.text = element_text(size = 6),
+          legend.title = element_text(size = 8),
+          legend.direction = "vertical")
+
+# Load required packages
+if( !require("ggpubr") ){
+    install.packages("ggpubr")
+    library("ggpubr")
+}
+# Load required packages
+if( !require("patchwork") ){
+    install.packages("patchwork")
+    library("patchwork")
+}
+
+# Combine legends
+legend <- wrap_plots(as_ggplot(get_legend(plots[[1]])), as_ggplot(get_legend(plots[[2]])), ncol = 1) 
+
+# Remove legends from the plots
+plots[[1]] <- plots[[1]] + theme(legend.position = "none")
+plots[[2]] <- plots[[2]] + theme(legend.position = "none", axis.title.x=element_blank()) 
+
+# Combine plots
+plot <- wrap_plots(plots[[2]], plots[[1]], ncol = 1, heights = c(2, 10))
+# Combine the plot with the legend
+wrap_plots(plot, legend, nrow = 1, widths = c(2, 1))
 ```
 
 For more sophisticated visualizations than those produced with `plotAbundance`
@@ -287,18 +334,20 @@ tse_phylum <- agglomerateByRank(tse,
                                 rank = "Phylum",
                                 onRankOnly = TRUE)
 # Add clr-transformation on samples
-tse_phylum <- transformSamples(tse_phylum, method = "clr", pseudocount = 1)
+tse_phylum <- transformSamples(tse_phylum, method = "relabundance", pseudocount = 1)
+tse_phylum <- transformSamples(tse_phylum, method = "clr", assay_name = "relabundance")
 # Add z-transformation on features (taxa)
-tse_phylum <- transformFeatures(tse_phylum, abund_values = "clr", 
+tse_phylum <- transformFeatures(tse_phylum, assay_name = "clr", 
                                 method = "z", name = "clr_z")
 
 # Takes subset: only samples from feces, skin, or tongue
 tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces", "Skin", "Tongue") ]
 
 # Does clr-transformation
-tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "clr", pseudocount = 1)
+tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "relabundance", pseudocount = 1)
+tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "clr", assay_name = "relabundance")
 # Does z-transformation
-tse_phylum_subset <- transformFeatures(tse_phylum_subset, abund_values = "clr", 
+tse_phylum_subset <- transformFeatures(tse_phylum_subset, assay_name = "clr", 
                                        method = "z", name = "clr_z")
 
 # Get n most abundant taxa, and subsets the data by them
@@ -585,7 +634,7 @@ plot
 ```
 
 Heatmaps find several other applications in biclustering and multi-assay
-analyses, that are discussed in chapters \@ref(biclustering) and
+analyses, that are discussed in chapters \@ref(clustering) and
 \@ref(multi-assay_analyses), where the packages _cobiclust_ and _MOFA2_ are of interest.
 
 

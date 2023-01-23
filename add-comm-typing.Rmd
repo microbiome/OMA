@@ -18,16 +18,16 @@ In the following, we agglomerate to the phylum level and subset by the country "
 library(miaViz)
 
 # Only consider Forest samples
-mat <- subsetSamples(tse, colData(tse)$Country == "Finland")
+tse <- subsetSamples(tse, colData(tse)$Country == "Finland")
 # Agglomerate to phylum level
-mat <- agglomerateByRank(mat, rank = "Phylum", agglomerateTree=TRUE)
+tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 # Get top taxa
-rel_taxa <- getTopTaxa(mat, top = 8, abund_values = "counts")
+rel_taxa <- getTopTaxa(tse, top = 8, assay_name = "counts")
 # Take only the top taxa
-mat <- subsetTaxa(mat, is.element(rownames(mat), rel_taxa))
+tse <- subsetTaxa(tse, is.element(rownames(tse), rel_taxa))
 
 # Visualise composition barplot, with samples order by "Firmicutes"
-plotAbundance(mat, rank = "Phylum", order_rank_by = "abund", order_sample_by = "Firmicutes")
+plotAbundance(tse, rank = "Phylum", order_rank_by = "abund", order_sample_by = "Firmicutes")
 ```
 
 ### Composition heatmap
@@ -41,18 +41,19 @@ library(pheatmap)
 library(grid)
 library(RColorBrewer)
 # Agglomerate to phylum level
-mat <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 # Take only the top taxa
-mat <- subsetTaxa(mat, is.element(rownames(mat), rel_taxa))
+tse <- subsetTaxa(tse, is.element(rownames(tse), rel_taxa))
 
 # CLR and Z transforms
-mat <- transformCounts(mat, abund_values = "counts", method = "clr", pseudocount = 1)
-mat <- transformFeatures(mat, abund_values = "clr", method = "z")
+tse <- transformSamples(tse, method = "relabundance")
+tse <- transformCounts(tse, assay_name = "relabundance", method = "clr", pseudocount = 1)
+tse <- transformFeatures(tse, assay_name = "clr", method = "z")
 
-Countries <- data.frame("Country" = colData(mat)$Country)
-rownames(Countries) <- colData(mat)$Sample_ID
+Countries <- data.frame("Country" = colData(tse)$Country)
+rownames(Countries) <- colData(tse)$Sample_ID
 # count matrix for pheatmap
-mat <- assays(mat)$z
+mat <- assays(tse)$z
 
 # Order community types
 mat <- mat[, order(Countries$Country)]
@@ -217,12 +218,13 @@ Looking at heatmaps of the CSTs can reveal structure on a different level. Using
 
 ```{r message = FALSE, warning = FALSE, results = FALSE}
 # Z transform of CLR counts
-mat <- transformCounts(tse2, abund_values = "counts", method = "clr", pseudocount = 1)
-mat <- transformFeatures(mat, abund_values = "clr", method = "z")
+tse2 <- transformCounts(tse2, assay_name = "counts", method = "relabundance")
+tse2 <- transformCounts(tse2, assay_name = "relabundance", method = "clr", pseudocount = 1)
+tse2 <- transformFeatures(tse2, assay_name = "clr", method = "z")
 # get top taxa
-mat <- subsetTaxa(mat, is.element(rownames(mat), rel_taxa))
+tse2 <- subsetTaxa(tse2, is.element(rownames(tse2), rel_taxa))
 
-mat <- assays(mat)$z
+mat <- assays(tse2)$z
 
 # Order CSTs
 mat <- mat[, order(clust)]
@@ -264,8 +266,8 @@ Let's cluster the data with DMM clustering.
 # Runs model and calculates the most likely number of clusters from 1 to 7.
 # Since this is a large dataset it takes a long time to run
 # For this reason we use only a subset of the data agglomerated to the phylum level
-mat <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
-tse_dmn <- runDMN(mat, name = "DMN", k = 1:7)
+tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
 ```
 
 ```{r}
@@ -345,33 +347,25 @@ vec <- colnames(prob)[max.col(prob,ties.method = "first")]
 Computing the bray PCoA and storing it as a dataframe
 
 ```{r}
-# Gets counts table
-count_assay <- assays(mat)$counts
-
-# Transposes it to get taxa to columns
-count_assay <- t(count_assay)
-
-# Calculates Euclidean distances between samples. Because taxa is in columns,
-# it is used to compare different samples.
-bray_dist <- vegan::vegdist(count_assay, method = "bray")
-
+# Calculate relative abundances
+tse_dmn <- transformSamples(tse_dmn, method = "relabundance")
 # Does principal coordinate analysis
-bray_pcoa <- ecodist::pco(bray_dist)
+bray_pcoa_df <- calculateMDS(tse_dmn, FUN = vegan::vegdist, method = "bray", 
+                             exprs_values = "relabundance")
 
-# Creates a data frame from principal coordinates
-bray_pcoa_df <- data.frame(pcoa1 = bray_pcoa$vectors[,1], 
-                                pcoa2 = bray_pcoa$vectors[,2])
-
+# Convert to data.frame
+bray_pcoa_df <- as.data.frame(bray_pcoa_df)
+colnames(bray_pcoa_df) <- c("pcoa1", "pcoa2")
+head(bray_pcoa_df)
 ```
 
 ```{r}
 # Creates a data frame that contains principal coordinates and DMM information
-bray_dmm_pcoa_df <- cbind(bray_pcoa_df,
-                               dmm_component = vec)
+bray_dmm_pcoa_df <- bray_pcoa_df 
+bray_dmm_pcoa_df$dmm_component <- vec
 # Creates a plot
 bray_dmm_plot <- ggplot(data = bray_dmm_pcoa_df, 
-                             aes(x=pcoa1, y=pcoa2,
-                                 color = dmm_component)) +
+                        aes(x = pcoa1, y = pcoa2, color = dmm_component)) +
   geom_point() +
   labs(x = "Coordinate 1",
        y = "Coordinate 2",
@@ -385,15 +379,16 @@ Visualise dmm clusters in a heatmap.
 
 ```{r}
 # get clr + z-transformed counts
-mat <- transformCounts(tse_dmn, abund_values = "counts", method = "clr", pseudocount = 1)
-mat <- transformFeatures(mat, abund_values = "clr", method = "z")
+tse_dmn <- transformCounts(tse_dmn, assay_name = "counts", method = "relabundance")
+tse_dmn <- transformCounts(tse_dmn, assay_name = "relabundance", method = "clr", pseudocount = 1)
+tse_dmn <- transformFeatures(tse_dmn, assay_name = "clr", method = "z")
 # objects containing dmm component information
 clust <- factor(vec)
-names(clust) <- colnames(mat)
+names(clust) <- colnames(tse_dmn)
 # get top taxa
-mat <- subsetTaxa(mat, is.element(rownames(mat), rel_taxa))
+tse_dmn <- subsetTaxa(tse_dmn, is.element(rownames(tse_dmn), rel_taxa))
 # get just counts
-mat <- assays(mat)$z
+mat <- assays(tse_dmn)$z
 # order according to dmm component
 mat <- mat[, order(clust)]
 colnames(mat) <- names(sort(clust))

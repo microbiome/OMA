@@ -17,7 +17,7 @@ tutorials** including this online book as well as the various package
 vignettes and other material.
 
 ```{r echo=FALSE}
-knitr::include_graphics("general/figures/FigureOverviewV2.png")
+knitr::include_graphics("general/figures/FigureOverviewV2_mod.png")
 ```
 
 
@@ -290,6 +290,7 @@ Convert data into right format and create _TreeSE_ object.
 ```{r dada2_4}
 # Create a list that contains assays
 counts <- t(seqtab.nochim)
+counts <- as.matrix(counts)
 assays <- SimpleList(counts = counts)
 
 # Convert colData and rowData into DataFrame
@@ -334,13 +335,110 @@ format. Here, we provide examples for common formats.
   input data files are properly prepared with appropriate row and
   column names.
 
-```{r importingcsv, message=FALSE, eval=FALSE}
+```{r importingcsv1, message=FALSE}
+count_file <- "data/assay_taxa.csv"
+tax_file <- "data/rowdata_taxa.csv"
+sample_file <- "data/coldata.csv"
+
+# Load files
 counts  <- read.csv(count_file)   # Abundance table (e.g. ASV data; to assay data)
 tax     <- read.csv(tax_file)     # Taxonomy table (to rowData)
 samples <- read.csv(sample_file)  # Sample data (to colData)
-tse <- TreeSummarizedExperiment(assays = list(counts = counts),
-                                colData = samples,
-                                rowData = tax)
+```
+
+**Always ensure that the tables have rownames!** The _TreeSE_ constructor compares 
+rownames and makes sure that, for example, right samples are linked with right patient.
+
+```{r importingcsv2}
+# Add rownames and remove an additional column
+rownames(counts) <- counts$X
+counts$X <- NULL
+
+# Add rownames and remove an additional column
+rownames(samples) <- samples$X
+samples$X <- NULL
+
+# Add rownames and remove an additional column
+rownames(tax) <- tax$X
+tax$X <- NULL
+
+# As an example:
+# If e.g. samples do not match between colData and counts table, you must order 
+# counts based on colData
+if( any( colnames(counts) != rownames(samples) ) ){
+    counts <- counts[ , rownames(samples) ]
+}
+
+# And same with rowData and counts...
+if( any( rownames(counts) != rownames(tax) ) ){
+    counts <- counts[ rownames(tax), ]
+}
+```
+
+The tables must be in correct format:
+
+   - counts --> matrix
+   - rowData --> DataFrame
+   - colData --> DataFrame
+   
+```{r importingcsv3}
+# Ensure that the data is in correct format
+
+# counts should be in matrix format
+counts <- as.matrix(counts)
+# And it should be added to a SimpleList
+assays <-  SimpleList(counts = counts)
+
+# colData and rowData should be in DataFrame format
+colData <- DataFrame(colData)
+rowData <- DataFrame(rowData)
+
+# Create a TreeSE
+tse_taxa <- TreeSummarizedExperiment(assays = assays,
+                                     colData = samples,
+                                     rowData = tax)
+
+tse_taxa
+```
+To construct a _MultiAssayExperiment_ object, just combine multiple _TreeSE_ data containers. 
+Here we import metabolite data from the same study.
+
+```{r importingcsv4, message=FALSE}
+count_file <- "data/assay_metabolites.csv"
+sample_file <- "data/coldata.csv"
+
+# Load files
+counts  <- read.csv(count_file)  
+samples <- read.csv(sample_file)
+
+# Add rownames and remove an additional column
+rownames(counts) <- counts$X
+counts$X <- NULL
+rownames(samples) <- samples$X
+samples$X <- NULL
+
+# Convert into right format
+counts <- as.matrix(counts)
+assays <-  SimpleList(concs = counts)
+colData <- DataFrame(colData)
+
+# Create a TreeSE
+tse_metabolite <- TreeSummarizedExperiment(assays = assays,
+                                           colData = samples)
+tse_metabolite
+```
+
+Now we can combine these two experiments into _MAE_.
+
+```{r importingcsv5}
+# Create an ExperimentList that includes experiments
+experiments <- ExperimentList(microbiome = tse_taxa, 
+                              metabolite = tse_metabolite)
+
+# Create a MAE
+mae <- MultiAssayExperiment(experiments = experiments)
+
+mae
 ```
 
 Specific import functions are provided for:

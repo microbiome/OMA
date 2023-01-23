@@ -3,10 +3,6 @@
 ```{r setup, echo=FALSE, results="asis"}
 library(rebook)
 chapterPreamble()
-if(!require(ecodist)){
-    install.packages("ecodist")
-    library(ecodist)
-}
 ```
 
 ```{r load-pkg-data}
@@ -89,8 +85,8 @@ with concentrations of individual metabolites. This helps as to answer the quest
 "If this bacteria is present, is this metabolite's concentration then low or high"?
 
 ```{r cross-correlation5}
-# Agglomerate microbiome data at Genus level
-mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Genus")
+# Agglomerate microbiome data at family level
+mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family")
 # Does log10 transform for microbiome data
 mae[[1]] <- transformSamples(mae[[1]], method = "log10", pseudocount = 1)
 
@@ -101,63 +97,38 @@ rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]])
 correlations <- testExperimentCrossCorrelation(mae, 
                                                experiment1 = 1,
                                                experiment2 = 2,
-                                               abund_values1 = "log10", 
-                                               abund_values2 = "nmr",
+                                               assay_name1 = "log10", 
+                                               assay_name2 = "nmr",
                                                method = "spearman", 
-                                               p_adj_threshold = 0.05,
-                                               cor_threshold = 0,
+                                               p_adj_threshold = NULL,
+                                               cor_threshold = NULL,
                                                # Remove when mia is fixed
-                                               # mode = "matrix",
-                                               # sort = TRUE,
+                                               mode = "matrix",
+                                               sort = TRUE,
                                                show_warnings = FALSE)
 ```
 
 Creates the heatmap
 
 ```{r cross-correlation6, fig.width=10, fig.height=8}
-# if( !require("ComplexHeatmap") ){
-#     BiocManager::install("ComplexHeatmap")
-#     library("ComplexHeatmap")
-# }
-#
-# # Create a heatmap and store it
-# plot <- Heatmap(correlations$cor, 
-#                 # Print values to cells
-#                 cell_fun = function(j, i, x, y, width, height, fill) {
-#                     # If the p-value is under threshold
-#                     if( correlations$p_adj[i, j] < 0.05 )
-#                         # Print "X"
-#                         grid.text(sprintf("%s", "X"), x, y, gp = gpar(fontsize = 8, col = "black"))
-#                     },
-#                 heatmap_legend_param = list(title = "", legend_height = unit(5, "cm"))
-#                 )
-# plot
+if( !require("ComplexHeatmap") ){
+    BiocManager::install("ComplexHeatmap")
+    library("ComplexHeatmap")
+}
 
-
-library(ggplot2)
-
-# Determines the scaling of colors
-limits <- c(-1, 1)
-breaks <- seq(from = min(limits), to = max(limits), by = 0.2)
-colours <- c("darkblue", "blue", "white", "red", "darkred")
-
-# Which observation have p-value under 0.05? --> creates a subset
-cor_table_sub <- correlations[which(correlations[["p_adj"]] < 0.05), ]
-
-# Creates a ggplot object
-ggplot(correlations, aes(x = Var1, y = Var2, fill = cor)) +
-  geom_tile() +
-
-  scale_fill_gradientn(name = "Correlation",
-                       breaks = breaks, limits = limits, colours = colours) +
-
-  # Adds label to those observations that have p-value under 0.05
-  geom_text(data = cor_table_sub, aes(x = Var1, y = Var2, label = "+")) +
-
-  theme(text = element_text(size=10),
-        axis.text.x = element_text(angle=45, hjust=1),
-        legend.key.size = unit(1, "cm")) +
-  labs(x = "Taxa", y = "Metabolites")
+# Create a heatmap and store it
+plot <- Heatmap(correlations$cor,
+                # Print values to cells
+                cell_fun = function(j, i, x, y, width, height, fill) {
+                    # If the p-value is under threshold
+                    if( !is.na(correlations$p_adj[i, j]) & correlations$p_adj[i, j] < 0.05 ){
+                        # Print "X"
+                        grid.text(sprintf("%s", "X"), x, y, gp = gpar(fontsize = 8, col = "black"))
+                        }
+                    },
+                heatmap_legend_param = list(title = "", legend_height = unit(5, "cm"))
+                )
+plot
 ```
 
 ## Multi-Omics Factor Analysis
@@ -183,7 +154,7 @@ if(!require(reticulate)){
 
 reticulate::install_miniconda(force = TRUE)
 reticulate::use_miniconda(condaenv = "env1", required = FALSE)
-reticulate::py_install(packages = c("mofapy2"), pip = TRUE)
+reticulate::py_install(packages = c("mofapy2"), pip = TRUE, python_version=3.6)
 ```
 
 The `mae` object could be used straight to create the MOFA model. Yet, we transform 
@@ -203,13 +174,14 @@ colData(mae)$Diet <- ifelse(colData(mae)$Diet == "High-fat" |
 mae[[1]] <- mae[[1]][!duplicated(rownames(assay(mae[[1]]))), ]
 
 # Transforming microbiome data with rclr
-mae[[1]] <- transformCounts(mae[[1]], abund_values = "counts", method = "rclr")
+mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
+mae[[1]] <- transformCounts(mae[[1]], assay_name = "relabundance", method = "rclr")
 
 # Transforming metabolomic data with log10
-mae[[2]] <- transformSamples(mae[[2]], abund_values = "nmr", method = "log10")
+mae[[2]] <- transformSamples(mae[[2]], assay_name = "nmr", method = "log10")
 
 # Transforming biomarker data with z-transform
-mae[[3]] <- transformFeatures(mae[[3]], abund_values = "signals", method = "z", pseudocount = 1)
+mae[[3]] <- transformFeatures(mae[[3]], assay_name = "signals", method = "z", pseudocount = 1)
 
 # Removing assays no longer needed
 assay(mae[[1]], "counts") <- NULL
@@ -228,7 +200,7 @@ Model options could be defined as follows:
 
 ```{r, message=FALSE, warning=FALSE}
 model_opts <- get_default_model_options(model)
-model_opts$num_factors <- 15
+model_opts$num_factors <- 5
 head(model_opts)
 ```
 
@@ -253,6 +225,7 @@ Visualizing the variance explained:
 
 ```{r, message=FALSE, warning=FALSE, fig.height=8, fig.width=10}
 library(patchwork)
+library(ggplot2)
 wrap_plots(
     plot_variance_explained(model.trained, x="view", y="factor", plot_total = T),
     nrow = 2
@@ -260,13 +233,13 @@ wrap_plots(
                     theme = theme(plot.title = element_text(hjust = 0.5)))
 ```
 
-The top weights for each assay using the three first factors:
+The top weights for each assay using all 5 factors:
 
 ```{r, warning=FALSE, message=FALSE, fig.height=10, fig.width=10}
 plots <- lapply(c("microbiota", "metabolites","biomarkers"), function(name) {
     plot_top_weights(model.trained,
                      view = name,
-                     factors = 1:3,
+                     factors = "all",
                      nfeatures = 10) +
         labs(title = paste0("Top weights of the ", name," assay"))
 })
