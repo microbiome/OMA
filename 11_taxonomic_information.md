@@ -67,7 +67,7 @@ dataset.
 
 ### dada2
 
-The dada2 package [@R-dada2] implements the `assignTaxonomy` function, which 
+The dada2 package [@Callahan2016dada2] implements the `assignTaxonomy` function, which 
 takes as input the ASV sequences associated with each row of data and a training
 dataset. For more information visit the 
 [dada2 homepage](https://benjjneb.github.io/dada2/assign.html).
@@ -589,13 +589,13 @@ other attached packages:
 [17] rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
- [1] ggbeeswarm_0.7.1            colorspace_2.0-3           
+ [1] ggbeeswarm_0.7.1            colorspace_2.1-0           
  [3] scuttle_1.8.3               BiocNeighbors_1.16.0       
  [5] ggrepel_0.9.2               bit64_4.0.5                
- [7] fansi_1.0.3                 decontam_1.18.0            
+ [7] fansi_1.0.4                 decontam_1.18.0            
  [9] codetools_0.2-18            splines_4.2.1              
 [11] sparseMatrixStats_1.10.0    cachem_1.0.6               
-[13] knitr_1.41                  scater_1.26.1              
+[13] knitr_1.42                  scater_1.26.1              
 [15] jsonlite_1.8.4              cluster_2.1.4              
 [17] graph_1.74.0                BiocManager_1.30.19        
 [19] compiler_4.2.1              assertthat_0.2.1           
@@ -605,15 +605,15 @@ loaded via a namespace (and not attached):
 [27] tools_4.2.1                 rsvd_1.0.5                 
 [29] gtable_0.3.1                glue_1.6.2                 
 [31] GenomeInfoDbData_1.2.9      reshape2_1.4.4             
-[33] dplyr_1.0.10                Rcpp_1.0.9                 
-[35] vctrs_0.5.1                 ape_5.6-2                  
+[33] dplyr_1.0.10                Rcpp_1.0.10                
+[35] vctrs_0.5.2                 ape_5.6-2                  
 [37] nlme_3.1-161                DECIPHER_2.26.0            
 [39] DelayedMatrixStats_1.20.0   xfun_0.36                  
 [41] stringr_1.5.0               beachmat_2.14.0            
 [43] lifecycle_1.0.3             irlba_2.3.5.1              
 [45] XML_3.99-0.13               zlibbioc_1.44.0            
-[47] MASS_7.3-58.1               scales_1.2.1               
-[49] parallel_4.2.1              yaml_2.3.6                 
+[47] MASS_7.3-58.2               scales_1.2.1               
+[49] parallel_4.2.1              yaml_2.3.7                 
 [51] memoise_2.0.1               gridExtra_2.3              
 [53] ggplot2_3.4.0               yulab.utils_0.0.6          
 [55] stringi_1.7.12              RSQLite_2.2.20             
@@ -621,21 +621,21 @@ loaded via a namespace (and not attached):
 [59] permute_0.9-7               filelock_1.0.2             
 [61] BiocParallel_1.32.5         rlang_1.0.6                
 [63] pkgconfig_2.0.3             bitops_1.0-7               
-[65] evaluate_0.19               lattice_0.20-45            
+[65] evaluate_0.20               lattice_0.20-45            
 [67] purrr_1.0.1                 treeio_1.22.0              
 [69] CodeDepends_0.6.5           bit_4.0.5                  
 [71] tidyselect_1.2.0            plyr_1.8.8                 
-[73] magrittr_2.0.3              bookdown_0.31              
+[73] magrittr_2.0.3              bookdown_0.32              
 [75] R6_2.5.1                    generics_0.1.3             
 [77] DelayedArray_0.24.0         DBI_1.1.3                  
 [79] withr_2.5.0                 pillar_1.8.1               
 [81] mgcv_1.8-41                 RCurl_1.98-1.9             
 [83] tibble_3.1.8                dir.expiry_1.4.0           
 [85] crayon_1.5.2                utf8_1.2.2                 
-[87] rmarkdown_2.19              viridis_0.6.2              
+[87] rmarkdown_2.20              viridis_0.6.2              
 [89] grid_4.2.1                  blob_1.2.3                 
 [91] vegan_2.6-4                 digest_0.6.31              
-[93] tidyr_1.2.1                 munsell_0.5.0              
+[93] tidyr_1.3.0                 munsell_0.5.0              
 [95] DirichletMultinomial_1.40.0 beeswarm_0.4.0             
 [97] viridisLite_0.4.1           vipor_0.4.5                
 ```

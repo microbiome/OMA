@@ -54,7 +54,7 @@ Human Microbiome Studies
 [@MorenoIndias2021]. The framework is based on the
 _TreeSummarizedExperiment_ data container created by Ruizhu Huang and
 others [@R-TreeSummarizedExperiment], and on the MultiAssayExperiment
-by Marcel Ramos et al. [@MultiAssayExperiment2017]. The idea of using
+by Marcel Ramos et al. [@Ramos2017]. The idea of using
 these containers as a basis for microbiome data science was initially
 advanced by the groundwork of Domenick Braccia, Héctor Corrada Bravo
 and others, and subsequently brought together with other microbiome
@@ -86,7 +86,7 @@ resources by Solomon Kurz [@McElreath2020] are key references that
 advanced reproducible data science training and dissemination. The
 Orchestrating Single-Cell Analysis with Bioconductor, or _OSCA_ book
 by Robert Amezquita, Aaron Lun, Stephanie Hicks, and Raphael Gottardo
-[@Amezquita2020] has implemented closely related work on the
+[@Amezquita2020natmeth] has implemented closely related work on the
 _SummarizedExperiment_ data container and its derivatives in the field
 of single cell sequencing studies. Many approaches used in this book
 have been derived from the [OSCA

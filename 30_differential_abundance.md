@@ -61,16 +61,17 @@ has also been criticized recently [@Quinn2021].
 
 There are many tools to perform DAA. The most popular tools, without going into
 evaluating whether or not they perform well for this task, are:  
-- [ALDEx2](https://bioconductor.org/packages/release/bioc/html/ALDEx2.html)   
-- [ANCOM-BC](https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html)  
-- [corncob](https://cran.r-project.org/web/packages/corncob/index.html)  
-- [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)  
-- [edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html)  
-- [LEFse](https://bioconductor.org/packages/release/bioc/html/lefser.html)  
-- [limma voom](https://bioconductor.org/packages/release/bioc/html/limma.html)  
-- [LinDA](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-022-02655-5)  
-- [MaAsLin2](https://www.bioconductor.org/packages/release/bioc/html/Maaslin2.html)  
-- [metagenomeSeq](https://www.bioconductor.org/packages/release/bioc/html/metagenomeSeq.html)  
+<<<<<<< HEAD
+- ALDEx2 [@Gloor2016] 
+- ANCOMBC [@ancombc2020]
+- corncob [@Martin2021]
+- DESeq2 [@Love2014] 
+- edgeR [@Chen2016]
+- lefser [@Khlebrodova2021]
+- Maaslin2 [@Mallick2020]
+- metagenomeSeq [@Paulson2017]
+- limma [@Ritchie2015]
+- LinDA [@Zhou2022]
 - [t-test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/t.test)  
 - [Wilcoxon test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/wilcox.test)  
 
@@ -287,14 +288,14 @@ Uknown & 0.0786 & 0.0439 & -0.2474 & 0.3852\\
 
 ### ANCOM-BC
 
-The analysis of composition of microbiomes with bias correction 
-(ANCOM-BC) [@Huang2020] 
+The analysis of composition of microbiomes with bias correction
+(ANCOM-BC) [@Das2020] 
 is a recently developed method for differential abundance testing. It is based
 on an 
 earlier published approach [@Mandal2015]. 
 The previous version of ANCOM was among the methods that produced the 
 most consistent results and is probably a conservative approach
-[@Nearing2022]. 
+[@Nearing2022].
 However, the new ANCOM-BC method operates quite differently compared to the
 former ANCOM method.
 
@@ -721,13 +722,6 @@ into account the phylogenetic information of bacterial taxa to perform
 group-wise associations.
 
 
-
-
-
-
-
-
-
 ## Tree-based methods
 
 ### Group-wise associations testing based on balances
@@ -763,13 +757,13 @@ other attached packages:
  [1] ANCOMBC_2.1.2                  forcats_0.5.2                 
  [3] stringr_1.5.0                  dplyr_1.0.10                  
  [5] purrr_1.0.1                    readr_2.1.3                   
- [7] tidyr_1.2.1                    tibble_3.1.8                  
+ [7] tidyr_1.3.0                    tibble_3.1.8                  
  [9] ggplot2_3.4.0                  tidyverse_1.3.2               
-[11] knitr_1.41                     MicrobiomeStat_1.1            
+[11] knitr_1.42                     MicrobiomeStat_1.1            
 [13] Maaslin2_1.10.0                ALDEx2_1.28.1                 
 [15] zCompositions_1.4.0-1          truncnorm_1.0-8               
 [17] NADA_1.6-1.1                   survival_3.5-0                
-[19] MASS_7.3-58.1                  tidySummarizedExperiment_1.6.1
+[19] MASS_7.3-58.2                  tidySummarizedExperiment_1.6.1
 [21] patchwork_1.1.2                mia_1.7.4                     
 [23] MultiAssayExperiment_1.24.0    TreeSummarizedExperiment_2.1.4
 [25] Biostrings_2.66.0              XVector_0.38.0                
@@ -789,31 +783,31 @@ loaded via a namespace (and not attached):
  [11] ScaledMatrix_1.6.0          timeSeries_4021.105        
  [13] RSQLite_2.2.20              proxy_0.4-27               
  [15] bit_4.0.5                   tzdb_0.3.0                 
- [17] xml2_1.3.3                  lubridate_1.9.0            
+ [17] xml2_1.3.3                  lubridate_1.9.1            
  [19] assertthat_0.2.1            DirichletMultinomial_1.40.0
  [21] viridis_0.6.2               gargle_1.2.1               
  [23] xfun_0.36                   fBasics_4021.93            
- [25] hms_1.1.2                   evaluate_0.19              
- [27] DEoptimR_1.0-11             fansi_1.0.3                
- [29] dbplyr_2.2.1                readxl_1.4.1               
+ [25] hms_1.1.2                   evaluate_0.20              
+ [27] DEoptimR_1.0-11             fansi_1.0.4                
+ [29] dbplyr_2.3.0                readxl_1.4.1               
  [31] igraph_1.3.5                DBI_1.1.3                  
  [33] htmlwidgets_1.6.1           googledrive_2.0.0          
- [35] hash_2.2.6.2                Rmpfr_0.8-9                
+ [35] hash_2.2.6.2                Rmpfr_0.9-0                
  [37] CVXR_1.0-11                 ellipsis_0.3.2             
  [39] energy_1.7-11               backports_1.4.1            
- [41] bookdown_0.31               permute_0.9-7              
+ [41] bookdown_0.32               permute_0.9-7              
  [43] deldir_1.0-6                sparseMatrixStats_1.10.0   
- [45] vctrs_0.5.1                 cachem_1.0.6               
+ [45] vctrs_0.5.2                 cachem_1.0.6               
  [47] withr_2.5.0                 robustbase_0.95-0          
- [49] emmeans_1.8.3               checkmate_2.1.0            
+ [49] emmeans_1.8.4-1             checkmate_2.1.0            
  [51] vegan_2.6-4                 treeio_1.22.0              
  [53] getopt_1.20.3               cluster_2.1.4              
- [55] gsl_2.1-7.1                 ape_5.6-2                  
+ [55] gsl_2.1-8                   ape_5.6-2                  
  [57] dir.expiry_1.4.0            lazyeval_0.2.2             
  [59] crayon_1.5.2                labeling_0.4.2             
  [61] pkgconfig_2.0.3             nlme_3.1-161               
  [63] vipor_0.4.5                 nnet_7.3-18                
- [65] rlang_1.0.6                 spatial_7.3-15             
+ [65] rlang_1.0.6                 spatial_7.3-16             
  [67] lifecycle_1.0.3             filelock_1.0.2             
  [69] phyloseq_1.40.0             modelr_0.1.10              
  [71] rsvd_1.0.5                  cellranger_1.1.0           
@@ -826,7 +820,7 @@ loaded via a namespace (and not attached):
  [85] stabledist_0.7-1            rootSolve_1.8.2.3          
  [87] bitops_1.0-7                rhdf5filters_1.8.0         
  [89] blob_1.2.3                  DelayedMatrixStats_1.20.0  
- [91] doRNG_1.8.3                 decontam_1.18.0            
+ [91] doRNG_1.8.6                 decontam_1.18.0            
  [93] jpeg_0.1-10                 DECIPHER_2.26.0            
  [95] beachmat_2.14.0             scales_1.2.1               
  [97] memoise_2.0.1               magrittr_2.0.3             
@@ -834,11 +828,11 @@ loaded via a namespace (and not attached):
 [101] compiler_4.2.1              RColorBrewer_1.1-3         
 [103] clue_0.3-63                 lme4_1.1-31                
 [105] cli_3.6.0                   ade4_1.7-20                
-[107] lmerTest_3.1-3              pbapply_1.6-0              
+[107] lmerTest_3.1-3              pbapply_1.7-0              
 [109] htmlTable_2.4.1             Formula_1.2-4              
 [111] mgcv_1.8-41                 tidyselect_1.2.0           
 [113] stringi_1.7.12              highr_0.10                 
-[115] yaml_2.3.6                  BiocSingular_1.14.0        
+[115] yaml_2.3.7                  BiocSingular_1.14.0        
 [117] latticeExtra_0.6-30         ggrepel_0.9.2              
 [119] grid_4.2.1                  lmom_2.9                   
 [121] tools_4.2.1                 timechange_0.2.0           
@@ -849,17 +843,17 @@ loaded via a namespace (and not attached):
 [131] gld_2.6.6                   farver_2.1.1               
 [133] stable_1.1.6                RcppZiggurat_0.1.6         
 [135] digest_0.6.31               BiocManager_1.30.19        
-[137] Rcpp_1.0.9                  broom_1.0.2                
+[137] Rcpp_1.0.10                 broom_1.0.3                
 [139] scuttle_1.8.3               httr_1.4.4                 
-[141] Rdpack_2.4                  colorspace_2.0-3           
+[141] Rdpack_2.4                  colorspace_2.1-0           
 [143] rvest_1.0.3                 XML_3.99-0.13              
-[145] fs_1.5.2                    modeest_2.4.0              
+[145] fs_1.6.0                    modeest_2.4.0              
 [147] splines_4.2.1               yulab.utils_0.0.6          
 [149] rmutil_1.1.10               statmod_1.5.0              
 [151] expm_0.999-7                tidytree_0.4.2             
 [153] scater_1.26.1               Exact_3.2                  
 [155] multtest_2.52.0             plotly_4.10.1              
-[157] xtable_1.8-4                gmp_0.6-9                  
+[157] xtable_1.8-4                gmp_0.6-10                 
 [159] jsonlite_1.8.4              nloptr_2.0.3               
 [161] CodeDepends_0.6.5           timeDate_4022.108          
 [163] Rfast_2.0.6                 R6_2.5.1                   
@@ -867,16 +861,16 @@ loaded via a namespace (and not attached):
 [167] htmltools_0.5.4             glue_1.6.2                 
 [169] fastmap_1.1.0               minqa_1.2.5                
 [171] BiocParallel_1.32.5         BiocNeighbors_1.16.0       
-[173] class_7.3-20                codetools_0.2-18           
+[173] class_7.3-21                codetools_0.2-18           
 [175] pcaPP_2.0-3                 mvtnorm_1.1-3              
 [177] utf8_1.2.2                  lattice_0.20-45            
 [179] numDeriv_2016.8-1.1         ggbeeswarm_0.7.1           
 [181] DescTools_0.99.47           interp_1.1-3               
-[183] biglm_0.9-2.1               rmarkdown_2.19             
+[183] biglm_0.9-2.1               rmarkdown_2.20             
 [185] biomformat_1.24.0           munsell_0.5.0              
 [187] e1071_1.7-12                rhdf5_2.40.0               
 [189] GenomeInfoDbData_1.2.9      iterators_1.0.14           
 [191] haven_2.5.1                 reshape2_1.4.4             
-[193] gtable_0.3.1                rbibutils_2.2.12           
+[193] gtable_0.3.1                rbibutils_2.2.13           
 ```
 </div>

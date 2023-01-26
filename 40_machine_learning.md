@@ -136,26 +136,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    10  11
-##      Veg      13  13
+##      Mixed    11  10
+##      Veg      12  14
 ##                                         
-##                Accuracy : 0.489         
-##                  95% CI : (0.341, 0.639)
+##                Accuracy : 0.532         
+##                  95% CI : (0.381, 0.679)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.669         
+##     P-Value [Acc > NIR] : 0.443         
 ##                                         
-##                   Kappa : -0.024        
+##                   Kappa : 0.062         
 ##                                         
-##  Mcnemar's Test P-Value : 0.838         
+##  Mcnemar's Test P-Value : 0.831         
 ##                                         
-##             Sensitivity : 0.435         
-##             Specificity : 0.542         
-##          Pos Pred Value : 0.476         
-##          Neg Pred Value : 0.500         
+##             Sensitivity : 0.478         
+##             Specificity : 0.583         
+##          Pos Pred Value : 0.524         
+##          Neg Pred Value : 0.538         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.213         
+##          Detection Rate : 0.234         
 ##    Detection Prevalence : 0.447         
-##       Balanced Accuracy : 0.488         
+##       Balanced Accuracy : 0.531         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -276,14 +276,14 @@ loaded via a namespace (and not attached):
   [5] listenv_0.9.0               scater_1.26.1              
   [7] digest_0.6.31               foreach_1.5.2              
   [9] yulab.utils_0.0.6           htmltools_0.5.4            
- [11] viridis_0.6.2               fansi_1.0.3                
+ [11] viridis_0.6.2               fansi_1.0.4                
  [13] magrittr_2.0.3              memoise_2.0.1              
  [15] MLmetrics_1.1.1             ScaledMatrix_1.6.0         
  [17] cluster_2.1.4               ROCR_1.0-11                
  [19] DECIPHER_2.26.0             recipes_1.0.3              
  [21] globals_0.16.2              gower_1.0.1                
  [23] hardhat_1.2.0               timechange_0.2.0           
- [25] colorspace_2.0-3            blob_1.2.3                 
+ [25] colorspace_2.1-0            blob_1.2.3                 
  [27] ggrepel_0.9.2               xfun_0.36                  
  [29] dplyr_1.0.10                crayon_1.5.2               
  [31] RCurl_1.98-1.9              jsonlite_1.8.4             
@@ -294,7 +294,7 @@ loaded via a namespace (and not attached):
  [41] DelayedArray_0.24.0         kernlab_0.9-31             
  [43] BiocSingular_1.14.0         shape_1.4.6                
  [45] future.apply_1.10.0         scales_1.2.1               
- [47] DBI_1.1.3                   Rcpp_1.0.9                 
+ [47] DBI_1.1.3                   Rcpp_1.0.10                
  [49] viridisLite_0.4.1           decontam_1.18.0            
  [51] tidytree_0.4.2              proxy_0.4-27               
  [53] bit_4.0.5                   rsvd_1.0.5                 
@@ -309,10 +309,10 @@ loaded via a namespace (and not attached):
  [71] tools_4.2.1                 cachem_1.0.6               
  [73] xgboost_1.6.0.1             cli_3.6.0                  
  [75] DirichletMultinomial_1.40.0 generics_0.1.3             
- [77] RSQLite_2.2.20              evaluate_0.19              
+ [77] RSQLite_2.2.20              evaluate_0.20              
  [79] stringr_1.5.0               fastmap_1.1.0              
- [81] yaml_2.3.6                  ModelMetrics_1.2.2.2       
- [83] knitr_1.41                  bit64_4.0.5                
+ [81] yaml_2.3.7                  ModelMetrics_1.2.2.2       
+ [83] knitr_1.42                  bit64_4.0.5                
  [85] randomForest_4.7-1.1        purrr_1.0.1                
  [87] future_1.30.0               nlme_3.1-161               
  [89] sparseMatrixStats_1.10.0    compiler_4.2.1             
@@ -321,21 +321,21 @@ loaded via a namespace (and not attached):
  [95] tibble_3.1.8                stringi_1.7.12             
  [97] highr_0.10                  Matrix_1.5-3               
  [99] vegan_2.6-4                 permute_0.9-7              
-[101] vctrs_0.5.1                 pillar_1.8.1               
+[101] vctrs_0.5.2                 pillar_1.8.1               
 [103] lifecycle_1.0.3             BiocManager_1.30.19        
 [105] BiocNeighbors_1.16.0        data.table_1.14.6          
 [107] bitops_1.0-7                irlba_2.3.5.1              
-[109] R6_2.5.1                    bookdown_0.31              
+[109] R6_2.5.1                    bookdown_0.32              
 [111] gridExtra_2.3               vipor_0.4.5                
 [113] parallelly_1.33.0           codetools_0.2-18           
-[115] MASS_7.3-58.1               assertthat_0.2.1           
+[115] MASS_7.3-58.2               assertthat_0.2.1           
 [117] withr_2.5.0                 GenomeInfoDbData_1.2.9     
 [119] mgcv_1.8-41                 parallel_4.2.1             
 [121] grid_4.2.1                  rpart_4.1.19               
 [123] beachmat_2.14.0             timeDate_4022.108          
-[125] tidyr_1.2.1                 class_7.3-20               
-[127] rmarkdown_2.19              DelayedMatrixStats_1.20.0  
-[129] pROC_1.18.0                 lubridate_1.9.0            
+[125] tidyr_1.3.0                 class_7.3-21               
+[127] rmarkdown_2.20              DelayedMatrixStats_1.20.0  
+[129] pROC_1.18.0                 lubridate_1.9.1            
 [131] ggbeeswarm_0.7.1           
 ```
 </div>

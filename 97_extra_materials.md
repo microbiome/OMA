@@ -114,8 +114,8 @@ enterotype <- transformSamples(enterotype, method = "relabundance")
 ```
 
 ```
-## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE or
-## useNames = FALSE.
+## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE
+## or useNames = FALSE.
 ```
 
 ```r

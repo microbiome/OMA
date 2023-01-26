@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 9 Community composition | Orchestrating Microbiome Analysis</title>
   <meta name="description" content="Chapter 9 Community composition | Orchestrating Microbiome Analysis" />
-  <meta name="generator" content="bookdown 0.31 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.32 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 9 Community composition | Orchestrating Microbiome Analysis" />
   <meta property="og:type" content="book" />
@@ -177,8 +177,8 @@ div.csl-indent {
 <li class="chapter" data-level="2.2.2" data-path="containers.html"><a href="containers.html#coldata"><i class="fa fa-check"></i><b>2.2.2</b> colData</a></li>
 <li class="chapter" data-level="2.2.3" data-path="containers.html"><a href="containers.html#rowdata"><i class="fa fa-check"></i><b>2.2.3</b> rowData</a></li>
 <li class="chapter" data-level="2.2.4" data-path="containers.html"><a href="containers.html#rowtree"><i class="fa fa-check"></i><b>2.2.4</b> rowTree</a></li>
-<li class="chapter" data-level="2.2.5" data-path="containers.html"><a href="containers.html#alternative-experiments"><i class="fa fa-check"></i><b>2.2.5</b> Alternative experiments</a></li>
-<li class="chapter" data-level="2.2.6" data-path="containers.html"><a href="containers.html#multiassayexperiments"><i class="fa fa-check"></i><b>2.2.6</b> MultiAssayExperiments</a></li>
+<li class="chapter" data-level="2.2.5" data-path="containers.html"><a href="containers.html#alt-exp"><i class="fa fa-check"></i><b>2.2.5</b> Alternative experiments</a></li>
+<li class="chapter" data-level="2.2.6" data-path="containers.html"><a href="containers.html#mae"><i class="fa fa-check"></i><b>2.2.6</b> MultiAssayExperiments</a></li>
 </ul></li>
 <li class="chapter" data-level="2.3" data-path="containers.html"><a href="containers.html#loading-experimental-microbiome-data"><i class="fa fa-check"></i><b>2.3</b> Loading experimental microbiome data</a>
 <ul>
@@ -560,6 +560,151 @@ techniques, we can visualize the abundances at Phylum level.</p>
 <span id="cb249-24"><a href="microbiome-community.html#cb249-24" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.key.size =</span> <span class="fu">unit</span>(<span class="dv">1</span>, <span class="st">&quot;cm&quot;</span>)) <span class="sc">+</span></span>
 <span id="cb249-25"><a href="microbiome-community.html#cb249-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Samples&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Taxa&quot;</span>)</span></code></pre></div>
 <p><img src="21_microbiome_community_files/figure-html/heatmap-1.png" width="672" /></p>
+<p><em>pheatmap</em> is a package that provides methods to plot clustered heatmaps.</p>
+<div class="sourceCode" id="cb250"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb250-1"><a href="microbiome-community.html#cb250-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(pheatmap)){</span>
+<span id="cb250-2"><a href="microbiome-community.html#cb250-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">&quot;pheatmap&quot;</span>)</span>
+<span id="cb250-3"><a href="microbiome-community.html#cb250-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(pheatmap)</span>
+<span id="cb250-4"><a href="microbiome-community.html#cb250-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb250-5"><a href="microbiome-community.html#cb250-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb250-6"><a href="microbiome-community.html#cb250-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Takes subset: only samples from feces, skin, or tongue</span></span>
+<span id="cb250-7"><a href="microbiome-community.html#cb250-7" aria-hidden="true" tabindex="-1"></a>tse_phylum_subset <span class="ot">&lt;-</span> tse_phylum[ , <span class="fu">colData</span>(tse_phylum)<span class="sc">$</span>SampleType <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;Feces&quot;</span>, <span class="st">&quot;Skin&quot;</span>, <span class="st">&quot;Tongue&quot;</span>) ]</span>
+<span id="cb250-8"><a href="microbiome-community.html#cb250-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb250-9"><a href="microbiome-community.html#cb250-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Does clr-transformation</span></span>
+<span id="cb250-10"><a href="microbiome-community.html#cb250-10" aria-hidden="true" tabindex="-1"></a>tse_phylum_subset <span class="ot">&lt;-</span> <span class="fu">transformSamples</span>(tse_phylum_subset, <span class="at">method =</span> <span class="st">&quot;clr&quot;</span>, <span class="at">pseudocount =</span> <span class="dv">1</span>)</span>
+<span id="cb250-11"><a href="microbiome-community.html#cb250-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Does z-transformation</span></span>
+<span id="cb250-12"><a href="microbiome-community.html#cb250-12" aria-hidden="true" tabindex="-1"></a>tse_phylum_subset <span class="ot">&lt;-</span> <span class="fu">transformFeatures</span>(tse_phylum_subset, <span class="at">abund_values =</span> <span class="st">&quot;clr&quot;</span>, </span>
+<span id="cb250-13"><a href="microbiome-community.html#cb250-13" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">method =</span> <span class="st">&quot;z&quot;</span>, <span class="at">name =</span> <span class="st">&quot;clr_z&quot;</span>)</span>
+<span id="cb250-14"><a href="microbiome-community.html#cb250-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb250-15"><a href="microbiome-community.html#cb250-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Get n most abundant taxa, and subsets the data by them</span></span>
+<span id="cb250-16"><a href="microbiome-community.html#cb250-16" aria-hidden="true" tabindex="-1"></a>top_taxa <span class="ot">&lt;-</span> <span class="fu">getTopTaxa</span>(tse_phylum_subset, <span class="at">top =</span> <span class="dv">20</span>)</span>
+<span id="cb250-17"><a href="microbiome-community.html#cb250-17" aria-hidden="true" tabindex="-1"></a>tse_phylum_subset <span class="ot">&lt;-</span> tse_phylum_subset[top_taxa, ]</span>
+<span id="cb250-18"><a href="microbiome-community.html#cb250-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb250-19"><a href="microbiome-community.html#cb250-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Gets the assay table</span></span>
+<span id="cb250-20"><a href="microbiome-community.html#cb250-20" aria-hidden="true" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">assay</span>(tse_phylum_subset, <span class="st">&quot;clr_z&quot;</span>)</span>
+<span id="cb250-21"><a href="microbiome-community.html#cb250-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb250-22"><a href="microbiome-community.html#cb250-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates the heatmap</span></span>
+<span id="cb250-23"><a href="microbiome-community.html#cb250-23" aria-hidden="true" tabindex="-1"></a><span class="fu">pheatmap</span>(mat)</span></code></pre></div>
+<p><img src="21_microbiome_community_files/figure-html/pheatmap1-1.png" width="672" /></p>
+<p>We can create clusters by hierarchical clustering and add them to the plot.</p>
+<div class="sourceCode" id="cb251"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb251-1"><a href="microbiome-community.html#cb251-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(ape)){</span>
+<span id="cb251-2"><a href="microbiome-community.html#cb251-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;ape&quot;</span>)</span>
+<span id="cb251-3"><a href="microbiome-community.html#cb251-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(ape)</span>
+<span id="cb251-4"><a href="microbiome-community.html#cb251-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb251-5"><a href="microbiome-community.html#cb251-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb251-6"><a href="microbiome-community.html#cb251-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Hierarchical clustering</span></span>
+<span id="cb251-7"><a href="microbiome-community.html#cb251-7" aria-hidden="true" tabindex="-1"></a>taxa_hclust <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">dist</span>(mat), <span class="at">method =</span> <span class="st">&quot;complete&quot;</span>)</span>
+<span id="cb251-8"><a href="microbiome-community.html#cb251-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb251-9"><a href="microbiome-community.html#cb251-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates a phylogenetic tree</span></span>
+<span id="cb251-10"><a href="microbiome-community.html#cb251-10" aria-hidden="true" tabindex="-1"></a>taxa_tree <span class="ot">&lt;-</span> <span class="fu">as.phylo</span>(taxa_hclust)</span></code></pre></div>
+<div class="sourceCode" id="cb252"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb252-1"><a href="microbiome-community.html#cb252-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(ggtree)){</span>
+<span id="cb252-2"><a href="microbiome-community.html#cb252-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;ggtree&quot;</span>)</span>
+<span id="cb252-3"><a href="microbiome-community.html#cb252-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(ggtree)</span>
+<span id="cb252-4"><a href="microbiome-community.html#cb252-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb252-5"><a href="microbiome-community.html#cb252-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb252-6"><a href="microbiome-community.html#cb252-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot taxa tree</span></span>
+<span id="cb252-7"><a href="microbiome-community.html#cb252-7" aria-hidden="true" tabindex="-1"></a>taxa_tree <span class="ot">&lt;-</span> <span class="fu">ggtree</span>(taxa_tree) <span class="sc">+</span> </span>
+<span id="cb252-8"><a href="microbiome-community.html#cb252-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">plot.margin=</span><span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)) <span class="co"># removes margins</span></span>
+<span id="cb252-9"><a href="microbiome-community.html#cb252-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb252-10"><a href="microbiome-community.html#cb252-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Get order of taxa in plot</span></span>
+<span id="cb252-11"><a href="microbiome-community.html#cb252-11" aria-hidden="true" tabindex="-1"></a>taxa_ordered <span class="ot">&lt;-</span> <span class="fu">get_taxa_name</span>(taxa_tree)</span>
+<span id="cb252-12"><a href="microbiome-community.html#cb252-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb252-13"><a href="microbiome-community.html#cb252-13" aria-hidden="true" tabindex="-1"></a>taxa_tree</span></code></pre></div>
+<p><img src="21_microbiome_community_files/figure-html/pheatmap3-1.png" width="672" /></p>
+<p>Based on phylo tree, we decide to create three clusters.</p>
+<div class="sourceCode" id="cb253"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb253-1"><a href="microbiome-community.html#cb253-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates clusters</span></span>
+<span id="cb253-2"><a href="microbiome-community.html#cb253-2" aria-hidden="true" tabindex="-1"></a>taxa_clusters <span class="ot">&lt;-</span> <span class="fu">cutree</span>(<span class="at">tree =</span> taxa_hclust, <span class="at">k =</span> <span class="dv">3</span>)</span>
+<span id="cb253-3"><a href="microbiome-community.html#cb253-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb253-4"><a href="microbiome-community.html#cb253-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Converts into data frame</span></span>
+<span id="cb253-5"><a href="microbiome-community.html#cb253-5" aria-hidden="true" tabindex="-1"></a>taxa_clusters <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">clusters =</span> taxa_clusters)</span>
+<span id="cb253-6"><a href="microbiome-community.html#cb253-6" aria-hidden="true" tabindex="-1"></a>taxa_clusters<span class="sc">$</span>clusters <span class="ot">&lt;-</span> <span class="fu">factor</span>(taxa_clusters<span class="sc">$</span>clusters)</span>
+<span id="cb253-7"><a href="microbiome-community.html#cb253-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb253-8"><a href="microbiome-community.html#cb253-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Order data so that it&#39;s same as in phylo tree</span></span>
+<span id="cb253-9"><a href="microbiome-community.html#cb253-9" aria-hidden="true" tabindex="-1"></a>taxa_clusters <span class="ot">&lt;-</span> taxa_clusters[taxa_ordered, , drop <span class="ot">=</span> <span class="cn">FALSE</span>] </span>
+<span id="cb253-10"><a href="microbiome-community.html#cb253-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb253-11"><a href="microbiome-community.html#cb253-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Prints taxa and their clusters</span></span>
+<span id="cb253-12"><a href="microbiome-community.html#cb253-12" aria-hidden="true" tabindex="-1"></a>taxa_clusters</span></code></pre></div>
+<pre><code>##                  clusters
+## Chloroflexi             3
+## Actinobacteria          3
+## Crenarchaeota           3
+## Planctomycetes          3
+## Gemmatimonadetes        3
+## Thermi                  3
+## Acidobacteria           3
+## Spirochaetes            2
+## Fusobacteria            2
+## SR1                     2
+## Cyanobacteria           2
+## Proteobacteria          2
+## Synergistetes           2
+## Lentisphaerae           1
+## Bacteroidetes           1
+## Verrucomicrobia         1
+## Tenericutes             1
+## Firmicutes              1
+## Euryarchaeota           1
+## SAR406                  1</code></pre>
+<div class="sourceCode" id="cb255"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb255-1"><a href="microbiome-community.html#cb255-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Adds information to rowData</span></span>
+<span id="cb255-2"><a href="microbiome-community.html#cb255-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rowData</span>(tse_phylum_subset)<span class="sc">$</span>clusters <span class="ot">&lt;-</span> taxa_clusters[<span class="fu">order</span>(<span class="fu">match</span>(<span class="fu">rownames</span>(taxa_clusters), </span>
+<span id="cb255-3"><a href="microbiome-community.html#cb255-3" aria-hidden="true" tabindex="-1"></a>                                                                 <span class="fu">rownames</span>(tse_phylum_subset))), ]</span>
+<span id="cb255-4"><a href="microbiome-community.html#cb255-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb255-5"><a href="microbiome-community.html#cb255-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Prints taxa and their clusters</span></span>
+<span id="cb255-6"><a href="microbiome-community.html#cb255-6" aria-hidden="true" tabindex="-1"></a><span class="fu">rowData</span>(tse_phylum_subset)<span class="sc">$</span>clusters</span></code></pre></div>
+<pre><code>##  [1] 1 1 2 3 2 2 1 1 1 1 3 2 3 3 3 2 2 3 3 1
+## Levels: 1 2 3</code></pre>
+<div class="sourceCode" id="cb257"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb257-1"><a href="microbiome-community.html#cb257-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hierarchical clustering</span></span>
+<span id="cb257-2"><a href="microbiome-community.html#cb257-2" aria-hidden="true" tabindex="-1"></a>sample_hclust <span class="ot">&lt;-</span> <span class="fu">hclust</span>(<span class="fu">dist</span>(<span class="fu">t</span>(mat)), <span class="at">method =</span> <span class="st">&quot;complete&quot;</span>)</span>
+<span id="cb257-3"><a href="microbiome-community.html#cb257-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb257-4"><a href="microbiome-community.html#cb257-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates a phylogenetic tree</span></span>
+<span id="cb257-5"><a href="microbiome-community.html#cb257-5" aria-hidden="true" tabindex="-1"></a>sample_tree <span class="ot">&lt;-</span> <span class="fu">as.phylo</span>(sample_hclust)</span>
+<span id="cb257-6"><a href="microbiome-community.html#cb257-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb257-7"><a href="microbiome-community.html#cb257-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot sample tree</span></span>
+<span id="cb257-8"><a href="microbiome-community.html#cb257-8" aria-hidden="true" tabindex="-1"></a>sample_tree <span class="ot">&lt;-</span> <span class="fu">ggtree</span>(sample_tree) <span class="sc">+</span> <span class="fu">layout_dendrogram</span>() <span class="sc">+</span> </span>
+<span id="cb257-9"><a href="microbiome-community.html#cb257-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">plot.margin=</span><span class="fu">margin</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)) <span class="co"># removes margins</span></span>
+<span id="cb257-10"><a href="microbiome-community.html#cb257-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb257-11"><a href="microbiome-community.html#cb257-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Get order of samples in plot</span></span>
+<span id="cb257-12"><a href="microbiome-community.html#cb257-12" aria-hidden="true" tabindex="-1"></a>samples_ordered <span class="ot">&lt;-</span> <span class="fu">rev</span>(<span class="fu">get_taxa_name</span>(sample_tree))</span>
+<span id="cb257-13"><a href="microbiome-community.html#cb257-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb257-14"><a href="microbiome-community.html#cb257-14" aria-hidden="true" tabindex="-1"></a>sample_tree</span></code></pre></div>
+<p><img src="21_microbiome_community_files/figure-html/pheatmap6-1.png" width="672" /></p>
+<div class="sourceCode" id="cb258"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb258-1"><a href="microbiome-community.html#cb258-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Creates clusters</span></span>
+<span id="cb258-2"><a href="microbiome-community.html#cb258-2" aria-hidden="true" tabindex="-1"></a>sample_clusters <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">cutree</span>(<span class="at">tree =</span> sample_hclust, <span class="at">k =</span> <span class="dv">3</span>))</span>
+<span id="cb258-3"><a href="microbiome-community.html#cb258-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb258-4"><a href="microbiome-community.html#cb258-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Converts into data frame</span></span>
+<span id="cb258-5"><a href="microbiome-community.html#cb258-5" aria-hidden="true" tabindex="-1"></a>sample_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">clusters =</span> sample_clusters)</span>
+<span id="cb258-6"><a href="microbiome-community.html#cb258-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb258-7"><a href="microbiome-community.html#cb258-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Order data so that it&#39;s same as in phylo tree</span></span>
+<span id="cb258-8"><a href="microbiome-community.html#cb258-8" aria-hidden="true" tabindex="-1"></a>sample_data <span class="ot">&lt;-</span> sample_data[samples_ordered, , drop <span class="ot">=</span> <span class="cn">FALSE</span>] </span>
+<span id="cb258-9"><a href="microbiome-community.html#cb258-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb258-10"><a href="microbiome-community.html#cb258-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Order data based on </span></span>
+<span id="cb258-11"><a href="microbiome-community.html#cb258-11" aria-hidden="true" tabindex="-1"></a>tse_phylum_subset <span class="ot">&lt;-</span> tse_phylum_subset[ , <span class="fu">rownames</span>(sample_data)]</span>
+<span id="cb258-12"><a href="microbiome-community.html#cb258-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb258-13"><a href="microbiome-community.html#cb258-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Add sample type data</span></span>
+<span id="cb258-14"><a href="microbiome-community.html#cb258-14" aria-hidden="true" tabindex="-1"></a>sample_data<span class="sc">$</span>sample_types <span class="ot">&lt;-</span> <span class="fu">unfactor</span>(<span class="fu">colData</span>(tse_phylum_subset)<span class="sc">$</span>SampleType)</span>
+<span id="cb258-15"><a href="microbiome-community.html#cb258-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb258-16"><a href="microbiome-community.html#cb258-16" aria-hidden="true" tabindex="-1"></a>sample_data</span></code></pre></div>
+<pre><code>##         clusters sample_types
+## M11Plmr        2         Skin
+## M31Plmr        2         Skin
+## F21Plmr        2         Skin
+## M31Fcsw        1        Feces
+## M11Fcsw        1        Feces
+## TS28           3        Feces
+## TS29           3        Feces
+## M31Tong        3       Tongue
+## M11Tong        3       Tongue</code></pre>
+<p>Now we can create heatmap with additional annotations.</p>
+<div class="sourceCode" id="cb260"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb260-1"><a href="microbiome-community.html#cb260-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Determines the scaling of colorss</span></span>
+<span id="cb260-2"><a href="microbiome-community.html#cb260-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Scale colors</span></span>
+<span id="cb260-3"><a href="microbiome-community.html#cb260-3" aria-hidden="true" tabindex="-1"></a>breaks <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="fu">ceiling</span>(<span class="fu">max</span>(<span class="fu">abs</span>(mat))), <span class="fu">ceiling</span>(<span class="fu">max</span>(<span class="fu">abs</span>(mat))), </span>
+<span id="cb260-4"><a href="microbiome-community.html#cb260-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">length.out =</span> <span class="fu">ifelse</span>( <span class="fu">max</span>(<span class="fu">abs</span>(mat))<span class="sc">&gt;</span><span class="dv">5</span>, <span class="dv">2</span><span class="sc">*</span><span class="fu">ceiling</span>(<span class="fu">max</span>(<span class="fu">abs</span>(mat))), <span class="dv">10</span> ) )</span>
+<span id="cb260-5"><a href="microbiome-community.html#cb260-5" aria-hidden="true" tabindex="-1"></a>colors <span class="ot">&lt;-</span> <span class="fu">colorRampPalette</span>(<span class="fu">c</span>(<span class="st">&quot;darkblue&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;white&quot;</span>, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;darkred&quot;</span>))(<span class="fu">length</span>(breaks)<span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb260-6"><a href="microbiome-community.html#cb260-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb260-7"><a href="microbiome-community.html#cb260-7" aria-hidden="true" tabindex="-1"></a><span class="fu">pheatmap</span>(mat, <span class="at">annotation_row =</span> taxa_clusters, </span>
+<span id="cb260-8"><a href="microbiome-community.html#cb260-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">annotation_col =</span> sample_data,</span>
+<span id="cb260-9"><a href="microbiome-community.html#cb260-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">breaks =</span> breaks,</span>
+<span id="cb260-10"><a href="microbiome-community.html#cb260-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">color =</span> colors)</span></code></pre></div>
+<p><img src="21_microbiome_community_files/figure-html/pheatmap8-1.png" width="672" /></p>
 <p>In addition, there are also other packages that provide functions for more complex heatmaps,
 such as <a href="https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html"><em>iheatmapr</em></a>
 and <a href="https://academic.oup.com/bioinformatics/article/32/18/2847/1743594?login=true">ComplexHeatmap</a>.
@@ -595,77 +740,78 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] miaViz_1.7.1                   ggraph_2.1.0                  
- [3] ggplot2_3.4.0                  mia_1.7.4                     
- [5] MultiAssayExperiment_1.24.0    TreeSummarizedExperiment_2.1.4
- [7] Biostrings_2.66.0              XVector_0.38.0                
- [9] SingleCellExperiment_1.20.0    SummarizedExperiment_1.28.0   
-[11] Biobase_2.58.0                 GenomicRanges_1.50.2          
-[13] GenomeInfoDb_1.34.6            IRanges_2.32.0                
-[15] S4Vectors_0.36.1               BiocGenerics_0.44.0           
-[17] MatrixGenerics_1.10.0          matrixStats_0.63.0-9003       
-[19] BiocStyle_2.24.0               rebook_1.6.0                  
+ [1] ggtree_3.4.4                   ape_5.6-2                     
+ [3] pheatmap_1.0.12                miaViz_1.7.1                  
+ [5] ggraph_2.1.0                   ggplot2_3.4.0                 
+ [7] mia_1.7.4                      MultiAssayExperiment_1.24.0   
+ [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
+[11] XVector_0.38.0                 SingleCellExperiment_1.20.0   
+[13] SummarizedExperiment_1.28.0    Biobase_2.58.0                
+[15] GenomicRanges_1.50.2           GenomeInfoDb_1.34.6           
+[17] IRanges_2.32.0                 S4Vectors_0.36.1              
+[19] BiocGenerics_0.44.0            MatrixGenerics_1.10.0         
+[21] matrixStats_0.63.0-9003        BiocStyle_2.24.0              
+[23] rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
-  [1] ggtree_3.4.4                ggnewscale_0.4.8           
-  [3] ggbeeswarm_0.7.1            colorspace_2.0-3           
-  [5] ellipsis_0.3.2              scuttle_1.8.3              
-  [7] BiocNeighbors_1.16.0        aplot_0.1.9                
-  [9] farver_2.1.1                graphlayouts_0.8.4         
- [11] ggrepel_0.9.2               bit64_4.0.5                
- [13] fansi_1.0.3                 decontam_1.18.0            
- [15] splines_4.2.1               codetools_0.2-18           
- [17] sparseMatrixStats_1.10.0    cachem_1.0.6               
- [19] knitr_1.41                  scater_1.26.1              
- [21] polyclip_1.10-4             jsonlite_1.8.4             
- [23] cluster_2.1.4               graph_1.74.0               
- [25] ggforce_0.4.1               BiocManager_1.30.19        
- [27] compiler_4.2.1              assertthat_0.2.1           
- [29] Matrix_1.5-3                fastmap_1.1.0              
- [31] lazyeval_0.2.2              cli_3.6.0                  
- [33] tweenr_2.0.2                BiocSingular_1.14.0        
- [35] htmltools_0.5.4             tools_4.2.1                
- [37] igraph_1.3.5                rsvd_1.0.5                 
- [39] gtable_0.3.1                glue_1.6.2                 
- [41] GenomeInfoDbData_1.2.9      reshape2_1.4.4             
- [43] dplyr_1.0.10                Rcpp_1.0.9                 
- [45] jquerylib_0.1.4             vctrs_0.5.1                
- [47] ape_5.6-2                   nlme_3.1-161               
- [49] DECIPHER_2.26.0             DelayedMatrixStats_1.20.0  
- [51] xfun_0.36                   stringr_1.5.0              
- [53] beachmat_2.14.0             lifecycle_1.0.3            
- [55] irlba_2.3.5.1               XML_3.99-0.13              
- [57] zlibbioc_1.44.0             MASS_7.3-58.1              
- [59] scales_1.2.1                tidygraph_1.2.2            
- [61] parallel_4.2.1              yaml_2.3.6                 
- [63] memoise_2.0.1               gridExtra_2.3              
- [65] ggfun_0.0.9                 yulab.utils_0.0.6          
- [67] sass_0.4.4                  stringi_1.7.12             
- [69] RSQLite_2.2.20              highr_0.10                 
- [71] ScaledMatrix_1.6.0          tidytree_0.4.2             
- [73] permute_0.9-7               filelock_1.0.2             
- [75] BiocParallel_1.32.5         rlang_1.0.6                
- [77] pkgconfig_2.0.3             bitops_1.0-7               
- [79] evaluate_0.19               lattice_0.20-45            
- [81] purrr_1.0.1                 labeling_0.4.2             
- [83] patchwork_1.1.2             treeio_1.22.0              
- [85] CodeDepends_0.6.5           bit_4.0.5                  
- [87] tidyselect_1.2.0            plyr_1.8.8                 
- [89] magrittr_2.0.3              bookdown_0.31              
- [91] R6_2.5.1                    generics_0.1.3             
- [93] DelayedArray_0.24.0         DBI_1.1.3                  
- [95] withr_2.5.0                 mgcv_1.8-41                
- [97] pillar_1.8.1                RCurl_1.98-1.9             
- [99] tibble_3.1.8                dir.expiry_1.4.0           
-[101] crayon_1.5.2                utf8_1.2.2                 
-[103] rmarkdown_2.19              viridis_0.6.2              
-[105] grid_4.2.1                  blob_1.2.3                 
-[107] vegan_2.6-4                 digest_0.6.31              
-[109] tidyr_1.2.1                 gridGraphics_0.5-1         
-[111] munsell_0.5.0               DirichletMultinomial_1.40.0
-[113] ggplotify_0.1.0             beeswarm_0.4.0             
-[115] viridisLite_0.4.1           vipor_0.4.5                
-[117] bslib_0.4.2                </code></pre>
+  [1] ggnewscale_0.4.8            ggbeeswarm_0.7.1           
+  [3] colorspace_2.1-0            scuttle_1.8.3              
+  [5] BiocNeighbors_1.16.0        aplot_0.1.9                
+  [7] farver_2.1.1                graphlayouts_0.8.4         
+  [9] ggrepel_0.9.2               bit64_4.0.5                
+ [11] fansi_1.0.4                 decontam_1.18.0            
+ [13] splines_4.2.1               codetools_0.2-18           
+ [15] sparseMatrixStats_1.10.0    cachem_1.0.6               
+ [17] knitr_1.42                  scater_1.26.1              
+ [19] polyclip_1.10-4             jsonlite_1.8.4             
+ [21] cluster_2.1.4               graph_1.74.0               
+ [23] ggforce_0.4.1               BiocManager_1.30.19        
+ [25] compiler_4.2.1              assertthat_0.2.1           
+ [27] Matrix_1.5-3                fastmap_1.1.0              
+ [29] lazyeval_0.2.2              cli_3.6.0                  
+ [31] tweenr_2.0.2                BiocSingular_1.14.0        
+ [33] htmltools_0.5.4             tools_4.2.1                
+ [35] igraph_1.3.5                rsvd_1.0.5                 
+ [37] gtable_0.3.1                glue_1.6.2                 
+ [39] GenomeInfoDbData_1.2.9      reshape2_1.4.4             
+ [41] dplyr_1.0.10                Rcpp_1.0.10                
+ [43] jquerylib_0.1.4             vctrs_0.5.2                
+ [45] nlme_3.1-161                DECIPHER_2.26.0            
+ [47] DelayedMatrixStats_1.20.0   xfun_0.36                  
+ [49] stringr_1.5.0               beachmat_2.14.0            
+ [51] lifecycle_1.0.3             irlba_2.3.5.1              
+ [53] XML_3.99-0.13               zlibbioc_1.44.0            
+ [55] MASS_7.3-58.2               scales_1.2.1               
+ [57] tidygraph_1.2.2             parallel_4.2.1             
+ [59] RColorBrewer_1.1-3          yaml_2.3.7                 
+ [61] memoise_2.0.1               gridExtra_2.3              
+ [63] ggfun_0.0.9                 yulab.utils_0.0.6          
+ [65] sass_0.4.5                  stringi_1.7.12             
+ [67] RSQLite_2.2.20              highr_0.10                 
+ [69] ScaledMatrix_1.6.0          tidytree_0.4.2             
+ [71] permute_0.9-7               filelock_1.0.2             
+ [73] BiocParallel_1.32.5         rlang_1.0.6                
+ [75] pkgconfig_2.0.3             bitops_1.0-7               
+ [77] evaluate_0.20               lattice_0.20-45            
+ [79] purrr_1.0.1                 labeling_0.4.2             
+ [81] patchwork_1.1.2             treeio_1.22.0              
+ [83] CodeDepends_0.6.5           bit_4.0.5                  
+ [85] tidyselect_1.2.0            plyr_1.8.8                 
+ [87] magrittr_2.0.3              bookdown_0.32              
+ [89] R6_2.5.1                    generics_0.1.3             
+ [91] DelayedArray_0.24.0         DBI_1.1.3                  
+ [93] withr_2.5.0                 pillar_1.8.1               
+ [95] mgcv_1.8-41                 RCurl_1.98-1.9             
+ [97] tibble_3.1.8                dir.expiry_1.4.0           
+ [99] crayon_1.5.2                utf8_1.2.2                 
+[101] rmarkdown_2.20              viridis_0.6.2              
+[103] grid_4.2.1                  blob_1.2.3                 
+[105] vegan_2.6-4                 digest_0.6.31              
+[107] tidyr_1.3.0                 gridGraphics_0.5-1         
+[109] munsell_0.5.0               DirichletMultinomial_1.40.0
+[111] ggplotify_0.1.0             beeswarm_0.4.0             
+[113] viridisLite_0.4.1           vipor_0.4.5                
+[115] bslib_0.4.2                </code></pre>
 </div>
 
 </div>

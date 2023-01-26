@@ -52,20 +52,17 @@ vignettes and other material.
 
 ## Data containers
 
-[`SummarizedExperiment`](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)
-(`SE`) is a generic and highly optimized container for complex data
+`SummarizedExperiment` (`SE`) [@R-SummarizedExperiment] is a generic and highly optimized container for complex data
 structures. It has become a common choice for analysing various types
 of biomedical profiling data, such as RNAseq, ChIp-Seq, microarrays,
 flow cytometry, proteomics, and single-cell
 sequencing.
 
-[`TreeSummarizedExperiment`](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html)
-(`TreeSE`) was developed as an extension to incorporate hierarchical
+[`TreeSummarizedExperiment`] (`TreeSE`) [@R-TreeSummarizedExperiment] was developed as an extension to incorporate hierarchical
 information (such as phylogenetic trees and sample hierarchies) and
 reference sequences.
 
-[`MultiAssayExperiment`](https://www.bioconductor.org/packages/release/bioc/html/MultiAssayExperiment.html)
-(`MAE`) provides an organized way to bind several different data
+[`MultiAssayExperiment`] (`MAE`) [@Ramos2017] provides an organized way to bind several different data
 structures together in a single object. For example, we can bind
 microbiome data (in `TreeSE` format) with metabolomic profiling data
 (in `SE`) format, with shared sample metadata. This is convenient and
@@ -322,7 +319,7 @@ the links in an existing object, the `changeTree` function is available.
 
 
 
-### Alternative experiments
+### Alternative experiments {#alt-exp}
 
 _**Alternative experiments**_ differ from transformations as they can
 contain complementary data, which is no longer tied to the same
@@ -413,13 +410,13 @@ For more details of altExp have a look at the [Intro vignette](https://bioconduc
 
 
 
-### MultiAssayExperiments
+### MultiAssayExperiments {#mae}
 
 _**Multiple experiments**_ relate to complementary measurement types,
 such as transcriptomic or metabolomic profiling of the microbiome or
 the host. Multiple experiments can be represented using the same
 options as alternative experiments, or by using the
-`MultiAssayExperiment` class [@R-MultiAssayExperiment]. Depending on how the 
+`MultiAssayExperiment` class [@Ramos2017]. Depending on how the 
 datasets relate to each other the data can be stored as:
 
 1. Separate _altExp_ if the samples can be matched directly 1:1; or
@@ -1189,10 +1186,9 @@ Check the documentation for this data set:
 
 ### ExperimentHub data
 
-[ExperimentHub](https://bioconductor.org/packages/release/bioc/vignettes/ExperimentHub/inst/doc/ExperimentHub.html)
+[ExperimentHub](https://bioconductor.org/packages/release/bioc/vignettes/ExperimentHub/inst/doc/ExperimentHub.html) 
 provides a variety of data resources, including the
-[microbiomeDataSets](https://bioconductor.org/packages/devel/data/experiment/html/microbiomeDataSets.html)
-package.
+microbiomeDataSets package [@Morgan2021; @microlahti2021].
 
 A table of the available data sets is available through the `availableDataSets`
 function.
@@ -1228,7 +1224,7 @@ mae <- HintikkaXOData()
 ```
 
 Data is available in *[SummarizedExperiment](https://bioconductor.org/packages/3.15/SummarizedExperiment)*, `r
-Biocpkg("TreeSummarizedExperiment")`, and `r
+Biocpkg("TreeSummarizedExperiment")` and `r
 Biocpkg("MultiAssayExperiment")` data containers; see the separate
 page on [alternative
 containers](https://microbiome.github.io/OMA/multitable.html) for more
@@ -1238,10 +1234,9 @@ details.
 
 ### Other data sources
 
-The
-[curatedMetagenomicData](https://waldronlab.io/curatedMetagenomicData)
+The curatedMetagenomicData 
 is an independent source that provides various example data sets as
-`(Tree)SummarizedExperiment` objects. This resource provides curated
+`(Tree)SummarizedExperiment` objects [@Pasolli2017]. This resource provides curated
 human microbiome data including gene families, marker abundance,
 marker presence, pathway abundance, pathway coverage, and relative
 abundance for samples from different body sites. See the package
@@ -1308,10 +1303,10 @@ loaded via a namespace (and not attached):
   [7] BiocParallel_1.32.5           scater_1.26.1                
   [9] digest_0.6.31                 foreach_1.5.2                
  [11] yulab.utils_0.0.6             htmltools_0.5.4              
- [13] viridis_0.6.2                 fansi_1.0.3                  
+ [13] viridis_0.6.2                 fansi_1.0.4                  
  [15] magrittr_2.0.3                memoise_2.0.1                
  [17] ScaledMatrix_1.6.0            cluster_2.1.4                
- [19] DECIPHER_2.26.0               colorspace_2.0-3             
+ [19] DECIPHER_2.26.0               colorspace_2.1-0             
  [21] blob_1.2.3                    rappdirs_0.3.3               
  [23] ggrepel_0.9.2                 xfun_0.36                    
  [25] dplyr_1.0.10                  crayon_1.5.2                 
@@ -1322,14 +1317,14 @@ loaded via a namespace (and not attached):
  [35] zlibbioc_1.44.0               DelayedArray_0.24.0          
  [37] BiocSingular_1.14.0           Rhdf5lib_1.18.2              
  [39] scales_1.2.1                  DBI_1.1.3                    
- [41] Rcpp_1.0.9                    xtable_1.8-4                 
+ [41] Rcpp_1.0.10                   xtable_1.8-4                 
  [43] viridisLite_0.4.1             decontam_1.18.0              
  [45] tidytree_0.4.2                bit_4.0.5                    
  [47] rsvd_1.0.5                    httr_1.4.4                   
  [49] dir.expiry_1.4.0              ellipsis_0.3.2               
  [51] pkgconfig_2.0.3               XML_3.99-0.13                
  [53] scuttle_1.8.3                 CodeDepends_0.6.5            
- [55] dbplyr_2.2.1                  utf8_1.2.2                   
+ [55] dbplyr_2.3.0                  utf8_1.2.2                   
  [57] AnnotationDbi_1.58.0          later_1.3.0                  
  [59] tidyselect_1.2.0              rlang_1.0.6                  
  [61] reshape2_1.4.4                munsell_0.5.0                
@@ -1337,10 +1332,10 @@ loaded via a namespace (and not attached):
  [65] cachem_1.0.6                  cli_3.6.0                    
  [67] DirichletMultinomial_1.40.0   generics_0.1.3               
  [69] RSQLite_2.2.20                ExperimentHub_2.4.0          
- [71] ade4_1.7-20                   evaluate_0.19                
+ [71] ade4_1.7-20                   evaluate_0.20                
  [73] biomformat_1.24.0             stringr_1.5.0                
- [75] fastmap_1.1.0                 yaml_2.3.6                   
- [77] knitr_1.41                    bit64_4.0.5                  
+ [75] fastmap_1.1.0                 yaml_2.3.7                   
+ [77] knitr_1.42                    bit64_4.0.5                  
  [79] purrr_1.0.1                   KEGGREST_1.36.3              
  [81] nlme_3.1-161                  sparseMatrixStats_1.10.0     
  [83] mime_0.12                     compiler_4.2.1               
@@ -1350,20 +1345,20 @@ loaded via a namespace (and not attached):
  [91] tibble_3.1.8                  stringi_1.7.12               
  [93] lattice_0.20-45               Matrix_1.5-3                 
  [95] vegan_2.6-4                   permute_0.9-7                
- [97] multtest_2.52.0               vctrs_0.5.1                  
+ [97] multtest_2.52.0               vctrs_0.5.2                  
  [99] pillar_1.8.1                  lifecycle_1.0.3              
 [101] rhdf5filters_1.8.0            BiocNeighbors_1.16.0         
 [103] data.table_1.14.6             bitops_1.0-7                 
 [105] irlba_2.3.5.1                 httpuv_1.6.8                 
 [107] R6_2.5.1                      promises_1.2.0.1             
-[109] bookdown_0.31                 gridExtra_2.3                
+[109] bookdown_0.32                 gridExtra_2.3                
 [111] vipor_0.4.5                   codetools_0.2-18             
-[113] MASS_7.3-58.1                 assertthat_0.2.1             
+[113] MASS_7.3-58.2                 assertthat_0.2.1             
 [115] rhdf5_2.40.0                  withr_2.5.0                  
 [117] GenomeInfoDbData_1.2.9        mgcv_1.8-41                  
 [119] parallel_4.2.1                grid_4.2.1                   
-[121] beachmat_2.14.0               tidyr_1.2.1                  
-[123] rmarkdown_2.19                DelayedMatrixStats_1.20.0    
+[121] beachmat_2.14.0               tidyr_1.3.0                  
+[123] rmarkdown_2.20                DelayedMatrixStats_1.20.0    
 [125] shiny_1.7.4                   ggbeeswarm_0.7.1             
 ```
 </div>

@@ -15,7 +15,7 @@ always_allow_html: yes
 date: "**Authors:** Leo Lahti [aut], Sudarshan Shetty [aut], Tuomas Borman [aut, cre], Felix GM Ernst [aut]<br/>
   **Version:** 0.98.10<br/>
   **Modified:** 2022-10-05<br/>
-  **Compiled:** 2023-01-15<br/>
+  **Compiled:** 2023-01-26<br/>
   **Environment:** R version 4.2.1 (2022-06-23), Bioconductor 3.15<br/>
   **License:** CC BY-NC-SA 3.0 US<br/>
   **Copyright:** <br/>
@@ -49,7 +49,7 @@ as well.
 
 This work has been heavily influenced by other similar resources, in
 particular the Orchestrating Single-Cell Analysis with Bioconductor
-[@Amezquita2020natmeth], [phyloseq
+[@Amezquita2020], [phyloseq
 tutorials](http://joey711.github.io/phyloseq/tutorials-index)
 [@Callahan2016] and [microbiome
 tutorials](https://microbiome.github.io/tutorials/) [@Shetty2019].

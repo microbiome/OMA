@@ -501,7 +501,7 @@ From RDA plot, we can see that only age has significant affect on microbial prof
 
 ## Visualizing the most dominant genus on PCoA
 
-In this section we visualize most dominant genus on PCoA. A similar visualization was proposed in [Taxonomic signatures of cause-specific mortality risk in human gut microbiome](https://www.nature.com/articles/s41467-021-22962-y), Salosensaari et al. (2021).
+In this section we visualize most dominant genus on PCoA. A similar visualization was proposed by Salosensaari et al. [-@Salosensaari2021].
 
 
 Let us agglomerate the data at a Genus level and getting the dominant taxa per sample.
@@ -559,7 +559,7 @@ plot
 
 ![](20_beta_diversity_files/figure-latex/unnamed-chunk-7-1.png)<!-- --> 
 
-Note: A 3D interactive version of the earlier plot can be found from [here](https://microbiome.github.io/OMA/extras.html#interactive-3d-plots).
+Note: A 3D interactive version of the earlier plot can be found from \@ref(extras).
 
 Similarly let's visualize and compare the sub-population.
 
@@ -774,7 +774,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] ggord_1.1.7                    knitr_1.41                    
+ [1] ggord_1.1.7                    knitr_1.42                    
  [3] stringr_1.5.0                  patchwork_1.1.2               
  [5] scater_1.26.1                  scuttle_1.8.3                 
  [7] ggplot2_3.4.0                  vegan_2.6-4                   
@@ -791,9 +791,9 @@ other attached packages:
 
 loaded via a namespace (and not attached):
  [1] Rtsne_0.16                  ggbeeswarm_0.7.1           
- [3] colorspace_2.0-3            BiocNeighbors_1.16.0       
+ [3] colorspace_2.1-0            BiocNeighbors_1.16.0       
  [5] farver_2.1.1                ggrepel_0.9.2              
- [7] bit64_4.0.5                 fansi_1.0.3                
+ [7] bit64_4.0.5                 fansi_1.0.4                
  [9] decontam_1.18.0             codetools_0.2-18           
 [11] splines_4.2.1               sparseMatrixStats_1.10.0   
 [13] cachem_1.0.6                jsonlite_1.8.4             
@@ -806,35 +806,35 @@ loaded via a namespace (and not attached):
 [27] rsvd_1.0.5                  gtable_0.3.1               
 [29] glue_1.6.2                  GenomeInfoDbData_1.2.9     
 [31] reshape2_1.4.4              dplyr_1.0.10               
-[33] Rcpp_1.0.9                  vctrs_0.5.1                
+[33] Rcpp_1.0.10                 vctrs_0.5.2                
 [35] ape_5.6-2                   nlme_3.1-161               
 [37] DECIPHER_2.26.0             DelayedMatrixStats_1.20.0  
 [39] xfun_0.36                   beachmat_2.14.0            
 [41] lifecycle_1.0.3             irlba_2.3.5.1              
 [43] XML_3.99-0.13               zlibbioc_1.44.0            
-[45] MASS_7.3-58.1               scales_1.2.1               
-[47] parallel_4.2.1              yaml_2.3.6                 
+[45] MASS_7.3-58.2               scales_1.2.1               
+[47] parallel_4.2.1              yaml_2.3.7                 
 [49] memoise_2.0.1               gridExtra_2.3              
 [51] yulab.utils_0.0.6           stringi_1.7.12             
 [53] RSQLite_2.2.20              highr_0.10                 
 [55] ScaledMatrix_1.6.0          tidytree_0.4.2             
 [57] filelock_1.0.2              BiocParallel_1.32.5        
 [59] rlang_1.0.6                 pkgconfig_2.0.3            
-[61] bitops_1.0-7                evaluate_0.19              
+[61] bitops_1.0-7                evaluate_0.20              
 [63] purrr_1.0.1                 labeling_0.4.2             
 [65] treeio_1.22.0               CodeDepends_0.6.5          
 [67] cowplot_1.1.1               bit_4.0.5                  
 [69] tidyselect_1.2.0            plyr_1.8.8                 
-[71] magrittr_2.0.3              bookdown_0.31              
+[71] magrittr_2.0.3              bookdown_0.32              
 [73] R6_2.5.1                    generics_0.1.3             
 [75] DelayedArray_0.24.0         DBI_1.1.3                  
 [77] withr_2.5.0                 pillar_1.8.1               
 [79] mgcv_1.8-41                 RCurl_1.98-1.9             
 [81] tibble_3.1.8                dir.expiry_1.4.0           
 [83] crayon_1.5.2                utf8_1.2.2                 
-[85] rmarkdown_2.19              viridis_0.6.2              
+[85] rmarkdown_2.20              viridis_0.6.2              
 [87] grid_4.2.1                  blob_1.2.3                 
-[89] digest_0.6.31               tidyr_1.2.1                
+[89] digest_0.6.31               tidyr_1.3.0                
 [91] munsell_0.5.0               DirichletMultinomial_1.40.0
 [93] beeswarm_0.4.0              viridisLite_0.4.1          
 [95] vipor_0.4.5                

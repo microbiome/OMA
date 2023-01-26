@@ -61,8 +61,8 @@ document.addEventListener("click", function (event) {
 ### Other relevant containers
 
 * [DataFrame](https://rdrr.io/bioc/S4Vectors/man/DataFrame-class.html) which behaves similarly to `data.frame`, yet efficient and fast when used with large datasets.
-* [DNAString](https://rdrr.io/bioc/Biostrings/man/DNAString-class.html) along with `DNAStringSet`,`RNAString` and `RNAStringSet`  efficient storage and handling of long biological sequences are offered within the [Biostrings](https://rdrr.io/bioc/Biostrings/) package.
-* [GenomicRanges](https://bioconductor.org/packages/3.13/bioc/html/GenomicRanges.html) offers an efficient representation and manipulation of genomic annotations and alignments, see e.g. `GRanges` and `GRangesList` at [An Introduction to the GenomicRangesPackage](https://bioconductor.org/packages/release/bioc/vignettes/GenomicRanges/inst/doc/GenomicRangesIntroduction.html).
+* [DNAString](https://rdrr.io/bioc/Biostrings/man/DNAString-class.html) along with `DNAStringSet`,`RNAString` and `RNAStringSet`  efficient storage and handling of long biological sequences are offered within the Biostrings package [@R-Biostrings].
+* GenomicRanges ([@GenomicRanges2013]) offers an efficient representation and manipulation of genomic annotations and alignments, see e.g. `GRanges` and `GRangesList` at [An Introduction to the GenomicRangesPackage](https://bioconductor.org/packages/release/bioc/vignettes/GenomicRanges/inst/doc/GenomicRangesIntroduction.html).
 
 [NGS Analysis Basics](http://girke.bioinformatics.ucr.edu/GEN242/tutorials/rsequences/rsequences/) provides a walk-through of the above-mentioned features with detailed examples.
 
@@ -78,7 +78,7 @@ each other.
 `assays` : This slot is similar to `otu_table` in `phyloseq`. In a
                `SummarizedExperiment` object multiple assays, raw
                counts, transformed counts can be stored. See also
-               [`MultiAssayExperiment`](https://bioconductor.org/packages/release/bioc/html/MultiAssayExperiment.html)
+               [@Ramos2017]
                for storing data from multiple `experiments` such as
                RNASeq, Proteomics, etc.  `rowData` : This slot is
                similar to `tax_table` in `phyloseq` to store taxonomic
@@ -108,10 +108,10 @@ width="100%"/>
 The (Tree)SummarizedExperiment objects can be converted into the alternative phyloseq format, for which further methods are available.
 
  * [List of R tools for microbiome analysis](https://microsud.github.io/Tools-Microbiome-Analysis/)
- * [phyloseq](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0061217)
+ * phyloseq [@McMurdie2013]
  * [microbiome tutorial](http://microbiome.github.io/tutorials/)
  * [microbiomeutilities](https://microsud.github.io/microbiomeutilities/)
- * Bioconductor Workflow for Microbiome Data Analysis: from raw reads to community analyses ([Callahan et al. F1000, 2016](https://f1000research.com/articles/5-1492/v2)).
+ * Bioconductor Workflow for Microbiome Data Analysis: from raw reads to community analyses [@Callahan2016].
 
 
 
@@ -121,8 +121,8 @@ The (Tree)SummarizedExperiment objects can be converted into the alternative phy
 
 If you are new to R, you could try [swirl](https://swirlstats.com/)
 for a kickstart to R programming. Further support resources are
-available through the [Bioconductor
-project](http://bioconductor.org/).
+available through the Bioconductor
+project [@Huber2015].
 
  * R programming basics: [Base R](https://www.rstudio.com/wp-content/uploads/2016/10/r-cheat-sheet-3.pdf)
  * Basics of R programming: [Base R](https://raw.githubusercontent.com/rstudio/cheatsheets/master/base-r.pdf)
@@ -132,7 +132,7 @@ project](http://bioconductor.org/).
 
 Rmarkdown
 
-* [Rmarkdown tips](https://rmarkdown.rstudio.com/)
+* Rmarkdown tips [@Xie2020]
 
 
 RStudio
@@ -147,18 +147,18 @@ RStudio
 
 S4 class system has brought several useful features to the
 object-oriented programming paradigm within R, and it is constantly
-deployed in [R/Bioconductor](https://bioconductor.org/) packages.
+deployed in R/Bioconductor packages [@Huber2015].
     
 |   Online Document:
 
 * Hervé Pagès, [A quick overview of the S4 class system](https://bioconductor.org/packages/release/bioc/vignettes/S4Vectors/inst/doc/S4QuickOverview.pdf).
 * Laurent Gatto, [A practical tutorial on S4 programming](https://bioconductor.org/help/course-materials/2013/CSAMA2013/friday/afternoon/S4-tutorial.pdf)
-* John M. Chambers. [How S4 Methods Work](http://developer.r-project.org/howMethodsWork.pdf)
+* How S4 Methods Work [@Chambers2006]
 
 |   Books:
 
-* John M. Chambers. Software for Data Analysis: Programming with R. Springer, New York, 2008. ISBN-13 978-0387759357.
-* I Robert Gentleman. R Programming for Bioinformatics. Chapman & Hall/CRC, New York, 2008. ISBN-13 978-1420063677
+* John M. Chambers. Software for Data Analysis: Programming with R. Springer, New York, 2008. ISBN-13 978-0387759357 [@Chambers2008]
+* I Robert Gentleman. R Programming for Bioinformatics. Chapman & Hall/CRC, New York, 2008. ISBN-13 978-1420063677 [@gentleman2008r]
 
 
 ## Reproducible reporting with Rmarkdown
@@ -186,9 +186,8 @@ data science. You can perform the following tasks to get started.
 **Figure sources:** 
 
 **Original article**
--   Huang R _et al_. (2021) [TreeSummarizedExperiment: a S4 class 
-for data with hierarchical structure](https://doi.org/10.12688/
-f1000research.26669.2). F1000Research 9:1246.
+-   Huang R _et al_. (2021) TreeSummarizedExperiment: a S4 class 
+for data with hierarchical structure. F1000Research 9:1246. [@Huang2021]
 
 **Reference Sequence slot extension**
 - Lahti L _et al_. (2020) [Upgrading the R/Bioconductor ecosystem for microbiome 

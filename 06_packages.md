@@ -75,11 +75,11 @@ devtools::install_github("microbiome/mia")
 
 Some of the R packages supporting the framework include:
 
-- [mia](microbiome.github.io/mia) : Microbiome analysis tools   
-- [miaViz](microbiome.github.io/miaViz) : Microbiome analysis specific visualization
-- [miaSim](microbiome.github.io/miaSim) : Microbiome data simulations
-- [miaTime](microbiome.github.io/miaTime) : Microbiome time series analysis
-- [philr](http://bioconductor.org/packages/devel/bioc/html/philr.html) (external)
+- [mia](microbiome.github.io/mia): Microbiome analysis tools [@R-mia]
+- [miaViz](microbiome.github.io/miaViz): Microbiome analysis specific visualization [@Ernst2022]
+- [miaSim](microbiome.github.io/miaSim): Microbiome data simulations [@Simsek2021]
+- [miaTime](microbiome.github.io/miaTime): Microbiome time series analysis [@Lahti2021]
+- philr (external, @Silverman2017)
 
 
 
@@ -112,15 +112,13 @@ other attached packages:
 [1] BiocStyle_2.24.0 rebook_1.6.0    
 
 loaded via a namespace (and not attached):
- [1] graph_1.74.0        knitr_1.41          magrittr_2.0.3     
- [4] BiocGenerics_0.44.0 rlang_1.0.6         fastmap_1.1.0      
- [7] stringr_1.5.0       tools_4.2.1         xfun_0.36          
-[10] cli_3.6.0           htmltools_0.5.4     CodeDepends_0.6.5  
-[13] yaml_2.3.6          digest_0.6.31       lifecycle_1.0.3    
-[16] bookdown_0.31       dir.expiry_1.4.0    BiocManager_1.30.19
-[19] vctrs_0.5.1         codetools_0.2-18    glue_1.6.2         
-[22] evaluate_0.19       rmarkdown_2.19      stringi_1.7.12     
-[25] compiler_4.2.1      filelock_1.0.2      stats4_4.2.1       
-[28] XML_3.99-0.13      
+ [1] bookdown_0.32       dir.expiry_1.4.0    codetools_0.2-18   
+ [4] XML_3.99-0.13       digest_0.6.31       stats4_4.2.1       
+ [7] evaluate_0.20       graph_1.74.0        rlang_1.0.6        
+[10] cli_3.6.0           filelock_1.0.2      rmarkdown_2.20     
+[13] tools_4.2.1         xfun_0.36           yaml_2.3.7         
+[16] fastmap_1.1.0       compiler_4.2.1      BiocGenerics_0.44.0
+[19] BiocManager_1.30.19 htmltools_0.5.4     CodeDepends_0.6.5  
+[22] knitr_1.42         
 ```
 </div>
