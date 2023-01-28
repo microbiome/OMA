@@ -61,7 +61,7 @@ has also been criticized recently [@Quinn2021].
 
 There are many tools to perform DAA. The most popular tools, without going into
 evaluating whether or not they perform well for this task, are:  
-<<<<<<< HEAD
+
 - ALDEx2 [@Gloor2016] 
 - ANCOMBC [@ancombc2020]
 - corncob [@Martin2021]
@@ -111,39 +111,37 @@ library(MicrobiomeStat)
 library(knitr)
 library(tidyverse)
 
+# set random seed because some tools can randomly vary and then produce 
+# different results:
+set.seed(13253)
+
 # For ANCOMBC we need development version
 # Can be installed with:
 # remotes::install_github("FrederickHuangLin/ANCOMBC")
 library(ANCOMBC)
 
-# we use the dmn_se dataset and restrict it to 
-# obese vs lean for easy illustration
-data(dmn_se)
-se <- dmn_se
-# To enable all features and advantages of TreeSE, we convert the object from SE to TreeSE
-tse <- as(se, "TreeSummarizedExperiment")
-tse <- tse[ ,colData(tse)$pheno != "Overwt"]
-colData(tse)$pheno <- fct_drop(colData(tse)$pheno, "Overwt")
+# we use a demo dataset and restrict it to two geo locations
+# for easy illustration
+data(peerj13075)
+tse <- peerj13075
+tse <- tse[ ,tse$Geographical_location %in% c("Pune", "Nashik")]
+# Let us make this a factor
+tse$Geographical_location <- factor(tse$Geographical_location)
+
 # how many observations do we have per group?
-count(as.data.frame(colData(tse)), pheno) %>% kable()
+count(as.data.frame(colData(tse)), Geographical_location) %>% kable()
 ```
 
 
 \begin{tabular}{l|r}
 \hline
-pheno & n\\
+Geographical\_location & n\\
 \hline
-Lean & 61\\
+Nashik & 11\\
 \hline
-Obese & 193\\
+Pune & 36\\
 \hline
 \end{tabular}
-
-```r
-# set a seed because some tools can randomly vary and then produce 
-# different results:
-set.seed(1)
-```
 
 ### Prevalence Filtering 
 
@@ -158,6 +156,7 @@ do this in `mia`:
 ```r
 tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 0.1)
 ```
+
 
 ### ALDEx2
 
@@ -182,27 +181,37 @@ example that illustrates the workflow.
 
 ```r
 # Generate Monte Carlo samples of the Dirichlet distribution for each sample.
-# Convert each instance using the centred log-ratio transform.
+# Convert each instance using the centered log-ratio transform.
 # This is the input for all further analyses.
+set.seed(254)
 x <- aldex.clr(
   reads = assay(tse),
-  conds = colData(tse)$pheno, 
-  # 128 recommened for ttest, 1000 for rigorous effect size calculation
-  mc.samples = 128, 
-  denom = "all",
-  verbose = FALSE
+  conds = tse$Geographical_location
 )
-# calculates expected values of the Welch's t-test and Wilcoxon rank test on
-# the data returned by aldex.clr
-x_tt <- aldex.ttest(
-  x, 
-  paired.test = FALSE, 
-  verbose = FALSE)
+x <- aldex.clr(assay(tse), tse$Geographical_location)     
+```
+
+
+The t-test:
+
+
+```r
+# calculates expected values of the Welch's t-test and Wilcoxon rank
+# test on the data returned by aldex.clr
+x_tt <- aldex.ttest(x, paired.test = FALSE, verbose = FALSE)
+```
+
+
+Effect sizes:
+
+
+```r
 # determines the median clr abundance of the feature in all samples and in
 # groups, the median difference between the two groups, the median variation
 # within each group and the effect size, which is the median of the ratio
 # of the between group difference and the larger of the variance within groups
 x_effect <- aldex.effect(x, CI = TRUE, verbose = FALSE)
+
 # combine all outputs 
 aldex_out <- data.frame(x_tt, x_effect)
 ```
@@ -236,19 +245,20 @@ par(mfrow = c(1, 2))
   )
 ```
 
-![](30_differential_abundance_files/figure-latex/unnamed-chunk-3-1.pdf)<!-- --> 
+![](30_differential_abundance_files/figure-latex/unnamed-chunk-2-1.pdf)<!-- --> 
 
 The evaluation as differential abundant in above plots is based on the
-corrected pvalue. According to the ALDEx2 developers, the safest approach is to
-identify those features where the 95% CI of the
-effect size does not cross 0. As we can see in below table, this is not the
-case for any of the identified 
-genera (see overlap column, which indicates the proportion of overlap). Also,
-the authors recommend to focus on effect sizes and CIs rather than interpreting
-the pvalue. To keep the comparison simple, we will here use the pvalue as 
-decision criterion. But please be aware that the effect size together with the
+corrected pvalue. According to the ALDEx2 developers, the safest
+approach is to identify those features where the 95% CI of the effect
+size does not cross 0. As we can see in below table, this is not the
+case for any of the identified genera (see overlap column, which
+indicates the proportion of overlap). Also, the authors recommend to
+focus on effect sizes and CIs rather than interpreting the pvalue. To
+keep the comparison simple, we will here use the pvalue as decision
+criterion. But please be aware that the effect size together with the
 CI is a better answer to the question we are typically interested in
-(see also [this article](https://www.nature.com/articles/d41586-019-00857-9)).
+(see also [this
+article](https://www.nature.com/articles/d41586-019-00857-9)).
 
 
 
@@ -264,73 +274,66 @@ rownames_to_column(aldex_out, "genus") %>%
 \hline
 genus & we.eBH & wi.eBH & effect & overlap\\
 \hline
-Alistipes & 0.0009 & 0.0001 & -0.3823 & 0.2979\\
+OTU194 & 0.0570 & 0.0156 & 0.8731 & 0.1634\\
 \hline
-Barnesiella & 0.0442 & 0.0066 & -0.3229 & 0.3489\\
+OTU562 & 0.0959 & 0.0255 & -0.7378 & 0.1660\\
 \hline
-Catenibacterium & 0.0266 & 0.0330 & 0.2713 & 0.3718\\
+OTU773 & 0.0317 & 0.0032 & 1.1905 & 0.1092\\
 \hline
-Lactobacillus & 0.0282 & 0.0183 & 0.2983 & 0.3537\\
+OTU860 & 0.0839 & 0.0353 & -0.8652 & 0.1761\\
 \hline
-Megasphaera & 0.0000 & 0.0001 & 0.5249 & 0.2758\\
+OTU1075 & 0.0410 & 0.0083 & -1.1272 & 0.1321\\
 \hline
-Oscillibacter & 0.0004 & 0.0014 & -0.3681 & 0.3291\\
+OTU1235 & 0.0331 & 0.0311 & -0.8827 & 0.1548\\
 \hline
-Parabacteroides & 0.0541 & 0.0133 & -0.2832 & 0.3509\\
+OTU1680 & 0.0883 & 0.0381 & -0.9757 & 0.1787\\
 \hline
-Phascolarctobacterium & 0.0238 & 0.0077 & -0.3491 & 0.3404\\
-\hline
-Uknown & 0.0786 & 0.0439 & -0.2474 & 0.3852\\
+OTU2529 & 0.0994 & 0.0458 & -0.8732 & 0.1816\\
 \hline
 \end{tabular}
-
-
 
 ### ANCOM-BC
 
 The analysis of composition of microbiomes with bias correction
-(ANCOM-BC) [@Das2020] 
-is a recently developed method for differential abundance testing. It is based
-on an 
-earlier published approach [@Mandal2015]. 
-The previous version of ANCOM was among the methods that produced the 
-most consistent results and is probably a conservative approach
-[@Nearing2022].
-However, the new ANCOM-BC method operates quite differently compared to the
-former ANCOM method.
+(ANCOM-BC) [@Das2020] is a recently developed method for differential
+abundance testing. It is based on an earlier published approach
+[@Mandal2015].  The previous version of ANCOM was among the methods
+that produced the most consistent results and is probably a
+conservative approach [@Nearing2022].  However, the new ANCOM-BC
+method operates quite differently compared to the former ANCOM method.
 
+As the only method, ANCOM-BC incorporates the so called *sampling
+fraction* into the model. The latter term could be empirically
+estimated by the ratio of the library size to the microbial
+load. According to the authors, variations in this sampling fraction
+would bias differential abundance analyses if ignored.  Furthermore,
+this method provides p-values and confidence intervals for each
+taxon. It also controls the FDR and it is computationally simple to
+implement.
 
-As the only method, ANCOM-BC incorporates the so called *sampling fraction*
-into the model. The latter term could be empirically estimated by the ratio of
-the library size to the microbial load. According to the authors, variations in
-this sampling fraction would bias differential abundance analyses if ignored.
-Furthermore, this method provides p-values and confidence intervals for each
-taxon. It also controls the FDR and it is computationally simple to implement. 
-
-
-As we will see below, to obtain results, all that is needed is to pass 
-a tse object to the `ancombc()` function. Below, we first specify a formula.
-In this formula, other covariates could potentially be included to adjust for
-confounding. We show this further below. 
-Please check the
-[function documentation](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html) 
+As we will see below, to obtain results, all that is needed is to pass
+a tse object to the `ancombc()` function. Below, we first specify a
+formula.  In this formula, other covariates could potentially be
+included to adjust for confounding. We show this further below.
+Please check the [function documentation](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html)
 to learn about the additional arguments that we specify below.
+
+We recommend to use  or higher in real case studies.
 
 
 ```r
 # perform the analysis 
-out <- ancombc(
+out <- ancombc2(
   data = tse,
-  formula = "pheno", 
+  fix_formula = "Geographical_location", 
   p_adj_method = "fdr", 
-  prv_cut = 0, # no prev filtering necessary anymore 
+  prv_cut = 0, # prev filtering has been done above already
   lib_cut = 0, 
-  group = "pheno", 
+  group = "Geographical_location", 
   struc_zero = TRUE, 
-  neg_lb = TRUE, 
-  tol = 1e-5, 
-  max_iter = 100, 
-  conserve = TRUE, 
+  neg_lb = TRUE,
+  iter_control = list(tol = 1e-5, max_iter = 20, verbose = FALSE),
+  em_control = list(tol = 1e-5, max_iter = 20),  
   alpha = 0.05, 
   global = TRUE # multi group comparison will be deactivated automatically 
 )
@@ -350,25 +353,25 @@ black-white). Below we show the first 6 entries of this dataframe:
 
 
 ```r
-kable(head(res$diff_abn))
+kable(head(res))
 ```
 
 
-\begin{tabular}{l|l|l}
+\begin{tabular}{l|r|r|r|r|r|r|r|r|r|r|l|l}
 \hline
-taxon & (Intercept) & phenoObese\\
+taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & se\_(Intercept) & se\_Geographical\_locationPune & W\_(Intercept) & W\_Geographical\_locationPune & p\_(Intercept) & p\_Geographical\_locationPune & q\_(Intercept) & q\_Geographical\_locationPune & diff\_(Intercept) & diff\_Geographical\_locationPune\\
 \hline
-Acetanaerobacterium & FALSE & TRUE\\
+OTU2 & 0.0399 & -0.0570 & 0.1675 & 0.1915 & 0.2383 & -0.2975 & 0.8117 & 0.7661 & 0.8718 & 0.8463 & FALSE & FALSE\\
 \hline
-Acetivibrio & TRUE & FALSE\\
+OTU15 & 0.6874 & -0.9024 & 0.1947 & 0.2225 & 3.5304 & -4.0547 & 0.0004 & 0.0001 & 0.0032 & 0.0004 & TRUE & TRUE\\
 \hline
-Acidaminococcus & TRUE & TRUE\\
+OTU53 & 0.1243 & -0.1672 & 0.7823 & 0.8940 & 0.1589 & -0.1870 & 0.8737 & 0.8516 & 0.8969 & 0.8701 & FALSE & FALSE\\
 \hline
-Akkermansia & FALSE & FALSE\\
+OTU87 & 0.1347 & -0.1807 & 0.1938 & 0.2215 & 0.6952 & -0.8161 & 0.4869 & 0.4145 & 0.6596 & 0.5616 & FALSE & FALSE\\
 \hline
-Alistipes & TRUE & TRUE\\
+OTU99 & 0.2716 & -0.3594 & 0.1635 & 0.1869 & 1.6608 & -1.9231 & 0.0967 & 0.0545 & 0.2793 & 0.1504 & FALSE & FALSE\\
 \hline
-Allisonella & TRUE & FALSE\\
+OTU111 & 0.0237 & -0.0358 & 0.1677 & 0.1917 & 0.1413 & -0.1868 & 0.8876 & 0.8519 & 0.8994 & 0.8701 & FALSE & FALSE\\
 \hline
 \end{tabular}
 
@@ -393,10 +396,10 @@ fit_data <- Maaslin2(
   meta_data,
   output = "DAA example",
   transform = "AST",
-  fixed_effects = "pheno",
+  fixed_effects = "Geographical_location",
   # random_effects = c(...), # you can also fit MLM by specifying random effects
   # specifying a ref is especially important if you have more than 2 levels
-  reference = "pheno,Lean",  
+  reference = "Geographical_location,Pune",  
   normalization = "TSS",
   standardize = FALSE,
   min_prevalence = 0 # prev filterin already done
@@ -415,17 +418,17 @@ kable(head(filter(fit_data$results, qval <= 0.05)))
 \hline
 feature & metadata & value & coef & stderr & pval & name & qval & N & N.not.zero\\
 \hline
-Megasphaera & pheno & Obese & 0.0489 & 0.0093 & 0 & phenoObese & 0e+00 & 254 & 78\\
+OTU1053 & Geographical\_location & Pune & -0.0080 & 0.0011 & 0 & Geographical\_locationPune & 0 & 47 & 9\\
 \hline
-Barnesiella & pheno & Obese & -0.0297 & 0.0068 & 0 & phenoObese & 2e-04 & 254 & 111\\
+OTU860 & Geographical\_location & Pune & -0.0373 & 0.0059 & 0 & Geographical\_locationPune & 0 & 47 & 13\\
 \hline
-Parabacteroides & pheno & Obese & -0.0219 & 0.0050 & 0 & phenoObese & 2e-04 & 254 & 163\\
+OTU1075 & Geographical\_location & Pune & -0.1295 & 0.0207 & 0 & Geographical\_locationPune & 0 & 47 & 27\\
 \hline
-Phascolarctobacterium & pheno & Obese & -0.0325 & 0.0072 & 0 & phenoObese & 2e-04 & 254 & 99\\
+OTU1980 & Geographical\_location & Pune & -0.0395 & 0.0062 & 0 & Geographical\_locationPune & 0 & 47 & 9\\
 \hline
-Alistipes & pheno & Obese & -0.0523 & 0.0123 & 0 & phenoObese & 3e-04 & 254 & 227\\
+OTU611 & Geographical\_location & Pune & -0.0274 & 0.0045 & 0 & Geographical\_locationPune & 0 & 47 & 10\\
 \hline
-Desulfovibrio & pheno & Obese & -0.0134 & 0.0032 & 0 & phenoObese & 3e-04 & 254 & 72\\
+OTU2335 & Geographical\_location & Pune & -0.0089 & 0.0015 & 0 & Geographical\_locationPune & 0 & 47 & 10\\
 \hline
 \end{tabular}
 
@@ -438,26 +441,26 @@ Desulfovibrio & pheno & Obese & -0.0134 & 0.0032 & 0 & phenoObese & 3e-04 & 254 
 ### LinDA 
 
 Lastly, we cover linear models for differential abundance analysis of
-microbiome compositional data (@Zhou2022). This tool is very
-similar to ANCOMBC with few differences: 1) LinDA correct for the compositional
-bias differently 
-using the mode of all regression coefficients. 2) The authors claim that it 
-runs 100-1000x faster than ANCOMBC and 3) it support hierarchical models.
-The latter could be ignored as ANCOMBC will be supporting hierarchical models
-with the next release. Nevertheless, LinDA seems a promising tool that achieves 
-the best power/fdr trade-off together with ANCOMBC according to the authors. The
-speed might make it the choice for bigger datasets or datasets with a very high
-number of features.
+microbiome compositional data (@Zhou2022). This tool is very similar
+to ANCOMBC with few differences: 1) LinDA correct for the
+compositional bias differently using the mode of all regression
+coefficients. 2) The authors claim that it runs 100-1000x faster than
+ANCOMBC and 3) it support hierarchical models.  The latter could be
+ignored as ANCOMBC will be supporting hierarchical models with the
+next release. Nevertheless, LinDA seems a promising tool that achieves
+the best power/fdr trade-off together with ANCOMBC according to the
+authors. The speed might make it the choice for bigger datasets or
+datasets with a very high number of features.
 
 
 
 ```r
 otu.tab <- as.data.frame(assay(tse))
-meta <- as.data.frame(colData(tse)) %>% select(pheno)
+meta <- as.data.frame(colData(tse)) %>% select(Geographical_location)
 res <- linda(
   otu.tab, 
   meta, 
-  formula = '~pheno', 
+  formula = '~Geographical_location', 
   alpha = 0.05, 
   prev.filter = 0, 
   mean.abund.filter = 0)
@@ -465,33 +468,33 @@ res <- linda(
 
 ```
 ## 0  features are filtered!
-## The filtered data has  254  samples and  55  features will be tested!
-## Imputation approach is used.
+## The filtered data has  47  samples and  262  features will be tested!
+## Pseudo-count approach is used.
 ## Fit linear models ...
 ## Completed.
 ```
 
 ```r
 # to scan the table for genera where H0 could be rejected:
-kable(head(filter(as.data.frame(res$output), phenoObese.reject)))
+kable(head(filter(as.data.frame(res$output), Geographical_locationPune.reject)))
 ```
 
 
 \begin{tabular}{l|r|r|r|r|r|r|l|r}
 \hline
-  & phenoObese.baseMean & phenoObese.log2FoldChange & phenoObese.lfcSE & phenoObese.stat & phenoObese.pvalue & phenoObese.padj & phenoObese.reject & phenoObese.df\\
+  & Geographical\_locationPune.baseMean & Geographical\_locationPune.log2FoldChange & Geographical\_locationPune.lfcSE & Geographical\_locationPune.stat & Geographical\_locationPune.pvalue & Geographical\_locationPune.padj & Geographical\_locationPune.reject & Geographical\_locationPune.df\\
 \hline
-Acetanaerobacterium & 918.5 & -0.7591 & 0.1619 & -4.687 & 0.0000 & 0.0000 & TRUE & 252\\
+OTU15 & 1194.9 & -1.9113 & 0.3579 & -5.340 & 0.0000 & 0.0000 & TRUE & 45\\
 \hline
-Acidaminococcus & 372.9 & 0.7394 & 0.2327 & 3.178 & 0.0017 & 0.0051 & TRUE & 252\\
+OTU22 & 393.5 & -0.6683 & 0.2184 & -3.060 & 0.0037 & 0.0160 & TRUE & 45\\
 \hline
-Akkermansia & 827.6 & -0.5110 & 0.2168 & -2.357 & 0.0192 & 0.0422 & TRUE & 252\\
+OTU76 & 837.0 & -1.8013 & 0.3598 & -5.006 & 0.0000 & 0.0001 & TRUE & 45\\
 \hline
-Alistipes & 23944.9 & -1.7646 & 0.3127 & -5.644 & 0.0000 & 0.0000 & TRUE & 252\\
+OTU127 & 938.2 & -1.7558 & 0.3912 & -4.488 & 0.0000 & 0.0004 & TRUE & 45\\
 \hline
-Asaccharobacter & 621.0 & -0.4913 & 0.1467 & -3.350 & 0.0009 & 0.0039 & TRUE & 252\\
+OTU170 & 416.9 & -0.7518 & 0.2351 & -3.197 & 0.0025 & 0.0123 & TRUE & 45\\
 \hline
-Bacteroides & 272640.7 & -0.8874 & 0.2686 & -3.304 & 0.0011 & 0.0040 & TRUE & 252\\
+OTU194 & 869.3 & 4.3671 & 1.2254 & 3.564 & 0.0009 & 0.0054 & TRUE & 45\\
 \hline
 \end{tabular}
 
@@ -512,20 +515,20 @@ taxon.
 
 ```r
 # Rename "taxon" column from ancombc results  so that it match with others
-colnames(out$res$diff_abn)[colnames(out$res$diff_abn) == "taxon"] <- "genus"
+colnames(out$res)[colnames(out$res) == "taxon"] <- "genus"
 
 summ <- full_join(
     rownames_to_column(aldex_out, "genus") %>%
       select(genus, aldex2 = wi.eBH),
-    out$res$diff_abn %>%
-      select(genus, ancombc = phenoObese),
+    out$res %>%
+      select(genus, ancombc = diff_Geographical_locationPune),
     by = "genus") %>%
   full_join(
     select(fit_data$results, genus = feature, maaslin2 = qval), 
     by = "genus") %>%
     full_join(
       rownames_to_column(as.data.frame(res$output), "genus") %>%
-        select(genus, LinDA = phenoObese.reject), 
+        select(genus, LinDA = Geographical_locationPune.reject), 
       by = "genus") %>%
   mutate(
     across(c(aldex2, maaslin2), ~ .x <= 0.05),
@@ -544,17 +547,17 @@ kable(head(summ))
 \hline
 genus & aldex2 & ancombc & maaslin2 & LinDA & score\\
 \hline
-Acetanaerobacterium & FALSE & TRUE & TRUE & TRUE & 3\\
+OTU2 & FALSE & FALSE & FALSE & FALSE & 0\\
 \hline
-Acetivibrio & FALSE & FALSE & FALSE & FALSE & 0\\
+OTU15 & FALSE & TRUE & TRUE & TRUE & 3\\
 \hline
-Acidaminococcus & FALSE & TRUE & TRUE & TRUE & 3\\
+OTU22 & FALSE & NA & TRUE & TRUE & NA\\
 \hline
-Akkermansia & FALSE & FALSE & FALSE & TRUE & 1\\
+OTU53 & FALSE & FALSE & FALSE & FALSE & 0\\
 \hline
-Alistipes & TRUE & TRUE & TRUE & TRUE & 4\\
+OTU69 & FALSE & NA & FALSE & FALSE & NA\\
 \hline
-Allisonella & FALSE & FALSE & FALSE & FALSE & 0\\
+OTU76 & FALSE & NA & TRUE & TRUE & NA\\
 \hline
 \end{tabular}
 
@@ -572,7 +575,7 @@ summarise(summ, across(where(is.logical), sum)) %>%
 \hline
 aldex2 & ancombc & maaslin2 & LinDA\\
 \hline
-9 & 22 & 16 & 25\\
+8 & NA & 67 & 75\\
 \hline
 \end{tabular}
 
@@ -586,21 +589,17 @@ filter(summ, score == 4) %>% kable()
 \hline
 genus & aldex2 & ancombc & maaslin2 & LinDA & score\\
 \hline
-Alistipes & TRUE & TRUE & TRUE & TRUE & 4\\
+OTU773 & TRUE & TRUE & TRUE & TRUE & 4\\
 \hline
-Barnesiella & TRUE & TRUE & TRUE & TRUE & 4\\
+OTU860 & TRUE & TRUE & TRUE & TRUE & 4\\
 \hline
-Catenibacterium & TRUE & TRUE & TRUE & TRUE & 4\\
+OTU1075 & TRUE & TRUE & TRUE & TRUE & 4\\
 \hline
-Lactobacillus & TRUE & TRUE & TRUE & TRUE & 4\\
+OTU1235 & TRUE & TRUE & TRUE & TRUE & 4\\
 \hline
-Megasphaera & TRUE & TRUE & TRUE & TRUE & 4\\
+OTU1680 & TRUE & TRUE & TRUE & TRUE & 4\\
 \hline
-Oscillibacter & TRUE & TRUE & TRUE & TRUE & 4\\
-\hline
-Parabacteroides & TRUE & TRUE & TRUE & TRUE & 4\\
-\hline
-Phascolarctobacterium & TRUE & TRUE & TRUE & TRUE & 4\\
+OTU2529 & TRUE & TRUE & TRUE & TRUE & 4\\
 \hline
 \end{tabular}
 
@@ -614,11 +613,11 @@ any method or for those taxa that were identified by all methods:
 
 ```r
 plot_data <- data.frame(t(assay(tse)))
-plot_data$pheno <- colData(tse)$pheno
+plot_data$Geographical_location <- tse$Geographical_location
 # create a plot for each genus where the score is indicated in the title
 plots <- pmap(select(summ, genus, score), function(genus, score) {
-  ggplot(plot_data, aes_string("pheno", genus)) +
-    geom_boxplot(aes(fill = pheno), outlier.shape = NA) +
+  ggplot(plot_data, aes("Geographical_location", genus)) +
+    geom_boxplot(aes(fill = Geographical_location), outlier.shape = NA) +
     geom_jitter(width = 0.2, alpha = 0.5) +
     ggtitle(glue::glue("Score {score}")) +
     theme_bw() +
@@ -626,28 +625,26 @@ plots <- pmap(select(summ, genus, score), function(genus, score) {
 })
 
 # now we can show only those genera that have at least score 3 (or 2 or 1)
-robust_plots <- plots[summ$score == 4] 
+robust_plots <- plots[summ$score == 4 & !is.na(summ$score)] 
 
 # to display this nicely in the book we use patchwork here:
-# (we show first 8)
+# (we show first ones)
 robust_plots[[1]] + 
   robust_plots[[2]] + 
   robust_plots[[3]] + 
   robust_plots[[4]] +
   robust_plots[[5]] +
   robust_plots[[6]] +
-  robust_plots[[7]] +
-  robust_plots[[8]] +
   plot_layout(nrow = 2)
 ```
 
-![](30_differential_abundance_files/figure-latex/unnamed-chunk-12-1.pdf)<!-- --> 
+![](30_differential_abundance_files/figure-latex/unnamed-chunk-11-1.pdf)<!-- --> 
 
 ```r
 # or if we have most trust in any specific method we can show genera that 
 # are differentially abundant according to that method and then look in the
 # title how many methods also identified it (we only show first 6 here):
-ancombc_plots <- plots[summ$ancombc] 
+ancombc_plots <- plots[summ$ancombc & !is.na(summ$score)] 
 ancombc_plots[[1]] + 
   ancombc_plots[[2]] + 
   ancombc_plots[[3]] + 
@@ -656,7 +653,7 @@ ancombc_plots[[1]] +
   ancombc_plots[[6]] 
 ```
 
-![](30_differential_abundance_files/figure-latex/unnamed-chunk-12-2.pdf)<!-- --> 
+![](30_differential_abundance_files/figure-latex/unnamed-chunk-11-2.pdf)<!-- --> 
 
 
 
@@ -673,47 +670,45 @@ object.
 
 
 ```r
-# Add random age variable for demonstration
-colData(tse)$age <- sample(18:64, ncol(tse), replace = TRUE)
-
-out_cov = ancombc(
+# FIXME: switch to a faster example / method
+out_cov = ancombc2(
   data = tse, 
-  formula = "pheno + age", # here we add age to the model
+  fix_formula = "Geographical_location + Age", # here we add Age to the model
   p_adj_method = "fdr", 
   prv_cut = 0,  # we did that already
   lib_cut = 0, 
-  group = "pheno", 
+  group = "Geographical_location",
   struc_zero = TRUE, 
   neg_lb = TRUE, 
-  tol = 1e-5, 
-  max_iter = 100, 
-  conserve = TRUE, 
+  iter_control = list(tol = 1e-5, max_iter = 20, verbose = FALSE),
+  em_control = list(tol = 1e-5, max_iter = 20),
   alpha = 0.05, 
-  global = TRUE
+  global = TRUE # multi group comparison will be deactivated automatically 
 )
-# now the model answers the question: holding age constant, are 
+
+# now the model answers the question: holding Age constant, are 
 # bacterial taxa differentially abundant? Or, if that is of interest,
-# holding phenotype constant, is age associated with bacterial abundance?
+# holding phenotype constant, is Age associated with bacterial abundance?
 # Again we only show the first 6 entries.
-kable(head(out_cov$res$diff_abn))
+kable(head(out_cov$res))
 ```
 
 
-\begin{tabular}{l|l|l|l}
+\begin{tabular}{l|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|l|l|l|l}
 \hline
-taxon & (Intercept) & phenoObese & age\\
+taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & lfc\_AgeElderly & lfc\_AgeMiddle\_age & se\_(Intercept) & se\_Geographical\_locationPune & se\_AgeElderly & se\_AgeMiddle\_age & W\_(Intercept) & W\_Geographical\_locationPune & W\_AgeElderly & W\_AgeMiddle\_age & p\_(Intercept) & p\_Geographical\_locationPune & p\_AgeElderly & p\_AgeMiddle\_age & q\_(Intercept) & q\_Geographical\_locationPune & q\_AgeElderly & q\_AgeMiddle\_age & diff\_(Intercept) & diff\_Geographical\_locationPune & diff\_AgeElderly & diff\_AgeMiddle\_age\\
 \hline
-Acetanaerobacterium & FALSE & TRUE & FALSE\\
+OTU2 & 0.0397 & -0.0948 & 0.0893 & 0.0126 & 0.1725 & 0.2388 & 0.2299 & 0.2344 & 0.2304 & -0.3971 & 0.3884 & 0.0537 & 0.8178 & 0.6913 & 0.6977 & 0.9572 & 0.8853 & 0.9266 & 0.9125 & 0.9952 & FALSE & FALSE & FALSE & FALSE\\
 \hline
-Acetivibrio & FALSE & FALSE & FALSE\\
+OTU15 & 0.7028 & -0.7558 & -0.2434 & -0.1577 & 0.1987 & 0.2751 & 0.2648 & 0.2700 & 3.5364 & -2.7476 & -0.9190 & -0.5839 & 0.0004 & 0.0060 & 0.3581 & 0.5593 & 0.0031 & 0.0387 & 0.8827 & 0.9860 & TRUE & TRUE & FALSE & FALSE\\
 \hline
-Acidaminococcus & FALSE & TRUE & FALSE\\
+OTU53 & 0.0205 & -1.0766 & 1.4992 & 1.1534 & 0.7871 & 1.0895 & 1.0494 & 1.0701 & 0.0260 & -0.9881 & 1.4287 & 1.0778 & 0.9793 & 0.3231 & 0.1531 & 0.2811 & 0.9878 & 0.6462 & 0.7721 & 0.7870 & FALSE & FALSE & FALSE & FALSE\\
 \hline
-Akkermansia & FALSE & FALSE & FALSE\\
+OTU87 & 0.1765 & 0.1238 & -0.4584 & -0.4487 & 0.1906 & 0.2638 & 0.2540 & 0.2590 & 0.9259 & 0.4691 & -1.8046 & -1.7322 & 0.3545 & 0.6390 & 0.0711 & 0.0832 & 0.5502 & 0.8903 & 0.5713 & 0.6117 & FALSE & FALSE & FALSE & FALSE\\
 \hline
-Alistipes & TRUE & TRUE & FALSE\\
+OTU99 & 0.3029 & -0.1602 & -0.2768 & -0.3341 & 0.1636 & 0.2264 & 0.2179 & 0.2222 & 1.8521 & -0.7074 & -1.2703 & -1.5035 & 0.0640 & 0.4793 & 0.2040 & 0.1327 & 0.2171 & 0.7723 & 0.8133 & 0.6117 & FALSE & FALSE & FALSE & FALSE\\
 \hline
-Allisonella & TRUE & FALSE & FALSE\\
+OTU111 & 0.0023 & -0.1442 & 0.1352 & 0.2461 & 0.1710 & 0.2367 & 0.2279 & 0.2324 & 0.0135 & -0.6093 & 0.5935 & 1.0592 & 0.9892 & 0.5424 & 0.5528 & 0.2895 & 0.9892 & 0.8310 & 0.8900 & 0.7870 & FALSE & FALSE & FALSE & FALSE\\
 \hline
 \end{tabular}
 
@@ -726,7 +721,8 @@ group-wise associations.
 
 ### Group-wise associations testing based on balances
 
-TO DO!!!
+For testing associations based on balances, check the philr R/Bioconductor package.
+
 
 ## Session Info {-}
 
@@ -874,3 +870,4 @@ loaded via a namespace (and not attached):
 [193] gtable_0.3.1                rbibutils_2.2.13           
 ```
 </div>
+

@@ -1,4 +1,4 @@
-# Multi-assay analyses {#multi-assay_analyses}
+# Multi-assay analyses {#multi-assay-analyses}
 
 <script>
 document.addEventListener("click", function (event) {
