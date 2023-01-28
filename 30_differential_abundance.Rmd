@@ -31,7 +31,7 @@ has also been criticized recently [@Quinn2021].
 
 There are many tools to perform DAA. The most popular tools, without going into
 evaluating whether or not they perform well for this task, are:  
-<<<<<<< HEAD
+
 - ALDEx2 [@Gloor2016] 
 - ANCOMBC [@ancombc2020]
 - corncob [@Martin2021]
@@ -80,24 +80,25 @@ library(MicrobiomeStat)
 library(knitr)
 library(tidyverse)
 
+# set random seed because some tools can randomly vary and then produce 
+# different results:
+set.seed(13253)
+
 # For ANCOMBC we need development version
 # Can be installed with:
 # remotes::install_github("FrederickHuangLin/ANCOMBC")
 library(ANCOMBC)
 
-# we use the dmn_se dataset and restrict it to 
-# obese vs lean for easy illustration
-data(dmn_se)
-se <- dmn_se
-# To enable all features and advantages of TreeSE, we convert the object from SE to TreeSE
-tse <- as(se, "TreeSummarizedExperiment")
-tse <- tse[ ,colData(tse)$pheno != "Overwt"]
-colData(tse)$pheno <- fct_drop(colData(tse)$pheno, "Overwt")
+# we use a demo dataset and restrict it to two geo locations
+# for easy illustration
+data(peerj13075)
+tse <- peerj13075
+tse <- tse[ ,tse$Geographical_location %in% c("Pune", "Nashik")]
+# Let us make this a factor
+tse$Geographical_location <- factor(tse$Geographical_location)
+
 # how many observations do we have per group?
-count(as.data.frame(colData(tse)), pheno) %>% kable()
-# set a seed because some tools can randomly vary and then produce 
-# different results:
-set.seed(1)
+count(as.data.frame(colData(tse)), Geographical_location) %>% kable()
 ```
 
 ### Prevalence Filtering 
@@ -112,6 +113,7 @@ do this in `mia`:
 ```{r}
 tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 0.1)
 ```
+
 
 ### ALDEx2
 
@@ -133,29 +135,37 @@ is applied in any case to correct for multiple testing. Below we show a simple
 example that illustrates the workflow.
 
 
-```{r}
+```{r, aldex2}
 # Generate Monte Carlo samples of the Dirichlet distribution for each sample.
-# Convert each instance using the centred log-ratio transform.
+# Convert each instance using the centered log-ratio transform.
 # This is the input for all further analyses.
+set.seed(254)
 x <- aldex.clr(
   reads = assay(tse),
-  conds = colData(tse)$pheno, 
-  # 128 recommened for ttest, 1000 for rigorous effect size calculation
-  mc.samples = 128, 
-  denom = "all",
-  verbose = FALSE
+  conds = tse$Geographical_location
 )
-# calculates expected values of the Welch's t-test and Wilcoxon rank test on
-# the data returned by aldex.clr
-x_tt <- aldex.ttest(
-  x, 
-  paired.test = FALSE, 
-  verbose = FALSE)
+x <- aldex.clr(assay(tse), tse$Geographical_location)     
+```
+
+
+The t-test:
+
+```{r, aldex2_ttest}
+# calculates expected values of the Welch's t-test and Wilcoxon rank
+# test on the data returned by aldex.clr
+x_tt <- aldex.ttest(x, paired.test = FALSE, verbose = FALSE)
+```
+
+
+Effect sizes:
+
+```{r, aldex2_efs}
 # determines the median clr abundance of the feature in all samples and in
 # groups, the median difference between the two groups, the median variation
 # within each group and the effect size, which is the median of the ratio
 # of the between group difference and the larger of the variance within groups
 x_effect <- aldex.effect(x, CI = TRUE, verbose = FALSE)
+
 # combine all outputs 
 aldex_out <- data.frame(x_tt, x_effect)
 ```
@@ -189,16 +199,17 @@ par(mfrow = c(1, 2))
 ```
 
 The evaluation as differential abundant in above plots is based on the
-corrected pvalue. According to the ALDEx2 developers, the safest approach is to
-identify those features where the 95% CI of the
-effect size does not cross 0. As we can see in below table, this is not the
-case for any of the identified 
-genera (see overlap column, which indicates the proportion of overlap). Also,
-the authors recommend to focus on effect sizes and CIs rather than interpreting
-the pvalue. To keep the comparison simple, we will here use the pvalue as 
-decision criterion. But please be aware that the effect size together with the
+corrected pvalue. According to the ALDEx2 developers, the safest
+approach is to identify those features where the 95% CI of the effect
+size does not cross 0. As we can see in below table, this is not the
+case for any of the identified genera (see overlap column, which
+indicates the proportion of overlap). Also, the authors recommend to
+focus on effect sizes and CIs rather than interpreting the pvalue. To
+keep the comparison simple, we will here use the pvalue as decision
+criterion. But please be aware that the effect size together with the
 CI is a better answer to the question we are typically interested in
-(see also [this article](https://www.nature.com/articles/d41586-019-00857-9)).
+(see also [this
+article](https://www.nature.com/articles/d41586-019-00857-9)).
 
 
 ```{r}
@@ -208,52 +219,47 @@ rownames_to_column(aldex_out, "genus") %>%
   kable()
 ```
 
-
-
 ### ANCOM-BC
 
 The analysis of composition of microbiomes with bias correction
-(ANCOM-BC) [@Das2020] 
-is a recently developed method for differential abundance testing. It is based
-on an 
-earlier published approach [@Mandal2015]. 
-The previous version of ANCOM was among the methods that produced the 
-most consistent results and is probably a conservative approach
-[@Nearing2022].
-However, the new ANCOM-BC method operates quite differently compared to the
-former ANCOM method.
+(ANCOM-BC) [@Das2020] is a recently developed method for differential
+abundance testing. It is based on an earlier published approach
+[@Mandal2015].  The previous version of ANCOM was among the methods
+that produced the most consistent results and is probably a
+conservative approach [@Nearing2022].  However, the new ANCOM-BC
+method operates quite differently compared to the former ANCOM method.
 
+As the only method, ANCOM-BC incorporates the so called *sampling
+fraction* into the model. The latter term could be empirically
+estimated by the ratio of the library size to the microbial
+load. According to the authors, variations in this sampling fraction
+would bias differential abundance analyses if ignored.  Furthermore,
+this method provides p-values and confidence intervals for each
+taxon. It also controls the FDR and it is computationally simple to
+implement.
 
-As the only method, ANCOM-BC incorporates the so called *sampling fraction*
-into the model. The latter term could be empirically estimated by the ratio of
-the library size to the microbial load. According to the authors, variations in
-this sampling fraction would bias differential abundance analyses if ignored.
-Furthermore, this method provides p-values and confidence intervals for each
-taxon. It also controls the FDR and it is computationally simple to implement. 
-
-
-As we will see below, to obtain results, all that is needed is to pass 
-a tse object to the `ancombc()` function. Below, we first specify a formula.
-In this formula, other covariates could potentially be included to adjust for
-confounding. We show this further below. 
-Please check the
-[function documentation](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html) 
+As we will see below, to obtain results, all that is needed is to pass
+a tse object to the `ancombc()` function. Below, we first specify a
+formula.  In this formula, other covariates could potentially be
+included to adjust for confounding. We show this further below.
+Please check the [function documentation](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html)
 to learn about the additional arguments that we specify below.
+
+We recommend to use `r max_iter = 100` or higher in real case studies.
 
 ```{r warning = FALSE}
 # perform the analysis 
-out <- ancombc(
+out <- ancombc2(
   data = tse,
-  formula = "pheno", 
+  fix_formula = "Geographical_location", 
   p_adj_method = "fdr", 
-  prv_cut = 0, # no prev filtering necessary anymore 
+  prv_cut = 0, # prev filtering has been done above already
   lib_cut = 0, 
-  group = "pheno", 
+  group = "Geographical_location", 
   struc_zero = TRUE, 
-  neg_lb = TRUE, 
-  tol = 1e-5, 
-  max_iter = 100, 
-  conserve = TRUE, 
+  neg_lb = TRUE,
+  iter_control = list(tol = 1e-5, max_iter = 20, verbose = FALSE),
+  em_control = list(tol = 1e-5, max_iter = 20),  
   alpha = 0.05, 
   global = TRUE # multi group comparison will be deactivated automatically 
 )
@@ -272,7 +278,7 @@ abundant between the groups (again, keep in mind that the answer is not
 black-white). Below we show the first 6 entries of this dataframe:  
 
 ```{r}
-kable(head(res$diff_abn))
+kable(head(res))
 ```
 
 
@@ -295,10 +301,10 @@ fit_data <- Maaslin2(
   meta_data,
   output = "DAA example",
   transform = "AST",
-  fixed_effects = "pheno",
+  fixed_effects = "Geographical_location",
   # random_effects = c(...), # you can also fit MLM by specifying random effects
   # specifying a ref is especially important if you have more than 2 levels
-  reference = "pheno,Lean",  
+  reference = "Geographical_location,Pune",  
   normalization = "TSS",
   standardize = FALSE,
   min_prevalence = 0 # prev filterin already done
@@ -317,31 +323,31 @@ kable(head(filter(fit_data$results, qval <= 0.05)))
 ### LinDA 
 
 Lastly, we cover linear models for differential abundance analysis of
-microbiome compositional data (@Zhou2022). This tool is very
-similar to ANCOMBC with few differences: 1) LinDA correct for the compositional
-bias differently 
-using the mode of all regression coefficients. 2) The authors claim that it 
-runs 100-1000x faster than ANCOMBC and 3) it support hierarchical models.
-The latter could be ignored as ANCOMBC will be supporting hierarchical models
-with the next release. Nevertheless, LinDA seems a promising tool that achieves 
-the best power/fdr trade-off together with ANCOMBC according to the authors. The
-speed might make it the choice for bigger datasets or datasets with a very high
-number of features.
+microbiome compositional data (@Zhou2022). This tool is very similar
+to ANCOMBC with few differences: 1) LinDA correct for the
+compositional bias differently using the mode of all regression
+coefficients. 2) The authors claim that it runs 100-1000x faster than
+ANCOMBC and 3) it support hierarchical models.  The latter could be
+ignored as ANCOMBC will be supporting hierarchical models with the
+next release. Nevertheless, LinDA seems a promising tool that achieves
+the best power/fdr trade-off together with ANCOMBC according to the
+authors. The speed might make it the choice for bigger datasets or
+datasets with a very high number of features.
 
 
 ```{r}
 otu.tab <- as.data.frame(assay(tse))
-meta <- as.data.frame(colData(tse)) %>% select(pheno)
+meta <- as.data.frame(colData(tse)) %>% select(Geographical_location)
 res <- linda(
   otu.tab, 
   meta, 
-  formula = '~pheno', 
+  formula = '~Geographical_location', 
   alpha = 0.05, 
   prev.filter = 0, 
   mean.abund.filter = 0)
 
 # to scan the table for genera where H0 could be rejected:
-kable(head(filter(as.data.frame(res$output), phenoObese.reject)))
+kable(head(filter(as.data.frame(res$output), Geographical_locationPune.reject)))
 ```
 
 
@@ -360,20 +366,20 @@ taxon.
 
 ```{r}
 # Rename "taxon" column from ancombc results  so that it match with others
-colnames(out$res$diff_abn)[colnames(out$res$diff_abn) == "taxon"] <- "genus"
+colnames(out$res)[colnames(out$res) == "taxon"] <- "genus"
 
 summ <- full_join(
     rownames_to_column(aldex_out, "genus") %>%
       select(genus, aldex2 = wi.eBH),
-    out$res$diff_abn %>%
-      select(genus, ancombc = phenoObese),
+    out$res %>%
+      select(genus, ancombc = diff_Geographical_locationPune),
     by = "genus") %>%
   full_join(
     select(fit_data$results, genus = feature, maaslin2 = qval), 
     by = "genus") %>%
     full_join(
       rownames_to_column(as.data.frame(res$output), "genus") %>%
-        select(genus, LinDA = phenoObese.reject), 
+        select(genus, LinDA = Geographical_locationPune.reject), 
       by = "genus") %>%
   mutate(
     across(c(aldex2, maaslin2), ~ .x <= 0.05),
@@ -406,11 +412,11 @@ any method or for those taxa that were identified by all methods:
 
 ```{r}
 plot_data <- data.frame(t(assay(tse)))
-plot_data$pheno <- colData(tse)$pheno
+plot_data$Geographical_location <- tse$Geographical_location
 # create a plot for each genus where the score is indicated in the title
 plots <- pmap(select(summ, genus, score), function(genus, score) {
-  ggplot(plot_data, aes_string("pheno", genus)) +
-    geom_boxplot(aes(fill = pheno), outlier.shape = NA) +
+  ggplot(plot_data, aes("Geographical_location", genus)) +
+    geom_boxplot(aes(fill = Geographical_location), outlier.shape = NA) +
     geom_jitter(width = 0.2, alpha = 0.5) +
     ggtitle(glue::glue("Score {score}")) +
     theme_bw() +
@@ -418,23 +424,21 @@ plots <- pmap(select(summ, genus, score), function(genus, score) {
 })
 
 # now we can show only those genera that have at least score 3 (or 2 or 1)
-robust_plots <- plots[summ$score == 4] 
+robust_plots <- plots[summ$score == 4 & !is.na(summ$score)] 
 
 # to display this nicely in the book we use patchwork here:
-# (we show first 8)
+# (we show first ones)
 robust_plots[[1]] + 
   robust_plots[[2]] + 
   robust_plots[[3]] + 
   robust_plots[[4]] +
   robust_plots[[5]] +
   robust_plots[[6]] +
-  robust_plots[[7]] +
-  robust_plots[[8]] +
   plot_layout(nrow = 2)
 # or if we have most trust in any specific method we can show genera that 
 # are differentially abundant according to that method and then look in the
 # title how many methods also identified it (we only show first 6 here):
-ancombc_plots <- plots[summ$ancombc] 
+ancombc_plots <- plots[summ$ancombc & !is.na(summ$score)] 
 ancombc_plots[[1]] + 
   ancombc_plots[[2]] + 
   ancombc_plots[[3]] + 
@@ -457,29 +461,27 @@ object.
 
 
 ```{r}
-# Add random age variable for demonstration
-colData(tse)$age <- sample(18:64, ncol(tse), replace = TRUE)
-
-out_cov = ancombc(
+# FIXME: switch to a faster example / method
+out_cov = ancombc2(
   data = tse, 
-  formula = "pheno + age", # here we add age to the model
+  fix_formula = "Geographical_location + Age", # here we add Age to the model
   p_adj_method = "fdr", 
   prv_cut = 0,  # we did that already
   lib_cut = 0, 
-  group = "pheno", 
+  group = "Geographical_location",
   struc_zero = TRUE, 
   neg_lb = TRUE, 
-  tol = 1e-5, 
-  max_iter = 100, 
-  conserve = TRUE, 
+  iter_control = list(tol = 1e-5, max_iter = 20, verbose = FALSE),
+  em_control = list(tol = 1e-5, max_iter = 20),
   alpha = 0.05, 
-  global = TRUE
+  global = TRUE # multi group comparison will be deactivated automatically 
 )
-# now the model answers the question: holding age constant, are 
+
+# now the model answers the question: holding Age constant, are 
 # bacterial taxa differentially abundant? Or, if that is of interest,
-# holding phenotype constant, is age associated with bacterial abundance?
+# holding phenotype constant, is Age associated with bacterial abundance?
 # Again we only show the first 6 entries.
-kable(head(out_cov$res$diff_abn))
+kable(head(out_cov$res))
 ```
 
 In the next section of this book chapter we cover methods that can also take
@@ -491,10 +493,12 @@ group-wise associations.
 
 ### Group-wise associations testing based on balances
 
-TO DO!!!
+For testing associations based on balances, check the philr R/Bioconductor package.
+
 
 ## Session Info {-}
 
 ```{r sessionInfo, echo=FALSE, results='asis'}
 prettySessionInfo()
 ```
+
