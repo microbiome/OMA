@@ -1,12 +1,8 @@
-# Multi-assay analyses {#multi-assay_analyses}
+# Multi-assay analyses {#multi-assay-analyses}
 
 ```{r setup, echo=FALSE, results="asis"}
 library(rebook)
 chapterPreamble()
-if(!require(ecodist)){
-    install.packages("ecodist")
-    library(ecodist)
-}
 ```
 
 ```{r load-pkg-data}
@@ -28,11 +24,8 @@ different types of data in a same container. Because of that, the _miaverse_ is
 well-suitable for multi-assay microbiome data which incorporates different types 
 of complementary data sources in a single reproducible workflow. 
 
-Another experiment can be stored in 
-[altExp](https://microbiome.github.io/OMA/containers.html#alternative-experiments) 
-slot of SE data container or both experiments can be stored side-by-side in
-[MAE](https://microbiome.github.io/OMA/containers.html#multiassayexperiments) 
-data container. 
+Another experiment can be stored in altExp
+slot of SE data container or both experiments can be stored side-by-side in MAE data container (see the sections \@ref(alt-exp) and \@ref(mae) to learn more about altExp and MAE objects, respectively). 
 
 Different experiments are first imported into SE or TreeSE data container similarly
 to the case when only one experiment is present. After that different experiments are 
@@ -41,9 +34,9 @@ experiment in altExp slot, or MAE object with multiple experiment in its
 experiment slot. 
 
 As an example data, we use data from following publication: Hintikka L _et al._ (2021) 
-[Xylo-oligosaccharides in prevention of hepatic steatosis and adipose tissue inflammation: 
+Xylo-oligosaccharides in prevention of hepatic steatosis and adipose tissue inflammation: 
 associating taxonomic and metabolomic patterns in fecal microbiotas with 
-biclustering](https://doi.org/10.3390/ijerph18084049).
+biclustering [@Hintikka2021].
 
 In this article, mice were fed with high-fat and low-fat diets with or without prebiotics.
 The purpose of this was to study if prebiotics would reduce the negative impacts
@@ -56,14 +49,11 @@ data into SE object you can find from [here](https://microbiome.github.io/OMA/co
 
 ```{r cross-correlation1}
 # Load the data
-# mae <- HintikkaXOData()
-# Since HintikkaXOData is now added to mia, we can load it directly from there
-# We suggest to check other datasets from microbiomeDataSets
-data(HintikkaXOData)
+data(HintikkaXOData, package = "mia")
 mae <- HintikkaXOData
-
 mae
 ```
+
 ```{r cross-correlation2}
 if(!require(stringr)){
     install.packages("stringr")
@@ -99,7 +89,7 @@ with concentrations of individual metabolites. This helps as to answer the quest
 # Agglomerate microbiome data at family level
 mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family")
 # Does log10 transform for microbiome data
-mae[[1]] <- transformSamples(mae[[1]], method = "log10", pseudocount = 1)
+mae[[1]] <- transformCounts(mae[[1]], method = "log10", pseudocount = 1)
 
 # Give unique names so that we do not have problems when we are creating a plot
 rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]])
@@ -165,7 +155,7 @@ if(!require(reticulate)){
 
 reticulate::install_miniconda(force = TRUE)
 reticulate::use_miniconda(condaenv = "env1", required = FALSE)
-reticulate::py_install(packages = c("mofapy2"), pip = TRUE)
+reticulate::py_install(packages = c("mofapy2"), pip = TRUE, python_version=3.6)
 ```
 
 The `mae` object could be used straight to create the MOFA model. Yet, we transform 
@@ -189,10 +179,14 @@ mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
 mae[[1]] <- transformCounts(mae[[1]], assay_name = "relabundance", method = "rclr")
 
 # Transforming metabolomic data with log10
-mae[[2]] <- transformSamples(mae[[2]], assay_name = "nmr", method = "log10")
+mae[[2]] <- transformCounts(mae[[2]], assay_name = "nmr",
+                            MARGIN = "samples",
+                            method = "log10")
 
 # Transforming biomarker data with z-transform
-mae[[3]] <- transformFeatures(mae[[3]], assay_name = "signals", method = "z", pseudocount = 1)
+mae[[3]] <- transformCounts(mae[[3]], assay_name = "signals",
+                            MARGIN = "features",
+                            method = "z", pseudocount = 1)
 
 # Removing assays no longer needed
 assay(mae[[1]], "counts") <- NULL
