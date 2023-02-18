@@ -100,7 +100,7 @@ In the second step, clustering is performed based on dissimilarities.
 
 ```r
 # Apply transformation
-tse <- transformSamples(tse, method = "relabundance")
+tse <- transformCounts(tse, method = "relabundance")
 # Get the assay
 assay <- assay(tse, "relabundance")
 # Transpose assay --> samples are now in rows --> we are clustering samples
@@ -327,13 +327,13 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7683 BIC: 8069 AIC: 7942 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7751 BIC: 8274 AIC: 8103 
+## Laplace: 7752 BIC: 8274 AIC: 8103 
 ## 
 ## [[5]]
 ## class: DMN 
@@ -396,15 +396,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.22   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.21   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.38  1906.4 1674.5 1735
+## Mock               2       3   67  980.2  110.61   911.4 1054.4 1115
+## Ocean              2       3   67 1096.7  -56.93   944.2 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
+## Skin               2       3   67  992.6  -84.93   826.1 1066.8 1128
 ## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Tongue             2       2   67  783.0 -107.77   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -417,8 +417,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.28
+## 1 0.5385 20.60
+## 2 0.4615 15.32
 ```
 
 
@@ -432,12 +432,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.050e-17
-## CC1     1.000e+00 3.903e-22
-## SV1     1.000e+00 1.957e-12
-## M31Fcsw 7.886e-26 1.000e+00
-## M11Fcsw 1.132e-16 1.000e+00
-## M31Plmr 1.124e-13 1.000e+00
+## CL3     1.000e+00 4.562e-17
+## CC1     1.000e+00 3.449e-22
+## SV1     1.000e+00 1.794e-12
+## M31Fcsw 6.909e-26 1.000e+00
+## M11Fcsw 1.028e-16 1.000e+00
+## M31Plmr 1.024e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -448,13 +448,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30382 0.1354654
-## Phylum:Euryarchaeota  0.23114 0.1468632
-## Phylum:Actinobacteria 1.21371 1.0600245
-## Phylum:Spirochaetes   0.21393 0.1318415
-## Phylum:MVP-15         0.02982 0.0007669
-## Phylum:Proteobacteria 6.84469 1.8153216
+##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354082
+## Phylum:Euryarchaeota  0.2314 0.1468945
+## Phylum:Actinobacteria 1.2107 1.0581104
+## Phylum:Spirochaetes   0.2141 0.1318102
+## Phylum:MVP-15         0.0299 0.0007698
+## Phylum:Proteobacteria 6.8408 1.8113562
 ```
 Get the assignment probabilities
 
@@ -475,7 +475,8 @@ Computing the euclidean PCoA and storing it as a data frame
 
 ```r
 # Does clr transformation. Pseudocount is added, because data contains zeros.
-tse <- transformCounts(tse, method = "relabundance", pseudocount = 1)
+assay(tse, "pseudo") <- assay(tse, "counts") + 1
+tse <- transformCounts(tse, assay_name = "pseudo", method = "relabundance")
 tse <- transformCounts(tse, "relabundance", method = "clr")
 
 library(scater)
@@ -638,8 +639,8 @@ Only the most prevalent taxa are included in analysis.
 # Subset data in the first experiment
 mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
 # clr-transform in the first experiment
-mae[[1]] <- transformSamples(mae[[1]], method = "relabundance", pseudocount = 1)
-mae[[1]] <- transformSamples(mae[[1]], "relabundance", method = "clr")
+mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
+mae[[1]] <- transformCounts(mae[[1]], "relabundance", method = "rclr")
 ```
 
 _cobiclust_ takes counts table as an input and gives _cobiclust_ object as an output.
@@ -691,7 +692,9 @@ if(!require(pheatmap)){
     library(pheatmap)
 }
 # z-transform for heatmap
-mae[[1]] <- transformFeatures(mae[[1]], assay_name = "clr", method = "z", name = "clr_z")
+mae[[1]] <- transformCounts(mae[[1]], assay_name = "rclr",
+                            MARGIN = "features",
+                            method = "z", name = "clr_z")
 
 # Create annotations. When column names are equal, they should share levels. 
 # Here samples include 3 clusters, and taxa 2. That is why we have to make 
@@ -724,15 +727,15 @@ if(!require(patchwork)){
 }
 
 # ggplot requires data in melted format
-melt_assay <- meltAssay(mae[[1]], assay_name = "clr", add_col_data = T, add_row_data = T)
+melt_assay <- meltAssay(mae[[1]], assay_name = "rclr", add_col_data = T, add_row_data = T)
 
 # patchwork two plots side-by-side
 p1 <- ggplot(melt_assay) +
-  geom_boxplot(aes(x = clusters.x, y = clr)) +
+  geom_boxplot(aes(x = clusters.x, y = rclr)) +
   labs(x = "Taxa clusters")
 
 p2 <- ggplot(melt_assay) +
-  geom_boxplot(aes(x = clusters.y, y = clr)) +
+  geom_boxplot(aes(x = clusters.y, y = rclr)) +
   labs(x = "Sample clusters")
 
 p1 + p2
@@ -755,7 +758,7 @@ mae[[1]] <- mae[[1]][ , colnames(mae[[2]]) ]
 rownames(mae[[1]]) <- make.unique(rownames(mae[[1]]))
 # Calculate correlations
 corr <- getExperimentCrossCorrelation(mae, 1, 2, 
-                                      assay_name1 = "clr", 
+                                      assay_name1 = "rclr", 
                                       assay_name2 = "nmr", 
                                       mode = "matrix", 
                                       cor_threshold = 0.2)
@@ -866,13 +869,13 @@ head(bicluster_rows)
 ```
 
 ```
-##                          cluster_1
-## D_5__Ruminiclostridium 5      TRUE
-## D_5__uncultured               TRUE
-## D_5__Lactococcus              TRUE
-## D_5__Lachnoclostridium        TRUE
-## D_5__Holdemania               TRUE
-## D_5__Anaerostipes             TRUE
+##                                    cluster_1
+## D_5__Ruminiclostridium 5                TRUE
+## D_5__Lachnoclostridium                  TRUE
+## D_5__Holdemania                         TRUE
+## D_5__Anaerostipes                       TRUE
+## D_5__uncultured_3                       TRUE
+## D_5__Ruminococcaceae NK4A214 group      TRUE
 ```
 
 Let's collect information for the scatter plot. 
@@ -910,7 +913,7 @@ Let's collect information for the scatter plot.
 }
 
 # Calculate info
-df <- .sum_mean_median_var(mae[[1]], mae[[2]], "clr", "nmr", bicluster_rows, bicluster_columns)
+df <- .sum_mean_median_var(mae[[1]], mae[[2]], "rclr", "nmr", bicluster_rows, bicluster_columns)
 ```
 
 Now we can create a scatter plot. X-axis includes median clr abundance of microbiome
@@ -928,7 +931,7 @@ for(i in seq_along(df)){
   pics[[i]] <- ggplot(df[[i]])  +
       geom_point(aes(x = median1, y = median2)) + 
       labs(title = paste0("Cluster ", i),
-           x = "Taxa (clr median)",
+           x = "Taxa (rclr median)",
            y = "Metabolites (abs. median)")
   print(pics[[i]])
 }
@@ -982,7 +985,7 @@ between taxa. _biclust_ is suitable for this.
 ```r
 # Calculate cross-correlation
 corr <- getExperimentCrossCorrelation(mae, 1, 1, 
-                                      assay_name1 = "clr", assay_name2 = "clr", 
+                                      assay_name1 = "rclr", assay_name2 = "rclr", 
                                       mode = "matrix",
                                       cor_threshold = 0.2, verbose = F, show_warning = F)
 

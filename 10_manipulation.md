@@ -54,7 +54,7 @@ For several custom analysis and visualization packages, such as those from the
 library(mia)
 data(GlobalPatterns, package="mia")
 tse <- GlobalPatterns
-tse <- transformSamples(tse, method="relabundance")
+tse <- transformCounts(tse, MARGIN = "samples", method="relabundance")
 
 molten_tse <- meltAssay(tse,
                         add_row_data = TRUE,

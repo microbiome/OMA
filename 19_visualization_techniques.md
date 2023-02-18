@@ -408,21 +408,28 @@ tse_phylum <- agglomerateByRank(tse,
                                 rank = "Phylum",
                                 onRankOnly = TRUE)
 # Add clr-transformation on samples
-tse_phylum <- transformSamples(tse_phylum, method = "relabundance", pseudocount = 1)
-tse_phylum <- transformSamples(tse_phylum, method = "clr", assay_name = "relabundance")
+assay(tse_phylum, "pseudo") <- assay(tse_phylum, "counts") + 1
+tse_phylum <- transformCounts(tse_phylum, assay_name = "pseudo",
+                              method = "relabundance")
+tse_phylum <- transformCounts(tse_phylum, method = "clr", assay_name = "relabundance")
 # Add z-transformation on features (taxa)
-tse_phylum <- transformFeatures(tse_phylum, assay_name = "clr", 
-                                method = "z", name = "clr_z")
+tse_phylum <- transformCounts(tse_phylum, assay_name = "clr",
+                              MARGIN = "features", 
+                              method = "z", name = "clr_z")
 
 # Takes subset: only samples from feces, skin, or tongue
 tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces", "Skin", "Tongue") ]
 
 # Does clr-transformation
-tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "relabundance", pseudocount = 1)
-tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "clr", assay_name = "relabundance")
+assay(tse_phylum_subset, "pseudo") <- assay(tse_phylum_subset, "counts") + 1
+tse_phylum_subset <- transformCounts(tse_phylum_subset, method = "relabundance",
+                                     assay_name = "pseudo")
+tse_phylum_subset <- transformCounts(tse_phylum_subset, method = "clr",
+                                     assay_name = "relabundance")
 # Does z-transformation
-tse_phylum_subset <- transformFeatures(tse_phylum_subset, assay_name = "clr", 
-                                       method = "z", name = "clr_z")
+tse_phylum_subset <- transformCounts(tse_phylum_subset, assay_name = "clr",
+                                     MARGIN = "features", 
+                                     method = "z", name = "clr_z")
 
 # Get n most abundant taxa, and subsets the data by them
 top_taxa <- getTopTaxa(tse_phylum_subset, top = 20)
@@ -799,25 +806,25 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] ggpubr_0.5.0                   ggtree_3.4.4                  
- [3] ape_5.6-2                      pheatmap_1.0.12               
+ [1] ggpubr_0.6.0                   ggtree_3.4.4                  
+ [3] ape_5.7                        pheatmap_1.0.12               
  [5] reshape2_1.4.4                 sechm_1.4.1                   
  [7] miaViz_1.7.1                   ggraph_2.1.0                  
  [9] patchwork_1.1.2                scater_1.26.1                 
-[11] scuttle_1.8.3                  mia_1.7.4                     
+[11] scuttle_1.8.4                  mia_1.7.5                     
 [13] MultiAssayExperiment_1.24.0    TreeSummarizedExperiment_2.1.4
 [15] Biostrings_2.66.0              XVector_0.38.0                
 [17] SingleCellExperiment_1.20.0    SummarizedExperiment_1.28.0   
 [19] Biobase_2.58.0                 GenomicRanges_1.50.2          
-[21] GenomeInfoDb_1.34.6            IRanges_2.32.0                
+[21] GenomeInfoDb_1.34.9            IRanges_2.32.0                
 [23] S4Vectors_0.36.1               BiocGenerics_0.44.0           
 [25] MatrixGenerics_1.10.0          matrixStats_0.63.0-9003       
-[27] ggplot2_3.4.0                  BiocStyle_2.24.0              
+[27] ggplot2_3.4.1                  BiocStyle_2.24.0              
 [29] rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
   [1] backports_1.4.1             circlize_0.4.15            
-  [3] plyr_1.8.8                  igraph_1.3.5               
+  [3] plyr_1.8.8                  igraph_1.4.0               
   [5] lazyeval_0.2.2              splines_4.2.1              
   [7] BiocParallel_1.32.5         digest_0.6.31              
   [9] ca_0.71.1                   foreach_1.5.2              
@@ -828,9 +835,9 @@ loaded via a namespace (and not attached):
  [19] doParallel_1.0.17           DECIPHER_2.26.0            
  [21] ComplexHeatmap_2.12.1       graphlayouts_0.8.4         
  [23] colorspace_2.1-0            blob_1.2.3                 
- [25] ggrepel_0.9.2               xfun_0.36                  
- [27] dplyr_1.0.10                crayon_1.5.2               
- [29] RCurl_1.98-1.9              jsonlite_1.8.4             
+ [25] ggrepel_0.9.3               xfun_0.37                  
+ [27] dplyr_1.1.0                 crayon_1.5.2               
+ [29] RCurl_1.98-1.10             jsonlite_1.8.4             
  [31] graph_1.74.0                iterators_1.0.14           
  [33] glue_1.6.2                  polyclip_1.10-4            
  [35] registry_0.5-1              gtable_0.3.1               
@@ -839,15 +846,15 @@ loaded via a namespace (and not attached):
  [41] car_3.1-1                   BiocSingular_1.14.0        
  [43] shape_1.4.6                 abind_1.4-5                
  [45] scales_1.2.1                DBI_1.1.3                  
- [47] rstatix_0.7.1               randomcoloR_1.1.0.1        
+ [47] rstatix_0.7.2               randomcoloR_1.1.0.1        
  [49] Rcpp_1.0.10                 viridisLite_0.4.1          
- [51] clue_0.3-63                 decontam_1.18.0            
+ [51] clue_0.3-64                 decontam_1.18.0            
  [53] gridGraphics_0.5-1          tidytree_0.4.2             
  [55] bit_4.0.5                   rsvd_1.0.5                 
  [57] RColorBrewer_1.1-3          dir.expiry_1.4.0           
  [59] pkgconfig_2.0.3             XML_3.99-0.13              
  [61] farver_2.1.1                CodeDepends_0.6.5          
- [63] utf8_1.2.2                  labeling_0.4.2             
+ [63] utf8_1.2.3                  labeling_0.4.2             
  [65] ggplotify_0.1.0             tidyselect_1.2.0           
  [67] rlang_1.0.6                 munsell_0.5.0              
  [69] tools_4.2.1                 cachem_1.0.6               
@@ -856,8 +863,8 @@ loaded via a namespace (and not attached):
  [75] broom_1.0.3                 evaluate_0.20              
  [77] stringr_1.5.0               fastmap_1.1.0              
  [79] yaml_2.3.7                  knitr_1.42                 
- [81] bit64_4.0.5                 tidygraph_1.2.2            
- [83] purrr_1.0.1                 nlme_3.1-161               
+ [81] bit64_4.0.5                 tidygraph_1.2.3            
+ [83] purrr_1.0.1                 nlme_3.1-162               
  [85] sparseMatrixStats_1.10.0    aplot_0.1.9                
  [87] compiler_4.2.1              curl_5.0.0                 
  [89] beeswarm_0.4.0              filelock_1.0.2             
@@ -872,17 +879,17 @@ loaded via a namespace (and not attached):
 [107] BiocNeighbors_1.16.0        cowplot_1.1.1              
 [109] bitops_1.0-7                irlba_2.3.5.1              
 [111] seriation_1.4.1             R6_2.5.1                   
-[113] TSP_1.2-1                   bookdown_0.32              
+[113] TSP_1.2-2                   bookdown_0.32              
 [115] gridExtra_2.3               vipor_0.4.5                
-[117] codetools_0.2-18            MASS_7.3-58.2              
-[119] assertthat_0.2.1            rjson_0.2.21               
-[121] withr_2.5.0                 GenomeInfoDbData_1.2.9     
-[123] mgcv_1.8-41                 parallel_4.2.1             
-[125] grid_4.2.1                  ggfun_0.0.9                
-[127] beachmat_2.14.0             tidyr_1.3.0                
-[129] rmarkdown_2.20              DelayedMatrixStats_1.20.0  
-[131] carData_3.0-5               Cairo_1.6-0                
-[133] Rtsne_0.16                  ggnewscale_0.4.8           
-[135] ggforce_0.4.1               ggbeeswarm_0.7.1           
+[117] codetools_0.2-19            MASS_7.3-58.2              
+[119] rjson_0.2.21                withr_2.5.0                
+[121] GenomeInfoDbData_1.2.9      mgcv_1.8-41                
+[123] parallel_4.2.1              grid_4.2.1                 
+[125] ggfun_0.0.9                 beachmat_2.14.0            
+[127] tidyr_1.3.0                 rmarkdown_2.20             
+[129] DelayedMatrixStats_1.20.0   carData_3.0-5              
+[131] Cairo_1.6-0                 Rtsne_0.16                 
+[133] ggnewscale_0.4.8            ggforce_0.4.1              
+[135] ggbeeswarm_0.7.1           
 ```
 </div>

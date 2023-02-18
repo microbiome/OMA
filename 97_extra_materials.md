@@ -110,7 +110,7 @@ library("vegan")
 
 ```r
 data("enterotype")
-enterotype <- transformSamples(enterotype, method = "relabundance")
+enterotype <- transformCounts(enterotype, method = "relabundance")
 ```
 
 ```

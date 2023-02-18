@@ -197,7 +197,7 @@ with concentrations of individual metabolites. This helps as to answer the quest
 # Agglomerate microbiome data at family level
 mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family")
 # Does log10 transform for microbiome data
-mae[[1]] <- transformSamples(mae[[1]], method = "log10", pseudocount = 1)
+mae[[1]] <- transformCounts(mae[[1]], method = "log10", pseudocount = 1)
 
 # Give unique names so that we do not have problems when we are creating a plot
 rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]])
@@ -299,10 +299,14 @@ mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
 mae[[1]] <- transformCounts(mae[[1]], assay_name = "relabundance", method = "rclr")
 
 # Transforming metabolomic data with log10
-mae[[2]] <- transformSamples(mae[[2]], assay_name = "nmr", method = "log10")
+mae[[2]] <- transformCounts(mae[[2]], assay_name = "nmr",
+                            MARGIN = "samples",
+                            method = "log10")
 
 # Transforming biomarker data with z-transform
-mae[[3]] <- transformFeatures(mae[[3]], assay_name = "signals", method = "z", pseudocount = 1)
+mae[[3]] <- transformCounts(mae[[3]], assay_name = "signals",
+                            MARGIN = "features",
+                            method = "z", pseudocount = 1)
 
 # Removing assays no longer needed
 assay(mae[[1]], "counts") <- NULL
@@ -458,14 +462,14 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] ggplot2_3.4.0                  patchwork_1.1.2               
- [3] reticulate_1.27                MOFA2_1.6.0                   
+ [1] ggplot2_3.4.1                  patchwork_1.1.2               
+ [3] reticulate_1.28                MOFA2_1.6.0                   
  [5] ComplexHeatmap_2.12.1          stringr_1.5.0                 
- [7] mia_1.7.4                      MultiAssayExperiment_1.24.0   
+ [7] mia_1.7.5                      MultiAssayExperiment_1.24.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [11] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [13] SummarizedExperiment_1.28.0    Biobase_2.58.0                
-[15] GenomicRanges_1.50.2           GenomeInfoDb_1.34.6           
+[15] GenomicRanges_1.50.2           GenomeInfoDb_1.34.9           
 [17] IRanges_2.32.0                 S4Vectors_0.36.1              
 [19] BiocGenerics_0.44.0            MatrixGenerics_1.10.0         
 [21] matrixStats_0.63.0-9003        BiocStyle_2.24.0              
@@ -483,11 +487,11 @@ loaded via a namespace (and not attached):
  [17] ScaledMatrix_1.6.0          cluster_2.1.4              
  [19] doParallel_1.0.17           DECIPHER_2.26.0            
  [21] colorspace_2.1-0            rappdirs_0.3.3             
- [23] blob_1.2.3                  ggrepel_0.9.2              
- [25] xfun_0.36                   dplyr_1.0.10               
- [27] crayon_1.5.2                RCurl_1.98-1.9             
+ [23] blob_1.2.3                  ggrepel_0.9.3              
+ [25] xfun_0.37                   dplyr_1.1.0                
+ [27] crayon_1.5.2                RCurl_1.98-1.10            
  [29] jsonlite_1.8.4              graph_1.74.0               
- [31] iterators_1.0.14            ape_5.6-2                  
+ [31] iterators_1.0.14            ape_5.7                    
  [33] glue_1.6.2                  gtable_0.3.1               
  [35] zlibbioc_1.44.0             GetoptLong_1.0.5           
  [37] DelayedArray_0.24.0         BiocSingular_1.14.0        
@@ -495,14 +499,14 @@ loaded via a namespace (and not attached):
  [41] HDF5Array_1.24.2            scales_1.2.1               
  [43] pheatmap_1.0.12             DBI_1.1.3                  
  [45] Rcpp_1.0.10                 viridisLite_0.4.1          
- [47] decontam_1.18.0             clue_0.3-63                
+ [47] decontam_1.18.0             clue_0.3-64                
  [49] tidytree_0.4.2              bit_4.0.5                  
  [51] rsvd_1.0.5                  dir.expiry_1.4.0           
  [53] RColorBrewer_1.1-3          farver_2.1.1               
  [55] pkgconfig_2.0.3             XML_3.99-0.13              
- [57] scuttle_1.8.3               uwot_0.1.14                
+ [57] scuttle_1.8.4               uwot_0.1.14                
  [59] CodeDepends_0.6.5           here_1.0.1                 
- [61] utf8_1.2.2                  labeling_0.4.2             
+ [61] utf8_1.2.3                  labeling_0.4.2             
  [63] tidyselect_1.2.0            rlang_1.0.6                
  [65] reshape2_1.4.4              munsell_0.5.0              
  [67] tools_4.2.1                 cachem_1.0.6               
@@ -511,12 +515,12 @@ loaded via a namespace (and not attached):
  [73] evaluate_0.20               fastmap_1.1.0              
  [75] yaml_2.3.7                  knitr_1.42                 
  [77] bit64_4.0.5                 purrr_1.0.1                
- [79] nlme_3.1-161                sparseMatrixStats_1.10.0   
+ [79] nlme_3.1-162                sparseMatrixStats_1.10.0   
  [81] compiler_4.2.1              beeswarm_0.4.0             
  [83] filelock_1.0.2              png_0.1-8                  
  [85] treeio_1.22.0               tibble_3.1.8               
  [87] stringi_1.7.12              highr_0.10                 
- [89] basilisk.utils_1.8.0        forcats_0.5.2              
+ [89] basilisk.utils_1.8.0        forcats_1.0.0              
  [91] lattice_0.20-45             Matrix_1.5-3               
  [93] vegan_2.6-4                 permute_0.9-7              
  [95] vctrs_0.5.2                 pillar_1.8.1               
@@ -526,15 +530,15 @@ loaded via a namespace (and not attached):
 [103] bitops_1.0-7                irlba_2.3.5.1              
 [105] R6_2.5.1                    bookdown_0.32              
 [107] gridExtra_2.3               vipor_0.4.5                
-[109] codetools_0.2-18            MASS_7.3-58.2              
-[111] assertthat_0.2.1            rhdf5_2.40.0               
-[113] rprojroot_2.0.3             rjson_0.2.21               
-[115] withr_2.5.0                 GenomeInfoDbData_1.2.9     
-[117] mgcv_1.8-41                 parallel_4.2.1             
-[119] beachmat_2.14.0             tidyr_1.3.0                
-[121] basilisk_1.8.1              rmarkdown_2.20             
-[123] DelayedMatrixStats_1.20.0   Rtsne_0.16                 
-[125] Cairo_1.6-0                 ggbeeswarm_0.7.1           
+[109] codetools_0.2-19            MASS_7.3-58.2              
+[111] rhdf5_2.40.0                rprojroot_2.0.3            
+[113] rjson_0.2.21                withr_2.5.0                
+[115] GenomeInfoDbData_1.2.9      mgcv_1.8-41                
+[117] parallel_4.2.1              beachmat_2.14.0            
+[119] tidyr_1.3.0                 basilisk_1.8.1             
+[121] rmarkdown_2.20              DelayedMatrixStats_1.20.0  
+[123] Rtsne_0.16                  Cairo_1.6-0                
+[125] ggbeeswarm_0.7.1           
 ```
 </div>
 

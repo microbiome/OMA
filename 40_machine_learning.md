@@ -89,8 +89,9 @@ Let's first preprocess the data.
 tse <- agglomerateByRank(tse, rank = "order")
 
 # Apply CLR transform
-tse <- transformSamples(tse, method = "relabundance", pseudocount = 1)
-tse <- transformSamples(tse, assay_name = "relabundance", method = "clr")
+assay(tse, "pseudo") <- assay(tse, "counts") + 1
+tse <- transformCounts(tse, assay_name = "pseudo", method = "relabundance")
+tse <- transformCounts(tse, assay_name = "relabundance", method = "clr")
 
 # Get assay
 assay <- assay(tse, "clr")
@@ -136,26 +137,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    12   6
-##      Veg      11  18
+##      Mixed    15   9
+##      Veg       8  15
 ##                                         
 ##                Accuracy : 0.638         
 ##                  95% CI : (0.485, 0.773)
 ##     No Information Rate : 0.511         
 ##     P-Value [Acc > NIR] : 0.0536        
 ##                                         
-##                   Kappa : 0.273         
+##                   Kappa : 0.277         
 ##                                         
-##  Mcnemar's Test P-Value : 0.3320        
+##  Mcnemar's Test P-Value : 1.0000        
 ##                                         
-##             Sensitivity : 0.522         
-##             Specificity : 0.750         
-##          Pos Pred Value : 0.667         
-##          Neg Pred Value : 0.621         
+##             Sensitivity : 0.652         
+##             Specificity : 0.625         
+##          Pos Pred Value : 0.625         
+##          Neg Pred Value : 0.652         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.255         
-##    Detection Prevalence : 0.383         
-##       Balanced Accuracy : 0.636         
+##          Detection Rate : 0.319         
+##    Detection Prevalence : 0.511         
+##       Balanced Accuracy : 0.639         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -259,12 +260,12 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.2                MLeval_0.3                    
  [3] caret_6.0-93                   lattice_0.20-45               
- [5] ggplot2_3.4.0                  mikropml_1.4.0                
- [7] mia_1.7.4                      MultiAssayExperiment_1.24.0   
+ [5] ggplot2_3.4.1                  mikropml_1.5.0                
+ [7] mia_1.7.5                      MultiAssayExperiment_1.24.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [11] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [13] SummarizedExperiment_1.28.0    Biobase_2.58.0                
-[15] GenomicRanges_1.50.2           GenomeInfoDb_1.34.6           
+[15] GenomicRanges_1.50.2           GenomeInfoDb_1.34.9           
 [17] IRanges_2.32.0                 S4Vectors_0.36.1              
 [19] BiocGenerics_0.44.0            MatrixGenerics_1.10.0         
 [21] matrixStats_0.63.0-9003        BiocStyle_2.24.0              
@@ -280,18 +281,18 @@ loaded via a namespace (and not attached):
  [13] magrittr_2.0.3              memoise_2.0.1              
  [15] MLmetrics_1.1.1             ScaledMatrix_1.6.0         
  [17] cluster_2.1.4               ROCR_1.0-11                
- [19] DECIPHER_2.26.0             recipes_1.0.3              
+ [19] DECIPHER_2.26.0             recipes_1.0.4              
  [21] globals_0.16.2              gower_1.0.1                
  [23] hardhat_1.2.0               timechange_0.2.0           
  [25] colorspace_2.1-0            blob_1.2.3                 
- [27] ggrepel_0.9.2               xfun_0.36                  
- [29] dplyr_1.0.10                crayon_1.5.2               
- [31] RCurl_1.98-1.9              jsonlite_1.8.4             
- [33] graph_1.74.0                survival_3.5-0             
- [35] iterators_1.0.14            ape_5.6-2                  
+ [27] ggrepel_0.9.3               xfun_0.37                  
+ [29] dplyr_1.1.0                 crayon_1.5.2               
+ [31] RCurl_1.98-1.10             jsonlite_1.8.4             
+ [33] graph_1.74.0                survival_3.5-3             
+ [35] iterators_1.0.14            ape_5.7                    
  [37] glue_1.6.2                  gtable_0.3.1               
  [39] ipred_0.9-13                zlibbioc_1.44.0            
- [41] DelayedArray_0.24.0         kernlab_0.9-31             
+ [41] DelayedArray_0.24.0         kernlab_0.9-32             
  [43] BiocSingular_1.14.0         shape_1.4.6                
  [45] future.apply_1.10.0         scales_1.2.1               
  [47] DBI_1.1.3                   Rcpp_1.0.10                
@@ -301,23 +302,23 @@ loaded via a namespace (and not attached):
  [55] lava_1.7.1                  prodlim_2019.11.13         
  [57] glmnet_4.1-6                dir.expiry_1.4.0           
  [59] farver_2.1.1                pkgconfig_2.0.3            
- [61] XML_3.99-0.13               scuttle_1.8.3              
+ [61] XML_3.99-0.13               scuttle_1.8.4              
  [63] nnet_7.3-18                 CodeDepends_0.6.5          
- [65] utf8_1.2.2                  labeling_0.4.2             
+ [65] utf8_1.2.3                  labeling_0.4.2             
  [67] tidyselect_1.2.0            rlang_1.0.6                
  [69] reshape2_1.4.4              munsell_0.5.0              
  [71] tools_4.2.1                 cachem_1.0.6               
- [73] xgboost_1.6.0.1             cli_3.6.0                  
+ [73] xgboost_1.7.3.1             cli_3.6.0                  
  [75] DirichletMultinomial_1.40.0 generics_0.1.3             
  [77] RSQLite_2.2.20              evaluate_0.20              
  [79] stringr_1.5.0               fastmap_1.1.0              
  [81] yaml_2.3.7                  ModelMetrics_1.2.2.2       
  [83] knitr_1.42                  bit64_4.0.5                
  [85] randomForest_4.7-1.1        purrr_1.0.1                
- [87] future_1.30.0               nlme_3.1-161               
+ [87] future_1.31.0               nlme_3.1-162               
  [89] sparseMatrixStats_1.10.0    compiler_4.2.1             
  [91] beeswarm_0.4.0              filelock_1.0.2             
- [93] e1071_1.7-12                treeio_1.22.0              
+ [93] e1071_1.7-13                treeio_1.22.0              
  [95] tibble_3.1.8                stringi_1.7.12             
  [97] highr_0.10                  Matrix_1.5-3               
  [99] vegan_2.6-4                 permute_0.9-7              
@@ -327,16 +328,15 @@ loaded via a namespace (and not attached):
 [107] bitops_1.0-7                irlba_2.3.5.1              
 [109] R6_2.5.1                    bookdown_0.32              
 [111] gridExtra_2.3               vipor_0.4.5                
-[113] parallelly_1.33.0           codetools_0.2-18           
-[115] MASS_7.3-58.2               assertthat_0.2.1           
-[117] withr_2.5.0                 GenomeInfoDbData_1.2.9     
-[119] mgcv_1.8-41                 parallel_4.2.1             
-[121] grid_4.2.1                  rpart_4.1.19               
-[123] beachmat_2.14.0             timeDate_4022.108          
-[125] tidyr_1.3.0                 class_7.3-21               
-[127] rmarkdown_2.20              DelayedMatrixStats_1.20.0  
-[129] pROC_1.18.0                 lubridate_1.9.1            
-[131] ggbeeswarm_0.7.1           
+[113] parallelly_1.34.0           codetools_0.2-19           
+[115] MASS_7.3-58.2               withr_2.5.0                
+[117] GenomeInfoDbData_1.2.9      mgcv_1.8-41                
+[119] parallel_4.2.1              grid_4.2.1                 
+[121] rpart_4.1.19                beachmat_2.14.0            
+[123] timeDate_4022.108           tidyr_1.3.0                
+[125] class_7.3-21                rmarkdown_2.20             
+[127] DelayedMatrixStats_1.20.0   pROC_1.18.0                
+[129] lubridate_1.9.2             ggbeeswarm_0.7.1           
 ```
 </div>
 

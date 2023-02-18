@@ -389,79 +389,78 @@ values compared to smaller values.
 
 In mia package, transformations are applied to abundance data. The transformed 
 abundance table is stored back to 'assays'. mia includes transformation 
-functions for sample-wise or column-wise transformation ('transformSamples()'), 
-and for feature-wise or row-wise transformation ('transformFeatures()'). 
+function ('transformCounts()') which applies sample-wise or column-wise transformation when MARGIN = 'samples', feature-wise or row-wise transformation when MARGIN = 'features'.
 
 For complete list of available transformations and parameters, see function 
 [help](https://microbiome.github.io/mia/reference/transformCounts.html).
 
 
 ```r
-tse <- transformSamples(tse, method = "relabundance")
-tse <- transformSamples(x = tse, assay_name = "relabundance", method = "clr", 
+assay(tse, "pseudo") <- assay(tse, "counts") + 1
+tse <- transformCounts(tse, assay_name = "pseudo", method = "relabundance")
+tse <- transformCounts(x = tse, assay_name = "relabundance", method = "clr", 
                         pseudocount = 1, name = "clr_transformation")
 
 head(assay(tse, "clr_transformation"))
 ```
 
 ```
-##                                        CL3        CC1        SV1    M31Fcsw
-## Class:Thermoprotei               -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
-## Class:Thermoprotei               -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
-## Species:Sulfolobusacidocaldarius -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
-## Class:Sd-NA                      -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
-## Class:Sd-NA                      -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
-## Class:Sd-NA                      -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
-##                                     M11Fcsw   M31Plmr    M11Plmr    F21Plmr
-## Class:Thermoprotei               -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
-## Class:Thermoprotei               -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
-## Species:Sulfolobusacidocaldarius -4.991e-05 -5.06e-05 -4.860e-05 -5.148e-05
-## Class:Sd-NA                      -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
-## Class:Sd-NA                      -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
-## Class:Sd-NA                      -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
-##                                    M31Tong   M11Tong   LMEpi24M   SLEpi20M
-## Class:Thermoprotei               -4.89e-05 -5.05e-05 -4.796e-05 -4.910e-05
-## Class:Thermoprotei               -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
-## Species:Sulfolobusacidocaldarius -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
-## Class:Sd-NA                      -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
-## Class:Sd-NA                      -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
-## Class:Sd-NA                      -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
+##                                         CL3        CC1        SV1    M31Fcsw
+## Class:Thermoprotei               -5.078e-05 -5.105e-05 -5.055e-05 -4.975e-05
+## Class:Thermoprotei               -5.078e-05 -5.105e-05 -5.055e-05 -4.975e-05
+## Species:Sulfolobusacidocaldarius -5.078e-05 -5.105e-05 -5.055e-05 -4.975e-05
+## Class:Sd-NA                      -5.078e-05 -5.105e-05 -5.055e-05 -4.975e-05
+## Class:Sd-NA                      -5.078e-05 -5.105e-05 -5.055e-05 -4.975e-05
+## Class:Sd-NA                      -5.078e-05 -5.105e-05 -5.055e-05 -4.975e-05
+##                                     M11Fcsw    M31Plmr    M11Plmr    F21Plmr
+## Class:Thermoprotei               -4.947e-05 -4.931e-05 -4.879e-05 -4.671e-05
+## Class:Thermoprotei               -4.947e-05 -4.931e-05 -4.879e-05 -4.671e-05
+## Species:Sulfolobusacidocaldarius -4.947e-05 -4.931e-05 -4.658e-05 -4.671e-05
+## Class:Sd-NA                      -4.947e-05 -4.931e-05 -4.879e-05 -4.671e-05
+## Class:Sd-NA                      -4.947e-05 -4.931e-05 -4.879e-05 -4.671e-05
+## Class:Sd-NA                      -4.947e-05 -4.931e-05 -4.879e-05 -4.671e-05
+##                                     M31Tong    M11Tong   LMEpi24M   SLEpi20M
+## Class:Thermoprotei               -4.846e-05 -4.257e-05 -4.756e-05 -4.837e-05
+## Class:Thermoprotei               -4.846e-05 -4.257e-05 -4.756e-05 -4.918e-05
+## Species:Sulfolobusacidocaldarius -4.846e-05 -4.257e-05 -4.756e-05 -4.918e-05
+## Class:Sd-NA                      -4.846e-05 -4.257e-05 -4.756e-05 -4.918e-05
+## Class:Sd-NA                      -4.846e-05 -4.257e-05 -4.756e-05 -4.918e-05
+## Class:Sd-NA                      -4.846e-05 -4.257e-05 -4.756e-05 -4.918e-05
 ##                                      AQC1cm     AQC4cm     AQC7cm        NP2
-## Class:Thermoprotei               -2.419e-05 -4.442e-06  2.822e-05 -4.900e-05
-## Class:Thermoprotei               -4.731e-05 -4.602e-05 -4.475e-05 -5.091e-05
-## Species:Sulfolobusacidocaldarius -4.731e-05 -4.686e-05 -4.828e-05 -5.091e-05
-## Class:Sd-NA                      -4.731e-05 -3.753e-05 -3.121e-05 -5.091e-05
-## Class:Sd-NA                      -4.731e-05 -4.602e-05 -4.769e-05 -5.091e-05
-## Class:Sd-NA                      -4.731e-05 -4.644e-05 -4.651e-05 -5.091e-05
+## Class:Thermoprotei               -2.385e-05 -4.438e-06  2.787e-05 -4.731e-05
+## Class:Thermoprotei               -4.660e-05 -4.568e-05 -4.428e-05 -4.915e-05
+## Species:Sulfolobusacidocaldarius -4.660e-05 -4.652e-05 -4.777e-05 -4.915e-05
+## Class:Sd-NA                      -4.660e-05 -3.726e-05 -3.090e-05 -4.915e-05
+## Class:Sd-NA                      -4.660e-05 -4.568e-05 -4.719e-05 -4.915e-05
+## Class:Sd-NA                      -4.660e-05 -4.610e-05 -4.603e-05 -4.915e-05
 ##                                         NP3        NP5    TRRsed1    TRRsed2
-## Class:Thermoprotei               -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
-## Class:Thermoprotei               -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
-## Species:Sulfolobusacidocaldarius -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
-## Class:Sd-NA                      -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
-## Class:Sd-NA                      -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
-## Class:Sd-NA                      -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
-##                                     TRRsed3       TS28      TS29      Even1
-## Class:Thermoprotei               -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
-## Class:Thermoprotei               -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
-## Species:Sulfolobusacidocaldarius -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
-## Class:Sd-NA                      -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
-## Class:Sd-NA                      -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
-## Class:Sd-NA                      -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
+## Class:Thermoprotei               -5.068e-05 -5.083e-05 -3.909e-05 -4.927e-05
+## Class:Thermoprotei               -5.068e-05 -5.083e-05 -3.909e-05 -4.927e-05
+## Species:Sulfolobusacidocaldarius -5.068e-05 -5.083e-05 -3.909e-05 -4.927e-05
+## Class:Sd-NA                      -5.068e-05 -5.083e-05 -3.909e-05 -4.927e-05
+## Class:Sd-NA                      -5.068e-05 -5.083e-05 -3.909e-05 -4.927e-05
+## Class:Sd-NA                      -5.068e-05 -5.083e-05 -3.909e-05 -4.927e-05
+##                                     TRRsed3       TS28       TS29      Even1
+## Class:Thermoprotei               -4.829e-05 -5.016e-05 -4.934e-05 -5.046e-05
+## Class:Thermoprotei               -4.829e-05 -5.016e-05 -4.934e-05 -5.046e-05
+## Species:Sulfolobusacidocaldarius -4.829e-05 -5.016e-05 -4.934e-05 -5.046e-05
+## Class:Sd-NA                      -4.829e-05 -5.016e-05 -4.934e-05 -5.046e-05
+## Class:Sd-NA                      -4.829e-05 -5.016e-05 -4.934e-05 -5.046e-05
+## Class:Sd-NA                      -4.829e-05 -5.016e-05 -4.934e-05 -5.046e-05
 ##                                       Even2      Even3
-## Class:Thermoprotei               -5.114e-05 -5.122e-05
-## Class:Thermoprotei               -5.114e-05 -5.122e-05
-## Species:Sulfolobusacidocaldarius -5.114e-05 -5.122e-05
-## Class:Sd-NA                      -5.114e-05 -5.122e-05
-## Class:Sd-NA                      -5.114e-05 -5.122e-05
-## Class:Sd-NA                      -5.114e-05 -5.122e-05
+## Class:Thermoprotei               -5.017e-05 -5.034e-05
+## Class:Thermoprotei               -5.017e-05 -5.034e-05
+## Species:Sulfolobusacidocaldarius -5.017e-05 -5.034e-05
+## Class:Sd-NA                      -5.017e-05 -5.034e-05
+## Class:Sd-NA                      -5.017e-05 -5.034e-05
+## Class:Sd-NA                      -5.017e-05 -5.034e-05
 ```
 
--   In 'pa' transformation, 'threshold' specifies the value that divides observations to
-be absent or present. By default, it is 0.
+-   In 'pa' transformation, abundance table is converted to present/absent table.
 
 
 ```r
-tse <- transformFeatures(tse, method = "pa", threshold = 10)
+tse <- transformCounts(tse, method = "pa")
 
 head(assay(tse, "pa"))
 ```
@@ -470,24 +469,24 @@ head(assay(tse, "pa"))
 ##                                  CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr
 ## Class:Thermoprotei                 0   0   0       0       0       0       0
 ## Class:Thermoprotei                 0   0   0       0       0       0       0
-## Species:Sulfolobusacidocaldarius   0   0   0       0       0       0       0
+## Species:Sulfolobusacidocaldarius   0   0   0       0       0       0       1
 ## Class:Sd-NA                        0   0   0       0       0       0       0
 ## Class:Sd-NA                        0   0   0       0       0       0       0
 ## Class:Sd-NA                        0   0   0       0       0       0       0
 ##                                  F21Plmr M31Tong M11Tong LMEpi24M SLEpi20M
-## Class:Thermoprotei                     0       0       0        0        0
+## Class:Thermoprotei                     0       0       0        0        1
 ## Class:Thermoprotei                     0       0       0        0        0
 ## Species:Sulfolobusacidocaldarius       0       0       0        0        0
 ## Class:Sd-NA                            0       0       0        0        0
 ## Class:Sd-NA                            0       0       0        0        0
 ## Class:Sd-NA                            0       0       0        0        0
 ##                                  AQC1cm AQC4cm AQC7cm NP2 NP3 NP5 TRRsed1
-## Class:Thermoprotei                    1      1      1   0   0   0       0
-## Class:Thermoprotei                    0      0      0   0   0   0       0
+## Class:Thermoprotei                    1      1      1   1   0   0       0
+## Class:Thermoprotei                    0      1      1   0   0   0       0
 ## Species:Sulfolobusacidocaldarius      0      0      0   0   0   0       0
 ## Class:Sd-NA                           0      1      1   0   0   0       0
-## Class:Sd-NA                           0      0      0   0   0   0       0
-## Class:Sd-NA                           0      0      0   0   0   0       0
+## Class:Sd-NA                           0      1      1   0   0   0       0
+## Class:Sd-NA                           0      1      1   0   0   0       0
 ##                                  TRRsed2 TRRsed3 TS28 TS29 Even1 Even2 Even3
 ## Class:Thermoprotei                     0       0    0    0     0     0     0
 ## Class:Thermoprotei                     0       0    0    0     0     0     0
@@ -504,8 +503,8 @@ assays(tse)
 ```
 
 ```
-## List of length 4
-## names(4): counts relabundance clr_transformation pa
+## List of length 5
+## names(5): counts relabundance pseudo clr_transformation pa
 ```
 
 ## Pick specific  
@@ -578,65 +577,65 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.7.4                      MultiAssayExperiment_1.24.0   
+ [1] mia_1.7.5                      MultiAssayExperiment_1.24.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
  [5] XVector_0.38.0                 SingleCellExperiment_1.20.0   
  [7] SummarizedExperiment_1.28.0    Biobase_2.58.0                
- [9] GenomicRanges_1.50.2           GenomeInfoDb_1.34.6           
+ [9] GenomicRanges_1.50.2           GenomeInfoDb_1.34.9           
 [11] IRanges_2.32.0                 S4Vectors_0.36.1              
 [13] BiocGenerics_0.44.0            MatrixGenerics_1.10.0         
 [15] matrixStats_0.63.0-9003        BiocStyle_2.24.0              
 [17] rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
- [1] ggbeeswarm_0.7.1            colorspace_2.1-0           
- [3] scuttle_1.8.3               BiocNeighbors_1.16.0       
- [5] ggrepel_0.9.2               bit64_4.0.5                
- [7] fansi_1.0.4                 decontam_1.18.0            
- [9] codetools_0.2-18            splines_4.2.1              
-[11] sparseMatrixStats_1.10.0    cachem_1.0.6               
-[13] knitr_1.42                  scater_1.26.1              
-[15] jsonlite_1.8.4              cluster_2.1.4              
-[17] graph_1.74.0                BiocManager_1.30.19        
-[19] compiler_4.2.1              assertthat_0.2.1           
-[21] Matrix_1.5-3                fastmap_1.1.0              
-[23] lazyeval_0.2.2              cli_3.6.0                  
-[25] BiocSingular_1.14.0         htmltools_0.5.4            
-[27] tools_4.2.1                 rsvd_1.0.5                 
-[29] gtable_0.3.1                glue_1.6.2                 
-[31] GenomeInfoDbData_1.2.9      reshape2_1.4.4             
-[33] dplyr_1.0.10                Rcpp_1.0.10                
-[35] vctrs_0.5.2                 ape_5.6-2                  
-[37] nlme_3.1-161                DECIPHER_2.26.0            
-[39] DelayedMatrixStats_1.20.0   xfun_0.36                  
-[41] stringr_1.5.0               beachmat_2.14.0            
-[43] lifecycle_1.0.3             irlba_2.3.5.1              
-[45] XML_3.99-0.13               zlibbioc_1.44.0            
-[47] MASS_7.3-58.2               scales_1.2.1               
-[49] parallel_4.2.1              yaml_2.3.7                 
-[51] memoise_2.0.1               gridExtra_2.3              
-[53] ggplot2_3.4.0               yulab.utils_0.0.6          
-[55] stringi_1.7.12              RSQLite_2.2.20             
-[57] ScaledMatrix_1.6.0          tidytree_0.4.2             
-[59] permute_0.9-7               filelock_1.0.2             
-[61] BiocParallel_1.32.5         rlang_1.0.6                
-[63] pkgconfig_2.0.3             bitops_1.0-7               
-[65] evaluate_0.20               lattice_0.20-45            
-[67] purrr_1.0.1                 treeio_1.22.0              
-[69] CodeDepends_0.6.5           bit_4.0.5                  
-[71] tidyselect_1.2.0            plyr_1.8.8                 
-[73] magrittr_2.0.3              bookdown_0.32              
-[75] R6_2.5.1                    generics_0.1.3             
-[77] DelayedArray_0.24.0         DBI_1.1.3                  
-[79] withr_2.5.0                 pillar_1.8.1               
-[81] mgcv_1.8-41                 RCurl_1.98-1.9             
-[83] tibble_3.1.8                dir.expiry_1.4.0           
-[85] crayon_1.5.2                utf8_1.2.2                 
-[87] rmarkdown_2.20              viridis_0.6.2              
-[89] grid_4.2.1                  blob_1.2.3                 
-[91] vegan_2.6-4                 digest_0.6.31              
-[93] tidyr_1.3.0                 munsell_0.5.0              
-[95] DirichletMultinomial_1.40.0 beeswarm_0.4.0             
-[97] viridisLite_0.4.1           vipor_0.4.5                
+ [1] nlme_3.1-162                bitops_1.0-7               
+ [3] DirichletMultinomial_1.40.0 bit64_4.0.5                
+ [5] filelock_1.0.2              tools_4.2.1                
+ [7] vegan_2.6-4                 utf8_1.2.3                 
+ [9] R6_2.5.1                    irlba_2.3.5.1              
+[11] vipor_0.4.5                 mgcv_1.8-41                
+[13] DBI_1.1.3                   lazyeval_0.2.2             
+[15] colorspace_2.1-0            permute_0.9-7              
+[17] withr_2.5.0                 tidyselect_1.2.0           
+[19] gridExtra_2.3               bit_4.0.5                  
+[21] compiler_4.2.1              graph_1.74.0               
+[23] cli_3.6.0                   BiocNeighbors_1.16.0       
+[25] DelayedArray_0.24.0         bookdown_0.32              
+[27] scales_1.2.1                stringr_1.5.0              
+[29] digest_0.6.31               yulab.utils_0.0.6          
+[31] rmarkdown_2.20              scater_1.26.1              
+[33] pkgconfig_2.0.3             htmltools_0.5.4            
+[35] decontam_1.18.0             sparseMatrixStats_1.10.0   
+[37] fastmap_1.1.0               rlang_1.0.6                
+[39] RSQLite_2.2.20              DelayedMatrixStats_1.20.0  
+[41] generics_0.1.3              jsonlite_1.8.4             
+[43] BiocParallel_1.32.5         dplyr_1.1.0                
+[45] RCurl_1.98-1.10             magrittr_2.0.3             
+[47] BiocSingular_1.14.0         GenomeInfoDbData_1.2.9     
+[49] scuttle_1.8.4               Matrix_1.5-3               
+[51] Rcpp_1.0.10                 ggbeeswarm_0.7.1           
+[53] munsell_0.5.0               fansi_1.0.4                
+[55] DECIPHER_2.26.0             ape_5.7                    
+[57] viridis_0.6.2               lifecycle_1.0.3            
+[59] stringi_1.7.12              yaml_2.3.7                 
+[61] MASS_7.3-58.2               zlibbioc_1.44.0            
+[63] plyr_1.8.8                  blob_1.2.3                 
+[65] grid_4.2.1                  parallel_4.2.1             
+[67] ggrepel_0.9.3               crayon_1.5.2               
+[69] dir.expiry_1.4.0            lattice_0.20-45            
+[71] splines_4.2.1               beachmat_2.14.0            
+[73] CodeDepends_0.6.5           knitr_1.42                 
+[75] pillar_1.8.1                reshape2_1.4.4             
+[77] codetools_0.2-19            ScaledMatrix_1.6.0         
+[79] XML_3.99-0.13               glue_1.6.2                 
+[81] evaluate_0.20               BiocManager_1.30.19        
+[83] vctrs_0.5.2                 treeio_1.22.0              
+[85] gtable_0.3.1                purrr_1.0.1                
+[87] tidyr_1.3.0                 cachem_1.0.6               
+[89] ggplot2_3.4.1               xfun_0.37                  
+[91] rsvd_1.0.5                  tidytree_0.4.2             
+[93] viridisLite_0.4.1           tibble_3.1.8               
+[95] memoise_2.0.1               beeswarm_0.4.0             
+[97] cluster_2.1.4              
 ```
 </div>

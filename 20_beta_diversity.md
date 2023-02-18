@@ -179,7 +179,7 @@ functions.
 library(scater)
 
 # Bray-Curtis is usually applied to relative abundances
-tse <- transformSamples(tse, method = "relabundance")
+tse <- transformCounts(tse, method = "relabundance")
 # Perform PCoA
 tse <- runMDS(tse, FUN = vegan::vegdist, method = "bray", name = "PCoA_BC", exprs_values = "relabundance")
 ```
@@ -341,7 +341,7 @@ data(enterotype)
 variable_names <- c("ClinicalStatus", "Gender", "Age")
 
 # Apply relative transform
-enterotype <- transformSamples(enterotype, method = "relabundance")
+enterotype <- transformCounts(enterotype, method = "relabundance")
 
 # Create a formula
 formula <- as.formula(paste0("assay ~ ", str_c(variable_names, collapse = " + ")) )
@@ -511,7 +511,7 @@ Let us agglomerate the data at a Genus level and getting the dominant taxa per s
 # Agglomerate to genus level
 tse_Genus <- agglomerateByRank(tse, rank="Genus")
 # Convert to relative abundances
-tse_Genus <- transformSamples(tse, method = "relabundance", assay_name="counts")
+tse_Genus <- transformCounts(tse, method = "relabundance", assay_name="counts")
 # Add info on dominant genus per sample
 tse_Genus <- addPerSampleDominantTaxa(tse_Genus, assay_name="relabundance", name = "dominant_taxa")
 ```
@@ -776,14 +776,14 @@ attached base packages:
 other attached packages:
  [1] ggord_1.1.7                    knitr_1.42                    
  [3] stringr_1.5.0                  patchwork_1.1.2               
- [5] scater_1.26.1                  scuttle_1.8.3                 
- [7] ggplot2_3.4.0                  vegan_2.6-4                   
+ [5] scater_1.26.1                  scuttle_1.8.4                 
+ [7] ggplot2_3.4.1                  vegan_2.6-4                   
  [9] lattice_0.20-45                permute_0.9-7                 
-[11] mia_1.7.4                      MultiAssayExperiment_1.24.0   
+[11] mia_1.7.5                      MultiAssayExperiment_1.24.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [15] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [17] SummarizedExperiment_1.28.0    Biobase_2.58.0                
-[19] GenomicRanges_1.50.2           GenomeInfoDb_1.34.6           
+[19] GenomicRanges_1.50.2           GenomeInfoDb_1.34.9           
 [21] IRanges_2.32.0                 S4Vectors_0.36.1              
 [23] BiocGenerics_0.44.0            MatrixGenerics_1.10.0         
 [25] matrixStats_0.63.0-9003        BiocStyle_2.24.0              
@@ -792,51 +792,50 @@ other attached packages:
 loaded via a namespace (and not attached):
  [1] Rtsne_0.16                  ggbeeswarm_0.7.1           
  [3] colorspace_2.1-0            BiocNeighbors_1.16.0       
- [5] farver_2.1.1                ggrepel_0.9.2              
+ [5] farver_2.1.1                ggrepel_0.9.3              
  [7] bit64_4.0.5                 fansi_1.0.4                
- [9] decontam_1.18.0             codetools_0.2-18           
+ [9] decontam_1.18.0             codetools_0.2-19           
 [11] splines_4.2.1               sparseMatrixStats_1.10.0   
 [13] cachem_1.0.6                jsonlite_1.8.4             
 [15] cluster_2.1.4               graph_1.74.0               
 [17] BiocManager_1.30.19         compiler_4.2.1             
-[19] assertthat_0.2.1            Matrix_1.5-3               
-[21] fastmap_1.1.0               lazyeval_0.2.2             
-[23] cli_3.6.0                   BiocSingular_1.14.0        
-[25] htmltools_0.5.4             tools_4.2.1                
-[27] rsvd_1.0.5                  gtable_0.3.1               
-[29] glue_1.6.2                  GenomeInfoDbData_1.2.9     
-[31] reshape2_1.4.4              dplyr_1.0.10               
-[33] Rcpp_1.0.10                 vctrs_0.5.2                
-[35] ape_5.6-2                   nlme_3.1-161               
-[37] DECIPHER_2.26.0             DelayedMatrixStats_1.20.0  
-[39] xfun_0.36                   beachmat_2.14.0            
-[41] lifecycle_1.0.3             irlba_2.3.5.1              
-[43] XML_3.99-0.13               zlibbioc_1.44.0            
-[45] MASS_7.3-58.2               scales_1.2.1               
-[47] parallel_4.2.1              yaml_2.3.7                 
-[49] memoise_2.0.1               gridExtra_2.3              
-[51] yulab.utils_0.0.6           stringi_1.7.12             
-[53] RSQLite_2.2.20              highr_0.10                 
-[55] ScaledMatrix_1.6.0          tidytree_0.4.2             
-[57] filelock_1.0.2              BiocParallel_1.32.5        
-[59] rlang_1.0.6                 pkgconfig_2.0.3            
-[61] bitops_1.0-7                evaluate_0.20              
-[63] purrr_1.0.1                 labeling_0.4.2             
-[65] treeio_1.22.0               CodeDepends_0.6.5          
-[67] cowplot_1.1.1               bit_4.0.5                  
-[69] tidyselect_1.2.0            plyr_1.8.8                 
-[71] magrittr_2.0.3              bookdown_0.32              
-[73] R6_2.5.1                    generics_0.1.3             
-[75] DelayedArray_0.24.0         DBI_1.1.3                  
-[77] withr_2.5.0                 pillar_1.8.1               
-[79] mgcv_1.8-41                 RCurl_1.98-1.9             
-[81] tibble_3.1.8                dir.expiry_1.4.0           
-[83] crayon_1.5.2                utf8_1.2.2                 
-[85] rmarkdown_2.20              viridis_0.6.2              
-[87] grid_4.2.1                  blob_1.2.3                 
-[89] digest_0.6.31               tidyr_1.3.0                
-[91] munsell_0.5.0               DirichletMultinomial_1.40.0
-[93] beeswarm_0.4.0              viridisLite_0.4.1          
-[95] vipor_0.4.5                
+[19] Matrix_1.5-3                fastmap_1.1.0              
+[21] lazyeval_0.2.2              cli_3.6.0                  
+[23] BiocSingular_1.14.0         htmltools_0.5.4            
+[25] tools_4.2.1                 rsvd_1.0.5                 
+[27] gtable_0.3.1                glue_1.6.2                 
+[29] GenomeInfoDbData_1.2.9      reshape2_1.4.4             
+[31] dplyr_1.1.0                 Rcpp_1.0.10                
+[33] vctrs_0.5.2                 ape_5.7                    
+[35] nlme_3.1-162                DECIPHER_2.26.0            
+[37] DelayedMatrixStats_1.20.0   xfun_0.37                  
+[39] beachmat_2.14.0             lifecycle_1.0.3            
+[41] irlba_2.3.5.1               XML_3.99-0.13              
+[43] zlibbioc_1.44.0             MASS_7.3-58.2              
+[45] scales_1.2.1                parallel_4.2.1             
+[47] yaml_2.3.7                  memoise_2.0.1              
+[49] gridExtra_2.3               yulab.utils_0.0.6          
+[51] stringi_1.7.12              RSQLite_2.2.20             
+[53] highr_0.10                  ScaledMatrix_1.6.0         
+[55] tidytree_0.4.2              filelock_1.0.2             
+[57] BiocParallel_1.32.5         rlang_1.0.6                
+[59] pkgconfig_2.0.3             bitops_1.0-7               
+[61] evaluate_0.20               purrr_1.0.1                
+[63] treeio_1.22.0               CodeDepends_0.6.5          
+[65] labeling_0.4.2              cowplot_1.1.1              
+[67] bit_4.0.5                   tidyselect_1.2.0           
+[69] plyr_1.8.8                  magrittr_2.0.3             
+[71] bookdown_0.32               R6_2.5.1                   
+[73] generics_0.1.3              DelayedArray_0.24.0        
+[75] DBI_1.1.3                   pillar_1.8.1               
+[77] withr_2.5.0                 mgcv_1.8-41                
+[79] RCurl_1.98-1.10             tibble_3.1.8               
+[81] dir.expiry_1.4.0            crayon_1.5.2               
+[83] utf8_1.2.3                  rmarkdown_2.20             
+[85] viridis_0.6.2               grid_4.2.1                 
+[87] blob_1.2.3                  digest_0.6.31              
+[89] tidyr_1.3.0                 munsell_0.5.0              
+[91] DirichletMultinomial_1.40.0 beeswarm_0.4.0             
+[93] viridisLite_0.4.1           vipor_0.4.5                
 ```
 </div>
