@@ -191,7 +191,7 @@ same object, which can be evaluated with the following coordination methods:
 * `runUMAP`
 
 Since these clustering techniques allow for multiple coordinates or components,
-**coordination plots** can also span multiple dimensions, which is explained in chapter \@ref{extras}.
+**coordination plots** can also span multiple dimensions, which is explained in chapter \@ref(extras).
 
 ```{r}
 # perform NMDS coordination method
@@ -334,21 +334,28 @@ tse_phylum <- agglomerateByRank(tse,
                                 rank = "Phylum",
                                 onRankOnly = TRUE)
 # Add clr-transformation on samples
-tse_phylum <- transformSamples(tse_phylum, method = "relabundance", pseudocount = 1)
-tse_phylum <- transformSamples(tse_phylum, method = "clr", assay_name = "relabundance")
+assay(tse_phylum, "pseudo") <- assay(tse_phylum, "counts") + 1
+tse_phylum <- transformCounts(tse_phylum, assay_name = "pseudo",
+                              method = "relabundance")
+tse_phylum <- transformCounts(tse_phylum, method = "clr", assay_name = "relabundance")
 # Add z-transformation on features (taxa)
-tse_phylum <- transformFeatures(tse_phylum, assay_name = "clr", 
-                                method = "z", name = "clr_z")
+tse_phylum <- transformCounts(tse_phylum, assay_name = "clr",
+                              MARGIN = "features", 
+                              method = "z", name = "clr_z")
 
 # Takes subset: only samples from feces, skin, or tongue
 tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces", "Skin", "Tongue") ]
 
 # Does clr-transformation
-tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "relabundance", pseudocount = 1)
-tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "clr", assay_name = "relabundance")
+assay(tse_phylum_subset, "pseudo") <- assay(tse_phylum_subset, "counts") + 1
+tse_phylum_subset <- transformCounts(tse_phylum_subset, method = "relabundance",
+                                     assay_name = "pseudo")
+tse_phylum_subset <- transformCounts(tse_phylum_subset, method = "clr",
+                                     assay_name = "relabundance")
 # Does z-transformation
-tse_phylum_subset <- transformFeatures(tse_phylum_subset, assay_name = "clr", 
-                                       method = "z", name = "clr_z")
+tse_phylum_subset <- transformCounts(tse_phylum_subset, assay_name = "clr",
+                                     MARGIN = "features", 
+                                     method = "z", name = "clr_z")
 
 # Get n most abundant taxa, and subsets the data by them
 top_taxa <- getTopTaxa(tse_phylum_subset, top = 20)
@@ -634,8 +641,8 @@ plot
 ```
 
 Heatmaps find several other applications in biclustering and multi-assay
-analyses, that are discussed in chapters \@ref(biclustering) and
-\@ref(multi-assay_analyses), where the packages _cobiclust_ and _MOFA2_ are of interest.
+analyses, that are discussed in chapters \@ref(clustering) and
+\@ref(multi-assay-analyses), where the packages _cobiclust_ and _MOFA2_ are of interest.
 
 
 ## Session Info {-}

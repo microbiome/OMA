@@ -36,7 +36,7 @@ dataset.
 
 ### dada2
 
-The dada2 package [@R-dada2] implements the `assignTaxonomy` function, which 
+The dada2 package [@Callahan2016dada2] implements the `assignTaxonomy` function, which 
 takes as input the ASV sequences associated with each row of data and a training
 dataset. For more information visit the 
 [dada2 homepage](https://benjjneb.github.io/dada2/assign.html).
@@ -175,25 +175,24 @@ values compared to smaller values.
 
 In mia package, transformations are applied to abundance data. The transformed 
 abundance table is stored back to 'assays'. mia includes transformation 
-functions for sample-wise or column-wise transformation ('transformSamples()'), 
-and for feature-wise or row-wise transformation ('transformFeatures()'). 
+function ('transformCounts()') which applies sample-wise or column-wise transformation when MARGIN = 'samples', feature-wise or row-wise transformation when MARGIN = 'features'.
 
 For complete list of available transformations and parameters, see function 
 [help](https://microbiome.github.io/mia/reference/transformCounts.html).
 
 ```{r}
-tse <- transformSamples(tse, method = "relabundance")
-tse <- transformSamples(x = tse, assay_name = "relabundance", method = "clr", 
+assay(tse, "pseudo") <- assay(tse, "counts") + 1
+tse <- transformCounts(tse, assay_name = "pseudo", method = "relabundance")
+tse <- transformCounts(x = tse, assay_name = "relabundance", method = "clr", 
                         pseudocount = 1, name = "clr_transformation")
 
 head(assay(tse, "clr_transformation"))
 ```
 
--   In 'pa' transformation, 'threshold' specifies the value that divides observations to
-be absent or present. By default, it is 0.
+-   In 'pa' transformation, abundance table is converted to present/absent table.
 
 ```{r}
-tse <- transformFeatures(tse, method = "pa", threshold = 10)
+tse <- transformCounts(tse, method = "pa")
 
 head(assay(tse, "pa"))
 ```

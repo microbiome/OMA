@@ -46,9 +46,11 @@ tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 tse <- subsetTaxa(tse, is.element(rownames(tse), rel_taxa))
 
 # CLR and Z transforms
-tse <- transformSamples(tse, method = "relabundance")
-tse <- transformCounts(tse, assay_name = "relabundance", method = "clr", pseudocount = 1)
-tse <- transformFeatures(tse, assay_name = "clr", method = "z")
+assay(tse, "pseudo") <- assay(tse, "counts") + 1
+tse <- transformCounts(tse, MARGIN = "samples", method = "relabundance")
+tse <- transformCounts(tse, MARGIN = "samples", assay_name = "relabundance",
+                       method = "clr")
+tse <- transformCounts(tse, MARGIN = "features", assay_name = "clr", method = "z")
 
 Countries <- data.frame("Country" = colData(tse)$Country)
 rownames(Countries) <- colData(tse)$Sample_ID
@@ -218,9 +220,12 @@ Looking at heatmaps of the CSTs can reveal structure on a different level. Using
 
 ```{r message = FALSE, warning = FALSE, results = FALSE}
 # Z transform of CLR counts
-tse2 <- transformCounts(tse2, assay_name = "counts", method = "relabundance")
-tse2 <- transformCounts(tse2, assay_name = "relabundance", method = "clr", pseudocount = 1)
-tse2 <- transformFeatures(tse2, assay_name = "clr", method = "z")
+assay(tse, "pseudo") <- assay(tse, "counts") + 1
+tse2 <- transformCounts(tse2, MARGIN = "samples", assay_name = "counts",
+                        method = "relabundance")
+tse2 <- transformCounts(tse2, MARGIN = "samples", assay_name = "relabundance",
+                        method = "clr")
+tse2 <- transformCounts(tse2, MARGIN = "features", assay_name = "clr", method = "z")
 # get top taxa
 tse2 <- subsetTaxa(tse2, is.element(rownames(tse2), rel_taxa))
 
@@ -347,33 +352,25 @@ vec <- colnames(prob)[max.col(prob,ties.method = "first")]
 Computing the bray PCoA and storing it as a dataframe
 
 ```{r}
-# Gets counts table
-count_assay <- assays(tse)$counts
-
-# Transposes it to get taxa to columns
-count_assay <- t(count_assay)
-
-# Calculates Euclidean distances between samples. Because taxa is in columns,
-# it is used to compare different samples.
-bray_dist <- vegan::vegdist(count_assay, method = "bray")
-
+# Calculate relative abundances
+tse_dmn <- transformCounts(tse_dmn, method = "relabundance")
 # Does principal coordinate analysis
-bray_pcoa <- ecodist::pco(bray_dist)
+bray_pcoa_df <- calculateMDS(tse_dmn, FUN = vegan::vegdist, method = "bray", 
+                             exprs_values = "relabundance")
 
-# Creates a data frame from principal coordinates
-bray_pcoa_df <- data.frame(pcoa1 = bray_pcoa$vectors[,1], 
-                                pcoa2 = bray_pcoa$vectors[,2])
-
+# Convert to data.frame
+bray_pcoa_df <- as.data.frame(bray_pcoa_df)
+colnames(bray_pcoa_df) <- c("pcoa1", "pcoa2")
+head(bray_pcoa_df)
 ```
 
 ```{r}
 # Creates a data frame that contains principal coordinates and DMM information
-bray_dmm_pcoa_df <- cbind(bray_pcoa_df,
-                               dmm_component = vec)
+bray_dmm_pcoa_df <- bray_pcoa_df 
+bray_dmm_pcoa_df$dmm_component <- vec
 # Creates a plot
 bray_dmm_plot <- ggplot(data = bray_dmm_pcoa_df, 
-                             aes(x=pcoa1, y=pcoa2,
-                                 color = dmm_component)) +
+                        aes(x = pcoa1, y = pcoa2, color = dmm_component)) +
   geom_point() +
   labs(x = "Coordinate 1",
        y = "Coordinate 2",
@@ -387,9 +384,11 @@ Visualise dmm clusters in a heatmap.
 
 ```{r}
 # get clr + z-transformed counts
-tse_dmn <- transformCounts(tse_dmn, assay_name = "counts", method = "relabundance")
+assay(tse_dmn, "pseudo") <- assay(tse_dmn, "counts") + 1
+tse_dmn <- transformCounts(tse_dmn, assay_name = "pseudo", method = "relabundance")
 tse_dmn <- transformCounts(tse_dmn, assay_name = "relabundance", method = "clr", pseudocount = 1)
-tse_dmn <- transformFeatures(tse_dmn, assay_name = "clr", method = "z")
+tse_dmn <- transformCounts(tse_dmn, MARGIN = "features",
+                           assay_name = "clr", method = "z")
 # objects containing dmm component information
 clust <- factor(vec)
 names(clust) <- colnames(tse_dmn)
