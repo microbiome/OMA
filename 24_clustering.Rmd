@@ -49,7 +49,7 @@ In the second step, clustering is performed based on dissimilarities.
 
 ```{r hclust2}
 # Apply transformation
-tse <- transformSamples(tse, method = "relabundance")
+tse <- transformCounts(tse, method = "relabundance")
 # Get the assay
 assay <- assay(tse, "relabundance")
 # Transpose assay --> samples are now in rows --> we are clustering samples
@@ -259,7 +259,8 @@ Computing the euclidean PCoA and storing it as a data frame
 
 ```{r}
 # Does clr transformation. Pseudocount is added, because data contains zeros.
-tse <- transformCounts(tse, method = "relabundance", pseudocount = 1)
+assay(tse, "pseudo") <- assay(tse, "counts") + 1
+tse <- transformCounts(tse, assay_name = "pseudo", method = "relabundance")
 tse <- transformCounts(tse, "relabundance", method = "clr")
 
 library(scater)
@@ -412,8 +413,8 @@ Only the most prevalent taxa are included in analysis.
 # Subset data in the first experiment
 mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
 # clr-transform in the first experiment
-mae[[1]] <- transformSamples(mae[[1]], method = "relabundance", pseudocount = 1)
-mae[[1]] <- transformSamples(mae[[1]], "relabundance", method = "clr")
+mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
+mae[[1]] <- transformCounts(mae[[1]], "relabundance", method = "rclr")
 ```
 
 _cobiclust_ takes counts table as an input and gives _cobiclust_ object as an output.
@@ -451,7 +452,9 @@ if(!require(pheatmap)){
     library(pheatmap)
 }
 # z-transform for heatmap
-mae[[1]] <- transformFeatures(mae[[1]], assay_name = "clr", method = "z", name = "clr_z")
+mae[[1]] <- transformCounts(mae[[1]], assay_name = "rclr",
+                            MARGIN = "features",
+                            method = "z", name = "clr_z")
 
 # Create annotations. When column names are equal, they should share levels. 
 # Here samples include 3 clusters, and taxa 2. That is why we have to make 
@@ -482,15 +485,15 @@ if(!require(patchwork)){
 }
 
 # ggplot requires data in melted format
-melt_assay <- meltAssay(mae[[1]], assay_name = "clr", add_col_data = T, add_row_data = T)
+melt_assay <- meltAssay(mae[[1]], assay_name = "rclr", add_col_data = T, add_row_data = T)
 
 # patchwork two plots side-by-side
 p1 <- ggplot(melt_assay) +
-  geom_boxplot(aes(x = clusters.x, y = clr)) +
+  geom_boxplot(aes(x = clusters.x, y = rclr)) +
   labs(x = "Taxa clusters")
 
 p2 <- ggplot(melt_assay) +
-  geom_boxplot(aes(x = clusters.y, y = clr)) +
+  geom_boxplot(aes(x = clusters.y, y = rclr)) +
   labs(x = "Sample clusters")
 
 p1 + p2
@@ -510,7 +513,7 @@ mae[[1]] <- mae[[1]][ , colnames(mae[[2]]) ]
 rownames(mae[[1]]) <- make.unique(rownames(mae[[1]]))
 # Calculate correlations
 corr <- getExperimentCrossCorrelation(mae, 1, 2, 
-                                      assay_name1 = "clr", 
+                                      assay_name1 = "rclr", 
                                       assay_name2 = "nmr", 
                                       mode = "matrix", 
                                       cor_threshold = 0.2)
@@ -640,7 +643,7 @@ Let's collect information for the scatter plot.
 }
 
 # Calculate info
-df <- .sum_mean_median_var(mae[[1]], mae[[2]], "clr", "nmr", bicluster_rows, bicluster_columns)
+df <- .sum_mean_median_var(mae[[1]], mae[[2]], "rclr", "nmr", bicluster_rows, bicluster_columns)
 ```
 
 Now we can create a scatter plot. X-axis includes median clr abundance of microbiome
@@ -657,7 +660,7 @@ for(i in seq_along(df)){
   pics[[i]] <- ggplot(df[[i]])  +
       geom_point(aes(x = median1, y = median2)) + 
       labs(title = paste0("Cluster ", i),
-           x = "Taxa (clr median)",
+           x = "Taxa (rclr median)",
            y = "Metabolites (abs. median)")
   print(pics[[i]])
 }
@@ -700,7 +703,7 @@ between taxa. _biclust_ is suitable for this.
 ```{r biclust_9}
 # Calculate cross-correlation
 corr <- getExperimentCrossCorrelation(mae, 1, 1, 
-                                      assay_name1 = "clr", assay_name2 = "clr", 
+                                      assay_name1 = "rclr", assay_name2 = "rclr", 
                                       mode = "matrix",
                                       cor_threshold = 0.2, verbose = F, show_warning = F)
 
