@@ -58,11 +58,14 @@ techniques, we can visualize the abundances at Phylum level.
 ```{r heatmap}
 library(ggplot2)
 # Add clr-transformation on samples
-tse_phylum <- transformSamples(tse_phylum, method = "relabundance", pseudocount = 1)
-tse_phylum <- transformSamples(tse_phylum, assay_name = "relabundance", method = "clr")
+assay(tse_phylum, "pseudo") <- assay(tse_phylum, "counts") + 1
+tse_phylum <- transformCounts(tse_phylum, assay_name = "pseudo",
+                              method = "relabundance")
+tse_phylum <- transformCounts(tse_phylum, assay_name = "relabundance", method = "clr")
 # Add z-transformation on features (taxa)
-tse_phylum <- transformFeatures(tse_phylum, assay_name = "clr", 
-                                method = "z", name = "clr_z")
+tse_phylum <- transformCounts(tse_phylum, assay_name = "clr", 
+                              MARGIN = "features",
+                              method = "z", name = "clr_z")
 # Melts the assay
 df <- meltAssay(tse_phylum, assay_name = "clr_z")
 
@@ -96,10 +99,11 @@ if(!require(pheatmap)){
 tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces", "Skin", "Tongue") ]
 
 # Does clr-transformation
-tse_phylum_subset <- transformSamples(tse_phylum_subset, method = "clr", pseudocount = 1)
+tse_phylum_subset <- transformCounts(tse_phylum_subset, method = "clr", pseudocount = 1)
 # Does z-transformation
-tse_phylum_subset <- transformFeatures(tse_phylum_subset, abund_values = "clr", 
-                                       method = "z", name = "clr_z")
+tse_phylum_subset <- transformCounts(tse_phylum_subset, abund_values = "clr",
+                                     MARGIN = "features", 
+                                     method = "z", name = "clr_z")
 
 # Get n most abundant taxa, and subsets the data by them
 top_taxa <- getTopTaxa(tse_phylum_subset, top = 20)
