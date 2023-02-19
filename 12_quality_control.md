@@ -68,9 +68,8 @@ be visualized as follows:
 
 ```r
 # Loading example data
-#library(microbiomeDataSets)
-#tse <- atlas1006()
 library(miaTime)
+library(miaViz)
 data(hitchip1006)
 tse <- hitchip1006
 
@@ -78,9 +77,12 @@ tse <- hitchip1006
 tse <- transformCounts(tse, MARGIN = "samples", method = "relabundance")
 
 library(miaViz)
+# Use argument names
+# assay_name / assay_name / assay_name
+# depending on the mia package version
 plotAbundanceDensity(tse, layout = "jitter", assay_name = "relabundance",
                      n = 40, point_size=1, point_shape=19, point_alpha=0.1) + 
-    scale_x_log10(label=scales::percent)
+                     scale_x_log10(label=scales::percent)
 ```
 
 ![](12_quality_control_files/figure-latex/unnamed-chunk-2-1.pdf)<!-- --> 
@@ -164,7 +166,8 @@ applied on the resulting object.
 
 
 ```r
-# Agglomerate taxa abundances to Phylum level, and add the new table to the altExp slot
+# Agglomerate taxa abundances to Phylum level, and add the new table
+# to the altExp slot
 altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
 # Check prevalence for the Phylum abundance table from the altExp slot
 head(getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = TRUE,
@@ -179,8 +182,8 @@ head(getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = TRUE,
 ```
 
 
-Alternatively, the `rank` argument could be set to perform the agglomeration on
-the fly.
+Alternatively, the `rank` argument could be set to perform the
+agglomeration on the fly.
 
 
 ```r
@@ -290,6 +293,8 @@ plotRowTree(x[rowData(x)$Phylum %in% top_phyla,],
 ```
 
 ![(\#fig:plot-prev-prev)Prevalence of top phyla as judged by prevalence](12_quality_control_files/figure-latex/plot-prev-prev-1.pdf) 
+
+
 
 ```r
 plotRowTree(x[rowData(x)$Phylum %in% top_phyla_mean,],
@@ -485,8 +490,8 @@ p1 + p2
 
 ![(\#fig:plot-viz-lib-size-1)Library size distribution.](12_quality_control_files/figure-latex/plot-viz-lib-size-1-1.pdf) 
 
-Library sizes - and other variables from `colData` - can be also visualized by using 
-specified function called `plotColData`.
+Library sizes - and other variables from `colData` - can be also
+visualized by using specified function called `plotColData`.
 
 
 ```r
@@ -525,7 +530,8 @@ Samples might be contaminated with exogenous sequences. The impact of
 each contaminant can be estimated based on their frequencies and
 concentrations across the samples.
 
-The following [decontam functions](https://microbiome.github.io/mia/reference/isContaminant.html)
+The following [decontam
+functions](https://microbiome.github.io/mia/reference/isContaminant.html)
 are based on the [@davis2018simple] and support such functionality:
 
 * `isContaminant`, `isNotContaminant`

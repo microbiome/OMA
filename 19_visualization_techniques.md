@@ -35,9 +35,16 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
-Whether a data set contains information on a microbial community or it originates from a different source, the way that data are visualized inevitably shapes how they will be interpreted, and motivates the next steps of the analysis.
+Whether a data set contains information on a microbial community or it
+originates from a different source, the way that data are visualized
+inevitably shapes how they will be interpreted, and motivates the next
+steps of the analysis.
 
-A large variety of graphing methods belong to microbial analysis, but only few are the choices that will return useful answers about the data. Therefore, knowledge on the available tools and their possible applications plays an important role in selecting the most suitable method for the asked question.
+A large variety of graphing methods belong to microbial analysis, but
+only few are the choices that will return useful answers about the
+data. Therefore, knowledge on the available tools and their possible
+applications plays an important role in selecting the most suitable
+method for the asked question.
 
 This chapter introduces the reader to a number of visualization techniques found in this book, such as:
 
@@ -48,7 +55,8 @@ This chapter introduces the reader to a number of visualization techniques found
 * regression charts
 * trees
 
-The toolkit which provides the essential plotting functionality includes the following packages:
+The toolkit which provides the essential plotting functionality
+includes the following packages:
 
 * _patchwork_, _cowplot_, _ggpubr_ and _gridExtra_: plot layout and multi-panel plotting
 * _miaViz_: specific visualization tools for `TreeSummaizedExperiment` objects
@@ -58,7 +66,8 @@ The toolkit which provides the essential plotting functionality includes the fol
 * _fido_: tree-based methods for differential abundance
 * _plotly_: animated and 3D plotting
 
-For systematic and extensive tutorials on the visual tools available in _mia_, readers can refer to the following material:
+For systematic and extensive tutorials on the visual tools available
+in _mia_, readers can refer to the following material:
 
 * [microbiome tutorials](https://microbiome.github.io/tutorials/)
 
@@ -68,9 +77,10 @@ For systematic and extensive tutorials on the visual tools available in _mia_, r
 
 ### Accessing row and column data
 
-`SCE` and `TSE` objects contain multiple layers of information in the form of
-rows, columns and meta data. The _scater_ package supports in accessing,
-modifying and graphing the meta data related to features as well as samples.
+`SCE` and `TreeSE` objects contain multiple layers of information in the
+form of rows, columns and meta data. The _scater_ package supports in
+accessing, modifying and graphing the meta data related to features as
+well as samples.
 
 
 ```r
@@ -94,7 +104,8 @@ names(colData(tse))
 ## [7] "Description"
 ```
 
-Such meta data can be directly plotted with the functions `plotRowData` and `plotColData`.
+Such meta data can be directly plotted with the functions
+`plotRowData` and `plotColData`.
 
 
 ```r
@@ -118,7 +129,8 @@ plotColData(tse, "sum", "X.SampleID", colour_by = "SampleType") +
 
 ![](19_visualization_techniques_files/figure-latex/unnamed-chunk-3-2.pdf)<!-- --> 
 
-Alternatively, they can be converted to a `data.frame` object and passed to `ggplot`.
+Alternatively, they can be converted to a `data.frame` object and
+passed to `ggplot`.
 
 
 ```r
@@ -134,10 +146,12 @@ ggplot(coldata, aes(x = SampleType)) +
 
 ![](19_visualization_techniques_files/figure-latex/unnamed-chunk-4-1.pdf)<!-- --> 
 
-Further methods of application can be found in the chapters \@ref(qc) and
-\@ref(richness) and in a few [external tutorials](https://github.com/davismcc/scater_tutorials_open_data)
-with open data. Additionally, `rowData` and `colData` allow manipulation and
-subsetting of large data sets into smaller units, as explained in chapter \@ref(datamanipulation).
+Further methods of application can be found in the chapters \@ref(qc)
+and \@ref(richness) and in a few [external
+tutorials](https://github.com/davismcc/scater_tutorials_open_data)
+with open data. Additionally, `rowData` and `colData` allow
+manipulation and subsetting of large data sets into smaller units, as
+explained in chapter \@ref(datamanipulation).
 
 ### Viewing abundance and prevalence patterns
 
@@ -147,22 +161,22 @@ in most of the samples (prevalence). The information on abundance and prevalence
 can be summarized into a **jitter** or **density plot** and a **tree**,
 respectively, with the _miaViz_ package.
 
-Specifically, the functions `plotAbundance`, `plotAbundanceDensity` and
-`plotRowTree` are used, and examples on their usage are discussed throughout
-chapter \@ref(quality-control).
+Specifically, the functions `plotAbundance`, `plotAbundanceDensity`
+and `plotRowTree` are used, and examples on their usage are discussed
+throughout chapter \@ref(quality-control).
 
 ## Diversity estimation
 
-Alpha diversity is commonly measured as one of the diversity indices explained
-in chapter \@ref(community-diversity). Because the focus lies on each sample
-separately, one-dimensional plots, such as **scatter**, **violin** and
-**box plots**, are suitable. 
+Alpha diversity is commonly measured as one of the diversity indices
+explained in chapter \@ref(community-diversity). Because the focus
+lies on each sample separately, one-dimensional plots, such as
+**scatter**, **violin** and **box plots**, are suitable.
 
-Beta diversity is generally evaluated as one of the dissimilarity indices
-reported in chapter \@ref(community-similarity). Unlike alpha diversity,
-samples are compared collectively to estimate the heterogeneity across them,
-therefore multidimensional plots, such as **Shepard** and **ordination plots**
-are suitable.
+Beta diversity is generally evaluated as one of the dissimilarity
+indices reported in chapter \@ref(community-similarity). Unlike alpha
+diversity, samples are compared collectively to estimate the
+heterogeneity across them, therefore multidimensional plots, such as
+**Shepard** and **ordination plots** are suitable.
 
 |                         | alpha diversity            | beta diversity            |
 |:-----------------------:|:--------------------------:|:-------------------------:|
@@ -172,12 +186,14 @@ are suitable.
 |                         |                            |                           | 
 | suitable visualization  | scatter, violin, box plots | Shepard, ordination plots |
 
-As a conclusion, visualization techniques for alpha and beta diversity significantly differ from one another.
+In conclusion, visualization techniques for alpha and beta diversity
+significantly differ from one another.
 
 ### Alpha diversity with scatter, violin and box plots
 
-The basic method to visualize the diversity values assigned to the different
-samples in a `TSE` object includes the following, where each data point represents one sample:
+The basic method to visualize the diversity values assigned to the
+different samples in a `TSE` object includes the following, where each
+data point represents one sample:
 
 
 ```r
@@ -192,12 +208,13 @@ plotColData(tse, "shannon", colour_by = "SampleType")
 
 ![](19_visualization_techniques_files/figure-latex/unnamed-chunk-5-1.pdf)<!-- --> 
 
-The several indices available for the evaluation of alpha diversity often return
-slightly divergent results, which can be visually compared with a multiple violin
-or box plot. For this purpose, `plotColData` (for violin plots) or `ggplot`
-(for box plots) are recursively applied to a number of diversity indices with
-the function `lapply` and the multi-panel plotting functionality of the
-_patchwork_ package is then exploited.
+The several indices available for the evaluation of alpha diversity
+often return slightly divergent results, which can be visually
+compared with a multiple violin or box plot. For this purpose,
+`plotColData` (for violin plots) or `ggplot` (for box plots) are
+recursively applied to a number of diversity indices with the function
+`lapply` and the multi-panel plotting functionality of the _patchwork_
+package is then exploited.
 
 
 ```r
@@ -219,17 +236,19 @@ plots[[1]] + plots[[2]]
 
 ![](19_visualization_techniques_files/figure-latex/unnamed-chunk-6-1.pdf)<!-- --> 
 
-The analogous output in the form of a violin plot is obtained in chapter
-\@ref(faith-diversity). In addition, box plots that group samples according to
-certain information, such as origin, sex, age and health condition, can be
-labeled with p-values for significant differences with the package _ggsignif_
-package, as shown in chapter \@ref(estimate-diversity).
+The analogous output in the form of a violin plot is obtained in
+chapter \@ref(faith-diversity). In addition, box plots that group
+samples according to certain information, such as origin, sex, age and
+health condition, can be labeled with p-values for significant
+differences with the package _ggsignif_ package, as shown in chapter
+\@ref(estimate-diversity).
 
 ### Beta diversity with Shepard and coordination plots
 
-The _scater_ package offers the general function `plotReducedDim`. In its basic
-form, it takes a `TSE` object and the results on sample similarity stored in the
-same object, which can be evaluated with the following coordination methods:
+The _scater_ package offers the general function `plotReducedDim`. In
+its basic form, it takes a `TSE` object and the results on sample
+similarity stored in the same object, which can be evaluated with the
+following coordination methods:
 
 * `runMDS`
 * `runNMDS`
@@ -237,8 +256,9 @@ same object, which can be evaluated with the following coordination methods:
 * `runTSNE`
 * `runUMAP`
 
-Since these clustering techniques allow for multiple coordinates or components,
-**coordination plots** can also span multiple dimensions, which is explained in chapter \@ref(extras).
+Since these clustering techniques allow for multiple coordinates or
+components, **coordination plots** can also span multiple dimensions,
+which is explained in chapter \@ref(extras).
 
 
 ```r
@@ -282,9 +302,10 @@ plotReducedDim(tse, "MDS", ncomponents = c(1:3), colour_by = "faith")
 
 ![](19_visualization_techniques_files/figure-latex/unnamed-chunk-8-1.pdf)<!-- --> 
 
-Similarly to iterating `plotColData` over indices of alpha diversity, `lapply`
-can be used in combination with _patchwork_ to recursively apply `plotReducedDim`
-and visually compare results among various coordination methods.
+Similarly to iterating `plotColData` over indices of alpha diversity,
+`lapply` can be used in combination with _patchwork_ to recursively
+apply `plotReducedDim` and visually compare results among various
+coordination methods.
 
 
 ```r
@@ -301,23 +322,25 @@ plots[[1]] + plots[[2]] +
 
 ![](19_visualization_techniques_files/figure-latex/unnamed-chunk-9-1.pdf)<!-- --> 
 
-For similar examples, readers are referred to chapter \@ref(community-similarity).
-Further material on the graphic capabilities of _patchwork_ is available in its
-[official package tutorial](https://patchwork.data-imaginist.com/articles/patchwork.html).
+For similar examples, readers are referred to chapter
+\@ref(community-similarity).  Further material on the graphic
+capabilities of _patchwork_ is available in its [official package
+tutorial](https://patchwork.data-imaginist.com/articles/patchwork.html).
 
 ## Statistical analysis
 
 ### Heatmaps
 
-As described in chapter \@ref(visual-composition), bar plots and heatmaps can
-offer a useful insight into the composition of a community. Simple methods involve
-the functions `plotAbundance` and `geom_tile` in combination with `scale_fill_gradientn`
-from the packages _miaViz_ and _ggplot2_, respectively.
+As described in chapter \@ref(visual-composition), bar plots and
+heatmaps can offer a useful insight into the composition of a
+community. Simple methods involve the functions `plotAbundance` and
+`geom_tile` in combination with `scale_fill_gradientn` from the
+packages _miaViz_ and _ggplot2_, respectively.
 
-For instance, below the composition of multiple samples (x axis) is reported
-in terms of relative abundances (y axis) for the top 10 taxa at the Order rank.
-Bar plots and heatmaps with analogous information at the Phylum level are
-available in the aforementioned chapter.
+For instance, below the composition of multiple samples (x axis) is
+reported in terms of relative abundances (y axis) for the top 10 taxa
+at the Order rank.  Bar plots and heatmaps with analogous information
+at the Phylum level are available in the aforementioned chapter.
 
 
 ```r
@@ -353,9 +376,12 @@ pf _plotAbundance_.
 
 ```r
 # Create plots
-plots <- plotAbundance(tse_order, assay_name = "relabundance", rank = "Order",
-                       order_rank_by = "abund", order_sample_by = "Clostridiales",
-                       features = "SampleType")
+plots <- plotAbundance(tse_order,
+      	    assay_name = "relabundance",
+	    rank = "Order",
+            order_rank_by = "abund",
+	    order_sample_by = "Clostridiales",
+            features = "SampleType")
 
 # Modify the legend of the first plot to be smaller 
 plots[[1]] <- plots[[1]] +
@@ -407,20 +433,22 @@ feature and sample clusters in a heatmap, along with further functionality.
 tse_phylum <- agglomerateByRank(tse,
                                 rank = "Phylum",
                                 onRankOnly = TRUE)
+
 # Add clr-transformation on samples
 assay(tse_phylum, "pseudo") <- assay(tse_phylum, "counts") + 1
 tse_phylum <- transformCounts(tse_phylum, assay_name = "pseudo",
                               method = "relabundance")
 tse_phylum <- transformCounts(tse_phylum, method = "clr", assay_name = "relabundance")
+
 # Add z-transformation on features (taxa)
 tse_phylum <- transformCounts(tse_phylum, assay_name = "clr",
                               MARGIN = "features", 
                               method = "z", name = "clr_z")
 
-# Takes subset: only samples from feces, skin, or tongue
-tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces", "Skin", "Tongue") ]
+# Take subset: only samples from feces, skin, or tongue
+tse_phylum_subset <- tse_phylum[ , tse_phylum$SampleType %in% c("Feces", "Skin", "Tongue") ]
 
-# Does clr-transformation
+# Add clr-transformation
 assay(tse_phylum_subset, "pseudo") <- assay(tse_phylum_subset, "counts") + 1
 tse_phylum_subset <- transformCounts(tse_phylum_subset, method = "relabundance",
                                      assay_name = "pseudo")
@@ -513,8 +541,7 @@ The information on the clusters is then added to the feature meta data.
 
 ```r
 # Adds information to rowData
-rowData(tse_phylum_subset)$clusters <- taxa_clusters[order(match(rownames(taxa_clusters), 
-                                                                 rownames(tse_phylum_subset))), ]
+rowData(tse_phylum_subset)$clusters <- taxa_clusters[order(match(rownames(taxa_clusters), rownames(tse_phylum_subset))), ]
 
 # Prints taxa and their clusters
 rowData(tse_phylum_subset)$clusters
@@ -619,8 +646,9 @@ sechm(tse_phylum_subset,
 
 ![](19_visualization_techniques_files/figure-latex/sechm-1.pdf)<!-- --> 
 
-It is also possible to create an analogous heatmap by just using the _ggplot2_
-package. However, a relatively long code is required to generate an identical output.
+It is also possible to create an analogous heatmap by just using the
+_ggplot2_ package. However, a relatively long code is required to
+generate an identical output.
 
 
 ```r
@@ -630,7 +658,8 @@ taxa_clusters$Feature <- factor(taxa_clusters$Feature, levels = taxa_clusters$Fe
 
 # Create annotation plot
 row_annotation <- ggplot(taxa_clusters) + 
-  geom_tile(aes(x = NA, y = Feature, fill = clusters)) + coord_equal(ratio = 1) +
+  geom_tile(aes(x = NA, y = Feature, fill = clusters)) +
+  coord_equal(ratio = 1) +
   theme(
         axis.text.x=element_blank(),
         axis.text.y=element_blank(),
@@ -648,8 +677,10 @@ row_annotation <- ggplot(taxa_clusters) +
 sample_data$sample <- factor(rownames(sample_data), levels = rownames(sample_data))
 
 # Create annotation plot
-sample_types_annotation <- ggplot(sample_data) + scale_y_discrete(position = "right", expand = c(0,0)) +
-  geom_tile(aes(y = NA, x = sample, fill = sample_types)) + coord_equal(ratio = 1) +
+sample_types_annotation <- ggplot(sample_data) +
+  scale_y_discrete(position = "right", expand = c(0,0)) +
+  geom_tile(aes(y = NA, x = sample, fill = sample_types)) +
+  coord_equal(ratio = 1) +
   theme(
         axis.text.x=element_blank(),
         axis.text.y=element_blank(),
@@ -663,8 +694,10 @@ sample_types_annotation <- ggplot(sample_data) + scale_y_discrete(position = "ri
 # sample_types_annotation
 
 # Create annotation plot
-sample_clusters_annotation <- ggplot(sample_data) + scale_y_discrete(position = "right", expand = c(0,0)) +
-  geom_tile(aes(y = NA, x = sample, fill = clusters)) + coord_equal(ratio = 1) +
+sample_clusters_annotation <- ggplot(sample_data) +
+  scale_y_discrete(position = "right", expand = c(0,0)) +
+  geom_tile(aes(y = NA, x = sample, fill = clusters)) +
+  coord_equal(ratio = 1) +
   theme(
         axis.text.x=element_blank(),
         axis.text.y=element_blank(),
@@ -725,11 +758,15 @@ design <- c(
 # plot(design)
 
 # Combine plots
-plot <- row_annotation + sample_clusters_annotation + sample_types_annotation + heatmap  +
-    plot_layout(design = design, guides = "collect", # Specify layout, collect legends
+plot <- row_annotation + sample_clusters_annotation +
+                         sample_types_annotation +
+			 heatmap  +
+    plot_layout(design = design, guides = "collect",
+                # Specify layout, collect legends
                 
                 # Adjust widths and heights to align plots.
-                # When annotation plot is larger, it might not fit into its column/row.
+                # When annotation plot is larger, it might not fit into
+		# its column/row.
                 # Then you need to make column/row larger.
                 
                 # Relative widths and heights of each column and row:

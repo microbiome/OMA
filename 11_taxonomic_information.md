@@ -67,9 +67,9 @@ dataset.
 
 ### dada2
 
-The dada2 package [@Callahan2016dada2] implements the `assignTaxonomy` function, which 
-takes as input the ASV sequences associated with each row of data and a training
-dataset. For more information visit the 
+The dada2 package [@Callahan2016dada2] implements the `assignTaxonomy`
+function, which takes as input the ASV sequences associated with each
+row of data and a training dataset. For more information visit the
 [dada2 homepage](https://benjjneb.github.io/dada2/assign.html).
 
 ### DECIPHER
@@ -213,9 +213,9 @@ head(getTaxonomyLabels(tse[phylum,], with_rank = TRUE))
 ## [5] "Phylum:Actinobacteria_1" "Phylum:Spirochaetes"
 ```
 
-By default the return value of `getTaxonomyLabels` contains only unique elements
-by passing it through `make.unique`. This step can be omitted by setting 
-`make_unique = FALSE`.
+By default the return value of `getTaxonomyLabels` contains only
+unique elements by passing it through `make.unique`. This step can be
+omitted by setting `make_unique = FALSE`.
 
 
 ```r
@@ -231,7 +231,8 @@ To apply the loop resolving function `resolveLoop` from the
 `TreeSummarizedExperiment` package [@R-TreeSummarizedExperiment] within
 `getTaxonomyLabels`, set `resolve_loops = TRUE`.
 
-The function `getUniqueTaxa` gives a list of unique taxa for the specified taxonomic rank.
+The function `getUniqueTaxa` gives a list of unique taxa for the
+specified taxonomic rank.
 
 
 ```r
@@ -377,21 +378,21 @@ assay(altExp(tse, "Family"), "counts")[1:5,1:7]
 ```
 
 `altExpNames` now consists of `Family` level data. This can be extended to use 
-any level present in Kingdom, Phylum, Class, Order, Family, Genus, Species.   
+any taxonomic level listed in `mia::taxonomyRanks(tse)`.   
+
 
 ## Data transformation
 
-Data transformation is a very common procedure in microbiome analysis. 
-In transformation, each data point is replaced with transformed value that is 
-calculated by applying transformation formula to the data point. Transformation 
-can be used, for example, to normalize skewed data, or to reduce weight of bigger 
-values compared to smaller values. 
+Data transformations are common in microbiome analysis. Examples
+include the logarithmic transformation, calculation of relative
+abundances (percentages), and compositionality-aware transformations
+such as the centered log-ratio transformation (clr).
 
 In mia package, transformations are applied to abundance data. The transformed 
 abundance table is stored back to 'assays'. mia includes transformation 
 function ('transformCounts()') which applies sample-wise or column-wise transformation when MARGIN = 'samples', feature-wise or row-wise transformation when MARGIN = 'features'.
 
-For complete list of available transformations and parameters, see function 
+For a complete list of available transformations and parameters, see function 
 [help](https://microbiome.github.io/mia/reference/transformCounts.html).
 
 

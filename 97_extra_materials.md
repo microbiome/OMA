@@ -340,7 +340,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.9978261
+## Proportions of Observations within 95% Credible Interval: 0.9979296
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 

@@ -41,24 +41,27 @@ contributions and interactions with other researchers, developers, and
 users. We express our gratitude to the entire Bioconductor community
 for developing this high-quality open research software repository for
 life science analytics, continuously pushing the limits in emerging
-fields [@Gentleman2004, @Huber2015].
+fields [@Gentleman2004, @Huber2015]. The developers and contributors
+of this online tutorial are listed in Chapter \@ref(contributors).
 
 The base ecosystem of data containers, packages, and tutorials was set
 up as a collaborative effort by Tuomas Borman, Henrik Eckermann,
 Chouaib Benchraka, Chandler Ross, Shigdel Rajesh, Yağmur Şimşek,
 Giulio Benedetti, Sudarshan Shetty, Felix Ernst, and [Leo
-Lahti](http://www.iki.fi/Leo.Lahti), with further support from the
-COST Action network on Statistical and Machine Learning Techniques for
-Human Microbiome Studies
-([ML4microbiome](https://www.ml4microbiome.eu/))
-[@MorenoIndias2021]. The framework is based on the
-_TreeSummarizedExperiment_ data container created by Ruizhu Huang and
-others [@R-TreeSummarizedExperiment], and on the MultiAssayExperiment
-by Marcel Ramos et al. [@Ramos2017]. The idea of using
-these containers as a basis for microbiome data science was initially
-advanced by the groundwork of Domenick Braccia, Héctor Corrada Bravo
-and others, and subsequently brought together with other microbiome
-data science developers [@Shetty2019].
+Lahti](http://www.iki.fi/Leo.Lahti).
+
+The work has been supported by the COST Action network on Statistical
+and Machine Learning Techniques for Human Microbiome Studies
+([ML4microbiome](https://www.ml4microbiome.eu/)) [@MorenoIndias2021].
+
+The framework is based on the _TreeSummarizedExperiment_ data
+container created by Ruizhu Huang and others
+[@R-TreeSummarizedExperiment], and on the MultiAssayExperiment by
+Marcel Ramos et al. [@Ramos2017]. The idea of using these containers
+as a basis for microbiome data science was initially advanced by the
+groundwork of Domenick Braccia, Héctor Corrada Bravo and others, and
+subsequently brought together with other microbiome data science
+developers [@Shetty2019].
 
 Ample demonstration data resources have been made available as the
 [curatedMetagenomicData](https://waldronlab.io/curatedMetagenomicData/)

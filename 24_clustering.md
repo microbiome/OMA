@@ -42,25 +42,28 @@ data("GlobalPatterns", package="mia")
 tse <- GlobalPatterns
 ```
 
-Clustering is an unsupervised machine learning technique. The idea of it is to find
-clusters from the data. A cluster is a group of features/samples that share pattern.
-For example, with clustering, we can find group of samples that share similar 
-community composition. There are multiple clustering algorithms available.
+Clustering is an unsupervised machine learning technique. The idea of
+it is to find clusters from the data. A cluster is a group of
+features/samples that share pattern.  For example, with clustering, we
+can find group of samples that share similar community
+composition. There are multiple clustering algorithms available.
 
 ## Hiearchical clustering
 
-Hiearchical clustering is a clustering method that aims to find hiearchy between 
-samples/features. There are to approaches: agglomerative ("bottom-up") 
-and divisive ("top-down"). 
+Hiearchical clustering is a clustering method that aims to find
+hiearchy between samples/features. There are to approaches:
+agglomerative ("bottom-up") and divisive ("top-down").
 
-In agglomerative approach, each observation is first unique cluster. 
-Algorithm continues by agglomerating similar clusters. Divisive approach starts 
-with one cluster that contains all the observations. Clusters are splitted recursively
-to clusters that differ the most. Clustering ends when each cluster contains only one
+In agglomerative approach, each observation is first unique cluster.
+Algorithm continues by agglomerating similar clusters. Divisive
+approach starts with one cluster that contains all the
+observations. Clusters are splitted recursively to clusters that
+differ the most. Clustering ends when each cluster contains only one
 observation.
 
-Hiearchical clustering can be visualized with dendrogram tree. In each splitting
-point, the three is divided into two clusters leading to hierarchy. 
+Hiearchical clustering can be visualized with dendrogram tree. In each
+splitting point, the three is divided into two clusters leading to
+hierarchy.
 
 Let's load data from mia package.
 
@@ -99,6 +102,9 @@ In the second step, clustering is performed based on dissimilarities.
 
 
 ```r
+if( !require(NbClust) ){install.packages("NbClust"); library(NbClust)}
+if( !require(cobiclust) ){install.packages("cobiclust"); library(cobiclust)}
+
 # Apply transformation
 tse <- transformCounts(tse, method = "relabundance")
 # Get the assay
@@ -114,23 +120,20 @@ hc <- hclust(diss, method = "complete")
 
 # To visualize, convert hclust object into dendrogram object
 dendro <- as.dendrogram(hc)
+
 # Plot dendrogram
 plot(dendro)
 ```
 
 ![](24_clustering_files/figure-latex/hclust2-1.pdf)<!-- --> 
-We can use dendrogram to determine the number of clusters. Usually, the tree is splitted 
-where the length of branches are the longest.
 
-However, as we can see from the dendrogram, clusters are no clear. Let's use an algorithm to 
-solve the best number of clusters.
+We can use dendrogram to determine the number of clusters. Usually the
+tree is splitted where the branch length is the largest. However, as
+we can see from the dendrogram, clusters are not clear. Algorithms are
+available to identify the optimal number of clusters.
 
 
 ```r
-if( !require(NbClust) ){
-    install.packages("NbClust")
-    library(NbClust)
-}
 # Determine the optimal number of clusters
 res <- NbClust(diss = diss, distance = NULL, method = "ward.D2",
                index = "silhouette")
@@ -188,18 +191,21 @@ plot(dend)
 
 ## K-means clustering
 
-Because, we were not able to find clusters with hierarchical clustering, let's try
-k-means clustering. In k-means clustering, observations are divided into clusters 
-so that the mean distances between observations and cluster centers are minimized;
-an observation belongs to cluster whose center is the nearest.
+Hierarchical clustering did not yield clusters. Let's try k-means
+clustering instead. Here observations are divided into clusters so
+that the distances between observations and cluster centers are
+minimized; an observation belongs to cluster whose center is the
+nearest.
 
-The algorithm starts by dividing observation to random clusters whose number is 
-defined by user. The centroids of clusters are then calculated. After that, observations'
-allocation to clusters are updated so that the means are minimized. Again, centroid 
-are calculated, and algorithm continues iteratively until the assignments do not change.
+The algorithm starts by dividing observation to random clusters whose
+number is defined by user. The centroids of clusters are then
+calculated. After that, observations' allocation to clusters are
+updated so that the means are minimized. Again, centroid are
+calculated, and algorithm continues iteratively until the assignments
+do not change.
 
-The number of clusters can be determined based on algorithm. Here we utilize silhouette
-analysis.
+The number of clusters can be determined based on algorithm. Here we
+utilize silhouette analysis.
 
 
 ```r
@@ -333,7 +339,7 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7751 BIC: 8274 AIC: 8103 
+## Laplace: 7752 BIC: 8274 AIC: 8103 
 ## 
 ## [[5]]
 ## class: DMN 
@@ -396,15 +402,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Feces              2       4   67 1078.3 -106.22   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.21   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.38  1906.4 1674.5 1735
+## Mock               2       3   67  980.2  110.61   911.4 1054.4 1115
+## Ocean              2       3   67 1096.7  -56.93   944.2 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
-## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
+## Skin               2       3   67  992.6  -84.93   826.1 1066.8 1128
+## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.77   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -418,7 +424,7 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 ```
 ##       pi theta
 ## 1 0.5385 20.60
-## 2 0.4615 15.28
+## 2 0.4615 15.32
 ```
 
 
@@ -432,12 +438,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.004e-17
-## CC1     1.000e+00 3.799e-22
-## SV1     1.000e+00 2.021e-12
-## M31Fcsw 7.309e-26 1.000e+00
-## M11Fcsw 1.061e-16 1.000e+00
-## M31Plmr 9.991e-14 1.000e+00
+## CL3     1.000e+00 4.562e-17
+## CC1     1.000e+00 3.449e-22
+## SV1     1.000e+00 1.794e-12
+## M31Fcsw 6.909e-26 1.000e+00
+## M11Fcsw 1.028e-16 1.000e+00
+## M31Plmr 1.024e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -449,12 +455,12 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 
 ```
 ##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354653
-## Phylum:Euryarchaeota  0.2314 0.1468632
-## Phylum:Actinobacteria 1.2105 1.0600542
-## Phylum:Spirochaetes   0.2141 0.1318414
-## Phylum:MVP-15         0.0299 0.0007646
-## Phylum:Proteobacteria 6.8425 1.8151526
+## Phylum:Crenarchaeota  0.3043 0.1354082
+## Phylum:Euryarchaeota  0.2314 0.1468945
+## Phylum:Actinobacteria 1.2107 1.0581104
+## Phylum:Spirochaetes   0.2141 0.1318102
+## Phylum:MVP-15         0.0299 0.0007698
+## Phylum:Proteobacteria 6.8408 1.8113562
 ```
 Get the assignment probabilities
 
@@ -614,15 +620,17 @@ solutions to apply biclustering to them.
 2.   Taxa vs biomolecule/biomarker
 3.   Taxa vs taxa
 
-Biclusters can be visualized using heatmap or boxplot, for instance. For checking purposes, 
-also scatter plot might be valid choice.
+Biclusters can be visualized using heatmap or boxplot, for
+instance. For checking purposes, also scatter plot might be valid
+choice.
 
-Check more ideas for heatmaps from chapters \@ref(viz-chapter) and \@ref(microbiome-community.
+Check more ideas for heatmaps from chapters \@ref(viz-chapter) and
+\@ref(microbiome-community.
 
 ### Taxa vs samples
 
-When you have microbial abundance matrices, we suggest to use _cobiclust_ which is
-designed for microbial data. 
+When you have microbial abundance matrices, we suggest to use
+_cobiclust_ which is designed for microbial data.
 
 Load example data
 
@@ -648,11 +656,6 @@ It includes clusters for taxa and samples.
 
 
 ```r
-if(!require(cobiclust)){
-    install.packages("cobiclust")
-    library(cobiclust)
-}
-
 # Do clustering; use counts table´
 clusters <- cobiclust(assay(mae[[1]], "counts"))
 
@@ -683,7 +686,7 @@ clusters$classification
 ##   2   3   3   3   3   3   3   3   3   3   3   3   3   3   3   3   3   3   3   1
 ```
 
-Next we can plot clusters. Commonly used plot is heatmap with annotations. 
+Next we can plot clusters. Annotated heatmap is a common choice.
 
 
 ```r
@@ -704,14 +707,20 @@ colnames(annotation_col) <- "col_clusters"
 
 annotation_row <- data.frame(rowData(mae[[1]])[, "clusters", drop = F])
 colnames(annotation_row) <- "row_clusters"
+```
 
-# Create a heatmap
+
+Plot the heatmap.
+
+
+```r
 pheatmap(assay(mae[[1]], "clr_z"), cluster_rows = F, cluster_cols = F, 
          annotation_col = annotation_col,
          annotation_row = annotation_row)
 ```
 
-![](24_clustering_files/figure-latex/cobiclust_3-1.pdf)<!-- --> 
+![](24_clustering_files/figure-latex/cobiclust_3b-1.pdf)<!-- --> 
+
 
 Boxplot is commonly used to summarize the results:
 
@@ -745,8 +754,9 @@ p1 + p2
 
 ### Taxa vs biomolecules
 
-Here, we analyze cross-correlation between taxa and metabolites. This is a case, where
-we use _biclust_ method which is suitable for numeric matrices in general.
+Here, we analyze cross-correlation between taxa and metabolites. This
+is a case, where we use _biclust_ method which is suitable for numeric
+matrices in general.
 
 
 ```r
@@ -798,8 +808,9 @@ bc
 ## There was no cluster found
 ```
 
-The object includes cluster information. However compared to _cobiclust_, 
-_biclust_ object includes only information about clusters that were found, not general cluster.
+The object includes cluster information. However compared to
+_cobiclust_, _biclust_ object includes only information about clusters
+that were found, not general cluster.
 
 Meaning that if one cluster size of 5 features was found out of 20 features, 
 those 15 features do not belong to any cluster. That is why we have to create an
@@ -824,7 +835,8 @@ additional cluster for features/samples that are not assigned into any cluster.
   return(list(bc_columns = bc_columns, bc_rows = bc_rows))
 }
 
-# Input clusters, and how many observations there should be, i.e., the number of samples or features
+# Input clusters, and how many observations there should be, i.e.,
+# the number of samples or features
 .manipulate_bc_data <- function(bc_clusters, assay, row_col){
   # Get right dimension
   dim <- ifelse(row_col == "col", ncol(assay), nrow(assay))
@@ -835,7 +847,8 @@ additional cluster for features/samples that are not assigned into any cluster.
     names <- rownames(assay)
   }
   
-  # If no clusters were found, create one. Otherwise create additional cluster which
+  # If no clusters were found, create one. Otherwise create additional
+  # cluster which
   # contain those samples that are not included in clusters that were found.
   if( nrow(bc_clusters) != dim ){
       bc_clusters <- data.frame(cluster = rep(TRUE, dim))
@@ -882,7 +895,9 @@ Let's collect information for the scatter plot.
 
 
 ```r
-# Function for obtaining sample-wise sum, mean, median, and mean variance for each cluster
+# Function for obtaining sample-wise sum, mean, median, and mean variance
+# for each cluster
+
 .sum_mean_median_var <- function(tse1, tse2, assay_name1, assay_name2, clusters1, clusters2){
   
   list <- list()
@@ -916,13 +931,14 @@ Let's collect information for the scatter plot.
 df <- .sum_mean_median_var(mae[[1]], mae[[2]], "rclr", "nmr", bicluster_rows, bicluster_columns)
 ```
 
-Now we can create a scatter plot. X-axis includes median clr abundance of microbiome
-and y-axis median absolute concentration of each metabolite. Each data point represents
-a single sample. 
+Now we can create a scatter plot. X-axis includes median clr abundance
+of microbiome and y-axis median absolute concentration of each
+metabolite. Each data point represents a single sample.
 
-From the plots, we can see that there is low negative correlation in both cluster 1 and 3.
-This means that when abundance of bacteria belonging to cluster 1 or 3 is higher, 
-the concentration of metabolites of cluster 1 or 3 is lower, and vice versa. 
+From the plots, we can see that there is low negative correlation in
+both cluster 1 and 3.  This means that when abundance of bacteria
+belonging to cluster 1 or 3 is higher, the concentration of
+metabolites of cluster 1 or 3 is lower, and vice versa.
 
 
 ```r
@@ -978,8 +994,8 @@ pheatmap(corr, cluster_cols = F, cluster_rows = F,
 
 ### Taxa vs taxa
 
-Third and final example deals with situation where we want to analyze correlation
-between taxa. _biclust_ is suitable for this. 
+Third and final example deals with situation where we want to analyze
+correlation between taxa. _biclust_ is suitable for this.
 
 
 ```r
@@ -1033,7 +1049,8 @@ pheatmap(corr, cluster_cols = F, cluster_rows = F,
 
 ## Additional Community Typing
 
-For more community typing techniques applied to the 'SprockettTHData' data set, see the attached .Rmd file.
+For more community typing techniques applied to the 'SprockettTHData'
+data set, see the attached .Rmd file.
 
 Link:
 

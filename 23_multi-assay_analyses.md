@@ -40,43 +40,52 @@ document.addEventListener("click", function (event) {
 library(mia)
 ```
 
-Multi-omics means that we integrate data from multiple sources. For example, 
-we can integrate microbial abundances in the gut with biomolecular profiling data
-from blood samples. This kind of integrative multi-omic approaches can support the 
-analysis of microbiome dysbiosis and facilitate the discovery of novel biomarkers 
-for health and disease. 
+Multi-omics means that we integrate data from multiple sources. For
+example, we can integrate microbial abundances in the gut with
+biomolecular profiling data from blood samples. This kind of
+integrative multi-omic approaches can support the analysis of
+microbiome dysbiosis and facilitate the discovery of novel biomarkers
+for health and disease.
 
-With cross-correlation analysis, we can analyze how strongly and how differently
-variables are associated between each other. For instance, we can analyze if 
-higher presence of a specific taxon equals to higher levels of a biomolecule.
+With cross-correlation analysis, we can analyze how strongly and how
+differently variables are associated between each other. For instance,
+we can analyze if higher presence of a specific taxon equals to higher
+levels of a biomolecule.
 
-The data containers that the _miaverse_ utilizes are scalable and they can contain
-different types of data in a same container. Because of that, the _miaverse_ is
-well-suitable for multi-assay microbiome data which incorporates different types 
-of complementary data sources in a single reproducible workflow. 
+The data containers that the _miaverse_ utilizes are scalable and they
+can contain different types of data in a same container. Because of
+that, the _miaverse_ is well-suitable for multi-assay microbiome data
+which incorporates different types of complementary data sources in a
+single reproducible workflow.
 
-Another experiment can be stored in altExp
-slot of SE data container or both experiments can be stored side-by-side in MAE data container (see the sections \@ref(alt-exp) and \@ref(mae) to learn more about altExp and MAE objects, respectively). 
+Another experiment can be stored in altExp slot of SE data container
+or both experiments can be stored side-by-side in MAE data container
+(see the sections \@ref(alt-exp) and \@ref(mae) to learn more about
+altExp and MAE objects, respectively).
 
-Different experiments are first imported into SE or TreeSE data container similarly
-to the case when only one experiment is present. After that different experiments are 
-combined into the same data container. Result is one TreeSE object with alternative
-experiment in altExp slot, or MAE object with multiple experiment in its 
-experiment slot. 
+Different experiments are first imported into SE or TreeSE data
+container similarly to the case when only one experiment is
+present. After that different experiments are combined into the same
+data container. Result is one TreeSE object with alternative
+experiment in altExp slot, or MAE object with multiple experiment in
+its experiment slot.
 
-As an example data, we use data from following publication: Hintikka L _et al._ (2021) 
-Xylo-oligosaccharides in prevention of hepatic steatosis and adipose tissue inflammation: 
-associating taxonomic and metabolomic patterns in fecal microbiotas with 
-biclustering [@Hintikka2021].
+As an example data, we use data from following publication: Hintikka L
+_et al._ (2021) Xylo-oligosaccharides in prevention of hepatic
+steatosis and adipose tissue inflammation: associating taxonomic and
+metabolomic patterns in fecal microbiotas with biclustering
+[@Hintikka2021].
 
-In this article, mice were fed with high-fat and low-fat diets with or without prebiotics.
-The purpose of this was to study if prebiotics would reduce the negative impacts
-of high-fat diet. 
+In this article, mice were fed with high-fat and low-fat diets with or
+without prebiotics.  The purpose of this was to study if prebiotics
+would reduce the negative impacts of high-fat diet.
 
-This example data can be loaded from microbiomeDataSets. The data is already in MAE
-format. It includes three different experiments: microbial abundance data, 
-metabolite concentrations, and data about different biomarkers. Help for importing
-data into SE object you can find from [here](https://microbiome.github.io/OMA/containers.html#loading-experimental-microbiome-data).
+This example data can be loaded from microbiomeDataSets. The data is
+already in MAE format. It includes three different experiments:
+microbial abundance data, metabolite concentrations, and data about
+different biomarkers. Help for importing data into SE object you can
+find from
+[here](https://microbiome.github.io/OMA/containers.html#loading-experimental-microbiome-data).
 
 
 ```r
@@ -187,10 +196,11 @@ mae[[3]]
 
 ## Cross-correlation Analysis
 
-Next we can do the cross-correlation analysis. 
-Here we analyse if individual bacteria genera correlates
-with concentrations of individual metabolites. This helps as to answer the question: 
-"If this bacteria is present, is this metabolite's concentration then low or high"?
+Next we can do the cross-correlation analysis.  Here we analyse if
+individual bacteria genera correlates with concentrations of
+individual metabolites. This helps as to answer the question: "If this
+bacteria is present, is this metabolite's concentration then low or
+high"?
 
 
 ```r
@@ -245,13 +255,17 @@ plot
 
 ## Multi-Omics Factor Analysis
 
-Multi-Omics Factor Analysis [@Argelaguet2018] (MOFA) is
-an unsupervised method for integrating multi-omic data sets in a downstream analysis.
-It could be seen as a generalization of principal component analysis. Yet, with the ability to infer a latent (low-dimensional) representation, 
-shared among the mutliple (-omics) data sets in hand.
+Multi-Omics Factor Analysis [@Argelaguet2018] (MOFA) is an
+unsupervised method for integrating multi-omic data sets in a
+downstream analysis.  It could be seen as a generalization of
+principal component analysis. Yet, with the ability to infer a latent
+(low-dimensional) representation, shared among the mutliple (-omics)
+data sets in hand.
 
-We use the R [MOFA2](https://biofam.github.io/MOFA2/index.html) package
-for the analysis, and [install](https://biofam.github.io/MOFA2/installation.html) the corresponding dependencies.
+We use the R [MOFA2](https://biofam.github.io/MOFA2/index.html)
+package for the analysis, and
+[install](https://biofam.github.io/MOFA2/installation.html) the
+corresponding dependencies.
 
 
 ```r
@@ -265,21 +279,16 @@ if(!require(reticulate)){
     install.packages("reticulate")
 }
 
-reticulate::install_miniconda(force = TRUE)
+# Let us assume that these have been installed already.
+#reticulate::install_miniconda(force = TRUE)
+#reticulate::use_miniconda(condaenv = "env1", required = FALSE)
+#reticulate::py_install(packages = c("mofapy2"), pip = TRUE, python_version=3.6)
 ```
 
-```
-## [1] "/github/home/.local/share/r-miniconda"
-```
-
-```r
-reticulate::use_miniconda(condaenv = "env1", required = FALSE)
-reticulate::py_install(packages = c("mofapy2"), pip = TRUE, python_version=3.6)
-```
-
-The `mae` object could be used straight to create the MOFA model. Yet, we transform 
-our assays since the model assumes normality per default. Other distributions that
-can be used, include Poisson or Bernoulli.
+The `mae` object could be used straight to create the MOFA model. Yet,
+we transform our assays since the model assumes normality per
+default. Other distributions that can be used, include Poisson or
+Bernoulli.
 
 
 ```r
@@ -414,7 +423,7 @@ wrap_plots(
                     theme = theme(plot.title = element_text(hjust = 0.5)))
 ```
 
-![](23_multi-assay_analyses_files/figure-latex/unnamed-chunk-6-1.pdf)<!-- --> 
+![](23_multi-assay_analyses_files/figure-latex/unnamed-chunk-5-1.pdf)<!-- --> 
 
 The top weights for each assay using all 5 factors:
 
@@ -430,7 +439,7 @@ plots <- lapply(c("microbiota", "metabolites","biomarkers"), function(name) {
 wrap_plots(plots, nrow = 3) & theme(text = element_text(size = 8))
 ```
 
-![](23_multi-assay_analyses_files/figure-latex/unnamed-chunk-7-1.pdf)<!-- --> 
+![](23_multi-assay_analyses_files/figure-latex/unnamed-chunk-6-1.pdf)<!-- --> 
 
 More tutorials and examples of using the package are found at: [link](https://biofam.github.io/MOFA2/tutorials.html)
 

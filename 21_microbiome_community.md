@@ -92,16 +92,27 @@ techniques, we can visualize the abundances at Phylum level.
 
 ```r
 library(ggplot2)
+
 # Add clr-transformation on samples
 assay(tse_phylum, "pseudo") <- assay(tse_phylum, "counts") + 1
 tse_phylum <- transformCounts(tse_phylum, assay_name = "pseudo",
                               method = "relabundance")
-tse_phylum <- transformCounts(tse_phylum, assay_name = "relabundance", method = "clr")
+
+tse_phylum <- transformCounts(tse_phylum,
+                  assay_name = "relabundance",
+		  method = "clr")
+
 # Add z-transformation on features (taxa)
 tse_phylum <- transformCounts(tse_phylum, assay_name = "clr", 
                               MARGIN = "features",
                               method = "z", name = "clr_z")
-# Melts the assay
+```
+
+Visualize as heatmap.
+
+
+```r
+# Melt the assay for plotting purposes
 df <- meltAssay(tse_phylum, assay_name = "clr_z")
 
 # Determines the scaling of colours
@@ -121,25 +132,24 @@ ggplot(df, aes(x = SampleID, y = FeatureID, fill = clr_z)) +
   labs(x = "Samples", y = "Taxa")
 ```
 
-![](21_microbiome_community_files/figure-latex/heatmap-1.pdf)<!-- --> 
+![](21_microbiome_community_files/figure-latex/heatmapvisu-1.pdf)<!-- --> 
 
 
 _pheatmap_ is a package that provides methods to plot clustered heatmaps. 
 
 
 ```r
-if(!require(pheatmap)){
-  install.packages("pheatmap")
-  library(pheatmap)
-}
+if(!require(pheatmap)){install.packages("pheatmap"); library(pheatmap)}
 
 # Takes subset: only samples from feces, skin, or tongue
 tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces", "Skin", "Tongue") ]
 
-# Does clr-transformation
-tse_phylum_subset <- transformCounts(tse_phylum_subset, method = "clr", pseudocount = 1)
-# Does z-transformation
-tse_phylum_subset <- transformCounts(tse_phylum_subset, abund_values = "clr",
+# Add clr-transformation
+tse_phylum_subset <- transformCounts(tse_phylum_subset,
+                         method = "clr",
+    			 pseudocount = 1)
+
+tse_phylum_subset <- transformCounts(tse_phylum_subset, assay_name = "clr",
                                      MARGIN = "features", 
                                      method = "z", name = "clr_z")
 
@@ -236,8 +246,7 @@ taxa_clusters
 
 ```r
 # Adds information to rowData
-rowData(tse_phylum_subset)$clusters <- taxa_clusters[order(match(rownames(taxa_clusters), 
-                                                                 rownames(tse_phylum_subset))), ]
+rowData(tse_phylum_subset)$clusters <- taxa_clusters[order(match(rownames(taxa_clusters), rownames(tse_phylum_subset))), ]
 
 # Prints taxa and their clusters
 rowData(tse_phylum_subset)$clusters
@@ -319,12 +328,14 @@ pheatmap(mat, annotation_row = taxa_clusters,
 
 ![](21_microbiome_community_files/figure-latex/pheatmap8-1.pdf)<!-- --> 
 
-In addition, there are also other packages that provide functions for more complex heatmaps,
-such as [_iheatmapr_](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html)
-and [ComplexHeatmap](https://academic.oup.com/bioinformatics/article/32/18/2847/1743594?login=true).
+In addition, there are also other packages that provide functions for
+more complex heatmaps, such as
+[_iheatmapr_](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html)
+and ComplexHeatmap [@ComplexHeatmap].
 [sechm](http://www.bioconductor.org/packages/release/bioc/vignettes/sechm/inst/doc/sechm.html)
-package provides wrapper for _ComplexHeatmap_ and its usage is explained in chapter \@ref(viz-chapter)
-along with the `pheatmap` package for clustered heatmaps.
+package provides wrapper for _ComplexHeatmap_ and its usage is
+explained in chapter \@ref(viz-chapter) along with the `pheatmap`
+package for clustered heatmaps.
 
 ## Session Info {-}
 
