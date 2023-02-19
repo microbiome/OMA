@@ -1220,7 +1220,11 @@ us retrieve a *[MultiAssayExperiment](https://bioconductor.org/packages/3.15/Mul
 
 
 ```r
-mae <- HintikkaXOData()
+# mae <- HintikkaXOData()
+# Since HintikkaXOData is now added to mia, we can load it directly from there
+# We suggest to check other datasets from microbiomeDataSets
+data(HintikkaXOData)
+mae <- HintikkaXOData
 ```
 
 Data is available in *[SummarizedExperiment](https://bioconductor.org/packages/3.15/SummarizedExperiment)*, `r

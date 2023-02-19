@@ -83,7 +83,6 @@ data into SE object you can find from [here](https://microbiome.github.io/OMA/co
 # Load the data
 data(HintikkaXOData, package = "mia")
 mae <- HintikkaXOData
-
 mae
 ```
 
@@ -103,6 +102,7 @@ mae
 ##  assays() - convert ExperimentList to a SimpleList of matrices
 ##  exportClass() - save data to flat files
 ```
+
 
 ```r
 if(!require(stringr)){
