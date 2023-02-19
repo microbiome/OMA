@@ -11,25 +11,28 @@ data("GlobalPatterns", package="mia")
 tse <- GlobalPatterns
 ```
 
-Clustering is an unsupervised machine learning technique. The idea of it is to find
-clusters from the data. A cluster is a group of features/samples that share pattern.
-For example, with clustering, we can find group of samples that share similar 
-community composition. There are multiple clustering algorithms available.
+Clustering is an unsupervised machine learning technique. The idea of
+it is to find clusters from the data. A cluster is a group of
+features/samples that share pattern.  For example, with clustering, we
+can find group of samples that share similar community
+composition. There are multiple clustering algorithms available.
 
 ## Hiearchical clustering
 
-Hiearchical clustering is a clustering method that aims to find hiearchy between 
-samples/features. There are to approaches: agglomerative ("bottom-up") 
-and divisive ("top-down"). 
+Hiearchical clustering is a clustering method that aims to find
+hiearchy between samples/features. There are to approaches:
+agglomerative ("bottom-up") and divisive ("top-down").
 
-In agglomerative approach, each observation is first unique cluster. 
-Algorithm continues by agglomerating similar clusters. Divisive approach starts 
-with one cluster that contains all the observations. Clusters are splitted recursively
-to clusters that differ the most. Clustering ends when each cluster contains only one
+In agglomerative approach, each observation is first unique cluster.
+Algorithm continues by agglomerating similar clusters. Divisive
+approach starts with one cluster that contains all the
+observations. Clusters are splitted recursively to clusters that
+differ the most. Clustering ends when each cluster contains only one
 observation.
 
-Hiearchical clustering can be visualized with dendrogram tree. In each splitting
-point, the three is divided into two clusters leading to hierarchy. 
+Hiearchical clustering can be visualized with dendrogram tree. In each
+splitting point, the three is divided into two clusters leading to
+hierarchy.
 
 Let's load data from mia package.
 
@@ -48,8 +51,11 @@ sequencing data is compositional, relative transformation is applied.
 In the second step, clustering is performed based on dissimilarities. 
 
 ```{r hclust2}
+if( !require(NbClust) ){install.packages("NbClust"); library(NbClust)}
+if( !require(cobiclust) ){install.packages("cobiclust"); library(cobiclust)}
+
 # Apply transformation
-tse <- transformSamples(tse, method = "relabundance")
+tse <- transformCounts(tse, method = "relabundance")
 # Get the assay
 assay <- assay(tse, "relabundance")
 # Transpose assay --> samples are now in rows --> we are clustering samples
@@ -63,20 +69,17 @@ hc <- hclust(diss, method = "complete")
 
 # To visualize, convert hclust object into dendrogram object
 dendro <- as.dendrogram(hc)
+
 # Plot dendrogram
 plot(dendro)
 ```
-We can use dendrogram to determine the number of clusters. Usually, the tree is splitted 
-where the length of branches are the longest.
 
-However, as we can see from the dendrogram, clusters are no clear. Let's use an algorithm to 
-solve the best number of clusters.
+We can use dendrogram to determine the number of clusters. Usually the
+tree is splitted where the branch length is the largest. However, as
+we can see from the dendrogram, clusters are not clear. Algorithms are
+available to identify the optimal number of clusters.
 
 ```{r hclust3}
-if( !require(NbClust) ){
-    install.packages("NbClust")
-    library(NbClust)
-}
 # Determine the optimal number of clusters
 res <- NbClust(diss = diss, distance = NULL, method = "ward.D2",
                index = "silhouette")
@@ -107,18 +110,21 @@ plot(dend)
 
 ## K-means clustering
 
-Because, we were not able to find clusters with hierarchical clustering, let's try
-k-means clustering. In k-means clustering, observations are divided into clusters 
-so that the mean distances between observations and cluster centers are minimized;
-an observation belongs to cluster whose center is the nearest.
+Hierarchical clustering did not yield clusters. Let's try k-means
+clustering instead. Here observations are divided into clusters so
+that the distances between observations and cluster centers are
+minimized; an observation belongs to cluster whose center is the
+nearest.
 
-The algorithm starts by dividing observation to random clusters whose number is 
-defined by user. The centroids of clusters are then calculated. After that, observations'
-allocation to clusters are updated so that the means are minimized. Again, centroid 
-are calculated, and algorithm continues iteratively until the assignments do not change.
+The algorithm starts by dividing observation to random clusters whose
+number is defined by user. The centroids of clusters are then
+calculated. After that, observations' allocation to clusters are
+updated so that the means are minimized. Again, centroid are
+calculated, and algorithm continues iteratively until the assignments
+do not change.
 
-The number of clusters can be determined based on algorithm. Here we utilize silhouette
-analysis.
+The number of clusters can be determined based on algorithm. Here we
+utilize silhouette analysis.
 
 ```{r kmeans1}
 if( !require(factoextra) ){
@@ -259,7 +265,8 @@ Computing the euclidean PCoA and storing it as a data frame
 
 ```{r}
 # Does clr transformation. Pseudocount is added, because data contains zeros.
-tse <- transformCounts(tse, method = "relabundance", pseudocount = 1)
+assay(tse, "pseudo") <- assay(tse, "counts") + 1
+tse <- transformCounts(tse, assay_name = "pseudo", method = "relabundance")
 tse <- transformCounts(tse, "relabundance", method = "clr")
 
 library(scater)
@@ -412,19 +419,14 @@ Only the most prevalent taxa are included in analysis.
 # Subset data in the first experiment
 mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
 # clr-transform in the first experiment
-mae[[1]] <- transformSamples(mae[[1]], method = "relabundance", pseudocount = 1)
-mae[[1]] <- transformSamples(mae[[1]], "relabundance", method = "clr")
+mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
+mae[[1]] <- transformCounts(mae[[1]], "relabundance", method = "rclr")
 ```
 
 _cobiclust_ takes counts table as an input and gives _cobiclust_ object as an output.
 It includes clusters for taxa and samples. 
 
 ```{r cobiclust_2}
-if(!require(cobiclust)){
-    install.packages("cobiclust")
-    library(cobiclust)
-}
-
 # Do clustering; use counts table´
 clusters <- cobiclust(assay(mae[[1]], "counts"))
 
@@ -443,15 +445,15 @@ mae[[1]] <- mae[[1]][order(rowData(mae[[1]])$clusters), order(colData(mae[[1]])$
 clusters$classification
 ```
 
-Next we can plot clusters. Commonly used plot is heatmap with annotations. 
+Next we can plot clusters. Annotated heatmap is a common choice.
 
 ```{r cobiclust_3, fig.width=14, fig.height=12}
-if(!require(pheatmap)){
-    install.packages("pheatmap")
-    library(pheatmap)
-}
-# z-transform for heatmap
-mae[[1]] <- transformFeatures(mae[[1]], assay_name = "clr", method = "z", name = "clr_z")
+if(!require(pheatmap)){install.packages("pheatmap"); library(pheatmap)}
+
+# z-transform for the heatmap
+mae[[1]] <- transformCounts(mae[[1]], assay_name = "rclr",
+                            MARGIN = "features",
+                            method = "z", name = "clr_z")
 
 # Create annotations. When column names are equal, they should share levels. 
 # Here samples include 3 clusters, and taxa 2. That is why we have to make 
@@ -461,13 +463,17 @@ colnames(annotation_col) <- "col_clusters"
 
 annotation_row <- data.frame(rowData(mae[[1]])[, "clusters", drop = F])
 colnames(annotation_row) <- "row_clusters"
+```
 
-# Create a heatmap
+
+Plot the heatmap.
+
+```{r cobiclust_3b, fig.width=14, fig.height=12}
 pheatmap(assay(mae[[1]], "clr_z"), cluster_rows = F, cluster_cols = F, 
          annotation_col = annotation_col,
          annotation_row = annotation_row)
-
 ```
+
 
 Boxplot is commonly used to summarize the results:
 
@@ -482,15 +488,15 @@ if(!require(patchwork)){
 }
 
 # ggplot requires data in melted format
-melt_assay <- meltAssay(mae[[1]], assay_name = "clr", add_col_data = T, add_row_data = T)
+melt_assay <- meltAssay(mae[[1]], assay_name = "rclr", add_col_data = T, add_row_data = T)
 
 # patchwork two plots side-by-side
 p1 <- ggplot(melt_assay) +
-  geom_boxplot(aes(x = clusters.x, y = clr)) +
+  geom_boxplot(aes(x = clusters.x, y = rclr)) +
   labs(x = "Taxa clusters")
 
 p2 <- ggplot(melt_assay) +
-  geom_boxplot(aes(x = clusters.y, y = clr)) +
+  geom_boxplot(aes(x = clusters.y, y = rclr)) +
   labs(x = "Sample clusters")
 
 p1 + p2
@@ -510,7 +516,7 @@ mae[[1]] <- mae[[1]][ , colnames(mae[[2]]) ]
 rownames(mae[[1]]) <- make.unique(rownames(mae[[1]]))
 # Calculate correlations
 corr <- getExperimentCrossCorrelation(mae, 1, 2, 
-                                      assay_name1 = "clr", 
+                                      assay_name1 = "rclr", 
                                       assay_name2 = "nmr", 
                                       mode = "matrix", 
                                       cor_threshold = 0.2)
@@ -640,7 +646,7 @@ Let's collect information for the scatter plot.
 }
 
 # Calculate info
-df <- .sum_mean_median_var(mae[[1]], mae[[2]], "clr", "nmr", bicluster_rows, bicluster_columns)
+df <- .sum_mean_median_var(mae[[1]], mae[[2]], "rclr", "nmr", bicluster_rows, bicluster_columns)
 ```
 
 Now we can create a scatter plot. X-axis includes median clr abundance of microbiome
@@ -657,7 +663,7 @@ for(i in seq_along(df)){
   pics[[i]] <- ggplot(df[[i]])  +
       geom_point(aes(x = median1, y = median2)) + 
       labs(title = paste0("Cluster ", i),
-           x = "Taxa (clr median)",
+           x = "Taxa (rclr median)",
            y = "Metabolites (abs. median)")
   print(pics[[i]])
 }
@@ -700,7 +706,7 @@ between taxa. _biclust_ is suitable for this.
 ```{r biclust_9}
 # Calculate cross-correlation
 corr <- getExperimentCrossCorrelation(mae, 1, 1, 
-                                      assay_name1 = "clr", assay_name2 = "clr", 
+                                      assay_name1 = "rclr", assay_name2 = "rclr", 
                                       mode = "matrix",
                                       cor_threshold = 0.2, verbose = F, show_warning = F)
 
