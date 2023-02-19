@@ -135,22 +135,18 @@ is applied in any case to correct for multiple testing. Below we show a simple
 example that illustrates the workflow.
 
 
-```{r, aldex2}
+```{r, aldex2, eval=FALSE}
 # Generate Monte Carlo samples of the Dirichlet distribution for each sample.
 # Convert each instance using the centered log-ratio transform.
 # This is the input for all further analyses.
 set.seed(254)
-x <- aldex.clr(
-  reads = assay(tse),
-  conds = tse$Geographical_location
-)
 x <- aldex.clr(assay(tse), tse$Geographical_location)     
 ```
 
 
 The t-test:
 
-```{r, aldex2_ttest}
+```{r, aldex2_ttest, eval=FALSE}
 # calculates expected values of the Welch's t-test and Wilcoxon rank
 # test on the data returned by aldex.clr
 x_tt <- aldex.ttest(x, paired.test = FALSE, verbose = FALSE)
@@ -159,7 +155,7 @@ x_tt <- aldex.ttest(x, paired.test = FALSE, verbose = FALSE)
 
 Effect sizes:
 
-```{r, aldex2_efs}
+```{r, aldex2_efs, eval=FALSE}
 # determines the median clr abundance of the feature in all samples and in
 # groups, the median difference between the two groups, the median variation
 # within each group and the effect size, which is the median of the ratio
@@ -178,7 +174,7 @@ differentially abundant ($q \leq 0.1$) between the 2 groups. Black points are
 rare taxa and grey ones are abundant taxa. The dashed line represent an effect
 size of 1. See @Gloor2016 to learn more about these plots.
 
-```{r}
+```{r, eval=FALSE}
 par(mfrow = c(1, 2))
   aldex.plot(
     aldex_out, 
@@ -212,7 +208,7 @@ CI is a better answer to the question we are typically interested in
 article](https://www.nature.com/articles/d41586-019-00857-9)).
 
 
-```{r}
+```{r, eval=FALSE}
 rownames_to_column(aldex_out, "genus") %>%
   filter(wi.eBH <= 0.05)  %>% # here we chose the wilcoxon output rather than tt
   select(genus, we.eBH, wi.eBH, effect, overlap) %>%
@@ -247,10 +243,11 @@ to learn about the additional arguments that we specify below.
 
 We recommend to use `r max_iter = 100` or higher in real case studies.
 
-```{r warning = FALSE}
+```{r ancombc2, warning = FALSE, eval=FALSE}
 # perform the analysis 
 out <- ancombc2(
   data = tse,
+  tax_level="family",
   fix_formula = "Geographical_location", 
   p_adj_method = "fdr", 
   prv_cut = 0, # prev filtering has been done above already
@@ -277,7 +274,7 @@ standard errors, p-values and q-values. Conveniently, there is a dataframe
 abundant between the groups (again, keep in mind that the answer is not 
 black-white). Below we show the first 6 entries of this dataframe:  
 
-```{r}
+```{r, eval=FALSE}
 kable(head(res))
 ```
 
@@ -289,7 +286,7 @@ Next, we will illustrate how to use MaAsLin2, which is the next generation of
 MaAsLin. As it is based on generalized linear models, it is flexible for different study designs and covariate
 structures. The official package tutorial can be found [here](https://github.com/biobakery/biobakery/wiki/maaslin2). 
 
-```{r results = "hide"}
+```{r maaslin2, results = "hide", eval=FALSE}
 # maaslin expects features as columns and samples as rows 
 # for both the asv/otu table as well as meta data 
 asv <- t(assay(tse))
@@ -311,14 +308,16 @@ fit_data <- Maaslin2(
 )
 ```
 
-```{r}
-# which genera are identified as differentially abundant? (leave out "head" to
-# see all)
+Which genera are identified as differentially abundant? (leave out "head" to see all).
+
+```{r, maaslin2kable, eval=FALSE}
 kable(head(filter(fit_data$results, qval <= 0.05)))
-# A folder will be created that is called like the above specified output.
-# It contains also figures to visualize the difference between genera 
-# for the significant ones.
 ```
+
+A folder will be created that is called like the above specified
+output.  It contains also figures to visualize the difference between
+genera for the significant ones.
+
 
 ### LinDA 
 
@@ -335,7 +334,7 @@ authors. The speed might make it the choice for bigger datasets or
 datasets with a very high number of features.
 
 
-```{r}
+```{r linda, eval=FALSE}
 otu.tab <- as.data.frame(assay(tse))
 meta <- as.data.frame(colData(tse)) %>% select(Geographical_location)
 res <- linda(
@@ -364,7 +363,7 @@ taxon.
 
 
 
-```{r}
+```{r linda2, eval=FALSE}
 # Rename "taxon" column from ancombc results  so that it match with others
 colnames(out$res)[colnames(out$res) == "taxon"] <- "genus"
 
@@ -395,7 +394,7 @@ kable(head(summ))
 
 Now we can answer our questions:
 
-```{r}
+```{r, eval=FALSE}
 # how many genera were identified by each method?
 summarise(summ, across(where(is.logical), sum)) %>%
   kable()
@@ -410,7 +409,7 @@ any method or for those taxa that were identified by all methods:
 
 
 
-```{r}
+```{r, daplotting, eval=FALSE}
 plot_data <- data.frame(t(assay(tse)))
 plot_data$Geographical_location <- tse$Geographical_location
 # create a plot for each genus where the score is indicated in the title
@@ -460,7 +459,7 @@ there are no covariates, I first simulate a new variable and add it to the TSE
 object.
 
 
-```{r}
+```{r, eval=FALSE}
 # FIXME: switch to a faster example / method
 out_cov = ancombc2(
   data = tse, 
