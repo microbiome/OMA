@@ -10,6 +10,12 @@ if (!require(rgl)){
 if (!require(plotly)){
   BiocManager::install("plotly")  
 }
+if (!require(gtools)){
+  install.packages("gtools")  
+}
+if (!require(purrr)){
+  install.packages("purrr")  
+}
 ```
 
 ```{r, setup, warning=FALSE, message=FALSE}
@@ -85,26 +91,81 @@ plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3) %>%
 
 ## PERMANOVA comparison
 
-```{r}
-library("vegan")
+Here we present two possible uses of the `adonis2` function which performs PERMANOVA. The optional argument `by` has an effect on the statistical outcome, so the two possibilities are compared in this section.
+
+```{r message = FALSE, warning = FALSE}
+library(vegan)
+library(gtools)
+library(purrr)
+
 data("enterotype")
 enterotype <- transformCounts(enterotype, method = "relabundance")
-# Drop those samples that do not have meta dtaa
-enterotype <- 
-    enterotype[ , !rowSums(is.na(colData(enterotype)[, c("Nationality", "Gender","ClinicalStatus")]) > 0 ) ]
 
-# Multiple variables, by = "margin"
-set.seed(75)
-adonis2(t(assay(enterotype ,"relabundance")) ~ Nationality + Gender + ClinicalStatus,
-        by = "margin",
-        data = colData(enterotype),
-        permutations = 99)
+# drop samples missing meta data
+enterotype <- enterotype[ , !rowSums(is.na(colData(enterotype)[ , c("Nationality", "Gender","ClinicalStatus")]) > 0 )]
 
-# Multiple variables, default: by = "terms"
-set.seed(75)
-adonis2(t(assay(enterotype ,"relabundance"))  ~ Nationality + Gender + ClinicalStatus,
-        data = colData(enterotype ),
-        permutations = 99)
+vars <- c("Nationality", "Gender", "ClinicalStatus")
+by_args <- factor(c("terms", "margin"))
+
+var_perm <- permutations(n = 3, r = 3, vars)
+formulas <- apply(var_perm, 1, function(row) reduce(row, function(x, y) paste(x, "+", y)))
+
+terms_df <- data.frame("Formula" = formulas,
+                       "ClinicalStatus" = rep(0, 6),
+                       "Gender" = rep(0, 6),
+                       "Nationality" = rep(0, 6))
+
+margin_df <- data.frame("Formula" = formulas,
+                        "ClinicalStatus" = rep(0, 6),
+                        "Gender" = rep(0, 6),
+                        "Nationality" = rep(0, 6))
+```
+
+
+```{r message = FALSE, warning = FALSE}
+for (row_idx in 1:nrow(var_perm)) {
+  
+  tmp_formula <- reduce(var_perm[row_idx, ], function(x, y) paste(x, "+", y))
+  tmp_formula <- as.formula(paste0('t(assay(enterotype, "relabundance")) ~ ',
+                            tmp_formula))
+
+  # multiple variables, default: by = "terms"
+  set.seed(75)
+  with_terms <- adonis2(tmp_formula, 
+                by = "terms",
+                data = colData(enterotype),
+                permutations = 99)
+  
+  # multiple variables, by = "margin"
+  set.seed(75)
+  with_margin <- adonis2(tmp_formula, 
+                 by = "margin",
+                 data = colData(enterotype),
+                 permutations = 99)
+
+  terms_p <- with_terms[["Pr(>F)"]]
+  terms_p <- terms_p[!is.na(terms_p)]
+  
+  margin_p <- with_margin[["Pr(>F)"]]
+  margin_p <- margin_p[!is.na(margin_p)]
+  
+  for (col_idx in 1:ncol(var_perm)) {
+    
+    terms_df[var_perm[row_idx, col_idx]][row_idx, ] <- terms_p[col_idx]
+    margin_df[var_perm[row_idx, col_idx]][row_idx, ] <- margin_p[col_idx]
+    
+  }
+  
+}
+```
+
+The following table displays the p-values for the three variables ClinicalStatus, Gender and Nationality obtained by PERMANOVA with `adonis2`. As you can see, p-values remain identical when `by = "margin"`, but they change with the order of the variables in the formula when `by = terms` (default).
+
+```{r message = FALSE, warning = FALSE}
+df <- terms_df %>%
+  inner_join(margin_df, by = "Formula", suffix = c(" (terms)", " (margin)"))
+
+knitr::kable(df)
 ```
 
 ## Bayesian Multinomial Logistic-Normal Models
