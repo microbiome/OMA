@@ -779,7 +779,7 @@ other attached packages:
  [5] scater_1.26.1                  scuttle_1.8.4                 
  [7] ggplot2_3.4.1                  vegan_2.6-4                   
  [9] lattice_0.20-45                permute_0.9-7                 
-[11] mia_1.7.5                      MultiAssayExperiment_1.24.0   
+[11] mia_1.7.7                      MultiAssayExperiment_1.24.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [15] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [17] SummarizedExperiment_1.28.0    Biobase_2.58.0                
@@ -815,7 +815,7 @@ loaded via a namespace (and not attached):
 [45] scales_1.2.1                parallel_4.2.1             
 [47] yaml_2.3.7                  memoise_2.0.1              
 [49] gridExtra_2.3               yulab.utils_0.0.6          
-[51] stringi_1.7.12              RSQLite_2.2.20             
+[51] stringi_1.7.12              RSQLite_2.3.0              
 [53] highr_0.10                  ScaledMatrix_1.6.0         
 [55] tidytree_0.4.2              filelock_1.0.2             
 [57] BiocParallel_1.32.5         rlang_1.0.6                

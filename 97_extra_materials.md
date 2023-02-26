@@ -93,136 +93,116 @@ plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3) %>%
 
 
 ```r
-library("vegan")
+if (!require(gtools)){
+  install.packages("gtools")  
+}
+if (!require(purrr)){
+  install.packages("purrr")  
+}
+
+library(vegan)
+library(gtools)
+library(purrr)
 ```
 
-```
-## Loading required package: permute
-```
+Here we present two possible uses of the `adonis2` function which performs PERMANOVA. The
+optional argument `by` has an effect on the statistical outcome, so the two possibilities are
+compared in this section.
 
-```
-## Loading required package: lattice
-```
-
-```
-## This is vegan 2.6-4
-```
 
 ```r
 data("enterotype")
 enterotype <- transformCounts(enterotype, method = "relabundance")
+
+# drop samples missing meta data
+enterotype <- enterotype[ , !rowSums(is.na(colData(enterotype)[ , c("Nationality", "Gender","ClinicalStatus")]) > 0 )]
+
+vars <- c("Nationality", "Gender", "ClinicalStatus")
+by_args <- factor(c("terms", "margin"))
+
+var_perm <- permutations(n = 3, r = 3, vars)
+formulas <- apply(var_perm, 1, function(row) purrr::reduce(row, function(x, y) paste(x, "+", y)))
+
+terms_df <- data.frame("Formula" = formulas,
+                       "ClinicalStatus" = rep(0, 6),
+                       "Gender" = rep(0, 6),
+                       "Nationality" = rep(0, 6))
+
+margin_df <- data.frame("Formula" = formulas,
+                        "ClinicalStatus" = rep(0, 6),
+                        "Gender" = rep(0, 6),
+                        "Nationality" = rep(0, 6))
 ```
 
-```
-## Warning: useNames = NA is deprecated. Instead, specify either useNames = TRUE
-## or useNames = FALSE.
-```
 
-```r
-# Drop those samples that do not have meta dtaa
-enterotype <- 
-    enterotype[ , !rowSums(is.na(colData(enterotype)[, c("Nationality", "Gender","ClinicalStatus")]) > 0 ) ]
-
-# Multiple variables, by = "margin"
-set.seed(75)
-adonis2(t(assay(enterotype ,"relabundance")) ~ Nationality + Gender + ClinicalStatus,
-        by = "margin",
-        data = colData(enterotype),
-        permutations = 99)
-```
-
-```
-## Permutation test for adonis under reduced model
-## Marginal effects of terms
-## Permutation: free
-## Number of permutations: 99
-## 
-## adonis2(formula = t(assay(enterotype, "relabundance")) ~ Nationality + Gender + ClinicalStatus, data = colData(enterotype), permutations = 99, by = "margin")
-##                Df SumOfSqs      R2      F Pr(>F)  
-## Nationality     4   0.7933 0.19338 2.0894   0.04 *
-## Gender          1   0.1230 0.02999 1.2963   0.29  
-## ClinicalStatus  3   0.2412 0.05879 0.8469   0.53  
-## Residual       29   2.7527 0.67101                
-## Total          38   4.1023 1.00000                
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-```
 
 ```r
-# Multiple variables, by = "margin"
-set.seed(75)
-adonis2(t(assay(enterotype ,"relabundance")) ~ ClinicalStatus + Nationality + Gender,
-        by = "margin",
-        data = colData(enterotype ),
-        permutations = 99)
+for (row_idx in 1:nrow(var_perm)) {
+  
+  tmp_formula <- purrr::reduce(var_perm[row_idx, ], function(x, y) paste(x, "+", y))
+  tmp_formula <- as.formula(paste0('t(assay(enterotype, "relabundance")) ~ ',
+                            tmp_formula))
+
+  # multiple variables, default: by = "terms"
+  set.seed(75)
+  with_terms <- adonis2(tmp_formula, 
+                by = "terms",
+                data = colData(enterotype),
+                permutations = 99)
+  
+  # multiple variables, by = "margin"
+  set.seed(75)
+  with_margin <- adonis2(tmp_formula, 
+                 by = "margin",
+                 data = colData(enterotype),
+                 permutations = 99)
+
+  terms_p <- with_terms[["Pr(>F)"]]
+  terms_p <- terms_p[!is.na(terms_p)]
+  
+  margin_p <- with_margin[["Pr(>F)"]]
+  margin_p <- margin_p[!is.na(margin_p)]
+  
+  for (col_idx in 1:ncol(var_perm)) {
+    
+    terms_df[var_perm[row_idx, col_idx]][row_idx, ] <- terms_p[col_idx]
+    margin_df[var_perm[row_idx, col_idx]][row_idx, ] <- margin_p[col_idx]
+    
+  }
+  
+}
 ```
 
-```
-## Permutation test for adonis under reduced model
-## Marginal effects of terms
-## Permutation: free
-## Number of permutations: 99
-## 
-## adonis2(formula = t(assay(enterotype, "relabundance")) ~ ClinicalStatus + Nationality + Gender, data = colData(enterotype), permutations = 99, by = "margin")
-##                Df SumOfSqs      R2      F Pr(>F)  
-## ClinicalStatus  3   0.2412 0.05879 0.8469   0.53  
-## Nationality     4   0.7933 0.19338 2.0894   0.04 *
-## Gender          1   0.1230 0.02999 1.2963   0.29  
-## Residual       29   2.7527 0.67101                
-## Total          38   4.1023 1.00000                
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-```
+The following table displays the p-values for the three variables ClinicalStatus, Gender and
+Nationality obtained by PERMANOVA with `adonis2`. As you can see, p-values remain identical when
+`by = "margin"`, but they change with the order of the variables in the formula when `by = terms` (default).
 
-```r
-# Multiple variables, default: by = "terms"
-set.seed(75)
-adonis2(t(assay(enterotype ,"relabundance"))  ~ Nationality + Gender + ClinicalStatus,
-        data = colData(enterotype ),
-        permutations = 99)
-```
-
-```
-## Permutation test for adonis under reduced model
-## Terms added sequentially (first to last)
-## Permutation: free
-## Number of permutations: 99
-## 
-## adonis2(formula = t(assay(enterotype, "relabundance")) ~ Nationality + Gender + ClinicalStatus, data = colData(enterotype), permutations = 99)
-##                Df SumOfSqs      R2      F Pr(>F)  
-## Nationality     5   1.0046 0.24490 2.1168   0.04 *
-## Gender          1   0.1038 0.02530 1.0934   0.39  
-## ClinicalStatus  3   0.2412 0.05879 0.8469   0.53  
-## Residual       29   2.7527 0.67101                
-## Total          38   4.1023 1.00000                
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-```
 
 ```r
-# Multiple variables, default: by = "terms"
-set.seed(75)
-adonis2(t(assay(enterotype ,"relabundance"))  ~ ClinicalStatus + Nationality + Gender,
-        data = colData(enterotype),
-        permutations = 99)
+df <- terms_df %>%
+  dplyr::inner_join(margin_df, by = "Formula", suffix = c(" (terms)", " (margin)"))
+
+knitr::kable(df)
 ```
 
-```
-## Permutation test for adonis under reduced model
-## Terms added sequentially (first to last)
-## Permutation: free
-## Number of permutations: 99
-## 
-## adonis2(formula = t(assay(enterotype, "relabundance")) ~ ClinicalStatus + Nationality + Gender, data = colData(enterotype), permutations = 99)
-##                Df SumOfSqs      R2      F Pr(>F)  
-## ClinicalStatus  4   0.5000 0.12189 1.3169   0.20  
-## Nationality     4   0.7265 0.17710 1.9135   0.05 *
-## Gender          1   0.1230 0.02999 1.2963   0.29  
-## Residual       29   2.7527 0.67101                
-## Total          38   4.1023 1.00000                
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-```
+
+\begin{tabular}{l|r|r|r|r|r|r}
+\hline
+Formula & ClinicalStatus (terms) & Gender (terms) & Nationality (terms) & ClinicalStatus (margin) & Gender (margin) & Nationality (margin)\\
+\hline
+ClinicalStatus + Gender + Nationality & 0.20 & 0.70 & 0.04 & 0.53 & 0.29 & 0.04\\
+\hline
+ClinicalStatus + Nationality + Gender & 0.20 & 0.29 & 0.05 & 0.53 & 0.29 & 0.04\\
+\hline
+Gender + ClinicalStatus + Nationality & 0.17 & 0.79 & 0.04 & 0.53 & 0.29 & 0.04\\
+\hline
+Gender + Nationality + ClinicalStatus & 0.53 & 0.79 & 0.03 & 0.53 & 0.29 & 0.04\\
+\hline
+Nationality + ClinicalStatus + Gender & 0.61 & 0.29 & 0.04 & 0.53 & 0.29 & 0.04\\
+\hline
+Nationality + Gender + ClinicalStatus & 0.53 & 0.39 & 0.04 & 0.53 & 0.29 & 0.04\\
+\hline
+\end{tabular}
 
 ## Bayesian Multinomial Logistic-Normal Models
 
@@ -320,7 +300,7 @@ names_covariates(priors) <- rownames(X)
 plot(priors, pars="Lambda") + ggplot2::xlim(c(-5, 5))
 ```
 
-![](97_extra_materials_files/figure-latex/unnamed-chunk-13-1.pdf)<!-- --> 
+![](97_extra_materials_files/figure-latex/unnamed-chunk-11-1.pdf)<!-- --> 
 
 Estimating the posterior by including our response data `Y`.
 Note: Some computational failures could occur (see [discussion](https://github-wiki-see.page/m/jsilve24/fido/wiki/Frequently-Asked-Questions))
@@ -350,7 +330,7 @@ names_categories(posterior) <- rownames(Y)
 plot(posterior,par="Lambda",focus.cov=rownames(X)[2:4])
 ```
 
-![](97_extra_materials_files/figure-latex/unnamed-chunk-16-1.pdf)<!-- --> 
+![](97_extra_materials_files/figure-latex/unnamed-chunk-14-1.pdf)<!-- --> 
 
 Taking a closer look at "Sex" and "Delivery_Mode":
 
@@ -359,4 +339,4 @@ Taking a closer look at "Sex" and "Delivery_Mode":
 plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
 ```
 
-![](97_extra_materials_files/figure-latex/unnamed-chunk-17-1.pdf)<!-- --> 
+![](97_extra_materials_files/figure-latex/unnamed-chunk-15-1.pdf)<!-- --> 

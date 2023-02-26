@@ -137,26 +137,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    10   9
-##      Veg      13  15
+##      Mixed    12  10
+##      Veg      11  14
 ##                                         
-##                Accuracy : 0.532         
-##                  95% CI : (0.381, 0.679)
+##                Accuracy : 0.553         
+##                  95% CI : (0.401, 0.698)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.443         
+##     P-Value [Acc > NIR] : 0.331         
 ##                                         
-##                   Kappa : 0.06          
+##                   Kappa : 0.105         
 ##                                         
-##  Mcnemar's Test P-Value : 0.522         
+##  Mcnemar's Test P-Value : 1.000         
 ##                                         
-##             Sensitivity : 0.435         
-##             Specificity : 0.625         
-##          Pos Pred Value : 0.526         
-##          Neg Pred Value : 0.536         
+##             Sensitivity : 0.522         
+##             Specificity : 0.583         
+##          Pos Pred Value : 0.545         
+##          Neg Pred Value : 0.560         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.213         
-##    Detection Prevalence : 0.404         
-##       Balanced Accuracy : 0.530         
+##          Detection Rate : 0.255         
+##    Detection Prevalence : 0.468         
+##       Balanced Accuracy : 0.553         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -261,7 +261,7 @@ other attached packages:
  [1] patchwork_1.1.2                MLeval_0.3                    
  [3] caret_6.0-93                   lattice_0.20-45               
  [5] ggplot2_3.4.1                  mikropml_1.5.0                
- [7] mia_1.7.5                      MultiAssayExperiment_1.24.0   
+ [7] mia_1.7.7                      MultiAssayExperiment_1.24.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [11] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [13] SummarizedExperiment_1.28.0    Biobase_2.58.0                
@@ -310,7 +310,7 @@ loaded via a namespace (and not attached):
  [71] tools_4.2.1                 cachem_1.0.6               
  [73] xgboost_1.7.3.1             cli_3.6.0                  
  [75] DirichletMultinomial_1.40.0 generics_0.1.3             
- [77] RSQLite_2.2.20              evaluate_0.20              
+ [77] RSQLite_2.3.0               evaluate_0.20              
  [79] stringr_1.5.0               fastmap_1.1.0              
  [81] yaml_2.3.7                  ModelMetrics_1.2.2.2       
  [83] knitr_1.42                  bit64_4.0.5                
@@ -324,7 +324,7 @@ loaded via a namespace (and not attached):
  [99] vegan_2.6-4                 permute_0.9-7              
 [101] vctrs_0.5.2                 pillar_1.8.1               
 [103] lifecycle_1.0.3             BiocManager_1.30.19        
-[105] BiocNeighbors_1.16.0        data.table_1.14.6          
+[105] BiocNeighbors_1.16.0        data.table_1.14.8          
 [107] bitops_1.0-7                irlba_2.3.5.1              
 [109] R6_2.5.1                    bookdown_0.32              
 [111] gridExtra_2.3               vipor_0.4.5                

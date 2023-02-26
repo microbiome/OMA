@@ -578,7 +578,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.7.5                      MultiAssayExperiment_1.24.0   
+ [1] mia_1.7.7                      MultiAssayExperiment_1.24.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
  [5] XVector_0.38.0                 SingleCellExperiment_1.20.0   
  [7] SummarizedExperiment_1.28.0    Biobase_2.58.0                
@@ -608,7 +608,7 @@ loaded via a namespace (and not attached):
 [33] pkgconfig_2.0.3             htmltools_0.5.4            
 [35] decontam_1.18.0             sparseMatrixStats_1.10.0   
 [37] fastmap_1.1.0               rlang_1.0.6                
-[39] RSQLite_2.2.20              DelayedMatrixStats_1.20.0  
+[39] RSQLite_2.3.0               DelayedMatrixStats_1.20.0  
 [41] generics_0.1.3              jsonlite_1.8.4             
 [43] BiocParallel_1.32.5         dplyr_1.1.0                
 [45] RCurl_1.98-1.10             magrittr_2.0.3             

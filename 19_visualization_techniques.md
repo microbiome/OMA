@@ -846,9 +846,9 @@ other attached packages:
  [1] ggpubr_0.6.0                   ggtree_3.4.4                  
  [3] ape_5.7                        pheatmap_1.0.12               
  [5] reshape2_1.4.4                 sechm_1.4.1                   
- [7] miaViz_1.7.1                   ggraph_2.1.0                  
+ [7] miaViz_1.7.3                   ggraph_2.1.0                  
  [9] patchwork_1.1.2                scater_1.26.1                 
-[11] scuttle_1.8.4                  mia_1.7.5                     
+[11] scuttle_1.8.4                  mia_1.7.7                     
 [13] MultiAssayExperiment_1.24.0    TreeSummarizedExperiment_2.1.4
 [15] Biostrings_2.66.0              XVector_0.38.0                
 [17] SingleCellExperiment_1.20.0    SummarizedExperiment_1.28.0   
@@ -896,7 +896,7 @@ loaded via a namespace (and not attached):
  [67] rlang_1.0.6                 munsell_0.5.0              
  [69] tools_4.2.1                 cachem_1.0.6               
  [71] cli_3.6.0                   DirichletMultinomial_1.40.0
- [73] generics_0.1.3              RSQLite_2.2.20             
+ [73] generics_0.1.3              RSQLite_2.3.0              
  [75] broom_1.0.3                 evaluate_0.20              
  [77] stringr_1.5.0               fastmap_1.1.0              
  [79] yaml_2.3.7                  knitr_1.42                 

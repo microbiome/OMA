@@ -355,7 +355,7 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.2                ggsignif_0.6.4                
  [3] scater_1.26.1                  ggplot2_3.4.1                 
- [5] scuttle_1.8.4                  mia_1.7.5                     
+ [5] scuttle_1.8.4                  mia_1.7.7                     
  [7] MultiAssayExperiment_1.24.0    TreeSummarizedExperiment_2.1.4
  [9] Biostrings_2.66.0              XVector_0.38.0                
 [11] SingleCellExperiment_1.20.0    SummarizedExperiment_1.28.0   
@@ -392,7 +392,7 @@ loaded via a namespace (and not attached):
 [47] parallel_4.2.1              yaml_2.3.7                 
 [49] memoise_2.0.1               gridExtra_2.3              
 [51] yulab.utils_0.0.6           stringi_1.7.12             
-[53] RSQLite_2.2.20              highr_0.10                 
+[53] RSQLite_2.3.0               highr_0.10                 
 [55] ScaledMatrix_1.6.0          tidytree_0.4.2             
 [57] permute_0.9-7               filelock_1.0.2             
 [59] BiocParallel_1.32.5         rlang_1.0.6                
