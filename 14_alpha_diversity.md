@@ -371,11 +371,11 @@ loaded via a namespace (and not attached):
  [5] ggrepel_0.9.3               bit64_4.0.5                
  [7] fansi_1.0.4                 decontam_1.18.0            
  [9] codetools_0.2-19            splines_4.2.1              
-[11] sparseMatrixStats_1.10.0    cachem_1.0.6               
+[11] sparseMatrixStats_1.10.0    cachem_1.0.7               
 [13] knitr_1.42                  jsonlite_1.8.4             
 [15] cluster_2.1.4               graph_1.74.0               
-[17] BiocManager_1.30.19         compiler_4.2.1             
-[19] Matrix_1.5-3                fastmap_1.1.0              
+[17] BiocManager_1.30.20         compiler_4.2.1             
+[19] Matrix_1.5-3                fastmap_1.1.1              
 [21] lazyeval_0.2.2              cli_3.6.0                  
 [23] BiocSingular_1.14.0         htmltools_0.5.4            
 [25] tools_4.2.1                 rsvd_1.0.5                 

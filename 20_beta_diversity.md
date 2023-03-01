@@ -499,7 +499,7 @@ plot
 
 From RDA plot, we can see that only age has significant affect on microbial profile. 
 
-## Visualizing the most dominant genus on PCoA
+## Visualizing the most dominant genus on PCoA {#pcoa-genus}
 
 In this section we visualize most dominant genus on PCoA. A similar visualization was proposed by Salosensaari et al. [-@Salosensaari2021].
 
@@ -796,10 +796,10 @@ loaded via a namespace (and not attached):
  [7] bit64_4.0.5                 fansi_1.0.4                
  [9] decontam_1.18.0             codetools_0.2-19           
 [11] splines_4.2.1               sparseMatrixStats_1.10.0   
-[13] cachem_1.0.6                jsonlite_1.8.4             
+[13] cachem_1.0.7                jsonlite_1.8.4             
 [15] cluster_2.1.4               graph_1.74.0               
-[17] BiocManager_1.30.19         compiler_4.2.1             
-[19] Matrix_1.5-3                fastmap_1.1.0              
+[17] BiocManager_1.30.20         compiler_4.2.1             
+[19] Matrix_1.5-3                fastmap_1.1.1              
 [21] lazyeval_0.2.2              cli_3.6.0                  
 [23] BiocSingular_1.14.0         htmltools_0.5.4            
 [25] tools_4.2.1                 rsvd_1.0.5                 

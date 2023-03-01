@@ -518,10 +518,10 @@ loaded via a namespace (and not attached):
  [61] utf8_1.2.3                  labeling_0.4.2             
  [63] tidyselect_1.2.0            rlang_1.0.6                
  [65] reshape2_1.4.4              munsell_0.5.0              
- [67] tools_4.2.1                 cachem_1.0.6               
+ [67] tools_4.2.1                 cachem_1.0.7               
  [69] cli_3.6.0                   DirichletMultinomial_1.40.0
  [71] generics_0.1.3              RSQLite_2.3.0              
- [73] evaluate_0.20               fastmap_1.1.0              
+ [73] evaluate_0.20               fastmap_1.1.1              
  [75] yaml_2.3.7                  knitr_1.42                 
  [77] bit64_4.0.5                 purrr_1.0.1                
  [79] nlme_3.1-162                sparseMatrixStats_1.10.0   
@@ -534,7 +534,7 @@ loaded via a namespace (and not attached):
  [93] vegan_2.6-4                 permute_0.9-7              
  [95] vctrs_0.5.2                 pillar_1.8.1               
  [97] lifecycle_1.0.3             rhdf5filters_1.8.0         
- [99] BiocManager_1.30.19         GlobalOptions_0.1.2        
+ [99] BiocManager_1.30.20         GlobalOptions_0.1.2        
 [101] BiocNeighbors_1.16.0        cowplot_1.1.1              
 [103] bitops_1.0-7                irlba_2.3.5.1              
 [105] R6_2.5.1                    bookdown_0.32              

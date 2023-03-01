@@ -137,26 +137,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    12  10
-##      Veg      11  14
+##      Mixed    14   8
+##      Veg       9  16
 ##                                         
-##                Accuracy : 0.553         
-##                  95% CI : (0.401, 0.698)
+##                Accuracy : 0.638         
+##                  95% CI : (0.485, 0.773)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.331         
+##     P-Value [Acc > NIR] : 0.0536        
 ##                                         
-##                   Kappa : 0.105         
+##                   Kappa : 0.276         
 ##                                         
-##  Mcnemar's Test P-Value : 1.000         
+##  Mcnemar's Test P-Value : 1.0000        
 ##                                         
-##             Sensitivity : 0.522         
-##             Specificity : 0.583         
-##          Pos Pred Value : 0.545         
-##          Neg Pred Value : 0.560         
+##             Sensitivity : 0.609         
+##             Specificity : 0.667         
+##          Pos Pred Value : 0.636         
+##          Neg Pred Value : 0.640         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.255         
+##          Detection Rate : 0.298         
 ##    Detection Prevalence : 0.468         
-##       Balanced Accuracy : 0.553         
+##       Balanced Accuracy : 0.638         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -307,11 +307,11 @@ loaded via a namespace (and not attached):
  [65] utf8_1.2.3                  labeling_0.4.2             
  [67] tidyselect_1.2.0            rlang_1.0.6                
  [69] reshape2_1.4.4              munsell_0.5.0              
- [71] tools_4.2.1                 cachem_1.0.6               
+ [71] tools_4.2.1                 cachem_1.0.7               
  [73] xgboost_1.7.3.1             cli_3.6.0                  
  [75] DirichletMultinomial_1.40.0 generics_0.1.3             
  [77] RSQLite_2.3.0               evaluate_0.20              
- [79] stringr_1.5.0               fastmap_1.1.0              
+ [79] stringr_1.5.0               fastmap_1.1.1              
  [81] yaml_2.3.7                  ModelMetrics_1.2.2.2       
  [83] knitr_1.42                  bit64_4.0.5                
  [85] randomForest_4.7-1.1        purrr_1.0.1                
@@ -323,7 +323,7 @@ loaded via a namespace (and not attached):
  [97] highr_0.10                  Matrix_1.5-3               
  [99] vegan_2.6-4                 permute_0.9-7              
 [101] vctrs_0.5.2                 pillar_1.8.1               
-[103] lifecycle_1.0.3             BiocManager_1.30.19        
+[103] lifecycle_1.0.3             BiocManager_1.30.20        
 [105] BiocNeighbors_1.16.0        data.table_1.14.8          
 [107] bitops_1.0-7                irlba_2.3.5.1              
 [109] R6_2.5.1                    bookdown_0.32              

@@ -596,7 +596,7 @@ loaded via a namespace (and not attached):
  [29] ggbeeswarm_0.7.1            clue_0.3-64                
  [31] graphlayouts_0.8.4          rsvd_1.0.5                 
  [33] seriation_1.4.1             locfit_1.5-9.7             
- [35] bitops_1.0-7                cachem_1.0.6               
+ [35] bitops_1.0-7                cachem_1.0.7               
  [37] gridGraphics_0.5-1          DelayedArray_0.24.0        
  [39] scales_1.2.1                SEtools_1.10.0             
  [41] beeswarm_0.4.0              gtable_0.3.1               
@@ -604,7 +604,7 @@ loaded via a namespace (and not attached):
  [45] tidygraph_1.2.3             rlang_1.0.6                
  [47] genefilter_1.78.0           GlobalOptions_0.1.2        
  [49] splines_4.2.1               lazyeval_0.2.2             
- [51] BiocManager_1.30.19         yaml_2.3.7                 
+ [51] BiocManager_1.30.20         yaml_2.3.7                 
  [53] reshape2_1.4.4              tools_4.2.1                
  [55] bookdown_0.32               ggplotify_0.1.0            
  [57] decontam_1.18.0             RColorBrewer_1.1-3         
@@ -628,7 +628,7 @@ loaded via a namespace (and not attached):
  [93] tweenr_2.0.2                ComplexHeatmap_2.12.1      
  [95] MASS_7.3-58.2               Matrix_1.5-3               
  [97] permute_0.9-7               cli_3.6.0                  
- [99] parallel_4.2.1              igraph_1.4.0               
+ [99] parallel_4.2.1              igraph_1.4.1               
 [101] pkgconfig_2.0.3             dir.expiry_1.4.0           
 [103] registry_0.5-1              foreach_1.5.2              
 [105] ggtree_3.4.4                annotate_1.74.0            
@@ -644,7 +644,7 @@ loaded via a namespace (and not attached):
 [125] viridisLite_0.4.1           limma_3.52.4               
 [127] fansi_1.0.4                 pillar_1.8.1               
 [129] lattice_0.20-45             KEGGREST_1.36.3            
-[131] fastmap_1.1.0               httr_1.4.4                 
+[131] fastmap_1.1.1               httr_1.4.5                 
 [133] survival_3.5-3              glue_1.6.2                 
 [135] zip_2.2.2                   sechm_1.4.1                
 [137] png_0.1-8                   iterators_1.0.14           

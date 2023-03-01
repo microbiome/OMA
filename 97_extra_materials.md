@@ -21,7 +21,7 @@ knitr::knit_hooks$set(webgl = hook_webgl)
 ```
 
 
-In this section we make a 3D version of the earlier [ Visualizing the most dominant genus on PCoA](https://microbiome.github.io/OMA/microbiome-exploration.html#visualizing-the-most-dominant-genus-on-pcoa), with the help of the [plotly](https://plotly.com/r/) R package.
+In this section we make a 3D version of the earlier "Visualizing the most dominant genus on PCoA" \@ref(pcoa-genus), with the help of the plotly R package [@Sievert2020].
 
 
 ```r
@@ -91,8 +91,13 @@ plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3) %>%
 
 ## PERMANOVA comparison
 
+Here we present two possible uses of the `adonis2` function which performs PERMANOVA. The
+optional argument `by` has an effect on the statistical outcome, so its two options are
+compared in this section.
+
 
 ```r
+# import necessary packages
 if (!require(gtools)){
   install.packages("gtools")  
 }
@@ -105,24 +110,25 @@ library(gtools)
 library(purrr)
 ```
 
-Here we present two possible uses of the `adonis2` function which performs PERMANOVA. The
-optional argument `by` has an effect on the statistical outcome, so the two possibilities are
-compared in this section.
+Below we load the _enterotype_ TSE object and run PERMANOVA with the `adonis2` function
+for different orders of the three variables ClinicalStatus, Gender and Nationality with
+two different approaches: `by = "margin"` or `by = "terms"`.
 
 
 ```r
+# load and prepare data
 data("enterotype")
 enterotype <- transformCounts(enterotype, method = "relabundance")
 
 # drop samples missing meta data
-enterotype <- enterotype[ , !rowSums(is.na(colData(enterotype)[ , c("Nationality", "Gender","ClinicalStatus")]) > 0 )]
+enterotype <- enterotype[ , !rowSums(is.na(colData(enterotype)[, c("Nationality", "Gender", "ClinicalStatus")]) > 0)]
 
+# define variables and list all possible combinations
 vars <- c("Nationality", "Gender", "ClinicalStatus")
-by_args <- factor(c("terms", "margin"))
-
 var_perm <- permutations(n = 3, r = 3, vars)
 formulas <- apply(var_perm, 1, function(row) purrr::reduce(row, function(x, y) paste(x, "+", y)))
 
+# create empty data.frames for further storing p-values
 terms_df <- data.frame("Formula" = formulas,
                        "ClinicalStatus" = rep(0, 6),
                        "Gender" = rep(0, 6),
@@ -139,6 +145,7 @@ margin_df <- data.frame("Formula" = formulas,
 ```r
 for (row_idx in 1:nrow(var_perm)) {
   
+  # generate temporary formula (i.e. "assay ~ ClinicalStatus + Nationality + Gender")
   tmp_formula <- purrr::reduce(var_perm[row_idx, ], function(x, y) paste(x, "+", y))
   tmp_formula <- as.formula(paste0('t(assay(enterotype, "relabundance")) ~ ',
                             tmp_formula))
@@ -157,12 +164,13 @@ for (row_idx in 1:nrow(var_perm)) {
                  data = colData(enterotype),
                  permutations = 99)
 
+  # extract p-values
   terms_p <- with_terms[["Pr(>F)"]]
   terms_p <- terms_p[!is.na(terms_p)]
-  
   margin_p <- with_margin[["Pr(>F)"]]
   margin_p <- margin_p[!is.na(margin_p)]
   
+  # store p-values into data.frames
   for (col_idx in 1:ncol(var_perm)) {
     
     terms_df[var_perm[row_idx, col_idx]][row_idx, ] <- terms_p[col_idx]
@@ -175,7 +183,7 @@ for (row_idx in 1:nrow(var_perm)) {
 
 The following table displays the p-values for the three variables ClinicalStatus, Gender and
 Nationality obtained by PERMANOVA with `adonis2`. As you can see, p-values remain identical when
-`by = "margin"`, but they change with the order of the variables in the formula when `by = terms` (default).
+`by = "margin"`, but they change with the order of the variables in the formula when `by = "terms"` (default).
 
 
 ```r
@@ -320,7 +328,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.9979296
+## Proportions of Observations within 95% Credible Interval: 0.9978261
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 

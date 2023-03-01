@@ -861,7 +861,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] backports_1.4.1             circlize_0.4.15            
-  [3] plyr_1.8.8                  igraph_1.4.0               
+  [3] plyr_1.8.8                  igraph_1.4.1               
   [5] lazyeval_0.2.2              splines_4.2.1              
   [7] BiocParallel_1.32.5         digest_0.6.31              
   [9] ca_0.71.1                   foreach_1.5.2              
@@ -894,11 +894,11 @@ loaded via a namespace (and not attached):
  [63] utf8_1.2.3                  labeling_0.4.2             
  [65] ggplotify_0.1.0             tidyselect_1.2.0           
  [67] rlang_1.0.6                 munsell_0.5.0              
- [69] tools_4.2.1                 cachem_1.0.6               
+ [69] tools_4.2.1                 cachem_1.0.7               
  [71] cli_3.6.0                   DirichletMultinomial_1.40.0
  [73] generics_0.1.3              RSQLite_2.3.0              
  [75] broom_1.0.3                 evaluate_0.20              
- [77] stringr_1.5.0               fastmap_1.1.0              
+ [77] stringr_1.5.0               fastmap_1.1.1              
  [79] yaml_2.3.7                  knitr_1.42                 
  [81] bit64_4.0.5                 tidygraph_1.2.3            
  [83] purrr_1.0.1                 nlme_3.1-162               
@@ -912,7 +912,7 @@ loaded via a namespace (and not attached):
  [99] Matrix_1.5-3                vegan_2.6-4                
 [101] permute_0.9-7               vctrs_0.5.2                
 [103] pillar_1.8.1                lifecycle_1.0.3            
-[105] BiocManager_1.30.19         GlobalOptions_0.1.2        
+[105] BiocManager_1.30.20         GlobalOptions_0.1.2        
 [107] BiocNeighbors_1.16.0        cowplot_1.1.1              
 [109] bitops_1.0-7                irlba_2.3.5.1              
 [111] seriation_1.4.1             R6_2.5.1                   

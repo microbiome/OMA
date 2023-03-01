@@ -613,14 +613,14 @@ loaded via a namespace (and not attached):
  [21] xfun_0.37                   fBasics_4021.93            
  [23] hms_1.1.2                   evaluate_0.20              
  [25] DEoptimR_1.0-11             fansi_1.0.4                
- [27] readxl_1.4.2                igraph_1.4.0               
+ [27] readxl_1.4.2                igraph_1.4.1               
  [29] DBI_1.1.3                   htmlwidgets_1.6.1          
  [31] Rmpfr_0.9-1                 CVXR_1.0-11                
  [33] ellipsis_0.3.2              energy_1.7-11              
  [35] backports_1.4.1             bookdown_0.32              
  [37] permute_0.9-7               deldir_1.0-6               
  [39] sparseMatrixStats_1.10.0    vctrs_0.5.2                
- [41] cachem_1.0.6                withr_2.5.0                
+ [41] cachem_1.0.7                withr_2.5.0                
  [43] robustbase_0.95-0           emmeans_1.8.4-1            
  [45] checkmate_2.1.0             vegan_2.6-4                
  [47] treeio_1.22.0               getopt_1.20.3              
@@ -650,7 +650,7 @@ loaded via a namespace (and not attached):
  [95] RColorBrewer_1.1-3          clue_0.3-64                
  [97] lme4_1.1-31                 cli_3.6.0                  
  [99] ade4_1.7-22                 lmerTest_3.1-3             
-[101] htmlTable_2.4.1             Formula_1.2-4              
+[101] htmlTable_2.4.1             Formula_1.2-5              
 [103] mgcv_1.8-41                 tidyselect_1.2.0           
 [105] stringi_1.7.12              yaml_2.3.7                 
 [107] BiocSingular_1.14.0         latticeExtra_0.6-30        
@@ -662,8 +662,8 @@ loaded via a namespace (and not attached):
 [119] optparse_1.7.3              gridExtra_2.3              
 [121] gld_2.6.6                   stable_1.1.6               
 [123] RcppZiggurat_0.1.6          digest_0.6.31              
-[125] BiocManager_1.30.19         Rcpp_1.0.10                
-[127] scuttle_1.8.4               httr_1.4.4                 
+[125] BiocManager_1.30.20         Rcpp_1.0.10                
+[127] scuttle_1.8.4               httr_1.4.5                 
 [129] Rdpack_2.4                  colorspace_2.1-0           
 [131] XML_3.99-0.13               modeest_2.4.0              
 [133] splines_4.2.1               yulab.utils_0.0.6          
@@ -677,7 +677,7 @@ loaded via a namespace (and not attached):
 [149] Rfast_2.0.7                 R6_2.5.1                   
 [151] Hmisc_4.8-0                 pillar_1.8.1               
 [153] htmltools_0.5.4             glue_1.6.2                 
-[155] fastmap_1.1.0               minqa_1.2.5                
+[155] fastmap_1.1.1               minqa_1.2.5                
 [157] BiocParallel_1.32.5         BiocNeighbors_1.16.0       
 [159] class_7.3-21                codetools_0.2-19           
 [161] pcaPP_2.0-3                 mvtnorm_1.1-3              

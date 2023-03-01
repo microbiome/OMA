@@ -1289,7 +1289,7 @@ attached base packages:
 
 other attached packages:
  [1] microbiomeDataSets_1.1.7       phyloseq_1.40.0               
- [3] BiocManager_1.30.19            ggplot2_3.4.1                 
+ [3] BiocManager_1.30.20            ggplot2_3.4.1                 
  [5] mia_1.7.7                      MultiAssayExperiment_1.24.0   
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
  [9] XVector_0.38.0                 SingleCellExperiment_1.20.0   
@@ -1302,7 +1302,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] AnnotationHub_3.4.0           BiocFileCache_2.4.0          
-  [3] plyr_1.8.8                    igraph_1.4.0                 
+  [3] plyr_1.8.8                    igraph_1.4.1                 
   [5] lazyeval_0.2.2                splines_4.2.1                
   [7] BiocParallel_1.32.5           scater_1.26.1                
   [9] digest_0.6.31                 foreach_1.5.2                
@@ -1324,21 +1324,21 @@ loaded via a namespace (and not attached):
  [41] Rcpp_1.0.10                   xtable_1.8-4                 
  [43] viridisLite_0.4.1             decontam_1.18.0              
  [45] tidytree_0.4.2                bit_4.0.5                    
- [47] rsvd_1.0.5                    httr_1.4.4                   
+ [47] rsvd_1.0.5                    httr_1.4.5                   
  [49] dir.expiry_1.4.0              ellipsis_0.3.2               
  [51] pkgconfig_2.0.3               XML_3.99-0.13                
  [53] scuttle_1.8.4                 CodeDepends_0.6.5            
- [55] dbplyr_2.3.0                  utf8_1.2.3                   
- [57] AnnotationDbi_1.58.0          later_1.3.0                  
- [59] tidyselect_1.2.0              rlang_1.0.6                  
- [61] reshape2_1.4.4                munsell_0.5.0                
+ [55] dbplyr_2.3.1                  utf8_1.2.3                   
+ [57] AnnotationDbi_1.58.0          tidyselect_1.2.0             
+ [59] rlang_1.0.6                   reshape2_1.4.4               
+ [61] later_1.3.0                   munsell_0.5.0                
  [63] BiocVersion_3.15.2            tools_4.2.1                  
- [65] cachem_1.0.6                  cli_3.6.0                    
+ [65] cachem_1.0.7                  cli_3.6.0                    
  [67] DirichletMultinomial_1.40.0   generics_0.1.3               
  [69] RSQLite_2.3.0                 ExperimentHub_2.4.0          
  [71] ade4_1.7-22                   evaluate_0.20                
  [73] biomformat_1.24.0             stringr_1.5.0                
- [75] fastmap_1.1.0                 yaml_2.3.7                   
+ [75] fastmap_1.1.1                 yaml_2.3.7                   
  [77] knitr_1.42                    bit64_4.0.5                  
  [79] purrr_1.0.1                   KEGGREST_1.36.3              
  [81] nlme_3.1-162                  sparseMatrixStats_1.10.0     
@@ -1357,12 +1357,12 @@ loaded via a namespace (and not attached):
 [107] R6_2.5.1                      promises_1.2.0.1             
 [109] bookdown_0.32                 gridExtra_2.3                
 [111] vipor_0.4.5                   codetools_0.2-19             
-[113] MASS_7.3-58.2                 assertthat_0.2.1             
-[115] rhdf5_2.40.0                  withr_2.5.0                  
-[117] GenomeInfoDbData_1.2.9        mgcv_1.8-41                  
-[119] parallel_4.2.1                grid_4.2.1                   
-[121] beachmat_2.14.0               tidyr_1.3.0                  
-[123] rmarkdown_2.20                DelayedMatrixStats_1.20.0    
-[125] shiny_1.7.4                   ggbeeswarm_0.7.1             
+[113] MASS_7.3-58.2                 rhdf5_2.40.0                 
+[115] withr_2.5.0                   GenomeInfoDbData_1.2.9       
+[117] mgcv_1.8-41                   parallel_4.2.1               
+[119] grid_4.2.1                    beachmat_2.14.0              
+[121] tidyr_1.3.0                   rmarkdown_2.20               
+[123] DelayedMatrixStats_1.20.0     shiny_1.7.4                  
+[125] ggbeeswarm_0.7.1             
 ```
 </div>

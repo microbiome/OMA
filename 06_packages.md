@@ -82,7 +82,7 @@ Some of the R packages supporting the _TreeSummarizedExperiment_ framework inclu
 - [miaSim](microbiome.github.io/miaSim) : microbiome data simulation
 - [miaTime](microbiome.github.io/miaTime) : microbiome time series analysis
 
-### Tree-based methods
+### Tree-based methods {sub-tree-methods}
 
 - [philr](http://bioconductor.org/packages/devel/bioc/html/philr.html) (external, @Silverman2017)
 - [mia](microbiome.github.io/mia): Microbiome analysis tools [@R-mia]
@@ -90,12 +90,12 @@ Some of the R packages supporting the _TreeSummarizedExperiment_ framework inclu
 - [miaSim](microbiome.github.io/miaSim): Microbiome data simulations [@Simsek2021]
 - [miaTime](microbiome.github.io/miaTime): Microbiome time series analysis [@Lahti2021]
 
-### Differential abundance
+### Differential abundance {sub-diff-abund}
 
 - [benchdamic](https://bioconductor.org/packages/release/bioc/vignettes/benchdamic/inst/doc/intro.html) for benchmarking differential abundance methods
 - [ANCOMBC](https://bioconductor.org/packages/devel/bioc/html/ANCOMBC.html) for differential abundance analysis
 
-### Manipulation
+### Manipulation {sub-manipulation}
 
 - [MicrobiotaProcess](https://bioconductor.org/packages/release/bioc/html/MicrobiotaProcess.html) for analyzing microbiome and other ecological data within the tidy framework
 
@@ -137,8 +137,8 @@ loaded via a namespace (and not attached):
  [7] evaluate_0.20       graph_1.74.0        rlang_1.0.6        
 [10] cli_3.6.0           filelock_1.0.2      rmarkdown_2.20     
 [13] tools_4.2.1         xfun_0.37           yaml_2.3.7         
-[16] fastmap_1.1.0       compiler_4.2.1      BiocGenerics_0.44.0
-[19] BiocManager_1.30.19 htmltools_0.5.4     CodeDepends_0.6.5  
+[16] fastmap_1.1.1       compiler_4.2.1      BiocGenerics_0.44.0
+[19] BiocManager_1.30.20 htmltools_0.5.4     CodeDepends_0.6.5  
 [22] knitr_1.42         
 ```
 </div>

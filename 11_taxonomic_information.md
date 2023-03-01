@@ -607,7 +607,7 @@ loaded via a namespace (and not attached):
 [31] rmarkdown_2.20              scater_1.26.1              
 [33] pkgconfig_2.0.3             htmltools_0.5.4            
 [35] decontam_1.18.0             sparseMatrixStats_1.10.0   
-[37] fastmap_1.1.0               rlang_1.0.6                
+[37] fastmap_1.1.1               rlang_1.0.6                
 [39] RSQLite_2.3.0               DelayedMatrixStats_1.20.0  
 [41] generics_0.1.3              jsonlite_1.8.4             
 [43] BiocParallel_1.32.5         dplyr_1.1.0                
@@ -629,10 +629,10 @@ loaded via a namespace (and not attached):
 [75] pillar_1.8.1                reshape2_1.4.4             
 [77] codetools_0.2-19            ScaledMatrix_1.6.0         
 [79] XML_3.99-0.13               glue_1.6.2                 
-[81] evaluate_0.20               BiocManager_1.30.19        
+[81] evaluate_0.20               BiocManager_1.30.20        
 [83] vctrs_0.5.2                 treeio_1.22.0              
 [85] gtable_0.3.1                purrr_1.0.1                
-[87] tidyr_1.3.0                 cachem_1.0.6               
+[87] tidyr_1.3.0                 cachem_1.0.7               
 [89] ggplot2_3.4.1               xfun_0.37                  
 [91] rsvd_1.0.5                  tidytree_0.4.2             
 [93] viridisLite_0.4.1           tibble_3.1.8               

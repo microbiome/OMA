@@ -384,16 +384,16 @@ loaded via a namespace (and not attached):
   [9] ggrepel_0.9.3               bit64_4.0.5                
  [11] fansi_1.0.4                 decontam_1.18.0            
  [13] codetools_0.2-19            splines_4.2.1              
- [15] sparseMatrixStats_1.10.0    cachem_1.0.6               
+ [15] sparseMatrixStats_1.10.0    cachem_1.0.7               
  [17] knitr_1.42                  scater_1.26.1              
  [19] polyclip_1.10-4             jsonlite_1.8.4             
  [21] cluster_2.1.4               graph_1.74.0               
- [23] ggforce_0.4.1               BiocManager_1.30.19        
+ [23] ggforce_0.4.1               BiocManager_1.30.20        
  [25] compiler_4.2.1              Matrix_1.5-3               
- [27] fastmap_1.1.0               lazyeval_0.2.2             
+ [27] fastmap_1.1.1               lazyeval_0.2.2             
  [29] cli_3.6.0                   tweenr_2.0.2               
  [31] BiocSingular_1.14.0         htmltools_0.5.4            
- [33] tools_4.2.1                 igraph_1.4.0               
+ [33] tools_4.2.1                 igraph_1.4.1               
  [35] rsvd_1.0.5                  gtable_0.3.1               
  [37] glue_1.6.2                  GenomeInfoDbData_1.2.9     
  [39] reshape2_1.4.4              dplyr_1.1.0                
