@@ -568,7 +568,7 @@ other attached packages:
  [3] scater_1.26.1                  scuttle_1.8.4                 
  [5] miaViz_1.7.3                   ggraph_2.1.0                  
  [7] ggplot2_3.4.1                  miaTime_0.1.18                
- [9] mia_1.7.7                      MultiAssayExperiment_1.24.0   
+ [9] mia_1.7.8                      MultiAssayExperiment_1.24.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [13] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [15] SummarizedExperiment_1.28.0    Biobase_2.58.0                
@@ -606,7 +606,7 @@ loaded via a namespace (and not attached):
  [49] splines_4.2.1               lazyeval_0.2.2             
  [51] BiocManager_1.30.20         yaml_2.3.7                 
  [53] reshape2_1.4.4              tools_4.2.1                
- [55] bookdown_0.32               ggplotify_0.1.0            
+ [55] bookdown_0.33               ggplotify_0.1.0            
  [57] decontam_1.18.0             RColorBrewer_1.1-3         
  [59] Rcpp_1.0.10                 plyr_1.8.8                 
  [61] sparseMatrixStats_1.10.0    zlibbioc_1.44.0            
@@ -622,7 +622,7 @@ loaded via a namespace (and not attached):
  [81] shape_1.4.6                 compiler_4.2.1             
  [83] tibble_3.1.8                V8_4.2.2                   
  [85] crayon_1.5.2                htmltools_0.5.4            
- [87] ggfun_0.0.9                 mgcv_1.8-41                
+ [87] ggfun_0.0.9                 mgcv_1.8-42                
  [89] tidyr_1.3.0                 geneplotter_1.74.0         
  [91] aplot_0.1.9                 DBI_1.1.3                  
  [93] tweenr_2.0.2                ComplexHeatmap_2.12.1      

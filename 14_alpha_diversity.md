@@ -355,7 +355,7 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.2                ggsignif_0.6.4                
  [3] scater_1.26.1                  ggplot2_3.4.1                 
- [5] scuttle_1.8.4                  mia_1.7.7                     
+ [5] scuttle_1.8.4                  mia_1.7.8                     
  [7] MultiAssayExperiment_1.24.0    TreeSummarizedExperiment_2.1.4
  [9] Biostrings_2.66.0              XVector_0.38.0                
 [11] SingleCellExperiment_1.20.0    SummarizedExperiment_1.28.0   
@@ -402,11 +402,11 @@ loaded via a namespace (and not attached):
 [67] treeio_1.22.0               CodeDepends_0.6.5          
 [69] cowplot_1.1.1               bit_4.0.5                  
 [71] tidyselect_1.2.0            plyr_1.8.8                 
-[73] magrittr_2.0.3              bookdown_0.32              
+[73] magrittr_2.0.3              bookdown_0.33              
 [75] R6_2.5.1                    generics_0.1.3             
 [77] DelayedArray_0.24.0         DBI_1.1.3                  
 [79] pillar_1.8.1                withr_2.5.0                
-[81] mgcv_1.8-41                 RCurl_1.98-1.10            
+[81] mgcv_1.8-42                 RCurl_1.98-1.10            
 [83] tibble_3.1.8                dir.expiry_1.4.0           
 [85] crayon_1.5.2                utf8_1.2.3                 
 [87] rmarkdown_2.20              viridis_0.6.2              

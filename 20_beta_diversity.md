@@ -779,7 +779,7 @@ other attached packages:
  [5] scater_1.26.1                  scuttle_1.8.4                 
  [7] ggplot2_3.4.1                  vegan_2.6-4                   
  [9] lattice_0.20-45                permute_0.9-7                 
-[11] mia_1.7.7                      MultiAssayExperiment_1.24.0   
+[11] mia_1.7.8                      MultiAssayExperiment_1.24.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [15] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [17] SummarizedExperiment_1.28.0    Biobase_2.58.0                
@@ -825,10 +825,10 @@ loaded via a namespace (and not attached):
 [65] labeling_0.4.2              cowplot_1.1.1              
 [67] bit_4.0.5                   tidyselect_1.2.0           
 [69] plyr_1.8.8                  magrittr_2.0.3             
-[71] bookdown_0.32               R6_2.5.1                   
+[71] bookdown_0.33               R6_2.5.1                   
 [73] generics_0.1.3              DelayedArray_0.24.0        
 [75] DBI_1.1.3                   pillar_1.8.1               
-[77] withr_2.5.0                 mgcv_1.8-41                
+[77] withr_2.5.0                 mgcv_1.8-42                
 [79] RCurl_1.98-1.10             tibble_3.1.8               
 [81] dir.expiry_1.4.0            crayon_1.5.2               
 [83] utf8_1.2.3                  rmarkdown_2.20             

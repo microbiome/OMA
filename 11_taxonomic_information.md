@@ -578,7 +578,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.7.7                      MultiAssayExperiment_1.24.0   
+ [1] mia_1.7.8                      MultiAssayExperiment_1.24.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
  [5] XVector_0.38.0                 SingleCellExperiment_1.20.0   
  [7] SummarizedExperiment_1.28.0    Biobase_2.58.0                
@@ -594,14 +594,14 @@ loaded via a namespace (and not attached):
  [5] filelock_1.0.2              tools_4.2.1                
  [7] vegan_2.6-4                 utf8_1.2.3                 
  [9] R6_2.5.1                    irlba_2.3.5.1              
-[11] vipor_0.4.5                 mgcv_1.8-41                
+[11] vipor_0.4.5                 mgcv_1.8-42                
 [13] DBI_1.1.3                   lazyeval_0.2.2             
 [15] colorspace_2.1-0            permute_0.9-7              
 [17] withr_2.5.0                 tidyselect_1.2.0           
 [19] gridExtra_2.3               bit_4.0.5                  
 [21] compiler_4.2.1              graph_1.74.0               
 [23] cli_3.6.0                   BiocNeighbors_1.16.0       
-[25] DelayedArray_0.24.0         bookdown_0.32              
+[25] DelayedArray_0.24.0         bookdown_0.33              
 [27] scales_1.2.1                stringr_1.5.0              
 [29] digest_0.6.31               yulab.utils_0.0.6          
 [31] rmarkdown_2.20              scater_1.26.1              

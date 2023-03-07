@@ -132,7 +132,7 @@ other attached packages:
 [1] BiocStyle_2.24.0 rebook_1.6.0    
 
 loaded via a namespace (and not attached):
- [1] bookdown_0.32       dir.expiry_1.4.0    codetools_0.2-19   
+ [1] bookdown_0.33       dir.expiry_1.4.0    codetools_0.2-19   
  [4] XML_3.99-0.13       digest_0.6.31       stats4_4.2.1       
  [7] evaluate_0.20       graph_1.74.0        rlang_1.0.6        
 [10] cli_3.6.0           filelock_1.0.2      rmarkdown_2.20     

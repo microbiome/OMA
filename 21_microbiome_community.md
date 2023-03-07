@@ -366,7 +366,7 @@ other attached packages:
  [1] ggtree_3.4.4                   ape_5.7                       
  [3] pheatmap_1.0.12                miaViz_1.7.3                  
  [5] ggraph_2.1.0                   ggplot2_3.4.1                 
- [7] mia_1.7.7                      MultiAssayExperiment_1.24.0   
+ [7] mia_1.7.8                      MultiAssayExperiment_1.24.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [11] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [13] SummarizedExperiment_1.28.0    Biobase_2.58.0                
@@ -419,10 +419,10 @@ loaded via a namespace (and not attached):
  [79] treeio_1.22.0               CodeDepends_0.6.5          
  [81] bit_4.0.5                   tidyselect_1.2.0           
  [83] plyr_1.8.8                  magrittr_2.0.3             
- [85] bookdown_0.32               R6_2.5.1                   
+ [85] bookdown_0.33               R6_2.5.1                   
  [87] generics_0.1.3              DelayedArray_0.24.0        
  [89] DBI_1.1.3                   pillar_1.8.1               
- [91] withr_2.5.0                 mgcv_1.8-41                
+ [91] withr_2.5.0                 mgcv_1.8-42                
  [93] RCurl_1.98-1.10             tibble_3.1.8               
  [95] dir.expiry_1.4.0            crayon_1.5.2               
  [97] utf8_1.2.3                  rmarkdown_2.20             

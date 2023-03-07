@@ -848,7 +848,7 @@ other attached packages:
  [5] reshape2_1.4.4                 sechm_1.4.1                   
  [7] miaViz_1.7.3                   ggraph_2.1.0                  
  [9] patchwork_1.1.2                scater_1.26.1                 
-[11] scuttle_1.8.4                  mia_1.7.7                     
+[11] scuttle_1.8.4                  mia_1.7.8                     
 [13] MultiAssayExperiment_1.24.0    TreeSummarizedExperiment_2.1.4
 [15] Biostrings_2.66.0              XVector_0.38.0                
 [17] SingleCellExperiment_1.20.0    SummarizedExperiment_1.28.0   
@@ -916,11 +916,11 @@ loaded via a namespace (and not attached):
 [107] BiocNeighbors_1.16.0        cowplot_1.1.1              
 [109] bitops_1.0-7                irlba_2.3.5.1              
 [111] seriation_1.4.1             R6_2.5.1                   
-[113] TSP_1.2-2                   bookdown_0.32              
+[113] TSP_1.2-2                   bookdown_0.33              
 [115] gridExtra_2.3               vipor_0.4.5                
 [117] codetools_0.2-19            MASS_7.3-58.2              
 [119] rjson_0.2.21                withr_2.5.0                
-[121] GenomeInfoDbData_1.2.9      mgcv_1.8-41                
+[121] GenomeInfoDbData_1.2.9      mgcv_1.8-42                
 [123] parallel_4.2.1              grid_4.2.1                 
 [125] ggfun_0.0.9                 beachmat_2.14.0            
 [127] tidyr_1.3.0                 rmarkdown_2.20             

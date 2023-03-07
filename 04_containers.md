@@ -1290,7 +1290,7 @@ attached base packages:
 other attached packages:
  [1] microbiomeDataSets_1.1.7       phyloseq_1.40.0               
  [3] BiocManager_1.30.20            ggplot2_3.4.1                 
- [5] mia_1.7.7                      MultiAssayExperiment_1.24.0   
+ [5] mia_1.7.8                      MultiAssayExperiment_1.24.0   
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
  [9] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [11] SummarizedExperiment_1.28.0    Biobase_2.58.0                
@@ -1355,11 +1355,11 @@ loaded via a namespace (and not attached):
 [103] data.table_1.14.8             bitops_1.0-7                 
 [105] irlba_2.3.5.1                 httpuv_1.6.9                 
 [107] R6_2.5.1                      promises_1.2.0.1             
-[109] bookdown_0.32                 gridExtra_2.3                
+[109] bookdown_0.33                 gridExtra_2.3                
 [111] vipor_0.4.5                   codetools_0.2-19             
 [113] MASS_7.3-58.2                 rhdf5_2.40.0                 
 [115] withr_2.5.0                   GenomeInfoDbData_1.2.9       
-[117] mgcv_1.8-41                   parallel_4.2.1               
+[117] mgcv_1.8-42                   parallel_4.2.1               
 [119] grid_4.2.1                    beachmat_2.14.0              
 [121] tidyr_1.3.0                   rmarkdown_2.20               
 [123] DelayedMatrixStats_1.20.0     shiny_1.7.4                  

@@ -474,7 +474,7 @@ other attached packages:
  [1] ggplot2_3.4.1                  patchwork_1.1.2               
  [3] reticulate_1.28                MOFA2_1.6.0                   
  [5] ComplexHeatmap_2.12.1          stringr_1.5.0                 
- [7] mia_1.7.7                      MultiAssayExperiment_1.24.0   
+ [7] mia_1.7.8                      MultiAssayExperiment_1.24.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [11] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [13] SummarizedExperiment_1.28.0    Biobase_2.58.0                
@@ -537,12 +537,12 @@ loaded via a namespace (and not attached):
  [99] BiocManager_1.30.20         GlobalOptions_0.1.2        
 [101] BiocNeighbors_1.16.0        cowplot_1.1.1              
 [103] bitops_1.0-7                irlba_2.3.5.1              
-[105] R6_2.5.1                    bookdown_0.32              
+[105] R6_2.5.1                    bookdown_0.33              
 [107] gridExtra_2.3               vipor_0.4.5                
 [109] codetools_0.2-19            MASS_7.3-58.2              
 [111] rhdf5_2.40.0                rprojroot_2.0.3            
 [113] rjson_0.2.21                withr_2.5.0                
-[115] GenomeInfoDbData_1.2.9      mgcv_1.8-41                
+[115] GenomeInfoDbData_1.2.9      mgcv_1.8-42                
 [117] parallel_4.2.1              beachmat_2.14.0            
 [119] tidyr_1.3.0                 basilisk_1.8.1             
 [121] rmarkdown_2.20              DelayedMatrixStats_1.20.0  

@@ -261,7 +261,7 @@ other attached packages:
  [1] patchwork_1.1.2                MLeval_0.3                    
  [3] caret_6.0-93                   lattice_0.20-45               
  [5] ggplot2_3.4.1                  mikropml_1.5.0                
- [7] mia_1.7.7                      MultiAssayExperiment_1.24.0   
+ [7] mia_1.7.8                      MultiAssayExperiment_1.24.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [11] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [13] SummarizedExperiment_1.28.0    Biobase_2.58.0                
@@ -326,11 +326,11 @@ loaded via a namespace (and not attached):
 [103] lifecycle_1.0.3             BiocManager_1.30.20        
 [105] BiocNeighbors_1.16.0        data.table_1.14.8          
 [107] bitops_1.0-7                irlba_2.3.5.1              
-[109] R6_2.5.1                    bookdown_0.32              
+[109] R6_2.5.1                    bookdown_0.33              
 [111] gridExtra_2.3               vipor_0.4.5                
 [113] parallelly_1.34.0           codetools_0.2-19           
 [115] MASS_7.3-58.2               withr_2.5.0                
-[117] GenomeInfoDbData_1.2.9      mgcv_1.8-41                
+[117] GenomeInfoDbData_1.2.9      mgcv_1.8-42                
 [119] parallel_4.2.1              grid_4.2.1                 
 [121] rpart_4.1.19                beachmat_2.14.0            
 [123] timeDate_4022.108           tidyr_1.3.0                

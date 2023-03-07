@@ -110,15 +110,11 @@ library(Maaslin2)
 library(MicrobiomeStat)
 library(knitr)
 library(tidyverse)
+library(ANCOMBC)
 
 # set random seed because some tools can randomly vary and then produce 
 # different results:
 set.seed(13253)
-
-# For ANCOMBC we need development version
-# Can be installed with:
-# remotes::install_github("FrederickHuangLin/ANCOMBC")
-library(ANCOMBC)
 
 # we use a demo dataset and restrict it to two geo locations
 # for easy illustration
@@ -242,13 +238,13 @@ par(mfrow = c(1, 2))
 ```
 
 The evaluation as differential abundant in above plots is based on the
-corrected pvalue. According to the ALDEx2 developers, the safest
+corrected p-value. According to the ALDEx2 developers, the safest
 approach is to identify those features where the 95% CI of the effect
 size does not cross 0. As we can see in below table, this is not the
 case for any of the identified genera (see overlap column, which
 indicates the proportion of overlap). Also, the authors recommend to
-focus on effect sizes and CIs rather than interpreting the pvalue. To
-keep the comparison simple, we will here use the pvalue as decision
+focus on effect sizes and CIs rather than interpreting the p-value. To
+keep the comparison simple, we will here use the p-value as decision
 criterion. But please be aware that the effect size together with the
 CI is a better answer to the question we are typically interested in
 (see also [this
@@ -282,21 +278,28 @@ this method provides p-values and confidence intervals for each
 taxon. It also controls the FDR and it is computationally simple to
 implement.
 
-As we will see below, to obtain results, all that is needed is to pass
-a tse object to the `ancombc()` function. Below, we first specify a
-formula.  In this formula, other covariates could potentially be
-included to adjust for confounding. We show this further below.
-Please check the [function documentation](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html)
-to learn about the additional arguments that we specify below.
+Note that the original method was implemented in the `ancombc()` function (see 
+[extended tutorial](https://www.bioconductor.org/packages/release/bioc/vignettes/ANCOMBC/inst/doc/ANCOMBC.html)).
+The method has since then been updated and new features have been added to enable
+multi-group comparisons and repeated measurements among other improvements. 
+We do not cover the more advanced features of ANCOMBC in this tutorial 
+as these features are documented in detail in this 
+[tutorial](https://www.bioconductor.org/packages/release/bioc/vignettes/ANCOMBC/inst/doc/ANCOMBC2.html).
 
-We recommend to use  or higher in real case studies.
+We now proceed with a simple example.  First, we specify a formula. In this 
+formula, other covariates could potentially be included to adjust for 
+confounding. We show this further below. Again, please make sure to check the 
+[function documentation](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html)
+as well as the linked tutorials to learn about the additional arguments 
+that we specify.
+
 
 
 ```r
 # perform the analysis 
 out <- ancombc2(
   data = tse,
-  tax_level="family",
+  tax_level="genus",
   fix_formula = "Geographical_location", 
   p_adj_method = "fdr", 
   prv_cut = 0, # prev filtering has been done above already
@@ -305,7 +308,7 @@ out <- ancombc2(
   struc_zero = TRUE, 
   neg_lb = TRUE,
   iter_control = list(tol = 1e-5, max_iter = 20, verbose = FALSE),
-  em_control = list(tol = 1e-5, max_iter = 20),  
+  em_control = list(tol = 1e-5, max_iter = 20), # use max_iter >= 100 on real data 
   alpha = 0.05, 
   global = TRUE # multi group comparison will be deactivated automatically 
 )
@@ -399,7 +402,7 @@ res <- linda(
   mean.abund.filter = 0)
 
 # to scan the table for genera where H0 could be rejected:
-kable(head(filter(as.data.frame(res$output), Geographical_locationPune.reject)))
+kable(head(filter(as.data.frame(res$output$Geographical_locationPune), reject)))
 ```
 
 
@@ -416,30 +419,35 @@ taxon.
 
 
 
-
 ```r
-# Rename "taxon" column from ancombc results  so that it match with others
-colnames(out$res)[colnames(out$res) == "taxon"] <- "genus"
+# change genus names to otu ids for ancombc results to make it joinable with others
+id_switch <- as.data.frame(rowData(tse)) %>%
+  rownames_to_column("taxid") %>%
+  select(taxid, genus)
+abc_res <- select(out$res, genus = taxon, ancombc = diff_Geographical_locationPune) %>%
+  left_join(id_switch, by = "genus") %>%
+  select(-genus)
 
+# join all results together
 summ <- full_join(
-    rownames_to_column(aldex_out, "genus") %>%
-      select(genus, aldex2 = wi.eBH),
-    out$res %>%
-      select(genus, ancombc = diff_Geographical_locationPune),
-    by = "genus") %>%
+    rownames_to_column(aldex_out, "taxid") %>%
+      select(taxid, aldex2 = wi.eBH),
+    abc_res,
+    by = "taxid") %>%
   full_join(
-    select(fit_data$results, genus = feature, maaslin2 = qval), 
-    by = "genus") %>%
+    select(fit_data$results, taxid = feature, maaslin2 = qval), 
+    by = "taxid") %>%
     full_join(
-      rownames_to_column(as.data.frame(res$output), "genus") %>%
-        select(genus, LinDA = Geographical_locationPune.reject), 
-      by = "genus") %>%
+      rownames_to_column(as.data.frame(res$output$Geographical_locationPune), "taxid") %>%
+        select(taxid, LinDA = reject), 
+      by = "taxid") %>%
   mutate(
     across(c(aldex2, maaslin2), ~ .x <= 0.05),
     # the following line would be necessary without prevalence filtering 
     # as some methods output NA
     #across(-genus, function(x) ifelse(is.na(x), FALSE, x)),
-    score = rowSums(across(c(aldex2, ancombc, maaslin2, LinDA)))
+    ancombc = ifelse(is.na(ancombc), FALSE, ancombc),
+    score = rowSums(across(c(aldex2, ancombc, maaslin2, LinDA))),
   )
 
 # This is how it looks like:
@@ -469,8 +477,8 @@ any method or for those taxa that were identified by all methods:
 plot_data <- data.frame(t(assay(tse)))
 plot_data$Geographical_location <- tse$Geographical_location
 # create a plot for each genus where the score is indicated in the title
-plots <- pmap(select(summ, genus, score), function(genus, score) {
-  ggplot(plot_data, aes("Geographical_location", genus)) +
+plots <- pmap(select(summ, taxid, score), function(taxid, score) {
+  ggplot(plot_data, aes_string("Geographical_location", taxid)) +
     geom_boxplot(aes(fill = Geographical_location), outlier.shape = NA) +
     geom_jitter(width = 0.2, alpha = 0.5) +
     ggtitle(glue::glue("Score {score}")) +
@@ -589,7 +597,7 @@ other attached packages:
 [17] truncnorm_1.0-8                NADA_1.6-1.1                  
 [19] survival_3.5-3                 MASS_7.3-58.2                 
 [21] tidySummarizedExperiment_1.6.1 patchwork_1.1.2               
-[23] mia_1.7.7                      MultiAssayExperiment_1.24.0   
+[23] mia_1.7.8                      MultiAssayExperiment_1.24.0   
 [25] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [27] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [29] SummarizedExperiment_1.28.0    Biobase_2.58.0                
@@ -610,14 +618,14 @@ loaded via a namespace (and not attached):
  [15] RSQLite_2.3.0               proxy_0.4-27               
  [17] bit_4.0.5                   tzdb_0.3.0                 
  [19] DirichletMultinomial_1.40.0 viridis_0.6.2              
- [21] xfun_0.37                   fBasics_4021.93            
+ [21] xfun_0.37                   fBasics_4022.94            
  [23] hms_1.1.2                   evaluate_0.20              
  [25] DEoptimR_1.0-11             fansi_1.0.4                
  [27] readxl_1.4.2                igraph_1.4.1               
  [29] DBI_1.1.3                   htmlwidgets_1.6.1          
  [31] Rmpfr_0.9-1                 CVXR_1.0-11                
  [33] ellipsis_0.3.2              energy_1.7-11              
- [35] backports_1.4.1             bookdown_0.32              
+ [35] backports_1.4.1             bookdown_0.33              
  [37] permute_0.9-7               deldir_1.0-6               
  [39] sparseMatrixStats_1.10.0    vctrs_0.5.2                
  [41] cachem_1.0.7                withr_2.5.0                
@@ -651,7 +659,7 @@ loaded via a namespace (and not attached):
  [97] lme4_1.1-31                 cli_3.6.0                  
  [99] ade4_1.7-22                 lmerTest_3.1-3             
 [101] htmlTable_2.4.1             Formula_1.2-5              
-[103] mgcv_1.8-41                 tidyselect_1.2.0           
+[103] mgcv_1.8-42                 tidyselect_1.2.0           
 [105] stringi_1.7.12              yaml_2.3.7                 
 [107] BiocSingular_1.14.0         latticeExtra_0.6-30        
 [109] ggrepel_0.9.3               grid_4.2.1                 
@@ -675,7 +683,7 @@ loaded via a namespace (and not attached):
 [145] jsonlite_1.8.4              nloptr_2.0.3               
 [147] CodeDepends_0.6.5           timeDate_4022.108          
 [149] Rfast_2.0.7                 R6_2.5.1                   
-[151] Hmisc_4.8-0                 pillar_1.8.1               
+[151] Hmisc_5.0-0                 pillar_1.8.1               
 [153] htmltools_0.5.4             glue_1.6.2                 
 [155] fastmap_1.1.1               minqa_1.2.5                
 [157] BiocParallel_1.32.5         BiocNeighbors_1.16.0       
