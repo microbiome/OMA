@@ -111,6 +111,7 @@ tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 0.1)
 ```
 
 
+
 ### ALDEx2
 
 In this section, we will show how to perform a simple ALDEx2 analysis. 
@@ -131,7 +132,7 @@ is applied in any case to correct for multiple testing. Below we show a simple
 example that illustrates the workflow.
 
 
-```{r, aldex2, eval=FALSE}
+```{r, aldex2, eval=TRUE}
 # Generate Monte Carlo samples of the Dirichlet distribution for each sample.
 # Convert each instance using the centered log-ratio transform.
 # This is the input for all further analyses.
@@ -142,7 +143,7 @@ x <- aldex.clr(assay(tse), tse$Geographical_location)
 
 The t-test:
 
-```{r, aldex2_ttest, eval=FALSE}
+```{r, aldex2_ttest, eval=TRUE}
 # calculates expected values of the Welch's t-test and Wilcoxon rank
 # test on the data returned by aldex.clr
 x_tt <- aldex.ttest(x, paired.test = FALSE, verbose = FALSE)
@@ -151,7 +152,7 @@ x_tt <- aldex.ttest(x, paired.test = FALSE, verbose = FALSE)
 
 Effect sizes:
 
-```{r, aldex2_efs, eval=FALSE}
+```{r, aldex2_efs, eval=TRUE}
 # determines the median clr abundance of the feature in all samples and in
 # groups, the median difference between the two groups, the median variation
 # within each group and the effect size, which is the median of the ratio
@@ -170,7 +171,7 @@ differentially abundant ($q \leq 0.1$) between the 2 groups. Black points are
 rare taxa and grey ones are abundant taxa. The dashed line represent an effect
 size of 1. See @Gloor2016 to learn more about these plots.
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 par(mfrow = c(1, 2))
   aldex.plot(
     aldex_out, 
@@ -204,7 +205,7 @@ CI is a better answer to the question we are typically interested in
 article](https://www.nature.com/articles/d41586-019-00857-9)).
 
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 rownames_to_column(aldex_out, "genus") %>%
   filter(wi.eBH <= 0.05)  %>% # here we chose the wilcoxon output rather than tt
   select(genus, we.eBH, wi.eBH, effect, overlap) %>%
@@ -246,7 +247,7 @@ as well as the linked tutorials to learn about the additional arguments
 that we specify.
 
 
-```{r ancombc2, warning = FALSE, eval=FALSE}
+```{r ancombc2, warning = FALSE, eval=TRUE}
 # perform the analysis 
 out <- ancombc2(
   data = tse,
@@ -277,7 +278,7 @@ standard errors, p-values and q-values. Conveniently, there is a dataframe
 abundant between the groups (again, keep in mind that the answer is not 
 black-white). Below we show the first 6 entries of this dataframe:  
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 kable(head(res))
 ```
 
@@ -289,7 +290,7 @@ Next, we will illustrate how to use MaAsLin2, which is the next generation of
 MaAsLin. As it is based on generalized linear models, it is flexible for different study designs and covariate
 structures. The official package tutorial can be found [here](https://github.com/biobakery/biobakery/wiki/maaslin2). 
 
-```{r maaslin2, results = "hide", eval=FALSE}
+```{r maaslin2, results = "hide", eval=TRUE}
 # maaslin expects features as columns and samples as rows 
 # for both the asv/otu table as well as meta data 
 asv <- t(assay(tse))
@@ -313,7 +314,7 @@ fit_data <- Maaslin2(
 
 Which genera are identified as differentially abundant? (leave out "head" to see all).
 
-```{r, maaslin2kable, eval=FALSE}
+```{r, maaslin2kable, eval=TRUE}
 kable(head(filter(fit_data$results, qval <= 0.05)))
 ```
 
@@ -337,7 +338,7 @@ authors. The speed might make it the choice for bigger datasets or
 datasets with a very high number of features.
 
 
-```{r linda, eval=FALSE}
+```{r linda, eval=TRUE}
 otu.tab <- as.data.frame(assay(tse))
 meta <- as.data.frame(colData(tse)) %>% select(Geographical_location)
 res <- linda(
@@ -365,7 +366,7 @@ and shows a score from 0 to 3 indicating how many methods agreed on a particular
 taxon.
 
 
-```{r linda2, eval=FALSE}
+```{r linda2, eval=TRUE}
 # change genus names to otu ids for ancombc results to make it joinable with others
 id_switch <- as.data.frame(rowData(tse)) %>%
   rownames_to_column("taxid") %>%
@@ -402,7 +403,7 @@ kable(head(summ))
 
 Now we can answer our questions:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 # how many genera were identified by each method?
 summarise(summ, across(where(is.logical), sum)) %>%
   kable()
@@ -410,22 +411,32 @@ summarise(summ, across(where(is.logical), sum)) %>%
 filter(summ, score == 4) %>% kable()
 ```
 
-We see that each method identified at least 9 genera as differentially
-abundant. Eight of those that were identified by ALDEx2,
-were also identified by the other methods. We could plot the data for
+We see that each method identified at least some genera as differentially
+abundant. Many of those that were identified by ALDEx2,
+were also identified by the other methods. Let us plot the data for
 any method or for those taxa that were identified by all methods:
 
 
+```{r, daplotting, eval=TRUE, fig.width=20,fig.height=4}
+# Data
+data(peerj13075)
+tse <- peerj13075
+tse <- tse[ ,tse$Geographical_location %in% c("Pune", "Nashik")]
+# Let us make this a factor
+tse$Geographical_location <- factor(tse$Geographical_location)
+tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 0.1)
 
-```{r, daplotting, eval=FALSE}
-plot_data <- data.frame(t(assay(tse)))
+# prepare the data for plotting
+assay.type <- "counts"
+plot_data <- data.frame(t(assay(tse, assay.type)))
 plot_data$Geographical_location <- tse$Geographical_location
-# create a plot for each genus where the score is indicated in the title
+
+# Create a jittered boxplot for each genus 
 plots <- pmap(select(summ, taxid, score), function(taxid, score) {
-  ggplot(plot_data, aes_string("Geographical_location", taxid)) +
-    geom_boxplot(aes(fill = Geographical_location), outlier.shape = NA) +
-    geom_jitter(width = 0.2, alpha = 0.5) +
-    ggtitle(glue::glue("Score {score}")) +
+  ggplot(plot_data, aes_string(x="Geographical_location", y=taxid)) +
+    geom_boxplot(outlier.shape = NA) +
+    geom_jitter(width = 0.2) +
+    labs(title=glue::glue("{taxid}"), x="", y=glue::glue("Abundance ({assay.type})")) +    
     theme_bw() +
     theme(legend.position = "none")
 })
@@ -441,7 +452,8 @@ robust_plots[[1]] +
   robust_plots[[4]] +
   robust_plots[[5]] +
   robust_plots[[6]] +
-  plot_layout(nrow = 2)
+  plot_layout(nrow = 1)
+  
 # or if we have most trust in any specific method we can show genera that 
 # are differentially abundant according to that method and then look in the
 # title how many methods also identified it (we only show first 6 here):
@@ -467,7 +479,7 @@ there are no covariates, I first simulate a new variable and add it to the TSE
 object.
 
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 # FIXME: switch to a faster example / method
 out_cov = ancombc2(
   data = tse, 
