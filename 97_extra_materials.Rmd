@@ -19,9 +19,9 @@ knitr::knit_hooks$set(webgl = hook_webgl)
 ```
 
 
-In this section we make a 3D version of the earlier [ Visualizing the most dominant genus on PCoA](https://microbiome.github.io/OMA/microbiome-exploration.html#visualizing-the-most-dominant-genus-on-pcoa), with the help of the [plotly](https://plotly.com/r/) R package.
+In this section we make a 3D version of the earlier "Visualizing the most dominant genus on PCoA" \@ref(pcoa-genus), with the help of the plotly R package [@Sievert2020].
 
-```{r, message=FALSE, warning=FALSE}
+```{r viz PCoA, message=FALSE, warning=FALSE}
 # Importing necessary libraries
 library(curatedMetagenomicData)
 library(dplyr)
@@ -85,40 +85,103 @@ plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3) %>%
 
 ## PERMANOVA comparison
 
-```{r}
-library("vegan")
+Here we present two possible uses of the `adonis2` function which performs PERMANOVA. The
+optional argument `by` has an effect on the statistical outcome, so its two options are
+compared in this section.
+
+```{r permanova_import, warning = FALSE, message = FALSE}
+# import necessary packages
+if (!require(gtools)){
+  install.packages("gtools")  
+}
+if (!require(purrr)){
+  install.packages("purrr")  
+}
+
+library(vegan)
+library(gtools)
+library(purrr)
+```
+
+Below we load the _enterotype_ TSE object and run PERMANOVA with the `adonis2` function
+for different orders of the three variables ClinicalStatus, Gender and Nationality with
+two different approaches: `by = "margin"` or `by = "terms"`.
+
+```{r permanova_prep, message = FALSE, warning = FALSE}
+# load and prepare data
 data("enterotype")
-enterotype <- transformSamples(enterotype, method = "relabundance")
-# Drop those samples that do not have meta dtaa
-enterotype <- 
-    enterotype[ , !rowSums(is.na(colData(enterotype)[, c("Nationality", "Gender","ClinicalStatus")]) > 0 ) ]
+enterotype <- transformCounts(enterotype, method = "relabundance")
 
-# Multiple variables, by = "margin"
-set.seed(75)
-adonis2(t(assay(enterotype ,"relabundance")) ~ Nationality + Gender + ClinicalStatus,
-        by = "margin",
-        data = colData(enterotype),
-        permutations = 99)
+# drop samples missing meta data
+enterotype <- enterotype[ , !rowSums(is.na(colData(enterotype)[, c("Nationality", "Gender", "ClinicalStatus")]) > 0)]
 
-# Multiple variables, by = "margin"
-set.seed(75)
-adonis2(t(assay(enterotype ,"relabundance")) ~ ClinicalStatus + Nationality + Gender,
-        by = "margin",
-        data = colData(enterotype ),
-        permutations = 99)
+# define variables and list all possible combinations
+vars <- c("Nationality", "Gender", "ClinicalStatus")
+var_perm <- permutations(n = 3, r = 3, vars)
+formulas <- apply(var_perm, 1, function(row) purrr::reduce(row, function(x, y) paste(x, "+", y)))
+
+# create empty data.frames for further storing p-values
+terms_df <- data.frame("Formula" = formulas,
+                       "ClinicalStatus" = rep(0, 6),
+                       "Gender" = rep(0, 6),
+                       "Nationality" = rep(0, 6))
+
+margin_df <- data.frame("Formula" = formulas,
+                        "ClinicalStatus" = rep(0, 6),
+                        "Gender" = rep(0, 6),
+                        "Nationality" = rep(0, 6))
+```
 
 
-# Multiple variables, default: by = "terms"
-set.seed(75)
-adonis2(t(assay(enterotype ,"relabundance"))  ~ Nationality + Gender + ClinicalStatus,
-        data = colData(enterotype ),
-        permutations = 99)
+```{r permanova_loop, message = FALSE, warning = FALSE}
+for (row_idx in 1:nrow(var_perm)) {
+  
+  # generate temporary formula (i.e. "assay ~ ClinicalStatus + Nationality + Gender")
+  tmp_formula <- purrr::reduce(var_perm[row_idx, ], function(x, y) paste(x, "+", y))
+  tmp_formula <- as.formula(paste0('t(assay(enterotype, "relabundance")) ~ ',
+                            tmp_formula))
 
-# Multiple variables, default: by = "terms"
-set.seed(75)
-adonis2(t(assay(enterotype ,"relabundance"))  ~ ClinicalStatus + Nationality + Gender,
-        data = colData(enterotype),
-        permutations = 99)
+  # multiple variables, default: by = "terms"
+  set.seed(75)
+  with_terms <- adonis2(tmp_formula, 
+                by = "terms",
+                data = colData(enterotype),
+                permutations = 99)
+  
+  # multiple variables, by = "margin"
+  set.seed(75)
+  with_margin <- adonis2(tmp_formula, 
+                 by = "margin",
+                 data = colData(enterotype),
+                 permutations = 99)
+
+  # extract p-values
+  terms_p <- with_terms[["Pr(>F)"]]
+  terms_p <- terms_p[!is.na(terms_p)]
+  margin_p <- with_margin[["Pr(>F)"]]
+  margin_p <- margin_p[!is.na(margin_p)]
+  
+  # store p-values into data.frames
+  for (col_idx in 1:ncol(var_perm)) {
+    
+    terms_df[var_perm[row_idx, col_idx]][row_idx, ] <- terms_p[col_idx]
+    margin_df[var_perm[row_idx, col_idx]][row_idx, ] <- margin_p[col_idx]
+    
+  }
+  
+}
+```
+
+The following table displays the p-values for the three variables ClinicalStatus, Gender and
+Nationality obtained by PERMANOVA with `adonis2`. As you can see, p-values remain identical when
+`by = "margin"`, but they change with the order of the variables in the formula when `by = "terms"` (default).
+
+```{r permanova_table, message = FALSE, warning = FALSE}
+
+df <- terms_df %>%
+  dplyr::inner_join(margin_df, by = "Formula", suffix = c(" (terms)", " (margin)"))
+
+knitr::kable(df)
 ```
 
 ## Bayesian Multinomial Logistic-Normal Models

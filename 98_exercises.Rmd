@@ -139,7 +139,7 @@ Useful functions: getPrevalence, getPrevalentTaxa, subsetByPrevalentTaxa
 2. Create two histograms. Another shows the distribution of absolute counts, another shows how CLR transformed values are distributed.
 3. Visualize how relative abundances are distributed between taxa in samples.
 
-Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformSamples, ggplot, wilcox.test, agglomerateByRank, plotAbundance
+Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformCounts, ggplot, wilcox.test, agglomerateByRank, plotAbundance
 
 ### Other functions
 
@@ -234,7 +234,7 @@ Useful functions: estimateDiversity, colSums, geom_point, geom_boxplot
 5. Analyze diets' association on beta diversity. Calculate dbRDA and then PERMANOVA. Visualize coefficients. Which taxa's abundances differ the most between samples? 
 6. Interpret your results. Is there association between community composition and location? What are those taxa that differ the most; find information from literature.
 
-Useful functions: runMDS, runRDA, anova.cca, transformSamples, agglomerateByRank, ggplot, plotReducedDim, vegan::adonis2
+Useful functions: runMDS, runRDA, anova.cca, transformCounts, agglomerateByRank, ggplot, plotReducedDim, vegan::adonis2
 
 
 
@@ -252,7 +252,7 @@ Useful functions: runMDS, runRDA, anova.cca, transformSamples, agglomerateByRank
 4. Visualize and compare both
 5. Test other transformations, dissimilarities, and ordination methods
 
-Useful functions: runMDS, runNMDS, transformSamples, ggplot, plotReducedDim
+Useful functions: runMDS, runNMDS, transformCounts, ggplot, plotReducedDim
 
 
 ### Heatmap visualization
@@ -277,7 +277,7 @@ See the OMA book for examples.
 7. Do multiple testing correction
 9. Compare the results from different tests with a scatterplot
 
-Useful functions: [], ggplot2::geom_boxplot, ggplot2::geom_jitter, wilcox.test, lm.test, transformSamples, p.adjust
+Useful functions: [], ggplot2::geom_boxplot, ggplot2::geom_jitter, wilcox.test, lm.test, transformCounts, p.adjust
 
 
 ### Differential abundance analysis
@@ -288,7 +288,7 @@ Useful functions: [], ggplot2::geom_boxplot, ggplot2::geom_jitter, wilcox.test, 
 4. Summarize findings by plotting a taxa vs samples heatmap. Add column annotation that tells the group of each sample, and row annotation that tells whether the difference of certain taxa was statistically significant.
 5. Choose statistically significant taxa and visualize their abundances with boxplot & jitterplot.
 
-Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::Heatmap, ancombc, aldex2, maaslin2, agglomerateByRank, transformSamples, transformFeatures, subsetByPrevalentTaxa
+Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::Heatmap, ancombc, aldex2, maaslin2, agglomerateByRank, transformCounts, subsetByPrevalentTaxa
 
 
 
@@ -315,7 +315,7 @@ Useful functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colname
 5. Perform cross-correlation analyses and visualize results with heatmaps. (Use Spearman coefficients)
 6. Is there significant correlations? Interpret your results.
 
-Useful functions: pheatmap, ComplexHeatMap::Heatmap, ggplot, transformSamples, testExperimentCrossAssociation
+Useful functions: pheatmap, ComplexHeatMap::Heatmap, ggplot, transformCounts, testExperimentCrossAssociation
 
 
 
