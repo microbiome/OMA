@@ -62,6 +62,7 @@ e <- attr(reducedDim(tse_Genus, "PCoA_BC"), "eig");
 var_explained <- e/sum(e[e>0])*100
 ```
 
+
 Interactive 3D visualization of the most dominant genus on PCoA.
 
 Note that labels at legend can be used to visualize one or more Genus
@@ -83,4 +84,48 @@ plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3) %>%
 
 
 
+## PERMANOVA comparison
+
+Here we present two possible uses of the `adonis2` function which performs PERMANOVA. The
+optional argument `by` has an effect on the statistical outcome, so its two options are
+compared in this section.
+
+```{r permanova_import, warning = FALSE, message = FALSE}
+# import necessary packages
+if (!require(gtools)){
+  install.packages("gtools")  
+}
+if (!require(purrr)){
+  install.packages("purrr")  
+}
+library(vegan)
+library(gtools)
+library(purrr)
+```
+
+Below we load the _enterotype_ TSE object and run PERMANOVA with the `adonis2` function
+for different orders of the three variables ClinicalStatus, Gender and Nationality with
+two different approaches: `by = "margin"` or `by = "terms"`.
+
+
+```{r permanova_prep, message = FALSE, warning = FALSE}
+# load and prepare data
+data("enterotype")
+enterotype <- transformCounts(enterotype, method = "relabundance")
+# drop samples missing meta data
+enterotype <- enterotype[ , !rowSums(is.na(colData(enterotype)[, c("Nationality", "Gender", "ClinicalStatus")]) > 0)]
+# define variables and list all possible combinations
+vars <- c("Nationality", "Gender", "ClinicalStatus")
+var_perm <- permutations(n = 3, r = 3, vars)
+formulas <- apply(var_perm, 1, function(row) purrr::reduce(row, function(x, y) paste(x, "+", y)))
+# create empty data.frames for further storing p-values
+terms_df <- data.frame("Formula" = formulas,
+                       "ClinicalStatus" = rep(0, 6),
+                       "Gender" = rep(0, 6),
+                       "Nationality" = rep(0, 6))
+margin_df <- data.frame("Formula" = formulas,
+                        "ClinicalStatus" = rep(0, 6),
+                        "Gender" = rep(0, 6),
+                        "Nationality" = rep(0, 6))
+```
 
