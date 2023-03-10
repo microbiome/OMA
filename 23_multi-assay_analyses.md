@@ -474,7 +474,7 @@ other attached packages:
  [1] ggplot2_3.4.1                  patchwork_1.1.2               
  [3] reticulate_1.28                MOFA2_1.6.0                   
  [5] ComplexHeatmap_2.12.1          stringr_1.5.0                 
- [7] mia_1.7.8                      MultiAssayExperiment_1.24.0   
+ [7] mia_1.7.9                      MultiAssayExperiment_1.24.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [11] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [13] SummarizedExperiment_1.28.0    Biobase_2.58.0                

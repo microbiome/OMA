@@ -1290,7 +1290,7 @@ attached base packages:
 other attached packages:
  [1] microbiomeDataSets_1.1.7       phyloseq_1.40.0               
  [3] BiocManager_1.30.20            ggplot2_3.4.1                 
- [5] mia_1.7.8                      MultiAssayExperiment_1.24.0   
+ [5] mia_1.7.9                      MultiAssayExperiment_1.24.0   
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
  [9] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [11] SummarizedExperiment_1.28.0    Biobase_2.58.0                

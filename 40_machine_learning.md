@@ -137,26 +137,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    11   8
-##      Veg      12  16
+##      Mixed    14  11
+##      Veg       9  13
 ##                                         
 ##                Accuracy : 0.574         
 ##                  95% CI : (0.422, 0.717)
 ##     No Information Rate : 0.511         
 ##     P-Value [Acc > NIR] : 0.233         
 ##                                         
-##                   Kappa : 0.145         
+##                   Kappa : 0.15          
 ##                                         
-##  Mcnemar's Test P-Value : 0.502         
+##  Mcnemar's Test P-Value : 0.823         
 ##                                         
-##             Sensitivity : 0.478         
-##             Specificity : 0.667         
-##          Pos Pred Value : 0.579         
-##          Neg Pred Value : 0.571         
+##             Sensitivity : 0.609         
+##             Specificity : 0.542         
+##          Pos Pred Value : 0.560         
+##          Neg Pred Value : 0.591         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.234         
-##    Detection Prevalence : 0.404         
-##       Balanced Accuracy : 0.572         
+##          Detection Rate : 0.298         
+##    Detection Prevalence : 0.532         
+##       Balanced Accuracy : 0.575         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -261,7 +261,7 @@ other attached packages:
  [1] patchwork_1.1.2                MLeval_0.3                    
  [3] caret_6.0-93                   lattice_0.20-45               
  [5] ggplot2_3.4.1                  mikropml_1.5.0                
- [7] mia_1.7.8                      MultiAssayExperiment_1.24.0   
+ [7] mia_1.7.9                      MultiAssayExperiment_1.24.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [11] XVector_0.38.0                 SingleCellExperiment_1.20.0   
 [13] SummarizedExperiment_1.28.0    Biobase_2.58.0                
