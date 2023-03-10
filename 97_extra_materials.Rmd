@@ -129,3 +129,44 @@ margin_df <- data.frame("Formula" = formulas,
                         "Nationality" = rep(0, 6))
 ```
 
+
+
+```{r permanova_loop, message = FALSE, warning = FALSE}
+for (row_idx in 1:nrow(var_perm)) {
+  
+  # generate temporary formula (i.e. "assay ~ ClinicalStatus + Nationality + Gender")
+  tmp_formula <- purrr::reduce(var_perm[row_idx, ], function(x, y) paste(x, "+", y))
+  tmp_formula <- as.formula(paste0('t(assay(enterotype, "relabundance")) ~ ',
+                            tmp_formula))
+
+  # multiple variables, default: by = "terms"
+  set.seed(75)
+  with_terms <- adonis2(tmp_formula, 
+                by = "terms",
+                data = colData(enterotype),
+                permutations = 99)
+  
+  # multiple variables, by = "margin"
+  set.seed(75)
+  with_margin <- adonis2(tmp_formula, 
+                 by = "margin",
+                 data = colData(enterotype),
+                 permutations = 99)
+
+  # extract p-values
+  terms_p <- with_terms[["Pr(>F)"]]
+  terms_p <- terms_p[!is.na(terms_p)]
+  margin_p <- with_margin[["Pr(>F)"]]
+  margin_p <- margin_p[!is.na(margin_p)]
+  
+  # store p-values into data.frames
+  for (col_idx in 1:ncol(var_perm)) {
+    
+    terms_df[var_perm[row_idx, col_idx]][row_idx, ] <- terms_p[col_idx]
+    margin_df[var_perm[row_idx, col_idx]][row_idx, ] <- margin_p[col_idx]
+    
+  }
+  
+}
+```
+
