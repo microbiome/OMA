@@ -527,7 +527,7 @@ loaded via a namespace (and not attached):
  [79] nlme_3.1-162                sparseMatrixStats_1.10.0   
  [81] compiler_4.2.1              beeswarm_0.4.0             
  [83] filelock_1.0.2              png_0.1-8                  
- [85] treeio_1.22.0               tibble_3.1.8               
+ [85] treeio_1.22.0               tibble_3.2.0               
  [87] stringi_1.7.12              highr_0.10                 
  [89] basilisk.utils_1.8.0        forcats_1.0.0              
  [91] lattice_0.20-45             Matrix_1.5-3               
@@ -539,7 +539,7 @@ loaded via a namespace (and not attached):
 [103] bitops_1.0-7                irlba_2.3.5.1              
 [105] R6_2.5.1                    bookdown_0.33              
 [107] gridExtra_2.3               vipor_0.4.5                
-[109] codetools_0.2-19            MASS_7.3-58.2              
+[109] codetools_0.2-19            MASS_7.3-58.3              
 [111] rhdf5_2.40.0                rprojroot_2.0.3            
 [113] rjson_0.2.21                withr_2.5.0                
 [115] GenomeInfoDbData_1.2.9      mgcv_1.8-42                

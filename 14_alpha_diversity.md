@@ -388,7 +388,7 @@ loaded via a namespace (and not attached):
 [39] stringr_1.5.0               beachmat_2.14.0            
 [41] lifecycle_1.0.3             irlba_2.3.5.1              
 [43] XML_3.99-0.13               zlibbioc_1.44.0            
-[45] MASS_7.3-58.2               scales_1.2.1               
+[45] MASS_7.3-58.3               scales_1.2.1               
 [47] parallel_4.2.1              yaml_2.3.7                 
 [49] memoise_2.0.1               gridExtra_2.3              
 [51] yulab.utils_0.0.6           stringi_1.7.12             
@@ -407,7 +407,7 @@ loaded via a namespace (and not attached):
 [77] DelayedArray_0.24.0         DBI_1.1.3                  
 [79] pillar_1.8.1                withr_2.5.0                
 [81] mgcv_1.8-42                 RCurl_1.98-1.10            
-[83] tibble_3.1.8                dir.expiry_1.4.0           
+[83] tibble_3.2.0                dir.expiry_1.4.0           
 [85] crayon_1.5.2                utf8_1.2.3                 
 [87] rmarkdown_2.20              viridis_0.6.2              
 [89] grid_4.2.1                  blob_1.2.3                 

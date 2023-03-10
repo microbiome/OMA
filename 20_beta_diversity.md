@@ -811,7 +811,7 @@ loaded via a namespace (and not attached):
 [37] DelayedMatrixStats_1.20.0   xfun_0.37                  
 [39] beachmat_2.14.0             lifecycle_1.0.3            
 [41] irlba_2.3.5.1               XML_3.99-0.13              
-[43] zlibbioc_1.44.0             MASS_7.3-58.2              
+[43] zlibbioc_1.44.0             MASS_7.3-58.3              
 [45] scales_1.2.1                parallel_4.2.1             
 [47] yaml_2.3.7                  memoise_2.0.1              
 [49] gridExtra_2.3               yulab.utils_0.0.6          
@@ -829,7 +829,7 @@ loaded via a namespace (and not attached):
 [73] generics_0.1.3              DelayedArray_0.24.0        
 [75] DBI_1.1.3                   pillar_1.8.1               
 [77] withr_2.5.0                 mgcv_1.8-42                
-[79] RCurl_1.98-1.10             tibble_3.1.8               
+[79] RCurl_1.98-1.10             tibble_3.2.0               
 [81] dir.expiry_1.4.0            crayon_1.5.2               
 [83] utf8_1.2.3                  rmarkdown_2.20             
 [85] viridis_0.6.2               grid_4.2.1                 

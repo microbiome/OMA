@@ -619,7 +619,7 @@ loaded via a namespace (and not attached):
 [55] DECIPHER_2.26.0             ape_5.7                    
 [57] viridis_0.6.2               lifecycle_1.0.3            
 [59] stringi_1.7.12              yaml_2.3.7                 
-[61] MASS_7.3-58.2               zlibbioc_1.44.0            
+[61] MASS_7.3-58.3               zlibbioc_1.44.0            
 [63] plyr_1.8.8                  blob_1.2.3                 
 [65] grid_4.2.1                  parallel_4.2.1             
 [67] ggrepel_0.9.3               crayon_1.5.2               
@@ -635,7 +635,7 @@ loaded via a namespace (and not attached):
 [87] tidyr_1.3.0                 cachem_1.0.7               
 [89] ggplot2_3.4.1               xfun_0.37                  
 [91] rsvd_1.0.5                  tidytree_0.4.2             
-[93] viridisLite_0.4.1           tibble_3.1.8               
+[93] viridisLite_0.4.1           tibble_3.2.0               
 [95] memoise_2.0.1               beeswarm_0.4.0             
 [97] cluster_2.1.4              
 ```

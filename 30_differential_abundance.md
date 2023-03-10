@@ -154,6 +154,7 @@ tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 0.1)
 ```
 
 
+
 ### ALDEx2
 
 In this section, we will show how to perform a simple ALDEx2 analysis. 
@@ -237,6 +238,8 @@ par(mfrow = c(1, 2))
   )
 ```
 
+![](30_differential_abundance_files/figure-latex/unnamed-chunk-2-1.pdf)<!-- --> 
+
 The evaluation as differential abundant in above plots is based on the
 corrected p-value. According to the ALDEx2 developers, the safest
 approach is to identify those features where the 95% CI of the effect
@@ -258,6 +261,31 @@ rownames_to_column(aldex_out, "genus") %>%
   select(genus, we.eBH, wi.eBH, effect, overlap) %>%
   kable()
 ```
+
+
+\begin{tabular}{l|r|r|r|r}
+\hline
+genus & we.eBH & wi.eBH & effect & overlap\\
+\hline
+OTU194 & 0.0553 & 0.0151 & 0.9552 & 0.1563\\
+\hline
+OTU562 & 0.0714 & 0.0266 & -0.7147 & 0.1648\\
+\hline
+OTU611 & 0.1204 & 0.0468 & -0.7630 & 0.1745\\
+\hline
+OTU773 & 0.0281 & 0.0036 & 1.1930 & 0.1037\\
+\hline
+OTU860 & 0.0866 & 0.0380 & -0.8501 & 0.1733\\
+\hline
+OTU1075 & 0.0374 & 0.0083 & -1.1059 & 0.1278\\
+\hline
+OTU1235 & 0.0280 & 0.0253 & -0.9094 & 0.1702\\
+\hline
+OTU1680 & 0.0834 & 0.0341 & -0.9270 & 0.1915\\
+\hline
+OTU2529 & 0.1113 & 0.0449 & -0.8634 & 0.1929\\
+\hline
+\end{tabular}
 
 ### ANCOM-BC
 
@@ -332,6 +360,25 @@ kable(head(res))
 ```
 
 
+\begin{tabular}{l|r|r|r|r|r|r|r|r|r|r|l|l}
+\hline
+taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & se\_(Intercept) & se\_Geographical\_locationPune & W\_(Intercept) & W\_Geographical\_locationPune & p\_(Intercept) & p\_Geographical\_locationPune & q\_(Intercept) & q\_Geographical\_locationPune & diff\_(Intercept) & diff\_Geographical\_locationPune\\
+\hline
+Abyssicoccus & 0.0399 & -0.0570 & 0.1675 & 0.1915 & 0.2383 & -0.2975 & 0.8117 & 0.7661 & 0.8718 & 0.8463 & FALSE & FALSE\\
+\hline
+Acidaminococcus & 0.6874 & -0.9024 & 0.1947 & 0.2225 & 3.5304 & -4.0547 & 0.0004 & 0.0001 & 0.0032 & 0.0004 & TRUE & TRUE\\
+\hline
+Acinetobacter & 0.1243 & -0.1672 & 0.7823 & 0.8940 & 0.1589 & -0.1870 & 0.8737 & 0.8516 & 0.8969 & 0.8701 & FALSE & FALSE\\
+\hline
+Actinomyces & 0.1347 & -0.1807 & 0.1938 & 0.2215 & 0.6952 & -0.8161 & 0.4869 & 0.4145 & 0.6596 & 0.5616 & FALSE & FALSE\\
+\hline
+Actinoplanes & 0.2716 & -0.3594 & 0.1635 & 0.1869 & 1.6608 & -1.9231 & 0.0967 & 0.0545 & 0.2793 & 0.1504 & FALSE & FALSE\\
+\hline
+Aerococcus & 0.0237 & -0.0358 & 0.1677 & 0.1917 & 0.1413 & -0.1868 & 0.8876 & 0.8519 & 0.8994 & 0.8701 & FALSE & FALSE\\
+\hline
+\end{tabular}
+
+
 
 ### MaAsLin2 
 
@@ -369,6 +416,25 @@ Which genera are identified as differentially abundant? (leave out "head" to see
 kable(head(filter(fit_data$results, qval <= 0.05)))
 ```
 
+
+\begin{tabular}{l|l|l|r|r|r|l|r|r|r}
+\hline
+feature & metadata & value & coef & stderr & pval & name & qval & N & N.not.zero\\
+\hline
+OTU1053 & Geographical\_location & Pune & -0.0080 & 0.0011 & 0 & Geographical\_locationPune & 0 & 47 & 9\\
+\hline
+OTU860 & Geographical\_location & Pune & -0.0373 & 0.0059 & 0 & Geographical\_locationPune & 0 & 47 & 13\\
+\hline
+OTU1075 & Geographical\_location & Pune & -0.1295 & 0.0207 & 0 & Geographical\_locationPune & 0 & 47 & 27\\
+\hline
+OTU1980 & Geographical\_location & Pune & -0.0395 & 0.0062 & 0 & Geographical\_locationPune & 0 & 47 & 9\\
+\hline
+OTU611 & Geographical\_location & Pune & -0.0274 & 0.0045 & 0 & Geographical\_locationPune & 0 & 47 & 10\\
+\hline
+OTU2335 & Geographical\_location & Pune & -0.0089 & 0.0015 & 0 & Geographical\_locationPune & 0 & 47 & 10\\
+\hline
+\end{tabular}
+
 A folder will be created that is called like the above specified
 output.  It contains also figures to visualize the difference between
 genera for the significant ones.
@@ -400,10 +466,39 @@ res <- linda(
   alpha = 0.05, 
   prev.filter = 0, 
   mean.abund.filter = 0)
+```
 
+```
+## 0  features are filtered!
+## The filtered data has  47  samples and  262  features will be tested!
+## Pseudo-count approach is used.
+## Fit linear models ...
+## Completed.
+```
+
+```r
 # to scan the table for genera where H0 could be rejected:
 kable(head(filter(as.data.frame(res$output$Geographical_locationPune), reject)))
 ```
+
+
+\begin{tabular}{l|r|r|r|r|r|r|l|r}
+\hline
+  & baseMean & log2FoldChange & lfcSE & stat & pvalue & padj & reject & df\\
+\hline
+OTU15 & 1194.9 & -1.9113 & 0.3579 & -5.340 & 0.0000 & 0.0000 & TRUE & 45\\
+\hline
+OTU22 & 393.5 & -0.6683 & 0.2184 & -3.060 & 0.0037 & 0.0160 & TRUE & 45\\
+\hline
+OTU76 & 837.0 & -1.8013 & 0.3598 & -5.006 & 0.0000 & 0.0001 & TRUE & 45\\
+\hline
+OTU127 & 938.2 & -1.7558 & 0.3912 & -4.488 & 0.0000 & 0.0004 & TRUE & 45\\
+\hline
+OTU170 & 416.9 & -0.7518 & 0.2351 & -3.197 & 0.0025 & 0.0123 & TRUE & 45\\
+\hline
+OTU194 & 869.3 & 4.3671 & 1.2254 & 3.564 & 0.0009 & 0.0054 & TRUE & 45\\
+\hline
+\end{tabular}
 
 
 ### Comparison of the methods
@@ -454,6 +549,25 @@ summ <- full_join(
 kable(head(summ))
 ```
 
+
+\begin{tabular}{l|l|l|l|l|r}
+\hline
+taxid & aldex2 & ancombc & maaslin2 & LinDA & score\\
+\hline
+OTU2 & FALSE & FALSE & FALSE & FALSE & 0\\
+\hline
+OTU15 & FALSE & TRUE & TRUE & TRUE & 3\\
+\hline
+OTU22 & FALSE & FALSE & TRUE & TRUE & 2\\
+\hline
+OTU53 & FALSE & FALSE & FALSE & FALSE & 0\\
+\hline
+OTU69 & FALSE & FALSE & FALSE & FALSE & 0\\
+\hline
+OTU76 & FALSE & FALSE & TRUE & TRUE & 2\\
+\hline
+\end{tabular}
+
 Now we can answer our questions:
 
 
@@ -461,27 +575,68 @@ Now we can answer our questions:
 # how many genera were identified by each method?
 summarise(summ, across(where(is.logical), sum)) %>%
   kable()
+```
+
+
+\begin{tabular}{r|r|r|r}
+\hline
+aldex2 & ancombc & maaslin2 & LinDA\\
+\hline
+9 & 31 & 67 & 75\\
+\hline
+\end{tabular}
+
+```r
 # which genera are identified by all methods?
 filter(summ, score == 4) %>% kable()
 ```
 
-We see that each method identified at least 9 genera as differentially
-abundant. Eight of those that were identified by ALDEx2,
-were also identified by the other methods. We could plot the data for
+
+\begin{tabular}{l|l|l|l|l|r}
+\hline
+taxid & aldex2 & ancombc & maaslin2 & LinDA & score\\
+\hline
+OTU773 & TRUE & TRUE & TRUE & TRUE & 4\\
+\hline
+OTU860 & TRUE & TRUE & TRUE & TRUE & 4\\
+\hline
+OTU1075 & TRUE & TRUE & TRUE & TRUE & 4\\
+\hline
+OTU1235 & TRUE & TRUE & TRUE & TRUE & 4\\
+\hline
+OTU1680 & TRUE & TRUE & TRUE & TRUE & 4\\
+\hline
+OTU2529 & TRUE & TRUE & TRUE & TRUE & 4\\
+\hline
+\end{tabular}
+
+We see that each method identified at least some genera as differentially
+abundant. Many of those that were identified by ALDEx2,
+were also identified by the other methods. Let us plot the data for
 any method or for those taxa that were identified by all methods:
 
 
 
-
 ```r
-plot_data <- data.frame(t(assay(tse)))
+# Data
+data(peerj13075)
+tse <- peerj13075
+tse <- tse[ ,tse$Geographical_location %in% c("Pune", "Nashik")]
+# Let us make this a factor
+tse$Geographical_location <- factor(tse$Geographical_location)
+tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 0.1)
+
+# prepare the data for plotting
+assay.type <- "counts"
+plot_data <- data.frame(t(assay(tse, assay.type)))
 plot_data$Geographical_location <- tse$Geographical_location
-# create a plot for each genus where the score is indicated in the title
+
+# Create a jittered boxplot for each genus 
 plots <- pmap(select(summ, taxid, score), function(taxid, score) {
-  ggplot(plot_data, aes_string("Geographical_location", taxid)) +
-    geom_boxplot(aes(fill = Geographical_location), outlier.shape = NA) +
-    geom_jitter(width = 0.2, alpha = 0.5) +
-    ggtitle(glue::glue("Score {score}")) +
+  ggplot(plot_data, aes_string(x="Geographical_location", y=taxid)) +
+    geom_boxplot(outlier.shape = NA) +
+    geom_jitter(width = 0.2) +
+    labs(title=glue::glue("{taxid}"), x="", y=glue::glue("Abundance ({assay.type})")) +    
     theme_bw() +
     theme(legend.position = "none")
 })
@@ -497,7 +652,12 @@ robust_plots[[1]] +
   robust_plots[[4]] +
   robust_plots[[5]] +
   robust_plots[[6]] +
-  plot_layout(nrow = 2)
+  plot_layout(nrow = 1)
+```
+
+![](30_differential_abundance_files/figure-latex/daplotting-1.pdf)<!-- --> 
+
+```r
 # or if we have most trust in any specific method we can show genera that 
 # are differentially abundant according to that method and then look in the
 # title how many methods also identified it (we only show first 6 here):
@@ -509,6 +669,8 @@ ancombc_plots[[1]] +
   ancombc_plots[[5]] +
   ancombc_plots[[6]] 
 ```
+
+![](30_differential_abundance_files/figure-latex/daplotting-2.pdf)<!-- --> 
 
 
 
@@ -547,6 +709,25 @@ out_cov = ancombc2(
 # Again we only show the first 6 entries.
 kable(head(out_cov$res))
 ```
+
+
+\begin{tabular}{l|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|l|l|l|l}
+\hline
+taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & lfc\_AgeElderly & lfc\_AgeMiddle\_age & se\_(Intercept) & se\_Geographical\_locationPune & se\_AgeElderly & se\_AgeMiddle\_age & W\_(Intercept) & W\_Geographical\_locationPune & W\_AgeElderly & W\_AgeMiddle\_age & p\_(Intercept) & p\_Geographical\_locationPune & p\_AgeElderly & p\_AgeMiddle\_age & q\_(Intercept) & q\_Geographical\_locationPune & q\_AgeElderly & q\_AgeMiddle\_age & diff\_(Intercept) & diff\_Geographical\_locationPune & diff\_AgeElderly & diff\_AgeMiddle\_age\\
+\hline
+OTU2 & 0.0397 & -0.0948 & 0.0893 & 0.0126 & 0.1725 & 0.2388 & 0.2299 & 0.2344 & 0.2304 & -0.3971 & 0.3884 & 0.0537 & 0.8178 & 0.6913 & 0.6977 & 0.9572 & 0.8853 & 0.9266 & 0.9125 & 0.9952 & FALSE & FALSE & FALSE & FALSE\\
+\hline
+OTU15 & 0.7028 & -0.7558 & -0.2434 & -0.1577 & 0.1987 & 0.2751 & 0.2648 & 0.2700 & 3.5364 & -2.7476 & -0.9190 & -0.5839 & 0.0004 & 0.0060 & 0.3581 & 0.5593 & 0.0031 & 0.0387 & 0.8827 & 0.9860 & TRUE & TRUE & FALSE & FALSE\\
+\hline
+OTU53 & 0.0205 & -1.0766 & 1.4992 & 1.1534 & 0.7871 & 1.0895 & 1.0494 & 1.0701 & 0.0260 & -0.9881 & 1.4287 & 1.0778 & 0.9793 & 0.3231 & 0.1531 & 0.2811 & 0.9878 & 0.6462 & 0.7721 & 0.7870 & FALSE & FALSE & FALSE & FALSE\\
+\hline
+OTU87 & 0.1765 & 0.1238 & -0.4584 & -0.4487 & 0.1906 & 0.2638 & 0.2540 & 0.2590 & 0.9259 & 0.4691 & -1.8046 & -1.7322 & 0.3545 & 0.6390 & 0.0711 & 0.0832 & 0.5502 & 0.8903 & 0.5713 & 0.6117 & FALSE & FALSE & FALSE & FALSE\\
+\hline
+OTU99 & 0.3029 & -0.1602 & -0.2768 & -0.3341 & 0.1636 & 0.2264 & 0.2179 & 0.2222 & 1.8521 & -0.7074 & -1.2703 & -1.5035 & 0.0640 & 0.4793 & 0.2040 & 0.1327 & 0.2171 & 0.7723 & 0.8133 & 0.6117 & FALSE & FALSE & FALSE & FALSE\\
+\hline
+OTU111 & 0.0023 & -0.1442 & 0.1352 & 0.2461 & 0.1710 & 0.2367 & 0.2279 & 0.2324 & 0.0135 & -0.6093 & 0.5935 & 1.0592 & 0.9892 & 0.5424 & 0.5528 & 0.2895 & 0.9892 & 0.8310 & 0.8900 & 0.7870 & FALSE & FALSE & FALSE & FALSE\\
+\hline
+\end{tabular}
 
 In the next section of this book chapter we cover methods that can also take
 into account the phylogenetic information of bacterial taxa to perform 
@@ -590,12 +771,12 @@ other attached packages:
  [3] forcats_1.0.0                  stringr_1.5.0                 
  [5] dplyr_1.1.0                    purrr_1.0.1                   
  [7] readr_2.1.4                    tidyr_1.3.0                   
- [9] tibble_3.1.8                   ggplot2_3.4.1                 
+ [9] tibble_3.2.0                   ggplot2_3.4.1                 
 [11] tidyverse_2.0.0                knitr_1.42                    
 [13] MicrobiomeStat_1.1             Maaslin2_1.10.0               
 [15] ALDEx2_1.28.1                  zCompositions_1.4.0-1         
 [17] truncnorm_1.0-8                NADA_1.6-1.1                  
-[19] survival_3.5-3                 MASS_7.3-58.2                 
+[19] survival_3.5-3                 MASS_7.3-58.3                 
 [21] tidySummarizedExperiment_1.6.1 patchwork_1.1.2               
 [23] mia_1.7.8                      MultiAssayExperiment_1.24.0   
 [25] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
@@ -623,81 +804,82 @@ loaded via a namespace (and not attached):
  [25] DEoptimR_1.0-11             fansi_1.0.4                
  [27] readxl_1.4.2                igraph_1.4.1               
  [29] DBI_1.1.3                   htmlwidgets_1.6.1          
- [31] Rmpfr_0.9-1                 CVXR_1.0-11                
- [33] ellipsis_0.3.2              energy_1.7-11              
- [35] backports_1.4.1             bookdown_0.33              
- [37] permute_0.9-7               deldir_1.0-6               
+ [31] hash_2.2.6.2                Rmpfr_0.9-1                
+ [33] CVXR_1.0-11                 ellipsis_0.3.2             
+ [35] energy_1.7-11               backports_1.4.1            
+ [37] bookdown_0.33               permute_0.9-7              
  [39] sparseMatrixStats_1.10.0    vctrs_0.5.2                
  [41] cachem_1.0.7                withr_2.5.0                
- [43] robustbase_0.95-0           emmeans_1.8.4-1            
+ [43] robustbase_0.95-0           emmeans_1.8.5              
  [45] checkmate_2.1.0             vegan_2.6-4                
  [47] treeio_1.22.0               getopt_1.20.3              
  [49] cluster_2.1.4               gsl_2.1-8                  
  [51] ape_5.7                     dir.expiry_1.4.0           
  [53] lazyeval_0.2.2              crayon_1.5.2               
- [55] pkgconfig_2.0.3             nlme_3.1-162               
- [57] vipor_0.4.5                 nnet_7.3-18                
- [59] rlang_1.0.6                 spatial_7.3-16             
- [61] lifecycle_1.0.3             sandwich_3.0-2             
- [63] filelock_1.0.2              phyloseq_1.40.0            
- [65] rsvd_1.0.5                  cellranger_1.1.0           
- [67] rngtools_1.5.2              graph_1.74.0               
- [69] Matrix_1.5-3                lpsymphony_1.24.0          
- [71] zoo_1.8-11                  Rhdf5lib_1.18.2            
- [73] boot_1.3-28.1               base64enc_0.1-3            
- [75] beeswarm_0.4.0              png_0.1-8                  
+ [55] labeling_0.4.2              pkgconfig_2.0.3            
+ [57] nlme_3.1-162                vipor_0.4.5                
+ [59] nnet_7.3-18                 rlang_1.0.6                
+ [61] spatial_7.3-16              lifecycle_1.0.3            
+ [63] sandwich_3.0-2              filelock_1.0.2             
+ [65] phyloseq_1.40.0             rsvd_1.0.5                 
+ [67] cellranger_1.1.0            rngtools_1.5.2             
+ [69] graph_1.74.0                Matrix_1.5-3               
+ [71] lpsymphony_1.24.0           zoo_1.8-11                 
+ [73] Rhdf5lib_1.18.2             boot_1.3-28.1              
+ [75] base64enc_0.1-3             beeswarm_0.4.0             
  [77] viridisLite_0.4.1           stabledist_0.7-1           
  [79] rootSolve_1.8.2.3           bitops_1.0-7               
  [81] rhdf5filters_1.8.0          blob_1.2.3                 
  [83] DelayedMatrixStats_1.20.0   doRNG_1.8.6                
- [85] decontam_1.18.0             jpeg_0.1-10                
- [87] DECIPHER_2.26.0             beachmat_2.14.0            
- [89] scales_1.2.1                memoise_2.0.1              
- [91] magrittr_2.0.3              plyr_1.8.8                 
- [93] zlibbioc_1.44.0             compiler_4.2.1             
- [95] RColorBrewer_1.1-3          clue_0.3-64                
- [97] lme4_1.1-31                 cli_3.6.0                  
- [99] ade4_1.7-22                 lmerTest_3.1-3             
+ [85] decontam_1.18.0             DECIPHER_2.26.0            
+ [87] beachmat_2.14.0             scales_1.2.1               
+ [89] memoise_2.0.1               magrittr_2.0.3             
+ [91] plyr_1.8.8                  zlibbioc_1.44.0            
+ [93] compiler_4.2.1              RColorBrewer_1.1-3         
+ [95] clue_0.3-64                 lme4_1.1-31                
+ [97] cli_3.6.0                   ade4_1.7-22                
+ [99] lmerTest_3.1-3              pbapply_1.7-0              
 [101] htmlTable_2.4.1             Formula_1.2-5              
 [103] mgcv_1.8-42                 tidyselect_1.2.0           
-[105] stringi_1.7.12              yaml_2.3.7                 
-[107] BiocSingular_1.14.0         latticeExtra_0.6-30        
+[105] stringi_1.7.12              highr_0.10                 
+[107] yaml_2.3.7                  BiocSingular_1.14.0        
 [109] ggrepel_0.9.3               grid_4.2.1                 
 [111] tools_4.2.1                 lmom_2.9                   
 [113] timechange_0.2.0            parallel_4.2.1             
-[115] rstudioapi_0.14             foreign_0.8-84             
-[117] foreach_1.5.2               statip_0.2.3               
-[119] optparse_1.7.3              gridExtra_2.3              
-[121] gld_2.6.6                   stable_1.1.6               
-[123] RcppZiggurat_0.1.6          digest_0.6.31              
-[125] BiocManager_1.30.20         Rcpp_1.0.10                
-[127] scuttle_1.8.4               httr_1.4.5                 
-[129] Rdpack_2.4                  colorspace_2.1-0           
-[131] XML_3.99-0.13               modeest_2.4.0              
-[133] splines_4.2.1               yulab.utils_0.0.6          
-[135] rmutil_1.1.10               statmod_1.5.0              
-[137] tidytree_0.4.2              expm_0.999-7               
-[139] scater_1.26.1               multtest_2.52.0            
-[141] Exact_3.2                   plotly_4.10.1              
-[143] xtable_1.8-4                gmp_0.7-1                  
-[145] jsonlite_1.8.4              nloptr_2.0.3               
-[147] CodeDepends_0.6.5           timeDate_4022.108          
-[149] Rfast_2.0.7                 R6_2.5.1                   
-[151] Hmisc_5.0-0                 pillar_1.8.1               
-[153] htmltools_0.5.4             glue_1.6.2                 
-[155] fastmap_1.1.1               minqa_1.2.5                
-[157] BiocParallel_1.32.5         BiocNeighbors_1.16.0       
-[159] class_7.3-21                codetools_0.2-19           
-[161] pcaPP_2.0-3                 mvtnorm_1.1-3              
-[163] utf8_1.2.3                  lattice_0.20-45            
-[165] numDeriv_2016.8-1.1         ggbeeswarm_0.7.1           
-[167] DescTools_0.99.48           interp_1.1-3               
-[169] biglm_0.9-2.1               rmarkdown_2.20             
-[171] biomformat_1.24.0           munsell_0.5.0              
-[173] e1071_1.7-13                rhdf5_2.40.0               
-[175] GenomeInfoDbData_1.2.9      iterators_1.0.14           
-[177] reshape2_1.4.4              gtable_0.3.1               
-[179] rbibutils_2.2.13           
+[115] rstudioapi_0.14             logging_0.10-108           
+[117] foreach_1.5.2               foreign_0.8-84             
+[119] statip_0.2.3                optparse_1.7.3             
+[121] gridExtra_2.3               gld_2.6.6                  
+[123] farver_2.1.1                stable_1.1.6               
+[125] RcppZiggurat_0.1.6          digest_0.6.31              
+[127] BiocManager_1.30.20         Rcpp_1.0.10                
+[129] scuttle_1.8.4               httr_1.4.5                 
+[131] Rdpack_2.4                  colorspace_2.1-0           
+[133] XML_3.99-0.13               modeest_2.4.0              
+[135] splines_4.2.1               yulab.utils_0.0.6          
+[137] rmutil_1.1.10               statmod_1.5.0              
+[139] tidytree_0.4.2              expm_0.999-7               
+[141] scater_1.26.1               multtest_2.52.0            
+[143] Exact_3.2                   plotly_4.10.1              
+[145] xtable_1.8-4                gmp_0.7-1                  
+[147] jsonlite_1.8.4              nloptr_2.0.3               
+[149] CodeDepends_0.6.5           timeDate_4022.108          
+[151] Rfast_2.0.7                 R6_2.5.1                   
+[153] Hmisc_5.0-1                 pillar_1.8.1               
+[155] htmltools_0.5.4             glue_1.6.2                 
+[157] fastmap_1.1.1               minqa_1.2.5                
+[159] BiocParallel_1.32.5         BiocNeighbors_1.16.0       
+[161] class_7.3-21                codetools_0.2-19           
+[163] pcaPP_2.0-3                 mvtnorm_1.1-3              
+[165] utf8_1.2.3                  lattice_0.20-45            
+[167] numDeriv_2016.8-1.1         ggbeeswarm_0.7.1           
+[169] DescTools_0.99.48           biglm_0.9-2.1              
+[171] rmarkdown_2.20              biomformat_1.24.0          
+[173] munsell_0.5.0               e1071_1.7-13               
+[175] rhdf5_2.40.0                GenomeInfoDbData_1.2.9     
+[177] iterators_1.0.14            reshape2_1.4.4             
+[179] gtable_0.3.1                rbibutils_2.2.13           
 ```
 </div>
+
 

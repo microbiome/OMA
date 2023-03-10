@@ -1346,7 +1346,7 @@ loaded via a namespace (and not attached):
  [85] beeswarm_0.4.0                filelock_1.0.2               
  [87] curl_5.0.0                    png_0.1-8                    
  [89] interactiveDisplayBase_1.34.0 treeio_1.22.0                
- [91] tibble_3.1.8                  stringi_1.7.12               
+ [91] tibble_3.2.0                  stringi_1.7.12               
  [93] lattice_0.20-45               Matrix_1.5-3                 
  [95] vegan_2.6-4                   permute_0.9-7                
  [97] multtest_2.52.0               vctrs_0.5.2                  
@@ -1357,7 +1357,7 @@ loaded via a namespace (and not attached):
 [107] R6_2.5.1                      promises_1.2.0.1             
 [109] bookdown_0.33                 gridExtra_2.3                
 [111] vipor_0.4.5                   codetools_0.2-19             
-[113] MASS_7.3-58.2                 rhdf5_2.40.0                 
+[113] MASS_7.3-58.3                 rhdf5_2.40.0                 
 [115] withr_2.5.0                   GenomeInfoDbData_1.2.9       
 [117] mgcv_1.8-42                   parallel_4.2.1               
 [119] grid_4.2.1                    beachmat_2.14.0              

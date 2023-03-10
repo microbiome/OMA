@@ -137,26 +137,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    14   8
-##      Veg       9  16
+##      Mixed    14   9
+##      Veg       9  15
 ##                                         
-##                Accuracy : 0.638         
-##                  95% CI : (0.485, 0.773)
+##                Accuracy : 0.617         
+##                  95% CI : (0.464, 0.755)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.0536        
+##     P-Value [Acc > NIR] : 0.0942        
 ##                                         
-##                   Kappa : 0.276         
+##                   Kappa : 0.234         
 ##                                         
 ##  Mcnemar's Test P-Value : 1.0000        
 ##                                         
 ##             Sensitivity : 0.609         
-##             Specificity : 0.667         
-##          Pos Pred Value : 0.636         
-##          Neg Pred Value : 0.640         
+##             Specificity : 0.625         
+##          Pos Pred Value : 0.609         
+##          Neg Pred Value : 0.625         
 ##              Prevalence : 0.489         
 ##          Detection Rate : 0.298         
-##    Detection Prevalence : 0.468         
-##       Balanced Accuracy : 0.638         
+##    Detection Prevalence : 0.489         
+##       Balanced Accuracy : 0.617         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -315,11 +315,11 @@ loaded via a namespace (and not attached):
  [81] yaml_2.3.7                  ModelMetrics_1.2.2.2       
  [83] knitr_1.42                  bit64_4.0.5                
  [85] randomForest_4.7-1.1        purrr_1.0.1                
- [87] future_1.31.0               nlme_3.1-162               
+ [87] future_1.32.0               nlme_3.1-162               
  [89] sparseMatrixStats_1.10.0    compiler_4.2.1             
  [91] beeswarm_0.4.0              filelock_1.0.2             
  [93] e1071_1.7-13                treeio_1.22.0              
- [95] tibble_3.1.8                stringi_1.7.12             
+ [95] tibble_3.2.0                stringi_1.7.12             
  [97] highr_0.10                  Matrix_1.5-3               
  [99] vegan_2.6-4                 permute_0.9-7              
 [101] vctrs_0.5.2                 pillar_1.8.1               
@@ -329,7 +329,7 @@ loaded via a namespace (and not attached):
 [109] R6_2.5.1                    bookdown_0.33              
 [111] gridExtra_2.3               vipor_0.4.5                
 [113] parallelly_1.34.0           codetools_0.2-19           
-[115] MASS_7.3-58.2               withr_2.5.0                
+[115] MASS_7.3-58.3               withr_2.5.0                
 [117] GenomeInfoDbData_1.2.9      mgcv_1.8-42                
 [119] parallel_4.2.1              grid_4.2.1                 
 [121] rpart_4.1.19                beachmat_2.14.0            

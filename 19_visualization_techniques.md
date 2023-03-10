@@ -902,11 +902,11 @@ loaded via a namespace (and not attached):
  [79] yaml_2.3.7                  knitr_1.42                 
  [81] bit64_4.0.5                 tidygraph_1.2.3            
  [83] purrr_1.0.1                 nlme_3.1-162               
- [85] sparseMatrixStats_1.10.0    aplot_0.1.9                
+ [85] sparseMatrixStats_1.10.0    aplot_0.1.10               
  [87] compiler_4.2.1              curl_5.0.0                 
  [89] beeswarm_0.4.0              filelock_1.0.2             
  [91] png_0.1-8                   ggsignif_0.6.4             
- [93] treeio_1.22.0               tibble_3.1.8               
+ [93] treeio_1.22.0               tibble_3.2.0               
  [95] tweenr_2.0.2                stringi_1.7.12             
  [97] highr_0.10                  lattice_0.20-45            
  [99] Matrix_1.5-3                vegan_2.6-4                
@@ -918,7 +918,7 @@ loaded via a namespace (and not attached):
 [111] seriation_1.4.1             R6_2.5.1                   
 [113] TSP_1.2-2                   bookdown_0.33              
 [115] gridExtra_2.3               vipor_0.4.5                
-[117] codetools_0.2-19            MASS_7.3-58.2              
+[117] codetools_0.2-19            MASS_7.3-58.3              
 [119] rjson_0.2.21                withr_2.5.0                
 [121] GenomeInfoDbData_1.2.9      mgcv_1.8-42                
 [123] parallel_4.2.1              grid_4.2.1                 

@@ -620,13 +620,13 @@ loaded via a namespace (and not attached):
  [77] evaluate_0.20               xtable_1.8-4               
  [79] XML_3.99-0.13               gridExtra_2.3              
  [81] shape_1.4.6                 compiler_4.2.1             
- [83] tibble_3.1.8                V8_4.2.2                   
+ [83] tibble_3.2.0                V8_4.2.2                   
  [85] crayon_1.5.2                htmltools_0.5.4            
  [87] ggfun_0.0.9                 mgcv_1.8-42                
  [89] tidyr_1.3.0                 geneplotter_1.74.0         
- [91] aplot_0.1.9                 DBI_1.1.3                  
+ [91] aplot_0.1.10                DBI_1.1.3                  
  [93] tweenr_2.0.2                ComplexHeatmap_2.12.1      
- [95] MASS_7.3-58.2               Matrix_1.5-3               
+ [95] MASS_7.3-58.3               Matrix_1.5-3               
  [97] permute_0.9-7               cli_3.6.0                  
  [99] parallel_4.2.1              igraph_1.4.1               
 [101] pkgconfig_2.0.3             dir.expiry_1.4.0           

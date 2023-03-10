@@ -379,7 +379,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] ggnewscale_0.4.8            ggbeeswarm_0.7.1           
   [3] colorspace_2.1-0            scuttle_1.8.4              
-  [5] BiocNeighbors_1.16.0        aplot_0.1.9                
+  [5] BiocNeighbors_1.16.0        aplot_0.1.10               
   [7] farver_2.1.1                graphlayouts_0.8.4         
   [9] ggrepel_0.9.3               bit64_4.0.5                
  [11] fansi_1.0.4                 decontam_1.18.0            
@@ -403,7 +403,7 @@ loaded via a namespace (and not attached):
  [47] stringr_1.5.0               beachmat_2.14.0            
  [49] lifecycle_1.0.3             irlba_2.3.5.1              
  [51] XML_3.99-0.13               zlibbioc_1.44.0            
- [53] MASS_7.3-58.2               scales_1.2.1               
+ [53] MASS_7.3-58.3               scales_1.2.1               
  [55] tidygraph_1.2.3             parallel_4.2.1             
  [57] RColorBrewer_1.1-3          yaml_2.3.7                 
  [59] memoise_2.0.1               gridExtra_2.3              
@@ -423,7 +423,7 @@ loaded via a namespace (and not attached):
  [87] generics_0.1.3              DelayedArray_0.24.0        
  [89] DBI_1.1.3                   pillar_1.8.1               
  [91] withr_2.5.0                 mgcv_1.8-42                
- [93] RCurl_1.98-1.10             tibble_3.1.8               
+ [93] RCurl_1.98-1.10             tibble_3.2.0               
  [95] dir.expiry_1.4.0            crayon_1.5.2               
  [97] utf8_1.2.3                  rmarkdown_2.20             
  [99] viridis_0.6.2               grid_4.2.1                 
