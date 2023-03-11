@@ -566,8 +566,8 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.2                dplyr_1.1.0                   
  [3] scater_1.26.1                  scuttle_1.8.4                 
- [5] miaViz_1.7.3                   ggraph_2.1.0                  
- [7] ggplot2_3.4.1                  miaTime_0.1.19                
+ [5] miaViz_1.7.4                   ggraph_2.1.0                  
+ [7] ggplot2_3.4.1                  miaTime_0.1.20                
  [9] mia_1.7.9                      MultiAssayExperiment_1.24.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [13] XVector_0.38.0                 SingleCellExperiment_1.20.0   
