@@ -929,7 +929,7 @@ loaded via a namespace (and not attached):
 [133] limma_3.52.4                fansi_1.0.4                
 [135] pillar_1.8.1                lattice_0.20-45            
 [137] KEGGREST_1.36.3             fastmap_1.1.1              
-[139] httr_1.4.5                  survival_3.3-1             
+[139] httr_1.4.5                  survival_3.5-3             
 [141] glue_1.6.2                  zip_2.2.2                  
 [143] png_0.1-8                   iterators_1.0.14           
 [145] bit_4.0.5                   ggforce_0.4.1              

@@ -137,26 +137,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    12   6
-##      Veg      11  18
+##      Mixed    12   9
+##      Veg      11  15
 ##                                         
-##                Accuracy : 0.638         
-##                  95% CI : (0.485, 0.773)
+##                Accuracy : 0.574         
+##                  95% CI : (0.422, 0.717)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.0536        
+##     P-Value [Acc > NIR] : 0.233         
 ##                                         
-##                   Kappa : 0.273         
+##                   Kappa : 0.147         
 ##                                         
-##  Mcnemar's Test P-Value : 0.3320        
+##  Mcnemar's Test P-Value : 0.823         
 ##                                         
 ##             Sensitivity : 0.522         
-##             Specificity : 0.750         
-##          Pos Pred Value : 0.667         
-##          Neg Pred Value : 0.621         
+##             Specificity : 0.625         
+##          Pos Pred Value : 0.571         
+##          Neg Pred Value : 0.577         
 ##              Prevalence : 0.489         
 ##          Detection Rate : 0.255         
-##    Detection Prevalence : 0.383         
-##       Balanced Accuracy : 0.636         
+##    Detection Prevalence : 0.447         
+##       Balanced Accuracy : 0.573         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -288,7 +288,7 @@ loaded via a namespace (and not attached):
  [27] ggrepel_0.9.3               xfun_0.37                  
  [29] dplyr_1.1.0                 crayon_1.5.2               
  [31] RCurl_1.98-1.10             jsonlite_1.8.4             
- [33] graph_1.74.0                survival_3.3-1             
+ [33] graph_1.74.0                survival_3.5-3             
  [35] iterators_1.0.14            ape_5.7                    
  [37] glue_1.6.2                  gtable_0.3.1               
  [39] ipred_0.9-13                zlibbioc_1.44.0            

@@ -621,21 +621,30 @@ any method or for those taxa that were identified by all methods:
 # Data
 data(peerj13075)
 tse <- peerj13075
-tse <- tse[ ,tse$Geographical_location %in% c("Pune", "Nashik")]
-# Let us make this a factor
-tse$Geographical_location <- factor(tse$Geographical_location)
-tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 0.1)
 
-# prepare the data for plotting
-assay.type <- "counts"
-plot_data <- data.frame(t(assay(tse, assay.type)))
-plot_data$Geographical_location <- tse$Geographical_location
+# Add relative abundances and clr abundances
+tse <- transformCounts(tse, method="relabundance")
+tse <- transformCounts(tse, method="clr", pseudocount=1)
+
+# Subset to prevalent taxa (exclude rare taxa at 10 percent prevalence using 0 detection threshold):
+# do the subsetting based on the relative abundance assay
+tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 10/100, assay.type="relabundance")
+
+# Subset to certain geolocations
+tse <- tse[ ,tse$Geographical_location %in% c("Pune", "Nashik")]
+
+# Let us make the geo location a factor
+tse$Geographical_location <- factor(tse$Geographical_location)
 
 # Create a jittered boxplot for each genus 
+assay.type <- "relabundance"
+plot_data <- data.frame(t(assay(tse, assay.type)))
+plot_data$Geographical_location <- tse$Geographical_location
 plots <- pmap(select(summ, taxid, score), function(taxid, score) {
   ggplot(plot_data, aes_string(x="Geographical_location", y=taxid)) +
     geom_boxplot(outlier.shape = NA) +
     geom_jitter(width = 0.2) +
+    scale_y_log10() + 
     labs(title=glue::glue("{taxid}"), x="", y=glue::glue("Abundance ({assay.type})")) +    
     theme_bw() +
     theme(legend.position = "none")
@@ -715,17 +724,17 @@ kable(head(out_cov$res))
 \hline
 taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & lfc\_AgeElderly & lfc\_AgeMiddle\_age & se\_(Intercept) & se\_Geographical\_locationPune & se\_AgeElderly & se\_AgeMiddle\_age & W\_(Intercept) & W\_Geographical\_locationPune & W\_AgeElderly & W\_AgeMiddle\_age & p\_(Intercept) & p\_Geographical\_locationPune & p\_AgeElderly & p\_AgeMiddle\_age & q\_(Intercept) & q\_Geographical\_locationPune & q\_AgeElderly & q\_AgeMiddle\_age & diff\_(Intercept) & diff\_Geographical\_locationPune & diff\_AgeElderly & diff\_AgeMiddle\_age\\
 \hline
-OTU2 & 0.0397 & -0.0948 & 0.0893 & 0.0126 & 0.1725 & 0.2388 & 0.2299 & 0.2344 & 0.2304 & -0.3971 & 0.3884 & 0.0537 & 0.8178 & 0.6913 & 0.6977 & 0.9572 & 0.8853 & 0.9266 & 0.9125 & 0.9952 & FALSE & FALSE & FALSE & FALSE\\
+OTU2 & 0.0441 & -0.1005 & 0.0892 & 0.0118 & 0.1727 & 0.2390 & 0.2301 & 0.2346 & 0.2553 & -0.4203 & 0.3876 & 0.0504 & 0.7985 & 0.6742 & 0.6983 & 0.9598 & 0.8739 & 0.9143 & 0.9128 & 0.9925 & FALSE & FALSE & FALSE & FALSE\\
 \hline
-OTU15 & 0.7028 & -0.7558 & -0.2434 & -0.1577 & 0.1987 & 0.2751 & 0.2648 & 0.2700 & 3.5364 & -2.7476 & -0.9190 & -0.5839 & 0.0004 & 0.0060 & 0.3581 & 0.5593 & 0.0031 & 0.0387 & 0.8827 & 0.9860 & TRUE & TRUE & FALSE & FALSE\\
+OTU15 & 0.7071 & -0.7615 & -0.2435 & -0.1584 & 0.1988 & 0.2752 & 0.2649 & 0.2702 & 3.5567 & -2.7669 & -0.9190 & -0.5865 & 0.0004 & 0.0057 & 0.3581 & 0.5576 & 0.0029 & 0.0365 & 0.8827 & 0.9891 & TRUE & TRUE & FALSE & FALSE\\
 \hline
-OTU53 & 0.0205 & -1.0766 & 1.4992 & 1.1534 & 0.7871 & 1.0895 & 1.0494 & 1.0701 & 0.0260 & -0.9881 & 1.4287 & 1.0778 & 0.9793 & 0.3231 & 0.1531 & 0.2811 & 0.9878 & 0.6462 & 0.7721 & 0.7870 & FALSE & FALSE & FALSE & FALSE\\
+OTU53 & 0.0248 & -1.0822 & 1.4991 & 1.1526 & 0.7869 & 1.0893 & 1.0491 & 1.0698 & 0.0315 & -0.9935 & 1.4289 & 1.0774 & 0.9749 & 0.3205 & 0.1530 & 0.2813 & 0.9749 & 0.6300 & 0.7718 & 0.7889 & FALSE & FALSE & FALSE & FALSE\\
 \hline
-OTU87 & 0.1765 & 0.1238 & -0.4584 & -0.4487 & 0.1906 & 0.2638 & 0.2540 & 0.2590 & 0.9259 & 0.4691 & -1.8046 & -1.7322 & 0.3545 & 0.6390 & 0.0711 & 0.0832 & 0.5502 & 0.8903 & 0.5713 & 0.6117 & FALSE & FALSE & FALSE & FALSE\\
+OTU87 & 0.1808 & 0.1182 & -0.4585 & -0.4494 & 0.1907 & 0.2640 & 0.2541 & 0.2592 & 0.9481 & 0.4476 & -1.8039 & -1.7342 & 0.3431 & 0.6544 & 0.0712 & 0.0829 & 0.5236 & 0.9143 & 0.5707 & 0.6097 & FALSE & FALSE & FALSE & FALSE\\
 \hline
-OTU99 & 0.3029 & -0.1602 & -0.2768 & -0.3341 & 0.1636 & 0.2264 & 0.2179 & 0.2222 & 1.8521 & -0.7074 & -1.2703 & -1.5035 & 0.0640 & 0.4793 & 0.2040 & 0.1327 & 0.2171 & 0.7723 & 0.8133 & 0.6117 & FALSE & FALSE & FALSE & FALSE\\
+OTU99 & 0.3073 & -0.1658 & -0.2769 & -0.3349 & 0.1637 & 0.2266 & 0.2182 & 0.2225 & 1.8767 & -0.7315 & -1.2693 & -1.5053 & 0.0606 & 0.4645 & 0.2043 & 0.1323 & 0.2096 & 0.7479 & 0.8240 & 0.6097 & FALSE & FALSE & FALSE & FALSE\\
 \hline
-OTU111 & 0.0023 & -0.1442 & 0.1352 & 0.2461 & 0.1710 & 0.2367 & 0.2279 & 0.2324 & 0.0135 & -0.6093 & 0.5935 & 1.0592 & 0.9892 & 0.5424 & 0.5528 & 0.2895 & 0.9892 & 0.8310 & 0.8900 & 0.7870 & FALSE & FALSE & FALSE & FALSE\\
+OTU111 & 0.0066 & -0.1499 & 0.1351 & 0.2453 & 0.1712 & 0.2369 & 0.2281 & 0.2326 & 0.0388 & -0.6325 & 0.5925 & 1.0548 & 0.9691 & 0.5271 & 0.5535 & 0.2915 & 0.9749 & 0.8026 & 0.8901 & 0.7889 & FALSE & FALSE & FALSE & FALSE\\
 \hline
 \end{tabular}
 
@@ -776,7 +785,7 @@ other attached packages:
 [13] MicrobiomeStat_1.1             Maaslin2_1.10.0               
 [15] ALDEx2_1.28.1                  zCompositions_1.4.0-1         
 [17] truncnorm_1.0-8                NADA_1.6-1.1                  
-[19] survival_3.3-1                 MASS_7.3-58.3                 
+[19] survival_3.5-3                 MASS_7.3-58.3                 
 [21] tidySummarizedExperiment_1.6.1 patchwork_1.1.2               
 [23] mia_1.7.9                      MultiAssayExperiment_1.24.0   
 [25] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
@@ -825,7 +834,7 @@ loaded via a namespace (and not attached):
  [67] cellranger_1.1.0            rngtools_1.5.2             
  [69] graph_1.74.0                Matrix_1.5-3               
  [71] lpsymphony_1.24.0           zoo_1.8-11                 
- [73] Rhdf5lib_1.18.2             boot_1.3-28                
+ [73] Rhdf5lib_1.18.2             boot_1.3-28.1              
  [75] base64enc_0.1-3             beeswarm_0.4.0             
  [77] viridisLite_0.4.1           stabledist_0.7-1           
  [79] rootSolve_1.8.2.3           bitops_1.0-7               
