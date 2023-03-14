@@ -645,7 +645,7 @@ loaded via a namespace (and not attached):
 [127] fansi_1.0.4                 pillar_1.8.1               
 [129] lattice_0.20-45             KEGGREST_1.36.3            
 [131] fastmap_1.1.1               httr_1.4.5                 
-[133] survival_3.5-3              glue_1.6.2                 
+[133] survival_3.5-5              glue_1.6.2                 
 [135] zip_2.2.2                   sechm_1.4.1                
 [137] png_0.1-8                   iterators_1.0.14           
 [139] bit_4.0.5                   ggforce_0.4.1              

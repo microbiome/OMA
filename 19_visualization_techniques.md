@@ -371,7 +371,7 @@ plotAbundance(tse_order,
 ![](19_visualization_techniques_files/figure-latex/plotAbundance1-1.pdf)<!-- --> 
 
 To add a sample annotation, you can combine plots that you get from the output
-pf _plotAbundance_.
+of _plotAbundance_.
 
 
 ```r
@@ -887,7 +887,7 @@ loaded via a namespace (and not attached):
  [49] rlang_1.0.6                 genefilter_1.78.0          
  [51] GlobalOptions_0.1.2         splines_4.2.1              
  [53] rstatix_0.7.2               lazyeval_0.2.2             
- [55] broom_1.0.3                 abind_1.4-5                
+ [55] broom_1.0.4                 abind_1.4-5                
  [57] BiocManager_1.30.20         yaml_2.3.7                 
  [59] backports_1.4.1             tools_4.2.1                
  [61] bookdown_0.33               ggplotify_0.1.0            
@@ -929,7 +929,7 @@ loaded via a namespace (and not attached):
 [133] limma_3.52.4                fansi_1.0.4                
 [135] pillar_1.8.1                lattice_0.20-45            
 [137] KEGGREST_1.36.3             fastmap_1.1.1              
-[139] httr_1.4.5                  survival_3.5-3             
+[139] httr_1.4.5                  survival_3.5-5             
 [141] glue_1.6.2                  zip_2.2.2                  
 [143] png_0.1-8                   iterators_1.0.14           
 [145] bit_4.0.5                   ggforce_0.4.1              
