@@ -823,11 +823,11 @@ loaded via a namespace (and not attached):
  [45] checkmate_2.1.0             vegan_2.6-4                
  [47] treeio_1.22.0               getopt_1.20.3              
  [49] cluster_2.1.4               gsl_2.1-8                  
- [51] ape_5.7                     dir.expiry_1.4.0           
+ [51] ape_5.7-1                   dir.expiry_1.4.0           
  [53] lazyeval_0.2.2              crayon_1.5.2               
  [55] labeling_0.4.2              pkgconfig_2.0.3            
  [57] nlme_3.1-162                vipor_0.4.5                
- [59] nnet_7.3-18                 rlang_1.0.6                
+ [59] nnet_7.3-18                 rlang_1.1.0                
  [61] spatial_7.3-16              lifecycle_1.0.3            
  [63] sandwich_3.0-2              filelock_1.0.2             
  [65] phyloseq_1.40.0             rsvd_1.0.5                 
@@ -845,7 +845,7 @@ loaded via a namespace (and not attached):
  [89] memoise_2.0.1               magrittr_2.0.3             
  [91] plyr_1.8.8                  zlibbioc_1.44.0            
  [93] compiler_4.2.1              RColorBrewer_1.1-3         
- [95] clue_0.3-64                 lme4_1.1-31                
+ [95] clue_0.3-64                 lme4_1.1-32                
  [97] cli_3.6.0                   ade4_1.7-22                
  [99] lmerTest_3.1-3              pbapply_1.7-0              
 [101] htmlTable_2.4.1             Formula_1.2-5              

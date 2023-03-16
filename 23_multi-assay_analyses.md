@@ -407,7 +407,10 @@ model.prepared <- prepare_mofa(
   object = model,
   model_options = model_opts
 )
-model.trained <- run_mofa(model.prepared)
+
+#Some systems may need the `use_basilisk = TRUE` function
+#so it has been added to the following code
+model.trained <- run_mofa(model.prepared, use_basilisk = TRUE)
 ```
 
 Visualizing the variance explained:
@@ -495,59 +498,58 @@ loaded via a namespace (and not attached):
  [15] magrittr_2.0.3              memoise_2.0.1              
  [17] ScaledMatrix_1.6.0          cluster_2.1.4              
  [19] doParallel_1.0.17           DECIPHER_2.26.0            
- [21] colorspace_2.1-0            rappdirs_0.3.3             
- [23] blob_1.2.3                  ggrepel_0.9.3              
- [25] xfun_0.37                   dplyr_1.1.0                
- [27] crayon_1.5.2                RCurl_1.98-1.10            
- [29] jsonlite_1.8.4              graph_1.74.0               
- [31] iterators_1.0.14            ape_5.7                    
- [33] glue_1.6.2                  gtable_0.3.1               
- [35] zlibbioc_1.44.0             GetoptLong_1.0.5           
- [37] DelayedArray_0.24.0         BiocSingular_1.14.0        
- [39] Rhdf5lib_1.18.2             shape_1.4.6                
- [41] HDF5Array_1.24.2            scales_1.2.1               
- [43] pheatmap_1.0.12             DBI_1.1.3                  
- [45] Rcpp_1.0.10                 viridisLite_0.4.1          
- [47] decontam_1.18.0             clue_0.3-64                
- [49] tidytree_0.4.2              bit_4.0.5                  
- [51] rsvd_1.0.5                  dir.expiry_1.4.0           
- [53] RColorBrewer_1.1-3          farver_2.1.1               
- [55] pkgconfig_2.0.3             XML_3.99-0.13              
- [57] scuttle_1.8.4               uwot_0.1.14                
- [59] CodeDepends_0.6.5           here_1.0.1                 
- [61] utf8_1.2.3                  labeling_0.4.2             
- [63] tidyselect_1.2.0            rlang_1.0.6                
- [65] reshape2_1.4.4              munsell_0.5.0              
- [67] tools_4.2.1                 cachem_1.0.7               
- [69] cli_3.6.0                   DirichletMultinomial_1.40.0
- [71] generics_0.1.3              RSQLite_2.3.0              
- [73] evaluate_0.20               fastmap_1.1.1              
- [75] yaml_2.3.7                  knitr_1.42                 
- [77] bit64_4.0.5                 purrr_1.0.1                
- [79] nlme_3.1-162                sparseMatrixStats_1.10.0   
- [81] compiler_4.2.1              beeswarm_0.4.0             
- [83] filelock_1.0.2              png_0.1-8                  
- [85] treeio_1.22.0               tibble_3.2.0               
- [87] stringi_1.7.12              highr_0.10                 
- [89] basilisk.utils_1.8.0        forcats_1.0.0              
- [91] lattice_0.20-45             Matrix_1.5-3               
- [93] vegan_2.6-4                 permute_0.9-7              
- [95] vctrs_0.5.2                 pillar_1.8.1               
- [97] lifecycle_1.0.3             rhdf5filters_1.8.0         
- [99] BiocManager_1.30.20         GlobalOptions_0.1.2        
-[101] BiocNeighbors_1.16.0        cowplot_1.1.1              
-[103] bitops_1.0-7                irlba_2.3.5.1              
-[105] R6_2.5.1                    bookdown_0.33              
-[107] gridExtra_2.3               vipor_0.4.5                
-[109] codetools_0.2-19            MASS_7.3-58.3              
-[111] rhdf5_2.40.0                rprojroot_2.0.3            
-[113] rjson_0.2.21                withr_2.5.0                
-[115] GenomeInfoDbData_1.2.9      mgcv_1.8-42                
-[117] parallel_4.2.1              beachmat_2.14.0            
-[119] tidyr_1.3.0                 basilisk_1.8.1             
-[121] rmarkdown_2.20              DelayedMatrixStats_1.20.0  
-[123] Rtsne_0.16                  Cairo_1.6-0                
-[125] ggbeeswarm_0.7.1           
+ [21] colorspace_2.1-0            blob_1.2.3                 
+ [23] ggrepel_0.9.3               xfun_0.37                  
+ [25] dplyr_1.1.0                 crayon_1.5.2               
+ [27] RCurl_1.98-1.10             jsonlite_1.8.4             
+ [29] graph_1.74.0                iterators_1.0.14           
+ [31] ape_5.7-1                   glue_1.6.2                 
+ [33] gtable_0.3.1                zlibbioc_1.44.0            
+ [35] GetoptLong_1.0.5            DelayedArray_0.24.0        
+ [37] BiocSingular_1.14.0         Rhdf5lib_1.18.2            
+ [39] shape_1.4.6                 HDF5Array_1.24.2           
+ [41] scales_1.2.1                pheatmap_1.0.12            
+ [43] DBI_1.1.3                   Rcpp_1.0.10                
+ [45] viridisLite_0.4.1           decontam_1.18.0            
+ [47] clue_0.3-64                 tidytree_0.4.2             
+ [49] bit_4.0.5                   rsvd_1.0.5                 
+ [51] dir.expiry_1.4.0            RColorBrewer_1.1-3         
+ [53] farver_2.1.1                pkgconfig_2.0.3            
+ [55] XML_3.99-0.13               scuttle_1.8.4              
+ [57] uwot_0.1.14                 CodeDepends_0.6.5          
+ [59] here_1.0.1                  utf8_1.2.3                 
+ [61] labeling_0.4.2              tidyselect_1.2.0           
+ [63] rlang_1.1.0                 reshape2_1.4.4             
+ [65] munsell_0.5.0               tools_4.2.1                
+ [67] cachem_1.0.7                cli_3.6.0                  
+ [69] DirichletMultinomial_1.40.0 generics_0.1.3             
+ [71] RSQLite_2.3.0               evaluate_0.20              
+ [73] fastmap_1.1.1               yaml_2.3.7                 
+ [75] knitr_1.42                  bit64_4.0.5                
+ [77] purrr_1.0.1                 nlme_3.1-162               
+ [79] sparseMatrixStats_1.10.0    compiler_4.2.1             
+ [81] beeswarm_0.4.0              filelock_1.0.2             
+ [83] png_0.1-8                   treeio_1.22.0              
+ [85] tibble_3.2.0                stringi_1.7.12             
+ [87] highr_0.10                  basilisk.utils_1.8.0       
+ [89] forcats_1.0.0               lattice_0.20-45            
+ [91] Matrix_1.5-3                vegan_2.6-4                
+ [93] permute_0.9-7               vctrs_0.5.2                
+ [95] pillar_1.8.1                lifecycle_1.0.3            
+ [97] rhdf5filters_1.8.0          BiocManager_1.30.20        
+ [99] GlobalOptions_0.1.2         BiocNeighbors_1.16.0       
+[101] cowplot_1.1.1               bitops_1.0-7               
+[103] irlba_2.3.5.1               R6_2.5.1                   
+[105] bookdown_0.33               gridExtra_2.3              
+[107] vipor_0.4.5                 codetools_0.2-19           
+[109] MASS_7.3-58.3               rhdf5_2.40.0               
+[111] rprojroot_2.0.3             rjson_0.2.21               
+[113] withr_2.5.0                 GenomeInfoDbData_1.2.9     
+[115] mgcv_1.8-42                 parallel_4.2.1             
+[117] beachmat_2.14.0             tidyr_1.3.0                
+[119] basilisk_1.8.1              rmarkdown_2.20             
+[121] DelayedMatrixStats_1.20.0   Rtsne_0.16                 
+[123] Cairo_1.6-0                 ggbeeswarm_0.7.1           
 ```
 </div>
 

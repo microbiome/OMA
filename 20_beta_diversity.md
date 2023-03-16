@@ -806,7 +806,7 @@ loaded via a namespace (and not attached):
 [27] gtable_0.3.1                glue_1.6.2                 
 [29] GenomeInfoDbData_1.2.9      reshape2_1.4.4             
 [31] dplyr_1.1.0                 Rcpp_1.0.10                
-[33] vctrs_0.5.2                 ape_5.7                    
+[33] vctrs_0.5.2                 ape_5.7-1                  
 [35] nlme_3.1-162                DECIPHER_2.26.0            
 [37] DelayedMatrixStats_1.20.0   xfun_0.37                  
 [39] beachmat_2.14.0             lifecycle_1.0.3            
@@ -818,7 +818,7 @@ loaded via a namespace (and not attached):
 [51] stringi_1.7.12              RSQLite_2.3.0              
 [53] highr_0.10                  ScaledMatrix_1.6.0         
 [55] tidytree_0.4.2              filelock_1.0.2             
-[57] BiocParallel_1.32.5         rlang_1.0.6                
+[57] BiocParallel_1.32.5         rlang_1.1.0                
 [59] pkgconfig_2.0.3             bitops_1.0-7               
 [61] evaluate_0.20               purrr_1.0.1                
 [63] treeio_1.22.0               CodeDepends_0.6.5          

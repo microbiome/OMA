@@ -844,7 +844,7 @@ attached base packages:
 
 other attached packages:
  [1] ggpubr_0.6.0                   ggtree_3.4.4                  
- [3] ape_5.7                        pheatmap_1.0.12               
+ [3] ape_5.7-1                      pheatmap_1.0.12               
  [5] reshape2_1.4.4                 sechm_1.4.1                   
  [7] miaViz_1.7.4                   ggraph_2.1.0                  
  [9] patchwork_1.1.2                scater_1.26.1                 
@@ -884,7 +884,7 @@ loaded via a namespace (and not attached):
  [43] beeswarm_0.4.0              gtable_0.3.1               
  [45] beachmat_2.14.0             Cairo_1.6-0                
  [47] sva_3.44.0                  tidygraph_1.2.3            
- [49] rlang_1.0.6                 genefilter_1.78.0          
+ [49] rlang_1.1.0                 genefilter_1.78.0          
  [51] GlobalOptions_0.1.2         splines_4.2.1              
  [53] rstatix_0.7.2               lazyeval_0.2.2             
  [55] broom_1.0.4                 abind_1.4-5                

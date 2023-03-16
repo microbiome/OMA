@@ -1316,7 +1316,7 @@ loaded via a namespace (and not attached):
  [25] dplyr_1.1.0                   crayon_1.5.2                 
  [27] RCurl_1.98-1.10               jsonlite_1.8.4               
  [29] graph_1.74.0                  survival_3.5-5               
- [31] iterators_1.0.14              ape_5.7                      
+ [31] iterators_1.0.14              ape_5.7-1                    
  [33] glue_1.6.2                    gtable_0.3.1                 
  [35] zlibbioc_1.44.0               DelayedArray_0.24.0          
  [37] BiocSingular_1.14.0           Rhdf5lib_1.18.2              
@@ -1330,7 +1330,7 @@ loaded via a namespace (and not attached):
  [53] scuttle_1.8.4                 CodeDepends_0.6.5            
  [55] dbplyr_2.3.1                  utf8_1.2.3                   
  [57] AnnotationDbi_1.58.0          tidyselect_1.2.0             
- [59] rlang_1.0.6                   reshape2_1.4.4               
+ [59] rlang_1.1.0                   reshape2_1.4.4               
  [61] later_1.3.0                   munsell_0.5.0                
  [63] BiocVersion_3.15.2            tools_4.2.1                  
  [65] cachem_1.0.7                  cli_3.6.0                    

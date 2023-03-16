@@ -165,7 +165,7 @@ It adds p-values to plot.
 
 ```r
 if( !require(ggsignif) ){
-  install.packages(ggsignif)
+  install.packages("ggsignif")
 }
 library(ggplot2)
 library(patchwork)
@@ -382,7 +382,7 @@ loaded via a namespace (and not attached):
 [27] gtable_0.3.1                glue_1.6.2                 
 [29] GenomeInfoDbData_1.2.9      reshape2_1.4.4             
 [31] dplyr_1.1.0                 Rcpp_1.0.10                
-[33] vctrs_0.5.2                 ape_5.7                    
+[33] vctrs_0.5.2                 ape_5.7-1                  
 [35] nlme_3.1-162                DECIPHER_2.26.0            
 [37] DelayedMatrixStats_1.20.0   xfun_0.37                  
 [39] stringr_1.5.0               beachmat_2.14.0            
@@ -395,7 +395,7 @@ loaded via a namespace (and not attached):
 [53] RSQLite_2.3.0               highr_0.10                 
 [55] ScaledMatrix_1.6.0          tidytree_0.4.2             
 [57] permute_0.9-7               filelock_1.0.2             
-[59] BiocParallel_1.32.5         rlang_1.0.6                
+[59] BiocParallel_1.32.5         rlang_1.1.0                
 [61] pkgconfig_2.0.3             bitops_1.0-7               
 [63] evaluate_0.20               lattice_0.20-45            
 [65] purrr_1.0.1                 labeling_0.4.2             

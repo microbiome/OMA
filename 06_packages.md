@@ -134,7 +134,7 @@ other attached packages:
 loaded via a namespace (and not attached):
  [1] bookdown_0.33       dir.expiry_1.4.0    codetools_0.2-19   
  [4] XML_3.99-0.13       digest_0.6.31       stats4_4.2.1       
- [7] evaluate_0.20       graph_1.74.0        rlang_1.0.6        
+ [7] evaluate_0.20       graph_1.74.0        rlang_1.1.0        
 [10] cli_3.6.0           filelock_1.0.2      rmarkdown_2.20     
 [13] tools_4.2.1         xfun_0.37           yaml_2.3.7         
 [16] fastmap_1.1.1       compiler_4.2.1      BiocGenerics_0.44.0

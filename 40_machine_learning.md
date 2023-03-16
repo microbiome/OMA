@@ -137,26 +137,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    15   4
-##      Veg       8  20
+##      Mixed    13  10
+##      Veg      10  14
 ##                                         
-##                Accuracy : 0.745         
-##                  95% CI : (0.597, 0.861)
+##                Accuracy : 0.574         
+##                  95% CI : (0.422, 0.717)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.000895      
+##     P-Value [Acc > NIR] : 0.233         
 ##                                         
-##                   Kappa : 0.487         
+##                   Kappa : 0.149         
 ##                                         
-##  Mcnemar's Test P-Value : 0.386476      
+##  Mcnemar's Test P-Value : 1.000         
 ##                                         
-##             Sensitivity : 0.652         
-##             Specificity : 0.833         
-##          Pos Pred Value : 0.789         
-##          Neg Pred Value : 0.714         
+##             Sensitivity : 0.565         
+##             Specificity : 0.583         
+##          Pos Pred Value : 0.565         
+##          Neg Pred Value : 0.583         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.319         
-##    Detection Prevalence : 0.404         
-##       Balanced Accuracy : 0.743         
+##          Detection Rate : 0.277         
+##    Detection Prevalence : 0.489         
+##       Balanced Accuracy : 0.574         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -289,7 +289,7 @@ loaded via a namespace (and not attached):
  [29] dplyr_1.1.0                 crayon_1.5.2               
  [31] RCurl_1.98-1.10             jsonlite_1.8.4             
  [33] graph_1.74.0                survival_3.5-5             
- [35] iterators_1.0.14            ape_5.7                    
+ [35] iterators_1.0.14            ape_5.7-1                  
  [37] glue_1.6.2                  gtable_0.3.1               
  [39] ipred_0.9-13                zlibbioc_1.44.0            
  [41] DelayedArray_0.24.0         kernlab_0.9-32             
@@ -305,7 +305,7 @@ loaded via a namespace (and not attached):
  [61] XML_3.99-0.13               scuttle_1.8.4              
  [63] nnet_7.3-18                 CodeDepends_0.6.5          
  [65] utf8_1.2.3                  labeling_0.4.2             
- [67] tidyselect_1.2.0            rlang_1.0.6                
+ [67] tidyselect_1.2.0            rlang_1.1.0                
  [69] reshape2_1.4.4              munsell_0.5.0              
  [71] tools_4.2.1                 cachem_1.0.7               
  [73] xgboost_1.7.3.1             cli_3.6.0                  

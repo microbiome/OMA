@@ -363,7 +363,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] ggtree_3.4.4                   ape_5.7                       
+ [1] ggtree_3.4.4                   ape_5.7-1                     
  [3] pheatmap_1.0.12                miaViz_1.7.4                  
  [5] ggraph_2.1.0                   ggplot2_3.4.1                 
  [7] mia_1.7.9                      MultiAssayExperiment_1.24.0   
@@ -400,7 +400,7 @@ loaded via a namespace (and not attached):
  [41] SEtools_1.10.0              beeswarm_0.4.0             
  [43] gtable_0.3.1                beachmat_2.14.0            
  [45] sva_3.44.0                  tidygraph_1.2.3            
- [47] rlang_1.0.6                 genefilter_1.78.0          
+ [47] rlang_1.1.0                 genefilter_1.78.0          
  [49] GlobalOptions_0.1.2         splines_4.2.1              
  [51] lazyeval_0.2.2              BiocManager_1.30.20        
  [53] yaml_2.3.7                  reshape2_1.4.4             

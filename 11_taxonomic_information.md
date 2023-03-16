@@ -607,7 +607,7 @@ loaded via a namespace (and not attached):
 [31] rmarkdown_2.20              scater_1.26.1              
 [33] pkgconfig_2.0.3             htmltools_0.5.4            
 [35] decontam_1.18.0             sparseMatrixStats_1.10.0   
-[37] fastmap_1.1.1               rlang_1.0.6                
+[37] fastmap_1.1.1               rlang_1.1.0                
 [39] RSQLite_2.3.0               DelayedMatrixStats_1.20.0  
 [41] generics_0.1.3              jsonlite_1.8.4             
 [43] BiocParallel_1.32.5         dplyr_1.1.0                
@@ -616,7 +616,7 @@ loaded via a namespace (and not attached):
 [49] scuttle_1.8.4               Matrix_1.5-3               
 [51] Rcpp_1.0.10                 ggbeeswarm_0.7.1           
 [53] munsell_0.5.0               fansi_1.0.4                
-[55] DECIPHER_2.26.0             ape_5.7                    
+[55] DECIPHER_2.26.0             ape_5.7-1                  
 [57] viridis_0.6.2               lifecycle_1.0.3            
 [59] stringi_1.7.12              yaml_2.3.7                 
 [61] MASS_7.3-58.3               zlibbioc_1.44.0            

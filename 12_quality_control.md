@@ -601,7 +601,7 @@ loaded via a namespace (and not attached):
  [39] scales_1.2.1                SEtools_1.10.0             
  [41] beeswarm_0.4.0              gtable_0.3.1               
  [43] beachmat_2.14.0             sva_3.44.0                 
- [45] tidygraph_1.2.3             rlang_1.0.6                
+ [45] tidygraph_1.2.3             rlang_1.1.0                
  [47] genefilter_1.78.0           GlobalOptions_0.1.2        
  [49] splines_4.2.1               lazyeval_0.2.2             
  [51] BiocManager_1.30.20         yaml_2.3.7                 
@@ -652,7 +652,7 @@ loaded via a namespace (and not attached):
 [141] stringi_1.7.12              blob_1.2.3                 
 [143] DESeq2_1.36.0               BiocSingular_1.14.0        
 [145] memoise_2.0.1               irlba_2.3.5.1              
-[147] ape_5.7                    
+[147] ape_5.7-1                  
 ```
 </div>
 
