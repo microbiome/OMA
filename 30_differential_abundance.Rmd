@@ -421,21 +421,30 @@ any method or for those taxa that were identified by all methods:
 # Data
 data(peerj13075)
 tse <- peerj13075
-tse <- tse[ ,tse$Geographical_location %in% c("Pune", "Nashik")]
-# Let us make this a factor
-tse$Geographical_location <- factor(tse$Geographical_location)
-tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 0.1)
 
-# prepare the data for plotting
-assay.type <- "counts"
-plot_data <- data.frame(t(assay(tse, assay.type)))
-plot_data$Geographical_location <- tse$Geographical_location
+# Add relative abundances and clr abundances
+tse <- transformCounts(tse, method="relabundance")
+tse <- transformCounts(tse, method="clr", pseudocount=1)
+
+# Subset to prevalent taxa (exclude rare taxa at 10 percent prevalence using 0 detection threshold):
+# do the subsetting based on the relative abundance assay
+tse <- subsetByPrevalentTaxa(tse, detection = 0, prevalence = 10/100, assay.type="relabundance")
+
+# Subset to certain geolocations
+tse <- tse[ ,tse$Geographical_location %in% c("Pune", "Nashik")]
+
+# Let us make the geo location a factor
+tse$Geographical_location <- factor(tse$Geographical_location)
 
 # Create a jittered boxplot for each genus 
+assay.type <- "relabundance"
+plot_data <- data.frame(t(assay(tse, assay.type)))
+plot_data$Geographical_location <- tse$Geographical_location
 plots <- pmap(select(summ, taxid, score), function(taxid, score) {
   ggplot(plot_data, aes_string(x="Geographical_location", y=taxid)) +
     geom_boxplot(outlier.shape = NA) +
     geom_jitter(width = 0.2) +
+    scale_y_log10() + 
     labs(title=glue::glue("{taxid}"), x="", y=glue::glue("Abundance ({assay.type})")) +    
     theme_bw() +
     theme(legend.position = "none")
