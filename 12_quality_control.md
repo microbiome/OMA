@@ -564,16 +564,16 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] patchwork_1.1.2                dplyr_1.1.0                   
+ [1] patchwork_1.1.2                dplyr_1.1.1                   
  [3] scater_1.26.1                  scuttle_1.8.4                 
- [5] miaViz_1.7.4                   ggraph_2.1.0                  
+ [5] miaViz_1.7.5                   ggraph_2.1.0                  
  [7] ggplot2_3.4.1                  miaTime_0.1.20                
- [9] mia_1.7.9                      MultiAssayExperiment_1.24.0   
+ [9] mia_1.7.11                     MultiAssayExperiment_1.24.0   
 [11] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
-[13] XVector_0.38.0                 SingleCellExperiment_1.20.0   
+[13] XVector_0.38.0                 SingleCellExperiment_1.20.1   
 [15] SummarizedExperiment_1.28.0    Biobase_2.58.0                
 [17] GenomicRanges_1.50.2           GenomeInfoDb_1.34.9           
-[19] IRanges_2.32.0                 S4Vectors_0.36.1              
+[19] IRanges_2.32.0                 S4Vectors_0.36.2              
 [21] BiocGenerics_0.44.0            MatrixGenerics_1.10.0         
 [23] matrixStats_0.63.0-9003        BiocStyle_2.24.0              
 [25] rebook_1.6.0                  
@@ -582,7 +582,7 @@ loaded via a namespace (and not attached):
   [1] utf8_1.2.3                  tidyselect_1.2.0           
   [3] RSQLite_2.3.0               AnnotationDbi_1.58.0       
   [5] grid_4.2.1                  TSP_1.2-3                  
-  [7] BiocParallel_1.32.5         Rtsne_0.16                 
+  [7] BiocParallel_1.32.6         Rtsne_0.16                 
   [9] munsell_0.5.0               ScaledMatrix_1.6.0         
  [11] codetools_0.2-19            withr_2.5.0                
  [13] colorspace_2.1-0            filelock_1.0.2             
@@ -590,8 +590,8 @@ loaded via a namespace (and not attached):
  [17] ca_0.71.1                   labeling_0.4.2             
  [19] GenomeInfoDbData_1.2.9      polyclip_1.10-4            
  [21] bit64_4.0.5                 farver_2.1.1               
- [23] vctrs_0.5.2                 treeio_1.22.0              
- [25] generics_0.1.3              xfun_0.37                  
+ [23] vctrs_0.6.1                 treeio_1.22.0              
+ [25] generics_0.1.3              xfun_0.38                  
  [27] R6_2.5.1                    doParallel_1.0.17          
  [29] ggbeeswarm_0.7.1            clue_0.3-64                
  [31] graphlayouts_0.8.4          rsvd_1.0.5                 
@@ -599,7 +599,7 @@ loaded via a namespace (and not attached):
  [35] bitops_1.0-7                cachem_1.0.7               
  [37] gridGraphics_0.5-1          DelayedArray_0.24.0        
  [39] scales_1.2.1                SEtools_1.10.0             
- [41] beeswarm_0.4.0              gtable_0.3.1               
+ [41] beeswarm_0.4.0              gtable_0.3.3               
  [43] beachmat_2.14.0             sva_3.44.0                 
  [45] tidygraph_1.2.3             rlang_1.1.0                
  [47] genefilter_1.78.0           GlobalOptions_0.1.2        
@@ -610,7 +610,7 @@ loaded via a namespace (and not attached):
  [57] decontam_1.18.0             RColorBrewer_1.1-3         
  [59] Rcpp_1.0.10                 plyr_1.8.8                 
  [61] sparseMatrixStats_1.10.0    zlibbioc_1.44.0            
- [63] purrr_1.0.1                 RCurl_1.98-1.10            
+ [63] purrr_1.0.1                 RCurl_1.98-1.12            
  [65] GetoptLong_1.0.5            viridis_0.6.2              
  [67] cowplot_1.1.1               ggrepel_0.9.3              
  [69] cluster_2.1.4               DECIPHER_2.26.0            
@@ -618,16 +618,16 @@ loaded via a namespace (and not attached):
  [73] openxlsx_4.2.5.2            circlize_0.4.15            
  [75] ggnewscale_0.4.8            randomcoloR_1.1.0.1        
  [77] evaluate_0.20               xtable_1.8-4               
- [79] XML_3.99-0.13               gridExtra_2.3              
+ [79] XML_3.99-0.14               gridExtra_2.3              
  [81] shape_1.4.6                 compiler_4.2.1             
- [83] tibble_3.2.0                V8_4.2.2                   
- [85] crayon_1.5.2                htmltools_0.5.4            
+ [83] tibble_3.2.1                V8_4.2.2                   
+ [85] crayon_1.5.2                htmltools_0.5.5            
  [87] ggfun_0.0.9                 mgcv_1.8-42                
  [89] tidyr_1.3.0                 geneplotter_1.74.0         
  [91] aplot_0.1.10                DBI_1.1.3                  
  [93] tweenr_2.0.2                ComplexHeatmap_2.12.1      
  [95] MASS_7.3-58.3               Matrix_1.5-3               
- [97] permute_0.9-7               cli_3.6.0                  
+ [97] permute_0.9-7               cli_3.6.1                  
  [99] parallel_4.2.1              igraph_1.4.1               
 [101] pkgconfig_2.0.3             dir.expiry_1.4.0           
 [103] registry_0.5-1              foreach_1.5.2              
@@ -635,21 +635,21 @@ loaded via a namespace (and not attached):
 [107] vipor_0.4.5                 DirichletMultinomial_1.40.0
 [109] yulab.utils_0.0.6           stringr_1.5.0              
 [111] digest_0.6.31               vegan_2.6-4                
-[113] graph_1.74.0                rmarkdown_2.20             
+[113] graph_1.74.0                rmarkdown_2.21             
 [115] tidytree_0.4.2              edgeR_3.38.4               
 [117] DelayedMatrixStats_1.20.0   curl_5.0.0                 
 [119] rjson_0.2.21                lifecycle_1.0.3            
 [121] nlme_3.1-162                jsonlite_1.8.4             
 [123] BiocNeighbors_1.16.0        CodeDepends_0.6.5          
 [125] viridisLite_0.4.1           limma_3.52.4               
-[127] fansi_1.0.4                 pillar_1.8.1               
+[127] fansi_1.0.4                 pillar_1.9.0               
 [129] lattice_0.20-45             KEGGREST_1.36.3            
 [131] fastmap_1.1.1               httr_1.4.5                 
 [133] survival_3.5-5              glue_1.6.2                 
 [135] zip_2.2.2                   sechm_1.4.1                
 [137] png_0.1-8                   iterators_1.0.14           
 [139] bit_4.0.5                   ggforce_0.4.1              
-[141] stringi_1.7.12              blob_1.2.3                 
+[141] stringi_1.7.12              blob_1.2.4                 
 [143] DESeq2_1.36.0               BiocSingular_1.14.0        
 [145] memoise_2.0.1               irlba_2.3.5.1              
 [147] ape_5.7-1                  

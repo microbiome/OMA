@@ -355,13 +355,13 @@ attached base packages:
 other attached packages:
  [1] patchwork_1.1.2                ggsignif_0.6.4                
  [3] scater_1.26.1                  ggplot2_3.4.1                 
- [5] scuttle_1.8.4                  mia_1.7.9                     
+ [5] scuttle_1.8.4                  mia_1.7.11                    
  [7] MultiAssayExperiment_1.24.0    TreeSummarizedExperiment_2.1.4
  [9] Biostrings_2.66.0              XVector_0.38.0                
-[11] SingleCellExperiment_1.20.0    SummarizedExperiment_1.28.0   
+[11] SingleCellExperiment_1.20.1    SummarizedExperiment_1.28.0   
 [13] Biobase_2.58.0                 GenomicRanges_1.50.2          
 [15] GenomeInfoDb_1.34.9            IRanges_2.32.0                
-[17] S4Vectors_0.36.1               BiocGenerics_0.44.0           
+[17] S4Vectors_0.36.2               BiocGenerics_0.44.0           
 [19] MatrixGenerics_1.10.0          matrixStats_0.63.0-9003       
 [21] BiocStyle_2.24.0               rebook_1.6.0                  
 
@@ -376,18 +376,18 @@ loaded via a namespace (and not attached):
 [15] cluster_2.1.4               graph_1.74.0               
 [17] BiocManager_1.30.20         compiler_4.2.1             
 [19] Matrix_1.5-3                fastmap_1.1.1              
-[21] lazyeval_0.2.2              cli_3.6.0                  
-[23] BiocSingular_1.14.0         htmltools_0.5.4            
+[21] lazyeval_0.2.2              cli_3.6.1                  
+[23] BiocSingular_1.14.0         htmltools_0.5.5            
 [25] tools_4.2.1                 rsvd_1.0.5                 
-[27] gtable_0.3.1                glue_1.6.2                 
+[27] gtable_0.3.3                glue_1.6.2                 
 [29] GenomeInfoDbData_1.2.9      reshape2_1.4.4             
-[31] dplyr_1.1.0                 Rcpp_1.0.10                
-[33] vctrs_0.5.2                 ape_5.7-1                  
+[31] dplyr_1.1.1                 Rcpp_1.0.10                
+[33] vctrs_0.6.1                 ape_5.7-1                  
 [35] nlme_3.1-162                DECIPHER_2.26.0            
-[37] DelayedMatrixStats_1.20.0   xfun_0.37                  
+[37] DelayedMatrixStats_1.20.0   xfun_0.38                  
 [39] stringr_1.5.0               beachmat_2.14.0            
 [41] lifecycle_1.0.3             irlba_2.3.5.1              
-[43] XML_3.99-0.13               zlibbioc_1.44.0            
+[43] XML_3.99-0.14               zlibbioc_1.44.0            
 [45] MASS_7.3-58.3               scales_1.2.1               
 [47] parallel_4.2.1              yaml_2.3.7                 
 [49] memoise_2.0.1               gridExtra_2.3              
@@ -395,7 +395,7 @@ loaded via a namespace (and not attached):
 [53] RSQLite_2.3.0               highr_0.10                 
 [55] ScaledMatrix_1.6.0          tidytree_0.4.2             
 [57] permute_0.9-7               filelock_1.0.2             
-[59] BiocParallel_1.32.5         rlang_1.1.0                
+[59] BiocParallel_1.32.6         rlang_1.1.0                
 [61] pkgconfig_2.0.3             bitops_1.0-7               
 [63] evaluate_0.20               lattice_0.20-45            
 [65] purrr_1.0.1                 labeling_0.4.2             
@@ -405,12 +405,12 @@ loaded via a namespace (and not attached):
 [73] magrittr_2.0.3              bookdown_0.33              
 [75] R6_2.5.1                    generics_0.1.3             
 [77] DelayedArray_0.24.0         DBI_1.1.3                  
-[79] pillar_1.8.1                withr_2.5.0                
-[81] mgcv_1.8-42                 RCurl_1.98-1.10            
-[83] tibble_3.2.0                dir.expiry_1.4.0           
+[79] pillar_1.9.0                withr_2.5.0                
+[81] mgcv_1.8-42                 RCurl_1.98-1.12            
+[83] tibble_3.2.1                dir.expiry_1.4.0           
 [85] crayon_1.5.2                utf8_1.2.3                 
-[87] rmarkdown_2.20              viridis_0.6.2              
-[89] grid_4.2.1                  blob_1.2.3                 
+[87] rmarkdown_2.21              viridis_0.6.2              
+[89] grid_4.2.1                  blob_1.2.4                 
 [91] vegan_2.6-4                 digest_0.6.31              
 [93] tidyr_1.3.0                 munsell_0.5.0              
 [95] DirichletMultinomial_1.40.0 beeswarm_0.4.0             

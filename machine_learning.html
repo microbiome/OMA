@@ -52,7 +52,7 @@
 <script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
 <script src="libs/kePrint-0.0.1/kePrint.js"></script>
 <link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
-<script src="libs/htmlwidgets-1.6.1/htmlwidgets.js"></script>
+<script src="libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
 <script src="libs/plotly-binding-4.10.1/plotly.js"></script>
 <script src="libs/typedarray-0.1/typedarray.min.js"></script>
 <link href="libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
@@ -524,11 +524,11 @@ data (e.g., k-means clustering).</p>
 contains labels (e.g., patient status), and the model is fitted based on the
 training data. After fitting, the model is utilized to predict labels of data whose
 labels are not known.</p>
-<div class="sourceCode" id="cb344"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb344-1"><a href="machine_learning.html#cb344-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mia)</span>
-<span id="cb344-2"><a href="machine_learning.html#cb344-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb344-3"><a href="machine_learning.html#cb344-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load experimental data</span></span>
-<span id="cb344-4"><a href="machine_learning.html#cb344-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(peerj13075)</span>
-<span id="cb344-5"><a href="machine_learning.html#cb344-5" aria-hidden="true" tabindex="-1"></a>(tse <span class="ot">&lt;-</span> peerj13075)</span></code></pre></div>
+<div class="sourceCode" id="cb346"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb346-1"><a href="machine_learning.html#cb346-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mia)</span>
+<span id="cb346-2"><a href="machine_learning.html#cb346-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb346-3"><a href="machine_learning.html#cb346-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load experimental data</span></span>
+<span id="cb346-4"><a href="machine_learning.html#cb346-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(peerj13075)</span>
+<span id="cb346-5"><a href="machine_learning.html#cb346-5" aria-hidden="true" tabindex="-1"></a>(tse <span class="ot">&lt;-</span> peerj13075)</span></code></pre></div>
 <pre><code>## class: TreeSummarizedExperiment 
 ## dim: 674 58 
 ## metadata(0):
@@ -545,115 +545,115 @@ labels are not known.</p>
 ## colLinks: NULL
 ## colTree: NULL</code></pre>
 <p>Let’s first preprocess the data.</p>
-<div class="sourceCode" id="cb346"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb346-1"><a href="machine_learning.html#cb346-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Agglomerate data</span></span>
-<span id="cb346-2"><a href="machine_learning.html#cb346-2" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(tse, <span class="at">rank =</span> <span class="st">&quot;order&quot;</span>)</span>
-<span id="cb346-3"><a href="machine_learning.html#cb346-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb346-4"><a href="machine_learning.html#cb346-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply CLR transform</span></span>
-<span id="cb346-5"><a href="machine_learning.html#cb346-5" aria-hidden="true" tabindex="-1"></a><span class="fu">assay</span>(tse, <span class="st">&quot;pseudo&quot;</span>) <span class="ot">&lt;-</span> <span class="fu">assay</span>(tse, <span class="st">&quot;counts&quot;</span>) <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb346-6"><a href="machine_learning.html#cb346-6" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformCounts</span>(tse, <span class="at">assay_name =</span> <span class="st">&quot;pseudo&quot;</span>, <span class="at">method =</span> <span class="st">&quot;relabundance&quot;</span>)</span>
-<span id="cb346-7"><a href="machine_learning.html#cb346-7" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformCounts</span>(tse, <span class="at">assay_name =</span> <span class="st">&quot;relabundance&quot;</span>, <span class="at">method =</span> <span class="st">&quot;clr&quot;</span>)</span>
-<span id="cb346-8"><a href="machine_learning.html#cb346-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb346-9"><a href="machine_learning.html#cb346-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Get assay</span></span>
-<span id="cb346-10"><a href="machine_learning.html#cb346-10" aria-hidden="true" tabindex="-1"></a>assay <span class="ot">&lt;-</span> <span class="fu">assay</span>(tse, <span class="st">&quot;clr&quot;</span>)</span>
-<span id="cb346-11"><a href="machine_learning.html#cb346-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Transpose assay</span></span>
-<span id="cb346-12"><a href="machine_learning.html#cb346-12" aria-hidden="true" tabindex="-1"></a>assay <span class="ot">&lt;-</span> <span class="fu">t</span>(assay)</span>
-<span id="cb346-13"><a href="machine_learning.html#cb346-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb346-14"><a href="machine_learning.html#cb346-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert into data.frame</span></span>
-<span id="cb346-15"><a href="machine_learning.html#cb346-15" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(assay)</span>
-<span id="cb346-16"><a href="machine_learning.html#cb346-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb346-17"><a href="machine_learning.html#cb346-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Add labels to assay</span></span>
-<span id="cb346-18"><a href="machine_learning.html#cb346-18" aria-hidden="true" tabindex="-1"></a>labels <span class="ot">&lt;-</span> <span class="fu">colData</span>(tse)<span class="sc">$</span>Diet</span>
-<span id="cb346-19"><a href="machine_learning.html#cb346-19" aria-hidden="true" tabindex="-1"></a>labels <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(labels)</span>
-<span id="cb346-20"><a href="machine_learning.html#cb346-20" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>diet <span class="ot">&lt;-</span> labels </span>
-<span id="cb346-21"><a href="machine_learning.html#cb346-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb346-22"><a href="machine_learning.html#cb346-22" aria-hidden="true" tabindex="-1"></a>df[<span class="dv">5</span>, <span class="dv">5</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb348"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb348-1"><a href="machine_learning.html#cb348-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Agglomerate data</span></span>
+<span id="cb348-2"><a href="machine_learning.html#cb348-2" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(tse, <span class="at">rank =</span> <span class="st">&quot;order&quot;</span>)</span>
+<span id="cb348-3"><a href="machine_learning.html#cb348-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb348-4"><a href="machine_learning.html#cb348-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply CLR transform</span></span>
+<span id="cb348-5"><a href="machine_learning.html#cb348-5" aria-hidden="true" tabindex="-1"></a><span class="fu">assay</span>(tse, <span class="st">&quot;pseudo&quot;</span>) <span class="ot">&lt;-</span> <span class="fu">assay</span>(tse, <span class="st">&quot;counts&quot;</span>) <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb348-6"><a href="machine_learning.html#cb348-6" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformCounts</span>(tse, <span class="at">assay_name =</span> <span class="st">&quot;pseudo&quot;</span>, <span class="at">method =</span> <span class="st">&quot;relabundance&quot;</span>)</span>
+<span id="cb348-7"><a href="machine_learning.html#cb348-7" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformCounts</span>(tse, <span class="at">assay_name =</span> <span class="st">&quot;relabundance&quot;</span>, <span class="at">method =</span> <span class="st">&quot;clr&quot;</span>)</span>
+<span id="cb348-8"><a href="machine_learning.html#cb348-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb348-9"><a href="machine_learning.html#cb348-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Get assay</span></span>
+<span id="cb348-10"><a href="machine_learning.html#cb348-10" aria-hidden="true" tabindex="-1"></a>assay <span class="ot">&lt;-</span> <span class="fu">assay</span>(tse, <span class="st">&quot;clr&quot;</span>)</span>
+<span id="cb348-11"><a href="machine_learning.html#cb348-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Transpose assay</span></span>
+<span id="cb348-12"><a href="machine_learning.html#cb348-12" aria-hidden="true" tabindex="-1"></a>assay <span class="ot">&lt;-</span> <span class="fu">t</span>(assay)</span>
+<span id="cb348-13"><a href="machine_learning.html#cb348-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb348-14"><a href="machine_learning.html#cb348-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert into data.frame</span></span>
+<span id="cb348-15"><a href="machine_learning.html#cb348-15" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(assay)</span>
+<span id="cb348-16"><a href="machine_learning.html#cb348-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb348-17"><a href="machine_learning.html#cb348-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Add labels to assay</span></span>
+<span id="cb348-18"><a href="machine_learning.html#cb348-18" aria-hidden="true" tabindex="-1"></a>labels <span class="ot">&lt;-</span> <span class="fu">colData</span>(tse)<span class="sc">$</span>Diet</span>
+<span id="cb348-19"><a href="machine_learning.html#cb348-19" aria-hidden="true" tabindex="-1"></a>labels <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(labels)</span>
+<span id="cb348-20"><a href="machine_learning.html#cb348-20" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>diet <span class="ot">&lt;-</span> labels </span>
+<span id="cb348-21"><a href="machine_learning.html#cb348-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb348-22"><a href="machine_learning.html#cb348-22" aria-hidden="true" tabindex="-1"></a>df[<span class="dv">5</span>, <span class="dv">5</span>]</span></code></pre></div>
 <pre><code>## [1] -0.4612</code></pre>
 <p>In the example below, we use <a href="https://journals.asm.org/doi/10.1128/mBio.00434-20">mikropml</a>
 package. We try to predict the diet type based on the data.</p>
-<div class="sourceCode" id="cb348"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb348-1"><a href="machine_learning.html#cb348-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>( <span class="sc">!</span><span class="fu">require</span>(<span class="st">&quot;mikropml&quot;</span>) ){</span>
-<span id="cb348-2"><a href="machine_learning.html#cb348-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;mikropml&quot;</span>)</span>
-<span id="cb348-3"><a href="machine_learning.html#cb348-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(mikropml)</span>
-<span id="cb348-4"><a href="machine_learning.html#cb348-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb348-5"><a href="machine_learning.html#cb348-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb348-6"><a href="machine_learning.html#cb348-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Run random forest </span></span>
-<span id="cb348-7"><a href="machine_learning.html#cb348-7" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">run_ml</span>(df, <span class="st">&quot;rf&quot;</span>, <span class="at">outcome_colname =</span> <span class="st">&#39;diet&#39;</span>, </span>
-<span id="cb348-8"><a href="machine_learning.html#cb348-8" aria-hidden="true" tabindex="-1"></a>                  <span class="at">kfold =</span> <span class="dv">2</span>, <span class="at">cv_times =</span> <span class="dv">5</span>, <span class="at">training_frac =</span> <span class="fl">0.8</span>)</span>
-<span id="cb348-9"><a href="machine_learning.html#cb348-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb348-10"><a href="machine_learning.html#cb348-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Print result</span></span>
-<span id="cb348-11"><a href="machine_learning.html#cb348-11" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(<span class="at">data =</span> results<span class="sc">$</span>trained_model<span class="sc">$</span>finalModel<span class="sc">$</span>predicted, </span>
-<span id="cb348-12"><a href="machine_learning.html#cb348-12" aria-hidden="true" tabindex="-1"></a>                <span class="at">reference =</span> results<span class="sc">$</span>trained_model<span class="sc">$</span>finalModel<span class="sc">$</span>y)</span></code></pre></div>
+<div class="sourceCode" id="cb350"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb350-1"><a href="machine_learning.html#cb350-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>( <span class="sc">!</span><span class="fu">require</span>(<span class="st">&quot;mikropml&quot;</span>) ){</span>
+<span id="cb350-2"><a href="machine_learning.html#cb350-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;mikropml&quot;</span>)</span>
+<span id="cb350-3"><a href="machine_learning.html#cb350-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(mikropml)</span>
+<span id="cb350-4"><a href="machine_learning.html#cb350-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb350-5"><a href="machine_learning.html#cb350-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb350-6"><a href="machine_learning.html#cb350-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Run random forest </span></span>
+<span id="cb350-7"><a href="machine_learning.html#cb350-7" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">run_ml</span>(df, <span class="st">&quot;rf&quot;</span>, <span class="at">outcome_colname =</span> <span class="st">&#39;diet&#39;</span>, </span>
+<span id="cb350-8"><a href="machine_learning.html#cb350-8" aria-hidden="true" tabindex="-1"></a>                  <span class="at">kfold =</span> <span class="dv">2</span>, <span class="at">cv_times =</span> <span class="dv">5</span>, <span class="at">training_frac =</span> <span class="fl">0.8</span>)</span>
+<span id="cb350-9"><a href="machine_learning.html#cb350-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb350-10"><a href="machine_learning.html#cb350-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Print result</span></span>
+<span id="cb350-11"><a href="machine_learning.html#cb350-11" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(<span class="at">data =</span> results<span class="sc">$</span>trained_model<span class="sc">$</span>finalModel<span class="sc">$</span>predicted, </span>
+<span id="cb350-12"><a href="machine_learning.html#cb350-12" aria-hidden="true" tabindex="-1"></a>                <span class="at">reference =</span> results<span class="sc">$</span>trained_model<span class="sc">$</span>finalModel<span class="sc">$</span>y)</span></code></pre></div>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    14   6
-##      Veg       9  18
+##      Mixed    13   9
+##      Veg      10  15
 ##                                         
-##                Accuracy : 0.681         
-##                  95% CI : (0.529, 0.809)
+##                Accuracy : 0.596         
+##                  95% CI : (0.443, 0.736)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc &gt; NIR] : 0.0136        
+##     P-Value [Acc &gt; NIR] : 0.154         
 ##                                         
-##                   Kappa : 0.36          
+##                   Kappa : 0.19          
 ##                                         
-##  Mcnemar&#39;s Test P-Value : 0.6056        
+##  Mcnemar&#39;s Test P-Value : 1.000         
 ##                                         
-##             Sensitivity : 0.609         
-##             Specificity : 0.750         
-##          Pos Pred Value : 0.700         
-##          Neg Pred Value : 0.667         
+##             Sensitivity : 0.565         
+##             Specificity : 0.625         
+##          Pos Pred Value : 0.591         
+##          Neg Pred Value : 0.600         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.298         
-##    Detection Prevalence : 0.426         
-##       Balanced Accuracy : 0.679         
+##          Detection Rate : 0.277         
+##    Detection Prevalence : 0.468         
+##       Balanced Accuracy : 0.595         
 ##                                         
 ##        &#39;Positive&#39; Class : Mixed         
 ## </code></pre>
 <p>mikropml offers easier interface to <a href="https://cran.r-project.org/web/packages/caret/index.html">caret</a>
 package. However, we can also use it directly.</p>
 <p>Let’s use xgboost model which is another commonly used algorithm in bioinformatics.</p>
-<div class="sourceCode" id="cb350"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb350-1"><a href="machine_learning.html#cb350-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set seed for reproducibility</span></span>
-<span id="cb350-2"><a href="machine_learning.html#cb350-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">6358</span>)</span>
-<span id="cb350-3"><a href="machine_learning.html#cb350-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb350-4"><a href="machine_learning.html#cb350-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify train control</span></span>
-<span id="cb350-5"><a href="machine_learning.html#cb350-5" aria-hidden="true" tabindex="-1"></a>train_control <span class="ot">&lt;-</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">&quot;cv&quot;</span>, <span class="at">number =</span> <span class="dv">5</span>,</span>
-<span id="cb350-6"><a href="machine_learning.html#cb350-6" aria-hidden="true" tabindex="-1"></a>                              <span class="at">classProbs =</span> <span class="cn">TRUE</span>, </span>
-<span id="cb350-7"><a href="machine_learning.html#cb350-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">savePredictions =</span> <span class="st">&quot;final&quot;</span>,</span>
-<span id="cb350-8"><a href="machine_learning.html#cb350-8" aria-hidden="true" tabindex="-1"></a>                              <span class="at">allowParallel =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb350-9"><a href="machine_learning.html#cb350-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb350-10"><a href="machine_learning.html#cb350-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify hyperparameter tuning grid</span></span>
-<span id="cb350-11"><a href="machine_learning.html#cb350-11" aria-hidden="true" tabindex="-1"></a>tune_grid <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">nrounds =</span> <span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>),</span>
-<span id="cb350-12"><a href="machine_learning.html#cb350-12" aria-hidden="true" tabindex="-1"></a>                         <span class="at">max_depth =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">10</span>),</span>
-<span id="cb350-13"><a href="machine_learning.html#cb350-13" aria-hidden="true" tabindex="-1"></a>                         <span class="at">colsample_bytree =</span> <span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">0.8</span>, <span class="dv">1</span>),</span>
-<span id="cb350-14"><a href="machine_learning.html#cb350-14" aria-hidden="true" tabindex="-1"></a>                         <span class="at">eta =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.3</span>),</span>
-<span id="cb350-15"><a href="machine_learning.html#cb350-15" aria-hidden="true" tabindex="-1"></a>                         <span class="at">gamma =</span> <span class="dv">0</span>,</span>
-<span id="cb350-16"><a href="machine_learning.html#cb350-16" aria-hidden="true" tabindex="-1"></a>                         <span class="at">min_child_weight =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>),</span>
-<span id="cb350-17"><a href="machine_learning.html#cb350-17" aria-hidden="true" tabindex="-1"></a>                         <span class="at">subsample =</span> <span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">0.8</span>)</span>
-<span id="cb350-18"><a href="machine_learning.html#cb350-18" aria-hidden="true" tabindex="-1"></a>                         )</span>
-<span id="cb350-19"><a href="machine_learning.html#cb350-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb350-20"><a href="machine_learning.html#cb350-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Train the model, use LOOCV to evaluate performance</span></span>
-<span id="cb350-21"><a href="machine_learning.html#cb350-21" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">train</span>(<span class="at">x =</span> assay, </span>
-<span id="cb350-22"><a href="machine_learning.html#cb350-22" aria-hidden="true" tabindex="-1"></a>               <span class="at">y =</span> labels, </span>
-<span id="cb350-23"><a href="machine_learning.html#cb350-23" aria-hidden="true" tabindex="-1"></a>               <span class="at">method =</span> <span class="st">&quot;xgbTree&quot;</span>,</span>
-<span id="cb350-24"><a href="machine_learning.html#cb350-24" aria-hidden="true" tabindex="-1"></a>               <span class="at">objective =</span> <span class="st">&quot;binary:logistic&quot;</span>,</span>
-<span id="cb350-25"><a href="machine_learning.html#cb350-25" aria-hidden="true" tabindex="-1"></a>               <span class="at">trControl =</span> train_control,</span>
-<span id="cb350-26"><a href="machine_learning.html#cb350-26" aria-hidden="true" tabindex="-1"></a>               <span class="at">tuneGrid =</span> tune_grid,</span>
-<span id="cb350-27"><a href="machine_learning.html#cb350-27" aria-hidden="true" tabindex="-1"></a>               <span class="at">metric =</span> <span class="st">&quot;AUC&quot;</span>,</span>
-<span id="cb350-28"><a href="machine_learning.html#cb350-28" aria-hidden="true" tabindex="-1"></a>               <span class="at">verbosity =</span> <span class="dv">0</span></span>
-<span id="cb350-29"><a href="machine_learning.html#cb350-29" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb352"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb352-1"><a href="machine_learning.html#cb352-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set seed for reproducibility</span></span>
+<span id="cb352-2"><a href="machine_learning.html#cb352-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">6358</span>)</span>
+<span id="cb352-3"><a href="machine_learning.html#cb352-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb352-4"><a href="machine_learning.html#cb352-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify train control</span></span>
+<span id="cb352-5"><a href="machine_learning.html#cb352-5" aria-hidden="true" tabindex="-1"></a>train_control <span class="ot">&lt;-</span> <span class="fu">trainControl</span>(<span class="at">method =</span> <span class="st">&quot;cv&quot;</span>, <span class="at">number =</span> <span class="dv">5</span>,</span>
+<span id="cb352-6"><a href="machine_learning.html#cb352-6" aria-hidden="true" tabindex="-1"></a>                              <span class="at">classProbs =</span> <span class="cn">TRUE</span>, </span>
+<span id="cb352-7"><a href="machine_learning.html#cb352-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">savePredictions =</span> <span class="st">&quot;final&quot;</span>,</span>
+<span id="cb352-8"><a href="machine_learning.html#cb352-8" aria-hidden="true" tabindex="-1"></a>                              <span class="at">allowParallel =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb352-9"><a href="machine_learning.html#cb352-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb352-10"><a href="machine_learning.html#cb352-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify hyperparameter tuning grid</span></span>
+<span id="cb352-11"><a href="machine_learning.html#cb352-11" aria-hidden="true" tabindex="-1"></a>tune_grid <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">nrounds =</span> <span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">200</span>),</span>
+<span id="cb352-12"><a href="machine_learning.html#cb352-12" aria-hidden="true" tabindex="-1"></a>                         <span class="at">max_depth =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">10</span>),</span>
+<span id="cb352-13"><a href="machine_learning.html#cb352-13" aria-hidden="true" tabindex="-1"></a>                         <span class="at">colsample_bytree =</span> <span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">0.8</span>, <span class="dv">1</span>),</span>
+<span id="cb352-14"><a href="machine_learning.html#cb352-14" aria-hidden="true" tabindex="-1"></a>                         <span class="at">eta =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.3</span>),</span>
+<span id="cb352-15"><a href="machine_learning.html#cb352-15" aria-hidden="true" tabindex="-1"></a>                         <span class="at">gamma =</span> <span class="dv">0</span>,</span>
+<span id="cb352-16"><a href="machine_learning.html#cb352-16" aria-hidden="true" tabindex="-1"></a>                         <span class="at">min_child_weight =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>),</span>
+<span id="cb352-17"><a href="machine_learning.html#cb352-17" aria-hidden="true" tabindex="-1"></a>                         <span class="at">subsample =</span> <span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">0.8</span>)</span>
+<span id="cb352-18"><a href="machine_learning.html#cb352-18" aria-hidden="true" tabindex="-1"></a>                         )</span>
+<span id="cb352-19"><a href="machine_learning.html#cb352-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb352-20"><a href="machine_learning.html#cb352-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Train the model, use LOOCV to evaluate performance</span></span>
+<span id="cb352-21"><a href="machine_learning.html#cb352-21" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">train</span>(<span class="at">x =</span> assay, </span>
+<span id="cb352-22"><a href="machine_learning.html#cb352-22" aria-hidden="true" tabindex="-1"></a>               <span class="at">y =</span> labels, </span>
+<span id="cb352-23"><a href="machine_learning.html#cb352-23" aria-hidden="true" tabindex="-1"></a>               <span class="at">method =</span> <span class="st">&quot;xgbTree&quot;</span>,</span>
+<span id="cb352-24"><a href="machine_learning.html#cb352-24" aria-hidden="true" tabindex="-1"></a>               <span class="at">objective =</span> <span class="st">&quot;binary:logistic&quot;</span>,</span>
+<span id="cb352-25"><a href="machine_learning.html#cb352-25" aria-hidden="true" tabindex="-1"></a>               <span class="at">trControl =</span> train_control,</span>
+<span id="cb352-26"><a href="machine_learning.html#cb352-26" aria-hidden="true" tabindex="-1"></a>               <span class="at">tuneGrid =</span> tune_grid,</span>
+<span id="cb352-27"><a href="machine_learning.html#cb352-27" aria-hidden="true" tabindex="-1"></a>               <span class="at">metric =</span> <span class="st">&quot;AUC&quot;</span>,</span>
+<span id="cb352-28"><a href="machine_learning.html#cb352-28" aria-hidden="true" tabindex="-1"></a>               <span class="at">verbosity =</span> <span class="dv">0</span></span>
+<span id="cb352-29"><a href="machine_learning.html#cb352-29" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p>Let’s create ROC curve which is a commonly used method in binary classification.
 For unbalanced data, you might want to plot precision-recall curve.</p>
-<div class="sourceCode" id="cb351"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb351-1"><a href="machine_learning.html#cb351-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>( <span class="sc">!</span><span class="fu">require</span>(MLeval) ){</span>
-<span id="cb351-2"><a href="machine_learning.html#cb351-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;MLeval&quot;</span>)</span>
-<span id="cb351-3"><a href="machine_learning.html#cb351-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(MLeval)</span>
-<span id="cb351-4"><a href="machine_learning.html#cb351-4" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb351-5"><a href="machine_learning.html#cb351-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate different evaluation metrics</span></span>
-<span id="cb351-6"><a href="machine_learning.html#cb351-6" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">evalm</span>(model, <span class="at">showplots =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb351-7"><a href="machine_learning.html#cb351-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb351-8"><a href="machine_learning.html#cb351-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Use patchwork to plot ROC and precision-recall curve side-by-side</span></span>
-<span id="cb351-9"><a href="machine_learning.html#cb351-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
-<span id="cb351-10"><a href="machine_learning.html#cb351-10" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>roc <span class="sc">+</span> res<span class="sc">$</span>proc <span class="sc">+</span> </span>
-<span id="cb351-11"><a href="machine_learning.html#cb351-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">&quot;collect&quot;</span>) <span class="sc">&amp;</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;bottom&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb353"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb353-1"><a href="machine_learning.html#cb353-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>( <span class="sc">!</span><span class="fu">require</span>(MLeval) ){</span>
+<span id="cb353-2"><a href="machine_learning.html#cb353-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;MLeval&quot;</span>)</span>
+<span id="cb353-3"><a href="machine_learning.html#cb353-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(MLeval)</span>
+<span id="cb353-4"><a href="machine_learning.html#cb353-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb353-5"><a href="machine_learning.html#cb353-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate different evaluation metrics</span></span>
+<span id="cb353-6"><a href="machine_learning.html#cb353-6" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">evalm</span>(model, <span class="at">showplots =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb353-7"><a href="machine_learning.html#cb353-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb353-8"><a href="machine_learning.html#cb353-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Use patchwork to plot ROC and precision-recall curve side-by-side</span></span>
+<span id="cb353-9"><a href="machine_learning.html#cb353-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb353-10"><a href="machine_learning.html#cb353-10" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>roc <span class="sc">+</span> res<span class="sc">$</span>proc <span class="sc">+</span> </span>
+<span id="cb353-11"><a href="machine_learning.html#cb353-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">&quot;collect&quot;</span>) <span class="sc">&amp;</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&#39;bottom&#39;</span>)</span></code></pre></div>
 <p><img src="40_machine_learning_files/figure-html/super5-1.png" width="672" /></p>
 </div>
 <div id="unsupervised-machine-learning" class="section level2 hasAnchor" number="12.2">
@@ -696,39 +696,39 @@ attached base packages:
 
 other attached packages:
  [1] patchwork_1.1.2                MLeval_0.3                    
- [3] caret_6.0-93                   lattice_0.20-45               
+ [3] caret_6.0-94                   lattice_0.20-45               
  [5] ggplot2_3.4.1                  mikropml_1.5.0                
- [7] mia_1.7.9                      MultiAssayExperiment_1.24.0   
+ [7] mia_1.7.11                     MultiAssayExperiment_1.24.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
-[11] XVector_0.38.0                 SingleCellExperiment_1.20.0   
+[11] XVector_0.38.0                 SingleCellExperiment_1.20.1   
 [13] SummarizedExperiment_1.28.0    Biobase_2.58.0                
 [15] GenomicRanges_1.50.2           GenomeInfoDb_1.34.9           
-[17] IRanges_2.32.0                 S4Vectors_0.36.1              
+[17] IRanges_2.32.0                 S4Vectors_0.36.2              
 [19] BiocGenerics_0.44.0            MatrixGenerics_1.10.0         
 [21] matrixStats_0.63.0-9003        BiocStyle_2.24.0              
 [23] rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
   [1] plyr_1.8.8                  lazyeval_0.2.2             
-  [3] splines_4.2.1               BiocParallel_1.32.5        
+  [3] splines_4.2.1               BiocParallel_1.32.6        
   [5] listenv_0.9.0               scater_1.26.1              
   [7] digest_0.6.31               foreach_1.5.2              
-  [9] yulab.utils_0.0.6           htmltools_0.5.4            
+  [9] yulab.utils_0.0.6           htmltools_0.5.5            
  [11] viridis_0.6.2               fansi_1.0.4                
  [13] magrittr_2.0.3              memoise_2.0.1              
  [15] MLmetrics_1.1.1             ScaledMatrix_1.6.0         
  [17] cluster_2.1.4               ROCR_1.0-11                
- [19] DECIPHER_2.26.0             recipes_1.0.4              
+ [19] DECIPHER_2.26.0             recipes_1.0.5              
  [21] globals_0.16.2              gower_1.0.1                
  [23] hardhat_1.2.0               timechange_0.2.0           
- [25] colorspace_2.1-0            blob_1.2.3                 
- [27] ggrepel_0.9.3               xfun_0.37                  
- [29] dplyr_1.1.0                 crayon_1.5.2               
- [31] RCurl_1.98-1.10             jsonlite_1.8.4             
+ [25] colorspace_2.1-0            blob_1.2.4                 
+ [27] ggrepel_0.9.3               xfun_0.38                  
+ [29] dplyr_1.1.1                 crayon_1.5.2               
+ [31] RCurl_1.98-1.12             jsonlite_1.8.4             
  [33] graph_1.74.0                survival_3.5-5             
  [35] iterators_1.0.14            ape_5.7-1                  
- [37] glue_1.6.2                  gtable_0.3.1               
- [39] ipred_0.9-13                zlibbioc_1.44.0            
+ [37] glue_1.6.2                  gtable_0.3.3               
+ [39] ipred_0.9-14                zlibbioc_1.44.0            
  [41] DelayedArray_0.24.0         kernlab_0.9-32             
  [43] BiocSingular_1.14.0         shape_1.4.6                
  [45] future.apply_1.10.0         scales_1.2.1               
@@ -736,17 +736,17 @@ loaded via a namespace (and not attached):
  [49] viridisLite_0.4.1           decontam_1.18.0            
  [51] tidytree_0.4.2              proxy_0.4-27               
  [53] bit_4.0.5                   rsvd_1.0.5                 
- [55] lava_1.7.1                  prodlim_2019.11.13         
- [57] glmnet_4.1-6                dir.expiry_1.4.0           
+ [55] lava_1.7.2.1                prodlim_2019.11.13         
+ [57] glmnet_4.1-7                dir.expiry_1.4.0           
  [59] farver_2.1.1                pkgconfig_2.0.3            
- [61] XML_3.99-0.13               scuttle_1.8.4              
+ [61] XML_3.99-0.14               scuttle_1.8.4              
  [63] nnet_7.3-18                 CodeDepends_0.6.5          
  [65] sass_0.4.5                  utf8_1.2.3                 
  [67] labeling_0.4.2              tidyselect_1.2.0           
  [69] rlang_1.1.0                 reshape2_1.4.4             
  [71] munsell_0.5.0               tools_4.2.1                
  [73] cachem_1.0.7                xgboost_1.7.3.1            
- [75] cli_3.6.0                   DirichletMultinomial_1.40.0
+ [75] cli_3.6.1                   DirichletMultinomial_1.40.0
  [77] generics_0.1.3              RSQLite_2.3.0              
  [79] evaluate_0.20               stringr_1.5.0              
  [81] fastmap_1.1.1               yaml_2.3.7                 
@@ -756,24 +756,24 @@ loaded via a namespace (and not attached):
  [89] nlme_3.1-162                sparseMatrixStats_1.10.0   
  [91] compiler_4.2.1              beeswarm_0.4.0             
  [93] filelock_1.0.2              e1071_1.7-13               
- [95] treeio_1.22.0               tibble_3.2.0               
+ [95] treeio_1.22.0               tibble_3.2.1               
  [97] bslib_0.4.2                 stringi_1.7.12             
  [99] highr_0.10                  Matrix_1.5-3               
 [101] vegan_2.6-4                 permute_0.9-7              
-[103] vctrs_0.5.2                 pillar_1.8.1               
+[103] vctrs_0.6.1                 pillar_1.9.0               
 [105] lifecycle_1.0.3             BiocManager_1.30.20        
 [107] jquerylib_0.1.4             BiocNeighbors_1.16.0       
 [109] data.table_1.14.8           bitops_1.0-7               
 [111] irlba_2.3.5.1               R6_2.5.1                   
 [113] bookdown_0.33               gridExtra_2.3              
-[115] vipor_0.4.5                 parallelly_1.34.0          
+[115] vipor_0.4.5                 parallelly_1.35.0          
 [117] codetools_0.2-19            MASS_7.3-58.3              
 [119] withr_2.5.0                 GenomeInfoDbData_1.2.9     
 [121] mgcv_1.8-42                 parallel_4.2.1             
 [123] grid_4.2.1                  rpart_4.1.19               
 [125] beachmat_2.14.0             timeDate_4022.108          
 [127] tidyr_1.3.0                 class_7.3-21               
-[129] rmarkdown_2.20              DelayedMatrixStats_1.20.0  
+[129] rmarkdown_2.21              DelayedMatrixStats_1.20.0  
 [131] pROC_1.18.0                 lubridate_1.9.2            
 [133] ggbeeswarm_0.7.1           </code></pre>
 </div>

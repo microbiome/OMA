@@ -578,12 +578,12 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] mia_1.7.9                      MultiAssayExperiment_1.24.0   
+ [1] mia_1.7.11                     MultiAssayExperiment_1.24.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
- [5] XVector_0.38.0                 SingleCellExperiment_1.20.0   
+ [5] XVector_0.38.0                 SingleCellExperiment_1.20.1   
  [7] SummarizedExperiment_1.28.0    Biobase_2.58.0                
  [9] GenomicRanges_1.50.2           GenomeInfoDb_1.34.9           
-[11] IRanges_2.32.0                 S4Vectors_0.36.1              
+[11] IRanges_2.32.0                 S4Vectors_0.36.2              
 [13] BiocGenerics_0.44.0            MatrixGenerics_1.10.0         
 [15] matrixStats_0.63.0-9003        BiocStyle_2.24.0              
 [17] rebook_1.6.0                  
@@ -600,18 +600,18 @@ loaded via a namespace (and not attached):
 [17] withr_2.5.0                 tidyselect_1.2.0           
 [19] gridExtra_2.3               bit_4.0.5                  
 [21] compiler_4.2.1              graph_1.74.0               
-[23] cli_3.6.0                   BiocNeighbors_1.16.0       
+[23] cli_3.6.1                   BiocNeighbors_1.16.0       
 [25] DelayedArray_0.24.0         bookdown_0.33              
 [27] scales_1.2.1                stringr_1.5.0              
 [29] digest_0.6.31               yulab.utils_0.0.6          
-[31] rmarkdown_2.20              scater_1.26.1              
-[33] pkgconfig_2.0.3             htmltools_0.5.4            
+[31] rmarkdown_2.21              scater_1.26.1              
+[33] pkgconfig_2.0.3             htmltools_0.5.5            
 [35] decontam_1.18.0             sparseMatrixStats_1.10.0   
 [37] fastmap_1.1.1               rlang_1.1.0                
 [39] RSQLite_2.3.0               DelayedMatrixStats_1.20.0  
 [41] generics_0.1.3              jsonlite_1.8.4             
-[43] BiocParallel_1.32.5         dplyr_1.1.0                
-[45] RCurl_1.98-1.10             magrittr_2.0.3             
+[43] BiocParallel_1.32.6         dplyr_1.1.1                
+[45] RCurl_1.98-1.12             magrittr_2.0.3             
 [47] BiocSingular_1.14.0         GenomeInfoDbData_1.2.9     
 [49] scuttle_1.8.4               Matrix_1.5-3               
 [51] Rcpp_1.0.10                 ggbeeswarm_0.7.1           
@@ -620,22 +620,22 @@ loaded via a namespace (and not attached):
 [57] viridis_0.6.2               lifecycle_1.0.3            
 [59] stringi_1.7.12              yaml_2.3.7                 
 [61] MASS_7.3-58.3               zlibbioc_1.44.0            
-[63] plyr_1.8.8                  blob_1.2.3                 
+[63] plyr_1.8.8                  blob_1.2.4                 
 [65] grid_4.2.1                  parallel_4.2.1             
 [67] ggrepel_0.9.3               crayon_1.5.2               
 [69] dir.expiry_1.4.0            lattice_0.20-45            
 [71] splines_4.2.1               beachmat_2.14.0            
 [73] CodeDepends_0.6.5           knitr_1.42                 
-[75] pillar_1.8.1                reshape2_1.4.4             
+[75] pillar_1.9.0                reshape2_1.4.4             
 [77] codetools_0.2-19            ScaledMatrix_1.6.0         
-[79] XML_3.99-0.13               glue_1.6.2                 
+[79] XML_3.99-0.14               glue_1.6.2                 
 [81] evaluate_0.20               BiocManager_1.30.20        
-[83] vctrs_0.5.2                 treeio_1.22.0              
-[85] gtable_0.3.1                purrr_1.0.1                
+[83] vctrs_0.6.1                 treeio_1.22.0              
+[85] gtable_0.3.3                purrr_1.0.1                
 [87] tidyr_1.3.0                 cachem_1.0.7               
-[89] ggplot2_3.4.1               xfun_0.37                  
+[89] ggplot2_3.4.1               xfun_0.38                  
 [91] rsvd_1.0.5                  tidytree_0.4.2             
-[93] viridisLite_0.4.1           tibble_3.2.0               
+[93] viridisLite_0.4.1           tibble_3.2.1               
 [95] memoise_2.0.1               beeswarm_0.4.0             
 [97] cluster_2.1.4              
 ```

@@ -43,8 +43,8 @@ document.addEventListener("click", function (event) {
 
 ### Tidy data
 
-For several custom analysis and visualization packages, such as those from the 
-`tidyverse`, the `SE` data can be converted to long data.frame format with 
+For several custom analysis and visualization packages, such as those from
+`tidyverse`, the `SE` data can be converted to a long data.frame format with 
 `meltAssay`.    
 
 
@@ -65,22 +65,22 @@ molten_tse
 
 ```
 ## # A tibble: 499,616 x 17
-##    FeatureID SampleID relabund~1 Kingdom Phylum Class Order Family Genus Species
-##    <fct>     <fct>         <dbl> <chr>   <chr>  <chr> <chr> <chr>  <chr> <chr>  
-##  1 549322    CL3               0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
-##  2 549322    CC1               0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
-##  3 549322    SV1               0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
-##  4 549322    M31Fcsw           0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
-##  5 549322    M11Fcsw           0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
-##  6 549322    M31Plmr           0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
-##  7 549322    M11Plmr           0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
-##  8 549322    F21Plmr           0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
-##  9 549322    M31Tong           0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
-## 10 549322    M11Tong           0 Archaea Crena~ Ther~ <NA>  <NA>   <NA>  <NA>   
-## # ... with 499,606 more rows, 7 more variables: X.SampleID <fct>, Primer <fct>,
+##    FeatureID SampleID relabundance Kingdom Phylum       Class Order Family Genus
+##    <fct>     <fct>           <dbl> <chr>   <chr>        <chr> <chr> <chr>  <chr>
+##  1 549322    CL3                 0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  2 549322    CC1                 0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  3 549322    SV1                 0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  4 549322    M31Fcsw             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  5 549322    M11Fcsw             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  6 549322    M31Plmr             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  7 549322    M11Plmr             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  8 549322    F21Plmr             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+##  9 549322    M31Tong             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+## 10 549322    M11Tong             0 Archaea Crenarchaeo~ Ther~ <NA>  <NA>   <NA> 
+## # i 499,606 more rows
+## # i 8 more variables: Species <chr>, X.SampleID <fct>, Primer <fct>,
 ## #   Final_Barcode <fct>, Barcode_truncated_plus_T <fct>,
-## #   Barcode_full_length <fct>, SampleType <fct>, Description <fct>, and
-## #   abbreviated variable name 1: relabundance
+## #   Barcode_full_length <fct>, SampleType <fct>, Description <fct>
 ```
 
 ### Subsetting
@@ -104,10 +104,10 @@ Let us store `GlobalPatterns` into `tse` and check its original number of featur
 
 
 ```r
-# store data into se and check dimensions
+# Store data into se and check dimensions
 data("GlobalPatterns", package="mia")
 tse <- GlobalPatterns
-# show dimensions (features x samples)
+# Show dimensions (features x samples)
 dim(tse) 
 ```
 
@@ -123,7 +123,7 @@ First, we would like to see all the possible values that `SampleType` can take o
 
 
 ```r
-# inspect possible values for SampleType
+# Inspect possible values for SampleType
 unique(tse$SampleType)
 ```
 
@@ -135,7 +135,7 @@ unique(tse$SampleType)
 ```
 
 ```r
-# show recurrence for each value
+# Show the frequency of each value
 tse$SampleType %>% table()
 ```
 \begin{table}
@@ -167,7 +167,7 @@ Tongue & 2\\
 \end{table}
 
 **Note**: after subsetting, expect the number of columns to equal the
-  sum of the recurrences of the samples that you are interested
+  sum of the frequencies of the samples that you are interested
   in. For instance, `ncols = Feces + Skin + Tongue = 4 + 3 + 2 = 9`.
 
 Next, we _logical index_ across the columns of `tse` (make sure to
@@ -177,10 +177,10 @@ samples from the meta data `colData(tse)`.
 
 
 ```r
-# subset by sample
+# Subset by sample
 tse_subset_by_sample <- tse[ , tse$SampleType %in% c("Feces", "Skin", "Tongue")]
 
-# show dimensions
+# Show dimensions
 dim(tse_subset_by_sample)
 ```
 
@@ -204,9 +204,9 @@ Several characteristics can be used to subset by sample:
 #### Subset by feature (row-wise)
 
 Similarly, here we will extract a subset containing only the features
-that belong to the Phyla "Actinobacteria" and "Chlamydiae", stored as
+that belong to the phyla Actinobacteria and Chlamydiae, stored as
 `Phylum` within `rowData(tse)`. However, subsetting by feature implies
-a few more obstacles, such as the presence of NA elements and the
+a few more obstacles, such as the presence of `NA` elements and the
 possible need for agglomeration.
 
 As previously, we would first like to see all the possible values that
@@ -214,7 +214,7 @@ As previously, we would first like to see all the possible values that
   
 
 ```r
-# inspect possible values for Phylum
+# Inspect possible values for phylum
 unique(rowData(tse)$Phylum)
 ```
 
@@ -239,7 +239,7 @@ unique(rowData(tse)$Phylum)
 ```
 
 ```r
-# show recurrence for each value
+# Show the frequency of each value
 rowData(tse)$Phylum %>% table()
 ```
 \begin{table}
@@ -385,35 +385,35 @@ ZB3 & 2\\
 \end{table}
 
 **Note**: after subsetting, expect the number of columns to equal the
-  sum of the recurrences of the feature(s) that you are interested
+  sum of the frequencies of the feature(s) that you are interested
   in. For instance, `nrows = Actinobacteria + Chlamydiae = 1631 + 21 =
   1652`.
 
-Depending on your research question, you might need to or need not
+Depending on your research question, you might or might not need to
 agglomerate the data in the first place: if you want to find the
 abundance of each and every feature that belongs to Actinobacteria and
 Chlamydiae, agglomeration is not needed; if you want to find the total
-abundance of all the features that belong to Actinobacteria or
+abundance of all features that belong to Actinobacteria or
 Chlamydiae, agglomeration is recommended.
 
 ##### Non-agglomerated data
 
 Next, we _logical index_ across the rows of `tse` (make sure to leave
 the second index empty to select all columns) and filter for the
-features that fall in either Actinobacteria or Chlamydiae. For this,
-we use the information on the samples from the meta data
+features that fall in either Actinobacteria or Chlamydiae group. For this,
+we use the information on the samples from the metadata
 `rowData(tse)`.
 
-The first term with the `%in%` operator are includes all the features
+The first term with the `%in%` operator includes all the features
 of interest, whereas the second term after the AND operator `&`
-filters out all the features that present a NA in place of Phylum.
+filters out all features that have an `NA` in place of the phylum variable.
 
 
 ```r
-# subset by feature
+# Subset by feature
 tse_subset_by_feature <- tse[rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(tse)$Phylum), ]
 
-# show dimensions
+# Show dimensions
 dim(tse_subset_by_feature)
 ```
 
@@ -421,21 +421,21 @@ dim(tse_subset_by_feature)
 ## [1] 1652   26
 ```
 
-As a sanity check, the new object `tse_subset_by_feature` should have the original number of samples (columns) and a number of features (rows) equal to the sum of the features of interest (in this case 1652).
+As a sanity check, the new object, `tse_subset_by_feature`, should have the original number of samples (columns) and a number of features (rows) equal to the sum of the features of interest (in this case, 1652).
 
 ##### Agglomerated data
 
-When total abundances of certain Phyla are of relevance, the data is initially agglomerated by Phylum. Then, similar steps as in the case of not agglomerated data are followed.
+When total abundances of certain phyla are of relevance, the data is initially agglomerated by Phylum. Then, similar steps as in the case of non-agglomerated data are followed.
 
 
 ```r
-# agglomerate by Phylum
+# Agglomerate by phylum
 tse_phylum <- tse %>% agglomerateByRank(rank = "Phylum")
 
-# subset by feature and get rid of NAs
+# Subset by feature and remove NAs
 tse_phylum_subset_by_feature <- tse_phylum[rowData(tse_phylum)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(tse_phylum)$Phylum), ]
 
-# show dimensions
+# Show dimensions
 dim(tse_phylum_subset_by_feature)
 ```
 
@@ -443,18 +443,18 @@ dim(tse_phylum_subset_by_feature)
 ## [1]  2 26
 ```
 
-**Note**: as data was agglomerated, the number of rows equal the
-  number of Phyla used to index (in this case, just 2)
+**Note**: as data was agglomerated, the number of rows should equal the
+  number of phyla used to index (in this case, just 2).
 
 Alternatively:
 
 
 ```r
-# store features of interest into phyla
+# Store features of interest into phyla
 phyla <- c("Phylum:Actinobacteria", "Phylum:Chlamydiae")
 # subset by feature
 tse_phylum_subset_by_feature <- tse_phylum[phyla, ]
-# show dimensions
+# Show dimensions
 dim(tse_subset_by_feature)
 ```
 
@@ -462,28 +462,28 @@ dim(tse_subset_by_feature)
 ## [1] 1652   26
 ```
 
-The code above returns the not agglomerated version of the data.
+The code above returns the non-agglomerated version of the data.
 
 Fewer characteristics can be used to subset by feature:
 
 * Taxonomic rank
 * Meta-taxonomic group
 
-For subsetting by Kingdom, agglomeration does not apply, whereas for
+For subsetting by kingdom, agglomeration does not apply, whereas for
 the other ranks it can be applied if necessary.
 
 #### Subset by sample and feature
 
 Finally, we can subset data by sample and feature at once. The
 resulting subset contains all the samples of human origin and all the
-features of Phyla "Actinobacteria" or "Chlamydiae".
+features of phyla Actinobacteria or Chlamydiae.
 
 
 ```r
-# subset by sample and feature and get rid of NAs
+# Subset by sample and feature and remove NAs
 tse_subset_by_sample_feature <- tse[rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(tse)$Phylum), tse$SampleType %in% c("Feces", "Skin", "Tongue")]
 
-# show dimensions
+# Show dimensions
 dim(tse_subset_by_sample_feature)
 ```
 
@@ -503,7 +503,7 @@ with.
 #### Remove empty columns and rows
 
 Sometimes data might contain, e.g., features that are not present in any of the  samples.
-This might occur after subsetting for instance. In certain analyses we might want to
+This can occur, for example, after the data subsetting. In certain analyses, we might want to
 remove those instances.
 
 
@@ -557,7 +557,7 @@ Now we can see that certain samples do not include any bacteria. We can remove t
 
 
 ```r
-# Remove samples that do not have present any bacteria
+# Remove samples that do not contain any bacteria
 tse_genus_sub <- tse_genus_sub[ , colSums(assay(tse_genus_sub, "counts")) != 0 ]
 tse_genus_sub
 ```
@@ -580,7 +580,7 @@ tse_genus_sub
 ## colTree: NULL
 ```
 
-Same thing can be done for features.
+The same action can also be applied to the features.
 
 
 ```r
@@ -611,7 +611,7 @@ tse_genus_sub
 
 
 ```r
-# How many bacteria there are that are not present?
+# What is the number of bacteria that are not present?
 sum(rowSums(assay(tse_genus_sub, "counts")) == 0)
 ```
 
@@ -619,7 +619,7 @@ sum(rowSums(assay(tse_genus_sub, "counts")) == 0)
 ## [1] 435
 ```
 
-We can see that there are bacteria that are not present in these samples that we chose.
+We can see that there are bacteria that are not present in these samples we chose.
 We can remove those bacteria from the data. 
 
 
@@ -651,10 +651,10 @@ tse_genus_sub
 
 ### Splitting
 
-You can split data base on variables. There are available functions `splitByRanks` 
+You can split the data based on variables by using the functions `splitByRanks` 
 and `splitOn`.
 
-`splitByRanks` splits the data based on rank. Since the elements of the output list
+`splitByRanks` splits the data based on taxonomic ranks. Since the elements of the output list
 share columns, they can be stored into `altExp`. 
 
 
@@ -668,7 +668,7 @@ altExps(tse)
 ## names(7): Kingdom Phylum Class Order Family Genus Species
 ```
 
-If you want to split the data based on other variable than taxonomy rank, use 
+If you want to split the data based on another variable than taxonomic rank, use 
 `splitOn`. It works for row-wise and column-wise splitting.
 
 
@@ -692,7 +692,7 @@ includes one sample.
 
 
 ```r
-# Take subsets for demonstrative purpose
+# Take subsets for demonstration purposes
 tse1 <- tse[, 1]
 tse2 <- tse[, 2]
 tse3 <- tse[, 3]
@@ -702,7 +702,7 @@ tse4 <- tse[1:100, 4]
 
 ```r
 # With inner join, we want to include all shared rows. When using mergeSEs function
-# all the samples are always preserved.
+# all samples are always preserved.
 tse <- mergeSEs(list(tse1, tse2, tse3, tse4), join = "inner")
 tse
 ```
@@ -727,7 +727,7 @@ tse
 
 
 ```r
-# left join preserves all the rows of the 1st object
+# Left join preserves all rows of the 1st object
 tse <- mia::left_join(tse1, tse4, missing_values = 0)
 tse
 ```
