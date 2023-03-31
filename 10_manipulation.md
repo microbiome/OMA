@@ -681,6 +681,46 @@ splitOn(tse, "SampleType")
 ## names(9): Soil Feces Skin Tongue ... Ocean Sediment (estuary) Mock
 ```
 
+## Add or modify data
+
+The information contained by the `colData` of a `TreeSE` can be modified by
+accessing the desired variables.
+
+
+```r
+# modify the Description entries
+colData(tse)$Description <- paste(colData(tse)$Description, "modified description")
+
+# view modified variable
+head(tse$Description)
+```
+
+```
+## [1] "Calhoun South Carolina Pine soil, pH 4.9 modified description"  
+## [2] "Cedar Creek Minnesota, grassland, pH 6.1 modified description"  
+## [3] "Sevilleta new Mexico, desert scrub, pH 8.3 modified description"
+## [4] "M3, Day 1, fecal swab, whole body study modified description"   
+## [5] "M1, Day 1, fecal swab, whole body study  modified description"  
+## [6] "M3, Day 1, right palm, whole body study modified description"
+```
+New information can also be added to the experiment by creating a new variable.
+
+
+```r
+# simulate new data
+new_data <- runif(ncol(tse))
+
+# store new data as new variable in colData
+colData(tse)$NewVariable <- new_data
+
+# view new variable
+head(tse$NewVariable)
+```
+
+```
+## [1] 0.8956 0.4965 0.2488 0.2088 0.1035 0.1937
+```
+
 ## Merge data
 
 `mia` package has `mergeSEs` function that merges multiple `SummarizedExperiment`
@@ -715,7 +755,7 @@ tse
 ## rownames(100): 239672 243675 ... 549322 951
 ## rowData names(7): Kingdom Phylum ... Genus Species
 ## colnames(4): CC1 CL3 M31Fcsw SV1
-## colData names(7): X.SampleID Primer ... SampleType Description
+## colData names(8): X.SampleID Primer ... Description NewVariable
 ## reducedDimNames(0):
 ## mainExpName: NULL
 ## altExpNames(0):
@@ -740,7 +780,7 @@ tse
 ## rownames(19216): 239672 243675 ... 146168 594324
 ## rowData names(7): Kingdom Phylum ... Genus Species
 ## colnames(2): CL3 M31Fcsw
-## colData names(7): X.SampleID Primer ... SampleType Description
+## colData names(8): X.SampleID Primer ... Description NewVariable
 ## reducedDimNames(0):
 ## mainExpName: NULL
 ## altExpNames(0):
