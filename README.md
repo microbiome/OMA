@@ -1,6 +1,6 @@
 # Orchestrating Microbiome Analysis Book <img src="general/figures/mia_logo.png" align="right" width="120" />
 
-## Overview
+## Overview (second version)
 
 This is a reference cookbook for performing **Microbiome Analysis** with 
 Bioconductor in R. This is a book based on R Markdown and **bookdown** 
