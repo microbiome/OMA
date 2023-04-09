@@ -47,8 +47,11 @@ Please note that chapters should be independent of each other.
 
 ### Housekeeping
 
-For developers. This can be used to generate package listing for the
-full book, chapter-specific R files, and render the book.
+For developers. This can be used to
+
+ * generate package listing for the full book
+ * chapter-specific R files in R/
+ * render the book
 
 ```
 # Generate R files for the book chapters (to be streamlined)
