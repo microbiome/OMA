@@ -18,13 +18,13 @@ In the following, we agglomerate to the phylum level and subset by the country "
 library(miaViz)
 
 # Only consider Forest samples
-tse <- subsetSamples(tse, colData(tse)$Country == "Finland")
+tse <- tse[, colData(tse)$Country == "Finland"]
 # Agglomerate to phylum level
 tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 # Get top taxa
 rel_taxa <- getTopTaxa(tse, top = 8, assay_name = "counts")
 # Take only the top taxa
-tse <- subsetTaxa(tse, is.element(rownames(tse), rel_taxa))
+tse <- tse[is.element(rownames(tse), rel_taxa), ]
 
 # Visualise composition barplot, with samples order by "Firmicutes"
 plotAbundance(tse, rank = "Phylum", order_rank_by = "abund", order_sample_by = "Firmicutes")
@@ -43,13 +43,11 @@ library(RColorBrewer)
 # Agglomerate to phylum level
 tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 # Take only the top taxa
-tse <- subsetTaxa(tse, is.element(rownames(tse), rel_taxa))
+tse <- tse[is.element(rownames(tse), rel_taxa),]
 
 # CLR and Z transforms
-assay(tse, "pseudo") <- assay(tse, "counts") + 1
-tse <- transformCounts(tse, MARGIN = "samples", method = "relabundance")
-tse <- transformCounts(tse, MARGIN = "samples", assay_name = "relabundance",
-                       method = "clr")
+tse <- transformCounts(tse, MARGIN = "samples", assay_name = "counts",
+                       method = "clr", pseudocount=1)
 tse <- transformCounts(tse, MARGIN = "features", assay_name = "clr", method = "z")
 
 Countries <- data.frame("Country" = colData(tse)$Country)
@@ -83,7 +81,7 @@ The scree plot allows us to see how much of the variance is captured by each dim
 library(ggplot2); th <- theme_bw()
 
 # Only consider Finland samples
-tse <- subsetSamples(tse, colData(tse)$Country == "Finland")
+tse <- tse[, colData(tse)$Country == "Finland"]
 
 # MDS analysis with the first 20 dimensions
 tse  <- scater::runMDS(tse, FUN = vegan::vegdist, method = "bray", 
@@ -220,14 +218,11 @@ Looking at heatmaps of the CSTs can reveal structure on a different level. Using
 
 ```{r message = FALSE, warning = FALSE, results = FALSE}
 # Z transform of CLR counts
-assay(tse, "pseudo") <- assay(tse, "counts") + 1
 tse2 <- transformCounts(tse2, MARGIN = "samples", assay_name = "counts",
-                        method = "relabundance")
-tse2 <- transformCounts(tse2, MARGIN = "samples", assay_name = "relabundance",
-                        method = "clr")
+                        method = "clr", pseudocount=1)
 tse2 <- transformCounts(tse2, MARGIN = "features", assay_name = "clr", method = "z")
 # get top taxa
-tse2 <- subsetTaxa(tse2, is.element(rownames(tse2), rel_taxa))
+tse2 <- tse2[is.element(rownames(tse2), rel_taxa), ]
 
 mat <- assays(tse2)$z
 
@@ -342,7 +337,7 @@ Get the assignment probabilities
 ```{r}
 prob <- DirichletMultinomial::mixture(getBestDMNFit(tse_dmn))
 # Add column names
-colnames(prob) <- c("comp1", "comp2", "comp3")
+colnames(prob) <- paste0("comp", seq_len(ncol(prob)))
 
 # For each row, finds column that has the highest value. Then extract the column 
 # names of highest values.
@@ -384,16 +379,16 @@ Visualise dmm clusters in a heatmap.
 
 ```{r}
 # get clr + z-transformed counts
-assay(tse_dmn, "pseudo") <- assay(tse_dmn, "counts") + 1
-tse_dmn <- transformCounts(tse_dmn, assay_name = "pseudo", method = "relabundance")
-tse_dmn <- transformCounts(tse_dmn, assay_name = "relabundance", method = "clr", pseudocount = 1)
+tse_dmn <- transformCounts(tse_dmn, MARGIN = "samples",
+                           assay_name = "counts", method = "clr",
+			   pseudocount = 1)
 tse_dmn <- transformCounts(tse_dmn, MARGIN = "features",
                            assay_name = "clr", method = "z")
 # objects containing dmm component information
 clust <- factor(vec)
 names(clust) <- colnames(tse_dmn)
 # get top taxa
-tse_dmn <- subsetTaxa(tse_dmn, is.element(rownames(tse_dmn), rel_taxa))
+tse_dmn <- tse_dmn[is.element(rownames(tse_dmn), rel_taxa), ]
 # get just counts
 mat <- assays(tse_dmn)$z
 # order according to dmm component

@@ -5,21 +5,18 @@ library(rebook)
 chapterPreamble()
 ```
 
-Whether a data set contains information on a microbial community or it
-originates from a different source, the way that data are visualized
-inevitably shapes how they will be interpreted, and motivates the next
-steps of the analysis.
+Data visualization will inevitably shape interpretation and motivate
+the next steps of the analysis. A variety of visualization methods are
+available for microbiome analysis but the application requires careful
+attention to details. Knowledge on the available tools and their
+limitations plays an important role in selecting the most suitable
+methods to address a given question.
 
-A large variety of graphing methods belong to microbial analysis, but
-only few are the choices that will return useful answers about the
-data. Therefore, knowledge on the available tools and their possible
-applications plays an important role in selecting the most suitable
-method for the asked question.
+This chapter introduces the reader to a number of visualization
+techniques found in this book, such as:
 
-This chapter introduces the reader to a number of visualization techniques found in this book, such as:
-
-* bar plots
-* box plots
+* barplots
+* boxplots
 * heatmaps
 * ordination charts
 * regression charts
@@ -361,10 +358,7 @@ tse_phylum <- agglomerateByRank(tse,
                                 onRankOnly = TRUE)
 
 # Add clr-transformation on samples
-assay(tse_phylum, "pseudo") <- assay(tse_phylum, "counts") + 1
-tse_phylum <- transformCounts(tse_phylum, assay_name = "pseudo",
-                              method = "relabundance")
-tse_phylum <- transformCounts(tse_phylum, method = "clr", assay_name = "relabundance")
+tse_phylum <- transformCounts(tse_phylum, MARGIN = "samples", method = "clr", assay_name = "counts", pseudocount=1)
 
 # Add z-transformation on features (taxa)
 tse_phylum <- transformCounts(tse_phylum, assay_name = "clr",
@@ -375,11 +369,9 @@ tse_phylum <- transformCounts(tse_phylum, assay_name = "clr",
 tse_phylum_subset <- tse_phylum[ , tse_phylum$SampleType %in% c("Feces", "Skin", "Tongue") ]
 
 # Add clr-transformation
-assay(tse_phylum_subset, "pseudo") <- assay(tse_phylum_subset, "counts") + 1
-tse_phylum_subset <- transformCounts(tse_phylum_subset, method = "relabundance",
-                                     assay_name = "pseudo")
 tse_phylum_subset <- transformCounts(tse_phylum_subset, method = "clr",
-                                     assay_name = "relabundance")
+                                     MARGIN="samples",
+                                     assay_name = "counts", pseudocount=1)
 # Does z-transformation
 tse_phylum_subset <- transformCounts(tse_phylum_subset, assay_name = "clr",
                                      MARGIN = "features", 
@@ -614,13 +606,15 @@ heatmap <- ggplot(melted_mat) +
 heatmap
 ```
 
-```{r more_complex_heatmap2, fig.width = 10, fig.height = 8}
+```{r more_complex_heatmap2, fig.width = 10, fig.height = 8, eval=FALSE}
+library(patchwork)
+
 # Create layout
 design <- c(
-  area(3, 1, 4, 1),
-  area(1, 2, 1, 3),
-  area(2, 2, 2, 3),
-  area(3, 2, 4, 3)
+  patchwork::area(3, 1, 4, 1),
+  patchwork::area(1, 2, 1, 3),
+  patchwork::area(2, 2, 2, 3),
+  patchwork::area(3, 2, 4, 3)
 )
 # to view the design, run
 # plot(design)
@@ -649,15 +643,15 @@ plot <- row_annotation + sample_clusters_annotation +
 # plot
 ```
 
-```{r more_complex_heatmap3, fig.width = 10, fig.height = 8}
+```{r more_complex_heatmap3, fig.width = 10, fig.height = 8, eval=FALSE}
 # Create layout
 design <- c(
-  area(4, 1, 5, 1),
-  area(4, 2, 5, 2),
-  area(1, 3, 1, 4),
-  area(2, 3, 2, 4),
-  area(3, 3, 3, 4),
-  area(4, 3, 5, 4)
+  patchwork::area(4, 1, 5, 1),
+  patchwork::area(4, 2, 5, 2),
+  patchwork::area(1, 3, 1, 4),
+  patchwork::area(2, 3, 2, 4),
+  patchwork::area(3, 3, 3, 4),
+  patchwork::area(4, 3, 5, 4)
 )
 
 # to view the design, run
@@ -677,9 +671,9 @@ plot <- taxa_tree +
 plot
 ```
 
-Heatmaps find several other applications in biclustering and multi-assay
-analyses, that are discussed in chapters \@ref(clustering) and
-\@ref(multi-assay-analyses), where the packages _cobiclust_ and _MOFA2_ are of interest.
+Heatmaps find several other applications in biclustering and
+multi-assay analyses. These are discussed further in chapters
+\@ref(clustering) and \@ref(multi-assay-analyses).
 
 
 ## Session Info {-}
