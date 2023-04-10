@@ -1,4 +1,3 @@
-
 # Empty the R folder and generate new R files from Rmd
 system("rm R/*")
 fs <- list.files(pattern=".Rmd"); 
