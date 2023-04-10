@@ -58,7 +58,7 @@ if(!requireNamespace("magrittr", quietly = TRUE)) {
 }
 
 ## list of packages required for each chapters
-pkgs <- read.csv(url("https://raw.githubusercontent.com/microbiome/OMA/master/oma_packages.csv"))
+pkgs <- read.table(url("https://raw.githubusercontent.com/microbiome/OMA/master/oma_packages.csv"))[,1]
 
 # pkgs <- readRDS("oma_packages.rds") # Just do all at once
 chapter_pkgs <- list(all=pkgs)

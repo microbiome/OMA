@@ -29,5 +29,5 @@ pkgs <- c(priority, setdiff(pkgs, priority))
 write.table(pkgs, file = "oma_packages.csv", row.names=FALSE, col.names=FALSE, quote=FALSE)
 
 # Build the book
-# bookdown::render_book("index.Rmd", "bookdown::gitbook")
+bookdown::render_book("index.Rmd", "bookdown::gitbook")
 
