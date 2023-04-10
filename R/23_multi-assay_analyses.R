@@ -156,8 +156,8 @@ model.prepared <- prepare_mofa(
   model_options = model_opts
 )
 
-#Some systems may need the `use_basilisk = TRUE` function
-#so it has been added to the following code
+# Some systems may require the specification `use_basilisk = TRUE`
+# so it has been added to the following code
 model.trained <- run_mofa(model.prepared, use_basilisk = TRUE)
 
 
