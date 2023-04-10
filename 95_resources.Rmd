@@ -3,7 +3,6 @@
 
 ## Data containers
 
-
 ### Resources for TreeSummarizedExperiment
 
  * SingleCellExperiment [@R-SingleCellExperiment]
@@ -122,7 +121,7 @@ deployed in R/Bioconductor packages [@Huber2015].
 
 
 
-## Reproducible reporting with Quarto
+## Reproducible reporting with Quarto {#quarto}
 
 Reproducible reporting is the starting point for robust interactive
 data science. Perform the following tasks:
