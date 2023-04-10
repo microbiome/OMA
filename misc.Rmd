@@ -1,3 +1,49 @@
+## Installing and loading the required R packages {#packages}
+
+This section shows how to install and load all required packages into
+the R session, if needed. 
+
+```{r warning = FALSE, message = FALSE}
+# List of packages that we need from cran and bioc 
+cran_pkg <- c("BiocManager", "bookdown", "dplyr", "ecodist", "ggplot2", 
+              "gridExtra", "kableExtra",  "knitr", "scales", "vegan", "matrixStats")
+bioc_pkg <- c("yulab.utils","ggtree","ANCOMBC", "ape", "DESeq2", "DirichletMultinomial", "mia", "miaViz")
+
+# Get those packages that are already installed
+cran_pkg_already_installed <- cran_pkg[ cran_pkg %in% installed.packages() ]
+bioc_pkg_already_installed <- bioc_pkg[ bioc_pkg %in% installed.packages() ]
+
+# Get those packages that need to be installed
+cran_pkg_to_be_installed <- setdiff(cran_pkg, cran_pkg_already_installed)
+bioc_pkg_to_be_installed <- setdiff(bioc_pkg, bioc_pkg_already_installed)
+
+# Reorders bioc packages, so that mia and miaViz are first
+bioc_pkg <- c(bioc_pkg[ bioc_pkg %in% c("mia", "miaViz") ], 
+              bioc_pkg[ !bioc_pkg %in% c("mia", "miaViz") ] ) 
+
+# Combine to one vector
+packages <- c(bioc_pkg, cran_pkg)
+packages_to_install <- c( bioc_pkg_to_be_installed, cran_pkg_to_be_installed )
+```
+
+```{r warning = FALSE, message = FALSE}
+# If there are packages that need to be installed, install them 
+if( length(packages_to_install) ) {
+   BiocManager::install(packages_to_install)
+}
+```
+
+Now all required packages are installed, so let's load them into the
+session.  Some function names occur in multiple packages. That is why
+we have prioritized the packages mia and miaViz on the list. Packages
+that are loaded first have a higher priority.
+
+```{r warning = FALSE, message = FALSE}
+# Loading all packages into session. Returns true if package was successfully loaded.
+loaded <- sapply(packages, require, character.only = TRUE)
+as.data.frame(loaded)
+```
+
 ### Differential abundance with visual comparisons
 
 The packages _ALDEx2_, _ANCOM-BC_, _Maaslin2_ and _fido_, which were described in chapter \@ref(differential-abundance), support a number of visualization techniques that are specific to each. The **MA**, also called **Bland-Altman**, and the **MW** plots are characteristic of _ALDEx2_ and show difference in abundance among strains as a function of log-ratio abundance and dispersion, respectively. They both present differentially abundant taxa as red dots, uniformly abundant ones as gray dots and rarely abundant ones as black dots. In the case of _ANCOM-BC_ and _Maaslin2_, the analysis returns several **box plots** of the top differentially abundant experimental and control samples. Finally, the tree-based model produced by _fido_ measures the effect of each parameter in terms of its predicted influence on the variance of the selected variable.

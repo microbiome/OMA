@@ -1,9 +1,9 @@
-```{r setup, echo=FALSE, results="asis"}
+## ----setup, echo=FALSE, results="asis"----------------------------------------
 library(rebook)
 chapterPreamble()
-```
 
-```{r include=FALSE}
+
+## ----include=FALSE------------------------------------------------------------
 # global knitr options
 knitr::opts_chunk$set(
   fig.width=10,
@@ -11,76 +11,9 @@ knitr::opts_chunk$set(
   dev = "png",
   dev.args = list(type = "cairo-png")
 )
-```
 
 
-# Community similarity {#community-similarity}
-
-Where alpha diversity focuses on community variation within a
-community (sample), beta diversity quantifies (dis-)similarites
-between communities (samples). Some of the most popular beta diversity
-measures in microbiome research include Bray-Curtis index (for
-compositional data), Jaccard index (for presence / absence data,
-ignoring abundance information), Aitchison distance (Euclidean
-distance for clr transformed abundances, aiming to avoid the
-compositionality bias), and the Unifrac distances (that take into
-account the phylogenetic tree information). Only some of the commonly
-used beta diversity measures are actual _distances_; this is a
-mathematically well-defined concept and many ecological beta diversity
-measures, such as Bray-Curtis index, are not proper distances.
-Therefore, the term dissimilarity or beta diversity is commonly used.
-
-Technically, beta diversities are usually represented as `dist`
-objects, which contain triangular data describing the distance between
-each pair of samples. These distances can be further subjected to
-ordination. Ordination is a common concept in ecology that aims to
-reduce the dimensionality of the data for further evaluation or
-visualization. Ordination techniques aim to capture as much of
-essential information in the data as possible in a lower dimensional
-representation.  Dimension reduction is bound to loose information but
-the common ordination techniques aim to preserve relevant information
-of sample similarities in an optimal way, which is defined in
-different ways by different methods. [TODO add references and/or link
-to ordination chapter instead?]
-
-Some of the most common ordination methods in microbiome research
-include Principal Component Analysis (PCA), metric and non-metric
-multi-dimensional scaling (MDS, NMDS), The MDS methods are also known
-as Principal Coordinates Analysis (PCoA). Other recently popular
-techniques include t-SNE and UMAP. 
-
-
-## Explained variance
-
-The percentage of explained variance is typically shown for PCA
-ordination plots. This quantifies the proportion of overall variance
-in the data that is captured by the PCA axes, or how well the
-ordination axes reflect the original distances.
-
-Sometimes a similar measure is shown for MDS/PCoA. The interpretation
-is generally different, however, and hence we do not recommend using
-it. PCA is a special case of PCoA with Euclidean distances.  With
-non-Euclidean dissimilarities PCoA uses a trick where the pointwise
-dissimilarities are first cast into similarities in a Euclidean space
-(with some information loss i.e. stress) and then projected to the
-maximal variance axes. In this case, the maximal variance axes do not
-directly reflect the correspondence of the projected distances and
-original distances, as they do for PCA.
-
-In typical use cases, we would like to know how well the ordination
-reflects the original similarity structures; then the quantity of
-interest is the so-called "stress" function, which measures the
-difference in pairwise similarities between the data points in the
-original (high-dimensional) vs. projected (low-dimensional) space.
-
-Hence, we propose that for PCoA and other ordination methods, users
-would report relative stress (varies in the unit interval; the smaller
-the better). This can be calculated as shown below. For further
-examples, check the [note from Huber
-lab](https://www.huber.embl.de/users/klaus/Teaching/statisticalMethods-lab.pdf).
-
-
-```{r relstress}
+## ----relstress----------------------------------------------------------------
 # Example data
 library(mia)
 data(GlobalPatterns, package="mia")
@@ -107,13 +40,9 @@ dp <- as.matrix(dist(pcoa))
 # Calculate stress i.e. relative difference in the original and
 # projected dissimilarities
 stress <- sum((dp - d0)^2)/sum(d0^2)
-```
 
 
-Shepard plot visualizes the original versus projected (ordination)
-dissimilarities between the data points:
-
-```{r shepard}
+## ----shepard------------------------------------------------------------------
 ord <- order(as.vector(d0))
 df <- data.frame(d0 = as.vector(d0)[ord],
                   dmds = as.vector(dp)[ord])
@@ -127,43 +56,18 @@ ggplot(aes(x = d0, y = dmds), data=df) +
        y = "MDS distance",       
             subtitle = paste("Stress:", round(stress, 2))) +
   theme_bw()
-```
 
 
-## Community comparisons by beta diversity analysis
-
-A typical comparison of community composition starts with a visual
-comparison of the groups on a 2D ordination.
-
-Then we estimate relative abundances and MDS ordination based on
-Bray-Curtis (BC) dissimilarity between the groups, and visualize the
-results.
-
-In the following examples dissimilarities are calculated by 
-functions supplied to the `FUN` argument. This function can be defined by
-the user. It must return a `dist` function, which can then be used to
-calculate reduced dimensions either via ordination methods (such as MDS
-or NMDS), and the results can be stored in the `reducedDim`.
-
-This entire process is wrapped in the `runMDS` and `runNMDS`
-functions.
-
-```{r runMDS, message=FALSE}
+## ----runMDS, message=FALSE----------------------------------------------------
 library(scater)
 
 # Bray-Curtis is usually applied to relative abundances
 tse <- transformCounts(tse, method = "relabundance")
 # Perform PCoA
 tse <- runMDS(tse, FUN = vegan::vegdist, method = "bray", name = "PCoA_BC", exprs_values = "relabundance")
-```
 
-Sample similarities can be visualized on a lower-dimensional display
-(typically 2D) using the `plotReducedDim` function in the `scater`
-package. This provides also further tools to incorporate additional
-information using variations in color, shape or size. Are there
-visible differences between the groups?
 
-```{r plot-mds-bray-curtis, fig.cap="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."}
+## ----plot-mds-bray-curtis, fig.cap="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."----
 # Create ggplot object
 p <- plotReducedDim(tse, "PCoA_BC", colour_by = "Group")
 
@@ -174,16 +78,9 @@ p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]],1), "%", ")", sep =
               y = paste("PCoA 2 (", round(100 * rel_eig[[2]],1), "%", ")", sep = ""))
 
 print(p)
-```
 
 
-
-
-With additional tools from the `ggplot2` universe, comparisons can be 
-performed informing on the applicability to visualize sample similarities in a 
-meaningful way.
-
-```{r plot-mds-nmds-comparison, fig.cap="Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.", message=FALSE}
+## ----plot-mds-nmds-comparison, fig.cap="Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.", message=FALSE----
 tse <- runMDS(tse, FUN = vegan::vegdist, name = "MDS_euclidean",
              method = "euclidean", exprs_values = "counts")
 tse <- runNMDS(tse, FUN = vegan::vegdist, name = "NMDS_BC")
@@ -197,65 +94,37 @@ plots <- lapply(c("PCoA_BC", "MDS_euclidean", "NMDS_BC", "NMDS_euclidean"),
 library(patchwork)
 plots[[1]] + plots[[2]] + plots[[3]] + plots[[4]] +
   plot_layout(guides = "collect")
-```
-
-The _Unifrac_ method is a special case, as it requires data on the
-relationship of features in form on a `phylo` tree. `calculateUnifrac`
-performs the calculation to return a `dist` object, which can again be
-used within `runMDS`.
 
 
-```{r}
+## -----------------------------------------------------------------------------
 library(scater)
 tse <- runMDS(tse, FUN = mia::calculateUnifrac, name = "Unifrac",
               tree = rowTree(tse),
               ntop = nrow(tse),
              exprs_values = "counts")
-```
 
-```{r plot-unifrac, fig.cap="Unifrac distances scaled by MDS of the GlobalPattern dataset."}
+
+## ----plot-unifrac, fig.cap="Unifrac distances scaled by MDS of the GlobalPattern dataset."----
 plotReducedDim(tse, "Unifrac", colour_by = "Group")
-```
 
-## Other ordination methods
 
-Other dimension reduction methods, such as `PCA`, `t-SNE` and `UMAP` are 
-inherited directly from the `scater` package.
-
-```{r}
+## -----------------------------------------------------------------------------
 tse <- runPCA(tse, name = "PCA", exprs_values = "counts", ncomponents = 10)
-```
 
-```{r plot-pca, fig.cap="PCA plot on the GlobalPatterns data set containing sample from different sources."}
+
+## ----plot-pca, fig.cap="PCA plot on the GlobalPatterns data set containing sample from different sources."----
 plotReducedDim(tse, "PCA", colour_by = "Group")
-```
 
-As mentioned before, applicability of the different methods depends on your
-sample set.
 
-FIXME: let us switch to UMAP for the examples?
-
-```{r}
+## -----------------------------------------------------------------------------
 tse <- runTSNE(tse, name = "TSNE", exprs_values = "counts", ncomponents = 3)
-```
 
-```{r plot-tsne, fig.cap="t-SNE plot on the GlobalPatterns data set containing sample from different sources."}
+
+## ----plot-tsne, fig.cap="t-SNE plot on the GlobalPatterns data set containing sample from different sources."----
 plotReducedDim(tse, "TSNE", colour_by = "Group", ncomponents = c(1:3))
-```
 
-As a final note, `mia` provides functions for the evaluation of additional dissimilarity indices, such as:
-* `calculateJSD`, `runJSD` (Jensen-Shannon divergence)
-* `calculateNMDS`, `plotNMDS` (non-metric multi-dimensional scaling)
-* `calculateCCA`, `runCCA` (Canonical Correspondence Analysis)
-* `calculateRDA`, `runRDA` (Redundancy Analysis)
-* `calculateOverlap`, `runOverlap` ()
-* `calculateDPCoA`, `runDPCoA` (Double Principal Coordinate Analysis)
 
-Redundancy analysis is similar to PCA, however, it takes into account covariates. 
-It aims to maximize the variance in respect of covariates. The results shows how much
-each covariate affects.
-
-```{r microbiome_RDA1}
+## ----microbiome_RDA1----------------------------------------------------------
 # Load required packages
 if(!require("vegan")){
     install.packages("vegan")
@@ -338,9 +207,9 @@ rda_info[["Homogeneity p-value (NULL hyp: distinct/homogeneous --> permanova sui
     homogeneity
 
 kable(rda_info)
-```
 
-```{r microbiome_RDA2}
+
+## ----microbiome_RDA2----------------------------------------------------------
 # Load ggord for plotting
 if(!require("ggord")){
     if(!require("devtools")){
@@ -409,37 +278,23 @@ plot <- ggord(rda, grp_in = coldata[["ClinicalStatus"]], vec_lab = vec_lab,
            y = guide_axis(ylab)) +
     theme( axis.title = element_text(size = 10) )
 plot
-```
-
-From RDA plot, we can see that only age has significant affect on microbial profile. 
-
-## Visualizing the most dominant genus on PCoA {#pcoa-genus}
-
-In this section we visualize most dominant genus on PCoA. A similar visualization was proposed by Salosensaari et al. [-@Salosensaari2021].
 
 
-Let us agglomerate the data at a Genus level and getting the dominant taxa per sample.
-
-```{r}
+## -----------------------------------------------------------------------------
 # Agglomerate to genus level
 tse_Genus <- agglomerateByRank(tse, rank="Genus")
 # Convert to relative abundances
 tse_Genus <- transformCounts(tse, method = "relabundance", assay_name="counts")
 # Add info on dominant genus per sample
 tse_Genus <- addPerSampleDominantTaxa(tse_Genus, assay_name="relabundance", name = "dominant_taxa")
-```
 
 
-Performing PCoA with Bray-Curtis dissimilarity.
-```{r}
+## -----------------------------------------------------------------------------
 tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist,
               name = "PCoA_BC", exprs_values = "relabundance")
-```
 
 
-Getting top taxa and visualizing the abundance on PCoA.
-
-```{r}
+## -----------------------------------------------------------------------------
 # Getting the top taxa
 top_taxa <- getTopTaxa(tse_Genus,top = 6, assay_name = "relabundance")
 
@@ -466,13 +321,9 @@ plot <-plotReducedDim(tse_Genus,"PCoA_BC", colour_by = "most_abundant") +
        y=paste("PC 2 (",round(var_explained[2],1),"%)"),
        color="")
 plot
-```
 
-Note: A 3D interactive version of the earlier plot can be found from \@ref(extras).
 
-Similarly let's visualize and compare the sub-population.
-
-```{r}
+## -----------------------------------------------------------------------------
 # Calculating the frequencies and percentages for both categories
 freq_TRUE <- table(as.character(most_abundant[colData(tse_Genus)$Group==TRUE]))
 freq_FALSE <- table(as.character(most_abundant[colData(tse_Genus)$Group==FALSE]))
@@ -495,41 +346,9 @@ plotReducedDim(tse_Genus[,colData(tse_Genus)$Group==FALSE],
   labs(x=paste("PC 1 (",round(var_explained[1],1),"%)"),
        y=paste("PC 2 (",round(var_explained[2],1),"%)"),
        title = "Group = FALSE", color="")
-```
 
 
-
-### Testing differences in community composition between sample groups
-
-The permutational analysis of variance (PERMANOVA) [@Anderson2001] is
-a widely used non-parametric multivariate method that can be used to
-estimate the actual statistical significance of differences in the
-observed community composition between two groups of
-samples.
-
-PERMANOVA evaluates the hypothesis that the centroids and dispersion
-of the community are equivalent between the compared groups. A small
-p-value indicates that the compared groups have, on average, a
-different community composition.
-
-This method is implemented in the `vegan` package in the function
-[`adonis2`](https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis).
-
-**Note:**
-
-It is recommended to `by = "margin"`. It specifies that each variable's marginal
-effect is analyzed individually. 
-
-When `by = "terms"` (the default)  the order of variables matters;
-each variable is analyzed sequentially, and the result is different when more than 1 variable is
-introduced and their order is differs. (Check [comparison](https://microbiome.github.io/OMA/extras.html#permanova-comparison))
-
-We can perform PERMANOVA with `adonis2` function or by first performing distance-based 
-redundancy analysis (dbRDA), and then applying permutational test for result of 
-redundancy analysis. Advantage of the latter approach is that by doing so we can get 
-coefficients: how much each taxa affect to the result.
-
-```{r}
+## -----------------------------------------------------------------------------
 if( !require(vegan) ){
     BiocManager::install("vegan")
     library("vegan")
@@ -563,17 +382,9 @@ p_values <- c( permanova["Group", "Pr(>F)"], permanova2["Group", "Pr(>F)"] )
 p_values <-as.data.frame(p_values)
 rownames(p_values) <- c("adonis2", "dbRDA+anova.cca")
 p_values
-```
 
-As we can see, the community composition is significantly different
-between the groups (p < 0.05), and these two methods give equal p-values.
 
-Let us visualize the model coefficients for species that exhibit the
-largest differences between the groups. This gives some insights into
-how the groups tend to differ from each other in terms of community
-composition.
-
-```{r}
+## -----------------------------------------------------------------------------
 # Add taxa info
 sppscores(dbrda) <- t(assay(tse,"relabundance"))
 # Get coefficients
@@ -584,11 +395,9 @@ top.coef <- head( coef[rev(order(abs(coef))), , drop = FALSE], 20)
 top.coef <- top.coef[ order(top.coef), ]
 # Get top names
 top_names <- names(top.coef)[ order(abs(top.coef), decreasing = TRUE) ]
-```
 
 
-
-```{r plot-top-coef-anova, fig.cap=""}
+## ----plot-top-coef-anova, fig.cap=""------------------------------------------
 ggplot(data.frame(x = top.coef,
                   y = factor(names(top.coef),
                                       unique(names(top.coef)))),
@@ -596,38 +405,12 @@ ggplot(data.frame(x = top.coef,
     geom_bar(stat="identity") +
     labs(x="",y="",title="Top Taxa") +
     theme_bw()
-```
-
-In the above example, the largest differences between the two groups
-can be attributed to _`r top_names[1] `_ (elevated in the first
-group) and _`r top_names[2] `_ (elevated in the second
-group), and many other co-varying species.
 
 
-
-### Checking the homogeneity condition 
-
-It is important to note that the application of PERMANOVA assumes
-homogeneous group dispersions (variances). This can be tested with the
-PERMDISP2 method [@Anderson2006] by using the same assay and distance
-method than in PERMANOVA.
-
-```{r}
+## -----------------------------------------------------------------------------
 anova( betadisper(vegdist(t(assay(tse, "counts"))), colData(tse)$Group) )
-```
-
-If the groups have similar dispersion, PERMANOVA can be seen as an
-appropriate choice for comparing community compositions.
 
 
-## Further reading
-
- - [How to extract information from clusters](http://bioconductor.org/books/release/OSCA/clustering.html)
-
- - Chapter \@ref(clustering) on community typing
-
-## Session Info {-}
-
-```{r sessionInfo, echo=FALSE, results='asis'}
+## ----sessionInfo, echo=FALSE, results='asis'----------------------------------
 prettySessionInfo()
-```
+
