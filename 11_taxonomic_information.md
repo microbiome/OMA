@@ -608,12 +608,12 @@ loaded via a namespace (and not attached):
 [33] pkgconfig_2.0.3             htmltools_0.5.5            
 [35] decontam_1.18.0             sparseMatrixStats_1.10.0   
 [37] fastmap_1.1.1               rlang_1.1.0                
-[39] RSQLite_2.3.0               DelayedMatrixStats_1.20.0  
+[39] RSQLite_2.3.1               DelayedMatrixStats_1.20.0  
 [41] generics_0.1.3              jsonlite_1.8.4             
 [43] BiocParallel_1.32.6         dplyr_1.1.1                
 [45] RCurl_1.98-1.12             magrittr_2.0.3             
 [47] BiocSingular_1.14.0         GenomeInfoDbData_1.2.9     
-[49] scuttle_1.8.4               Matrix_1.5-3               
+[49] scuttle_1.8.4               Matrix_1.5-4               
 [51] Rcpp_1.0.10                 ggbeeswarm_0.7.1           
 [53] munsell_0.5.0               fansi_1.0.4                
 [55] DECIPHER_2.26.0             ape_5.7-1                  
@@ -623,7 +623,7 @@ loaded via a namespace (and not attached):
 [63] plyr_1.8.8                  blob_1.2.4                 
 [65] grid_4.2.1                  parallel_4.2.1             
 [67] ggrepel_0.9.3               crayon_1.5.2               
-[69] dir.expiry_1.4.0            lattice_0.20-45            
+[69] dir.expiry_1.4.0            lattice_0.21-8             
 [71] splines_4.2.1               beachmat_2.14.0            
 [73] CodeDepends_0.6.5           knitr_1.42                 
 [75] pillar_1.9.0                reshape2_1.4.4             
@@ -633,7 +633,7 @@ loaded via a namespace (and not attached):
 [83] vctrs_0.6.1                 treeio_1.22.0              
 [85] gtable_0.3.3                purrr_1.0.1                
 [87] tidyr_1.3.0                 cachem_1.0.7               
-[89] ggplot2_3.4.1               xfun_0.38                  
+[89] ggplot2_3.4.2               xfun_0.38                  
 [91] rsvd_1.0.5                  tidytree_0.4.2             
 [93] viridisLite_0.4.1           tibble_3.2.1               
 [95] memoise_2.0.1               beeswarm_0.4.0             

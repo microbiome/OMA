@@ -35,21 +35,18 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
-Whether a data set contains information on a microbial community or it
-originates from a different source, the way that data are visualized
-inevitably shapes how they will be interpreted, and motivates the next
-steps of the analysis.
+Data visualization will inevitably shape interpretation and motivate
+the next steps of the analysis. A variety of visualization methods are
+available for microbiome analysis but the application requires careful
+attention to details. Knowledge on the available tools and their
+limitations plays an important role in selecting the most suitable
+methods to address a given question.
 
-A large variety of graphing methods belong to microbial analysis, but
-only few are the choices that will return useful answers about the
-data. Therefore, knowledge on the available tools and their possible
-applications plays an important role in selecting the most suitable
-method for the asked question.
+This chapter introduces the reader to a number of visualization
+techniques found in this book, such as:
 
-This chapter introduces the reader to a number of visualization techniques found in this book, such as:
-
-* bar plots
-* box plots
+* barplots
+* boxplots
 * heatmaps
 * ordination charts
 * regression charts
@@ -435,10 +432,7 @@ tse_phylum <- agglomerateByRank(tse,
                                 onRankOnly = TRUE)
 
 # Add clr-transformation on samples
-assay(tse_phylum, "pseudo") <- assay(tse_phylum, "counts") + 1
-tse_phylum <- transformCounts(tse_phylum, assay_name = "pseudo",
-                              method = "relabundance")
-tse_phylum <- transformCounts(tse_phylum, method = "clr", assay_name = "relabundance")
+tse_phylum <- transformCounts(tse_phylum, MARGIN = "samples", method = "clr", assay_name = "counts", pseudocount=1)
 
 # Add z-transformation on features (taxa)
 tse_phylum <- transformCounts(tse_phylum, assay_name = "clr",
@@ -449,11 +443,9 @@ tse_phylum <- transformCounts(tse_phylum, assay_name = "clr",
 tse_phylum_subset <- tse_phylum[ , tse_phylum$SampleType %in% c("Feces", "Skin", "Tongue") ]
 
 # Add clr-transformation
-assay(tse_phylum_subset, "pseudo") <- assay(tse_phylum_subset, "counts") + 1
-tse_phylum_subset <- transformCounts(tse_phylum_subset, method = "relabundance",
-                                     assay_name = "pseudo")
 tse_phylum_subset <- transformCounts(tse_phylum_subset, method = "clr",
-                                     assay_name = "relabundance")
+                                     MARGIN="samples",
+                                     assay_name = "counts", pseudocount=1)
 # Does z-transformation
 tse_phylum_subset <- transformCounts(tse_phylum_subset, assay_name = "clr",
                                      MARGIN = "features", 
@@ -747,12 +739,14 @@ heatmap
 
 
 ```r
+library(patchwork)
+
 # Create layout
 design <- c(
-  area(3, 1, 4, 1),
-  area(1, 2, 1, 3),
-  area(2, 2, 2, 3),
-  area(3, 2, 4, 3)
+  patchwork::area(3, 1, 4, 1),
+  patchwork::area(1, 2, 1, 3),
+  patchwork::area(2, 2, 2, 3),
+  patchwork::area(3, 2, 4, 3)
 )
 # to view the design, run
 # plot(design)
@@ -785,12 +779,12 @@ plot <- row_annotation + sample_clusters_annotation +
 ```r
 # Create layout
 design <- c(
-  area(4, 1, 5, 1),
-  area(4, 2, 5, 2),
-  area(1, 3, 1, 4),
-  area(2, 3, 2, 4),
-  area(3, 3, 3, 4),
-  area(4, 3, 5, 4)
+  patchwork::area(4, 1, 5, 1),
+  patchwork::area(4, 2, 5, 2),
+  patchwork::area(1, 3, 1, 4),
+  patchwork::area(2, 3, 2, 4),
+  patchwork::area(3, 3, 3, 4),
+  patchwork::area(4, 3, 5, 4)
 )
 
 # to view the design, run
@@ -810,11 +804,9 @@ plot <- taxa_tree +
 plot
 ```
 
-![](19_visualization_techniques_files/figure-latex/more_complex_heatmap3-1.pdf)<!-- --> 
-
-Heatmaps find several other applications in biclustering and multi-assay
-analyses, that are discussed in chapters \@ref(clustering) and
-\@ref(multi-assay-analyses), where the packages _cobiclust_ and _MOFA2_ are of interest.
+Heatmaps find several other applications in biclustering and
+multi-assay analyses. These are discussed further in chapters
+\@ref(clustering) and \@ref(multi-assay-analyses).
 
 
 ## Session Info {-}
@@ -856,7 +848,7 @@ other attached packages:
 [21] GenomeInfoDb_1.34.9            IRanges_2.32.0                
 [23] S4Vectors_0.36.2               BiocGenerics_0.44.0           
 [25] MatrixGenerics_1.10.0          matrixStats_0.63.0-9003       
-[27] ggplot2_3.4.1                  BiocStyle_2.24.0              
+[27] ggplot2_3.4.2                  BiocStyle_2.24.0              
 [29] rebook_1.6.0                  
 
 loaded via a namespace (and not attached):
@@ -880,7 +872,7 @@ loaded via a namespace (and not attached):
  [35] registry_0.5-1              gtable_0.3.3               
  [37] zlibbioc_1.44.0             V8_4.2.2                   
  [39] GetoptLong_1.0.5            DelayedArray_0.24.0        
- [41] car_3.1-1                   BiocSingular_1.14.0        
+ [41] car_3.1-2                   BiocSingular_1.14.0        
  [43] shape_1.4.6                 abind_1.4-5                
  [45] scales_1.2.1                DBI_1.1.3                  
  [47] rstatix_0.7.2               randomcoloR_1.1.0.1        
@@ -896,7 +888,7 @@ loaded via a namespace (and not attached):
  [67] rlang_1.1.0                 munsell_0.5.0              
  [69] tools_4.2.1                 cachem_1.0.7               
  [71] cli_3.6.1                   DirichletMultinomial_1.40.0
- [73] generics_0.1.3              RSQLite_2.3.0              
+ [73] generics_0.1.3              RSQLite_2.3.1              
  [75] broom_1.0.4                 evaluate_0.20              
  [77] stringr_1.5.0               fastmap_1.1.1              
  [79] yaml_2.3.7                  knitr_1.42                 
@@ -908,8 +900,8 @@ loaded via a namespace (and not attached):
  [91] png_0.1-8                   ggsignif_0.6.4             
  [93] treeio_1.22.0               tibble_3.2.1               
  [95] tweenr_2.0.2                stringi_1.7.12             
- [97] highr_0.10                  lattice_0.20-45            
- [99] Matrix_1.5-3                vegan_2.6-4                
+ [97] highr_0.10                  lattice_0.21-8             
+ [99] Matrix_1.5-4                vegan_2.6-4                
 [101] permute_0.9-7               vctrs_0.6.1                
 [103] pillar_1.9.0                lifecycle_1.0.3            
 [105] BiocManager_1.30.20         GlobalOptions_0.1.2        

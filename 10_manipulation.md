@@ -55,8 +55,7 @@ library(mia)
 data(GlobalPatterns, package="mia")
 tse <- GlobalPatterns
 tse <- transformCounts(tse, MARGIN = "samples", method="relabundance")
-
-molten_tse <- meltAssay(tse,
+molten_tse <- mia::meltAssay(tse,
                         add_row_data = TRUE,
                         add_col_data = TRUE,
                         assay_name = "relabundance")
@@ -718,7 +717,7 @@ head(tse$NewVariable)
 ```
 
 ```
-## [1] 0.8956 0.4965 0.2488 0.2088 0.1035 0.1937
+## [1] 0.72078 0.05798 0.83589 0.83728 0.41271 0.61584
 ```
 
 ## Merge data

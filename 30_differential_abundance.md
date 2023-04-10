@@ -782,7 +782,7 @@ other attached packages:
  [7] stringr_1.5.0                  dplyr_1.1.1                   
  [9] purrr_1.0.1                    readr_2.1.4                   
 [11] tidyr_1.3.0                    tibble_3.2.1                  
-[13] ggplot2_3.4.1                  tidyverse_2.0.0               
+[13] ggplot2_3.4.2                  tidyverse_2.0.0               
 [15] knitr_1.42                     MicrobiomeStat_1.1            
 [17] Maaslin2_1.10.0                ALDEx2_1.28.1                 
 [19] zCompositions_1.4.0-1          truncnorm_1.0-9               
@@ -806,7 +806,7 @@ loaded via a namespace (and not attached):
   [9] doParallel_1.0.17           RCurl_1.98-1.12            
  [11] generics_0.1.3              ScaledMatrix_1.6.0         
  [13] TH.data_1.1-1               timeSeries_4021.105        
- [15] RSQLite_2.3.0               proxy_0.4-27               
+ [15] RSQLite_2.3.1               proxy_0.4-27               
  [17] bit_4.0.5                   tzdb_0.3.0                 
  [19] DirichletMultinomial_1.40.0 viridis_0.6.2              
  [21] xfun_0.38                   fBasics_4022.94            
@@ -833,7 +833,7 @@ loaded via a namespace (and not attached):
  [63] sandwich_3.0-2              filelock_1.0.2             
  [65] phyloseq_1.40.0             rsvd_1.0.5                 
  [67] cellranger_1.1.0            graph_1.74.0               
- [69] Matrix_1.5-3                lpsymphony_1.24.0          
+ [69] Matrix_1.5-4                lpsymphony_1.24.0          
  [71] zoo_1.8-11                  Rhdf5lib_1.18.2            
  [73] boot_1.3-28.1               base64enc_0.1-3            
  [75] beeswarm_0.4.0              viridisLite_0.4.1          
@@ -880,7 +880,7 @@ loaded via a namespace (and not attached):
 [157] BiocNeighbors_1.16.0        class_7.3-21               
 [159] codetools_0.2-19            pcaPP_2.0-3                
 [161] mvtnorm_1.1-3               utf8_1.2.3                 
-[163] lattice_0.20-45             numDeriv_2016.8-1.1        
+[163] lattice_0.21-8              numDeriv_2016.8-1.1        
 [165] ggbeeswarm_0.7.1            DescTools_0.99.48          
 [167] biglm_0.9-2.1               rmarkdown_2.21             
 [169] biomformat_1.24.0           munsell_0.5.0              

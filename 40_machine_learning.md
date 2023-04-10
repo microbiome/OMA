@@ -59,26 +59,8 @@ labels are not known.
 library(mia)
 
 # Load experimental data
-data(peerj13075)
-(tse <- peerj13075)
-```
-
-```
-## class: TreeSummarizedExperiment 
-## dim: 674 58 
-## metadata(0):
-## assays(1): counts
-## rownames(674): OTU1 OTU2 ... OTU2567 OTU2569
-## rowData names(6): kingdom phylum ... family genus
-## colnames(58): ID1 ID2 ... ID57 ID58
-## colData names(5): Sample Geographical_location Gender Age Diet
-## reducedDimNames(0):
-## mainExpName: NULL
-## altExpNames(0):
-## rowLinks: NULL
-## rowTree: NULL
-## colLinks: NULL
-## colTree: NULL
+data(peerj13075, package="mia")
+tse <- peerj13075
 ```
 
 Let's first preprocess the data.
@@ -89,9 +71,8 @@ Let's first preprocess the data.
 tse <- agglomerateByRank(tse, rank = "order")
 
 # Apply CLR transform
-assay(tse, "pseudo") <- assay(tse, "counts") + 1
-tse <- transformCounts(tse, assay_name = "pseudo", method = "relabundance")
-tse <- transformCounts(tse, assay_name = "relabundance", method = "clr")
+tse <- transformCounts(tse, assay_name = "counts", method = "clr",
+                       MARGIN="samples", pseudocount=1)
 
 # Get assay
 assay <- assay(tse, "clr")
@@ -137,26 +118,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    10  12
-##      Veg      13  12
+##      Mixed    11   8
+##      Veg      12  16
 ##                                         
-##                Accuracy : 0.468         
-##                  95% CI : (0.321, 0.619)
+##                Accuracy : 0.574         
+##                  95% CI : (0.422, 0.717)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.767         
+##     P-Value [Acc > NIR] : 0.233         
 ##                                         
-##                   Kappa : -0.065        
+##                   Kappa : 0.145         
 ##                                         
-##  Mcnemar's Test P-Value : 1.000         
+##  Mcnemar's Test P-Value : 0.502         
 ##                                         
-##             Sensitivity : 0.435         
-##             Specificity : 0.500         
-##          Pos Pred Value : 0.455         
-##          Neg Pred Value : 0.480         
+##             Sensitivity : 0.478         
+##             Specificity : 0.667         
+##          Pos Pred Value : 0.579         
+##          Neg Pred Value : 0.571         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.213         
-##    Detection Prevalence : 0.468         
-##       Balanced Accuracy : 0.467         
+##          Detection Rate : 0.234         
+##    Detection Prevalence : 0.404         
+##       Balanced Accuracy : 0.572         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -259,8 +240,8 @@ attached base packages:
 
 other attached packages:
  [1] patchwork_1.1.2                MLeval_0.3                    
- [3] caret_6.0-94                   lattice_0.20-45               
- [5] ggplot2_3.4.1                  mikropml_1.5.0                
+ [3] caret_6.0-94                   lattice_0.21-8                
+ [5] ggplot2_3.4.2                  mikropml_1.5.0                
  [7] mia_1.7.11                     MultiAssayExperiment_1.24.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [11] XVector_0.38.0                 SingleCellExperiment_1.20.1   
@@ -310,7 +291,7 @@ loaded via a namespace (and not attached):
  [71] tools_4.2.1                 cachem_1.0.7               
  [73] xgboost_1.7.3.1             cli_3.6.1                  
  [75] DirichletMultinomial_1.40.0 generics_0.1.3             
- [77] RSQLite_2.3.0               evaluate_0.20              
+ [77] RSQLite_2.3.1               evaluate_0.20              
  [79] stringr_1.5.0               fastmap_1.1.1              
  [81] yaml_2.3.7                  ModelMetrics_1.2.2.2       
  [83] knitr_1.42                  bit64_4.0.5                
@@ -320,7 +301,7 @@ loaded via a namespace (and not attached):
  [91] beeswarm_0.4.0              filelock_1.0.2             
  [93] e1071_1.7-13                treeio_1.22.0              
  [95] tibble_3.2.1                stringi_1.7.12             
- [97] highr_0.10                  Matrix_1.5-3               
+ [97] highr_0.10                  Matrix_1.5-4               
  [99] vegan_2.6-4                 permute_0.9-7              
 [101] vctrs_0.6.1                 pillar_1.9.0               
 [103] lifecycle_1.0.3             BiocManager_1.30.20        

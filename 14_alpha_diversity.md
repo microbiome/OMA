@@ -354,7 +354,7 @@ attached base packages:
 
 other attached packages:
  [1] patchwork_1.1.2                ggsignif_0.6.4                
- [3] scater_1.26.1                  ggplot2_3.4.1                 
+ [3] scater_1.26.1                  ggplot2_3.4.2                 
  [5] scuttle_1.8.4                  mia_1.7.11                    
  [7] MultiAssayExperiment_1.24.0    TreeSummarizedExperiment_2.1.4
  [9] Biostrings_2.66.0              XVector_0.38.0                
@@ -375,7 +375,7 @@ loaded via a namespace (and not attached):
 [13] knitr_1.42                  jsonlite_1.8.4             
 [15] cluster_2.1.4               graph_1.74.0               
 [17] BiocManager_1.30.20         compiler_4.2.1             
-[19] Matrix_1.5-3                fastmap_1.1.1              
+[19] Matrix_1.5-4                fastmap_1.1.1              
 [21] lazyeval_0.2.2              cli_3.6.1                  
 [23] BiocSingular_1.14.0         htmltools_0.5.5            
 [25] tools_4.2.1                 rsvd_1.0.5                 
@@ -392,12 +392,12 @@ loaded via a namespace (and not attached):
 [47] parallel_4.2.1              yaml_2.3.7                 
 [49] memoise_2.0.1               gridExtra_2.3              
 [51] yulab.utils_0.0.6           stringi_1.7.12             
-[53] RSQLite_2.3.0               highr_0.10                 
+[53] RSQLite_2.3.1               highr_0.10                 
 [55] ScaledMatrix_1.6.0          tidytree_0.4.2             
 [57] permute_0.9-7               filelock_1.0.2             
 [59] BiocParallel_1.32.6         rlang_1.1.0                
 [61] pkgconfig_2.0.3             bitops_1.0-7               
-[63] evaluate_0.20               lattice_0.20-45            
+[63] evaluate_0.20               lattice_0.21-8             
 [65] purrr_1.0.1                 labeling_0.4.2             
 [67] treeio_1.22.0               CodeDepends_0.6.5          
 [69] cowplot_1.1.1               bit_4.0.5                  

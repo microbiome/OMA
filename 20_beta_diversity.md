@@ -336,7 +336,7 @@ if(!require("knitr")){
     library("knitr")
 }
 # Load data
-data(enterotype)
+data(enterotype, package="mia")
 # Covariates that are being analyzed
 variable_names <- c("ClinicalStatus", "Gender", "Age")
 
@@ -743,7 +743,6 @@ appropriate choice for comparing community compositions.
 
 ## Further reading
 
-
  - [How to extract information from clusters](http://bioconductor.org/books/release/OSCA/clustering.html)
 
  - Chapter \@ref(clustering) on community typing
@@ -777,8 +776,8 @@ other attached packages:
  [1] ggord_1.1.7                    knitr_1.42                    
  [3] stringr_1.5.0                  patchwork_1.1.2               
  [5] scater_1.26.1                  scuttle_1.8.4                 
- [7] ggplot2_3.4.1                  vegan_2.6-4                   
- [9] lattice_0.20-45                permute_0.9-7                 
+ [7] ggplot2_3.4.2                  vegan_2.6-4                   
+ [9] lattice_0.21-8                 permute_0.9-7                 
 [11] mia_1.7.11                     MultiAssayExperiment_1.24.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [15] XVector_0.38.0                 SingleCellExperiment_1.20.1   
@@ -799,7 +798,7 @@ loaded via a namespace (and not attached):
 [13] cachem_1.0.7                jsonlite_1.8.4             
 [15] cluster_2.1.4               graph_1.74.0               
 [17] BiocManager_1.30.20         compiler_4.2.1             
-[19] Matrix_1.5-3                fastmap_1.1.1              
+[19] Matrix_1.5-4                fastmap_1.1.1              
 [21] lazyeval_0.2.2              cli_3.6.1                  
 [23] BiocSingular_1.14.0         htmltools_0.5.5            
 [25] tools_4.2.1                 rsvd_1.0.5                 
@@ -815,7 +814,7 @@ loaded via a namespace (and not attached):
 [45] scales_1.2.1                parallel_4.2.1             
 [47] yaml_2.3.7                  memoise_2.0.1              
 [49] gridExtra_2.3               yulab.utils_0.0.6          
-[51] stringi_1.7.12              RSQLite_2.3.0              
+[51] stringi_1.7.12              RSQLite_2.3.1              
 [53] highr_0.10                  ScaledMatrix_1.6.0         
 [55] tidytree_0.4.2              filelock_1.0.2             
 [57] BiocParallel_1.32.6         rlang_1.1.0                

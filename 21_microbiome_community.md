@@ -365,7 +365,7 @@ attached base packages:
 other attached packages:
  [1] ggtree_3.4.4                   ape_5.7-1                     
  [3] pheatmap_1.0.12                miaViz_1.7.5                  
- [5] ggraph_2.1.0                   ggplot2_3.4.1                 
+ [5] ggraph_2.1.0                   ggplot2_3.4.2                 
  [7] mia_1.7.11                     MultiAssayExperiment_1.24.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
 [11] XVector_0.38.0                 SingleCellExperiment_1.20.1   
@@ -389,7 +389,7 @@ loaded via a namespace (and not attached):
  [19] polyclip_1.10-4             jsonlite_1.8.4             
  [21] cluster_2.1.4               graph_1.74.0               
  [23] ggforce_0.4.1               BiocManager_1.30.20        
- [25] compiler_4.2.1              Matrix_1.5-3               
+ [25] compiler_4.2.1              Matrix_1.5-4               
  [27] fastmap_1.1.1               lazyeval_0.2.2             
  [29] cli_3.6.1                   tweenr_2.0.2               
  [31] BiocSingular_1.14.0         htmltools_0.5.5            
@@ -408,13 +408,13 @@ loaded via a namespace (and not attached):
  [57] RColorBrewer_1.1-3          yaml_2.3.7                 
  [59] memoise_2.0.1               gridExtra_2.3              
  [61] ggfun_0.0.9                 yulab.utils_0.0.6          
- [63] stringi_1.7.12              RSQLite_2.3.0              
+ [63] stringi_1.7.12              RSQLite_2.3.1              
  [65] highr_0.10                  ScaledMatrix_1.6.0         
  [67] tidytree_0.4.2              permute_0.9-7              
  [69] filelock_1.0.2              BiocParallel_1.32.6        
  [71] rlang_1.1.0                 pkgconfig_2.0.3            
  [73] bitops_1.0-7                evaluate_0.20              
- [75] lattice_0.20-45             purrr_1.0.1                
+ [75] lattice_0.21-8              purrr_1.0.1                
  [77] labeling_0.4.2              patchwork_1.1.2            
  [79] treeio_1.22.0               CodeDepends_0.6.5          
  [81] bit_4.0.5                   tidyselect_1.2.0           

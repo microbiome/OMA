@@ -1117,11 +1117,12 @@ Conversion is possible between other data formats. Interested readers can refer 
 
 ## Demonstration data {#example-data}
 
-
 Open demonstration data for testing and benchmarking purposes is
 available from multiple locations. This chapter introduces some
 options. The other chapters of this book provide ample examples about
 the use of the data.
+
+
 
 
 ### Package data {#package-data}
@@ -1186,12 +1187,13 @@ Check the documentation for this data set:
 
 ### ExperimentHub data
 
-[ExperimentHub](https://bioconductor.org/packages/release/bioc/vignettes/ExperimentHub/inst/doc/ExperimentHub.html) 
+[ExperimentHub](https://bioconductor.org/packages/release/bioc/vignettes/ExperimentHub/inst/doc/ExperimentHub.html)
 provides a variety of data resources, including the
-microbiomeDataSets package [@Morgan2021; @microlahti2021].
+[microbiomeDataSets](https://bioconductor.org/packages/release/data/experiment/html/microbiomeDataSets.html)
+package [@Morgan2021; @microlahti2021].
 
-A table of the available data sets is available through the `availableDataSets`
-function.
+A table of the available data sets is available through the
+`availableDataSets` function.
 
 
 ```r
@@ -1235,20 +1237,18 @@ containers](https://microbiome.github.io/OMA/multitable.html) for more
 details.
 
 
+### Curated metagenomic data
 
-### Other data sources
-
-The curatedMetagenomicData 
-is an independent source that provides various example data sets as
-`(Tree)SummarizedExperiment` objects [@Pasolli2017]. This resource provides curated
-human microbiome data including gene families, marker abundance,
-marker presence, pathway abundance, pathway coverage, and relative
-abundance for samples from different body sites. See the package
-homepage for more details on data availability and access.
+[curatedMetagenomicData](https://bioconductor.org/packages/release/data/experiment/html/curatedMetagenomicData.html)
+is a large collection of curated human microbiome data sets, provided as
+`(Tree)SummarizedExperiment` objects [@Pasolli2017]. The resource
+provides curated human microbiome data including gene families, marker
+abundance, marker presence, pathway abundance, pathway coverage, and
+relative abundance for samples from different body sites. See the
+package homepage for more details on data availability and access.
 
 As one example, let us retrieve the Vatanen (2016) [@Vatanen2016] data
 set. This is a larger collection with a bit longer download time.
-
 
 
 ```r
@@ -1258,7 +1258,13 @@ tse <- curatedMetagenomicData("Vatanen*", dryrun = FALSE, counts = TRUE)
 
 
 
+### Other data sources
 
+The current collections provide access to vast microbiome data
+resources. The output has to be converted into TreeSE/MAE separately.
+
+- [MGnifyR](https://github.com/beadyallen/MGnifyR) provides access to [EBI/MGnify](https://www.ebi.ac.uk/metagenomics/) 
+- [qiitr](https://github.com/cran/qiitr) provides access to [QIITA](https://qiita.com/about) 
 
 
 
@@ -1289,7 +1295,7 @@ attached base packages:
 
 other attached packages:
  [1] microbiomeDataSets_1.1.7       phyloseq_1.40.0               
- [3] BiocManager_1.30.20            ggplot2_3.4.1                 
+ [3] BiocManager_1.30.20            ggplot2_3.4.2                 
  [5] mia_1.7.11                     MultiAssayExperiment_1.24.0   
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
  [9] XVector_0.38.0                 SingleCellExperiment_1.20.1   
@@ -1335,7 +1341,7 @@ loaded via a namespace (and not attached):
  [63] BiocVersion_3.15.2            tools_4.2.1                  
  [65] cachem_1.0.7                  cli_3.6.1                    
  [67] DirichletMultinomial_1.40.0   generics_0.1.3               
- [69] RSQLite_2.3.0                 ExperimentHub_2.4.0          
+ [69] RSQLite_2.3.1                 ExperimentHub_2.4.0          
  [71] ade4_1.7-22                   evaluate_0.20                
  [73] biomformat_1.24.0             stringr_1.5.0                
  [75] fastmap_1.1.1                 yaml_2.3.7                   
@@ -1347,7 +1353,7 @@ loaded via a namespace (and not attached):
  [87] curl_5.0.0                    png_0.1-8                    
  [89] interactiveDisplayBase_1.34.0 treeio_1.22.0                
  [91] tibble_3.2.1                  stringi_1.7.12               
- [93] lattice_0.20-45               Matrix_1.5-3                 
+ [93] lattice_0.21-8                Matrix_1.5-4                 
  [95] vegan_2.6-4                   permute_0.9-7                
  [97] multtest_2.52.0               vctrs_0.6.1                  
  [99] pillar_1.9.0                  lifecycle_1.0.3              

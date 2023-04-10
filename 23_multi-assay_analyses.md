@@ -408,8 +408,8 @@ model.prepared <- prepare_mofa(
   model_options = model_opts
 )
 
-#Some systems may need the `use_basilisk = TRUE` function
-#so it has been added to the following code
+# Some systems may require the specification `use_basilisk = TRUE`
+# so it has been added to the following code
 model.trained <- run_mofa(model.prepared, use_basilisk = TRUE)
 ```
 
@@ -474,7 +474,7 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] ggplot2_3.4.1                  patchwork_1.1.2               
+ [1] ggplot2_3.4.2                  patchwork_1.1.2               
  [3] reticulate_1.28                MOFA2_1.6.0                   
  [5] ComplexHeatmap_2.12.1          stringr_1.5.0                 
  [7] mia_1.7.11                     MultiAssayExperiment_1.24.0   
@@ -523,7 +523,7 @@ loaded via a namespace (and not attached):
  [65] munsell_0.5.0               tools_4.2.1                
  [67] cachem_1.0.7                cli_3.6.1                  
  [69] DirichletMultinomial_1.40.0 generics_0.1.3             
- [71] RSQLite_2.3.0               evaluate_0.20              
+ [71] RSQLite_2.3.1               evaluate_0.20              
  [73] fastmap_1.1.1               yaml_2.3.7                 
  [75] knitr_1.42                  bit64_4.0.5                
  [77] purrr_1.0.1                 nlme_3.1-162               
@@ -532,8 +532,8 @@ loaded via a namespace (and not attached):
  [83] png_0.1-8                   treeio_1.22.0              
  [85] tibble_3.2.1                stringi_1.7.12             
  [87] highr_0.10                  basilisk.utils_1.8.0       
- [89] forcats_1.0.0               lattice_0.20-45            
- [91] Matrix_1.5-3                vegan_2.6-4                
+ [89] forcats_1.0.0               lattice_0.21-8             
+ [91] Matrix_1.5-4                vegan_2.6-4                
  [93] permute_0.9-7               vctrs_0.6.1                
  [95] pillar_1.9.0                lifecycle_1.0.3            
  [97] rhdf5filters_1.8.0          BiocManager_1.30.20        
