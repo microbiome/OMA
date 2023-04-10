@@ -27,6 +27,6 @@ pkgs <- c(priority, setdiff(pkgs, priority))
 # Store the library list
 write.table(pkgs, file = "oma_packages.csv", row.names=FALSE, col.names=FALSE, quote=FALSE)
 
-# Build the book
-bookdown::render_book("index.Rmd", "bookdown::gitbook")
+# Build the book - must be run separately
+#bookdown::render_book("index.Rmd", "bookdown::gitbook")
 
