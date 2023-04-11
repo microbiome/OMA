@@ -39,22 +39,18 @@ document.addEventListener("click", function (event) {
 
 ## Package installation
 
-You can install all the packages that are required to run every example in the book via the following command:
+You can install all packages that are required to run every example in this book via the following command:
 
 
 ```r
-source("https://github.com/microbiome/OMA/blob/master/install_packages.R")
+source("https://raw.githubusercontent.com/microbiome/OMA/master/install_packages.R")
 ```
 
 
 ### Installing specific packages {#packages}
 
-Methods for the analysis and manipulation of
-`(Tree)SummarizedExperiment` and `MultiAssayExperiment` data
-containers are available through a number of R packages. One of these
-is `mia`. This and other packages can be installed with the following
-procedure.
-
+You can install R packages of your choice with the following command
+line procedure.
 
 **Bioconductor release version** is the most stable and tested version
 but may miss some of the latest methods and updates. It can be
@@ -87,11 +83,14 @@ devtools::install_github("microbiome/mia")
 
 ## Package ecosystem 
 
-Some of the R packages supporting the _(Tree)SummarizedExperiment_ or
-_MultiAssayExperiment_ framework include the following. If you know
-more tips on such packages, data sources, or other resources, kindly
-[let us know](https://microbiome.github.io) through the issues, pull
-requests, or online channels.
+Methods for the analysis and manipulation of
+`(Tree)SummarizedExperiment` and `MultiAssayExperiment` data
+containers are available through a number of R packages. Some of these
+are listed below. If you know more tips on such packages, data
+sources, or other resources, kindly [let us
+know](https://microbiome.github.io) through the issues, pull requests,
+or online channels.
+
 
 ### mia family of methods
 
@@ -116,10 +115,17 @@ requests, or online channels.
 - [MicrobiotaProcess](https://bioconductor.org/packages/release/bioc/html/MicrobiotaProcess.html) for analyzing microbiome and other ecological data within the tidy framework
 
 
+### Further options
+
+- [Tools for Microbiome
+  Analysis](https://microsud.github.io/Tools-Microbiome-Analysis/)
+  site listed over 130 R packages for microbiome data science in
+  2023. Many of these do not directly support the data containers used
+  in this book but can be used with minor conversions between formats.
+
 ## Data ecosystem
 
 Section \@ref(example-data) links to various open microbiome data resources that support this framework.
-
 
 
 
