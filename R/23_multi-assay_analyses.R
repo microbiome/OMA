@@ -1,69 +1,20 @@
-# Multi-assay analyses {#multi-assay-analyses}
-
-```{r setup, echo=FALSE, results="asis"}
+## ----setup, echo=FALSE, results="asis"----------------------------------------
 library(rebook)
 chapterPreamble()
-```
 
-```{r load-pkg-data}
+
+## ----load-pkg-data------------------------------------------------------------
 library(mia)
-```
 
-Multi-omics means that we integrate data from multiple sources. For
-example, we can integrate microbial abundances in the gut with
-biomolecular profiling data from blood samples. This kind of
-integrative multi-omic approaches can support the analysis of
-microbiome dysbiosis and facilitate the discovery of novel biomarkers
-for health and disease.
 
-With cross-correlation analysis, we can analyze how strongly and how
-differently variables are associated between each other. For instance,
-we can analyze if higher presence of a specific taxon equals to higher
-levels of a biomolecule.
-
-The data containers that the _miaverse_ utilizes are scalable and they
-can contain different types of data in a same container. Because of
-that, the _miaverse_ is well-suitable for multi-assay microbiome data
-which incorporates different types of complementary data sources in a
-single reproducible workflow.
-
-Another experiment can be stored in altExp slot of SE data container
-or both experiments can be stored side-by-side in MAE data container
-(see the sections \@ref(alt-exp) and \@ref(mae) to learn more about
-altExp and MAE objects, respectively).
-
-Different experiments are first imported into SE or TreeSE data
-container similarly to the case when only one experiment is
-present. After that different experiments are combined into the same
-data container. Result is one TreeSE object with alternative
-experiment in altExp slot, or MAE object with multiple experiment in
-its experiment slot.
-
-As an example data, we use data from following publication: Hintikka L
-_et al._ (2021) Xylo-oligosaccharides in prevention of hepatic
-steatosis and adipose tissue inflammation: associating taxonomic and
-metabolomic patterns in fecal microbiotas with biclustering
-[@Hintikka2021].
-
-In this article, mice were fed with high-fat and low-fat diets with or
-without prebiotics.  The purpose of this was to study if prebiotics
-would reduce the negative impacts of high-fat diet.
-
-This example data can be loaded from microbiomeDataSets. The data is
-already in MAE format. It includes three different experiments:
-microbial abundance data, metabolite concentrations, and data about
-different biomarkers. Help for importing data into SE object you can
-find from
-[here](https://microbiome.github.io/OMA/containers.html#loading-experimental-microbiome-data).
-
-```{r cross-correlation1}
+## ----cross-correlation1-------------------------------------------------------
 # Load the data
 data(HintikkaXOData, package = "mia")
 mae <- HintikkaXOData
 mae
-```
 
-```{r cross-correlation2}
+
+## ----cross-correlation2-------------------------------------------------------
 if(!require(stringr)){
     install.packages("stringr")
     library(stringr)
@@ -75,27 +26,19 @@ rowData(mae[[1]]) <- DataFrame(apply(rowData(mae[[1]]), 2,
                                      str_remove, pattern = "._[0-9]__"))
 # Microbiome data
 mae[[1]]
-```
 
-```{r cross-correlation3}
+
+## ----cross-correlation3-------------------------------------------------------
 # Metabolite data
 mae[[2]]
-```
 
-```{r cross-correlation4}
+
+## ----cross-correlation4-------------------------------------------------------
 # Biomarker data
 mae[[3]]
-```
 
-## Cross-correlation Analysis
 
-Next we can do the cross-correlation analysis.  Here we analyse if
-individual bacteria genera correlates with concentrations of
-individual metabolites. This helps as to answer the question: "If this
-bacteria is present, is this metabolite's concentration then low or
-high"?
-
-```{r cross-correlation5}
+## ----cross-correlation5-------------------------------------------------------
 # Agglomerate microbiome data at family level
 mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family")
 # Does log10 transform for microbiome data
@@ -117,11 +60,9 @@ correlations <- testExperimentCrossCorrelation(mae,
                                                mode = "matrix",
                                                sort = TRUE,
                                                show_warnings = FALSE)
-```
 
-Creates the heatmap
 
-```{r cross-correlation6, fig.width=10, fig.height=8}
+## ----cross-correlation6, fig.width=10, fig.height=8---------------------------
 if( !require("ComplexHeatmap") ){
     BiocManager::install("ComplexHeatmap")
     library("ComplexHeatmap")
@@ -140,23 +81,9 @@ plot <- Heatmap(correlations$cor,
                 heatmap_legend_param = list(title = "", legend_height = unit(5, "cm"))
                 )
 plot
-```
 
-## Multi-Omics Factor Analysis
 
-Multi-Omics Factor Analysis [@Argelaguet2018] (MOFA) is an
-unsupervised method for integrating multi-omic data sets in a
-downstream analysis.  It could be seen as a generalization of
-principal component analysis. Yet, with the ability to infer a latent
-(low-dimensional) representation, shared among the mutliple (-omics)
-data sets in hand.
-
-We use the R [MOFA2](https://biofam.github.io/MOFA2/index.html)
-package for the analysis, and
-[install](https://biofam.github.io/MOFA2/installation.html) the
-corresponding dependencies.
-
-```{r MOFA2, message=FALSE, warning=FALSE}
+## ----MOFA2, message=FALSE, warning=FALSE--------------------------------------
 if(!require(MOFA2)){
     BiocManager::install("MOFA2")
 }
@@ -171,14 +98,9 @@ if(!require(reticulate)){
 #reticulate::install_miniconda(force = TRUE)
 #reticulate::use_miniconda(condaenv = "env1", required = FALSE)
 #reticulate::py_install(packages = c("mofapy2"), pip = TRUE, python_version=3.6)
-```
 
-The `mae` object could be used straight to create the MOFA model. Yet,
-we transform our assays since the model assumes normality per
-default. Other distributions that can be used, include Poisson or
-Bernoulli.
 
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 library(MOFA2)
 # For simplicity, classify all high-fat diets as high-fat, and all the low-fat 
 # diets as low-fat diets
@@ -215,26 +137,20 @@ model <- create_mofa_from_MultiAssayExperiment(mae,
                                                groups = "Diet", 
                                                extract_metadata = TRUE)
 model
-```
 
-Model options could be defined as follows:
 
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 model_opts <- get_default_model_options(model)
 model_opts$num_factors <- 5
 head(model_opts)
-```
 
-Model's training options are defined with the following:
 
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 train_opts <- get_default_training_options(model)
 head(train_opts)
-```
 
-Preparing and training the model:
 
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 model.prepared <- prepare_mofa(
   object = model,
   model_options = model_opts
@@ -243,11 +159,9 @@ model.prepared <- prepare_mofa(
 # Some systems may require the specification `use_basilisk = TRUE`
 # so it has been added to the following code
 model.trained <- run_mofa(model.prepared, use_basilisk = TRUE)
-```
 
-Visualizing the variance explained:
 
-```{r, message=FALSE, warning=FALSE, fig.height=8, fig.width=10}
+## ---- message=FALSE, warning=FALSE, fig.height=8, fig.width=10----------------
 library(patchwork)
 library(ggplot2)
 wrap_plots(
@@ -255,11 +169,9 @@ wrap_plots(
     nrow = 2
 ) + plot_annotation(title = "Variance Explained per factor and assay",
                     theme = theme(plot.title = element_text(hjust = 0.5)))
-```
 
-The top weights for each assay using all 5 factors:
 
-```{r, warning=FALSE, message=FALSE, fig.height=10, fig.width=10}
+## ---- warning=FALSE, message=FALSE, fig.height=10, fig.width=10---------------
 plots <- lapply(c("microbiota", "metabolites","biomarkers"), function(name) {
     plot_top_weights(model.trained,
                      view = name,
@@ -268,15 +180,8 @@ plots <- lapply(c("microbiota", "metabolites","biomarkers"), function(name) {
         labs(title = paste0("Top weights of the ", name," assay"))
 })
 wrap_plots(plots, nrow = 3) & theme(text = element_text(size = 8))
-```
-
-More tutorials and examples of using the package are found at: [link](https://biofam.github.io/MOFA2/tutorials.html)
 
 
-
-## Session Info {-}
-
-```{r sessionInfo, echo=FALSE, results='asis'}
+## ----sessionInfo, echo=FALSE, results='asis'----------------------------------
 prettySessionInfo()
-```
 

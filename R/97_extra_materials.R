@@ -1,20 +1,9 @@
-# (PART) Appendix {-}
-
-# Extra material {#extras}
-
-```{r setup, echo=FALSE, results="asis"}
+## ----setup, echo=FALSE, results="asis"----------------------------------------
 library(rebook)
 chapterPreamble()
-```
 
 
-## PERMANOVA comparison
-
-Here we present two possible uses of the `adonis2` function which performs PERMANOVA. The
-optional argument `by` has an effect on the statistical outcome, so its two options are
-compared here.
-
-```{r permanova_import, warning = FALSE, message = FALSE}
+## ----permanova_import, warning = FALSE, message = FALSE-----------------------
 # import necessary packages
 if (!require(gtools)){
   install.packages("gtools")  
@@ -25,14 +14,9 @@ if (!require(purrr)){
 library(vegan)
 library(gtools)
 library(purrr)
-```
-
-Let us load the _enterotype_ TSE object and run PERMANOVA for
-different orders of three variables with two different approaches:
-`by = "margin"` or `by = "terms"`.
 
 
-```{r permanova_prep, message = FALSE, warning = FALSE}
+## ----permanova_prep, message = FALSE, warning = FALSE-------------------------
 # load and prepare data
 library(mia)
 data("enterotype", package="mia")
@@ -52,11 +36,9 @@ margin_df <- data.frame("Formula" = formulas,
                         "ClinicalStatus" = rep(0, 6),
                         "Gender" = rep(0, 6),
                         "Nationality" = rep(0, 6))
-```
 
 
-
-```{r permanova_loop, message = FALSE, warning = FALSE}
+## ----permanova_loop, message = FALSE, warning = FALSE-------------------------
 for (row_idx in 1:nrow(var_perm)) {
   
   # generate temporary formula (i.e. "assay ~ ClinicalStatus + Nationality + Gender")
@@ -93,104 +75,63 @@ for (row_idx in 1:nrow(var_perm)) {
   }
   
 }
-```
 
 
-
-
-The following table displays the p-values for the three variables
-ClinicalStatus, Gender and Nationality obtained by PERMANOVA with
-`adonis2`. Note that the p-values remain identical when `by =
-"margin"`, but change with the order of the variables in the
-formula when `by = "terms"` (default).
-
-
-```{r permanova_table, message = FALSE, warning = FALSE}
+## ----permanova_table, message = FALSE, warning = FALSE------------------------
 
 df <- terms_df %>%
   dplyr::inner_join(margin_df, by = "Formula", suffix = c(" (terms)", " (margin)"))
 
 knitr::kable(df)
-```
 
 
-## Bayesian Multinomial Logistic-Normal Models
-
-Analysis using such model could be performed with the function
-`pibble` from the `fido` package, wihch is in form of a Multinomial
-Logistic-Normal Linear Regression model; see
-[vignette](https://jsilve24.github.io/fido/articles/introduction-to-fido.html)
-of package.
-
-
-The following presents such an exemplary analysis based on the 
-data of @Sprockett2020 available
-through `microbiomeDataSets` package.
-
-
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 if (!require(fido)){
   # installing the fido package
   devtools::install_github("jsilve24/fido")
 }
-```
 
-Loading the libraries and importing data:
 
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 library(fido)
-```
 
-```{r, message=FALSE, warning=FALSE, eval=FALSE}
-library(microbiomeDataSets)
-tse <- SprockettTHData()
-```
 
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
+## ---- message=FALSE, warning=FALSE, eval=FALSE--------------------------------
+## library(microbiomeDataSets)
+## tse <- SprockettTHData()
+
+
+## ---- message=FALSE, warning=FALSE, echo=FALSE--------------------------------
 # saveRDS(tse, file="data/SprockettTHData.Rds")
 # Hidden reading of the saved data
 tse <- readRDS("data/SprockettTHData.Rds")
-```
 
 
-We pick three covariates ("Sex","Age_Years","Delivery_Mode") during this
-analysis as an example, and beforehand we check for missing data:
-
-
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 library(mia)
 cov_names <- c("Sex","Age_Years","Delivery_Mode")
 na_counts <- apply(is.na(colData(tse)[,cov_names]), 2, sum)
 na_summary<-as.data.frame(na_counts,row.names=cov_names)
-```
 
-We drop missing values of the covariates:
 
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 tse <- tse[ , !is.na(colData(tse)$Delivery_Mode) ]
 tse <- tse[ , !is.na(colData(tse)$Age_Years) ]
-```
 
-We agglomerate microbiome data to Phylum:
 
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 tse_phylum <- agglomerateByRank(tse, "Phylum")
-```
 
-We extract the counts assay and covariate data to build the model
-matrix:
 
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 Y <- assays(tse_phylum)$counts
 # design matrix
 # taking 3 covariates
 sample_data<-as.data.frame(colData(tse_phylum)[,cov_names])
 X <- t(model.matrix(~Sex+Age_Years+Delivery_Mode,data=sample_data))
-```
 
-Building the parameters for the `pibble` call to build the model; see more at [vignette](https://jsilve24.github.io/fido/articles/introduction-to-fido.html):
 
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 n_taxa<-nrow(Y)
 upsilon <- n_taxa+3
 Omega <- diag(n_taxa)
@@ -198,47 +139,33 @@ G <- cbind(diag(n_taxa-1), -1)
 Xi <- (upsilon-n_taxa)*G%*%Omega%*%t(G)
 Theta <- matrix(0, n_taxa-1, nrow(X))
 Gamma <- diag(nrow(X))
-```
 
-Automatically initializing the priors and visualizing their distributions:
 
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 priors <- pibble(NULL, X, upsilon, Theta, Gamma, Xi)
 names_covariates(priors) <- rownames(X)
 plot(priors, pars="Lambda") + ggplot2::xlim(c(-5, 5))
-```
 
-Estimating the posterior by including our response data `Y`.
-Note: Some computational failures could occur (see [discussion](https://github-wiki-see.page/m/jsilve24/fido/wiki/Frequently-Asked-Questions))
-the arguments `multDirichletBoot` `calcGradHess` could be passed in such case.
 
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 priors$Y <- Y 
 posterior <- refit(priors, optim_method="adam", multDirichletBoot=0.5) #calcGradHess=FALSE
-```
 
-Printing a summary about the posterior:
 
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 ppc_summary(posterior)
-```
-Plotting the summary of the posterior distributions of the regression parameters:
 
-```{r, message=FALSE, warning=FALSE}
+
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 names_categories(posterior) <- rownames(Y)
 plot(posterior,par="Lambda",focus.cov=rownames(X)[2:4])
-```
 
-Taking a closer look at "Sex" and "Delivery_Mode":
 
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
-```
 
 
-## Interactive 3D Plots
-
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 # Installing required packages
 if (!require(rgl)){
   BiocManager::install("rgl")  
@@ -246,18 +173,15 @@ if (!require(rgl)){
 if (!require(plotly)){
   BiocManager::install("plotly")  
 }
-```
 
-```{r setup2, warning=FALSE, message=FALSE}
+
+## ----setup2, warning=FALSE, message=FALSE-------------------------------------
 library(knitr)
 library(rgl)
 knitr::knit_hooks$set(webgl = hook_webgl)
-```
 
 
-In this section we make a 3D version of the earlier  Visualizing the most dominant genus on PCoA (see \@ref(quality-control)), with the help of the plotly [@Sievert2020].
-
-```{r, message=FALSE, warning=FALSE}
+## ---- message=FALSE, warning=FALSE--------------------------------------------
 # Installing the package
 if (!require(curatedMetagenomicData)){
   BiocManager::install("curatedMetagenomicData")  
@@ -299,12 +223,9 @@ most_abundant_percent <- round(most_abundant_freq/sum(most_abundant_freq)*100, 1
 # Retrieving the explained variance
 e <- attr(reducedDim(tse_Genus, "PCoA_BC"), "eig");
 var_explained <- e/sum(e[e>0])*100
-```
 
-Interactive 3D visualization of the most dominant genus on PCoA.
-Note that labels at legend can be used to visualize one or more Genus separately (double click to isolate one from the others, or toggle to select multiple ones).
 
-```{r, test-rgl,webgl=TRUE, warning=FALSE, message=FALSE}
+## ---- test-rgl,webgl=TRUE, warning=FALSE, message=FALSE-----------------------
 library(plotly)
 
 # 3D Visualization
@@ -317,5 +238,4 @@ plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3)%>%
                     yaxis=list(title = paste("PC2 (",round(var_explained[2],1),"%)")),
                     zaxis=list(title = paste("PC3 (",round(var_explained[3],1),"%)"))))
 
-```
 

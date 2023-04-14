@@ -45,8 +45,25 @@ Please note that chapters should be independent of each other.
 - Create the relevant Rmd file; follow the numbering logic
 - Add it also to the list in file [_bookdown.yml](_bookdown.yml). 
 
+### Housekeeping
+
+For developers. This can be used to
+
+ * generate package listing for the full book
+ * chapter-specific R files in R/
+ * render the book
+
+```
+# Generate R files for the book chapters (to be streamlined)
+source("build.R")
+```
+
 
 # Code of conduct
 
 Please note that the OMA project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).
 By contributing to this project, you agree to abide by its terms.
+
+
+
+

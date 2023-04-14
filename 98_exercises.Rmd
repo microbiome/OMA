@@ -10,7 +10,7 @@ Here you can find assignments on different topics.
 
 ## Workflows
 
-### Reproducible reporting
+### Reproducible reporting with Quarto
 
 1. Create a new Quarto file
 
@@ -34,9 +34,27 @@ Here you can find assignments on different topics.
 For tips on Quarto, see [Quarto tutorial](https://quarto.org/docs/authoring/markdown-basics.html)
 
 
-## TreeSummarizedExperiment: basic components
+## Data containers: TreeSE
+
+
+### Constructing a data object
+
+Import data from CSV files to TreeSE (see shared data folder for example data sets).
+
+1. Import the data files in R
+2. Construct a TreeSE data object (see [Ch. 2](https://microbiome.github.io/OMA/containers.html#loading-experimental-microbiome-data))
+3. Check that importing is done correctly. E.g., choose random samples and features,
+and check that their values equal between raw files and TreeSE.
+
+Useful functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colnames, SimpleList
+
+### Importing data
+
 
 You can also check the [function reference in the mia package](https://microbiome.github.io/mia/reference/index.html)
+
+1. Import data from another format (functions: loadFromMetaphlan | loadFromMothur | loadFromQIIME2 | makeTreeSummarizedExperimentFromBiom | makeTreeSummarizedExperimentFromDADA2 ...)
+2. Try out conversions between TreeSE and phyloseq data containers (makeTreeSummarizedExperimentFromPhyloseq; makephyloseqFromTreeSummarizedExperiment)
 
 ### Basic summaries
 
@@ -75,7 +93,7 @@ Optional:
  * [rowtree](https://microbiome.github.io/OMA/containers.html#rowtree)
 
 
-### Other components
+### Other elements
 
 Try to extract some of the [other TreeSE elements](https://f1000research.com/articles/9-1246/v2). These are not always included:
 
@@ -83,25 +101,6 @@ Try to extract some of the [other TreeSE elements](https://f1000research.com/art
 * Sample tree (colTree)
 * Phylogenetic tree (rowTree)
 * Feature sequences information (DNA sequence slot)
-
-
-## TreeSummarizedExperiment: data import
-
-Import data from CSV files to TreeSE (see shared data folder for example data sets).
-
-1. Import the data files in R
-2. Construct a TreeSE data object (see [Ch. 2](https://microbiome.github.io/OMA/containers.html#loading-experimental-microbiome-data))
-3. Check that importing is done correctly. E.g., choose random samples and features,
-and check that their values equal between raw files and TreeSE.
-
-Useful functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colnames, SimpleList
-
-Optional:
-
-4. Import data from another format (functions: loadFromMetaphlan | loadFromMothur | loadFromQIIME2 | makeTreeSummarizedExperimentFromBiom | makeTreeSummarizedExperimentFromDADA2 ...)
-5. Try out conversions between TreeSE and phyloseq data containers (makeTreeSummarizedExperimentFromPhyloseq; makephyloseqFromTreeSummarizedExperiment)
-
-
 
 
 
@@ -133,7 +132,7 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, addPerCellQ
 Useful functions: getPrevalence, getPrevalentTaxa, subsetByPrevalentTaxa
 
 
-### Explore the data
+### Data exploration
 
 1. Summarize sample metadata variables. (How many age groups, how they are distributed? 0%, 25%, 50%, 75%, and 100% quantiles of library size?)
 2. Create two histograms. Another shows the distribution of absolute counts, another shows how CLR transformed values are distributed.
@@ -146,8 +145,6 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformCo
 1. Merge data objects (merge, mergeSEs)
 2. Melt the data for visualization purposes (meltAssay)
 
-
-## Transformations
 
 ### Transformations
 
@@ -162,7 +159,8 @@ Optional:
 6. If the data has phylogenetic tree, perform the phILR transformation
 
 
-## Taxonomic levels
+
+## Abundance tables
 
 ### Taxonomic levels
 
@@ -190,7 +188,7 @@ Optional:
 
 
 
-## Alpha diversity
+## Community diversity (alpha diversity)
 
 ### Alpha diversity basics
 
@@ -214,7 +212,7 @@ Useful functions: estimateDiversity, colSums, geom_point, geom_boxplot
 
 
 
-## Community composition
+## Community composition (beta diversity)
 
 ### Beta diversity basics
 
@@ -237,31 +235,6 @@ Useful functions: estimateDiversity, colSums, geom_point, geom_boxplot
 Useful functions: runMDS, runRDA, anova.cca, transformCounts, agglomerateByRank, ggplot, plotReducedDim, vegan::adonis2
 
 
-
-
-
-
-
-## Visualization
-
-### Multivariate ordination
-
-1. Load experimental dataset from mia.
-2. Create PCoA with Bray-Curtis dissimilarities
-3. Create PCA with Aitchison dissimilarities
-4. Visualize and compare both
-5. Test other transformations, dissimilarities, and ordination methods
-
-Useful functions: runMDS, runNMDS, transformCounts, ggplot, plotReducedDim
-
-
-### Heatmap visualization
-
-1. Load experimental dataset from mia.
-2. Visualize abundances with heatmap
-3. Visualize abundances with heatmap after CLR + Z transformation 
-
-See the OMA book for examples.
 
 
 ## Differential abundance
@@ -291,12 +264,32 @@ Useful functions: [], ggplot2::geom_boxplot, ggplot2::geom_jitter, wilcox.test, 
 Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::Heatmap, ancombc, aldex2, maaslin2, agglomerateByRank, transformCounts, subsetByPrevalentTaxa
 
 
+## Visualization
+
+### Multivariate ordination
+
+1. Load experimental dataset from mia.
+2. Create PCoA with Bray-Curtis dissimilarities
+3. Create PCA with Aitchison dissimilarities
+4. Visualize and compare both
+5. Test other transformations, dissimilarities, and ordination methods
+
+Useful functions: runMDS, runNMDS, transformCounts, ggplot, plotReducedDim
+
+
+### Heatmap visualization
+
+1. Load experimental dataset from mia.
+2. Visualize abundances with heatmap
+3. Visualize abundances with heatmap after CLR + Z transformation 
+
+See the OMA book for examples.
+
 
 
 ## Multiomics
 
-
-### Introduction to MultiAssayExperiment (MAE)
+### MultiAssayExperiment (MAE) data container
 
 1. Create TreeSE data containers from individual CSV files.
 2. Combine TreeSE into MAE.
@@ -306,7 +299,7 @@ Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::H
 Useful functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colnames, MultiAssayExperiment, ExperimentList, SimpleList
 
 
-### Introduction to multiomics
+### Multi-omic data exploration
 
 1. Load experimental dataset from microbiomeDataSets (e.g., HintikkaXOData).
 2. Analyze correlations between experiments. (Taxa vs lipids, Taxa vs biomarkers, Lipids vs biomarkers)

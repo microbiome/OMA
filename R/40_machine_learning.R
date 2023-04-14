@@ -1,40 +1,17 @@
-# Machine learning {#machine_learning}
-
-```{r setup, echo=FALSE, results="asis"}
+## ----setup, echo=FALSE, results="asis"----------------------------------------
 library(rebook)
 chapterPreamble()
-```
-
-Machine learning (ML) is a part of artificial intelligence. There are multiple
-definitions, but "machine" refers to computation and "learning" to improving 
-performance based on the data by finding patterns from it. Machine learning
-includes wide variety of methods from simple statistical methods to more 
-complex methods such as neural-networks. 
-
-Machine learning can be divided into supervised and unsupervised machine learning.
-Supervised ML is used to predict outcome based on the data. Unsupervised ML is used, 
-for example, to reduce dimensionality (e.g. PCA) and to find clusters from the 
-data (e.g., k-means clustering). 
 
 
-## Supervised machine learning
-
-"Supervised" means that the training data is introduced before. The training data
-contains labels (e.g., patient status), and the model is fitted based on the 
-training data. After fitting, the model is utilized to predict labels of data whose 
-labels are not known. 
-
-```{r superML1}
+## ----superML1-----------------------------------------------------------------
 library(mia)
 
 # Load experimental data
 data(peerj13075, package="mia")
 tse <- peerj13075
-```
 
-Let's first preprocess the data.
 
-```{r super2}
+## ----super2-------------------------------------------------------------------
 # Agglomerate data
 tse <- agglomerateByRank(tse, rank = "order")
 
@@ -56,12 +33,9 @@ labels <- as.factor(labels)
 df$diet <- labels 
 
 df[5, 5]
-```
 
-In the example below, we use [mikropml](https://journals.asm.org/doi/10.1128/mBio.00434-20)
-package. We try to predict the diet type based on the data.
 
-```{r super3}
+## ----super3-------------------------------------------------------------------
 if( !require("mikropml") ){
     install.packages("mikropml")
     library(mikropml)
@@ -74,14 +48,9 @@ results <- run_ml(df, "rf", outcome_colname = 'diet',
 # Print result
 confusionMatrix(data = results$trained_model$finalModel$predicted, 
                 reference = results$trained_model$finalModel$y)
-```
 
-mikropml offers easier interface to [caret](https://cran.r-project.org/web/packages/caret/index.html) 
-package. However, we can also use it directly.
 
-Let's use xgboost model which is another commonly used algorithm in bioinformatics.
-
-```{r super4}
+## ----super4-------------------------------------------------------------------
 # Set seed for reproducibility
 set.seed(6358)
 
@@ -112,12 +81,9 @@ model <- train(x = assay,
                verbosity = 0
 )
 
-```
 
-Let's create ROC curve which is a commonly used method in binary classification.
-For unbalanced data, you might want to plot precision-recall curve. 
 
-```{r super5}
+## ----super5-------------------------------------------------------------------
 if( !require(MLeval) ){
     install.packages("MLeval")
     library(MLeval)
@@ -129,23 +95,8 @@ res <- evalm(model, showplots = FALSE)
 library(patchwork)
 res$roc + res$proc + 
     plot_layout(guides = "collect") & theme(legend.position = 'bottom')
-```
 
-## Unsupervised machine learning
 
-"Unsupervised" means that the labels (e.g., patient status is not known), 
-and patterns are learned based only the abundance table, for instance. 
-Unsupervised ML is also known as a data mining where patterns are extracted 
-from big datasets. 
-
-For unsupervised machine learning, please refer to chapters that are listed below:
-
-- Chapter \@ref(clustering)
-- Chapter \@ref(community-similarity) 
-
-## Session Info {-}
-
-```{r sessionInfo, echo=FALSE, results='asis'}
+## ----sessionInfo, echo=FALSE, results='asis'----------------------------------
 prettySessionInfo()
-```
 
