@@ -853,7 +853,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] backports_1.4.1             circlize_0.4.15            
-  [3] plyr_1.8.8                  igraph_1.4.1               
+  [3] plyr_1.8.8                  igraph_1.4.2               
   [5] lazyeval_0.2.2              splines_4.2.1              
   [7] BiocParallel_1.32.6         digest_0.6.31              
   [9] ca_0.71.1                   foreach_1.5.2              
