@@ -57,11 +57,20 @@ if(!requireNamespace("magrittr", quietly = TRUE)) {
   BiocManager::install('magrittr', quiet = TRUE, update = FALSE, ask = FALSE, type = pkg_type)
 }
 
+# ---------------------------
+
 ## list of packages required for each chapters
-pkgs <- read.table(url("https://raw.githubusercontent.com/microbiome/OMA/master/oma_packages.csv"))[,1]
+pkgs_all <- read.table(url("https://raw.githubusercontent.com/microbiome/OMA/master/oma_packages.csv"))[,1]
+
+# Customization
+# Github packages must be installed separately
+pkgs_github <- c("miaTime", "ggord")
+pkgs_nongithub <- setdiff(pkgs_all, pkgs_github)
+
+# ---------------------------
 
 # pkgs <- readRDS("oma_packages.rds") # Just do all at once
-chapter_pkgs <- list(all=pkgs)
+chapter_pkgs <- list(all=pkgs_all)
 # Can check later how packages can be splitted by chapter
 #chapter_pkgs <- split(pkgs$packages, pkgs$chapter)
 ### subset a selection of chapters if specified
@@ -72,9 +81,13 @@ chapter_pkgs <- list(all=pkgs)
 for(i in seq_along(chapter_pkgs)) {
   message("### CHAPTER: ", i, " ###")
   pkgsAvailable <- installed.packages()[, "Package"]
-  pkgsToInstall <- setdiff(chapter_pkgs[[i]], pkgsAvailable)
+  pkgsToInstall <- setdiff(chapter_pkgs[[i]], c(pkgsAvailable, pkgs_github))
   BiocManager::install(pkgsToInstall, update = FALSE, upgrade = FALSE, ask = FALSE, type = pkg_type)
 }
+
+# Github packages
+devtools::install_github("microbiome/miaTime")
+devtools::install_github("fawda123/ggord")
 
 ## report packages no installed
 ## find only those not currently installed
@@ -87,7 +100,7 @@ if(length(pkgsToInstall)) {
   message("You can try re-running this installation script.\n",
   "It will only try to install the missing packages.\n",
   "This may make it easier to see the information R gives about why the installation failed.\n",
-  "Please contact tuomas.v.borman@utu.fi for additional help.")
+  "Please contact microbiome@utu.fi for additional help.")
 }
 
 Sys.unsetenv("R_REMOTES_UPGRADE")
