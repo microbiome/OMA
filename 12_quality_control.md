@@ -599,7 +599,7 @@ loaded via a namespace (and not attached):
  [41] ape_5.7-1                   nlme_3.1-162               
  [43] DECIPHER_2.26.0             DelayedMatrixStats_1.20.0  
  [45] xfun_0.38                   stringr_1.5.0              
- [47] beachmat_2.14.0             lifecycle_1.0.3            
+ [47] beachmat_2.14.2             lifecycle_1.0.3            
  [49] irlba_2.3.5.1               XML_3.99-0.14              
  [51] zlibbioc_1.44.0             MASS_7.3-58.3              
  [53] scales_1.2.1                tidygraph_1.2.3            

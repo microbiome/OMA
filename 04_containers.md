@@ -1366,7 +1366,7 @@ loaded via a namespace (and not attached):
 [113] MASS_7.3-58.3                 rhdf5_2.40.0                 
 [115] withr_2.5.0                   GenomeInfoDbData_1.2.9       
 [117] mgcv_1.8-42                   parallel_4.2.1               
-[119] grid_4.2.1                    beachmat_2.14.0              
+[119] grid_4.2.1                    beachmat_2.14.2              
 [121] tidyr_1.3.0                   rmarkdown_2.21               
 [123] DelayedMatrixStats_1.20.0     shiny_1.7.4                  
 [125] ggbeeswarm_0.7.1             

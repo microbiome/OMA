@@ -40,50 +40,51 @@ document.addEventListener("click", function (event) {
 library(mia)
 ```
 
-Multi-omics means that we integrate data from multiple sources. For
-example, we can integrate microbial abundances in the gut with
-biomolecular profiling data from blood samples. This kind of
-integrative multi-omic approaches can support the analysis of
-microbiome dysbiosis and facilitate the discovery of novel biomarkers
-for health and disease.
+Multi-omics approaches integrate data from multiple sources. For
+example, we can integrate taxonomic abundance profiles with
+metabolomic or other biomolecular profiling data to observe
+associations, make predictions, or aim at causal
+inferences. Integrating evidence across multiple sources can lead to
+enhanced predictions, more holistic understanding, or facilitate the
+discovery of novel biomarkers. In this section we demonstrate common
+multi-assay data integration tasks.
 
-With cross-correlation analysis, we can analyze how strongly and how
-differently variables are associated between each other. For instance,
+Cross-correlation analysis is a straightforward approach that can
+reveal assocation strengths and types between data sets. For instance,
 we can analyze if higher presence of a specific taxon equals to higher
 levels of a biomolecule.
 
-The data containers that the _miaverse_ utilizes are scalable and they
-can contain different types of data in a same container. Because of
-that, the _miaverse_ is well-suitable for multi-assay microbiome data
-which incorporates different types of complementary data sources in a
-single reproducible workflow.
-
-Another experiment can be stored in altExp slot of SE data container
-or both experiments can be stored side-by-side in MAE data container
-(see the sections \@ref(alt-exp) and \@ref(mae) to learn more about
-altExp and MAE objects, respectively).
-
-Different experiments are first imported into SE or TreeSE data
-container similarly to the case when only one experiment is
-present. After that different experiments are combined into the same
-data container. Result is one TreeSE object with alternative
-experiment in altExp slot, or MAE object with multiple experiment in
-its experiment slot.
+The analyse can be facilitated by the multi-assay data containers,
+_TreeSummarizedExperiment_ and _MultiAssayExperiment_. These are
+scalable and contain different types of data in a single container,
+making this framework particularly suited for multi-assay microbiome
+data incorporating different types of complementary data sources in a
+single reproducible workflow. Th different solutions for varying data
+integration needs are discussed in more detail in Section
+\@ref(containers). Another experiment can be stored in _altExp_ slot
+of SE data container or both experiments can be stored side-by-side in
+MAE data container (see the sections \@ref(alt-exp) and \@ref(mae) to
+learn more about altExp and MAE objects, respectively). Different
+experiments are first imported into these data containers similarly to
+the case when only one experiment is present. After that, the
+different experiments can be combined into the same multi-assay data
+container. The result is one TreeSE object with alternative experiment in
+altExp slot, or MAE object with multiple experiment in its experiment
+slot, for instance.
 
 As an example data, we use data from following publication: Hintikka L
 _et al._ (2021) Xylo-oligosaccharides in prevention of hepatic
 steatosis and adipose tissue inflammation: associating taxonomic and
-metabolomic patterns in fecal microbiotas with biclustering
-[@Hintikka2021].
+metabolomic patterns in fecal microbiota with biclustering
+[@Hintikka2021]. In this article, mice were fed with high-fat and
+low-fat diets with or without prebiotics.  The purpose of this was to
+study if prebiotics would reduce the negative impact of high-fat diet.
 
-In this article, mice were fed with high-fat and low-fat diets with or
-without prebiotics.  The purpose of this was to study if prebiotics
-would reduce the negative impacts of high-fat diet.
-
-This example data can be loaded from microbiomeDataSets. The data is
-already in MAE format. It includes three different experiments:
-microbial abundance data, metabolite concentrations, and data about
-different biomarkers. Help for importing data into SE object you can
+This example data is readily available in the MultiAssayExperiment
+format. It includes three different experiments: microbial abundance
+data, metabolite concentrations, and data about different
+biomarkers. If you like to construct the same data object from the
+original files instead, Help for importing data into SE object you can
 find from
 [here](https://microbiome.github.io/OMA/containers.html#loading-experimental-microbiome-data).
 
@@ -196,9 +197,9 @@ mae[[3]]
 
 ## Cross-correlation Analysis
 
-Next we can do the cross-correlation analysis.  Here we analyse if
+Next we can do the cross-correlation analysis. Let us analyse if
 individual bacteria genera correlates with concentrations of
-individual metabolites. This helps as to answer the question: "If this
+individual metabolites. This helps to answer the question: "If this
 bacteria is present, is this metabolite's concentration then low or
 high"?
 
@@ -546,7 +547,7 @@ loaded via a namespace (and not attached):
 [111] rprojroot_2.0.3             rjson_0.2.21               
 [113] withr_2.5.0                 GenomeInfoDbData_1.2.9     
 [115] mgcv_1.8-42                 parallel_4.2.1             
-[117] beachmat_2.14.0             tidyr_1.3.0                
+[117] beachmat_2.14.2             tidyr_1.3.0                
 [119] basilisk_1.8.1              rmarkdown_2.21             
 [121] DelayedMatrixStats_1.20.0   Rtsne_0.16                 
 [123] Cairo_1.6-0                 ggbeeswarm_0.7.1           

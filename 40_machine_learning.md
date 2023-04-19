@@ -118,26 +118,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    12  10
-##      Veg      11  14
+##      Mixed    14   8
+##      Veg       9  16
 ##                                         
-##                Accuracy : 0.553         
-##                  95% CI : (0.401, 0.698)
+##                Accuracy : 0.638         
+##                  95% CI : (0.485, 0.773)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.331         
+##     P-Value [Acc > NIR] : 0.0536        
 ##                                         
-##                   Kappa : 0.105         
+##                   Kappa : 0.276         
 ##                                         
-##  Mcnemar's Test P-Value : 1.000         
+##  Mcnemar's Test P-Value : 1.0000        
 ##                                         
-##             Sensitivity : 0.522         
-##             Specificity : 0.583         
-##          Pos Pred Value : 0.545         
-##          Neg Pred Value : 0.560         
+##             Sensitivity : 0.609         
+##             Specificity : 0.667         
+##          Pos Pred Value : 0.636         
+##          Neg Pred Value : 0.640         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.255         
+##          Detection Rate : 0.298         
 ##    Detection Prevalence : 0.468         
-##       Balanced Accuracy : 0.553         
+##       Balanced Accuracy : 0.638         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -313,7 +313,7 @@ loaded via a namespace (and not attached):
 [115] MASS_7.3-58.3               withr_2.5.0                
 [117] GenomeInfoDbData_1.2.9      mgcv_1.8-42                
 [119] parallel_4.2.1              grid_4.2.1                 
-[121] rpart_4.1.19                beachmat_2.14.0            
+[121] rpart_4.1.19                beachmat_2.14.2            
 [123] timeDate_4022.108           tidyr_1.3.0                
 [125] class_7.3-21                rmarkdown_2.21             
 [127] DelayedMatrixStats_1.20.0   pROC_1.18.0                

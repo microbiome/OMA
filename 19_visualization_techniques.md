@@ -914,7 +914,7 @@ loaded via a namespace (and not attached):
 [119] rjson_0.2.21                withr_2.5.0                
 [121] GenomeInfoDbData_1.2.9      mgcv_1.8-42                
 [123] parallel_4.2.1              grid_4.2.1                 
-[125] ggfun_0.0.9                 beachmat_2.14.0            
+[125] ggfun_0.0.9                 beachmat_2.14.2            
 [127] tidyr_1.3.0                 rmarkdown_2.21             
 [129] DelayedMatrixStats_1.20.0   carData_3.0-5              
 [131] Cairo_1.6-0                 Rtsne_0.16                 

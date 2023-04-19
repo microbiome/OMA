@@ -48,11 +48,11 @@ features/samples that share pattern.  For example, with clustering, we
 can find group of samples that share similar community
 composition. There are multiple clustering algorithms available.
 
-## Hiearchical clustering
+## Hierarchical clustering
 
-Hiearchical clustering is a clustering method that aims to find
-hiearchy between samples/features. There are to approaches:
-agglomerative ("bottom-up") and divisive ("top-down").
+Hiearchical clustering aims to find hiearchy between
+samples/features. There are to approaches: agglomerative ("bottom-up")
+and divisive ("top-down").
 
 In agglomerative approach, each observation is first unique cluster.
 Algorithm continues by agglomerating similar clusters. Divisive
@@ -409,7 +409,7 @@ dmn_group
 ## Ocean              2       3   67 1096.7  -56.93   944.2 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
 ## Skin               2       3   67  992.6  -84.98   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
+## Soil               2       3   67 1380.3   11.19  1261.8 1454.5 1515
 ## Tongue             2       2   67  783.0 -107.78   605.1  829.8  918
 ```
 

@@ -777,7 +777,7 @@ attached base packages:
 
 other attached packages:
  [1] doRNG_1.8.6                    rngtools_1.5.2                
- [3] foreach_1.5.2                  ANCOMBC_2.1.3                 
+ [3] foreach_1.5.2                  ANCOMBC_2.1.4                 
  [5] lubridate_1.9.2                forcats_1.0.0                 
  [7] stringr_1.5.0                  dplyr_1.1.1                   
  [9] purrr_1.0.1                    readr_2.1.4                   
@@ -805,7 +805,7 @@ loaded via a namespace (and not attached):
   [7] data.table_1.14.8           rpart_4.1.19               
   [9] doParallel_1.0.17           RCurl_1.98-1.12            
  [11] generics_0.1.3              ScaledMatrix_1.6.0         
- [13] TH.data_1.1-1               timeSeries_4021.105        
+ [13] TH.data_1.1-2               timeSeries_4021.105        
  [15] RSQLite_2.3.1               proxy_0.4-27               
  [17] bit_4.0.5                   tzdb_0.3.0                 
  [19] DirichletMultinomial_1.40.0 viridis_0.6.2              
@@ -841,7 +841,7 @@ loaded via a namespace (and not attached):
  [79] bitops_1.0-7                rhdf5filters_1.8.0         
  [81] blob_1.2.4                  DelayedMatrixStats_1.20.0  
  [83] decontam_1.18.0             DECIPHER_2.26.0            
- [85] beachmat_2.14.0             scales_1.2.1               
+ [85] beachmat_2.14.2             scales_1.2.1               
  [87] memoise_2.0.1               magrittr_2.0.3             
  [89] plyr_1.8.8                  zlibbioc_1.44.0            
  [91] compiler_4.2.1              RColorBrewer_1.1-3         

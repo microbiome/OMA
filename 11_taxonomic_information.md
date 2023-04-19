@@ -624,7 +624,7 @@ loaded via a namespace (and not attached):
 [65] grid_4.2.1                  parallel_4.2.1             
 [67] ggrepel_0.9.3               crayon_1.5.2               
 [69] dir.expiry_1.4.0            lattice_0.21-8             
-[71] splines_4.2.1               beachmat_2.14.0            
+[71] splines_4.2.1               beachmat_2.14.2            
 [73] CodeDepends_0.6.5           knitr_1.42                 
 [75] pillar_1.9.0                reshape2_1.4.4             
 [77] codetools_0.2-19            ScaledMatrix_1.6.0         

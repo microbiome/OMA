@@ -385,7 +385,7 @@ loaded via a namespace (and not attached):
 [33] vctrs_0.6.1                 ape_5.7-1                  
 [35] nlme_3.1-162                DECIPHER_2.26.0            
 [37] DelayedMatrixStats_1.20.0   xfun_0.38                  
-[39] stringr_1.5.0               beachmat_2.14.0            
+[39] stringr_1.5.0               beachmat_2.14.2            
 [41] lifecycle_1.0.3             irlba_2.3.5.1              
 [43] XML_3.99-0.14               zlibbioc_1.44.0            
 [45] MASS_7.3-58.3               scales_1.2.1               

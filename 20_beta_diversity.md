@@ -808,7 +808,7 @@ loaded via a namespace (and not attached):
 [33] vctrs_0.6.1                 ape_5.7-1                  
 [35] nlme_3.1-162                DECIPHER_2.26.0            
 [37] DelayedMatrixStats_1.20.0   xfun_0.38                  
-[39] beachmat_2.14.0             lifecycle_1.0.3            
+[39] beachmat_2.14.2             lifecycle_1.0.3            
 [41] irlba_2.3.5.1               XML_3.99-0.14              
 [43] zlibbioc_1.44.0             MASS_7.3-58.3              
 [45] scales_1.2.1                parallel_4.2.1             
