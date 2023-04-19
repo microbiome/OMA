@@ -1,4 +1,3 @@
-
 # Empty the R folder and generate new R files from Rmd
 system("rm R/*")
 fs <- list.files(pattern=".Rmd"); 
@@ -26,8 +25,8 @@ priority <- c("mia", "miaViz", "miaTime", "miaSim")
 pkgs <- c(priority, setdiff(pkgs, priority))
 
 # Store the library list
-saveRDS(pkgs, file="oma_packages.rds")
+write.table(pkgs, file = "oma_packages.csv", row.names=FALSE, col.names=FALSE, quote=FALSE)
 
-# Build the book
-# bookdown::render_book("index.Rmd", "bookdown::gitbook")
+# Build the book - must be run separately
+#bookdown::render_book("index.Rmd", "bookdown::gitbook")
 

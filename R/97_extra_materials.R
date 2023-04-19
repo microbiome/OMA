@@ -1,3 +1,8 @@
+## ----setup, echo=FALSE, results="asis"----------------------------------------
+library(rebook)
+chapterPreamble()
+
+
 ## ----permanova_import, warning = FALSE, message = FALSE-----------------------
 # import necessary packages
 if (!require(gtools)){
@@ -170,7 +175,7 @@ if (!require(plotly)){
 }
 
 
-## ---- setup, warning=FALSE, message=FALSE-------------------------------------
+## ----setup2, warning=FALSE, message=FALSE-------------------------------------
 library(knitr)
 library(rgl)
 knitr::knit_hooks$set(webgl = hook_webgl)

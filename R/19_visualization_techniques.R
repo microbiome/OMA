@@ -420,69 +420,69 @@ heatmap <- ggplot(melted_mat) +
 heatmap
 
 
-## ----more_complex_heatmap2, fig.width = 10, fig.height = 8--------------------
-library(patchwork)
+## ----more_complex_heatmap2, fig.width = 10, fig.height = 8, eval=FALSE--------
+## library(patchwork)
+## 
+## # Create layout
+## design <- c(
+##   patchwork::area(3, 1, 4, 1),
+##   patchwork::area(1, 2, 1, 3),
+##   patchwork::area(2, 2, 2, 3),
+##   patchwork::area(3, 2, 4, 3)
+## )
+## # to view the design, run
+## # plot(design)
+## 
+## # Combine plots
+## plot <- row_annotation + sample_clusters_annotation +
+##                          sample_types_annotation +
+## 			 heatmap  +
+##     plot_layout(design = design, guides = "collect",
+##                 # Specify layout, collect legends
+## 
+##                 # Adjust widths and heights to align plots.
+##                 # When annotation plot is larger, it might not fit into
+## 		# its column/row.
+##                 # Then you need to make column/row larger.
+## 
+##                 # Relative widths and heights of each column and row:
+##                 # Currently, the width of the first column is 15 % and the height of
+##                 # first two rows are 30 % the size of others
+## 
+##                 # To get this work most of the times, you can adjust all sizes to be 1, i.e. equal,
+##                 # but then the gaps between plots are larger.
+##                 widths = c(0.15, 1, 1),
+##                 heights = c(0.3, 0.3, 1, 1))
+## 
+## # plot
 
-# Create layout
-design <- c(
-  patchwork::area(3, 1, 4, 1),
-  patchwork::area(1, 2, 1, 3),
-  patchwork::area(2, 2, 2, 3),
-  patchwork::area(3, 2, 4, 3)
-)
-# to view the design, run
-# plot(design)
 
-# Combine plots
-plot <- row_annotation + sample_clusters_annotation +
-                         sample_types_annotation +
-			 heatmap  +
-    plot_layout(design = design, guides = "collect",
-                # Specify layout, collect legends
-                
-                # Adjust widths and heights to align plots.
-                # When annotation plot is larger, it might not fit into
-		# its column/row.
-                # Then you need to make column/row larger.
-                
-                # Relative widths and heights of each column and row:
-                # Currently, the width of the first column is 15 % and the height of
-                # first two rows are 30 % the size of others
-                
-                # To get this work most of the times, you can adjust all sizes to be 1, i.e. equal, 
-                # but then the gaps between plots are larger.
-                widths = c(0.15, 1, 1),
-                heights = c(0.3, 0.3, 1, 1))
-
-# plot
-
-
-## ----more_complex_heatmap3, fig.width = 10, fig.height = 8--------------------
-# Create layout
-design <- c(
-  patchwork::area(4, 1, 5, 1),
-  patchwork::area(4, 2, 5, 2),
-  patchwork::area(1, 3, 1, 4),
-  patchwork::area(2, 3, 2, 4),
-  patchwork::area(3, 3, 3, 4),
-  patchwork::area(4, 3, 5, 4)
-)
-
-# to view the design, run
-# plot(design)
-
-# Combine plots
-plot <- taxa_tree + 
-  row_annotation +
-  sample_tree + 
-  sample_clusters_annotation +
-  sample_types_annotation +
-  heatmap +
-    plot_layout(design = design, guides = "collect", # Specify layout, collect legends
-                widths = c(0.2, 0.15, 1, 1, 1),
-                heights = c(0.1, 0.15, 0.15, 0.25, 1, 1))
-
-plot
+## ----more_complex_heatmap3, fig.width = 10, fig.height = 8, eval=FALSE--------
+## # Create layout
+## design <- c(
+##   patchwork::area(4, 1, 5, 1),
+##   patchwork::area(4, 2, 5, 2),
+##   patchwork::area(1, 3, 1, 4),
+##   patchwork::area(2, 3, 2, 4),
+##   patchwork::area(3, 3, 3, 4),
+##   patchwork::area(4, 3, 5, 4)
+## )
+## 
+## # to view the design, run
+## # plot(design)
+## 
+## # Combine plots
+## plot <- taxa_tree +
+##   row_annotation +
+##   sample_tree +
+##   sample_clusters_annotation +
+##   sample_types_annotation +
+##   heatmap +
+##     plot_layout(design = design, guides = "collect", # Specify layout, collect legends
+##                 widths = c(0.2, 0.15, 1, 1, 1),
+##                 heights = c(0.1, 0.15, 0.15, 0.25, 1, 1))
+## 
+## plot
 
 
 ## ----sessionInfo, echo = FALSE, results = "asis"------------------------------
