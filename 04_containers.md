@@ -1318,8 +1318,8 @@ loaded via a namespace (and not attached):
  [17] ScaledMatrix_1.6.0            cluster_2.1.4                
  [19] DECIPHER_2.26.0               colorspace_2.1-0             
  [21] blob_1.2.4                    rappdirs_0.3.3               
- [23] ggrepel_0.9.3                 xfun_0.38                    
- [25] dplyr_1.1.1                   crayon_1.5.2                 
+ [23] ggrepel_0.9.3                 xfun_0.39                    
+ [25] dplyr_1.1.2                   crayon_1.5.2                 
  [27] RCurl_1.98-1.12               jsonlite_1.8.4               
  [29] graph_1.74.0                  survival_3.5-5               
  [31] iterators_1.0.14              ape_5.7-1                    
@@ -1355,7 +1355,7 @@ loaded via a namespace (and not attached):
  [91] tibble_3.2.1                  stringi_1.7.12               
  [93] lattice_0.21-8                Matrix_1.5-4                 
  [95] vegan_2.6-4                   permute_0.9-7                
- [97] multtest_2.52.0               vctrs_0.6.1                  
+ [97] multtest_2.52.0               vctrs_0.6.2                  
  [99] pillar_1.9.0                  lifecycle_1.0.3              
 [101] rhdf5filters_1.8.0            BiocNeighbors_1.16.0         
 [103] data.table_1.14.8             bitops_1.0-7                 

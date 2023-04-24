@@ -864,8 +864,8 @@ loaded via a namespace (and not attached):
  [19] doParallel_1.0.17           DECIPHER_2.26.0            
  [21] ComplexHeatmap_2.12.1       graphlayouts_0.8.4         
  [23] colorspace_2.1-0            blob_1.2.4                 
- [25] ggrepel_0.9.3               xfun_0.38                  
- [27] dplyr_1.1.1                 crayon_1.5.2               
+ [25] ggrepel_0.9.3               xfun_0.39                  
+ [27] dplyr_1.1.2                 crayon_1.5.2               
  [29] RCurl_1.98-1.12             jsonlite_1.8.4             
  [31] graph_1.74.0                iterators_1.0.14           
  [33] glue_1.6.2                  polyclip_1.10-4            
@@ -902,7 +902,7 @@ loaded via a namespace (and not attached):
  [95] tweenr_2.0.2                stringi_1.7.12             
  [97] highr_0.10                  lattice_0.21-8             
  [99] Matrix_1.5-4                vegan_2.6-4                
-[101] permute_0.9-7               vctrs_0.6.1                
+[101] permute_0.9-7               vctrs_0.6.2                
 [103] pillar_1.9.0                lifecycle_1.0.3            
 [105] BiocManager_1.30.20         GlobalOptions_0.1.2        
 [107] BiocNeighbors_1.16.0        cowplot_1.1.1              

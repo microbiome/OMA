@@ -779,7 +779,7 @@ other attached packages:
  [1] doRNG_1.8.6                    rngtools_1.5.2                
  [3] foreach_1.5.2                  ANCOMBC_2.1.4                 
  [5] lubridate_1.9.2                forcats_1.0.0                 
- [7] stringr_1.5.0                  dplyr_1.1.1                   
+ [7] stringr_1.5.0                  dplyr_1.1.2                   
  [9] purrr_1.0.1                    readr_2.1.4                   
 [11] tidyr_1.3.0                    tibble_3.2.1                  
 [13] ggplot2_3.4.2                  tidyverse_2.0.0               
@@ -809,7 +809,7 @@ loaded via a namespace (and not attached):
  [15] RSQLite_2.3.1               proxy_0.4-27               
  [17] bit_4.0.5                   tzdb_0.3.0                 
  [19] DirichletMultinomial_1.40.0 viridis_0.6.2              
- [21] xfun_0.38                   fBasics_4022.94            
+ [21] xfun_0.39                   fBasics_4022.94            
  [23] hms_1.1.3                   evaluate_0.20              
  [25] DEoptimR_1.0-12             fansi_1.0.4                
  [27] readxl_1.4.2                igraph_1.4.2               
@@ -818,7 +818,7 @@ loaded via a namespace (and not attached):
  [33] CVXR_1.0-11                 ellipsis_0.3.2             
  [35] energy_1.7-11               backports_1.4.1            
  [37] bookdown_0.33               permute_0.9-7              
- [39] sparseMatrixStats_1.10.0    vctrs_0.6.1                
+ [39] sparseMatrixStats_1.10.0    vctrs_0.6.2                
  [41] cachem_1.0.7                withr_2.5.0                
  [43] robustbase_0.95-1           emmeans_1.8.5              
  [45] checkmate_2.1.0             vegan_2.6-4                

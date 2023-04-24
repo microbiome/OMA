@@ -72,10 +72,22 @@ container. The result is one TreeSE object with alternative experiment in
 altExp slot, or MAE object with multiple experiment in its experiment
 slot, for instance.
 
-As an example data, we use data from following publication: Hintikka L
+As an example data, we use data from the following publication: Hintikka L
 _et al._ (2021) Xylo-oligosaccharides in prevention of hepatic
 steatosis and adipose tissue inflammation: associating taxonomic and
 metabolomic patterns in fecal microbiota with biclustering
+
+[@Hintikka2021].
+
+In this study, mice were fed with high-fat and low-fat diets with or
+without prebiotics.  The purpose of this was to study whether prebiotics
+reduce negative impacts of a high-fat diet.
+
+This example data can be loaded from microbiomeDataSets. The data is
+already in MAE format. It includes three different experiments:
+microbial abundance data, metabolite concentrations, and data about
+different biomarkers.
+=======
 [@Hintikka2021]. In this article, mice were fed with high-fat and
 low-fat diets with or without prebiotics.  The purpose of this was to
 study if prebiotics would reduce the negative impact of high-fat diet.
@@ -84,9 +96,8 @@ This example data is readily available in the MultiAssayExperiment
 format. It includes three different experiments: microbial abundance
 data, metabolite concentrations, and data about different
 biomarkers. If you like to construct the same data object from the
-original files instead, Help for importing data into SE object you can
-find from
-[here](https://microbiome.github.io/OMA/containers.html#loading-experimental-microbiome-data).
+original files instead, [Here](https://microbiome.github.io/OMA/containers.html#loading-experimental-microbiome-data) 
+you can find help for importing data into a SE object.
 
 
 ```r
@@ -197,6 +208,7 @@ mae[[3]]
 
 ## Cross-correlation Analysis
 
+
 Next we can do the cross-correlation analysis. Let us analyse if
 individual bacteria genera correlates with concentrations of
 individual metabolites. This helps to answer the question: "If this
@@ -260,7 +272,7 @@ Multi-Omics Factor Analysis [@Argelaguet2018] (MOFA) is an
 unsupervised method for integrating multi-omic data sets in a
 downstream analysis.  It could be seen as a generalization of
 principal component analysis. Yet, with the ability to infer a latent
-(low-dimensional) representation, shared among the mutliple (-omics)
+(low-dimensional) representation, shared among the multiple (-omics)
 data sets in hand.
 
 We use the R [MOFA2](https://biofam.github.io/MOFA2/index.html)
@@ -288,8 +300,7 @@ if(!require(reticulate)){
 
 The `mae` object could be used straight to create the MOFA model. Yet,
 we transform our assays since the model assumes normality per
-default. Other distributions that can be used, include Poisson or
-Bernoulli.
+default. We can also use Poisson or Bernoulli distributions among others.
 
 
 ```r
@@ -429,7 +440,7 @@ wrap_plots(
 
 ![](23_multi-assay_analyses_files/figure-latex/unnamed-chunk-5-1.pdf)<!-- --> 
 
-The top weights for each assay using all 5 factors:
+The top weights for each assay using all five factors:
 
 
 ```r
@@ -445,7 +456,7 @@ wrap_plots(plots, nrow = 3) & theme(text = element_text(size = 8))
 
 ![](23_multi-assay_analyses_files/figure-latex/unnamed-chunk-6-1.pdf)<!-- --> 
 
-More tutorials and examples of using the package are found at: [link](https://biofam.github.io/MOFA2/tutorials.html)
+More tutorials and examples of using the package are found at [link](https://biofam.github.io/MOFA2/tutorials.html)
 
 
 
@@ -500,8 +511,8 @@ loaded via a namespace (and not attached):
  [17] ScaledMatrix_1.6.0          cluster_2.1.4              
  [19] doParallel_1.0.17           DECIPHER_2.26.0            
  [21] colorspace_2.1-0            blob_1.2.4                 
- [23] ggrepel_0.9.3               xfun_0.38                  
- [25] dplyr_1.1.1                 crayon_1.5.2               
+ [23] ggrepel_0.9.3               xfun_0.39                  
+ [25] dplyr_1.1.2                 crayon_1.5.2               
  [27] RCurl_1.98-1.12             jsonlite_1.8.4             
  [29] graph_1.74.0                iterators_1.0.14           
  [31] ape_5.7-1                   glue_1.6.2                 
@@ -535,7 +546,7 @@ loaded via a namespace (and not attached):
  [87] highr_0.10                  basilisk.utils_1.8.0       
  [89] forcats_1.0.0               lattice_0.21-8             
  [91] Matrix_1.5-4                vegan_2.6-4                
- [93] permute_0.9-7               vctrs_0.6.1                
+ [93] permute_0.9-7               vctrs_0.6.2                
  [95] pillar_1.9.0                lifecycle_1.0.3            
  [97] rhdf5filters_1.8.0          BiocManager_1.30.20        
  [99] GlobalOptions_0.1.2         BiocNeighbors_1.16.0       

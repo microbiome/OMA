@@ -804,10 +804,10 @@ loaded via a namespace (and not attached):
 [25] tools_4.2.1                 rsvd_1.0.5                 
 [27] gtable_0.3.3                glue_1.6.2                 
 [29] GenomeInfoDbData_1.2.9      reshape2_1.4.4             
-[31] dplyr_1.1.1                 Rcpp_1.0.10                
-[33] vctrs_0.6.1                 ape_5.7-1                  
+[31] dplyr_1.1.2                 Rcpp_1.0.10                
+[33] vctrs_0.6.2                 ape_5.7-1                  
 [35] nlme_3.1-162                DECIPHER_2.26.0            
-[37] DelayedMatrixStats_1.20.0   xfun_0.38                  
+[37] DelayedMatrixStats_1.20.0   xfun_0.39                  
 [39] beachmat_2.14.2             lifecycle_1.0.3            
 [41] irlba_2.3.5.1               XML_3.99-0.14              
 [43] zlibbioc_1.44.0             MASS_7.3-58.3              

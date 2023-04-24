@@ -610,7 +610,7 @@ loaded via a namespace (and not attached):
 [37] fastmap_1.1.1               rlang_1.1.0                
 [39] RSQLite_2.3.1               DelayedMatrixStats_1.20.0  
 [41] generics_0.1.3              jsonlite_1.8.4             
-[43] BiocParallel_1.32.6         dplyr_1.1.1                
+[43] BiocParallel_1.32.6         dplyr_1.1.2                
 [45] RCurl_1.98-1.12             magrittr_2.0.3             
 [47] BiocSingular_1.14.0         GenomeInfoDbData_1.2.9     
 [49] scuttle_1.8.4               Matrix_1.5-4               
@@ -630,10 +630,10 @@ loaded via a namespace (and not attached):
 [77] codetools_0.2-19            ScaledMatrix_1.6.0         
 [79] XML_3.99-0.14               glue_1.6.2                 
 [81] evaluate_0.20               BiocManager_1.30.20        
-[83] vctrs_0.6.1                 treeio_1.22.0              
+[83] vctrs_0.6.2                 treeio_1.22.0              
 [85] gtable_0.3.3                purrr_1.0.1                
 [87] tidyr_1.3.0                 cachem_1.0.7               
-[89] ggplot2_3.4.2               xfun_0.38                  
+[89] ggplot2_3.4.2               xfun_0.39                  
 [91] rsvd_1.0.5                  tidytree_0.4.2             
 [93] viridisLite_0.4.1           tibble_3.2.1               
 [95] memoise_2.0.1               beeswarm_0.4.0             

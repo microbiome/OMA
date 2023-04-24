@@ -561,7 +561,7 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] patchwork_1.1.2                dplyr_1.1.1                   
+ [1] patchwork_1.1.2                dplyr_1.1.2                   
  [3] scater_1.26.1                  scuttle_1.8.4                 
  [5] miaViz_1.7.5                   ggraph_2.1.0                  
  [7] ggplot2_3.4.2                  miaTime_0.1.21                
@@ -595,10 +595,10 @@ loaded via a namespace (and not attached):
  [33] igraph_1.4.2                rsvd_1.0.5                 
  [35] gtable_0.3.3                glue_1.6.2                 
  [37] GenomeInfoDbData_1.2.9      reshape2_1.4.4             
- [39] Rcpp_1.0.10                 vctrs_0.6.1                
+ [39] Rcpp_1.0.10                 vctrs_0.6.2                
  [41] ape_5.7-1                   nlme_3.1-162               
  [43] DECIPHER_2.26.0             DelayedMatrixStats_1.20.0  
- [45] xfun_0.38                   stringr_1.5.0              
+ [45] xfun_0.39                   stringr_1.5.0              
  [47] beachmat_2.14.2             lifecycle_1.0.3            
  [49] irlba_2.3.5.1               XML_3.99-0.14              
  [51] zlibbioc_1.44.0             MASS_7.3-58.3              

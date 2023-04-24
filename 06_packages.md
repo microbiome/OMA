@@ -161,7 +161,7 @@ loaded via a namespace (and not attached):
  [4] XML_3.99-0.14       digest_0.6.31       stats4_4.2.1       
  [7] evaluate_0.20       graph_1.74.0        rlang_1.1.0        
 [10] cli_3.6.1           filelock_1.0.2      rmarkdown_2.21     
-[13] tools_4.2.1         xfun_0.38           yaml_2.3.7         
+[13] tools_4.2.1         xfun_0.39           yaml_2.3.7         
 [16] fastmap_1.1.1       compiler_4.2.1      BiocGenerics_0.44.0
 [19] BiocManager_1.30.20 htmltools_0.5.5     CodeDepends_0.6.5  
 [22] knitr_1.42         

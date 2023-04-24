@@ -396,10 +396,10 @@ loaded via a namespace (and not attached):
  [33] tools_4.2.1                 igraph_1.4.2               
  [35] rsvd_1.0.5                  gtable_0.3.3               
  [37] glue_1.6.2                  GenomeInfoDbData_1.2.9     
- [39] reshape2_1.4.4              dplyr_1.1.1                
- [41] Rcpp_1.0.10                 vctrs_0.6.1                
+ [39] reshape2_1.4.4              dplyr_1.1.2                
+ [41] Rcpp_1.0.10                 vctrs_0.6.2                
  [43] nlme_3.1-162                DECIPHER_2.26.0            
- [45] DelayedMatrixStats_1.20.0   xfun_0.38                  
+ [45] DelayedMatrixStats_1.20.0   xfun_0.39                  
  [47] stringr_1.5.0               beachmat_2.14.2            
  [49] lifecycle_1.0.3             irlba_2.3.5.1              
  [51] XML_3.99-0.14               zlibbioc_1.44.0            

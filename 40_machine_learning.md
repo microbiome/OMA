@@ -118,26 +118,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    14   8
-##      Veg       9  16
+##      Mixed    13  11
+##      Veg      10  13
 ##                                         
-##                Accuracy : 0.638         
-##                  95% CI : (0.485, 0.773)
+##                Accuracy : 0.553         
+##                  95% CI : (0.401, 0.698)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.0536        
+##     P-Value [Acc > NIR] : 0.331         
 ##                                         
-##                   Kappa : 0.276         
+##                   Kappa : 0.107         
 ##                                         
-##  Mcnemar's Test P-Value : 1.0000        
+##  Mcnemar's Test P-Value : 1.000         
 ##                                         
-##             Sensitivity : 0.609         
-##             Specificity : 0.667         
-##          Pos Pred Value : 0.636         
-##          Neg Pred Value : 0.640         
+##             Sensitivity : 0.565         
+##             Specificity : 0.542         
+##          Pos Pred Value : 0.542         
+##          Neg Pred Value : 0.565         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.298         
-##    Detection Prevalence : 0.468         
-##       Balanced Accuracy : 0.638         
+##          Detection Rate : 0.277         
+##    Detection Prevalence : 0.511         
+##       Balanced Accuracy : 0.553         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -266,8 +266,8 @@ loaded via a namespace (and not attached):
  [21] globals_0.16.2              gower_1.0.1                
  [23] hardhat_1.2.0               timechange_0.2.0           
  [25] colorspace_2.1-0            blob_1.2.4                 
- [27] ggrepel_0.9.3               xfun_0.38                  
- [29] dplyr_1.1.1                 crayon_1.5.2               
+ [27] ggrepel_0.9.3               xfun_0.39                  
+ [29] dplyr_1.1.2                 crayon_1.5.2               
  [31] RCurl_1.98-1.12             jsonlite_1.8.4             
  [33] graph_1.74.0                survival_3.5-5             
  [35] iterators_1.0.14            ape_5.7-1                  
@@ -303,7 +303,7 @@ loaded via a namespace (and not attached):
  [95] tibble_3.2.1                stringi_1.7.12             
  [97] highr_0.10                  Matrix_1.5-4               
  [99] vegan_2.6-4                 permute_0.9-7              
-[101] vctrs_0.6.1                 pillar_1.9.0               
+[101] vctrs_0.6.2                 pillar_1.9.0               
 [103] lifecycle_1.0.3             BiocManager_1.30.20        
 [105] BiocNeighbors_1.16.0        data.table_1.14.8          
 [107] bitops_1.0-7                irlba_2.3.5.1              
