@@ -1,5 +1,4 @@
 # Differential abundance {#differential-abundance}
-
 ```{r setup, echo=FALSE, results="asis"}
 library(rebook)
 chapterPreamble()
@@ -8,6 +7,7 @@ chapterPreamble()
 
 
 ## Differential abundance analysis
+
 
 This section provides an overview and examples of *differential
 abundance analysis (DAA)* based on one of the [openly available
@@ -29,8 +29,22 @@ has also been criticized recently [@Quinn2021].
 
 ### Examples and tools
 
-There are many tools to perform DAA. The most popular tools, without going into
-evaluating whether or not they perform well for this task, are:  
+Due to the complex data characteristics of microbiome sequencing data, differential abundance analysis of microbiome data faces many statistical challenges, including:
+  (1) Highly variable. The abundance of a specific taxon could range over several orders of magnitude. 
+  (2) Zero-inflated. In a typical microbiome dataset, more than 70% of the values are zeros. Zeros could be due to either physical absence (structural zeros) or insufficient sampling effort (sampling zeros).
+  (3) Compositional. Increase or decrease in the (absolute) abundance of one taxon at the sampling site will lead to apparent changes in the relative abundances of other taxa in the sample. 
+
+To address zero inflation, both over-dispersed count models and zero-inflated mixture models/hurdle models have been proposed. (a) Examples of over-dispersed count models include the negative binomial model used by edgeR and DESeq2, beta-binomial model used by corncorb. (b) Examples of zero-inflated mixture models include zero-inflated log-normal/normal mixture model used by metagenomeSeq and RAIDA, zero-inflated beta-binomial model used by ZIBB, and zero-inflated negative binomial model used by Omnibus. 
+For methods working on proportion data, Bayesian methods have been used to impute the zeros, accounting for sampling variability and sequencing depth variation. Examples include ALDEx2 and eBay. 
+Other methods use the pseudo-count approach to impute the zeros, such as MaAsLin2 and ANCOMBC.
+
+Different strategies have been used to address compositional effects, including:
+  (a) Robust normalization. edgeR, DESeq2, metagenomeSeq, ALDEx2 and Omnibus, respectively used the Trimmed mean of M-values (TMM), relative log expression (RLE), cumulative sum scaling (CSS), centered log-ratio transformation (CLR), and geometric mean of pairwise ratios (GMPR) normalization. Wrench normalization corrects the compositional bias by an empirical Bayes approach, which has been recommended in metagenomeSeq.
+  (b) Reference taxa approach. DACOMP, RAIDA. 
+  (c) Analyzing the pattern of pairwise log ratios, such as ANCOM.
+  (d) Bias-correction. ANCOMBC.
+
+The most popular tools, without going into evaluating whether or not they perform well for this task, are:  
 
 - ALDEx2 [@Gloor2016] 
 - ANCOMBC [@ancombc2020]
@@ -38,10 +52,19 @@ evaluating whether or not they perform well for this task, are:
 - DESeq2 [@Love2014] 
 - edgeR [@Chen2016]
 - lefser [@Khlebrodova2021]
-- Maaslin2 [@Mallick2020]
+- MaAsLin2 [@Mallick2020]
 - metagenomeSeq [@Paulson2017]
 - limma [@Ritchie2015]
 - LinDA [@Zhou2022]
+- ZicoSeq [@Yang2022]
+- LDM [@Hu2020]
+- RAIDA [@Sohn2015]
+- DACOMP [@Brill2019]
+- Omnibus [@Chen2018]
+- eBay [@Liu2020]
+- ZINQ [@Ling2021]
+- ANCOM [@Mandal2015]
+- fastANCOM [@Zhou2022]
 - [t-test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/t.test)  
 - [Wilcoxon test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/wilcox.test)  
 
@@ -52,11 +75,10 @@ different datasets. Because different methods use different approaches
 (parametric vs non-parametric, different normalization techiniques, assumptions
 etc.), results can differ between methods. 
 Unfortunately, as @Nearing2022 point out, they
-can differ substantially. Therefore, it is highly recommended to pick several
+can differ substantially. Also, more recently @Yang2022 comprehensively evaluated these methods via a Semi-parametric framework and 106 real datasets. @Yang2022 also pointed out, different DAA tools could sometimes produce quite discordant results, opening to the possibility of cherry-picking the tool in favor of one’s own hypothesis. Therefore, it is highly recommended to pick several
 methods to get an idea about how robust and potentially reproducible your
 findings are depending on the method. In this section we demonstrate 4 methods
-that can be recommended based on recent literature (ANCOM-BC, ALDEx2, Maaslin2
-and LinDA) and we will compare the results between them.
+that can be recommended based on recent literature (ANCOM-BC, ALDEx2, Maaslin2, LinDA and ZicoSeq) and we will compare the results between them.
 Note that the purpose of this section is to show how to perform DAA in R, not
 how to correctly do causal inference. Depending on your experimental setup
 and your theory, you must determine how to specify any model exactly. 
@@ -68,18 +90,27 @@ object as well as a grouping variable in the sample data. We simplify the
 analysis by only including 2 of the 3 groups. 
 
 
-
-
 ```{r load-pkg-data}
 library(mia)
 library(patchwork)
 library(tidySummarizedExperiment)
+library(knitr)
+library(tidyverse)
+library(phyloseq)
 library(ALDEx2)
 library(Maaslin2)
 library(MicrobiomeStat)
-library(knitr)
-library(tidyverse)
-library(ANCOMBC)
+
+if(!require(ANCOMBC)){
+  BiocManager::install("ANCOMBC")
+  library(ANCOMBC)
+
+}
+if(!require(GUniFrac)){
+  install.packages("GUniFrac")
+  library(GUniFrac)
+}
+
 
 # set random seed because some tools can randomly vary and then produce 
 # different results:
@@ -208,7 +239,7 @@ article](https://www.nature.com/articles/d41586-019-00857-9)).
 ```{r, eval=TRUE}
 rownames_to_column(aldex_out, "genus") %>%
   filter(wi.eBH <= 0.05)  %>% # here we chose the wilcoxon output rather than tt
-  select(genus, we.eBH, wi.eBH, effect, overlap) %>%
+  dplyr::select(genus, we.eBH, wi.eBH, effect, overlap) %>%
   kable()
 ```
 
@@ -248,24 +279,25 @@ that we specify.
 
 
 ```{r ancombc2, warning = FALSE, eval=TRUE}
+# make phyloseq object
+otu <- otu_table(assay(tse), taxa_are_rows = T)
+taxa <- tax_table(as.matrix(rowData(tse)))
+meta <- sample_data(as.data.frame(colData(tse)))
+phy <- phyloseq(otu,taxa,meta)
 # perform the analysis 
-out <- ancombc2(
-  data = tse,
-  tax_level="genus",
-  fix_formula = "Geographical_location", 
+out <- ancombc(
+  phyloseq = phy,
+  formula = "Geographical_location", 
   p_adj_method = "fdr", 
-  prv_cut = 0, # prev filtering has been done above already
   lib_cut = 0, 
   group = "Geographical_location", 
   struc_zero = TRUE, 
   neg_lb = TRUE,
-  iter_control = list(tol = 1e-5, max_iter = 20, verbose = FALSE),
-  em_control = list(tol = 1e-5, max_iter = 20), # use max_iter >= 100 on real data 
   alpha = 0.05, 
   global = TRUE # multi group comparison will be deactivated automatically 
 )
 # store the results in res 
-res <- out$res
+ancombc_out <- out$res$q_val
 ```
 
 The object `out` contains all model output. Again, see the 
@@ -279,7 +311,7 @@ abundant between the groups (again, keep in mind that the answer is not
 black-white). Below we show the first 6 entries of this dataframe:  
 
 ```{r, eval=TRUE}
-kable(head(res))
+kable(head(ancombc_out))
 ```
 
 
@@ -297,7 +329,7 @@ asv <- t(assay(tse))
 meta_data <- data.frame(colData(tse))
 # you can specifiy different GLMs/normalizations/transforms. We used similar
 # settings as in Nearing et al. (2021) here:
-fit_data <- Maaslin2(
+maaslin2_out <- Maaslin2(
   asv,
   meta_data,
   output = "DAA example",
@@ -315,7 +347,7 @@ fit_data <- Maaslin2(
 Which genera are identified as differentially abundant? (leave out "head" to see all).
 
 ```{r, maaslin2kable, eval=TRUE}
-kable(head(filter(fit_data$results, qval <= 0.05)))
+kable(head(filter(maaslin2_out$results, qval <= 0.05)))
 ```
 
 A folder will be created that is called like the above specified
@@ -340,8 +372,8 @@ datasets with a very high number of features.
 
 ```{r linda, eval=TRUE}
 otu.tab <- as.data.frame(assay(tse))
-meta <- as.data.frame(colData(tse)) %>% select(Geographical_location)
-res <- linda(
+meta <- as.data.frame(colData(tse)) %>% dplyr::select(Geographical_location)
+linda.res <- linda(
   otu.tab, 
   meta, 
   formula = '~Geographical_location', 
@@ -349,9 +381,42 @@ res <- linda(
   prev.filter = 0, 
   mean.abund.filter = 0)
 
+linda_out <- linda.res$output$Geographical_locationPune
 # to scan the table for genera where H0 could be rejected:
-kable(head(filter(as.data.frame(res$output$Geographical_locationPune), reject)))
+kable(head(filter(as.data.frame(linda_out), reject)))
 ```
+
+### ZicoSeq
+
+Subsequently, we add a linear model and permutation-based method. This approach has been assessed to exhibit high power and a low false discovery rate, which has the following components:
+- Winsorization to decrease the influence of outliers;
+- Posterior sampling based on a beta mixture prior to address sampling variability and zero inflation;
+- Reference-based multiple-stage normalization to address compositional effects;
+
+
+```{r ZicoSeq, eval=TRUE}
+set.seed(123)
+otu.tab <- as.matrix(assay(tse))
+meta <- as.data.frame(colData(tse)) 
+zicoseq.obj <- GUniFrac::ZicoSeq(meta.dat = meta, 
+                                 feature.dat = otu.tab,
+                                 grp.name = 'Geographical_location',
+                                 adj.name = NULL, 
+                                 feature.dat.type = 'count',
+                                 prev.filter = 0,
+                                 mean.abund.filter = 0,
+                                 max.abund.filter = 0,
+                                 return.feature.dat = T)
+zicoseq_out <- cbind.data.frame(p.raw=zicoseq.obj$p.raw, p.adj.fdr=zicoseq.obj$p.adj.fdr) 
+kable(head(filter(zicoseq_out, p.adj.fdr<0.05)))
+```
+
+
+```{r}
+## x-axis is the effect size: R2 * direction of coefficient
+ZicoSeq.plot(ZicoSeq.obj = zicoseq.obj, meta.dat = meta, pvalue.type ='p.adj.fdr')
+```
+
 
 
 ### Comparison of the methods
@@ -367,34 +432,19 @@ taxon.
 
 
 ```{r linda2, eval=TRUE}
-# change genus names to otu ids for ancombc results to make it joinable with others
-id_switch <- as.data.frame(rowData(tse)) %>%
-  rownames_to_column("taxid") %>%
-  select(taxid, genus)
-abc_res <- select(out$res, genus = taxon, ancombc = diff_Geographical_locationPune) %>%
-  left_join(id_switch, by = "genus") %>%
-  select(-genus)
-
-# join all results together
-summ <- full_join(
-    rownames_to_column(aldex_out, "taxid") %>%
-      select(taxid, aldex2 = wi.eBH),
-    abc_res,
-    by = "taxid") %>%
+summ <- full_join(rownames_to_column(aldex_out, "taxid") %>% dplyr::select(taxid, aldex2 = wi.eBH),
+    ancombc_out %>% rownames_to_column('taxid') %>% rename('ancombc'=2),by = "taxid") %>%
   full_join(
-    select(fit_data$results, taxid = feature, maaslin2 = qval), 
+    dplyr::select(maaslin2_out$results, taxid = feature, maaslin2 = qval), 
     by = "taxid") %>%
-    full_join(
-      rownames_to_column(as.data.frame(res$output$Geographical_locationPune), "taxid") %>%
-        select(taxid, LinDA = reject), 
-      by = "taxid") %>%
+    full_join(linda_out %>% rename(LinDA=padj) %>% dplyr::select(LinDA)%>% rownames_to_column('taxid') ) %>%
+  full_join(zicoseq_out %>% dplyr::select(p.adj.fdr) %>% rename(ZicoSeq = p.adj.fdr) %>% rownames_to_column('taxid')) %>%
   mutate(
-    across(c(aldex2, maaslin2), ~ .x <= 0.05),
+    across(c(aldex2: ZicoSeq), ~ .x <= 0.05),
     # the following line would be necessary without prevalence filtering 
     # as some methods output NA
-    #across(-genus, function(x) ifelse(is.na(x), FALSE, x)),
-    ancombc = ifelse(is.na(ancombc), FALSE, ancombc),
-    score = rowSums(across(c(aldex2, ancombc, maaslin2, LinDA))),
+    #across(-taxid, function(x) ifelse(is.na(x), FALSE, x)),
+    score = rowSums(across(c(aldex2, ancombc, maaslin2, LinDA, ZicoSeq)))
   )
 
 # This is how it looks like:
@@ -408,7 +458,7 @@ Now we can answer our questions:
 summarise(summ, across(where(is.logical), sum)) %>%
   kable()
 # which genera are identified by all methods?
-filter(summ, score == 4) %>% kable()
+filter(summ, score == 5) %>% kable()
 ```
 
 We see that each method identified at least some genera as differentially
@@ -424,7 +474,7 @@ tse <- peerj13075
 
 # Add relative abundances and clr abundances
 tse <- transformCounts(tse, method="relabundance")
-tse <- transformCounts(tse, method="clr", pseudocount=1)
+# tse <- transformCounts(tse, method="clr", pseudocount=1) # not bale to run
 
 # Subset to prevalent taxa (exclude rare taxa at 10 percent prevalence using 0 detection threshold):
 # do the subsetting based on the relative abundance assay
@@ -440,17 +490,18 @@ tse$Geographical_location <- factor(tse$Geographical_location)
 assay.type <- "relabundance"
 plot_data <- data.frame(t(assay(tse, assay.type)))
 plot_data$Geographical_location <- tse$Geographical_location
-plots <- pmap(select(summ, taxid, score), function(taxid, score) {
+plots <- pmap(dplyr::select(summ, taxid, score), function(taxid, score) {
   ggplot(plot_data, aes_string(x="Geographical_location", y=taxid)) +
     geom_boxplot(outlier.shape = NA) +
     geom_jitter(width = 0.2) +
-    scale_y_log10() + 
+    # scale_y_log10() + # log trans will cause 0 values missing 
+    scale_y_sqrt() + 
     labs(title=glue::glue("{taxid}"), x="", y=glue::glue("Abundance ({assay.type})")) +    
     theme_bw() +
     theme(legend.position = "none")
 })
 
-# now we can show only those genera that have at least score 3 (or 2 or 1)
+# now we can show only those genera that have at least score 5 (or 4 or 3 or 2 or 1)
 robust_plots <- plots[summ$score == 4 & !is.na(summ$score)] 
 
 # to display this nicely in the book we use patchwork here:
@@ -479,37 +530,76 @@ ancombc_plots[[1]] +
 
 ### Confounding variables
 
-To perform causal inference, it is crucial that the method is able to include
-covariates in the model. This is not possible with e.g. the Wilcoxon test.
-Other methods such as both ANCOM methods, ALDEx2, LinDA, MaAsLin2 and others
-allow this. Below we show how to include a covariate in ANCOM-BC.
-It is very similar for all the methods that allow this. Since in this dataset
-there are no covariates, I first simulate a new variable and add it to the TSE
-object.
+Confounders are common for microbiome studies. In general, it can be classified into 3 types:
+(1) Biological confounder, such as age, sex, etc. 
+(2) Technical confounder that caused by data collection, storage, DNA extraction, sequencing process, etc. 
+(3) Confounder caused by experimental models, such as cage effect, sample background, etc. 
+Adjusting confounder is necessary and important to reach a valid conclusion. To perform causal inference, it is crucial that the method is able to include covariates in the model. This is not possible with e.g. the Wilcoxon test. Other methods such as DESeq2, edgeR, ANCOMBC, LDM, Aldex2, Corncob,MaAsLin2, ZicoSeq, fastANCOM and ZINQ allow this. Below we show how to include a confounder/covariate in ANCOMBC, LinDA and ZicoSeq.
 
 
-```{r, eval=TRUE}
-# FIXME: switch to a faster example / method
-out_cov = ancombc2(
-  data = tse, 
-  fix_formula = "Geographical_location + Age", # here we add Age to the model
+#### ANCOMBC
+
+```{r ancombc_adj, eval=TRUE}
+# make phyloseq object
+otu <- otu_table(assay(tse), taxa_are_rows = T)
+taxa <- tax_table(as.matrix(rowData(tse)))
+meta <- sample_data(as.data.frame(colData(tse)))
+phy <- phyloseq(otu,taxa,meta)
+# perform the analysis 
+ancombc_cov <- ancombc(
+  phyloseq = phy,
+  formula = "Geographical_location + Age", 
   p_adj_method = "fdr", 
-  prv_cut = 0,  # we did that already
   lib_cut = 0, 
-  group = "Geographical_location",
+  group = "Geographical_location", 
   struc_zero = TRUE, 
-  neg_lb = TRUE, 
-  iter_control = list(tol = 1e-5, max_iter = 20, verbose = FALSE),
-  em_control = list(tol = 1e-5, max_iter = 20),
+  neg_lb = TRUE,
   alpha = 0.05, 
   global = TRUE # multi group comparison will be deactivated automatically 
 )
-
 # now the model answers the question: holding Age constant, are 
 # bacterial taxa differentially abundant? Or, if that is of interest,
 # holding phenotype constant, is Age associated with bacterial abundance?
 # Again we only show the first 6 entries.
-kable(head(out_cov$res))
+kable(head(ancombc_cov$res))
+```
+
+#### LinDA
+
+```{r linda_adj, eval=TRUE}
+otu.tab <- as.data.frame(assay(tse))
+meta <- as.data.frame(colData(tse))
+linda_cov <- linda(
+  otu.tab, 
+  meta, 
+  formula = '~ Geographical_location + Age', 
+  alpha = 0.05, 
+  prev.filter = 0, 
+  mean.abund.filter = 0)
+linda.res <- linda_cov$output$Geographical_locationPune
+kable(head(filter(linda.res, reject==T)))
+
+```
+
+
+
+#### ZicoSeq
+
+```{r ZicoSeq_adj, eval=TRUE}
+set.seed(123)
+otu.tab <- as.matrix(assay(tse))
+meta <- as.data.frame(colData(tse)) 
+zicoseq.obj <- GUniFrac::ZicoSeq(meta.dat = meta, 
+                                 feature.dat = otu.tab,
+                                 grp.name = 'Geographical_location',
+                                 adj.name = 'Gender', 
+                                 feature.dat.type = 'count',
+                                 prev.filter = 0,
+                                 mean.abund.filter = 0,
+                                 max.abund.filter = 0,
+                                 return.feature.dat = T)
+zicoseq_out <- cbind.data.frame(p.raw=zicoseq.obj$p.raw, p.adj.fdr=zicoseq.obj$p.adj.fdr) 
+kable(head(filter(zicoseq_out, p.adj.fdr<0.05)))
 ```
 
 In the next section of this book chapter we cover methods that can also take
