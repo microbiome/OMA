@@ -41,8 +41,7 @@ bookdown::serve_book()
 
 
 
-
-## Development and Contribtions
+## Development and Contributions
 
 To contribute reports, follow the Git flow procedure (you can see instructions
 to [getting started with Github](https://docs.github.com/en/get-started)):
