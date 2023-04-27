@@ -8,39 +8,110 @@ Bioconductor in R. This is a book based on R Markdown and **bookdown**
 
 ## Deployment
 
-For now the book is deployed to GitHub Pages from GitHub Actions. 
-The book can also be built locally:
+The book is deployed from master branch to GitHub Pages from GitHub
+Actions.
+
+You can also build it locally after _cloning_ this Github
+repository. This is useful for instance if you like to suggest
+improvements in the material. You can use this to test the build
+before making a pull request to add your new changes in the official
+release.
+
+Building and viewing the book locally involves the following steps:
+
+
+1. Install the necessary dependencies to build to book, if necessary:
+
+```
+BiocManager::install(remotes::local_package_deps(dependencies=TRUE))
+```
+
+2. Render the book:
 
 ```
 bookdown::render_book("index.Rmd", "bookdown::gitbook")
 ```
 
-You can view the book also with:
+3. View the local book version through your browser. If you modify the source files, the changes should update to this version automatically.
 
 ```
 bookdown::serve_book()
 ```
 
 
-To install the necessary dependencies to build to book, run
 
-```
-BiocManager::install(remotes::local_package_deps(dependencies=TRUE))
-```
+
 
 ## Development and Contribtions
 
-To contribute reports, follow the Git flow procedure:
+To contribute reports, follow the Git flow procedure (you can see instructions
+to [getting started with Github](https://docs.github.com/en/get-started)):
 
 1. Fork the project
-2. Create a new branch
-3. Commit changes to the new branch
-4. Create a pull request (PR) back to the original repo
-5. Fix and discuss issues in the review process
+2. Clone your fork
+3. Modify the material
+4. Check locally that the changes render successfully (see above)
+5. Add and commit the changes to your fork
+6. Create a pull request (PR) from your fork back to the original repo
+7. Fix and discuss issues in the review process
 
-Please note that chapters should be independent of each other.
+
+You can set OMA master branch as your _upstream_ branch and pull the
+changes from that before making new Pull Requests (see below). This way you can
+make sure that your local version is in sync with the latest full
+release.
+
+### Setting upstream
+
+After you forked OMA, you have two repositories to care about:
+
+- **origin:** your own Github fork of OMA, under your github account
+- **upstream:** [master branch of OMA](https://github.com/microbiome/OMA/)
+
+The origin you have after you cloned your own fork.
+
+The upstream you can set on command line as follows, for instance (and
+you can educate yourself more through various online resources on
+using Git/hub):
+
+
+```
+git remote add upstream git@github.com:microbiome/OMA.git
+```
+
+
+Pull changes from the _origin_ and _upstream_ to your local version:
+
+```
+git fetch --all
+git merge origin/master
+git merge upstream/master
+```
+
+
+Sync your local version with the _origin_ and _upstream_:
+
+```
+git add . 
+git commit -am "my changes"
+```
+
+
+Push your changes to origin:
+
+```
+git push origin master
+```
+
+
+After this you can open a PR from origin to the [official master branch](https://github.com/microbiome/OMA/) in Github.
+
+
+
 
 ### Adding new sections
+
+Please note that chapters should be independent of each other.
 
 - Create the relevant Rmd file; follow the numbering logic
 - Add it also to the list in file [_bookdown.yml](_bookdown.yml). 
