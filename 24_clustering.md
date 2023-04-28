@@ -237,7 +237,7 @@ km <- kmeans(diss, 3, nstart = 25)
 colData(tse)$clusters <- as.factor(km$cluster)
 
 # Perform PCoA so that we can visualize clusters
-tse <- runMDS(tse, exprs_values = "relabundance", FUN = vegan::vegdist, method = "bray")
+tse <- runMDS(tse, assay.type = "relabundance", FUN = vegan::vegdist, method = "bray")
 
 # Plot PCoA and color clusters
 plotReducedDim(tse, "MDS", colour_by = "clusters")
@@ -392,7 +392,7 @@ Patient status is used for grouping.
 
 
 ```r
-dmn_group <- calculateDMNgroup(tse_dmn, variable = "SampleType",  exprs_values = "counts",
+dmn_group <- calculateDMNgroup(tse_dmn, variable = "SampleType",  assay.type = "counts",
                                k = 2, seed=.Machine$integer.max)
 
 dmn_group
@@ -406,7 +406,7 @@ dmn_group
 ## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
 ## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
 ## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
-## Ocean              2       3   67 1100.0  -44.82   953.6 1174.2 1235
+## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
 ## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
 ## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
@@ -423,8 +423,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.60
-## 2 0.4615 15.27
+## 1 0.5385 20.58
+## 2 0.4615 15.28
 ```
 
 
@@ -438,12 +438,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.108e-17
-## CC1     1.000e+00 3.962e-22
-## SV1     1.000e+00 2.094e-12
-## M31Fcsw 7.276e-26 1.000e+00
-## M11Fcsw 1.045e-16 1.000e+00
-## M31Plmr 9.958e-14 1.000e+00
+## CL3     1.000e+00 5.050e-17
+## CC1     1.000e+00 3.903e-22
+## SV1     1.000e+00 1.957e-12
+## M31Fcsw 7.886e-26 1.000e+00
+## M11Fcsw 1.132e-16 1.000e+00
+## M31Plmr 1.124e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -454,13 +454,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]     [,2]
-## Phylum:Crenarchaeota  0.30436 0.135458
-## Phylum:Euryarchaeota  0.23142 0.146863
-## Phylum:Actinobacteria 1.21033 1.059691
-## Phylum:Spirochaetes   0.21413 0.131824
-## Phylum:MVP-15         0.02991 0.000762
-## Phylum:Proteobacteria 6.84289 1.814203
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30382 0.1354654
+## Phylum:Euryarchaeota  0.23114 0.1468632
+## Phylum:Actinobacteria 1.21371 1.0600245
+## Phylum:Spirochaetes   0.21393 0.1318415
+## Phylum:MVP-15         0.02982 0.0007669
+## Phylum:Proteobacteria 6.84469 1.8153216
 ```
 Get the assignment probabilities
 
@@ -488,7 +488,7 @@ tse <- transformCounts(tse, "relabundance", method = "clr")
 library(scater)
 
 # Does principal coordinate analysis
-df <- calculateMDS(tse, exprs_values = "clr", method = "euclidean")
+df <- calculateMDS(tse, assay.type = "clr", method = "euclidean")
 
 # Creates a data frame from principal coordinates
 euclidean_pcoa_df <- data.frame(pcoa1 = df[,1], 
@@ -554,7 +554,7 @@ tse <- enterotype
 tse <- transformCounts(tse, method = "rclr")
 
 # Performing and storing UMAP
-tse <- runUMAP(tse, name="UMAP", exprs_values="rclr")
+tse <- runUMAP(tse, name="UMAP", assay.type="rclr")
 
 k <- c(2,3,5,10)
 ClustAndPlot <- function(x) {

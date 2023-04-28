@@ -136,7 +136,7 @@ assay(tse, "counts")[1:5,1:7]
 ```
 
 To illustrate the use of multiple assays, the relative abundance data can be 
-calcualted and stored along the original count data using `relAbundanceCounts`.
+calculated and stored along the original count data using `relAbundanceCounts`.
 
 
 ```r
@@ -223,6 +223,8 @@ colData(tse)
 ## Even2                                      Even2  
 ## Even3                                      Even3
 ```
+
+
 
 ### rowData
 
@@ -447,6 +449,148 @@ Table: (\#tab:options) **Recommended options for storing multiple data tables in
 
 
 
+## Demonstration data {#example-data}
+
+Open demonstration data for testing and benchmarking purposes is
+available from multiple locations. This chapter introduces some
+options. The other chapters of this book provide ample examples about
+the use of the data.
+
+
+
+
+### Package data {#package-data}
+
+The `mia` R package contains example data sets that are direct
+conversions from the alternative `phyloseq` container to the
+`TreeSummarizedExperiment` container.
+
+List the [available
+datasets](https://microbiome.github.io/mia/reference/index.html) in
+the `mia` package:
+
+
+
+```r
+library(mia)
+data(package="mia")
+```
+
+Load the `GlobalPatterns` data from the `mia` package:
+
+
+```r
+data("GlobalPatterns", package="mia")
+GlobalPatterns
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 19216 26 
+## metadata(0):
+## assays(1): counts
+## rownames(19216): 549322 522457 ... 200359 271582
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(26): CL3 CC1 ... Even2 Even3
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: a LinkDataFrame (19216 rows)
+## rowTree: 1 phylo tree(s) (19216 leaves)
+## colLinks: NULL
+## colTree: NULL
+```
+
+
+Check the documentation for this data set:
+
+
+
+
+
+### ExperimentHub data
+
+[ExperimentHub](https://bioconductor.org/packages/release/bioc/vignettes/ExperimentHub/inst/doc/ExperimentHub.html)
+provides a variety of data resources, including the
+[microbiomeDataSets](https://bioconductor.org/packages/release/data/experiment/html/microbiomeDataSets.html)
+package [@Morgan2021; @microlahti2021].
+
+A table of the available data sets is available through the
+`availableDataSets` function.
+
+
+```r
+library(microbiomeDataSets)
+availableDataSets()
+```
+
+```
+##             Dataset
+## 1  GrieneisenTSData
+## 2    HintikkaXOData
+## 3       LahtiMLData
+## 4        LahtiMData
+## 5       LahtiWAData
+## 6      OKeefeDSData
+## 7 SilvermanAGutData
+## 8        SongQAData
+## 9   SprockettTHData
+```
+
+All data are downloaded from ExperimentHub and cached for local
+re-use. Check the [man pages of each
+function](https://microbiome.github.io/microbiomeDataSets/reference/index.html)
+for a detailed documentation of the data contents and references. Let
+us retrieve a *[MultiAssayExperiment](https://bioconductor.org/packages/3.17/MultiAssayExperiment)* data set:
+
+
+```r
+# mae <- HintikkaXOData()
+# Since HintikkaXOData is now added to mia, we can load it directly from there
+# We suggest to check other datasets from microbiomeDataSets
+data(HintikkaXOData)
+mae <- HintikkaXOData
+```
+
+Data is available in *[SummarizedExperiment](https://bioconductor.org/packages/3.17/SummarizedExperiment)*, `r
+Biocpkg("TreeSummarizedExperiment")` and `r
+Biocpkg("MultiAssayExperiment")` data containers; see the separate
+page on [alternative
+containers](https://microbiome.github.io/OMA/multitable.html) for more
+details.
+
+
+### Curated metagenomic data
+
+[curatedMetagenomicData](https://bioconductor.org/packages/release/data/experiment/html/curatedMetagenomicData.html)
+is a large collection of curated human microbiome data sets, provided as
+`(Tree)SummarizedExperiment` objects [@Pasolli2017]. The resource
+provides curated human microbiome data including gene families, marker
+abundance, marker presence, pathway abundance, pathway coverage, and
+relative abundance for samples from different body sites. See the
+package homepage for more details on data availability and access.
+
+As one example, let us retrieve the Vatanen (2016) [@Vatanen2016] data
+set. This is a larger collection with a bit longer download time.
+
+
+```r
+library(curatedMetagenomicData)
+tse <- curatedMetagenomicData("Vatanen*", dryrun = FALSE, counts = TRUE)
+```
+
+
+
+### Other data sources
+
+The current collections provide access to vast microbiome data
+resources. The output has to be converted into TreeSE/MAE separately.
+
+- [MGnifyR](https://github.com/beadyallen/MGnifyR) provides access to [EBI/MGnify](https://www.ebi.ac.uk/metagenomics/) 
+- [qiitr](https://github.com/cran/qiitr) provides access to [QIITA](https://qiita.com/about) 
+
+
 ## Loading experimental microbiome data
 
 ### 16S workflow
@@ -557,87 +701,163 @@ tse
 ## referenceSeq: a DNAStringSet (232 sequences)
 ```
 
+
+
 ### Import from external files
 
 Microbiome (taxonomic) profiling data is commonly distributed in
 various file formats. You can import such external data files as a
 (Tree)SummarizedExperiment object but the details depend on the file
-format. Here, we provide examples for common formats.
+format. Here, we provide examples for common formats. 
+
+
+#### CSV import
 
 **CSV data tables** can be imported with the standard R functions,
   then converted to the desired format. For detailed examples, you can
   check the [Bioconductor course
   material](https://bioconductor.org/help/course-materials/2019/BSS2019/04_Practical_CoreApproachesInBioconductor.html)
-  by Martin Morgan. The following example reads abundance tables,
-  taxonomic mapping tables, and sample metadata, assuming that the
-  input data files are properly prepared with appropriate row and
-  column names.
+  by Martin Morgan. You can also check the [example
+  files](https://github.com/microbiome/OMA/tree/master/data) and
+  construct your own CSV files accordingly.
+
+Recommendations for the CSV files are the following. File names are
+arbitrary; we refer here to the same names than in the examples:
+
+- Abundance table (`assay_taxa.csv`): data matrix (features x
+  samples); first column provides feature IDs, the first row provides
+  sample IDs; other values should be numeric (abundances).
+
+- Row data (`rowdata_taxa.csv`): data table (features x info); first
+  column provides feature IDs, the first row provides column headers;
+  this file usually contains the taxonomic mapping between different
+  taxonomic levels. Ideally, the feature IDs (row names) match one-to-one with
+  the abundance table row names. 
+
+- Column data (`coldata.csv`): data table (samples x info); first
+  column provides sample IDs, the first row provides column headers;
+  this file usually contains the sample metadata/phenodata (such as
+  subject age, health etc). Ideally, the sample IDs match one-to-one with
+  the abundance table column names. 
+
+After you have set up the CSV files, you can read them in R:
 
 
 ```r
-count_file <- "data/assay_taxa.csv"
-tax_file <- "data/rowdata_taxa.csv"
+count_file  <- "data/assay_taxa.csv"
+tax_file    <- "data/rowdata_taxa.csv"
 sample_file <- "data/coldata.csv"
 
 # Load files
-counts  <- read.csv(count_file)   # Abundance table (e.g. ASV data; to assay data)
-tax     <- read.csv(tax_file)     # Taxonomy table (to rowData)
-samples <- read.csv(sample_file)  # Sample data (to colData)
+counts  <- read.csv(count_file, row.names=1)   # Abundance table (e.g. ASV data; to assay data)
+tax     <- read.csv(tax_file, row.names=1)     # Taxonomy table (to rowData)
+samples <- read.csv(sample_file, row.names=1)  # Sample data (to colData)
 ```
+
+After reading the data in R, ensure the following:
+
+- abundance table (`counts`): numeric `matrix`, with feature IDs as
+  rownames and sample IDs as column names
+
+- rowdata (`tax`): `DataFrame`, with feature IDs as rownames. If this
+  is a `data.frame` you can use the function `DataFrame()` to change
+  the format. Column names are free but in microbiome analysis they
+  usually they refer to taxonomic ranks. The rownames in rowdata
+  should match with rownames in abundance table.
+
+- coldata (`samples`): `DataFrame`, with sample IDs as rownames. If
+  this is a `data.frame` you can use the function `DataFrame()` to
+  change the format.  Column names are free. The rownames in coldata
+  should match with colnames in abundance table.
 
 **Always ensure that the tables have rownames!** The _TreeSE_ constructor compares 
-rownames and makes sure that, for example, right samples are linked with right patient.
+rownames and ensures that, for example, right samples are linked with right patient.
+
+Also ensure that the row and column names match one-to-one between
+abundance table, rowdata, and coldata:
 
 
 ```r
-# Add rownames and remove an additional column
-rownames(counts) <- counts$X
-counts$X <- NULL
+# Match rows and columns
+counts <- counts[rownames(tax), rownames(samples)]
 
-# Add rownames and remove an additional column
-rownames(samples) <- samples$X
-samples$X <- NULL
-
-# Add rownames and remove an additional column
-rownames(tax) <- tax$X
-tax$X <- NULL
-
-# As an example:
-# If e.g. samples do not match between colData and counts table, you must order 
-# counts based on colData
-if( any( colnames(counts) != rownames(samples) ) ){
-    counts <- counts[ , rownames(samples) ]
-}
-
-# And same with rowData and counts...
-if( any( rownames(counts) != rownames(tax) ) ){
-    counts <- counts[ rownames(tax), ]
-}
+# Let us ensure that the data is in correct (numeric matrix) format:
+counts <- as.matrix(counts)
 ```
 
-The tables must be in correct format:
+If you hesitate about the format of the data, you can compare to one
+of the available demonstration data sets, and make sure that your data
+components have the same format.
 
-   - counts --> matrix
-   - rowData --> DataFrame
-   - colData --> DataFrame
-   
+There are many different source files and many different ways to read
+data in R. One can do data manipulation in R as well. Investigate the
+entries as follows.
+
+
 
 ```r
-# Ensure that the data is in correct format
+# coldata rownames match assay colnames
+all(rownames(samples) == colnames(counts)) # our data set
+```
 
-# counts should be in matrix format
-counts <- as.matrix(counts)
-# And it should be added to a SimpleList
-assays <-  SimpleList(counts = counts)
+```
+## [1] TRUE
+```
 
-# colData and rowData should be in DataFrame format
-colData <- DataFrame(colData)
-rowData <- DataFrame(rowData)
+```r
+class(samples) # should be data.frame or DataFrame
+```
 
+```
+## [1] "data.frame"
+```
+
+```r
+# rowdata rownames match assay rownames
+all(rownames(tax) == rownames(counts)) # our data set
+```
+
+```
+## [1] TRUE
+```
+
+```r
+class(tax) # should be data.frame or DataFrame
+```
+
+```
+## [1] "data.frame"
+```
+
+```r
+# Counts 
+class(counts) # should be a numeric matrix
+```
+
+```
+## [1] "matrix" "array"
+```
+
+
+### Constructing TreeSummarizedExperiment
+
+Now let us create the TreeSE object from the input data tables. Here
+we also convert the data objects in their preferred formats:
+
+   - counts --> numeric matrix
+   - rowData --> DataFrame
+   - colData --> DataFrame
+
+The `SimpleList` could be used to include multiple alternative assays, if
+necessary.
+
+
+
+```r
 # Create a TreeSE
-tse_taxa <- TreeSummarizedExperiment(assays = assays,
-                                     colData = samples,
-                                     rowData = tax)
+tse_taxa <- TreeSummarizedExperiment(assays =  SimpleList(counts = counts),
+                                     colData = DataFrame(samples),
+                                     rowData = DataFrame(tax))
 
 tse_taxa
 ```
@@ -660,6 +880,12 @@ tse_taxa
 ## colLinks: NULL
 ## colTree: NULL
 ```
+
+Now you should have a ready-made TreeSE data object that can be used in downstream analyses.
+
+
+### Constructing MultiAssayExperiment
+
 To construct a _MultiAssayExperiment_ object, just combine multiple _TreeSE_ data containers. 
 Here we import metabolite data from the same study.
 
@@ -669,23 +895,13 @@ count_file <- "data/assay_metabolites.csv"
 sample_file <- "data/coldata.csv"
 
 # Load files
-counts  <- read.csv(count_file)  
-samples <- read.csv(sample_file)
+counts  <- read.csv(count_file, row.names=1)  
+samples <- read.csv(sample_file, row.names=1)
 
-# Add rownames and remove an additional column
-rownames(counts) <- counts$X
-counts$X <- NULL
-rownames(samples) <- samples$X
-samples$X <- NULL
+# Create a TreeSE for the metabolite data
+tse_metabolite <- TreeSummarizedExperiment(assays = SimpleList(concs = as.matrix(counts)),
+                                           colData = DataFrame(samples))
 
-# Convert into right format
-counts <- as.matrix(counts)
-assays <-  SimpleList(concs = counts)
-colData <- DataFrame(colData)
-
-# Create a TreeSE
-tse_metabolite <- TreeSummarizedExperiment(assays = assays,
-                                           colData = samples)
 tse_metabolite
 ```
 
@@ -737,6 +953,10 @@ mae
 ##  exportClass() - save data to flat files
 ```
 
+
+
+### Import functions for standard formats
+
 Specific import functions are provided for:
 
 -   Biom files (see `help(mia::loadFromBiom)`)
@@ -744,7 +964,7 @@ Specific import functions are provided for:
 -   Mothur files (see `help(mia::loadFromMothur)`)
 
 
-#### Biom example
+#### Biom import
 
 This example shows how Biom files are imported into a
 `TreeSummarizedExperiment` object.
@@ -1115,171 +1335,18 @@ Conversion is possible between other data formats. Interested readers can refer 
 * [readQZA](https://microbiome.github.io/mia/reference/loadFromQIIME2.html)
 
 
-## Demonstration data {#example-data}
-
-Open demonstration data for testing and benchmarking purposes is
-available from multiple locations. This chapter introduces some
-options. The other chapters of this book provide ample examples about
-the use of the data.
-
-
-
-
-### Package data {#package-data}
-
-The `mia` R package contains example data sets that are direct
-conversions from the alternative `phyloseq` container to the
-`TreeSummarizedExperiment` container.
-
-List the [available
-datasets](https://microbiome.github.io/mia/reference/index.html) in
-the `mia` package:
-
-
-
-```r
-library(mia)
-data(package="mia")
-```
-
-Load the `GlobalPatterns` data from the `mia` package:
-
-
-```r
-data("GlobalPatterns", package="mia")
-GlobalPatterns
-```
-
-```
-## class: TreeSummarizedExperiment 
-## dim: 19216 26 
-## metadata(0):
-## assays(1): counts
-## rownames(19216): 549322 522457 ... 200359 271582
-## rowData names(7): Kingdom Phylum ... Genus Species
-## colnames(26): CL3 CC1 ... Even2 Even3
-## colData names(7): X.SampleID Primer ... SampleType Description
-## reducedDimNames(0):
-## mainExpName: NULL
-## altExpNames(0):
-## rowLinks: a LinkDataFrame (19216 rows)
-## rowTree: 1 phylo tree(s) (19216 leaves)
-## colLinks: NULL
-## colTree: NULL
-```
-
-
-Check the documentation for this data set:
-
-
-```
-## Help on topic 'GlobalPatterns' was found in the following packages:
-## 
-##   Package               Library
-##   phyloseq              /__w/_temp/Library
-##   mia                   /__w/_temp/Library
-## 
-## 
-## Using the first match ...
-```
-
-
-
-### ExperimentHub data
-
-[ExperimentHub](https://bioconductor.org/packages/release/bioc/vignettes/ExperimentHub/inst/doc/ExperimentHub.html)
-provides a variety of data resources, including the
-[microbiomeDataSets](https://bioconductor.org/packages/release/data/experiment/html/microbiomeDataSets.html)
-package [@Morgan2021; @microlahti2021].
-
-A table of the available data sets is available through the
-`availableDataSets` function.
-
-
-```r
-library(microbiomeDataSets)
-availableDataSets()
-```
-
-```
-##             Dataset
-## 1  GrieneisenTSData
-## 2    HintikkaXOData
-## 3       LahtiMLData
-## 4        LahtiMData
-## 5       LahtiWAData
-## 6      OKeefeDSData
-## 7 SilvermanAGutData
-## 8        SongQAData
-## 9   SprockettTHData
-```
-
-All data are downloaded from ExperimentHub and cached for local
-re-use. Check the [man pages of each
-function](https://microbiome.github.io/microbiomeDataSets/reference/index.html)
-for a detailed documentation of the data contents and references. Let
-us retrieve a *[MultiAssayExperiment](https://bioconductor.org/packages/3.15/MultiAssayExperiment)* data set:
-
-
-```r
-# mae <- HintikkaXOData()
-# Since HintikkaXOData is now added to mia, we can load it directly from there
-# We suggest to check other datasets from microbiomeDataSets
-data(HintikkaXOData)
-mae <- HintikkaXOData
-```
-
-Data is available in *[SummarizedExperiment](https://bioconductor.org/packages/3.15/SummarizedExperiment)*, `r
-Biocpkg("TreeSummarizedExperiment")` and `r
-Biocpkg("MultiAssayExperiment")` data containers; see the separate
-page on [alternative
-containers](https://microbiome.github.io/OMA/multitable.html) for more
-details.
-
-
-### Curated metagenomic data
-
-[curatedMetagenomicData](https://bioconductor.org/packages/release/data/experiment/html/curatedMetagenomicData.html)
-is a large collection of curated human microbiome data sets, provided as
-`(Tree)SummarizedExperiment` objects [@Pasolli2017]. The resource
-provides curated human microbiome data including gene families, marker
-abundance, marker presence, pathway abundance, pathway coverage, and
-relative abundance for samples from different body sites. See the
-package homepage for more details on data availability and access.
-
-As one example, let us retrieve the Vatanen (2016) [@Vatanen2016] data
-set. This is a larger collection with a bit longer download time.
-
-
-```r
-library(curatedMetagenomicData)
-tse <- curatedMetagenomicData("Vatanen*", dryrun = FALSE, counts = TRUE)
-```
-
-
-
-### Other data sources
-
-The current collections provide access to vast microbiome data
-resources. The output has to be converted into TreeSE/MAE separately.
-
-- [MGnifyR](https://github.com/beadyallen/MGnifyR) provides access to [EBI/MGnify](https://www.ebi.ac.uk/metagenomics/) 
-- [qiitr](https://github.com/cran/qiitr) provides access to [QIITA](https://qiita.com/about) 
-
-
-
 ## Session Info {-}
 
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.2.1 (2022-06-23)
+R version 4.3.0 (2023-04-21)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.4 LTS
+Running under: Ubuntu 22.04.2 LTS
 
 Matrix products: default
-BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
-LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/liblapack.so.3
+BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
+LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.20.so;  LAPACK version 3.10.0
 
 locale:
  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
@@ -1289,86 +1356,89 @@ locale:
  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 
+time zone: UTC
+tzcode source: system (glibc)
+
 attached base packages:
 [1] stats4    stats     graphics  grDevices utils     datasets  methods  
 [8] base     
 
 other attached packages:
- [1] microbiomeDataSets_1.1.7       phyloseq_1.40.0               
- [3] BiocManager_1.30.20            ggplot2_3.4.2                 
- [5] mia_1.7.11                     MultiAssayExperiment_1.24.0   
- [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.66.0             
- [9] XVector_0.38.0                 SingleCellExperiment_1.20.1   
-[11] SummarizedExperiment_1.28.0    Biobase_2.58.0                
-[13] GenomicRanges_1.50.2           GenomeInfoDb_1.34.9           
-[15] IRanges_2.32.0                 S4Vectors_0.36.2              
-[17] BiocGenerics_0.44.0            MatrixGenerics_1.10.0         
-[19] matrixStats_0.63.0-9003        BiocStyle_2.24.0              
-[21] rebook_1.6.0                  
+ [1] phyloseq_1.44.0                BiocManager_1.30.20           
+ [3] ggplot2_3.4.2                  microbiomeDataSets_1.1.7      
+ [5] mia_1.7.11                     MultiAssayExperiment_1.26.0   
+ [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.68.0             
+ [9] XVector_0.40.0                 SingleCellExperiment_1.22.0   
+[11] SummarizedExperiment_1.30.0    Biobase_2.60.0                
+[13] GenomicRanges_1.52.0           GenomeInfoDb_1.36.0           
+[15] IRanges_2.34.0                 S4Vectors_0.38.0              
+[17] BiocGenerics_0.46.0            MatrixGenerics_1.12.0         
+[19] matrixStats_0.63.0-9003        BiocStyle_2.28.0              
+[21] rebook_1.9.0                  
 
 loaded via a namespace (and not attached):
-  [1] AnnotationHub_3.4.0           BiocFileCache_2.4.0          
-  [3] plyr_1.8.8                    igraph_1.4.2                 
-  [5] lazyeval_0.2.2                splines_4.2.1                
-  [7] BiocParallel_1.32.6           scater_1.26.1                
-  [9] digest_0.6.31                 foreach_1.5.2                
- [11] yulab.utils_0.0.6             htmltools_0.5.5              
- [13] viridis_0.6.2                 fansi_1.0.4                  
- [15] magrittr_2.0.3                memoise_2.0.1                
- [17] ScaledMatrix_1.6.0            cluster_2.1.4                
- [19] DECIPHER_2.26.0               colorspace_2.1-0             
- [21] blob_1.2.4                    rappdirs_0.3.3               
- [23] ggrepel_0.9.3                 xfun_0.39                    
- [25] dplyr_1.1.2                   crayon_1.5.2                 
- [27] RCurl_1.98-1.12               jsonlite_1.8.4               
- [29] graph_1.74.0                  survival_3.5-5               
- [31] iterators_1.0.14              ape_5.7-1                    
- [33] glue_1.6.2                    gtable_0.3.3                 
- [35] zlibbioc_1.44.0               DelayedArray_0.24.0          
- [37] BiocSingular_1.14.0           Rhdf5lib_1.18.2              
- [39] scales_1.2.1                  DBI_1.1.3                    
- [41] Rcpp_1.0.10                   xtable_1.8-4                 
- [43] viridisLite_0.4.1             decontam_1.18.0              
- [45] tidytree_0.4.2                bit_4.0.5                    
- [47] rsvd_1.0.5                    httr_1.4.5                   
- [49] dir.expiry_1.4.0              ellipsis_0.3.2               
- [51] pkgconfig_2.0.3               XML_3.99-0.14                
- [53] scuttle_1.8.4                 CodeDepends_0.6.5            
- [55] dbplyr_2.3.2                  utf8_1.2.3                   
- [57] AnnotationDbi_1.58.0          tidyselect_1.2.0             
- [59] rlang_1.1.0                   reshape2_1.4.4               
- [61] later_1.3.0                   munsell_0.5.0                
- [63] BiocVersion_3.15.2            tools_4.2.1                  
- [65] cachem_1.0.7                  cli_3.6.1                    
- [67] DirichletMultinomial_1.40.0   generics_0.1.3               
- [69] RSQLite_2.3.1                 ExperimentHub_2.4.0          
- [71] ade4_1.7-22                   evaluate_0.20                
- [73] biomformat_1.24.0             stringr_1.5.0                
- [75] fastmap_1.1.1                 yaml_2.3.7                   
- [77] knitr_1.42                    bit64_4.0.5                  
- [79] purrr_1.0.1                   KEGGREST_1.36.3              
- [81] nlme_3.1-162                  sparseMatrixStats_1.10.0     
- [83] mime_0.12                     compiler_4.2.1               
- [85] beeswarm_0.4.0                filelock_1.0.2               
- [87] curl_5.0.0                    png_0.1-8                    
- [89] interactiveDisplayBase_1.34.0 treeio_1.22.0                
- [91] tibble_3.2.1                  stringi_1.7.12               
- [93] lattice_0.21-8                Matrix_1.5-4                 
- [95] vegan_2.6-4                   permute_0.9-7                
- [97] multtest_2.52.0               vctrs_0.6.2                  
- [99] pillar_1.9.0                  lifecycle_1.0.3              
-[101] rhdf5filters_1.8.0            BiocNeighbors_1.16.0         
-[103] data.table_1.14.8             bitops_1.0-7                 
-[105] irlba_2.3.5.1                 httpuv_1.6.9                 
-[107] R6_2.5.1                      promises_1.2.0.1             
-[109] bookdown_0.33                 gridExtra_2.3                
-[111] vipor_0.4.5                   codetools_0.2-19             
-[113] MASS_7.3-58.3                 rhdf5_2.40.0                 
-[115] withr_2.5.0                   GenomeInfoDbData_1.2.9       
-[117] mgcv_1.8-42                   parallel_4.2.1               
-[119] grid_4.2.1                    beachmat_2.14.2              
-[121] tidyr_1.3.0                   rmarkdown_2.21               
-[123] DelayedMatrixStats_1.20.0     shiny_1.7.4                  
-[125] ggbeeswarm_0.7.1             
+  [1] jsonlite_1.8.4                CodeDepends_0.6.5            
+  [3] magrittr_2.0.3                ggbeeswarm_0.7.1             
+  [5] rmarkdown_2.21                zlibbioc_1.46.0              
+  [7] vctrs_0.6.2                   multtest_2.56.0              
+  [9] memoise_2.0.1                 DelayedMatrixStats_1.22.0    
+ [11] RCurl_1.98-1.12               htmltools_0.5.5              
+ [13] AnnotationHub_3.8.0           curl_5.0.0                   
+ [15] BiocNeighbors_1.18.0          Rhdf5lib_1.22.0              
+ [17] rhdf5_2.44.0                  plyr_1.8.8                   
+ [19] DECIPHER_2.28.0               cachem_1.0.7                 
+ [21] igraph_1.4.2                  iterators_1.0.14             
+ [23] mime_0.12                     lifecycle_1.0.3              
+ [25] pkgconfig_2.0.3               rsvd_1.0.5                   
+ [27] Matrix_1.5-4                  R6_2.5.1                     
+ [29] fastmap_1.1.1                 GenomeInfoDbData_1.2.10      
+ [31] shiny_1.7.4                   digest_0.6.31                
+ [33] colorspace_2.1-0              AnnotationDbi_1.62.0         
+ [35] scater_1.28.0                 irlba_2.3.5.1                
+ [37] ExperimentHub_2.8.0           RSQLite_2.3.1                
+ [39] vegan_2.6-4                   beachmat_2.16.0              
+ [41] filelock_1.0.2                fansi_1.0.4                  
+ [43] httr_1.4.5                    mgcv_1.8-42                  
+ [45] compiler_4.3.0                withr_2.5.0                  
+ [47] bit64_4.0.5                   BiocParallel_1.34.0          
+ [49] viridis_0.6.2                 DBI_1.1.3                    
+ [51] MASS_7.3-59                   rappdirs_0.3.3               
+ [53] DelayedArray_0.25.0           biomformat_1.28.0            
+ [55] permute_0.9-7                 tools_4.3.0                  
+ [57] vipor_0.4.5                   beeswarm_0.4.0               
+ [59] ape_5.7-1                     interactiveDisplayBase_1.38.0
+ [61] httpuv_1.6.9                  glue_1.6.2                   
+ [63] rhdf5filters_1.12.0           nlme_3.1-162                 
+ [65] promises_1.2.0.1              grid_4.3.0                   
+ [67] ade4_1.7-22                   cluster_2.1.4                
+ [69] reshape2_1.4.4                generics_0.1.3               
+ [71] gtable_0.3.3                  tidyr_1.3.0                  
+ [73] data.table_1.14.8             BiocSingular_1.16.0          
+ [75] ScaledMatrix_1.7.1            utf8_1.2.3                   
+ [77] foreach_1.5.2                 ggrepel_0.9.3                
+ [79] BiocVersion_3.17.1            pillar_1.9.0                 
+ [81] stringr_1.5.0                 yulab.utils_0.0.6            
+ [83] later_1.3.0                   splines_4.3.0                
+ [85] dplyr_1.1.2                   BiocFileCache_2.8.0          
+ [87] treeio_1.24.0                 lattice_0.21-8               
+ [89] survival_3.5-5                bit_4.0.5                    
+ [91] tidyselect_1.2.0              DirichletMultinomial_1.42.0  
+ [93] scuttle_1.10.0                knitr_1.42                   
+ [95] gridExtra_2.3                 bookdown_0.33                
+ [97] xfun_0.39                     stringi_1.7.12               
+ [99] lazyeval_0.2.2                yaml_2.3.7                   
+[101] evaluate_0.20                 codetools_0.2-19             
+[103] tibble_3.2.1                  graph_1.78.0                 
+[105] cli_3.6.1                     xtable_1.8-4                 
+[107] munsell_0.5.0                 Rcpp_1.0.10                  
+[109] dir.expiry_1.8.0              dbplyr_2.3.2                 
+[111] png_0.1-8                     XML_3.99-0.14                
+[113] parallel_4.3.0                ellipsis_0.3.2               
+[115] blob_1.2.4                    sparseMatrixStats_1.12.0     
+[117] bitops_1.0-7                  decontam_1.20.0              
+[119] viridisLite_0.4.1             tidytree_0.4.2               
+[121] scales_1.2.1                  purrr_1.0.1                  
+[123] crayon_1.5.2                  rlang_1.1.0                  
+[125] KEGGREST_1.40.0              
 ```
 </div>

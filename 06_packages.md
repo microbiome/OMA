@@ -37,6 +37,19 @@ document.addEventListener("click", function (event) {
 
 <img src="general/figures/mia_logo.png" width="100" alt="mia logo" align="right" style="margin: 0 1em 0 1em" />
 
+
+The Bioconductor framework for microbiome data science include the following components:
+
+- specific data containers to organize microbiome profiling data
+- dedicated R packages that provide methods for analysing the data
+- active user and developer community
+
+
+This section provides an overview of the package ecosystem. Section
+\@ref(example-data) links to various open microbiome data resources
+that support this framework.
+
+
 ## Package installation
 
 You can install all packages that are required to run every example in this book via the following command:
@@ -45,7 +58,6 @@ You can install all packages that are required to run every example in this book
 ```r
 source("https://raw.githubusercontent.com/microbiome/OMA/master/install_packages.R")
 ```
-
 
 ### Installing specific packages {#packages}
 
@@ -120,12 +132,9 @@ or online channels.
 - [Tools for Microbiome
   Analysis](https://microsud.github.io/Tools-Microbiome-Analysis/)
   site listed over 130 R packages for microbiome data science in
-  2023. Many of these do not directly support the data containers used
-  in this book but can be used with minor conversions between formats.
-
-## Data ecosystem
-
-Section \@ref(example-data) links to various open microbiome data resources that support this framework.
+  2023. Many of these are not in Bioconductor, or do not directly
+  support the data containers used in this book but can be used with
+  minor modifications.
 
 
 
@@ -134,13 +143,13 @@ Section \@ref(example-data) links to various open microbiome data resources that
 <button class="rebook-collapse">View session info</button>
 <div class="rebook-content">
 ```
-R version 4.2.1 (2022-06-23)
+R version 4.3.0 (2023-04-21)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 20.04.4 LTS
+Running under: Ubuntu 22.04.2 LTS
 
 Matrix products: default
-BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
-LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/liblapack.so.3
+BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
+LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.20.so;  LAPACK version 3.10.0
 
 locale:
  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
@@ -150,20 +159,23 @@ locale:
  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
 [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 
+time zone: UTC
+tzcode source: system (glibc)
+
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] BiocStyle_2.24.0 rebook_1.6.0    
+[1] BiocStyle_2.28.0 rebook_1.9.0    
 
 loaded via a namespace (and not attached):
- [1] bookdown_0.33       dir.expiry_1.4.0    codetools_0.2-19   
- [4] XML_3.99-0.14       digest_0.6.31       stats4_4.2.1       
- [7] evaluate_0.20       graph_1.74.0        rlang_1.1.0        
-[10] cli_3.6.1           filelock_1.0.2      rmarkdown_2.21     
-[13] tools_4.2.1         xfun_0.39           yaml_2.3.7         
-[16] fastmap_1.1.1       compiler_4.2.1      BiocGenerics_0.44.0
-[19] BiocManager_1.30.20 htmltools_0.5.5     CodeDepends_0.6.5  
-[22] knitr_1.42         
+ [1] graph_1.78.0        digest_0.6.31       XML_3.99-0.14      
+ [4] codetools_0.2-19    bookdown_0.33       fastmap_1.1.1      
+ [7] xfun_0.39           CodeDepends_0.6.5   dir.expiry_1.8.0   
+[10] filelock_1.0.2      knitr_1.42          BiocGenerics_0.46.0
+[13] htmltools_0.5.5     rmarkdown_2.21      stats4_4.3.0       
+[16] cli_3.6.1           compiler_4.3.0      tools_4.3.0        
+[19] evaluate_0.20       yaml_2.3.7          BiocManager_1.30.20
+[22] rlang_1.1.0        
 ```
 </div>

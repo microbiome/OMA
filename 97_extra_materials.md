@@ -285,7 +285,7 @@ ppc_summary(posterior)
 ```
 
 ```
-## Proportions of Observations within 95% Credible Interval: 0.9979
+## Proportions of Observations within 95% Credible Interval: 0.9978
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
@@ -354,7 +354,7 @@ tse_Genus <- addPerSampleDominantTaxa(tse_Genus,assay_name="relative_abundance",
 
 # Performing PCoA with Bray-Curtis dissimilarity.
 tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist, ncomponents = 3,
-              name = "PCoA_BC", exprs_values = "relative_abundance")
+              name = "PCoA_BC", assay.type = "relative_abundance")
 
 # Getting the 6 top taxa
 top_taxa <- getTopTaxa(tse_Genus,top = 6, assay_name = "relative_abundance")
@@ -374,24 +374,4 @@ most_abundant_percent <- round(most_abundant_freq/sum(most_abundant_freq)*100, 1
 e <- attr(reducedDim(tse_Genus, "PCoA_BC"), "eig");
 var_explained <- e/sum(e[e>0])*100
 ```
-
-Interactive 3D visualization of the most dominant genus on PCoA.
-Note that labels at legend can be used to visualize one or more Genus separately (double click to isolate one from the others, or toggle to select multiple ones).
-
-
-```r
-library(plotly)
-
-# 3D Visualization
-reduced_data  <- as.data.frame(reducedDim(tse_Genus)[,])
-names(reduced_data) <- c("PC1","PC2","PC3")
-plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3)%>%
-  add_markers(color=sapply(strsplit(colData(tse_Genus)$most_abundant, "_"), tail, 1), size=5,
-              colors=c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red")) %>%
-  layout(scene=list(xaxis=list(title = paste("PC1 (",round(var_explained[1],1),"%)")),
-                    yaxis=list(title = paste("PC2 (",round(var_explained[2],1),"%)")),
-                    zaxis=list(title = paste("PC3 (",round(var_explained[3],1),"%)"))))
-```
-
-![](97_extra_materials_files/figure-latex/test-rgl-1.pdf)<!-- --> 
 
