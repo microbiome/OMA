@@ -841,9 +841,9 @@ other attached packages:
  [1] ggpubr_0.6.0                   ggtree_3.8.0                  
  [3] ape_5.7-1                      pheatmap_1.0.12               
  [5] reshape2_1.4.4                 sechm_1.8.0                   
- [7] miaViz_1.7.5                   ggraph_2.1.0                  
+ [7] miaViz_1.9.1                   ggraph_2.1.0                  
  [9] patchwork_1.1.2                scater_1.28.0                 
-[11] scuttle_1.10.0                 mia_1.7.11                    
+[11] scuttle_1.10.0                 mia_1.9.2                     
 [13] MultiAssayExperiment_1.26.0    TreeSummarizedExperiment_2.1.4
 [15] Biostrings_2.68.0              XVector_0.40.0                
 [17] SingleCellExperiment_1.22.0    SummarizedExperiment_1.30.0   
@@ -922,6 +922,6 @@ loaded via a namespace (and not attached):
 [129] sparseMatrixStats_1.12.0    bit64_4.0.5                
 [131] highr_0.10                  igraph_1.4.2               
 [133] broom_1.0.4                 memoise_2.0.1              
-[135] bit_4.0.5                  
+[135] miaTime_0.1.21              bit_4.0.5                  
 ```
 </div>

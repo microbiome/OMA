@@ -118,26 +118,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    10   9
-##      Veg      13  15
+##      Mixed    15   6
+##      Veg       8  18
 ##                                         
-##                Accuracy : 0.532         
-##                  95% CI : (0.381, 0.679)
+##                Accuracy : 0.702         
+##                  95% CI : (0.551, 0.827)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.443         
+##     P-Value [Acc > NIR] : 0.00604       
 ##                                         
-##                   Kappa : 0.06          
+##                   Kappa : 0.403         
 ##                                         
-##  Mcnemar's Test P-Value : 0.522         
+##  Mcnemar's Test P-Value : 0.78927       
 ##                                         
-##             Sensitivity : 0.435         
-##             Specificity : 0.625         
-##          Pos Pred Value : 0.526         
-##          Neg Pred Value : 0.536         
+##             Sensitivity : 0.652         
+##             Specificity : 0.750         
+##          Pos Pred Value : 0.714         
+##          Neg Pred Value : 0.692         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.213         
-##    Detection Prevalence : 0.404         
-##       Balanced Accuracy : 0.530         
+##          Detection Rate : 0.319         
+##    Detection Prevalence : 0.447         
+##       Balanced Accuracy : 0.701         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -245,7 +245,7 @@ other attached packages:
  [1] patchwork_1.1.2                MLeval_0.3                    
  [3] caret_6.0-94                   lattice_0.21-8                
  [5] ggplot2_3.4.2                  mikropml_1.6.0                
- [7] mia_1.7.11                     MultiAssayExperiment_1.26.0   
+ [7] mia_1.9.2                      MultiAssayExperiment_1.26.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.68.0             
 [11] XVector_0.40.0                 SingleCellExperiment_1.22.0   
 [13] SummarizedExperiment_1.30.0    Biobase_2.60.0                

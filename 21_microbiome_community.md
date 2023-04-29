@@ -367,9 +367,9 @@ attached base packages:
 
 other attached packages:
  [1] ggtree_3.8.0                   ape_5.7-1                     
- [3] pheatmap_1.0.12                miaViz_1.7.5                  
+ [3] pheatmap_1.0.12                miaViz_1.9.1                  
  [5] ggraph_2.1.0                   ggplot2_3.4.2                 
- [7] mia_1.7.11                     MultiAssayExperiment_1.26.0   
+ [7] mia_1.9.2                      MultiAssayExperiment_1.26.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.68.0             
 [11] XVector_0.40.0                 SingleCellExperiment_1.22.0   
 [13] SummarizedExperiment_1.30.0    Biobase_2.60.0                
@@ -406,36 +406,36 @@ loaded via a namespace (and not attached):
  [47] DBI_1.1.3                   highr_0.10                 
  [49] ggforce_0.4.1               MASS_7.3-59                
  [51] DelayedArray_0.25.0         permute_0.9-7              
- [53] tools_4.3.0                 vipor_0.4.5                
- [55] beeswarm_0.4.0              glue_1.6.2                 
- [57] nlme_3.1-162                grid_4.3.0                 
- [59] cluster_2.1.4               reshape2_1.4.4             
- [61] generics_0.1.3              gtable_0.3.3               
- [63] tidyr_1.3.0                 BiocSingular_1.16.0        
- [65] tidygraph_1.2.3             ScaledMatrix_1.7.1         
- [67] utf8_1.2.3                  ggrepel_0.9.3              
- [69] pillar_1.9.0                stringr_1.5.0              
- [71] yulab.utils_0.0.6           splines_4.3.0              
- [73] dplyr_1.1.2                 tweenr_2.0.2               
- [75] treeio_1.24.0               lattice_0.21-8             
- [77] bit_4.0.5                   tidyselect_1.2.0           
- [79] DirichletMultinomial_1.42.0 scuttle_1.10.0             
- [81] knitr_1.42                  gridExtra_2.3              
- [83] bookdown_0.33               xfun_0.39                  
- [85] graphlayouts_0.8.4          stringi_1.7.12             
- [87] lazyeval_0.2.2              ggfun_0.0.9                
- [89] yaml_2.3.7                  evaluate_0.20              
- [91] codetools_0.2-19            tibble_3.2.1               
- [93] BiocManager_1.30.20         graph_1.78.0               
- [95] ggplotify_0.1.0             cli_3.6.1                  
- [97] munsell_0.5.0               Rcpp_1.0.10                
- [99] dir.expiry_1.8.0            XML_3.99-0.14              
-[101] parallel_4.3.0              blob_1.2.4                 
-[103] sparseMatrixStats_1.12.0    bitops_1.0-7               
-[105] decontam_1.20.0             viridisLite_0.4.1          
-[107] tidytree_0.4.2              scales_1.2.1               
-[109] purrr_1.0.1                 crayon_1.5.2               
-[111] rlang_1.1.0                
+ [53] miaTime_0.1.21              tools_4.3.0                
+ [55] vipor_0.4.5                 beeswarm_0.4.0             
+ [57] glue_1.6.2                  nlme_3.1-162               
+ [59] grid_4.3.0                  cluster_2.1.4              
+ [61] reshape2_1.4.4              generics_0.1.3             
+ [63] gtable_0.3.3                tidyr_1.3.0                
+ [65] BiocSingular_1.16.0         tidygraph_1.2.3            
+ [67] ScaledMatrix_1.7.1          utf8_1.2.3                 
+ [69] ggrepel_0.9.3               pillar_1.9.0               
+ [71] stringr_1.5.0               yulab.utils_0.0.6          
+ [73] splines_4.3.0               dplyr_1.1.2                
+ [75] tweenr_2.0.2                treeio_1.24.0              
+ [77] lattice_0.21-8              bit_4.0.5                  
+ [79] tidyselect_1.2.0            DirichletMultinomial_1.42.0
+ [81] scuttle_1.10.0              knitr_1.42                 
+ [83] gridExtra_2.3               bookdown_0.33              
+ [85] xfun_0.39                   graphlayouts_0.8.4         
+ [87] stringi_1.7.12              lazyeval_0.2.2             
+ [89] ggfun_0.0.9                 yaml_2.3.7                 
+ [91] evaluate_0.20               codetools_0.2-19           
+ [93] tibble_3.2.1                BiocManager_1.30.20        
+ [95] graph_1.78.0                ggplotify_0.1.0            
+ [97] cli_3.6.1                   munsell_0.5.0              
+ [99] Rcpp_1.0.10                 dir.expiry_1.8.0           
+[101] XML_3.99-0.14               parallel_4.3.0             
+[103] blob_1.2.4                  sparseMatrixStats_1.12.0   
+[105] bitops_1.0-7                decontam_1.20.0            
+[107] viridisLite_0.4.1           tidytree_0.4.2             
+[109] scales_1.2.1                purrr_1.0.1                
+[111] crayon_1.5.2                rlang_1.1.0                
 ```
 </div>
 

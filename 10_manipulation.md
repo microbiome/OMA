@@ -717,7 +717,7 @@ head(tse$NewVariable)
 ```
 
 ```
-## [1] 0.4623 0.6004 0.6190 0.4636 0.7863 0.5584
+## [1] 0.5266 0.3029 0.7318 0.2838 0.6683 0.3970
 ```
 
 ## Merge data
@@ -776,7 +776,7 @@ tse
 ## dim: 19216 2 
 ## metadata(0):
 ## assays(1): counts
-## rownames(19216): 239672 243675 ... 146168 594324
+## rownames(19216): 239672 243675 ... 239967 254851
 ## rowData names(7): Kingdom Phylum ... Genus Species
 ## colnames(2): CL3 M31Fcsw
 ## colData names(8): X.SampleID Primer ... Description NewVariable
