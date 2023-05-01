@@ -121,6 +121,12 @@ or online channels.
 
 - [ANCOMBC](https://bioconductor.org/packages/devel/bioc/html/ANCOMBC.html) for differential abundance analysis
 - [benchdamic](https://bioconductor.org/packages/release/bioc/vignettes/benchdamic/inst/doc/intro.html) for benchmarking differential abundance methods
+- [LinDA](https://cran.r-project.org/web/packages/MicrobiomeStat/) for differential abundance analysis
+- [ZicoSeq](https://cran.r-project.org/web/packages/GUniFrac/) for differential abundance analysis
+- [ALDEx2](https://www.bioconductor.org/packages/release/bioc/html/ALDEx2.html) for differential abundance analysis
+- [phyloseq](https://www.bioconductor.org/packages/release/bioc/html/phyloseq.html) for data preparation into phyloseq format for differential abundance analysis, such as ANCOMBC requires the input data is phyloseq format
+
+
 
 ### Manipulation {#sub-manipulation}
 
@@ -176,6 +182,6 @@ loaded via a namespace (and not attached):
 [13] htmltools_0.5.5     rmarkdown_2.21      stats4_4.3.0       
 [16] cli_3.6.1           compiler_4.3.0      tools_4.3.0        
 [19] evaluate_0.20       yaml_2.3.7          BiocManager_1.30.20
-[22] rlang_1.1.0        
+[22] rlang_1.1.1        
 ```
 </div>

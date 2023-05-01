@@ -580,7 +580,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] jsonlite_1.8.4              CodeDepends_0.6.5          
-  [3] magrittr_2.0.3              ggbeeswarm_0.7.1           
+  [3] magrittr_2.0.3              ggbeeswarm_0.7.2           
   [5] farver_2.1.1                rmarkdown_2.21             
   [7] zlibbioc_1.46.0             vctrs_0.6.2                
   [9] memoise_2.0.1               DelayedMatrixStats_1.22.0  
@@ -632,7 +632,7 @@ loaded via a namespace (and not attached):
 [101] bitops_1.0-7                decontam_1.20.0            
 [103] viridisLite_0.4.1           tidytree_0.4.2             
 [105] scales_1.2.1                purrr_1.0.1                
-[107] crayon_1.5.2                rlang_1.1.0                
+[107] crayon_1.5.2                rlang_1.1.1                
 [109] cowplot_1.1.1              
 ```
 </div>

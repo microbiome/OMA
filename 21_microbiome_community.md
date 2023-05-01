@@ -382,7 +382,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] RColorBrewer_1.1-3          jsonlite_1.8.4             
   [3] CodeDepends_0.6.5           magrittr_2.0.3             
-  [5] ggbeeswarm_0.7.1            farver_2.1.1               
+  [5] ggbeeswarm_0.7.2            farver_2.1.1               
   [7] rmarkdown_2.21              zlibbioc_1.46.0            
   [9] vctrs_0.6.2                 memoise_2.0.1              
  [11] DelayedMatrixStats_1.22.0   RCurl_1.98-1.12            
@@ -435,7 +435,7 @@ loaded via a namespace (and not attached):
 [105] bitops_1.0-7                decontam_1.20.0            
 [107] viridisLite_0.4.1           tidytree_0.4.2             
 [109] scales_1.2.1                purrr_1.0.1                
-[111] crayon_1.5.2                rlang_1.1.0                
+[111] crayon_1.5.2                rlang_1.1.1                
 ```
 </div>
 

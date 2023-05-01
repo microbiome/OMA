@@ -505,7 +505,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] RColorBrewer_1.1-3          jsonlite_1.8.4             
   [3] shape_1.4.6                 CodeDepends_0.6.5          
-  [5] magrittr_2.0.3              ggbeeswarm_0.7.1           
+  [5] magrittr_2.0.3              ggbeeswarm_0.7.2           
   [7] farver_2.1.1                corrplot_0.92              
   [9] rmarkdown_2.21              GlobalOptions_0.1.2        
  [11] zlibbioc_1.46.0             vctrs_0.6.2                
@@ -536,7 +536,7 @@ loaded via a namespace (and not attached):
  [61] permute_0.9-7               tools_4.3.0                
  [63] vipor_0.4.5                 beeswarm_0.4.0             
  [65] ape_5.7-1                   glue_1.6.2                 
- [67] rhdf5filters_1.12.0         nlme_3.1-162               
+ [67] rhdf5filters_1.12.1         nlme_3.1-162               
  [69] Rtsne_0.16                  cluster_2.1.4              
  [71] reshape2_1.4.4              generics_0.1.3             
  [73] gtable_0.3.3                tidyr_1.3.0                
@@ -564,7 +564,7 @@ loaded via a namespace (and not attached):
 [117] viridisLite_0.4.1           tidytree_0.4.2             
 [119] scales_1.2.1                purrr_1.0.1                
 [121] crayon_1.5.2                GetoptLong_1.0.5           
-[123] rlang_1.1.0                 cowplot_1.1.1              
+[123] rlang_1.1.1                 cowplot_1.1.1              
 ```
 </div>
 

@@ -118,26 +118,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    15   6
-##      Veg       8  18
+##      Mixed    13   7
+##      Veg      10  17
 ##                                         
-##                Accuracy : 0.702         
-##                  95% CI : (0.551, 0.827)
+##                Accuracy : 0.638         
+##                  95% CI : (0.485, 0.773)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.00604       
+##     P-Value [Acc > NIR] : 0.0536        
 ##                                         
-##                   Kappa : 0.403         
+##                   Kappa : 0.274         
 ##                                         
-##  Mcnemar's Test P-Value : 0.78927       
+##  Mcnemar's Test P-Value : 0.6276        
 ##                                         
-##             Sensitivity : 0.652         
-##             Specificity : 0.750         
-##          Pos Pred Value : 0.714         
-##          Neg Pred Value : 0.692         
+##             Sensitivity : 0.565         
+##             Specificity : 0.708         
+##          Pos Pred Value : 0.650         
+##          Neg Pred Value : 0.630         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.319         
-##    Detection Prevalence : 0.447         
-##       Balanced Accuracy : 0.701         
+##          Detection Rate : 0.277         
+##    Detection Prevalence : 0.426         
+##       Balanced Accuracy : 0.637         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -258,7 +258,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] shape_1.4.6                 jsonlite_1.8.4             
   [3] CodeDepends_0.6.5           magrittr_2.0.3             
-  [5] ggbeeswarm_0.7.1            farver_2.1.1               
+  [5] ggbeeswarm_0.7.2            farver_2.1.1               
   [7] rmarkdown_2.21              zlibbioc_1.46.0            
   [9] vctrs_0.6.2                 ROCR_1.0-11                
  [11] memoise_2.0.1               DelayedMatrixStats_1.22.0  
@@ -320,7 +320,7 @@ loaded via a namespace (and not attached):
 [123] tidytree_0.4.2              ipred_0.9-14               
 [125] e1071_1.7-13                scales_1.2.1               
 [127] prodlim_2023.03.31          purrr_1.0.1                
-[129] crayon_1.5.2                rlang_1.1.0                
+[129] crayon_1.5.2                rlang_1.1.1                
 ```
 </div>
 

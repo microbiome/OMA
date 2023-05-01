@@ -912,9 +912,9 @@ loaded via a namespace (and not attached):
 [109] beachmat_2.16.0             cluster_2.1.4              
 [111] beeswarm_0.4.0              evaluate_0.20              
 [113] cli_3.6.1                   compiler_4.3.0             
-[115] rlang_1.1.0                 crayon_1.5.2               
+[115] rlang_1.1.1                 crayon_1.5.2               
 [117] ggsignif_0.6.4              labeling_0.4.2             
-[119] plyr_1.8.8                  ggbeeswarm_0.7.1           
+[119] plyr_1.8.8                  ggbeeswarm_0.7.2           
 [121] stringi_1.7.12              viridisLite_0.4.1          
 [123] BiocParallel_1.34.0         munsell_0.5.0              
 [125] lazyeval_0.2.2              V8_4.3.0                   

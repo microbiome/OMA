@@ -371,7 +371,7 @@ other attached packages:
 loaded via a namespace (and not attached):
  [1] DBI_1.1.3                   bitops_1.0-7               
  [3] gridExtra_2.3               permute_0.9-7              
- [5] CodeDepends_0.6.5           rlang_1.1.0                
+ [5] CodeDepends_0.6.5           rlang_1.1.1                
  [7] magrittr_2.0.3              compiler_4.3.0             
  [9] RSQLite_2.3.1               mgcv_1.8-42                
 [11] dir.expiry_1.8.0            DelayedMatrixStats_1.22.0  
@@ -380,7 +380,7 @@ loaded via a namespace (and not attached):
 [17] crayon_1.5.2                fastmap_1.1.1              
 [19] labeling_0.4.2              utf8_1.2.3                 
 [21] rmarkdown_2.21              graph_1.78.0               
-[23] ggbeeswarm_0.7.1            DirichletMultinomial_1.42.0
+[23] ggbeeswarm_0.7.2            DirichletMultinomial_1.42.0
 [25] purrr_1.0.1                 bit_4.0.5                  
 [27] xfun_0.39                   zlibbioc_1.46.0            
 [29] cachem_1.0.7                beachmat_2.16.0            

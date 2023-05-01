@@ -1378,7 +1378,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] jsonlite_1.8.4                CodeDepends_0.6.5            
-  [3] magrittr_2.0.3                ggbeeswarm_0.7.1             
+  [3] magrittr_2.0.3                ggbeeswarm_0.7.2             
   [5] rmarkdown_2.21                zlibbioc_1.46.0              
   [7] vctrs_0.6.2                   multtest_2.56.0              
   [9] memoise_2.0.1                 DelayedMatrixStats_1.22.0    
@@ -1408,7 +1408,7 @@ loaded via a namespace (and not attached):
  [57] vipor_0.4.5                   beeswarm_0.4.0               
  [59] ape_5.7-1                     interactiveDisplayBase_1.38.0
  [61] httpuv_1.6.9                  glue_1.6.2                   
- [63] rhdf5filters_1.12.0           nlme_3.1-162                 
+ [63] rhdf5filters_1.12.1           nlme_3.1-162                 
  [65] promises_1.2.0.1              grid_4.3.0                   
  [67] ade4_1.7-22                   cluster_2.1.4                
  [69] reshape2_1.4.4                generics_0.1.3               
@@ -1438,7 +1438,7 @@ loaded via a namespace (and not attached):
 [117] bitops_1.0-7                  decontam_1.20.0              
 [119] viridisLite_0.4.1             tidytree_0.4.2               
 [121] scales_1.2.1                  purrr_1.0.1                  
-[123] crayon_1.5.2                  rlang_1.1.0                  
+[123] crayon_1.5.2                  rlang_1.1.1                  
 [125] KEGGREST_1.40.0              
 ```
 </div>

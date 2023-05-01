@@ -1,5 +1,4 @@
 # Differential abundance {#differential-abundance}
-
 <script>
 document.addEventListener("click", function (event) {
     if (event.target.classList.contains("rebook-collapse")) {
@@ -36,8 +35,8 @@ document.addEventListener("click", function (event) {
 </style>
 
 
-
 ## Differential abundance analysis
+
 
 This section provides an overview and examples of *differential
 abundance analysis (DAA)* based on one of the [openly available
@@ -59,8 +58,32 @@ has also been criticized recently [@Quinn2021].
 
 ### Examples and tools
 
-There are many tools to perform DAA. The most popular tools, without going into
-evaluating whether or not they perform well for this task, are:  
+Due to the complex data characteristics of microbiome sequencing data, differential abundance analysis of microbiome data faces many statistical challenges [@Yang2022], including:
+  
+- Highly variable. The abundance of a specific taxon could range over several orders of magnitude. 
+  
+- Zero-inflated. In a typical microbiome dataset, more than 70% of the values are zeros. Zeros could be due to either physical absence (structural zeros) or insufficient sampling effort (sampling zeros).
+  
+- Compositional. Increase or decrease in the (absolute) abundance of one taxon at the sampling site will lead to apparent changes in the relative abundances of other taxa in the sample. 
+
+As summarized in @Yang2022, to address the above statistical chanllenegs:
+
+- Over-dispersed count models has been proposed to address zero inflation, such as the negative binomial model used by edgeR [@Chen2016] and DESeq2 [@Love2014], the beta-binomial model used by corncorb [@Martin2021]. 
+
+- Zero-inflated mixture models has aslo been proposed to address zero inflation, such as zero-inflated log-normal/normal mixture model used by metagenomeSeq [@Paulson2017] and RAIDA [@Sohn2015], zero-inflated beta-binomial model used by ZIBB [@ZIBB2018], and zero-inflated negative binomial model used by Omnibus [@Omnibus2018]. 
+
+- Bayesian methods have been used to impute the zeros for methods working on proportion data, accounting for sampling variability and sequencing depth variation. Examples include ALDEx2 [@Gloor2016] and eBay [@Liu2020]. 
+
+- Other methods use the pseudo-count approach to impute the zeros, such as MaAsLin2 [@Mallick2020] and ANCOMBC [@ancombc2020].
+
+- Different strategies have been used to address compositional effects, including:
+
+  - Robust normalization. For example, trimmed mean of M-values (TMM) normalization used by edgeR, relative log expression (RLE) normalization used by DESeq2 [@Love2014], cumulative sum scaling (CSS) normalization used by metagenomeSeq, centered log-ratio transformation (CLR) normalization used by ALDEx2 [@Gloor2016] and geometric mean of pairwise ratios (GMPR) normalization used by Omnibus [@Omnibus2018]. Wrench normalization [@Kumar2018] corrects the compositional bias by an empirical Bayes approach, which has been recommended in metagenomeSeq [@Paulson2017] tutorial.
+  - Reference taxa approach used by DACOMP [@Brill2019] and RAIDA [@Sohn2015]. 
+  - Analyzing the pattern of pairwise log ratios, such as ANCOM [@Mandal2015].
+  - Bias-correction used by ANCOMBC [@ancombc2020].
+
+The most popular tools, without going into evaluating whether or not they perform well for this task, are:  
 
 - ALDEx2 [@Gloor2016] 
 - ANCOMBC [@ancombc2020]
@@ -68,10 +91,19 @@ evaluating whether or not they perform well for this task, are:
 - DESeq2 [@Love2014] 
 - edgeR [@Chen2016]
 - lefser [@Khlebrodova2021]
-- Maaslin2 [@Mallick2020]
+- MaAsLin2 [@Mallick2020]
 - metagenomeSeq [@Paulson2017]
 - limma [@Ritchie2015]
 - LinDA [@Zhou2022]
+- ZicoSeq [@Yang2022]
+- LDM [@Hu2020]
+- RAIDA [@Sohn2015]
+- DACOMP [@Brill2019]
+- Omnibus [@Omnibus2018]
+- eBay [@Liu2020]
+- ZINQ [@Ling2021]
+- ANCOM [@Mandal2015]
+- fastANCOM [@fastANCOM2022]
 - [t-test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/t.test)  
 - [Wilcoxon test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/wilcox.test)  
 
@@ -81,17 +113,13 @@ who compared all these listed methods across 38
 different datasets. Because different methods use different approaches
 (parametric vs non-parametric, different normalization techiniques, assumptions
 etc.), results can differ between methods. 
-Unfortunately, as @Nearing2022 point out, they
-can differ substantially. Therefore, it is highly recommended to pick several
-methods to get an idea about how robust and potentially reproducible your
-findings are depending on the method. In this section we demonstrate 4 methods
-that can be recommended based on recent literature (ANCOM-BC, ALDEx2, Maaslin2
-and LinDA) and we will compare the results between them.
+Unfortunately, as @Nearing2022 point out, they can differ substantially. Also, more recently @Yang2022 comprehensively evaluated these methods via a Semi-parametric framework and 106 real datasets. @Yang2022 also pointed out, different DAA tools could sometimes produce quite discordant results, opening to the possibility of cherry-picking the tool in favor of one’s own hypothesis. Therefore, it is highly recommended to pick several methods to get an idea about how robust and potentially reproducible your findings are depending on the method. In this section we demonstrate 4 methods that can be recommended based on recent literature (ANCOM-BC [@ancombc2020], ALDEx2 [@Gloor2016], Maaslin2 [@Mallick2020], LinDA [@Zhou2022] and ZicoSeq [@Yang2022]) and we will compare the results between them.
+
 Note that the purpose of this section is to show how to perform DAA in R, not
 how to correctly do causal inference. Depending on your experimental setup
 and your theory, you must determine how to specify any model exactly. 
 E.g., there might be confounding factors that might drive (the absence of)
-differences between the shown groups that we ignore here for simplicity.
+differences between the shown groups that we ignore here for simplicity. Or your dataset is repeated sampling design, matched-pair design or the general longitudianl design.
 However, we will show how you could include covariates in those models.
 Furthermore, we picked a dataset that merely has microbial abundances in a TSE
 object as well as a grouping variable in the sample data. We simplify the
@@ -99,18 +127,27 @@ analysis by only including 2 of the 3 groups.
 
 
 
-
-
 ```r
 library(mia)
 library(patchwork)
 library(tidySummarizedExperiment)
+library(knitr)
+library(tidyverse)
+library(phyloseq)
 library(ALDEx2)
 library(Maaslin2)
 library(MicrobiomeStat)
-library(knitr)
-library(tidyverse)
-library(ANCOMBC)
+
+if(!require(ANCOMBC)){
+  BiocManager::install("ANCOMBC")
+  library(ANCOMBC)
+
+}
+if(!require(GUniFrac)){
+  install.packages("GUniFrac")
+  library(GUniFrac)
+}
+
 
 # set random seed because some tools can randomly vary and then produce 
 # different results:
@@ -258,7 +295,7 @@ article](https://www.nature.com/articles/d41586-019-00857-9)).
 ```r
 rownames_to_column(aldex_out, "genus") %>%
   filter(wi.eBH <= 0.05)  %>% # here we chose the wilcoxon output rather than tt
-  select(genus, we.eBH, wi.eBH, effect, overlap) %>%
+  dplyr::select(genus, we.eBH, wi.eBH, effect, overlap) %>%
   kable()
 ```
 
@@ -290,7 +327,7 @@ OTU2529 & 0.1113 & 0.0449 & -0.8634 & 0.1929\\
 ### ANCOM-BC
 
 The analysis of composition of microbiomes with bias correction
-(ANCOM-BC) [@Das2020] is a recently developed method for differential
+(ANCOM-BC) [@ancombc2020] is a recently developed method for differential
 abundance testing. It is based on an earlier published approach
 [@Mandal2015].  The previous version of ANCOM was among the methods
 that produced the most consistent results and is probably a
@@ -324,24 +361,27 @@ that we specify.
 
 
 ```r
+# make phyloseq object
+otu <- otu_table(assay(tse), taxa_are_rows = T)
+taxa <- tax_table(as.matrix(rowData(tse)))
+meta <- sample_data(as.data.frame(colData(tse)))
+phy <- phyloseq(otu,taxa,meta)
 # perform the analysis 
-out <- ancombc2(
-  data = tse,
-  tax_level="genus",
-  fix_formula = "Geographical_location", 
+out <- ancombc(
+  phyloseq = phy,
+  formula = "Geographical_location", 
   p_adj_method = "fdr", 
-  prv_cut = 0, # prev filtering has been done above already
   lib_cut = 0, 
   group = "Geographical_location", 
   struc_zero = TRUE, 
   neg_lb = TRUE,
-  iter_control = list(tol = 1e-5, max_iter = 20, verbose = FALSE),
-  em_control = list(tol = 1e-5, max_iter = 20), # use max_iter >= 100 on real data 
   alpha = 0.05, 
   global = TRUE # multi group comparison will be deactivated automatically 
 )
-# store the results in res 
-res <- out$res
+# store the FDR adjusted results [test on v2.0.3] 
+ancombc_out <- cbind.data.frame(taxid = out$res$q_val$taxon, ancombc = as.vector(out$res$q_val$Geographical_locationPune))
+# store the FDR adjusted results [test on v1.2.2] 
+# ancombc_out <- out$res$q_val %>% rownames_to_column('taxid') %>% dplyr::rename(ancombc = 2)
 ```
 
 The object `out` contains all model output. Again, see the 
@@ -356,25 +396,25 @@ black-white). Below we show the first 6 entries of this dataframe:
 
 
 ```r
-kable(head(res))
+kable(head(ancombc_out))
 ```
 
 
-\begin{tabular}{l|r|r|r|r|r|r|r|r|r|r|l|l}
+\begin{tabular}{l|r}
 \hline
-taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & se\_(Intercept) & se\_Geographical\_locationPune & W\_(Intercept) & W\_Geographical\_locationPune & p\_(Intercept) & p\_Geographical\_locationPune & q\_(Intercept) & q\_Geographical\_locationPune & diff\_(Intercept) & diff\_Geographical\_locationPune\\
+taxid & ancombc\\
 \hline
-Abyssicoccus & 0.0399 & -0.0570 & 0.1675 & 0.1915 & 0.2383 & -0.2975 & 0.8117 & 0.7661 & 0.8718 & 0.8463 & FALSE & FALSE\\
+OTU2 & 0.5501\\
 \hline
-Acidaminococcus & 0.6874 & -0.9024 & 0.1947 & 0.2225 & 3.5304 & -4.0547 & 0.0004 & 0.0001 & 0.0032 & 0.0004 & TRUE & TRUE\\
+OTU15 & 0.0253\\
 \hline
-Acinetobacter & 0.1243 & -0.1672 & 0.7823 & 0.8940 & 0.1589 & -0.1870 & 0.8737 & 0.8516 & 0.8969 & 0.8701 & FALSE & FALSE\\
+OTU22 & 0.0000\\
 \hline
-Actinomyces & 0.1347 & -0.1807 & 0.1938 & 0.2215 & 0.6952 & -0.8161 & 0.4869 & 0.4145 & 0.6596 & 0.5616 & FALSE & FALSE\\
+OTU53 & 0.8949\\
 \hline
-Actinoplanes & 0.2716 & -0.3594 & 0.1635 & 0.1869 & 1.6608 & -1.9231 & 0.0967 & 0.0545 & 0.2793 & 0.1504 & FALSE & FALSE\\
+OTU69 & 0.0000\\
 \hline
-Aerococcus & 0.0237 & -0.0358 & 0.1677 & 0.1917 & 0.1413 & -0.1868 & 0.8876 & 0.8519 & 0.8994 & 0.8701 & FALSE & FALSE\\
+OTU76 & 0.0000\\
 \hline
 \end{tabular}
 
@@ -382,11 +422,10 @@ Aerococcus & 0.0237 & -0.0358 & 0.1677 & 0.1917 & 0.1413 & -0.1868 & 0.8876 & 0.
 
 ### MaAsLin2 
 
-Next, we will illustrate the use of MaAsLin2. The method is based on
+Next, we will illustrate the use of MaAsLin2 [@Mallick2020]. The method is based on
 generalized linear models. It is flexible for different study designs
 and covariate structures. For more details, you can check their [official
 tutorial](https://github.com/biobakery/biobakery/wiki/maaslin2).
-
 
 
 ```r
@@ -396,7 +435,7 @@ asv <- t(assay(tse))
 meta_data <- data.frame(colData(tse))
 # We can specify different GLMs/normalizations/transforms.
 # Let us use similar settings as in Nearing et al. (2021):
-fit_data <- Maaslin2(
+maaslin2_out <- Maaslin2(
   asv,
   meta_data,
   output = "DAA example",
@@ -404,7 +443,7 @@ fit_data <- Maaslin2(
   fixed_effects = "Geographical_location",
   # random_effects = c(...), # you can also fit MLM by specifying random effects
   # specifying a ref is especially important if you have more than 2 levels
-  # reference = "Geographical_location,Pune",  
+  reference = "Geographical_location,Pune",  
   normalization = "TSS",
   standardize = FALSE,
   min_prevalence = 0 # prev filterin already done
@@ -415,7 +454,7 @@ Which genera are identified as differentially abundant? (leave out "head" to see
 
 
 ```r
-kable(head(filter(fit_data$results, qval <= 0.05)))
+kable(head(filter(maaslin2_out$results, qval <= 0.05)))
 ```
 
 
@@ -423,17 +462,17 @@ kable(head(filter(fit_data$results, qval <= 0.05)))
 \hline
 feature & metadata & value & coef & stderr & pval & name & qval & N & N.not.zero\\
 \hline
-OTU1053 & Geographical\_location & Pune & -0.0080 & 0.0011 & 0 & Geographical\_locationPune & 0 & 47 & 9\\
+OTU1053 & Geographical\_location & Nashik & 0.0080 & 0.0011 & 0 & Geographical\_locationNashik & 0 & 47 & 9\\
 \hline
-OTU860 & Geographical\_location & Pune & -0.0373 & 0.0059 & 0 & Geographical\_locationPune & 0 & 47 & 13\\
+OTU860 & Geographical\_location & Nashik & 0.0373 & 0.0059 & 0 & Geographical\_locationNashik & 0 & 47 & 13\\
 \hline
-OTU1075 & Geographical\_location & Pune & -0.1295 & 0.0207 & 0 & Geographical\_locationPune & 0 & 47 & 27\\
+OTU1075 & Geographical\_location & Nashik & 0.1295 & 0.0207 & 0 & Geographical\_locationNashik & 0 & 47 & 27\\
 \hline
-OTU1980 & Geographical\_location & Pune & -0.0395 & 0.0062 & 0 & Geographical\_locationPune & 0 & 47 & 9\\
+OTU1980 & Geographical\_location & Nashik & 0.0395 & 0.0062 & 0 & Geographical\_locationNashik & 0 & 47 & 9\\
 \hline
-OTU611 & Geographical\_location & Pune & -0.0274 & 0.0045 & 0 & Geographical\_locationPune & 0 & 47 & 10\\
+OTU611 & Geographical\_location & Nashik & 0.0274 & 0.0045 & 0 & Geographical\_locationNashik & 0 & 47 & 10\\
 \hline
-OTU2335 & Geographical\_location & Pune & -0.0089 & 0.0015 & 0 & Geographical\_locationPune & 0 & 47 & 10\\
+OTU2335 & Geographical\_location & Nashik & 0.0089 & 0.0015 & 0 & Geographical\_locationNashik & 0 & 47 & 10\\
 \hline
 \end{tabular}
 
@@ -460,8 +499,8 @@ datasets with a very high number of features.
 
 ```r
 otu.tab <- as.data.frame(assay(tse))
-meta <- as.data.frame(colData(tse)) %>% select(Geographical_location)
-res <- linda(
+meta <- as.data.frame(colData(tse)) %>% dplyr::select(Geographical_location)
+linda.res <- linda(
   otu.tab, 
   meta, 
   formula = '~Geographical_location', 
@@ -479,8 +518,9 @@ res <- linda(
 ```
 
 ```r
+linda_out <- linda.res$output$Geographical_locationPune
 # to scan the table for genera where H0 could be rejected:
-kable(head(filter(as.data.frame(res$output$Geographical_locationPune), reject)))
+kable(head(filter(as.data.frame(linda_out), reject)))
 ```
 
 
@@ -502,6 +542,80 @@ OTU194 & 869.3 & 4.3671 & 1.2254 & 3.564 & 0.0009 & 0.0054 & TRUE & 45\\
 \hline
 \end{tabular}
 
+### ZicoSeq
+
+Subsequently, we add a linear model and permutation-based method, see details at [tutorial](https://cran.r-project.org/web/packages/GUniFrac/vignettes/ZicoSeq.html). This approach has been assessed to exhibit high power and a low false discovery rate, which has the following components: 
+
+  - 1) Winsorization to decrease the influence of outliers;
+  - 2) Posterior sampling based on a beta mixture prior to address sampling variability and zero inflation;
+  - 3) Reference-based multiple-stage normalization to address compositional effects;
+
+
+
+```r
+set.seed(123)
+otu.tab <- as.matrix(assay(tse))
+meta <- as.data.frame(colData(tse)) 
+zicoseq.obj <- GUniFrac::ZicoSeq(meta.dat = meta, 
+                                 feature.dat = otu.tab,
+                                 grp.name = 'Geographical_location',
+                                 adj.name = NULL, 
+                                 feature.dat.type = 'count',
+                                 prev.filter = 0,
+                                 perm.no = 999,
+                                 mean.abund.filter = 0,
+                                 max.abund.filter = 0,
+                                 return.feature.dat = T)
+```
+
+```
+## 0  features are filtered!
+## The data has  47  samples and  262  features will be tested!
+## On average,  1  outlier counts will be replaced for each feature!
+## Fitting beta mixture ...
+## Finding the references ...
+## Permutation testing ...
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## Completed!
+```
+
+```r
+zicoseq_out <- cbind.data.frame(p.raw=zicoseq.obj$p.raw, p.adj.fdr=zicoseq.obj$p.adj.fdr) 
+kable(head(filter(zicoseq_out, p.adj.fdr<0.05)))
+```
+
+
+\begin{tabular}{l|r|r}
+\hline
+  & p.raw & p.adj.fdr\\
+\hline
+OTU76 & 0.001 & 0.0001\\
+\hline
+OTU127 & 0.001 & 0.0038\\
+\hline
+OTU207 & 0.001 & 0.0094\\
+\hline
+OTU211 & 0.001 & 0.0001\\
+\hline
+OTU610 & 0.001 & 0.0094\\
+\hline
+OTU611 & 0.001 & 0.0001\\
+\hline
+\end{tabular}
+
+
+
+```r
+## x-axis is the effect size: R2 * direction of coefficient
+ZicoSeq.plot(ZicoSeq.obj = zicoseq.obj, meta.dat = meta, pvalue.type ='p.adj.fdr')
+```
+
+![](30_differential_abundance_files/figure-latex/ZicoSeqplot-1.pdf)<!-- --> 
 
 
 
@@ -509,7 +623,7 @@ OTU194 & 869.3 & 4.3671 & 1.2254 & 3.564 & 0.0009 & 0.0054 & TRUE & 45\\
 
 When we compare the methods in the context of a research question, we could
 look at e.g. at whether they agree based on the applied decision criterion
-(e.g. adjusted p value < 0.05). That is what we illustrate here. First we will 
+(e.g. adjusted p value <= 0.05). That is what we illustrate here. First we will 
 look at how many taxa were identified by each method to begin with. In the next
 step we will look at the intersection of identified taxa. To achieve that, we
 first create a dataframe that summarises the decision criterion for each method
@@ -519,34 +633,19 @@ taxon.
 
 
 ```r
-# change genus names to otu ids for ancombc results to make it joinable with others
-id_switch <- as.data.frame(rowData(tse)) %>%
-  rownames_to_column("taxid") %>%
-  select(taxid, genus)
-abc_res <- select(out$res, genus = taxon, ancombc = diff_Geographical_locationPune) %>%
-  left_join(id_switch, by = "genus") %>%
-  select(-genus)
-
-# join all results together
-summ <- full_join(
-    rownames_to_column(aldex_out, "taxid") %>%
-      select(taxid, aldex2 = wi.eBH),
-    abc_res,
-    by = "taxid") %>%
+summ <- full_join(rownames_to_column(aldex_out, "taxid") %>% dplyr::select(taxid, aldex2 = wi.eBH),
+    ancombc_out,by = "taxid") %>%
   full_join(
-    select(fit_data$results, taxid = feature, maaslin2 = qval), 
+    dplyr::select(maaslin2_out$results, taxid = feature, maaslin2 = qval), 
     by = "taxid") %>%
-    full_join(
-      rownames_to_column(as.data.frame(res$output$Geographical_locationPune), "taxid") %>%
-        select(taxid, LinDA = reject), 
-      by = "taxid") %>%
+    full_join(linda_out %>% rename(LinDA=padj) %>% dplyr::select(LinDA)%>% rownames_to_column('taxid') ) %>%
+  full_join(zicoseq_out %>% dplyr::select(p.adj.fdr) %>% rename(ZicoSeq = p.adj.fdr) %>% rownames_to_column('taxid')) %>%
   mutate(
-    across(c(aldex2, maaslin2), ~ .x <= 0.05),
+    across(c(aldex2: ZicoSeq), ~ .x <= 0.05),
     # the following line would be necessary without prevalence filtering 
     # as some methods output NA
-    #across(-genus, function(x) ifelse(is.na(x), FALSE, x)),
-    ancombc = ifelse(is.na(ancombc), FALSE, ancombc),
-    score = rowSums(across(c(aldex2, ancombc, maaslin2, LinDA))),
+    #across(-taxid, function(x) ifelse(is.na(x), FALSE, x)),
+    score = rowSums(across(c(aldex2, ancombc, maaslin2, LinDA, ZicoSeq)))
   )
 
 # This is how it looks like:
@@ -554,21 +653,21 @@ kable(head(summ))
 ```
 
 
-\begin{tabular}{l|l|l|l|l|r}
+\begin{tabular}{l|l|l|l|l|l|r}
 \hline
-taxid & aldex2 & ancombc & maaslin2 & LinDA & score\\
+taxid & aldex2 & ancombc & maaslin2 & LinDA & ZicoSeq & score\\
 \hline
-OTU2 & FALSE & FALSE & FALSE & FALSE & 0\\
+OTU2 & FALSE & FALSE & FALSE & FALSE & FALSE & 0\\
 \hline
-OTU15 & FALSE & TRUE & TRUE & TRUE & 3\\
+OTU15 & FALSE & TRUE & TRUE & TRUE & FALSE & 3\\
 \hline
-OTU22 & FALSE & FALSE & TRUE & TRUE & 2\\
+OTU22 & FALSE & TRUE & TRUE & TRUE & FALSE & 3\\
 \hline
-OTU53 & FALSE & FALSE & FALSE & FALSE & 0\\
+OTU53 & FALSE & FALSE & FALSE & FALSE & FALSE & 0\\
 \hline
-OTU69 & FALSE & FALSE & FALSE & FALSE & 0\\
+OTU69 & FALSE & TRUE & FALSE & FALSE & FALSE & 1\\
 \hline
-OTU76 & FALSE & FALSE & TRUE & TRUE & 2\\
+OTU76 & FALSE & TRUE & TRUE & TRUE & TRUE & 4\\
 \hline
 \end{tabular}
 
@@ -582,35 +681,33 @@ summarise(summ, across(where(is.logical), sum)) %>%
 ```
 
 
-\begin{tabular}{r|r|r|r}
+\begin{tabular}{r|r|r|r|r}
 \hline
-aldex2 & ancombc & maaslin2 & LinDA\\
+aldex2 & ancombc & maaslin2 & LinDA & ZicoSeq\\
 \hline
-9 & 31 & 67 & 75\\
+9 & 165 & 67 & 75 & 18\\
 \hline
 \end{tabular}
 
 ```r
 # which genera are identified by all methods?
-filter(summ, score == 4) %>% kable()
+filter(summ, score == 5) %>% kable()
 ```
 
 
-\begin{tabular}{l|l|l|l|l|r}
+\begin{tabular}{l|l|l|l|l|l|r}
 \hline
-taxid & aldex2 & ancombc & maaslin2 & LinDA & score\\
+taxid & aldex2 & ancombc & maaslin2 & LinDA & ZicoSeq & score\\
 \hline
-OTU773 & TRUE & TRUE & TRUE & TRUE & 4\\
+OTU611 & TRUE & TRUE & TRUE & TRUE & TRUE & 5\\
 \hline
-OTU860 & TRUE & TRUE & TRUE & TRUE & 4\\
+OTU773 & TRUE & TRUE & TRUE & TRUE & TRUE & 5\\
 \hline
-OTU1075 & TRUE & TRUE & TRUE & TRUE & 4\\
+OTU860 & TRUE & TRUE & TRUE & TRUE & TRUE & 5\\
 \hline
-OTU1235 & TRUE & TRUE & TRUE & TRUE & 4\\
+OTU1075 & TRUE & TRUE & TRUE & TRUE & TRUE & 5\\
 \hline
-OTU1680 & TRUE & TRUE & TRUE & TRUE & 4\\
-\hline
-OTU2529 & TRUE & TRUE & TRUE & TRUE & 4\\
+OTU2529 & TRUE & TRUE & TRUE & TRUE & TRUE & 5\\
 \hline
 \end{tabular}
 
@@ -628,7 +725,7 @@ tse <- peerj13075
 
 # Add relative abundances and clr abundances
 tse <- transformCounts(tse, method="relabundance")
-tse <- transformCounts(tse, method="clr", pseudocount=1)
+tse <- transformCounts(tse, method="clr", pseudocount=1) # not bale to run
 
 # Subset to prevalent taxa (exclude rare taxa at 10 percent prevalence using 0 detection threshold):
 # do the subsetting based on the relative abundance assay
@@ -644,17 +741,18 @@ tse$Geographical_location <- factor(tse$Geographical_location)
 assay.type <- "relabundance"
 plot_data <- data.frame(t(assay(tse, assay.type)))
 plot_data$Geographical_location <- tse$Geographical_location
-plots <- pmap(select(summ, taxid, score), function(taxid, score) {
+plots <- pmap(dplyr::select(summ, taxid, score), function(taxid, score) {
   ggplot(plot_data, aes_string(x="Geographical_location", y=taxid)) +
     geom_boxplot(outlier.shape = NA) +
     geom_jitter(width = 0.2) +
-    scale_y_log10() + 
+    # scale_y_log10() + # log trans will cause 0 values missing 
+    scale_y_sqrt() + 
     labs(title=glue::glue("{taxid}"), x="", y=glue::glue("Abundance ({assay.type})")) +    
     theme_bw() +
     theme(legend.position = "none")
 })
 
-# now we can show only those genera that have at least score 3 (or 2 or 1)
+# now we can show only those genera that have at least score 5 (or 4 or 3 or 2 or 1)
 robust_plots <- plots[summ$score == 4 & !is.na(summ$score)] 
 
 # to display this nicely in the book we use patchwork here:
@@ -680,7 +778,8 @@ ancombc_plots[[1]] +
   ancombc_plots[[3]] + 
   ancombc_plots[[4]] +
   ancombc_plots[[5]] +
-  ancombc_plots[[6]] 
+  ancombc_plots[[6]] +
+  plot_layout(nrow = 1)
 ```
 
 ![](30_differential_abundance_files/figure-latex/daplotting-2.pdf)<!-- --> 
@@ -689,56 +788,167 @@ ancombc_plots[[1]] +
 
 ### Confounding variables
 
-To perform causal inference, it is crucial that the method is able to include
-covariates in the model. This is not possible with e.g. the Wilcoxon test.
-Other methods such as both ANCOM methods, ALDEx2, LinDA, MaAsLin2 and others
-allow this. Below we show how to include a covariate in ANCOM-BC.
-It is very similar for all the methods that allow this. Since in this dataset
-there are no covariates, I first simulate a new variable and add it to the TSE
-object.
+Confounders are common for microbiome studies. In general, it can be classified into 3 types:
 
+- Biological confounder, such as age, sex, etc. 
+- Technical confounder that caused by data collection, storage, DNA extraction, sequencing process, etc. 
+- Confounder caused by experimental models, such as cage effect, sample background, etc. 
+
+Adjusting confounder is necessary and important to reach a valid conclusion. To perform causal inference, it is crucial that the method is able to include covariates in the model. This is not possible with e.g. the Wilcoxon test. Other methods such as DESeq2, edgeR, ANCOMBC, LDM, Aldex2, Corncob, MaAsLin2, ZicoSeq, fastANCOM and ZINQ allow this. Below we show how to include a confounder/covariate in ANCOMBC, LinDA and ZicoSeq.
+
+
+#### ANCOMBC
 
 
 ```r
-# FIXME: switch to a faster example / method
-out_cov = ancombc2(
-  data = tse, 
-  fix_formula = "Geographical_location + Age", # here we add Age to the model
+# make phyloseq object
+otu <- otu_table(assay(tse), taxa_are_rows = T)
+taxa <- tax_table(as.matrix(rowData(tse)))
+meta <- sample_data(as.data.frame(colData(tse)))
+phy <- phyloseq(otu,taxa,meta)
+# perform the analysis 
+ancombc_cov <- ancombc(
+  phyloseq = phy,
+  formula = "Geographical_location + Age", 
   p_adj_method = "fdr", 
-  prv_cut = 0,  # we did that already
   lib_cut = 0, 
-  group = "Geographical_location",
+  group = "Geographical_location", 
   struc_zero = TRUE, 
-  neg_lb = TRUE, 
-  iter_control = list(tol = 1e-5, max_iter = 20, verbose = FALSE),
-  em_control = list(tol = 1e-5, max_iter = 20),
+  neg_lb = TRUE,
   alpha = 0.05, 
   global = TRUE # multi group comparison will be deactivated automatically 
 )
-
 # now the model answers the question: holding Age constant, are 
 # bacterial taxa differentially abundant? Or, if that is of interest,
 # holding phenotype constant, is Age associated with bacterial abundance?
 # Again we only show the first 6 entries.
-kable(head(out_cov$res))
+kable(head(ancombc_cov$res$q_val))
 ```
 
 
-\begin{tabular}{l|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|r|l|l|l|l}
+\begin{tabular}{l|r|r|r|r}
 \hline
-taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & lfc\_AgeElderly & lfc\_AgeMiddle\_age & se\_(Intercept) & se\_Geographical\_locationPune & se\_AgeElderly & se\_AgeMiddle\_age & W\_(Intercept) & W\_Geographical\_locationPune & W\_AgeElderly & W\_AgeMiddle\_age & p\_(Intercept) & p\_Geographical\_locationPune & p\_AgeElderly & p\_AgeMiddle\_age & q\_(Intercept) & q\_Geographical\_locationPune & q\_AgeElderly & q\_AgeMiddle\_age & diff\_(Intercept) & diff\_Geographical\_locationPune & diff\_AgeElderly & diff\_AgeMiddle\_age\\
+taxon & (Intercept) & Geographical\_locationPune & AgeElderly & AgeMiddle\_age\\
 \hline
-OTU2 & 0.0441 & -0.1005 & 0.0892 & 0.0118 & 0.1727 & 0.2390 & 0.2301 & 0.2346 & 0.2553 & -0.4203 & 0.3876 & 0.0504 & 0.7985 & 0.6742 & 0.6983 & 0.9598 & 0.8739 & 0.9143 & 0.9128 & 0.9925 & FALSE & FALSE & FALSE & FALSE\\
+OTU2 & 0.3110 & 0.9049 & 0.8293 & 0.8582\\
 \hline
-OTU15 & 0.7071 & -0.7615 & -0.2435 & -0.1584 & 0.1988 & 0.2752 & 0.2649 & 0.2702 & 3.5567 & -2.7669 & -0.9190 & -0.5865 & 0.0004 & 0.0057 & 0.3581 & 0.5576 & 0.0029 & 0.0365 & 0.8827 & 0.9891 & TRUE & TRUE & FALSE & FALSE\\
+OTU15 & 0.0122 & 0.0188 & 0.4545 & 0.9543\\
 \hline
-OTU53 & 0.0248 & -1.0822 & 1.4991 & 1.1526 & 0.7869 & 1.0893 & 1.0491 & 1.0698 & 0.0315 & -0.9935 & 1.4289 & 1.0774 & 0.9749 & 0.3205 & 0.1530 & 0.2813 & 0.9749 & 0.6300 & 0.7718 & 0.7889 & FALSE & FALSE & FALSE & FALSE\\
+OTU22 & 0.9749 & 0.0000 & 0.7095 & 0.3344\\
 \hline
-OTU87 & 0.1808 & 0.1182 & -0.4585 & -0.4494 & 0.1907 & 0.2640 & 0.2541 & 0.2592 & 0.9481 & 0.4476 & -1.8039 & -1.7342 & 0.3431 & 0.6544 & 0.0712 & 0.0829 & 0.5236 & 0.9143 & 0.5707 & 0.6097 & FALSE & FALSE & FALSE & FALSE\\
+OTU53 & 0.2281 & 0.5025 & 0.4272 & 0.4503\\
 \hline
-OTU99 & 0.3073 & -0.1658 & -0.2769 & -0.3349 & 0.1637 & 0.2266 & 0.2182 & 0.2225 & 1.8767 & -0.7315 & -1.2693 & -1.5053 & 0.0606 & 0.4645 & 0.2043 & 0.1323 & 0.2096 & 0.7479 & 0.8240 & 0.6097 & FALSE & FALSE & FALSE & FALSE\\
+OTU69 & 0.8700 & 0.0000 & 0.3927 & 0.3892\\
 \hline
-OTU111 & 0.0066 & -0.1499 & 0.1351 & 0.2453 & 0.1712 & 0.2369 & 0.2281 & 0.2326 & 0.0388 & -0.6325 & 0.5925 & 1.0548 & 0.9691 & 0.5271 & 0.5535 & 0.2915 & 0.9749 & 0.8026 & 0.8901 & 0.7889 & FALSE & FALSE & FALSE & FALSE\\
+OTU76 & 0.1172 & 0.0000 & 0.7337 & 0.8582\\
+\hline
+\end{tabular}
+
+#### LinDA
+
+
+```r
+otu.tab <- as.data.frame(assay(tse))
+meta <- as.data.frame(colData(tse))
+linda_cov <- linda(
+  otu.tab, 
+  meta, 
+  formula = '~ Geographical_location + Age', 
+  alpha = 0.05, 
+  prev.filter = 0, 
+  mean.abund.filter = 0)
+```
+
+```
+## 0  features are filtered!
+## The filtered data has  47  samples and  275  features will be tested!
+## Pseudo-count approach is used.
+## Fit linear models ...
+## Completed.
+```
+
+```r
+linda.res <- linda_cov$output$Geographical_locationPune
+kable(head(filter(linda.res, reject==T)))
+```
+
+
+\begin{tabular}{l|r|r|r|r|r|r|l|r}
+\hline
+  & baseMean & log2FoldChange & lfcSE & stat & pvalue & padj & reject & df\\
+\hline
+OTU15 & 1137.8 & -1.4861 & 0.4407 & -3.372 & 0.0016 & 0.0146 & TRUE & 43\\
+\hline
+OTU22 & 363.8 & -0.7457 & 0.2603 & -2.865 & 0.0064 & 0.0442 & TRUE & 43\\
+\hline
+OTU76 & 802.8 & -1.5674 & 0.4509 & -3.477 & 0.0012 & 0.0116 & TRUE & 43\\
+\hline
+OTU127 & 910.8 & -1.3446 & 0.4880 & -2.756 & 0.0086 & 0.0498 & TRUE & 43\\
+\hline
+OTU194 & 936.8 & 6.7471 & 1.3990 & 4.823 & 0.0000 & 0.0005 & TRUE & 43\\
+\hline
+OTU207 & 985.6 & -1.7352 & 0.5444 & -3.187 & 0.0027 & 0.0223 & TRUE & 43\\
+\hline
+\end{tabular}
+
+
+
+#### ZicoSeq
+
+
+```r
+set.seed(123)
+otu.tab <- as.matrix(assay(tse))
+meta <- as.data.frame(colData(tse)) 
+zicoseq.obj <- GUniFrac::ZicoSeq(meta.dat = meta, 
+                                 feature.dat = otu.tab,
+                                 grp.name = 'Geographical_location',
+                                 adj.name = 'Gender', 
+                                 feature.dat.type = 'count',
+                                 prev.filter = 0,
+                                 perm.no = 999,
+                                 mean.abund.filter = 0,
+                                 max.abund.filter = 0,
+                                 return.feature.dat = T)
+```
+
+```
+## 0  features are filtered!
+## The data has  47  samples and  275  features will be tested!
+## On average,  1  outlier counts will be replaced for each feature!
+## Fitting beta mixture ...
+## Finding the references ...
+## Permutation testing ...
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## Completed!
+```
+
+```r
+zicoseq_out <- cbind.data.frame(p.raw=zicoseq.obj$p.raw, p.adj.fdr=zicoseq.obj$p.adj.fdr) 
+kable(head(filter(zicoseq_out, p.adj.fdr<0.05)))
+```
+
+
+\begin{tabular}{l|r|r}
+\hline
+  & p.raw & p.adj.fdr\\
+\hline
+OTU76 & 0.001 & 0.0008\\
+\hline
+OTU127 & 0.001 & 0.0052\\
+\hline
+OTU207 & 0.001 & 0.0064\\
+\hline
+OTU211 & 0.001 & 0.0001\\
+\hline
+OTU610 & 0.001 & 0.0194\\
+\hline
+OTU611 & 0.001 & 0.0001\\
 \hline
 \end{tabular}
 
@@ -784,26 +994,27 @@ attached base packages:
 
 other attached packages:
  [1] doRNG_1.8.6                     rngtools_1.5.2                 
- [3] foreach_1.5.2                   ANCOMBC_2.2.0                  
- [5] lubridate_1.9.2                 forcats_1.0.0                  
- [7] stringr_1.5.0                   dplyr_1.1.2                    
- [9] purrr_1.0.1                     readr_2.1.4                    
-[11] tidyr_1.3.0                     tibble_3.2.1                   
-[13] ggplot2_3.4.2                   tidyverse_2.0.0                
-[15] knitr_1.42                      MicrobiomeStat_1.1             
-[17] Maaslin2_1.7.3                  ALDEx2_1.32.0                  
-[19] zCompositions_1.4.0-1           truncnorm_1.0-9                
-[21] NADA_1.6-1.1                    survival_3.5-5                 
-[23] MASS_7.3-59                     tidySummarizedExperiment_1.10.0
-[25] patchwork_1.1.2                 mia_1.9.2                      
-[27] MultiAssayExperiment_1.26.0     TreeSummarizedExperiment_2.1.4 
-[29] Biostrings_2.68.0               XVector_0.40.0                 
-[31] SingleCellExperiment_1.22.0     SummarizedExperiment_1.30.0    
-[33] Biobase_2.60.0                  GenomicRanges_1.52.0           
-[35] GenomeInfoDb_1.36.0             IRanges_2.34.0                 
-[37] S4Vectors_0.38.0                BiocGenerics_0.46.0            
-[39] MatrixGenerics_1.12.0           matrixStats_0.63.0-9003        
-[41] BiocStyle_2.28.0                rebook_1.9.0                   
+ [3] foreach_1.5.2                   GUniFrac_1.7                   
+ [5] ANCOMBC_2.2.0                   MicrobiomeStat_1.1             
+ [7] Maaslin2_1.7.3                  ALDEx2_1.32.0                  
+ [9] zCompositions_1.4.0-1           truncnorm_1.0-9                
+[11] NADA_1.6-1.1                    survival_3.5-5                 
+[13] MASS_7.3-59                     phyloseq_1.44.0                
+[15] lubridate_1.9.2                 forcats_1.0.0                  
+[17] stringr_1.5.0                   dplyr_1.1.2                    
+[19] purrr_1.0.1                     readr_2.1.4                    
+[21] tidyr_1.3.0                     tibble_3.2.1                   
+[23] ggplot2_3.4.2                   tidyverse_2.0.0                
+[25] knitr_1.42                      tidySummarizedExperiment_1.10.0
+[27] patchwork_1.1.2                 mia_1.9.2                      
+[29] MultiAssayExperiment_1.26.0     TreeSummarizedExperiment_2.1.4 
+[31] Biostrings_2.68.0               XVector_0.40.0                 
+[33] SingleCellExperiment_1.22.0     SummarizedExperiment_1.30.0    
+[35] Biobase_2.60.0                  GenomicRanges_1.52.0           
+[37] GenomeInfoDb_1.36.0             IRanges_2.34.0                 
+[39] S4Vectors_0.38.0                BiocGenerics_0.46.0            
+[41] MatrixGenerics_1.12.0           matrixStats_0.63.0-9003        
+[43] BiocStyle_2.28.0                rebook_1.9.0                   
 
 loaded via a namespace (and not attached):
   [1] bitops_1.0-7                DirichletMultinomial_1.42.0
@@ -812,7 +1023,7 @@ loaded via a namespace (and not attached):
   [7] backports_1.4.1             tools_4.3.0                
   [9] utf8_1.2.3                  R6_2.5.1                   
  [11] vegan_2.6-4                 lazyeval_0.2.2             
- [13] mgcv_1.8-42                 rhdf5filters_1.12.0        
+ [13] mgcv_1.8-42                 rhdf5filters_1.12.1        
  [15] permute_0.9-7               withr_2.5.0                
  [17] gridExtra_2.3               cli_3.6.1                  
  [19] logging_0.10-108            biglm_0.9-2.1              
@@ -824,7 +1035,7 @@ loaded via a namespace (and not attached):
  [31] readxl_1.4.2                rstudioapi_0.14            
  [33] RSQLite_2.3.1               generics_0.1.3             
  [35] Matrix_1.5-4                biomformat_1.28.0          
- [37] ggbeeswarm_0.7.1            fansi_1.0.4                
+ [37] ggbeeswarm_0.7.2            fansi_1.0.4                
  [39] DescTools_0.99.48           DECIPHER_2.28.0            
  [41] lifecycle_1.0.3             multcomp_1.4-23            
  [43] yaml_2.3.7                  rhdf5_2.44.0               
@@ -845,56 +1056,55 @@ loaded via a namespace (and not attached):
  [73] timeDate_4022.108           iterators_1.0.14           
  [75] statmod_1.5.0               gmp_0.7-1                  
  [77] TH.data_1.1-2               ellipsis_0.3.2             
- [79] nlme_3.1-162                phyloseq_1.44.0            
- [81] bit64_4.0.5                 filelock_1.0.2             
- [83] fBasics_4022.94             irlba_2.3.5.1              
- [85] vipor_0.4.5                 rpart_4.1.19               
- [87] Hmisc_5.0-1                 colorspace_2.1-0           
- [89] DBI_1.1.3                   nnet_7.3-18                
- [91] ade4_1.7-22                 Exact_3.2                  
- [93] tidyselect_1.2.0            emmeans_1.8.5              
- [95] timeSeries_4021.105         bit_4.0.5                  
- [97] compiler_4.3.0              graph_1.78.0               
- [99] htmlTable_2.4.1             BiocNeighbors_1.18.0       
-[101] expm_0.999-7                DelayedArray_0.25.0        
-[103] plotly_4.10.1               bookdown_0.33              
-[105] checkmate_2.2.0             scales_1.2.1               
-[107] DEoptimR_1.0-12             spatial_7.3-16             
-[109] digest_0.6.31               minqa_1.2.5                
-[111] rmarkdown_2.21              base64enc_0.1-3            
-[113] htmltools_0.5.5             pkgconfig_2.0.3            
-[115] lme4_1.1-33                 sparseMatrixStats_1.12.0   
-[117] lpsymphony_1.28.0           highr_0.10                 
-[119] stabledist_0.7-1            fastmap_1.1.1              
-[121] rlang_1.1.0                 htmlwidgets_1.6.2          
-[123] DelayedMatrixStats_1.22.0   farver_2.1.1               
-[125] energy_1.7-11               zoo_1.8-12                 
-[127] jsonlite_1.8.4              BiocParallel_1.34.0        
-[129] BiocSingular_1.16.0         RCurl_1.98-1.12            
-[131] magrittr_2.0.3              Formula_1.2-5              
-[133] scuttle_1.10.0              GenomeInfoDbData_1.2.10    
-[135] Rhdf5lib_1.22.0             munsell_0.5.0              
-[137] Rcpp_1.0.10                 ape_5.7-1                  
-[139] viridis_0.6.2               RcppZiggurat_0.1.6         
-[141] CVXR_1.0-11                 stringi_1.7.12             
-[143] rootSolve_1.8.2.3           stable_1.1.6               
-[145] zlibbioc_1.46.0             plyr_1.8.8                 
-[147] parallel_4.3.0              ggrepel_0.9.3              
-[149] lmom_2.9                    splines_4.3.0              
-[151] hash_2.2.6.2                multtest_2.56.0            
-[153] hms_1.1.3                   igraph_1.4.2               
-[155] reshape2_1.4.4              ScaledMatrix_1.7.1         
-[157] rmutil_1.1.10               XML_3.99-0.14              
-[159] evaluate_0.20               BiocManager_1.30.20        
-[161] nloptr_2.0.3                tzdb_0.3.0                 
-[163] getopt_1.20.3               clue_0.3-64                
-[165] rsvd_1.0.5                  xtable_1.8-4               
-[167] Rmpfr_0.9-2                 e1071_1.7-13               
-[169] tidytree_0.4.2              viridisLite_0.4.1          
-[171] class_7.3-21                gsl_2.1-8                  
-[173] lmerTest_3.1-3              memoise_2.0.1              
-[175] beeswarm_0.4.0              cluster_2.1.4              
-[177] timechange_0.2.0           
+ [79] nlme_3.1-162                bit64_4.0.5                
+ [81] filelock_1.0.2              fBasics_4022.94            
+ [83] irlba_2.3.5.1               vipor_0.4.5                
+ [85] rpart_4.1.19                colorspace_2.1-0           
+ [87] DBI_1.1.3                   Hmisc_5.0-1                
+ [89] nnet_7.3-18                 ade4_1.7-22                
+ [91] Exact_3.2                   tidyselect_1.2.0           
+ [93] emmeans_1.8.5               timeSeries_4021.105        
+ [95] bit_4.0.5                   compiler_4.3.0             
+ [97] graph_1.78.0                htmlTable_2.4.1            
+ [99] BiocNeighbors_1.18.0        expm_0.999-7               
+[101] DelayedArray_0.25.0         plotly_4.10.1              
+[103] bookdown_0.33               checkmate_2.2.0            
+[105] scales_1.2.1                DEoptimR_1.0-12            
+[107] spatial_7.3-16              digest_0.6.31              
+[109] minqa_1.2.5                 rmarkdown_2.21             
+[111] htmltools_0.5.5             pkgconfig_2.0.3            
+[113] base64enc_0.1-3             lme4_1.1-33                
+[115] sparseMatrixStats_1.12.0    lpsymphony_1.28.0          
+[117] highr_0.10                  stabledist_0.7-1           
+[119] fastmap_1.1.1               rlang_1.1.1                
+[121] htmlwidgets_1.6.2           DelayedMatrixStats_1.22.0  
+[123] farver_2.1.1                energy_1.7-11              
+[125] zoo_1.8-12                  jsonlite_1.8.4             
+[127] BiocParallel_1.34.0         BiocSingular_1.16.0        
+[129] RCurl_1.98-1.12             magrittr_2.0.3             
+[131] Formula_1.2-5               scuttle_1.10.0             
+[133] GenomeInfoDbData_1.2.10     Rhdf5lib_1.22.0            
+[135] munsell_0.5.0               Rcpp_1.0.10                
+[137] ape_5.7-1                   viridis_0.6.2              
+[139] RcppZiggurat_0.1.6          CVXR_1.0-11                
+[141] stringi_1.7.12              rootSolve_1.8.2.3          
+[143] stable_1.1.6                zlibbioc_1.46.0            
+[145] plyr_1.8.8                  parallel_4.3.0             
+[147] ggrepel_0.9.3               lmom_2.9                   
+[149] splines_4.3.0               hash_2.2.6.2               
+[151] multtest_2.56.0             hms_1.1.3                  
+[153] igraph_1.4.2                reshape2_1.4.4             
+[155] ScaledMatrix_1.7.1          rmutil_1.1.10              
+[157] XML_3.99-0.14               evaluate_0.20              
+[159] BiocManager_1.30.20         nloptr_2.0.3               
+[161] tzdb_0.3.0                  getopt_1.20.3              
+[163] clue_0.3-64                 rsvd_1.0.5                 
+[165] xtable_1.8-4                Rmpfr_0.9-2                
+[167] e1071_1.7-13                tidytree_0.4.2             
+[169] viridisLite_0.4.1           class_7.3-21               
+[171] gsl_2.1-8                   lmerTest_3.1-3             
+[173] memoise_2.0.1               beeswarm_0.4.0             
+[175] cluster_2.1.4               timechange_0.2.0           
 ```
 </div>
 
