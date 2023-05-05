@@ -347,7 +347,7 @@ enterotype <- transformCounts(enterotype, method = "relabundance")
 formula <- as.formula(paste0("assay ~ ", str_c(variable_names, collapse = " + ")) )
 
 # # Perform RDA
-rda <- calculateRDA(enterotype, assay_name = "relabundance",
+rda <- calculateRDA(enterotype, assay.type = "relabundance",
                     formula = formula, distance = "bray", na.action = na.exclude)
 # Get the rda object
 rda <- attr(rda, "rda")
@@ -511,9 +511,9 @@ Let us agglomerate the data at a Genus level and getting the dominant taxa per s
 # Agglomerate to genus level
 tse_Genus <- agglomerateByRank(tse, rank="Genus")
 # Convert to relative abundances
-tse_Genus <- transformCounts(tse, method = "relabundance", assay_name="counts")
+tse_Genus <- transformCounts(tse, method = "relabundance", assay.type="counts")
 # Add info on dominant genus per sample
-tse_Genus <- addPerSampleDominantTaxa(tse_Genus, assay_name="relabundance", name = "dominant_taxa")
+tse_Genus <- addPerSampleDominantTaxa(tse_Genus, assay.type="relabundance", name = "dominant_taxa")
 ```
 
 
@@ -530,7 +530,7 @@ Getting top taxa and visualizing the abundance on PCoA.
 
 ```r
 # Getting the top taxa
-top_taxa <- getTopTaxa(tse_Genus,top = 6, assay_name = "relabundance")
+top_taxa <- getTopTaxa(tse_Genus,top = 6, assay.type = "relabundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
@@ -778,15 +778,15 @@ attached base packages:
 other attached packages:
  [1] ggord_1.1.7                    knitr_1.42                    
  [3] stringr_1.5.0                  patchwork_1.1.2               
- [5] scater_1.28.0                  scuttle_1.10.0                
+ [5] scater_1.28.0                  scuttle_1.10.1                
  [7] ggplot2_3.4.2                  vegan_2.6-4                   
  [9] lattice_0.21-8                 permute_0.9-7                 
 [11] mia_1.9.2                      MultiAssayExperiment_1.26.0   
 [13] TreeSummarizedExperiment_2.1.4 Biostrings_2.68.0             
 [15] XVector_0.40.0                 SingleCellExperiment_1.22.0   
-[17] SummarizedExperiment_1.30.0    Biobase_2.60.0                
+[17] SummarizedExperiment_1.30.1    Biobase_2.60.0                
 [19] GenomicRanges_1.52.0           GenomeInfoDb_1.36.0           
-[21] IRanges_2.34.0                 S4Vectors_0.38.0              
+[21] IRanges_2.34.0                 S4Vectors_0.38.1              
 [23] BiocGenerics_0.46.0            MatrixGenerics_1.12.0         
 [25] matrixStats_0.63.0-9003        BiocStyle_2.28.0              
 [27] rebook_1.9.0                  
@@ -805,18 +805,18 @@ loaded via a namespace (and not attached):
 [21] ggbeeswarm_0.7.2            DirichletMultinomial_1.42.0
 [23] purrr_1.0.1                 bit_4.0.5                  
 [25] xfun_0.39                   zlibbioc_1.46.0            
-[27] cachem_1.0.7                beachmat_2.16.0            
+[27] cachem_1.0.8                beachmat_2.16.0            
 [29] jsonlite_1.8.4              blob_1.2.4                 
-[31] highr_0.10                  DelayedArray_0.25.0        
+[31] highr_0.10                  DelayedArray_0.26.1        
 [33] BiocParallel_1.34.0         cluster_2.1.4              
 [35] irlba_2.3.5.1               parallel_4.3.0             
 [37] R6_2.5.1                    stringi_1.7.12             
 [39] Rcpp_1.0.10                 bookdown_0.33              
 [41] DECIPHER_2.28.0             splines_4.3.0              
 [43] Matrix_1.5-4                tidyselect_1.2.0           
-[45] yaml_2.3.7                  viridis_0.6.2              
-[47] codetools_0.2-19            tibble_3.2.1               
-[49] plyr_1.8.8                  withr_2.5.0                
+[45] yaml_2.3.7                  viridis_0.6.3              
+[47] codetools_0.2-19            plyr_1.8.8                 
+[49] tibble_3.2.1                withr_2.5.0                
 [51] treeio_1.24.0               Rtsne_0.16                 
 [53] evaluate_0.20               pillar_1.9.0               
 [55] BiocManager_1.30.20         filelock_1.0.2             
@@ -825,19 +825,20 @@ loaded via a namespace (and not attached):
 [61] scales_1.2.1                tidytree_0.4.2             
 [63] glue_1.6.2                  lazyeval_0.2.2             
 [65] tools_4.3.0                 BiocNeighbors_1.18.0       
-[67] ScaledMatrix_1.7.1          XML_3.99-0.14              
+[67] ScaledMatrix_1.8.1          XML_3.99-0.14              
 [69] cowplot_1.1.1               grid_4.3.0                 
 [71] tidyr_1.3.0                 ape_5.7-1                  
 [73] colorspace_2.1-0            nlme_3.1-162               
 [75] GenomeInfoDbData_1.2.10     beeswarm_0.4.0             
 [77] BiocSingular_1.16.0         vipor_0.4.5                
 [79] cli_3.6.1                   rsvd_1.0.5                 
-[81] fansi_1.0.4                 viridisLite_0.4.1          
-[83] dplyr_1.1.2                 gtable_0.3.3               
-[85] yulab.utils_0.0.6           digest_0.6.31              
-[87] ggrepel_0.9.3               farver_2.1.1               
-[89] decontam_1.20.0             memoise_2.0.1              
-[91] htmltools_0.5.5             lifecycle_1.0.3            
-[93] bit64_4.0.5                 MASS_7.3-59                
+[81] fansi_1.0.4                 S4Arrays_1.0.1             
+[83] viridisLite_0.4.2           dplyr_1.1.2                
+[85] gtable_0.3.3                yulab.utils_0.0.6          
+[87] digest_0.6.31               ggrepel_0.9.3              
+[89] farver_2.1.1                decontam_1.20.0            
+[91] memoise_2.0.1               htmltools_0.5.5            
+[93] lifecycle_1.0.3             bit64_4.0.5                
+[95] MASS_7.3-60                
 ```
 </div>

@@ -999,7 +999,7 @@ other attached packages:
  [7] Maaslin2_1.7.3                  ALDEx2_1.32.0                  
  [9] zCompositions_1.4.0-1           truncnorm_1.0-9                
 [11] NADA_1.6-1.1                    survival_3.5-5                 
-[13] MASS_7.3-59                     phyloseq_1.44.0                
+[13] MASS_7.3-60                     phyloseq_1.44.0                
 [15] lubridate_1.9.2                 forcats_1.0.0                  
 [17] stringr_1.5.0                   dplyr_1.1.2                    
 [19] purrr_1.0.1                     readr_2.1.4                    
@@ -1009,10 +1009,10 @@ other attached packages:
 [27] patchwork_1.1.2                 mia_1.9.2                      
 [29] MultiAssayExperiment_1.26.0     TreeSummarizedExperiment_2.1.4 
 [31] Biostrings_2.68.0               XVector_0.40.0                 
-[33] SingleCellExperiment_1.22.0     SummarizedExperiment_1.30.0    
+[33] SingleCellExperiment_1.22.0     SummarizedExperiment_1.30.1    
 [35] Biobase_2.60.0                  GenomicRanges_1.52.0           
 [37] GenomeInfoDb_1.36.0             IRanges_2.34.0                 
-[39] S4Vectors_0.38.0                BiocGenerics_0.46.0            
+[39] S4Vectors_0.38.1                BiocGenerics_0.46.0            
 [41] MatrixGenerics_1.12.0           matrixStats_0.63.0-9003        
 [43] BiocStyle_2.28.0                rebook_1.9.0                   
 
@@ -1049,62 +1049,63 @@ loaded via a namespace (and not attached):
  [59] glue_1.6.2                  data.table_1.14.8          
  [61] Rdpack_2.4                  vctrs_0.6.2                
  [63] treeio_1.24.0               cellranger_1.1.0           
- [65] gtable_0.3.3                cachem_1.0.7               
+ [65] gtable_0.3.3                cachem_1.0.8               
  [67] xfun_0.39                   rbibutils_2.2.13           
- [69] Rfast_2.0.7                 coda_0.19-4                
- [71] pcaPP_2.0-3                 modeest_2.4.0              
- [73] timeDate_4022.108           iterators_1.0.14           
- [75] statmod_1.5.0               gmp_0.7-1                  
- [77] TH.data_1.1-2               ellipsis_0.3.2             
- [79] nlme_3.1-162                bit64_4.0.5                
- [81] filelock_1.0.2              fBasics_4022.94            
- [83] irlba_2.3.5.1               vipor_0.4.5                
- [85] rpart_4.1.19                colorspace_2.1-0           
- [87] DBI_1.1.3                   Hmisc_5.0-1                
- [89] nnet_7.3-18                 ade4_1.7-22                
- [91] Exact_3.2                   tidyselect_1.2.0           
- [93] emmeans_1.8.5               timeSeries_4021.105        
- [95] bit_4.0.5                   compiler_4.3.0             
- [97] graph_1.78.0                htmlTable_2.4.1            
- [99] BiocNeighbors_1.18.0        expm_0.999-7               
-[101] DelayedArray_0.25.0         plotly_4.10.1              
-[103] bookdown_0.33               checkmate_2.2.0            
-[105] scales_1.2.1                DEoptimR_1.0-12            
-[107] spatial_7.3-16              digest_0.6.31              
-[109] minqa_1.2.5                 rmarkdown_2.21             
-[111] htmltools_0.5.5             pkgconfig_2.0.3            
-[113] base64enc_0.1-3             lme4_1.1-33                
-[115] sparseMatrixStats_1.12.0    lpsymphony_1.28.0          
-[117] highr_0.10                  stabledist_0.7-1           
-[119] fastmap_1.1.1               rlang_1.1.1                
-[121] htmlwidgets_1.6.2           DelayedMatrixStats_1.22.0  
-[123] farver_2.1.1                energy_1.7-11              
-[125] zoo_1.8-12                  jsonlite_1.8.4             
-[127] BiocParallel_1.34.0         BiocSingular_1.16.0        
-[129] RCurl_1.98-1.12             magrittr_2.0.3             
-[131] Formula_1.2-5               scuttle_1.10.0             
-[133] GenomeInfoDbData_1.2.10     Rhdf5lib_1.22.0            
-[135] munsell_0.5.0               Rcpp_1.0.10                
-[137] ape_5.7-1                   viridis_0.6.2              
-[139] RcppZiggurat_0.1.6          CVXR_1.0-11                
-[141] stringi_1.7.12              rootSolve_1.8.2.3          
-[143] stable_1.1.6                zlibbioc_1.46.0            
-[145] plyr_1.8.8                  parallel_4.3.0             
-[147] ggrepel_0.9.3               lmom_2.9                   
-[149] splines_4.3.0               hash_2.2.6.2               
-[151] multtest_2.56.0             hms_1.1.3                  
-[153] igraph_1.4.2                reshape2_1.4.4             
-[155] ScaledMatrix_1.7.1          rmutil_1.1.10              
-[157] XML_3.99-0.14               evaluate_0.20              
-[159] BiocManager_1.30.20         nloptr_2.0.3               
-[161] tzdb_0.3.0                  getopt_1.20.3              
-[163] clue_0.3-64                 rsvd_1.0.5                 
-[165] xtable_1.8-4                Rmpfr_0.9-2                
-[167] e1071_1.7-13                tidytree_0.4.2             
-[169] viridisLite_0.4.1           class_7.3-21               
-[171] gsl_2.1-8                   lmerTest_3.1-3             
-[173] memoise_2.0.1               beeswarm_0.4.0             
-[175] cluster_2.1.4               timechange_0.2.0           
+ [69] S4Arrays_1.0.1              Rfast_2.0.7                
+ [71] coda_0.19-4                 pcaPP_2.0-3                
+ [73] modeest_2.4.0               timeDate_4022.108          
+ [75] iterators_1.0.14            statmod_1.5.0              
+ [77] gmp_0.7-1                   TH.data_1.1-2              
+ [79] ellipsis_0.3.2              nlme_3.1-162               
+ [81] bit64_4.0.5                 filelock_1.0.2             
+ [83] fBasics_4022.94             irlba_2.3.5.1              
+ [85] vipor_0.4.5                 rpart_4.1.19               
+ [87] colorspace_2.1-0            DBI_1.1.3                  
+ [89] Hmisc_5.0-1                 nnet_7.3-19                
+ [91] ade4_1.7-22                 Exact_3.2                  
+ [93] tidyselect_1.2.0            emmeans_1.8.5              
+ [95] timeSeries_4021.105         bit_4.0.5                  
+ [97] compiler_4.3.0              graph_1.78.0               
+ [99] htmlTable_2.4.1             BiocNeighbors_1.18.0       
+[101] expm_0.999-7                DelayedArray_0.26.1        
+[103] plotly_4.10.1               bookdown_0.33              
+[105] checkmate_2.2.0             scales_1.2.1               
+[107] DEoptimR_1.0-13             spatial_7.3-16             
+[109] digest_0.6.31               minqa_1.2.5                
+[111] rmarkdown_2.21              htmltools_0.5.5            
+[113] pkgconfig_2.0.3             base64enc_0.1-3            
+[115] lme4_1.1-33                 sparseMatrixStats_1.12.0   
+[117] lpsymphony_1.28.0           highr_0.10                 
+[119] stabledist_0.7-1            fastmap_1.1.1              
+[121] rlang_1.1.1                 htmlwidgets_1.6.2          
+[123] DelayedMatrixStats_1.22.0   farver_2.1.1               
+[125] energy_1.7-11               zoo_1.8-12                 
+[127] jsonlite_1.8.4              BiocParallel_1.34.0        
+[129] BiocSingular_1.16.0         RCurl_1.98-1.12            
+[131] magrittr_2.0.3              Formula_1.2-5              
+[133] scuttle_1.10.1              GenomeInfoDbData_1.2.10    
+[135] Rhdf5lib_1.22.0             munsell_0.5.0              
+[137] Rcpp_1.0.10                 ape_5.7-1                  
+[139] viridis_0.6.3               RcppZiggurat_0.1.6         
+[141] CVXR_1.0-11                 stringi_1.7.12             
+[143] rootSolve_1.8.2.3           stable_1.1.6               
+[145] zlibbioc_1.46.0             plyr_1.8.8                 
+[147] parallel_4.3.0              ggrepel_0.9.3              
+[149] lmom_2.9                    splines_4.3.0              
+[151] hash_2.2.6.2                multtest_2.56.0            
+[153] hms_1.1.3                   igraph_1.4.2               
+[155] reshape2_1.4.4              ScaledMatrix_1.8.1         
+[157] rmutil_1.1.10               XML_3.99-0.14              
+[159] evaluate_0.20               BiocManager_1.30.20        
+[161] nloptr_2.0.3                tzdb_0.3.0                 
+[163] getopt_1.20.3               clue_0.3-64                
+[165] rsvd_1.0.5                  xtable_1.8-4               
+[167] Rmpfr_0.9-2                 e1071_1.7-13               
+[169] tidytree_0.4.2              viridisLite_0.4.2          
+[171] class_7.3-22                gsl_2.1-8                  
+[173] lmerTest_3.1-3              memoise_2.0.1              
+[175] beeswarm_0.4.0              cluster_2.1.4              
+[177] timechange_0.2.0           
 ```
 </div>
 

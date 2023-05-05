@@ -71,7 +71,7 @@ Let's first preprocess the data.
 tse <- agglomerateByRank(tse, rank = "order")
 
 # Apply CLR transform
-tse <- transformCounts(tse, assay_name = "counts", method = "clr",
+tse <- transformCounts(tse, assay.type = "counts", method = "clr",
                        MARGIN="samples", pseudocount=1)
 
 # Get assay
@@ -118,26 +118,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    13   7
-##      Veg      10  17
+##      Mixed    14   9
+##      Veg       9  15
 ##                                         
-##                Accuracy : 0.638         
-##                  95% CI : (0.485, 0.773)
+##                Accuracy : 0.617         
+##                  95% CI : (0.464, 0.755)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.0536        
+##     P-Value [Acc > NIR] : 0.0942        
 ##                                         
-##                   Kappa : 0.274         
+##                   Kappa : 0.234         
 ##                                         
-##  Mcnemar's Test P-Value : 0.6276        
+##  Mcnemar's Test P-Value : 1.0000        
 ##                                         
-##             Sensitivity : 0.565         
-##             Specificity : 0.708         
-##          Pos Pred Value : 0.650         
-##          Neg Pred Value : 0.630         
+##             Sensitivity : 0.609         
+##             Specificity : 0.625         
+##          Pos Pred Value : 0.609         
+##          Neg Pred Value : 0.625         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.277         
-##    Detection Prevalence : 0.426         
-##       Balanced Accuracy : 0.637         
+##          Detection Rate : 0.298         
+##    Detection Prevalence : 0.489         
+##       Balanced Accuracy : 0.617         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -248,9 +248,9 @@ other attached packages:
  [7] mia_1.9.2                      MultiAssayExperiment_1.26.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.68.0             
 [11] XVector_0.40.0                 SingleCellExperiment_1.22.0   
-[13] SummarizedExperiment_1.30.0    Biobase_2.60.0                
+[13] SummarizedExperiment_1.30.1    Biobase_2.60.0                
 [15] GenomicRanges_1.52.0           GenomeInfoDb_1.36.0           
-[17] IRanges_2.34.0                 S4Vectors_0.38.0              
+[17] IRanges_2.34.0                 S4Vectors_0.38.1              
 [19] BiocGenerics_0.46.0            MatrixGenerics_1.12.0         
 [21] matrixStats_0.63.0-9003        BiocStyle_2.28.0              
 [23] rebook_1.9.0                  
@@ -263,64 +263,65 @@ loaded via a namespace (and not attached):
   [9] vctrs_0.6.2                 ROCR_1.0-11                
  [11] memoise_2.0.1               DelayedMatrixStats_1.22.0  
  [13] RCurl_1.98-1.12             htmltools_0.5.5            
- [15] BiocNeighbors_1.18.0        xgboost_1.7.5.1            
- [17] pROC_1.18.0                 parallelly_1.35.0          
- [19] plyr_1.8.8                  DECIPHER_2.28.0            
- [21] lubridate_1.9.2             cachem_1.0.7               
- [23] lifecycle_1.0.3             iterators_1.0.14           
- [25] pkgconfig_2.0.3             rsvd_1.0.5                 
- [27] Matrix_1.5-4                R6_2.5.1                   
- [29] fastmap_1.1.1               future_1.32.0              
- [31] GenomeInfoDbData_1.2.10     digest_0.6.31              
- [33] colorspace_2.1-0            scater_1.28.0              
- [35] irlba_2.3.5.1               RSQLite_2.3.1              
- [37] vegan_2.6-4                 beachmat_2.16.0            
- [39] labeling_0.4.2              filelock_1.0.2             
- [41] randomForest_4.7-1.1        timechange_0.2.0           
- [43] fansi_1.0.4                 mgcv_1.8-42                
- [45] compiler_4.3.0              proxy_0.4-27               
- [47] withr_2.5.0                 bit64_4.0.5                
- [49] BiocParallel_1.34.0         viridis_0.6.2              
- [51] DBI_1.1.3                   highr_0.10                 
- [53] MASS_7.3-59                 lava_1.7.2.1               
- [55] DelayedArray_0.25.0         permute_0.9-7              
- [57] ModelMetrics_1.2.2.2        tools_4.3.0                
- [59] vipor_0.4.5                 beeswarm_0.4.0             
- [61] ape_5.7-1                   future.apply_1.10.0        
- [63] nnet_7.3-18                 glue_1.6.2                 
- [65] nlme_3.1-162                grid_4.3.0                 
- [67] cluster_2.1.4               reshape2_1.4.4             
- [69] generics_0.1.3              recipes_1.0.6              
- [71] gtable_0.3.3                class_7.3-21               
- [73] tidyr_1.3.0                 data.table_1.14.8          
- [75] BiocSingular_1.16.0         ScaledMatrix_1.7.1         
- [77] utf8_1.2.3                  ggrepel_0.9.3              
- [79] foreach_1.5.2               pillar_1.9.0               
- [81] stringr_1.5.0               yulab.utils_0.0.6          
- [83] splines_4.3.0               dplyr_1.1.2                
- [85] treeio_1.24.0               survival_3.5-5             
- [87] bit_4.0.5                   tidyselect_1.2.0           
- [89] DirichletMultinomial_1.42.0 scuttle_1.10.0             
- [91] knitr_1.42                  gridExtra_2.3              
- [93] bookdown_0.33               xfun_0.39                  
- [95] hardhat_1.3.0               timeDate_4022.108          
- [97] stringi_1.7.12              lazyeval_0.2.2             
- [99] yaml_2.3.7                  evaluate_0.20              
-[101] codetools_0.2-19            MLmetrics_1.1.1            
-[103] kernlab_0.9-32              tibble_3.2.1               
-[105] BiocManager_1.30.20         graph_1.78.0               
-[107] cli_3.6.1                   rpart_4.1.19               
-[109] munsell_0.5.0               Rcpp_1.0.10                
-[111] globals_0.16.2              dir.expiry_1.8.0           
-[113] XML_3.99-0.14               parallel_4.3.0             
-[115] gower_1.0.1                 blob_1.2.4                 
-[117] sparseMatrixStats_1.12.0    bitops_1.0-7               
-[119] glmnet_4.1-7                listenv_0.9.0              
-[121] decontam_1.20.0             viridisLite_0.4.1          
-[123] tidytree_0.4.2              ipred_0.9-14               
-[125] e1071_1.7-13                scales_1.2.1               
-[127] prodlim_2023.03.31          purrr_1.0.1                
-[129] crayon_1.5.2                rlang_1.1.1                
+ [15] S4Arrays_1.0.1              BiocNeighbors_1.18.0       
+ [17] xgboost_1.7.5.1             pROC_1.18.0                
+ [19] parallelly_1.35.0           plyr_1.8.8                 
+ [21] DECIPHER_2.28.0             lubridate_1.9.2            
+ [23] cachem_1.0.8                lifecycle_1.0.3            
+ [25] iterators_1.0.14            pkgconfig_2.0.3            
+ [27] rsvd_1.0.5                  Matrix_1.5-4               
+ [29] R6_2.5.1                    fastmap_1.1.1              
+ [31] future_1.32.0               GenomeInfoDbData_1.2.10    
+ [33] digest_0.6.31               colorspace_2.1-0           
+ [35] scater_1.28.0               irlba_2.3.5.1              
+ [37] RSQLite_2.3.1               vegan_2.6-4                
+ [39] beachmat_2.16.0             labeling_0.4.2             
+ [41] filelock_1.0.2              randomForest_4.7-1.1       
+ [43] timechange_0.2.0            fansi_1.0.4                
+ [45] mgcv_1.8-42                 compiler_4.3.0             
+ [47] proxy_0.4-27                withr_2.5.0                
+ [49] bit64_4.0.5                 BiocParallel_1.34.0        
+ [51] viridis_0.6.3               DBI_1.1.3                  
+ [53] highr_0.10                  lava_1.7.2.1               
+ [55] MASS_7.3-60                 DelayedArray_0.26.1        
+ [57] permute_0.9-7               ModelMetrics_1.2.2.2       
+ [59] tools_4.3.0                 vipor_0.4.5                
+ [61] beeswarm_0.4.0              ape_5.7-1                  
+ [63] future.apply_1.10.0         nnet_7.3-19                
+ [65] glue_1.6.2                  nlme_3.1-162               
+ [67] grid_4.3.0                  cluster_2.1.4              
+ [69] reshape2_1.4.4              generics_0.1.3             
+ [71] recipes_1.0.6               gtable_0.3.3               
+ [73] class_7.3-22                tidyr_1.3.0                
+ [75] data.table_1.14.8           BiocSingular_1.16.0        
+ [77] ScaledMatrix_1.8.1          utf8_1.2.3                 
+ [79] ggrepel_0.9.3               foreach_1.5.2              
+ [81] pillar_1.9.0                stringr_1.5.0              
+ [83] yulab.utils_0.0.6           splines_4.3.0              
+ [85] dplyr_1.1.2                 treeio_1.24.0              
+ [87] survival_3.5-5              bit_4.0.5                  
+ [89] tidyselect_1.2.0            DirichletMultinomial_1.42.0
+ [91] scuttle_1.10.1              knitr_1.42                 
+ [93] gridExtra_2.3               bookdown_0.33              
+ [95] xfun_0.39                   hardhat_1.3.0              
+ [97] timeDate_4022.108           stringi_1.7.12             
+ [99] lazyeval_0.2.2              yaml_2.3.7                 
+[101] evaluate_0.20               codetools_0.2-19           
+[103] MLmetrics_1.1.1             kernlab_0.9-32             
+[105] tibble_3.2.1                BiocManager_1.30.20        
+[107] graph_1.78.0                cli_3.6.1                  
+[109] rpart_4.1.19                munsell_0.5.0              
+[111] Rcpp_1.0.10                 globals_0.16.2             
+[113] dir.expiry_1.8.0            XML_3.99-0.14              
+[115] parallel_4.3.0              gower_1.0.1                
+[117] blob_1.2.4                  sparseMatrixStats_1.12.0   
+[119] bitops_1.0-7                glmnet_4.1-7               
+[121] listenv_0.9.0               decontam_1.20.0            
+[123] viridisLite_0.4.2           tidytree_0.4.2             
+[125] ipred_0.9-14                e1071_1.7-13               
+[127] scales_1.2.1                prodlim_2023.03.31         
+[129] purrr_1.0.1                 crayon_1.5.2               
+[131] rlang_1.1.1                
 ```
 </div>
 

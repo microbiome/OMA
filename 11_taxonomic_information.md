@@ -398,8 +398,8 @@ For a complete list of available transformations and parameters, see function
 
 ```r
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
-tse <- transformCounts(tse, assay_name = "pseudo", method = "relabundance")
-tse <- transformCounts(x = tse, assay_name = "relabundance", method = "clr", 
+tse <- transformCounts(tse, assay.type = "pseudo", method = "relabundance")
+tse <- transformCounts(x = tse, assay.type = "relabundance", method = "clr", 
                         pseudocount = 1, name = "clr_transformation")
 
 head(assay(tse, "clr_transformation"))
@@ -519,7 +519,7 @@ in one sample.
 ```r
 taxa.abund.cc1 <- getAbundanceSample(tse, 
                                      sample_id = "CC1",
-                                     assay_name = "counts")
+                                     assay.type = "counts")
 taxa.abund.cc1[1:10]
 ```
 
@@ -542,7 +542,7 @@ taxa.abund.cc1[1:10]
 ```r
 taxa.abundances <- getAbundanceFeature(tse, 
                                       feature_id = "Phylum:Bacteroidetes",
-                                      assay_name = "counts")
+                                      assay.type = "counts")
 taxa.abundances[1:10]
 ```
 
@@ -584,9 +584,9 @@ other attached packages:
  [1] mia_1.9.2                      MultiAssayExperiment_1.26.0   
  [3] TreeSummarizedExperiment_2.1.4 Biostrings_2.68.0             
  [5] XVector_0.40.0                 SingleCellExperiment_1.22.0   
- [7] SummarizedExperiment_1.30.0    Biobase_2.60.0                
+ [7] SummarizedExperiment_1.30.1    Biobase_2.60.0                
  [9] GenomicRanges_1.52.0           GenomeInfoDb_1.36.0           
-[11] IRanges_2.34.0                 S4Vectors_0.38.0              
+[11] IRanges_2.34.0                 S4Vectors_0.38.1              
 [13] BiocGenerics_0.46.0            MatrixGenerics_1.12.0         
 [15] matrixStats_0.63.0-9003        BiocStyle_2.28.0              
 [17] rebook_1.9.0                  
@@ -601,14 +601,14 @@ loaded via a namespace (and not attached):
 [13] DelayedMatrixStats_1.22.0   vctrs_0.6.2                
 [15] reshape2_1.4.4              stringr_1.5.0              
 [17] pkgconfig_2.0.3             crayon_1.5.2               
-[19] fastmap_1.1.1               scuttle_1.10.0             
+[19] fastmap_1.1.1               scuttle_1.10.1             
 [21] utf8_1.2.3                  rmarkdown_2.21             
 [23] graph_1.78.0                ggbeeswarm_0.7.2           
 [25] DirichletMultinomial_1.42.0 purrr_1.0.1                
 [27] bit_4.0.5                   xfun_0.39                  
-[29] zlibbioc_1.46.0             cachem_1.0.7               
+[29] zlibbioc_1.46.0             cachem_1.0.8               
 [31] beachmat_2.16.0             jsonlite_1.8.4             
-[33] blob_1.2.4                  DelayedArray_0.25.0        
+[33] blob_1.2.4                  DelayedArray_0.26.1        
 [35] BiocParallel_1.34.0         cluster_2.1.4              
 [37] irlba_2.3.5.1               parallel_4.3.0             
 [39] R6_2.5.1                    stringi_1.7.12             
@@ -616,9 +616,9 @@ loaded via a namespace (and not attached):
 [43] knitr_1.42                  DECIPHER_2.28.0            
 [45] splines_4.3.0               Matrix_1.5-4               
 [47] tidyselect_1.2.0            yaml_2.3.7                 
-[49] viridis_0.6.2               vegan_2.6-4                
-[51] codetools_0.2-19            lattice_0.21-8             
-[53] tibble_3.2.1                plyr_1.8.8                 
+[49] viridis_0.6.3               vegan_2.6-4                
+[51] codetools_0.2-19            plyr_1.8.8                 
+[53] lattice_0.21-8              tibble_3.2.1               
 [55] withr_2.5.0                 treeio_1.24.0              
 [57] evaluate_0.20               pillar_1.9.0               
 [59] BiocManager_1.30.20         filelock_1.0.2             
@@ -627,19 +627,19 @@ loaded via a namespace (and not attached):
 [65] munsell_0.5.0               scales_1.2.1               
 [67] tidytree_0.4.2              glue_1.6.2                 
 [69] lazyeval_0.2.2              tools_4.3.0                
-[71] BiocNeighbors_1.18.0        ScaledMatrix_1.7.1         
+[71] BiocNeighbors_1.18.0        ScaledMatrix_1.8.1         
 [73] XML_3.99-0.14               grid_4.3.0                 
 [75] tidyr_1.3.0                 ape_5.7-1                  
 [77] colorspace_2.1-0            nlme_3.1-162               
 [79] GenomeInfoDbData_1.2.10     beeswarm_0.4.0             
 [81] BiocSingular_1.16.0         vipor_0.4.5                
 [83] cli_3.6.1                   rsvd_1.0.5                 
-[85] fansi_1.0.4                 viridisLite_0.4.1          
-[87] dplyr_1.1.2                 gtable_0.3.3               
-[89] yulab.utils_0.0.6           digest_0.6.31              
-[91] ggrepel_0.9.3               decontam_1.20.0            
-[93] memoise_2.0.1               htmltools_0.5.5            
-[95] lifecycle_1.0.3             bit64_4.0.5                
-[97] MASS_7.3-59                
+[85] fansi_1.0.4                 S4Arrays_1.0.1             
+[87] viridisLite_0.4.2           dplyr_1.1.2                
+[89] gtable_0.3.3                yulab.utils_0.0.6          
+[91] digest_0.6.31               ggrepel_0.9.3              
+[93] decontam_1.20.0             memoise_2.0.1              
+[95] htmltools_0.5.5             lifecycle_1.0.3            
+[97] bit64_4.0.5                 MASS_7.3-60                
 ```
 </div>

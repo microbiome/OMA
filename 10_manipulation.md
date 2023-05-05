@@ -58,7 +58,7 @@ tse <- transformCounts(tse, MARGIN = "samples", method="relabundance")
 molten_tse <- mia::meltAssay(tse,
                         add_row_data = TRUE,
                         add_col_data = TRUE,
-                        assay_name = "relabundance")
+                        assay.type = "relabundance")
 molten_tse
 ```
 
@@ -717,7 +717,7 @@ head(tse$NewVariable)
 ```
 
 ```
-## [1] 0.5594 0.3367 0.1741 0.5695 0.5090 0.7758
+## [1] 0.3231 0.2093 0.7448 0.9334 0.2946 0.6158
 ```
 
 ## Merge data
