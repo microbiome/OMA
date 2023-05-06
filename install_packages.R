@@ -1,6 +1,13 @@
 # The code adapted from Huber et al. 2023 
 # https://www.huber.embl.de/msmb/install_packages.R
 
+
+# Source location for the up-to-date package list:
+packages <- url("https://raw.githubusercontent.com/microbiome/OMA/master/oma_packages.csv")
+#packages <- "oma_packages.csv"
+
+# -------------------------------------------------------------------------------------------
+
 options(install.packages.check.source = "no")
 options(install.packages.compile.from.source = "never")
 Sys.setenv(R_REMOTES_UPGRADE = "never")
@@ -60,12 +67,20 @@ if(!requireNamespace("magrittr", quietly = TRUE)) {
 # ---------------------------
 
 ## list of packages required for each chapters
-pkgs_all <- read.table(url("https://raw.githubusercontent.com/microbiome/OMA/master/oma_packages.csv"))[,1]
+pkgs_all <- read.table(packages)[,1]
+
+# This will be installed manually later in this script
+# since it requires the latest devel update
+pkgs_all <- setdiff(pkgs_all, "Maaslin2") 
 
 # Customization
 # Github packages must be installed separately
 pkgs_github <- c("miaTime", "ggord")
 pkgs_nongithub <- setdiff(pkgs_all, pkgs_github)
+
+# Maaslin2 needs an update, see
+# https://forum.biobakery.org/t/xtfrm-error-with-maaslin2-default-example-in-r/5216/3
+remotes::install_github("biobakery/Maaslin2")
 
 # ---------------------------
 
