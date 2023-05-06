@@ -85,7 +85,8 @@ chanllenegs:
   
   - Bias-correction used by ANCOMBC [@ancombc2020].
 
-The most popular tools, without going into evaluating whether or not they perform well for this task, are:  
+The most popular tools, without going into evaluating whether or not
+they perform well for this task, are:
 
 - ALDEx2 [@Gloor2016] 
 - ANCOMBC [@ancombc2020]
@@ -167,19 +168,28 @@ tse0 <- tse0[ ,tse0$Geographical_location %in% c("Pune", "Nashik")]
 tse0$Geographical_location <- factor(tse0$Geographical_location)
 
 # how many observations do we have per group?
-count(as.data.frame(colData(tse0)), Geographical_location) %>% kable()
+as.data.frame(colData(tse0)) %>% 
+count(Geographical_location) %>%
+  kable()
 ```
 
 ### Prevalence Filtering 
 
-Before we jump to our analyses, we may want to perform some data manipulation.
+Before we jump to our analyses, we may want to perform some data
+manipulation.
 
-Let us here do aggregation to genus level, add relative abundance assay, and perform prevalence filtering.
+Let us here do aggregation to genus level, add relative abundance
+assay, and perform prevalence filtering.
 
 ```{r}
 tse <- agglomerateByRank(tse0, rank = "genus") %>%
-       transformCounts(assay.type = "counts", method = "relabundance", MARGIN = "samples") %>%
-       subsetByPrevalentTaxa(detection = 0, prevalence = 10/100, assay.type = "relabundance")
+       transformCounts(assay.type = "counts",
+                       method = "relabundance",
+		       MARGIN = "samples") %>%
+       # subset based on the relative abundance assay		       
+       subsetByPrevalentTaxa(detection = 0,
+                             prevalence = 10/100,
+			     assay.type = "relabundance")
 
 # Add also clr abundances
 tse <- transformCounts(tse, method="clr", pseudocount=1) # not bale to run
@@ -347,10 +357,11 @@ out <- ancombc2(
 
 # store the FDR adjusted results [test on v2.0.3] 
 ancombc_result <- cbind.data.frame(taxid = out$res$taxon,
-                                   ancombc = as.vector(out$res$q_Geographical_locationPune))
+                       ancombc = as.vector(out$res$q_Geographical_locationPune))
 
 # store the FDR adjusted results [test on v1.2.2] 
-# ancombc_result <- out$res$q_val %>% rownames_to_column('taxid') %>% dplyr::rename(ancombc = 2)
+# ancombc_result <- out$res$q_val %>% rownames_to_column('taxid') %>%
+                                      dplyr::rename(ancombc = 2)
 ```
 
 The object `out` contains all model output. Again, see the 
@@ -363,7 +374,7 @@ standard errors, p-values and q-values. Conveniently, there is a dataframe
 abundant between the groups (again, keep in mind that the answer is not 
 black-white). Below we show the first 6 entries of this dataframe.
 
-```{r, eval=TRUE}
+```{r, eval=FALSE}
 kable(head(ancombc_result))
 ```
 
@@ -399,7 +410,7 @@ maaslin2_out <- Maaslin2(
 
 Which genera are identified as differentially abundant? (leave out "head" to see all).
 
-```{r, maaslin2kable, eval=TRUE}
+```{r, maaslin2kable, eval=FALSE}
 kable(head(filter(maaslin2_out$results, qval <= 0.05)))
 ```
 
@@ -434,6 +445,9 @@ linda.res <- linda(
   mean.abund.filter = 0)
 
 linda_out <- linda.res$output$Geographical_locationPune
+```
+
+```{r linda2, eval=FALSE}
 # to scan the table for genera where H0 could be rejected:
 kable(head(filter(as.data.frame(linda_out), reject)))
 ```
@@ -465,13 +479,18 @@ zicoseq.obj <- GUniFrac::ZicoSeq(meta.dat = meta,
                                  max.abund.filter = 0,
                                  return.feature.dat = T)
 zicoseq_out <- cbind.data.frame(p.raw=zicoseq.obj$p.raw, p.adj.fdr=zicoseq.obj$p.adj.fdr) 
+
+
+```{r ZicoSeq, eval=FALSE}
 kable(head(filter(zicoseq_out, p.adj.fdr<0.05)))
 ```
 
 
 ```{r ZicoSeqplot, eval=TRUE}
 ## x-axis is the effect size: R2 * direction of coefficient
-ZicoSeq.plot(ZicoSeq.obj = zicoseq.obj, meta.dat = meta, pvalue.type ='p.adj.fdr')
+ZicoSeq.plot(ZicoSeq.obj = zicoseq.obj,
+             meta.dat = meta,
+	     pvalue.type ='p.adj.fdr')
 ```
 
 
@@ -512,7 +531,7 @@ kable(head(summ))
 
 Now we can answer our questions:
 
-```{r, eval=TRUE}
+```{r, eval=FALSE}
 # how many genera were identified by each method?
 summarise(summ, across(where(is.logical), sum)) %>%
   kable()
@@ -537,12 +556,16 @@ plots <- pmap(dplyr::select(summ, taxid, score), function(taxid, score) {
     geom_jitter(width = 0.2) +
     # scale_y_log10() + # log trans will cause 0 values missing 
     scale_y_sqrt() + 
-    labs(title=glue::glue("{taxid}"), x="", y=glue::glue("Abundance ({assay.type})")) +    
+    labs(title=glue::glue("{taxid}"),
+         x="",
+	 y=glue::glue("Abundance ({assay.type})")) +    
     theme_bw() +
     theme(legend.position = "none")
 })
 
-# now we can show only those genera that have at least score 5 (or 4 or 3 or 2 or 1)
+# now we can show just those genera that have at least score 5 (or 4
+# or 3 or 2 or 1)
+
 robust_plots <- plots[summ$score == 4 & !is.na(summ$score)] 
 
 # to display this nicely in the book we use patchwork here:
@@ -571,11 +594,16 @@ ancombc_plots[[1]] +
 
 ### Confounding variables
 
-Confounders are common for microbiome studies. In general, it can be classified into 3 types:
+Confounders are common in experimental research. In general, these can be
+classified into 3 types:
 
 - Biological confounder, such as age, sex, etc. 
-- Technical confounder that caused by data collection, storage, DNA extraction, sequencing process, etc. 
-- Confounder caused by experimental models, such as cage effect, sample background, etc. 
+
+- Technical confounder that caused by data collection, storage, DNA
+  extraction, sequencing process, etc.
+
+- Confounder caused by experimental models, such as cage effect,
+  sample background, etc.
 
 Adjusting confounder is necessary and important to reach a valid
 conclusion. To perform causal inference, it is crucial that the method
@@ -607,6 +635,9 @@ ancombc_cov <- ancombc2(
 # bacterial taxa differentially abundant? Or, if that is of interest,
 # holding phenotype constant, is Age associated with bacterial abundance?
 # Again we only show the first 6 entries.
+```
+
+```{r ancombc_adj2, eval=FALSE}
 kable(head(ancombc_cov$res$q_val))
 ```
 
@@ -623,8 +654,10 @@ linda_cov <- linda(
   prev.filter = 0, 
   mean.abund.filter = 0)
 linda.res <- linda_cov$output$Geographical_locationPune
-kable(head(filter(linda.res, reject==T)))
+```
 
+```{r linda_adj2, eval=FALSE}
+kable(head(filter(linda.res, reject==T)))
 ```
 
 
@@ -643,16 +676,20 @@ zicoseq.obj <- GUniFrac::ZicoSeq(meta.dat = as.data.frame(colData(tse)) ,
                                  mean.abund.filter = 0,
                                  max.abund.filter = 0,
                                  return.feature.dat = T)
-zicoseq_out <- cbind.data.frame(p.raw=zicoseq.obj$p.raw, p.adj.fdr=zicoseq.obj$p.adj.fdr) 
+zicoseq_out <- cbind.data.frame(p.raw=zicoseq.obj$p.raw,
+                                p.adj.fdr=zicoseq.obj$p.adj.fdr) 
+```
+
+```{r ZicoSeq_adj2, eval=FALSE}
 kable(head(filter(zicoseq_out, p.adj.fdr<0.05)))
 ```
 
-In the next section of this book chapter we cover methods that can also take
-into account the phylogenetic information of bacterial taxa to perform 
-group-wise associations.
 
 
 ## Tree-based methods
+
+Let us next cover phylogeny-aware methods to perform group-wise
+associations.
 
 ### Group-wise associations testing based on balances
 
