@@ -16,7 +16,7 @@ tse <- peerj13075
 tse <- agglomerateByRank(tse, rank = "order")
 
 # Apply CLR transform
-tse <- transformCounts(tse, assay_name = "counts", method = "clr",
+tse <- transformCounts(tse, assay.type = "counts", method = "clr",
                        MARGIN="samples", pseudocount=1)
 
 # Get assay
@@ -84,10 +84,8 @@ model <- train(x = assay,
 
 
 ## ----super5-------------------------------------------------------------------
-if( !require(MLeval) ){
-    install.packages("MLeval")
-    library(MLeval)
-}
+library(MLeval)
+
 # Calculate different evaluation metrics
 res <- evalm(model, showplots = FALSE)
 

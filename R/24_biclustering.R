@@ -47,7 +47,7 @@ if(!require(pheatmap)){
     library(pheatmap)
 }
 # z-transform for heatmap
-mae[[1]] <- transformCounts(mae[[1]], assay_name = "rclr",
+mae[[1]] <- transformCounts(mae[[1]], assay.type = "rclr",
                             MARGIN = "features",
                             method = "z", name = "clr_z")
 
@@ -78,7 +78,7 @@ if(!require(patchwork)){
 }
 
 # ggplot requires data in melted format
-melt_assay <- meltAssay(mae[[1]], assay_name = "rclr", add_col_data = T, add_row_data = T)
+melt_assay <- meltAssay(mae[[1]], assay.type = "rclr", add_col_data = T, add_row_data = T)
 
 # patchwork two plots side-by-side
 p1 <- ggplot(melt_assay) +
@@ -101,8 +101,8 @@ mae[[1]] <- mae[[1]][ , colnames(mae[[2]]) ]
 rownames(mae[[1]]) <- make.unique(rownames(mae[[1]]))
 # Calculate correlations
 corr <- getExperimentCrossCorrelation(mae, 1, 2, 
-                                      assay_name1 = "rclr", 
-                                      assay_name2 = "nmr", 
+                                      assay.type1 = "rclr", 
+                                      assay.type2 = "nmr", 
                                       mode = "matrix", 
                                       cor_threshold = 0.2)
 
@@ -110,10 +110,7 @@ corr <- getExperimentCrossCorrelation(mae, 1, 2,
 
 ## ----biclust_2----------------------------------------------------------------
 # Load package
-if(!require(biclust)){
-    install.packages("biclust")
-    library(biclust)
-}
+library(biclust)
 
 # Set seed for reproducibility
 set.seed(3973)
@@ -188,7 +185,7 @@ head(bicluster_rows)
 
 ## ----biclust_5----------------------------------------------------------------
 # Function for obtaining sample-wise sum, mean, median, and mean variance for each cluster
-.sum_mean_median_var <- function(tse1, tse2, assay_name1, assay_name2, clusters1, clusters2){
+.sum_mean_median_var <- function(tse1, tse2, assay.type1, assay.type2, clusters1, clusters2){
   
   list <- list()
   # Create a data frame that includes all the information
@@ -197,8 +194,8 @@ head(bicluster_rows)
     tse_subset1 <- tse1[clusters1[,i], ]
     tse_subset2 <- tse2[clusters2[,i], ]
     # Get assay
-    assay1 <- assay(tse_subset1, assay_name1)
-    assay2 <- assay(tse_subset2, assay_name2)
+    assay1 <- assay(tse_subset1, assay.type1)
+    assay2 <- assay(tse_subset2, assay.type2)
     # Calculate sum, mean, median, and mean variance
     sum1 <- colSums2(assay1, na.rm = T)
     mean1 <- colMeans2(assay1, na.rm = T)
@@ -261,7 +258,7 @@ pheatmap(corr, cluster_cols = F, cluster_rows = F,
 ## ----biclust_9----------------------------------------------------------------
 # Calculate cross-correlation
 corr <- getExperimentCrossCorrelation(mae, 1, 1, 
-                                      assay_name1 = "rclr", assay_name2 = "rclr", 
+                                      assay.type1 = "rclr", assay.type2 = "rclr", 
                                       mode = "matrix",
                                       cor_threshold = 0.2, verbose = F, show_warning = F)
 

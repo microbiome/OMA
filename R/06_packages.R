@@ -4,7 +4,7 @@ chapterPreamble()
 
 
 ## ----eval=FALSE, message=FALSE------------------------------------------------
-## source("https://github.com/microbiome/OMA/blob/master/install_packages.R")
+## source("https://raw.githubusercontent.com/microbiome/OMA/master/install_packages.R")
 
 
 ## ----eval=FALSE, message=FALSE------------------------------------------------

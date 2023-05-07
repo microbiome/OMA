@@ -64,7 +64,7 @@ library(scater)
 # Bray-Curtis is usually applied to relative abundances
 tse <- transformCounts(tse, method = "relabundance")
 # Perform PCoA
-tse <- runMDS(tse, FUN = vegan::vegdist, method = "bray", name = "PCoA_BC", exprs_values = "relabundance")
+tse <- runMDS(tse, FUN = vegan::vegdist, method = "bray", name = "PCoA_BC", assay.type = "relabundance")
 
 
 ## ----plot-mds-bray-curtis, fig.cap="MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."----
@@ -82,7 +82,7 @@ print(p)
 
 ## ----plot-mds-nmds-comparison, fig.cap="Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.", message=FALSE----
 tse <- runMDS(tse, FUN = vegan::vegdist, name = "MDS_euclidean",
-             method = "euclidean", exprs_values = "counts")
+             method = "euclidean", assay.type = "counts")
 tse <- runNMDS(tse, FUN = vegan::vegdist, name = "NMDS_BC")
 tse <- runNMDS(tse, FUN = vegan::vegdist, name = "NMDS_euclidean",
                method = "euclidean")
@@ -101,7 +101,7 @@ library(scater)
 tse <- runMDS(tse, FUN = mia::calculateUnifrac, name = "Unifrac",
               tree = rowTree(tse),
               ntop = nrow(tse),
-             exprs_values = "counts")
+             assay.type = "counts")
 
 
 ## ----plot-unifrac, fig.cap="Unifrac distances scaled by MDS of the GlobalPattern dataset."----
@@ -109,7 +109,7 @@ plotReducedDim(tse, "Unifrac", colour_by = "Group")
 
 
 ## -----------------------------------------------------------------------------
-tse <- runPCA(tse, name = "PCA", exprs_values = "counts", ncomponents = 10)
+tse <- runPCA(tse, name = "PCA", assay.type = "counts", ncomponents = 10)
 
 
 ## ----plot-pca, fig.cap="PCA plot on the GlobalPatterns data set containing sample from different sources."----
@@ -117,7 +117,7 @@ plotReducedDim(tse, "PCA", colour_by = "Group")
 
 
 ## -----------------------------------------------------------------------------
-tse <- runTSNE(tse, name = "TSNE", exprs_values = "counts", ncomponents = 3)
+tse <- runTSNE(tse, name = "TSNE", assay.type = "counts", ncomponents = 3)
 
 
 ## ----plot-tsne, fig.cap="t-SNE plot on the GlobalPatterns data set containing sample from different sources."----
@@ -150,7 +150,7 @@ enterotype <- transformCounts(enterotype, method = "relabundance")
 formula <- as.formula(paste0("assay ~ ", str_c(variable_names, collapse = " + ")) )
 
 # # Perform RDA
-rda <- calculateRDA(enterotype, assay_name = "relabundance",
+rda <- calculateRDA(enterotype, assay.type = "relabundance",
                     formula = formula, distance = "bray", na.action = na.exclude)
 # Get the rda object
 rda <- attr(rda, "rda")
@@ -284,19 +284,19 @@ plot
 # Agglomerate to genus level
 tse_Genus <- agglomerateByRank(tse, rank="Genus")
 # Convert to relative abundances
-tse_Genus <- transformCounts(tse, method = "relabundance", assay_name="counts")
+tse_Genus <- transformCounts(tse, method = "relabundance", assay.type="counts")
 # Add info on dominant genus per sample
-tse_Genus <- addPerSampleDominantTaxa(tse_Genus, assay_name="relabundance", name = "dominant_taxa")
+tse_Genus <- addPerSampleDominantTaxa(tse_Genus, assay.type="relabundance", name = "dominant_taxa")
 
 
 ## -----------------------------------------------------------------------------
 tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist,
-              name = "PCoA_BC", exprs_values = "relabundance")
+              name = "PCoA_BC", assay.type = "relabundance")
 
 
 ## -----------------------------------------------------------------------------
 # Getting the top taxa
-top_taxa <- getTopTaxa(tse_Genus,top = 6, assay_name = "relabundance")
+top_taxa <- getTopTaxa(tse_Genus,top = 6, assay.type = "relabundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
