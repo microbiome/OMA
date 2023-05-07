@@ -26,6 +26,7 @@ library(mikropml)
 library(GUniFrac)
 library(gridExtra)
 library(MLeval)
+library(quarto)
 
 # List the session libraries
 # prioritize the mia packages to ensure their priority in NAMESPACE
