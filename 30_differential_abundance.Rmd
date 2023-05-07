@@ -363,21 +363,21 @@ ancombc_result <- cbind.data.frame(taxid = out$res$taxon,
 ```
 
 
+
+
 ```{r ancombc2c, warning = FALSE, eval=TRUE}
-# store the FDR adjusted results [test on v1.2.2] 
-ancombc_result <- out$res$q_val %>% rownames_to_column('taxid') %>%
-                                    dplyr::rename(ancombc = 2)
+# store the FDR adjusted results [test on v1.2.2]
+ancombc_result <- out$res %>% dplyr::select(starts_with(c("taxon", "lfc", "q")))
 ```
 
-The object `out` contains all model output. Again, see the 
-[documentation of the function](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html) 
-under **Value** for an explanation of all the output objects. Our question
-whether taxa are differentially abundant can be answered by looking at the
-`res` object, which now contains dataframes with the coefficients, 
-standard errors, p-values and q-values. Conveniently, there is a dataframe
-`diff_abn`. Here, for each taxon it is indicated whether it is differentially
-abundant between the groups (again, keep in mind that the answer is not 
-black-white). Below we show the first 6 entries of this dataframe.
+The object `out` contains all model output. Again, see the
+[documentation of the
+function](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html)
+under **Value** for details. Our question whether taxa are
+differentially abundant can be answered by looking at the `res`
+object, which contains dataframes with the coefficients, standard
+errors, p-values and q-values. Below we show the first entries of this
+dataframe.
 
 ```{r ancom_kable, eval=FALSE}
 kable(head(ancombc_result))
@@ -504,104 +504,18 @@ ZicoSeq.plot(ZicoSeq.obj = zicoseq.obj,
 
 
 
-### Comparison of the methods
+### Comparison of methods
 
-When we compare the methods in the context of a research question, we could
-look at e.g. at whether they agree based on the applied decision criterion
-(e.g. adjusted p value <= 0.05). That is what we illustrate here. First we will 
-look at how many taxa were identified by each method to begin with. In the next
-step we will look at the intersection of identified taxa. To achieve that, we
-first create a dataframe that summarises the decision criterion for each method
-and shows a score from 0 to 3 indicating how many methods agreed on a particular
-taxon.
-
-```{r comparison, eval=TRUE}
-aldex_result <- rownames_to_column(aldex_out, "taxid") %>% dplyr::select(taxid, aldex2 = wi.eBH)
-summ <- full_join(aldex_result, ancombc_result, by = "taxid") %>%
-  full_join(
-    dplyr::select(maaslin2_out$results, taxid = feature, maaslin2 = qval), 
-    by = "taxid") %>%
-    full_join(linda_out %>% rename(LinDA=padj) %>% dplyr::select(LinDA)%>% rownames_to_column('taxid') ) %>%
-  full_join(zicoseq_out %>% dplyr::select(p.adj.fdr) %>% rename(ZicoSeq = p.adj.fdr) %>% rownames_to_column('taxid')) %>%
-  mutate(
-    across(c(aldex2: ZicoSeq), ~ .x <= 0.05),
-    # the following line would be necessary without prevalence filtering 
-    # as some methods output NA
-    #across(-taxid, function(x) ifelse(is.na(x), FALSE, x)),
-    score = rowSums(across(c(aldex2, ancombc, maaslin2, LinDA, ZicoSeq)))
-  )
-
-# Mark all NAs as FALSE
-summ[is.na(summ)] <- FALSE
-
-# This is how it looks like:
-kable(head(summ))
-```
-
-Now we can answer our questions:
-
-```{r, eval=FALSE}
-# how many genera were identified by each method?
-summarise(summ, across(where(is.logical), sum)) %>%
-  kable()
-# which genera are identified by all methods?
-filter(summ, score == 5) %>% kable()
-```
-
-We see that each method identified at least some genera as
-differentially abundant. Many of those that were identified by ALDEx2,
-were also identified by the other methods. Let us plot the data for
-any method or for those taxa that were identified by all methods.
-
-
-```{r, daplotting, eval=TRUE, fig.width=20,fig.height=4}
-# Create a jittered boxplot for each genus 
-assay.type <- "relabundance"
-plot_data <- data.frame(t(assay(tse, assay.type)))
-plot_data$Geographical_location <- tse$Geographical_location
-plots <- pmap(dplyr::select(summ, taxid, score), function(taxid, score) {
-  ggplot(plot_data, aes_string(x="Geographical_location", y=taxid)) +
-    geom_boxplot(outlier.shape = NA) +
-    geom_jitter(width = 0.2) +
-    # scale_y_log10() + # log trans will cause 0 values missing 
-    scale_y_sqrt() + 
-    labs(title=glue::glue("{taxid}"),
-         x="",
-	 y=glue::glue("Abundance ({assay.type})")) +    
-    theme_bw() +
-    theme(legend.position = "none")
-})
-
-# now we can show just those genera that have at least score 5 (or 4
-# or 3 or 2 or 1)
-
-robust_plots <- plots[summ$score == 4 & !is.na(summ$score)] 
-
-# to display this nicely in the book we use patchwork here:
-# (we show first ones)
-robust_plots[[1]] + 
-  robust_plots[[2]] + 
-  robust_plots[[3]] + 
-  robust_plots[[4]] +
-  robust_plots[[5]] +
-  plot_layout(nrow = 1)
-  
-# or if we have most trust in any specific method we can show genera that 
-# are differentially abundant according to that method and then look in the
-# title how many methods also identified it (we only show first 6 here):
-ancombc_plots <- plots[summ$ancombc & !is.na(summ$score)] 
-ancombc_plots[[1]] + 
-  ancombc_plots[[2]] + 
-  ancombc_plots[[3]] + 
-  ancombc_plots[[4]] +
-  ancombc_plots[[5]] +
-  ancombc_plots[[6]] +
-  plot_layout(nrow = 1)
-```
+The different methods yield somewhat different results but they could
+be also expected to overlap to a substantial degree. As an exercirse,
+you can compare the outcomes between the different methods in terms of
+effect sizes, significances, or other aspects that are comparable
+between the methods.
 
 
 
-### Confounding variables
+
+## Confounding variables
 
 Confounders are common in experimental research. In general, these can be
 classified into 3 types:
@@ -623,7 +537,7 @@ this. Below we show how to include a confounder/covariate in ANCOMBC,
 LinDA and ZicoSeq.
 
 
-#### ANCOMBC
+### ANCOMBC
 
 ```{r ancombc_adj, eval=TRUE}
 # perform the analysis 
@@ -647,10 +561,11 @@ ancombc_cov <- ancombc2(
 ```
 
 ```{r ancombc_adj2, eval=FALSE}
-kable(head(ancombc_cov$res$q_val))
+tab <- ancombc_cov$res %>% dplyr::select(starts_with(c("taxon", "lfc", "q"))) %>%
+kable(head(tab))
 ```
 
-#### LinDA
+### LinDA
 
 ```{r linda_adj, eval=TRUE}
 otu.tab <- as.data.frame(assay(tse))
@@ -671,7 +586,7 @@ kable(head(filter(linda.res, reject==T)))
 
 
 
-#### ZicoSeq
+### ZicoSeq
 
 ```{r ZicoSeq_adj, eval=TRUE}
 set.seed(123)
