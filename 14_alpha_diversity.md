@@ -385,8 +385,8 @@ loaded via a namespace (and not attached):
 [27] xfun_0.39                   zlibbioc_1.46.0            
 [29] cachem_1.0.8                beachmat_2.16.0            
 [31] jsonlite_1.8.4              blob_1.2.4                 
-[33] highr_0.10                  DelayedArray_0.26.1        
-[35] BiocParallel_1.34.0         cluster_2.1.4              
+[33] highr_0.10                  DelayedArray_0.26.2        
+[35] BiocParallel_1.34.1         cluster_2.1.4              
 [37] irlba_2.3.5.1               parallel_4.3.0             
 [39] R6_2.5.1                    stringi_1.7.12             
 [41] Rcpp_1.0.10                 bookdown_0.33              

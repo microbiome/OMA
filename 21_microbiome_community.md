@@ -402,10 +402,10 @@ loaded via a namespace (and not attached):
  [39] filelock_1.0.2              fansi_1.0.4                
  [41] polyclip_1.10-4             mgcv_1.8-42                
  [43] compiler_4.3.0              bit64_4.0.5                
- [45] withr_2.5.0                 BiocParallel_1.34.0        
+ [45] withr_2.5.0                 BiocParallel_1.34.1        
  [47] viridis_0.6.3               DBI_1.1.3                  
  [49] highr_0.10                  ggforce_0.4.1              
- [51] MASS_7.3-60                 DelayedArray_0.26.1        
+ [51] MASS_7.3-60                 DelayedArray_0.26.2        
  [53] permute_0.9-7               miaTime_0.1.21             
  [55] tools_4.3.0                 vipor_0.4.5                
  [57] beeswarm_0.4.0              glue_1.6.2                 

@@ -99,13 +99,10 @@ package. We try to predict the diet type based on the data.
 
 
 ```r
-if( !require("mikropml") ){
-    install.packages("mikropml")
-    library(mikropml)
-}
+library(mikropml)
 
 # Run random forest 
-results <- run_ml(df, "rf", outcome_colname = 'diet', 
+results <- run_ml(df, "rf", outcome_colname = "diet", 
                   kfold = 2, cv_times = 5, training_frac = 0.8)
 
 # Print result
@@ -118,26 +115,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    14   9
-##      Veg       9  15
+##      Mixed    12   7
+##      Veg      11  17
 ##                                         
 ##                Accuracy : 0.617         
 ##                  95% CI : (0.464, 0.755)
 ##     No Information Rate : 0.511         
 ##     P-Value [Acc > NIR] : 0.0942        
 ##                                         
-##                   Kappa : 0.234         
+##                   Kappa : 0.231         
 ##                                         
-##  Mcnemar's Test P-Value : 1.0000        
+##  Mcnemar's Test P-Value : 0.4795        
 ##                                         
-##             Sensitivity : 0.609         
-##             Specificity : 0.625         
-##          Pos Pred Value : 0.609         
-##          Neg Pred Value : 0.625         
+##             Sensitivity : 0.522         
+##             Specificity : 0.708         
+##          Pos Pred Value : 0.632         
+##          Neg Pred Value : 0.607         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.298         
-##    Detection Prevalence : 0.489         
-##       Balanced Accuracy : 0.617         
+##          Detection Rate : 0.255         
+##    Detection Prevalence : 0.404         
+##       Balanced Accuracy : 0.615         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -186,10 +183,8 @@ For unbalanced data, you might want to plot precision-recall curve.
 
 
 ```r
-if( !require(MLeval) ){
-    install.packages("MLeval")
-    library(MLeval)
-}
+library(MLeval)
+
 # Calculate different evaluation metrics
 res <- evalm(model, showplots = FALSE)
 
@@ -280,10 +275,10 @@ loaded via a namespace (and not attached):
  [43] timechange_0.2.0            fansi_1.0.4                
  [45] mgcv_1.8-42                 compiler_4.3.0             
  [47] proxy_0.4-27                withr_2.5.0                
- [49] bit64_4.0.5                 BiocParallel_1.34.0        
+ [49] bit64_4.0.5                 BiocParallel_1.34.1        
  [51] viridis_0.6.3               DBI_1.1.3                  
  [53] highr_0.10                  lava_1.7.2.1               
- [55] MASS_7.3-60                 DelayedArray_0.26.1        
+ [55] MASS_7.3-60                 DelayedArray_0.26.2        
  [57] permute_0.9-7               ModelMetrics_1.2.2.2       
  [59] tools_4.3.0                 vipor_0.4.5                
  [61] beeswarm_0.4.0              ape_5.7-1                  

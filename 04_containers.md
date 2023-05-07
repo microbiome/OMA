@@ -1401,9 +1401,9 @@ loaded via a namespace (and not attached):
  [43] fansi_1.0.4                   httr_1.4.5                   
  [45] mgcv_1.8-42                   compiler_4.3.0               
  [47] withr_2.5.0                   bit64_4.0.5                  
- [49] BiocParallel_1.34.0           viridis_0.6.3                
+ [49] BiocParallel_1.34.1           viridis_0.6.3                
  [51] DBI_1.1.3                     MASS_7.3-60                  
- [53] rappdirs_0.3.3                DelayedArray_0.26.1          
+ [53] rappdirs_0.3.3                DelayedArray_0.26.2          
  [55] biomformat_1.28.0             permute_0.9-7                
  [57] tools_4.3.0                   vipor_0.4.5                  
  [59] beeswarm_0.4.0                ape_5.7-1                    

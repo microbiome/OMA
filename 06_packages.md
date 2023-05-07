@@ -38,11 +38,13 @@ document.addEventListener("click", function (event) {
 <img src="general/figures/mia_logo.png" width="100" alt="mia logo" align="right" style="margin: 0 1em 0 1em" />
 
 
-The Bioconductor framework for microbiome data science include the following components:
+The Bioconductor microbiome data science framework consists of:
 
-- specific data containers to organize microbiome profiling data
-- dedicated R packages that provide methods for analysing the data
-- active user and developer community
+- **data containers**, designed to organize multi-assay microbiome data
+- **R packages** that provide dedicated methods for analysing such data
+- **community** of users and developers 
+
+<img src="general/figures/ecosystem.png" width="100" alt="mia logo" align="right" style="margin: 0 1em 0 1em" />
 
 
 This section provides an overview of the package ecosystem. Section
@@ -59,7 +61,7 @@ You can install all packages that are required to run every example in this book
 source("https://raw.githubusercontent.com/microbiome/OMA/master/install_packages.R")
 ```
 
-### Installing specific packages {#packages}
+### Installing specific packages {#packages_specific}
 
 You can install R packages of your choice with the following command
 line procedure.

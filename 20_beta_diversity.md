@@ -807,8 +807,8 @@ loaded via a namespace (and not attached):
 [25] xfun_0.39                   zlibbioc_1.46.0            
 [27] cachem_1.0.8                beachmat_2.16.0            
 [29] jsonlite_1.8.4              blob_1.2.4                 
-[31] highr_0.10                  DelayedArray_0.26.1        
-[33] BiocParallel_1.34.0         cluster_2.1.4              
+[31] highr_0.10                  DelayedArray_0.26.2        
+[33] BiocParallel_1.34.1         cluster_2.1.4              
 [35] irlba_2.3.5.1               parallel_4.3.0             
 [37] R6_2.5.1                    stringi_1.7.12             
 [39] Rcpp_1.0.10                 bookdown_0.33              

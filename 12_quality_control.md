@@ -600,10 +600,10 @@ loaded via a namespace (and not attached):
  [37] filelock_1.0.2              fansi_1.0.4                
  [39] polyclip_1.10-4             mgcv_1.8-42                
  [41] compiler_4.3.0              bit64_4.0.5                
- [43] withr_2.5.0                 BiocParallel_1.34.0        
+ [43] withr_2.5.0                 BiocParallel_1.34.1        
  [45] viridis_0.6.3               DBI_1.1.3                  
  [47] highr_0.10                  ggforce_0.4.1              
- [49] MASS_7.3-60                 DelayedArray_0.26.1        
+ [49] MASS_7.3-60                 DelayedArray_0.26.2        
  [51] permute_0.9-7               tools_4.3.0                
  [53] vipor_0.4.5                 beeswarm_0.4.0             
  [55] ape_5.7-1                   glue_1.6.2                 

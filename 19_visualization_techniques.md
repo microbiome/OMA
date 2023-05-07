@@ -874,7 +874,7 @@ loaded via a namespace (and not attached):
  [33] ggrepel_0.9.3               irlba_2.3.5.1              
  [35] tidytree_0.4.2              vegan_2.6-4                
  [37] permute_0.9-7               DelayedMatrixStats_1.22.0  
- [39] codetools_0.2-19            DelayedArray_0.26.1        
+ [39] codetools_0.2-19            DelayedArray_0.26.2        
  [41] ggforce_0.4.1               tidyselect_1.2.0           
  [43] shape_1.4.6                 aplot_0.1.10               
  [45] farver_2.1.1                ScaledMatrix_1.8.1         
@@ -916,7 +916,7 @@ loaded via a namespace (and not attached):
 [117] crayon_1.5.2                ggsignif_0.6.4             
 [119] labeling_0.4.2              plyr_1.8.8                 
 [121] ggbeeswarm_0.7.2            stringi_1.7.12             
-[123] viridisLite_0.4.2           BiocParallel_1.34.0        
+[123] viridisLite_0.4.2           BiocParallel_1.34.1        
 [125] munsell_0.5.0               lazyeval_0.2.2             
 [127] V8_4.3.0                    Matrix_1.5-4               
 [129] dir.expiry_1.8.0            sparseMatrixStats_1.12.0   

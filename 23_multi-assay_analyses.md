@@ -529,10 +529,10 @@ loaded via a namespace (and not attached):
  [47] fansi_1.0.4                 mgcv_1.8-42                
  [49] compiler_4.3.0              here_1.0.1                 
  [51] bit64_4.0.5                 withr_2.5.0                
- [53] doParallel_1.0.17           BiocParallel_1.34.0        
+ [53] doParallel_1.0.17           BiocParallel_1.34.1        
  [55] viridis_0.6.3               DBI_1.1.3                  
  [57] highr_0.10                  HDF5Array_1.28.1           
- [59] MASS_7.3-60                 DelayedArray_0.26.1        
+ [59] MASS_7.3-60                 DelayedArray_0.26.2        
  [61] rjson_0.2.21                permute_0.9-7              
  [63] tools_4.3.0                 vipor_0.4.5                
  [65] beeswarm_0.4.0              ape_5.7-1                  
