@@ -5,45 +5,79 @@ library(rebook)
 chapterPreamble()
 ```
 
+Clustering is an unsupervised machine learning technique. The idea of 
+it is to find clusters from the data. A cluster is a group of 
+features/samples that share pattern. For example, with clustering, we 
+can find group of samples that share similar community composition.
+There are multiple clustering algorithms available. Most can be 
+used through the `bluster` package and its `clusterRows` function.
+
+Let's load data from mia package.
 ```{r load-pkg-data1}
 library(mia)
 data("GlobalPatterns", package="mia")
 tse <- GlobalPatterns
 ```
+Prior to doing any clustering, we can apply transformation to the data. 
+Here, we will transform the data using `relabundance`.
+```{r load-bluster}
+# Load dependencies
+if( !require(bluster) ){install.packages("bluster"); library(bluster)}
 
-Clustering is an unsupervised machine learning technique. The idea of
-it is to find clusters from the data. A cluster is a group of
-features/samples that share pattern.  For example, with clustering, we
-can find group of samples that share similar community
-composition. There are multiple clustering algorithms available.
+# Optional: Apply transformation
+tse <- transformCounts(tse, method = "relabundance")
+```
 
+Also, we can do clustering on samples or on features. 
+```{r assay-preparation}
+# To cluster the features, simply get the assay
+assay <- assay(tse, "relabundance")
+
+# To cluster the samples, transpose the assay so that the samples are now in rows
+assay <- t(assay)
+```
+
+Once the clustering on the samples is done, we can also plot the clusters.
+```{r plot-samples, eval = FALSE}
+# Beforehand, the clusters must be computed and put in colData in column "clusters"
+
+# Add the MDS dimensions for plotting
+tse <- runMDS(tse, assay.type = "relabundance", FUN = vegan::vegdist, method = "bray")
+
+# Plot the clusters
+plotReducedDim(tse, "MDS", colour_by = "clusters")
+```
+Moving forward, we will cluster on the samples.
 ## Hierarchical clustering
 
-Hiearchical clustering aims to find hiearchy between
-samples/features. There are to approaches: agglomerative ("bottom-up")
-and divisive ("top-down").
+Hierarchical clustering aims to find hierarchy between samples/features.
+There are to approaches: agglomerative (“bottom-up”) and divisive (“top-down”).
 
-In agglomerative approach, each observation is first unique cluster.
-Algorithm continues by agglomerating similar clusters. Divisive
-approach starts with one cluster that contains all the
-observations. Clusters are splitted recursively to clusters that
-differ the most. Clustering ends when each cluster contains only one
-observation.
+In agglomerative approach, each observation is first unique cluster. 
+Algorithm continues by agglomerating similar clusters. Divisive 
+approach starts with one cluster that contains all the observations. 
+Clusters are split recursively to clusters that differ the most. 
+Clustering ends when each cluster contains only one observation.
 
-Hiearchical clustering can be visualized with dendrogram tree. In each
-splitting point, the three is divided into two clusters leading to
-hierarchy.
+Hierarchical clustering can be visualized with dendrogram tree. 
+In each splitting point, the three is divided into two clusters leading 
+to hierarchy.
 
-Let's load data from mia package.
+To do the hierarchical clustering, we use the `clusterRows` with 
+the `HclustParam()` parameter.
 
 ```{r hclust1}
-library(mia)
-library(vegan)
+# Simple use of the hierarchical clustering which sets the cut
+# height to half the dendrogram height.
+hclust.out <- clusterRows(assay, HclustParam())
 
-# Load experimental data
-data(peerj13075)
-(tse <- peerj13075)
+# Add data to the TSE
+colData(tse)$clusters <- hclust.out$clusters
+
+colData(tse)$clusters
 ```
+More parameters can be passed to the algorithm. To see them, 
+check the [HclustParam documentation](https://rdrr.io/github/LTLA/bluster/man/HclustParam-class.html).
 
 Hierarchical clustering requires 2 steps. In the fist step, dissimilarities are 
 calculated. In prior to that, data transformation is applied if needed. Since
@@ -51,28 +85,10 @@ sequencing data is compositional, relative transformation is applied.
 In the second step, clustering is performed based on dissimilarities. 
 
 ```{r hclust2}
-if( !require(NbClust) ){install.packages("NbClust"); library(NbClust)}
-if( !require(cobiclust) ){install.packages("cobiclust"); library(cobiclust)}
-
-# Apply transformation
-tse <- transformCounts(tse, method = "relabundance")
-# Get the assay
-assay <- assay(tse, "relabundance")
-# Transpose assay --> samples are now in rows --> we are clustering samples
-assay <- t(assay)
-
-# Calculate distances
-diss <- vegdist(assay, method = "bray")
-
-# Perform hierarchical clustering
-hc <- hclust(diss, method = "complete")
-
-# To visualize, convert hclust object into dendrogram object
-dendro <- as.dendrogram(hc)
-
-# Plot dendrogram
-plot(dendro)
+# More complex use of the algorithm with another method and cut height
+HclustParam(method="ward.D2", cut.dynamic=TRUE)
 ```
+To plot the dendrogram, we need the full information from the hierarchical clustering.
 
 We can use dendrogram to determine the number of clusters. Usually the
 tree is splitted where the branch length is the largest. However, as
@@ -80,83 +96,213 @@ we can see from the dendrogram, clusters are not clear. Algorithms are
 available to identify the optimal number of clusters.
 
 ```{r hclust3}
-# Determine the optimal number of clusters
-res <- NbClust(diss = diss, distance = NULL, method = "ward.D2",
-               index = "silhouette")
+# Get full hierarchical clustering information
+hclust.out <- clusterRows(assay, HclustParam(), full=TRUE)
 
-res$Best.nc
-```
+# Add data to the TSE
+colData(tse)$clusters <- hclust.out$clusters
 
-Based on the result, let's divide observations into 15 clusters.
+# Get the dendrogram object
+dendro <- as.dendrogram(hclust.out$objects$hclust)
 
-```{r hclust4}
-if( !require(dendextend) ){
-    install.packages("dendextend")
-    library(dendextend)
-}
+# Plot the dendrogram
+plot(dendro)
 
-# Find clusters
-cutree(hc, k = 15) 
-
-# Making colors for 6 clusters
-col_val_map <- randomcoloR::distinctColorPalette(15) %>%
-     as.list() %>% setNames(paste0("clust_",seq(15)))
-
-dend <- color_branches(dendro, k=15, col=unlist(col_val_map))
+# Plot dendrogram with colors
+nbclusters <- length(levels(hclust.out$clusters))
+col_val_map <- randomcoloR::distinctColorPalette(nbclusters) %>%
+    as.list() %>% setNames(paste0("clust_",seq(nbclusters)))
+dend <- color_branches(dendro, k=nbclusters, col=unlist(col_val_map))
 labels(dend) <- NULL
 plot(dend)
-
 ```
-
 ## K-means clustering
+Let's now try k-means clustering. Here observations are divided into clusters 
+so that the distances between observations and cluster centers are minimized; 
+an observation belongs to cluster whose center is the nearest.
 
-Hierarchical clustering did not yield clusters. Let's try k-means
-clustering instead. Here observations are divided into clusters so
-that the distances between observations and cluster centers are
-minimized; an observation belongs to cluster whose center is the
-nearest.
+The algorithm starts by dividing observation to random clusters whose number 
+is defined by user. The centroids of clusters are then calculated. After that, 
+observations' allocation to clusters are updated so that the means are minimized. 
+Again, centroid are calculated, and algorithm continues iteratively until the 
+assignments do not change.
+### Getting the number of clusters
 
-The algorithm starts by dividing observation to random clusters whose
-number is defined by user. The centroids of clusters are then
-calculated. After that, observations' allocation to clusters are
-updated so that the means are minimized. Again, centroid are
-calculated, and algorithm continues iteratively until the assignments
-do not change.
-
-The number of clusters can be determined based on algorithm. Here we
-utilize silhouette analysis.
+The number of clusters can be determined based on algorithm. Here we utilize 
+silhouette analysis.
 
 ```{r kmeans1}
-if( !require(factoextra) ){
-    install.packages("factoextra")
-    library(factoextra)
+# Load dependencies
+# Load dependencies
+if( !require(factoextra) ) { 
+	install.packages("factoextra"); 
+	library(factoextra)
 }
+
+# Calculate distances
+diss <- vegdist(assay, method = "bray")
 
 # Convert dist object into matrix
 diss <- as.matrix(diss)
+
 # Perform silhouette analysis and plot the result
-fviz_nbclust(diss, kmeans, method = "silhouette")
+fviz_nbclust(diss, kmeans, method = "silhouette").
 ```
 
-Based on the result of silhouette analysis, we choose 3 to be the number of clusters
-in k-means clustering.
+We can also get the number of clusters by using a function. For example sqrt.
+
+### K-means algorithm
+
+Based on the result of silhouette analysis, we choose **3** to be the number of clusters in k-means clustering.
+
 
 ```{r kmeans2}
-library(scater)
+# There's a random aspect to K-means (to get the initial centers) so if we want reproducible results, we set a random seed.
+set.seed(100)
 
-# The first step is random, add seed for reproducibility
-set.seed(15463)
-# Perform k-means clustering with 3 clusters
-km <- kmeans(diss, 3, nstart = 25)
-# Add the result to colData
-colData(tse)$clusters <- as.factor(km$cluster)
+# Do the K-means clustering
+kmeans.out <- clusterRows(assay, KmeansParam(10))
 
-# Perform PCoA so that we can visualize clusters
-tse <- runMDS(tse, assay.type = "relabundance", FUN = vegan::vegdist, method = "bray")
+# Add data to the TSE
+colData(tse)$clusters <- hclust.out$clusters
+hclust.out$clusters
+```
 
-# Plot PCoA and color clusters
+As seen in the hierarchical clustering, if the clusters are done on the samples, we can plot them with `plotReducedDim`.
+
+As mentioned before, we can also get the number of clusters using a function:
+
+```{r kmeans2}
+kmeans.out <- clusterRows(assay, KmeansParam(sqrt))
+```
+
+### K-means variants
+
+#### Mini-batch k-means
+
+This variant uses mini-batching to approximate the full k-means algorithm for greater speed.
+
+```{r mbkmeans}
+if( !require("mbkmeans") ){
+    BiocManager::install("mbkmeans")
+    library("mbkmeans")
+}
+set.seed(100)
+mbkmeans.out <- clusterRows(assay, MbkmeansParam(10))
+colData(tse)$clusters <- mbkmeans.out
+mbkmeans.out
+```
+
+## Affinity propagation
+
+Contrarily to the K-means algorithm, this algorithm doesn't require 
+a number of clusters before running. It instead uses a communication 
+system between the data points to find which members of the input set 
+that are representative of clusters.
+
+This algorithm isn't particularly fast as it involves the calculation 
+of a square similarity matrix between all pairs of observations. 
+So, we'll speed it up by taking analyzing a subset of the data:
+
+```{r affinity-prop}
+set.seed(1000)
+
+# Take a sub dataset
+sub <- tse[sample(nrow(tse), 2000),]
+
+# Clustering by sample --> transpose the subset
+ap.out <- clusterRows(t(sub), AffinityParam())
+colData(tse)$clusters <- ap.out
+ap.out
+# Plotting the results
 plotReducedDim(tse, "MDS", colour_by = "clusters")
 ```
+
+We can change parameters such as q which determines the resolution 
+of the clustering. Find out more on the 
+[AffinityParam doc](https://rdrr.io/github/LTLA/bluster/man/AffinityParam-class.html).
+
+## Self-organizing maps (SOM)
+
+Another possibility is to use self-organizing maps from the kohonen 
+package. This allocates observations to nodes of a simple neural 
+network; each node is then treated as a cluster.
+
+```{r som1}
+if( !require("kohonen") ){
+    BiocManager::install("kohonen")
+    library("kohonen")
+}
+set.seed(1000)
+
+# Clustering on the samples
+som.out <- clusterRows(t(relassay), SomParam(20), full=TRUE)
+head(som.out$clusters)
+colData(tse)$clusters <- som.out$clusters
+
+# Plotting clusters
+plotReducedDim(tse, "MDS", colour_by = "clusters")
+
+```
+
+The key feature of SOMs is that they apply additional topological 
+constraints on the relative positions of the nodes. This allows 
+us to naturally determine the relationships between clusters 
+based on the proximity of the nodes.
+
+```{r som2}
+# Plotting relationship between clusters
+par(mfrow=c(1,2))
+plot(som.out$objects$som, "counts")
+grid <- som.out$objects$som$grid$pts
+text(grid[,1], grid[,2], seq_len(nrow(grid)))
+```
+
+## Graph-based clustering
+This algorithm builds a graph were the vertices are the data points 
+and there is an edge between two points *p* and *q* if the distance 
+between these points is among the *k*-th smallest distances from *p* 
+to other objects from *p*. Thus, here, the number of neighbors `k` 
+controls the resolution of the clusters.
+
+We can build shared or direct nearest neighbor graphs and perform 
+community detection with igraph.
+
+```{r GNN}
+set.seed(101) # just in case there are ties.
+
+# Clustering on the samples
+graph.out <- clusterRows(t(assay), NNGraphParam(k=3), full=TRUE)
+colData(tse)$clusters <- graph.out$clusters
+colData(tse)$clusters
+plotReducedDim(tse, "MDS", colour_by = "clusters")
+```
+It is possible to change parameters such as the algorithm. 
+Further documentation is available [here](https://rdrr.io/bioc/bluster/man/NNGraphParam-class.html).
+
+## Density-based clustering
+
+The bluster package also offers a density-based clustering algorithm 
+with DBSCAN. This algorithm has the particularity to consider certain 
+points as noise (if they aren’t close enough to other points). Here 
+we determine the neighborhoods using `eps` and `min.pts`.
+
+```{r dbscan}
+# DBSCAN clustering on the samples
+dbscan.out <- clusterRows(t(relassay), DbscanParam(eps=0.2, min.pts = 3))
+colData(tse)$clusters <- dbscan.out
+dbscan.out
+
+# Plot the clusters
+plotReducedDim(tse, "MDS", colour_by = "clusters")
+
+# Check the number of noise points (with no value)
+summary(is.na(dbscan.out))
+```
+
+It’s also possible to determine the neighborhoods using core.prop 
+and min.pts. Find out more on the DbscanParam with the 
+[documentation](https://rdrr.io/github/LTLA/bluster/man/DbscanParam-class.html).
 
 ## Dirichlet Multinomial Mixtures (DMM)
 
@@ -763,3 +909,17 @@ data set, see the attached .Rmd file.
 Link:
 
    * [Rmd](add-comm-typing.Rmd)
+
+
+## Going further with bluster
+There are additional algorithms and handy functions that are 
+in bluster, but weren't covered here:
+- `clusterSweep` which allows to do a sweep across combinations 
+of parameters to obtain different clusterings from the same algorithm.
+- `compareClusterings` to compare pairs of clusterings. This can 
+be combined with the previous method to find out which parameter 
+settings have the greatest effect in a sweep.
+- `clusterRMSD` to compute the root mean-squared deviation (RMSD) 
+for each cluster.
+
+The full documentation is available [here](https://bioconductor.org/packages/release/bioc/manuals/bluster/man/bluster.pdf).
