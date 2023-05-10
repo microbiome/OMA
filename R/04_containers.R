@@ -67,6 +67,38 @@ dim(altExp(tse[,1:10],"Phylum"))
 #TODO: Find the right dataset to explain a non 1:1 sample relationship
 
 
+## ---- message=FALSE, eval=FALSE-----------------------------------------------
+## library(mia)
+## data(package="mia")
+
+
+## ---- message=FALSE-----------------------------------------------------------
+data("GlobalPatterns", package="mia")
+GlobalPatterns
+
+
+## ---- message=FALSE, echo=FALSE-----------------------------------------------
+help(GlobalPatterns)
+
+
+## ---- message=FALSE-----------------------------------------------------------
+library(microbiomeDataSets)
+availableDataSets()
+
+
+## ----eval=FALSE, message=FALSE------------------------------------------------
+## # mae <- HintikkaXOData()
+## # Since HintikkaXOData is now added to mia, we can load it directly from there
+## # We suggest to check other datasets from microbiomeDataSets
+## data(HintikkaXOData)
+## mae <- HintikkaXOData
+
+
+## ---- message=FALSE, eval=FALSE-----------------------------------------------
+## library(curatedMetagenomicData)
+## tse <- curatedMetagenomicData("Vatanen*", dryrun = FALSE, counts = TRUE)
+
+
 ## ----dada2_1, include=FALSE---------------------------------------------------
 # Load objects
 seqtab.nochim <- readRDS("data/dada2_seqtab.nochim")
@@ -132,58 +164,42 @@ tse
 
 
 ## ----importingcsv1, message=FALSE---------------------------------------------
-count_file <- "data/assay_taxa.csv"
-tax_file <- "data/rowdata_taxa.csv"
+count_file  <- "data/assay_taxa.csv"
+tax_file    <- "data/rowdata_taxa.csv"
 sample_file <- "data/coldata.csv"
 
 # Load files
-counts  <- read.csv(count_file)   # Abundance table (e.g. ASV data; to assay data)
-tax     <- read.csv(tax_file)     # Taxonomy table (to rowData)
-samples <- read.csv(sample_file)  # Sample data (to colData)
+counts  <- read.csv(count_file, row.names=1)   # Abundance table (e.g. ASV data; to assay data)
+tax     <- read.csv(tax_file, row.names=1)     # Taxonomy table (to rowData)
+samples <- read.csv(sample_file, row.names=1)  # Sample data (to colData)
 
 
 ## ----importingcsv2------------------------------------------------------------
-# Add rownames and remove an additional column
-rownames(counts) <- counts$X
-counts$X <- NULL
+# Match rows and columns
+counts <- counts[rownames(tax), rownames(samples)]
 
-# Add rownames and remove an additional column
-rownames(samples) <- samples$X
-samples$X <- NULL
+# Let us ensure that the data is in correct (numeric matrix) format:
+counts <- as.matrix(counts)
 
-# Add rownames and remove an additional column
-rownames(tax) <- tax$X
-tax$X <- NULL
 
-# As an example:
-# If e.g. samples do not match between colData and counts table, you must order 
-# counts based on colData
-if( any( colnames(counts) != rownames(samples) ) ){
-    counts <- counts[ , rownames(samples) ]
-}
+## ----demodata, message=FALSE--------------------------------------------------
+# coldata rownames match assay colnames
+all(rownames(samples) == colnames(counts)) # our data set
+class(samples) # should be data.frame or DataFrame
 
-# And same with rowData and counts...
-if( any( rownames(counts) != rownames(tax) ) ){
-    counts <- counts[ rownames(tax), ]
-}
+# rowdata rownames match assay rownames
+all(rownames(tax) == rownames(counts)) # our data set
+class(tax) # should be data.frame or DataFrame
+
+# Counts 
+class(counts) # should be a numeric matrix
 
 
 ## ----importingcsv3------------------------------------------------------------
-# Ensure that the data is in correct format
-
-# counts should be in matrix format
-counts <- as.matrix(counts)
-# And it should be added to a SimpleList
-assays <-  SimpleList(counts = counts)
-
-# colData and rowData should be in DataFrame format
-colData <- DataFrame(colData)
-rowData <- DataFrame(rowData)
-
 # Create a TreeSE
-tse_taxa <- TreeSummarizedExperiment(assays = assays,
-                                     colData = samples,
-                                     rowData = tax)
+tse_taxa <- TreeSummarizedExperiment(assays =  SimpleList(counts = counts),
+                                     colData = DataFrame(samples),
+                                     rowData = DataFrame(tax))
 
 tse_taxa
 
@@ -193,23 +209,13 @@ count_file <- "data/assay_metabolites.csv"
 sample_file <- "data/coldata.csv"
 
 # Load files
-counts  <- read.csv(count_file)  
-samples <- read.csv(sample_file)
+counts  <- read.csv(count_file, row.names=1)  
+samples <- read.csv(sample_file, row.names=1)
 
-# Add rownames and remove an additional column
-rownames(counts) <- counts$X
-counts$X <- NULL
-rownames(samples) <- samples$X
-samples$X <- NULL
+# Create a TreeSE for the metabolite data
+tse_metabolite <- TreeSummarizedExperiment(assays = SimpleList(concs = as.matrix(counts)),
+                                           colData = DataFrame(samples))
 
-# Convert into right format
-counts <- as.matrix(counts)
-assays <-  SimpleList(concs = counts)
-colData <- DataFrame(colData)
-
-# Create a TreeSE
-tse_metabolite <- TreeSummarizedExperiment(assays = assays,
-                                           colData = samples)
 tse_metabolite
 
 
@@ -344,38 +350,6 @@ GlobalPatterns_TSE
 # convert TSE to phyloseq
 GlobalPatterns_phyloseq2 <- makePhyloseqFromTreeSummarizedExperiment(GlobalPatterns_TSE) 
 GlobalPatterns_phyloseq2
-
-
-## ---- message=FALSE, eval=FALSE-----------------------------------------------
-## library(mia)
-## data(package="mia")
-
-
-## ---- message=FALSE-----------------------------------------------------------
-data("GlobalPatterns", package="mia")
-GlobalPatterns
-
-
-## ---- message=FALSE, echo=FALSE-----------------------------------------------
-help(GlobalPatterns)
-
-
-## ---- message=FALSE-----------------------------------------------------------
-library(microbiomeDataSets)
-availableDataSets()
-
-
-## ----eval=FALSE, message=FALSE------------------------------------------------
-## # mae <- HintikkaXOData()
-## # Since HintikkaXOData is now added to mia, we can load it directly from there
-## # We suggest to check other datasets from microbiomeDataSets
-## data(HintikkaXOData)
-## mae <- HintikkaXOData
-
-
-## ---- message=FALSE, eval=FALSE-----------------------------------------------
-## library(curatedMetagenomicData)
-## tse <- curatedMetagenomicData("Vatanen*", dryrun = FALSE, counts = TRUE)
 
 
 ## ----sessionInfo, echo=FALSE, results='asis'----------------------------------

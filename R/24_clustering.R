@@ -92,7 +92,7 @@ km <- kmeans(diss, 3, nstart = 25)
 colData(tse)$clusters <- as.factor(km$cluster)
 
 # Perform PCoA so that we can visualize clusters
-tse <- runMDS(tse, exprs_values = "relabundance", FUN = vegan::vegdist, method = "bray")
+tse <- runMDS(tse, assay.type = "relabundance", FUN = vegan::vegdist, method = "bray")
 
 # Plot PCoA and color clusters
 plotReducedDim(tse, "MDS", colour_by = "clusters")
@@ -133,7 +133,7 @@ getBestDMNFit(tse_dmn, type = "laplace")
 
 
 ## -----------------------------------------------------------------------------
-dmn_group <- calculateDMNgroup(tse_dmn, variable = "SampleType",  exprs_values = "counts",
+dmn_group <- calculateDMNgroup(tse_dmn, variable = "SampleType",  assay.type = "counts",
                                k = 2, seed=.Machine$integer.max)
 
 dmn_group
@@ -165,13 +165,13 @@ vec <- colnames(prob)[max.col(prob,ties.method = "first")]
 ## -----------------------------------------------------------------------------
 # Does clr transformation. Pseudocount is added, because data contains zeros.
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
-tse <- transformCounts(tse, assay_name = "pseudo", method = "relabundance")
+tse <- transformCounts(tse, assay.type = "pseudo", method = "relabundance")
 tse <- transformCounts(tse, "relabundance", method = "clr")
 
 library(scater)
 
 # Does principal coordinate analysis
-df <- calculateMDS(tse, exprs_values = "clr", method = "euclidean")
+df <- calculateMDS(tse, assay.type = "clr", method = "euclidean")
 
 # Creates a data frame from principal coordinates
 euclidean_pcoa_df <- data.frame(pcoa1 = df[,1], 
@@ -212,7 +212,7 @@ tse <- enterotype
 tse <- transformCounts(tse, method = "rclr")
 
 # Performing and storing UMAP
-tse <- runUMAP(tse, name="UMAP", exprs_values="rclr")
+tse <- runUMAP(tse, name="UMAP", assay.type="rclr")
 
 k <- c(2,3,5,10)
 ClustAndPlot <- function(x) {
@@ -288,7 +288,7 @@ if(!require(pheatmap)){
     library(pheatmap)
 }
 # z-transform for heatmap
-mae[[1]] <- transformCounts(mae[[1]], assay_name = "rclr",
+mae[[1]] <- transformCounts(mae[[1]], assay.type = "rclr",
                             MARGIN = "features",
                             method = "z", name = "clr_z")
 
@@ -319,7 +319,7 @@ if(!require(patchwork)){
 }
 
 # ggplot requires data in melted format
-melt_assay <- meltAssay(mae[[1]], assay_name = "rclr", add_col_data = T, add_row_data = T)
+melt_assay <- meltAssay(mae[[1]], assay.type = "rclr", add_col_data = T, add_row_data = T)
 
 # patchwork two plots side-by-side
 p1 <- ggplot(melt_assay) +
@@ -342,24 +342,19 @@ mae[[1]] <- mae[[1]][ , colnames(mae[[2]]) ]
 rownames(mae[[1]]) <- make.unique(rownames(mae[[1]]))
 # Calculate correlations
 corr <- getExperimentCrossCorrelation(mae, 1, 2, 
-                                      assay_name1 = "rclr", 
-                                      assay_name2 = "nmr", 
+                                      assay.type1 = "rclr", 
+                                      assay.type2 = "nmr", 
                                       mode = "matrix", 
                                       cor_threshold = 0.2)
 
 
 
 ## ----biclust_2----------------------------------------------------------------
-# Load package
-if(!require(biclust)){
-    install.packages("biclust")
-    library(biclust)
-}
-
 # Set seed for reproducibility
 set.seed(3973)
 
 # Find biclusters
+library(biclust)
 bc <- biclust(corr, method=BCPlaid(), fit.model = y ~ m,
               background = TRUE, shuffle = 100, back.fit = 0, max.layers = 10,
               iter.startup = 10, iter.layer = 100, verbose = FALSE)
@@ -433,7 +428,7 @@ head(bicluster_rows)
 # Function for obtaining sample-wise sum, mean, median, and mean variance
 # for each cluster
 
-.sum_mean_median_var <- function(tse1, tse2, assay_name1, assay_name2, clusters1, clusters2){
+.sum_mean_median_var <- function(tse1, tse2, assay.type1, assay.type2, clusters1, clusters2){
   
   list <- list()
   # Create a data frame that includes all the information
@@ -442,8 +437,8 @@ head(bicluster_rows)
     tse_subset1 <- tse1[clusters1[,i], ]
     tse_subset2 <- tse2[clusters2[,i], ]
     # Get assay
-    assay1 <- assay(tse_subset1, assay_name1)
-    assay2 <- assay(tse_subset2, assay_name2)
+    assay1 <- assay(tse_subset1, assay.type1)
+    assay2 <- assay(tse_subset2, assay.type2)
     # Calculate sum, mean, median, and mean variance
     sum1 <- colSums2(assay1, na.rm = T)
     mean1 <- colMeans2(assay1, na.rm = T)
@@ -506,11 +501,12 @@ pheatmap(corr, cluster_cols = F, cluster_rows = F,
 ## ----biclust_9----------------------------------------------------------------
 # Calculate cross-correlation
 corr <- getExperimentCrossCorrelation(mae, 1, 1, 
-                                      assay_name1 = "rclr", assay_name2 = "rclr", 
+                                      assay.type1 = "rclr", assay.type2 = "rclr", 
                                       mode = "matrix",
                                       cor_threshold = 0.2, verbose = F, show_warning = F)
 
 # Find biclusters
+library(biclust)
 bc <- biclust(corr, method=BCPlaid(), fit.model = y ~ m,
               background = TRUE, shuffle = 100, back.fit = 0, max.layers = 10,
               iter.startup = 10, iter.layer = 100, verbose = FALSE)

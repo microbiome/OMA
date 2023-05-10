@@ -77,8 +77,8 @@ assay(altExp(tse, "Family"), "counts")[1:5,1:7]
 
 ## -----------------------------------------------------------------------------
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
-tse <- transformCounts(tse, assay_name = "pseudo", method = "relabundance")
-tse <- transformCounts(x = tse, assay_name = "relabundance", method = "clr", 
+tse <- transformCounts(tse, assay.type = "pseudo", method = "relabundance")
+tse <- transformCounts(x = tse, assay.type = "relabundance", method = "clr", 
                         pseudocount = 1, name = "clr_transformation")
 
 head(assay(tse, "clr_transformation"))
@@ -98,14 +98,14 @@ assays(tse)
 ## -----------------------------------------------------------------------------
 taxa.abund.cc1 <- getAbundanceSample(tse, 
                                      sample_id = "CC1",
-                                     assay_name = "counts")
+                                     assay.type = "counts")
 taxa.abund.cc1[1:10]
 
 
 ## -----------------------------------------------------------------------------
 taxa.abundances <- getAbundanceFeature(tse, 
                                       feature_id = "Phylum:Bacteroidetes",
-                                      assay_name = "counts")
+                                      assay.type = "counts")
 taxa.abundances[1:10]
 
 

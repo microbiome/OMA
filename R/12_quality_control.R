@@ -8,7 +8,7 @@ library(mia)
 
 
 ## ---- warning=FALSE, message=FALSE--------------------------------------------
-# Loading example data
+# Load example data
 library(miaTime)
 library(miaViz)
 data(hitchip1006)
@@ -17,17 +17,16 @@ tse <- hitchip1006
 # Add relative abundances
 tse <- transformCounts(tse, MARGIN = "samples", method = "relabundance")
 
-library(miaViz)
 # Use argument names
-# assay_name / assay_name / assay_name
+# assay.type / assay.type / assay.type
 # depending on the mia package version
-plotAbundanceDensity(tse, layout = "jitter", assay_name = "relabundance",
+plotAbundanceDensity(tse, layout = "jitter", assay.type = "relabundance",
                      n = 40, point_size=1, point_shape=19, point_alpha=0.1) + 
                      scale_x_log10(label=scales::percent)
 
 
 ## ---- warning=FALSE, message=FALSE--------------------------------------------
-plotAbundanceDensity(tse, layout = "density", assay_name = "relabundance",
+plotAbundanceDensity(tse, layout = "density", assay.type = "relabundance",
                      n = 5, colour_by="nationality", point_alpha=1/10) +
     scale_x_log10()
 
@@ -37,7 +36,7 @@ head(getPrevalence(tse, detection = 1/100, sort = TRUE, as_relative = TRUE))
 
 
 ## ----concepts_prevalence2-----------------------------------------------------
-head(getPrevalence(tse, detection = 1, sort = TRUE, assay_name = "counts",
+head(getPrevalence(tse, detection = 1, sort = TRUE, assay.type = "counts",
                    as_relative = FALSE))
 
 
@@ -47,12 +46,12 @@ head(getPrevalence(tse, detection = 1, sort = TRUE, assay_name = "counts",
 altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
 # Check prevalence for the Phylum abundance table from the altExp slot
 head(getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = TRUE,
-                   assay_name = "counts", as_relative = TRUE))
+                   assay.type = "counts", as_relative = TRUE))
 
 
 ## -----------------------------------------------------------------------------
 head(getPrevalence(tse, rank = "Phylum", detection = 1/100, sort = TRUE,
-                   assay_name = "counts", as_relative = TRUE))
+                   assay.type = "counts", as_relative = TRUE))
 
 
 ## ----core-members, message=FALSE, warning=FALSE, eval = FALSE-----------------
@@ -65,7 +64,7 @@ head(getPrevalence(tse, rank = "Phylum", detection = 1/100, sort = TRUE,
 ## -----------------------------------------------------------------------------
 rowData(altExp(tse,"Phylum"))$prevalence <- 
     getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = FALSE,
-                  assay_name = "counts", as_relative = TRUE)
+                  assay.type = "counts", as_relative = TRUE)
 
 
 ## ---- message=FALSE, warning=FALSE--------------------------------------------
@@ -80,17 +79,17 @@ altExps(tse) <-
           function(y){
               rowData(y)$prevalence <- 
                   getPrevalence(y, detection = 1/100, sort = FALSE,
-                                assay_name = "counts", as_relative = TRUE)
+                                assay.type = "counts", as_relative = TRUE)
               y
           })
 top_phyla <- getTopTaxa(altExp(tse,"Phylum"),
                         method="prevalence",
                         top=5L,
-                        assay_name="counts")
+                        assay.type="counts")
 top_phyla_mean <- getTopTaxa(altExp(tse,"Phylum"),
                              method="mean",
                              top=5L,
-                             assay_name="counts")
+                             assay.type="counts")
 x <- unsplitByRanks(tse, ranks = taxonomyRanks(tse)[1:6])
 x <- addTaxonomyTree(x)
 
