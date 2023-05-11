@@ -7,8 +7,8 @@ chapterPreamble()
 
 ```{r load-pkg-data1}
 library(mia)
-data("GlobalPatterns", package = "mia")
-tse <- GlobalPatterns
+data("peerj13075", package = "mia")
+tse <- peerj13075
 ```
 
 Clustering is an unsupervised machine learning technique. The idea of
@@ -111,7 +111,27 @@ pam.out <- clusterCells(tse,
 )
 ```
 
-### Features clustering
+### Taxa clustering
+
+It's also possible to do clustering for the taxa. We'll do once again the 
+hierarchical clustering.
+```{r taxa-clust}
+# Transform data with CLR
+tse <- transformCounts(tse,
+  assay.type = "relabundance",
+  method = "clr",
+  pseudocount = min(assay(tse, "relabundance")[assay(tse, "relabundance") > 0])
+)
+
+# Cluster the taxa using hierarchical clustering
+hclust.out <- clusterRows(assay(tse, "clr"), HclustParam())
+
+# Put the cluster data in rowData
+rowData(tse)$clusters <- hclust.out
+
+# Merge the rows
+mergeRows(tse, rowData(tse)$clusters)
+```
 
 
 ## Hierarchical clustering
