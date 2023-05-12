@@ -1398,7 +1398,7 @@ loaded via a namespace (and not attached):
  [37] irlba_2.3.5.1                 ExperimentHub_2.8.0          
  [39] RSQLite_2.3.1                 vegan_2.6-4                  
  [41] beachmat_2.16.0               filelock_1.0.2               
- [43] fansi_1.0.4                   httr_1.4.5                   
+ [43] fansi_1.0.4                   httr_1.4.6                   
  [45] mgcv_1.8-42                   compiler_4.3.0               
  [47] withr_2.5.0                   bit64_4.0.5                  
  [49] BiocParallel_1.34.1           viridis_0.6.3                
@@ -1407,7 +1407,7 @@ loaded via a namespace (and not attached):
  [55] biomformat_1.28.0             permute_0.9-7                
  [57] tools_4.3.0                   vipor_0.4.5                  
  [59] beeswarm_0.4.0                ape_5.7-1                    
- [61] interactiveDisplayBase_1.38.0 httpuv_1.6.9                 
+ [61] interactiveDisplayBase_1.38.0 httpuv_1.6.11                
  [63] glue_1.6.2                    rhdf5filters_1.12.1          
  [65] nlme_3.1-162                  promises_1.2.0.1             
  [67] grid_4.3.0                    ade4_1.7-22                  
@@ -1425,9 +1425,9 @@ loaded via a namespace (and not attached):
  [91] bit_4.0.5                     tidyselect_1.2.0             
  [93] DirichletMultinomial_1.42.0   scuttle_1.10.1               
  [95] knitr_1.42                    gridExtra_2.3                
- [97] bookdown_0.33                 xfun_0.39                    
+ [97] bookdown_0.34                 xfun_0.39                    
  [99] stringi_1.7.12                lazyeval_0.2.2               
-[101] yaml_2.3.7                    evaluate_0.20                
+[101] yaml_2.3.7                    evaluate_0.21                
 [103] codetools_0.2-19              tibble_3.2.1                 
 [105] graph_1.78.0                  cli_3.6.1                    
 [107] xtable_1.8-4                  munsell_0.5.0                

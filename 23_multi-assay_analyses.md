@@ -549,10 +549,10 @@ loaded via a namespace (and not attached):
  [87] lattice_0.21-8              bit_4.0.5                  
  [89] tidyselect_1.2.0            DirichletMultinomial_1.42.0
  [91] scuttle_1.10.1              knitr_1.42                 
- [93] gridExtra_2.3               bookdown_0.33              
+ [93] gridExtra_2.3               bookdown_0.34              
  [95] xfun_0.39                   pheatmap_1.0.12            
  [97] stringi_1.7.12              lazyeval_0.2.2             
- [99] yaml_2.3.7                  evaluate_0.20              
+ [99] yaml_2.3.7                  evaluate_0.21              
 [101] codetools_0.2-19            tibble_3.2.1               
 [103] BiocManager_1.30.20         graph_1.78.0               
 [105] cli_3.6.1                   uwot_0.1.14                

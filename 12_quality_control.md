@@ -619,10 +619,10 @@ loaded via a namespace (and not attached):
  [75] lattice_0.21-8              bit_4.0.5                  
  [77] tidyselect_1.2.0            DirichletMultinomial_1.42.0
  [79] knitr_1.42                  gridExtra_2.3              
- [81] bookdown_0.33               xfun_0.39                  
+ [81] bookdown_0.34               xfun_0.39                  
  [83] graphlayouts_1.0.0          stringi_1.7.12             
  [85] lazyeval_0.2.2              ggfun_0.0.9                
- [87] yaml_2.3.7                  evaluate_0.20              
+ [87] yaml_2.3.7                  evaluate_0.21              
  [89] codetools_0.2-19            tibble_3.2.1               
  [91] BiocManager_1.30.20         graph_1.78.0               
  [93] ggplotify_0.1.0             cli_3.6.1                  

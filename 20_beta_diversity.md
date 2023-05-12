@@ -811,14 +811,14 @@ loaded via a namespace (and not attached):
 [33] BiocParallel_1.34.1         cluster_2.1.4              
 [35] irlba_2.3.5.1               parallel_4.3.0             
 [37] R6_2.5.1                    stringi_1.7.12             
-[39] Rcpp_1.0.10                 bookdown_0.33              
+[39] Rcpp_1.0.10                 bookdown_0.34              
 [41] DECIPHER_2.28.0             splines_4.3.0              
 [43] Matrix_1.5-4                tidyselect_1.2.0           
 [45] yaml_2.3.7                  viridis_0.6.3              
 [47] codetools_0.2-19            plyr_1.8.8                 
 [49] tibble_3.2.1                withr_2.5.0                
 [51] treeio_1.24.0               Rtsne_0.16                 
-[53] evaluate_0.20               pillar_1.9.0               
+[53] evaluate_0.21               pillar_1.9.0               
 [55] BiocManager_1.30.20         filelock_1.0.2             
 [57] generics_0.1.3              RCurl_1.98-1.12            
 [59] sparseMatrixStats_1.12.0    munsell_0.5.0              

@@ -900,7 +900,7 @@ loaded via a namespace (and not attached):
  [85] gtable_0.3.3                blob_1.2.4                 
  [87] registry_0.5-1              ComplexHeatmap_2.16.0      
  [89] htmltools_0.5.5             carData_3.0-5              
- [91] bookdown_0.33               clue_0.3-64                
+ [91] bookdown_0.34               clue_0.3-64                
  [93] scales_1.2.1                png_0.1-8                  
  [95] ggfun_0.0.9                 knitr_1.42                 
  [97] rjson_0.2.21                nlme_3.1-162               
@@ -911,7 +911,7 @@ loaded via a namespace (and not attached):
 [107] vctrs_0.6.2                 car_3.1-2                  
 [109] BiocSingular_1.16.0         beachmat_2.16.0            
 [111] cluster_2.1.4               beeswarm_0.4.0             
-[113] evaluate_0.20               cli_3.6.1                  
+[113] evaluate_0.21               cli_3.6.1                  
 [115] compiler_4.3.0              rlang_1.1.1                
 [117] crayon_1.5.2                ggsignif_0.6.4             
 [119] labeling_0.4.2              plyr_1.8.8                 

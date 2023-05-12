@@ -389,7 +389,7 @@ loaded via a namespace (and not attached):
 [35] BiocParallel_1.34.1         cluster_2.1.4              
 [37] irlba_2.3.5.1               parallel_4.3.0             
 [39] R6_2.5.1                    stringi_1.7.12             
-[41] Rcpp_1.0.10                 bookdown_0.33              
+[41] Rcpp_1.0.10                 bookdown_0.34              
 [43] knitr_1.42                  DECIPHER_2.28.0            
 [45] splines_4.3.0               Matrix_1.5-4               
 [47] tidyselect_1.2.0            yaml_2.3.7                 
@@ -397,7 +397,7 @@ loaded via a namespace (and not attached):
 [51] codetools_0.2-19            plyr_1.8.8                 
 [53] lattice_0.21-8              tibble_3.2.1               
 [55] withr_2.5.0                 treeio_1.24.0              
-[57] evaluate_0.20               pillar_1.9.0               
+[57] evaluate_0.21               pillar_1.9.0               
 [59] BiocManager_1.30.20         filelock_1.0.2             
 [61] generics_0.1.3              RCurl_1.98-1.12            
 [63] sparseMatrixStats_1.12.0    munsell_0.5.0              

@@ -115,26 +115,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    12   7
-##      Veg      11  17
+##      Mixed     9  11
+##      Veg      14  13
 ##                                         
-##                Accuracy : 0.617         
-##                  95% CI : (0.464, 0.755)
+##                Accuracy : 0.468         
+##                  95% CI : (0.321, 0.619)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.0942        
+##     P-Value [Acc > NIR] : 0.767         
 ##                                         
-##                   Kappa : 0.231         
+##                   Kappa : -0.067        
 ##                                         
-##  Mcnemar's Test P-Value : 0.4795        
+##  Mcnemar's Test P-Value : 0.689         
 ##                                         
-##             Sensitivity : 0.522         
-##             Specificity : 0.708         
-##          Pos Pred Value : 0.632         
-##          Neg Pred Value : 0.607         
+##             Sensitivity : 0.391         
+##             Specificity : 0.542         
+##          Pos Pred Value : 0.450         
+##          Neg Pred Value : 0.481         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.255         
-##    Detection Prevalence : 0.404         
-##       Balanced Accuracy : 0.615         
+##          Detection Rate : 0.191         
+##    Detection Prevalence : 0.426         
+##       Balanced Accuracy : 0.466         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -297,11 +297,11 @@ loaded via a namespace (and not attached):
  [87] survival_3.5-5              bit_4.0.5                  
  [89] tidyselect_1.2.0            DirichletMultinomial_1.42.0
  [91] scuttle_1.10.1              knitr_1.42                 
- [93] gridExtra_2.3               bookdown_0.33              
+ [93] gridExtra_2.3               bookdown_0.34              
  [95] xfun_0.39                   hardhat_1.3.0              
  [97] timeDate_4022.108           stringi_1.7.12             
  [99] lazyeval_0.2.2              yaml_2.3.7                 
-[101] evaluate_0.20               codetools_0.2-19           
+[101] evaluate_0.21               codetools_0.2-19           
 [103] MLmetrics_1.1.1             kernlab_0.9-32             
 [105] tibble_3.2.1                BiocManager_1.30.20        
 [107] graph_1.78.0                cli_3.6.1                  

@@ -960,7 +960,7 @@ other attached packages:
 loaded via a namespace (and not attached):
   [1] bitops_1.0-7                DirichletMultinomial_1.42.0
   [3] RColorBrewer_1.1-3          doParallel_1.0.17          
-  [5] httr_1.4.5                  numDeriv_2016.8-1.1        
+  [5] httr_1.4.6                  numDeriv_2016.8-1.1        
   [7] backports_1.4.1             tools_4.3.0                
   [9] utf8_1.2.3                  R6_2.5.1                   
  [11] vegan_2.6-4                 lazyeval_0.2.2             
@@ -1002,15 +1002,15 @@ loaded via a namespace (and not attached):
  [83] filelock_1.0.2              fBasics_4022.94            
  [85] irlba_2.3.5.1               vipor_0.4.5                
  [87] rpart_4.1.19                colorspace_2.1-0           
- [89] DBI_1.1.3                   Hmisc_5.0-1                
+ [89] DBI_1.1.3                   Hmisc_5.1-0                
  [91] nnet_7.3-19                 ade4_1.7-22                
  [93] Exact_3.2                   tidyselect_1.2.0           
- [95] emmeans_1.8.5               timeSeries_4021.105        
+ [95] emmeans_1.8.6               timeSeries_4021.105        
  [97] bit_4.0.5                   compiler_4.3.0             
  [99] graph_1.78.0                htmlTable_2.4.1            
 [101] BiocNeighbors_1.18.0        expm_0.999-7               
 [103] DelayedArray_0.26.2         plotly_4.10.1              
-[105] bookdown_0.33               checkmate_2.2.0            
+[105] bookdown_0.34               checkmate_2.2.0            
 [107] scales_1.2.1                DEoptimR_1.0-13            
 [109] spatial_7.3-16              digest_0.6.31              
 [111] minqa_1.2.5                 rmarkdown_2.21             
@@ -1037,7 +1037,7 @@ loaded via a namespace (and not attached):
 [153] multtest_2.56.0             hms_1.1.3                  
 [155] igraph_1.4.2                reshape2_1.4.4             
 [157] ScaledMatrix_1.8.1          rmutil_1.1.10              
-[159] XML_3.99-0.14               evaluate_0.20              
+[159] XML_3.99-0.14               evaluate_0.21              
 [161] BiocManager_1.30.20         nloptr_2.0.3               
 [163] tzdb_0.3.0                  getopt_1.20.3              
 [165] clue_0.3-64                 rsvd_1.0.5                 

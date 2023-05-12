@@ -422,10 +422,10 @@ loaded via a namespace (and not attached):
  [79] bit_4.0.5                   tidyselect_1.2.0           
  [81] DirichletMultinomial_1.42.0 scuttle_1.10.1             
  [83] knitr_1.42                  gridExtra_2.3              
- [85] bookdown_0.33               xfun_0.39                  
+ [85] bookdown_0.34               xfun_0.39                  
  [87] graphlayouts_1.0.0          stringi_1.7.12             
  [89] lazyeval_0.2.2              ggfun_0.0.9                
- [91] yaml_2.3.7                  evaluate_0.20              
+ [91] yaml_2.3.7                  evaluate_0.21              
  [93] codetools_0.2-19            tibble_3.2.1               
  [95] BiocManager_1.30.20         graph_1.78.0               
  [97] ggplotify_0.1.0             cli_3.6.1                  
