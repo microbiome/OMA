@@ -23,38 +23,40 @@ composition. There are multiple clustering algorithms available.
 *bluster* is a Bioconductor package specialized in clustering. It offers 
 multiple algorithms such as hierarchical clustering, DBSCAN, K-means, 
 amongst others. The first thing to do when using this package is to load 
-it. It's also possible to use `transformCounts` to transform the data 
-for the clustering.
-```{r load-bluster}
+it, and apply transformation to the data.
+
+```{r load_bluster}
 # Load dependencies
 if (!require(bluster)) {
   install.packages("bluster")
   library(bluster)
 }
 
-# Optional: Apply transformation
+# Apply transformation
 tse <- transformCounts(tse, method = "relabundance")
 ```
 
 The clustering can be done on the features or the samples.
 
-### Samples clustering
+### Sample clustering
 
-To cluster the samples, we simply need to transpose the assay so that 
+To cluster samples, we simply need to transpose the assay so that 
 the samples are in rows.
-```{r sample-clust-prep}
-assay <- t(assay(tse, "relabundance"))
+
+```{r sample_clust_prep}
+x <- t(assay(tse, "relabundance"))
 ```
 
-Then, to do the clustering, use the `clusterRows` function. Depending 
+Then, to perform clustering, use the `clusterRows` function. Depending 
 on its parameters, it will perform a different algorithm. Here, we'll 
 perform a hierarchical clustering.
-```{r bluster-sample-hclust1}
+
+```{r bluster_sample_hclust1}
 # Simple use of the hierarchical clustering which sets the cut height to
 # half the dendrogram height.
-hclust.out <- clusterRows(assay, HclustParam())
+hclust.out <- clusterRows(x, HclustParam())
 
-# Add data to the TSE
+# Add cluster indices to the TSE
 colData(tse)$clusters <- hclust.out
 
 # Checking the result
@@ -62,11 +64,13 @@ hclust.out
 ```
 
 Once the clustering on the samples is done, we can also plot the clusters.
-```{r bluster-sample-plot}
+
+```{r bluster_sample_plot}
 library(scater)
 # Add the MDS dimensions for plotting
 tse <- runMDS(tse,
-  assay.type = "relabundance", FUN = vegan::vegdist,
+  assay.type = "relabundance",
+  FUN = vegan::vegdist,
   method = "bray"
 )
 
@@ -77,12 +81,12 @@ plotReducedDim(tse, "MDS", colour_by = "clusters")
 To change the clustering parameters, simply change the parameters in 
 `HclustParam` function. To see the different parameters, check the 
 [HclustParam documentation](https://rdrr.io/github/LTLA/bluster/man/HclustParam-class.html).
-```{r bluster-sample-hclust2}
+
+```{r bluster_sample_hclust2}
 # More complex use of the algorithm with another method and cut height.
 # We also add the full parameter to get the full hierarchical clustering
 # information to plot the dendrogram
-hclust.out <- clusterRows(assay, HclustParam(method = "complete"), full = TRUE)
-hclust.out$clusters
+hclust.out <- clusterRows(x, HclustParam(method = "complete"), full = TRUE)
 
 # Add data to the TSE
 colData(tse)$clusters <- hclust.out$clusters
@@ -97,7 +101,8 @@ plot(dendro)
 Alternatively, it's also possible to use the `clusterCells` function from 
 the *scran* package.This function uses directly the tree as a parameter 
 instead of the assay itself. Here, we will use the PAM algorithm.
-```{r scran-sample-clust}
+
+```{r scran_sample_clust}
 if (!require(scran)) {
   BiocManager::install("scran")
   library(scran)
@@ -110,26 +115,12 @@ pam.out <- clusterCells(tse,
 
 ### Taxa clustering
 
-It's also possible to do clustering for the taxa. We'll do once again the 
-hierarchical clustering.
-```{r taxa-clust}
-# Transform data with CLR
-tse <- transformCounts(tse,
-  assay.type = "relabundance",
-  method = "clr",
-  pseudocount = min(assay(tse, "relabundance")[assay(tse, "relabundance") > 0])
-)
-
-# Cluster the taxa using hierarchical clustering
-hclust.out <- clusterRows(assay(tse, "clr"), HclustParam())
-
-# Put the cluster data in rowData
-rowData(tse)$clusters <- hclust.out
-
-# Merge the rows
-mergeRows(tse, rowData(tse)$clusters)
-```
-
+Similarly to samples, it's also possible to cluster taxa. 
+Prior to clustering, the data should be modified with compositionally 
+aware transformations such as CLR. Then, simply follow the same steps as
+with samples, using the `clusterRows` function, then putting the cluster 
+indices in rowData. At the end, you can also merge the rows using the 
+clusters indices.
 
 ## Hierarchical clustering
 
