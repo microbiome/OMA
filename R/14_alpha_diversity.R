@@ -11,7 +11,7 @@ tse <- GlobalPatterns
 
 ## -----------------------------------------------------------------------------
 tse <- mia::estimateRichness(tse, 
-                             assay_name = "counts", 
+                             assay.type = "counts", 
                              index = "observed", 
                              name="observed")
 
@@ -31,7 +31,7 @@ plotColData(tse,
 
 ## ----estimate-shannon---------------------------------------------------------
 tse <- mia::estimateDiversity(tse, 
-                              assay_name = "counts",
+                              assay.type = "counts",
                               index = "shannon", 
                               name = "shannon")
 head(colData(tse)$shannon)
@@ -68,7 +68,7 @@ ggplot(df, aes(x = SampleType, y = shannon)) +
 
 ## ----phylo-div-1--------------------------------------------------------------
 tse <- mia::estimateFaith(tse,
-                          assay_name = "counts")
+                          assay.type = "counts")
 head(colData(tse)$faith)
 
 
@@ -82,21 +82,21 @@ plots[[1]] + plots[[2]] +
 
 ## ----phylo-div-3--------------------------------------------------------------
 tse <- mia::estimateDiversity(tse, 
-                              assay_name = "counts",
+                              assay.type = "counts",
                               index = "faith", 
                               name = "faith")
 
 
 ## ----evenness-1---------------------------------------------------------------
 tse <- estimateEvenness(tse, 
-                        assay_name = "counts", 
+                        assay.type = "counts", 
                         index="simpson")
 head(colData(tse)$simpson)
 
 
 ## ----dominance-1--------------------------------------------------------------
 tse <- estimateDominance(tse, 
-                         assay_name = "counts", 
+                         assay.type = "counts", 
                          index="relative")
 
 head(colData(tse)$relative)
@@ -104,7 +104,7 @@ head(colData(tse)$relative)
 
 ## ----rarity-1-----------------------------------------------------------------
 tse <- mia::estimateDiversity(tse, 
-                              assay_name = "counts",
+                              assay.type = "counts",
                               index = "log_modulo_skewness")
 
 head(colData(tse)$log_modulo_skewness)
@@ -112,7 +112,7 @@ head(colData(tse)$log_modulo_skewness)
 
 ## -----------------------------------------------------------------------------
 tse <- mia::estimateDivergence(tse,
-                               assay_name = "counts",
+                               assay.type = "counts",
                                reference = "median",
                                FUN = vegan::vegdist)
 

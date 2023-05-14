@@ -13,7 +13,7 @@ tse <- tse[, colData(tse)$Country == "Finland"]
 # Agglomerate to phylum level
 tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 # Get top taxa
-rel_taxa <- getTopTaxa(tse, top = 8, assay_name = "counts")
+rel_taxa <- getTopTaxa(tse, top = 8, assay.type = "counts")
 # Take only the top taxa
 tse <- tse[is.element(rownames(tse), rel_taxa), ]
 
@@ -31,9 +31,9 @@ tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 tse <- tse[is.element(rownames(tse), rel_taxa),]
 
 # CLR and Z transforms
-tse <- transformCounts(tse, MARGIN = "samples", assay_name = "counts",
+tse <- transformCounts(tse, MARGIN = "samples", assay.type = "counts",
                        method = "clr", pseudocount=1)
-tse <- transformCounts(tse, MARGIN = "features", assay_name = "clr", method = "z")
+tse <- transformCounts(tse, MARGIN = "features", assay.type = "clr", method = "z")
 
 Countries <- data.frame("Country" = colData(tse)$Country)
 rownames(Countries) <- colData(tse)$Sample_ID
@@ -64,7 +64,7 @@ tse <- tse[, colData(tse)$Country == "Finland"]
 
 # MDS analysis with the first 20 dimensions
 tse  <- scater::runMDS(tse, FUN = vegan::vegdist, method = "bray", 
-                       name = "MDS_BC", exprs_values = "counts", ncomponents = 20)
+                       name = "MDS_BC", assay.type = "counts", ncomponents = 20)
 ord  <- reducedDim(tse, "MDS_BC", withDimnames = TRUE)
 # retrieve eigenvalues
 eigs <- attr(ord, "eig")
@@ -155,7 +155,7 @@ p2 <- scater::plotReducedDim(tse2, "MDS_BC", colour_by = "CST", point_alpha = 1,
 
 ## ----message = FALSE, warning = FALSE-----------------------------------------
 tse2  <- runNMDS(tse2, FUN = vegan::vegdist, method = "bray", 
-                name = "NMDS_BC", exprs_values = "counts", ncomponents = 20)
+                name = "NMDS_BC", assay.type = "counts", ncomponents = 20)
 scater::plotReducedDim(tse2, "NMDS_BC", colour_by = "CST", point_alpha = 1) + th + 
         labs(title = "NMDS Bray-Curtis by Cluster") +
         theme(plot.title = element_text(hjust = 0.5)) + CSTColorScale
@@ -163,9 +163,9 @@ scater::plotReducedDim(tse2, "NMDS_BC", colour_by = "CST", point_alpha = 1) + th
 
 ## ----message = FALSE, warning = FALSE, results = FALSE------------------------
 # Z transform of CLR counts
-tse2 <- transformCounts(tse2, MARGIN = "samples", assay_name = "counts",
+tse2 <- transformCounts(tse2, MARGIN = "samples", assay.type = "counts",
                         method = "clr", pseudocount=1)
-tse2 <- transformCounts(tse2, MARGIN = "features", assay_name = "clr", method = "z")
+tse2 <- transformCounts(tse2, MARGIN = "features", assay.type = "clr", method = "z")
 # get top taxa
 tse2 <- tse2[is.element(rownames(tse2), rel_taxa), ]
 
@@ -224,7 +224,7 @@ getBestDMNFit(tse_dmn, type = "laplace")
 
 
 ## -----------------------------------------------------------------------------
-dmn_group <- calculateDMNgroup(tse_dmn, variable = "Country",  exprs_values = "counts",
+dmn_group <- calculateDMNgroup(tse_dmn, variable = "Country",  assay.type = "counts",
                                k = 3, seed=.Machine$integer.max)
 
 dmn_group
@@ -257,7 +257,7 @@ vec <- colnames(prob)[max.col(prob,ties.method = "first")]
 tse_dmn <- transformCounts(tse_dmn, method = "relabundance")
 # Does principal coordinate analysis
 bray_pcoa_df <- calculateMDS(tse_dmn, FUN = vegan::vegdist, method = "bray", 
-                             exprs_values = "relabundance")
+                             assay.type = "relabundance")
 
 # Convert to data.frame
 bray_pcoa_df <- as.data.frame(bray_pcoa_df)
@@ -284,10 +284,10 @@ bray_dmm_plot
 ## -----------------------------------------------------------------------------
 # get clr + z-transformed counts
 tse_dmn <- transformCounts(tse_dmn, MARGIN = "samples",
-                           assay_name = "counts", method = "clr",
+                           assay.type = "counts", method = "clr",
 			   pseudocount = 1)
 tse_dmn <- transformCounts(tse_dmn, MARGIN = "features",
-                           assay_name = "clr", method = "z")
+                           assay.type = "clr", method = "z")
 # objects containing dmm component information
 clust <- factor(vec)
 names(clust) <- colnames(tse_dmn)

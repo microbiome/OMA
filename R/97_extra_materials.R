@@ -200,14 +200,14 @@ tse <- sampleMetadata %>%
     returnSamples("relative_abundance")
 
 tse_Genus <- agglomerateByRank(tse, rank="genus")
-tse_Genus <- addPerSampleDominantTaxa(tse_Genus,assay_name="relative_abundance", name = "dominant_taxa")
+tse_Genus <- addPerSampleDominantTaxa(tse_Genus,assay.type="relative_abundance", name = "dominant_taxa")
 
 # Performing PCoA with Bray-Curtis dissimilarity.
 tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist, ncomponents = 3,
-              name = "PCoA_BC", exprs_values = "relative_abundance")
+              name = "PCoA_BC", assay.type = "relative_abundance")
 
 # Getting the 6 top taxa
-top_taxa <- getTopTaxa(tse_Genus,top = 6, assay_name = "relative_abundance")
+top_taxa <- getTopTaxa(tse_Genus,top = 6, assay.type = "relative_abundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
@@ -223,19 +223,4 @@ most_abundant_percent <- round(most_abundant_freq/sum(most_abundant_freq)*100, 1
 # Retrieving the explained variance
 e <- attr(reducedDim(tse_Genus, "PCoA_BC"), "eig");
 var_explained <- e/sum(e[e>0])*100
-
-
-## ---- test-rgl,webgl=TRUE, warning=FALSE, message=FALSE-----------------------
-library(plotly)
-
-# 3D Visualization
-reduced_data  <- as.data.frame(reducedDim(tse_Genus)[,])
-names(reduced_data) <- c("PC1","PC2","PC3")
-plot_ly(reduced_data, x=~PC1,y=~PC2,z=~PC3)%>%
-  add_markers(color=sapply(strsplit(colData(tse_Genus)$most_abundant, "_"), tail, 1), size=5,
-              colors=c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red")) %>%
-  layout(scene=list(xaxis=list(title = paste("PC1 (",round(var_explained[1],1),"%)")),
-                    yaxis=list(title = paste("PC2 (",round(var_explained[2],1),"%)")),
-                    zaxis=list(title = paste("PC3 (",round(var_explained[3],1),"%)"))))
-
 

@@ -24,7 +24,13 @@ Building and viewing the book locally involves the following steps:
 
 ```
 BiocManager::install(remotes::local_package_deps(dependencies=TRUE))
+
+# Optionally, you can also run a more comprehensive set of package installations
+# (covering the whole book with examples):
+source("https://raw.githubusercontent.com/microbiome/OMA/master/install_packages.R")
 ```
+
+
 
 2. Render the book:
 
@@ -125,6 +131,7 @@ For developers. This can be used to
 
 ```
 # Generate R files for the book chapters (to be streamlined)
+# and the required packages listing 
 source("build.R")
 ```
 

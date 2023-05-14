@@ -41,7 +41,7 @@ getBestDMNFit(tse_dmn, type = "laplace")
 
 
 ## -----------------------------------------------------------------------------
-dmn_group <- calculateDMNgroup(tse_dmn, variable = "SampleType",  exprs_values = "counts",
+dmn_group <- calculateDMNgroup(tse_dmn, variable = "SampleType",  assay.type = "counts",
                                k = 2, seed=.Machine$integer.max)
 
 dmn_group
@@ -75,12 +75,12 @@ colData(tse)$dmm_component <- vec
 ## -----------------------------------------------------------------------------
 # Does clr transformation. Pseudocount is added, because data contains zeros.
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
-tse <- transformCounts(tse, assay_name = "pseudo", method = "relabundance")
-tse <- transformCounts(tse, assay_name = "relabundance", method = "clr")
+tse <- transformCounts(tse, assay.type = "pseudo", method = "relabundance")
+tse <- transformCounts(tse, assay.type = "relabundance", method = "clr")
 
 library(scater)
 # Calculate PCoA
-tse <- runMDS(tse, exprs_values = "clr", method = "euclidean")
+tse <- runMDS(tse, assay.type = "clr", method = "euclidean")
 
 
 
@@ -112,7 +112,7 @@ tse <- transformCounts(tse, method = "relabundance")
 tse <- transformCounts(tse, method = "rclr")
 
 # Performing and storing UMAP
-tse <- runUMAP(tse, name="UMAP", exprs_values="rclr")
+tse <- runUMAP(tse, name="UMAP", assay.type="rclr")
 
 k <- c(2,3,5,10)
 ClustAndPlot <- function(x) {
