@@ -27,7 +27,10 @@ it, and transform the data if necessary, depending on your analysis goals.
 
 ```{r load_bluster}
 # Load dependencies
-library(bluster)
+if (!require(bluster)) {
+  install.packages("bluster")
+  library(bluster)
+}
 
 # Apply transformation
 tse <- transformCounts(tse, method = "relabundance")
@@ -100,7 +103,10 @@ the *scran* package.This function uses directly the tree as a parameter
 instead of the assay itself. Here, we will use the PAM algorithm.
 
 ```{r scran_sample_clust}
-library(scran)
+if (!require(scran)) {
+  BiocManager::install("scran")
+  library(scran)
+}
 pam.out <- clusterCells(tse,
   assay.type = "relabundance",
   BLUSPARAM = PamParam(centers = 5)
@@ -144,14 +150,20 @@ data(peerj13075)
 (tse <- peerj13075)
 ```
 
-Hierarchical clustering librarys 2 steps. In the fist step, dissimilarities are 
+Hierarchical clustering requires 2 steps. In the fist step, dissimilarities are 
 calculated. In prior to that, data transformation is applied if needed. Since
 sequencing data is compositional, relative transformation is applied.
 In the second step, clustering is performed based on dissimilarities. 
 
 ```{r hclust2}
-library(NbClust)
-library(cobiclust)
+if (!require(NbClust)) {
+  install.packages("NbClust")
+  library(NbClust)
+}
+if (!require(cobiclust)) {
+  install.packages("cobiclust")
+  library(cobiclust)
+}
 
 # Apply transformation
 tse <- transformCounts(tse, method = "relabundance")
@@ -191,7 +203,10 @@ res$Best.nc
 Based on the result, let's divide observations into 15 clusters.
 
 ```{r hclust4}
-library(dendextend)
+if (!require(dendextend)) {
+  install.packages("dendextend")
+  library(dendextend)
+}
 
 # Find clusters
 cutree(hc, k = 15)
@@ -225,8 +240,10 @@ The number of clusters can be determined based on algorithm. Here we
 utilize silhouette analysis.
 
 ```{r kmeans1}
-library(factoextra)
-
+if (!require(factoextra)) {
+  install.packages("factoextra")
+  library(factoextra)
+}
 
 # Convert dist object into matrix
 diss <- as.matrix(diss)
@@ -416,7 +433,9 @@ task.
 Installing package:
 
 ```{r}
-library(bluster)
+if (!require(bluster)) {
+  BiocManager::install("bluster")
+}
 ```
 
 The algorithm used is "short random walks" [@Pons2006]. Graph is
@@ -551,7 +570,10 @@ clusters$classification
 Next we can plot clusters. Annotated heatmap is a common choice.
 
 ```{r cobiclust_3, fig.width=14, fig.height=12}
-library(pheatmap)
+if (!require(pheatmap)) {
+  install.packages("pheatmap")
+  library(pheatmap)
+}
 # z-transform for heatmap
 mae[[1]] <- transformCounts(mae[[1]],
   assay.type = "rclr",
@@ -584,10 +606,16 @@ pheatmap(assay(mae[[1]], "clr_z"),
 Boxplot is commonly used to summarize the results:
 
 ```{r cobiclust_4}
-library(ggplot2)
-library(patchwork)
+if (!require(ggplot2)) {
+  install.packages("ggplot2")
+  library(ggplot2)
+}
+if (!require(patchwork)) {
+  install.packages("patchwork")
+  library(patchwork)
+}
 
-# ggplot librarys data in melted format
+# ggplot requires data in melted format
 melt_assay <- meltAssay(mae[[1]], assay.type = "rclr", add_col_data = T, add_row_data = T)
 
 # patchwork two plots side-by-side
@@ -613,7 +641,7 @@ matrices in general.
 # (Only 1st experiment  was ordered in cobiclust step leading to unequal order)
 mae[[1]] <- mae[[1]][, colnames(mae[[2]])]
 
-# Make rownames unique since it is library by other steps
+# Make rownames unique since it is require by other steps
 rownames(mae[[1]]) <- make.unique(rownames(mae[[1]]))
 # Calculate correlations
 corr <- getExperimentCrossCorrelation(mae, 1, 2,
