@@ -174,16 +174,16 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] BiocStyle_2.28.0 rebook_1.9.0    
+[1] BiocStyle_2.28.0 rebook_1.10.1   
 
 loaded via a namespace (and not attached):
  [1] graph_1.78.0        digest_0.6.31       XML_3.99-0.14      
  [4] codetools_0.2-19    bookdown_0.34       fastmap_1.1.1      
  [7] xfun_0.39           CodeDepends_0.6.5   dir.expiry_1.8.0   
-[10] filelock_1.0.2      knitr_1.42          BiocGenerics_0.46.0
-[13] htmltools_0.5.5     rmarkdown_2.21      stats4_4.3.0       
-[16] cli_3.6.1           compiler_4.3.0      tools_4.3.0        
-[19] evaluate_0.21       yaml_2.3.7          BiocManager_1.30.20
-[22] rlang_1.1.1        
+[10] filelock_1.0.2      knitr_1.43          BiocGenerics_0.46.0
+[13] htmltools_0.5.5     rmarkdown_2.22      stats4_4.3.0       
+[16] cli_3.6.1           compiler_4.3.0      rstudioapi_0.14    
+[19] tools_4.3.0         evaluate_0.21       yaml_2.3.7         
+[22] BiocManager_1.30.20 rlang_1.1.1        
 ```
 </div>

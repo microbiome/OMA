@@ -172,6 +172,8 @@ only including two of the three groups.
 
 
 
+
+
 ```r
 library(mia)
 library(patchwork)
@@ -935,27 +937,27 @@ attached base packages:
 
 other attached packages:
  [1] doRNG_1.8.6                     rngtools_1.5.2                 
- [3] foreach_1.5.2                   GUniFrac_1.7                   
- [5] ANCOMBC_2.2.0                   MicrobiomeStat_1.1             
- [7] Maaslin2_1.7.3                  ALDEx2_1.32.0                  
- [9] zCompositions_1.4.0-1           truncnorm_1.0-9                
-[11] NADA_1.6-1.1                    survival_3.5-5                 
-[13] MASS_7.3-60                     lubridate_1.9.2                
-[15] forcats_1.0.0                   stringr_1.5.0                  
-[17] dplyr_1.1.2                     purrr_1.0.1                    
-[19] readr_2.1.4                     tidyr_1.3.0                    
-[21] tibble_3.2.1                    ggplot2_3.4.2                  
-[23] tidyverse_2.0.0                 knitr_1.42                     
-[25] tidySummarizedExperiment_1.10.0 patchwork_1.1.2                
-[27] mia_1.9.2                       MultiAssayExperiment_1.26.0    
-[29] TreeSummarizedExperiment_2.1.4  Biostrings_2.68.0              
-[31] XVector_0.40.0                  SingleCellExperiment_1.22.0    
-[33] SummarizedExperiment_1.30.1     Biobase_2.60.0                 
-[35] GenomicRanges_1.52.0            GenomeInfoDb_1.36.0            
-[37] IRanges_2.34.0                  S4Vectors_0.38.1               
-[39] BiocGenerics_0.46.0             MatrixGenerics_1.12.0          
-[41] matrixStats_0.63.0-9003         BiocStyle_2.28.0               
-[43] rebook_1.9.0                   
+ [3] foreach_1.5.2                   ANCOMBC_2.2.0                  
+ [5] MicrobiomeStat_1.1              Maaslin2_1.7.3                 
+ [7] ALDEx2_1.32.0                   zCompositions_1.4.0-1          
+ [9] truncnorm_1.0-9                 NADA_1.6-1.1                   
+[11] survival_3.5-5                  MASS_7.3-60                    
+[13] lubridate_1.9.2                 forcats_1.0.0                  
+[15] stringr_1.5.0                   dplyr_1.1.2                    
+[17] purrr_1.0.1                     readr_2.1.4                    
+[19] tidyr_1.3.0                     tibble_3.2.1                   
+[21] ggplot2_3.4.2                   tidyverse_2.0.0                
+[23] knitr_1.43                      tidySummarizedExperiment_1.10.0
+[25] patchwork_1.1.2                 mia_1.9.2                      
+[27] MultiAssayExperiment_1.26.0     TreeSummarizedExperiment_2.1.4 
+[29] Biostrings_2.68.1               XVector_0.40.0                 
+[31] SingleCellExperiment_1.22.0     SummarizedExperiment_1.30.1    
+[33] Biobase_2.60.0                  GenomicRanges_1.52.0           
+[35] GenomeInfoDb_1.36.0             IRanges_2.34.0                 
+[37] S4Vectors_0.38.1                BiocGenerics_0.46.0            
+[39] MatrixGenerics_1.12.0           matrixStats_1.0.0-9000         
+[41] GUniFrac_1.7                    BiocStyle_2.28.0               
+[43] rebook_1.10.1                  
 
 loaded via a namespace (and not attached):
   [1] bitops_1.0-7                DirichletMultinomial_1.42.0
@@ -975,9 +977,9 @@ loaded via a namespace (and not attached):
  [29] scater_1.28.0               decontam_1.20.0            
  [31] readxl_1.4.2                rstudioapi_0.14            
  [33] RSQLite_2.3.1               generics_0.1.3             
- [35] Matrix_1.5-4                biomformat_1.28.0          
+ [35] Matrix_1.5-4.1              biomformat_1.28.0          
  [37] ggbeeswarm_0.7.2            fansi_1.0.4                
- [39] DescTools_0.99.48           DECIPHER_2.28.0            
+ [39] DescTools_0.99.49           DECIPHER_2.28.0            
  [41] lifecycle_1.0.3             multcomp_1.4-23            
  [43] yaml_2.3.7                  rhdf5_2.44.0               
  [45] grid_4.3.0                  blob_1.2.4                 
@@ -989,10 +991,10 @@ loaded via a namespace (and not attached):
  [57] estimability_1.4.1          codetools_0.2-19           
  [59] glue_1.6.2                  data.table_1.14.8          
  [61] Rdpack_2.4                  vctrs_0.6.2                
- [63] treeio_1.24.0               cellranger_1.1.0           
+ [63] treeio_1.24.1               cellranger_1.1.0           
  [65] gtable_0.3.3                cachem_1.0.8               
  [67] xfun_0.39                   rbibutils_2.2.13           
- [69] S4Arrays_1.0.1              Rfast_2.0.7                
+ [69] S4Arrays_1.0.4              Rfast_2.0.7                
  [71] coda_0.19-4                 pcaPP_2.0-3                
  [73] modeest_2.4.0               timeDate_4022.108          
  [75] iterators_1.0.14            statmod_1.5.0              
@@ -1001,52 +1003,52 @@ loaded via a namespace (and not attached):
  [81] phyloseq_1.44.0             bit64_4.0.5                
  [83] filelock_1.0.2              fBasics_4022.94            
  [85] irlba_2.3.5.1               vipor_0.4.5                
- [87] rpart_4.1.19                colorspace_2.1-0           
- [89] DBI_1.1.3                   Hmisc_5.1-0                
+ [87] rpart_4.1.19                Hmisc_5.1-0                
+ [89] colorspace_2.1-0            DBI_1.1.3                  
  [91] nnet_7.3-19                 ade4_1.7-22                
  [93] Exact_3.2                   tidyselect_1.2.0           
- [95] emmeans_1.8.6               timeSeries_4021.105        
+ [95] emmeans_1.8.6               timeSeries_4030.106        
  [97] bit_4.0.5                   compiler_4.3.0             
  [99] graph_1.78.0                htmlTable_2.4.1            
 [101] BiocNeighbors_1.18.0        expm_0.999-7               
-[103] DelayedArray_0.26.2         plotly_4.10.1              
+[103] DelayedArray_0.26.3         plotly_4.10.1              
 [105] bookdown_0.34               checkmate_2.2.0            
 [107] scales_1.2.1                DEoptimR_1.0-13            
 [109] spatial_7.3-16              digest_0.6.31              
-[111] minqa_1.2.5                 rmarkdown_2.21             
+[111] minqa_1.2.5                 rmarkdown_2.22             
 [113] base64enc_0.1-3             htmltools_0.5.5            
 [115] pkgconfig_2.0.3             lme4_1.1-33                
-[117] sparseMatrixStats_1.12.0    lpsymphony_1.28.0          
-[119] highr_0.10                  stabledist_0.7-1           
-[121] fastmap_1.1.1               rlang_1.1.1                
-[123] htmlwidgets_1.6.2           DelayedMatrixStats_1.22.0  
-[125] farver_2.1.1                energy_1.7-11              
-[127] zoo_1.8-12                  jsonlite_1.8.4             
-[129] BiocParallel_1.34.1         BiocSingular_1.16.0        
-[131] RCurl_1.98-1.12             magrittr_2.0.3             
-[133] Formula_1.2-5               scuttle_1.10.1             
-[135] GenomeInfoDbData_1.2.10     Rhdf5lib_1.22.0            
-[137] munsell_0.5.0               Rcpp_1.0.10                
-[139] ape_5.7-1                   viridis_0.6.3              
-[141] RcppZiggurat_0.1.6          CVXR_1.0-11                
-[143] stringi_1.7.12              rootSolve_1.8.2.3          
-[145] stable_1.1.6                zlibbioc_1.46.0            
-[147] plyr_1.8.8                  parallel_4.3.0             
-[149] ggrepel_0.9.3               lmom_2.9                   
-[151] splines_4.3.0               hash_2.2.6.2               
-[153] multtest_2.56.0             hms_1.1.3                  
-[155] igraph_1.4.2                reshape2_1.4.4             
-[157] ScaledMatrix_1.8.1          rmutil_1.1.10              
-[159] XML_3.99-0.14               evaluate_0.21              
-[161] BiocManager_1.30.20         nloptr_2.0.3               
-[163] tzdb_0.3.0                  getopt_1.20.3              
-[165] clue_0.3-64                 rsvd_1.0.5                 
-[167] xtable_1.8-4                Rmpfr_0.9-2                
-[169] e1071_1.7-13                tidytree_0.4.2             
-[171] viridisLite_0.4.2           class_7.3-22               
-[173] gsl_2.1-8                   lmerTest_3.1-3             
-[175] memoise_2.0.1               beeswarm_0.4.0             
-[177] cluster_2.1.4               timechange_0.2.0           
+[117] sparseMatrixStats_1.12.0    highr_0.10                 
+[119] stabledist_0.7-1            fastmap_1.1.1              
+[121] rlang_1.1.1                 htmlwidgets_1.6.2          
+[123] DelayedMatrixStats_1.22.0   farver_2.1.1               
+[125] energy_1.7-11               zoo_1.8-12                 
+[127] jsonlite_1.8.4              BiocParallel_1.34.2        
+[129] BiocSingular_1.16.0         RCurl_1.98-1.12            
+[131] magrittr_2.0.3              Formula_1.2-5              
+[133] scuttle_1.10.1              GenomeInfoDbData_1.2.10    
+[135] Rhdf5lib_1.22.0             munsell_0.5.0              
+[137] Rcpp_1.0.10                 ape_5.7-1                  
+[139] viridis_0.6.3               RcppZiggurat_0.1.6         
+[141] CVXR_1.0-11                 stringi_1.7.12             
+[143] rootSolve_1.8.2.3           stable_1.1.6               
+[145] zlibbioc_1.46.0             plyr_1.8.8                 
+[147] parallel_4.3.0              ggrepel_0.9.3              
+[149] lmom_2.9                    splines_4.3.0              
+[151] hash_2.2.6.2                multtest_2.56.0            
+[153] hms_1.1.3                   igraph_1.4.3               
+[155] reshape2_1.4.4              ScaledMatrix_1.8.1         
+[157] rmutil_1.1.10               XML_3.99-0.14              
+[159] evaluate_0.21               BiocManager_1.30.20        
+[161] nloptr_2.0.3                tzdb_0.4.0                 
+[163] getopt_1.20.3               clue_0.3-64                
+[165] rsvd_1.0.5                  xtable_1.8-4               
+[167] Rmpfr_0.9-2                 e1071_1.7-13               
+[169] tidytree_0.4.2              viridisLite_0.4.2          
+[171] class_7.3-22                gsl_2.1-8                  
+[173] lmerTest_3.1-3              memoise_2.0.1              
+[175] beeswarm_0.4.0              cluster_2.1.4              
+[177] timechange_0.2.0           
 ```
 </div>
 
