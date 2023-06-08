@@ -511,8 +511,9 @@ Check the documentation for this data set:
 #### HintikkaXOData {#hintikka-desc}
 
 [HintikkaXOData](https://microbiome.github.io/microbiomeDataSets/reference/HintikkaXOData.html)
-is a MAE derived from a study about the effects of fat diet and prebiotics on the
-microbiome of rat models [@ijerph18084049]. The dataset is briefly presented in
+is derived from a study about the effects of fat diet and prebiotics on the
+microbiome of rat models [@Hintikka2021]. It is available in the MAE data
+container for R. The dataset is briefly presented in
 [these slides](https://microbiome.github.io/outreach/hintikkaxo_presentation.html).
 
 
@@ -1376,7 +1377,7 @@ other attached packages:
  [5] mia_1.9.2                      MultiAssayExperiment_1.26.0   
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.68.1             
  [9] XVector_0.40.0                 SingleCellExperiment_1.22.0   
-[11] SummarizedExperiment_1.30.1    Biobase_2.60.0                
+[11] SummarizedExperiment_1.30.2    Biobase_2.60.0                
 [13] GenomicRanges_1.52.0           GenomeInfoDb_1.36.0           
 [15] IRanges_2.34.0                 S4Vectors_0.38.1              
 [17] BiocGenerics_0.46.0            MatrixGenerics_1.12.0         
@@ -1384,7 +1385,7 @@ other attached packages:
 [21] rebook_1.10.1                 
 
 loaded via a namespace (and not attached):
-  [1] rstudioapi_0.14               jsonlite_1.8.4               
+  [1] rstudioapi_0.14               jsonlite_1.8.5               
   [3] CodeDepends_0.6.5             magrittr_2.0.3               
   [5] ggbeeswarm_0.7.2              rmarkdown_2.22               
   [7] zlibbioc_1.46.0               vctrs_0.6.2                  

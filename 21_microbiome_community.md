@@ -372,7 +372,7 @@ other attached packages:
  [7] mia_1.9.2                      MultiAssayExperiment_1.26.0   
  [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.68.1             
 [11] XVector_0.40.0                 SingleCellExperiment_1.22.0   
-[13] SummarizedExperiment_1.30.1    Biobase_2.60.0                
+[13] SummarizedExperiment_1.30.2    Biobase_2.60.0                
 [15] GenomicRanges_1.52.0           GenomeInfoDb_1.36.0           
 [17] IRanges_2.34.0                 S4Vectors_0.38.1              
 [19] BiocGenerics_0.46.0            MatrixGenerics_1.12.0         
@@ -381,7 +381,7 @@ other attached packages:
 
 loaded via a namespace (and not attached):
   [1] RColorBrewer_1.1-3          rstudioapi_0.14            
-  [3] jsonlite_1.8.4              CodeDepends_0.6.5          
+  [3] jsonlite_1.8.5              CodeDepends_0.6.5          
   [5] magrittr_2.0.3              ggbeeswarm_0.7.2           
   [7] farver_2.1.1                rmarkdown_2.22             
   [9] zlibbioc_1.46.0             vctrs_0.6.2                

@@ -117,26 +117,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    14   8
-##      Veg       9  16
+##      Mixed    16   6
+##      Veg       7  18
 ##                                         
-##                Accuracy : 0.638         
-##                  95% CI : (0.485, 0.773)
+##                Accuracy : 0.723         
+##                  95% CI : (0.574, 0.844)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.0536        
+##     P-Value [Acc > NIR] : 0.00244       
 ##                                         
-##                   Kappa : 0.276         
+##                   Kappa : 0.446         
 ##                                         
-##  Mcnemar's Test P-Value : 1.0000        
+##  Mcnemar's Test P-Value : 1.00000       
 ##                                         
-##             Sensitivity : 0.609         
-##             Specificity : 0.667         
-##          Pos Pred Value : 0.636         
-##          Neg Pred Value : 0.640         
+##             Sensitivity : 0.696         
+##             Specificity : 0.750         
+##          Pos Pred Value : 0.727         
+##          Neg Pred Value : 0.720         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.298         
+##          Detection Rate : 0.340         
 ##    Detection Prevalence : 0.468         
-##       Balanced Accuracy : 0.638         
+##       Balanced Accuracy : 0.723         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -244,7 +244,7 @@ other attached packages:
  [5] mia_1.9.2                      MultiAssayExperiment_1.26.0   
  [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.68.1             
  [9] XVector_0.40.0                 SingleCellExperiment_1.22.0   
-[11] SummarizedExperiment_1.30.1    Biobase_2.60.0                
+[11] SummarizedExperiment_1.30.2    Biobase_2.60.0                
 [13] GenomicRanges_1.52.0           GenomeInfoDb_1.36.0           
 [15] IRanges_2.34.0                 S4Vectors_0.38.1              
 [17] BiocGenerics_0.46.0            MatrixGenerics_1.12.0         
@@ -274,7 +274,7 @@ loaded via a namespace (and not attached):
  [37] DelayedArray_0.26.3         scuttle_1.10.1             
  [39] tidyselect_1.2.0            shape_1.4.6                
  [41] farver_2.1.1                ScaledMatrix_1.8.1         
- [43] viridis_0.6.3               jsonlite_1.8.4             
+ [43] viridis_0.6.3               jsonlite_1.8.5             
  [45] BiocNeighbors_1.18.0        e1071_1.7-13               
  [47] decontam_1.20.0             survival_3.5-5             
  [49] scater_1.28.0               iterators_1.0.14           

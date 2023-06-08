@@ -361,7 +361,7 @@ other attached packages:
  [5] scuttle_1.10.1                 mia_1.9.2                     
  [7] MultiAssayExperiment_1.26.0    TreeSummarizedExperiment_2.1.4
  [9] Biostrings_2.68.1              XVector_0.40.0                
-[11] SingleCellExperiment_1.22.0    SummarizedExperiment_1.30.1   
+[11] SingleCellExperiment_1.22.0    SummarizedExperiment_1.30.2   
 [13] Biobase_2.60.0                 GenomicRanges_1.52.0          
 [15] GenomeInfoDb_1.36.0            IRanges_2.34.0                
 [17] S4Vectors_0.38.1               BiocGenerics_0.46.0           
@@ -384,7 +384,7 @@ loaded via a namespace (and not attached):
  [25] purrr_1.0.1                 bit_4.0.5                  
  [27] xfun_0.39                   zlibbioc_1.46.0            
  [29] cachem_1.0.8                beachmat_2.16.0            
- [31] jsonlite_1.8.4              blob_1.2.4                 
+ [31] jsonlite_1.8.5              blob_1.2.4                 
  [33] highr_0.10                  DelayedArray_0.26.3        
  [35] BiocParallel_1.34.2         cluster_2.1.4              
  [37] irlba_2.3.5.1               parallel_4.3.0             

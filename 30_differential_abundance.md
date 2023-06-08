@@ -951,7 +951,7 @@ other attached packages:
 [25] patchwork_1.1.2                 mia_1.9.2                      
 [27] MultiAssayExperiment_1.26.0     TreeSummarizedExperiment_2.1.4 
 [29] Biostrings_2.68.1               XVector_0.40.0                 
-[31] SingleCellExperiment_1.22.0     SummarizedExperiment_1.30.1    
+[31] SingleCellExperiment_1.22.0     SummarizedExperiment_1.30.2    
 [33] Biobase_2.60.0                  GenomicRanges_1.52.0           
 [35] GenomeInfoDb_1.36.0             IRanges_2.34.0                 
 [37] S4Vectors_0.38.1                BiocGenerics_0.46.0            
@@ -971,7 +971,7 @@ loaded via a namespace (and not attached):
  [17] gridExtra_2.3               cli_3.6.1                  
  [19] logging_0.10-108            biglm_0.9-2.1              
  [21] sandwich_3.0-2              labeling_0.4.2             
- [23] mvtnorm_1.1-3               robustbase_0.95-1          
+ [23] mvtnorm_1.2-1               robustbase_0.95-1          
  [25] pbapply_1.7-0               proxy_0.4-27               
  [27] yulab.utils_0.0.6           foreign_0.8-84             
  [29] scater_1.28.0               decontam_1.20.0            
@@ -1011,7 +1011,7 @@ loaded via a namespace (and not attached):
  [97] bit_4.0.5                   compiler_4.3.0             
  [99] graph_1.78.0                htmlTable_2.4.1            
 [101] BiocNeighbors_1.18.0        expm_0.999-7               
-[103] DelayedArray_0.26.3         plotly_4.10.1              
+[103] DelayedArray_0.26.3         plotly_4.10.2              
 [105] bookdown_0.34               checkmate_2.2.0            
 [107] scales_1.2.1                DEoptimR_1.0-13            
 [109] spatial_7.3-16              digest_0.6.31              
@@ -1023,7 +1023,7 @@ loaded via a namespace (and not attached):
 [121] rlang_1.1.1                 htmlwidgets_1.6.2          
 [123] DelayedMatrixStats_1.22.0   farver_2.1.1               
 [125] energy_1.7-11               zoo_1.8-12                 
-[127] jsonlite_1.8.4              BiocParallel_1.34.2        
+[127] jsonlite_1.8.5              BiocParallel_1.34.2        
 [129] BiocSingular_1.16.0         RCurl_1.98-1.12            
 [131] magrittr_2.0.3              Formula_1.2-5              
 [133] scuttle_1.10.1              GenomeInfoDbData_1.2.10    
