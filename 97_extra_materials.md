@@ -47,12 +47,8 @@ compared here.
 
 ```r
 # import necessary packages
-if (!require(gtools)){
-  install.packages("gtools")  
-}
-if (!require(purrr)){
-  install.packages("purrr")  
-}
+library(gtools)
+library(purrr)
 library(vegan)
 library(gtools)
 library(purrr)
@@ -182,10 +178,7 @@ through `microbiomeDataSets` package.
 
 
 ```r
-if (!require(fido)){
-  # installing the fido package
-  devtools::install_github("jsilve24/fido")
-}
+library(fido)
 ```
 
 Loading the libraries and importing data:
@@ -311,13 +304,9 @@ plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
 
 
 ```r
-# Installing required packages
-if (!require(rgl)){
-  BiocManager::install("rgl")  
-}
-if (!require(plotly)){
-  BiocManager::install("plotly")  
-}
+# Installing libraryd packages
+library(rgl)
+library(plotly)
 ```
 
 
@@ -333,9 +322,7 @@ In this section we make a 3D version of the earlier  Visualizing the most domina
 
 ```r
 # Installing the package
-if (!require(curatedMetagenomicData)){
-  BiocManager::install("curatedMetagenomicData")  
-}
+library(curatedMetagenomicData)
 # Importing necessary libraries
 library(curatedMetagenomicData)
 library(dplyr)

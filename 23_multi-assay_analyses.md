@@ -126,10 +126,7 @@ mae
 
 
 ```r
-if(!require(stringr)){
-    install.packages("stringr")
-    library(stringr)
-}
+library(stringr)
 # Drop off those bacteria that do not include information in Phylum or lower levels
 mae[[1]] <- mae[[1]][!is.na(rowData(mae[[1]])$Phylum), ]
 # Clean taxonomy data, so that names do not include additional characters
@@ -244,10 +241,7 @@ Creates the heatmap
 
 
 ```r
-if( !require("ComplexHeatmap") ){
-    BiocManager::install("ComplexHeatmap")
-    library("ComplexHeatmap")
-}
+library("ComplexHeatmap") 
 
 # Create a heatmap and store it
 plot <- Heatmap(correlations$cor,
@@ -282,16 +276,11 @@ corresponding dependencies.
 
 
 ```r
-if(!require(MOFA2)){
-    BiocManager::install("MOFA2")
-}
+library(MOFA2)
 
 # For inter-operability between Python and R, and setting Python dependencies,
 # reticulate package is needed
-if(!require(reticulate)){
-    install.packages("reticulate")
-}
-
+library(reticulate)
 # Let us assume that these have been installed already.
 #reticulate::install_miniconda(force = TRUE)
 #reticulate::use_miniconda(condaenv = "env1", required = FALSE)
@@ -460,112 +449,4 @@ More tutorials and examples of using the package are found at [link](https://bio
 
 
 
-## Session Info {-}
-
-<button class="rebook-collapse">View session info</button>
-<div class="rebook-content">
-```
-R version 4.3.0 (2023-04-21)
-Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 22.04.2 LTS
-
-Matrix products: default
-BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
-LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.20.so;  LAPACK version 3.10.0
-
-locale:
- [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
- [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
- [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
- [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
- [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
-
-time zone: UTC
-tzcode source: system (glibc)
-
-attached base packages:
-[1] grid      stats4    stats     graphics  grDevices utils     datasets 
-[8] methods   base     
-
-other attached packages:
- [1] ggplot2_3.4.2                  patchwork_1.1.2               
- [3] reticulate_1.29                MOFA2_1.10.0                  
- [5] ComplexHeatmap_2.16.0          stringr_1.5.0                 
- [7] mia_1.9.2                      MultiAssayExperiment_1.26.0   
- [9] TreeSummarizedExperiment_2.1.4 Biostrings_2.68.1             
-[11] XVector_0.40.0                 SingleCellExperiment_1.22.0   
-[13] SummarizedExperiment_1.30.2    Biobase_2.60.0                
-[15] GenomicRanges_1.52.0           GenomeInfoDb_1.36.0           
-[17] IRanges_2.34.0                 S4Vectors_0.38.1              
-[19] BiocGenerics_0.46.0            MatrixGenerics_1.12.0         
-[21] matrixStats_1.0.0-9000         BiocStyle_2.28.0              
-[23] rebook_1.10.1                 
-
-loaded via a namespace (and not attached):
-  [1] RColorBrewer_1.1-3          rstudioapi_0.14            
-  [3] jsonlite_1.8.5              shape_1.4.6                
-  [5] CodeDepends_0.6.5           magrittr_2.0.3             
-  [7] ggbeeswarm_0.7.2            farver_2.1.1               
-  [9] corrplot_0.92               rmarkdown_2.22             
- [11] GlobalOptions_0.1.2         zlibbioc_1.46.0            
- [13] vctrs_0.6.2                 memoise_2.0.1              
- [15] Cairo_1.6-0                 DelayedMatrixStats_1.22.0  
- [17] RCurl_1.98-1.12             forcats_1.0.0              
- [19] htmltools_0.5.5             S4Arrays_1.0.4             
- [21] BiocBaseUtils_1.2.0         BiocNeighbors_1.18.0       
- [23] Rhdf5lib_1.22.0             rhdf5_2.44.0               
- [25] basilisk_1.12.0             plyr_1.8.8                 
- [27] DECIPHER_2.28.0             cachem_1.0.8               
- [29] lifecycle_1.0.3             iterators_1.0.14           
- [31] pkgconfig_2.0.3             rsvd_1.0.5                 
- [33] Matrix_1.5-4.1              R6_2.5.1                   
- [35] fastmap_1.1.1               GenomeInfoDbData_1.2.10    
- [37] clue_0.3-64                 digest_0.6.31              
- [39] colorspace_2.1-0            rprojroot_2.0.3            
- [41] scater_1.28.0               irlba_2.3.5.1              
- [43] RSQLite_2.3.1               vegan_2.6-4                
- [45] beachmat_2.16.0             labeling_0.4.2             
- [47] filelock_1.0.2              fansi_1.0.4                
- [49] mgcv_1.8-42                 compiler_4.3.0             
- [51] here_1.0.1                  bit64_4.0.5                
- [53] withr_2.5.0                 doParallel_1.0.17          
- [55] BiocParallel_1.34.2         viridis_0.6.3              
- [57] DBI_1.1.3                   highr_0.10                 
- [59] HDF5Array_1.28.1            MASS_7.3-60                
- [61] DelayedArray_0.26.3         rjson_0.2.21               
- [63] permute_0.9-7               tools_4.3.0                
- [65] vipor_0.4.5                 beeswarm_0.4.0             
- [67] ape_5.7-1                   glue_1.6.2                 
- [69] rhdf5filters_1.12.1         nlme_3.1-162               
- [71] Rtsne_0.16                  cluster_2.1.4              
- [73] reshape2_1.4.4              generics_0.1.3             
- [75] gtable_0.3.3                tidyr_1.3.0                
- [77] BiocSingular_1.16.0         ScaledMatrix_1.8.1         
- [79] utf8_1.2.3                  ggrepel_0.9.3              
- [81] foreach_1.5.2               pillar_1.9.0               
- [83] yulab.utils_0.0.6           circlize_0.4.15            
- [85] splines_4.3.0               dplyr_1.1.2                
- [87] treeio_1.24.1               lattice_0.21-8             
- [89] bit_4.0.5                   tidyselect_1.2.0           
- [91] DirichletMultinomial_1.42.0 scuttle_1.10.1             
- [93] knitr_1.43                  gridExtra_2.3              
- [95] bookdown_0.34               xfun_0.39                  
- [97] pheatmap_1.0.12             stringi_1.7.12             
- [99] lazyeval_0.2.2              yaml_2.3.7                 
-[101] evaluate_0.21               codetools_0.2-19           
-[103] tibble_3.2.1                BiocManager_1.30.20        
-[105] graph_1.78.0                cli_3.6.1                  
-[107] uwot_0.1.14                 munsell_0.5.0              
-[109] Rcpp_1.0.10                 dir.expiry_1.8.0           
-[111] png_0.1-8                   XML_3.99-0.14              
-[113] parallel_4.3.0              blob_1.2.4                 
-[115] basilisk.utils_1.12.1       sparseMatrixStats_1.12.0   
-[117] bitops_1.0-7                decontam_1.20.0            
-[119] viridisLite_0.4.2           tidytree_0.4.2             
-[121] scales_1.2.1                purrr_1.0.1                
-[123] crayon_1.5.2                GetoptLong_1.0.5           
-[125] rlang_1.1.1                 cowplot_1.1.1              
-```
-</div>
 

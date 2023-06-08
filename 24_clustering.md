@@ -59,10 +59,7 @@ it, and transform the data if necessary, depending on your analysis goals.
 
 ```r
 # Load dependencies
-if (!require(bluster)) {
-  install.packages("bluster")
-  library(bluster)
-}
+library(bluster)
 
 # Apply transformation
 tse <- transformCounts(tse, method = "relabundance")
@@ -156,10 +153,7 @@ instead of the assay itself. Here, we will use the PAM algorithm.
 
 
 ```r
-if (!require(scran)) {
-  BiocManager::install("scran")
-  library(scran)
-}
+library(scran)
 pam.out <- clusterCells(tse,
   assay.type = "relabundance",
   BLUSPARAM = PamParam(centers = 5)
@@ -229,14 +223,8 @@ In the second step, clustering is performed based on dissimilarities.
 
 
 ```r
-if (!require(NbClust)) {
-  install.packages("NbClust")
-  library(NbClust)
-}
-if (!require(cobiclust)) {
-  install.packages("cobiclust")
-  library(cobiclust)
-}
+library(NbClust)
+library(cobiclust)
 
 # Apply transformation
 tse <- transformCounts(tse, method = "relabundance")
@@ -292,10 +280,7 @@ Based on the result, let's divide observations into 15 clusters.
 
 
 ```r
-if (!require(dendextend)) {
-  install.packages("dendextend")
-  library(dendextend)
-}
+library(dendextend)
 
 # Find clusters
 cutree(hc, k = 15)
@@ -345,10 +330,8 @@ utilize silhouette analysis.
 
 
 ```r
-if (!require(factoextra)) {
-  install.packages("factoextra")
-  library(factoextra)
-}
+library(factoextra)
+
 
 # Convert dist object into matrix
 diss <- as.matrix(diss)
@@ -469,7 +452,7 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7690 BIC: 8076 AIC: 7948 
+## Laplace: 7729 BIC: 8124 AIC: 7996 
 ## 
 ## [[4]]
 ## class: DMN 
@@ -677,9 +660,7 @@ Installing package:
 
 
 ```r
-if (!require(bluster)) {
-  BiocManager::install("bluster")
-}
+library(bluster)
 ```
 
 The algorithm used is "short random walks" [@Pons2006]. Graph is
@@ -836,10 +817,7 @@ Next we can plot clusters. Annotated heatmap is a common choice.
 
 
 ```r
-if (!require(pheatmap)) {
-  install.packages("pheatmap")
-  library(pheatmap)
-}
+library(pheatmap)
 # z-transform for heatmap
 mae[[1]] <- transformCounts(mae[[1]],
   assay.type = "rclr",
@@ -876,14 +854,8 @@ Boxplot is commonly used to summarize the results:
 
 
 ```r
-if (!require(ggplot2)) {
-  install.packages("ggplot2")
-  library(ggplot2)
-}
-if (!require(patchwork)) {
-  install.packages("patchwork")
-  library(patchwork)
-}
+library(ggplot2)
+library(patchwork)
 
 # ggplot requires data in melted format
 melt_assay <- meltAssay(mae[[1]], assay.type = "rclr", add_col_data = T, add_row_data = T)

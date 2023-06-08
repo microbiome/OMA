@@ -444,7 +444,7 @@ For information have a look at the [intro vignette](https://bioconductor.org/pac
    altExp             free              match    Alternative experiments  
 MultiAssay            free      free (mapping)    Multi-omic experiments    
 
-Table: (\#tab:options) **Recommended options for storing multiple data tables in microbiome studies** The _assays_ are best suited for data transformations (one-to-one match between samples and columns across the assays). The _alternative experiments_ are particularly suitable for alternative versions of the data that are of same type but may have a different number of features (e.g. taxonomic groups); this is for instance the case with taxonomic abundance tables agglomerated at different levels (e.g. genus vs. phyla) or alternative profiling technologies (e.g. amplicon sequencing vs. shallow shotgun metagenomics). For alternative experiments one-to-one match between samples (cols) is required but the alternative experiment tables can have different numbers of features (rows). Finally, elements of the _MultiAssayExperiment_ provide the most flexible way to incorporate multi-omic data tables with flexible numbers of samples and features. We recommend these conventions as the basis for methods development and application in microbiome studies.
+Table: (\#tab:options) **Recommended options for storing multiple data tables in microbiome studies** The _assays_ are best suited for data transformations (one-to-one match between samples and columns across the assays). The _alternative experiments_ are particularly suitable for alternative versions of the data that are of same type but may have a different number of features (e.g. taxonomic groups); this is for instance the case with taxonomic abundance tables agglomerated at different levels (e.g. genus vs. phyla) or alternative profiling technologies (e.g. amplicon sequencing vs. shallow shotgun metagenomics). For alternative experiments one-to-one match between samples (cols) is libraryd but the alternative experiment tables can have different numbers of features (rows). Finally, elements of the _MultiAssayExperiment_ provide the most flexible way to incorporate multi-omic data tables with flexible numbers of samples and features. We recommend these conventions as the basis for methods development and application in microbiome studies.
 
 
 
@@ -626,15 +626,9 @@ Load required packages.
 library(mia)
 library(ggplot2)
 
-if( !require("BiocManager") ){
-    install.packages("BiocManager")
-    library("BiocManager")
-}
+library("BiocManager")
+library("Biostrings")
 
-if( !require("Biostrings") ){
-    BiocManager::install("Biostrings")
-    library("Biostrings")
-}
 library(Biostrings)
 ```
 
@@ -1343,111 +1337,4 @@ Conversion is possible between other data formats. Interested readers can refer 
 * [readQZA](https://microbiome.github.io/mia/reference/loadFromQIIME2.html)
 
 
-## Session Info {-}
 
-<button class="rebook-collapse">View session info</button>
-<div class="rebook-content">
-```
-R version 4.3.0 (2023-04-21)
-Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 22.04.2 LTS
-
-Matrix products: default
-BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
-LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.20.so;  LAPACK version 3.10.0
-
-locale:
- [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
- [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
- [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
- [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
- [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
-
-time zone: UTC
-tzcode source: system (glibc)
-
-attached base packages:
-[1] stats4    stats     graphics  grDevices utils     datasets  methods  
-[8] base     
-
-other attached packages:
- [1] phyloseq_1.44.0                BiocManager_1.30.20           
- [3] ggplot2_3.4.2                  microbiomeDataSets_1.1.7      
- [5] mia_1.9.2                      MultiAssayExperiment_1.26.0   
- [7] TreeSummarizedExperiment_2.1.4 Biostrings_2.68.1             
- [9] XVector_0.40.0                 SingleCellExperiment_1.22.0   
-[11] SummarizedExperiment_1.30.2    Biobase_2.60.0                
-[13] GenomicRanges_1.52.0           GenomeInfoDb_1.36.0           
-[15] IRanges_2.34.0                 S4Vectors_0.38.1              
-[17] BiocGenerics_0.46.0            MatrixGenerics_1.12.0         
-[19] matrixStats_1.0.0-9000         BiocStyle_2.28.0              
-[21] rebook_1.10.1                 
-
-loaded via a namespace (and not attached):
-  [1] rstudioapi_0.14               jsonlite_1.8.5               
-  [3] CodeDepends_0.6.5             magrittr_2.0.3               
-  [5] ggbeeswarm_0.7.2              rmarkdown_2.22               
-  [7] zlibbioc_1.46.0               vctrs_0.6.2                  
-  [9] multtest_2.56.0               memoise_2.0.1                
- [11] DelayedMatrixStats_1.22.0     RCurl_1.98-1.12              
- [13] htmltools_0.5.5               S4Arrays_1.0.4               
- [15] AnnotationHub_3.8.0           curl_5.0.0                   
- [17] BiocNeighbors_1.18.0          Rhdf5lib_1.22.0              
- [19] rhdf5_2.44.0                  plyr_1.8.8                   
- [21] DECIPHER_2.28.0               cachem_1.0.8                 
- [23] igraph_1.4.3                  iterators_1.0.14             
- [25] mime_0.12                     lifecycle_1.0.3              
- [27] pkgconfig_2.0.3               rsvd_1.0.5                   
- [29] Matrix_1.5-4.1                R6_2.5.1                     
- [31] fastmap_1.1.1                 GenomeInfoDbData_1.2.10      
- [33] shiny_1.7.4                   digest_0.6.31                
- [35] colorspace_2.1-0              AnnotationDbi_1.62.1         
- [37] scater_1.28.0                 irlba_2.3.5.1                
- [39] ExperimentHub_2.8.0           RSQLite_2.3.1                
- [41] vegan_2.6-4                   beachmat_2.16.0              
- [43] filelock_1.0.2                fansi_1.0.4                  
- [45] httr_1.4.6                    mgcv_1.8-42                  
- [47] compiler_4.3.0                withr_2.5.0                  
- [49] bit64_4.0.5                   BiocParallel_1.34.2          
- [51] viridis_0.6.3                 DBI_1.1.3                    
- [53] MASS_7.3-60                   rappdirs_0.3.3               
- [55] DelayedArray_0.26.3           biomformat_1.28.0            
- [57] permute_0.9-7                 tools_4.3.0                  
- [59] vipor_0.4.5                   beeswarm_0.4.0               
- [61] ape_5.7-1                     interactiveDisplayBase_1.38.0
- [63] httpuv_1.6.11                 glue_1.6.2                   
- [65] rhdf5filters_1.12.1           nlme_3.1-162                 
- [67] promises_1.2.0.1              grid_4.3.0                   
- [69] ade4_1.7-22                   cluster_2.1.4                
- [71] reshape2_1.4.4                generics_0.1.3               
- [73] gtable_0.3.3                  tidyr_1.3.0                  
- [75] data.table_1.14.8             BiocSingular_1.16.0          
- [77] ScaledMatrix_1.8.1            utf8_1.2.3                   
- [79] foreach_1.5.2                 ggrepel_0.9.3                
- [81] BiocVersion_3.17.1            pillar_1.9.0                 
- [83] stringr_1.5.0                 yulab.utils_0.0.6            
- [85] later_1.3.1                   splines_4.3.0                
- [87] dplyr_1.1.2                   BiocFileCache_2.8.0          
- [89] treeio_1.24.1                 lattice_0.21-8               
- [91] survival_3.5-5                bit_4.0.5                    
- [93] tidyselect_1.2.0              DirichletMultinomial_1.42.0  
- [95] scuttle_1.10.1                knitr_1.43                   
- [97] gridExtra_2.3                 bookdown_0.34                
- [99] xfun_0.39                     stringi_1.7.12               
-[101] lazyeval_0.2.2                yaml_2.3.7                   
-[103] evaluate_0.21                 codetools_0.2-19             
-[105] tibble_3.2.1                  graph_1.78.0                 
-[107] cli_3.6.1                     xtable_1.8-4                 
-[109] munsell_0.5.0                 Rcpp_1.0.10                  
-[111] dir.expiry_1.8.0              dbplyr_2.3.2                 
-[113] png_0.1-8                     XML_3.99-0.14                
-[115] parallel_4.3.0                ellipsis_0.3.2               
-[117] blob_1.2.4                    sparseMatrixStats_1.12.0     
-[119] bitops_1.0-7                  decontam_1.20.0              
-[121] viridisLite_0.4.2             tidytree_0.4.2               
-[123] scales_1.2.1                  purrr_1.0.1                  
-[125] crayon_1.5.2                  rlang_1.1.1                  
-[127] KEGGREST_1.40.0              
-```
-</div>
