@@ -89,12 +89,10 @@ mae[[3]]
 
 ## Cross-correlation Analysis
 
-
-Next we can do the cross-correlation analysis. Let us analyse if
-individual bacteria genera correlates with concentrations of
-individual metabolites. This helps to answer the question: "If this
-bacteria is present, is this metabolite's concentration then low or
-high"?
+Next we can perform a cross-correlation analysis. Let us analyze if
+individual bacteria genera are correlated with concentrations of
+individual metabolites. This helps to answer the following question: "If
+bacterium X is present, is the concentration of metabolite Y lower or higher"?
 
 ```{r cross-correlation5}
 # Agglomerate microbiome data at family level
@@ -120,7 +118,8 @@ correlations <- testExperimentCrossCorrelation(mae,
                                                show_warnings = FALSE)
 ```
 
-Creates the heatmap
+Next, we create a heatmap depicting all cross-correlations between bacterial
+genera and metabolite concentrations.
 
 ```{r cross-correlation6, fig.width=10, fig.height=8}
 if( !require("ComplexHeatmap") ){
@@ -145,12 +144,10 @@ plot
 
 ## Multi-Omics Factor Analysis
 
-Multi-Omics Factor Analysis [@Argelaguet2018] (MOFA) is an
-unsupervised method for integrating multi-omic data sets in a
-downstream analysis.  It could be seen as a generalization of
-principal component analysis. Yet, with the ability to infer a latent
-(low-dimensional) representation, shared among the multiple (-omics)
-data sets in hand.
+Multi-Omics Factor Analysis (MOFA) is an unsupervised method for integrating multi-omic data sets in a downstream analysis [@Argelaguet2018]. It could be
+seen as a generalization of principal component analysis. Yet, with the ability
+to infer a latent (low-dimensional) representation, shared among the multiple
+(-omics) data sets in hand.
 
 We use the R [MOFA2](https://biofam.github.io/MOFA2/index.html)
 package for the analysis, and
@@ -217,7 +214,7 @@ model <- create_mofa_from_MultiAssayExperiment(mae,
 model
 ```
 
-Model options could be defined as follows:
+Model options can be defined as follows:
 
 ```{r, message=FALSE, warning=FALSE}
 model_opts <- get_default_model_options(model)
@@ -225,14 +222,14 @@ model_opts$num_factors <- 5
 head(model_opts)
 ```
 
-Model's training options are defined with the following:
+Training options for the model are defined in the following way:
 
 ```{r, message=FALSE, warning=FALSE}
 train_opts <- get_default_training_options(model)
 head(train_opts)
 ```
 
-Preparing and training the model:
+The model is then prepared  with `prepare_mofa` and trained with `run_mofa`:
 
 ```{r, message=FALSE, warning=FALSE}
 model.prepared <- prepare_mofa(
@@ -245,29 +242,37 @@ model.prepared <- prepare_mofa(
 model.trained <- run_mofa(model.prepared, use_basilisk = TRUE)
 ```
 
-Visualizing the variance explained:
+The explained variance is visualized with the `plot_variance_explained` function:
 
 ```{r, message=FALSE, warning=FALSE, fig.height=8, fig.width=10}
 library(patchwork)
 library(ggplot2)
-wrap_plots(
-    plot_variance_explained(model.trained, x="view", y="factor", plot_total = T),
-    nrow = 2
-) + plot_annotation(title = "Variance Explained per factor and assay",
-                    theme = theme(plot.title = element_text(hjust = 0.5)))
+
+plot_list <- plot_variance_explained(model.trained,
+                                     x = "view", y = "factor",
+                                     plot_total = T)
+
+wrap_plots(plot_list, nrow = 2) +
+  plot_annotation(title = "Variance Explained per factor and assay",
+                  theme = theme(plot.title = element_text(hjust = 0.5)))
 ```
 
 The top weights for each assay using all five factors:
 
 ```{r, warning=FALSE, message=FALSE, fig.height=10, fig.width=10}
-plots <- lapply(c("microbiota", "metabolites","biomarkers"), function(name) {
-    plot_top_weights(model.trained,
-                     view = name,
-                     factors = "all",
-                     nfeatures = 10) +
-        labs(title = paste0("Top weights of the ", name," assay"))
-})
-wrap_plots(plots, nrow = 3) & theme(text = element_text(size = 8))
+custom_plotter <- function(name) {
+  
+  p <- plot_top_weights(model.trained,
+                        view = name,
+                        factors = "all",
+                        nfeatures = 10) +
+    labs(title = paste0("Top weights of the ", name, " assay"))
+  
+}
+
+plot_list <- lapply(c("microbiota", "metabolites", "biomarkers"), custom_plotter)
+
+wrap_plots(plot_list, nrow = 3) & theme(text = element_text(size = 8))
 ```
 
 More tutorials and examples of using the package are found at [link](https://biofam.github.io/MOFA2/tutorials.html)
