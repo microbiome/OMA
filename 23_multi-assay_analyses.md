@@ -50,54 +50,42 @@ discovery of novel biomarkers. In this section we demonstrate common
 multi-assay data integration tasks.
 
 Cross-correlation analysis is a straightforward approach that can
-reveal assocation strengths and types between data sets. For instance,
-we can analyze if higher presence of a specific taxon equals to higher
+reveal strength and type of assocations between data sets. For instance,
+we can analyze if higher presence of a specific taxon relates to higher
 levels of a biomolecule.
 
-The analyse can be facilitated by the multi-assay data containers,
+The analyses can be facilitated by the multi-assay data containers,
 _TreeSummarizedExperiment_ and _MultiAssayExperiment_. These are
 scalable and contain different types of data in a single container,
 making this framework particularly suited for multi-assay microbiome
 data incorporating different types of complementary data sources in a
-single reproducible workflow. Th different solutions for varying data
-integration needs are discussed in more detail in Section
+single reproducible workflow. Solutions to a number of data
+integration problems are discussed in more detail in Section
 \@ref(containers). Another experiment can be stored in _altExp_ slot
-of SE data container or both experiments can be stored side-by-side in
-MAE data container (see the sections \@ref(alt-exp) and \@ref(mae) to
-learn more about altExp and MAE objects, respectively). Different
-experiments are first imported into these data containers similarly to
+of SE data container. Alternatively, both experiments can be stored
+side-by-side in a MAE data container (see sections \@ref(alt-exp) and \@ref(mae)
+to learn more about altExp and MAE objects, respectively). Different
+experiments are first imported as single-assay data containers similarly to
 the case when only one experiment is present. After that, the
-different experiments can be combined into the same multi-assay data
-container. The result is one TreeSE object with alternative experiment in
-altExp slot, or MAE object with multiple experiment in its experiment
-slot, for instance.
+different experiments can be combined into one multi-assay data
+container. The result is a MAE object with multiple experiments in its
+experiment slot, or a TreeSE object with alternative experiments in
+the altExp slot.
 
-As an example data, we use data from the following publication: Hintikka L
-_et al._ (2021) Xylo-oligosaccharides in prevention of hepatic
+As an example, we use a dataset from the following publication:
+[-@Hintikka2021] Xylo-oligosaccharides in prevention of hepatic
 steatosis and adipose tissue inflammation: associating taxonomic and
-metabolomic patterns in fecal microbiota with biclustering
-
-[@Hintikka2021].
-
-In this study, mice were fed with high-fat and low-fat diets with or
-without prebiotics.  The purpose of this was to study whether prebiotics
-reduce negative impacts of a high-fat diet.
+metabolomic patterns in fecal microbiota with biclustering.
+In this study, mice were fed either with a high-fat or a low-fat diet,
+and with or without prebiotics, for the purpose studying whether prebiotics
+attenuate the negative impact of a high-fat diet on health.
 
 This example data can be loaded from microbiomeDataSets. The data is
 already in MAE format. It includes three different experiments:
 microbial abundance data, metabolite concentrations, and data about
-different biomarkers.
-=======
-[@Hintikka2021]. In this article, mice were fed with high-fat and
-low-fat diets with or without prebiotics.  The purpose of this was to
-study if prebiotics would reduce the negative impact of high-fat diet.
-
-This example data is readily available in the MultiAssayExperiment
-format. It includes three different experiments: microbial abundance
-data, metabolite concentrations, and data about different
-biomarkers. If you like to construct the same data object from the
-original files instead, [Here](https://microbiome.github.io/OMA/containers.html#loading-experimental-microbiome-data) 
-you can find help for importing data into a SE object.
+different biomarkers. If you like to construct the same data object from the
+original files instead, [here](https://microbiome.github.io/OMA/containers.html#loading-experimental-microbiome-data) 
+you can find help for importing data into an SE object.
 
 
 ```r
@@ -203,14 +191,12 @@ mae[[3]]
 ## colTree: NULL
 ```
 
-## Cross-correlation Analysis
+## Cross-correlation Analysis {#cross-correlation}
 
-
-Next we can do the cross-correlation analysis. Let us analyse if
-individual bacteria genera correlates with concentrations of
-individual metabolites. This helps to answer the question: "If this
-bacteria is present, is this metabolite's concentration then low or
-high"?
+Next we can perform a cross-correlation analysis. Let us analyze if
+individual bacteria genera are correlated with concentrations of
+individual metabolites. This helps to answer the following question: "If
+bacterium X is present, is the concentration of metabolite Y lower or higher"?
 
 
 ```r
@@ -237,7 +223,8 @@ correlations <- testExperimentCrossCorrelation(mae,
                                                show_warnings = FALSE)
 ```
 
-Creates the heatmap
+Next, we create a heatmap depicting all cross-correlations between bacterial
+genera and metabolite concentrations.
 
 
 ```r
@@ -260,14 +247,12 @@ plot
 
 ![](23_multi-assay_analyses_files/figure-latex/cross-correlation6-1.pdf)<!-- --> 
 
-## Multi-Omics Factor Analysis
+## Multi-Omics Factor Analysis {#mofa}
 
-Multi-Omics Factor Analysis [@Argelaguet2018] (MOFA) is an
-unsupervised method for integrating multi-omic data sets in a
-downstream analysis.  It could be seen as a generalization of
-principal component analysis. Yet, with the ability to infer a latent
-(low-dimensional) representation, shared among the multiple (-omics)
-data sets in hand.
+Multi-Omics Factor Analysis (MOFA) is an unsupervised method for integrating multi-omic data sets in a downstream analysis [@Argelaguet2018]. It could be
+seen as a generalization of principal component analysis. Yet, with the ability
+to infer a latent (low-dimensional) representation, shared among the multiple
+(-omics) data sets in hand.
 
 We use the R [MOFA2](https://biofam.github.io/MOFA2/index.html)
 package for the analysis, and
@@ -342,7 +327,7 @@ model
 ## 
 ```
 
-Model options could be defined as follows:
+Model options can be defined as follows:
 
 
 ```r
@@ -372,7 +357,7 @@ head(model_opts)
 ## [1] TRUE
 ```
 
-Model's training options are defined with the following:
+Training options for the model are defined in the following way:
 
 
 ```r
@@ -400,7 +385,7 @@ head(train_opts)
 ## [1] 5
 ```
 
-Preparing and training the model:
+The model is then prepared  with `prepare_mofa` and trained with `run_mofa`:
 
 
 ```r
@@ -414,17 +399,20 @@ model.prepared <- prepare_mofa(
 model.trained <- run_mofa(model.prepared, use_basilisk = TRUE)
 ```
 
-Visualizing the variance explained:
+The explained variance is visualized with the `plot_variance_explained` function:
 
 
 ```r
 library(patchwork)
 library(ggplot2)
-wrap_plots(
-    plot_variance_explained(model.trained, x="view", y="factor", plot_total = T),
-    nrow = 2
-) + plot_annotation(title = "Variance Explained per factor and assay",
-                    theme = theme(plot.title = element_text(hjust = 0.5)))
+
+plot_list <- plot_variance_explained(model.trained,
+                                     x = "view", y = "factor",
+                                     plot_total = T)
+
+wrap_plots(plot_list, nrow = 2) +
+  plot_annotation(title = "Variance Explained per factor and assay",
+                  theme = theme(plot.title = element_text(hjust = 0.5)))
 ```
 
 ![](23_multi-assay_analyses_files/figure-latex/unnamed-chunk-5-1.pdf)<!-- --> 
@@ -433,14 +421,19 @@ The top weights for each assay using all five factors:
 
 
 ```r
-plots <- lapply(c("microbiota", "metabolites","biomarkers"), function(name) {
-    plot_top_weights(model.trained,
-                     view = name,
-                     factors = "all",
-                     nfeatures = 10) +
-        labs(title = paste0("Top weights of the ", name," assay"))
-})
-wrap_plots(plots, nrow = 3) & theme(text = element_text(size = 8))
+custom_plotter <- function(name) {
+  
+  p <- plot_top_weights(model.trained,
+                        view = name,
+                        factors = "all",
+                        nfeatures = 10) +
+    labs(title = paste0("Top weights of the ", name, " assay"))
+  
+}
+
+plot_list <- lapply(c("microbiota", "metabolites", "biomarkers"), custom_plotter)
+
+wrap_plots(plot_list, nrow = 3) & theme(text = element_text(size = 8))
 ```
 
 ![](23_multi-assay_analyses_files/figure-latex/unnamed-chunk-6-1.pdf)<!-- --> 
