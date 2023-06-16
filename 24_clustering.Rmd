@@ -18,7 +18,7 @@ features/samples that share pattern.  For example, with clustering, we
 can find group of samples that share similar community
 composition. There are multiple clustering algorithms available.
 
-## Introduction to bluster package
+## Introduction to bluster package and wrapper
 
 *bluster* is a Bioconductor package specialized in clustering. It offers 
 multiple algorithms such as hierarchical clustering, DBSCAN, K-means, 
@@ -33,7 +33,10 @@ library(bluster)
 tse <- transformCounts(tse, method = "relabundance")
 ```
 
-The clustering can be done on features or samples.
+*bluster*'s main function `clusterRows`, used to do the clustering can be 
+used via mia's `cluster` function.
+
+The clustering can be done on features or samples. 
 
 ### Sample clustering
 
@@ -51,13 +54,11 @@ perform a hierarchical clustering.
 ```{r bluster_sample_hclust1}
 # Simple use of the hierarchical clustering which sets the cut height to
 # half the dendrogram height.
-hclust.out <- clusterRows(x, HclustParam())
+tse <- cluster(tse, MARGIN = "samples", HclustParam())
 
-# Add cluster indices to the TSE
-colData(tse)$clusters <- hclust.out
-
-# Checking the result
-hclust.out
+# Check the result contained in the clusters part of colData. To change the 
+# name clusters, you can change the parameter clust.col
+colData(tse)$clusters
 ```
 
 Once the clustering on the samples is done, we can also plot the clusters.
@@ -83,13 +84,15 @@ To change the clustering parameters, simply change the parameters in
 # More complex use of the algorithm with another method and cut height.
 # We also add the full parameter to get the full hierarchical clustering
 # information to plot the dendrogram
-hclust.out <- clusterRows(x, HclustParam(method = "complete"), full = TRUE)
+tse <- cluster(tse, HclustParam(method = "complete"), full = TRUE)
 
-# Add data to the TSE
-colData(tse)$clusters <- hclust.out$clusters
+
+# Information is stored in the metadata under the name "clusters". That
+# can be changed using the parameter "name"
+hclust_data <- metadata(tseb)$clusters$hclust
 
 # Get the dendrogram object
-dendro <- as.dendrogram(hclust.out$objects$hclust)
+dendro <- as.dendrogram(hclust_data)
 
 # Plot the dendrogram
 plot(dendro)
@@ -112,9 +115,8 @@ pam.out <- clusterCells(tse,
 Similarly to samples, it's also possible to cluster taxa. 
 Prior to clustering, the data should be modified with compositionally 
 aware transformations such as CLR. Then, simply follow the same steps as
-with samples, using the `clusterRows` function, then putting the cluster 
-indices in rowData. At the end, you can also merge the rows using the 
-clusters indices.
+with samples, using `cluster` with `MARGIN = features`. At the end, you 
+can also merge the rows using the clusters indices.
 
 ## Hierarchical clustering
 
