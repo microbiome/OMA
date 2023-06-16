@@ -37,19 +37,24 @@ For tips on Quarto, see [Quarto tutorial](https://quarto.org/docs/authoring/mark
 ## Data containers: TreeSE
 
 
-### Constructing a data object
+### Constructing a data object {#construct-TreeSE}
 
-Import data from CSV files to TreeSE (see shared data folder for example data sets).
+Here we cover how to construct a TreeSE from CSV files, using the components
+of OKeefeDSData from the microbiomeDataSets package as an example dataset.
 
-1. Import the data files in R
-2. Construct a TreeSE data object (see [Ch. 2](https://microbiome.github.io/OMA/containers.html#loading-experimental-microbiome-data))
-3. Check that importing is done correctly. E.g., choose random samples and features,
+1. Download the files with the prefix _DS_ from
+   [this directory](https://github.com/JuliaTurkuDataScience/MicrobiomeAnalysis.jl/tree/main/src/assets)
+2. Read in the csv files with `read.csv` and store them into the variables
+   `assays`, `rowdata` and `coldata`, respectively
+3. Create a TreeSE from the individual components with `TreeSummarizedExperiment`.
+   Note that the function requires three arguments: assays, rowData and colData,
+   to which you can give the appropriate item
+4. Check that importing is done correctly. E.g., choose random samples and features,
 and check that their values equal between raw files and TreeSE.
 
-Useful functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colnames, SimpleList
+Usefuls functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colnames, SimpleList
 
 ### Importing data
-
 
 You can also check the [function reference in the mia package](https://microbiome.github.io/mia/reference/index.html)
 
@@ -289,29 +294,142 @@ See the OMA book for examples.
 
 ## Multiomics
 
-### MultiAssayExperiment (MAE) data container
+### Basic exploration
 
-1. Create TreeSE data containers from individual CSV files.
-2. Combine TreeSE into MAE.
-3. Check that each individual experiment of MAE equals corresponding TreeSE.
-4. Take a subset of MAE (e.g., 10 first samples), and observe the subsetted MAE.
+Here we learn how to conduct preliminary exploration on a MAE, using
+HintikkaXOData as an example dataset.
 
-Useful functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colnames, MultiAssayExperiment, ExperimentList, SimpleList
+1. Import the mia package, load HintikkaXOData with `data` and store it into a
+   variable named `mae`
+2. Which experiments make up the MAE? How many samples and features are contained
+   by each experiment? You can get a summary for all experiments with `experiments`,
+   and check for each individual experiment with `dim`, `nrow` and `ncol`
+3. What are the names of the features and samples of the different experiments?
+   You can see that with `rownames` and `colnames`, respectively
+4. What information is known about the samples? Remember that information about
+   samples is stored in the `rowData` of the MAE
+5. **Extra**: How do the samples of the individual experiments map to the
+   columns of the MAE? You can find the sample mapping in the `sampleMap`
+   of the MAE
 
+So far so good. You explored a MAE and its experiments, getting a taste of how
+information is organized in its internal structure.
 
-### Multi-omic data exploration
+### Experiment agglomeration
 
-1. Load experimental dataset from microbiomeDataSets (e.g., HintikkaXOData).
-2. Analyze correlations between experiments. (Taxa vs lipids, Taxa vs biomarkers, Lipids vs biomarkers)
-3. Agglomerate taxa data.
-4. Apply CLR to taxa data, apply log10 to lipids and biomarkers.
-5. Perform cross-correlation analyses and visualize results with heatmaps. (Use Spearman coefficients)
-6. Is there significant correlations? Interpret your results.
+Here we learn how to manipulate an experiment contained by a MAE and save the
+new modified version of the experiment in a suitable place (the altExp slot).
 
-Useful functions: pheatmap, ComplexHeatMap::Heatmap, ggplot, transformCounts, testExperimentCrossAssociation
+1. Import the mia package, load HintikkaXOData with `data` and store it into a
+   variable named `mae`
+2. Agglomerate the microbiota experiment by Genus and store the output into the
+   `altExp` slot of the microbiota experiment, with the custom name
+   `microbiota_genus`
+3. How many features remain after agglomerating? What are their names?
+4. **Extra**: create one more alternative experiment named
+   `prevalent_microbiota_family`, which contains the microbiota experiment
+   agglomerated by Family with a prevalence threshold of 10%. You can
+   agglomerate and in parallel select by prevalence with
+   `agglomerateByPrevalence`
 
+Good job! You agglomerated one of the experiments in the MAE and stored it as
+an alternative experiment.
 
+### Experiment transformation
 
+We proceed with an exercise on a different type of data manipulation, that is,
+transformation of assays of individual experiments in the MAE.
 
+1. Import the mia package, load HintikkaXOData with `data` and store it into a
+   variable named `mae`
+2. What assays are contained by each individual experiment? You can check their
+   names with `assays`
+3. Apply a log10 transformation to the assay of the metabolite experiment.
+   For that you can use `transformCounts` and don't forget to specify the assay
+   to be transformed with the argument `assay.type`
+4. Apply a CLR transformation to the counts assay of the microbiota experiment.
+   To ensure non-null values in the assay, set `pseudocount` equal to 1.
+   
+You made it! You learnt how to apply different transformations to the assays
+of individual experiments in a MAE with `transformCounts`, specifying optional
+arguments based on the used method.
 
+### Assay extraction
+
+The following exercise walks you through disassembling a MAE object in
+order to retrieve a specific assay, or to store its components as
+multiple separate csv files.
+
+1. Import the mia package, load HintikkaXOData with `data` and store it into a
+   variable named `mae`
+2. Extract the individual metabolite experiment from the MAE into a distinct
+   TreeSE object named `metabolites`
+3. Which and how many assays are contained by `metabolites`? You can check that
+   with `assays` or `assayNames`
+4. Write a csv file for the nmr assay with `write.csv`. You can access an
+   individual assay of a TreeSE with `assay` by specifying the name of the
+   desired assay
+5. **Extra**: Repeat step 1 - 4 also for the microbiota and biomarkers experiments,
+   so that a completely disassembled version of the MAE is available
+6. **Extra**: Besides experiments, MAEs also include a sampleData and a sampleMap,
+   which are accessible with `colData(mae)` and `sampleMap(mae)`, respectively.
+   Save also each of these two elements into a csv file.
+
+Well done! You just splitted a MAE into its components and stored them as csv files.
+[This script](https://github.com/JuliaTurkuDataScience/MicrobiomeAnalysis.jl/blob/main/src/assets/XO_preprocess.R)
+shows a possible approach.
+
+### MAE reconstruction
+
+Next, we will try to reconstruct the same MAE from the files you created.
+Make sure you know their names and location! Alternatively, you can download
+[this directory](https://github.com/microbiome/course_2023_oulu/tree/main/data)
+with the readily disassembled components of HintikkaXOData.
+
+1. Read in the csv files containing assays with `read.csv` and save each
+   of them into a variable named `<assay name>_assays`
+2. Create one TreeSE from each assays object with the `TreeSummarizedExperiment`
+   function, as explained in the exercise \@ref(construct-TreeSE)
+3. Read in the sampleData and the sampleMap and store them into the
+   variables `sample_data` and `sample_map`, respectively
+4. Combine the components with `MultiAssayExperiment`, where the first argument
+   is an `ExperimentList` (for now include only the microbiota and metabolites
+   TreeSEs), the second is colData and the third is sampleMap
+5. Make sure that the MAE experiments are identical to the original TreeSEs. You
+   can do that qualitatively by checking their `head` and quantitatively by 
+   looking at their `dim`
+6. **Extra**: Add the biomarkers TreeSE as a new experiment to the MAE.
+   Note that new experiments can be added to a MAE through simple concatenation
+   with `c(mae, experiment)`
+
+Good job! Now you are aware of how MAEs are built and we can proceed to some
+analytical exercises.
+
+### Cross-correlation analysis
+
+Now we will perform a cross-correlation analysis between two of the
+experiments in the MAE.
+
+1. Import the mia package, load HintikkaXOData with `data` and store it into a
+   variable named `mae`
+2. Analyze correlations between the microbiota and the biomarkers experiments
+   with `getExperimentCrossAssociation`. Don't forget to specify the experiments
+   you want to compare with the arguments `experiment1` and `experiment2`, and
+   which of their assays with `assay.type1` and `assay.type2`
+3. What does the output look like? By default, correlation is measured in terms
+   of Kendall tau coefficients. Repeat point 2, but this time change `method`
+   to Spearman coefficients.
+4. Are you able to infer significance from the output? In order to also obtain
+   p-values from the cross-correlation analysis, repeat point 2 with the
+   additional argument `test_significance = TRUE`
+5. Visualize results with a heatmap similarly to the example in section
+   \@ref(cross-correlation). Do you see any significant correlations?
+   Interpret your results.
+6. **Extra**: Perform cross-correlation analysis between the remaining
+   experiments (microbiota vs metabolites and metabolites vs biomarkers) and
+   visualize results with heatmaps
+   
+Great job! You performed a cross-correlation analysis between two experiments of
+a MAE and visualized the results with a heatmap. You are also able to customise
+the correlation method and significance testing used for the analysis.
 
