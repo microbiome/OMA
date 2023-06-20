@@ -38,7 +38,7 @@ document.addEventListener("click", function (event) {
 
 This chapter focuses on the quality control and exploration of
 microbiome data and establishes commonly used descriptive
-summaries. Familiarizing with the peculiarities of a given data set is
+summaries. Familiarizing with the peculiarities of a given dataset is
 the essential basis for any data analysis and model building.
 
 The dataset should not suffer from severe technical biases, and you
@@ -305,7 +305,7 @@ plotRowTree(x[rowData(x)$Phylum %in% top_phyla_mean,],
 
 ## Quality control {#qc}
 
-Next, let us load the `GlobalPatterns` data set to illustrate standard
+Next, let us load the `GlobalPatterns` dataset to illustrate standard
 microbiome data summaries.
 
 

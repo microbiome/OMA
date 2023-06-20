@@ -397,8 +397,7 @@ For a complete list of available transformations and parameters, see function
 
 
 ```r
-assay(tse, "pseudo") <- assay(tse, "counts") + 1
-tse <- transformCounts(tse, assay.type = "pseudo", method = "relabundance")
+tse <- transformCounts(tse, assay.type = "counts", method = "relabundance", pseudocount = 1)
 tse <- transformCounts(x = tse, assay.type = "relabundance", method = "clr", 
                         pseudocount = 1, name = "clr_transformation")
 
@@ -406,55 +405,55 @@ head(assay(tse, "clr_transformation"))
 ```
 
 ```
-##                                         CL3        CC1        SV1    M31Fcsw
-## Class:Thermoprotei               -5.078e-05 -5.105e-05 -5.055e-05 -4.975e-05
-## Class:Thermoprotei               -5.078e-05 -5.105e-05 -5.055e-05 -4.975e-05
-## Species:Sulfolobusacidocaldarius -5.078e-05 -5.105e-05 -5.055e-05 -4.975e-05
-## Class:Sd-NA                      -5.078e-05 -5.105e-05 -5.055e-05 -4.975e-05
-## Class:Sd-NA                      -5.078e-05 -5.105e-05 -5.055e-05 -4.975e-05
-## Class:Sd-NA                      -5.078e-05 -5.105e-05 -5.055e-05 -4.975e-05
-##                                     M11Fcsw    M31Plmr    M11Plmr    F21Plmr
-## Class:Thermoprotei               -4.947e-05 -4.931e-05 -4.879e-05 -4.671e-05
-## Class:Thermoprotei               -4.947e-05 -4.931e-05 -4.879e-05 -4.671e-05
-## Species:Sulfolobusacidocaldarius -4.947e-05 -4.931e-05 -4.658e-05 -4.671e-05
-## Class:Sd-NA                      -4.947e-05 -4.931e-05 -4.879e-05 -4.671e-05
-## Class:Sd-NA                      -4.947e-05 -4.931e-05 -4.879e-05 -4.671e-05
-## Class:Sd-NA                      -4.947e-05 -4.931e-05 -4.879e-05 -4.671e-05
-##                                     M31Tong    M11Tong   LMEpi24M   SLEpi20M
-## Class:Thermoprotei               -4.846e-05 -4.257e-05 -4.756e-05 -4.837e-05
-## Class:Thermoprotei               -4.846e-05 -4.257e-05 -4.756e-05 -4.918e-05
-## Species:Sulfolobusacidocaldarius -4.846e-05 -4.257e-05 -4.756e-05 -4.918e-05
-## Class:Sd-NA                      -4.846e-05 -4.257e-05 -4.756e-05 -4.918e-05
-## Class:Sd-NA                      -4.846e-05 -4.257e-05 -4.756e-05 -4.918e-05
-## Class:Sd-NA                      -4.846e-05 -4.257e-05 -4.756e-05 -4.918e-05
+##                                        CL3        CC1        SV1    M31Fcsw
+## Class:Thermoprotei               -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
+## Class:Thermoprotei               -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
+## Species:Sulfolobusacidocaldarius -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
+## Class:Sd-NA                      -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
+## Class:Sd-NA                      -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
+## Class:Sd-NA                      -5.19e-05 -5.192e-05 -5.194e-05 -5.035e-05
+##                                     M11Fcsw   M31Plmr    M11Plmr    F21Plmr
+## Class:Thermoprotei               -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
+## Class:Thermoprotei               -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
+## Species:Sulfolobusacidocaldarius -4.991e-05 -5.06e-05 -4.860e-05 -5.148e-05
+## Class:Sd-NA                      -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
+## Class:Sd-NA                      -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
+## Class:Sd-NA                      -4.991e-05 -5.06e-05 -5.091e-05 -5.148e-05
+##                                    M31Tong   M11Tong   LMEpi24M   SLEpi20M
+## Class:Thermoprotei               -4.89e-05 -5.05e-05 -4.796e-05 -4.910e-05
+## Class:Thermoprotei               -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
+## Species:Sulfolobusacidocaldarius -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
+## Class:Sd-NA                      -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
+## Class:Sd-NA                      -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
+## Class:Sd-NA                      -4.89e-05 -5.05e-05 -4.796e-05 -4.993e-05
 ##                                      AQC1cm     AQC4cm     AQC7cm        NP2
-## Class:Thermoprotei               -2.385e-05 -4.438e-06  2.787e-05 -4.731e-05
-## Class:Thermoprotei               -4.660e-05 -4.568e-05 -4.428e-05 -4.915e-05
-## Species:Sulfolobusacidocaldarius -4.660e-05 -4.652e-05 -4.777e-05 -4.915e-05
-## Class:Sd-NA                      -4.660e-05 -3.726e-05 -3.090e-05 -4.915e-05
-## Class:Sd-NA                      -4.660e-05 -4.568e-05 -4.719e-05 -4.915e-05
-## Class:Sd-NA                      -4.660e-05 -4.610e-05 -4.603e-05 -4.915e-05
+## Class:Thermoprotei               -2.419e-05 -4.442e-06  2.822e-05 -4.900e-05
+## Class:Thermoprotei               -4.731e-05 -4.602e-05 -4.475e-05 -5.091e-05
+## Species:Sulfolobusacidocaldarius -4.731e-05 -4.686e-05 -4.828e-05 -5.091e-05
+## Class:Sd-NA                      -4.731e-05 -3.753e-05 -3.121e-05 -5.091e-05
+## Class:Sd-NA                      -4.731e-05 -4.602e-05 -4.769e-05 -5.091e-05
+## Class:Sd-NA                      -4.731e-05 -4.644e-05 -4.651e-05 -5.091e-05
 ##                                         NP3        NP5    TRRsed1    TRRsed2
-## Class:Thermoprotei               -5.068e-05 -5.083e-05 -3.909e-05 -4.927e-05
-## Class:Thermoprotei               -5.068e-05 -5.083e-05 -3.909e-05 -4.927e-05
-## Species:Sulfolobusacidocaldarius -5.068e-05 -5.083e-05 -3.909e-05 -4.927e-05
-## Class:Sd-NA                      -5.068e-05 -5.083e-05 -3.909e-05 -4.927e-05
-## Class:Sd-NA                      -5.068e-05 -5.083e-05 -3.909e-05 -4.927e-05
-## Class:Sd-NA                      -5.068e-05 -5.083e-05 -3.909e-05 -4.927e-05
-##                                     TRRsed3       TS28       TS29      Even1
-## Class:Thermoprotei               -4.829e-05 -5.016e-05 -4.934e-05 -5.046e-05
-## Class:Thermoprotei               -4.829e-05 -5.016e-05 -4.934e-05 -5.046e-05
-## Species:Sulfolobusacidocaldarius -4.829e-05 -5.016e-05 -4.934e-05 -5.046e-05
-## Class:Sd-NA                      -4.829e-05 -5.016e-05 -4.934e-05 -5.046e-05
-## Class:Sd-NA                      -4.829e-05 -5.016e-05 -4.934e-05 -5.046e-05
-## Class:Sd-NA                      -4.829e-05 -5.016e-05 -4.934e-05 -5.046e-05
+## Class:Thermoprotei               -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
+## Class:Thermoprotei               -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
+## Species:Sulfolobusacidocaldarius -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
+## Class:Sd-NA                      -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
+## Class:Sd-NA                      -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
+## Class:Sd-NA                      -5.133e-05 -5.141e-05 -5.185e-05 -5.116e-05
+##                                     TRRsed3       TS28      TS29      Even1
+## Class:Thermoprotei               -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
+## Class:Thermoprotei               -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
+## Species:Sulfolobusacidocaldarius -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
+## Class:Sd-NA                      -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
+## Class:Sd-NA                      -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
+## Class:Sd-NA                      -5.158e-05 -5.117e-05 -5.01e-05 -5.125e-05
 ##                                       Even2      Even3
-## Class:Thermoprotei               -5.017e-05 -5.034e-05
-## Class:Thermoprotei               -5.017e-05 -5.034e-05
-## Species:Sulfolobusacidocaldarius -5.017e-05 -5.034e-05
-## Class:Sd-NA                      -5.017e-05 -5.034e-05
-## Class:Sd-NA                      -5.017e-05 -5.034e-05
-## Class:Sd-NA                      -5.017e-05 -5.034e-05
+## Class:Thermoprotei               -5.114e-05 -5.122e-05
+## Class:Thermoprotei               -5.114e-05 -5.122e-05
+## Species:Sulfolobusacidocaldarius -5.114e-05 -5.122e-05
+## Class:Sd-NA                      -5.114e-05 -5.122e-05
+## Class:Sd-NA                      -5.114e-05 -5.122e-05
+## Class:Sd-NA                      -5.114e-05 -5.122e-05
 ```
 
 -   In 'pa' transformation, abundance table is converted to present/absent table.
@@ -504,8 +503,8 @@ assays(tse)
 ```
 
 ```
-## List of length 5
-## names(5): counts relabundance pseudo clr_transformation pa
+## List of length 4
+## names(4): counts relabundance clr_transformation pa
 ```
 
 ## Pick specific  

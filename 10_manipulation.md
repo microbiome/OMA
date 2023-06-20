@@ -85,8 +85,8 @@ molten_tse
 ### Subsetting
 
 **Subsetting** data helps to draw the focus of analysis on particular
-  sets of samples and / or features. When dealing with large data
-  sets, the subset of interest can be extracted and investigated
+  sets of samples and / or features. When dealing with large datasets, 
+  the subset of interest can be extracted and investigated
   separately. This might improve performance and reduce the
   computational load.
 
@@ -717,7 +717,7 @@ head(tse$NewVariable)
 ```
 
 ```
-## [1] 0.3996 0.1324 0.1326 0.9240 0.7375 0.3107
+## [1] 0.97068 0.51854 0.71642 0.18693 0.55862 0.02114
 ```
 
 ## Merge data

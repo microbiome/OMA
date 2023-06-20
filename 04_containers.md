@@ -460,7 +460,7 @@ the use of the data.
 
 ### Package data {#package-data}
 
-The `mia` R package contains example data sets that are direct
+The `mia` R package contains example datasets that are direct
 conversions from the alternative `phyloseq` container to the
 `TreeSummarizedExperiment` container.
 
@@ -502,7 +502,7 @@ GlobalPatterns
 ```
 
 
-Check the documentation for this data set:
+Check the documentation for this dataset:
 
 
 
@@ -523,7 +523,7 @@ provides a variety of data resources, including the
 [microbiomeDataSets](https://bioconductor.org/packages/release/data/experiment/html/microbiomeDataSets.html)
 package [@Morgan2021; @microlahti2021].
 
-A table of the available data sets is available through the
+A table of the available datasets is available through the
 `availableDataSets` function.
 
 
@@ -549,7 +549,7 @@ All data are downloaded from ExperimentHub and cached for local
 re-use. Check the [man pages of each
 function](https://microbiome.github.io/microbiomeDataSets/reference/index.html)
 for a detailed documentation of the data contents and references. Let
-us retrieve a *[MultiAssayExperiment](https://bioconductor.org/packages/3.17/MultiAssayExperiment)* data set:
+us retrieve a *[MultiAssayExperiment](https://bioconductor.org/packages/3.17/MultiAssayExperiment)* dataset:
 
 
 ```r
@@ -571,7 +571,7 @@ details.
 ### Curated metagenomic data
 
 [curatedMetagenomicData](https://bioconductor.org/packages/release/data/experiment/html/curatedMetagenomicData.html)
-is a large collection of curated human microbiome data sets, provided as
+is a large collection of curated human microbiome datasets, provided as
 `(Tree)SummarizedExperiment` objects [@Pasolli2017]. The resource
 provides curated human microbiome data including gene families, marker
 abundance, marker presence, pathway abundance, pathway coverage, and
@@ -787,7 +787,7 @@ counts <- as.matrix(counts)
 ```
 
 If you hesitate about the format of the data, you can compare to one
-of the available demonstration data sets, and make sure that your data
+of the available demonstration datasets, and make sure that your data
 components have the same format.
 
 There are many different source files and many different ways to read
@@ -798,7 +798,7 @@ entries as follows.
 
 ```r
 # coldata rownames match assay colnames
-all(rownames(samples) == colnames(counts)) # our data set
+all(rownames(samples) == colnames(counts)) # our dataset
 ```
 
 ```
@@ -815,7 +815,7 @@ class(samples) # should be data.frame or DataFrame
 
 ```r
 # rowdata rownames match assay rownames
-all(rownames(tax) == rownames(counts)) # our data set
+all(rownames(tax) == rownames(counts)) # our dataset
 ```
 
 ```
@@ -975,7 +975,7 @@ Tengeler AC _et al._ (2020) [**Gut microbiota from persons with
 attention-deficit/hyperactivity disorder affects the brain in
 mice**](https://doi.org/10.1186/s40168-020-00816-x). 
 
-The data set consists of 3 files:
+The dataset consists of 3 files:
 
 -   biom file: abundance table and taxonomy information
 -   csv file: sample metadata
