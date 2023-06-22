@@ -18,12 +18,13 @@ features/samples that share pattern.  For example, with clustering, we
 can find group of samples that share similar community
 composition. There are multiple clustering algorithms available.
 
-## Introduction to bluster package and wrapper
+## Custom tools
 
-*bluster* is a Bioconductor package specialized in clustering. It offers 
-multiple algorithms such as hierarchical clustering, DBSCAN, K-means, 
-amongst others. The first thing to do when using this package is to load 
-it, and transform the data if necessary, depending on your analysis goals.
+*bluster* is a Bioconductor package providing tools for clustering data in 
+in the `SummarizedExperiment` container. It offers multiple algorithms such 
+as hierarchical clustering, DBSCAN, K-means, amongst others. The first thing 
+to do when using this package is to load it, and transform the data if 
+necessary, depending on your analysis goals.
 
 ```{r load_bluster}
 # Load dependencies
@@ -33,30 +34,24 @@ library(bluster)
 tse <- transformCounts(tse, method = "relabundance")
 ```
 
-*bluster*'s main function `clusterRows`, used to do the clustering can be 
-used via mia's `cluster` function.
+The main focus here will be how to use mia's `cluster` function to do the 
+clustering.
 
 The clustering can be done on features or samples. 
 
 ### Sample clustering
 
-To cluster samples, we simply need to transpose the assay so that 
-the samples are in rows.
-
-```{r sample_clust_prep}
-x <- t(assay(tse, "relabundance"))
-```
-
-Then, to perform clustering, use the `clusterRows` function. Depending 
-on its parameters, it will perform a different algorithm. Here, we'll 
-perform a hierarchical clustering.
+The `cluster` function's parameters allow to choose which algorithm to use, 
+whether we want to cluster on samples or taxa (amongst other things). Here 
+for example, we cluster using the hierarchical clustering and on the samples 
+(`MARGIN` parameter).
 
 ```{r bluster_sample_hclust1}
 # Simple use of the hierarchical clustering which sets the cut height to
 # half the dendrogram height.
-tse <- cluster(tse, MARGIN = "samples", HclustParam())
+tse <- cluster(tse, assay.type = "relabundance", MARGIN = "samples", HclustParam())
 
-# Check the result contained in the clusters part of colData. To change the 
+# Check the result contained in the clusters part of colData. To change the
 # name clusters, you can change the parameter clust.col
 colData(tse)$clusters
 ```
@@ -79,36 +74,7 @@ plotReducedDim(tse, "MDS", colour_by = "clusters")
 To change the clustering parameters, simply change the parameters in 
 `HclustParam` function. To see the different parameters, check the 
 [HclustParam documentation](https://rdrr.io/github/LTLA/bluster/man/HclustParam-class.html).
-
-```{r bluster_sample_hclust2}
-# More complex use of the algorithm with another method and cut height.
-# We also add the full parameter to get the full hierarchical clustering
-# information to plot the dendrogram
-tse <- cluster(tse, HclustParam(method = "complete"), full = TRUE)
-
-
-# Information is stored in the metadata under the name "clusters". That
-# can be changed using the parameter "name"
-hclust_data <- metadata(tseb)$clusters$hclust
-
-# Get the dendrogram object
-dendro <- as.dendrogram(hclust_data)
-
-# Plot the dendrogram
-plot(dendro)
-```
-
-Alternatively, it's also possible to use the `clusterCells` function from 
-the *scran* package.This function uses directly the tree as a parameter 
-instead of the assay itself. Here, we will use the PAM algorithm.
-
-```{r scran_sample_clust}
-library(scran)
-pam.out <- clusterCells(tse,
-  assay.type = "relabundance",
-  BLUSPARAM = PamParam(centers = 5)
-)
-```
+Check dedicated part to see other examples.
 
 ### Taxa clustering
 
@@ -142,8 +108,7 @@ library(mia)
 library(vegan)
 
 # Load experimental data
-data(peerj13075)
-(tse <- peerj13075)
+tse <- peerj13075
 ```
 
 Hierarchical clustering requires 2 steps. In the fist step, dissimilarities are 
@@ -157,19 +122,21 @@ library(cobiclust)
 
 # Apply transformation
 tse <- transformCounts(tse, method = "relabundance")
-# Get the assay
-assay <- assay(tse, "relabundance")
-# Transpose assay --> samples are now in rows --> we are clustering samples
-assay <- t(assay)
 
-# Calculate distances
-diss <- vegdist(assay, method = "bray")
+# Do the clustering
+tse <- cluster(tse, 
+               assay.type = "relabundance",
+               MARGIN = "samples",
+               HclustParam(method = "complete",
+                           dist.fun = vegdist,
+                           metric = "bray"),
+               full = TRUE)
 
-# Perform hierarchical clustering
-hc <- hclust(diss, method = "complete")
 
-# To visualize, convert hclust object into dendrogram object
-dendro <- as.dendrogram(hc)
+hclust_data <- metadata(tse)$clusters$hclust
+
+# Get the dendrogram object
+dendro <- as.dendrogram(hclust_data)
 
 # Plot dendrogram
 plot(dendro)
@@ -181,11 +148,10 @@ we can see from the dendrogram, clusters are not clear. Algorithms are
 available to identify the optimal number of clusters.
 
 ```{r hclust3}
+diss <- metadata(tse)$clusters$dist
 # Determine the optimal number of clusters
-res <- NbClust(
-  diss = diss, distance = NULL, method = "ward.D2",
-  index = "silhouette"
-)
+res <- NbClust(diss = diss, distance = NULL, method = "ward.D2",
+               index = "silhouette")
 
 res$Best.nc
 ```
@@ -196,9 +162,9 @@ Based on the result, let's divide observations into 15 clusters.
 library(dendextend)
 
 # Find clusters
-cutree(hc, k = 15)
+cutree(hclust_data, k = 15)
 
-# Making colors for 6 clusters
+# Making colors for 15 clusters
 col_val_map <- randomcoloR::distinctColorPalette(15) %>%
   as.list() %>%
   setNames(paste0("clust_", seq(15)))
@@ -404,30 +370,22 @@ euclidean_dmm_plot <- ggplot(
 euclidean_dmm_plot
 ```
 
-## Community Detection
+## Graph-based clustering
 
 Another approach for discovering communities within the samples of the
 data, is to run community detection algorithms after building a
 graph. The following demonstration builds a graph based on the k
 nearest-neighbors and performs the community detection on the fly.
 
-_`bluster`_ [@R-bluster] package offers several clustering methods,
-among which graph-based are present, enabling the community detection
-task.
-
-Installing package:
-
-```{r}
-library(bluster)
-```
+Here, we will be using the `cluster` function with a graph-based clustering 
+function, enabling the community detection task.
 
 The algorithm used is "short random walks" [@Pons2006]. Graph is
 constructed using different k values (the number of nearest neighbors
 to consider during graph construction) using the robust centered log
 ratio (rclr) assay data. Then plotting the communities using UMAP
-[@McInnes2018] ordination as a visual exploration aid.  In the
-following demonstration we use the `enterotype` dataset from the
-[@R-mia] package.
+[@McInnes2018] ordination as a visual exploration aid. Let us cluster the 
+`enterotype` dataset.
 
 ```{r, message=FALSE, warning=FALSE}
 library(bluster)
@@ -443,11 +401,12 @@ tse <- runUMAP(tse, name = "UMAP", assay.type = "rclr")
 
 k <- c(2, 3, 5, 10)
 ClustAndPlot <- function(x) {
-  # Creating the graph and running the short random walks algorithm
-  graph_clusters <- clusterRows(t(assays(tse)$rclr), NNGraphParam(k = x))
-
-  # Results of the clustering as a color for each sample
-  plotUMAP(tse, colour_by = I(graph_clusters)) +
+  # Adding the clustering data from the short random walks algorithm to the TSE
+    tse <- cluster(tse, assay.type = "rclr", 
+                   MARGIN = "col", NNGraphParam(k = x))
+    
+    # Results of the clustering as a color for each sample
+    plotUMAP(tse, colour_by = I(colData(tse)$clusters)) +
     labs(title = paste0("k = ", x))
 }
 
@@ -455,7 +414,7 @@ ClustAndPlot <- function(x) {
 plots <- lapply(k, ClustAndPlot)
 
 # Displaying plots in a grid
-(plots[[1]] + plots[[2]]) / (plots[[3]] + plots[[4]])
+plots[[1]] + plots[[2]] + plots[[3]] + plots[[4]] + plot_layout(ncol = 4)
 ```
 
 Similarly, the _`bluster`_ [@R-bluster] package offers clustering
@@ -469,13 +428,14 @@ about Silhouettes read [@Rousseeuw1987].
 ```{r, message=FALSE, warning=FALSE}
 ClustDiagPlot <- function(x) {
   # Getting the clustering results
-  graph_clusters <- clusterRows(t(assays(tse)$rclr), NNGraphParam(k = x))
+    tse <- cluster(tse, assay.type = "rclr", 
+                   MARGIN = "col", NNGraphParam(k = x))
 
-  # Computing the diagnostic info
-  sil <- approxSilhouette(t(assays(tse)$rclr), graph_clusters)
+    # Computing the diagnostic info
+    sil <- approxSilhouette(t(assays(tse)$rclr), colData(tse)$clusters)
 
-  # Plotting as a boxlpot to observe cluster separation
-  boxplot(split(sil$width, graph_clusters), main = paste0("k = ", x))
+    # Plotting as a boxlpot to observe cluster separation
+    boxplot(split(sil$width, colData(tse)$clusters), main = paste0("k = ", x))
 }
 # Applying the function for different k values
 res <- lapply(k, ClustDiagPlot)
@@ -504,7 +464,7 @@ instance. For checking purposes, also scatter plot might be valid
 choice.
 
 Check more ideas for heatmaps from chapters \@ref(viz-chapter) and
-\@ref(microbiome-community.
+\@ref(microbiome-community).
 
 ### Taxa vs samples
 
