@@ -545,7 +545,7 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 ```
 ##       pi theta
 ## 1 0.5385 20.60
-## 2 0.4615 15.27
+## 2 0.4615 15.28
 ```
 
 
@@ -559,12 +559,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.092e-17
-## CC1     1.000e+00 3.935e-22
-## SV1     1.000e+00 2.086e-12
-## M31Fcsw 7.255e-26 1.000e+00
-## M11Fcsw 1.043e-16 1.000e+00
-## M31Plmr 9.946e-14 1.000e+00
+## CL3     1.000e+00 5.004e-17
+## CC1     1.000e+00 3.799e-22
+## SV1     1.000e+00 2.021e-12
+## M31Fcsw 7.309e-26 1.000e+00
+## M11Fcsw 1.061e-16 1.000e+00
+## M31Plmr 9.991e-14 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -575,13 +575,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30435 0.1354504
-## Phylum:Euryarchaeota  0.23144 0.1468489
-## Phylum:Actinobacteria 1.21041 1.0595602
-## Phylum:Spirochaetes   0.21412 0.1318190
-## Phylum:MVP-15         0.02991 0.0007606
-## Phylum:Proteobacteria 6.84332 1.8142158
+##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354653
+## Phylum:Euryarchaeota  0.2314 0.1468632
+## Phylum:Actinobacteria 1.2105 1.0600542
+## Phylum:Spirochaetes   0.2141 0.1318414
+## Phylum:MVP-15         0.0299 0.0007646
+## Phylum:Proteobacteria 6.8425 1.8151526
 ```
 Get the assignment probabilities
 
