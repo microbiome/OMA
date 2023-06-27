@@ -12,7 +12,7 @@ tse <- GlobalPatterns
 ## -----------------------------------------------------------------------------
 library(miaViz)
 # Computing relative abundance
-tse <- relAbundanceCounts(tse)
+tse <- transformCounts(tse, assay.type = "counts", method = "relabundance")
 
 # Getting top taxa on a Phylum level
 tse_phylum <- agglomerateByRank(tse, rank ="Phylum", onRankOnly=TRUE)
