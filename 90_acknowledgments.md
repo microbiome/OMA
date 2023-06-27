@@ -1,5 +1,5 @@
 
-# Acknowledgments {#acknowledgments}
+# Contributors {-}
 
 <script>
 document.addEventListener("click", function (event) {
@@ -36,6 +36,50 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
+
+### *Chandler Ross, PhD* {-}
+
+Chandler Ross is a PhD researcher at Turku Data science group research team.His research interest is mainly into Eco-Evolutionary Dynamics, Statistical Modelling and Time Series.
+
+### *Chouaib Benchraka, Msc* {-}
+
+Chouaib Benchraka is a research assistant at Turku data science research group.He is interested working with Machine Learning and Data Science researches.
+
+### *Felix Ernst, PhD* {-}
+
+Felic Ernst is among the developers who participated in the development of [miaverse](https://microbiome.github.io) which is open source project developing R/Bioc methods, benchmarking data, and educational material for microbiome research based on the SummarizedExperiment class and its derivatives.
+
+### *Giulio Benedetti, Research Assistant* {-}
+
+Guilio Benedetti is a research assistant at Turku data science research group. His research  interest  is mostly related to  Data Science.
+
+### *Henrik Eckermann, PhD* {-}
+
+Henerik Eckermann is PhD researcher at the research group Turku data science. His research interest is in Human microbiome bioinformatics.
+
+### *Leo Lahti, Professor* {-}
+
+Leo Lahti is the group leader for the research team at Turku data science and professor in Data Science in University of Turku, Finland. His research team focuses on computational analysis and modeling of complex natural and social systems. Lahti obtained doctoral degree (DSc) in statistical machine learning and bioinformatics from Aalto University in Finland (2010), developing probabilistic data integration methods for high-throughput life science data.
+
+### *Shigdel Rajesh, PhD* {-}
+
+Shigdel Rajesh was a visiting scholar to Turku data science group.His research interest is mainly related to bioinformatics, microbiome data analysis. 
+
+### *Sudarshan Shetty, PhD* {-}
+
+Sudarshan Shetty is one of the key developers in the [miaverse](https://microbiome.github.io) R/Bioconductor package for microbiome bioinformatics based on (Tree)SummerizedExperiment. 
+
+### *Tuomas Borman, PhD* {-}
+
+Tuomas Borman is a PhD researcher and one of the key developers of [miaverse](https://microbiome.github.io). He participated in setting up the base ecosystem of data containers, packages, and tutorials with other team members.
+
+### *Yağmur Şimşek, *{-}
+
+Yağmur Şimşek was a research assistant at the Turku data science reseach group when she contributed to this work.
+
+
+### Acknowledgments {-}
+
 This work would not have been possible without the countless
 contributions and interactions with other researchers, developers, and
 users. We express our gratitude to the entire Bioconductor community
@@ -56,7 +100,7 @@ and Machine Learning Techniques for Human Microbiome Studies
 
 The framework is based on the _TreeSummarizedExperiment_ data
 container created by Ruizhu Huang and others
-[@R-TreeSummarizedExperiment], and on the MultiAssayExperiment by
+[@R_TreeSummarizedExperiment], and on the MultiAssayExperiment by
 Marcel Ramos et al. [@Ramos2017]. The idea of using these containers
 as a basis for microbiome data science was initially advanced by the
 groundwork of Domenick Braccia, Héctor Corrada Bravo and others, and

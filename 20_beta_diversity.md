@@ -323,9 +323,12 @@ each covariate affects.
 
 ```r
 # Load libraryd packages
-library("vegan")
-library("stringr")
-library("knitr")
+
+library(vegan)
+library(stringr)
+library(knitr)
+
+
 # Load data
 data(enterotype, package="mia")
 # Covariates that are being analyzed
@@ -417,8 +420,9 @@ Residual & 30 & 2.8757 & NA & NA & 3.991 & 0.7205 & NA\\
 
 ```r
 # Load ggord for plotting
-library("ggord")
-library("ggplot2")
+library(ggord)
+library(ggplot2)
+
 
 # Since na.exclude was used, if there were rows missing information, they were 
 # dropped off. Subset coldata so that it matches with rda.

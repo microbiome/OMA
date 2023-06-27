@@ -15,7 +15,7 @@ always_allow_html: yes
 date: "**Authors:** Leo Lahti [aut], Tuomas Borman [aut, cre], Henrik Eckermann [ctb], Sudarshan Shetty [aut], Felix GM Ernst [aut]<br/>
   **Version:** 0.98.14<br/>
   **Modified:** 2023-04-10<br/>
-  **Compiled:** 2023-06-26<br/>
+  **Compiled:** 2023-06-27<br/>
   **Environment:** R version 4.3.0 (2023-04-21), Bioconductor 3.17<br/>
   **License:** CC BY-NC-SA 3.0 US<br/>
   **Copyright:** <br/>
@@ -30,11 +30,10 @@ url: "https://github.com/microbiome/OMA"
 # Welcome {-}
 
 
-<a href="https://bioconductor.org"><img src="https://github.com/Bioconductor/BiocStickers/raw/master/Bioconductor/Bioconductor-serial.gif" width="200" alt="Bioconductor Sticker" align="right" style="margin: 0 1em 0 1em" /></a>
 
 
 You are reading the online book, [**Orchestrating Microbiome Analysis
-with R and Bioconductor**](microbiome.github.io/OMA) [@OMA], where we
+with R and Bioconductor**](https://microbiome.github.io/OMA/) [@OMA], where we
 walk through common strategies and workflows in microbiome data
 science.
 

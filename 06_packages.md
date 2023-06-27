@@ -108,10 +108,10 @@ or online channels.
 
 ### mia family of methods
 
-- [mia](microbiome.github.io/mia): Microbiome analysis tools [@R-mia]
-- [miaViz](microbiome.github.io/miaViz): Microbiome analysis specific visualization [@Ernst2022]
-- [miaSim](microbiome.github.io/miaSim): Microbiome data simulations [@Simsek2021]
-- [miaTime](microbiome.github.io/miaTime): Microbiome time series analysis [@Lahti2021]
+- [mia](https://microbiome.github.io/mia/): Microbiome analysis tools [@R_mia]
+- [miaViz](https://microbiome.github.io/miaViz/): Microbiome analysis specific visualization [@Ernst2022]
+- [miaSim](https://microbiome.github.io/miaSim/): Microbiome data simulations [@Simsek2021]
+- [miaTime](https://microbiome.github.io/miaTime/): Microbiome time series analysis [@Lahti2021]
 
 
 ### Tree-based methods {#sub-tree-methods}

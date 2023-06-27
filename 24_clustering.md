@@ -523,8 +523,8 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.14   901.2 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.17   717.0  936.4 1025
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
 ## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
 ## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
 ## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
@@ -652,7 +652,7 @@ data, is to run community detection algorithms after building a
 graph. The following demonstration builds a graph based on the k
 nearest-neighbors and performs the community detection on the fly.
 
-_`bluster`_ [@R-bluster] package offers several clustering methods,
+_`bluster`_ [@R_bluster] package offers several clustering methods,
 among which graph-based are present, enabling the community detection
 task.
 
@@ -669,7 +669,7 @@ to consider during graph construction) using the robust centered log
 ratio (rclr) assay data. Then plotting the communities using UMAP
 [@McInnes2018] ordination as a visual exploration aid.  In the
 following demonstration we use the `enterotype` dataset from the
-[@R-mia] package.
+[@R_mia] package.
 
 
 ```r
@@ -703,7 +703,7 @@ plots <- lapply(k, ClustAndPlot)
 
 ![](24_clustering_files/figure-latex/unnamed-chunk-14-1.pdf)<!-- --> 
 
-Similarly, the _`bluster`_ [@R-bluster] package offers clustering
+Similarly, the _`bluster`_ [@R_bluster] package offers clustering
 diagnostics that can be used for judging the clustering quality (see
 [Assorted clustering
 diagnostics](http://bioconductor.org/packages/release/bioc/vignettes/bluster/inst/doc/diagnostics.html)).

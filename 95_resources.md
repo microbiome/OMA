@@ -3,24 +3,26 @@
 
 ## Data containers
 
-### Resources for TreeSummarizedExperiment
+### Data container documentation
 
- * SingleCellExperiment [@R-SingleCellExperiment]
+ * SingleCellExperiment [@R_SingleCellExperiment]
    + [Online tutorial](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html)
    + [Project page](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html)
- * SummarizedExperiment [@R-SummarizedExperiment]
+ * SummarizedExperiment [@R_SummarizedExperiment]
    + [Online tutorial](https://bioconductor.org/packages/release/bioc/vignettes/SummarizedExperiment/inst/doc/SummarizedExperiment.html)
    + [Project page](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)
- * TreeSummarizedExperiment [@R-TreeSummarizedExperiment]
+ * TreeSummarizedExperiment [@R_TreeSummarizedExperiment]
    + [Online tutorial](https://bioconductor.org/packages/release/bioc/vignettes/TreeSummarizedExperiment/inst/doc/Introduction_to_treeSummarizedExperiment.html)
    + [Project page](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html)
    + Publication: [@Huang2021]
-   
+* MultiAssayExperiment [@Ramos2017]
+   + [Online tutorial](https://www.bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html)
+   + [Project page](https://bioconductor.org/packages/release/bioc/html/MultiAssayExperiment.html)   
 
 ### Other relevant containers
 
 * [DataFrame](https://rdrr.io/bioc/S4Vectors/man/DataFrame-class.html) which behaves similarly to `data.frame`, yet efficient and fast when used with large datasets.
-* [DNAString](https://rdrr.io/bioc/Biostrings/man/DNAString-class.html) along with `DNAStringSet`,`RNAString` and `RNAStringSet`  efficient storage and handling of long biological sequences are offered within the Biostrings package [@R-Biostrings].
+* [DNAString](https://rdrr.io/bioc/Biostrings/man/DNAString-class.html) along with `DNAStringSet`,`RNAString` and `RNAStringSet`  efficient storage and handling of long biological sequences are offered within the Biostrings package [@R_Biostrings].
 * GenomicRanges ([@GenomicRanges2013]) offers an efficient representation and manipulation of genomic annotations and alignments, see e.g. `GRanges` and `GRangesList` at [An Introduction to the GenomicRangesPackage](https://bioconductor.org/packages/release/bioc/vignettes/GenomicRanges/inst/doc/GenomicRangesIntroduction.html).
 
 [NGS Analysis Basics](http://girke.bioinformatics.ucr.edu/GEN242/tutorials/rsequences/rsequences/) provides a walk-through of the above-mentioned features with detailed examples.

@@ -52,13 +52,13 @@ vignettes and other materials.
 
 ## Data containers
 
-`SummarizedExperiment` (`SE`) [@R-SummarizedExperiment] is a generic and highly optimized container for complex data
+`SummarizedExperiment` (`SE`) [@R_SummarizedExperiment] is a generic and highly optimized container for complex data
 structures. It has become a common choice for analysing various types
 of biomedical profiling data, such as RNAseq, ChIp-Seq, microarrays,
 flow cytometry, proteomics, and single-cell
 sequencing.
 
-[`TreeSummarizedExperiment`] (`TreeSE`) [@R-TreeSummarizedExperiment] was developed as an extension to incorporate hierarchical
+[`TreeSummarizedExperiment`] (`TreeSE`) [@R_TreeSummarizedExperiment] was developed as an extension to incorporate hierarchical
 information (such as phylogenetic trees and sample hierarchies) and
 reference sequences.
 
@@ -407,7 +407,7 @@ dim(altExp(tse[,1:10],"Phylum"))
 ```
 
 For more details of altExp have a look at the [Intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html) of the 
-`SingleCellExperiment` package [@R-SingleCellExperiment].
+`SingleCellExperiment` package [@R_SingleCellExperiment].
 
 
 
@@ -624,10 +624,7 @@ Load required packages.
 ```r
 library(mia)
 library(ggplot2)
-
-library("BiocManager")
-library("Biostrings")
-
+library(BiocManager)
 library(Biostrings)
 ```
 

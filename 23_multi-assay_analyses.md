@@ -228,7 +228,7 @@ genera and metabolite concentrations.
 
 
 ```r
-library("ComplexHeatmap") 
+library(ComplexHeatmap) 
 
 # Create a heatmap and store it
 plot <- Heatmap(correlations$cor,

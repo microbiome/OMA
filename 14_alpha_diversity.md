@@ -99,7 +99,7 @@ by species abundances.
 
 Alpha diversity can be estimated with wrapper functions that interact
 with other packages implementing the calculation, such as _`vegan`_
-[@R-vegan].
+[@R_vegan].
 
 
 ### Richness {#richness}
@@ -121,7 +121,7 @@ head(colData(tse)$observed)
 ##    6964    7679    5729    2667    2574    3214
 ```
 This allows access to the values to be analyzed directly from the `colData`, for example
-by plotting them using `plotColData` from the _`scater`_ package [@R-scater].
+by plotting them using `plotColData` from the _`scater`_ package [@R_scater].
 
 
 ```r
@@ -223,7 +223,7 @@ plots[[1]] + plots[[2]] +
 ![](14_alpha_diversity_files/figure-latex/phylo-div-2-1.pdf)<!-- --> 
  
 Alternatively, the phylogenetic diversity can be calculated by `mia::estimateDiversity`. This is a faster re-implementation of   
-the widely used function in _`picante`_ [@R-picante, @Kembel2010].  
+the widely used function in _`picante`_ [@R_picante, @Kembel2010].  
 
 Load `picante` R package and get the `phylo` stored in `rowTree`.
 
