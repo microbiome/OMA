@@ -135,11 +135,11 @@ assay(tse, "counts")[1:5,1:7]
 ```
 
 To illustrate the use of multiple assays, the relative abundance data can be 
-calculated and stored along the original count data using `relAbundanceCounts`.
+calculated and stored along the original count data using `transformCounts`.
 
 
 ```r
-tse <- relAbundanceCounts(tse)
+tse <- transformCounts(tse, assay.type = "counts", method = "relabundance")
 assays(tse)
 ```
 
