@@ -26,10 +26,7 @@ to do when using this package is to load it, and transform the data if
 necessary, depending on your analysis goals.
 
 ```{r load_bluster}
-# Install dependencies (to remove in the next bioc release)
-devtools::install_github("LTLA/bluster") 
-
-# Load dependencies
+# Load dependencies (remove github dependency in the next bioc release)
 library(bluster)
 
 # Apply transformation
@@ -150,20 +147,20 @@ res <- NbClust(diss = diss, distance = NULL, method = "ward.D2",
 res$Best.nc
 ```
 
-Based on the result, let's divide observations into 15 clusters.
+Based on the result, let's divide observations into 2 clusters.
 
 ```{r hclust4}
 library(dendextend)
 
 # Find clusters
-cutree(hclust_data, k = 15)
+cutree(hclust_data, k = 2)
 
 # Making colors for 15 clusters
-col_val_map <- randomcoloR::distinctColorPalette(15) %>%
+col_val_map <- randomcoloR::distinctColorPalette(2) %>%
   as.list() %>%
-  setNames(paste0("clust_", seq(15)))
+  setNames(paste0("clust_", seq(2)))
 
-dend <- color_branches(dendro, k = 15, col = unlist(col_val_map))
+dend <- color_branches(dendro, k = 2, col = unlist(col_val_map))
 labels(dend) <- NULL
 plot(dend)
 ```
@@ -196,7 +193,7 @@ diss <- as.matrix(diss)
 fviz_nbclust(diss, kmeans, method = "silhouette")
 ```
 
-Based on the result of silhouette analysis, we choose 3 to be the number of clusters
+Based on the result of silhouette analysis, we choose 2 to be the number of clusters
 in k-means clustering.
 
 ```{r kmeans2}
@@ -205,7 +202,7 @@ library(scater)
 # The first step is random, add seed for reproducibility
 set.seed(15463)
 # Perform k-means clustering with 3 clusters
-km <- kmeans(diss, 3, nstart = 25)
+km <- kmeans(diss, 2, nstart = 25)
 # Add the result to colData
 colData(tse)$clusters <- as.factor(km$cluster)
 
@@ -234,31 +231,25 @@ Let's cluster the data with DMM clustering.
 # Runs model and calculates the most likely number of clusters from 1 to 7.
 # Since this is a large dataset it takes long computational time.
 # For this reason we use only a subset of the data; agglomerated by Phylum as a rank.
-tse <- enterotype
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
 tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
 ```
 
 ```{r dmm2}
-tse_dmn <- mia::runDMN(tse, name = "DMN", k = 1:7)
+tse_dmm <- cluster(tse, name = "DMM", DmmParam(k = 1:7, type = "laplace"), MARGIN = "samples", full = TRUE)
 ```
 
 ```{r}
-# It is stored in metadata
-tse_dmn
+# The dmm info is stored in the metadata (the label is the one indicated in the name parameter)
+tse_dmm
 ```
 
-Return information on metadata that the object contains.
+The following operation returns a list of DMN objects for a closer investigation.
 
 ```{r}
-names(metadata(tse_dmn))
+metadata(tse_dmm)$DMM$dmm
 ```
-
-This returns a list of DMN objects for a closer investigation.
-
-```{r}
-getDMN(tse_dmn)
-```
-
 
 Show Laplace approximation (model evidence) for each model of the k models.
 
@@ -267,10 +258,11 @@ library(miaViz)
 plotDMNFit(tse_dmn, type = "laplace")
 ```
 
-Return the model that has the best fit.
+Get the model that has the best fit.
 
 ```{r}
-getBestDMNFit(tse_dmn, type = "laplace")
+bestFit <- metadata(tse_dmm)$DMM$dmm[[metadata(tse_dmm)$DMM$best]]
+bestFit
 ```
 
 ### PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors
@@ -279,7 +271,7 @@ Group samples and return DMNGroup object that contains a summary.
 Patient status is used for grouping.
 
 ```{r}
-dmn_group <- calculateDMNgroup(tse_dmn,
+dmn_group <- calculateDMNgroup(tse_dmm,
   variable = "SampleType", assay.type = "counts",
   k = 2, seed = .Machine$integer.max
 )
@@ -291,7 +283,7 @@ Mixture weights  (rough measure of the cluster size).
 
 
 ```{r}
-DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
+DirichletMultinomial::mixturewt(bestFit)
 ```
 
 
@@ -299,25 +291,14 @@ Samples-cluster assignment probabilities / how probable it is that sample belong
 to each cluster
 
 ```{r}
-head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
+prob <- metadata(tse_dmm)$DMM$prob
+head(prob)
 ```
 
 Contribution of each taxa to each component
 
 ```{r}
-head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
-```
-Get the assignment probabilities
-
-
-```{r}
-prob <- DirichletMultinomial::mixture(getBestDMNFit(tse_dmn))
-# Add column names
-colnames(prob) <- c("comp1", "comp2")
-
-# For each row, finds column that has the highest value. Then extract the column
-# names of highest values.
-vec <- colnames(prob)[max.col(prob, ties.method = "first")]
+head(DirichletMultinomial::fitted(bestFit))
 ```
 
 Computing the euclidean PCoA and storing it as a data frame
@@ -343,7 +324,7 @@ euclidean_pcoa_df <- data.frame(
 ```{r}
 # Creates a data frame that contains principal coordinates and DMM information
 euclidean_dmm_pcoa_df <- cbind(euclidean_pcoa_df,
-  dmm_component = vec
+  dmm_component = colData(tse_dmm)$clusters
 )
 # Creates a plot
 euclidean_dmm_plot <- ggplot(
