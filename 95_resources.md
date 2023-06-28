@@ -39,7 +39,7 @@ each other.
 `assays` : This slot is similar to `otu_table` in `phyloseq`. In a
                `SummarizedExperiment` object multiple assays, raw
                counts, transformed counts can be stored. See also
-               [@Ramos2017]
+               [-@Ramos2017]
                for storing data from multiple `experiments` such as
                RNASeq, Proteomics, etc.  `rowData` : This slot is
                similar to `tax_table` in `phyloseq` to store taxonomic
@@ -80,26 +80,17 @@ The (Tree)SummarizedExperiment objects can be converted into the alternative phy
 
 ## R programming resources
 
+### Base R and RStudio
+
 If you are new to R, you could try [swirl](https://swirlstats.com/)
 for a kickstart to R programming. Further support resources are
 available through the Bioconductor
 project [@Huber2015].
 
- * R programming basics: [Base R](https://www.rstudio.com/wp-content/uploads/2016/10/r-cheat-sheet-3.pdf)
- * Basics of R programming: [Base R](https://raw.githubusercontent.com/rstudio/cheatsheets/master/base-r.pdf)
- * [R cheat sheets](https://www.rstudio.com/resources/cheatsheets/)
- * R visualization with [ggplot2](https://www.rstudio.com/wp-content/uploads/2016/11/ggplot2-cheatsheet-2.1.pdf) 
+ * [base R and RStudio cheatsheets](https://geomoer.github.io/moer-base-r/cheatsheet.html)
+ * [Package-specific cheatsheets](https://www.rstudio.com/resources/cheatsheets/)
+ * [visualization with ggplot2](https://ggplot2.tidyverse.org/) 
  * [R graphics cookbook](http://www.cookbook-r.com/Graphs/)
-
-Rmarkdown
-
-* Rmarkdown tips [@Xie2020]
-
-
-RStudio
-
-* [RStudio cheat sheet](https://www.rstudio.com/wp-content/uploads/2016/01/rstudio-IDE-cheatsheet.pdf) 
-
 
 
 ### Bioconductor Classes {#bioc_intro}
