@@ -306,18 +306,14 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformCo
 2. Melt the data for visualization purposes (meltAssay)
 
 
-### Transformations
+### Assay transformation
 
 1. Transform abundance data with relative abundance and add a relative abundance assay (see [data-transformation](https://microbiome.github.io/OMA/taxonomic-information.html#data-transformation))
 2. Transform abundance data with clr transformation and add a new assay
 3. List the available assays by name
 4. Pick one of the assays and show a subset of it
 5. Subset the entire TreeSE data object, and check how this affects individual (transformed) assays
-
-Optional:
-
-6. If the data has phylogenetic tree, perform the phILR transformation
-
+6. **Extra**: If the data has phylogenetic tree, perform the phILR transformation
 
 
 ## Abundance tables
@@ -348,31 +344,81 @@ Useful functions: [taxonomyRanks](https://microbiome.github.io/mia/reference/tax
    complete list with `altExps`
 5. Retrieve the data agglomerated by genus from the corresponding `altExp`.
    As for assays, you can access the desired altExp by name or index.
-6. **Extra**: Split the data based on other features (splitOn)
+6. **Extra**: Split the data based on other features (`splitOn`)
 
 
-## Community diversity
+## Community (alpha) diversity
 
-### Alpha diversity basics
+### Estimation
 
-1. Calculate alpha diversity indices
-2. Test if data agglomeration to higher taxonomic ranks affects the indices
-3. Look for differences in alpha diversity between groups or correlation with a continuous variable
+1. Import the mia package, load GlobalPatterns with `data` and store it into a
+   variable named `tse`.
+2. Calculate multiple alpha diversity indices with `estimateDiversity` without
+   any additional arguments.
+3. Check the names of colData with `names`. Can you identify which columns
+   contain the alpha diversity indices?
+4. **Extra**: Agglomerate the TreeSE by phylum and compare the mean Shannon
+   diversity of the original experiment with its agglomerated version. You can
+   use `agglomerateByRank` to perform agglomeration and `mean` to calculate the
+   mean values of the respective columns in colData.
 
-Useful functions: estimateDiversity, colSums, agglomerateByRank, kruskal.test, cor
+### Visualization 
 
+1. Import the mia and scater packages, load GlobalPatterns with `data` and store
+   it into a variable named `tse`.
+2. Calculate Shannon diversity index and Faith's phylogenetic diversity with
+   `estimateDiversity` and the appropriate arguments for `index`.
+3. Make a boxplot of Shannon diversity on the y axis and sample type on the x
+   axis with `plotColData`.
+4. Repeat the previous point with Faith's phylogenetic diversity and compare the
+   sample distributions of the two alpha diversity indices. How greatly do they
+   differ?
+5. **Extra**: Make a scatterplot of Shannon diversity on the y axis and Faith's
+   phylogenetic diversity on the x axis with `plotColData`. Colour the points
+   by sample type with the appropriate optional argument.
+   
+### Correlation
 
-### Alpha diversity extra
+1. Import the mia and scater packages, load peerj13075 with `data` and store it
+   into a variable named `tse`.
+2. Calculate coverage and Shannon diversity index with `estimateDiversity` and
+    the appropriate arguments for `index`.
+4. Test the correlation between the two indices with `cor.test`. Remember that
+   colData parameters are accessible with `tse$param_name`. Use Kendall tau
+   coefficients as `method` to measure correlation. Is the correlation
+   weak or strong, significant or not?
+5. Make a scatterplot of Shannon diversity index on the y axis and coverage on
+   the x axis. You can do that with `plotColData`. How do the two indices
+   relate to one another?
+6. **Extra**: Compute the library size of the samples by applying `colSums` to
+   the counts assay of the TreeSE, and test the correlation of library size with
+   Shannon diversity or coverage. Which index is more correlated with library size?
+   
+In this example, we inspected the correlation between two related variables,
+also known as multicollinearity, and checked the correlation to library size,
+which is part of quality control. However, the correlation between alpha diversity
+and other numerical data about samples, such as participant's age and weight, also
+represent an important analysis in several studies.
 
-1. Estimate Shannon diversity for the data
-2. Try also another diversity index and compare the results with a scatterplot
-3. Compare Shannon diversity between groups (boxplot)
-4. Is diversity significantly different between vegan and mixed diet?
-5. Calculate and visualize library size, compare with diversity
+### Differences between groups
 
-Useful functions: estimateDiversity, colSums, geom_point, geom_boxplot
-
-
+1. Import the mia package, load peerj13075 with `data` and store it into a
+   variable named `tse`.
+2. Calculate the Gini-Simpson diversity with `estimateDiversity` and the
+   appropriate argument for `index`. Set `name` to `simpson`. You will use this
+   name to access the diversity index from colData.
+3. Inspect the Diet column in the colData. Determine how the samples are grouped
+   in terms of diet. You can see the number of unique elements in a column with
+   `unique`.
+4. Test differences in Gini-Simpson diversity between different diets with
+   `kruskal.test`. Remember that colData parameters are accessible with
+   `tse$param_name`.
+5. Is diversity significantly different between vegan and mixed diet? To
+   visualize that, make a boxplot of Gini-Simpson diversity on the y axis and
+   diet on the x axis with `plotColData`.
+6. **Extra**: Repeat points 3 through 5, this time for age groups. Make sure
+   that you are using an appropriate statistical test for the number of groups
+   and distribution.
 
 
 ## Community similarity
