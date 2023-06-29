@@ -164,8 +164,65 @@ assay(altExp(tse, "Family"), "counts")[1:5,1:7]
 ```
 
 `altExpNames` now consists of `Family` level data. This can be extended to use 
-any taxonomic level listed in `mia::taxonomyRanks(tse)`.   
+any taxonomic level listed in `mia::taxonomyRanks(tse)`.
 
+### Taxa clustering {#taxa-clustering}
+Another way to agglomerate the data is to do clustering on the taxa. To do so,
+we usually start by doing a compositionality aware transformation such as CLR, 
+followed by the application of a standard clustering method. 
+
+Here is an example that does a CLR transformation followed by the hierarchical
+clustering algorithm. 
+
+First, we import the library `bluster` that simplifies the clustering. We
+
+```{r bluster_dependence}
+library(bluster)
+```
+
+Then we do the CLR transform followed by the clustering.
+
+```{r taxa_clustering}
+# The result of the CLR transform is stored in the assay clr
+tse <- transformCounts(tse, assay.type = "counts", method = "clr", 
+                       pseudocount = 1, MARGIN = "features")
+
+# We do the clustering on the features of the clr assay 
+tse <- cluster(tse, assay.type = "clr", HclustParam(method = "ward.D2"), 
+               MARGIN = "features", clust.col = "hclust")
+```
+
+The result is stored in the `rowData` column specified with the `clust.col` 
+parameter.
+
+```{r taxa_clustering_result}
+# Checking the clusters
+clusters <- rowData(tse)$hclust
+head(clusters, 10)
+```
+
+To better visualize the results and the distribution of the clusters, we can 
+plot the histogram of the clusters.
+
+```{r taxa_clustering_histogram}
+library(ggplot2)
+ggplot(data.frame(clusters = clusters), aes(x = clusters)) + 
+    geom_histogram(stat = "count") + 
+    labs(title = "Histogram of clusters occurrence amongst the features",
+       x = "Clusters", y = "Feature count") +
+    theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+It's also possible to merge the rows by cluster.
+
+```{r taxa_clustering_row_merge}
+# Merging the rows by cluster
+tse_merged <- mergeRows(tse, clusters)
+tse_merged
+```
+We can note that it worked as planned since there were 6 clusters and there are
+now 6 rows.
 
 ## Data transformation
 
