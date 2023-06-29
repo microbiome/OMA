@@ -56,7 +56,7 @@ tse
 
 
 ## -----------------------------------------------------------------------------
-tse <- relAbundanceCounts(tse)
+tse <- transformCounts(tse, assay.type = "counts", method = "relabundance")
 altExp(tse, "Family") <- agglomerateByRank(tse, rank = "Family",
                                            agglomerateTree = TRUE)
 altExp(tse, "Family")
