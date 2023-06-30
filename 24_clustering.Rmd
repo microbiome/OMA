@@ -12,10 +12,14 @@ tse <- enterotype
 ```
 
 Clustering is an unsupervised machine learning technique. The idea of
-it is to find clusters from the data. A cluster is a group of
-features/samples that share pattern.  For example, with clustering, we
+it is to find clusters in the data. A cluster is a group of
+features/samples that share a pattern.  For example, with clustering, we
 can find group of samples that share similar community
 composition. There are multiple clustering algorithms available.
+
+As mentioned before, clustering can be done either features or samples.
+We will focus on the latter here. To learn about feature clustering,
+check out chapter 6.3.
 
 ## Custom tools
 
@@ -34,24 +38,23 @@ tse <- transformCounts(tse, method = "relabundance")
 ```
 
 The main focus here will be how to use mia's `cluster` function to do the 
-clustering.
-
-The clustering can be done on features or samples. 
-
-### Sample clustering
-
-The `cluster` function's parameters allow to choose which algorithm to use, 
-whether we want to cluster on samples or taxa (amongst other things). Here 
-for example, we cluster using the hierarchical clustering and on the samples 
-(`MARGIN` parameter).
+clustering. It has multiple parameters that allow you to shape the result.
+* The main new parameter allows you to choose the algorithm you want to use. 
+In this example, we will use HclustParam which does the hierarchical 
+clustering. This parameter itself has parameters on its own, you can check
+them in the
+[HclustParam documentation](https://rdrr.io/github/LTLA/bluster/man/HclustParam-class.html).
+* Another parameter is `MARGIN`, which allows us to choose whether we want to
+cluster the features or samples . Here we will cluster the latter.
+* We will see the other parameters as we go along.
 
 ```{r bluster_sample_hclust1}
-# Simple use of the hierarchical clustering which sets the cut height to
-# half the dendrogram height.
-tse <- cluster(tse, assay.type = "relabundance", MARGIN = "samples", HclustParam())
+# Simple use of the hierarchical clustering. Here, the default parameters
+# set the cut height to half of the dendrogram height.
+tse <- cluster(tse, assay.type = "relabundance", 
+               MARGIN = "samples", HclustParam())
 
-# Check the result contained in the clusters part of colData. To change the
-# name clusters, you can change the parameter clust.col
+# Check the result contained in the clusters part of colData
 colData(tse)$clusters
 ```
 
@@ -59,88 +62,115 @@ Once the clustering on the samples is done, we can also plot the clusters.
 
 ```{r bluster_sample_plot}
 library(scater)
+
 # Add the MDS dimensions for plotting
-tse <- runMDS(tse,
-  assay.type = "relabundance",
-  FUN = vegan::vegdist,
-  method = "bray"
-)
+tse <- runMDS(tse, assay.type = "relabundance", 
+              FUN = vegan::vegdist, method = "bray")
 
 # Plot the clusters
 plotReducedDim(tse, "MDS", colour_by = "clusters")
 ```
 
-To change the clustering parameters, simply change the parameters in 
-`HclustParam` function. To see the different parameters, check the 
-[HclustParam documentation](https://rdrr.io/github/LTLA/bluster/man/HclustParam-class.html).
-Check dedicated part to see other examples.
+We will now see different common algorithms and how to use them.
 
 ## Hierarchical clustering
 
-Hierarchical clustering aims to find hiearchy between
+The hierarchical clustering algorithm aims to find hierarchy between
 samples/features. There are to approaches: agglomerative ("bottom-up")
 and divisive ("top-down").
 
 In agglomerative approach, each observation is first unique cluster.
-Algorithm continues by agglomerating similar clusters. Divisive
-approach starts with one cluster that contains all the
-observations. Clusters are splitted recursively to clusters that
-differ the most. Clustering ends when each cluster contains only one
-observation.
+The algorithm continues by agglomerating similar clusters. The divisive
+approach starts with one cluster that contains all the observations. 
+Clusters are splitted recursively to clusters that differ the most. 
+The clustering ends when each cluster contains only one observation. 
+In this algorithm, the similarity of two clusters is based on the distance
+between them.
 
-Hierarchical clustering can be visualized with dendrogram tree. In each
-splitting point, the three is divided into two clusters leading to
+Hierarchical clustering can be visualized with a dendrogram tree. In each
+splitting point, the tree is divided into two clusters leading to the
 hierarchy.
 
 Let's load data from mia package.
 
 ```{r hclust1}
-library(mia)
 library(vegan)
 
 # Load experimental data
 tse <- enterotype
 ```
 
-Hierarchical clustering requires 2 steps. In the fist step, dissimilarities are 
-calculated. In prior to that, data transformation is applied if needed. Since
-sequencing data is compositional, relative transformation is applied.
-In the second step, clustering is performed based on dissimilarities. 
+Hierarchical clustering requires 2 steps. 
+1. Computation of the dissimilarities with a given distance.  
+2. Clustering based on dissimilarities. 
+
+Additionally, since sequencing data is compositional, we'll apply relative
+transformation (as seen in the previous example).
 
 ```{r hclust2}
-library(NbClust)
-library(cobiclust)
-
 # Apply transformation
 tse <- transformCounts(tse, method = "relabundance")
 
 # Do the clustering
-tse <- cluster(tse, 
+tse <- cluster(tse,
                assay.type = "relabundance",
                MARGIN = "samples",
                HclustParam(method = "complete",
                            dist.fun = vegdist,
                            metric = "bray"),
-               full = TRUE)
+               full = TRUE,
+               clust.col = "Hclust")
+```
 
+In this example, we wanted additional information on the clustering. To do so, 
+we used the `full` parameter. We also computed the dissimilarities with the 
+bray distance. Finally, the `clust.col` parameter allows us to choose the name
+of the column in the colData (default name is `clusters`).
 
+Next, we will plot the dendrogram, which is possible since we got the 
+additional information from the clustering.
+
+```{r hclust3}
+# Get hclust data from metadata
 hclust_data <- metadata(tse)$clusters$hclust
 
 # Get the dendrogram object
 dendro <- as.dendrogram(hclust_data)
 
 # Plot dendrogram
+labels(dendro) <- NULL
 plot(dendro)
 ```
 
-We can use dendrogram to determine the number of clusters. Usually the
-tree is splitted where the branch length is the largest. However, as
-we can see from the dendrogram, clusters are not clear. Algorithms are
-available to identify the optimal number of clusters.
+In our case, we cut the dendrogram in half by default. To know how many clusters
+we have, we can check the colData.
 
-```{r hclust3}
+```{r hclust4}
+# Get the clusters
+head(colData(tse)$Hclust)
+```
+
+We can see that there are 26 clusters, but that probably isn't optimal since the 
+the number of clusters was chosen arbitrarily. To determine the number of 
+clusters, we can use the dendrogram. Usually the tree is split where the branch
+length is the largest. However, as we can see from the dendrogram, clusters are
+not clear. There are algorithms to identify the optimal number of clusters.
+
+
+The `NbClust` library is useful to that end as it offers multiple methods to 
+determine the optimal number of clusters. Here we will use the silhouette 
+analysis to determine the optimal number of clusters. For each data point, this 
+analysis measures the distance to other data points in the same cluster
+(cohesion), and the distance to the other clusters (separation), establishing a
+score. That score is then combined across the data points. `NbClust` does
+this for multiple number of clusters and the best score corresponds to the
+optimal number of clusters.
+
+```{r hclust5}
+library(NbClust)
 diss <- metadata(tse)$clusters$dist
-# Determine the optimal number of clusters
+
+# Apply the silhouette analysis on the distance matrix
 res <- NbClust(diss = diss, distance = NULL, method = "ward.D2",
                index = "silhouette")
 
@@ -149,65 +179,65 @@ res$Best.nc
 
 Based on the result, let's divide observations into 2 clusters.
 
-```{r hclust4}
+```{r hclust6}
 library(dendextend)
 
-# Find clusters
-cutree(hclust_data, k = 2)
+# Get optimal number of clusters
+k <- res$Best.nc[1]
 
-# Making colors for 15 clusters
-col_val_map <- randomcoloR::distinctColorPalette(2) %>%
-  as.list() %>%
-  setNames(paste0("clust_", seq(2)))
+# Making colors for 2 clusters
+col_val_map <- randomcoloR::distinctColorPalette(k) %>%
+    as.list() %>% 
+    setNames(paste0("clust_", seq(k)))
 
-dend <- color_branches(dendro, k = 2, col = unlist(col_val_map))
+dend <- color_branches(dendro, k = k, col = unlist(col_val_map))
 labels(dend) <- NULL
 plot(dend)
 ```
 
 ## K-means clustering
 
-Hierarchical clustering did not yield clusters. Let's try k-means
-clustering instead. Here observations are divided into clusters so
+Let's now try k-means clustering. Here observations are divided into clusters so
 that the distances between observations and cluster centers are
 minimized; an observation belongs to cluster whose center is the
 nearest.
 
 The algorithm starts by dividing observation to random clusters whose
-number is defined by user. The centroids of clusters are then
+number is defined by user. The centroids of the clusters are then
 calculated. After that, observations' allocation to clusters are
-updated so that the means are minimized. Again, centroid are
-calculated, and algorithm continues iteratively until the assignments
+updated so that the means are minimized. Again, the centroids are
+calculated, and the algorithm continues iteratively until the assignments
 do not change.
 
-The number of clusters can be determined based on algorithm. Here we
-utilize silhouette analysis.
+As an alternative to `NbClust` get the optimal number of clusters, we can 
+visualize the silhouette analysis thanks to the library `factoextra`.
 
 ```{r kmeans1}
 library(factoextra)
 
-
 # Convert dist object into matrix
 diss <- as.matrix(diss)
+
 # Perform silhouette analysis and plot the result
 fviz_nbclust(diss, kmeans, method = "silhouette")
 ```
 
-Based on the result of silhouette analysis, we choose 2 to be the number of clusters
-in k-means clustering.
+Based on the result of silhouette analysis, we confirm that 2 is the optimal
+number of clusters in k-means clustering.
 
 ```{r kmeans2}
-library(scater)
-
 # The first step is random, add seed for reproducibility
 set.seed(15463)
-# Perform k-means clustering with 3 clusters
+
+# Perform k-means clustering with 2 clusters
 km <- kmeans(diss, 2, nstart = 25)
+
 # Add the result to colData
 colData(tse)$clusters <- as.factor(km$cluster)
 
 # Perform PCoA so that we can visualize clusters
-tse <- runMDS(tse, assay.type = "relabundance", FUN = vegan::vegdist, method = "bray")
+tse <- runMDS(tse, assay.type = "relabundance", 
+              FUN = vegan::vegdist, method = "bray")
 
 # Plot PCoA and color clusters
 plotReducedDim(tse, "MDS", colour_by = "clusters")
@@ -219,48 +249,58 @@ This section focus on DMM analysis.
 
 One technique that allows to search for groups of samples that are
 similar to each other is the [Dirichlet-Multinomial Mixture
-Model](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030126). In
-DMM, we first determine the number of clusters (k) that best fit the
+Model](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030126)
+. In DMM, we first determine the number of clusters (k) that best fit the
 data (model evidence) using Laplace approximation. After fitting the
 model with k clusters, we obtain for each sample k probabilities that
 reflect the probability that a sample belongs to the given cluster.
 
-Let's cluster the data with DMM clustering. 
+Let's cluster the data with DMM clustering. Since the dataset is large, the 
+algorithm will take long computational time. Therefore, we use only a subset 
+of the data; agglomerated by Phylum as a rank.
 
 ```{r dmm1}
-# Runs model and calculates the most likely number of clusters from 1 to 7.
-# Since this is a large dataset it takes long computational time.
-# For this reason we use only a subset of the data; agglomerated by Phylum as a rank.
+# Get the data
 data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
+
+# Agglomerate by rank
 tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
 ```
 
+Here we will further our use of `cluster` by renaming the clusters column in 
+the metadata thanks to the `name` parameter.
+
 ```{r dmm2}
-tse_dmm <- cluster(tse, name = "DMM", DmmParam(k = 1:7, type = "laplace"), MARGIN = "samples", full = TRUE)
+# Run the model and calculates the most likely number of clusters from 1 to 7
+tse_dmm <- cluster(tse, name = "DMM", DmmParam(k = 1:7, type = "laplace"), 
+                   MARGIN = "samples", full = TRUE)
 ```
 
-```{r}
-# The dmm info is stored in the metadata (the label is the one indicated in the name parameter)
+```{r dmm3}
+# The dmm info is stored in the metadata under the 'DMM' column
 tse_dmm
 ```
 
-The following operation returns a list of DMN objects for a closer investigation.
+The following operation returns a list of DMM objects for closer investigation.
 
-```{r}
+```{r dmm4}
 metadata(tse_dmm)$DMM$dmm
 ```
 
-Show Laplace approximation (model evidence) for each model of the k models.
+We can see the Laplace approximation (model evidence)
+for each model of the k models.
 
-```{r}
+```{r dmm5}
 library(miaViz)
 plotDMNFit(tse_dmm, type = "laplace")
 ```
 
-Get the model that has the best fit.
+On the graph, we can see that the best number of clusters is 2. We can confirm
+that with the following operation.
 
-```{r}
+```{r dmm6}
+# Get the model that has the best fit
 bestFit <- metadata(tse_dmm)$DMM$dmm[[metadata(tse_dmm)$DMM$best]]
 bestFit
 ```
@@ -270,77 +310,63 @@ bestFit
 Group samples and return DMNGroup object that contains a summary.
 Patient status is used for grouping.
 
-```{r}
-dmn_group <- calculateDMNgroup(tse_dmm,
-  variable = "SampleType", assay.type = "counts",
-  k = 2, seed = .Machine$integer.max
-)
+```{r dmm_group}
+dmm_group <- calculateDMNgroup(tse_dmm, variable = "SampleType", 
+                               assay.type = "counts", k = 2, 
+                               seed = .Machine$integer.max)
 
-dmn_group
+dmm_group
 ```
 
-Mixture weights  (rough measure of the cluster size).
+Mixture weights (rough measure of the cluster size).
 
-
-```{r}
+```{r dmm7}
 DirichletMultinomial::mixturewt(bestFit)
 ```
 
+It's also possible to get the samples-cluster assignment probabilities: how
+probable it is that each sample belongs to each cluster
 
-Samples-cluster assignment probabilities / how probable it is that sample belongs
-to each cluster
-
-```{r}
+```{r dmm8}
 prob <- metadata(tse_dmm)$DMM$prob
 head(prob)
 ```
 
-Contribution of each taxa to each component
+We can also know the contribution of each taxa to each component
 
-```{r}
+```{r dmm9}
 head(DirichletMultinomial::fitted(bestFit))
 ```
 
-Computing the euclidean PCoA and storing it as a data frame
+Finally, to be able to visualize our data and clusters, we start by 
+computing the euclidean PCoA and storing it as a data frame.
 
-```{r}
-# Does clr transformation. Pseudocount is added, because data contains zeros.
+```{r dmm10}
+# Do clr transformation. Pseudocount is added, because data contains zeros.
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
 tse <- transformCounts(tse, assay.type = "pseudo", method = "relabundance")
 tse <- transformCounts(tse, "relabundance", method = "clr")
 
-library(scater)
-
-# Does principal coordinate analysis
+# Do principal coordinate analysis
 df <- calculateMDS(tse, assay.type = "clr", method = "euclidean")
 
-# Creates a data frame from principal coordinates
-euclidean_pcoa_df <- data.frame(
-  pcoa1 = df[, 1],
-  pcoa2 = df[, 2]
-)
+# Create a data frame from principal coordinates
+euclidean_pcoa_df <- data.frame(pcoa1 = df[, 1], pcoa2 = df[, 2])
 ```
 
-```{r}
-# Creates a data frame that contains principal coordinates and DMM information
+```{r dmm11}
+# Create a data frame that contains principal coordinates and DMM information
 euclidean_dmm_pcoa_df <- cbind(euclidean_pcoa_df,
-  dmm_component = colData(tse_dmm)$clusters
-)
-# Creates a plot
-euclidean_dmm_plot <- ggplot(
-  data = euclidean_dmm_pcoa_df,
-  aes(
-    x = pcoa1, y = pcoa2,
-    color = dmm_component
-  )
-) +
-  geom_point() +
-  labs(
-    x = "Coordinate 1",
-    y = "Coordinate 2",
-    title = "PCoA with Aitchison distances"
-  ) +
-  theme(title = element_text(size = 12)) # makes titles smaller
+                               dmm_component = colData(tse_dmm)$clusters)
+
+# Create a plot
+euclidean_dmm_plot <- ggplot(data = euclidean_dmm_pcoa_df,
+                             aes(x = pcoa1, y = pcoa2, color = dmm_component)) +
+    geom_point() +
+    labs(x = "Coordinate 1",y = "Coordinate 2", 
+         title = "PCoA with Aitchison distances") +
+    theme(plot.title = element_text(size = 12, # makes titles smaller
+                                    hjust = 0.5)) 
 
 euclidean_dmm_plot
 ```
@@ -355,7 +381,7 @@ nearest-neighbors and performs the community detection on the fly.
 Here, we will be using the `cluster` function with a graph-based clustering 
 function, enabling the community detection task.
 
-The algorithm used is "short random walks" [@Pons2006]. Graph is
+The algorithm used is "short random walks" [@Pons2006]. The graph is
 constructed using different k values (the number of nearest neighbors
 to consider during graph construction) using the robust centered log
 ratio (rclr) assay data. Then plotting the communities using UMAP
@@ -363,35 +389,38 @@ ratio (rclr) assay data. Then plotting the communities using UMAP
 `enterotype` dataset.
 
 
-```{r, message=FALSE, warning=FALSE}
-library(bluster)
+```{r NNGraph1, message=FALSE, warning=FALSE}
 library(patchwork) # For arranging several plots as a grid
-library(scater)
 
-data("enterotype", package = "mia")
+# Get enterotype dataset and transform data with rclr
 tse <- enterotype
 tse <- transformCounts(tse, method = "rclr")
 
-# Performing and storing UMAP
+# Perform and store UMAP
 tse <- runUMAP(tse, name = "UMAP", assay.type = "rclr")
 
+# Set different k values to test
 k <- c(2, 3, 5, 10)
+
 ClustAndPlot <- function(x) {
-  # Adding the clustering data from the short random walks algorithm to the TSE
+    # Add the clustering data from the short random walks algorithm to the TSE
     tse <- cluster(tse, assay.type = "rclr", 
                    MARGIN = "col", NNGraphParam(k = x))
     
-    # Results of the clustering as a color for each sample
+    # Plot the results of the clustering as a color for each sample
     plotUMAP(tse, colour_by = I(colData(tse)$clusters)) +
     labs(title = paste0("k = ", x))
 }
 
-# Applying the function for different k values
+# Apply the function for different k values
 plots <- lapply(k, ClustAndPlot)
 
-# Displaying plots in a grid
+# Display plots in a grid
 plots[[1]] + plots[[2]] + plots[[3]] + plots[[4]] + plot_layout(ncol = 4)
 ```
+
+In this graph, we can clearly see the impact of the k choice on the quality
+of the clustering
 
 Similarly, the _`bluster`_ [@R_bluster] package offers clustering
 diagnostics that can be used for judging the clustering quality (see
@@ -401,19 +430,19 @@ In the following, Silhouette width as a diagnostic tool is computed
 and results are visualized for each case presented earlier. For more
 about Silhouettes read [@Rousseeuw1987].
 
-```{r, message=FALSE, warning=FALSE}
+```{r NNGraph2, message=FALSE, warning=FALSE}
 ClustDiagPlot <- function(x) {
-  # Getting the clustering results
+  # Get the clustering results
     tse <- cluster(tse, assay.type = "rclr", 
                    MARGIN = "col", NNGraphParam(k = x))
 
-    # Computing the diagnostic info
+    # Compute the diagnostic info
     sil <- approxSilhouette(t(assays(tse)$rclr), colData(tse)$clusters)
 
-    # Plotting as a boxlpot to observe cluster separation
+    # Plot as a boxplot to observe cluster separation
     boxplot(split(sil$width, colData(tse)$clusters), main = paste0("k = ", x))
 }
-# Applying the function for different k values
+# Apply the function for different k values
 res <- lapply(k, ClustDiagPlot)
 ```
 
@@ -468,7 +497,7 @@ _cobiclust_ takes counts table as an input and gives _cobiclust_ object as an ou
 It includes clusters for taxa and samples. 
 
 ```{r cobiclust_2}
-# Do clustering; use counts table´
+# Do clustering using counts table
 clusters <- cobiclust(assay(mae[[1]], "counts"))
 
 # Get clusters
@@ -488,14 +517,11 @@ clusters$classification
 
 Next we can plot clusters. Annotated heatmap is a common choice.
 
-```{r cobiclust_3, fig.width=14, fig.height=12}
+```{r cobiclust_3a, fig.width=14, fig.height=12}
 library(pheatmap)
 # z-transform for heatmap
-mae[[1]] <- transformCounts(mae[[1]],
-  assay.type = "rclr",
-  MARGIN = "features",
-  method = "z", name = "clr_z"
-)
+mae[[1]] <- transformCounts(mae[[1]], assay.type = "rclr",
+                            MARGIN = "features", method = "z", name = "clr_z")
 
 # Create annotations. When column names are equal, they should share levels.
 # Here samples include 3 clusters, and taxa 2. That is why we have to make
@@ -507,17 +533,12 @@ annotation_row <- data.frame(rowData(mae[[1]])[, "clusters", drop = F])
 colnames(annotation_row) <- "row_clusters"
 ```
 
-
 Plot the heatmap.
 
 ```{r cobiclust_3b, fig.width=14, fig.height=12}
-pheatmap(assay(mae[[1]], "clr_z"),
-  cluster_rows = F, cluster_cols = F,
-  annotation_col = annotation_col,
-  annotation_row = annotation_row
-)
+pheatmap(assay(mae[[1]], "clr_z"), cluster_rows = F, cluster_cols = F,
+         annotation_col = annotation_col, annotation_row = annotation_row)
 ```
-
 
 Boxplot is commonly used to summarize the results:
 
@@ -526,16 +547,17 @@ library(ggplot2)
 library(patchwork)
 
 # ggplot requires data in melted format
-melt_assay <- meltAssay(mae[[1]], assay.type = "rclr", add_col_data = T, add_row_data = T)
+melt_assay <- meltAssay(mae[[1]], assay.type = "rclr", 
+                        add_col_data = T, add_row_data = T)
 
 # patchwork two plots side-by-side
 p1 <- ggplot(melt_assay) +
-  geom_boxplot(aes(x = clusters.x, y = rclr)) +
-  labs(x = "Taxa clusters")
+    geom_boxplot(aes(x = clusters.x, y = rclr)) +
+    labs(x = "Taxa clusters")
 
 p2 <- ggplot(melt_assay) +
-  geom_boxplot(aes(x = clusters.y, y = rclr)) +
-  labs(x = "Sample clusters")
+    geom_boxplot(aes(x = clusters.y, y = rclr)) +
+    labs(x = "Sample clusters")
 
 p1 + p2
 ```
