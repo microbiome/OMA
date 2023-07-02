@@ -492,21 +492,70 @@ Good job! You are now able to produce and visualize reduced dimensions of a
 TreeSE. `runMDS` is actually one of several algorithms for PCoA and dimensionality
 reduction, which you can find in section \@ref(other-ord-methods).
 
+### PERMANOVA analysis
 
-### Beta diversity analysis 1
+In this exercise we focus on studying the weight of variables on the microbiome
+composition. Significance of each variable on beta diversity is tested with
+PERMANOVA (point 4) and the homogeneity assumption is also be controlled with a
+PERMDISP2 analysis (point 5).
 
-1. Visualize community variation with different methods (PCA, MDS, NMDS, etc.) with plotReduceDim and with different dissimilarities and transformations, plot also other than the first two axes.
-2. Use PERMANOVA to test differences in beta diversity. You can also try including continuous and/or categorical covariates
-3. If there are statistical differences in PERMANOVA, test PERMDISP2 (betadisper function)
-4. Do clustering
-5. Try RDA to test the variance explained by external variables
+1. Import the mia and vegan packages, load peerj13075 with `data` and store it
+   into a variable named `tse`.
+2. Transform the `counts` assay into relative abundances with `transformCounts`.
+3. Extract the relative abundance assay, transpose it and save it into
+   a variable named `relabund_assay`.
+4. Perform PERMANOVA with `adonis2` to see how much Diet can explain the relative
+   abundance assay (`formula = relabund_assay ~ Diet`) in terms of Bray-Curtis
+   dissimilarity (`method = "bray"`). Also set `data = colData(tse)`
+   `by = "margin"` and `permutations = 99`. What do the results tell you about
+   Diet with respect to beta diversity?
+5. **Extra**: Test homogeneity of distribution across Diet groups with
+   `anova(betadisper(my_mat), my_groups`, where `my_mat` is the Bray-Curtis
+   dissimilarity matrix of `relabund_assay` calculated with
+   `vegdist(relabund_assay, "bray")` and `my_groups` is the vector of Diet values
+   obtained from the colData of the TreeSE.
+   
+Well done! You went through testing the effect and significance of Diet on beta
+diversity. Keep in mind that the formula fed to `adonis2` can take more than one
+independent variable, so that you can also (and very often should) include
+covariates of your studies.
 
+### Redundance analysis (RDA)
 
-### Beta diversity analysis 2
+Here we apply RDA, an ordination method that provides dimensions with
+the largest variation between the data based in the light of the specified
+variables (point 3). The results of RDA are usually assessed with PERMANOVA
+(point 5) and the homogeneity assumption should be checked as in the previous
+exercise. This is a relatively complex procedure, but the way this is broken
+down into steps below will hopefully make more sense.
 
-1. Install the latest development version of mia from GitHub.
-2. Load experimental dataset from mia.
-3. Create a PCoA with Aitchison dissimilarities. How much coordinate 1 explains the differences? How about coordinate 2?
+1. Import the mia and vegan packages, load peerj13075 with `data` and store it
+   into a variable named `tse`.
+2. Transform the `counts` assay into relative abundances with `transformCounts`.
+3. Perform RDA with `calculateRDA` to see how much Diet can explain the relative
+   abundance assay (`formula = assay ~ Diet` and `assay.type = relabundance`) in
+   terms of Bray-Curtis dissimilarity (`method = "bray"`).
+4. Extract the RDA dimensions from the appropriate reducedDim slot with
+   `attr(reducedDim(tse, "RDA"), "rda)` and store it into `rda`.
+5. Test the effect and significance of Diet on beta diversity by PERMANOVA with
+   `anova.cca`. Feed this function with `rda` and set `by = "margin"` and
+   `permutations = 99`, respectively. What do the results tell you about Diet?
+6. **Extra**: Check what other parameters are stored in the colData of peerj13075,
+   add them to the formula (`formula = assay ~ Diet + ...`) of `calculateRDA`
+   and proceed to see how that changes the results of PERMANOVA.
+
+Well done! You went through an RDA analysis followed by significance testing
+with PERMANOVA and BETADISPER2. In the next exercise we'll go deeper quantify
+the contributions to beta diversity.
+
+### Beta diversity analysis
+
+This exercise prompts you to implement a workflow with distance-based RDA
+(dbRDA). You can refer to chapter \@ref(dbrda-workflow) for a step-by-step
+walkthrough, which may be simplified in the future.
+
+1. Import the mia and vegan packages, load peerj13075 with `data` and store it
+   into a variable named `tse`.
 4. Create dbRDA with Bray-Curtis dissimilarities on relative abundances. Use PERMANOVA. Can differences between samples be explained with variables of sample meta data? 
 5. Analyze diets' association on beta diversity. Calculate dbRDA and then PERMANOVA. Visualize coefficients. Which taxa's abundances differ the most between samples? 
 6. Interpret your results. Is there association between community composition and location? What are those taxa that differ the most; find information from literature.
