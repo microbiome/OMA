@@ -149,16 +149,17 @@ the links in an existing object, the `changeTree` function is available.
 
 ### Alternative experiments {#alt-exp}
 
-_**Alternative experiments**_ differ from transformations as they can
-contain complementary data, which is no longer tied to the same
-dimensions as the assay data. However, the number of samples (columns)
-must be the same.
+_**Alternative experiments**_ complement _assays_. They can contain
+complementary data, which is no longer tied to the same dimensions as
+the assay data. However, the number of samples (columns) must be the
+same.
 
-This can come into play, for instance, when one has taxonomic abundance
-profiles quantified with different measurement technologies, such as
-phylogenetic microarrays, amplicon sequencing, or metagenomic
-sequencing. Such alternative experiments that concern the same samples
-can be stored as
+This can come into play, for instance, when one has taxonomic
+abundance profiles quantified with different measurement technologies,
+such as phylogenetic microarrays, amplicon sequencing, or metagenomic
+sequencing. Another common use case is including abundance tables for
+different taxonomic ranks. Such alternative experiments concerning the
+same set of samples can be stored as
 
 1. Separate _assays_ assuming that the taxonomic information can be mapped 
 between features directly 1:1; or 
@@ -166,30 +167,39 @@ between features directly 1:1; or
 dimensions differ. Each element of the _altExp_ slot is a `SummarizedExperiment`
 or an object from a derived class with independent feature data.
 
-
-As an example, we show how to store taxonomic abundance tables
+The following shows how to store taxonomic abundance tables
 agglomerated at different taxonomic levels. However, the data could as
 well originate from entirely different measurement sources as long as
-the samples are matched.
+the samples match.
 
-```{r}
-# Agglomerate the data to Phylym level
+Let us first agglomerate the data to Phylym level. This yields a new TreeSE data object.
+
+```{r altexp_agglomerate}
 tse_phylum <- agglomerateByRank(tse, "Phylum")
 # both have the same number of columns (samples)
 dim(tse)
 dim(tse_phylum)
+```
 
-# Add the new table as an alternative experiment
+
+Then we can add the new phylum-level data object as an alternative experiment in the original data.
+
+```{r altexp_agglomerate2}
+# Add the new data object to the original data object as an alternative experiment with the name "Phylum"
 altExp(tse, "Phylum") <- tse_phylum
-altExpNames(tse)
 
-# Pick a sample subset: this acts on both altExp and assay data
+# Check the alternative experiment names available in the data
+altExpNames(tse)
+```
+
+We can now subset the data, for instance, and this acts on both altExp and assay data.
+
+```{r altexp_agglomerate3}
 tse[,1:10]
 dim(altExp(tse[,1:10],"Phylum"))
 ```
 
-For more details of altExp have a look at the [Intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html) of the 
-`SingleCellExperiment` package [@R_SingleCellExperiment].
+For more details on _altExp_, you can check the [introduction](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html) to the `SingleCellExperiment` package [@R_SingleCellExperiment].
 
 
 
@@ -210,10 +220,11 @@ samples are defined through a `sampleMap`. Each element on the
 the number of samples can differ between the elements.
 
 
+<!--
 ```{r}
 #TODO: Find the right dataset to explain a non 1:1 sample relationship
 ```
-
+-->
 
 For information have a look at the [intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html) of the `MultiAssayExperiment` package.  
 
