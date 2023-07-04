@@ -274,7 +274,7 @@ plotReducedDim(tse, "Unifrac", colour_by = "Group")
 
 ![(\#fig:plot-unifrac)Unifrac distances scaled by MDS of the GlobalPattern dataset.](20_beta_diversity_files/figure-latex/plot-unifrac-1.png) 
 
-## Other ordination methods
+## Other ordination methods {#other-ord-methods}
 
 Other dimension reduction methods, such as `PCA`, `t-SNE` and `UMAP` are 
 inherited directly from the `scater` package.
@@ -322,8 +322,7 @@ each covariate affects.
 
 
 ```r
-# Load libraryd packages
-
+# Load packages
 library(vegan)
 library(stringr)
 library(knitr)
@@ -583,7 +582,7 @@ plotReducedDim(tse_Genus[,colData(tse_Genus)$Group==FALSE],
 
 
 
-### Testing differences in community composition between sample groups
+### Testing differences in community composition between sample groups {#dbrda-workflow}
 
 The permutational analysis of variance (PERMANOVA) [@Anderson2001] is
 a widely used non-parametric multivariate method that can be used to

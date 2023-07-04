@@ -87,7 +87,7 @@ on how to represent different varieties of multi-table data within the
 The options and recommendations are summarized in Table \@ref(tab:options).
 
 
-### Assay data 
+### Assay data {#assay-slot}
 
 The original count-based taxonomic abundance tables may have different 
 transformations, such as logarithmic, Centered Log-Ratio (CLR), or relative 

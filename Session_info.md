@@ -32,6 +32,6 @@ sessionInfo()
 ## [1] BiocStyle_2.28.0 rebook_1.10.1   
 ## 
 ## loaded via a namespace (and not attached):
-## [1] knitr_1.43      shiny_1.7.4     htmltools_0.5.5 rmarkdown_2.22 
+## [1] knitr_1.43      shiny_1.7.4     htmltools_0.5.5 rmarkdown_2.23 
 ## [5] bookdown_0.34   miniUI_0.1.1.1  tools_4.3.0
 ```

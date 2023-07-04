@@ -245,7 +245,7 @@ head(getUniqueTaxa(tse, rank = "Phylum"))
 ```
 
 
-### Generate a taxonomic tree on the fly
+### Generate a taxonomic tree on the fly {#fly-tree}
 
 To create a taxonomic tree, `taxonomyTree` used the information and returns a
 `phylo` object. Duplicate information from the `rowData` is removed.
@@ -381,7 +381,7 @@ assay(altExp(tse, "Family"), "counts")[1:5,1:7]
 any taxonomic level listed in `mia::taxonomyRanks(tse)`.   
 
 
-## Data transformation
+## Data transformation {#assay-transform}
 
 Data transformations are common in microbiome analysis. Examples
 include the logarithmic transformation, calculation of relative
@@ -507,7 +507,7 @@ assays(tse)
 ## names(4): counts relabundance clr_transformation pa
 ```
 
-## Pick specific  
+## Pick specific {#pick-specific}
 
 Retrieving of specific elements that are required for specific analysis. For
 instance, extracting abundances for a specific taxa in all samples or all taxa 
