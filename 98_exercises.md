@@ -167,7 +167,7 @@ you can find more information about parameter definition and usage.
 TreeSE containers represent the working unit of the mia package. In the
 following exercises we learn how to construct, explore and work with them.
 A few demo datasets can be imported with mia and can be accessed as explained
-in chapter \ref(example-data).
+in chapter \@ref(example-data).
 
 ### Constructing a data object {#construct-TreeSE}
 
@@ -175,12 +175,12 @@ Here we cover how to construct a TreeSE from CSV files, using the components
 of OKeefeDSData from the microbiomeDataSets package as an example dataset.
 
 1. Download the files with the prefix _DS_ from
-   [this directory](https://github.com/JuliaTurkuDataScience/MicrobiomeAnalysis.jl/tree/main/src/assets)
+   [this directory](https://github.com/JuliaTurkuDataScience/MicrobiomeAnalysis.jl/tree/main/src/assets).
 2. Read in the csv files with `read.csv` and store them into the variables
-   `assays`, `rowdata` and `coldata`, respectively
+   `assays`, `rowdata` and `coldata`, respectively.
 3. Create a TreeSE from the individual components with `TreeSummarizedExperiment`.
    Note that the function requires three arguments: assays, rowData and colData,
-   to which you can give the appropriate item
+   to which you can give the appropriate item.
 4. Check that importing is done correctly. E.g., choose random samples and features,
 and check that their values equal between raw files and TreeSE.
 
@@ -217,7 +217,7 @@ You can also check the [function reference in the mia package](https://microbiom
    argument can be either the name or the index of the desired assay.
    
 Well done! You can now locate and retrieve individual assays of a TreeSE. If you
-got stuck, you can refer to chapter \ref(assay-slot) of this book.
+got stuck, you can refer to chapter \@ref(assay-slot) of this book.
 
 
 ### Sample information 
@@ -230,14 +230,14 @@ got stuck, you can refer to chapter \ref(assay-slot) of this book.
    in the different columns.
 3. Get the abundances of all features for a specific sample, such as `ID34`. You
    can access sample-specific abundances with `getAbundaceSample`, specifying the
-   desired `sample_id` and `assay.type`
+   desired `sample_id` and `assay.type`.
 
 
 ### Feature information
 
 1. Import the mia package, load peerj13075 with `data` and store it into a
    variable named `tse`.
-2. Check the names of the features with `rownames`
+2. Check the names of the features with `rownames`.
 3. List the information on features available in rowData with `names`.
 4. Visualize the rowData with `View` and briefly look at the information stored
    in the different columns.
@@ -247,13 +247,13 @@ got stuck, you can refer to chapter \ref(assay-slot) of this book.
 6. **Extra**: Create a taxonomy tree based on the taxonomy mappings with
    `addTaxonomyTree` and display its content with `taxonomyTree` and `ggtree`.
 
-If you got stuck, you can look up chapters \ref(pick-specific) and \ref(fly-tree)
+If you got stuck, you can look up chapters \@ref(pick-specific) and \@ref(fly-tree)
 on how to pick specific abundances and generate row trees, respectively.
 
 
 ### Other elements
 
-Try to extract some of the other TreeSE elements listed in chapter \ref(containers).
+Try to extract some of the other TreeSE elements listed in chapter \@ref(containers).
 However, such data are not always included.
 
 1. Import the mia package, load peerj13075 with `data` and store it into a
@@ -351,10 +351,10 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformCo
 3. Agglomerate the TreeSE to each taxonomic rank and store the resulting
    experiments as altExps. This can be performed automatically with `splitByRanks`.
 4. Check the names of the generated altExps with `altExpNames` and retrieve a
-   complete list with `altExps`
+   complete list with `altExps`.
 5. Retrieve the data agglomerated by genus from the corresponding `altExp`.
    As for assays, you can access the desired altExp by name or index.
-6. **Extra**: Split the data based on other features (`splitOn`)
+6. **Extra**: Split the data based on other features with `splitOn`.
 
 
 ## Community (alpha) diversity
@@ -715,7 +715,7 @@ with the readily disassembled components of HintikkaXOData.
 1. Read in the csv files containing assays with `read.csv` and save each
    of them into a variable named `<assay name>_assays`.
 2. Create one TreeSE from each assays object with the `TreeSummarizedExperiment`
-   function, as explained in the exercise \@ref(construct-TreeSE).
+   function, as explained in [this exercise](#construct-TreeSE).
 3. Read in the sampleData and the sampleMap and store them into the
    variables `sample_data` and `sample_map`, respectively.
 4. Combine the components with `MultiAssayExperiment`, where the first argument

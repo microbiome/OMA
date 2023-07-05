@@ -73,7 +73,7 @@ components to install include:
 
 ## Study material {#material}
 
-We encourage to familiarize with the material and test examples in advance.
+We encourage to familiarize with the material and test examples in advance:
 
  * [Short online videos](https://www.youtube.com/playlist?list=PLjiXAZO27elAJEptP59BN3whVJ61XIkST) on microbiome data science with R/Bioconductor  
 
@@ -83,9 +83,9 @@ We encourage to familiarize with the material and test examples in advance.
 
  * [Orchestrating Microbiome Analysis with R/Bioconductor (OMA)](https://microbiome.github.io/OMA/) (this book)
 
- * [Exercises](https://microbiome.github.io/OMA/exercises.html) for self-study
+ * [Exercises](#exercises) for self-study
 
- * [Resources](https://microbiome.github.io/OMA/resources.html) and links to complementary external material
+ * [Resources](#resources) and links to complementary external material
 
 
 

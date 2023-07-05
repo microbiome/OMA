@@ -135,7 +135,7 @@
 
 \title{Orchestrating Microbiome Analysis}
 \author{}
-\date{\vspace{-2.5em}\textbf{Authors:} Leo Lahti {[}aut{]}, Tuomas Borman {[}aut, cre{]}, Henrik Eckermann {[}ctb{]}, Sudarshan Shetty {[}aut{]}, Felix GM Ernst {[}aut{]} \textbf{Version:} 0.98.14 \textbf{Modified:} 2023-04-10 \textbf{Compiled:} 2023-07-04 \textbf{Environment:} R version 4.3.0 (2023-04-21), Bioconductor 3.17 \textbf{License:} CC BY-NC-SA 3.0 US \textbf{Copyright:} \textbf{Source:} \url{https://github.com/microbiome/OMA}}
+\date{\vspace{-2.5em}\textbf{Authors:} Leo Lahti {[}aut{]}, Tuomas Borman {[}aut, cre{]}, Henrik Eckermann {[}ctb{]}, Sudarshan Shetty {[}aut{]}, Felix GM Ernst {[}aut{]} \textbf{Version:} 0.98.14 \textbf{Modified:} 2023-04-10 \textbf{Compiled:} 2023-07-05 \textbf{Environment:} R version 4.3.0 (2023-04-21), Bioconductor 3.17 \textbf{License:} CC BY-NC-SA 3.0 US \textbf{Copyright:} \textbf{Source:} \url{https://github.com/microbiome/OMA}}
 
 \begin{document}
 \maketitle
@@ -2503,7 +2503,7 @@ New information can also be added to the experiment by creating a new variable.
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 0.5607 0.9323 0.1121 0.9248 0.5746 0.4319
+## [1] 0.4850 0.4583 0.3699 0.5730 0.1943 0.5505
 \end{verbatim}
 
 \hypertarget{merge-data}{%
@@ -2591,7 +2591,7 @@ includes one sample.
 \end{itemize}
 
 \hypertarget{quality-control}{%
-\chapter{Exploration and quality Control}\label{quality-control}}
+\chapter{Exploration and Quality Control}\label{quality-control}}
 
 This chapter focuses on the quality control and exploration of
 microbiome data and establishes commonly used descriptive
@@ -3700,7 +3700,7 @@ in one sample.
 \end{verbatim}
 
 \hypertarget{community-diversity}{%
-\chapter{Community diversity}\label{community-diversity}}
+\chapter{Community Diversity}\label{community-diversity}}
 
 Diversity estimates are a central topic in microbiome data analysis.
 
@@ -4015,43 +4015,275 @@ A plot comparing all the diversity measures calculated above and stored in \text
 \includegraphics{14_alpha_diversity_files/figure-latex/plot-all-diversities-1.pdf}
 
 \hypertarget{community-similarity}{%
-\chapter{Community similarity}\label{community-similarity}}
+\chapter{Community Similarity}\label{community-similarity}}
 
-Where alpha diversity focuses on community variation within a
-community (sample), beta diversity quantifies (dis-)similarites
-between communities (samples). Some of the most popular beta diversity
-measures in microbiome research include Bray-Curtis index (for
-compositional data), Jaccard index (for presence / absence data,
-ignoring abundance information), Aitchison distance (Euclidean
-distance for clr transformed abundances, aiming to avoid the
-compositionality bias), and the Unifrac distances (that take into
-account the phylogenetic tree information). Only some of the commonly
-used beta diversity measures are actual \emph{distances}; this is a
-mathematically well-defined concept and many ecological beta diversity
-measures, such as Bray-Curtis index, are not proper distances.
-Therefore, the term dissimilarity or beta diversity is commonly used.
+Whereas alpha diversity focuses on community variation within a community
+(one sample), beta diversity quantifies the dissimilarity between communities
+(multiple samples). In microbiome research, the most popular metrics of beta
+diversity include the Bray-Curtis index (for compositional data), Jaccard index
+(for presence / absence data, ignoring abundance information), Aitchison distance
+(Euclidean distance for clr transformed abundances, aiming to avoid the
+compositionality bias), and the Unifrac distance (that takes into account the
+phylogenetic tree information). Notably, only some of these measures are actual
+\emph{distances}, as this is a mathematical concept whose definition is not satisfied
+by certain ecological measure, such as the Bray-Curtis index. Therefore, the terms
+dissimilarity and beta diversity are preferred.
 
-Technically, beta diversities are usually represented as \texttt{dist}
-objects, which contain triangular data describing the distance between
-each pair of samples. These distances can be further subjected to
-ordination. Ordination is a common concept in ecology that aims to
-reduce the dimensionality of the data for further evaluation or
-visualization. Ordination techniques aim to capture as much of
-essential information in the data as possible in a lower dimensional
-representation. Dimension reduction is bound to loose information but
-the common ordination techniques aim to preserve relevant information
-of sample similarities in an optimal way, which is defined in
-different ways by different methods. {[}TODO add references and/or link
-to ordination chapter instead?{]}
+In practice, beta diversity is usually represented as a \texttt{dist} object, a
+triangular matrix where the distance between each pair of samples is encoded by
+a specific cell. This distance matrix can then undergo ordination, which is an
+important ecological tool to reduce the dimensionality of data for a more
+efficient analysis and visualization. Ordination techniques aim to capture as
+much essential information from the data as possible and turn it into a lower
+dimensional representation. Dimension reduction is bound to lose information but
+commonly used ordination techniques can preserve relevant information of sample
+similarities in an optimal way, which is defined in different ways by different
+methods. {[}TODO add references and/or link to ordination chapter instead?{]}
 
-Some of the most common ordination methods in microbiome research
-include Principal Component Analysis (PCA), metric and non-metric
-multi-dimensional scaling (MDS, NMDS), The MDS methods are also known
-as Principal Coordinates Analysis (PCoA). Other recently popular
-techniques include t-SNE and UMAP.
+Based on the type of algorithm, ordination methods in microbiome research can
+be generally divided in two categories: unsupervised and supervized ordination.
+The former includes Principal Coordinate Analysis (PCoA), Principal Component
+Analysis (PCA) and Uniform Manifold Approximation and Projection for Dimension
+Reduction (UMAP), whereas the latter is mainly represented by distance-based
+Redundance Analysis (dbRDA). We will first discuss unsupervized ordination
+methods and then proceed to supervized ones.
+
+To run the examples in this chapter, the following packages should be imported:
+
+\begin{itemize}
+\tightlist
+\item
+  mia: microbiome analysis framework
+\item
+  scater: plotting reduced dimensions
+\item
+  vegan: ecological distances
+\item
+  ggplot2: plotting
+\item
+  patchwork: combining plots
+\end{itemize}
+
+\hypertarget{unsupervized-ordination}{%
+\section{Unsupervized ordination}\label{unsupervized-ordination}}
+
+Unsupervized ordination methods variation in the data without additional
+information on covariates or other supervision of the model. Among the different
+approaches, Multi-Dimensional Scaling (MDS) and non-metric MDS (NMDS) can be
+regarded as the standard. They are jointly referred to as PCoA. For this
+demonstration we will analyse beta diversity in GlobalPatterns, and observe the
+variation between stool samples and those with a different origin.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Example data}
+\FunctionTok{data}\NormalTok{(}\StringTok{"GlobalPatterns"}\NormalTok{, }\AttributeTok{package =} \StringTok{"mia"}\NormalTok{)}
+
+\CommentTok{\# Data matrix (features x samples)}
+\NormalTok{tse }\OtherTok{\textless{}{-}}\NormalTok{ GlobalPatterns}
+
+\CommentTok{\# some beta diversity metrics are usually applied to relative abundances}
+\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{transformCounts}\NormalTok{(tse,}
+                       \AttributeTok{method =} \StringTok{"relabundance"}\NormalTok{)}
+
+\CommentTok{\# Add group information Feces yes/no}
+\FunctionTok{colData}\NormalTok{(tse)}\SpecialCharTok{$}\NormalTok{Group }\OtherTok{\textless{}{-}} \FunctionTok{colData}\NormalTok{(tse)}\SpecialCharTok{$}\NormalTok{SampleType }\SpecialCharTok{==} \StringTok{"Feces"}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{comparing-communities-by-beta-diversity-analysis}{%
+\subsection{Comparing communities by beta diversity analysis}\label{comparing-communities-by-beta-diversity-analysis}}
+
+A typical comparison of community compositions starts with a visual
+representation of the groups by a 2D ordination. Then we estimate relative
+abundances and MDS ordination based on Bray-Curtis index between the groups,
+and visualize the results.
+
+In the following examples dissimilarity is calculated with the function supplied
+to the \texttt{FUN} argument. Several metrics of beta diversity are defined by the \texttt{vegdist}
+function of the vegan package, which is often used in this context. However, such
+custom functions created by the user also work, as long as they return a \texttt{dist}
+object. In either case, this function is then applied to calculate reduced
+dimensions via an ordination method, the results of which can be stored in the
+\texttt{reducedDim} slot of the TreeSE. This entire process is contained by the \texttt{runMDS}
+and \texttt{runNMDS} functions.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Perform PCoA}
+\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runMDS}\NormalTok{(tse,}
+              \AttributeTok{FUN =}\NormalTok{ vegan}\SpecialCharTok{::}\NormalTok{vegdist,}
+              \AttributeTok{method =} \StringTok{"bray"}\NormalTok{,}
+              \AttributeTok{name =} \StringTok{"PCoA\_BC"}\NormalTok{,}
+              \AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Sample dissimilarity can be visualized on a lower-dimensional display (typically
+2D) using the \texttt{plotReducedDim} function from the scater package. This also
+provides tools to incorporate additional information encoded by color, shape,
+size and other aesthetics. Can you find any difference between the groups?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Create ggplot object}
+\NormalTok{p }\OtherTok{\textless{}{-}} \FunctionTok{plotReducedDim}\NormalTok{(tse, }\StringTok{"PCoA\_BC"}\NormalTok{,}
+                    \AttributeTok{colour\_by =} \StringTok{"Group"}\NormalTok{)}
+
+\CommentTok{\# Calculate explained variance}
+\NormalTok{e }\OtherTok{\textless{}{-}} \FunctionTok{attr}\NormalTok{(}\FunctionTok{reducedDim}\NormalTok{(tse, }\StringTok{"PCoA\_BC"}\NormalTok{), }\StringTok{"eig"}\NormalTok{)}
+\NormalTok{rel\_eig }\OtherTok{\textless{}{-}}\NormalTok{ e }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(e[e }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{])}
+
+\CommentTok{\# Add explained variance for each axis}
+\NormalTok{p }\OtherTok{\textless{}{-}}\NormalTok{ p }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \FunctionTok{paste}\NormalTok{(}\StringTok{"PCoA 1 ("}\NormalTok{, }\FunctionTok{round}\NormalTok{(}\DecValTok{100} \SpecialCharTok{*}\NormalTok{ rel\_eig[[}\DecValTok{1}\NormalTok{]], }\DecValTok{1}\NormalTok{), }\StringTok{"\%"}\NormalTok{, }\StringTok{")"}\NormalTok{, }\AttributeTok{sep =} \StringTok{""}\NormalTok{),}
+              \AttributeTok{y =} \FunctionTok{paste}\NormalTok{(}\StringTok{"PCoA 2 ("}\NormalTok{, }\FunctionTok{round}\NormalTok{(}\DecValTok{100} \SpecialCharTok{*}\NormalTok{ rel\_eig[[}\DecValTok{2}\NormalTok{]], }\DecValTok{1}\NormalTok{), }\StringTok{"\%"}\NormalTok{, }\StringTok{")"}\NormalTok{, }\AttributeTok{sep =} \StringTok{""}\NormalTok{))}
+
+\NormalTok{p}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+\centering
+\includegraphics{20_beta_diversity_files/figure-latex/plot-mds-bray-curtis-1.png}
+\caption{\label{fig:plot-mds-bray-curtis}MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset.}
+\end{figure}
+
+With additional tools from the ggplot2 package, ordination methods can be
+compared to find similarities between them or select the most suitable one to
+visualize beta diversity in the light of the research question.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runMDS}\NormalTok{(tse,}
+              \AttributeTok{FUN =}\NormalTok{ vegan}\SpecialCharTok{::}\NormalTok{vegdist,}
+              \AttributeTok{name =} \StringTok{"MDS\_euclidean"}\NormalTok{,}
+              \AttributeTok{method =} \StringTok{"euclidean"}\NormalTok{,}
+              \AttributeTok{assay.type =} \StringTok{"counts"}\NormalTok{)}
+
+\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runNMDS}\NormalTok{(tse,}
+               \AttributeTok{FUN =}\NormalTok{ vegan}\SpecialCharTok{::}\NormalTok{vegdist,}
+               \AttributeTok{name =} \StringTok{"NMDS\_BC"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## initial  value 47.733208 
+## iter   5 value 33.853364
+## iter  10 value 32.891200
+## final  value 32.823570 
+## converged
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runNMDS}\NormalTok{(tse,}
+               \AttributeTok{FUN =}\NormalTok{ vegan}\SpecialCharTok{::}\NormalTok{vegdist,}
+               \AttributeTok{name =} \StringTok{"NMDS\_euclidean"}\NormalTok{,}
+               \AttributeTok{method =} \StringTok{"euclidean"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## initial  value 31.882673 
+## final  value 31.882673 
+## converged
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plots }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"PCoA\_BC"}\NormalTok{, }\StringTok{"MDS\_euclidean"}\NormalTok{, }\StringTok{"NMDS\_BC"}\NormalTok{, }\StringTok{"NMDS\_euclidean"}\NormalTok{),}
+\NormalTok{                plotReducedDim,}
+                \AttributeTok{object =}\NormalTok{ tse,}
+                \AttributeTok{colour\_by =} \StringTok{"Group"}\NormalTok{)}
+
+\NormalTok{((plots[[}\DecValTok{1}\NormalTok{]] }\SpecialCharTok{|}\NormalTok{ plots[[}\DecValTok{2}\NormalTok{]]) }\SpecialCharTok{/}\NormalTok{ (plots[[}\DecValTok{3}\NormalTok{]] }\SpecialCharTok{|}\NormalTok{ plots[[}\DecValTok{4}\NormalTok{]])) }\SpecialCharTok{+}
+  \FunctionTok{plot\_layout}\NormalTok{(}\AttributeTok{guides =} \StringTok{"collect"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+\centering
+\includegraphics{20_beta_diversity_files/figure-latex/plot-mds-nmds-comparison-1.png}
+\caption{\label{fig:plot-mds-nmds-comparison}Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.}
+\end{figure}
+
+The \emph{Unifrac} method is a special case, as it requires data on the
+relationship of features in form on a \texttt{phylo} tree. \texttt{calculateUnifrac}
+performs the calculation to return a \texttt{dist} object, which can again be
+used within \texttt{runMDS}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runMDS}\NormalTok{(tse,}
+              \AttributeTok{FUN =}\NormalTok{ mia}\SpecialCharTok{::}\NormalTok{calculateUnifrac,}
+              \AttributeTok{name =} \StringTok{"Unifrac"}\NormalTok{,}
+              \AttributeTok{tree =} \FunctionTok{rowTree}\NormalTok{(tse),}
+              \AttributeTok{ntop =} \FunctionTok{nrow}\NormalTok{(tse),}
+              \AttributeTok{assay.type =} \StringTok{"counts"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plotReducedDim}\NormalTok{(tse, }\StringTok{"Unifrac"}\NormalTok{,}
+               \AttributeTok{colour\_by =} \StringTok{"Group"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+\centering
+\includegraphics{20_beta_diversity_files/figure-latex/plot-unifrac-1.png}
+\caption{\label{fig:plot-unifrac}Unifrac distances scaled by MDS of the GlobalPattern dataset.}
+\end{figure}
+
+\hypertarget{other-ord-methods}{%
+\subsection{Other ordination methods}\label{other-ord-methods}}
+
+Other dimension reduction methods, such as PCA and UMAP, are inherited from the
+scater package.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runPCA}\NormalTok{(tse,}
+              \AttributeTok{name =} \StringTok{"PCA"}\NormalTok{,}
+              \AttributeTok{assay.type =} \StringTok{"counts"}\NormalTok{,}
+              \AttributeTok{ncomponents =} \DecValTok{10}\NormalTok{)}
+
+\FunctionTok{plotReducedDim}\NormalTok{(tse, }\StringTok{"PCA"}\NormalTok{,}
+               \AttributeTok{colour\_by =} \StringTok{"Group"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+\centering
+\includegraphics{20_beta_diversity_files/figure-latex/plot-pca-1.png}
+\caption{\label{fig:plot-pca}PCA plot on the GlobalPatterns data set containing sample from different sources.}
+\end{figure}
+
+As mentioned before, applicability of the different methods depends on your
+sample set and research question.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runUMAP}\NormalTok{(tse,}
+               \AttributeTok{name =} \StringTok{"UMAP"}\NormalTok{,}
+               \AttributeTok{assay.type =} \StringTok{"counts"}\NormalTok{,}
+               \AttributeTok{ncomponents =} \DecValTok{3}\NormalTok{)}
+
+\FunctionTok{plotReducedDim}\NormalTok{(tse, }\StringTok{"UMAP"}\NormalTok{,}
+               \AttributeTok{colour\_by =} \StringTok{"Group"}\NormalTok{,}
+               \AttributeTok{ncomponents =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}
+\centering
+\includegraphics{20_beta_diversity_files/figure-latex/plot-umap-1.png}
+\caption{\label{fig:plot-umap}UMAP plot on the GlobalPatterns data set containing sample from different sources.}
+\end{figure}
 
 \hypertarget{explained-variance}{%
-\section{Explained variance}\label{explained-variance}}
+\subsection{Explained variance}\label{explained-variance}}
 
 The percentage of explained variance is typically shown for PCA
 ordination plots. This quantifies the proportion of overall variance
@@ -4075,26 +4307,12 @@ difference in pairwise similarities between the data points in the
 original (high-dimensional) vs.~projected (low-dimensional) space.
 
 Hence, we propose that for PCoA and other ordination methods, users
-would report relative stress (varies in the unit interval; the smaller
-the better). This can be calculated as shown below. For further
-examples, check the \href{https://www.huber.embl.de/users/klaus/Teaching/statisticalMethods-lab.pdf}{note from Huber
-lab}.
+would report relative stress, which varies in the unit interval and is better
+if smaller. This can be calculated as shown below.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Example data}
-\FunctionTok{library}\NormalTok{(mia)}
-\FunctionTok{data}\NormalTok{(GlobalPatterns, }\AttributeTok{package=}\StringTok{"mia"}\NormalTok{)}
-
-\CommentTok{\# Data matrix (features x samples)}
-\NormalTok{tse }\OtherTok{\textless{}{-}}\NormalTok{ GlobalPatterns}
-\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{transformCounts}\NormalTok{(tse, }\AttributeTok{method =} \StringTok{"relabundance"}\NormalTok{)}
-
-\CommentTok{\# Add group information Feces yes/no}
-\FunctionTok{colData}\NormalTok{(tse)}\SpecialCharTok{$}\NormalTok{Group }\OtherTok{\textless{}{-}} \FunctionTok{colData}\NormalTok{(tse)}\SpecialCharTok{$}\NormalTok{SampleType}\SpecialCharTok{==}\StringTok{"Feces"}
-
 \CommentTok{\# Quantify dissimilarities in the original feature space}
-\FunctionTok{library}\NormalTok{(vegan)}
 \NormalTok{x }\OtherTok{\textless{}{-}} \FunctionTok{assay}\NormalTok{(tse, }\StringTok{"relabundance"}\NormalTok{) }\CommentTok{\# Pick relabunance assay separately}
 \NormalTok{d0 }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(}\FunctionTok{vegdist}\NormalTok{(}\FunctionTok{t}\NormalTok{(x), }\StringTok{"bray"}\NormalTok{))}
 
@@ -4107,238 +4325,75 @@ lab}.
 
 \CommentTok{\# Calculate stress i.e. relative difference in the original and}
 \CommentTok{\# projected dissimilarities}
-\NormalTok{stress }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{((dp }\SpecialCharTok{{-}}\NormalTok{ d0)}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}\SpecialCharTok{/}\FunctionTok{sum}\NormalTok{(d0}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
+\NormalTok{stress }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{((dp }\SpecialCharTok{{-}}\NormalTok{ d0)}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{) }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(d0}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-Shepard plot visualizes the original versus projected (ordination)
-dissimilarities between the data points:
+A Shepard plot visualizes the original versus the ordinated dissimilarity
+between the observations.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{ord }\OtherTok{\textless{}{-}} \FunctionTok{order}\NormalTok{(}\FunctionTok{as.vector}\NormalTok{(d0))}
 \NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{d0 =} \FunctionTok{as.vector}\NormalTok{(d0)[ord],}
-                  \AttributeTok{dmds =} \FunctionTok{as.vector}\NormalTok{(dp)[ord])}
+                 \AttributeTok{dmds =} \FunctionTok{as.vector}\NormalTok{(dp)[ord])}
 
-\FunctionTok{library}\NormalTok{(ggplot2)}
-\FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ d0, }\AttributeTok{y =}\NormalTok{ dmds), }\AttributeTok{data=}\NormalTok{df) }\SpecialCharTok{+} 
-       \FunctionTok{geom\_smooth}\NormalTok{() }\SpecialCharTok{+}
-       \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+}       
-       \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Shepard plot"}\NormalTok{,}
+\FunctionTok{ggplot}\NormalTok{(df, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ d0, }\AttributeTok{y =}\NormalTok{ dmds)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+}    
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Shepard plot"}\NormalTok{,}
        \AttributeTok{x =} \StringTok{"Original distance"}\NormalTok{,}
-       \AttributeTok{y =} \StringTok{"MDS distance"}\NormalTok{,       }
-            \AttributeTok{subtitle =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Stress:"}\NormalTok{, }\FunctionTok{round}\NormalTok{(stress, }\DecValTok{2}\NormalTok{))) }\SpecialCharTok{+}
+       \AttributeTok{y =} \StringTok{"MDS distance"}\NormalTok{,   }
+       \AttributeTok{subtitle =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Stress:"}\NormalTok{, }\FunctionTok{round}\NormalTok{(stress, }\DecValTok{2}\NormalTok{))) }\SpecialCharTok{+}
   \FunctionTok{theme\_bw}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
 \includegraphics{20_beta_diversity_files/figure-latex/shepard-1.png}
 
-\hypertarget{community-comparisons-by-beta-diversity-analysis}{%
-\section{Community comparisons by beta diversity analysis}\label{community-comparisons-by-beta-diversity-analysis}}
+\hypertarget{supervized-ordination}{%
+\section{Supervized ordination}\label{supervized-ordination}}
 
-A typical comparison of community composition starts with a visual
-comparison of the groups on a 2D ordination.
+dbRDA is a supervized counterpart of PCoA, that is, it takes into account the
+covariates specified by the user to maximize the variance with respect to the
+them. The result shows how much each covariate affects beta diversity. The table
+below illustrates the relation between supervized and unsupervized ordination
+methods.
 
-Then we estimate relative abundances and MDS ordination based on
-Bray-Curtis (BC) dissimilarity between the groups, and visualize the
-results.
+\begin{longtable}[]{@{}
+  >{\centering\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3506}}
+  >{\centering\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3117}}
+  >{\centering\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3377}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\centering
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+supervized ordination
+\end{minipage} & \begin{minipage}[b]{\linewidth}\centering
+unsupervized ordination
+\end{minipage} \\
+\midrule()
+\endhead
+Euclidean distance & RDA & PCA \\
+& & \\
+non-Euclidean distance & dbRDA & PCoA \\
+\bottomrule()
+\end{longtable}
 
-In the following examples dissimilarities are calculated by
-functions supplied to the \texttt{FUN} argument. This function can be defined by
-the user. It must return a \texttt{dist} function, which can then be used to
-calculate reduced dimensions either via ordination methods (such as MDS
-or NMDS), and the results can be stored in the \texttt{reducedDim}.
-
-This entire process is wrapped in the \texttt{runMDS} and \texttt{runNMDS}
-functions.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(scater)}
-
-\CommentTok{\# Bray{-}Curtis is usually applied to relative abundances}
-\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{transformCounts}\NormalTok{(tse, }\AttributeTok{method =} \StringTok{"relabundance"}\NormalTok{)}
-\CommentTok{\# Perform PCoA}
-\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runMDS}\NormalTok{(tse, }\AttributeTok{FUN =}\NormalTok{ vegan}\SpecialCharTok{::}\NormalTok{vegdist, }\AttributeTok{method =} \StringTok{"bray"}\NormalTok{, }\AttributeTok{name =} \StringTok{"PCoA\_BC"}\NormalTok{, }\AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-Sample similarities can be visualized on a lower-dimensional display
-(typically 2D) using the \texttt{plotReducedDim} function in the \texttt{scater}
-package. This provides also further tools to incorporate additional
-information using variations in color, shape or size. Are there
-visible differences between the groups?
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Create ggplot object}
-\NormalTok{p }\OtherTok{\textless{}{-}} \FunctionTok{plotReducedDim}\NormalTok{(tse, }\StringTok{"PCoA\_BC"}\NormalTok{, }\AttributeTok{colour\_by =} \StringTok{"Group"}\NormalTok{)}
-
-\CommentTok{\# Add explained variance for each axis}
-\NormalTok{e }\OtherTok{\textless{}{-}} \FunctionTok{attr}\NormalTok{(}\FunctionTok{reducedDim}\NormalTok{(tse, }\StringTok{"PCoA\_BC"}\NormalTok{), }\StringTok{"eig"}\NormalTok{);}
-\NormalTok{rel\_eig }\OtherTok{\textless{}{-}}\NormalTok{ e}\SpecialCharTok{/}\FunctionTok{sum}\NormalTok{(e[e}\SpecialCharTok{\textgreater{}}\DecValTok{0}\NormalTok{])          }
-\NormalTok{p }\OtherTok{\textless{}{-}}\NormalTok{ p }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \FunctionTok{paste}\NormalTok{(}\StringTok{"PCoA 1 ("}\NormalTok{, }\FunctionTok{round}\NormalTok{(}\DecValTok{100} \SpecialCharTok{*}\NormalTok{ rel\_eig[[}\DecValTok{1}\NormalTok{]],}\DecValTok{1}\NormalTok{), }\StringTok{"\%"}\NormalTok{, }\StringTok{")"}\NormalTok{, }\AttributeTok{sep =} \StringTok{""}\NormalTok{),}
-              \AttributeTok{y =} \FunctionTok{paste}\NormalTok{(}\StringTok{"PCoA 2 ("}\NormalTok{, }\FunctionTok{round}\NormalTok{(}\DecValTok{100} \SpecialCharTok{*}\NormalTok{ rel\_eig[[}\DecValTok{2}\NormalTok{]],}\DecValTok{1}\NormalTok{), }\StringTok{"\%"}\NormalTok{, }\StringTok{")"}\NormalTok{, }\AttributeTok{sep =} \StringTok{""}\NormalTok{))}
-
-\FunctionTok{print}\NormalTok{(p)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}
-\centering
-\includegraphics{20_beta_diversity_files/figure-latex/plot-mds-bray-curtis-1.png}
-\caption{\label{fig:plot-mds-bray-curtis}MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset.}
-\end{figure}
-
-With additional tools from the \texttt{ggplot2} universe, comparisons can be
-performed informing on the applicability to visualize sample similarities in a
-meaningful way.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runMDS}\NormalTok{(tse, }\AttributeTok{FUN =}\NormalTok{ vegan}\SpecialCharTok{::}\NormalTok{vegdist, }\AttributeTok{name =} \StringTok{"MDS\_euclidean"}\NormalTok{,}
-             \AttributeTok{method =} \StringTok{"euclidean"}\NormalTok{, }\AttributeTok{assay.type =} \StringTok{"counts"}\NormalTok{)}
-\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runNMDS}\NormalTok{(tse, }\AttributeTok{FUN =}\NormalTok{ vegan}\SpecialCharTok{::}\NormalTok{vegdist, }\AttributeTok{name =} \StringTok{"NMDS\_BC"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## initial  value 47.733208 
-## iter   5 value 33.853364
-## iter  10 value 32.891200
-## final  value 32.823570 
-## converged
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runNMDS}\NormalTok{(tse, }\AttributeTok{FUN =}\NormalTok{ vegan}\SpecialCharTok{::}\NormalTok{vegdist, }\AttributeTok{name =} \StringTok{"NMDS\_euclidean"}\NormalTok{,}
-               \AttributeTok{method =} \StringTok{"euclidean"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## initial  value 31.882673 
-## final  value 31.882673 
-## converged
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{plots }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"PCoA\_BC"}\NormalTok{, }\StringTok{"MDS\_euclidean"}\NormalTok{, }\StringTok{"NMDS\_BC"}\NormalTok{, }\StringTok{"NMDS\_euclidean"}\NormalTok{),}
-\NormalTok{                plotReducedDim,}
-                \AttributeTok{object =}\NormalTok{ tse,}
-                \AttributeTok{colour\_by =} \StringTok{"Group"}\NormalTok{)}
-
-\FunctionTok{library}\NormalTok{(patchwork)}
-\NormalTok{plots[[}\DecValTok{1}\NormalTok{]] }\SpecialCharTok{+}\NormalTok{ plots[[}\DecValTok{2}\NormalTok{]] }\SpecialCharTok{+}\NormalTok{ plots[[}\DecValTok{3}\NormalTok{]] }\SpecialCharTok{+}\NormalTok{ plots[[}\DecValTok{4}\NormalTok{]] }\SpecialCharTok{+}
-  \FunctionTok{plot\_layout}\NormalTok{(}\AttributeTok{guides =} \StringTok{"collect"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}
-\centering
-\includegraphics{20_beta_diversity_files/figure-latex/plot-mds-nmds-comparison-1.png}
-\caption{\label{fig:plot-mds-nmds-comparison}Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.}
-\end{figure}
-
-The \emph{Unifrac} method is a special case, as it requires data on the
-relationship of features in form on a \texttt{phylo} tree. \texttt{calculateUnifrac}
-performs the calculation to return a \texttt{dist} object, which can again be
-used within \texttt{runMDS}.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(scater)}
-\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runMDS}\NormalTok{(tse, }\AttributeTok{FUN =}\NormalTok{ mia}\SpecialCharTok{::}\NormalTok{calculateUnifrac, }\AttributeTok{name =} \StringTok{"Unifrac"}\NormalTok{,}
-              \AttributeTok{tree =} \FunctionTok{rowTree}\NormalTok{(tse),}
-              \AttributeTok{ntop =} \FunctionTok{nrow}\NormalTok{(tse),}
-             \AttributeTok{assay.type =} \StringTok{"counts"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{plotReducedDim}\NormalTok{(tse, }\StringTok{"Unifrac"}\NormalTok{, }\AttributeTok{colour\_by =} \StringTok{"Group"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}
-\centering
-\includegraphics{20_beta_diversity_files/figure-latex/plot-unifrac-1.png}
-\caption{\label{fig:plot-unifrac}Unifrac distances scaled by MDS of the GlobalPattern dataset.}
-\end{figure}
-
-\hypertarget{other-ord-methods}{%
-\section{Other ordination methods}\label{other-ord-methods}}
-
-Other dimension reduction methods, such as \texttt{PCA}, \texttt{t-SNE} and \texttt{UMAP} are
-inherited directly from the \texttt{scater} package.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runPCA}\NormalTok{(tse, }\AttributeTok{name =} \StringTok{"PCA"}\NormalTok{, }\AttributeTok{assay.type =} \StringTok{"counts"}\NormalTok{, }\AttributeTok{ncomponents =} \DecValTok{10}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{plotReducedDim}\NormalTok{(tse, }\StringTok{"PCA"}\NormalTok{, }\AttributeTok{colour\_by =} \StringTok{"Group"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}
-\centering
-\includegraphics{20_beta_diversity_files/figure-latex/plot-pca-1.png}
-\caption{\label{fig:plot-pca}PCA plot on the GlobalPatterns data set containing sample from different sources.}
-\end{figure}
-
-As mentioned before, applicability of the different methods depends on your
-sample set.
-
-FIXME: let us switch to UMAP for the examples?
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runTSNE}\NormalTok{(tse, }\AttributeTok{name =} \StringTok{"TSNE"}\NormalTok{, }\AttributeTok{assay.type =} \StringTok{"counts"}\NormalTok{, }\AttributeTok{ncomponents =} \DecValTok{3}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{plotReducedDim}\NormalTok{(tse, }\StringTok{"TSNE"}\NormalTok{, }\AttributeTok{colour\_by =} \StringTok{"Group"}\NormalTok{, }\AttributeTok{ncomponents =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}
-\centering
-\includegraphics{20_beta_diversity_files/figure-latex/plot-tsne-1.png}
-\caption{\label{fig:plot-tsne}t-SNE plot on the GlobalPatterns data set containing sample from different sources.}
-\end{figure}
-
-As a final note, \texttt{mia} provides functions for the evaluation of additional dissimilarity indices, such as:
-* \texttt{calculateJSD}, \texttt{runJSD} (Jensen-Shannon divergence)
-* \texttt{calculateNMDS}, \texttt{plotNMDS} (non-metric multi-dimensional scaling)
-* \texttt{calculateCCA}, \texttt{runCCA} (Canonical Correspondence Analysis)
-* \texttt{calculateRDA}, \texttt{runRDA} (Redundancy Analysis)
-* \texttt{calculateOverlap}, \texttt{runOverlap} ()
-* \texttt{calculateDPCoA}, \texttt{runDPCoA} (Double Principal Coordinate Analysis)
-
-Redundancy analysis is similar to PCA, however, it takes into account covariates.
-It aims to maximize the variance in respect of covariates. The results shows how much
-each covariate affects.
+We demonstrate the usage of dbRDA with the enterotype TreeSE, where samples
+correspond to patients. The colData contains the clinical status of each patient
+as well as a few covariates such as their gender and age, which can be included
+in the supervized model together with the clinical status, the main outcome variable.
+dbRDA can be perfomed with the \texttt{calculateRDA} function, which lies at the center
+of the following workflow.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Load packages}
-\FunctionTok{library}\NormalTok{(vegan)}
 \FunctionTok{library}\NormalTok{(stringr)}
-\FunctionTok{library}\NormalTok{(knitr)}
-
 
 \CommentTok{\# Load data}
-\FunctionTok{data}\NormalTok{(enterotype, }\AttributeTok{package=}\StringTok{"mia"}\NormalTok{)}
+\FunctionTok{data}\NormalTok{(}\StringTok{"enterotype"}\NormalTok{, }\AttributeTok{package =} \StringTok{"mia"}\NormalTok{)}
+
 \CommentTok{\# Covariates that are being analyzed}
 \NormalTok{variable\_names }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"ClinicalStatus"}\NormalTok{, }\StringTok{"Gender"}\NormalTok{, }\StringTok{"Age"}\NormalTok{)}
 
@@ -4349,8 +4404,12 @@ each covariate affects.
 \NormalTok{formula }\OtherTok{\textless{}{-}} \FunctionTok{as.formula}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(}\StringTok{"assay \textasciitilde{} "}\NormalTok{, }\FunctionTok{str\_c}\NormalTok{(variable\_names, }\AttributeTok{collapse =} \StringTok{" + "}\NormalTok{)) )}
 
 \CommentTok{\# \# Perform RDA}
-\NormalTok{rda }\OtherTok{\textless{}{-}} \FunctionTok{calculateRDA}\NormalTok{(enterotype, }\AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{,}
-                    \AttributeTok{formula =}\NormalTok{ formula, }\AttributeTok{distance =} \StringTok{"bray"}\NormalTok{, }\AttributeTok{na.action =}\NormalTok{ na.exclude)}
+\NormalTok{rda }\OtherTok{\textless{}{-}} \FunctionTok{calculateRDA}\NormalTok{(enterotype,}
+                    \AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{,}
+                    \AttributeTok{formula =}\NormalTok{ formula,}
+                    \AttributeTok{distance =} \StringTok{"bray"}\NormalTok{,}
+                    \AttributeTok{na.action =}\NormalTok{ na.exclude)}
+
 \CommentTok{\# Get the rda object}
 \NormalTok{rda }\OtherTok{\textless{}{-}} \FunctionTok{attr}\NormalTok{(rda, }\StringTok{"rda"}\NormalTok{)}
 \CommentTok{\# Calculate p{-}value and variance for whole model}
@@ -4405,7 +4464,7 @@ each covariate affects.
 \NormalTok{rda\_info[[}\StringTok{"Homogeneity p{-}value (NULL hyp: distinct/homogeneous {-}{-}\textgreater{} permanova suitable)"}\NormalTok{]] }\OtherTok{\textless{}{-}}
 \NormalTok{    homogeneity}
 
-\FunctionTok{kable}\NormalTok{(rda\_info)}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(rda\_info)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -4429,8 +4488,6 @@ Residual & 30 & 2.8757 & NA & NA & 3.991 & 0.7205 & NA\\
 \begin{Highlighting}[]
 \CommentTok{\# Load ggord for plotting}
 \FunctionTok{library}\NormalTok{(ggord)}
-\FunctionTok{library}\NormalTok{(ggplot2)}
-
 
 \CommentTok{\# Since na.exclude was used, if there were rows missing information, they were }
 \CommentTok{\# dropped off. Subset coldata so that it matches with rda.}
@@ -4492,151 +4549,165 @@ Residual & 30 & 2.8757 & NA & NA & 3.991 & 0.7205 & NA\\
 
 \includegraphics{20_beta_diversity_files/figure-latex/microbiome_RDA2-1.png}
 
-From RDA plot, we can see that only age has significant affect on microbial profile.
+From RDA plot we can see that only age has significant affect on microbial profile.
+
+\hypertarget{case-studies}{%
+\section{Case studies}\label{case-studies}}
 
 \hypertarget{pcoa-genus}{%
-\section{Visualizing the most dominant genus on PCoA}\label{pcoa-genus}}
+\subsubsection{Visualizing the most dominant genus on PCoA}\label{pcoa-genus}}
 
-In this section we visualize most dominant genus on PCoA. A similar visualization was proposed by Salosensaari et al. \citeyearpar{Salosensaari2021}.
-
-Let us agglomerate the data at a Genus level and getting the dominant taxa per sample.
+In this section, we visualize the most dominant genus on PCoA. A similar
+visualization was proposed by \citeyearpar{Salosensaari2021}. First, we agglomerate the
+data at the Genus level and get the dominant taxa per sample.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Agglomerate to genus level}
-\NormalTok{tse\_Genus }\OtherTok{\textless{}{-}} \FunctionTok{agglomerateByRank}\NormalTok{(tse, }\AttributeTok{rank=}\StringTok{"Genus"}\NormalTok{)}
+\NormalTok{tse\_genus }\OtherTok{\textless{}{-}} \FunctionTok{agglomerateByRank}\NormalTok{(tse,}
+                               \AttributeTok{rank =} \StringTok{"Genus"}\NormalTok{)}
+
 \CommentTok{\# Convert to relative abundances}
-\NormalTok{tse\_Genus }\OtherTok{\textless{}{-}} \FunctionTok{transformCounts}\NormalTok{(tse, }\AttributeTok{method =} \StringTok{"relabundance"}\NormalTok{, }\AttributeTok{assay.type=}\StringTok{"counts"}\NormalTok{)}
+\NormalTok{tse\_genus }\OtherTok{\textless{}{-}} \FunctionTok{transformCounts}\NormalTok{(tse,}
+                             \AttributeTok{method =} \StringTok{"relabundance"}\NormalTok{,}
+                             \AttributeTok{assay.type =} \StringTok{"counts"}\NormalTok{)}
+
 \CommentTok{\# Add info on dominant genus per sample}
-\NormalTok{tse\_Genus }\OtherTok{\textless{}{-}} \FunctionTok{addPerSampleDominantTaxa}\NormalTok{(tse\_Genus, }\AttributeTok{assay.type=}\StringTok{"relabundance"}\NormalTok{, }\AttributeTok{name =} \StringTok{"dominant\_taxa"}\NormalTok{)}
+\NormalTok{tse\_genus }\OtherTok{\textless{}{-}} \FunctionTok{addPerSampleDominantTaxa}\NormalTok{(tse\_genus,}
+                                      \AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{,}
+                                      \AttributeTok{name =} \StringTok{"dominant\_taxa"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-Performing PCoA with Bray-Curtis dissimilarity.
+Next, we perform PCoA with Bray-Curtis dissimilarity.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{tse\_Genus }\OtherTok{\textless{}{-}} \FunctionTok{runMDS}\NormalTok{(tse\_Genus, }\AttributeTok{FUN =}\NormalTok{ vegan}\SpecialCharTok{::}\NormalTok{vegdist,}
-              \AttributeTok{name =} \StringTok{"PCoA\_BC"}\NormalTok{, }\AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{)}
+\NormalTok{tse\_genus }\OtherTok{\textless{}{-}} \FunctionTok{runMDS}\NormalTok{(tse\_genus,}
+                    \AttributeTok{FUN =}\NormalTok{ vegan}\SpecialCharTok{::}\NormalTok{vegdist,}
+                    \AttributeTok{name =} \StringTok{"PCoA\_BC"}\NormalTok{,}
+                    \AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-Getting top taxa and visualizing the abundance on PCoA.
+Finally, we get the top taxa and and visualize their abundances on PCoA. Note
+that A 3D interactive version of the plot below can be found in \ref{extras}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Getting the top taxa}
-\NormalTok{top\_taxa }\OtherTok{\textless{}{-}} \FunctionTok{getTopTaxa}\NormalTok{(tse\_Genus,}\AttributeTok{top =} \DecValTok{6}\NormalTok{, }\AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{)}
+\NormalTok{top\_taxa }\OtherTok{\textless{}{-}} \FunctionTok{getTopTaxa}\NormalTok{(tse\_genus,}
+                       \AttributeTok{top =} \DecValTok{6}\NormalTok{,}
+                       \AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{)}
 
 \CommentTok{\# Naming all the rest of non top{-}taxa as "Other"}
-\NormalTok{most\_abundant }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\FunctionTok{colData}\NormalTok{(tse\_Genus)}\SpecialCharTok{$}\NormalTok{dominant\_taxa,}
-                   \ControlFlowTok{function}\NormalTok{(x)\{}\ControlFlowTok{if}\NormalTok{ (x }\SpecialCharTok{\%in\%}\NormalTok{ top\_taxa) \{x\} }\ControlFlowTok{else}\NormalTok{ \{}\StringTok{"Other"}\NormalTok{\}\})}
+\NormalTok{most\_abundant }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\FunctionTok{colData}\NormalTok{(tse\_genus)}\SpecialCharTok{$}\NormalTok{dominant\_taxa,}
+                        \ControlFlowTok{function}\NormalTok{(x) \{}\ControlFlowTok{if}\NormalTok{ (x }\SpecialCharTok{\%in\%}\NormalTok{ top\_taxa) \{x\} }\ControlFlowTok{else}\NormalTok{ \{}\StringTok{"Other"}\NormalTok{\}\})}
 
 \CommentTok{\# Storing the previous results as a new column within colData}
-\FunctionTok{colData}\NormalTok{(tse\_Genus)}\SpecialCharTok{$}\NormalTok{most\_abundant }\OtherTok{\textless{}{-}} \FunctionTok{as.character}\NormalTok{(most\_abundant)}
+\FunctionTok{colData}\NormalTok{(tse\_genus)}\SpecialCharTok{$}\NormalTok{most\_abundant }\OtherTok{\textless{}{-}} \FunctionTok{as.character}\NormalTok{(most\_abundant)}
 
 \CommentTok{\# Calculating percentage of the most abundant}
 \NormalTok{most\_abundant\_freq }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(}\FunctionTok{as.character}\NormalTok{(most\_abundant))}
-\NormalTok{most\_abundant\_percent }\OtherTok{\textless{}{-}} \FunctionTok{round}\NormalTok{(most\_abundant\_freq}\SpecialCharTok{/}\FunctionTok{sum}\NormalTok{(most\_abundant\_freq)}\SpecialCharTok{*}\DecValTok{100}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+\NormalTok{most\_abundant\_percent }\OtherTok{\textless{}{-}} \FunctionTok{round}\NormalTok{(most\_abundant\_freq }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(most\_abundant\_freq) }\SpecialCharTok{*} \DecValTok{100}\NormalTok{, }\DecValTok{1}\NormalTok{)}
 
 \CommentTok{\# Retrieving the explained variance}
-\NormalTok{e }\OtherTok{\textless{}{-}} \FunctionTok{attr}\NormalTok{(}\FunctionTok{reducedDim}\NormalTok{(tse\_Genus, }\StringTok{"PCoA\_BC"}\NormalTok{), }\StringTok{"eig"}\NormalTok{);}
-\NormalTok{var\_explained }\OtherTok{\textless{}{-}}\NormalTok{ e}\SpecialCharTok{/}\FunctionTok{sum}\NormalTok{(e[e}\SpecialCharTok{\textgreater{}}\DecValTok{0}\NormalTok{])}\SpecialCharTok{*}\DecValTok{100}
+\NormalTok{e }\OtherTok{\textless{}{-}} \FunctionTok{attr}\NormalTok{(}\FunctionTok{reducedDim}\NormalTok{(tse\_genus, }\StringTok{"PCoA\_BC"}\NormalTok{), }\StringTok{"eig"}\NormalTok{)}
+\NormalTok{var\_explained }\OtherTok{\textless{}{-}}\NormalTok{ e }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(e[e }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{]) }\SpecialCharTok{*} \DecValTok{100}
+
+\CommentTok{\# Define colors for visualization}
+\NormalTok{my\_colors }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"black"}\NormalTok{, }\StringTok{"blue"}\NormalTok{, }\StringTok{"lightblue"}\NormalTok{, }\StringTok{"darkgray"}\NormalTok{, }\StringTok{"magenta"}\NormalTok{, }\StringTok{"darkgreen"}\NormalTok{, }\StringTok{"red"}\NormalTok{)}
 
 \CommentTok{\# Visualization}
-\NormalTok{plot }\OtherTok{\textless{}{-}}\FunctionTok{plotReducedDim}\NormalTok{(tse\_Genus,}\StringTok{"PCoA\_BC"}\NormalTok{, }\AttributeTok{colour\_by =} \StringTok{"most\_abundant"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"black"}\NormalTok{, }\StringTok{"blue"}\NormalTok{, }\StringTok{"lightblue"}\NormalTok{, }\StringTok{"darkgray"}\NormalTok{, }\StringTok{"magenta"}\NormalTok{, }\StringTok{"darkgreen"}\NormalTok{, }\StringTok{"red"}\NormalTok{),}
-                      \AttributeTok{labels=}\FunctionTok{paste0}\NormalTok{(}\FunctionTok{names}\NormalTok{(most\_abundant\_percent),}\StringTok{"("}\NormalTok{,most\_abundant\_percent,}\StringTok{"\%)"}\NormalTok{))}\SpecialCharTok{+}
-  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x=}\FunctionTok{paste}\NormalTok{(}\StringTok{"PC 1 ("}\NormalTok{,}\FunctionTok{round}\NormalTok{(var\_explained[}\DecValTok{1}\NormalTok{],}\DecValTok{1}\NormalTok{),}\StringTok{"\%)"}\NormalTok{),}
-       \AttributeTok{y=}\FunctionTok{paste}\NormalTok{(}\StringTok{"PC 2 ("}\NormalTok{,}\FunctionTok{round}\NormalTok{(var\_explained[}\DecValTok{2}\NormalTok{],}\DecValTok{1}\NormalTok{),}\StringTok{"\%)"}\NormalTok{),}
-       \AttributeTok{color=}\StringTok{""}\NormalTok{)}
+\NormalTok{plot }\OtherTok{\textless{}{-}}\FunctionTok{plotReducedDim}\NormalTok{(tse\_genus, }\StringTok{"PCoA\_BC"}\NormalTok{,}
+                      \AttributeTok{colour\_by =} \StringTok{"most\_abundant"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =}\NormalTok{ my\_colors,}
+                      \AttributeTok{labels =} \FunctionTok{paste0}\NormalTok{(}\FunctionTok{names}\NormalTok{(most\_abundant\_percent), }\StringTok{"("}\NormalTok{, most\_abundant\_percent, }\StringTok{"\%)"}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \FunctionTok{paste}\NormalTok{(}\StringTok{"PC 1 ("}\NormalTok{, }\FunctionTok{round}\NormalTok{(var\_explained[}\DecValTok{1}\NormalTok{], }\DecValTok{1}\NormalTok{), }\StringTok{"\%)"}\NormalTok{),}
+       \AttributeTok{y =} \FunctionTok{paste}\NormalTok{(}\StringTok{"PC 2 ("}\NormalTok{, }\FunctionTok{round}\NormalTok{(var\_explained[}\DecValTok{2}\NormalTok{], }\DecValTok{1}\NormalTok{), }\StringTok{"\%)"}\NormalTok{),}
+       \AttributeTok{color =} \StringTok{""}\NormalTok{)}
+
 \NormalTok{plot}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{20_beta_diversity_files/figure-latex/unnamed-chunk-7-1.png}
+\includegraphics{20_beta_diversity_files/figure-latex/unnamed-chunk-5-1.png}
 
-Note: A 3D interactive version of the earlier plot can be found from \ref{extras}.
-
-Similarly let's visualize and compare the sub-population.
+Similarly, we visualize and compare the sub-population.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Calculating the frequencies and percentages for both categories}
-\NormalTok{freq\_TRUE }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(}\FunctionTok{as.character}\NormalTok{(most\_abundant[}\FunctionTok{colData}\NormalTok{(tse\_Genus)}\SpecialCharTok{$}\NormalTok{Group}\SpecialCharTok{==}\ConstantTok{TRUE}\NormalTok{]))}
-\NormalTok{freq\_FALSE }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(}\FunctionTok{as.character}\NormalTok{(most\_abundant[}\FunctionTok{colData}\NormalTok{(tse\_Genus)}\SpecialCharTok{$}\NormalTok{Group}\SpecialCharTok{==}\ConstantTok{FALSE}\NormalTok{]))}
-\NormalTok{percent\_TRUE }\OtherTok{\textless{}{-}} \FunctionTok{round}\NormalTok{(freq\_TRUE}\SpecialCharTok{/}\FunctionTok{sum}\NormalTok{(freq\_TRUE)}\SpecialCharTok{*}\DecValTok{100}\NormalTok{, }\DecValTok{1}\NormalTok{)}
-\NormalTok{percent\_FALSE }\OtherTok{\textless{}{-}} \FunctionTok{round}\NormalTok{(freq\_FALSE}\SpecialCharTok{/}\FunctionTok{sum}\NormalTok{(freq\_FALSE)}\SpecialCharTok{*}\DecValTok{100}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+\NormalTok{freq\_TRUE }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(}\FunctionTok{as.character}\NormalTok{(most\_abundant[}\FunctionTok{colData}\NormalTok{(tse\_genus)}\SpecialCharTok{$}\NormalTok{Group }\SpecialCharTok{==} \ConstantTok{TRUE}\NormalTok{]))}
+\NormalTok{freq\_FALSE }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(}\FunctionTok{as.character}\NormalTok{(most\_abundant[}\FunctionTok{colData}\NormalTok{(tse\_genus)}\SpecialCharTok{$}\NormalTok{Group }\SpecialCharTok{==} \ConstantTok{FALSE}\NormalTok{]))}
+\NormalTok{percent\_TRUE }\OtherTok{\textless{}{-}} \FunctionTok{round}\NormalTok{(freq\_TRUE }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(freq\_TRUE) }\SpecialCharTok{*} \DecValTok{100}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+\NormalTok{percent\_FALSE }\OtherTok{\textless{}{-}} \FunctionTok{round}\NormalTok{(freq\_FALSE }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(freq\_FALSE) }\SpecialCharTok{*} \DecValTok{100}\NormalTok{, }\DecValTok{1}\NormalTok{)}
 
 \CommentTok{\# Visualization}
-\FunctionTok{plotReducedDim}\NormalTok{(tse\_Genus[,}\FunctionTok{colData}\NormalTok{(tse\_Genus)}\SpecialCharTok{$}\NormalTok{Group}\SpecialCharTok{==}\ConstantTok{TRUE}\NormalTok{],}
-                          \StringTok{"PCoA\_BC"}\NormalTok{, }\AttributeTok{colour\_by =} \StringTok{"most\_abundant"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"black"}\NormalTok{, }\StringTok{"blue"}\NormalTok{, }\StringTok{"lightblue"}\NormalTok{, }\StringTok{"darkgray"}\NormalTok{, }\StringTok{"magenta"}\NormalTok{, }\StringTok{"darkgreen"}\NormalTok{, }\StringTok{"red"}\NormalTok{),}
-                      \AttributeTok{labels=}\FunctionTok{paste0}\NormalTok{(}\FunctionTok{names}\NormalTok{(percent\_TRUE),}\StringTok{"("}\NormalTok{,percent\_TRUE,}\StringTok{"\%)"}\NormalTok{))}\SpecialCharTok{+}
-  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x=}\FunctionTok{paste}\NormalTok{(}\StringTok{"PC 1 ("}\NormalTok{,}\FunctionTok{round}\NormalTok{(var\_explained[}\DecValTok{1}\NormalTok{],}\DecValTok{1}\NormalTok{),}\StringTok{"\%)"}\NormalTok{),}
-       \AttributeTok{y=}\FunctionTok{paste}\NormalTok{(}\StringTok{"PC 2 ("}\NormalTok{,}\FunctionTok{round}\NormalTok{(var\_explained[}\DecValTok{2}\NormalTok{],}\DecValTok{1}\NormalTok{),}\StringTok{"\%)"}\NormalTok{),}
-       \AttributeTok{title =} \StringTok{"Group = TRUE"}\NormalTok{, }\AttributeTok{color=}\StringTok{""}\NormalTok{)}
+\FunctionTok{plotReducedDim}\NormalTok{(tse\_genus[ , }\FunctionTok{colData}\NormalTok{(tse\_genus)}\SpecialCharTok{$}\NormalTok{Group }\SpecialCharTok{==} \ConstantTok{TRUE}\NormalTok{], }\StringTok{"PCoA\_BC"}\NormalTok{,}
+               \AttributeTok{colour\_by =} \StringTok{"most\_abundant"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =}\NormalTok{ my\_colors,}
+                      \AttributeTok{labels =} \FunctionTok{paste0}\NormalTok{(}\FunctionTok{names}\NormalTok{(percent\_TRUE), }\StringTok{"("}\NormalTok{, percent\_TRUE, }\StringTok{"\%)"}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \FunctionTok{paste}\NormalTok{(}\StringTok{"PC 1 ("}\NormalTok{, }\FunctionTok{round}\NormalTok{(var\_explained[}\DecValTok{1}\NormalTok{], }\DecValTok{1}\NormalTok{), }\StringTok{"\%)"}\NormalTok{),}
+       \AttributeTok{y =} \FunctionTok{paste}\NormalTok{(}\StringTok{"PC 2 ("}\NormalTok{, }\FunctionTok{round}\NormalTok{(var\_explained[}\DecValTok{2}\NormalTok{], }\DecValTok{1}\NormalTok{), }\StringTok{"\%)"}\NormalTok{),}
+       \AttributeTok{title =} \StringTok{"Group = TRUE"}\NormalTok{, }\AttributeTok{color =} \StringTok{""}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{20_beta_diversity_files/figure-latex/unnamed-chunk-8-1.png}
+\includegraphics{20_beta_diversity_files/figure-latex/unnamed-chunk-6-1.png}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{plotReducedDim}\NormalTok{(tse\_Genus[,}\FunctionTok{colData}\NormalTok{(tse\_Genus)}\SpecialCharTok{$}\NormalTok{Group}\SpecialCharTok{==}\ConstantTok{FALSE}\NormalTok{],}
-                          \StringTok{"PCoA\_BC"}\NormalTok{, }\AttributeTok{colour\_by =} \StringTok{"most\_abundant"}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"black"}\NormalTok{, }\StringTok{"blue"}\NormalTok{, }\StringTok{"lightblue"}\NormalTok{, }\StringTok{"darkgray"}\NormalTok{, }\StringTok{"magenta"}\NormalTok{, }\StringTok{"darkgreen"}\NormalTok{, }\StringTok{"red"}\NormalTok{),}
-                      \AttributeTok{labels=}\FunctionTok{paste0}\NormalTok{(}\FunctionTok{names}\NormalTok{(percent\_FALSE),}\StringTok{"("}\NormalTok{,percent\_FALSE,}\StringTok{"\%)"}\NormalTok{))}\SpecialCharTok{+}
-  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x=}\FunctionTok{paste}\NormalTok{(}\StringTok{"PC 1 ("}\NormalTok{,}\FunctionTok{round}\NormalTok{(var\_explained[}\DecValTok{1}\NormalTok{],}\DecValTok{1}\NormalTok{),}\StringTok{"\%)"}\NormalTok{),}
-       \AttributeTok{y=}\FunctionTok{paste}\NormalTok{(}\StringTok{"PC 2 ("}\NormalTok{,}\FunctionTok{round}\NormalTok{(var\_explained[}\DecValTok{2}\NormalTok{],}\DecValTok{1}\NormalTok{),}\StringTok{"\%)"}\NormalTok{),}
-       \AttributeTok{title =} \StringTok{"Group = FALSE"}\NormalTok{, }\AttributeTok{color=}\StringTok{""}\NormalTok{)}
+\FunctionTok{plotReducedDim}\NormalTok{(tse\_genus[ , }\FunctionTok{colData}\NormalTok{(tse\_genus)}\SpecialCharTok{$}\NormalTok{Group }\SpecialCharTok{==} \ConstantTok{FALSE}\NormalTok{], }\StringTok{"PCoA\_BC"}\NormalTok{,}
+               \AttributeTok{colour\_by =} \StringTok{"most\_abundant"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_colour\_manual}\NormalTok{(}\AttributeTok{values =}\NormalTok{ my\_colors,}
+                      \AttributeTok{labels =} \FunctionTok{paste0}\NormalTok{(}\FunctionTok{names}\NormalTok{(percent\_FALSE), }\StringTok{"("}\NormalTok{, percent\_FALSE, }\StringTok{"\%)"}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \FunctionTok{paste}\NormalTok{(}\StringTok{"PC 1 ("}\NormalTok{, }\FunctionTok{round}\NormalTok{(var\_explained[}\DecValTok{1}\NormalTok{], }\DecValTok{1}\NormalTok{), }\StringTok{"\%)"}\NormalTok{),}
+       \AttributeTok{y =} \FunctionTok{paste}\NormalTok{(}\StringTok{"PC 2 ("}\NormalTok{, }\FunctionTok{round}\NormalTok{(var\_explained[}\DecValTok{2}\NormalTok{], }\DecValTok{1}\NormalTok{), }\StringTok{"\%)"}\NormalTok{),}
+       \AttributeTok{title =} \StringTok{"Group = FALSE"}\NormalTok{, }\AttributeTok{color =} \StringTok{""}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{20_beta_diversity_files/figure-latex/unnamed-chunk-8-2.png}
+\includegraphics{20_beta_diversity_files/figure-latex/unnamed-chunk-6-2.png}
 
 \hypertarget{dbrda-workflow}{%
 \subsection{Testing differences in community composition between sample groups}\label{dbrda-workflow}}
 
-The permutational analysis of variance (PERMANOVA) \citep{Anderson2001} is
-a widely used non-parametric multivariate method that can be used to
+Permutational Analysis of Variance (PERMANOVA; \citeyearpar{Anderson2001}) is
+a widely used non-parametric multivariate method that aims to
 estimate the actual statistical significance of differences in the
-observed community composition between two groups of
-samples.
+observed community composition between two groups of samples.
 
-PERMANOVA evaluates the hypothesis that the centroids and dispersion
-of the community are equivalent between the compared groups. A small
-p-value indicates that the compared groups have, on average, a
-different community composition.
+PERMANOVA tests the hypothesis that the centroids and dispersion
+of the community are equivalent between the compared groups. A p-value
+smaller than the significance threshold indicates that the groups have a
+different community composition. This method is implemented with the
+\href{https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis}{\texttt{adonis2}}
+function from the vegan package.
 
-This method is implemented in the \texttt{vegan} package in the function
-\href{https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis}{\texttt{adonis2}}.
+By default, the argument \texttt{by} is set to \texttt{"terms"}, in which the order of variables
+in the formula matters. In this case, each variable is analyzed sequentially, and
+the result is different when more than 1 variable is introduced and their order differs.
+Therefore, it is recommended to set \texttt{by\ =\ "margin"}, which specifies that the
+marginal effect of each variable is analyzed individually. You can view a
+comparison between the two designs in chapter \ref{compare-permanova}.
 
-\textbf{Note:}
-
-It is recommended to \texttt{by\ =\ "margin"}. It specifies that each variable's marginal
-effect is analyzed individually.
-
-When \texttt{by\ =\ "terms"} (the default) the order of variables matters;
-each variable is analyzed sequentially, and the result is different when more than 1 variable is
-introduced and their order is differs. (Check \href{https://microbiome.github.io/OMA/extras.html\#permanova-comparison}{comparison})
-
-We can perform PERMANOVA with \texttt{adonis2} function or by first performing distance-based
-redundancy analysis (dbRDA), and then applying permutational test for result of
-redundancy analysis. Advantage of the latter approach is that by doing so we can get
-coefficients: how much each taxa affect to the result.
+We can perform PERMANOVA either with \texttt{adonis2} function or by first performing
+dbRDA and then applying permutational test its results. An advantage of the latter
+approach is that by doing so we can get coefficients: how much each taxa affects
+the variation between communities.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(vegan)}
 \CommentTok{\# Agglomerate data to Species level}
-\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{agglomerateByRank}\NormalTok{(tse, }\AttributeTok{rank =} \StringTok{"Species"}\NormalTok{)}
+\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{agglomerateByRank}\NormalTok{(tse,}
+                         \AttributeTok{rank =} \StringTok{"Species"}\NormalTok{)}
 
 \CommentTok{\# Set seed for reproducibility}
 \FunctionTok{set.seed}\NormalTok{(}\DecValTok{1576}\NormalTok{)}
 \CommentTok{\# We choose 99 random permutations. Consider applying more (999 or 9999) in your}
 \CommentTok{\# analysis. }
-\NormalTok{permanova }\OtherTok{\textless{}{-}} \FunctionTok{adonis2}\NormalTok{(}\FunctionTok{t}\NormalTok{(}\FunctionTok{assay}\NormalTok{(tse,}\StringTok{"relabundance"}\NormalTok{)) }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Group,}
+\NormalTok{permanova }\OtherTok{\textless{}{-}} \FunctionTok{adonis2}\NormalTok{(}\FunctionTok{t}\NormalTok{(}\FunctionTok{assay}\NormalTok{(tse, }\StringTok{"relabundance"}\NormalTok{)) }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Group,}
                      \AttributeTok{by =} \StringTok{"margin"}\NormalTok{, }\CommentTok{\# each term (here only \textquotesingle{}Group\textquotesingle{}) analyzed individually}
                      \AttributeTok{data =} \FunctionTok{colData}\NormalTok{(tse),}
                      \AttributeTok{method =} \StringTok{"euclidean"}\NormalTok{,}
@@ -4654,7 +4725,7 @@ coefficients: how much each taxa affect to the result.
                         \AttributeTok{permutations =} \DecValTok{99}\NormalTok{)}
 
 \CommentTok{\# Get p{-}values}
-\NormalTok{p\_values }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{( permanova[}\StringTok{"Group"}\NormalTok{, }\StringTok{"Pr(\textgreater{}F)"}\NormalTok{], permanova2[}\StringTok{"Group"}\NormalTok{, }\StringTok{"Pr(\textgreater{}F)"}\NormalTok{] )}
+\NormalTok{p\_values }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(permanova[}\StringTok{"Group"}\NormalTok{, }\StringTok{"Pr(\textgreater{}F)"}\NormalTok{], permanova2[}\StringTok{"Group"}\NormalTok{, }\StringTok{"Pr(\textgreater{}F)"}\NormalTok{])}
 \NormalTok{p\_values }\OtherTok{\textless{}{-}}\FunctionTok{as.data.frame}\NormalTok{(p\_values)}
 \FunctionTok{rownames}\NormalTok{(p\_values) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"adonis2"}\NormalTok{, }\StringTok{"dbRDA+anova.cca"}\NormalTok{)}
 \NormalTok{p\_values}
@@ -4678,33 +4749,33 @@ composition.
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Add taxa info}
-\FunctionTok{sppscores}\NormalTok{(dbrda) }\OtherTok{\textless{}{-}} \FunctionTok{t}\NormalTok{(}\FunctionTok{assay}\NormalTok{(tse,}\StringTok{"relabundance"}\NormalTok{))}
+\FunctionTok{sppscores}\NormalTok{(dbrda) }\OtherTok{\textless{}{-}} \FunctionTok{t}\NormalTok{(}\FunctionTok{assay}\NormalTok{(tse, }\StringTok{"relabundance"}\NormalTok{))}
 \CommentTok{\# Get coefficients}
 \NormalTok{coef }\OtherTok{\textless{}{-}}\NormalTok{ dbrda}\SpecialCharTok{$}\NormalTok{CCA}\SpecialCharTok{$}\NormalTok{v}
 \CommentTok{\# Get the taxa with biggest weights}
-\NormalTok{top.coef }\OtherTok{\textless{}{-}} \FunctionTok{head}\NormalTok{( coef[}\FunctionTok{rev}\NormalTok{(}\FunctionTok{order}\NormalTok{(}\FunctionTok{abs}\NormalTok{(coef))), , }\AttributeTok{drop =} \ConstantTok{FALSE}\NormalTok{], }\DecValTok{20}\NormalTok{)}
+\NormalTok{top.coef }\OtherTok{\textless{}{-}} \FunctionTok{head}\NormalTok{(coef[}\FunctionTok{rev}\NormalTok{(}\FunctionTok{order}\NormalTok{(}\FunctionTok{abs}\NormalTok{(coef))), , }\AttributeTok{drop =} \ConstantTok{FALSE}\NormalTok{], }\DecValTok{20}\NormalTok{)}
 \CommentTok{\# Sort weights in increasing order}
-\NormalTok{top.coef }\OtherTok{\textless{}{-}}\NormalTok{ top.coef[ }\FunctionTok{order}\NormalTok{(top.coef), ]}
+\NormalTok{top.coef }\OtherTok{\textless{}{-}}\NormalTok{ top.coef[}\FunctionTok{order}\NormalTok{(top.coef), ]}
 \CommentTok{\# Get top names}
-\NormalTok{top\_names }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(top.coef)[ }\FunctionTok{order}\NormalTok{(}\FunctionTok{abs}\NormalTok{(top.coef), }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{) ]}
+\NormalTok{top\_names }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(top.coef)[}\FunctionTok{order}\NormalTok{(}\FunctionTok{abs}\NormalTok{(top.coef), }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{)]}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{ggplot}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x =}\NormalTok{ top.coef,}
-                  \AttributeTok{y =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{names}\NormalTok{(top.coef),}
-                                      \FunctionTok{unique}\NormalTok{(}\FunctionTok{names}\NormalTok{(top.coef)))),}
-        \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{y =}\NormalTok{ y)) }\SpecialCharTok{+}
-    \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat=}\StringTok{"identity"}\NormalTok{) }\SpecialCharTok{+}
-    \FunctionTok{labs}\NormalTok{(}\AttributeTok{x=}\StringTok{""}\NormalTok{,}\AttributeTok{y=}\StringTok{""}\NormalTok{,}\AttributeTok{title=}\StringTok{"Top Taxa"}\NormalTok{) }\SpecialCharTok{+}
-    \FunctionTok{theme\_bw}\NormalTok{()}
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x =}\NormalTok{ top.coef,}
+                 \AttributeTok{y =} \FunctionTok{factor}\NormalTok{(}\FunctionTok{names}\NormalTok{(top.coef), }\FunctionTok{unique}\NormalTok{(}\FunctionTok{names}\NormalTok{(top.coef))))}
+
+\FunctionTok{ggplot}\NormalTok{(df, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{y =}\NormalTok{ y)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{stat =} \StringTok{"identity"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{""}\NormalTok{, }\AttributeTok{y=} \StringTok{""}\NormalTok{, }\AttributeTok{title =} \StringTok{"Top Taxa"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_bw}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
 \includegraphics{20_beta_diversity_files/figure-latex/plot-top-coef-anova-1.png}
 
-In the above example, the largest differences between the two groups
+In the example above, the largest differences between the two groups
 can be attributed to \emph{Genus:Bacteroides} (elevated in the first
 group) and \emph{Family:Ruminococcaceae} (elevated in the second
 group), and many other co-varying species.
@@ -4719,7 +4790,7 @@ method than in PERMANOVA.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{anova}\NormalTok{( }\FunctionTok{betadisper}\NormalTok{(}\FunctionTok{vegdist}\NormalTok{(}\FunctionTok{t}\NormalTok{(}\FunctionTok{assay}\NormalTok{(tse, }\StringTok{"counts"}\NormalTok{))), }\FunctionTok{colData}\NormalTok{(tse)}\SpecialCharTok{$}\NormalTok{Group) )}
+\FunctionTok{anova}\NormalTok{(}\FunctionTok{betadisper}\NormalTok{(}\FunctionTok{vegdist}\NormalTok{(}\FunctionTok{t}\NormalTok{(}\FunctionTok{assay}\NormalTok{(tse, }\StringTok{"counts"}\NormalTok{))), }\FunctionTok{colData}\NormalTok{(tse)}\SpecialCharTok{$}\NormalTok{Group))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -4737,10 +4808,40 @@ method than in PERMANOVA.
 If the groups have similar dispersion, PERMANOVA can be seen as an
 appropriate choice for comparing community compositions.
 
-\hypertarget{further-reading}{%
-\section{Further reading}\label{further-reading}}
+\hypertarget{summary}{%
+\section{Summary}\label{summary}}
+
+As a final note, we provide a comprehensive list of functions for the evaluation
+of dissimilarity indices available in the mia and scater packages. The
+\texttt{calculate} methods return a reducedDim object as an output, whereas the \texttt{run}
+methods store the reducedDim object into the specified TreeSE.
 
 \begin{itemize}
+\tightlist
+\item
+  Canonical Correspondence Analysis (CCA): \texttt{calculateCCA} and \texttt{runCCA}
+\item
+  dbRDA: \texttt{calculateRDA} and \texttt{runRDA}
+\item
+  Double Principal Coordinate Analysis (DPCoA): \texttt{calculateDPCoA} and \texttt{runDPCoA}
+\item
+  Jensen-Shannon Divergence (JSD): \texttt{calculateJSD} and \texttt{runJSD}
+\item
+  MDS: \texttt{calculateMDS} and \texttt{runMDS}
+\item
+  NMDS: \texttt{calculateNMDS} and \texttt{runNMDS}
+\item
+  Overlap: \texttt{calculateOverlap} and \texttt{runOverlap}
+\item
+  t-distributed Stochastic Neighbor Embedding (t-SNE): \texttt{calculateTSNE} and \texttt{runTSNE}
+\item
+  UMAP: \texttt{calculateUMAP} and \texttt{runUMAP}
+\end{itemize}
+
+For more information on clustering samples by beta diversity, you can refer to:
+
+\begin{itemize}
+\tightlist
 \item
   \href{http://bioconductor.org/books/release/OSCA/clustering.html}{How to extract information from clusters}
 \item
@@ -4748,7 +4849,7 @@ appropriate choice for comparing community compositions.
 \end{itemize}
 
 \hypertarget{microbiome-community}{%
-\chapter{Community composition}\label{microbiome-community}}
+\chapter{Community Composition}\label{microbiome-community}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -5059,7 +5160,7 @@ explained in chapter \ref{viz-chapter} along with the \texttt{pheatmap}
 package for clustered heatmaps.
 
 \hypertarget{clustering}{%
-\chapter{Community typing (clustering)}\label{clustering}}
+\chapter{Community Typing (Clustering)}\label{clustering}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -6297,51 +6398,46 @@ Link:
 \end{itemize}
 
 \hypertarget{differential-abundance}{%
-\chapter{Differential abundance}\label{differential-abundance}}
+\chapter{Differential Abundance}\label{differential-abundance}}
 
 \hypertarget{differential-abundance-analysis}{%
 \section{Differential abundance analysis}\label{differential-abundance-analysis}}
 
-This section provides an overview and examples of \emph{differential
-abundance analysis (DAA)} based on one of the \href{https://microbiome.github.io/mia/reference/mia-datasets.html}{openly available
-datasets}
-in mia to illustrate how to perform differential abundance analysis
-(DAA). DAA identifies differences in the abundances of individual
-taxonomic groups between two or more groups (e.g.~treatment vs
-control). This can be performed at any phylogenetic level.
+This section provides an introduction to Differential Abundance Analysis (DAA),
+which is used to identify differences in the abundances of individual taxa (at
+any taxonomic level) between two or more groups, such as treatment and control.
+Here, we demonstrate its implementation on peerj13075, one of the \protect\hyperlink{package-data}{mia datasets}.
 
-We perform DAA to identify biomarkers and/or gain understanding of a
-complex system by looking at its isolated components. For example,
-identifying that a bacterial taxon is different between a patient
-group with disease \emph{X} vs a healthy control group might lead to
-important insights into the pathophysiology. Changes in the microbiota
-might be cause or a consequence of a disease. Either way, it can
-help to understand the system as a whole. Be aware that this approach
-has also been criticized recently \citep{Quinn2021}.
+The goal of DAA is to identify biomarkers of a certain phenotype or condition,
+and gain understanding of a complex system by looking at its isolated components.
+For example, the identification of a bacterial taxon that is differentially
+abundant between healthy patients and diseased patients can lead to important
+insights into the pathophysiology of the disease. In other words, differentially
+abundant taxa can be involved in the dynamics of the disease, which in turn helps
+understand the system as a whole. Despite its relevance in current research,
+the DAA approach has also been subject to debate \citep{Quinn2021}.
 
 \hypertarget{examples-and-tools}{%
 \subsection{Examples and tools}\label{examples-and-tools}}
 
-Due to the complex data characteristics of microbiome sequencing data,
-differential abundance analysis of microbiome data faces many
-statistical challenges \citep{Yang2022}, including:
+Due to the size and complexity of microbiome sequencing data, in this field
+DAA still faces several statistical challenges \citep{Yang2022}. These include:
 
 \begin{itemize}
 \item
-  Highly variable. The abundance of a specific taxon could range over
+  High variability. The abundance of a specific taxon could range over
   several orders of magnitude.
 \item
-  Zero-inflated. In a typical microbiome dataset, more than 70\% of the
+  Zero-inflation. In a typical microbiome dataset, more than 70\% of the
   values are zeros. Zeros could be due to either physical absence
   (structural zeros) or insufficient sampling effort (sampling zeros).
 \item
-  Compositional. Increase or decrease in the (absolute) abundance of
+  Compositionality. Increase or decrease in the (absolute) abundance of
   one taxon at the sampling site will lead to apparent changes in the
   relative abundances of other taxa in the sample.
 \end{itemize}
 
-As summarized in \citet{Yang2022}, to address the above statistical
-chanllenegs:
+As a consequence, the following approaches have been developed:
 
 \begin{itemize}
 \item
@@ -7302,26 +7398,26 @@ package. We try to predict the diet type based on the data.
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    11   8
-##      Veg      12  16
+##      Mixed    10   9
+##      Veg      13  15
 ##                                         
-##                Accuracy : 0.574         
-##                  95% CI : (0.422, 0.717)
+##                Accuracy : 0.532         
+##                  95% CI : (0.381, 0.679)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.233         
+##     P-Value [Acc > NIR] : 0.443         
 ##                                         
-##                   Kappa : 0.145         
+##                   Kappa : 0.06          
 ##                                         
-##  Mcnemar's Test P-Value : 0.502         
+##  Mcnemar's Test P-Value : 0.522         
 ##                                         
-##             Sensitivity : 0.478         
-##             Specificity : 0.667         
-##          Pos Pred Value : 0.579         
-##          Neg Pred Value : 0.571         
+##             Sensitivity : 0.435         
+##             Specificity : 0.625         
+##          Pos Pred Value : 0.526         
+##          Neg Pred Value : 0.536         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.234         
+##          Detection Rate : 0.213         
 ##    Detection Prevalence : 0.404         
-##       Balanced Accuracy : 0.572         
+##       Balanced Accuracy : 0.530         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -8722,7 +8818,7 @@ components to install include:
 \hypertarget{material}{%
 \section{Study material}\label{material}}
 
-We encourage to familiarize with the material and test examples in advance.
+We encourage to familiarize with the material and test examples in advance:
 
 \begin{itemize}
 \item
@@ -8734,9 +8830,9 @@ We encourage to familiarize with the material and test examples in advance.
 \item
   \href{https://microbiome.github.io/OMA/}{Orchestrating Microbiome Analysis with R/Bioconductor (OMA)} (this book)
 \item
-  \href{https://microbiome.github.io/OMA/exercises.html}{Exercises} for self-study
+  \protect\hyperlink{exercises}{Exercises} for self-study
 \item
-  \href{https://microbiome.github.io/OMA/resources.html}{Resources} and links to complementary external material
+  \protect\hyperlink{resources}{Resources} and links to complementary external material
 \end{itemize}
 
 \hypertarget{support-and-resources}{%
@@ -8897,11 +8993,11 @@ project \citep{Huber2015}.
 \begin{itemize}
 \tightlist
 \item
-  \href{https://geomoer.github.io/moer-base-r/cheatsheet.html}{base R and RStudio cheatsheets}
+  \href{https://geomoer.github.io/moer-base-r/cheatsheet.html}{Base R and RStudio cheatsheets}
 \item
   \href{https://www.rstudio.com/resources/cheatsheets/}{Package-specific cheatsheets}
 \item
-  \href{https://ggplot2.tidyverse.org/}{visualization with ggplot2}
+  \href{https://ggplot2.tidyverse.org/}{Visualization with ggplot2}
 \item
   \href{http://www.cookbook-r.com/Graphs/}{R graphics cookbook}
 \end{itemize}
@@ -8972,11 +9068,11 @@ Being able to use Quarto in R partly relies on your previous knowledge of Rmarkd
 \begin{itemize}
 \tightlist
 \item
-  \href{https://www.markdowntutorial.com/}{online tutorial}
+  \href{https://www.markdowntutorial.com/}{Online tutorial}
 \item
-  \href{https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf}{cheatsheet}
+  \href{https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf}{Cheatsheet}
 \item
-  \href{https://rmarkdown.rstudio.com/lesson-1.html}{documentation}
+  \href{https://rmarkdown.rstudio.com/lesson-1.html}{Documentation}
 \item
   \href{https://rpubs.com/marschmi/RMarkdown}{Dr.~C Titus Brown's tutorial}
 \end{itemize}
@@ -9231,7 +9327,7 @@ you can find more information about parameter definition and usage.
 TreeSE containers represent the working unit of the mia package. In the
 following exercises we learn how to construct, explore and work with them.
 A few demo datasets can be imported with mia and can be accessed as explained
-in chapter \ref(example-data).
+in chapter \ref{example-data}.
 
 \hypertarget{construct-TreeSE}{%
 \subsection{Constructing a data object}\label{construct-TreeSE}}
@@ -9244,14 +9340,14 @@ of OKeefeDSData from the microbiomeDataSets package as an example dataset.
 \tightlist
 \item
   Download the files with the prefix \emph{DS} from
-  \href{https://github.com/JuliaTurkuDataScience/MicrobiomeAnalysis.jl/tree/main/src/assets}{this directory}
+  \href{https://github.com/JuliaTurkuDataScience/MicrobiomeAnalysis.jl/tree/main/src/assets}{this directory}.
 \item
   Read in the csv files with \texttt{read.csv} and store them into the variables
-  \texttt{assays}, \texttt{rowdata} and \texttt{coldata}, respectively
+  \texttt{assays}, \texttt{rowdata} and \texttt{coldata}, respectively.
 \item
   Create a TreeSE from the individual components with \texttt{TreeSummarizedExperiment}.
   Note that the function requires three arguments: assays, rowData and colData,
-  to which you can give the appropriate item
+  to which you can give the appropriate item.
 \item
   Check that importing is done correctly. E.g., choose random samples and features,
   and check that their values equal between raw files and TreeSE.
@@ -9317,7 +9413,7 @@ You can also check the \href{https://microbiome.github.io/mia/reference/index.ht
 \end{enumerate}
 
 Well done! You can now locate and retrieve individual assays of a TreeSE. If you
-got stuck, you can refer to chapter \ref(assay-slot) of this book.
+got stuck, you can refer to chapter \ref{assay-slot} of this book.
 
 \hypertarget{sample-information}{%
 \subsection{Sample information}\label{sample-information}}
@@ -9338,7 +9434,7 @@ got stuck, you can refer to chapter \ref(assay-slot) of this book.
 \item
   Get the abundances of all features for a specific sample, such as \texttt{ID34}. You
   can access sample-specific abundances with \texttt{getAbundaceSample}, specifying the
-  desired \texttt{sample\_id} and \texttt{assay.type}
+  desired \texttt{sample\_id} and \texttt{assay.type}.
 \end{enumerate}
 
 \hypertarget{feature-information}{%
@@ -9351,7 +9447,7 @@ got stuck, you can refer to chapter \ref(assay-slot) of this book.
   Import the mia package, load peerj13075 with \texttt{data} and store it into a
   variable named \texttt{tse}.
 \item
-  Check the names of the features with \texttt{rownames}
+  Check the names of the features with \texttt{rownames}.
 \item
   List the information on features available in rowData with \texttt{names}.
 \item
@@ -9366,13 +9462,13 @@ got stuck, you can refer to chapter \ref(assay-slot) of this book.
   \texttt{addTaxonomyTree} and display its content with \texttt{taxonomyTree} and \texttt{ggtree}.
 \end{enumerate}
 
-If you got stuck, you can look up chapters \ref(pick-specific) and \ref(fly-tree)
+If you got stuck, you can look up chapters \ref{pick-specific} and \ref{fly-tree}
 on how to pick specific abundances and generate row trees, respectively.
 
 \hypertarget{other-elements}{%
 \subsection{Other elements}\label{other-elements}}
 
-Try to extract some of the other TreeSE elements listed in chapter \ref(containers).
+Try to extract some of the other TreeSE elements listed in chapter \ref{containers}.
 However, such data are not always included.
 
 \begin{enumerate}
@@ -9543,12 +9639,12 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformCo
   experiments as altExps. This can be performed automatically with \texttt{splitByRanks}.
 \item
   Check the names of the generated altExps with \texttt{altExpNames} and retrieve a
-  complete list with \texttt{altExps}
+  complete list with \texttt{altExps}.
 \item
   Retrieve the data agglomerated by genus from the corresponding \texttt{altExp}.
   As for assays, you can access the desired altExp by name or index.
 \item
-  \textbf{Extra}: Split the data based on other features (\texttt{splitOn})
+  \textbf{Extra}: Split the data based on other features with \texttt{splitOn}.
 \end{enumerate}
 
 \hypertarget{community-alpha-diversity}{%
@@ -10091,7 +10187,7 @@ with the readily disassembled components of HintikkaXOData.
   of them into a variable named \texttt{\textless{}assay\ name\textgreater{}\_assays}.
 \item
   Create one TreeSE from each assays object with the \texttt{TreeSummarizedExperiment}
-  function, as explained in the exercise \ref{construct-TreeSE}.
+  function, as explained in \protect\hyperlink{construct-TreeSE}{this exercise}.
 \item
   Read in the sampleData and the sampleMap and store them into the
   variables \texttt{sample\_data} and \texttt{sample\_map}, respectively.
@@ -10157,8 +10253,8 @@ the correlation method and significance testing used for the analysis.
 \hypertarget{extras}{%
 \chapter{Extra material}\label{extras}}
 
-\hypertarget{permanova-comparison}{%
-\section{PERMANOVA comparison}\label{permanova-comparison}}
+\hypertarget{compare-permanova}{%
+\section{PERMANOVA comparison}\label{compare-permanova}}
 
 Here we present two possible uses of the \texttt{adonis2} function which performs PERMANOVA. The
 optional argument \texttt{by} has an effect on the statistical outcome, so its two options are

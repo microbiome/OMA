@@ -1,4 +1,4 @@
-# Community diversity {#community-diversity}
+# Community Diversity {#community-diversity}
 
 <script>
 document.addEventListener("click", function (event) {

@@ -1,4 +1,4 @@
-# Community typing (clustering) {#clustering}
+# Community Typing (Clustering) {#clustering}
 
 <script>
 document.addEventListener("click", function (event) {

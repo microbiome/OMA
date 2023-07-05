@@ -1,4 +1,4 @@
-# Community composition {#microbiome-community}
+# Community Composition {#microbiome-community}
 
 <script>
 document.addEventListener("click", function (event) {
