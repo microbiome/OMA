@@ -1,0 +1,664 @@
+# Network learning and inference {#network-inference}
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+Estimating microbial association networks is a further common exploratory data analysis approach aimed at understanding the complex interplay of microbial communities in their natural habitat. Microbial networks consist of nodes, representing microbial species or taxa, and edges, expressing their association. The mathematical representation of a network is the adjacency matrix, which has a non-zero entry for each edge in the network. 
+
+A typical workflow for estimating a microbial network involves several analysis steps, including methods for zero handling, data normalization, and computing microbial associations. The inferred association matrix is then sparsified and transformed into an adjacency matrix. The resulting network can be analyzed using local network properties, such as centrality measures, or global measures that describe the overall structure of the network. Network plots provide further insight into the microbial community structure and allow for an exploratory analysis of the microbial relationships.
+
+Since microbial interactions are likely to change between conditions, e.g., between healthy individuals and patients, identifying network differences between groups is often an integral secondary analysis step. Differences can be detected visually by plotting the two networks side by side, or quantitatively using differential network analysis tools.
+
+All of the above steps are implemented in the R package NetCoMi [@peschel2021netcomi], which provides functionality for the complete workflow of constructing, analyzing, and comparing networks for microbiome data. In this section, we demonstrate the use of NetCoMi.
+
+
+## Intruduction to NetCoMi
+
+The package has a modular structure with a function for each step of the workflow. These are the main functions with their purpose and expected input:
+
+| Function               | Purpose                | Input
+|:----------------------:|:----------------------:|:----------------------:|
+| `netConstruct`       | Network construction   | Count matrix, phyloseq object, or association matrix|
+| `netAnalyze`         | Network analysis       | Object of class `microNet` returned by `netConstruct`|
+| `plot.microNetProps` | Network plotting       | Object of class `microNetProps` returned by `netAnalyze`|
+| `netCompare`         | Network comparison     | Object of class `microNetProps` returned by `netAnalyze`|
+| `diffnet`            | Differential network construction | Object of class `microNet` returned by `netConstruct`|
+
+
+We start by installing NetCoMi from GitHub and loading the necessary packages.
+
+```{r install-pkg, eval=FALSE}
+if(!require(NetCoMi)){
+  devtools::install_github("stefpeschel/NetCoMi", force = TRUE,
+                         dependencies = c("Depends", "Imports", "LinkingTo"),
+                         repos = c("https://cloud.r-project.org/",
+                                   BiocManager::repositories()))
+}
+```
+
+```{r load_packages, message=FALSE, warning=FALSE}
+library(NetCoMi)
+library(mia)
+library(phyloseq)
+
+```
+
+## Data preparation
+
+The PeerJ data set [@potbhare2022skin] is used in this example, which contains skin microbial profiles of 58 subjects. 
+
+```{r load_data}
+data("peerj13075", package = "mia")
+```
+
+Since NetCoMi expects either a count matrix or a phyloseq object as input, we first transform the data into a phyloseq object. This object contains the count matrix, the taxonomy table, and a list with metadata.
+
+```{r make_phyloseq}
+peerj_phy <- makePhyloseqFromTreeSE(peerj13075)
+peerj_phy
+head(tax_table(peerj_phy))
+```
+Since we want to construct the networks at genus level, we need to make the genus names unique. NetCoMi's function `renameTaxa` does this job for us by numerating duplicate names. 
+
+The function can also be used to rename missing genus names by replacing them with the names of higher taxonomic ranks. For this data set this step is not necessary as there are no missing genus names.
+
+```{r rename_taxa}
+# Check the genus names for duplicates
+any(duplicated(tax_table(peerj_phy)[, "genus"]))
+
+# Rename taxonomic table and make rank genus unique
+peerj_phy <- renameTaxa(peerj_phy, 
+                        pat = "<name>",
+                        numDupli = "genus",
+                        ranks = colnames(tax_table(peerj_phy)))
+
+any(duplicated(tax_table(peerj_phy)[, "genus"]))
+```
+## Analyzing a single network
+
+### Network construction
+
+We construct a single association network using SPRING [@yoon2019microbial] to estimate partial correlations between genera. In contrast to classical correlation measures such as Pearson's correlation coefficient, partial correlations can be interpreted as direct associations between microbes. Under certain conditions, two microbes with a partial correlation of zero can be considered conditionally independent.
+
+The data are filtered within `netConstruct` as follows:
+
+* Only samples with a total of at least 1000 reads are included (argument `filtSamp`).
+* Only the 50 most abundant taxa are included (argument `filtTax`).
+
+The argument `measure` defines the association or dissimilarity measure, in our case the SPRING approach. Additional arguments are passed to `SPRING` via `measurePar`. `nlambda` and `rep.num` are the length of the $\lambda$ vector and the repetition number of subsampling used for model selection.The "approx" method (multilinear approximation of latent correlations) is used to save runtime.
+
+Normalization and zero handling is done internally in `SPRING`, so we set `normMethod` and `zeroMethod` to "none".
+
+We also set `sparsMethod` to "none" because the SPRING approach includes model selection to obtain a sparse network. Therefore, no additional sparsification step is needed.
+
+The "signed" method is used to transform associations into dissimilarities (argument `dissFunc`). Thus, strongly negatively associated taxa have a high dissimilarity and conversely a low similarity, corresponding to low edge weights on the network plot.
+
+```{r netConstruct_single, eval=FALSE}
+peerj_net <- netConstruct(peerj_phy,
+                          taxRank = "genus",
+                          filtTax = "highestFreq",
+                          filtTaxPar = list(highestFreq  = 50),
+                          filtSamp = "totalReads",
+                          filtSampPar = list(totalReads = 1000),
+                          measure = "spring",
+                          measurePar = list(nlambda=30, 
+                                            rep.num=30,
+                                            Rmethod = "approx"),
+                          normMethod = "none", 
+                          zeroMethod = "none",
+                          sparsMethod = "none", 
+                          dissFunc = "signed",
+                          seed = 13075
+                          verbose = 3)
+```
+
+
+```{r, eval=FALSE, echo=FALSE}
+saveRDS(peerj_net, file = "general/network_files/peerj_net.rds")
+```
+
+
+```{r, echo=FALSE}
+peerj_net <- readRDS("general/network_files/peerj_net.rds")
+```
+
+`netConstruct` returns an object of the class `microNet`, which contains all matrices generated during network construction. These are the basis for the network analysis.
+
+The object also contains an edge list, giving each edge's estimated association, dissimilarity, and adjacency. Let's take a quick look at the edges with the highest and lowest edge weights:
+
+```{r}
+edgelist <- peerj_net$edgelist1[order(peerj_net$edgelist1$adja, decreasing = TRUE), ]
+head(edgelist)
+tail(edgelist)
+```
+
+### Network analysis
+
+The `microNet` object is now passed to `netAnalyze` to perform network analysis.
+
+The function computes several common network analysis measures such as centrality measures, cluster assignment, the graphlet correlation matrix, as well as global network measures like the average path length and the clustering coefficient.
+
+Here, `centrLCC` is set to `TRUE` meaning that centralities are calculated only 
+for nodes in the largest connected component (LCC). 
+
+Clusters are identified using greedy modularity optimization 
+(by `cluster_fast_greedy` from [`igraph`](https://igraph.org/r/) package).
+
+Hubs are nodes with an eigenvector centrality value above the empirical 
+95% quantile of all eigenvector centralities in the network (argument `hubPar`).
+
+`weightDeg` and `normDeg` are set to `FALSE` so that the degree of a node is
+simply the number of its adjacent nodes.
+
+By default, a heatmap of the Graphlet Correlation Matrix (GCM) is returned (with 
+graphlet correlations in the upper triangle and significance codes resulting 
+from Student's t-test in the lower triangle). 
+See `?calcGCM` and `?testGCM` for details.
+
+```{r netAnalyze_single, fig.width=7, fig.height=7, out.width='75%'}
+peerj_netprops <- netAnalyze(peerj_net, 
+                             centrLCC = TRUE,
+                             clustMethod = "cluster_fast_greedy",
+                             hubPar = "eigenvector",
+                             hubQuant = 0.95,
+                             weightDeg = FALSE, 
+                             normDeg = FALSE)
+```
+
+```{r summary_single}
+summary(peerj_netprops)
+```
+
+Interpretation of some of the results:
+
+* The largest connected component (LCC) has 35 nodes and the network contains 6 singletons.
+* 10 clusters have been identified, containing two to eight nodes.
+* The detected hub nodes are Citrobacter, Escherichia, and Salmonella, which by definition are the nodes with the highest eigenvector centrality.
+* These three genera do also have a high degree and closeness centrality, but a lower betweenness centrality.
+* The average path length is 3.56. This means that on average it takes 3.56 steps (step length is the average dissimilarity) to get from one node to another node in the network.
+* Low values of edge density and the connectivity measures indicate that the network is rather sparse and not robust to perturbations (i.e., removal of nodes or edges).
+
+### Network plot
+
+Further insight into the network structure can be gained by visualizing the network, which is done using NetCoMi's plot function. The help page can be accessed via `?plot.microNetProps`.
+
+#### Highlight node properties
+
+In the first plot, node colors and sizes are used to visualize certain network properties.
+
+Here is a short explanation of our argument configuration:
+
+* `layout = "spring"`: A force-directed layout is used, placing strongly connected nodes close together and nodes with less edge weight farther apart.
+* `repulsion = 0.98`: Default is 1. By decreasing the repulsion, nodes are placed farther apart.
+* `rmSingles = TRUE`: Singletons are removed.
+* `labelScale = FALSE`: Labels are not scaled by node size.
+* `nodeSize = "eigenvector"`: Nodes are scaled by eigenvector centrality.
+* `nodeSizeSpread = 3`: Node sizes are more similar if the value is decreased. This argument (in combination with cexNodes) is useful to enlarge small nodes while keeping the size of big nodes. Default is 4.
+* `nodeColor = "cluster"`: Node colors represent clusters.
+* `edgeTranspHigh = 20`: Edges with high edge weight are given some transparency so that node labels overlapping the edges are still readable.
+* `cex...`: Scaling of the node sizes, labels, title, etc.
+
+**Note:** Nodes are sometimes placed too close together so that the labels overlap. You may need to play around with the repulsion until you find a value where the labels are legible, but also the clusters are still well recognizable.
+
+```{r network_plot_single_cluster, fig.width=13, fig.height=10}
+plot(peerj_netprops,
+     layout = "spring",
+     repulsion = 0.98,
+     rmSingles = TRUE,
+     labelScale = FALSE,
+     nodeSize = "eigenvector",
+     nodeSizeSpread = 3,
+     nodeColor = "cluster", 
+     edgeTranspHigh = 20,
+     title1 = "Network on genus level", 
+     showTitle = TRUE,
+     cexTitle = 2.3,
+     cexNodes = 2,
+     cexLabels = 1,
+     cexHubLabels = 1.3,
+     mar = c(1, 3, 4, 8))
+
+legend(0.7, 1.1, cex = 1.7, title = "estimated correlation:",
+       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"), 
+       bty = "n", horiz = TRUE)
+```
+
+Since hubs are highlighted by default, we see at a glance that Escherichia, Citrobacter, and Salmonella are hub nodes. Strinking are also the strong associations between Achromobacter and Bhargavaea, between Citrobacter and Escherichia, and between Geobacillus and Virgibacillus, which we have already seen in the edge list.
+
+#### Highlight data features
+
+We now color nodes according to their phylum. The sizes of the nodes are scaled by the mclr-transformed abundances of the genera, since SPRING uses this transformation to account for compositionality.
+
+```{r network_plot_single_phylum, fig.width=15, fig.height=10}
+# Get phyla names
+taxtab <- as(tax_table(peerj_phy), "matrix")
+phyla <- gsub("p__", "", taxtab[, "phylum"])
+names(phyla) <- taxtab[, "genus"]
+
+# Assign low abundant phyla to a "Other" class
+low_abundant <- names(table(phyla)[table(phyla) <= 3])
+phyla[phyla %in% low_abundant] <- "Other"
+
+# Take a look at the table
+table(phyla)
+phyla <- as.factor(phyla)
+
+# Define phylum colors
+phylcol <- c("cyan", "blue3", "red", "lawngreen", "yellow", "deeppink", "orange")
+
+plot(peerj_netprops,
+     layout = "spring",
+     repulsion = 0.98,
+     rmSingles = TRUE,
+     labelScale = FALSE,
+     nodeSize = "mclr",
+     nodeColor = "feature", 
+     featVecCol = phyla, 
+     colorVec =  phylcol,
+     edgeTranspHigh = 20,
+     title1 = "Network on genus level", 
+     showTitle = TRUE,
+     cexTitle = 2.3,
+     cexNodes = 2,
+     cexLabels = 1,
+     cexHubLabels = 1.3,
+     mar = c(1, 10, 4, 6))
+
+# Add legends
+legend(0.7, 1.1, cex = 1.7, title = "estimated correlation:",
+       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"), 
+       bty = "n", horiz = TRUE)
+
+# Colors used in the legend should be equally transparent as in the plot
+phylcol_transp <- colToTransp(phylcol, 60)
+
+legend(-1.8, 1.1, cex = 1.7, pt.cex = 2.5, title = "Phylum:", 
+       legend=levels(phyla), col = phylcol_transp, bty = "n", pch = 16) 
+```
+
+## Differential network analysis
+
+In addition to the count matrix, the data set also includes information on the subjects' geographical location, gender, age and diet. 
+
+An interesting question to explore now is whether the skin microbiome differs between people whose diets are different.
+
+```{r sample_data}
+sampdata <- sample_data(peerj_phy)
+head(sampdata)
+table(sampdata$Diet)
+```
+
+We split the data set into two phyloseq objects: One with mixed diet subjects and one with vegetarian subjects. Both subsets have nearly the same sample size and are therefore comparable.
+
+```{r split_data}
+peerj_diet_mixed <- phyloseq::subset_samples(peerj_phy, Diet == "Mixed")
+peerj_diet_veg <- phyloseq::subset_samples(peerj_phy, Diet == "Veg")
+peerj_diet_mixed
+peerj_diet_veg
+```
+
+### Network construction
+
+The approach starts again with network construction and analysis, but this time we pass the two data sets to `netConstruct` to perform a network comparison.
+
+The `rep.num` argument is set to 10 to perform only 10 repetitions in the model selection approach. This speeds up the permutation tests performed later, and has a negligible effect for this data set.
+
+```{r netConstruct_diet, eval=FALSE}
+peerj_net_diet <- netConstruct(data = peerj_diet_mixed,
+                               data2 = peerj_diet_veg,
+                               taxRank = "genus",
+                               filtTax = "highestFreq",
+                               filtTaxPar = list(highestFreq  = 50),
+                               filtSamp = "totalReads",
+                               filtSampPar = list(totalReads = 1000),
+                               measure = "spring",
+                               measurePar = list(nlambda=30, 
+                                                 rep.num=10,
+                                                 Rmethod = "approx"),
+                               normMethod = "none", 
+                               zeroMethod = "none",
+                               sparsMethod = "none", 
+                               dissFunc = "signed",
+                               verbose = 3,
+                               seed = 13075)
+```
+
+```{r, eval=FALSE, echo=FALSE}
+saveRDS(peerj_net_diet, file = "general/network_files/peerj_net_diet.rds")
+```
+
+```{r, echo=FALSE}
+peerj_net_diet <- readRDS("general/network_files/peerj_net_diet.rds")
+```
+
+### Network analysis
+
+All network measures are now computed for both networks. Also, both GCMs are plotted together with a third matrix containing the differences between the GCMs and significance codes to test if the differences are significantly different from zero.
+
+```{r netAnalyze_diet, fig.width=10, fig.height=10}
+peerj_netprops_diet <- netAnalyze(peerj_net_diet, 
+                                  centrLCC = TRUE,
+                                  clustMethod = "cluster_fast_greedy",
+                                  hubPar = "eigenvector",
+                                  hubQuant = 0.95,
+                                  weightDeg = FALSE, 
+                                  normDeg = FALSE)
+```
+
+Only the correlation between the orbits O10 and O11 is significantly different between the two groups.
+
+```{r summary_diet}
+summary(peerj_netprops_diet, groupNames = c("Mixed diet", "Vegetarian"))
+```
+
+For each centrality measure, the five nodes with the highest centrality in each group are plotted by default.
+
+We notice some differences in the network properties. Using NetCoMi's `netCompare` function, we will later check if the differences are significant.
+
+### Network plot
+
+The network plots enable a visual comparison. We use the same configuration as before.
+
+```{r network_plot_diet_difflay, fig.width=17, fig.height=8}
+plot(peerj_netprops_diet,
+     layout = "spring",
+     repulsion = 0.96,
+     rmSingles = TRUE,
+     labelScale = FALSE,
+     nodeSize = "eigenvector",
+     nodeSizeSpread = 3,
+     nodeColor = "cluster", 
+     sameColThresh = 2,
+     edgeTranspHigh = 20,
+     title1 = "Mixed diet", 
+     title2 = "Vegetarian",
+     showTitle = TRUE,
+     cexTitle = 2,
+     cexNodes = 2.5,
+     cexLabels = 1.3,
+     cexHubLabels = 1.5,
+     mar = c(1, 4, 4, 4))
+
+# Overlay a transparent plot on which the legend is plotted
+par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), mar=c(0, 0, 0, 0), new=TRUE)
+plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
+
+legend(-0.2, -0.9, cex = 1.5, title = "estimated correlation:",
+       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"), 
+       bty = "n", horiz = TRUE)
+```
+
+The layout is computed separately for each network, making it difficult to visually compare certain associations. It is therefore recommended to use the same layout for both groups (argument `sameLayout`). Instead of simply copying one layout to the other network, we set `layoutGroup` to "union". This ensures that the nodes are placed as optimally as possible for both networks.
+
+```{r network_plot_diet_samelay, fig.width=17, fig.height=8}
+plot(peerj_netprops_diet,
+     layout = "spring",
+     sameLayout = TRUE,
+     layoutGroup = "union",
+     repulsion = 0.93,
+     rmSingles = TRUE,
+     labelScale = FALSE,
+     nodeSize = "eigenvector",
+     nodeSizeSpread = 3,
+     nodeColor = "cluster", 
+     sameColThresh = 2,
+     edgeTranspHigh = 20,
+     title1 = "Mixed diet", 
+     title2 = "Vegetarian",
+     showTitle = TRUE,
+     cexTitle = 2,
+     cexNodes = 2.5,
+     cexLabels = 1.3,
+     cexHubLabels = 1.5,
+     mar = c(1, 4, 4, 4))
+
+# Add legend
+par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), mar=c(0, 0, 0, 0), new=TRUE)
+plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
+legend(-0.2, -0.8, cex = 1.7, title = "estimated correlation:",
+       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"), 
+       bty = "n", horiz = TRUE)
+```
+
+Differences in the edge weights can now be seen at first glance. For example, Aeromonas and Salmonella are strongly associated in the vegetarian group, but not in the mixed diet group.
+
+Clusters must share at least two nodes (`sameColThresh` argument) to be colored equally in both networks. This is the case here for all clusters. However, there are some differences in the cluster assignments.
+
+As before, we also generate a network plot using phylum names to color the nodes and mclr-transformed abundances to scale the nodes.
+
+```{r network_plot_diet_phyla, fig.width=17, fig.height=8}
+plot(peerj_netprops_diet,
+     layout = "spring",
+     sameLayout = TRUE,
+     layoutGroup = "union",
+     repulsion = 0.93,
+     rmSingles = TRUE,
+     labelScale = FALSE,
+     nodeSize = "mclr",
+     nodeColor = "feature", 
+     featVecCol = phyla, 
+     colorVec =  phylcol,
+     edgeTranspHigh = 20,
+     title1 = "Mixed diet", 
+     title2 = "Vegetarian",
+     showTitle = TRUE,
+     cexTitle = 2,
+     cexNodes = 2.5,
+     cexLabels = 1.3,
+     cexHubLabels = 1.5,
+     mar = c(1, 4, 4, 4))
+
+# Add legends
+par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), mar=c(0, 0, 0, 0), new=TRUE)
+plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
+legend(-0.15, -0.8, cex = 1.7, title = "estimated correlation:",
+       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"), 
+       bty = "n", horiz = TRUE)
+legend(-0.15, 1.3, cex = 1.7, pt.cex = 2.5, title = "Phylum:", 
+       legend=levels(phyla), col = phylcol_transp, bty = "n", pch = 16) 
+```
+
+### Network comparison {#netcomp}
+
+`netCompare` provides a quantitative comparison of networks using comparative measures such as Jaccard's Index, Adjusted Rand Index, and permutation tests. 
+
+To test for statistical significance of differences in network properties, we perform permutation tests with 1000 permutations. Multiple CPU cores are used to save run time. The association matrices that are estimated for all permutations are stored in an external file. They can be used later for differential network construction, or `netCompare` can be rerun with different parameter settings.
+
+```{r netcomp_diet_permute, eval=FALSE}
+peerj_netcomp_diet <- netCompare(peerj_netprops_diet, 
+                                 permTest = TRUE,
+                                 nPerm = 1000,
+                                 cores = 6,
+                                 seed = 13075,
+                                 storeAssoPerm = TRUE,
+                                 fileStoreAssoPerm = "general/network_files/peerj_assoPerm",
+                                 verbose = TRUE)
+```
+
+```{r, eval=FALSE, echo=FALSE}
+saveRDS(peerj_netcomp_diet, file = "general/network_files/peerj_netcomp.rds")
+```
+
+
+```{r, echo=FALSE}
+peerj_netcomp_diet <- readRDS("general/network_files/peerj_netcomp.rds")
+```
+
+```{r summary_netcomp_diet}
+summary(peerj_netcomp_diet, 
+        groupNames = c("Mixed diet", "Vegetarian"),
+        numbNodes = 5)
+```
+
+Interpretation of some of the results:
+
+* The clustering coefficient is the only global network property that differs significantly between the groups.
+* For the Jaccard index, the probability P(>=Jacc) is significant, meaning that the sets of the most central nodes are extremely similar for eigenvector centrality.
+* As indicated by some similarities in the clusterings, the Adjusted Rand Index is significantly different from zero and thus from random clustering. This is true for the whole network as well as for the Largest Connected Component (LCC).
+* Neither of the two GCD values is significantly different from zero, indicating only small differences in the overall network structures. 
+* There are no significant differences in the centrality values.
+
+Note that the permutation tests generally have low power due to the small sample sizes and the small number of permutations. 
+
+## Differential association analysis
+
+The `diffnet' function provides statistical tests to assess whether the associations themselves are significantly different between the two groups. NetCoMi also provides a plot function to generate a differential network, where two nodes are connected if they are differentially associated between the groups.
+
+### Differential network
+
+Since we have already computed the permutation association matrices before, we can reuse them here (argument `fileLoadAssoPerm`).
+
+The local false discovery rate is controlled at level 0.2 to account for multiplicity.
+
+```{r diffnet_diet, message=FALSE, results='hide'}
+peerj_diffnet <- diffnet(peerj_net_diet,
+                         diffMethod = "permute",
+                         fileLoadAssoPerm = "general/network_files/peerj_assoPerm",
+                         adjust = "lfdr")
+```
+
+```{r hist_pvals, out.width='80%'}
+hist(peerj_diffnet$pvalsVec, 20,
+     ylim = c(0, 100), 
+     main = "Histogram of unadjusted p-values",
+     xlab = "p-value")
+sum(peerj_diffnet$pAdjustVec < 0.1)
+```
+
+Some of the p-values are below the usual 5% significance level. However, none of the differences remain significant after adjusting for multiple testing. 
+
+To demonstrate the interpretation of a differential network, we increase the significance level and set `adjust` to "none", which is actually statistically incorrect.
+
+```{r diffnet_diet_unadjusted, message=FALSE, results='hide'}
+peerj_diffnet <- diffnet(peerj_net_diet,
+                         diffMethod = "permute",
+                         fileLoadAssoPerm = "general/network_files/peerj_assoPerm",
+                         alpha = 0.1,
+                         adjust = "none")
+```
+
+NetCoMi comes with a plot function to visualize the differential associations.
+
+```{r diffnet_plot, fig.width=20, fig.height=14}
+plot(peerj_diffnet, 
+     cexLabels = 1.7,
+     cexNodes = 1, 
+     cexLegend = 2.5,
+     cexTitle = 3,
+     mar = c(3,2,5,15),
+     legendGroupnames = c("Mixed diet", "Vegetarian"),
+     legendPos = c(1.2,1.5),
+     fade = FALSE)
+```
+
+Edge colors represent the direction of the associations in the two groups. For example, if two OTUs are positively correlated in the mixed diet group and uncorrelated in the vegetarian group (such as Tatumella and Raoultella), the edge color is dark green.
+
+
+### Association networks
+
+In order to get a different perspective on the differential associations, we can reduce the association networks from Section \@ref(netcomp) to contain only the differential associations.
+
+Note that this comparison is again based on the unadjusted p-values only. 
+
+```{r, fig.width=17, fig.height=8}
+# Identify the differentially associated OTUs
+diffmat_sums <- rowSums(peerj_diffnet$diffMat)
+diff_asso_names <- names(diffmat_sums[diffmat_sums > 0])
+
+# Network plot
+plot(peerj_netprops_diet,
+     nodeFilter = "names",
+     nodeFilterPar = diff_asso_names,
+     layout = "spring",
+     sameLay = TRUE,
+     repulsion = 0.96,
+     rmSingles = TRUE,
+     labelScale = FALSE,
+     nodeSize = "eigenvector",
+     nodeSizeSpread = 3,
+     nodeColor = "feature", 
+     featVecCol = phyla, 
+     colorVec =  phylcol,
+     edgeTranspHigh = 20,
+     title1 = "Mixed diet", 
+     title2 = "Vegetarian",
+     showTitle = TRUE,
+     cexTitle = 2,
+     cexNodes = 2.5,
+     cexLabels = 1.3,
+     cexHubLabels = 1.5,
+     mar = c(1, 4, 4, 4))
+
+# Add legends
+par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), mar=c(0, 0, 0, 0), new=TRUE)
+plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
+legend(-0.2, -0.9, cex = 1.5, title = "estimated correlation:",
+       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"), 
+       bty = "n", horiz = TRUE)
+legend(-0.15, 1.3, cex = 1.7, pt.cex = 2.5, title = "Phylum:", 
+       legend=levels(phyla), col = phylcol_transp, bty = "n", pch = 16) 
+```
+
+## Sample similarity networks
+
+Instead of looking at microbial associations, we could also be interested in how similar the microbial compositions of the samples are.
+
+The Aitchison distance is an appropriate dissimilarity measure that takes into account the compositional structure of the data. 
+
+Since the Aitchison distance is based on the clr transformation, zeros in the data must be replaced.
+
+The network is sparsified using the k-nearest neighbor (knn) algorithm.
+
+```{r sample_network}
+net_aitchison <- netConstruct(peerj_phy,
+                              measure = "aitchison",
+                              zeroMethod = "multRepl",
+                              sparsMethod = "knn", 
+                              kNeighbor = 3,
+                              verbose = 3)
+```
+
+For cluster detection, we use hierarchical clustering with average linkage. Internally, "k=3" is passed to `cutree` from stats package so that the tree is cut into 3 clusters.
+
+```{r sample_network_analysis}
+props_aitchison <- netAnalyze(net_aitchison,
+                              clustMethod = "hierarchical",
+                              clustPar = list(method = "average", k = 3),
+                              hubPar = "eigenvector",
+                              gcmHeat = FALSE)
+```
+
+In the network plot, node colors represent the clusters and node sizes their eigenvector centrality. 
+
+```{r sample_network_plot, fig.width=15, fig.height=10}
+plot(props_aitchison, 
+     nodeColor = "cluster", 
+     nodeSize = "eigenvector",
+     hubTransp = 40,
+     edgeTranspLow = 60,
+     showTitle = TRUE,
+     title1 = "Sample similarity network",
+     cexTitle = 2,
+     cexLabels = 1.2,
+     mar = c(1, 3, 3, 10))
+
+# Add 40% transparency to the green color
+green2 <- colToTransp("#009900", 40)
+
+legend(0.7, 1.1,
+       cex = 1.5,
+       legend = c("high similarity (low Aitchison distance)",
+                  "low similarity (high Aitchison distance)"), 
+       lty = 1, 
+       lwd = c(10, 2),
+       col = c("darkgreen", green2),
+       bty = "n")
+```
+In this dissimilarity-based network, nodes with high edge weight correspond to samples with similar microbial composition. Thus, hubs are interpreted as samples with similar microbial composition to many other samples, and the microbial composition of samples within a cluster is more similar than that of nodes of different clusters.
+
+## Which method(s) to choose?
+
+Throughout all the steps from primary data to potentially significant network features, NetCoMi provides a variety of methods and parameters to choose from. However, there is no general consensus in the community on the "right" way to estimate and analyze microbial networks. In the absence of a "best method" for inferring and analyzing microbial networks, researchers may be tempted to try different methods and report only the optimal results or those that fit some prior knowledge. This carries the risk of "overfitting" the analysis to the existing data so that the results are not replicable for new data [@ullmann2023over].  
+
+Therefore, the selection of the workflow building blocks should be set up once and independently of any hypothesis about the data, thus avoiding the fallacy of starting to "fish" for results that best fit a previously formulated hypothesis. For example, one should ask prior to the analysis whether correlation or conditional dependence as a measure of association better fits the research question and choose the method accordingly. Another example is the choice of transformation from estimated association to dissimilarity (i.e., "signed" or "unsigned"), which completely changes the interpretation and characteristics of the network. This choice should be made based on the research question before starting the analysis.
