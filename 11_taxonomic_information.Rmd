@@ -27,6 +27,9 @@ a capital first letter.
 * the columns must be given in the order shown above
 * column can be omited, but the order must remain
 
+In this chapter, we will refer to co-abundant groups as CAGs, which are
+clusters of taxa that co-vary across samples.
+
 ## Assigning taxonomic information.
 
 There are a number of methods to assign taxonomic information. We like to give
@@ -164,8 +167,99 @@ assay(altExp(tse, "Family"), "counts")[1:5,1:7]
 ```
 
 `altExpNames` now consists of `Family` level data. This can be extended to use 
-any taxonomic level listed in `mia::taxonomyRanks(tse)`.   
+any taxonomic level listed in `mia::taxonomyRanks(tse)`.
 
+```{r}
+# Saving the tse for later
+tseGlobalPatterns <- tse
+```
+
+
+### Taxa clustering {#taxa-clustering}
+Another way to agglomerate the data is to cluster on the taxa. To do so,
+we usually start by doing a compositionality aware transformation such as CLR, 
+followed by the application of a standard clustering method. 
+
+Here is an example that does a CLR transformation followed by the hierarchical
+clustering algorithm. 
+
+First, we import the library `bluster` that simplifies the clustering. We
+
+```{r bluster_dependence}
+library(bluster)
+```
+
+Then we do the CLR transform followed by the clustering. We will cluster with
+two different distances: the euclidean distance and 
+
+```{r taxa_clustering}
+# Get the data
+data("peerj13075", package = "mia")
+tse <- peerj13075
+
+# The result of the CLR transform is stored in the assay clr
+tse <- transformCounts(tse, assay.type = "counts", method = "clr", 
+                       pseudocount = 1)
+
+tse <- transformCounts(tse, assay.type = "clr", method = "z", MARGIN = "features")
+
+# Cluster (with euclidean dist) on the features of the z assay 
+tse <- cluster(tse, assay.type = "z",
+               clust.col = "hclustEuclidean", MARGIN = "features",
+               HclustParam(dist.fun = stats::dist, metric = "euclidean",
+                           method = "ward.D2"))
+
+# Declare the Kendall dissimilarity computation function
+kendall_dissimilarity <- function(x) {
+    as.dist(1 - cor(t(x), method = "kendall"))
+}
+
+# Cluster (with Kendall dissimilarity) on the features of the z assay 
+tse <- cluster(tse, assay.type = "z", MARGIN = "features", 
+               clust.col = "hclustKendall",
+               HclustParam(method = "ward.D2", 
+                           dist.fun = kendall_dissimilarity))
+```
+
+Let us store the resulting cluster indices in the `rowData` column specified 
+with the `clust.col` parameter.
+
+```{r taxa_clustering_result}
+# Checking the clusters
+clusters_euclidean <- rowData(tse)$hclustEuclidean
+head(clusters_euclidean, 10)
+
+clusters_kendall <- rowData(tse)$hclustKendall
+head(clusters_kendall, 10)
+```
+
+To better visualize the results and the distribution of the clusters, we can 
+plot the histogram of the clusters.
+
+```{r taxa_clustering_histogram}
+library(ggplot2)
+library(patchwork) # For arranging several plots as a grid
+plot1 <- ggplot(as.data.frame(rowData(tse)), aes(x = clusters_euclidean)) + 
+    geom_bar() + 
+    labs(title = "CAG size distribution (Euclidean distance)",
+         x = "Clusters", y = "Feature count (n)")
+plot2 <- ggplot(as.data.frame(rowData(tse)), aes(x = clusters_kendall)) + 
+    geom_bar() + 
+    labs(title = "CAG size distribution (1 - tau distance)",
+         x = "Clusters", y = "Feature count (n)")
+plot1 + plot2 + plot_layout(ncol = 2)
+```
+
+
+It's also possible to merge the rows by cluster.
+
+```{r taxa_clustering_row_merge}
+# Aggregate clusters as a sum of each cluster values
+tse_merged <- mergeRows(tse, clusters_euclidean)
+tse_merged
+```
+We can note that it worked as planned since there were 6 clusters and there are
+now 6 rows.
 
 ## Data transformation {#assay-transform}
 
@@ -182,6 +276,7 @@ For a complete list of available transformations and parameters, see function
 [help](https://microbiome.github.io/mia/reference/transformCounts.html).
 
 ```{r}
+tse <- tseGlobalPatterns
 tse <- transformCounts(tse, assay.type = "counts", method = "relabundance", pseudocount = 1)
 tse <- transformCounts(x = tse, assay.type = "relabundance", method = "clr", 
                         pseudocount = 1, name = "clr_transformation")
