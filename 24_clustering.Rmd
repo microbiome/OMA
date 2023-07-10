@@ -459,12 +459,11 @@ Here, we use following packages:
 -   [cobiclust](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13582)
 
 _cobiclust_ is especially developed for microbiome data whereas _biclust_ is more
-general method. In this section, we show three different cases and example 
+general method. In this section, we show two different cases and example 
 solutions to apply biclustering to them. 
 
 1.   Taxa vs samples
 2.   Taxa vs biomolecule/biomarker
-3.   Taxa vs taxa
 
 Biclusters can be visualized using heatmap or boxplot, for
 instance. For checking purposes, also scatter plot might be valid
@@ -772,59 +771,6 @@ for (name in cluster_names) {
 pheatmap(corr, cluster_cols = F, cluster_rows = F,
          annotation_col = bicluster_columns, annotation_row = bicluster_rows,
          annotation_colors = annotation_colors)
-```
-
-### Taxa vs taxa
-
-Third and final example deals with situation where we want to analyze
-correlation between taxa. _biclust_ is suitable for this.
-
-```{r biclust_10}
-# Calculate cross-correlation
-corr <- getExperimentCrossCorrelation(mae, 1, 1, assay.type1 = "rclr",
-                                      assay.type2 = "rclr", mode = "matrix",
-                                      cor_threshold = 0.2, verbose = F, 
-                                      show_warning = F)
-
-# Find biclusters
-bc <- biclust(corr, method = BCPlaid(), fit.model = y ~ m, background = TRUE, 
-              shuffle = 100, back.fit = 0, max.layers = 10,iter.startup = 10, 
-              iter.layer = 100, verbose = FALSE)
-```
-
-```{r biclust_11}
-# Get biclusters
-bcs <- .get_biclusters_from_biclust(bc, corr)
-
-bicluster_rows <- bcs$bc_rows
-bicluster_columns <- bcs$bc_columns
-```
-
-
-```{r biclust_12}
-# Create a column that combines information
-# If row/column includes in multiple clusters, 
-# cluster numbers are separated with "_&_"
-bicluster_columns$clusters <- apply(bicluster_columns, 1, function(x) {
-        paste(paste(which(x)), collapse = "_&_")
-    }
-)
-bicluster_columns <- bicluster_columns[, "clusters", drop = FALSE]
-
-bicluster_rows$clusters <- apply(bicluster_rows, 1, function(x) {
-        paste(paste(which(x)), collapse = "_&_")
-    }
-)
-bicluster_rows <- bicluster_rows[, "clusters", drop = FALSE]
-```
-
-```{r biclust_13, fig.width=14, fig.height=12}
-# Convert boolean values into factor
-bicluster_columns <- data.frame(apply(bicluster_columns, 2, as.factor))
-bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
-
-pheatmap(corr, cluster_cols = F, cluster_rows = F,
-         annotation_col = bicluster_columns, annotation_row = bicluster_rows)
 ```
 
 ## Additional Community Typing
