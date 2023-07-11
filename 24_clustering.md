@@ -464,7 +464,7 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7854 BIC: 8553 AIC: 8340 
+## Laplace: 7862 BIC: 8553 AIC: 8340 
 ## 
 ## [[6]]
 ## class: DMN 
