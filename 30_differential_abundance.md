@@ -463,17 +463,17 @@ kable(head(ancombc_result))
 \hline
 taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & q\_(Intercept) & q\_Geographical\_locationPune\\
 \hline
-Abyssicoccus & 0.0397 & -0.0569 & 0.8731 & 0.8468\\
+Abyssicoccus & -0.1478 & 0.5549 & 1 & 0.0260\\
 \hline
-Acidaminococcus & 0.6872 & -0.9022 & 0.0032 & 0.0004\\
+Acidaminococcus & 0.0096 & 0.1032 & 1 & 0.7878\\
 \hline
-Acinetobacter & 0.1241 & -0.1671 & 0.8972 & 0.8698\\
+Acinetobacter & 1.2778 & -1.1398 & 1 & 0.1936\\
 \hline
-Actinomyces & 0.1345 & -0.1806 & 0.6548 & 0.5551\\
+Actinomyces & 0.0611 & 0.1270 & 1 & 0.7294\\
 \hline
-Actinoplanes & 0.2713 & -0.3593 & 0.2760 & 0.1476\\
+Actinoplanes & 0.6893 & -0.7957 & 1 & 0.0058\\
 \hline
-Aerococcus & 0.0234 & -0.0357 & 0.8985 & 0.8698\\
+Aerococcus & -0.3872 & 0.9859 & 1 & 0.0009\\
 \hline
 \end{tabular}
 
@@ -760,17 +760,17 @@ kable(head(tab))
 \hline
 taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & lfc\_AgeElderly & lfc\_AgeMiddle\_age & q\_(Intercept) & q\_Geographical\_locationPune & q\_AgeElderly & q\_AgeMiddle\_age\\
 \hline
-Abyssicoccus & 0.0395 & -0.0947 & 0.0895 & 0.0127 & 0.8841 & 0.9271 & 0.9118 & 0.9948\\
+Abyssicoccus & 0.0723 & 0.0319 & 0.3264 & 0.2208 & 0.7456 & 0.9763 & 0.7328 & 1.0000\\
 \hline
-Acidaminococcus & 0.7025 & -0.7557 & -0.2431 & -0.1576 & 0.0032 & 0.0388 & 0.8895 & 0.9774\\
+Acidaminococcus & 0.2364 & 0.0584 & -0.6752 & -0.3702 & 0.6251 & 0.9721 & 0.4517 & 0.9279\\
 \hline
-Acinetobacter & 0.0202 & -1.0765 & 1.4995 & 1.1535 & 0.9880 & 0.6353 & 0.7718 & 0.7886\\
+Acinetobacter & 1.5023 & -3.2362 & 2.2397 & 2.1993 & 0.0833 & 0.0013 & 0.1015 & 0.0639\\
 \hline
-Actinomyces & 0.1762 & 0.1239 & -0.4581 & -0.4485 & 0.5453 & 0.8893 & 0.5720 & 0.6120\\
+Actinomyces & 0.3740 & 0.0866 & -0.7335 & -0.6522 & 0.3437 & 0.9439 & 0.4352 & 0.7294\\
 \hline
-Actinoplanes & 0.3027 & -0.1600 & -0.2766 & -0.3340 & 0.2111 & 0.7623 & 0.8167 & 0.6120\\
+Actinoplanes & 0.9135 & -1.1217 & -0.1497 & 0.0000 & 0.0020 & 0.0461 & 0.8662 & 1.0000\\
 \hline
-Aerococcus & 0.0021 & -0.1441 & 0.1355 & 0.2462 & 0.9904 & 0.8209 & 0.8895 & 0.7886\\
+Aerococcus & -0.2178 & 0.6432 & 0.0922 & 0.0864 & 0.3378 & 0.1375 & 0.8662 & 1.0000\\
 \hline
 \end{tabular}
 
