@@ -339,19 +339,22 @@ that we specify.
 
 
 ```{r ancombc2, warning = FALSE, eval=TRUE}
-# Run ANCOM-BC 
+# Agglomerate data to genus level and add this new abundance table to the altExp slot
+altExp(tse, "genus") <- agglomerateByRank(tse, "genus")
+
+# Identify prevalent genera
+prevalent.genera <- getPrevalentFeatures(altExp(tse, "genus"), detection = 0, prevalence = 20/100)
+
+# Run ANCOM-BC at the genus level and only including the prevalent genera
 out <- ancombc2(
-  data = tse,
+  data = altExp(tse, "genus")[prevalent.genera, ],
   assay_name = "counts", 
-  tax_level = "genus", 
   fix_formula = "Geographical_location", 
   p_adj_method = "fdr", 
-  lib_cut = 0,
   prv_cut = 0,
   group = "Geographical_location", 
   struc_zero = TRUE, 
   neg_lb = TRUE,
-  alpha = 0.05, 
   global = TRUE # multi group comparison will be deactivated automatically 
 )
 ```
