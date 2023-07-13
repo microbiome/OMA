@@ -411,19 +411,22 @@ that we specify.
 
 
 ```r
-# Run ANCOM-BC 
+# Agglomerate data to genus level and add this new abundance table to the altExp slot
+altExp(tse, "genus") <- agglomerateByRank(tse, "genus")
+
+# Identify prevalent genera
+prevalent.genera <- getPrevalentFeatures(altExp(tse, "genus"), detection = 0, prevalence = 20/100)
+
+# Run ANCOM-BC at the genus level and only including the prevalent genera
 out <- ancombc2(
-  data = tse,
+  data = altExp(tse, "genus")[prevalent.genera, ],
   assay_name = "counts", 
-  tax_level = "genus", 
   fix_formula = "Geographical_location", 
   p_adj_method = "fdr", 
-  lib_cut = 0,
   prv_cut = 0,
   group = "Geographical_location", 
   struc_zero = TRUE, 
   neg_lb = TRUE,
-  alpha = 0.05, 
   global = TRUE # multi group comparison will be deactivated automatically 
 )
 ```
@@ -463,17 +466,17 @@ kable(head(ancombc_result))
 \hline
 taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & q\_(Intercept) & q\_Geographical\_locationPune\\
 \hline
-Abyssicoccus & -0.1478 & 0.5549 & 1 & 0.0260\\
+Abyssicoccus & 0.0000 & 0.0965 & 0.9999 & 0.7697\\
 \hline
-Acidaminococcus & 0.0096 & 0.1032 & 1 & 0.7878\\
+Acidaminococcus & 0.1130 & -0.3193 & 0.8119 & 0.5141\\
 \hline
-Acinetobacter & 1.2778 & -1.1398 & 1 & 0.1936\\
+Acinetobacter & 1.4447 & -1.6241 & 0.0753 & 0.0839\\
 \hline
-Actinomyces & 0.0611 & 0.1270 & 1 & 0.7294\\
+Actinomyces & 0.1779 & -0.3299 & 0.6849 & 0.4584\\
 \hline
-Actinoplanes & 0.6893 & -0.7957 & 1 & 0.0058\\
+Actinoplanes & 0.7968 & -1.2515 & 0.0019 & 0.0026\\
 \hline
-Aerococcus & -0.3872 & 0.9859 & 1 & 0.0009\\
+Aerococcus & -0.3036 & 0.6006 & 0.1202 & 0.0603\\
 \hline
 \end{tabular}
 

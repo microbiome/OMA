@@ -93,17 +93,13 @@ The original count-based taxonomic abundance tables may have different
 transformations, such as logarithmic, Centered Log-Ratio (CLR), or relative 
 abundance. These are typically stored in _**assays**_.
 
+Let us load example data and rename it as tse.
+
 
 ```r
 library(mia)
-data(GlobalPatterns, package="mia")
-tse <- GlobalPatterns
-assays(tse)
-```
-
-```
-## List of length 1
-## names(1): counts
+data(hitchip1006, package="miaTime")
+tse <- hitchip1006
 ```
 
 The `assays` slot contains the experimental data as multiple count matrices. The result of `assays` is a list of matrices.
@@ -126,12 +122,18 @@ assay(tse, "counts")[1:5,1:7]
 ```
 
 ```
-##        CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr
-## 549322   0   0   0       0       0       0       0
-## 522457   0   0   0       0       0       0       0
-## 951      0   0   0       0       0       0       1
-## 244423   0   0   0       0       0       0       0
-## 586076   0   0   0       0       0       0       0
+##                              Sample-1 Sample-2 Sample-3 Sample-4 Sample-5
+## Actinomycetaceae                    0        0        0        0        0
+## Aerococcus                          0        0        0        0        0
+## Aeromonas                           0        0        0        0        0
+## Akkermansia                        21       36      475       61       34
+## Alcaligenes faecalis et rel.        1        1        1        2        1
+##                              Sample-6 Sample-7
+## Actinomycetaceae                    0        0
+## Aerococcus                          0        0
+## Aeromonas                           0        0
+## Akkermansia                        14       27
+## Alcaligenes faecalis et rel.        1        1
 ```
 
 To illustrate the use of multiple assays, the relative abundance data can be 
@@ -157,17 +159,23 @@ assay(tse, "relabundance")[1:5,1:7]
 ```
 
 ```
-##        CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr   M11Plmr
-## 549322   0   0   0       0       0       0 0.000e+00
-## 522457   0   0   0       0       0       0 0.000e+00
-## 951      0   0   0       0       0       0 2.305e-06
-## 244423   0   0   0       0       0       0 0.000e+00
-## 586076   0   0   0       0       0       0 0.000e+00
+##                               Sample-1  Sample-2  Sample-3  Sample-4  Sample-5
+## Actinomycetaceae             0.0000000 0.000e+00 0.0000000 0.0000000 0.000e+00
+## Aerococcus                   0.0000000 0.000e+00 0.0000000 0.0000000 0.000e+00
+## Aeromonas                    0.0000000 0.000e+00 0.0000000 0.0000000 0.000e+00
+## Akkermansia                  0.0027657 3.547e-03 0.0666106 0.0056195 2.833e-03
+## Alcaligenes faecalis et rel. 0.0001317 9.854e-05 0.0001402 0.0001842 8.333e-05
+##                               Sample-6  Sample-7
+## Actinomycetaceae             0.0000000 0.0000000
+## Aerococcus                   0.0000000 0.0000000
+## Aeromonas                    0.0000000 0.0000000
+## Akkermansia                  0.0017690 0.0045570
+## Alcaligenes faecalis et rel. 0.0001264 0.0001688
 ```
 
 
-Here the dimension of the count data remains unchanged. This is in
-fact, a requirement for any `SummarizedExperiment` object.
+Here the dimension of the count data remains unchanged in
+transformation. This is in fact, a requirement for the assays.
 
 
 
@@ -181,46 +189,33 @@ colData(tse)
 ```
 
 ```
-## DataFrame with 26 rows and 7 columns
-##         X.SampleID   Primer Final_Barcode Barcode_truncated_plus_T
-##           <factor> <factor>      <factor>                 <factor>
-## CL3        CL3      ILBC_01        AACGCA                   TGCGTT
-## CC1        CC1      ILBC_02        AACTCG                   CGAGTT
-## SV1        SV1      ILBC_03        AACTGT                   ACAGTT
-## M31Fcsw    M31Fcsw  ILBC_04        AAGAGA                   TCTCTT
-## M11Fcsw    M11Fcsw  ILBC_05        AAGCTG                   CAGCTT
-## ...            ...      ...           ...                      ...
-## TS28         TS28   ILBC_25        ACCAGA                   TCTGGT
-## TS29         TS29   ILBC_26        ACCAGC                   GCTGGT
-## Even1        Even1  ILBC_27        ACCGCA                   TGCGGT
-## Even2        Even2  ILBC_28        ACCTCG                   CGAGGT
-## Even3        Even3  ILBC_29        ACCTGT                   ACAGGT
-##         Barcode_full_length SampleType
-##                    <factor>   <factor>
-## CL3             CTAGCGTGCGT      Soil 
-## CC1             CATCGACGAGT      Soil 
-## SV1             GTACGCACAGT      Soil 
-## M31Fcsw         TCGACATCTCT      Feces
-## M11Fcsw         CGACTGCAGCT      Feces
-## ...                     ...        ...
-## TS28            GCATCGTCTGG      Feces
-## TS29            CTAGTCGCTGG      Feces
-## Even1           TGACTCTGCGG      Mock 
-## Even2           TCTGATCGAGG      Mock 
-## Even3           AGAGAGACAGG      Mock 
-##                                        Description
-##                                           <factor>
-## CL3     Calhoun South Carolina Pine soil, pH 4.9  
-## CC1     Cedar Creek Minnesota, grassland, pH 6.1  
-## SV1     Sevilleta new Mexico, desert scrub, pH 8.3
-## M31Fcsw M3, Day 1, fecal swab, whole body study   
-## M11Fcsw M1, Day 1, fecal swab, whole body study   
-## ...                                            ...
-## TS28                                       Twin #1
-## TS29                                       Twin #2
-## Even1                                      Even1  
-## Even2                                      Even2  
-## Even3                                      Even3
+## DataFrame with 1151 rows and 10 columns
+##                   age      sex nationality DNA_extraction_method  project
+##             <integer> <factor>    <factor>              <factor> <factor>
+## Sample-1           28   male            US                    NA        1
+## Sample-2           24   female          US                    NA        1
+## Sample-3           52   male            US                    NA        1
+## Sample-4           22   female          US                    NA        1
+## Sample-5           25   female          US                    NA        1
+## ...               ...      ...         ...                   ...      ...
+## Sample-1168        50   female Scandinavia                     r       40
+## Sample-1169        31   female Scandinavia                     r       40
+## Sample-1170        31   female Scandinavia                     r       40
+## Sample-1171        52   male   Scandinavia                     r       40
+## Sample-1172        52   male   Scandinavia                     r       40
+##             diversity   bmi_group  subject      time      sample
+##             <numeric>    <factor> <factor> <numeric> <character>
+## Sample-1         5.76 severeobese        1         0    Sample-1
+## Sample-2         6.06 obese              2         0    Sample-2
+## Sample-3         5.50 lean               3         0    Sample-3
+## Sample-4         5.87 underweight        4         0    Sample-4
+## Sample-5         5.89 lean               5         0    Sample-5
+## ...               ...         ...      ...       ...         ...
+## Sample-1168      5.87 severeobese      244       8.1 Sample-1168
+## Sample-1169      5.87 overweight       245       2.3 Sample-1169
+## Sample-1170      5.92 overweight       245       8.2 Sample-1170
+## Sample-1171      6.04 overweight       246       2.1 Sample-1171
+## Sample-1172      5.74 overweight       246       7.9 Sample-1172
 ```
 
 
@@ -236,33 +231,33 @@ rowData(tse)
 ```
 
 ```
-## DataFrame with 19216 rows and 7 columns
-##            Kingdom        Phylum        Class        Order        Family
-##        <character>   <character>  <character>  <character>   <character>
-## 549322     Archaea Crenarchaeota Thermoprotei           NA            NA
-## 522457     Archaea Crenarchaeota Thermoprotei           NA            NA
-## 951        Archaea Crenarchaeota Thermoprotei Sulfolobales Sulfolobaceae
-## 244423     Archaea Crenarchaeota        Sd-NA           NA            NA
-## 586076     Archaea Crenarchaeota        Sd-NA           NA            NA
-## ...            ...           ...          ...          ...           ...
-## 278222    Bacteria           SR1           NA           NA            NA
-## 463590    Bacteria           SR1           NA           NA            NA
-## 535321    Bacteria           SR1           NA           NA            NA
-## 200359    Bacteria           SR1           NA           NA            NA
-## 271582    Bacteria           SR1           NA           NA            NA
-##              Genus                Species
-##        <character>            <character>
-## 549322          NA                     NA
-## 522457          NA                     NA
-## 951     Sulfolobus Sulfolobusacidocalda..
-## 244423          NA                     NA
-## 586076          NA                     NA
-## ...            ...                    ...
-## 278222          NA                     NA
-## 463590          NA                     NA
-## 535321          NA                     NA
-## 200359          NA                     NA
-## 271582          NA                     NA
+## DataFrame with 130 rows and 3 columns
+##                                       Phylum          Family
+##                                  <character>     <character>
+## Actinomycetaceae              Actinobacteria  Actinobacteria
+## Aerococcus                        Firmicutes         Bacilli
+## Aeromonas                     Proteobacteria  Proteobacteria
+## Akkermansia                  Verrucomicrobia Verrucomicrobia
+## Alcaligenes faecalis et rel.  Proteobacteria  Proteobacteria
+## ...                                      ...             ...
+## Vibrio                        Proteobacteria  Proteobacteria
+## Weissella et rel.                 Firmicutes         Bacilli
+## Wissella et rel.                  Firmicutes         Bacilli
+## Xanthomonadaceae              Proteobacteria  Proteobacteria
+## Yersinia et rel.              Proteobacteria  Proteobacteria
+##                                               Genus
+##                                         <character>
+## Actinomycetaceae                   Actinomycetaceae
+## Aerococcus                               Aerococcus
+## Aeromonas                                 Aeromonas
+## Akkermansia                             Akkermansia
+## Alcaligenes faecalis et rel. Alcaligenes faecalis..
+## ...                                             ...
+## Vibrio                                       Vibrio
+## Weissella et rel.                 Weissella et rel.
+## Wissella et rel.                   Wissella et rel.
+## Xanthomonadaceae                   Xanthomonadaceae
+## Yersinia et rel.                   Yersinia et rel.
 ```
 
 ### rowTree  
@@ -278,15 +273,7 @@ rowTree(tse)
 ```
 
 ```
-## 
-## Phylogenetic tree with 19216 tips and 19215 internal nodes.
-## 
-## Tip labels:
-##   549322, 522457, 951, 244423, 586076, 246140, ...
-## Node labels:
-##   , 0.858.4, 1.000.154, 0.764.3, 0.995.2, 1.000.2, ...
-## 
-## Rooted; includes branch lengths.
+## NULL
 ```
 
 The links to the individual features are available through `rowLinks`.
@@ -297,20 +284,7 @@ rowLinks(tse)
 ```
 
 ```
-## LinkDataFrame with 19216 rows and 5 columns
-##           nodeLab   nodeNum nodeLab_alias    isLeaf   whichTree
-##       <character> <integer>   <character> <logical> <character>
-## 1          549322         1       alias_1      TRUE       phylo
-## 2          522457         2       alias_2      TRUE       phylo
-## 3             951         3       alias_3      TRUE       phylo
-## 4          244423         4       alias_4      TRUE       phylo
-## 5          586076         5       alias_5      TRUE       phylo
-## ...           ...       ...           ...       ...         ...
-## 19212      278222     19212   alias_19212      TRUE       phylo
-## 19213      463590     19213   alias_19213      TRUE       phylo
-## 19214      535321     19214   alias_19214      TRUE       phylo
-## 19215      200359     19215   alias_19215      TRUE       phylo
-## 19216      271582     19216   alias_19216      TRUE       phylo
+## NULL
 ```
 
 Please note that there can be a 1:1 relationship between tree nodes and 
@@ -322,16 +296,17 @@ the links in an existing object, the `changeTree` function is available.
 
 ### Alternative experiments {#alt-exp}
 
-_**Alternative experiments**_ differ from transformations as they can
-contain complementary data, which is no longer tied to the same
-dimensions as the assay data. However, the number of samples (columns)
-must be the same.
+_**Alternative experiments**_ complement _assays_. They can contain
+complementary data, which is no longer tied to the same dimensions as
+the assay data. However, the number of samples (columns) must be the
+same.
 
-This can come into play, for instance, when one has taxonomic abundance
-profiles quantified with different measurement technologies, such as
-phylogenetic microarrays, amplicon sequencing, or metagenomic
-sequencing. Such alternative experiments that concern the same samples
-can be stored as
+This can come into play, for instance, when one has taxonomic
+abundance profiles quantified with different measurement technologies,
+such as phylogenetic microarrays, amplicon sequencing, or metagenomic
+sequencing. Another common use case is including abundance tables for
+different taxonomic ranks. Such alternative experiments concerning the
+same set of samples can be stored as
 
 1. Separate _assays_ assuming that the taxonomic information can be mapped 
 between features directly 1:1; or 
@@ -339,22 +314,24 @@ between features directly 1:1; or
 dimensions differ. Each element of the _altExp_ slot is a `SummarizedExperiment`
 or an object from a derived class with independent feature data.
 
-
-As an example, we show how to store taxonomic abundance tables
+The following shows how to store taxonomic abundance tables
 agglomerated at different taxonomic levels. However, the data could as
 well originate from entirely different measurement sources as long as
-the samples are matched.
+the samples match.
+
+Let us first agglomerate the data to Phylum level. This yields a new
+TreeSE data object.
+
 
 
 ```r
-# Agglomerate the data to Phylym level
-tse_phylum <- agglomerateByRank(tse, "Phylum")
-# both have the same number of columns (samples)
+tse_phylum <- agglomerateByRank(tse, "Phylum", na.rm=TRUE)
+# Both have the same number of columns (samples)
 dim(tse)
 ```
 
 ```
-## [1] 19216    26
+## [1]  130 1151
 ```
 
 ```r
@@ -362,12 +339,18 @@ dim(tse_phylum)
 ```
 
 ```
-## [1] 67 26
+## [1]    8 1151
 ```
 
+
+Then we can add the new phylum-level data object as an alternative experiment in the original data.
+
+
 ```r
-# Add the new table as an alternative experiment
+# Add the new data object to the original data object as an alternative experiment with the name "Phylum"
 altExp(tse, "Phylum") <- tse_phylum
+
+# Check the alternative experiment names available in the data
 altExpNames(tse)
 ```
 
@@ -375,25 +358,28 @@ altExpNames(tse)
 ## [1] "Phylum"
 ```
 
+We can now subset the data, for instance, and this acts on both altExp and assay data.
+
+
 ```r
-# Pick a sample subset: this acts on both altExp and assay data
 tse[,1:10]
 ```
 
 ```
 ## class: TreeSummarizedExperiment 
-## dim: 19216 10 
+## dim: 130 10 
 ## metadata(0):
 ## assays(2): counts relabundance
-## rownames(19216): 549322 522457 ... 200359 271582
-## rowData names(7): Kingdom Phylum ... Genus Species
-## colnames(10): CL3 CC1 ... M31Tong M11Tong
-## colData names(7): X.SampleID Primer ... SampleType Description
+## rownames(130): Actinomycetaceae Aerococcus ... Xanthomonadaceae
+##   Yersinia et rel.
+## rowData names(3): Phylum Family Genus
+## colnames(10): Sample-1 Sample-2 ... Sample-9 Sample-10
+## colData names(10): age sex ... time sample
 ## reducedDimNames(0):
 ## mainExpName: NULL
 ## altExpNames(1): Phylum
-## rowLinks: a LinkDataFrame (19216 rows)
-## rowTree: 1 phylo tree(s) (19216 leaves)
+## rowLinks: NULL
+## rowTree: NULL
 ## colLinks: NULL
 ## colTree: NULL
 ```
@@ -403,11 +389,10 @@ dim(altExp(tse[,1:10],"Phylum"))
 ```
 
 ```
-## [1] 67 10
+## [1]  8 10
 ```
 
-For more details of altExp have a look at the [Intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html) of the 
-`SingleCellExperiment` package [@R_SingleCellExperiment].
+For more details on _altExp_, you can check the [introduction](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html) to the `SingleCellExperiment` package [@R_SingleCellExperiment].
 
 
 
@@ -428,11 +413,12 @@ samples are defined through a `sampleMap`. Each element on the
 the number of samples can differ between the elements.
 
 
+<!--
 
 ```r
 #TODO: Find the right dataset to explain a non 1:1 sample relationship
 ```
-
+-->
 
 For information have a look at the [intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html) of the `MultiAssayExperiment` package.  
 
@@ -500,11 +486,6 @@ GlobalPatterns
 ## colLinks: NULL
 ## colTree: NULL
 ```
-
-
-Check the documentation for this dataset:
-
-
 
 
 #### HintikkaXOData {#hintikka-desc}

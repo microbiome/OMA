@@ -135,7 +135,7 @@
 
 \title{Orchestrating Microbiome Analysis}
 \author{}
-\date{\vspace{-2.5em}\textbf{Authors:} Leo Lahti {[}aut{]}, Tuomas Borman {[}aut, cre{]}, Henrik Eckermann {[}ctb{]}, Sudarshan Shetty {[}aut{]}, Felix GM Ernst {[}aut{]} \textbf{Version:} 0.98.14 \textbf{Modified:} 2023-04-10 \textbf{Compiled:} 2023-07-11 \textbf{Environment:} R version 4.3.0 (2023-04-21), Bioconductor 3.17 \textbf{License:} CC BY-NC-SA 3.0 US \textbf{Copyright:} \textbf{Source:} \url{https://github.com/microbiome/OMA}}
+\date{\vspace{-2.5em}\textbf{Authors:} Leo Lahti {[}aut{]}, Tuomas Borman {[}aut, cre{]}, Henrik Eckermann {[}ctb{]}, Sudarshan Shetty {[}aut{]}, Felix GM Ernst {[}aut{]} \textbf{Version:} 0.98.15 \textbf{Modified:} 2023-07-13 \textbf{Compiled:} 2023-07-13 \textbf{Environment:} R version 4.3.0 (2023-04-21), Bioconductor 3.17 \textbf{License:} CC BY-NC-SA 3.0 US \textbf{Copyright:} \textbf{Source:} \url{https://github.com/microbiome/OMA}}
 
 \begin{document}
 \maketitle
@@ -305,8 +305,8 @@ all available tools.
 \end{Highlighting}
 \end{Shaded}
 
-\hypertarget{package-ecosystem}{%
-\section{Package ecosystem}\label{package-ecosystem}}
+\hypertarget{ecosystem}{%
+\section{Package ecosystem}\label{ecosystem}}
 
 Methods for the analysis and manipulation of
 \texttt{(Tree)SummarizedExperiment} and \texttt{MultiAssayExperiment} data
@@ -448,19 +448,15 @@ The original count-based taxonomic abundance tables may have different
 transformations, such as logarithmic, Centered Log-Ratio (CLR), or relative
 abundance. These are typically stored in \emph{\textbf{assays}}.
 
+Let us load example data and rename it as tse.
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(mia)}
-\FunctionTok{data}\NormalTok{(GlobalPatterns, }\AttributeTok{package=}\StringTok{"mia"}\NormalTok{)}
-\NormalTok{tse }\OtherTok{\textless{}{-}}\NormalTok{ GlobalPatterns}
-\FunctionTok{assays}\NormalTok{(tse)}
+\FunctionTok{data}\NormalTok{(hitchip1006, }\AttributeTok{package=}\StringTok{"miaTime"}\NormalTok{)}
+\NormalTok{tse }\OtherTok{\textless{}{-}}\NormalTok{ hitchip1006}
 \end{Highlighting}
 \end{Shaded}
-
-\begin{verbatim}
-## List of length 1
-## names(1): counts
-\end{verbatim}
 
 The \texttt{assays} slot contains the experimental data as multiple count matrices. The result of \texttt{assays} is a list of matrices.
 
@@ -484,12 +480,18 @@ Individual assays can be accessed via \texttt{assay}
 \end{Shaded}
 
 \begin{verbatim}
-##        CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr
-## 549322   0   0   0       0       0       0       0
-## 522457   0   0   0       0       0       0       0
-## 951      0   0   0       0       0       0       1
-## 244423   0   0   0       0       0       0       0
-## 586076   0   0   0       0       0       0       0
+##                              Sample-1 Sample-2 Sample-3 Sample-4 Sample-5
+## Actinomycetaceae                    0        0        0        0        0
+## Aerococcus                          0        0        0        0        0
+## Aeromonas                           0        0        0        0        0
+## Akkermansia                        21       36      475       61       34
+## Alcaligenes faecalis et rel.        1        1        1        2        1
+##                              Sample-6 Sample-7
+## Actinomycetaceae                    0        0
+## Aerococcus                          0        0
+## Aeromonas                           0        0
+## Akkermansia                        14       27
+## Alcaligenes faecalis et rel.        1        1
 \end{verbatim}
 
 To illustrate the use of multiple assays, the relative abundance data can be
@@ -517,16 +519,22 @@ Now there are two assays available in the \texttt{tse} object, \texttt{counts} a
 \end{Shaded}
 
 \begin{verbatim}
-##        CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr   M11Plmr
-## 549322   0   0   0       0       0       0 0.000e+00
-## 522457   0   0   0       0       0       0 0.000e+00
-## 951      0   0   0       0       0       0 2.305e-06
-## 244423   0   0   0       0       0       0 0.000e+00
-## 586076   0   0   0       0       0       0 0.000e+00
+##                               Sample-1  Sample-2  Sample-3  Sample-4  Sample-5
+## Actinomycetaceae             0.0000000 0.000e+00 0.0000000 0.0000000 0.000e+00
+## Aerococcus                   0.0000000 0.000e+00 0.0000000 0.0000000 0.000e+00
+## Aeromonas                    0.0000000 0.000e+00 0.0000000 0.0000000 0.000e+00
+## Akkermansia                  0.0027657 3.547e-03 0.0666106 0.0056195 2.833e-03
+## Alcaligenes faecalis et rel. 0.0001317 9.854e-05 0.0001402 0.0001842 8.333e-05
+##                               Sample-6  Sample-7
+## Actinomycetaceae             0.0000000 0.0000000
+## Aerococcus                   0.0000000 0.0000000
+## Aeromonas                    0.0000000 0.0000000
+## Akkermansia                  0.0017690 0.0045570
+## Alcaligenes faecalis et rel. 0.0001264 0.0001688
 \end{verbatim}
 
-Here the dimension of the count data remains unchanged. This is in
-fact, a requirement for any \texttt{SummarizedExperiment} object.
+Here the dimension of the count data remains unchanged in
+transformation. This is in fact, a requirement for the assays.
 
 \hypertarget{coldata}{%
 \subsection{colData}\label{coldata}}
@@ -540,46 +548,33 @@ fact, a requirement for any \texttt{SummarizedExperiment} object.
 \end{Shaded}
 
 \begin{verbatim}
-## DataFrame with 26 rows and 7 columns
-##         X.SampleID   Primer Final_Barcode Barcode_truncated_plus_T
-##           <factor> <factor>      <factor>                 <factor>
-## CL3        CL3      ILBC_01        AACGCA                   TGCGTT
-## CC1        CC1      ILBC_02        AACTCG                   CGAGTT
-## SV1        SV1      ILBC_03        AACTGT                   ACAGTT
-## M31Fcsw    M31Fcsw  ILBC_04        AAGAGA                   TCTCTT
-## M11Fcsw    M11Fcsw  ILBC_05        AAGCTG                   CAGCTT
-## ...            ...      ...           ...                      ...
-## TS28         TS28   ILBC_25        ACCAGA                   TCTGGT
-## TS29         TS29   ILBC_26        ACCAGC                   GCTGGT
-## Even1        Even1  ILBC_27        ACCGCA                   TGCGGT
-## Even2        Even2  ILBC_28        ACCTCG                   CGAGGT
-## Even3        Even3  ILBC_29        ACCTGT                   ACAGGT
-##         Barcode_full_length SampleType
-##                    <factor>   <factor>
-## CL3             CTAGCGTGCGT      Soil 
-## CC1             CATCGACGAGT      Soil 
-## SV1             GTACGCACAGT      Soil 
-## M31Fcsw         TCGACATCTCT      Feces
-## M11Fcsw         CGACTGCAGCT      Feces
-## ...                     ...        ...
-## TS28            GCATCGTCTGG      Feces
-## TS29            CTAGTCGCTGG      Feces
-## Even1           TGACTCTGCGG      Mock 
-## Even2           TCTGATCGAGG      Mock 
-## Even3           AGAGAGACAGG      Mock 
-##                                        Description
-##                                           <factor>
-## CL3     Calhoun South Carolina Pine soil, pH 4.9  
-## CC1     Cedar Creek Minnesota, grassland, pH 6.1  
-## SV1     Sevilleta new Mexico, desert scrub, pH 8.3
-## M31Fcsw M3, Day 1, fecal swab, whole body study   
-## M11Fcsw M1, Day 1, fecal swab, whole body study   
-## ...                                            ...
-## TS28                                       Twin #1
-## TS29                                       Twin #2
-## Even1                                      Even1  
-## Even2                                      Even2  
-## Even3                                      Even3
+## DataFrame with 1151 rows and 10 columns
+##                   age      sex nationality DNA_extraction_method  project
+##             <integer> <factor>    <factor>              <factor> <factor>
+## Sample-1           28   male            US                    NA        1
+## Sample-2           24   female          US                    NA        1
+## Sample-3           52   male            US                    NA        1
+## Sample-4           22   female          US                    NA        1
+## Sample-5           25   female          US                    NA        1
+## ...               ...      ...         ...                   ...      ...
+## Sample-1168        50   female Scandinavia                     r       40
+## Sample-1169        31   female Scandinavia                     r       40
+## Sample-1170        31   female Scandinavia                     r       40
+## Sample-1171        52   male   Scandinavia                     r       40
+## Sample-1172        52   male   Scandinavia                     r       40
+##             diversity   bmi_group  subject      time      sample
+##             <numeric>    <factor> <factor> <numeric> <character>
+## Sample-1         5.76 severeobese        1         0    Sample-1
+## Sample-2         6.06 obese              2         0    Sample-2
+## Sample-3         5.50 lean               3         0    Sample-3
+## Sample-4         5.87 underweight        4         0    Sample-4
+## Sample-5         5.89 lean               5         0    Sample-5
+## ...               ...         ...      ...       ...         ...
+## Sample-1168      5.87 severeobese      244       8.1 Sample-1168
+## Sample-1169      5.87 overweight       245       2.3 Sample-1169
+## Sample-1170      5.92 overweight       245       8.2 Sample-1170
+## Sample-1171      6.04 overweight       246       2.1 Sample-1171
+## Sample-1172      5.74 overweight       246       7.9 Sample-1172
 \end{verbatim}
 
 \hypertarget{rowdata}{%
@@ -595,33 +590,33 @@ interest to the microbiome field, this is used to store taxonomic information.
 \end{Shaded}
 
 \begin{verbatim}
-## DataFrame with 19216 rows and 7 columns
-##            Kingdom        Phylum        Class        Order        Family
-##        <character>   <character>  <character>  <character>   <character>
-## 549322     Archaea Crenarchaeota Thermoprotei           NA            NA
-## 522457     Archaea Crenarchaeota Thermoprotei           NA            NA
-## 951        Archaea Crenarchaeota Thermoprotei Sulfolobales Sulfolobaceae
-## 244423     Archaea Crenarchaeota        Sd-NA           NA            NA
-## 586076     Archaea Crenarchaeota        Sd-NA           NA            NA
-## ...            ...           ...          ...          ...           ...
-## 278222    Bacteria           SR1           NA           NA            NA
-## 463590    Bacteria           SR1           NA           NA            NA
-## 535321    Bacteria           SR1           NA           NA            NA
-## 200359    Bacteria           SR1           NA           NA            NA
-## 271582    Bacteria           SR1           NA           NA            NA
-##              Genus                Species
-##        <character>            <character>
-## 549322          NA                     NA
-## 522457          NA                     NA
-## 951     Sulfolobus Sulfolobusacidocalda..
-## 244423          NA                     NA
-## 586076          NA                     NA
-## ...            ...                    ...
-## 278222          NA                     NA
-## 463590          NA                     NA
-## 535321          NA                     NA
-## 200359          NA                     NA
-## 271582          NA                     NA
+## DataFrame with 130 rows and 3 columns
+##                                       Phylum          Family
+##                                  <character>     <character>
+## Actinomycetaceae              Actinobacteria  Actinobacteria
+## Aerococcus                        Firmicutes         Bacilli
+## Aeromonas                     Proteobacteria  Proteobacteria
+## Akkermansia                  Verrucomicrobia Verrucomicrobia
+## Alcaligenes faecalis et rel.  Proteobacteria  Proteobacteria
+## ...                                      ...             ...
+## Vibrio                        Proteobacteria  Proteobacteria
+## Weissella et rel.                 Firmicutes         Bacilli
+## Wissella et rel.                  Firmicutes         Bacilli
+## Xanthomonadaceae              Proteobacteria  Proteobacteria
+## Yersinia et rel.              Proteobacteria  Proteobacteria
+##                                               Genus
+##                                         <character>
+## Actinomycetaceae                   Actinomycetaceae
+## Aerococcus                               Aerococcus
+## Aeromonas                                 Aeromonas
+## Akkermansia                             Akkermansia
+## Alcaligenes faecalis et rel. Alcaligenes faecalis..
+## ...                                             ...
+## Vibrio                                       Vibrio
+## Weissella et rel.                 Weissella et rel.
+## Wissella et rel.                   Wissella et rel.
+## Xanthomonadaceae                   Xanthomonadaceae
+## Yersinia et rel.                   Yersinia et rel.
 \end{verbatim}
 
 \hypertarget{rowtree}{%
@@ -640,15 +635,7 @@ A tree can be accessed via \texttt{rowTree} as \texttt{phylo} object.
 \end{Shaded}
 
 \begin{verbatim}
-## 
-## Phylogenetic tree with 19216 tips and 19215 internal nodes.
-## 
-## Tip labels:
-##   549322, 522457, 951, 244423, 586076, 246140, ...
-## Node labels:
-##   , 0.858.4, 1.000.154, 0.764.3, 0.995.2, 1.000.2, ...
-## 
-## Rooted; includes branch lengths.
+## NULL
 \end{verbatim}
 
 The links to the individual features are available through \texttt{rowLinks}.
@@ -660,20 +647,7 @@ The links to the individual features are available through \texttt{rowLinks}.
 \end{Shaded}
 
 \begin{verbatim}
-## LinkDataFrame with 19216 rows and 5 columns
-##           nodeLab   nodeNum nodeLab_alias    isLeaf   whichTree
-##       <character> <integer>   <character> <logical> <character>
-## 1          549322         1       alias_1      TRUE       phylo
-## 2          522457         2       alias_2      TRUE       phylo
-## 3             951         3       alias_3      TRUE       phylo
-## 4          244423         4       alias_4      TRUE       phylo
-## 5          586076         5       alias_5      TRUE       phylo
-## ...           ...       ...           ...       ...         ...
-## 19212      278222     19212   alias_19212      TRUE       phylo
-## 19213      463590     19213   alias_19213      TRUE       phylo
-## 19214      535321     19214   alias_19214      TRUE       phylo
-## 19215      200359     19215   alias_19215      TRUE       phylo
-## 19216      271582     19216   alias_19216      TRUE       phylo
+## NULL
 \end{verbatim}
 
 Please note that there can be a 1:1 relationship between tree nodes and
@@ -684,16 +658,17 @@ the links in an existing object, the \texttt{changeTree} function is available.
 \hypertarget{alt-exp}{%
 \subsection{Alternative experiments}\label{alt-exp}}
 
-\emph{\textbf{Alternative experiments}} differ from transformations as they can
-contain complementary data, which is no longer tied to the same
-dimensions as the assay data. However, the number of samples (columns)
-must be the same.
+\emph{\textbf{Alternative experiments}} complement \emph{assays}. They can contain
+complementary data, which is no longer tied to the same dimensions as
+the assay data. However, the number of samples (columns) must be the
+same.
 
-This can come into play, for instance, when one has taxonomic abundance
-profiles quantified with different measurement technologies, such as
-phylogenetic microarrays, amplicon sequencing, or metagenomic
-sequencing. Such alternative experiments that concern the same samples
-can be stored as
+This can come into play, for instance, when one has taxonomic
+abundance profiles quantified with different measurement technologies,
+such as phylogenetic microarrays, amplicon sequencing, or metagenomic
+sequencing. Another common use case is including abundance tables for
+different taxonomic ranks. Such alternative experiments concerning the
+same set of samples can be stored as
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -707,22 +682,24 @@ can be stored as
   or an object from a derived class with independent feature data.
 \end{enumerate}
 
-As an example, we show how to store taxonomic abundance tables
+The following shows how to store taxonomic abundance tables
 agglomerated at different taxonomic levels. However, the data could as
 well originate from entirely different measurement sources as long as
-the samples are matched.
+the samples match.
+
+Let us first agglomerate the data to Phylum level. This yields a new
+TreeSE data object.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Agglomerate the data to Phylym level}
-\NormalTok{tse\_phylum }\OtherTok{\textless{}{-}} \FunctionTok{agglomerateByRank}\NormalTok{(tse, }\StringTok{"Phylum"}\NormalTok{)}
-\CommentTok{\# both have the same number of columns (samples)}
+\NormalTok{tse\_phylum }\OtherTok{\textless{}{-}} \FunctionTok{agglomerateByRank}\NormalTok{(tse, }\StringTok{"Phylum"}\NormalTok{, }\AttributeTok{na.rm=}\ConstantTok{TRUE}\NormalTok{)}
+\CommentTok{\# Both have the same number of columns (samples)}
 \FunctionTok{dim}\NormalTok{(tse)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 19216    26
+## [1]  130 1151
 \end{verbatim}
 
 \begin{Shaded}
@@ -732,13 +709,17 @@ the samples are matched.
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 67 26
+## [1]    8 1151
 \end{verbatim}
+
+Then we can add the new phylum-level data object as an alternative experiment in the original data.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Add the new table as an alternative experiment}
+\CommentTok{\# Add the new data object to the original data object as an alternative experiment with the name "Phylum"}
 \FunctionTok{altExp}\NormalTok{(tse, }\StringTok{"Phylum"}\NormalTok{) }\OtherTok{\textless{}{-}}\NormalTok{ tse\_phylum}
+
+\CommentTok{\# Check the alternative experiment names available in the data}
 \FunctionTok{altExpNames}\NormalTok{(tse)}
 \end{Highlighting}
 \end{Shaded}
@@ -747,27 +728,29 @@ the samples are matched.
 ## [1] "Phylum"
 \end{verbatim}
 
+We can now subset the data, for instance, and this acts on both altExp and assay data.
+
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Pick a sample subset: this acts on both altExp and assay data}
 \NormalTok{tse[,}\DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{]}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
 ## class: TreeSummarizedExperiment 
-## dim: 19216 10 
+## dim: 130 10 
 ## metadata(0):
 ## assays(2): counts relabundance
-## rownames(19216): 549322 522457 ... 200359 271582
-## rowData names(7): Kingdom Phylum ... Genus Species
-## colnames(10): CL3 CC1 ... M31Tong M11Tong
-## colData names(7): X.SampleID Primer ... SampleType Description
+## rownames(130): Actinomycetaceae Aerococcus ... Xanthomonadaceae
+##   Yersinia et rel.
+## rowData names(3): Phylum Family Genus
+## colnames(10): Sample-1 Sample-2 ... Sample-9 Sample-10
+## colData names(10): age sex ... time sample
 ## reducedDimNames(0):
 ## mainExpName: NULL
 ## altExpNames(1): Phylum
-## rowLinks: a LinkDataFrame (19216 rows)
-## rowTree: 1 phylo tree(s) (19216 leaves)
+## rowLinks: NULL
+## rowTree: NULL
 ## colLinks: NULL
 ## colTree: NULL
 \end{verbatim}
@@ -779,11 +762,10 @@ the samples are matched.
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 67 10
+## [1]  8 10
 \end{verbatim}
 
-For more details of altExp have a look at the \href{https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html}{Intro vignette} of the
-\texttt{SingleCellExperiment} package \citep{R_SingleCellExperiment}.
+For more details on \emph{altExp}, you can check the \href{https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html}{introduction} to the \texttt{SingleCellExperiment} package \citep{R_SingleCellExperiment}.
 
 \hypertarget{mae}{%
 \subsection{MultiAssayExperiments}\label{mae}}
@@ -807,12 +789,6 @@ datasets relate to each other the data can be stored as:
   \texttt{matrix}-like objects, including \texttt{SummarizedExperiment} objects, and
   the number of samples can differ between the elements.
 \end{enumerate}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\#TODO: Find the right dataset to explain a non 1:1 sample relationship}
-\end{Highlighting}
-\end{Shaded}
 
 For information have a look at the \href{https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html}{intro vignette} of the \texttt{MultiAssayExperiment} package.
 
@@ -884,8 +860,6 @@ Load the \texttt{GlobalPatterns} data from the \texttt{mia} package:
 ## colLinks: NULL
 ## colTree: NULL
 \end{verbatim}
-
-Check the documentation for this dataset:
 
 \hypertarget{hintikka-desc}{%
 \subsubsection{HintikkaXOData}\label{hintikka-desc}}
@@ -2503,7 +2477,7 @@ New information can also be added to the experiment by creating a new variable.
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 0.46307 0.90297 0.73152 0.74479 0.33450 0.04205
+## [1] 0.4682 0.7674 0.3378 0.7564 0.4630 0.4771
 \end{verbatim}
 
 \hypertarget{merge-data}{%
@@ -5607,7 +5581,7 @@ This returns a list of DMN objects for a closer investigation.
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7690 BIC: 8076 AIC: 7948 
+## Laplace: 7683 BIC: 8069 AIC: 7942 
 ## 
 ## [[4]]
 ## class: DMN 
@@ -5619,7 +5593,7 @@ This returns a list of DMN objects for a closer investigation.
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7862 BIC: 8553 AIC: 8340 
+## Laplace: 7854 BIC: 8553 AIC: 8340 
 ## 
 ## [[6]]
 ## class: DMN 
@@ -5681,15 +5655,15 @@ Patient status is used for grouping.
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
-## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
+## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
+## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
 \end{verbatim}
 
 Mixture weights (rough measure of the cluster size).
@@ -5702,7 +5676,7 @@ Mixture weights (rough measure of the cluster size).
 
 \begin{verbatim}
 ##       pi theta
-## 1 0.5385 20.60
+## 1 0.5385 20.58
 ## 2 0.4615 15.28
 \end{verbatim}
 
@@ -5717,12 +5691,12 @@ to each cluster
 
 \begin{verbatim}
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.004e-17
-## CC1     1.000e+00 3.799e-22
-## SV1     1.000e+00 2.021e-12
-## M31Fcsw 7.309e-26 1.000e+00
-## M11Fcsw 1.061e-16 1.000e+00
-## M31Plmr 9.991e-14 1.000e+00
+## CL3     1.000e+00 5.050e-17
+## CC1     1.000e+00 3.903e-22
+## SV1     1.000e+00 1.957e-12
+## M31Fcsw 7.886e-26 1.000e+00
+## M11Fcsw 1.132e-16 1.000e+00
+## M31Plmr 1.124e-13 1.000e+00
 \end{verbatim}
 
 Contribution of each taxa to each component
@@ -5734,13 +5708,13 @@ Contribution of each taxa to each component
 \end{Shaded}
 
 \begin{verbatim}
-##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354653
-## Phylum:Euryarchaeota  0.2314 0.1468632
-## Phylum:Actinobacteria 1.2105 1.0600542
-## Phylum:Spirochaetes   0.2141 0.1318414
-## Phylum:MVP-15         0.0299 0.0007646
-## Phylum:Proteobacteria 6.8425 1.8151526
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30382 0.1354654
+## Phylum:Euryarchaeota  0.23114 0.1468632
+## Phylum:Actinobacteria 1.21371 1.0600245
+## Phylum:Spirochaetes   0.21393 0.1318415
+## Phylum:MVP-15         0.02982 0.0007669
+## Phylum:Proteobacteria 6.84469 1.8153216
 \end{verbatim}
 
 Get the assignment probabilities
@@ -6807,19 +6781,22 @@ that we specify.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Run ANCOM{-}BC }
+\CommentTok{\# Agglomerate data to genus level and add this new abundance table to the altExp slot}
+\FunctionTok{altExp}\NormalTok{(tse, }\StringTok{"genus"}\NormalTok{) }\OtherTok{\textless{}{-}} \FunctionTok{agglomerateByRank}\NormalTok{(tse, }\StringTok{"genus"}\NormalTok{)}
+
+\CommentTok{\# Identify prevalent genera}
+\NormalTok{prevalent.genera }\OtherTok{\textless{}{-}} \FunctionTok{getPrevalentFeatures}\NormalTok{(}\FunctionTok{altExp}\NormalTok{(tse, }\StringTok{"genus"}\NormalTok{), }\AttributeTok{detection =} \DecValTok{0}\NormalTok{, }\AttributeTok{prevalence =} \DecValTok{20}\SpecialCharTok{/}\DecValTok{100}\NormalTok{)}
+
+\CommentTok{\# Run ANCOM{-}BC at the genus level and only including the prevalent genera}
 \NormalTok{out }\OtherTok{\textless{}{-}} \FunctionTok{ancombc2}\NormalTok{(}
-  \AttributeTok{data =}\NormalTok{ tse,}
+  \AttributeTok{data =} \FunctionTok{altExp}\NormalTok{(tse, }\StringTok{"genus"}\NormalTok{)[prevalent.genera, ],}
   \AttributeTok{assay\_name =} \StringTok{"counts"}\NormalTok{, }
-  \AttributeTok{tax\_level =} \StringTok{"genus"}\NormalTok{, }
   \AttributeTok{fix\_formula =} \StringTok{"Geographical\_location"}\NormalTok{, }
   \AttributeTok{p\_adj\_method =} \StringTok{"fdr"}\NormalTok{, }
-  \AttributeTok{lib\_cut =} \DecValTok{0}\NormalTok{,}
   \AttributeTok{prv\_cut =} \DecValTok{0}\NormalTok{,}
   \AttributeTok{group =} \StringTok{"Geographical\_location"}\NormalTok{, }
   \AttributeTok{struc\_zero =} \ConstantTok{TRUE}\NormalTok{, }
   \AttributeTok{neg\_lb =} \ConstantTok{TRUE}\NormalTok{,}
-  \AttributeTok{alpha =} \FloatTok{0.05}\NormalTok{, }
   \AttributeTok{global =} \ConstantTok{TRUE} \CommentTok{\# multi group comparison will be deactivated automatically }
 \NormalTok{)}
 \end{Highlighting}
@@ -6859,17 +6836,17 @@ dataframe.
 \hline
 taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & q\_(Intercept) & q\_Geographical\_locationPune\\
 \hline
-Abyssicoccus & -0.1478 & 0.5549 & 1 & 0.0260\\
+Abyssicoccus & 0.0000 & 0.0965 & 0.9999 & 0.7697\\
 \hline
-Acidaminococcus & 0.0096 & 0.1032 & 1 & 0.7878\\
+Acidaminococcus & 0.1130 & -0.3193 & 0.8119 & 0.5141\\
 \hline
-Acinetobacter & 1.2778 & -1.1398 & 1 & 0.1936\\
+Acinetobacter & 1.4447 & -1.6241 & 0.0753 & 0.0839\\
 \hline
-Actinomyces & 0.0611 & 0.1270 & 1 & 0.7294\\
+Actinomyces & 0.1779 & -0.3299 & 0.6849 & 0.4584\\
 \hline
-Actinoplanes & 0.6893 & -0.7957 & 1 & 0.0058\\
+Actinoplanes & 0.7968 & -1.2515 & 0.0019 & 0.0026\\
 \hline
-Aerococcus & -0.3872 & 0.9859 & 1 & 0.0009\\
+Aerococcus & -0.3036 & 0.6006 & 0.1202 & 0.0603\\
 \hline
 \end{tabular}
 
@@ -7398,26 +7375,26 @@ package. We try to predict the diet type based on the data.
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    13   8
-##      Veg      10  16
+##      Mixed    10  10
+##      Veg      13  14
 ##                                         
-##                Accuracy : 0.617         
-##                  95% CI : (0.464, 0.755)
+##                Accuracy : 0.511         
+##                  95% CI : (0.361, 0.659)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.0942        
+##     P-Value [Acc > NIR] : 0.558         
 ##                                         
-##                   Kappa : 0.232         
+##                   Kappa : 0.018         
 ##                                         
-##  Mcnemar's Test P-Value : 0.8137        
+##  Mcnemar's Test P-Value : 0.677         
 ##                                         
-##             Sensitivity : 0.565         
-##             Specificity : 0.667         
-##          Pos Pred Value : 0.619         
-##          Neg Pred Value : 0.615         
+##             Sensitivity : 0.435         
+##             Specificity : 0.583         
+##          Pos Pred Value : 0.500         
+##          Neg Pred Value : 0.519         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.277         
-##    Detection Prevalence : 0.447         
-##       Balanced Accuracy : 0.616         
+##          Detection Rate : 0.213         
+##    Detection Prevalence : 0.426         
+##       Balanced Accuracy : 0.509         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -10494,7 +10471,7 @@ Printing a summary about the posterior:
 \end{Shaded}
 
 \begin{verbatim}
-## Proportions of Observations within 95% Credible Interval: 0.9979
+## Proportions of Observations within 95% Credible Interval: 0.9978
 \end{verbatim}
 
 Plotting the summary of the posterior distributions of the regression parameters:
@@ -10583,69 +10560,74 @@ In this section we make a 3D version of the earlier Visualizing the most dominan
 \end{Highlighting}
 \end{Shaded}
 
-\hypertarget{contributors}{%
-\chapter*{Contributors}\label{contributors}}
-\addcontentsline{toc}{chapter}{Contributors}
+\hypertarget{authors-and-contributors}{%
+\chapter*{Authors and contributors}\label{authors-and-contributors}}
+\addcontentsline{toc}{chapter}{Authors and contributors}
 
-\hypertarget{chandler-ross-phd}{%
-\subsection*{\texorpdfstring{\emph{Chandler Ross, PhD}}{Chandler Ross, PhD}}\label{chandler-ross-phd}}
-\addcontentsline{toc}{subsection}{\emph{Chandler Ross, PhD}}
+\hypertarget{leo-lahti-dsc}{%
+\subsection*{\texorpdfstring{\emph{Leo Lahti, DSc}}{Leo Lahti, DSc}}\label{leo-lahti-dsc}}
+\addcontentsline{toc}{subsection}{\emph{Leo Lahti, DSc}}
 
-Chandler Ross is a PhD researcher at Turku Data science group research team.His research interest is mainly into Eco-Evolutionary Dynamics, Statistical Modelling and Time Series.
+Leo Lahti is professor in Data Science at the \href{https://datascience.utu.fi/}{Department of Computing, University of Turku, Finland}, with a focus on computational microbiome analysis. Lahti obtained doctoral degree (DSc) from Aalto University in Finland (2010), developing probabilistic machine learning and data integration methods for high-throughput life science data. Since 2011 he has carried out microbiome research and developed, among other things, the \emph{phyloseq}-based \href{https://bioconductor.org/packages/release/bioc/html/microbiome.html}{microbiome R package} before starting to develop the mia libraries and \emph{TreeSummarizedExperiment} / \emph{MultiAssayExperiment} framework for microbiome data science introduced in this gitbook. In addition to carrying out computational microbiome research, Lahti is in the editorial board of \emph{ISME} and \emph{Microbiome} journals, work group leader in the European COST action network \href{https://ml4microbiome.eu/}{ML4microbiome}, national delegate in the International Science Council Committee on Data (\href{https://codata.org/}{CODATA}), and has led the development of \href{https://avointiede.fi/en/policies-materials/policies-open-science-and-research-finland/policy-open-research-data-and-methods}{national policy on open access to research methods in Finland}. He is current member in the \href{https://bioconductor.org/about/community-advisory-board/}{Bioconductor Community Advisory Board} and runs regular training workshops in microbiome data science.
 
-\hypertarget{chouaib-benchraka-msc}{%
-\subsection*{\texorpdfstring{\emph{Chouaib Benchraka, Msc}}{Chouaib Benchraka, Msc}}\label{chouaib-benchraka-msc}}
-\addcontentsline{toc}{subsection}{\emph{Chouaib Benchraka, Msc}}
+\hypertarget{tuomas-borman}{%
+\subsection*{\texorpdfstring{\emph{Tuomas Borman}}{Tuomas Borman}}\label{tuomas-borman}}
+\addcontentsline{toc}{subsection}{\emph{Tuomas Borman}}
 
-Chouaib Benchraka is a research assistant at Turku data science research group.He is interested working with Machine Learning and Data Science researches.
+Tuomas Borman is a PhD researcher at the Department of Computing, University of Turku, and one of the key developers of the microbiome data science framework presented in this gitbook. He has helped to set up the base ecosystem of R/Bioconductor packages and other online resources.
+
+\hypertarget{giulio-benedetti}{%
+\subsection*{\texorpdfstring{\emph{Giulio Benedetti}}{Giulio Benedetti}}\label{giulio-benedetti}}
+\addcontentsline{toc}{subsection}{\emph{Giulio Benedetti}}
+
+Giulio Benedetti is a scientific programmer at the Department of Computing, University of Turku. His research interest is mostly related to Data Science. He has also helped to expand the SummarizedExperiment-based microbiome analysis framework to the Julia language, implementing \href{https://github.com/JuliaTurkuDataScience/MicrobiomeAnalysis.jl}{MicrobiomeAnalysis.jl}.
 
 \hypertarget{felix-ernst-phd}{%
 \subsection*{\texorpdfstring{\emph{Felix Ernst, PhD}}{Felix Ernst, PhD}}\label{felix-ernst-phd}}
 \addcontentsline{toc}{subsection}{\emph{Felix Ernst, PhD}}
 
-Felic Ernst is among the developers who participated in the development of \href{https://microbiome.github.io}{miaverse} which is open source project developing R/Bioc methods, benchmarking data, and educational material for microbiome research based on the SummarizedExperiment class and its derivatives.
+Felix Ernst is among the first developers of R/Bioc methods for microbiome research based on the \emph{SummarizedExperiment} class and its derivatives.
 
-\hypertarget{giulio-benedetti-research-assistant}{%
-\subsection*{\texorpdfstring{\emph{Giulio Benedetti, Research Assistant}}{Giulio Benedetti, Research Assistant}}\label{giulio-benedetti-research-assistant}}
-\addcontentsline{toc}{subsection}{\emph{Giulio Benedetti, Research Assistant}}
+\hypertarget{contributors}{%
+\subsection*{Contributors}\label{contributors}}
+\addcontentsline{toc}{subsection}{Contributors}
 
-Guilio Benedetti is a research assistant at Turku data science research group. His research interest is mostly related to Data Science.
+This work is a remarkably collaborative effort over the years. The
+full list of contributors is available via
+\href{https://github.com/microbiome/OMA/graphs/contributors}{Github}. Some
+of the key contributors include:
 
-\hypertarget{henrik-eckermann-phd}{%
-\subsection*{\texorpdfstring{\emph{Henrik Eckermann, PhD}}{Henrik Eckermann, PhD}}\label{henrik-eckermann-phd}}
-\addcontentsline{toc}{subsection}{\emph{Henrik Eckermann, PhD}}
-
-Henerik Eckermann is PhD researcher at the research group Turku data science. His research interest is in Human microbiome bioinformatics.
-
-\hypertarget{leo-lahti-professor}{%
-\subsection*{\texorpdfstring{\emph{Leo Lahti, Professor}}{Leo Lahti, Professor}}\label{leo-lahti-professor}}
-\addcontentsline{toc}{subsection}{\emph{Leo Lahti, Professor}}
-
-Leo Lahti is the group leader for the research team at Turku data science and professor in Data Science in University of Turku, Finland. His research team focuses on computational analysis and modeling of complex natural and social systems. Lahti obtained doctoral degree (DSc) in statistical machine learning and bioinformatics from Aalto University in Finland (2010), developing probabilistic data integration methods for high-throughput life science data.
-
-\hypertarget{shigdel-rajesh-phd}{%
-\subsection*{\texorpdfstring{\emph{Shigdel Rajesh, PhD}}{Shigdel Rajesh, PhD}}\label{shigdel-rajesh-phd}}
-\addcontentsline{toc}{subsection}{\emph{Shigdel Rajesh, PhD}}
-
-Shigdel Rajesh was a visiting scholar to Turku data science group.His research interest is mainly related to bioinformatics, microbiome data analysis.
-
-\hypertarget{sudarshan-shetty-phd}{%
-\subsection*{\texorpdfstring{\emph{Sudarshan Shetty, PhD}}{Sudarshan Shetty, PhD}}\label{sudarshan-shetty-phd}}
-\addcontentsline{toc}{subsection}{\emph{Sudarshan Shetty, PhD}}
-
-Sudarshan Shetty is one of the key developers in the \href{https://microbiome.github.io}{miaverse} R/Bioconductor package for microbiome bioinformatics based on (Tree)SummerizedExperiment.
-
-\hypertarget{tuomas-borman-phd}{%
-\subsection*{\texorpdfstring{\emph{Tuomas Borman, PhD}}{Tuomas Borman, PhD}}\label{tuomas-borman-phd}}
-\addcontentsline{toc}{subsection}{\emph{Tuomas Borman, PhD}}
-
-Tuomas Borman is a PhD researcher and one of the key developers of \href{https://microbiome.github.io}{miaverse}. He participated in setting up the base ecosystem of data containers, packages, and tutorials with other team members.
-
-\hypertarget{yaux11fmur-ux15fimux15fek}{%
-\subsection*{\texorpdfstring{\emph{Yağmur Şimşek, }}{Yağmur Şimşek, }}\label{yaux11fmur-ux15fimux15fek}}
-\addcontentsline{toc}{subsection}{\emph{Yağmur Şimşek, }}
-
-Yağmur Şimşek was a research assistant at the Turku data science reseach group when she contributed to this work.
+\begin{itemize}
+\item
+  \emph{Sudarshan Shetty, PhD} has supported the establishment of the
+  framework and associated tools. He also maintains a list of
+  \href{https://microsud.github.io/Tools-Microbiome-Analysis/}{microbiome R
+  packages}.
+\item
+  \emph{Henrik Eckermann}, in particular to the development of
+  the differential abundance analyses
+\item
+  \emph{Chouaib Benchraka} provided various contributions to the package ecosystem and the OMA book
+\item
+  \emph{Yağmur Şimşek} converted the miaSim R package to support the Bioconductor framework
+\item
+  \emph{Basil Courbayre} provided various contributions to the package
+  ecosystem and the OMA book, in particular on unsupervised machine
+  learning
+\item
+  \emph{Matti Ruuskanen, PhD}, added machine learning techniques for
+  microbiome analysis
+\item
+  \emph{Shigdel Rajesh, PhD}
+\item
+  \emph{Artur Sannikov}
+\item
+  \emph{Jeba Akewak}
+\item
+  \emph{Himmi Lindgren}
+\item
+  \emph{Lu Yang}
+\end{itemize}
 
 \hypertarget{acknowledgments}{%
 \subsection*{Acknowledgments}\label{acknowledgments}}
@@ -10656,60 +10638,75 @@ contributions and interactions with other researchers, developers, and
 users. We express our gratitude to the entire Bioconductor community
 for developing this high-quality open research software repository for
 life science analytics, continuously pushing the limits in emerging
-fields \citep[\citet{Huber2015}]{Gentleman2004}. The developers and contributors
-of this online tutorial are listed in Chapter \ref{contributors}.
+fields \citep{Gentleman2004}, \citep{Huber2015}.
 
-The base ecosystem of data containers, packages, and tutorials was set
-up as a collaborative effort by Tuomas Borman, Henrik Eckermann,
-Chouaib Benchraka, Chandler Ross, Shigdel Rajesh, Yağmur Şimşek,
-Giulio Benedetti, Sudarshan Shetty, Felix Ernst, and \href{http://www.iki.fi/Leo.Lahti}{Leo
-Lahti}.
-
-The work has been supported by the COST Action network on Statistical
-and Machine Learning Techniques for Human Microbiome Studies
-(\href{https://www.ml4microbiome.eu/}{ML4microbiome}) \citep{MorenoIndias2021}.
-
-The framework is based on the \emph{TreeSummarizedExperiment} data
-container created by Ruizhu Huang and others
-\citep{R_TreeSummarizedExperiment}, and on the MultiAssayExperiment by
-Marcel Ramos et al. \citep{Ramos2017}. The idea of using these containers
-as a basis for microbiome data science was initially advanced by the
-groundwork of Domenick Braccia, Héctor Corrada Bravo and others, and
-subsequently brought together with other microbiome data science
-developers \citep{Shetty2019}.
-
-Ample demonstration data resources have been made available as the
-\href{https://waldronlab.io/curatedMetagenomicData/}{curatedMetagenomicData}
-project by Edoardo Pasolli, Lucas Schiffer, Levi Waldron and others
-\citep{Pasolli2017} adding important support.
-A number of other contributors have advanced the ecosystem
-further, and will be acknowledged in the individual
+The presented framework for microbiome data science is based on the
+\emph{TreeSummarizedExperiment} data container created by Ruizhu Huang and
+others \citep{R_TreeSummarizedExperiment}, \citep{Ernst2020}, and on the
+\emph{MultiAssayExperiment} by Marcel Ramos et al. \citep{Ramos2017}. The idea
+of using these containers as a basis for microbiome data science was
+initially advanced by the groundwork of Domenick Braccia, Héctor
+Corrada Bravo and others and brought together with other microbiome
+data science developers \citep{Shetty2019}. Setting up the base ecosystem
+of packages and tutorials was then subsequently led by Tuomas Borman,
+Felix Ernst, and \href{http://www.iki.fi/Leo.Lahti}{Leo Lahti}. We would
+specifically like to thank everyone who contributed to the work
+supporting the \emph{TreeSummarizedExperiment} ecosystem for microbiome
+research, including but not limited to the R packages mia, miaViz,
+miaTime, miaSim, philr, ANCOMBC, curatedMetagenomicData, scater,
+scuttle, and other packages, some of which are listed in Section
+\ref{ecosystem}. A number of other contributors have advanced the
+ecosystem further, and will be acknowledged in the individual
 packages, \href{https://github.com/microbiome/OMA/graphs/contributors}{pull
 requests},
 \href{https://github.com/microbiome/OMA/issues}{issues}, and other work.
 
-The work has drawn inspiration from many sources, most notably from
-the work on \emph{phyloseq} by Paul McMurdie and Susan Holmes
+Ample demonstration data resources supporting this framework have been
+made available through the
+\href{https://waldronlab.io/curatedMetagenomicData/}{curatedMetagenomicData}
+project by Edoardo Pasolli, Lucas Schiffer, Levi Waldron and others
+\citep{Pasolli2017}.
+
+The work has drawn initial inspiration from many sources, most notably
+from the work on \emph{phyloseq} by Paul McMurdie and Susan Holmes
 \citep{McMurdie2013} who pioneered the work on rigorous and reproducible
 microbiome data science ecosystems in R/Bioconductor. The phyloseq
 framework continues to provide a vast array of complementary packages
-and methods for microbiome studies, and we aim to support full
-interoperability.
-
-The open source books by Susan Holmes and Wolfgang Huber, Modern
-Statistics for Modern Biology \citep{Holmes2019} and by Garret Grolemund
-and Hadley Wickham, the R for Data Science \citep{Grolemund2017}, and
-Richard McElreath's Statistical Rethinking and the associated online
-resources by Solomon Kurz \citep{McElreath2020} are key references that
-advanced reproducible data science training and dissemination. The
-Orchestrating Single-Cell Analysis with Bioconductor, or \emph{OSCA} book
-by Robert Amezquita, Aaron Lun, Stephanie Hicks, and Raphael Gottardo
+and methods for microbiome studies. The Orchestrating Single-Cell
+Analysis with Bioconductor, or
+\href{https://bioconductor.org/books/release/OSCA/}{\emph{OSCA}} book by Robert
+Amezquita, Aaron Lun, Stephanie Hicks, and Raphael Gottardo
 \citep{Amezquita2020natmeth} has implemented closely related work on the
 \emph{SummarizedExperiment} data container and its derivatives in the field
-of single cell sequencing studies. Many approaches used in this book
-have been derived from the \href{https://bioconductor.org/books/release/OSCA/}{OSCA
-framework}, with various
-adjustments and extensions dedicated to microbiome data science.
+of single cell sequencing studies that have inspired this work.
+
+In the background, the open source books by Susan Holmes and Wolfgang
+Huber, Modern Statistics for Modern Biology \citep{Holmes2019} and by
+Garret Grolemund and Hadley Wickham, the R for Data Science
+\citep{Grolemund2017}, and Richard McElreath's Statistical Rethinking and
+the associated online resources by Solomon Kurz \citep{McElreath2020} are
+key references that have advanced reproducible data science training
+and dissemination.
+
+\hypertarget{support}{%
+\subsection*{Support}\label{support}}
+\addcontentsline{toc}{subsection}{Support}
+
+This work has been supported by:
+
+\begin{itemize}
+\item
+  \href{https://www.aka.fi/}{Research Council of Finland}
+\item
+  \href{https://www.findingpheno.eu/}{FindingPheno} European Union's Horizon 2020 research and innovation programme under grant agreement No 952914
+\item
+  COST Action network on Statistical and Machine Learning Techniques for Human Microbiome Studies
+  (\href{https://www.ml4microbiome.eu/}{ML4microbiome}) \citep{MorenoIndias2021}.
+\item
+  Computational Life Science Research Program, \href{https://biocityturku.fi/}{Biocity Turku}
+\item
+  \href{https://www.yliopistosaatio.fi/en/}{Turku University Foundation}
+\end{itemize}
 
 \hypertarget{sessioninfo}{%
 \chapter*{Sessioninfo}\label{sessioninfo}}
@@ -10747,7 +10744,7 @@ adjustments and extensions dedicated to microbiome data science.
 ## [1] BiocStyle_2.28.0 rebook_1.10.1   
 ## 
 ## loaded via a namespace (and not attached):
-## [1] knitr_1.43      shiny_1.7.4     htmltools_0.5.5 rmarkdown_2.23 
+## [1] knitr_1.43      shiny_1.7.4.1   htmltools_0.5.5 rmarkdown_2.23 
 ## [5] bookdown_0.34   miniUI_0.1.1.1  tools_4.3.0
 \end{verbatim}
 
