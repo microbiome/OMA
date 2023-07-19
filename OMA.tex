@@ -2480,7 +2480,7 @@ New information can also be added to the experiment by creating a new variable.
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 0.2464 0.1149 0.5252 0.7665 0.4073 0.6141
+## [1] 0.3291 0.5856 0.2019 0.3793 0.4616 0.8645
 \end{verbatim}
 
 \hypertarget{merge-data}{%
@@ -5349,138 +5349,6 @@ Hierarchical clustering can be visualized with dendrogram tree. In each
 splitting point, the three is divided into two clusters leading to
 hierarchy.
 
-Let's load data from mia package.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(mia)}
-\FunctionTok{library}\NormalTok{(vegan)}
-
-\CommentTok{\# Load experimental data}
-\FunctionTok{data}\NormalTok{(peerj13075)}
-\NormalTok{(tse }\OtherTok{\textless{}{-}}\NormalTok{ peerj13075)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## class: TreeSummarizedExperiment 
-## dim: 674 58 
-## metadata(0):
-## assays(1): counts
-## rownames(674): OTU1 OTU2 ... OTU2567 OTU2569
-## rowData names(6): kingdom phylum ... family genus
-## colnames(58): ID1 ID2 ... ID57 ID58
-## colData names(5): Sample Geographical_location Gender Age Diet
-## reducedDimNames(0):
-## mainExpName: NULL
-## altExpNames(0):
-## rowLinks: NULL
-## rowTree: NULL
-## colLinks: NULL
-## colTree: NULL
-\end{verbatim}
-
-Hierarchical clustering requires 2 steps. In the fist step, dissimilarities are
-calculated. In prior to that, data transformation is applied if needed. Since
-sequencing data is compositional, relative transformation is applied.
-In the second step, clustering is performed based on dissimilarities.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(NbClust)}
-\FunctionTok{library}\NormalTok{(cobiclust)}
-
-\CommentTok{\# Apply transformation}
-\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{transformCounts}\NormalTok{(tse, }\AttributeTok{method =} \StringTok{"relabundance"}\NormalTok{)}
-\CommentTok{\# Get the assay}
-\NormalTok{assay }\OtherTok{\textless{}{-}} \FunctionTok{assay}\NormalTok{(tse, }\StringTok{"relabundance"}\NormalTok{)}
-\CommentTok{\# Transpose assay {-}{-}\textgreater{} samples are now in rows {-}{-}\textgreater{} we are clustering samples}
-\NormalTok{assay }\OtherTok{\textless{}{-}} \FunctionTok{t}\NormalTok{(assay)}
-
-\CommentTok{\# Calculate distances}
-\NormalTok{diss }\OtherTok{\textless{}{-}} \FunctionTok{vegdist}\NormalTok{(assay, }\AttributeTok{method =} \StringTok{"bray"}\NormalTok{)}
-
-\CommentTok{\# Perform hierarchical clustering}
-\NormalTok{hc }\OtherTok{\textless{}{-}} \FunctionTok{hclust}\NormalTok{(diss, }\AttributeTok{method =} \StringTok{"complete"}\NormalTok{)}
-
-\CommentTok{\# To visualize, convert hclust object into dendrogram object}
-\NormalTok{dendro }\OtherTok{\textless{}{-}} \FunctionTok{as.dendrogram}\NormalTok{(hc)}
-
-\CommentTok{\# Plot dendrogram}
-\FunctionTok{plot}\NormalTok{(dendro)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{24_clustering_files/figure-latex/hclust2-1.pdf}
-
-We can use dendrogram to determine the number of clusters. Usually the
-tree is splitted where the branch length is the largest. However, as
-we can see from the dendrogram, clusters are not clear. Algorithms are
-available to identify the optimal number of clusters.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Determine the optimal number of clusters}
-\NormalTok{res }\OtherTok{\textless{}{-}} \FunctionTok{NbClust}\NormalTok{(}
-  \AttributeTok{diss =}\NormalTok{ diss, }\AttributeTok{distance =} \ConstantTok{NULL}\NormalTok{, }\AttributeTok{method =} \StringTok{"ward.D2"}\NormalTok{,}
-  \AttributeTok{index =} \StringTok{"silhouette"}
-\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## 
-##  Only frey, mcclain, cindex, sihouette and dunn can be computed. To compute the other indices, data matrix is needed
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{res}\SpecialCharTok{$}\NormalTok{Best.nc}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## Number_clusters     Value_Index 
-##         15.0000          0.4543
-\end{verbatim}
-
-Based on the result, let's divide observations into 15 clusters.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(dendextend)}
-
-\CommentTok{\# Find clusters}
-\FunctionTok{cutree}\NormalTok{(hc, }\AttributeTok{k =} \DecValTok{15}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-##  ID1  ID2  ID3  ID4  ID5  ID6  ID7  ID8  ID9 ID10 ID11 ID12 ID13 ID14 ID15 ID16 
-##    1    2    3    4    5    5    2    2    2    6    5    5    2    5    2    5 
-## ID17 ID18 ID19 ID20 ID21 ID22 ID23 ID24 ID25 ID26 ID27 ID28 ID29 ID30 ID31 ID32 
-##    5    4    5    5    7    8    9    5    3    1    8    8    8    3    1    2 
-## ID33 ID34 ID35 ID36 ID37 ID38 ID39 ID40 ID41 ID42 ID43 ID44 ID45 ID46 ID47 ID48 
-##    2    2    2    2    2    9   10   11    6    5    4    2    9    1   12    2 
-## ID49 ID50 ID51 ID52 ID53 ID54 ID55 ID56 ID57 ID58 
-##    4    4    2    8    7   13   14    3    8   15
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Making colors for 6 clusters}
-\NormalTok{col\_val\_map }\OtherTok{\textless{}{-}}\NormalTok{ randomcoloR}\SpecialCharTok{::}\FunctionTok{distinctColorPalette}\NormalTok{(}\DecValTok{15}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{as.list}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
-  \FunctionTok{setNames}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(}\StringTok{"clust\_"}\NormalTok{, }\FunctionTok{seq}\NormalTok{(}\DecValTok{15}\NormalTok{)))}
-
-\NormalTok{dend }\OtherTok{\textless{}{-}} \FunctionTok{color\_branches}\NormalTok{(dendro, }\AttributeTok{k =} \DecValTok{15}\NormalTok{, }\AttributeTok{col =} \FunctionTok{unlist}\NormalTok{(col\_val\_map))}
-\FunctionTok{labels}\NormalTok{(dend) }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
-\FunctionTok{plot}\NormalTok{(dend)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{24_clustering_files/figure-latex/hclust4-1.pdf}
-
 \hypertarget{k-means-clustering}{%
 \section{K-means clustering}\label{k-means-clustering}}
 
@@ -5496,47 +5364,6 @@ calculated. After that, observations' allocation to clusters are
 updated so that the means are minimized. Again, centroid are
 calculated, and algorithm continues iteratively until the assignments
 do not change.
-
-The number of clusters can be determined based on algorithm. Here we
-utilize silhouette analysis.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(factoextra)}
-
-
-\CommentTok{\# Convert dist object into matrix}
-\NormalTok{diss }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(diss)}
-\CommentTok{\# Perform silhouette analysis and plot the result}
-\FunctionTok{fviz\_nbclust}\NormalTok{(diss, kmeans, }\AttributeTok{method =} \StringTok{"silhouette"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{24_clustering_files/figure-latex/kmeans1-1.pdf}
-
-Based on the result of silhouette analysis, we choose 3 to be the number of clusters
-in k-means clustering.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(scater)}
-
-\CommentTok{\# The first step is random, add seed for reproducibility}
-\FunctionTok{set.seed}\NormalTok{(}\DecValTok{15463}\NormalTok{)}
-\CommentTok{\# Perform k{-}means clustering with 3 clusters}
-\NormalTok{km }\OtherTok{\textless{}{-}} \FunctionTok{kmeans}\NormalTok{(diss, }\DecValTok{3}\NormalTok{, }\AttributeTok{nstart =} \DecValTok{25}\NormalTok{)}
-\CommentTok{\# Add the result to colData}
-\FunctionTok{colData}\NormalTok{(tse)}\SpecialCharTok{$}\NormalTok{clusters }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(km}\SpecialCharTok{$}\NormalTok{cluster)}
-
-\CommentTok{\# Perform PCoA so that we can visualize clusters}
-\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runMDS}\NormalTok{(tse, }\AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{, }\AttributeTok{FUN =}\NormalTok{ vegan}\SpecialCharTok{::}\NormalTok{vegdist, }\AttributeTok{method =} \StringTok{"bray"}\NormalTok{)}
-
-\CommentTok{\# Plot PCoA and color clusters}
-\FunctionTok{plotReducedDim}\NormalTok{(tse, }\StringTok{"MDS"}\NormalTok{, }\AttributeTok{colour\_by =} \StringTok{"clusters"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{24_clustering_files/figure-latex/kmeans2-1.pdf}
 
 \hypertarget{dirichlet-multinomial-mixtures-dmm}{%
 \section{Dirichlet Multinomial Mixtures (DMM)}\label{dirichlet-multinomial-mixtures-dmm}}
@@ -5632,31 +5459,31 @@ This returns a list of DMN objects for a closer investigation.
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7683 BIC: 8069 AIC: 7942 
+## Laplace: 7689 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7751 BIC: 8274 AIC: 8103 
+## Laplace: 7752 BIC: 8276 AIC: 8105 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7854 BIC: 8553 AIC: 8340 
+## Laplace: 7849 BIC: 8565 AIC: 8352 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7926 BIC: 8796 AIC: 8540 
+## Laplace: 7927 BIC: 8796 AIC: 8540 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8003 BIC: 9051 AIC: 8752
+## Laplace: 8065 BIC: 9139 AIC: 8840
 \end{verbatim}
 
 Show Laplace approximation (model evidence) for each model of the k models.
@@ -5706,15 +5533,15 @@ Patient status is used for grouping.
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 \end{verbatim}
 
 Mixture weights (rough measure of the cluster size).
@@ -5727,8 +5554,8 @@ Mixture weights (rough measure of the cluster size).
 
 \begin{verbatim}
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.28
+## 1 0.5385 20.60
+## 2 0.4615 15.32
 \end{verbatim}
 
 Samples-cluster assignment probabilities / how probable it is that sample belongs
@@ -5742,12 +5569,12 @@ to each cluster
 
 \begin{verbatim}
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.050e-17
-## CC1     1.000e+00 3.903e-22
-## SV1     1.000e+00 1.957e-12
-## M31Fcsw 7.886e-26 1.000e+00
-## M11Fcsw 1.132e-16 1.000e+00
-## M31Plmr 1.124e-13 1.000e+00
+## CL3     1.000e+00 4.439e-17
+## CC1     1.000e+00 3.296e-22
+## SV1     1.000e+00 1.764e-12
+## M31Fcsw 6.906e-26 1.000e+00
+## M11Fcsw 1.025e-16 1.000e+00
+## M31Plmr 1.024e-13 1.000e+00
 \end{verbatim}
 
 Contribution of each taxa to each component
@@ -5759,13 +5586,13 @@ Contribution of each taxa to each component
 \end{Shaded}
 
 \begin{verbatim}
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30382 0.1354654
-## Phylum:Euryarchaeota  0.23114 0.1468632
-## Phylum:Actinobacteria 1.21371 1.0600245
-## Phylum:Spirochaetes   0.21393 0.1318415
-## Phylum:MVP-15         0.02982 0.0007669
-## Phylum:Proteobacteria 6.84469 1.8153216
+##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354082
+## Phylum:Euryarchaeota  0.2314 0.1468931
+## Phylum:Actinobacteria 1.2105 1.0580846
+## Phylum:Spirochaetes   0.2141 0.1318102
+## Phylum:MVP-15         0.0299 0.0007628
+## Phylum:Proteobacteria 6.8414 1.8114364
 \end{verbatim}
 
 Get the assignment probabilities
@@ -5991,6 +5818,7 @@ It includes clusters for taxa and samples.
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(cobiclust)}
 \CommentTok{\# Do clustering; use counts table´}
 \NormalTok{clusters }\OtherTok{\textless{}{-}} \FunctionTok{cobiclust}\NormalTok{(}\FunctionTok{assay}\NormalTok{(mae[[}\DecValTok{1}\NormalTok{]], }\StringTok{"counts"}\NormalTok{))}
 
@@ -6410,6 +6238,185 @@ correlation between taxa. \emph{biclust} is suitable for this.
 
 \hypertarget{additional-community-typing}{%
 \section{Additional Community Typing}\label{additional-community-typing}}
+
+\hypertarget{hierarchical-clustering-demo}{%
+\subsection{Hierarchical clustering demo}\label{hierarchical-clustering-demo}}
+
+Let's load data from mia package.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(mia)}
+\FunctionTok{library}\NormalTok{(vegan)}
+
+\CommentTok{\# Load experimental data}
+\FunctionTok{data}\NormalTok{(peerj13075)}
+\NormalTok{(tse }\OtherTok{\textless{}{-}}\NormalTok{ peerj13075)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## class: TreeSummarizedExperiment 
+## dim: 674 58 
+## metadata(0):
+## assays(1): counts
+## rownames(674): OTU1 OTU2 ... OTU2567 OTU2569
+## rowData names(6): kingdom phylum ... family genus
+## colnames(58): ID1 ID2 ... ID57 ID58
+## colData names(5): Sample Geographical_location Gender Age Diet
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: NULL
+## rowTree: NULL
+## colLinks: NULL
+## colTree: NULL
+\end{verbatim}
+
+Hierarchical clustering requires 2 steps. In the fist step, dissimilarities are
+calculated. In prior to that, data transformation is applied if needed. Since
+sequencing data is compositional, relative transformation is applied.
+In the second step, clustering is performed based on dissimilarities.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(NbClust)}
+\FunctionTok{library}\NormalTok{(cobiclust)}
+
+\CommentTok{\# Apply transformation}
+\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{transformCounts}\NormalTok{(tse, }\AttributeTok{method =} \StringTok{"relabundance"}\NormalTok{)}
+\CommentTok{\# Get the assay}
+\NormalTok{assay }\OtherTok{\textless{}{-}} \FunctionTok{assay}\NormalTok{(tse, }\StringTok{"relabundance"}\NormalTok{)}
+\CommentTok{\# Transpose assay {-}{-}\textgreater{} samples are now in rows {-}{-}\textgreater{} we are clustering samples}
+\NormalTok{assay }\OtherTok{\textless{}{-}} \FunctionTok{t}\NormalTok{(assay)}
+
+\CommentTok{\# Calculate distances}
+\NormalTok{diss }\OtherTok{\textless{}{-}} \FunctionTok{vegdist}\NormalTok{(assay, }\AttributeTok{method =} \StringTok{"bray"}\NormalTok{)}
+
+\CommentTok{\# Perform hierarchical clustering}
+\NormalTok{hc }\OtherTok{\textless{}{-}} \FunctionTok{hclust}\NormalTok{(diss, }\AttributeTok{method =} \StringTok{"complete"}\NormalTok{)}
+
+\CommentTok{\# To visualize, convert hclust object into dendrogram object}
+\NormalTok{dendro }\OtherTok{\textless{}{-}} \FunctionTok{as.dendrogram}\NormalTok{(hc)}
+
+\CommentTok{\# Plot dendrogram}
+\FunctionTok{plot}\NormalTok{(dendro)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{24_clustering_files/figure-latex/hclust2-1.pdf}
+
+We can use dendrogram to determine the number of clusters. Usually the
+tree is splitted where the branch length is the largest. However, as
+we can see from the dendrogram, clusters are not clear. Algorithms are
+available to identify the optimal number of clusters.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Determine the optimal number of clusters}
+\NormalTok{res }\OtherTok{\textless{}{-}} \FunctionTok{NbClust}\NormalTok{(}
+  \AttributeTok{diss =}\NormalTok{ diss, }\AttributeTok{distance =} \ConstantTok{NULL}\NormalTok{, }\AttributeTok{method =} \StringTok{"ward.D2"}\NormalTok{,}
+  \AttributeTok{index =} \StringTok{"silhouette"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Only frey, mcclain, cindex, sihouette and dunn can be computed. To compute the other indices, data matrix is needed
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res}\SpecialCharTok{$}\NormalTok{Best.nc}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Number_clusters     Value_Index 
+##         15.0000          0.4543
+\end{verbatim}
+
+Based on the result, let's divide observations into 15 clusters.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(dendextend)}
+
+\CommentTok{\# Find clusters}
+\FunctionTok{cutree}\NormalTok{(hc, }\AttributeTok{k =} \DecValTok{15}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  ID1  ID2  ID3  ID4  ID5  ID6  ID7  ID8  ID9 ID10 ID11 ID12 ID13 ID14 ID15 ID16 
+##    1    2    3    4    5    5    2    2    2    6    5    5    2    5    2    5 
+## ID17 ID18 ID19 ID20 ID21 ID22 ID23 ID24 ID25 ID26 ID27 ID28 ID29 ID30 ID31 ID32 
+##    5    4    5    5    7    8    9    5    3    1    8    8    8    3    1    2 
+## ID33 ID34 ID35 ID36 ID37 ID38 ID39 ID40 ID41 ID42 ID43 ID44 ID45 ID46 ID47 ID48 
+##    2    2    2    2    2    9   10   11    6    5    4    2    9    1   12    2 
+## ID49 ID50 ID51 ID52 ID53 ID54 ID55 ID56 ID57 ID58 
+##    4    4    2    8    7   13   14    3    8   15
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Making colors for 6 clusters}
+\NormalTok{col\_val\_map }\OtherTok{\textless{}{-}}\NormalTok{ randomcoloR}\SpecialCharTok{::}\FunctionTok{distinctColorPalette}\NormalTok{(}\DecValTok{15}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{as.list}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{setNames}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(}\StringTok{"clust\_"}\NormalTok{, }\FunctionTok{seq}\NormalTok{(}\DecValTok{15}\NormalTok{)))}
+
+\NormalTok{dend }\OtherTok{\textless{}{-}} \FunctionTok{color\_branches}\NormalTok{(dendro, }\AttributeTok{k =} \DecValTok{15}\NormalTok{, }\AttributeTok{col =} \FunctionTok{unlist}\NormalTok{(col\_val\_map))}
+\FunctionTok{labels}\NormalTok{(dend) }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
+\FunctionTok{plot}\NormalTok{(dend)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{24_clustering_files/figure-latex/hclust4-1.pdf}
+
+\hypertarget{k-means-clustering-demo}{%
+\subsection{K-means clustering Demo}\label{k-means-clustering-demo}}
+
+The number of clusters can be determined based on algorithm. Here we
+utilize silhouette analysis.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(factoextra)}
+
+
+\CommentTok{\# Convert dist object into matrix}
+\NormalTok{diss }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(diss)}
+\CommentTok{\# Perform silhouette analysis and plot the result}
+\FunctionTok{fviz\_nbclust}\NormalTok{(diss, kmeans, }\AttributeTok{method =} \StringTok{"silhouette"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{24_clustering_files/figure-latex/kmeans1-1.pdf}
+
+Based on the result of silhouette analysis, we choose 3 to be the number of clusters
+in k-means clustering.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(scater)}
+
+\CommentTok{\# The first step is random, add seed for reproducibility}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{15463}\NormalTok{)}
+\CommentTok{\# Perform k{-}means clustering with 3 clusters}
+\NormalTok{km }\OtherTok{\textless{}{-}} \FunctionTok{kmeans}\NormalTok{(diss, }\DecValTok{3}\NormalTok{, }\AttributeTok{nstart =} \DecValTok{25}\NormalTok{)}
+\CommentTok{\# Add the result to colData}
+\FunctionTok{colData}\NormalTok{(tse)}\SpecialCharTok{$}\NormalTok{clusters }\OtherTok{\textless{}{-}} \FunctionTok{as.factor}\NormalTok{(km}\SpecialCharTok{$}\NormalTok{cluster)}
+
+\CommentTok{\# Perform PCoA so that we can visualize clusters}
+\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{runMDS}\NormalTok{(tse, }\AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{, }\AttributeTok{FUN =}\NormalTok{ vegan}\SpecialCharTok{::}\NormalTok{vegdist, }\AttributeTok{method =} \StringTok{"bray"}\NormalTok{)}
+
+\CommentTok{\# Plot PCoA and color clusters}
+\FunctionTok{plotReducedDim}\NormalTok{(tse, }\StringTok{"MDS"}\NormalTok{, }\AttributeTok{colour\_by =} \StringTok{"clusters"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{24_clustering_files/figure-latex/kmeans2-1.pdf}
 
 For more community typing techniques applied to the `SprockettTHData'
 data set, see the attached .Rmd file.
@@ -6836,7 +6843,7 @@ that we specify.
 \FunctionTok{altExp}\NormalTok{(tse, }\StringTok{"genus"}\NormalTok{) }\OtherTok{\textless{}{-}} \FunctionTok{agglomerateByRank}\NormalTok{(tse, }\StringTok{"genus"}\NormalTok{)}
 
 \CommentTok{\# Identify prevalent genera}
-\NormalTok{prevalent.genera }\OtherTok{\textless{}{-}} \FunctionTok{getPrevalentFeatures}\NormalTok{(}\FunctionTok{altExp}\NormalTok{(tse, }\StringTok{"genus"}\NormalTok{), }\AttributeTok{detection =} \DecValTok{0}\NormalTok{, }\AttributeTok{prevalence =} \DecValTok{20}\SpecialCharTok{/}\DecValTok{100}\NormalTok{)}
+\NormalTok{prevalent.genera }\OtherTok{\textless{}{-}} \FunctionTok{getPrevalentFeatures}\NormalTok{(}\FunctionTok{altExp}\NormalTok{(tse, }\StringTok{"genus"}\NormalTok{), }\AttributeTok{detection =} \DecValTok{0}\NormalTok{, }\AttributeTok{prevalence =} \DecValTok{30}\SpecialCharTok{/}\DecValTok{100}\NormalTok{)}
 
 \CommentTok{\# Run ANCOM{-}BC at the genus level and only including the prevalent genera}
 \NormalTok{out }\OtherTok{\textless{}{-}} \FunctionTok{ancombc2}\NormalTok{(}
@@ -6887,17 +6894,17 @@ dataframe.
 \hline
 taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & q\_(Intercept) & q\_Geographical\_locationPune\\
 \hline
-Abyssicoccus & 0.0000 & 0.0965 & 0.9999 & 0.7697\\
+Abyssicoccus & 0.0904 & 0.1619 & 0.7617 & 0.6060\\
 \hline
-Acidaminococcus & 0.1130 & -0.3193 & 0.8119 & 0.5141\\
+Acidaminococcus & 0.2093 & -0.2665 & 0.7148 & 0.6066\\
 \hline
-Acinetobacter & 1.4447 & -1.6241 & 0.0753 & 0.0839\\
+Acinetobacter & 1.5838 & -1.6285 & 0.0861 & 0.0725\\
 \hline
-Actinomyces & 0.1779 & -0.3299 & 0.6849 & 0.4584\\
+Actinomyces & 0.2896 & -0.3084 & 0.6344 & 0.5269\\
 \hline
-Actinoplanes & 0.7968 & -1.2515 & 0.0019 & 0.0026\\
+Aerococcus & -0.2045 & 0.6671 & 0.5381 & 0.0366\\
 \hline
-Aerococcus & -0.3036 & 0.6006 & 0.1202 & 0.0603\\
+Aeromonas & -0.3480 & 0.6383 & 0.5110 & 0.1952\\
 \hline
 \end{tabular}
 
@@ -7426,26 +7433,26 @@ package. We try to predict the diet type based on the data.
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    12   9
-##      Veg      11  15
+##      Mixed    11   8
+##      Veg      12  16
 ##                                         
 ##                Accuracy : 0.574         
 ##                  95% CI : (0.422, 0.717)
 ##     No Information Rate : 0.511         
 ##     P-Value [Acc > NIR] : 0.233         
 ##                                         
-##                   Kappa : 0.147         
+##                   Kappa : 0.145         
 ##                                         
-##  Mcnemar's Test P-Value : 0.823         
+##  Mcnemar's Test P-Value : 0.502         
 ##                                         
-##             Sensitivity : 0.522         
-##             Specificity : 0.625         
-##          Pos Pred Value : 0.571         
-##          Neg Pred Value : 0.577         
+##             Sensitivity : 0.478         
+##             Specificity : 0.667         
+##          Pos Pred Value : 0.579         
+##          Neg Pred Value : 0.571         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.255         
-##    Detection Prevalence : 0.447         
-##       Balanced Accuracy : 0.573         
+##          Detection Rate : 0.234         
+##    Detection Prevalence : 0.404         
+##       Balanced Accuracy : 0.572         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -10531,7 +10538,7 @@ Printing a summary about the posterior:
 \end{Shaded}
 
 \begin{verbatim}
-## Proportions of Observations within 95% Credible Interval: 0.9978
+## Proportions of Observations within 95% Credible Interval: 0.9979
 \end{verbatim}
 
 Plotting the summary of the posterior distributions of the regression parameters:

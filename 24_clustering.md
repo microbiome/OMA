@@ -186,129 +186,6 @@ Hierarchical clustering can be visualized with dendrogram tree. In each
 splitting point, the three is divided into two clusters leading to
 hierarchy.
 
-Let's load data from mia package.
-
-
-```r
-library(mia)
-library(vegan)
-
-# Load experimental data
-data(peerj13075)
-(tse <- peerj13075)
-```
-
-```
-## class: TreeSummarizedExperiment 
-## dim: 674 58 
-## metadata(0):
-## assays(1): counts
-## rownames(674): OTU1 OTU2 ... OTU2567 OTU2569
-## rowData names(6): kingdom phylum ... family genus
-## colnames(58): ID1 ID2 ... ID57 ID58
-## colData names(5): Sample Geographical_location Gender Age Diet
-## reducedDimNames(0):
-## mainExpName: NULL
-## altExpNames(0):
-## rowLinks: NULL
-## rowTree: NULL
-## colLinks: NULL
-## colTree: NULL
-```
-
-Hierarchical clustering requires 2 steps. In the fist step, dissimilarities are 
-calculated. In prior to that, data transformation is applied if needed. Since
-sequencing data is compositional, relative transformation is applied.
-In the second step, clustering is performed based on dissimilarities. 
-
-
-```r
-library(NbClust)
-library(cobiclust)
-
-# Apply transformation
-tse <- transformCounts(tse, method = "relabundance")
-# Get the assay
-assay <- assay(tse, "relabundance")
-# Transpose assay --> samples are now in rows --> we are clustering samples
-assay <- t(assay)
-
-# Calculate distances
-diss <- vegdist(assay, method = "bray")
-
-# Perform hierarchical clustering
-hc <- hclust(diss, method = "complete")
-
-# To visualize, convert hclust object into dendrogram object
-dendro <- as.dendrogram(hc)
-
-# Plot dendrogram
-plot(dendro)
-```
-
-![](24_clustering_files/figure-latex/hclust2-1.pdf)<!-- --> 
-
-We can use dendrogram to determine the number of clusters. Usually the
-tree is splitted where the branch length is the largest. However, as
-we can see from the dendrogram, clusters are not clear. Algorithms are
-available to identify the optimal number of clusters.
-
-
-```r
-# Determine the optimal number of clusters
-res <- NbClust(
-  diss = diss, distance = NULL, method = "ward.D2",
-  index = "silhouette"
-)
-```
-
-```
-## 
-##  Only frey, mcclain, cindex, sihouette and dunn can be computed. To compute the other indices, data matrix is needed
-```
-
-```r
-res$Best.nc
-```
-
-```
-## Number_clusters     Value_Index 
-##         15.0000          0.4543
-```
-
-Based on the result, let's divide observations into 15 clusters.
-
-
-```r
-library(dendextend)
-
-# Find clusters
-cutree(hc, k = 15)
-```
-
-```
-##  ID1  ID2  ID3  ID4  ID5  ID6  ID7  ID8  ID9 ID10 ID11 ID12 ID13 ID14 ID15 ID16 
-##    1    2    3    4    5    5    2    2    2    6    5    5    2    5    2    5 
-## ID17 ID18 ID19 ID20 ID21 ID22 ID23 ID24 ID25 ID26 ID27 ID28 ID29 ID30 ID31 ID32 
-##    5    4    5    5    7    8    9    5    3    1    8    8    8    3    1    2 
-## ID33 ID34 ID35 ID36 ID37 ID38 ID39 ID40 ID41 ID42 ID43 ID44 ID45 ID46 ID47 ID48 
-##    2    2    2    2    2    9   10   11    6    5    4    2    9    1   12    2 
-## ID49 ID50 ID51 ID52 ID53 ID54 ID55 ID56 ID57 ID58 
-##    4    4    2    8    7   13   14    3    8   15
-```
-
-```r
-# Making colors for 6 clusters
-col_val_map <- randomcoloR::distinctColorPalette(15) %>%
-  as.list() %>%
-  setNames(paste0("clust_", seq(15)))
-
-dend <- color_branches(dendro, k = 15, col = unlist(col_val_map))
-labels(dend) <- NULL
-plot(dend)
-```
-
-![](24_clustering_files/figure-latex/hclust4-1.pdf)<!-- --> 
 
 ## K-means clustering
 
@@ -324,45 +201,6 @@ calculated. After that, observations' allocation to clusters are
 updated so that the means are minimized. Again, centroid are
 calculated, and algorithm continues iteratively until the assignments
 do not change.
-
-The number of clusters can be determined based on algorithm. Here we
-utilize silhouette analysis.
-
-
-```r
-library(factoextra)
-
-
-# Convert dist object into matrix
-diss <- as.matrix(diss)
-# Perform silhouette analysis and plot the result
-fviz_nbclust(diss, kmeans, method = "silhouette")
-```
-
-![](24_clustering_files/figure-latex/kmeans1-1.pdf)<!-- --> 
-
-Based on the result of silhouette analysis, we choose 3 to be the number of clusters
-in k-means clustering.
-
-
-```r
-library(scater)
-
-# The first step is random, add seed for reproducibility
-set.seed(15463)
-# Perform k-means clustering with 3 clusters
-km <- kmeans(diss, 3, nstart = 25)
-# Add the result to colData
-colData(tse)$clusters <- as.factor(km$cluster)
-
-# Perform PCoA so that we can visualize clusters
-tse <- runMDS(tse, assay.type = "relabundance", FUN = vegan::vegdist, method = "bray")
-
-# Plot PCoA and color clusters
-plotReducedDim(tse, "MDS", colour_by = "clusters")
-```
-
-![](24_clustering_files/figure-latex/kmeans2-1.pdf)<!-- --> 
 
 ## Dirichlet Multinomial Mixtures (DMM)
 
@@ -452,31 +290,31 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7683 BIC: 8069 AIC: 7942 
+## Laplace: 7689 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7751 BIC: 8274 AIC: 8103 
+## Laplace: 7752 BIC: 8276 AIC: 8105 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7854 BIC: 8553 AIC: 8340 
+## Laplace: 7849 BIC: 8565 AIC: 8352 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7926 BIC: 8796 AIC: 8540 
+## Laplace: 7927 BIC: 8796 AIC: 8540 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8003 BIC: 9051 AIC: 8752
+## Laplace: 8065 BIC: 9139 AIC: 8840
 ```
 
 
@@ -523,15 +361,15 @@ dmn_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 ```
 
 Mixture weights  (rough measure of the cluster size).
@@ -544,8 +382,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.28
+## 1 0.5385 20.60
+## 2 0.4615 15.32
 ```
 
 
@@ -559,12 +397,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 5.050e-17
-## CC1     1.000e+00 3.903e-22
-## SV1     1.000e+00 1.957e-12
-## M31Fcsw 7.886e-26 1.000e+00
-## M11Fcsw 1.132e-16 1.000e+00
-## M31Plmr 1.124e-13 1.000e+00
+## CL3     1.000e+00 4.439e-17
+## CC1     1.000e+00 3.296e-22
+## SV1     1.000e+00 1.764e-12
+## M31Fcsw 6.906e-26 1.000e+00
+## M11Fcsw 1.025e-16 1.000e+00
+## M31Plmr 1.024e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -575,13 +413,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30382 0.1354654
-## Phylum:Euryarchaeota  0.23114 0.1468632
-## Phylum:Actinobacteria 1.21371 1.0600245
-## Phylum:Spirochaetes   0.21393 0.1318415
-## Phylum:MVP-15         0.02982 0.0007669
-## Phylum:Proteobacteria 6.84469 1.8153216
+##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354082
+## Phylum:Euryarchaeota  0.2314 0.1468931
+## Phylum:Actinobacteria 1.2105 1.0580846
+## Phylum:Spirochaetes   0.2141 0.1318102
+## Phylum:MVP-15         0.0299 0.0007628
+## Phylum:Proteobacteria 6.8414 1.8114364
 ```
 Get the assignment probabilities
 
@@ -783,6 +621,7 @@ It includes clusters for taxa and samples.
 
 
 ```r
+library(cobiclust)
 # Do clustering; use counts table´
 clusters <- cobiclust(assay(mae[[1]], "counts"))
 
@@ -1187,6 +1026,175 @@ pheatmap(corr,
 ![](24_clustering_files/figure-latex/biclust_12-1.pdf)<!-- --> 
 
 ## Additional Community Typing
+
+### Hierarchical clustering demo
+
+Let's load data from mia package.
+
+
+```r
+library(mia)
+library(vegan)
+
+# Load experimental data
+data(peerj13075)
+(tse <- peerj13075)
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 674 58 
+## metadata(0):
+## assays(1): counts
+## rownames(674): OTU1 OTU2 ... OTU2567 OTU2569
+## rowData names(6): kingdom phylum ... family genus
+## colnames(58): ID1 ID2 ... ID57 ID58
+## colData names(5): Sample Geographical_location Gender Age Diet
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: NULL
+## rowTree: NULL
+## colLinks: NULL
+## colTree: NULL
+```
+
+Hierarchical clustering requires 2 steps. In the fist step, dissimilarities are 
+calculated. In prior to that, data transformation is applied if needed. Since
+sequencing data is compositional, relative transformation is applied.
+In the second step, clustering is performed based on dissimilarities. 
+
+
+```r
+library(NbClust)
+library(cobiclust)
+
+# Apply transformation
+tse <- transformCounts(tse, method = "relabundance")
+# Get the assay
+assay <- assay(tse, "relabundance")
+# Transpose assay --> samples are now in rows --> we are clustering samples
+assay <- t(assay)
+
+# Calculate distances
+diss <- vegdist(assay, method = "bray")
+
+# Perform hierarchical clustering
+hc <- hclust(diss, method = "complete")
+
+# To visualize, convert hclust object into dendrogram object
+dendro <- as.dendrogram(hc)
+
+# Plot dendrogram
+plot(dendro)
+```
+
+![](24_clustering_files/figure-latex/hclust2-1.pdf)<!-- --> 
+
+We can use dendrogram to determine the number of clusters. Usually the
+tree is splitted where the branch length is the largest. However, as
+we can see from the dendrogram, clusters are not clear. Algorithms are
+available to identify the optimal number of clusters.
+
+
+```r
+# Determine the optimal number of clusters
+res <- NbClust(
+  diss = diss, distance = NULL, method = "ward.D2",
+  index = "silhouette"
+)
+```
+
+```
+## 
+##  Only frey, mcclain, cindex, sihouette and dunn can be computed. To compute the other indices, data matrix is needed
+```
+
+```r
+res$Best.nc
+```
+
+```
+## Number_clusters     Value_Index 
+##         15.0000          0.4543
+```
+
+Based on the result, let's divide observations into 15 clusters.
+
+
+```r
+library(dendextend)
+
+# Find clusters
+cutree(hc, k = 15)
+```
+
+```
+##  ID1  ID2  ID3  ID4  ID5  ID6  ID7  ID8  ID9 ID10 ID11 ID12 ID13 ID14 ID15 ID16 
+##    1    2    3    4    5    5    2    2    2    6    5    5    2    5    2    5 
+## ID17 ID18 ID19 ID20 ID21 ID22 ID23 ID24 ID25 ID26 ID27 ID28 ID29 ID30 ID31 ID32 
+##    5    4    5    5    7    8    9    5    3    1    8    8    8    3    1    2 
+## ID33 ID34 ID35 ID36 ID37 ID38 ID39 ID40 ID41 ID42 ID43 ID44 ID45 ID46 ID47 ID48 
+##    2    2    2    2    2    9   10   11    6    5    4    2    9    1   12    2 
+## ID49 ID50 ID51 ID52 ID53 ID54 ID55 ID56 ID57 ID58 
+##    4    4    2    8    7   13   14    3    8   15
+```
+
+```r
+# Making colors for 6 clusters
+col_val_map <- randomcoloR::distinctColorPalette(15) %>%
+  as.list() %>%
+  setNames(paste0("clust_", seq(15)))
+
+dend <- color_branches(dendro, k = 15, col = unlist(col_val_map))
+labels(dend) <- NULL
+plot(dend)
+```
+
+![](24_clustering_files/figure-latex/hclust4-1.pdf)<!-- --> 
+
+### K-means clustering Demo
+
+
+The number of clusters can be determined based on algorithm. Here we
+utilize silhouette analysis.
+
+
+```r
+library(factoextra)
+
+
+# Convert dist object into matrix
+diss <- as.matrix(diss)
+# Perform silhouette analysis and plot the result
+fviz_nbclust(diss, kmeans, method = "silhouette")
+```
+
+![](24_clustering_files/figure-latex/kmeans1-1.pdf)<!-- --> 
+
+Based on the result of silhouette analysis, we choose 3 to be the number of clusters
+in k-means clustering.
+
+
+```r
+library(scater)
+
+# The first step is random, add seed for reproducibility
+set.seed(15463)
+# Perform k-means clustering with 3 clusters
+km <- kmeans(diss, 3, nstart = 25)
+# Add the result to colData
+colData(tse)$clusters <- as.factor(km$cluster)
+
+# Perform PCoA so that we can visualize clusters
+tse <- runMDS(tse, assay.type = "relabundance", FUN = vegan::vegdist, method = "bray")
+
+# Plot PCoA and color clusters
+plotReducedDim(tse, "MDS", colour_by = "clusters")
+```
+
+![](24_clustering_files/figure-latex/kmeans2-1.pdf)<!-- --> 
+
 
 For more community typing techniques applied to the 'SprockettTHData'
 data set, see the attached .Rmd file.

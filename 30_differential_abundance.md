@@ -415,7 +415,7 @@ that we specify.
 altExp(tse, "genus") <- agglomerateByRank(tse, "genus")
 
 # Identify prevalent genera
-prevalent.genera <- getPrevalentFeatures(altExp(tse, "genus"), detection = 0, prevalence = 20/100)
+prevalent.genera <- getPrevalentFeatures(altExp(tse, "genus"), detection = 0, prevalence = 30/100)
 
 # Run ANCOM-BC at the genus level and only including the prevalent genera
 out <- ancombc2(
@@ -466,17 +466,17 @@ kable(head(ancombc_result))
 \hline
 taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & q\_(Intercept) & q\_Geographical\_locationPune\\
 \hline
-Abyssicoccus & 0.0000 & 0.0965 & 0.9999 & 0.7697\\
+Abyssicoccus & 0.0904 & 0.1619 & 0.7617 & 0.6060\\
 \hline
-Acidaminococcus & 0.1130 & -0.3193 & 0.8119 & 0.5141\\
+Acidaminococcus & 0.2093 & -0.2665 & 0.7148 & 0.6066\\
 \hline
-Acinetobacter & 1.4447 & -1.6241 & 0.0753 & 0.0839\\
+Acinetobacter & 1.5838 & -1.6285 & 0.0861 & 0.0725\\
 \hline
-Actinomyces & 0.1779 & -0.3299 & 0.6849 & 0.4584\\
+Actinomyces & 0.2896 & -0.3084 & 0.6344 & 0.5269\\
 \hline
-Actinoplanes & 0.7968 & -1.2515 & 0.0019 & 0.0026\\
+Aerococcus & -0.2045 & 0.6671 & 0.5381 & 0.0366\\
 \hline
-Aerococcus & -0.3036 & 0.6006 & 0.1202 & 0.0603\\
+Aeromonas & -0.3480 & 0.6383 & 0.5110 & 0.1952\\
 \hline
 \end{tabular}
 
