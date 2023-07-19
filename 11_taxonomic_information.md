@@ -378,7 +378,52 @@ assay(altExp(tse, "Family"), "counts")[1:5,1:7]
 ```
 
 `altExpNames` now consists of `Family` level data. This can be extended to use 
-any taxonomic level listed in `mia::taxonomyRanks(tse)`.   
+any taxonomic level listed in `mia::taxonomyRanks(tse)`.
+
+Rare taxa can also be aggregated into a single group "Other" instead of filtering them out. A suitable function for this is `agglomerateByPrevance`. The number of rare taxa is higher on the species level, which causes the need for data agglomeration by prevalence.
+
+
+```r
+altExp(tse, "Species_byPrevalence") <- agglomerateByPrevalence(tse, rank = "Species", other_label = "Other", prevalence = 5/100, detection = 1/100, as_relative = T)
+altExp(tse, "Species_byPrevalence")
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 92 26 
+## metadata(2): agglomerated_by_rank agglomerated_by_rank
+## assays(2): counts relabundance
+## rownames(92): pIVWA5 SCA1145 ... Desulfitobacteriumhafniense Other
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(26): CL3 CC1 ... Even2 Even3
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: NULL
+## rowTree: NULL
+## colLinks: NULL
+## colTree: NULL
+```
+
+```r
+assay(altExp(tse, "Species_byPrevalence"), "relabundance")[88:92, 1:7]
+```
+
+```
+##                                   CL3       CC1       SV1   M31Fcsw   M11Fcsw
+## Streptococcusthermophilus   5.787e-06 2.290e-05 1.290e-05 6.032e-04 1.122e-04
+## Mitsuokellamultacida        8.101e-06 7.046e-06 1.147e-05 6.479e-07 9.632e-07
+## Veillonellaparvula          1.736e-05 1.673e-05 1.720e-05 7.645e-05 1.589e-05
+## Desulfitobacteriumhafniense 1.620e-05 1.585e-05 8.602e-06 1.296e-06 9.632e-07
+## Other                       8.622e-03 6.787e-03 4.325e-02 2.763e-02 2.682e-03
+##                               M31Plmr  M11Plmr
+## Streptococcusthermophilus   1.225e-02 0.002478
+## Mitsuokellamultacida        2.782e-06 0.000000
+## Veillonellaparvula          2.075e-02 0.001143
+## Desulfitobacteriumhafniense 0.000e+00 0.000000
+## Other                       7.077e-02 0.070752
+```
 
 
 ## Data transformation {#assay-transform}

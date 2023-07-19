@@ -202,7 +202,7 @@ div.csl-indent {
 <li class="chapter" data-level="3.4" data-path="containers.html"><a href="containers.html#loading-experimental-microbiome-data"><i class="fa fa-check"></i><b>3.4</b> Loading experimental microbiome data</a>
 <ul>
 <li class="chapter" data-level="3.4.1" data-path="containers.html"><a href="containers.html#s-workflow"><i class="fa fa-check"></i><b>3.4.1</b> 16S workflow</a></li>
-<li class="chapter" data-level="3.4.2" data-path="containers.html"><a href="containers.html#import-from-external-files"><i class="fa fa-check"></i><b>3.4.2</b> Import from external files</a></li>
+<li class="chapter" data-level="3.4.2" data-path="containers.html"><a href="containers.html#import-from-file"><i class="fa fa-check"></i><b>3.4.2</b> Import from external files</a></li>
 <li class="chapter" data-level="3.4.3" data-path="containers.html"><a href="containers.html#constructing-treesummarizedexperiment"><i class="fa fa-check"></i><b>3.4.3</b> Constructing TreeSummarizedExperiment</a></li>
 <li class="chapter" data-level="3.4.4" data-path="containers.html"><a href="containers.html#constructing-multiassayexperiment"><i class="fa fa-check"></i><b>3.4.4</b> Constructing MultiAssayExperiment</a></li>
 <li class="chapter" data-level="3.4.5" data-path="containers.html"><a href="containers.html#import-functions-for-standard-formats"><i class="fa fa-check"></i><b>3.4.5</b> Import functions for standard formats</a></li>
@@ -744,6 +744,37 @@ is as an alternative experiment.</p>
 ## Family:SAGMA-X         0   7   0       0       0       0       0</code></pre>
 <p><code>altExpNames</code> now consists of <code>Family</code> level data. This can be extended to use
 any taxonomic level listed in <code>mia::taxonomyRanks(tse)</code>.</p>
+<p>Rare taxa can also be aggregated into a single group “Other” instead of filtering them out. A suitable function for this is <code>agglomerateByPrevance</code>. The number of rare taxa is higher on the species level, which causes the need for data agglomeration by prevalence.</p>
+<div class="sourceCode" id="cb196"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb196-1"><a href="taxonomic-information.html#cb196-1" aria-hidden="true" tabindex="-1"></a><span class="fu">altExp</span>(tse, <span class="st">&quot;Species_byPrevalence&quot;</span>) <span class="ot">&lt;-</span> <span class="fu">agglomerateByPrevalence</span>(tse, <span class="at">rank =</span> <span class="st">&quot;Species&quot;</span>, <span class="at">other_label =</span> <span class="st">&quot;Other&quot;</span>, <span class="at">prevalence =</span> <span class="dv">5</span><span class="sc">/</span><span class="dv">100</span>, <span class="at">detection =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">100</span>, <span class="at">as_relative =</span> T)</span>
+<span id="cb196-2"><a href="taxonomic-information.html#cb196-2" aria-hidden="true" tabindex="-1"></a><span class="fu">altExp</span>(tse, <span class="st">&quot;Species_byPrevalence&quot;</span>)</span></code></pre></div>
+<pre><code>## class: TreeSummarizedExperiment 
+## dim: 92 26 
+## metadata(2): agglomerated_by_rank agglomerated_by_rank
+## assays(2): counts relabundance
+## rownames(92): pIVWA5 SCA1145 ... Desulfitobacteriumhafniense Other
+## rowData names(7): Kingdom Phylum ... Genus Species
+## colnames(26): CL3 CC1 ... Even2 Even3
+## colData names(7): X.SampleID Primer ... SampleType Description
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: NULL
+## rowTree: NULL
+## colLinks: NULL
+## colTree: NULL</code></pre>
+<div class="sourceCode" id="cb198"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb198-1"><a href="taxonomic-information.html#cb198-1" aria-hidden="true" tabindex="-1"></a><span class="fu">assay</span>(<span class="fu">altExp</span>(tse, <span class="st">&quot;Species_byPrevalence&quot;</span>), <span class="st">&quot;relabundance&quot;</span>)[<span class="dv">88</span><span class="sc">:</span><span class="dv">92</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>]</span></code></pre></div>
+<pre><code>##                                   CL3       CC1       SV1   M31Fcsw   M11Fcsw
+## Streptococcusthermophilus   5.787e-06 2.290e-05 1.290e-05 6.032e-04 1.122e-04
+## Mitsuokellamultacida        8.101e-06 7.046e-06 1.147e-05 6.479e-07 9.632e-07
+## Veillonellaparvula          1.736e-05 1.673e-05 1.720e-05 7.645e-05 1.589e-05
+## Desulfitobacteriumhafniense 1.620e-05 1.585e-05 8.602e-06 1.296e-06 9.632e-07
+## Other                       8.622e-03 6.787e-03 4.325e-02 2.763e-02 2.682e-03
+##                               M31Plmr  M11Plmr
+## Streptococcusthermophilus   1.225e-02 0.002478
+## Mitsuokellamultacida        2.782e-06 0.000000
+## Veillonellaparvula          2.075e-02 0.001143
+## Desulfitobacteriumhafniense 0.000e+00 0.000000
+## Other                       7.077e-02 0.070752</code></pre>
 </div>
 <div id="assay-transform" class="section level2 hasAnchor" number="6.4">
 <h2><span class="header-section-number">6.4</span> Data transformation<a href="taxonomic-information.html#assay-transform" class="anchor-section" aria-label="Anchor link to header"></a></h2>
@@ -756,11 +787,11 @@ abundance table is stored back to ‘assays’. mia includes transformation
 function (‘transformCounts()’) which applies sample-wise or column-wise transformation when MARGIN = ‘samples’, feature-wise or row-wise transformation when MARGIN = ‘features’.</p>
 <p>For a complete list of available transformations and parameters, see function
 <a href="https://microbiome.github.io/mia/reference/transformCounts.html">help</a>.</p>
-<div class="sourceCode" id="cb196"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb196-1"><a href="taxonomic-information.html#cb196-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformCounts</span>(tse, <span class="at">assay.type =</span> <span class="st">&quot;counts&quot;</span>, <span class="at">method =</span> <span class="st">&quot;relabundance&quot;</span>, <span class="at">pseudocount =</span> <span class="dv">1</span>)</span>
-<span id="cb196-2"><a href="taxonomic-information.html#cb196-2" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformCounts</span>(<span class="at">x =</span> tse, <span class="at">assay.type =</span> <span class="st">&quot;relabundance&quot;</span>, <span class="at">method =</span> <span class="st">&quot;clr&quot;</span>, </span>
-<span id="cb196-3"><a href="taxonomic-information.html#cb196-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">pseudocount =</span> <span class="dv">1</span>, <span class="at">name =</span> <span class="st">&quot;clr_transformation&quot;</span>)</span>
-<span id="cb196-4"><a href="taxonomic-information.html#cb196-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb196-5"><a href="taxonomic-information.html#cb196-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;clr_transformation&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb200"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb200-1"><a href="taxonomic-information.html#cb200-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformCounts</span>(tse, <span class="at">assay.type =</span> <span class="st">&quot;counts&quot;</span>, <span class="at">method =</span> <span class="st">&quot;relabundance&quot;</span>, <span class="at">pseudocount =</span> <span class="dv">1</span>)</span>
+<span id="cb200-2"><a href="taxonomic-information.html#cb200-2" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformCounts</span>(<span class="at">x =</span> tse, <span class="at">assay.type =</span> <span class="st">&quot;relabundance&quot;</span>, <span class="at">method =</span> <span class="st">&quot;clr&quot;</span>, </span>
+<span id="cb200-3"><a href="taxonomic-information.html#cb200-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">pseudocount =</span> <span class="dv">1</span>, <span class="at">name =</span> <span class="st">&quot;clr_transformation&quot;</span>)</span>
+<span id="cb200-4"><a href="taxonomic-information.html#cb200-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb200-5"><a href="taxonomic-information.html#cb200-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;clr_transformation&quot;</span>))</span></code></pre></div>
 <pre><code>##                                         CL3        CC1        SV1    M31Fcsw
 ## Class:Thermoprotei               -5.078e-05 -5.105e-05 -5.055e-05 -4.975e-05
 ## Class:Thermoprotei               -5.078e-05 -5.105e-05 -5.055e-05 -4.975e-05
@@ -813,9 +844,9 @@ function (‘transformCounts()’) which applies sample-wise or column-wise tran
 <ul>
 <li>In ‘pa’ transformation, abundance table is converted to present/absent table.</li>
 </ul>
-<div class="sourceCode" id="cb198"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb198-1"><a href="taxonomic-information.html#cb198-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformCounts</span>(tse, <span class="at">method =</span> <span class="st">&quot;pa&quot;</span>)</span>
-<span id="cb198-2"><a href="taxonomic-information.html#cb198-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb198-3"><a href="taxonomic-information.html#cb198-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;pa&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb202"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb202-1"><a href="taxonomic-information.html#cb202-1" aria-hidden="true" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformCounts</span>(tse, <span class="at">method =</span> <span class="st">&quot;pa&quot;</span>)</span>
+<span id="cb202-2"><a href="taxonomic-information.html#cb202-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb202-3"><a href="taxonomic-information.html#cb202-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;pa&quot;</span>))</span></code></pre></div>
 <pre><code>##                                  CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr
 ## Class:Thermoprotei                 0   0   0       0       0       0       0
 ## Class:Thermoprotei                 0   0   0       0       0       0       0
@@ -844,8 +875,8 @@ function (‘transformCounts()’) which applies sample-wise or column-wise tran
 ## Class:Sd-NA                            0       0    0    0     0     0     0
 ## Class:Sd-NA                            0       0    0    0     0     0     0
 ## Class:Sd-NA                            0       0    0    0     0     0     0</code></pre>
-<div class="sourceCode" id="cb200"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb200-1"><a href="taxonomic-information.html#cb200-1" aria-hidden="true" tabindex="-1"></a><span class="co"># list of abundance tables that assays slot contains</span></span>
-<span id="cb200-2"><a href="taxonomic-information.html#cb200-2" aria-hidden="true" tabindex="-1"></a><span class="fu">assays</span>(tse)</span></code></pre></div>
+<div class="sourceCode" id="cb204"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb204-1"><a href="taxonomic-information.html#cb204-1" aria-hidden="true" tabindex="-1"></a><span class="co"># list of abundance tables that assays slot contains</span></span>
+<span id="cb204-2"><a href="taxonomic-information.html#cb204-2" aria-hidden="true" tabindex="-1"></a><span class="fu">assays</span>(tse)</span></code></pre></div>
 <pre><code>## List of length 4
 ## names(4): counts relabundance clr_transformation pa</code></pre>
 </div>
@@ -856,10 +887,10 @@ instance, extracting abundances for a specific taxa in all samples or all taxa
 in one sample.</p>
 <div id="abundances-of-all-taxa-in-specific-sample" class="section level3 hasAnchor" number="6.5.1">
 <h3><span class="header-section-number">6.5.1</span> Abundances of all taxa in specific sample<a href="taxonomic-information.html#abundances-of-all-taxa-in-specific-sample" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb202"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb202-1"><a href="taxonomic-information.html#cb202-1" aria-hidden="true" tabindex="-1"></a>taxa.abund.cc1 <span class="ot">&lt;-</span> <span class="fu">getAbundanceSample</span>(tse, </span>
-<span id="cb202-2"><a href="taxonomic-information.html#cb202-2" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">sample_id =</span> <span class="st">&quot;CC1&quot;</span>,</span>
-<span id="cb202-3"><a href="taxonomic-information.html#cb202-3" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">assay.type =</span> <span class="st">&quot;counts&quot;</span>)</span>
-<span id="cb202-4"><a href="taxonomic-information.html#cb202-4" aria-hidden="true" tabindex="-1"></a>taxa.abund.cc1[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb206"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb206-1"><a href="taxonomic-information.html#cb206-1" aria-hidden="true" tabindex="-1"></a>taxa.abund.cc1 <span class="ot">&lt;-</span> <span class="fu">getAbundanceSample</span>(tse, </span>
+<span id="cb206-2"><a href="taxonomic-information.html#cb206-2" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">sample_id =</span> <span class="st">&quot;CC1&quot;</span>,</span>
+<span id="cb206-3"><a href="taxonomic-information.html#cb206-3" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">assay.type =</span> <span class="st">&quot;counts&quot;</span>)</span>
+<span id="cb206-4"><a href="taxonomic-information.html#cb206-4" aria-hidden="true" tabindex="-1"></a>taxa.abund.cc1[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code></pre></div>
 <pre><code>##               Class:Thermoprotei               Class:Thermoprotei 
 ##                                0                                0 
 ## Species:Sulfolobusacidocaldarius                      Class:Sd-NA 
@@ -873,10 +904,10 @@ in one sample.</p>
 </div>
 <div id="abundances-of-specific-taxa-in-all-samples" class="section level3 hasAnchor" number="6.5.2">
 <h3><span class="header-section-number">6.5.2</span> Abundances of specific taxa in all samples<a href="taxonomic-information.html#abundances-of-specific-taxa-in-all-samples" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<div class="sourceCode" id="cb204"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb204-1"><a href="taxonomic-information.html#cb204-1" aria-hidden="true" tabindex="-1"></a>taxa.abundances <span class="ot">&lt;-</span> <span class="fu">getAbundanceFeature</span>(tse, </span>
-<span id="cb204-2"><a href="taxonomic-information.html#cb204-2" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">feature_id =</span> <span class="st">&quot;Phylum:Bacteroidetes&quot;</span>,</span>
-<span id="cb204-3"><a href="taxonomic-information.html#cb204-3" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">assay.type =</span> <span class="st">&quot;counts&quot;</span>)</span>
-<span id="cb204-4"><a href="taxonomic-information.html#cb204-4" aria-hidden="true" tabindex="-1"></a>taxa.abundances[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb208"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb208-1"><a href="taxonomic-information.html#cb208-1" aria-hidden="true" tabindex="-1"></a>taxa.abundances <span class="ot">&lt;-</span> <span class="fu">getAbundanceFeature</span>(tse, </span>
+<span id="cb208-2"><a href="taxonomic-information.html#cb208-2" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">feature_id =</span> <span class="st">&quot;Phylum:Bacteroidetes&quot;</span>,</span>
+<span id="cb208-3"><a href="taxonomic-information.html#cb208-3" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">assay.type =</span> <span class="st">&quot;counts&quot;</span>)</span>
+<span id="cb208-4"><a href="taxonomic-information.html#cb208-4" aria-hidden="true" tabindex="-1"></a>taxa.abundances[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code></pre></div>
 <pre><code>##     CL3     CC1     SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr F21Plmr M31Tong M11Tong 
 ##       2      18       2       0       0       0       0       1       0       0</code></pre>
 

@@ -15,7 +15,7 @@ always_allow_html: yes
 date: "**Authors:** Leo Lahti [aut], Tuomas Borman [aut, cre], Henrik Eckermann [ctb], Sudarshan Shetty [aut], Felix GM Ernst [aut]<br/>
   **Version:** 0.98.15<br/>
   **Modified:** 2023-07-13<br/>
-  **Compiled:** 2023-07-13<br/>
+  **Compiled:** 2023-07-19<br/>
   **Environment:** R version 4.3.0 (2023-04-21), Bioconductor 3.17<br/>
   **License:** CC BY-NC-SA 3.0 US<br/>
   **Copyright:** <br/>

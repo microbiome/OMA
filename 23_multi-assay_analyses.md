@@ -92,24 +92,6 @@ you can find help for importing data into an SE object.
 # Load the data
 data(HintikkaXOData, package = "mia")
 mae <- HintikkaXOData
-mae
-```
-
-```
-## A MultiAssayExperiment object of 3 listed
-##  experiments with user-defined names and respective classes.
-##  Containing an ExperimentList class object of length 3:
-##  [1] microbiota: TreeSummarizedExperiment with 12706 rows and 40 columns
-##  [2] metabolites: TreeSummarizedExperiment with 38 rows and 40 columns
-##  [3] biomarkers: TreeSummarizedExperiment with 39 rows and 40 columns
-## Functionality:
-##  experiments() - obtain the ExperimentList instance
-##  colData() - the primary/phenotype DataFrame
-##  sampleMap() - the sample coordination DataFrame
-##  `$`, `[`, `[[` - extract colData columns, subset, or experiment
-##  *Format() - convert into a long or wide DataFrame
-##  assays() - convert ExperimentList to a SimpleList of matrices
-##  exportClass() - save data to flat files
 ```
 
 
@@ -120,8 +102,25 @@ mae[[1]] <- mae[[1]][!is.na(rowData(mae[[1]])$Phylum), ]
 # Clean taxonomy data, so that names do not include additional characters
 rowData(mae[[1]]) <- DataFrame(apply(rowData(mae[[1]]), 2, 
                                      str_remove, pattern = "._[0-9]__"))
+```
+
+
+```r
+# Available alternative experiments
+experiments(mae)
+```
+
+```
+## ExperimentList class object of length 3:
+##  [1] microbiota: TreeSummarizedExperiment with 12613 rows and 40 columns
+##  [2] metabolites: TreeSummarizedExperiment with 38 rows and 40 columns
+##  [3] biomarkers: TreeSummarizedExperiment with 39 rows and 40 columns
+```
+
+
+```r
 # Microbiome data
-mae[[1]]
+getWithColData(mae, "microbiota")
 ```
 
 ```
@@ -133,7 +132,7 @@ mae[[1]]
 ##   JRJTB:03787:02429 JRJTB:03787:02478
 ## rowData names(7): Phylum Class ... Species OTU
 ## colnames(40): C1 C2 ... C39 C40
-## colData names(0):
+## colData names(6): Sample Rat ... Fat XOS
 ## reducedDimNames(0):
 ## mainExpName: NULL
 ## altExpNames(0):
@@ -146,7 +145,7 @@ mae[[1]]
 
 ```r
 # Metabolite data
-mae[[2]]
+getWithColData(mae, "metabolites")
 ```
 
 ```
@@ -157,7 +156,7 @@ mae[[2]]
 ## rownames(38): Butyrate Acetate ... Malonate 1,3-dihydroxyacetone
 ## rowData names(0):
 ## colnames(40): C1 C2 ... C39 C40
-## colData names(0):
+## colData names(6): Sample Rat ... Fat XOS
 ## reducedDimNames(0):
 ## mainExpName: NULL
 ## altExpNames(0):
@@ -170,7 +169,7 @@ mae[[2]]
 
 ```r
 # Biomarker data
-mae[[3]]
+getWithColData(mae, "biomarkers")
 ```
 
 ```
@@ -181,7 +180,7 @@ mae[[3]]
 ## rownames(39): Triglycerides_liver CLSs_epi ... NPY_serum Glycogen_liver
 ## rowData names(0):
 ## colnames(40): C1 C2 ... C39 C40
-## colData names(0):
+## colData names(6): Sample Rat ... Fat XOS
 ## reducedDimNames(0):
 ## mainExpName: NULL
 ## altExpNames(0):
@@ -415,7 +414,7 @@ wrap_plots(plot_list, nrow = 2) +
                   theme = theme(plot.title = element_text(hjust = 0.5)))
 ```
 
-![](23_multi-assay_analyses_files/figure-latex/unnamed-chunk-5-1.pdf)<!-- --> 
+![](23_multi-assay_analyses_files/figure-latex/unnamed-chunk-7-1.pdf)<!-- --> 
 
 The top weights for each assay using all five factors:
 
@@ -436,7 +435,7 @@ plot_list <- lapply(c("microbiota", "metabolites", "biomarkers"), custom_plotter
 wrap_plots(plot_list, nrow = 3) & theme(text = element_text(size = 8))
 ```
 
-![](23_multi-assay_analyses_files/figure-latex/unnamed-chunk-6-1.pdf)<!-- --> 
+![](23_multi-assay_analyses_files/figure-latex/unnamed-chunk-8-1.pdf)<!-- --> 
 
 More tutorials and examples of using the package are found at [link](https://biofam.github.io/MOFA2/tutorials.html)
 

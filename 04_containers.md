@@ -682,12 +682,15 @@ tse
 
 
 
-### Import from external files
+### Import from external files {#import-from-file}
 
 Microbiome (taxonomic) profiling data is commonly distributed in
 various file formats. You can import such external data files as a
 (Tree)SummarizedExperiment object, but the details depend on the file
-format. Here, we provide examples for common formats. 
+format. Here, we provide examples for common formats. Some datasets and raw
+files to learn how to import raw data and construct TreeSE/MAE containers are
+available in the
+[microbiome data repository](https://github.com/microbiome/data).
 
 
 #### CSV import
@@ -945,8 +948,8 @@ Specific import functions are provided for:
 
 #### Biom import
 
-This example shows how Biom files are imported into a
-`TreeSummarizedExperiment` object.
+This example shows how [Biom files](https://biom-format.org/) are imported into
+a `TreeSummarizedExperiment` object.
 
 The data is from following publication: 
 Tengeler AC _et al._ (2020) [**Gut microbiota from persons with
