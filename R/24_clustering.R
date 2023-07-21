@@ -256,7 +256,7 @@ mae <- HintikkaXOData
 
 ## ----cobiclust_1--------------------------------------------------------------
 # Subset data in the first experiment
-mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
+mae[[1]] <- subsetByPrevalentFeatures(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
 # clr-transform in the first experiment
 mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
 mae[[1]] <- transformCounts(mae[[1]], "relabundance", method = "rclr")

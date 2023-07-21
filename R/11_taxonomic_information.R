@@ -43,7 +43,7 @@ head(getTaxonomyLabels(tse[phylum,], with_rank = TRUE, make_unique = FALSE))
 
 
 ## -----------------------------------------------------------------------------
-head(getUniqueTaxa(tse, rank = "Phylum"))
+head(getUniqueFeatures(tse, rank = "Phylum"))
 
 
 ## -----------------------------------------------------------------------------

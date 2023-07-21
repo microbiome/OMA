@@ -1598,13 +1598,13 @@ Note that, by default, `na.rm = TRUE` is used for agglomeration in
 `getPrevalence`, whereas the default for `agglomerateByRank` is
 `FALSE` to prevent accidental data loss.
 
-If you only need the names of the prevalent taxa, `getPrevalentTaxa`
+If you only need the names of the prevalent taxa, `getPrevalentFeatures`
 is available. This returns the taxa that exceed the given prevalence
 and detection thresholds.
 
 ```{r core-members, message=FALSE, warning=FALSE, eval = FALSE}
-getPrevalentTaxa(tse, detection = 0, prevalence = 50/100)
-prev <- getPrevalentTaxa(tse, detection = 0, prevalence = 50/100,
+getPrevalentFeatures(tse, detection = 0, prevalence = 50/100)
+prev <- getPrevalentFeatures(tse, detection = 0, prevalence = 50/100,
                          rank = "Phylum", sort = TRUE)
 prev
 ```
@@ -1621,8 +1621,8 @@ relative abundance of the prevalent taxa (between 0 and 1).
 ### Rare taxa
 
 Related functions are available for the analysis of rare taxa
-(`rareMembers`; `rareAbundance`; `lowAbundance`, `getRareTaxa`,
-`subsetByRareTaxa`).
+(`rareMembers`; `rareAbundance`; `lowAbundance`, `getRareFeatures`,
+`subsetByRareFeatures`).
 
 
 ### Plotting prevalence
@@ -1658,11 +1658,11 @@ altExps(tse) <-
                                 assay.type = "counts", as_relative = TRUE)
               y
           })
-top_phyla <- getTopTaxa(altExp(tse,"Phylum"),
+top_phyla <- getTopFeatures(altExp(tse,"Phylum"),
                         method="prevalence",
                         top=5L,
                         assay.type="counts")
-top_phyla_mean <- getTopTaxa(altExp(tse,"Phylum"),
+top_phyla_mean <- getTopFeatures(altExp(tse,"Phylum"),
                              method="mean",
                              top=5L,
                              assay.type="counts")
@@ -1703,11 +1703,11 @@ tse <- GlobalPatterns
 
 ### Top taxa  
 
-The `getTopTaxa` identifies top taxa in the data.   
+The `getTopFeatures` identifies top taxa in the data.   
 
 ```{r top-feature-taxo}
 # Pick the top taxa
-top_features <- getTopTaxa(tse, method="median", top=10)
+top_features <- getTopFeatures(tse, method="median", top=10)
 
 # Check the information for these
 rowData(tse)[top_features, taxonomyRanks(tse)]
@@ -1924,11 +1924,11 @@ To apply the loop resolving function `resolveLoop` from the
 `TreeSummarizedExperiment` package [@R_TreeSummarizedExperiment] within
 `getTaxonomyLabels`, set `resolve_loops = TRUE`.
 
-The function `getUniqueTaxa` gives a list of unique taxa for the
+The function `getUniqueFeatures` gives a list of unique taxa for the
 specified taxonomic rank.
 
 ```{r}
-head(getUniqueTaxa(tse, rank = "Phylum"))
+head(getUniqueFeatures(tse, rank = "Phylum"))
 ```
 
 
@@ -2721,7 +2721,7 @@ tse_Genus <- agglomerateByRank(tse, rank="Genus")
 # Convert to relative abundances
 tse_Genus <- transformCounts(tse, method = "relabundance", assay.type="counts")
 # Add info on dominant genus per sample
-tse_Genus <- addPerSampleDominantTaxa(tse_Genus, assay.type="relabundance", name = "dominant_taxa")
+tse_Genus <- addPerSampleDominantFeatures(tse_Genus, assay.type="relabundance", name = "dominant_taxa")
 ```
 
 
@@ -2736,7 +2736,7 @@ Getting top taxa and visualizing the abundance on PCoA.
 
 ```{r}
 # Getting the top taxa
-top_taxa <- getTopTaxa(tse_Genus,top = 6, assay.type = "relabundance")
+top_taxa <- getTopFeatures(tse_Genus,top = 6, assay.type = "relabundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
@@ -2956,7 +2956,7 @@ tse <- transformCounts(tse, assay.type = "counts", method = "relabundance")
 
 # Getting top taxa on a Phylum level
 tse_phylum <- agglomerateByRank(tse, rank ="Phylum", onRankOnly=TRUE)
-top_taxa <- getTopTaxa(tse_phylum,top = 5, assay.type = "relabundance")
+top_taxa <- getTopFeatures(tse_phylum,top = 5, assay.type = "relabundance")
 
 # Renaming the "Phylum" rank to keep only top taxa and the rest to "Other"
 phylum_renamed <- lapply(rowData(tse)$Phylum,
@@ -3043,7 +3043,7 @@ tse_phylum_subset <- transformCounts(tse_phylum_subset, assay.type = "clr",
                                      method = "z", name = "clr_z")
 
 # Get n most abundant taxa, and subsets the data by them
-top_taxa <- getTopTaxa(tse_phylum_subset, top = 20)
+top_taxa <- getTopFeatures(tse_phylum_subset, top = 20)
 tse_phylum_subset <- tse_phylum_subset[top_taxa, ]
 
 # Gets the assay table
@@ -3696,7 +3696,7 @@ Only the most prevalent taxa are included in analysis.
 
 ```{r cobiclust_1}
 # Subset data in the first experiment
-mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
+mae[[1]] <- subsetByPrevalentFeatures(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
 # clr-transform in the first experiment
 mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
 mae[[1]] <- transformCounts(mae[[1]], "relabundance", method = "rclr")
@@ -4244,7 +4244,7 @@ tse <- agglomerateByRank(tse0, rank = "genus") %>%
                        method = "relabundance",
 		       MARGIN = "samples") %>%
        # subset based on the relative abundance assay		       
-       subsetByPrevalentTaxa(detection = 0,
+       subsetByPrevalentFeatures(detection = 0,
                              prevalence = 10/100,
 			     assay.type = "relabundance")
 
@@ -5409,7 +5409,7 @@ tse_order <- transformCounts(tse_order,
                               assay.type = "counts",
                               method = "relabundance")
 # get top orders
-top_taxa <- getTopTaxa(tse_order,
+top_taxa <- getTopFeatures(tse_order,
                        top = 10,
                        assay.type = "relabundance")
 # leave only names for top 10 orders and label the rest with "Other"
@@ -5497,7 +5497,7 @@ tse_phylum_subset <- transformCounts(tse_phylum_subset, assay.type = "clr",
                                      method = "z", name = "clr_z")
 
 # Get n most abundant taxa, and subsets the data by them
-top_taxa <- getTopTaxa(tse_phylum_subset, top = 20)
+top_taxa <- getTopFeatures(tse_phylum_subset, top = 20)
 tse_phylum_subset <- tse_phylum_subset[top_taxa, ]
 
 # Gets the assay table
@@ -6169,7 +6169,7 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, addPerCellQ
 3. Report the thresholds and the dimensionality of the data before and after subsetting
 4. Visualize prevalence
 
-Useful functions: getPrevalence, getPrevalentTaxa, subsetByPrevalentTaxa
+Useful functions: getPrevalence, getPrevalentFeatures, subsetByPrevalentFeatures
 
 
 ### Data exploration
@@ -6301,7 +6301,7 @@ Useful functions: [], ggplot2::geom_boxplot, ggplot2::geom_jitter, wilcox.test, 
 4. Summarize findings by plotting a taxa vs samples heatmap. Add column annotation that tells the group of each sample, and row annotation that tells whether the difference of certain taxa was statistically significant.
 5. Choose statistically significant taxa and visualize their abundances with boxplot & jitterplot.
 
-Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::Heatmap, ancombc, aldex2, maaslin2, agglomerateByRank, transformCounts, subsetByPrevalentTaxa
+Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::Heatmap, ancombc, aldex2, maaslin2, agglomerateByRank, transformCounts, subsetByPrevalentFeatures
 
 
 ## Visualization
@@ -6623,14 +6623,14 @@ tse <- sampleMetadata %>%
     returnSamples("relative_abundance")
 
 tse_Genus <- agglomerateByRank(tse, rank="genus")
-tse_Genus <- addPerSampleDominantTaxa(tse_Genus,assay.type="relative_abundance", name = "dominant_taxa")
+tse_Genus <- addPerSampleDominantFeatures(tse_Genus,assay.type="relative_abundance", name = "dominant_taxa")
 
 # Performing PCoA with Bray-Curtis dissimilarity.
 tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist, ncomponents = 3,
               name = "PCoA_BC", assay.type = "relative_abundance")
 
 # Getting the 6 top taxa
-top_taxa <- getTopTaxa(tse_Genus,top = 6, assay.type = "relative_abundance")
+top_taxa <- getTopFeatures(tse_Genus,top = 6, assay.type = "relative_abundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,

@@ -286,7 +286,7 @@ tse_Genus <- agglomerateByRank(tse, rank="Genus")
 # Convert to relative abundances
 tse_Genus <- transformCounts(tse, method = "relabundance", assay.type="counts")
 # Add info on dominant genus per sample
-tse_Genus <- addPerSampleDominantTaxa(tse_Genus, assay.type="relabundance", name = "dominant_taxa")
+tse_Genus <- addPerSampleDominantFeatures(tse_Genus, assay.type="relabundance", name = "dominant_taxa")
 
 
 ## -----------------------------------------------------------------------------
@@ -296,7 +296,7 @@ tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist,
 
 ## -----------------------------------------------------------------------------
 # Getting the top taxa
-top_taxa <- getTopTaxa(tse_Genus,top = 6, assay.type = "relabundance")
+top_taxa <- getTopFeatures(tse_Genus,top = 6, assay.type = "relabundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
