@@ -133,78 +133,6 @@ Hierarchical clustering can be visualized with dendrogram tree. In each
 splitting point, the three is divided into two clusters leading to
 hierarchy.
 
-Let's load data from mia package.
-
-```{r hclust1}
-library(mia)
-library(vegan)
-
-# Load experimental data
-data(peerj13075)
-(tse <- peerj13075)
-```
-
-Hierarchical clustering requires 2 steps. In the fist step, dissimilarities are 
-calculated. In prior to that, data transformation is applied if needed. Since
-sequencing data is compositional, relative transformation is applied.
-In the second step, clustering is performed based on dissimilarities. 
-
-```{r hclust2}
-library(NbClust)
-library(cobiclust)
-
-# Apply transformation
-tse <- transformCounts(tse, method = "relabundance")
-# Get the assay
-assay <- assay(tse, "relabundance")
-# Transpose assay --> samples are now in rows --> we are clustering samples
-assay <- t(assay)
-
-# Calculate distances
-diss <- vegdist(assay, method = "bray")
-
-# Perform hierarchical clustering
-hc <- hclust(diss, method = "complete")
-
-# To visualize, convert hclust object into dendrogram object
-dendro <- as.dendrogram(hc)
-
-# Plot dendrogram
-plot(dendro)
-```
-
-We can use dendrogram to determine the number of clusters. Usually the
-tree is splitted where the branch length is the largest. However, as
-we can see from the dendrogram, clusters are not clear. Algorithms are
-available to identify the optimal number of clusters.
-
-```{r hclust3}
-# Determine the optimal number of clusters
-res <- NbClust(
-  diss = diss, distance = NULL, method = "ward.D2",
-  index = "silhouette"
-)
-
-res$Best.nc
-```
-
-Based on the result, let's divide observations into 15 clusters.
-
-```{r hclust4}
-library(dendextend)
-
-# Find clusters
-cutree(hc, k = 15)
-
-# Making colors for 6 clusters
-col_val_map <- randomcoloR::distinctColorPalette(15) %>%
-  as.list() %>%
-  setNames(paste0("clust_", seq(15)))
-
-dend <- color_branches(dendro, k = 15, col = unlist(col_val_map))
-labels(dend) <- NULL
-plot(dend)
-```
 
 ## K-means clustering
 
@@ -220,39 +148,6 @@ calculated. After that, observations' allocation to clusters are
 updated so that the means are minimized. Again, centroid are
 calculated, and algorithm continues iteratively until the assignments
 do not change.
-
-The number of clusters can be determined based on algorithm. Here we
-utilize silhouette analysis.
-
-```{r kmeans1}
-library(factoextra)
-
-
-# Convert dist object into matrix
-diss <- as.matrix(diss)
-# Perform silhouette analysis and plot the result
-fviz_nbclust(diss, kmeans, method = "silhouette")
-```
-
-Based on the result of silhouette analysis, we choose 3 to be the number of clusters
-in k-means clustering.
-
-```{r kmeans2}
-library(scater)
-
-# The first step is random, add seed for reproducibility
-set.seed(15463)
-# Perform k-means clustering with 3 clusters
-km <- kmeans(diss, 3, nstart = 25)
-# Add the result to colData
-colData(tse)$clusters <- as.factor(km$cluster)
-
-# Perform PCoA so that we can visualize clusters
-tse <- runMDS(tse, assay.type = "relabundance", FUN = vegan::vegdist, method = "bray")
-
-# Plot PCoA and color clusters
-plotReducedDim(tse, "MDS", colour_by = "clusters")
-```
 
 ## Dirichlet Multinomial Mixtures (DMM)
 
@@ -530,6 +425,7 @@ _cobiclust_ takes counts table as an input and gives _cobiclust_ object as an ou
 It includes clusters for taxa and samples. 
 
 ```{r cobiclust_2}
+library(cobiclust)
 # Do clustering; use counts table´
 clusters <- cobiclust(assay(mae[[1]], "counts"))
 
@@ -871,6 +767,118 @@ pheatmap(corr,
 ```
 
 ## Additional Community Typing
+
+### Hierarchical clustering demo
+
+Let's load data from mia package.
+
+```{r hclust1}
+library(mia)
+library(vegan)
+
+# Load experimental data
+data(peerj13075)
+(tse <- peerj13075)
+```
+
+Hierarchical clustering requires 2 steps. In the fist step, dissimilarities are 
+calculated. In prior to that, data transformation is applied if needed. Since
+sequencing data is compositional, relative transformation is applied.
+In the second step, clustering is performed based on dissimilarities. 
+
+```{r hclust2}
+library(NbClust)
+library(cobiclust)
+
+# Apply transformation
+tse <- transformCounts(tse, method = "relabundance")
+# Get the assay
+assay <- assay(tse, "relabundance")
+# Transpose assay --> samples are now in rows --> we are clustering samples
+assay <- t(assay)
+
+# Calculate distances
+diss <- vegdist(assay, method = "bray")
+
+# Perform hierarchical clustering
+hc <- hclust(diss, method = "complete")
+
+# To visualize, convert hclust object into dendrogram object
+dendro <- as.dendrogram(hc)
+
+# Plot dendrogram
+plot(dendro)
+```
+
+We can use dendrogram to determine the number of clusters. Usually the
+tree is splitted where the branch length is the largest. However, as
+we can see from the dendrogram, clusters are not clear. Algorithms are
+available to identify the optimal number of clusters.
+
+```{r hclust3}
+# Determine the optimal number of clusters
+res <- NbClust(
+  diss = diss, distance = NULL, method = "ward.D2",
+  index = "silhouette"
+)
+
+res$Best.nc
+```
+
+Based on the result, let's divide observations into 15 clusters.
+
+```{r hclust4}
+library(dendextend)
+
+# Find clusters
+cutree(hc, k = 15)
+
+# Making colors for 6 clusters
+col_val_map <- randomcoloR::distinctColorPalette(15) %>%
+  as.list() %>%
+  setNames(paste0("clust_", seq(15)))
+
+dend <- color_branches(dendro, k = 15, col = unlist(col_val_map))
+labels(dend) <- NULL
+plot(dend)
+```
+
+### K-means clustering Demo
+
+
+The number of clusters can be determined based on algorithm. Here we
+utilize silhouette analysis.
+
+```{r kmeans1}
+library(factoextra)
+
+
+# Convert dist object into matrix
+diss <- as.matrix(diss)
+# Perform silhouette analysis and plot the result
+fviz_nbclust(diss, kmeans, method = "silhouette")
+```
+
+Based on the result of silhouette analysis, we choose 3 to be the number of clusters
+in k-means clustering.
+
+```{r kmeans2}
+library(scater)
+
+# The first step is random, add seed for reproducibility
+set.seed(15463)
+# Perform k-means clustering with 3 clusters
+km <- kmeans(diss, 3, nstart = 25)
+# Add the result to colData
+colData(tse)$clusters <- as.factor(km$cluster)
+
+# Perform PCoA so that we can visualize clusters
+tse <- runMDS(tse, assay.type = "relabundance", FUN = vegan::vegdist, method = "bray")
+
+# Plot PCoA and color clusters
+plotReducedDim(tse, "MDS", colour_by = "clusters")
+```
+
 
 For more community typing techniques applied to the 'SprockettTHData'
 data set, see the attached .Rmd file.
