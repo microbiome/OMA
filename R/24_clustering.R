@@ -23,7 +23,7 @@ if( !require(NbClust) ){install.packages("NbClust"); library(NbClust)}
 if( !require(cobiclust) ){install.packages("cobiclust"); library(cobiclust)}
 
 # Apply transformation
-tse <- transformCounts(tse, method = "relabundance")
+tse <- transformAssay(tse, method = "relabundance")
 # Get the assay
 assay <- assay(tse, "relabundance")
 # Transpose assay --> samples are now in rows --> we are clustering samples
@@ -165,8 +165,8 @@ vec <- colnames(prob)[max.col(prob,ties.method = "first")]
 ## -----------------------------------------------------------------------------
 # Does clr transformation. Pseudocount is added, because data contains zeros.
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
-tse <- transformCounts(tse, assay.type = "pseudo", method = "relabundance")
-tse <- transformCounts(tse, "relabundance", method = "clr")
+tse <- transformAssay(tse, assay.type = "pseudo", method = "relabundance")
+tse <- transformAssay(tse, "relabundance", method = "clr")
 
 library(scater)
 
@@ -209,7 +209,7 @@ library(scater)
 
 data("enterotype", package="mia")
 tse <- enterotype
-tse <- transformCounts(tse, method = "rclr")
+tse <- transformAssay(tse, method = "rclr")
 
 # Performing and storing UMAP
 tse <- runUMAP(tse, name="UMAP", assay.type="rclr")
@@ -258,8 +258,8 @@ mae <- HintikkaXOData
 # Subset data in the first experiment
 mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
 # clr-transform in the first experiment
-mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
-mae[[1]] <- transformCounts(mae[[1]], "relabundance", method = "rclr")
+mae[[1]] <- transformAssay(mae[[1]], method = "relabundance")
+mae[[1]] <- transformAssay(mae[[1]], "relabundance", method = "rclr")
 
 
 ## ----cobiclust_2--------------------------------------------------------------
@@ -288,7 +288,7 @@ if(!require(pheatmap)){
     library(pheatmap)
 }
 # z-transform for heatmap
-mae[[1]] <- transformCounts(mae[[1]], assay.type = "rclr",
+mae[[1]] <- transformAssay(mae[[1]], assay.type = "rclr",
                             MARGIN = "features",
                             method = "z", name = "clr_z")
 

@@ -75,8 +75,8 @@ colData(tse)$dmm_component <- vec
 ## -----------------------------------------------------------------------------
 # Does clr transformation. Pseudocount is added, because data contains zeros.
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
-tse <- transformCounts(tse, assay.type = "pseudo", method = "relabundance")
-tse <- transformCounts(tse, assay.type = "relabundance", method = "clr")
+tse <- transformAssay(tse, assay.type = "pseudo", method = "relabundance")
+tse <- transformAssay(tse, assay.type = "relabundance", method = "clr")
 
 library(scater)
 # Calculate PCoA
@@ -108,8 +108,8 @@ library(scater)
 
 data("enterotype", package="mia")
 tse <- enterotype
-tse <- transformCounts(tse, method = "relabundance")
-tse <- transformCounts(tse, method = "rclr")
+tse <- transformAssay(tse, method = "relabundance")
+tse <- transformAssay(tse, method = "rclr")
 
 # Performing and storing UMAP
 tse <- runUMAP(tse, name="UMAP", assay.type="rclr")

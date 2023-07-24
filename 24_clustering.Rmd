@@ -34,7 +34,7 @@ necessary, depending on your analysis goals.
 library(bluster)
 
 # Apply transformation
-tse <- transformCounts(tse, method = "relabundance")
+tse <- transformAssay(tse, method = "relabundance")
 ```
 
 The main focus here will be how to use mia's `cluster` function to 
@@ -91,7 +91,6 @@ Hierarchical clustering can be visualized with a dendrogram tree. In each
 splitting point, the tree is divided into two clusters leading to the
 hierarchy.
 
-Let's load data from mia package.
 
 ```{r hclust1}
 library(vegan)
@@ -345,8 +344,8 @@ computing the euclidean PCoA and storing it as a data frame.
 ```{r dmm10}
 # Do clr transformation. Pseudocount is added, because data contains zeros.
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
-tse <- transformCounts(tse, assay.type = "pseudo", method = "relabundance")
-tse <- transformCounts(tse, "relabundance", method = "clr")
+tse <- transformAssay(tse, assay.type = "pseudo", method = "relabundance")
+tse <- transformAssay(tse, "relabundance", method = "clr")
 
 # Do principal coordinate analysis
 df <- calculateMDS(tse, assay.type = "clr", method = "euclidean")
@@ -394,7 +393,7 @@ library(patchwork) # For arranging several plots as a grid
 
 # Get enterotype dataset and transform data with rclr
 tse <- enterotype
-tse <- transformCounts(tse, method = "rclr")
+tse <- transformAssay(tse, method = "rclr")
 
 # Perform and store UMAP
 tse <- runUMAP(tse, name = "UMAP", assay.type = "rclr")
@@ -490,7 +489,7 @@ mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2,
                                   detection = 0.001)
 
 # rclr-transform in the first experiment
-mae[[1]] <- transformCounts(mae[[1]], "counts", method = "rclr")
+mae[[1]] <- transformAssay(mae[[1]], method = "rclr")
 ```
 
 _cobiclust_ takes counts table as an input and gives _cobiclust_ object as an output.
@@ -521,7 +520,7 @@ Next we can plot clusters. Annotated heatmap is a common choice.
 ```{r cobiclust_3a, fig.width=14, fig.height=12}
 library(pheatmap)
 # z-transform for heatmap
-mae[[1]] <- transformCounts(mae[[1]], assay.type = "rclr",
+mae[[1]] <- transformAssay(mae[[1]], assay.type = "rclr",
                             MARGIN = "features", method = "z", name = "rclr_z")
 
 # Create annotations. When column names are equal, they should share levels.
@@ -767,6 +766,69 @@ for (name in cluster_names) {
 pheatmap(corr, cluster_cols = F, cluster_rows = F,
          annotation_col = bicluster_columns, annotation_row = bicluster_rows,
          annotation_colors = annotation_colors)
+```
+
+### Taxa vs taxa
+
+Third and final example deals with situation where we want to analyze
+correlation between taxa. _biclust_ is suitable for this.
+
+```{r biclust_9}
+# Calculate cross-correlation
+corr <- getExperimentCrossCorrelation(mae, 1, 1,
+  assay.type1 = "rclr", assay.type2 = "rclr",
+  mode = "matrix",
+  cor_threshold = 0.2, verbose = F, show_warning = F
+)
+
+# Find biclusters
+library(biclust)
+bc <- biclust(corr,
+  method = BCPlaid(), fit.model = y ~ m,
+  background = TRUE, shuffle = 100, back.fit = 0, max.layers = 10,
+  iter.startup = 10, iter.layer = 100, verbose = FALSE
+)
+```
+
+```{r biclust_10}
+# Get biclusters
+bcs <- .get_biclusters_from_biclust(bc, corr)
+
+bicluster_rows <- bcs$bc_rows
+bicluster_columns <- bcs$bc_columns
+```
+
+
+```{r biclust_11}
+# Create a column that combines information
+# If row/column includes in multiple clusters, cluster numbers are separated with "_&_"
+bicluster_columns$clusters <- apply(
+  bicluster_columns, 1,
+  function(x) {
+    paste(paste(which(x)), collapse = "_&_")
+  }
+)
+bicluster_columns <- bicluster_columns[, "clusters", drop = FALSE]
+
+bicluster_rows$clusters <- apply(
+  bicluster_rows, 1,
+  function(x) {
+    paste(paste(which(x)), collapse = "_&_")
+  }
+)
+bicluster_rows <- bicluster_rows[, "clusters", drop = FALSE]
+```
+
+```{r biclust_12, fig.width=14, fig.height=12}
+# Convert boolean values into factor
+bicluster_columns <- data.frame(apply(bicluster_columns, 2, as.factor))
+bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
+
+pheatmap(corr,
+  cluster_cols = F, cluster_rows = F,
+  annotation_col = bicluster_columns,
+  annotation_row = bicluster_rows
+)
 ```
 
 ## Additional Community Typing
