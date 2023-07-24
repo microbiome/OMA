@@ -33,11 +33,11 @@ count(as.data.frame(colData(tse0)), Geographical_location) %>% kable()
 
 ## -----------------------------------------------------------------------------
 tse <- agglomerateByRank(tse0, rank = "genus") %>%
-       transformCounts(assay.type = "counts", method = "relabundance", MARGIN = "samples") %>%
+       transformAssay(assay.type = "counts", method = "relabundance", MARGIN = "samples") %>%
        subsetByPrevalentTaxa(detection = 0, prevalence = 10/100, assay.type = "relabundance")
 
 # Add also clr abundances
-tse <- transformCounts(tse, method="clr", pseudocount=1) # not bale to run
+tse <- transformAssay(tse, method="clr", pseudocount=1) # not bale to run
 
 
 ## ---- aldex2, eval=TRUE-------------------------------------------------------

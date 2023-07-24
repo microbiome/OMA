@@ -371,10 +371,10 @@ assay(tse, "counts")[1:5,1:7]
 ```
 
 To illustrate the use of multiple assays, the relative abundance data can be 
-calculated and stored along the original count data using `transformCounts`.
+calculated and stored along the original count data using `transformAssay`.
 
 ```{r}
-tse <- transformCounts(tse, assay.type = "counts", method = "relabundance")
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 assays(tse)
 ```
 
@@ -1121,7 +1121,7 @@ For several custom analysis and visualization packages, such as those from
 library(mia)
 data(GlobalPatterns, package="mia")
 tse <- GlobalPatterns
-tse <- transformCounts(tse, MARGIN = "samples", method="relabundance")
+tse <- transformAssay(tse, MARGIN = "samples", method="relabundance")
 molten_tse <- mia::meltAssay(tse,
                         add_row_data = TRUE,
                         add_col_data = TRUE,
@@ -1368,7 +1368,7 @@ The same action can also be applied to the features.
 
 ```{r}
 # Take only those samples that are collected from feces, skin, or tongue
-tse_genus_sub <- tse_genus[ , colData(tse_genus)$SampleType %in% c("Feces", "Skin", "Tongue")]
+tse_genus_sub <- tse_genus[ , tse_genus$SampleType %in% c("Feces", "Skin", "Tongue")]
 
 tse_genus_sub
 ```
@@ -1513,7 +1513,7 @@ data(hitchip1006)
 tse <- hitchip1006
 
 # Add relative abundances
-tse <- transformCounts(tse, MARGIN = "samples", method = "relabundance")
+tse <- transformAssay(tse, MARGIN = "samples", method = "relabundance")
 
 # Use argument names
 # assay.type / assay.type / assay.type
@@ -1959,7 +1959,7 @@ changing conditions through these levels. For this `mia` contains the
 is as an alternative experiment.
 
 ```{r}
-tse <- transformCounts(tse, assay.type = "counts", method = "relabundance")
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 altExp(tse, "Family") <- agglomerateByRank(tse, rank = "Family",
                                            agglomerateTree = TRUE)
 altExp(tse, "Family")
@@ -1993,15 +1993,15 @@ such as the centered log-ratio transformation (clr).
 
 In mia package, transformations are applied to abundance data. The transformed 
 abundance table is stored back to 'assays'. mia includes transformation 
-function ('transformCounts()') which applies sample-wise or column-wise transformation when MARGIN = 'samples', feature-wise or row-wise transformation when MARGIN = 'features'.
+function ('transformAssay()') which applies sample-wise or column-wise transformation when MARGIN = 'samples', feature-wise or row-wise transformation when MARGIN = 'features'.
 
 For a complete list of available transformations and parameters, see function 
-[help](https://microbiome.github.io/mia/reference/transformCounts.html).
+[help](https://microbiome.github.io/mia/reference/transformAssay.html).
 
 ```{r}
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
-tse <- transformCounts(tse, assay.type = "pseudo", method = "relabundance")
-tse <- transformCounts(x = tse, assay.type = "relabundance", method = "clr", 
+tse <- transformAssay(tse, assay.type = "pseudo", method = "relabundance")
+tse <- transformAssay(x = tse, assay.type = "relabundance", method = "clr", 
                         pseudocount = 1, name = "clr_transformation")
 
 head(assay(tse, "clr_transformation"))
@@ -2010,7 +2010,7 @@ head(assay(tse, "clr_transformation"))
 -   In 'pa' transformation, abundance table is converted to present/absent table.
 
 ```{r}
-tse <- transformCounts(tse, method = "pa")
+tse <- transformAssay(tse, method = "pa")
 
 head(assay(tse, "pa"))
 ```
@@ -2179,8 +2179,7 @@ library(ggsignif)
 
 # Subsets the data. Takes only those samples that are from feces, skin, or tongue,
 # and creates data frame from the collected data
-df <- as.data.frame(colData(tse)[colData(tse)$SampleType %in% 
-                                  c("Feces", "Skin", "Tongue"), ])
+df <- as.data.frame(tse[ , tse$SampleType %in% c("Feces", "Skin", "Tongue")])
 
 # Changes old levels with new levels
 df$SampleType <- factor(df$SampleType)
@@ -2400,10 +2399,10 @@ data(GlobalPatterns, package="mia")
 
 # Data matrix (features x samples)
 tse <- GlobalPatterns
-tse <- transformCounts(tse, method = "relabundance")
+tse <- transformAssay(tse, method = "relabundance")
 
 # Add group information Feces yes/no
-colData(tse)$Group <- colData(tse)$SampleType=="Feces"
+tse$Group <- tse$SampleType=="Feces"
 
 # Quantify dissimilarities in the original feature space
 library(vegan)
@@ -2465,7 +2464,7 @@ functions.
 library(scater)
 
 # Bray-Curtis is usually applied to relative abundances
-tse <- transformCounts(tse, method = "relabundance")
+tse <- transformAssay(tse, method = "relabundance")
 # Perform PCoA
 tse <- runMDS(tse, FUN = vegan::vegdist, method = "bray", name = "PCoA_BC", assay.type = "relabundance")
 ```
@@ -2579,7 +2578,7 @@ data(enterotype, package="mia")
 variable_names <- c("ClinicalStatus", "Gender", "Age")
 
 # Apply relative transform
-enterotype <- transformCounts(enterotype, method = "relabundance")
+enterotype <- transformAssay(enterotype, method = "relabundance")
 
 # Create a formula
 formula <- as.formula(paste0("assay ~ ", str_c(variable_names, collapse = " + ")) )
@@ -2719,7 +2718,7 @@ Let us agglomerate the data at a Genus level and getting the dominant taxa per s
 # Agglomerate to genus level
 tse_Genus <- agglomerateByRank(tse, rank="Genus")
 # Convert to relative abundances
-tse_Genus <- transformCounts(tse, method = "relabundance", assay.type="counts")
+tse_Genus <- transformAssay(tse, method = "relabundance", assay.type="counts")
 # Add info on dominant genus per sample
 tse_Genus <- addPerSampleDominantTaxa(tse_Genus, assay.type="relabundance", name = "dominant_taxa")
 ```
@@ -2952,7 +2951,7 @@ samples by "Bacteroidetes":
 ```{r}
 library(miaViz)
 # Computing relative abundance
-tse <- transformCounts(tse, assay.type = "counts", method = "relabundance")
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 
 # Getting top taxa on a Phylum level
 tse_phylum <- agglomerateByRank(tse, rank ="Phylum", onRankOnly=TRUE)
@@ -2988,15 +2987,15 @@ library(ggplot2)
 
 # Add clr-transformation on samples
 assay(tse_phylum, "pseudo") <- assay(tse_phylum, "counts") + 1
-tse_phylum <- transformCounts(tse_phylum, assay.type = "pseudo",
+tse_phylum <- transformAssay(tse_phylum, assay.type = "pseudo",
                               method = "relabundance")
 
-tse_phylum <- transformCounts(tse_phylum,
+tse_phylum <- transformAssay(tse_phylum,
                   assay.type = "relabundance",
 		  method = "clr")
 
 # Add z-transformation on features (taxa)
-tse_phylum <- transformCounts(tse_phylum, assay.type = "clr", 
+tse_phylum <- transformAssay(tse_phylum, assay.type = "clr", 
                               MARGIN = "features",
                               method = "z", name = "clr_z")
 ```
@@ -3031,14 +3030,14 @@ _pheatmap_ is a package that provides methods to plot clustered heatmaps.
 library(pheatmap)
 
 # Takes subset: only samples from feces, skin, or tongue
-tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces", "Skin", "Tongue") ]
+tse_phylum_subset <- tse_phylum[ , tse_phylum$SampleType %in% c("Feces", "Skin", "Tongue") ]
 
 # Add clr-transformation
-tse_phylum_subset <- transformCounts(tse_phylum_subset,
+tse_phylum_subset <- transformAssay(tse_phylum_subset,
                          method = "clr",
     			 pseudocount = 1)
 
-tse_phylum_subset <- transformCounts(tse_phylum_subset, assay.type = "clr",
+tse_phylum_subset <- transformAssay(tse_phylum_subset, assay.type = "clr",
                                      MARGIN = "features", 
                                      method = "z", name = "clr_z")
 
@@ -3204,7 +3203,7 @@ it, and transform the data if necessary, depending on your analysis goals.
 library(bluster)
 
 # Apply transformation
-tse <- transformCounts(tse, method = "relabundance")
+tse <- transformAssay(tse, method = "relabundance")
 ```
 
 The clustering can be done on features or samples.
@@ -3328,7 +3327,7 @@ library(NbClust)
 library(cobiclust)
 
 # Apply transformation
-tse <- transformCounts(tse, method = "relabundance")
+tse <- transformAssay(tse, method = "relabundance")
 # Get the assay
 assay <- assay(tse, "relabundance")
 # Transpose assay --> samples are now in rows --> we are clustering samples
@@ -3537,8 +3536,8 @@ Computing the euclidean PCoA and storing it as a data frame
 ```{r}
 # Does clr transformation. Pseudocount is added, because data contains zeros.
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
-tse <- transformCounts(tse, assay.type = "pseudo", method = "relabundance")
-tse <- transformCounts(tse, "relabundance", method = "clr")
+tse <- transformAssay(tse, assay.type = "pseudo", method = "relabundance")
+tse <- transformAssay(tse, "relabundance", method = "clr")
 
 library(scater)
 
@@ -3609,7 +3608,7 @@ library(scater)
 
 data("enterotype", package = "mia")
 tse <- enterotype
-tse <- transformCounts(tse, method = "rclr")
+tse <- transformAssay(tse, method = "rclr")
 
 # Performing and storing UMAP
 tse <- runUMAP(tse, name = "UMAP", assay.type = "rclr")
@@ -3698,8 +3697,8 @@ Only the most prevalent taxa are included in analysis.
 # Subset data in the first experiment
 mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
 # clr-transform in the first experiment
-mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
-mae[[1]] <- transformCounts(mae[[1]], "relabundance", method = "rclr")
+mae[[1]] <- transformAssay(mae[[1]], method = "relabundance")
+mae[[1]] <- transformAssay(mae[[1]], "relabundance", method = "rclr")
 ```
 
 _cobiclust_ takes counts table as an input and gives _cobiclust_ object as an output.
@@ -3729,7 +3728,7 @@ Next we can plot clusters. Annotated heatmap is a common choice.
 ```{r cobiclust_3, fig.width=14, fig.height=12}
 library(pheatmap)
 # z-transform for heatmap
-mae[[1]] <- transformCounts(mae[[1]],
+mae[[1]] <- transformAssay(mae[[1]],
   assay.type = "rclr",
   MARGIN = "features",
   method = "z", name = "clr_z"
@@ -4240,7 +4239,7 @@ assay, and perform prevalence filtering.
 
 ```{r datasetup}
 tse <- agglomerateByRank(tse0, rank = "genus") %>%
-       transformCounts(assay.type = "counts",
+       transformAssay(assay.type = "counts",
                        method = "relabundance",
 		       MARGIN = "samples") %>%
        # subset based on the relative abundance assay		       
@@ -4249,7 +4248,7 @@ tse <- agglomerateByRank(tse0, rank = "genus") %>%
 			     assay.type = "relabundance")
 
 # Add also clr abundances
-tse <- transformCounts(tse, method="clr", pseudocount=1) # not bale to run
+tse <- transformAssay(tse, method="clr", pseudocount=1) # not bale to run
 ```
 
 Regarding prevalence filtering, @Nearing2022 found that applying a 10%
@@ -4731,7 +4730,7 @@ Let's first preprocess the data.
 tse <- agglomerateByRank(tse, rank = "order")
 
 # Apply CLR transform
-tse <- transformCounts(tse, assay.type = "counts", method = "clr",
+tse <- transformAssay(tse, assay.type = "counts", method = "clr",
                        MARGIN="samples", pseudocount=1)
 
 # Get assay
@@ -4950,7 +4949,7 @@ high"?
 # Agglomerate microbiome data at family level
 mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family")
 # Does log10 transform for microbiome data
-mae[[1]] <- transformCounts(mae[[1]], method = "log10", pseudocount = 1)
+mae[[1]] <- transformAssay(mae[[1]], method = "log10", pseudocount = 1)
 
 # Give unique names so that we do not have problems when we are creating a plot
 rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]])
@@ -5033,16 +5032,16 @@ colData(mae)$Diet <- ifelse(colData(mae)$Diet == "High-fat" |
 mae[[1]] <- mae[[1]][!duplicated(rownames(assay(mae[[1]]))), ]
 
 # Transforming microbiome data with rclr
-mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
-mae[[1]] <- transformCounts(mae[[1]], assay.type = "relabundance", method = "rclr")
+mae[[1]] <- transformAssay(mae[[1]], method = "relabundance")
+mae[[1]] <- transformAssay(mae[[1]], assay.type = "relabundance", method = "rclr")
 
 # Transforming metabolomic data with log10
-mae[[2]] <- transformCounts(mae[[2]], assay.type = "nmr",
+mae[[2]] <- transformAssay(mae[[2]], assay.type = "nmr",
                             MARGIN = "samples",
                             method = "log10")
 
 # Transforming biomarker data with z-transform
-mae[[3]] <- transformCounts(mae[[3]], assay.type = "signals",
+mae[[3]] <- transformAssay(mae[[3]], assay.type = "signals",
                             MARGIN = "features",
                             method = "z", pseudocount = 1)
 
@@ -5405,7 +5404,7 @@ tse_order <- agglomerateByRank(tse,
                                 rank = "Order",
                                 onRankOnly = TRUE)
 # transform counts into relative abundance
-tse_order <- transformCounts(tse_order,
+tse_order <- transformAssay(tse_order,
                               assay.type = "counts",
                               method = "relabundance")
 # get top orders
@@ -5477,10 +5476,10 @@ tse_phylum <- agglomerateByRank(tse,
                                 onRankOnly = TRUE)
 
 # Add clr-transformation on samples
-tse_phylum <- transformCounts(tse_phylum, MARGIN = "samples", method = "clr", assay.type = "counts", pseudocount=1)
+tse_phylum <- transformAssay(tse_phylum, MARGIN = "samples", method = "clr", assay.type = "counts", pseudocount=1)
 
 # Add z-transformation on features (taxa)
-tse_phylum <- transformCounts(tse_phylum, assay.type = "clr",
+tse_phylum <- transformAssay(tse_phylum, assay.type = "clr",
                               MARGIN = "features", 
                               method = "z", name = "clr_z")
 
@@ -5488,11 +5487,11 @@ tse_phylum <- transformCounts(tse_phylum, assay.type = "clr",
 tse_phylum_subset <- tse_phylum[ , tse_phylum$SampleType %in% c("Feces", "Skin", "Tongue") ]
 
 # Add clr-transformation
-tse_phylum_subset <- transformCounts(tse_phylum_subset, method = "clr",
+tse_phylum_subset <- transformAssay(tse_phylum_subset, method = "clr",
                                      MARGIN="samples",
                                      assay.type = "counts", pseudocount=1)
 # Does z-transformation
-tse_phylum_subset <- transformCounts(tse_phylum_subset, assay.type = "clr",
+tse_phylum_subset <- transformAssay(tse_phylum_subset, assay.type = "clr",
                                      MARGIN = "features", 
                                      method = "z", name = "clr_z")
 
@@ -6178,7 +6177,7 @@ Useful functions: getPrevalence, getPrevalentTaxa, subsetByPrevalentTaxa
 2. Create two histograms. Another shows the distribution of absolute counts, another shows how CLR transformed values are distributed.
 3. Visualize how relative abundances are distributed between taxa in samples.
 
-Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformCounts, ggplot, wilcox.test, agglomerateByRank, plotAbundance
+Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAssay, ggplot, wilcox.test, agglomerateByRank, plotAbundance
 
 ### Other functions
 
@@ -6272,7 +6271,7 @@ Useful functions: estimateDiversity, colSums, geom_point, geom_boxplot
 5. Analyze diets' association on beta diversity. Calculate dbRDA and then PERMANOVA. Visualize coefficients. Which taxa's abundances differ the most between samples? 
 6. Interpret your results. Is there association between community composition and location? What are those taxa that differ the most; find information from literature.
 
-Useful functions: runMDS, runRDA, anova.cca, transformCounts, agglomerateByRank, ggplot, plotReducedDim, vegan::adonis2
+Useful functions: runMDS, runRDA, anova.cca, transformAssay, agglomerateByRank, ggplot, plotReducedDim, vegan::adonis2
 
 
 
@@ -6290,7 +6289,7 @@ Useful functions: runMDS, runRDA, anova.cca, transformCounts, agglomerateByRank,
 7. Do multiple testing correction
 9. Compare the results from different tests with a scatterplot
 
-Useful functions: [], ggplot2::geom_boxplot, ggplot2::geom_jitter, wilcox.test, lm.test, transformCounts, p.adjust
+Useful functions: [], ggplot2::geom_boxplot, ggplot2::geom_jitter, wilcox.test, lm.test, transformAssay, p.adjust
 
 
 ### Differential abundance analysis
@@ -6301,7 +6300,7 @@ Useful functions: [], ggplot2::geom_boxplot, ggplot2::geom_jitter, wilcox.test, 
 4. Summarize findings by plotting a taxa vs samples heatmap. Add column annotation that tells the group of each sample, and row annotation that tells whether the difference of certain taxa was statistically significant.
 5. Choose statistically significant taxa and visualize their abundances with boxplot & jitterplot.
 
-Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::Heatmap, ancombc, aldex2, maaslin2, agglomerateByRank, transformCounts, subsetByPrevalentTaxa
+Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::Heatmap, ancombc, aldex2, maaslin2, agglomerateByRank, transformAssay, subsetByPrevalentTaxa
 
 
 ## Visualization
@@ -6314,7 +6313,7 @@ Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::H
 4. Visualize and compare both
 5. Test other transformations, dissimilarities, and ordination methods
 
-Useful functions: runMDS, runNMDS, transformCounts, ggplot, plotReducedDim
+Useful functions: runMDS, runNMDS, transformAssay, ggplot, plotReducedDim
 
 
 ### Heatmap visualization
@@ -6348,7 +6347,7 @@ Useful functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colname
 5. Perform cross-correlation analyses and visualize results with heatmaps. (Use Spearman coefficients)
 6. Is there significant correlations? Interpret your results.
 
-Useful functions: pheatmap, ComplexHeatMap::Heatmap, ggplot, transformCounts, testExperimentCrossAssociation
+Useful functions: pheatmap, ComplexHeatMap::Heatmap, ggplot, transformAssay, testExperimentCrossAssociation
 
 
 
@@ -6392,7 +6391,7 @@ different orders of three variables with two different approaches:
 # load and prepare data
 library(mia)
 data("enterotype", package="mia")
-enterotype <- transformCounts(enterotype, method = "relabundance")
+enterotype <- transformAssay(enterotype, method = "relabundance")
 # drop samples missing meta data
 enterotype <- enterotype[ , !rowSums(is.na(colData(enterotype)[, c("Nationality", "Gender", "ClinicalStatus")]) > 0)]
 # define variables and list all possible combinations

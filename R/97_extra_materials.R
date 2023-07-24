@@ -20,7 +20,7 @@ library(purrr)
 # load and prepare data
 library(mia)
 data("enterotype", package="mia")
-enterotype <- transformCounts(enterotype, method = "relabundance")
+enterotype <- transformAssay(enterotype, method = "relabundance")
 # drop samples missing meta data
 enterotype <- enterotype[ , !rowSums(is.na(colData(enterotype)[, c("Nationality", "Gender", "ClinicalStatus")]) > 0)]
 # define variables and list all possible combinations
