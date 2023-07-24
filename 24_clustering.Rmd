@@ -767,68 +767,6 @@ pheatmap(corr, cluster_cols = F, cluster_rows = F,
          annotation_colors = annotation_colors)
 ```
 
-### Taxa vs taxa
-
-Third and final example deals with situation where we want to analyze
-correlation between taxa. _biclust_ is suitable for this.
-
-```{r biclust_9}
-# Calculate cross-correlation
-corr <- getExperimentCrossCorrelation(mae, 1, 1,
-  assay.type1 = "rclr", assay.type2 = "rclr",
-  mode = "matrix",
-  cor_threshold = 0.2, verbose = F, show_warning = F
-)
-
-# Find biclusters
-library(biclust)
-bc <- biclust(corr,
-  method = BCPlaid(), fit.model = y ~ m,
-  background = TRUE, shuffle = 100, back.fit = 0, max.layers = 10,
-  iter.startup = 10, iter.layer = 100, verbose = FALSE
-)
-```
-
-```{r biclust_10}
-# Get biclusters
-bcs <- .get_biclusters_from_biclust(bc, corr)
-
-bicluster_rows <- bcs$bc_rows
-bicluster_columns <- bcs$bc_columns
-```
-
-```{r biclust_11}
-# Create a column that combines information
-# If row/column includes in multiple clusters, cluster numbers are separated with "_&_"
-bicluster_columns$clusters <- apply(
-  bicluster_columns, 1,
-  function(x) {
-    paste(paste(which(x)), collapse = "_&_")
-  }
-)
-bicluster_columns <- bicluster_columns[, "clusters", drop = FALSE]
-
-bicluster_rows$clusters <- apply(
-  bicluster_rows, 1,
-  function(x) {
-    paste(paste(which(x)), collapse = "_&_")
-  }
-)
-bicluster_rows <- bicluster_rows[, "clusters", drop = FALSE]
-```
-
-```{r biclust_12, fig.width=14, fig.height=12}
-# Convert boolean values into factor
-bicluster_columns <- data.frame(apply(bicluster_columns, 2, as.factor))
-bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
-
-pheatmap(corr,
-  cluster_cols = F, cluster_rows = F,
-  annotation_col = bicluster_columns,
-  annotation_row = bicluster_rows
-)
-```
-
 ## Additional Community Typing
 
 For more community typing techniques applied to the 'SprockettTHData'
