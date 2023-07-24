@@ -7,8 +7,8 @@ chapterPreamble()
 
 ```{r, message=FALSE}
 library(mia)
-data("GlobalPatterns", package="mia")
-tse <- GlobalPatterns 
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
 ```
 
 Taxonomic information is a key part of analyzing microbiome data and without
@@ -69,7 +69,7 @@ taxonomyRanks(tse)
 This can then be used to subset the `rowData` to columns needed.
 
 ```{r}
-rowData(tse)[,taxonomyRanks(tse)]
+rowData(tse)[, taxonomyRanks(tse)]
 ```
 
 `taxonomyRankEmpty` checks for empty values in the given `rank` and returns a 
@@ -93,8 +93,8 @@ string with the following scheme `level:value`. If all levels are the same,
 this part is omitted, but can be added by setting `with_rank = TRUE`.
 
 ```{r}
-phylum <- !is.na(rowData(tse)$Phylum) & 
-    vapply(data.frame(apply(rowData(tse)[,taxonomyRanks(tse)[3:7]],1L,is.na)),all,logical(1))
+phylum <- !is.na(rowData(tse)$Phylum) &
+    vapply(data.frame(apply(rowData(tse)[, taxonomyRanks(tse)[3:7]], 1L, is.na)), all, logical(1))
 head(getTaxonomyLabels(tse[phylum,]))
 head(getTaxonomyLabels(tse[phylum,], with_rank = TRUE))
 ```
@@ -158,23 +158,28 @@ assayNames(altExp(tse, "Family"))
 ```
 
 ```{r}
-assay(altExp(tse, "Family"), "relabundance")[1:5,1:7]
+assay(altExp(tse, "Family"), "relabundance")[1:5, 1:7]
 ```
   
 ```{r taxinfo_altexp_example}
-assay(altExp(tse, "Family"), "counts")[1:5,1:7]
+assay(altExp(tse, "Family"), "counts")[1:5, 1:7]
 ```
 
 `altExpNames` now consists of `Family` level data. This can be extended to use 
 any taxonomic level listed in `mia::taxonomyRanks(tse)`.
 
 Rare taxa can also be aggregated into a single group "Other" instead of 
-filtering them out. A suitable function for this is `agglomerateByPrevance`. 
+filtering them out. A suitable function for this is `agglomerateByPrevalence`.
 The number of rare taxa is higher on the species level, which causes the need 
 for data agglomeration by prevalence.
 
 ```{r}
-altExp(tse, "Species_byPrevalence") <- agglomerateByPrevalence(tse, rank = "Species", other_label = "Other", prevalence = 5/100, detection = 1/100, as_relative = T)
+altExp(tse, "Species_byPrevalence") <- agglomerateByPrevalence(tse, 
+                                                               rank = "Species", 
+                                                               other_label = "Other", 
+                                                               prevalence = 5 / 100, 
+                                                               detection = 1 / 100, 
+                                                               as_relative = T)
 altExp(tse, "Species_byPrevalence")
 
 assay(altExp(tse, "Species_byPrevalence"), "relabundance")[88:92, 1:7]
@@ -212,7 +217,7 @@ tse <- transformAssay(tse, method = "clr", pseudocount = 1)
 tse <- transformAssay(tse, assay.type = "clr", method = "z", 
                       MARGIN = "features")
 
-# Cluster (with euclidean distance) on the features of the z assay 
+# Cluster (with euclidean distance) on the features of the z assay
 tse <- cluster(tse, assay.type = "z",
                clust.col = "hclustEuclidean", MARGIN = "features",
                HclustParam(dist.fun = stats::dist, metric = "euclidean",
@@ -223,7 +228,7 @@ kendall_dissimilarity <- function(x) {
     as.dist(1 - cor(t(x), method = "kendall"))
 }
 
-# Cluster (with Kendall dissimilarity) on the features of the z assay 
+# Cluster (with Kendall dissimilarity) on the features of the z assay
 tse <- cluster(tse, assay.type = "z", MARGIN = "features", 
                clust.col = "hclustKendall",
                HclustParam(method = "ward.D2", 
@@ -248,13 +253,13 @@ plot the histogram of the clusters.
 ```{r taxa_clustering_histogram}
 library(ggplot2)
 library(patchwork) # TO arrange several plots as a grid
-plot1 <- ggplot(as.data.frame(rowData(tse)), aes(x = clusters_euclidean)) + 
-    geom_bar() + 
+plot1 <- ggplot(as.data.frame(rowData(tse)), aes(x = clusters_euclidean)) +
+    geom_bar() +
     labs(title = "CAG size distribution (Euclidean distance)",
          x = "Clusters", y = "Feature count (n)")
-plot2 <- ggplot(as.data.frame(rowData(tse)), aes(x = clusters_kendall)) + 
-    geom_bar() + 
-    labs(title = "CAG size distribution (1 - tau distance)",
+plot2 <- ggplot(as.data.frame(rowData(tse)), aes(x = clusters_kendall)) +
+    geom_bar() +
+    labs(title = "CAG size distribution (1 - tau)",
          x = "Clusters", y = "Feature count (n)")
 plot1 + plot2 + plot_layout(ncol = 2)
 ```
@@ -289,9 +294,9 @@ For a complete list of available transformations and parameters, see function
 tse <- tseGlobalPatterns
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance", pseudocount = 1)
 tse <- transformAssay(x = tse, assay.type = "relabundance", method = "clr", 
-                        pseudocount = 1, name = "clr_transformation")
+                      pseudocount = 1, name = "clr")
 
-head(assay(tse, "clr_transformation"))
+head(assay(tse, "clr"))
 ```
 
 -   In 'pa' transformation, abundance table is converted to present/absent table.
@@ -315,7 +320,7 @@ in one sample.
 
 ### Abundances of all taxa in specific sample 
 ```{r}
-taxa.abund.cc1 <- getAbundanceSample(tse, 
+taxa.abund.cc1 <- getAbundanceSample(tse,
                                      sample_id = "CC1",
                                      assay.type = "counts")
 taxa.abund.cc1[1:10]
@@ -324,9 +329,9 @@ taxa.abund.cc1[1:10]
 ### Abundances of specific taxa in all samples   
 
 ```{r}
-taxa.abundances <- getAbundanceFeature(tse, 
-                                      feature_id = "Phylum:Bacteroidetes",
-                                      assay.type = "counts")
+taxa.abundances <- getAbundanceFeature(tse,
+                                       feature_id = "Phylum:Bacteroidetes",
+                                       assay.type = "counts")
 taxa.abundances[1:10]
 ```
 
