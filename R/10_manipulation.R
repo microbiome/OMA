@@ -19,7 +19,7 @@ library(mia)
 library(mia)
 data(GlobalPatterns, package="mia")
 tse <- GlobalPatterns
-tse <- transformCounts(tse, MARGIN = "samples", method="relabundance")
+tse <- transformAssay(tse, MARGIN = "samples", method="relabundance")
 molten_tse <- mia::meltAssay(tse,
                         add_row_data = TRUE,
                         add_col_data = TRUE,
