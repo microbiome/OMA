@@ -140,7 +140,7 @@ tse_genus_sub
 
 ## -----------------------------------------------------------------------------
 # Take only those samples that are collected from feces, skin, or tongue
-tse_genus_sub <- tse_genus[ , colData(tse_genus)$SampleType %in% c("Feces", "Skin", "Tongue")]
+tse_genus_sub <- tse_genus[ , tse_genus$SampleType %in% c("Feces", "Skin", "Tongue")]
 
 tse_genus_sub
 

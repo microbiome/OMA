@@ -72,7 +72,7 @@ ggplot(df, aes(x = SampleID, y = FeatureID, fill = clr_z)) +
 if(!require(pheatmap)){install.packages("pheatmap"); library(pheatmap)}
 
 # Takes subset: only samples from feces, skin, or tongue
-tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces", "Skin", "Tongue") ]
+tse_phylum_subset <- tse_phylum[ , tse_phylum$SampleType %in% c("Feces", "Skin", "Tongue") ]
 
 # Add clr-transformation
 tse_phylum_subset <- transformCounts(tse_phylum_subset,

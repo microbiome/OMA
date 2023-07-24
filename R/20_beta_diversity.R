@@ -23,7 +23,7 @@ tse <- GlobalPatterns
 tse <- transformCounts(tse, method = "relabundance")
 
 # Add group information Feces yes/no
-colData(tse)$Group <- colData(tse)$SampleType=="Feces"
+colData(tse)$Group <- tse$SampleType=="Feces"
 
 # Quantify dissimilarities in the original feature space
 library(vegan)
