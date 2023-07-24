@@ -73,7 +73,7 @@ Let's first preprocess the data.
 tse <- agglomerateByRank(tse, rank = "order")
 
 # Apply CLR transform
-tse <- transformCounts(tse, assay.type = "counts", method = "clr",
+tse <- transformAssay(tse, assay.type = "counts", method = "clr",
                        MARGIN="samples", pseudocount=1)
 
 # Get assay
@@ -117,26 +117,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    11   8
-##      Veg      12  16
+##      Mixed    15   9
+##      Veg       8  15
 ##                                         
-##                Accuracy : 0.574         
-##                  95% CI : (0.422, 0.717)
+##                Accuracy : 0.638         
+##                  95% CI : (0.485, 0.773)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.233         
+##     P-Value [Acc > NIR] : 0.0536        
 ##                                         
-##                   Kappa : 0.145         
+##                   Kappa : 0.277         
 ##                                         
-##  Mcnemar's Test P-Value : 0.502         
+##  Mcnemar's Test P-Value : 1.0000        
 ##                                         
-##             Sensitivity : 0.478         
-##             Specificity : 0.667         
-##          Pos Pred Value : 0.579         
-##          Neg Pred Value : 0.571         
+##             Sensitivity : 0.652         
+##             Specificity : 0.625         
+##          Pos Pred Value : 0.625         
+##          Neg Pred Value : 0.652         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.234         
-##    Detection Prevalence : 0.404         
-##       Balanced Accuracy : 0.572         
+##          Detection Rate : 0.319         
+##    Detection Prevalence : 0.511         
+##       Balanced Accuracy : 0.639         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 

@@ -56,7 +56,7 @@ samples by "Bacteroidetes":
 ```r
 library(miaViz)
 # Computing relative abundance
-tse <- transformCounts(tse, assay.type = "counts", method = "relabundance")
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 
 # Getting top taxa on a Phylum level
 tse_phylum <- agglomerateByRank(tse, rank ="Phylum", onRankOnly=TRUE)
@@ -94,14 +94,14 @@ techniques, we can visualize the abundances at Phylum level.
 library(ggplot2)
 
 # Add clr-transformation on samples
-tse_phylum <- transformCounts(tse_phylum, assay.type = "counts",
+tse_phylum <- transformAssay(tse_phylum, assay.type = "counts",
                               method = "relabundance", pseudocount = 1)
 
-tse_phylum <- transformCounts(tse_phylum, assay.type = "relabundance",
+tse_phylum <- transformAssay(tse_phylum, assay.type = "relabundance",
                               method = "clr", pseudocount = 1)
 
 # Add z-transformation on features (taxa)
-tse_phylum <- transformCounts(tse_phylum, assay.type = "clr", 
+tse_phylum <- transformAssay(tse_phylum, assay.type = "clr", 
                               MARGIN = "features",
                               method = "z", name = "clr_z")
 ```
@@ -140,14 +140,14 @@ _pheatmap_ is a package that provides methods to plot clustered heatmaps.
 library(pheatmap)
 
 # Takes subset: only samples from feces, skin, or tongue
-tse_phylum_subset <- tse_phylum[ , colData(tse_phylum)$SampleType %in% c("Feces", "Skin", "Tongue") ]
+tse_phylum_subset <- tse_phylum[ , tse_phylum$SampleType %in% c("Feces", "Skin", "Tongue") ]
 
 # Add clr-transformation
-tse_phylum_subset <- transformCounts(tse_phylum_subset,
+tse_phylum_subset <- transformAssay(tse_phylum_subset,
                          method = "clr",
     			 pseudocount = 1)
 
-tse_phylum_subset <- transformCounts(tse_phylum_subset, assay.type = "clr",
+tse_phylum_subset <- transformAssay(tse_phylum_subset, assay.type = "clr",
                                      MARGIN = "features", 
                                      method = "z", name = "clr_z")
 

@@ -113,7 +113,7 @@ tse <- mia::estimateRichness(tse,
                              index = "observed", 
                              name="observed")
 
-head(colData(tse)$observed)
+head(tse$observed)
 ```
 
 ```
@@ -147,7 +147,7 @@ tse <- mia::estimateDiversity(tse,
                               assay.type = "counts",
                               index = "shannon", 
                               name = "shannon")
-head(colData(tse)$shannon)
+head(tse$shannon)
 ```
 
 ```
@@ -171,8 +171,8 @@ library(ggsignif)
 
 # Subsets the data. Takes only those samples that are from feces, skin, or tongue,
 # and creates data frame from the collected data
-df <- as.data.frame(colData(tse)[colData(tse)$SampleType %in% 
-                                  c("Feces", "Skin", "Tongue"), ])
+df <- as.data.frame(colData(tse)[tse$SampleType %in% 
+                 c("Feces", "Skin", "Tongue"), ])
 
 # Changes old levels with new levels
 df$SampleType <- factor(df$SampleType)
@@ -200,7 +200,7 @@ The Faith index is returned by the function `estimateFaith`.
 ```r
 tse <- mia::estimateFaith(tse,
                           assay.type = "counts")
-head(colData(tse)$faith)
+head(tse$faith)
 ```
 
 ```
@@ -244,7 +244,7 @@ Evenness can be calculated with `estimateEvenness`.
 tse <- estimateEvenness(tse, 
                         assay.type = "counts", 
                         index="simpson")
-head(colData(tse)$simpson)
+head(tse$simpson)
 ```
 
 ```
@@ -262,7 +262,7 @@ tse <- estimateDominance(tse,
                          assay.type = "counts", 
                          index="relative")
 
-head(colData(tse)$relative)
+head(tse$relative)
 ```
 
 ```
@@ -281,7 +281,7 @@ tse <- mia::estimateDiversity(tse,
                               assay.type = "counts",
                               index = "log_modulo_skewness")
 
-head(colData(tse)$log_modulo_skewness)
+head(tse$log_modulo_skewness)
 ```
 
 ```

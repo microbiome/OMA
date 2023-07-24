@@ -62,7 +62,7 @@ it, and transform the data if necessary, depending on your analysis goals.
 library(bluster)
 
 # Apply transformation
-tse <- transformCounts(tse, method = "relabundance")
+tse <- transformAssay(tse, method = "relabundance")
 ```
 
 The clustering can be done on features or samples.
@@ -296,25 +296,25 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7752 BIC: 8276 AIC: 8105 
+## Laplace: 7741 BIC: 8282 AIC: 8112 
 ## 
 ## [[5]]
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7849 BIC: 8565 AIC: 8352 
+## Laplace: 7844 BIC: 8548 AIC: 8335 
 ## 
 ## [[6]]
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7927 BIC: 8796 AIC: 8540 
+## Laplace: 7984 BIC: 8832 AIC: 8576 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8065 BIC: 9139 AIC: 8840
+## Laplace: 8064 BIC: 9086 AIC: 8787
 ```
 
 
@@ -382,7 +382,7 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.60
+## 1 0.5385 20.58
 ## 2 0.4615 15.32
 ```
 
@@ -397,12 +397,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 4.439e-17
-## CC1     1.000e+00 3.296e-22
-## SV1     1.000e+00 1.764e-12
-## M31Fcsw 6.906e-26 1.000e+00
-## M11Fcsw 1.025e-16 1.000e+00
-## M31Plmr 1.024e-13 1.000e+00
+## CL3     1.000e+00 4.504e-17
+## CC1     1.000e+00 3.401e-22
+## SV1     1.000e+00 1.711e-12
+## M31Fcsw 7.417e-26 1.000e+00
+## M11Fcsw 1.090e-16 1.000e+00
+## M31Plmr 1.153e-13 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -413,13 +413,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354082
-## Phylum:Euryarchaeota  0.2314 0.1468931
-## Phylum:Actinobacteria 1.2105 1.0580846
-## Phylum:Spirochaetes   0.2141 0.1318102
-## Phylum:MVP-15         0.0299 0.0007628
-## Phylum:Proteobacteria 6.8414 1.8114364
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30381 0.1354046
+## Phylum:Euryarchaeota  0.23114 0.1468860
+## Phylum:Actinobacteria 1.21375 1.0580921
+## Phylum:Spirochaetes   0.21393 0.1318063
+## Phylum:MVP-15         0.02982 0.0007649
+## Phylum:Proteobacteria 6.84552 1.8113248
 ```
 Get the assignment probabilities
 
@@ -441,8 +441,8 @@ Computing the euclidean PCoA and storing it as a data frame
 ```r
 # Does clr transformation. Pseudocount is added, because data contains zeros.
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
-tse <- transformCounts(tse, assay.type = "pseudo", method = "relabundance")
-tse <- transformCounts(tse, "relabundance", method = "clr")
+tse <- transformAssay(tse, assay.type = "pseudo", method = "relabundance")
+tse <- transformAssay(tse, "relabundance", method = "clr")
 
 library(scater)
 
@@ -517,7 +517,7 @@ library(scater)
 
 data("enterotype", package = "mia")
 tse <- enterotype
-tse <- transformCounts(tse, method = "rclr")
+tse <- transformAssay(tse, method = "rclr")
 
 # Performing and storing UMAP
 tse <- runUMAP(tse, name = "UMAP", assay.type = "rclr")
@@ -612,8 +612,8 @@ Only the most prevalent taxa are included in analysis.
 # Subset data in the first experiment
 mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
 # clr-transform in the first experiment
-mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
-mae[[1]] <- transformCounts(mae[[1]], "relabundance", method = "rclr")
+mae[[1]] <- transformAssay(mae[[1]], method = "relabundance")
+mae[[1]] <- transformAssay(mae[[1]], "relabundance", method = "rclr")
 ```
 
 _cobiclust_ takes counts table as an input and gives _cobiclust_ object as an output.
@@ -658,7 +658,7 @@ Next we can plot clusters. Annotated heatmap is a common choice.
 ```r
 library(pheatmap)
 # z-transform for heatmap
-mae[[1]] <- transformCounts(mae[[1]],
+mae[[1]] <- transformAssay(mae[[1]],
   assay.type = "rclr",
   MARGIN = "features",
   method = "z", name = "clr_z"
@@ -1070,7 +1070,7 @@ library(NbClust)
 library(cobiclust)
 
 # Apply transformation
-tse <- transformCounts(tse, method = "relabundance")
+tse <- transformAssay(tse, method = "relabundance")
 # Get the assay
 assay <- assay(tse, "relabundance")
 # Transpose assay --> samples are now in rows --> we are clustering samples

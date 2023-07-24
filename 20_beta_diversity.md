@@ -96,11 +96,11 @@ data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 
 # some beta diversity metrics are usually applied to relative abundances
-tse <- transformCounts(tse,
+tse <- transformAssay(tse,
                        method = "relabundance")
 
 # Add group information Feces yes/no
-colData(tse)$Group <- colData(tse)$SampleType == "Feces"
+tse$Group <- tse$SampleType == "Feces"
 ```
 
 ### Comparing communities by beta diversity analysis
@@ -360,7 +360,7 @@ data("enterotype", package = "mia")
 variable_names <- c("ClinicalStatus", "Gender", "Age")
 
 # Apply relative transform
-enterotype <- transformCounts(enterotype, method = "relabundance")
+enterotype <- transformAssay(enterotype, method = "relabundance")
 
 # Create a formula
 formula <- as.formula(paste0("assay ~ ", str_c(variable_names, collapse = " + ")) )
@@ -527,7 +527,7 @@ tse_genus <- agglomerateByRank(tse,
                                rank = "Genus")
 
 # Convert to relative abundances
-tse_genus <- transformCounts(tse,
+tse_genus <- transformAssay(tse,
                              method = "relabundance",
                              assay.type = "counts")
 

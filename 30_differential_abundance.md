@@ -220,7 +220,7 @@ assay, and perform prevalence filtering.
 
 ```r
 tse <- agglomerateByRank(tse0, rank = "genus") %>%
-       transformCounts(assay.type = "counts",
+       transformAssay(assay.type = "counts",
                        method = "relabundance",
 		       MARGIN = "samples") %>%
        # subset based on the relative abundance assay		       
@@ -229,7 +229,7 @@ tse <- agglomerateByRank(tse0, rank = "genus") %>%
 			     assay.type = "relabundance")
 
 # Add also clr abundances
-tse <- transformCounts(tse, method="clr", pseudocount=1) # not bale to run
+tse <- transformAssay(tse, method="clr", pseudocount=1) # not bale to run
 ```
 
 Regarding prevalence filtering, @Nearing2022 found that applying a 10%

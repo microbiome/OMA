@@ -305,7 +305,7 @@ is as an alternative experiment.
 
 
 ```r
-tse <- transformCounts(tse, assay.type = "counts", method = "relabundance")
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 altExp(tse, "Family") <- agglomerateByRank(tse, rank = "Family",
                                            agglomerateTree = TRUE)
 altExp(tse, "Family")
@@ -435,15 +435,15 @@ such as the centered log-ratio transformation (clr).
 
 In mia package, transformations are applied to abundance data. The transformed 
 abundance table is stored back to 'assays'. mia includes transformation 
-function ('transformCounts()') which applies sample-wise or column-wise transformation when MARGIN = 'samples', feature-wise or row-wise transformation when MARGIN = 'features'.
+function ('transformAssay()') which applies sample-wise or column-wise transformation when MARGIN = 'samples', feature-wise or row-wise transformation when MARGIN = 'features'.
 
 For a complete list of available transformations and parameters, see function 
-[help](https://microbiome.github.io/mia/reference/transformCounts.html).
+[help](https://microbiome.github.io/mia/reference/transformAssay.html).
 
 
 ```r
-tse <- transformCounts(tse, assay.type = "counts", method = "relabundance", pseudocount = 1)
-tse <- transformCounts(x = tse, assay.type = "relabundance", method = "clr", 
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance", pseudocount = 1)
+tse <- transformAssay(x = tse, assay.type = "relabundance", method = "clr", 
                         pseudocount = 1, name = "clr_transformation")
 
 head(assay(tse, "clr_transformation"))
@@ -505,7 +505,7 @@ head(assay(tse, "clr_transformation"))
 
 
 ```r
-tse <- transformCounts(tse, method = "pa")
+tse <- transformAssay(tse, method = "pa")
 
 head(assay(tse, "pa"))
 ```
