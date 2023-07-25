@@ -16,7 +16,7 @@ tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 
 # Getting top taxa on a Phylum level
 tse_phylum <- agglomerateByRank(tse, rank ="Phylum", onRankOnly=TRUE)
-top_taxa <- getTopTaxa(tse_phylum,top = 5, assay.type = "relabundance")
+top_taxa <- getTopFeatures(tse_phylum,top = 5, assay.type = "relabundance")
 
 # Renaming the "Phylum" rank to keep only top taxa and the rest to "Other"
 phylum_renamed <- lapply(rowData(tse)$Phylum,
@@ -84,7 +84,7 @@ tse_phylum_subset <- transformAssay(tse_phylum_subset, assay.type = "clr",
                                      method = "z", name = "clr_z")
 
 # Get n most abundant taxa, and subsets the data by them
-top_taxa <- getTopTaxa(tse_phylum_subset, top = 20)
+top_taxa <- getTopFeatures(tse_phylum_subset, top = 20)
 tse_phylum_subset <- tse_phylum_subset[top_taxa, ]
 
 # Gets the assay table

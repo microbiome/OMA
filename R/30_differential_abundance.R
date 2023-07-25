@@ -34,7 +34,7 @@ count(as.data.frame(colData(tse0)), Geographical_location) %>% kable()
 ## -----------------------------------------------------------------------------
 tse <- agglomerateByRank(tse0, rank = "genus") %>%
        transformAssay(assay.type = "counts", method = "relabundance", MARGIN = "samples") %>%
-       subsetByPrevalentTaxa(detection = 0, prevalence = 10/100, assay.type = "relabundance")
+       subsetByPrevalentFeatures(detection = 0, prevalence = 10/100, assay.type = "relabundance")
 
 # Add also clr abundances
 tse <- transformAssay(tse, method="clr", pseudocount=1) # not bale to run
