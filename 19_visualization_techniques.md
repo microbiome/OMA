@@ -350,7 +350,7 @@ tse_order <- transformAssay(tse_order,
                               assay.type = "counts",
                               method = "relabundance")
 # get top orders
-top_taxa <- getTopTaxa(tse_order,
+top_taxa <- getTopFeatures(tse_order,
                        top = 10,
                        assay.type = "relabundance")
 # leave only names for top 10 orders and label the rest with "Other"
@@ -444,7 +444,7 @@ tse_phylum_subset <- transformAssay(tse_phylum_subset, assay.type = "clr",
                                      method = "z", name = "clr_z")
 
 # Get n most abundant taxa, and subsets the data by them
-top_taxa <- getTopTaxa(tse_phylum_subset, top = 20)
+top_taxa <- getTopFeatures(tse_phylum_subset, top = 20)
 tse_phylum_subset <- tse_phylum_subset[top_taxa, ]
 
 # Gets the assay table

@@ -117,26 +117,26 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    15   9
-##      Veg       8  15
+##      Mixed    12  11
+##      Veg      11  13
 ##                                         
-##                Accuracy : 0.638         
-##                  95% CI : (0.485, 0.773)
+##                Accuracy : 0.532         
+##                  95% CI : (0.381, 0.679)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.0536        
+##     P-Value [Acc > NIR] : 0.443         
 ##                                         
-##                   Kappa : 0.277         
+##                   Kappa : 0.063         
 ##                                         
-##  Mcnemar's Test P-Value : 1.0000        
+##  Mcnemar's Test P-Value : 1.000         
 ##                                         
-##             Sensitivity : 0.652         
-##             Specificity : 0.625         
-##          Pos Pred Value : 0.625         
-##          Neg Pred Value : 0.652         
+##             Sensitivity : 0.522         
+##             Specificity : 0.542         
+##          Pos Pred Value : 0.522         
+##          Neg Pred Value : 0.542         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.319         
-##    Detection Prevalence : 0.511         
-##       Balanced Accuracy : 0.639         
+##          Detection Rate : 0.255         
+##    Detection Prevalence : 0.489         
+##       Balanced Accuracy : 0.532         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 

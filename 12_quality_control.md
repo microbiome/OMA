@@ -200,14 +200,14 @@ Note that, by default, `na.rm = TRUE` is used for agglomeration in
 `getPrevalence`, whereas the default for `agglomerateByRank` is
 `FALSE` to prevent accidental data loss.
 
-If you only need the names of the prevalent taxa, `getPrevalentTaxa`
+If you only need the names of the prevalent taxa, `getPrevalentFeatures`
 is available. This returns the taxa that exceed the given prevalence
 and detection thresholds.
 
 
 ```r
-getPrevalentTaxa(tse, detection = 0, prevalence = 50/100)
-prev <- getPrevalentTaxa(tse, detection = 0, prevalence = 50/100,
+getPrevalentFeatures(tse, detection = 0, prevalence = 50/100)
+prev <- getPrevalentFeatures(tse, detection = 0, prevalence = 50/100,
                          rank = "Phylum", sort = TRUE)
 prev
 ```
@@ -224,8 +224,8 @@ relative abundance of the prevalent taxa (between 0 and 1).
 ### Rare taxa
 
 Related functions are available for the analysis of rare taxa
-(`rareMembers`; `rareAbundance`; `lowAbundance`, `getRareTaxa`,
-`subsetByRareTaxa`).
+(`rareMembers`; `rareAbundance`; `lowAbundance`, `getRareFeatures`,
+`subsetByRareFeatures`).
 
 
 ### Plotting prevalence
@@ -266,11 +266,11 @@ altExps(tse) <-
                                 assay.type = "counts", as_relative = TRUE)
               y
           })
-top_phyla <- getTopTaxa(altExp(tse,"Phylum"),
+top_phyla <- getTopFeatures(altExp(tse,"Phylum"),
                         method="prevalence",
                         top=5L,
                         assay.type="counts")
-top_phyla_mean <- getTopTaxa(altExp(tse,"Phylum"),
+top_phyla_mean <- getTopFeatures(altExp(tse,"Phylum"),
                              method="mean",
                              top=5L,
                              assay.type="counts")
@@ -318,12 +318,12 @@ tse <- GlobalPatterns
 
 ### Top taxa  
 
-The `getTopTaxa` identifies top taxa in the data.   
+The `getTopFeatures` identifies top taxa in the data.   
 
 
 ```r
 # Pick the top taxa
-top_features <- getTopTaxa(tse, method="median", top=10)
+top_features <- getTopFeatures(tse, method="median", top=10)
 
 # Check the information for these
 rowData(tse)[top_features, taxonomyRanks(tse)]

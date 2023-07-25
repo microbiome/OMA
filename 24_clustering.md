@@ -290,13 +290,13 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7689 BIC: 8076 AIC: 7948 
+## Laplace: 7690 BIC: 8076 AIC: 7948 
 ## 
 ## [[4]]
 ## class: DMN 
 ## k: 4 
 ## samples x taxa: 26 x 67 
-## Laplace: 7741 BIC: 8282 AIC: 8112 
+## Laplace: 7750 BIC: 8327 AIC: 8156 
 ## 
 ## [[5]]
 ## class: DMN 
@@ -308,13 +308,13 @@ getDMN(tse_dmn)
 ## class: DMN 
 ## k: 6 
 ## samples x taxa: 26 x 67 
-## Laplace: 7984 BIC: 8832 AIC: 8576 
+## Laplace: 7943 BIC: 8840 AIC: 8584 
 ## 
 ## [[7]]
 ## class: DMN 
 ## k: 7 
 ## samples x taxa: 26 x 67 
-## Laplace: 8064 BIC: 9086 AIC: 8787
+## Laplace: 8049 BIC: 9086 AIC: 8787
 ```
 
 
@@ -382,8 +382,8 @@ DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.32
+## 1 0.5385 20.60
+## 2 0.4615 15.28
 ```
 
 
@@ -397,12 +397,12 @@ head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 ```
 ##              [,1]      [,2]
-## CL3     1.000e+00 4.504e-17
-## CC1     1.000e+00 3.401e-22
-## SV1     1.000e+00 1.711e-12
-## M31Fcsw 7.417e-26 1.000e+00
-## M11Fcsw 1.090e-16 1.000e+00
-## M31Plmr 1.153e-13 1.000e+00
+## CL3     1.000e+00 5.072e-17
+## CC1     1.000e+00 3.883e-22
+## SV1     1.000e+00 2.039e-12
+## M31Fcsw 7.319e-26 1.000e+00
+## M11Fcsw 1.063e-16 1.000e+00
+## M31Plmr 9.993e-14 1.000e+00
 ```
 
 Contribution of each taxa to each component
@@ -413,13 +413,13 @@ head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30381 0.1354046
-## Phylum:Euryarchaeota  0.23114 0.1468860
-## Phylum:Actinobacteria 1.21375 1.0580921
-## Phylum:Spirochaetes   0.21393 0.1318063
-## Phylum:MVP-15         0.02982 0.0007649
-## Phylum:Proteobacteria 6.84552 1.8113248
+##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354654
+## Phylum:Euryarchaeota  0.2314 0.1468638
+## Phylum:Actinobacteria 1.2105 1.0600259
+## Phylum:Spirochaetes   0.2141 0.1318416
+## Phylum:MVP-15         0.0299 0.0007679
+## Phylum:Proteobacteria 6.8417 1.8151997
 ```
 Get the assignment probabilities
 
@@ -610,7 +610,7 @@ Only the most prevalent taxa are included in analysis.
 
 ```r
 # Subset data in the first experiment
-mae[[1]] <- subsetByPrevalentTaxa(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
+mae[[1]] <- subsetByPrevalentFeatures(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
 # clr-transform in the first experiment
 mae[[1]] <- transformAssay(mae[[1]], method = "relabundance")
 mae[[1]] <- transformAssay(mae[[1]], "relabundance", method = "rclr")

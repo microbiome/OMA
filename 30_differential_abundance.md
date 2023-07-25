@@ -224,7 +224,7 @@ tse <- agglomerateByRank(tse0, rank = "genus") %>%
                        method = "relabundance",
 		       MARGIN = "samples") %>%
        # subset based on the relative abundance assay		       
-       subsetByPrevalentTaxa(detection = 0,
+       subsetByPrevalentFeatures(detection = 0,
                              prevalence = 10/100,
 			     assay.type = "relabundance")
 

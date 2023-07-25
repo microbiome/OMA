@@ -537,7 +537,7 @@ us retrieve a *[MultiAssayExperiment](https://bioconductor.org/packages/3.17/Mul
 # mae <- HintikkaXOData()
 # Since HintikkaXOData is now added to mia, we can load it directly from there
 # We suggest to check other datasets from microbiomeDataSets
-data(HintikkaXOData)
+data(HintikkaXOData, package = "mia")
 mae <- HintikkaXOData
 ```
 
