@@ -23,7 +23,7 @@ assay(tse, "counts")[1:5,1:7]
 
 
 ## -----------------------------------------------------------------------------
-tse <- transformCounts(tse, assay.type = "counts", method = "relabundance")
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 assays(tse)
 
 

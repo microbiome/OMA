@@ -31,9 +31,9 @@ tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 tse <- tse[is.element(rownames(tse), rel_taxa),]
 
 # CLR and Z transforms
-tse <- transformCounts(tse, MARGIN = "samples", assay.type = "counts",
+tse <- transformAssay(tse, MARGIN = "samples", assay.type = "counts",
                        method = "clr", pseudocount=1)
-tse <- transformCounts(tse, MARGIN = "features", assay.type = "clr", method = "z")
+tse <- transformAssay(tse, MARGIN = "features", assay.type = "clr", method = "z")
 
 Countries <- data.frame("Country" = colData(tse)$Country)
 rownames(Countries) <- colData(tse)$Sample_ID
@@ -163,9 +163,9 @@ scater::plotReducedDim(tse2, "NMDS_BC", colour_by = "CST", point_alpha = 1) + th
 
 ## ----message = FALSE, warning = FALSE, results = FALSE------------------------
 # Z transform of CLR counts
-tse2 <- transformCounts(tse2, MARGIN = "samples", assay.type = "counts",
+tse2 <- transformAssay(tse2, MARGIN = "samples", assay.type = "counts",
                         method = "clr", pseudocount=1)
-tse2 <- transformCounts(tse2, MARGIN = "features", assay.type = "clr", method = "z")
+tse2 <- transformAssay(tse2, MARGIN = "features", assay.type = "clr", method = "z")
 # get top taxa
 tse2 <- tse2[is.element(rownames(tse2), rel_taxa), ]
 
@@ -254,7 +254,7 @@ vec <- colnames(prob)[max.col(prob,ties.method = "first")]
 
 ## -----------------------------------------------------------------------------
 # Calculate relative abundances
-tse_dmn <- transformCounts(tse_dmn, method = "relabundance")
+tse_dmn <- transformAssay(tse_dmn, method = "relabundance")
 # Does principal coordinate analysis
 bray_pcoa_df <- calculateMDS(tse_dmn, FUN = vegan::vegdist, method = "bray", 
                              assay.type = "relabundance")
@@ -283,10 +283,10 @@ bray_dmm_plot
 
 ## -----------------------------------------------------------------------------
 # get clr + z-transformed counts
-tse_dmn <- transformCounts(tse_dmn, MARGIN = "samples",
+tse_dmn <- transformAssay(tse_dmn, MARGIN = "samples",
                            assay.type = "counts", method = "clr",
 			   pseudocount = 1)
-tse_dmn <- transformCounts(tse_dmn, MARGIN = "features",
+tse_dmn <- transformAssay(tse_dmn, MARGIN = "features",
                            assay.type = "clr", method = "z")
 # objects containing dmm component information
 clust <- factor(vec)

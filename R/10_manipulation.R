@@ -19,7 +19,7 @@ library(mia)
 library(mia)
 data(GlobalPatterns, package="mia")
 tse <- GlobalPatterns
-tse <- transformCounts(tse, MARGIN = "samples", method="relabundance")
+tse <- transformAssay(tse, MARGIN = "samples", method="relabundance")
 molten_tse <- mia::meltAssay(tse,
                         add_row_data = TRUE,
                         add_col_data = TRUE,
@@ -140,7 +140,7 @@ tse_genus_sub
 
 ## -----------------------------------------------------------------------------
 # Take only those samples that are collected from feces, skin, or tongue
-tse_genus_sub <- tse_genus[ , colData(tse_genus)$SampleType %in% c("Feces", "Skin", "Tongue")]
+tse_genus_sub <- tse_genus[ , tse_genus$SampleType %in% c("Feces", "Skin", "Tongue")]
 
 tse_genus_sub
 
