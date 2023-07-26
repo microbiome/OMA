@@ -90,7 +90,7 @@ availableDataSets()
 ## # mae <- HintikkaXOData()
 ## # Since HintikkaXOData is now added to mia, we can load it directly from there
 ## # We suggest to check other datasets from microbiomeDataSets
-## data(HintikkaXOData)
+## data(HintikkaXOData, package = "mia")
 ## mae <- HintikkaXOData
 
 
