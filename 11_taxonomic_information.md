@@ -38,8 +38,8 @@ document.addEventListener("click", function (event) {
 
 ```r
 library(mia)
-data("GlobalPatterns", package="mia")
-tse <- GlobalPatterns 
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
 ```
 
 Taxonomic information is a key part of analyzing microbiome data and without
@@ -57,6 +57,9 @@ and assumes certain key aspects:
 a capital first letter.
 * the columns must be given in the order shown above
 * column can be omited, but the order must remain
+
+In this chapter, we will refer to co-abundant groups as CAGs, which are
+clusters of taxa that co-vary across samples.
 
 ## Assigning taxonomic information.
 
@@ -108,7 +111,7 @@ This can then be used to subset the `rowData` to columns needed.
 
 
 ```r
-rowData(tse)[,taxonomyRanks(tse)]
+rowData(tse)[, taxonomyRanks(tse)]
 ```
 
 ```
@@ -193,8 +196,8 @@ this part is omitted, but can be added by setting `with_rank = TRUE`.
 
 
 ```r
-phylum <- !is.na(rowData(tse)$Phylum) & 
-    vapply(data.frame(apply(rowData(tse)[,taxonomyRanks(tse)[3:7]],1L,is.na)),all,logical(1))
+phylum <- !is.na(rowData(tse)$Phylum) &
+    vapply(data.frame(apply(rowData(tse)[, taxonomyRanks(tse)[3:7]], 1L, is.na)), all, logical(1))
 head(getTaxonomyLabels(tse[phylum,]))
 ```
 
@@ -243,7 +246,6 @@ head(getUniqueFeatures(tse, rank = "Phylum"))
 ## [1] "Crenarchaeota"  "Euryarchaeota"  "Actinobacteria" "Spirochaetes"  
 ## [5] "MVP-15"         "Proteobacteria"
 ```
-
 
 ### Generate a taxonomic tree on the fly {#fly-tree}
 
@@ -351,7 +353,7 @@ assayNames(altExp(tse, "Family"))
 
 
 ```r
-assay(altExp(tse, "Family"), "relabundance")[1:5,1:7]
+assay(altExp(tse, "Family"), "relabundance")[1:5, 1:7]
 ```
 
 ```
@@ -365,7 +367,7 @@ assay(altExp(tse, "Family"), "relabundance")[1:5,1:7]
   
 
 ```r
-assay(altExp(tse, "Family"), "counts")[1:5,1:7]
+assay(altExp(tse, "Family"), "counts")[1:5, 1:7]
 ```
 
 ```
@@ -380,11 +382,19 @@ assay(altExp(tse, "Family"), "counts")[1:5,1:7]
 `altExpNames` now consists of `Family` level data. This can be extended to use 
 any taxonomic level listed in `mia::taxonomyRanks(tse)`.
 
-Rare taxa can also be aggregated into a single group "Other" instead of filtering them out. A suitable function for this is `agglomerateByPrevance`. The number of rare taxa is higher on the species level, which causes the need for data agglomeration by prevalence.
+Rare taxa can also be aggregated into a single group "Other" instead of 
+filtering them out. A suitable function for this is `agglomerateByPrevalence`.
+The number of rare taxa is higher on the species level, which causes the need 
+for data agglomeration by prevalence.
 
 
 ```r
-altExp(tse, "Species_byPrevalence") <- agglomerateByPrevalence(tse, rank = "Species", other_label = "Other", prevalence = 5/100, detection = 1/100, as_relative = T)
+altExp(tse, "Species_byPrevalence") <- agglomerateByPrevalence(tse, 
+                                                               rank = "Species", 
+                                                               other_label = "Other", 
+                                                               prevalence = 5 / 100, 
+                                                               detection = 1 / 100, 
+                                                               as_relative = T)
 altExp(tse, "Species_byPrevalence")
 ```
 
@@ -426,6 +436,134 @@ assay(altExp(tse, "Species_byPrevalence"), "relabundance")[88:92, 1:7]
 ```
 
 
+```r
+# Saving the tse for later
+tseGlobalPatterns <- tse
+```
+
+### Taxa clustering {#taxa-clustering}
+Another way to agglomerate the data is to cluster the taxa. To do so,
+we usually start by doing a compositionality aware transformation such as CLR, 
+followed by the application of a standard clustering method.
+
+Here is an example that does a CLR transformation followed by the hierarchical
+clustering algorithm. 
+
+First, we import the library `bluster` that simplifies the clustering.
+
+```r
+library(bluster)
+```
+
+Then we do the CLR transform followed by the clustering. We will cluster with
+two different distances: the euclidean distance and the kendall distance.
+
+
+```r
+# Get the data
+data("peerj13075", package = "mia")
+tse <- peerj13075
+
+# The result of the CLR transform is stored in the assay clr
+tse <- transformAssay(tse, method = "clr", pseudocount = 1)
+
+tse <- transformAssay(tse, assay.type = "clr", method = "z", 
+                      MARGIN = "features")
+
+# Cluster (with euclidean distance) on the features of the z assay
+tse <- cluster(tse, assay.type = "z",
+               clust.col = "hclustEuclidean", MARGIN = "features",
+               HclustParam(dist.fun = stats::dist, metric = "euclidean",
+                           method = "ward.D2"))
+
+# Declare the Kendall dissimilarity computation function
+kendall_dissimilarity <- function(x) {
+    as.dist(1 - cor(t(x), method = "kendall"))
+}
+
+# Cluster (with Kendall dissimilarity) on the features of the z assay
+tse <- cluster(tse, assay.type = "z", MARGIN = "features", 
+               clust.col = "hclustKendall",
+               HclustParam(method = "ward.D2", 
+                           dist.fun = kendall_dissimilarity))
+```
+
+Let us store the resulting cluster indices in the `rowData` column specified 
+with the `clust.col` parameter.
+
+
+```r
+# Checking the clusters
+clusters_euclidean <- rowData(tse)$hclustEuclidean
+head(clusters_euclidean, 10)
+```
+
+```
+##  OTU1  OTU2  OTU7  OTU9 OTU10 OTU12 OTU14 OTU15 OTU18 OTU19 
+##     1     2     1     1     1     1     3     4     3     2 
+## Levels: 1 2 3 4 5
+```
+
+```r
+clusters_kendall <- rowData(tse)$hclustKendall
+head(clusters_kendall, 10)
+```
+
+```
+##  OTU1  OTU2  OTU7  OTU9 OTU10 OTU12 OTU14 OTU15 OTU18 OTU19 
+##     1     2     1     3     3     1     3     1     1     3 
+## Levels: 1 2 3 4
+```
+
+To better visualize the results and the distribution of the clusters, we can 
+plot the histogram of the clusters.
+
+
+```r
+library(ggplot2)
+library(patchwork) # TO arrange several plots as a grid
+plot1 <- ggplot(as.data.frame(rowData(tse)), aes(x = clusters_euclidean)) +
+    geom_bar() +
+    labs(title = "CAG size distribution (Euclidean distance)",
+         x = "Clusters", y = "Feature count (n)")
+plot2 <- ggplot(as.data.frame(rowData(tse)), aes(x = clusters_kendall)) +
+    geom_bar() +
+    labs(title = "CAG size distribution (1 - tau)",
+         x = "Clusters", y = "Feature count (n)")
+plot1 + plot2 + plot_layout(ncol = 2)
+```
+
+![](11_taxonomic_information_files/figure-latex/taxa_clustering_histogram-1.pdf)<!-- --> 
+
+It's also possible to merge the rows by cluster.
+
+
+```r
+# Aggregate clusters as a sum of each cluster values
+tse_merged <- mergeRows(tse, clusters_euclidean)
+tse_merged
+```
+
+```
+## class: TreeSummarizedExperiment 
+## dim: 5 58 
+## metadata(0):
+## assays(3): counts clr z
+## rownames(5): 1 2 3 4 5
+## rowData names(8): kingdom phylum ... hclustEuclidean hclustKendall
+## colnames(58): ID1 ID2 ... ID57 ID58
+## colData names(5): Sample Geographical_location Gender Age Diet
+## reducedDimNames(0):
+## mainExpName: NULL
+## altExpNames(0):
+## rowLinks: NULL
+## rowTree: NULL
+## colLinks: NULL
+## colTree: NULL
+```
+We can note that it worked as planned since there were 5 clusters and there are
+now 5 rows.
+
 ## Data transformation {#assay-transform}
 
 Data transformations are common in microbiome analysis. Examples
@@ -435,18 +573,21 @@ such as the centered log-ratio transformation (clr).
 
 In mia package, transformations are applied to abundance data. The transformed 
 abundance table is stored back to 'assays'. mia includes transformation 
-function ('transformAssay()') which applies sample-wise or column-wise transformation when MARGIN = 'samples', feature-wise or row-wise transformation when MARGIN = 'features'.
+function ('transformAssay()') which applies sample-wise or column-wise 
+transformation when MARGIN = 'samples', feature-wise or row-wise transformation 
+when MARGIN = 'features'.
 
 For a complete list of available transformations and parameters, see function 
 [help](https://microbiome.github.io/mia/reference/transformAssay.html).
 
 
 ```r
+tse <- tseGlobalPatterns
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance", pseudocount = 1)
 tse <- transformAssay(x = tse, assay.type = "relabundance", method = "clr", 
-                        pseudocount = 1, name = "clr_transformation")
+                      pseudocount = 1, name = "clr")
 
-head(assay(tse, "clr_transformation"))
+head(assay(tse, "clr"))
 ```
 
 ```
@@ -549,7 +690,7 @@ assays(tse)
 
 ```
 ## List of length 4
-## names(4): counts relabundance clr_transformation pa
+## names(4): counts relabundance clr pa
 ```
 
 ## Pick specific {#pick-specific}
@@ -561,7 +702,7 @@ in one sample.
 ### Abundances of all taxa in specific sample 
 
 ```r
-taxa.abund.cc1 <- getAbundanceSample(tse, 
+taxa.abund.cc1 <- getAbundanceSample(tse,
                                      sample_id = "CC1",
                                      assay.type = "counts")
 taxa.abund.cc1[1:10]
@@ -584,9 +725,9 @@ taxa.abund.cc1[1:10]
 
 
 ```r
-taxa.abundances <- getAbundanceFeature(tse, 
-                                      feature_id = "Phylum:Bacteroidetes",
-                                      assay.type = "counts")
+taxa.abundances <- getAbundanceFeature(tse,
+                                       feature_id = "Phylum:Bacteroidetes",
+                                       assay.type = "counts")
 taxa.abundances[1:10]
 ```
 
