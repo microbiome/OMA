@@ -87,9 +87,9 @@ for a kickstart to R programming. Further support resources are
 available through the Bioconductor
 project [@Huber2015].
 
- * [base R and RStudio cheatsheets](https://geomoer.github.io/moer-base-r/cheatsheet.html)
+ * [Base R and RStudio cheatsheets](https://geomoer.github.io/moer-base-r/cheatsheet.html)
  * [Package-specific cheatsheets](https://www.rstudio.com/resources/cheatsheets/)
- * [visualization with ggplot2](https://ggplot2.tidyverse.org/) 
+ * [Visualization with ggplot2](https://ggplot2.tidyverse.org/) 
  * [R graphics cookbook](http://www.cookbook-r.com/Graphs/)
 
 
@@ -140,9 +140,9 @@ data science. Perform the following tasks:
 
 Being able to use Quarto in R partly relies on your previous knowledge of Rmarkdown. The following resources can help you get familiar with Rmarkdown:
 
- * [online tutorial](https://www.markdowntutorial.com/)
- * [cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf)
- * [documentation](https://rmarkdown.rstudio.com/lesson-1.html)
+ * [Online tutorial](https://www.markdowntutorial.com/)
+ * [Cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf)
+ * [Documentation](https://rmarkdown.rstudio.com/lesson-1.html)
  * [Dr. C Titus Brown's tutorial](https://rpubs.com/marschmi/RMarkdown)
 
 

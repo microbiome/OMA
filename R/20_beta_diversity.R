@@ -20,10 +20,10 @@ data(GlobalPatterns, package="mia")
 
 # Data matrix (features x samples)
 tse <- GlobalPatterns
-tse <- transformCounts(tse, method = "relabundance")
+tse <- transformAssay(tse, method = "relabundance")
 
 # Add group information Feces yes/no
-colData(tse)$Group <- colData(tse)$SampleType=="Feces"
+colData(tse)$Group <- tse$SampleType=="Feces"
 
 # Quantify dissimilarities in the original feature space
 library(vegan)
@@ -62,7 +62,7 @@ ggplot(aes(x = d0, y = dmds), data=df) +
 library(scater)
 
 # Bray-Curtis is usually applied to relative abundances
-tse <- transformCounts(tse, method = "relabundance")
+tse <- transformAssay(tse, method = "relabundance")
 # Perform PCoA
 tse <- runMDS(tse, FUN = vegan::vegdist, method = "bray", name = "PCoA_BC", assay.type = "relabundance")
 
@@ -144,7 +144,7 @@ data(enterotype, package="mia")
 variable_names <- c("ClinicalStatus", "Gender", "Age")
 
 # Apply relative transform
-enterotype <- transformCounts(enterotype, method = "relabundance")
+enterotype <- transformAssay(enterotype, method = "relabundance")
 
 # Create a formula
 formula <- as.formula(paste0("assay ~ ", str_c(variable_names, collapse = " + ")) )
@@ -284,9 +284,9 @@ plot
 # Agglomerate to genus level
 tse_Genus <- agglomerateByRank(tse, rank="Genus")
 # Convert to relative abundances
-tse_Genus <- transformCounts(tse, method = "relabundance", assay.type="counts")
+tse_Genus <- transformAssay(tse, method = "relabundance", assay.type="counts")
 # Add info on dominant genus per sample
-tse_Genus <- addPerSampleDominantTaxa(tse_Genus, assay.type="relabundance", name = "dominant_taxa")
+tse_Genus <- addPerSampleDominantFeatures(tse_Genus, assay.type="relabundance", name = "dominant_taxa")
 
 
 ## -----------------------------------------------------------------------------
@@ -296,7 +296,7 @@ tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist,
 
 ## -----------------------------------------------------------------------------
 # Getting the top taxa
-top_taxa <- getTopTaxa(tse_Genus,top = 6, assay.type = "relabundance")
+top_taxa <- getTopFeatures(tse_Genus,top = 6, assay.type = "relabundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,

@@ -60,7 +60,6 @@ you can find help for importing data into an SE object.
 # Load the data
 data(HintikkaXOData, package = "mia")
 mae <- HintikkaXOData
-mae
 ```
 
 ```{r cross-correlation2}
@@ -70,18 +69,26 @@ mae[[1]] <- mae[[1]][!is.na(rowData(mae[[1]])$Phylum), ]
 # Clean taxonomy data, so that names do not include additional characters
 rowData(mae[[1]]) <- DataFrame(apply(rowData(mae[[1]]), 2, 
                                      str_remove, pattern = "._[0-9]__"))
+```
+
+```{r}
+# Available alternative experiments
+experiments(mae)
+```
+
+```{r}
 # Microbiome data
-mae[[1]]
+getWithColData(mae, "microbiota")
 ```
 
 ```{r cross-correlation3}
 # Metabolite data
-mae[[2]]
+getWithColData(mae, "metabolites")
 ```
 
 ```{r cross-correlation4}
 # Biomarker data
-mae[[3]]
+getWithColData(mae, "biomarkers")
 ```
 
 ## Cross-correlation Analysis {#cross-correlation}
@@ -95,7 +102,7 @@ bacterium X is present, is the concentration of metabolite Y lower or higher"?
 # Agglomerate microbiome data at family level
 mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family")
 # Does log10 transform for microbiome data
-mae[[1]] <- transformCounts(mae[[1]], method = "log10", pseudocount = 1)
+mae[[1]] <- transformAssay(mae[[1]], method = "log10", pseudocount = 1)
 
 # Give unique names so that we do not have problems when we are creating a plot
 rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]])
@@ -177,16 +184,16 @@ colData(mae)$Diet <- ifelse(colData(mae)$Diet == "High-fat" |
 mae[[1]] <- mae[[1]][!duplicated(rownames(assay(mae[[1]]))), ]
 
 # Transforming microbiome data with rclr
-mae[[1]] <- transformCounts(mae[[1]], method = "relabundance")
-mae[[1]] <- transformCounts(mae[[1]], assay.type = "relabundance", method = "rclr")
+mae[[1]] <- transformAssay(mae[[1]], method = "relabundance")
+mae[[1]] <- transformAssay(mae[[1]], assay.type = "relabundance", method = "rclr")
 
 # Transforming metabolomic data with log10
-mae[[2]] <- transformCounts(mae[[2]], assay.type = "nmr",
+mae[[2]] <- transformAssay(mae[[2]], assay.type = "nmr",
                             MARGIN = "samples",
                             method = "log10")
 
 # Transforming biomarker data with z-transform
-mae[[3]] <- transformCounts(mae[[3]], assay.type = "signals",
+mae[[3]] <- transformAssay(mae[[3]], assay.type = "signals",
                             MARGIN = "features",
                             method = "z", pseudocount = 1)
 

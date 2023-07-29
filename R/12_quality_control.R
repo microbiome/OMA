@@ -15,7 +15,7 @@ data(hitchip1006)
 tse <- hitchip1006
 
 # Add relative abundances
-tse <- transformCounts(tse, MARGIN = "samples", method = "relabundance")
+tse <- transformAssay(tse, MARGIN = "samples", method = "relabundance")
 
 # Use argument names
 # assay.type / assay.type / assay.type
@@ -55,8 +55,8 @@ head(getPrevalence(tse, rank = "Phylum", detection = 1/100, sort = TRUE,
 
 
 ## ----core-members, message=FALSE, warning=FALSE, eval = FALSE-----------------
-## getPrevalentTaxa(tse, detection = 0, prevalence = 50/100)
-## prev <- getPrevalentTaxa(tse, detection = 0, prevalence = 50/100,
+## getPrevalentFeatures(tse, detection = 0, prevalence = 50/100)
+## prev <- getPrevalentFeatures(tse, detection = 0, prevalence = 50/100,
 ##                          rank = "Phylum", sort = TRUE)
 ## prev
 
@@ -82,11 +82,11 @@ altExps(tse) <-
                                 assay.type = "counts", as_relative = TRUE)
               y
           })
-top_phyla <- getTopTaxa(altExp(tse,"Phylum"),
+top_phyla <- getTopFeatures(altExp(tse,"Phylum"),
                         method="prevalence",
                         top=5L,
                         assay.type="counts")
-top_phyla_mean <- getTopTaxa(altExp(tse,"Phylum"),
+top_phyla_mean <- getTopFeatures(altExp(tse,"Phylum"),
                              method="mean",
                              top=5L,
                              assay.type="counts")
@@ -117,7 +117,7 @@ tse <- GlobalPatterns
 
 ## ----top-feature-taxo---------------------------------------------------------
 # Pick the top taxa
-top_features <- getTopTaxa(tse, method="median", top=10)
+top_features <- getTopFeatures(tse, method="median", top=10)
 
 # Check the information for these
 rowData(tse)[top_features, taxonomyRanks(tse)]
