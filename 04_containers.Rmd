@@ -280,7 +280,7 @@ GlobalPatterns
 
 Tengeler2020 is derived from a randomised blinded study on the effects of gut
 microbiome on attention-deficit/hyperactivity disorder (ADHD) in humanised mice
-[@tengeler2020gut]. The dataset is briefly presented in
+[@Tengeler2020]. The dataset is briefly presented in
 [these slides](https://microbiome.github.io/outreach/tengeler2020_presentation.html).
 
 #### HintikkaXOData {#hintikka-desc}
@@ -619,18 +619,17 @@ Specific import functions are provided for:
 
 #### Biom import
 
-This example shows how [Biom files](https://biom-format.org/) are imported into
-a `TreeSummarizedExperiment` object.
-
-The dataset consists of 3 files, which can be fetched or downloaded from
+Here we show how [Biom files](https://biom-format.org/) are imported into
+a TreeSE object using as an example Tengeler2020, which is further described in section \@ref(#tengeler-desc). This dataset consists of 3 files, which can be
+fetched or downloaded from
 [this repository](https://github.com/microbiome/data/tree/main/Tengeler2020):
 
 -   biom file: abundance table and taxonomy information
 -   csv file: sample metadata
 -   tree file: phylogenetic tree
 
-Store the data in your desired local directory (for instance, _data/_ under the
-working directory), and define source file paths
+To begin with, we store the data in a local directory within the working
+directory, such as _data/_, and define the source file paths.
 
 ```{r}
 biom_file_path <- "data/Aggregated_humanization2.biom"
@@ -643,13 +642,10 @@ Now we can read in the biom file and convert it into a TreeSE object. In additio
 ```{r}
 library(mia)
 
-# Read in biom file
-biom_obj <- biomformat::read_biom(biom_file_path)
-
-# Convert biom to TreeSE
-tse <- makeTreeSEFromBiom(biom_obj,
-                          rankFromPrefix = TRUE,
-                          removeTaxaPrefixes = TRUE)
+# read biom and convert it to TreeSE
+tse <- loadFromBiom(biom_file_path,
+                    rankFromPrefix = TRUE,
+                    removeTaxaPrefixes = TRUE)
 
 # Check
 tse
@@ -660,16 +656,15 @@ abundance table is named as "counts".  Let us inspect only the first
 cols and rows.
 
 ```{r}
-assays(tse)$counts[1:3, 1:3]
+assay(tse)[1:3, 1:3]
 ```
 
-The `rowdata` includes taxonomic information from the biom file. The `head()` command
-shows just the beginning of the data table for an overview.
+The `rowdata` includes taxonomic information from the biom file. The `head()` command shows just the beginning of the data table for an overview.
 
-`knitr::kable()` is for printing the information more nicely.
+`knitr::kable()` helps print the information more nicely.
 
 ```{r}
-head(rowData(t6se))
+head(rowData(tse))
 ```
 
 We further polish the feature names by removing unnecessary characters and then replace the original rowData with its updated version.
@@ -716,7 +711,7 @@ Now the colData includes the sample metadata.
 head(colData(tse))
 ```
 
-Next, we add a phylogenetic tree to the rowData slot. Such feature is available only in TreeSE objects. Similarly, Trees specifying the sample hierarchy can be stored in the colTree slot.
+Finally, we add a phylogenetic tree to the rowData slot. Such feature is available only in TreeSE objects. Similarly, Trees specifying the sample hierarchy can be stored in the colTree slot.
 
 Here, we read in the file containing the phylogenetic tree and insert it in corresponding slot of the TreeSE object.
 
@@ -731,18 +726,10 @@ rowTree(tse) <- tree
 tse
 ```
 
-Now `rowTree` includes a phylogenetic tree:
+Now the rowTree slot contains the phylogenetic tree:
 
-```{r, eval = FALSE}
+```{r, eval=FALSE}
 head(rowTree(tse))
-```
-
-Finally, we save the complete TreeSE object as an RDS file, so that we can
-readily import and use it in the future.
-
-```{r, eval = FALSE}
-# SAVE as RDS file
-saveRDS(tse, file = "tse.rds")
 ```
 
 
