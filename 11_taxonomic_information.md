@@ -451,6 +451,7 @@ clustering algorithm.
 
 First, we import the library `bluster` that simplifies the clustering.
 
+
 ```r
 library(bluster)
 ```
@@ -471,10 +472,11 @@ tse <- transformAssay(tse, assay.type = "clr", method = "z",
                       MARGIN = "features")
 
 # Cluster (with euclidean distance) on the features of the z assay
-tse <- cluster(tse, assay.type = "z",
-               clust.col = "hclustEuclidean", MARGIN = "features",
-               HclustParam(dist.fun = stats::dist, metric = "euclidean",
-                           method = "ward.D2"))
+tse <- cluster(tse,
+               assay.type = "z",
+               clust.col = "hclustEuclidean",
+	       MARGIN = "features",
+               HclustParam(dist.fun = stats::dist, method = "ward.D2"))
 
 # Declare the Kendall dissimilarity computation function
 kendall_dissimilarity <- function(x) {
@@ -482,10 +484,11 @@ kendall_dissimilarity <- function(x) {
 }
 
 # Cluster (with Kendall dissimilarity) on the features of the z assay
-tse <- cluster(tse, assay.type = "z", MARGIN = "features", 
+tse <- cluster(tse,
+               assay.type = "z",
                clust.col = "hclustKendall",
-               HclustParam(method = "ward.D2", 
-                           dist.fun = kendall_dissimilarity))
+       	       MARGIN = "features", 	       
+               HclustParam(dist.fun = kendall_dissimilarity, method = "ward.D2"))
 ```
 
 Let us store the resulting cluster indices in the `rowData` column specified 
@@ -691,48 +694,5 @@ assays(tse)
 ```
 ## List of length 4
 ## names(4): counts relabundance clr pa
-```
-
-## Pick specific {#pick-specific}
-
-Retrieving of specific elements that are required for specific analysis. For
-instance, extracting abundances for a specific taxa in all samples or all taxa 
-in one sample.  
-
-### Abundances of all taxa in specific sample 
-
-```r
-taxa.abund.cc1 <- getAbundanceSample(tse,
-                                     sample_id = "CC1",
-                                     assay.type = "counts")
-taxa.abund.cc1[1:10]
-```
-
-```
-##               Class:Thermoprotei               Class:Thermoprotei 
-##                                0                                0 
-## Species:Sulfolobusacidocaldarius                      Class:Sd-NA 
-##                                0                                0 
-##                      Class:Sd-NA                      Class:Sd-NA 
-##                                0                                0 
-##                      Order:NRP-J                      Order:NRP-J 
-##                                1                                0 
-##                      Order:NRP-J                      Order:NRP-J 
-##                              194                                5
-```
-
-### Abundances of specific taxa in all samples   
-
-
-```r
-taxa.abundances <- getAbundanceFeature(tse,
-                                       feature_id = "Phylum:Bacteroidetes",
-                                       assay.type = "counts")
-taxa.abundances[1:10]
-```
-
-```
-##     CL3     CC1     SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr F21Plmr M31Tong M11Tong 
-##       2      18       2       0       0       0       0       1       0       0
 ```
 

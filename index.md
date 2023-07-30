@@ -1,5 +1,5 @@
 --- 
-title: "Orchestrating Microbiome Analysis"
+title: "Orchestrating Microbiome Analysis with Bioconductor"
 documentclass: book
 site: bookdown::bookdown_site
 bibliography: [book.bib]
@@ -12,10 +12,10 @@ always_allow_html: yes
 
 
 ---
-date: "**Authors:** Leo Lahti [aut], Tuomas Borman [aut, cre], Henrik Eckermann [ctb], Sudarshan Shetty [aut], Felix GM Ernst [aut]<br/>
-  **Version:** 0.98.15<br/>
-  **Modified:** 2023-07-13<br/>
-  **Compiled:** 2023-07-26<br/>
+date: "**Authors:** Leo Lahti [aut], Tuomas Borman [aut, cre], Felix GM Ernst [aut], and others (see the full list of contributors) [ctb]<br/>
+  **Version:** 0.98.16<br/>
+  **Modified:** 2023-07-29<br/>
+  **Compiled:** 2023-07-30<br/>
   **Environment:** R version 4.3.0 (2023-04-21), Bioconductor 3.17<br/>
   **License:** CC BY-NC-SA 3.0 US<br/>
   **Copyright:** <br/>
@@ -24,16 +24,10 @@ url: "https://github.com/microbiome/OMA"
 ---
 
 
-
-
-
 # Welcome {-}
 
-
-
-
 You are reading the online book, [**Orchestrating Microbiome Analysis
-with R and Bioconductor**](https://microbiome.github.io/OMA/) [@OMA], where we
+with Bioconductor**](https://microbiome.github.io/OMA/) [@OMA], where we
 walk through common strategies and workflows in microbiome data
 science.
 

@@ -37,8 +37,7 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
-This work - [**Orchestrating Microbiome Analysis with R and
-Bioconductor**](https://microbiome.github.io/OMA/) [@OMA] - contributes novel
+This work - [**Orchestrating Microbiome Analysis with Bioconductor**](https://microbiome.github.io/OMA/) [@OMA] - contributes novel
 methods and educational resources for microbiome data science.  It
 aims to teach the grammar of Bioconductor workflows in the context of
 microbiome data science. We show through concrete examples how to use

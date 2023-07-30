@@ -418,6 +418,7 @@ altExp(tse, "genus") <- agglomerateByRank(tse, "genus")
 prevalent.genera <- getPrevalentFeatures(altExp(tse, "genus"), detection = 0, prevalence = 30/100)
 
 # Run ANCOM-BC at the genus level and only including the prevalent genera
+
 out <- ancombc2(
   data = altExp(tse, "genus")[prevalent.genera, ],
   assay_name = "counts", 
