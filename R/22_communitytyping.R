@@ -14,7 +14,7 @@ tse <- GlobalPatterns
 # Since this is a large dataset it takes long computational time.
 # For this reason we use only a subset of the data; agglomerated by Phylum as a rank.
 tse <- GlobalPatterns
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
 
 

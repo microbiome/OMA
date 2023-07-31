@@ -43,7 +43,7 @@ head(getPrevalence(tse, detection = 1, sort = TRUE, assay.type = "counts",
 ## -----------------------------------------------------------------------------
 # Agglomerate taxa abundances to Phylum level, and add the new table
 # to the altExp slot
-altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
+altExp(tse,"Phylum") <- mergeFeaturesByRank(tse, "Phylum")
 # Check prevalence for the Phylum abundance table from the altExp slot
 head(getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = TRUE,
                    assay.type = "counts", as_relative = TRUE))

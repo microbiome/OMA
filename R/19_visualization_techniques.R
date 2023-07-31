@@ -116,7 +116,7 @@ plots[[1]] + plots[[2]] +
 
 ## ----plotAbundance1-----------------------------------------------------------
 # agglomerate tse by Order
-tse_order <- agglomerateByRank(tse,
+tse_order <- mergeFeaturesByRank(tse,
                                 rank = "Order",
                                 onRankOnly = TRUE)
 # transform counts into relative abundance
@@ -188,7 +188,7 @@ wrap_plots(plot, legend, nrow = 1, widths = c(2, 1))
 
 ## ----pheatmap1----------------------------------------------------------------
 # Agglomerate tse by phylum
-tse_phylum <- agglomerateByRank(tse,
+tse_phylum <- mergeFeaturesByRank(tse,
                                 rank = "Phylum",
                                 onRankOnly = TRUE)
 

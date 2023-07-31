@@ -90,7 +90,7 @@ dim(tse_subset_by_feature)
 
 ## -----------------------------------------------------------------------------
 # Agglomerate by phylum
-tse_phylum <- tse %>% agglomerateByRank(rank = "Phylum")
+tse_phylum <- tse %>% mergeFeaturesByRank(rank = "Phylum")
 
 # Subset by feature and remove NAs
 tse_phylum_subset_by_feature <- tse_phylum[rowData(tse_phylum)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(tse_phylum)$Phylum), ]
@@ -118,7 +118,7 @@ dim(tse_subset_by_sample_feature)
 
 ## -----------------------------------------------------------------------------
 # Agglomerate data at Genus level 
-tse_genus <- agglomerateByRank(tse, rank = "Genus")
+tse_genus <- mergeFeaturesByRank(tse, rank = "Genus")
 # List bacteria that we want to include
 genera <- c("Class:Thermoprotei", "Genus:Sulfolobus", "Genus:Sediminicola")
 # Subset data

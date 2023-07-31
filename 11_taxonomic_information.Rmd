@@ -140,12 +140,12 @@ The implementation is based on the `toTree` function from the
 One of the main applications of taxonomic information in regards to count data
 is to agglomerate count data on taxonomic levels and track the influence of 
 changing conditions through these levels. For this `mia` contains the
-`agglomerateByRank` function. The ideal location to store the agglomerated data
+`mergeFeaturesByRank` function. The ideal location to store the agglomerated data
 is as an alternative experiment.
 
 ```{r}
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
-altExp(tse, "Family") <- agglomerateByRank(tse, rank = "Family",
+altExp(tse, "Family") <- mergeFeaturesByRank(tse, rank = "Family",
                                            agglomerateTree = TRUE)
 altExp(tse, "Family")
 ```
@@ -169,12 +169,12 @@ assay(altExp(tse, "Family"), "counts")[1:5, 1:7]
 any taxonomic level listed in `mia::taxonomyRanks(tse)`.
 
 Rare taxa can also be aggregated into a single group "Other" instead of 
-filtering them out. A suitable function for this is `agglomerateByPrevalence`.
+filtering them out. A suitable function for this is `mergeFeaturesByPrevalence`.
 The number of rare taxa is higher on the species level, which causes the need 
 for data agglomeration by prevalence.
 
 ```{r}
-altExp(tse, "Species_byPrevalence") <- agglomerateByPrevalence(tse, 
+altExp(tse, "Species_byPrevalence") <- mergeFeaturesByPrevalence(tse, 
                                                                rank = "Species", 
                                                                other_label = "Other", 
                                                                prevalence = 5 / 100, 
@@ -199,6 +199,7 @@ Here is an example that does a CLR transformation followed by the hierarchical
 clustering algorithm. 
 
 First, we import the library `bluster` that simplifies the clustering.
+
 ```{r bluster_dependence}
 library(bluster)
 ```
@@ -218,10 +219,11 @@ tse <- transformAssay(tse, assay.type = "clr", method = "z",
                       MARGIN = "features")
 
 # Cluster (with euclidean distance) on the features of the z assay
-tse <- cluster(tse, assay.type = "z",
-               clust.col = "hclustEuclidean", MARGIN = "features",
-               HclustParam(dist.fun = stats::dist, metric = "euclidean",
-                           method = "ward.D2"))
+tse <- cluster(tse,
+               assay.type = "z",
+               clust.col = "hclustEuclidean",
+	       MARGIN = "features",
+               HclustParam(dist.fun = stats::dist, method = "ward.D2"))
 
 # Declare the Kendall dissimilarity computation function
 kendall_dissimilarity <- function(x) {
@@ -229,10 +231,11 @@ kendall_dissimilarity <- function(x) {
 }
 
 # Cluster (with Kendall dissimilarity) on the features of the z assay
-tse <- cluster(tse, assay.type = "z", MARGIN = "features", 
+tse <- cluster(tse,
+               assay.type = "z",
                clust.col = "hclustKendall",
-               HclustParam(method = "ward.D2", 
-                           dist.fun = kendall_dissimilarity))
+       	       MARGIN = "features", 	       
+               HclustParam(dist.fun = kendall_dissimilarity, method = "ward.D2"))
 ```
 
 Let us store the resulting cluster indices in the `rowData` column specified 
@@ -268,7 +271,7 @@ It's also possible to merge the rows by cluster.
 
 ```{r taxa_clustering_row_merge}
 # Aggregate clusters as a sum of each cluster values
-tse_merged <- mergeRows(tse, clusters_euclidean)
+tse_merged <- mergeFeatures(tse, clusters_euclidean)
 tse_merged
 ```
 We can note that it worked as planned since there were 5 clusters and there are
@@ -310,28 +313,5 @@ head(assay(tse, "pa"))
 ```{r}
 # list of abundance tables that assays slot contains
 assays(tse)
-```
-
-## Pick specific {#pick-specific}
-
-Retrieving of specific elements that are required for specific analysis. For
-instance, extracting abundances for a specific taxa in all samples or all taxa 
-in one sample.  
-
-### Abundances of all taxa in specific sample 
-```{r}
-taxa.abund.cc1 <- getAbundanceSample(tse,
-                                     sample_id = "CC1",
-                                     assay.type = "counts")
-taxa.abund.cc1[1:10]
-```
-
-### Abundances of specific taxa in all samples   
-
-```{r}
-taxa.abundances <- getAbundanceFeature(tse,
-                                       feature_id = "Phylum:Bacteroidetes",
-                                       assay.type = "counts")
-taxa.abundances[1:10]
 ```
 
