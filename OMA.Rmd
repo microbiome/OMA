@@ -461,7 +461,7 @@ the samples are matched.
 
 ```{r}
 # Agglomerate the data to Phylym level
-tse_phylum <- agglomerateByRank(tse, "Phylum")
+tse_phylum <- mergeFeaturesByRank(tse, "Phylum")
 # both have the same number of columns (samples)
 dim(tse)
 dim(tse_phylum)
@@ -1278,7 +1278,7 @@ When total abundances of certain phyla are of relevance, the data is initially a
 
 ```{r}
 # Agglomerate by phylum
-tse_phylum <- tse %>% agglomerateByRank(rank = "Phylum")
+tse_phylum <- tse %>% mergeFeaturesByRank(rank = "Phylum")
 
 # Subset by feature and remove NAs
 tse_phylum_subset_by_feature <- tse_phylum[rowData(tse_phylum)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(tse_phylum)$Phylum), ]
@@ -1342,7 +1342,7 @@ remove those instances.
 
 ```{r}
 # Agglomerate data at Genus level 
-tse_genus <- agglomerateByRank(tse, rank = "Genus")
+tse_genus <- mergeFeaturesByRank(tse, rank = "Genus")
 # List bacteria that we want to include
 genera <- c("Class:Thermoprotei", "Genus:Sulfolobus", "Genus:Sediminicola")
 # Subset data
@@ -1465,7 +1465,7 @@ tse
 
 ### Additional functions
 * [mapTaxonomy](https://microbiome.github.io/mia/reference/taxonomy-methods.html)
-* [mergeRows/mergeCols](https://microbiome.github.io/mia/reference/merge-methods.html)
+* [mergeFeatures/mergeSamples](https://microbiome.github.io/mia/reference/merge-methods.html)
 
 <!--chapter:end:10_manipulation.Rmd-->
 
@@ -1579,7 +1579,7 @@ applied on the resulting object.
 ```{r}
 # Agglomerate taxa abundances to Phylum level, and add the new table
 # to the altExp slot
-altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
+altExp(tse,"Phylum") <- mergeFeaturesByRank(tse, "Phylum")
 # Check prevalence for the Phylum abundance table from the altExp slot
 head(getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = TRUE,
                    assay.type = "counts", as_relative = TRUE))
@@ -1595,7 +1595,7 @@ head(getPrevalence(tse, rank = "Phylum", detection = 1/100, sort = TRUE,
 ```
 
 Note that, by default, `na.rm = TRUE` is used for agglomeration in
-`getPrevalence`, whereas the default for `agglomerateByRank` is
+`getPrevalence`, whereas the default for `mergeFeaturesByRank` is
 `FALSE` to prevent accidental data loss.
 
 If you only need the names of the prevalent taxa, `getPrevalentFeatures`
@@ -1955,12 +1955,12 @@ The implementation is based on the `toTree` function from the
 One of the main applications of taxonomic information in regards to count data
 is to agglomerate count data on taxonomic levels and track the influence of 
 changing conditions through these levels. For this `mia` contains the
-`agglomerateByRank` function. The ideal location to store the agglomerated data
+`mergeFeaturesByRank` function. The ideal location to store the agglomerated data
 is as an alternative experiment.
 
 ```{r}
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
-altExp(tse, "Family") <- agglomerateByRank(tse, rank = "Family",
+altExp(tse, "Family") <- mergeFeaturesByRank(tse, rank = "Family",
                                            agglomerateTree = TRUE)
 altExp(tse, "Family")
 ```
@@ -2716,7 +2716,7 @@ Let us agglomerate the data at a Genus level and getting the dominant taxa per s
 
 ```{r}
 # Agglomerate to genus level
-tse_Genus <- agglomerateByRank(tse, rank="Genus")
+tse_Genus <- mergeFeaturesByRank(tse, rank="Genus")
 # Convert to relative abundances
 tse_Genus <- transformAssay(tse, method = "relabundance", assay.type="counts")
 # Add info on dominant genus per sample
@@ -2826,7 +2826,7 @@ coefficients: how much each taxa affect to the result.
 ```{r}
 library(vegan)
 # Agglomerate data to Species level
-tse <- agglomerateByRank(tse, rank = "Species")
+tse <- mergeFeaturesByRank(tse, rank = "Species")
 
 # Set seed for reproducibility
 set.seed(1576)
@@ -2954,7 +2954,7 @@ library(miaViz)
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 
 # Getting top taxa on a Phylum level
-tse_phylum <- agglomerateByRank(tse, rank ="Phylum", onRankOnly=TRUE)
+tse_phylum <- mergeFeaturesByRank(tse, rank ="Phylum", onRankOnly=TRUE)
 top_taxa <- getTopFeatures(tse_phylum,top = 5, assay.type = "relabundance")
 
 # Renaming the "Phylum" rank to keep only top taxa and the rest to "Other"
@@ -3446,7 +3446,7 @@ Let's cluster the data with DMM clustering.
 # Since this is a large dataset it takes long computational time.
 # For this reason we use only a subset of the data; agglomerated by Phylum as a rank.
 tse <- GlobalPatterns
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
+tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
 ```
 
 ```{r dmm2}
@@ -4238,7 +4238,7 @@ Let us here do aggregation to genus level, add relative abundance
 assay, and perform prevalence filtering.
 
 ```{r datasetup}
-tse <- agglomerateByRank(tse0, rank = "genus") %>%
+tse <- mergeFeaturesByRank(tse0, rank = "genus") %>%
        transformAssay(assay.type = "counts",
                        method = "relabundance",
 		       MARGIN = "samples") %>%
@@ -4727,7 +4727,7 @@ Let's first preprocess the data.
 
 ```{r super2}
 # Agglomerate data
-tse <- agglomerateByRank(tse, rank = "order")
+tse <- mergeFeaturesByRank(tse, rank = "order")
 
 # Apply CLR transform
 tse <- transformAssay(tse, assay.type = "counts", method = "clr",
@@ -4947,7 +4947,7 @@ high"?
 
 ```{r cross-correlation5}
 # Agglomerate microbiome data at family level
-mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family")
+mae[[1]] <- mergeFeaturesByPrevalence(mae[[1]], rank = "Family")
 # Does log10 transform for microbiome data
 mae[[1]] <- transformAssay(mae[[1]], method = "log10", pseudocount = 1)
 
@@ -5400,7 +5400,7 @@ at the Phylum level are available in the aforementioned chapter.
 
 ```{r plotAbundance1}
 # agglomerate tse by Order
-tse_order <- agglomerateByRank(tse,
+tse_order <- mergeFeaturesByRank(tse,
                                 rank = "Order",
                                 onRankOnly = TRUE)
 # transform counts into relative abundance
@@ -5471,7 +5471,7 @@ feature and sample clusters in a heatmap, along with further functionality.
 
 ```{r pheatmap1}
 # Agglomerate tse by phylum
-tse_phylum <- agglomerateByRank(tse,
+tse_phylum <- mergeFeaturesByRank(tse,
                                 rank = "Phylum",
                                 onRankOnly = TRUE)
 
@@ -6159,7 +6159,7 @@ Try to extract some of the [other TreeSE elements](https://f1000research.com/art
 1. Calculate library sizes
 2. Subsample / rarify the counts (see: subsampleCounts)
 
-Useful functions: nrow, ncol, dim, summary, table, quantile, unique, addPerCellQC, agglomerateByRank
+Useful functions: nrow, ncol, dim, summary, table, quantile, unique, addPerCellQC, mergeFeaturesByRank
 
 ### Prevalent and core taxonomic features
 
@@ -6177,7 +6177,7 @@ Useful functions: getPrevalence, getPrevalentFeatures, subsetByPrevalentFeatures
 2. Create two histograms. Another shows the distribution of absolute counts, another shows how CLR transformed values are distributed.
 3. Visualize how relative abundances are distributed between taxa in samples.
 
-Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAssay, ggplot, wilcox.test, agglomerateByRank, plotAbundance
+Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAssay, ggplot, wilcox.test, mergeFeaturesByRank, plotAbundance
 
 ### Other functions
 
@@ -6212,7 +6212,7 @@ Optional:
 4. Perform CLR transformation on the data; does this affect agglomeration?
 5. List full taxonomic information for some given taxa (Hint: [mapTaxonomy](https://microbiome.github.io/mia/reference/taxonomy-methods.html))
 
-Useful functions: [taxonomyRanks](https://microbiome.github.io/mia/reference/taxonomy-methods.html), agglomerateByRank, mergeRows
+Useful functions: [taxonomyRanks](https://microbiome.github.io/mia/reference/taxonomy-methods.html), mergeFeaturesByRank, mergeFeatures
 
 
 ### Alternative experiments (altExp)
@@ -6235,7 +6235,7 @@ Optional:
 2. Test if data agglomeration to higher taxonomic ranks affects the indices
 3. Look for differences in alpha diversity between groups or correlation with a continuous variable
 
-Useful functions: estimateDiversity, colSums, agglomerateByRank, kruskal.test, cor
+Useful functions: estimateDiversity, colSums, mergeFeaturesByRank, kruskal.test, cor
 
 
 ### Alpha diversity extra
@@ -6271,7 +6271,7 @@ Useful functions: estimateDiversity, colSums, geom_point, geom_boxplot
 5. Analyze diets' association on beta diversity. Calculate dbRDA and then PERMANOVA. Visualize coefficients. Which taxa's abundances differ the most between samples? 
 6. Interpret your results. Is there association between community composition and location? What are those taxa that differ the most; find information from literature.
 
-Useful functions: runMDS, runRDA, anova.cca, transformAssay, agglomerateByRank, ggplot, plotReducedDim, vegan::adonis2
+Useful functions: runMDS, runRDA, anova.cca, transformAssay, mergeFeaturesByRank, ggplot, plotReducedDim, vegan::adonis2
 
 
 
@@ -6301,7 +6301,7 @@ Useful functions: [], ggplot2::geom_boxplot, ggplot2::geom_jitter, wilcox.test, 
 5. Choose statistically significant taxa and visualize their abundances with boxplot & jitterplot.
 
 
-Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::Heatmap, ancombc, aldex2, maaslin2, agglomerateByRank, transformAssay, subsetByPrevalentFeatures
+Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::Heatmap, ancombc, aldex2, maaslin2, mergeFeaturesByRank, transformAssay, subsetByPrevalentFeatures
 
 
 ## Visualization
@@ -6527,7 +6527,7 @@ tse <- tse[ , !is.na(colData(tse)$Age_Years) ]
 We agglomerate microbiome data to Phylum:
 
 ```{r, message=FALSE, warning=FALSE}
-tse_phylum <- agglomerateByRank(tse, "Phylum")
+tse_phylum <- mergeFeaturesByRank(tse, "Phylum")
 ```
 
 We extract the counts assay and covariate data to build the model
@@ -6622,7 +6622,7 @@ tse <- sampleMetadata %>%
     filter(!is.na(alcohol)) %>% # excluding missing values
     returnSamples("relative_abundance")
 
-tse_Genus <- agglomerateByRank(tse, rank="genus")
+tse_Genus <- mergeFeaturesByRank(tse, rank="genus")
 tse_Genus <- addPerSampleDominantFeatures(tse_Genus,assay.type="relative_abundance", name = "dominant_taxa")
 
 # Performing PCoA with Bray-Curtis dissimilarity.

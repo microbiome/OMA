@@ -13,7 +13,7 @@ tse <- peerj13075
 
 ## ----super2-------------------------------------------------------------------
 # Agglomerate data
-tse <- agglomerateByRank(tse, rank = "order")
+tse <- mergeFeaturesByRank(tse, rank = "order")
 
 # Apply CLR transform
 tse <- transformAssay(tse, assay.type = "counts", method = "clr",

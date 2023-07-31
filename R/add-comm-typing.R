@@ -11,7 +11,7 @@ library(miaViz)
 # Only consider Forest samples
 tse <- tse[, colData(tse)$Country == "Finland"]
 # Agglomerate to phylum level
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 # Get top taxa
 rel_taxa <- getTopFeatures(tse, top = 8, assay.type = "counts")
 # Take only the top taxa
@@ -26,7 +26,7 @@ library(pheatmap)
 library(grid)
 library(RColorBrewer)
 # Agglomerate to phylum level
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 # Take only the top taxa
 tse <- tse[is.element(rownames(tse), rel_taxa),]
 
@@ -118,7 +118,7 @@ factoextra::fviz_nbclust(x, kmeans, method = "gap_stat", nboot = 50)+
 
 ## ----create clusters----------------------------------------------------------
 library(cluster)
-tse2 <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse2 <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 
 # assume 6 clusters
 K <- 6
@@ -197,7 +197,7 @@ grid.text("Phylum", x = -0.04, y = 0.47, rot = 90, gp = gpar(fontsize = 16))
 # Runs model and calculates the most likely number of clusters from 1 to 7.
 # Since this is a large dataset it takes a long time to run
 # For this reason we use only a subset of the data agglomerated to the phylum level
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
 
 

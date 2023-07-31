@@ -120,7 +120,7 @@ tse <- tse[ , !is.na(colData(tse)$Age_Years) ]
 
 
 ## ---- message=FALSE, warning=FALSE--------------------------------------------
-tse_phylum <- agglomerateByRank(tse, "Phylum")
+tse_phylum <- mergeFeaturesByRank(tse, "Phylum")
 
 
 ## ---- message=FALSE, warning=FALSE--------------------------------------------
@@ -199,7 +199,7 @@ tse <- sampleMetadata %>%
     filter(!is.na(alcohol)) %>% # excluding missing values
     returnSamples("relative_abundance")
 
-tse_Genus <- agglomerateByRank(tse, rank="genus")
+tse_Genus <- mergeFeaturesByRank(tse, rank="genus")
 tse_Genus <- addPerSampleDominantFeatures(tse_Genus,assay.type="relative_abundance", name = "dominant_taxa")
 
 # Performing PCoA with Bray-Curtis dissimilarity.
