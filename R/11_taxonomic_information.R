@@ -57,7 +57,7 @@ tse
 
 ## -----------------------------------------------------------------------------
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
-altExp(tse, "Family") <- agglomerateByRank(tse, rank = "Family",
+altExp(tse, "Family") <- mergeFeaturesByRank(tse, rank = "Family",
                                            agglomerateTree = TRUE)
 altExp(tse, "Family")
 

@@ -282,7 +282,7 @@ plot
 
 ## -----------------------------------------------------------------------------
 # Agglomerate to genus level
-tse_Genus <- agglomerateByRank(tse, rank="Genus")
+tse_Genus <- mergeFeaturesByRank(tse, rank="Genus")
 # Convert to relative abundances
 tse_Genus <- transformAssay(tse, method = "relabundance", assay.type="counts")
 # Add info on dominant genus per sample
@@ -354,7 +354,7 @@ if( !require(vegan) ){
     library("vegan")
 }
 # Agglomerate data to Species level
-tse <- agglomerateByRank(tse, rank = "Species")
+tse <- mergeFeaturesByRank(tse, rank = "Species")
 
 # Set seed for reproducibility
 set.seed(1576)

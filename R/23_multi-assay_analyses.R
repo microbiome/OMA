@@ -40,7 +40,7 @@ mae[[3]]
 
 ## ----cross-correlation5-------------------------------------------------------
 # Agglomerate microbiome data at family level
-mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family")
+mae[[1]] <- mergeFeaturesByPrevalence(mae[[1]], rank = "Family")
 # Does log10 transform for microbiome data
 mae[[1]] <- transformAssay(mae[[1]], method = "log10", pseudocount = 1)
 

@@ -49,7 +49,7 @@ rowLinks(tse)
 
 ## -----------------------------------------------------------------------------
 # Agglomerate the data to Phylym level
-tse_phylum <- agglomerateByRank(tse, "Phylum")
+tse_phylum <- mergeFeaturesByRank(tse, "Phylum")
 # both have the same number of columns (samples)
 dim(tse)
 dim(tse_phylum)
