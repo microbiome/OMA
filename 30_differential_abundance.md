@@ -219,7 +219,7 @@ assay, and perform prevalence filtering.
 
 
 ```r
-tse <- agglomerateByRank(tse0, rank = "genus") %>%
+tse <- mergeFeaturesByRank(tse0, rank = "genus") %>%
        transformAssay(assay.type = "counts",
                        method = "relabundance",
 		       MARGIN = "samples") %>%
@@ -412,7 +412,7 @@ that we specify.
 
 ```r
 # Agglomerate data to genus level and add this new abundance table to the altExp slot
-altExp(tse, "genus") <- agglomerateByRank(tse, "genus")
+altExp(tse, "genus") <- mergeFeaturesByRank(tse, "genus")
 
 # Identify prevalent genera
 prevalent.genera <- getPrevalentFeatures(altExp(tse, "genus"), detection = 0, prevalence = 30/100)

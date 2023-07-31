@@ -429,7 +429,7 @@ When total abundances of certain phyla are of relevance, the data is initially a
 
 ```r
 # Agglomerate by phylum
-tse_phylum <- tse %>% agglomerateByRank(rank = "Phylum")
+tse_phylum <- tse %>% mergeFeaturesByRank(rank = "Phylum")
 
 # Subset by feature and remove NAs
 tse_phylum_subset_by_feature <- tse_phylum[rowData(tse_phylum)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(tse_phylum)$Phylum), ]
@@ -508,7 +508,7 @@ remove those instances.
 
 ```r
 # Agglomerate data at Genus level 
-tse_genus <- agglomerateByRank(tse, rank = "Genus")
+tse_genus <- mergeFeaturesByRank(tse, rank = "Genus")
 # List bacteria that we want to include
 genera <- c("Class:Thermoprotei", "Genus:Sulfolobus", "Genus:Sediminicola")
 # Subset data
@@ -717,7 +717,7 @@ head(tse$NewVariable)
 ```
 
 ```
-## [1] 0.20639 0.42847 0.84933 0.31360 0.09938 0.27090
+## [1] 0.63123 0.38711 0.36598 0.02818 0.93492 0.89195
 ```
 
 ## Merge data
@@ -791,4 +791,4 @@ tse
 
 ### Additional functions
 * [mapTaxonomy](https://microbiome.github.io/mia/reference/taxonomy-methods.html)
-* [mergeRows/mergeCols](https://microbiome.github.io/mia/reference/merge-methods.html)
+* [mergeFeatures/mergeSamples](https://microbiome.github.io/mia/reference/merge-methods.html)

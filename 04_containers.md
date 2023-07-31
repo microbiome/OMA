@@ -325,7 +325,7 @@ TreeSE data object.
 
 
 ```r
-tse_phylum <- agglomerateByRank(tse, "Phylum", na.rm=TRUE)
+tse_phylum <- mergeFeaturesByRank(tse, "Phylum", na.rm=TRUE)
 # Both have the same number of columns (samples)
 dim(tse)
 ```

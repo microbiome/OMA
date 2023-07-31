@@ -419,7 +419,7 @@ data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 
 # Agglomerate by rank
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
+tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
 ```
 
 Here we will further our use of `cluster` by renaming the clusters column in 
@@ -513,6 +513,7 @@ for each model of the k models.
 
 
 ```r
+BiocManager::install("microbiome/miaViz")
 library(miaViz)
 plotDMNFit(tse_dmm, type = "laplace", name = "DMM")
 ```
@@ -554,15 +555,15 @@ dmm_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
-## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
+## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
+## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
 ```
 
 Mixture weights (rough measure of the cluster size).
@@ -574,7 +575,7 @@ DirichletMultinomial::mixturewt(bestFit)
 
 ```
 ##       pi theta
-## 1 0.5385 20.59
+## 1 0.5385 20.58
 ## 2 0.4615 15.32
 ```
 
@@ -589,12 +590,12 @@ head(prob)
 
 ```
 ##                 1         2
-## CL3     1.000e+00 4.594e-17
-## CC1     1.000e+00 3.526e-22
-## SV1     1.000e+00 1.735e-12
-## M31Fcsw 7.385e-26 1.000e+00
-## M11Fcsw 1.089e-16 1.000e+00
-## M31Plmr 1.150e-13 1.000e+00
+## CL3     1.000e+00 4.501e-17
+## CC1     1.000e+00 3.417e-22
+## SV1     1.000e+00 1.712e-12
+## M31Fcsw 7.425e-26 1.000e+00
+## M11Fcsw 1.093e-16 1.000e+00
+## M31Plmr 1.152e-13 1.000e+00
 ```
 
 We can also know the contribution of each taxa to each component
@@ -606,12 +607,12 @@ head(DirichletMultinomial::fitted(bestFit))
 
 ```
 ##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30381 0.1354058
-## Phylum:Euryarchaeota  0.23114 0.1468923
-## Phylum:Actinobacteria 1.21375 1.0581803
-## Phylum:Spirochaetes   0.21393 0.1318079
-## Phylum:MVP-15         0.02983 0.0007714
-## Phylum:Proteobacteria 6.84670 1.8116041
+## Phylum:Crenarchaeota  0.30381 0.1354045
+## Phylum:Euryarchaeota  0.23114 0.1468879
+## Phylum:Actinobacteria 1.21375 1.0581523
+## Phylum:Spirochaetes   0.21393 0.1318064
+## Phylum:MVP-15         0.02982 0.0007669
+## Phylum:Proteobacteria 6.84470 1.8114033
 ```
 
 Finally, to be able to visualize our data and clusters, we start by 

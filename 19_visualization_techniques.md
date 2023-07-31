@@ -342,7 +342,7 @@ at the Phylum level are available in the aforementioned chapter.
 
 ```r
 # agglomerate tse by Order
-tse_order <- agglomerateByRank(tse,
+tse_order <- mergeFeaturesByRank(tse,
                                 rank = "Order",
                                 onRankOnly = TRUE)
 # transform counts into relative abundance
@@ -419,7 +419,7 @@ feature and sample clusters in a heatmap, along with further functionality.
 
 ```r
 # Agglomerate tse by phylum
-tse_phylum <- agglomerateByRank(tse,
+tse_phylum <- mergeFeaturesByRank(tse,
                                 rank = "Phylum",
                                 onRankOnly = TRUE)
 

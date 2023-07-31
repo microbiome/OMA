@@ -166,7 +166,7 @@ applied on the resulting object.
 ```r
 # Agglomerate taxa abundances to Phylum level, and add the new table
 # to the altExp slot
-altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
+altExp(tse,"Phylum") <- mergeFeaturesByRank(tse, "Phylum")
 # Check prevalence for the Phylum abundance table from the altExp slot
 head(getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = TRUE,
                    assay.type = "counts", as_relative = TRUE))
@@ -197,7 +197,7 @@ head(getPrevalence(tse, rank = "Phylum", detection = 1/100, sort = TRUE,
 ```
 
 Note that, by default, `na.rm = TRUE` is used for agglomeration in
-`getPrevalence`, whereas the default for `agglomerateByRank` is
+`getPrevalence`, whereas the default for `mergeFeaturesByRank` is
 `FALSE` to prevent accidental data loss.
 
 If you only need the names of the prevalent taxa, `getPrevalentFeatures`

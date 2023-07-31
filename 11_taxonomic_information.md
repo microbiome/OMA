@@ -302,13 +302,13 @@ The implementation is based on the `toTree` function from the
 One of the main applications of taxonomic information in regards to count data
 is to agglomerate count data on taxonomic levels and track the influence of 
 changing conditions through these levels. For this `mia` contains the
-`agglomerateByRank` function. The ideal location to store the agglomerated data
+`mergeFeaturesByRank` function. The ideal location to store the agglomerated data
 is as an alternative experiment.
 
 
 ```r
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
-altExp(tse, "Family") <- agglomerateByRank(tse, rank = "Family",
+altExp(tse, "Family") <- mergeFeaturesByRank(tse, rank = "Family",
                                            agglomerateTree = TRUE)
 altExp(tse, "Family")
 ```
@@ -383,13 +383,13 @@ assay(altExp(tse, "Family"), "counts")[1:5, 1:7]
 any taxonomic level listed in `mia::taxonomyRanks(tse)`.
 
 Rare taxa can also be aggregated into a single group "Other" instead of 
-filtering them out. A suitable function for this is `agglomerateByPrevalence`.
+filtering them out. A suitable function for this is `mergeFeaturesByPrevalence`.
 The number of rare taxa is higher on the species level, which causes the need 
 for data agglomeration by prevalence.
 
 
 ```r
-altExp(tse, "Species_byPrevalence") <- agglomerateByPrevalence(tse, 
+altExp(tse, "Species_byPrevalence") <- mergeFeaturesByPrevalence(tse, 
                                                                rank = "Species", 
                                                                other_label = "Other", 
                                                                prevalence = 5 / 100, 
@@ -543,7 +543,7 @@ It's also possible to merge the rows by cluster.
 
 ```r
 # Aggregate clusters as a sum of each cluster values
-tse_merged <- mergeRows(tse, clusters_euclidean)
+tse_merged <- mergeFeatures(tse, clusters_euclidean)
 tse_merged
 ```
 
