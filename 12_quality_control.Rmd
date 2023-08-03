@@ -1,4 +1,4 @@
-# Exploration and quality Control {#quality-control}
+# Exploration and Quality Control {#quality-control}
 
 
 ```{r setup, echo=FALSE, results="asis"}
@@ -42,7 +42,7 @@ data(hitchip1006)
 tse <- hitchip1006
 
 # Add relative abundances
-tse <- transformCounts(tse, MARGIN = "samples", method = "relabundance")
+tse <- transformAssay(tse, MARGIN = "samples", method = "relabundance")
 
 # Use argument names
 # assay.type / assay.type / assay.type
@@ -108,7 +108,7 @@ applied on the resulting object.
 ```{r}
 # Agglomerate taxa abundances to Phylum level, and add the new table
 # to the altExp slot
-altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
+altExp(tse,"Phylum") <- mergeFeaturesByRank(tse, "Phylum")
 # Check prevalence for the Phylum abundance table from the altExp slot
 head(getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = TRUE,
                    assay.type = "counts", as_relative = TRUE))
@@ -124,16 +124,16 @@ head(getPrevalence(tse, rank = "Phylum", detection = 1/100, sort = TRUE,
 ```
 
 Note that, by default, `na.rm = TRUE` is used for agglomeration in
-`getPrevalence`, whereas the default for `agglomerateByRank` is
+`getPrevalence`, whereas the default for `mergeFeaturesByRank` is
 `FALSE` to prevent accidental data loss.
 
-If you only need the names of the prevalent taxa, `getPrevalentTaxa`
+If you only need the names of the prevalent taxa, `getPrevalentFeatures`
 is available. This returns the taxa that exceed the given prevalence
 and detection thresholds.
 
 ```{r core-members, message=FALSE, warning=FALSE, eval = FALSE}
-getPrevalentTaxa(tse, detection = 0, prevalence = 50/100)
-prev <- getPrevalentTaxa(tse, detection = 0, prevalence = 50/100,
+getPrevalentFeatures(tse, detection = 0, prevalence = 50/100)
+prev <- getPrevalentFeatures(tse, detection = 0, prevalence = 50/100,
                          rank = "Phylum", sort = TRUE)
 prev
 ```
@@ -150,8 +150,8 @@ relative abundance of the prevalent taxa (between 0 and 1).
 ### Rare taxa
 
 Related functions are available for the analysis of rare taxa
-(`rareMembers`; `rareAbundance`; `lowAbundance`, `getRareTaxa`,
-`subsetByRareTaxa`).
+(`rareMembers`; `rareAbundance`; `lowAbundance`, `getRareFeatures`,
+`subsetByRareFeatures`).
 
 
 ### Plotting prevalence
@@ -187,11 +187,11 @@ altExps(tse) <-
                                 assay.type = "counts", as_relative = TRUE)
               y
           })
-top_phyla <- getTopTaxa(altExp(tse,"Phylum"),
+top_phyla <- getTopFeatures(altExp(tse,"Phylum"),
                         method="prevalence",
                         top=5L,
                         assay.type="counts")
-top_phyla_mean <- getTopTaxa(altExp(tse,"Phylum"),
+top_phyla_mean <- getTopFeatures(altExp(tse,"Phylum"),
                              method="mean",
                              top=5L,
                              assay.type="counts")
@@ -232,11 +232,11 @@ tse <- GlobalPatterns
 
 ### Top taxa  
 
-The `getTopTaxa` identifies top taxa in the data.   
+The `getTopFeatures` identifies top taxa in the data.   
 
 ```{r top-feature-taxo}
 # Pick the top taxa
-top_features <- getTopTaxa(tse, method="median", top=10)
+top_features <- getTopFeatures(tse, method="median", top=10)
 
 # Check the information for these
 rowData(tse)[top_features, taxonomyRanks(tse)]

@@ -43,7 +43,7 @@ head(getTaxonomyLabels(tse[phylum,], with_rank = TRUE, make_unique = FALSE))
 
 
 ## -----------------------------------------------------------------------------
-head(getUniqueTaxa(tse, rank = "Phylum"))
+head(getUniqueFeatures(tse, rank = "Phylum"))
 
 
 ## -----------------------------------------------------------------------------
@@ -56,8 +56,8 @@ tse
 
 
 ## -----------------------------------------------------------------------------
-tse <- transformCounts(tse, assay.type = "counts", method = "relabundance")
-altExp(tse, "Family") <- agglomerateByRank(tse, rank = "Family",
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+altExp(tse, "Family") <- mergeFeaturesByRank(tse, rank = "Family",
                                            agglomerateTree = TRUE)
 altExp(tse, "Family")
 
@@ -77,15 +77,15 @@ assay(altExp(tse, "Family"), "counts")[1:5,1:7]
 
 ## -----------------------------------------------------------------------------
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
-tse <- transformCounts(tse, assay.type = "pseudo", method = "relabundance")
-tse <- transformCounts(x = tse, assay.type = "relabundance", method = "clr", 
+tse <- transformAssay(tse, assay.type = "pseudo", method = "relabundance")
+tse <- transformAssay(x = tse, assay.type = "relabundance", method = "clr", 
                         pseudocount = 1, name = "clr_transformation")
 
 head(assay(tse, "clr_transformation"))
 
 
 ## -----------------------------------------------------------------------------
-tse <- transformCounts(tse, method = "pa")
+tse <- transformAssay(tse, method = "pa")
 
 head(assay(tse, "pa"))
 

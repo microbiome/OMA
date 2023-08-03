@@ -33,16 +33,16 @@ sequencing.
 information (such as phylogenetic trees and sample hierarchies) and
 reference sequences.
 
-[`MultiAssayExperiment`] (`MAE`) [@Ramos2017] provides an organized way to bind several different data
-structures together in a single object. For example, we can bind
-microbiome data (in `TreeSE` format) with metabolomic profiling data
-(in `SE`) format, with shared sample metadata. This is convenient and
-robust for instance in subsetting and other data manipulation
-tasks. Microbiome data can be part of multiomics experiments and
-analysis strategies and we want to outline the understanding in which
-we think the packages explained and used in this book relate to these
-experiment layouts using the `TreeSummarizedExperiment` and classes
-beyond.
+[`MultiAssayExperiment`] (`MAE`) [@Ramos2017] provides an organized
+way to bind several different data containers together in a single
+object. For example, we can bind microbiome data (in `TreeSE`
+container) with metabolomic profiling data (in `SE`) container, with
+(partially) shared sample metadata. This is convenient and robust for
+instance in subsetting and other data manipulation tasks. Microbiome
+data can be part of multiomics experiments and analysis strategies. We
+highlight how the methods used througout in this book relate to this
+data framework by using the `TreeSummarizedExperiment`,
+`MultiAssayExperiment`, and classes beyond.
 
 This section provides an introductions to these data containers. In
 microbiome data science, these containers link taxonomic abundance
@@ -58,17 +58,18 @@ on how to represent different varieties of multi-table data within the
 The options and recommendations are summarized in Table \@ref(tab:options).
 
 
-### Assay data 
+### Assay data {#assay-slot}
 
 The original count-based taxonomic abundance tables may have different 
 transformations, such as logarithmic, Centered Log-Ratio (CLR), or relative 
 abundance. These are typically stored in _**assays**_.
 
+Let us load example data and rename it as tse.
+
 ```{r}
 library(mia)
-data(GlobalPatterns, package="mia")
-tse <- GlobalPatterns
-assays(tse)
+data(hitchip1006, package="miaTime")
+tse <- hitchip1006
 ```
 
 The `assays` slot contains the experimental data as multiple count matrices. The result of `assays` is a list of matrices.
@@ -84,10 +85,10 @@ assay(tse, "counts")[1:5,1:7]
 ```
 
 To illustrate the use of multiple assays, the relative abundance data can be 
-calculated and stored along the original count data using `transformCounts`.
+calculated and stored along the original count data using `transformAssay`.
 
 ```{r}
-tse <- transformCounts(tse, assay.type = "counts", method = "relabundance")
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 assays(tse)
 ```
 
@@ -99,8 +100,8 @@ assay(tse, "relabundance")[1:5,1:7]
 ```
 
 
-Here the dimension of the count data remains unchanged. This is in
-fact, a requirement for any `SummarizedExperiment` object.
+Here the dimension of the count data remains unchanged in
+transformation. This is in fact, a requirement for the assays.
 
 
 
@@ -149,16 +150,17 @@ the links in an existing object, the `changeTree` function is available.
 
 ### Alternative experiments {#alt-exp}
 
-_**Alternative experiments**_ differ from transformations as they can
-contain complementary data, which is no longer tied to the same
-dimensions as the assay data. However, the number of samples (columns)
-must be the same.
+_**Alternative experiments**_ complement _assays_. They can contain
+complementary data, which is no longer tied to the same dimensions as
+the assay data. However, the number of samples (columns) must be the
+same.
 
-This can come into play, for instance, when one has taxonomic abundance
-profiles quantified with different measurement technologies, such as
-phylogenetic microarrays, amplicon sequencing, or metagenomic
-sequencing. Such alternative experiments that concern the same samples
-can be stored as
+This can come into play, for instance, when one has taxonomic
+abundance profiles quantified with different measurement technologies,
+such as phylogenetic microarrays, amplicon sequencing, or metagenomic
+sequencing. Another common use case is including abundance tables for
+different taxonomic ranks. Such alternative experiments concerning the
+same set of samples can be stored as
 
 1. Separate _assays_ assuming that the taxonomic information can be mapped 
 between features directly 1:1; or 
@@ -166,30 +168,41 @@ between features directly 1:1; or
 dimensions differ. Each element of the _altExp_ slot is a `SummarizedExperiment`
 or an object from a derived class with independent feature data.
 
-
-As an example, we show how to store taxonomic abundance tables
+The following shows how to store taxonomic abundance tables
 agglomerated at different taxonomic levels. However, the data could as
 well originate from entirely different measurement sources as long as
-the samples are matched.
+the samples match.
 
-```{r}
-# Agglomerate the data to Phylym level
-tse_phylum <- agglomerateByRank(tse, "Phylum")
-# both have the same number of columns (samples)
+Let us first agglomerate the data to Phylum level. This yields a new
+TreeSE data object.
+
+
+```{r altexp_agglomerate}
+tse_phylum <- mergeFeaturesByRank(tse, "Phylum", na.rm=TRUE)
+# Both have the same number of columns (samples)
 dim(tse)
 dim(tse_phylum)
+```
 
-# Add the new table as an alternative experiment
+
+Then we can add the new phylum-level data object as an alternative experiment in the original data.
+
+```{r altexp_agglomerate2}
+# Add the new data object to the original data object as an alternative experiment with the name "Phylum"
 altExp(tse, "Phylum") <- tse_phylum
-altExpNames(tse)
 
-# Pick a sample subset: this acts on both altExp and assay data
+# Check the alternative experiment names available in the data
+altExpNames(tse)
+```
+
+We can now subset the data, for instance, and this acts on both altExp and assay data.
+
+```{r altexp_agglomerate3}
 tse[,1:10]
 dim(altExp(tse[,1:10],"Phylum"))
 ```
 
-For more details of altExp have a look at the [Intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html) of the 
-`SingleCellExperiment` package [@R_SingleCellExperiment].
+For more details on _altExp_, you can check the [introduction](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html) to the `SingleCellExperiment` package [@R_SingleCellExperiment].
 
 
 
@@ -210,10 +223,11 @@ samples are defined through a `sampleMap`. Each element on the
 the number of samples can differ between the elements.
 
 
+<!--
 ```{r}
 #TODO: Find the right dataset to explain a non 1:1 sample relationship
 ```
-
+-->
 
 For information have a look at the [intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html) of the `MultiAssayExperiment` package.  
 
@@ -263,19 +277,12 @@ GlobalPatterns
 ```
 
 
-Check the documentation for this dataset:
-
-```{r, message=FALSE, echo=FALSE}
-help(GlobalPatterns)
-```
-
-
 #### HintikkaXOData {#hintikka-desc}
 
 [HintikkaXOData](https://microbiome.github.io/microbiomeDataSets/reference/HintikkaXOData.html)
 is derived from a study about the effects of fat diet and prebiotics on the
 microbiome of rat models [@Hintikka2021]. It is available in the MAE data
-container for R. The dataset is briefly presented in
+container for R. The dataset is briefly summarized in
 [these slides](https://microbiome.github.io/outreach/hintikkaxo_presentation.html).
 
 
@@ -304,7 +311,7 @@ us retrieve a `r Biocpkg("MultiAssayExperiment")` dataset:
 # mae <- HintikkaXOData()
 # Since HintikkaXOData is now added to mia, we can load it directly from there
 # We suggest to check other datasets from microbiomeDataSets
-data(HintikkaXOData)
+data(HintikkaXOData, package = "mia")
 mae <- HintikkaXOData
 ```
 
@@ -429,12 +436,15 @@ tse
 
 
 
-### Import from external files
+### Import from external files {#import-from-file}
 
 Microbiome (taxonomic) profiling data is commonly distributed in
 various file formats. You can import such external data files as a
 (Tree)SummarizedExperiment object, but the details depend on the file
-format. Here, we provide examples for common formats. 
+format. Here, we provide examples for common formats. Some datasets and raw
+files to learn how to import raw data and construct TreeSE/MAE containers are
+available in the
+[microbiome data repository](https://github.com/microbiome/data).
 
 
 #### CSV import
@@ -603,8 +613,8 @@ Specific import functions are provided for:
 
 #### Biom import
 
-This example shows how Biom files are imported into a
-`TreeSummarizedExperiment` object.
+This example shows how [Biom files](https://biom-format.org/) are imported into
+a `TreeSummarizedExperiment` object.
 
 The data is from following publication: 
 Tengeler AC _et al._ (2020) [**Gut microbiota from persons with
@@ -644,7 +654,7 @@ abundance table is named as "counts".  Let us inspect only the first
 cols and rows.
 
 ```{r}
-assays(se)$counts[1:3, 1:3]
+assay(se, "counts")[1:3, 1:3]
 ```
 
 The `rowdata` includes taxonomic information from the biom file. The `head()` command

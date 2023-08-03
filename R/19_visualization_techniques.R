@@ -116,15 +116,15 @@ plots[[1]] + plots[[2]] +
 
 ## ----plotAbundance1-----------------------------------------------------------
 # agglomerate tse by Order
-tse_order <- agglomerateByRank(tse,
+tse_order <- mergeFeaturesByRank(tse,
                                 rank = "Order",
                                 onRankOnly = TRUE)
 # transform counts into relative abundance
-tse_order <- transformCounts(tse_order,
+tse_order <- transformAssay(tse_order,
                               assay.type = "counts",
                               method = "relabundance")
 # get top orders
-top_taxa <- getTopTaxa(tse_order,
+top_taxa <- getTopFeatures(tse_order,
                        top = 10,
                        assay.type = "relabundance")
 # leave only names for top 10 orders and label the rest with "Other"
@@ -188,15 +188,15 @@ wrap_plots(plot, legend, nrow = 1, widths = c(2, 1))
 
 ## ----pheatmap1----------------------------------------------------------------
 # Agglomerate tse by phylum
-tse_phylum <- agglomerateByRank(tse,
+tse_phylum <- mergeFeaturesByRank(tse,
                                 rank = "Phylum",
                                 onRankOnly = TRUE)
 
 # Add clr-transformation on samples
-tse_phylum <- transformCounts(tse_phylum, MARGIN = "samples", method = "clr", assay.type = "counts", pseudocount=1)
+tse_phylum <- transformAssay(tse_phylum, MARGIN = "samples", method = "clr", assay.type = "counts", pseudocount=1)
 
 # Add z-transformation on features (taxa)
-tse_phylum <- transformCounts(tse_phylum, assay.type = "clr",
+tse_phylum <- transformAssay(tse_phylum, assay.type = "clr",
                               MARGIN = "features", 
                               method = "z", name = "clr_z")
 
@@ -204,16 +204,16 @@ tse_phylum <- transformCounts(tse_phylum, assay.type = "clr",
 tse_phylum_subset <- tse_phylum[ , tse_phylum$SampleType %in% c("Feces", "Skin", "Tongue") ]
 
 # Add clr-transformation
-tse_phylum_subset <- transformCounts(tse_phylum_subset, method = "clr",
+tse_phylum_subset <- transformAssay(tse_phylum_subset, method = "clr",
                                      MARGIN="samples",
                                      assay.type = "counts", pseudocount=1)
 # Does z-transformation
-tse_phylum_subset <- transformCounts(tse_phylum_subset, assay.type = "clr",
+tse_phylum_subset <- transformAssay(tse_phylum_subset, assay.type = "clr",
                                      MARGIN = "features", 
                                      method = "z", name = "clr_z")
 
 # Get n most abundant taxa, and subsets the data by them
-top_taxa <- getTopTaxa(tse_phylum_subset, top = 20)
+top_taxa <- getTopFeatures(tse_phylum_subset, top = 20)
 tse_phylum_subset <- tse_phylum_subset[top_taxa, ]
 
 # Gets the assay table

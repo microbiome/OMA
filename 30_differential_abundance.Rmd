@@ -1,4 +1,4 @@
-# Differential abundance {#differential-abundance}
+# Differential Abundance {#differential-abundance}
 ```{r setup, echo=FALSE, results="asis"}
 library(rebook)
 chapterPreamble()
@@ -7,44 +7,38 @@ chapterPreamble()
 
 ## Differential abundance analysis
 
+This section provides an introduction to Differential Abundance Analysis (DAA),
+which is used to identify differences in the abundances of individual taxa (at
+any taxonomic level) between two or more groups, such as treatment and control.
+Here, we demonstrate its implementation on peerj13075, one of the [mia datasets](#package-data).
 
-This section provides an overview and examples of *differential
-abundance analysis (DAA)* based on one of the [openly available
-datasets](https://microbiome.github.io/mia/reference/mia-datasets.html)
-in mia to illustrate how to perform differential abundance analysis
-(DAA). DAA identifies differences in the abundances of individual
-taxonomic groups between two or more groups (e.g. treatment vs
-control). This can be performed at any phylogenetic level.
-
-We perform DAA to identify biomarkers and/or gain understanding of a
-complex system by looking at its isolated components. For example,
-identifying that a bacterial taxon is different between a patient
-group with disease *X* vs a healthy control group might lead to
-important insights into the pathophysiology. Changes in the microbiota
-might be cause or a consequence of a disease. Either way, it can
-help to understand the system as a whole. Be aware that this approach
-has also been criticized recently [@Quinn2021].
+The goal of DAA is to identify biomarkers of a certain phenotype or condition,
+and gain understanding of a complex system by looking at its isolated components.
+For example, the identification of a bacterial taxon that is differentially
+abundant between healthy patients and diseased patients can lead to important
+insights into the pathophysiology of the disease. In other words, differentially
+abundant taxa can be involved in the dynamics of the disease, which in turn helps
+understand the system as a whole. Despite its relevance in current research,
+the DAA approach has also been subject to debate [@Quinn2021].
 
 
 ### Examples and tools
 
-Due to the complex data characteristics of microbiome sequencing data,
-differential abundance analysis of microbiome data faces many
-statistical challenges [@Yang2022], including:
+Due to the size and complexity of microbiome sequencing data, in this field
+DAA still faces several statistical challenges [@Yang2022]. These include:
   
-- Highly variable. The abundance of a specific taxon could range over
+- High variability. The abundance of a specific taxon could range over
   several orders of magnitude.
   
-- Zero-inflated. In a typical microbiome dataset, more than 70% of the
+- Zero-inflation. In a typical microbiome dataset, more than 70% of the
   values are zeros. Zeros could be due to either physical absence
   (structural zeros) or insufficient sampling effort (sampling zeros).
   
-- Compositional. Increase or decrease in the (absolute) abundance of
+- Compositionality. Increase or decrease in the (absolute) abundance of
   one taxon at the sampling site will lead to apparent changes in the
   relative abundances of other taxa in the sample.
 
-As summarized in @Yang2022, to address the above statistical
-chanllenegs:
+As a consequence, the following approaches have been developed:
 
 - Over-dispersed count models has been proposed to address zero
   inflation, such as the negative binomial model used by edgeR
@@ -186,17 +180,17 @@ Let us here do aggregation to genus level, add relative abundance
 assay, and perform prevalence filtering.
 
 ```{r datasetup}
-tse <- agglomerateByRank(tse0, rank = "genus") %>%
-       transformCounts(assay.type = "counts",
+tse <- mergeFeaturesByRank(tse0, rank = "genus") %>%
+       transformAssay(assay.type = "counts",
                        method = "relabundance",
 		       MARGIN = "samples") %>%
        # subset based on the relative abundance assay		       
-       subsetByPrevalentTaxa(detection = 0,
+       subsetByPrevalentFeatures(detection = 0,
                              prevalence = 10/100,
 			     assay.type = "relabundance")
 
 # Add also clr abundances
-tse <- transformCounts(tse, method="clr", pseudocount=1) # not bale to run
+tse <- transformAssay(tse, method="clr", pseudocount=1) # not bale to run
 ```
 
 Regarding prevalence filtering, @Nearing2022 found that applying a 10%
@@ -345,19 +339,24 @@ that we specify.
 
 
 ```{r ancombc2, warning = FALSE, eval=TRUE}
-# Run ANCOM-BC 
+
+# Agglomerate data to genus level and add this new abundance table to the altExp slot
+altExp(tse, "genus") <- mergeFeaturesByRank(tse, "genus")
+
+# Identify prevalent genera
+prevalent.genera <- getPrevalentFeatures(altExp(tse, "genus"), detection = 0, prevalence = 30/100)
+
+# Run ANCOM-BC at the genus level and only including the prevalent genera
+
 out <- ancombc2(
-  data = tse,
+  data = altExp(tse, "genus")[prevalent.genera, ],
   assay_name = "counts", 
-  tax_level = "genus", 
   fix_formula = "Geographical_location", 
   p_adj_method = "fdr", 
-  lib_cut = 0,
   prv_cut = 0,
   group = "Geographical_location", 
   struc_zero = TRUE, 
   neg_lb = TRUE,
-  alpha = 0.05, 
   global = TRUE # multi group comparison will be deactivated automatically 
 )
 ```

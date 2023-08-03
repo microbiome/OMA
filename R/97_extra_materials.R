@@ -20,7 +20,7 @@ library(purrr)
 # load and prepare data
 library(mia)
 data("enterotype", package="mia")
-enterotype <- transformCounts(enterotype, method = "relabundance")
+enterotype <- transformAssay(enterotype, method = "relabundance")
 # drop samples missing meta data
 enterotype <- enterotype[ , !rowSums(is.na(colData(enterotype)[, c("Nationality", "Gender", "ClinicalStatus")]) > 0)]
 # define variables and list all possible combinations
@@ -120,7 +120,7 @@ tse <- tse[ , !is.na(colData(tse)$Age_Years) ]
 
 
 ## ---- message=FALSE, warning=FALSE--------------------------------------------
-tse_phylum <- agglomerateByRank(tse, "Phylum")
+tse_phylum <- mergeFeaturesByRank(tse, "Phylum")
 
 
 ## ---- message=FALSE, warning=FALSE--------------------------------------------
@@ -199,15 +199,15 @@ tse <- sampleMetadata %>%
     filter(!is.na(alcohol)) %>% # excluding missing values
     returnSamples("relative_abundance")
 
-tse_Genus <- agglomerateByRank(tse, rank="genus")
-tse_Genus <- addPerSampleDominantTaxa(tse_Genus,assay.type="relative_abundance", name = "dominant_taxa")
+tse_Genus <- mergeFeaturesByRank(tse, rank="genus")
+tse_Genus <- addPerSampleDominantFeatures(tse_Genus,assay.type="relative_abundance", name = "dominant_taxa")
 
 # Performing PCoA with Bray-Curtis dissimilarity.
 tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist, ncomponents = 3,
               name = "PCoA_BC", assay.type = "relative_abundance")
 
 # Getting the 6 top taxa
-top_taxa <- getTopTaxa(tse_Genus,top = 6, assay.type = "relative_abundance")
+top_taxa <- getTopFeatures(tse_Genus,top = 6, assay.type = "relative_abundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
