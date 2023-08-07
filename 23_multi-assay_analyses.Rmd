@@ -171,6 +171,9 @@ The `mae` object could be used straight to create the MOFA model. Yet,
 we transform our assays since the model assumes normality per
 default. We can also use Poisson or Bernoulli distributions among others.
 
+Note that duplicates, such as "uncultured", might appear when aggregating the microbiome data by a taxonomic rank. To check for duplicates, run `any(duplicated(rownames(mae[[1]])))`. If it returns `TRUE`, then the
+duplicates are present. We can add `rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]], make_unique=TRUE)` to remove them.
+
 ```{r, message=FALSE, warning=FALSE}
 library(MOFA2)
 # For simplicity, classify all high-fat diets as high-fat, and all the low-fat 
@@ -179,8 +182,7 @@ colData(mae)$Diet <- ifelse(colData(mae)$Diet == "High-fat" |
                               colData(mae)$Diet == "High-fat + XOS", 
                             "High-fat", "Low-fat")
 
-# Removing duplicates at the microbiome data
-# which are also in form e.g. "Ambiguous" and "uncultured" taxa
+# Transforming microbiome data with rclr
 mae[[1]] <- mae[[1]][!duplicated(rownames(assay(mae[[1]]))), ]
 
 # Transforming microbiome data with rclr
