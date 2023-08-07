@@ -1032,22 +1032,22 @@ head(rowData(se))
 
 ```
 ## DataFrame with 6 rows and 6 columns
-##             taxonomy1          taxonomy2           taxonomy3
-##           <character>        <character>         <character>
-## 1726470  "k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-## 1726471  "k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-## 17264731 "k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-## 17264726 "k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-## 1726472  "k__Bacteria p__Verrucomicrobia c__Verrucomicrobiae
-## 17264724 "k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-##                      taxonomy4              taxonomy5           taxonomy6
-##                    <character>            <character>         <character>
-## 1726470       o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides"
-## 1726471       o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides"
-## 17264731      o__Bacteroidales  f__Porphyromonadaceae g__Parabacteroides"
-## 17264726      o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides"
-## 1726472  o__Verrucomicrobiales f__Verrucomicrobiaceae     g__Akkermansia"
-## 17264724      o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides"
+##            taxonomy1          taxonomy2           taxonomy3
+##          <character>        <character>         <character>
+## 1726470  k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+## 1726471  k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+## 17264731 k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+## 17264726 k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+## 1726472  k__Bacteria p__Verrucomicrobia c__Verrucomicrobiae
+## 17264724 k__Bacteria   p__Bacteroidetes      c__Bacteroidia
+##                      taxonomy4              taxonomy5          taxonomy6
+##                    <character>            <character>        <character>
+## 1726470       o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides
+## 1726471       o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides
+## 17264731      o__Bacteroidales  f__Porphyromonadaceae g__Parabacteroides
+## 17264726      o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides
+## 1726472  o__Verrucomicrobiales f__Verrucomicrobiaceae     g__Akkermansia
+## 17264724      o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides
 ```
 
 These taxonomic rank names (column names) are not real rank
