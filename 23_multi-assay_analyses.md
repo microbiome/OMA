@@ -236,7 +236,7 @@ plot <- Heatmap(correlations$cor,
                     # If the p-value is under threshold
                     if( !is.na(correlations$p_adj[i, j]) & correlations$p_adj[i, j] < 0.05 ){
                         # Print "X"
-                        grid.text(sprintf("%s", "X"), x, y, gp = gpar(fontsize = 8, col = "black"))
+                        grid.text(sprintf("%s", "X"), x, y, gp = gpar(fontsize = 10, col = "#1dff00"))
                         }
                     },
                 heatmap_legend_param = list(title = "", legend_height = unit(5, "cm"))
