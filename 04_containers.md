@@ -487,6 +487,12 @@ GlobalPatterns
 ## colTree: NULL
 ```
 
+#### Tengeler2020 {#tengeler-desc}
+
+Tengeler2020 is derived from a randomised blinded study on the effects of gut
+microbiome on attention-deficit/hyperactivity disorder (ADHD) in humanised mice
+[@Tengeler2020]. The dataset is briefly presented in
+[these slides](https://microbiome.github.io/outreach/tengeler2020_presentation.html).
 
 #### HintikkaXOData {#hintikka-desc}
 
@@ -948,23 +954,17 @@ Specific import functions are provided for:
 
 #### Biom import
 
-This example shows how [Biom files](https://biom-format.org/) are imported into
-a `TreeSummarizedExperiment` object.
-
-The data is from following publication: 
-Tengeler AC _et al._ (2020) [**Gut microbiota from persons with
-attention-deficit/hyperactivity disorder affects the brain in
-mice**](https://doi.org/10.1186/s40168-020-00816-x). 
-
-The dataset consists of 3 files:
+Here we show how [Biom files](https://biom-format.org/) are imported into
+a TreeSE object using as an example Tengeler2020, which is further described in section \@ref(#tengeler-desc). This dataset consists of 3 files, which can be
+fetched or downloaded from
+[this repository](https://github.com/microbiome/data/tree/main/Tengeler2020):
 
 -   biom file: abundance table and taxonomy information
 -   csv file: sample metadata
 -   tree file: phylogenetic tree
 
-
-Store the data in your desired local directory (for instance, _data/_ under the
-working directory), and define source file paths
+To begin with, we store the data in a local directory within the working
+directory, such as _data/_, and define the source file paths.
 
 
 ```r
@@ -973,17 +973,19 @@ sample_meta_file_path <- "data/Mapping_file_ADHD_aggregated.csv"
 tree_file_path <- "data/Data_humanization_phylo_aggregation.tre"
 ```
 
-Now we can load the biom data into a SummarizedExperiment (SE) object.
+Now we can read in the biom file and convert it into a TreeSE object. In addition, we retrieve the rank names from the prefixes of the feature names and then remove them with the `rankFromPrefix` and `removeTaxaPrefixes` optional arguments.
 
 
 ```r
 library(mia)
 
-# Imports the data
-se <- loadFromBiom(biom_file_path)
+# read biom and convert it to TreeSE
+tse <- loadFromBiom(biom_file_path,
+                    rankFromPrefix = TRUE,
+                    removeTaxaPrefixes = TRUE)
 
 # Check
-se
+tse
 ```
 
 ```
@@ -992,7 +994,7 @@ se
 ## metadata(0):
 ## assays(1): counts
 ## rownames(151): 1726470 1726471 ... 17264756 17264757
-## rowData names(6): taxonomy1 taxonomy2 ... taxonomy5 taxonomy6
+## rowData names(6): Kingdom Phylum ... Family Genus
 ## colnames(27): A110 A111 ... A38 A39
 ## colData names(0):
 ## reducedDimNames(0):
@@ -1010,7 +1012,7 @@ cols and rows.
 
 
 ```r
-assay(se, "counts")[1:3, 1:3]
+assay(tse, "counts")[1:3, 1:3]
 ```
 
 ```
@@ -1020,66 +1022,13 @@ assay(se, "counts")[1:3, 1:3]
 ## 17264731     0   970    0
 ```
 
-The `rowdata` includes taxonomic information from the biom file. The `head()` command
-shows just the beginning of the data table for an overview.
+The `rowdata` includes taxonomic information from the biom file. The `head()` command shows just the beginning of the data table for an overview.
 
-`knitr::kable()` is for printing the information more nicely.
-
-
-```r
-head(rowData(se))
-```
-
-```
-## DataFrame with 6 rows and 6 columns
-##            taxonomy1          taxonomy2           taxonomy3
-##          <character>        <character>         <character>
-## 1726470  k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-## 1726471  k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-## 17264731 k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-## 17264726 k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-## 1726472  k__Bacteria p__Verrucomicrobia c__Verrucomicrobiae
-## 17264724 k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-##                      taxonomy4              taxonomy5          taxonomy6
-##                    <character>            <character>        <character>
-## 1726470       o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides
-## 1726471       o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides
-## 17264731      o__Bacteroidales  f__Porphyromonadaceae g__Parabacteroides
-## 17264726      o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides
-## 1726472  o__Verrucomicrobiales f__Verrucomicrobiaceae     g__Akkermansia
-## 17264724      o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides
-```
-
-These taxonomic rank names (column names) are not real rank
-names. Let’s replace them with real rank names.
-
-In addition to that, the taxa names include, e.g., '"k__' before the name, so let's
-make them cleaner by removing them. 
+`knitr::kable()` helps print the information more nicely.
 
 
 ```r
-names(rowData(se)) <- c("Kingdom", "Phylum", "Class", "Order", 
-                        "Family", "Genus")
-
-# Goes through the whole DataFrame. Removes '.*[kpcofg]__' from strings, where [kpcofg] 
-# is any character from listed ones, and .* any character.
-rowdata_modified <- BiocParallel::bplapply(rowData(se), 
-                                           FUN = stringr::str_remove, 
-                                           pattern = '.*[kpcofg]__')
-
-# Genus level has additional '\"', so let's delete that also
-rowdata_modified <- BiocParallel::bplapply(rowdata_modified, 
-                                           FUN = stringr::str_remove, 
-                                           pattern = '\"')
-
-# rowdata_modified is a list, so it is converted back to DataFrame format. 
-rowdata_modified <- DataFrame(rowdata_modified)
-
-# And then assigned back to the SE object
-rowData(se) <- rowdata_modified
-
-# Now we have a nicer table
-head(rowData(se))
+head(rowData(tse))
 ```
 
 ```
@@ -1102,100 +1051,90 @@ head(rowData(se))
 ## 17264724      Bacteroidaceae     Bacteroides
 ```
 
-We notice that the imported biom file did not contain the sample meta data
-yet, so it includes an empty data frame.
+We further polish the feature names by removing unnecessary characters and then replace the original rowData with its updated version.
 
 
 ```r
-head(colData(se))
+# Genus level has additional '\"', so let's delete that also
+rowdata_modified <- BiocParallel::bplapply(rowData(tse), 
+                                           FUN = stringr::str_remove, 
+                                           pattern = '\"')
+
+# rowdata_modified is a list, so convert this back to DataFrame format. 
+# and assign the cleaned data back to the TSE rowData
+rowData(tse) <- DataFrame(rowdata_modified)
+
+# Now we have a nicer table
+head(rowData(tse))
+```
+
+```
+## DataFrame with 6 rows and 6 columns
+##              Kingdom          Phylum            Class              Order
+##          <character>     <character>      <character>        <character>
+## 1726470     Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726471     Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 17264731    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 17264726    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726472     Bacteria Verrucomicrobia Verrucomicrobiae Verrucomicrobiales
+## 17264724    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+##                       Family           Genus
+##                  <character>     <character>
+## 1726470       Bacteroidaceae     Bacteroides
+## 1726471       Bacteroidaceae     Bacteroides
+## 17264731  Porphyromonadaceae Parabacteroides
+## 17264726      Bacteroidaceae     Bacteroides
+## 1726472  Verrucomicrobiaceae     Akkermansia
+## 17264724      Bacteroidaceae     Bacteroides
+```
+
+We notice that the imported biom file did not contain any colData yet,
+so only an empty dataframe appears in this slot.
+
+
+```r
+head(colData(tse))
 ```
 
 ```
 ## DataFrame with 6 rows and 0 columns
 ```
 
-Let us add a sample metadata file.
+Let us add colData from the sample metadata, which is stored in a CSV file.
 
 
 ```r
-# We use this to check what type of data it is
-# read.table(sample_meta_file_path)
+# CSV file with colnames in the first row and rownames in the first column
+sample_meta <- read.csv(sample_meta_file_path,
+                        sep = ",", row.names = 1)
 
-# It seems like a comma separated file and it does not include headers
-# Let us read it and then convert from data.frame to DataFrame
-# (required for our purposes)
-sample_meta <- DataFrame(read.table(sample_meta_file_path, sep = ",", header = FALSE))
-
-# Add sample names to rownames
-rownames(sample_meta) <- sample_meta[,1]
-
-# Delete column that included sample names
-sample_meta[,1] <- NULL
-
-# We can add headers
-colnames(sample_meta) <- c("patient_status", "cohort", "patient_status_vs_cohort", "sample_name")
-
-# Then it can be added to colData
-colData(se) <- sample_meta
+# Add this sample data to colData of the taxonomic data object
+# Note that the data must be given in a DataFrame format (required for our purposes)
+colData(tse) <- DataFrame(sample_meta)
 ```
 
-Now `colData` includes the sample metadata.
+Now the colData includes the sample metadata.
 
 
 ```r
-head(colData(se))
+head(colData(tse))
 ```
 
 ```
 ## DataFrame with 6 rows and 4 columns
-##      patient_status      cohort patient_status_vs_cohort sample_name
-##         <character> <character>              <character> <character>
-## A110           ADHD    Cohort_1            ADHD_Cohort_1        A110
-## A12            ADHD    Cohort_1            ADHD_Cohort_1         A12
-## A15            ADHD    Cohort_1            ADHD_Cohort_1         A15
-## A19            ADHD    Cohort_1            ADHD_Cohort_1         A19
-## A21            ADHD    Cohort_2            ADHD_Cohort_2         A21
-## A23            ADHD    Cohort_2            ADHD_Cohort_2         A23
+##        Treatment      Cohort TreatmentxCohort Description
+##      <character> <character>      <character> <character>
+## A110        ADHD    Cohort_1    ADHD_Cohort_1        A110
+## A12         ADHD    Cohort_1    ADHD_Cohort_1         A12
+## A15         ADHD    Cohort_1    ADHD_Cohort_1         A15
+## A19         ADHD    Cohort_1    ADHD_Cohort_1         A19
+## A21         ADHD    Cohort_2    ADHD_Cohort_2         A21
+## A23         ADHD    Cohort_2    ADHD_Cohort_2         A23
 ```
 
-Now, let's add a phylogenetic tree.
+Finally, we add a phylogenetic tree to the rowData slot. Such feature is available only in TreeSE objects. Similarly, Trees specifying the sample hierarchy can be stored in the colTree slot.
 
-The current data object, se, is a SummarizedExperiment object. This
-does not include a slot for adding a phylogenetic tree. In order to do
-this, we can convert the SE object to an extended TreeSummarizedExperiment
-object which includes also a `rowTree` slot.
-
-TreeSummarizedExperiment contains also other additional slots and features which
-is why we recommend to use `TreeSE`.
-
-
-```r
-tse <- as(se, "TreeSummarizedExperiment")
-
-# tse includes same data as se
-tse
-```
-
-```
-## class: TreeSummarizedExperiment 
-## dim: 151 27 
-## metadata(0):
-## assays(1): counts
-## rownames(151): 1726470 1726471 ... 17264756 17264757
-## rowData names(6): Kingdom Phylum ... Family Genus
-## colnames(27): A110 A12 ... A35 A38
-## colData names(4): patient_status cohort patient_status_vs_cohort
-##   sample_name
-## reducedDimNames(0):
-## mainExpName: NULL
-## altExpNames(0):
-## rowLinks: NULL
-## rowTree: NULL
-## colLinks: NULL
-## colTree: NULL
-```
-
-Next, let us read the tree data file and add it to the R data object (tse).
+Here, we read in the file containing the phylogenetic tree and insert it in corresponding slot of the TreeSE object.
 
 
 ```r
@@ -1217,8 +1156,7 @@ tse
 ## rownames(151): 1726470 1726471 ... 17264756 17264757
 ## rowData names(6): Kingdom Phylum ... Family Genus
 ## colnames(27): A110 A12 ... A35 A38
-## colData names(4): patient_status cohort patient_status_vs_cohort
-##   sample_name
+## colData names(4): Treatment Cohort TreatmentxCohort Description
 ## reducedDimNames(0):
 ## mainExpName: NULL
 ## altExpNames(0):
@@ -1228,7 +1166,7 @@ tse
 ## colTree: NULL
 ```
 
-Now `rowTree` includes a phylogenetic tree:
+Now the rowTree slot contains the phylogenetic tree:
 
 
 ```r

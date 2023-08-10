@@ -135,7 +135,7 @@
 
 \title{Orchestrating Microbiome Analysis with Bioconductor}
 \author{}
-\date{\vspace{-2.5em}\textbf{Authors:} Leo Lahti {[}aut{]}, Tuomas Borman {[}aut, cre{]}, Felix GM Ernst {[}aut{]}, and others (see the full list of contributors) {[}ctb{]} \textbf{Version:} 0.98.16 \textbf{Modified:} 2023-07-29 \textbf{Compiled:} 2023-08-08 \textbf{Environment:} R version 4.3.0 (2023-04-21), Bioconductor 3.17 \textbf{License:} CC BY-NC-SA 3.0 US \textbf{Copyright:} \textbf{Source:} \url{https://github.com/microbiome/OMA}}
+\date{\vspace{-2.5em}\textbf{Authors:} Leo Lahti {[}aut{]}, Tuomas Borman {[}aut, cre{]}, Felix GM Ernst {[}aut{]}, and others (see the full list of contributors) {[}ctb{]} \textbf{Version:} 0.98.16 \textbf{Modified:} 2023-07-29 \textbf{Compiled:} 2023-08-10 \textbf{Environment:} R version 4.3.0 (2023-04-21), Bioconductor 3.17 \textbf{License:} CC BY-NC-SA 3.0 US \textbf{Copyright:} \textbf{Source:} \url{https://github.com/microbiome/OMA}}
 
 \begin{document}
 \maketitle
@@ -849,6 +849,14 @@ Load the \texttt{GlobalPatterns} data from the \texttt{mia} package:
 ## colTree: NULL
 \end{verbatim}
 
+\hypertarget{tengeler-desc}{%
+\subsubsection{Tengeler2020}\label{tengeler-desc}}
+
+Tengeler2020 is derived from a randomised blinded study on the effects of gut
+microbiome on attention-deficit/hyperactivity disorder (ADHD) in humanised mice
+\citep{Tengeler2020}. The dataset is briefly presented in
+\href{https://microbiome.github.io/outreach/tengeler2020_presentation.html}{these slides}.
+
 \hypertarget{hintikka-desc}{%
 \subsubsection{HintikkaXOData}\label{hintikka-desc}}
 
@@ -1346,15 +1354,10 @@ Specific import functions are provided for:
 \hypertarget{biom-import}{%
 \subsubsection{Biom import}\label{biom-import}}
 
-This example shows how \href{https://biom-format.org/}{Biom files} are imported into
-a \texttt{TreeSummarizedExperiment} object.
-
-The data is from following publication:
-Tengeler AC \emph{et al.} (2020) \href{https://doi.org/10.1186/s40168-020-00816-x}{\textbf{Gut microbiota from persons with
-attention-deficit/hyperactivity disorder affects the brain in
-mice}}.
-
-The dataset consists of 3 files:
+Here we show how \href{https://biom-format.org/}{Biom files} are imported into
+a TreeSE object using as an example Tengeler2020, which is further described in section @ref(\#tengeler-desc). This dataset consists of 3 files, which can be
+fetched or downloaded from
+\href{https://github.com/microbiome/data/tree/main/Tengeler2020}{this repository}:
 
 \begin{itemize}
 \tightlist
@@ -1366,8 +1369,8 @@ The dataset consists of 3 files:
   tree file: phylogenetic tree
 \end{itemize}
 
-Store the data in your desired local directory (for instance, \emph{data/} under the
-working directory), and define source file paths
+To begin with, we store the data in a local directory within the working
+directory, such as \emph{data/}, and define the source file paths.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1377,17 +1380,19 @@ working directory), and define source file paths
 \end{Highlighting}
 \end{Shaded}
 
-Now we can load the biom data into a SummarizedExperiment (SE) object.
+Now we can read in the biom file and convert it into a TreeSE object. In addition, we retrieve the rank names from the prefixes of the feature names and then remove them with the \texttt{rankFromPrefix} and \texttt{removeTaxaPrefixes} optional arguments.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(mia)}
 
-\CommentTok{\# Imports the data}
-\NormalTok{se }\OtherTok{\textless{}{-}} \FunctionTok{loadFromBiom}\NormalTok{(biom\_file\_path)}
+\CommentTok{\# read biom and convert it to TreeSE}
+\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{loadFromBiom}\NormalTok{(biom\_file\_path,}
+                    \AttributeTok{rankFromPrefix =} \ConstantTok{TRUE}\NormalTok{,}
+                    \AttributeTok{removeTaxaPrefixes =} \ConstantTok{TRUE}\NormalTok{)}
 
 \CommentTok{\# Check}
-\NormalTok{se}
+\NormalTok{tse}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1397,7 +1402,7 @@ Now we can load the biom data into a SummarizedExperiment (SE) object.
 ## metadata(0):
 ## assays(1): counts
 ## rownames(151): 1726470 1726471 ... 17264756 17264757
-## rowData names(6): taxonomy1 taxonomy2 ... taxonomy5 taxonomy6
+## rowData names(6): Kingdom Phylum ... Family Genus
 ## colnames(27): A110 A111 ... A38 A39
 ## colData names(0):
 ## reducedDimNames(0):
@@ -1415,7 +1420,7 @@ cols and rows.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{assay}\NormalTok{(se, }\StringTok{"counts"}\NormalTok{)[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{]}
+\FunctionTok{assay}\NormalTok{(tse, }\StringTok{"counts"}\NormalTok{)[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{, }\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{]}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1426,67 +1431,13 @@ cols and rows.
 ## 17264731     0   970    0
 \end{verbatim}
 
-The \texttt{rowdata} includes taxonomic information from the biom file. The \texttt{head()} command
-shows just the beginning of the data table for an overview.
+The \texttt{rowdata} includes taxonomic information from the biom file. The \texttt{head()} command shows just the beginning of the data table for an overview.
 
-\texttt{knitr::kable()} is for printing the information more nicely.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{head}\NormalTok{(}\FunctionTok{rowData}\NormalTok{(se))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## DataFrame with 6 rows and 6 columns
-##            taxonomy1          taxonomy2           taxonomy3
-##          <character>        <character>         <character>
-## 1726470  k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-## 1726471  k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-## 17264731 k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-## 17264726 k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-## 1726472  k__Bacteria p__Verrucomicrobia c__Verrucomicrobiae
-## 17264724 k__Bacteria   p__Bacteroidetes      c__Bacteroidia
-##                      taxonomy4              taxonomy5          taxonomy6
-##                    <character>            <character>        <character>
-## 1726470       o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides
-## 1726471       o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides
-## 17264731      o__Bacteroidales  f__Porphyromonadaceae g__Parabacteroides
-## 17264726      o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides
-## 1726472  o__Verrucomicrobiales f__Verrucomicrobiaceae     g__Akkermansia
-## 17264724      o__Bacteroidales      f__Bacteroidaceae     g__Bacteroides
-\end{verbatim}
-
-These taxonomic rank names (column names) are not real rank
-names. Let's replace them with real rank names.
-
-In addition to that, the taxa names include, e.g., '\,``k\_\_' before the name, so let's
-make them cleaner by removing them.
+\texttt{knitr::kable()} helps print the information more nicely.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{names}\NormalTok{(}\FunctionTok{rowData}\NormalTok{(se)) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Kingdom"}\NormalTok{, }\StringTok{"Phylum"}\NormalTok{, }\StringTok{"Class"}\NormalTok{, }\StringTok{"Order"}\NormalTok{, }
-                        \StringTok{"Family"}\NormalTok{, }\StringTok{"Genus"}\NormalTok{)}
-
-\CommentTok{\# Goes through the whole DataFrame. Removes \textquotesingle{}.*[kpcofg]\_\_\textquotesingle{} from strings, where [kpcofg] }
-\CommentTok{\# is any character from listed ones, and .* any character.}
-\NormalTok{rowdata\_modified }\OtherTok{\textless{}{-}}\NormalTok{ BiocParallel}\SpecialCharTok{::}\FunctionTok{bplapply}\NormalTok{(}\FunctionTok{rowData}\NormalTok{(se), }
-                                           \AttributeTok{FUN =}\NormalTok{ stringr}\SpecialCharTok{::}\NormalTok{str\_remove, }
-                                           \AttributeTok{pattern =} \StringTok{\textquotesingle{}.*[kpcofg]\_\_\textquotesingle{}}\NormalTok{)}
-
-\CommentTok{\# Genus level has additional \textquotesingle{}\textbackslash{}"\textquotesingle{}, so let\textquotesingle{}s delete that also}
-\NormalTok{rowdata\_modified }\OtherTok{\textless{}{-}}\NormalTok{ BiocParallel}\SpecialCharTok{::}\FunctionTok{bplapply}\NormalTok{(rowdata\_modified, }
-                                           \AttributeTok{FUN =}\NormalTok{ stringr}\SpecialCharTok{::}\NormalTok{str\_remove, }
-                                           \AttributeTok{pattern =} \StringTok{\textquotesingle{}}\SpecialCharTok{\textbackslash{}"}\StringTok{\textquotesingle{}}\NormalTok{)}
-
-\CommentTok{\# rowdata\_modified is a list, so it is converted back to DataFrame format. }
-\NormalTok{rowdata\_modified }\OtherTok{\textless{}{-}} \FunctionTok{DataFrame}\NormalTok{(rowdata\_modified)}
-
-\CommentTok{\# And then assigned back to the SE object}
-\FunctionTok{rowData}\NormalTok{(se) }\OtherTok{\textless{}{-}}\NormalTok{ rowdata\_modified}
-
-\CommentTok{\# Now we have a nicer table}
-\FunctionTok{head}\NormalTok{(}\FunctionTok{rowData}\NormalTok{(se))}
+\FunctionTok{head}\NormalTok{(}\FunctionTok{rowData}\NormalTok{(tse))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1510,12 +1461,50 @@ make them cleaner by removing them.
 ## 17264724      Bacteroidaceae     Bacteroides
 \end{verbatim}
 
-We notice that the imported biom file did not contain the sample meta data
-yet, so it includes an empty data frame.
+We further polish the feature names by removing unnecessary characters and then replace the original rowData with its updated version.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{head}\NormalTok{(}\FunctionTok{colData}\NormalTok{(se))}
+\CommentTok{\# Genus level has additional \textquotesingle{}\textbackslash{}"\textquotesingle{}, so let\textquotesingle{}s delete that also}
+\NormalTok{rowdata\_modified }\OtherTok{\textless{}{-}}\NormalTok{ BiocParallel}\SpecialCharTok{::}\FunctionTok{bplapply}\NormalTok{(}\FunctionTok{rowData}\NormalTok{(tse), }
+                                           \AttributeTok{FUN =}\NormalTok{ stringr}\SpecialCharTok{::}\NormalTok{str\_remove, }
+                                           \AttributeTok{pattern =} \StringTok{\textquotesingle{}}\SpecialCharTok{\textbackslash{}"}\StringTok{\textquotesingle{}}\NormalTok{)}
+
+\CommentTok{\# rowdata\_modified is a list, so convert this back to DataFrame format. }
+\CommentTok{\# and assign the cleaned data back to the TSE rowData}
+\FunctionTok{rowData}\NormalTok{(tse) }\OtherTok{\textless{}{-}} \FunctionTok{DataFrame}\NormalTok{(rowdata\_modified)}
+
+\CommentTok{\# Now we have a nicer table}
+\FunctionTok{head}\NormalTok{(}\FunctionTok{rowData}\NormalTok{(tse))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## DataFrame with 6 rows and 6 columns
+##              Kingdom          Phylum            Class              Order
+##          <character>     <character>      <character>        <character>
+## 1726470     Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726471     Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 17264731    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 17264726    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726472     Bacteria Verrucomicrobia Verrucomicrobiae Verrucomicrobiales
+## 17264724    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+##                       Family           Genus
+##                  <character>     <character>
+## 1726470       Bacteroidaceae     Bacteroides
+## 1726471       Bacteroidaceae     Bacteroides
+## 17264731  Porphyromonadaceae Parabacteroides
+## 17264726      Bacteroidaceae     Bacteroides
+## 1726472  Verrucomicrobiaceae     Akkermansia
+## 17264724      Bacteroidaceae     Bacteroides
+\end{verbatim}
+
+We notice that the imported biom file did not contain any colData yet,
+so only an empty dataframe appears in this slot.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{head}\NormalTok{(}\FunctionTok{colData}\NormalTok{(tse))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1523,91 +1512,43 @@ yet, so it includes an empty data frame.
 ## DataFrame with 6 rows and 0 columns
 \end{verbatim}
 
-Let us add a sample metadata file.
+Let us add colData from the sample metadata, which is stored in a CSV file.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# We use this to check what type of data it is}
-\CommentTok{\# read.table(sample\_meta\_file\_path)}
+\CommentTok{\# CSV file with colnames in the first row and rownames in the first column}
+\NormalTok{sample\_meta }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(sample\_meta\_file\_path,}
+                        \AttributeTok{sep =} \StringTok{","}\NormalTok{, }\AttributeTok{row.names =} \DecValTok{1}\NormalTok{)}
 
-\CommentTok{\# It seems like a comma separated file and it does not include headers}
-\CommentTok{\# Let us read it and then convert from data.frame to DataFrame}
-\CommentTok{\# (required for our purposes)}
-\NormalTok{sample\_meta }\OtherTok{\textless{}{-}} \FunctionTok{DataFrame}\NormalTok{(}\FunctionTok{read.table}\NormalTok{(sample\_meta\_file\_path, }\AttributeTok{sep =} \StringTok{","}\NormalTok{, }\AttributeTok{header =} \ConstantTok{FALSE}\NormalTok{))}
-
-\CommentTok{\# Add sample names to rownames}
-\FunctionTok{rownames}\NormalTok{(sample\_meta) }\OtherTok{\textless{}{-}}\NormalTok{ sample\_meta[,}\DecValTok{1}\NormalTok{]}
-
-\CommentTok{\# Delete column that included sample names}
-\NormalTok{sample\_meta[,}\DecValTok{1}\NormalTok{] }\OtherTok{\textless{}{-}} \ConstantTok{NULL}
-
-\CommentTok{\# We can add headers}
-\FunctionTok{colnames}\NormalTok{(sample\_meta) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"patient\_status"}\NormalTok{, }\StringTok{"cohort"}\NormalTok{, }\StringTok{"patient\_status\_vs\_cohort"}\NormalTok{, }\StringTok{"sample\_name"}\NormalTok{)}
-
-\CommentTok{\# Then it can be added to colData}
-\FunctionTok{colData}\NormalTok{(se) }\OtherTok{\textless{}{-}}\NormalTok{ sample\_meta}
+\CommentTok{\# Add this sample data to colData of the taxonomic data object}
+\CommentTok{\# Note that the data must be given in a DataFrame format (required for our purposes)}
+\FunctionTok{colData}\NormalTok{(tse) }\OtherTok{\textless{}{-}} \FunctionTok{DataFrame}\NormalTok{(sample\_meta)}
 \end{Highlighting}
 \end{Shaded}
 
-Now \texttt{colData} includes the sample metadata.
+Now the colData includes the sample metadata.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{head}\NormalTok{(}\FunctionTok{colData}\NormalTok{(se))}
+\FunctionTok{head}\NormalTok{(}\FunctionTok{colData}\NormalTok{(tse))}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
 ## DataFrame with 6 rows and 4 columns
-##      patient_status      cohort patient_status_vs_cohort sample_name
-##         <character> <character>              <character> <character>
-## A110           ADHD    Cohort_1            ADHD_Cohort_1        A110
-## A12            ADHD    Cohort_1            ADHD_Cohort_1         A12
-## A15            ADHD    Cohort_1            ADHD_Cohort_1         A15
-## A19            ADHD    Cohort_1            ADHD_Cohort_1         A19
-## A21            ADHD    Cohort_2            ADHD_Cohort_2         A21
-## A23            ADHD    Cohort_2            ADHD_Cohort_2         A23
+##        Treatment      Cohort TreatmentxCohort Description
+##      <character> <character>      <character> <character>
+## A110        ADHD    Cohort_1    ADHD_Cohort_1        A110
+## A12         ADHD    Cohort_1    ADHD_Cohort_1         A12
+## A15         ADHD    Cohort_1    ADHD_Cohort_1         A15
+## A19         ADHD    Cohort_1    ADHD_Cohort_1         A19
+## A21         ADHD    Cohort_2    ADHD_Cohort_2         A21
+## A23         ADHD    Cohort_2    ADHD_Cohort_2         A23
 \end{verbatim}
 
-Now, let's add a phylogenetic tree.
+Finally, we add a phylogenetic tree to the rowData slot. Such feature is available only in TreeSE objects. Similarly, Trees specifying the sample hierarchy can be stored in the colTree slot.
 
-The current data object, se, is a SummarizedExperiment object. This
-does not include a slot for adding a phylogenetic tree. In order to do
-this, we can convert the SE object to an extended TreeSummarizedExperiment
-object which includes also a \texttt{rowTree} slot.
-
-TreeSummarizedExperiment contains also other additional slots and features which
-is why we recommend to use \texttt{TreeSE}.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{as}\NormalTok{(se, }\StringTok{"TreeSummarizedExperiment"}\NormalTok{)}
-
-\CommentTok{\# tse includes same data as se}
-\NormalTok{tse}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## class: TreeSummarizedExperiment 
-## dim: 151 27 
-## metadata(0):
-## assays(1): counts
-## rownames(151): 1726470 1726471 ... 17264756 17264757
-## rowData names(6): Kingdom Phylum ... Family Genus
-## colnames(27): A110 A12 ... A35 A38
-## colData names(4): patient_status cohort patient_status_vs_cohort
-##   sample_name
-## reducedDimNames(0):
-## mainExpName: NULL
-## altExpNames(0):
-## rowLinks: NULL
-## rowTree: NULL
-## colLinks: NULL
-## colTree: NULL
-\end{verbatim}
-
-Next, let us read the tree data file and add it to the R data object (tse).
+Here, we read in the file containing the phylogenetic tree and insert it in corresponding slot of the TreeSE object.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1630,8 +1571,7 @@ Next, let us read the tree data file and add it to the R data object (tse).
 ## rownames(151): 1726470 1726471 ... 17264756 17264757
 ## rowData names(6): Kingdom Phylum ... Family Genus
 ## colnames(27): A110 A12 ... A35 A38
-## colData names(4): patient_status cohort patient_status_vs_cohort
-##   sample_name
+## colData names(4): Treatment Cohort TreatmentxCohort Description
 ## reducedDimNames(0):
 ## mainExpName: NULL
 ## altExpNames(0):
@@ -1641,7 +1581,7 @@ Next, let us read the tree data file and add it to the R data object (tse).
 ## colTree: NULL
 \end{verbatim}
 
-Now \texttt{rowTree} includes a phylogenetic tree:
+Now the rowTree slot contains the phylogenetic tree:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -2468,7 +2408,7 @@ New information can also be added to the experiment by creating a new variable.
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 0.71017 0.89075 0.49724 0.05002 0.26741 0.15928
+## [1] 0.6371 0.7267 0.2701 0.9476 0.5194 0.8266
 \end{verbatim}
 
 \hypertarget{merge-data}{%
@@ -5829,15 +5769,15 @@ Patient status is used for grouping.
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 \end{verbatim}
 
 Mixture weights (rough measure of the cluster size).
@@ -5850,7 +5790,7 @@ Mixture weights (rough measure of the cluster size).
 
 \begin{verbatim}
 ##       pi theta
-## 1 0.5385 20.58
+## 1 0.5385 20.59
 ## 2 0.4615 15.32
 \end{verbatim}
 
@@ -5866,12 +5806,12 @@ probable it is that each sample belongs to each cluster
 
 \begin{verbatim}
 ##                 1         2
-## CL3     1.000e+00 4.501e-17
-## CC1     1.000e+00 3.417e-22
-## SV1     1.000e+00 1.712e-12
-## M31Fcsw 7.425e-26 1.000e+00
-## M11Fcsw 1.093e-16 1.000e+00
-## M31Plmr 1.152e-13 1.000e+00
+## CL3     1.000e+00 4.594e-17
+## CC1     1.000e+00 3.526e-22
+## SV1     1.000e+00 1.735e-12
+## M31Fcsw 7.385e-26 1.000e+00
+## M11Fcsw 1.089e-16 1.000e+00
+## M31Plmr 1.150e-13 1.000e+00
 \end{verbatim}
 
 We can also know the contribution of each taxa to each component
@@ -5884,12 +5824,12 @@ We can also know the contribution of each taxa to each component
 
 \begin{verbatim}
 ##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30381 0.1354045
-## Phylum:Euryarchaeota  0.23114 0.1468879
-## Phylum:Actinobacteria 1.21375 1.0581523
-## Phylum:Spirochaetes   0.21393 0.1318064
-## Phylum:MVP-15         0.02982 0.0007669
-## Phylum:Proteobacteria 6.84470 1.8114033
+## Phylum:Crenarchaeota  0.30381 0.1354058
+## Phylum:Euryarchaeota  0.23114 0.1468923
+## Phylum:Actinobacteria 1.21375 1.0581803
+## Phylum:Spirochaetes   0.21393 0.1318079
+## Phylum:MVP-15         0.02983 0.0007714
+## Phylum:Proteobacteria 6.84670 1.8116041
 \end{verbatim}
 
 Finally, to be able to visualize our data and clusters, we start by
@@ -7467,26 +7407,26 @@ package. We try to predict the diet type based on the data.
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    15   8
-##      Veg       8  16
+##      Mixed    14   8
+##      Veg       9  16
 ##                                         
-##                Accuracy : 0.66          
-##                  95% CI : (0.507, 0.791)
+##                Accuracy : 0.638         
+##                  95% CI : (0.485, 0.773)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.0282        
+##     P-Value [Acc > NIR] : 0.0536        
 ##                                         
-##                   Kappa : 0.319         
+##                   Kappa : 0.276         
 ##                                         
 ##  Mcnemar's Test P-Value : 1.0000        
 ##                                         
-##             Sensitivity : 0.652         
+##             Sensitivity : 0.609         
 ##             Specificity : 0.667         
-##          Pos Pred Value : 0.652         
-##          Neg Pred Value : 0.667         
+##          Pos Pred Value : 0.636         
+##          Neg Pred Value : 0.640         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.319         
-##    Detection Prevalence : 0.489         
-##       Balanced Accuracy : 0.659         
+##          Detection Rate : 0.298         
+##    Detection Prevalence : 0.468         
+##       Balanced Accuracy : 0.638         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -9408,18 +9348,17 @@ of OKeefeDSData from the microbiomeDataSets package as an example dataset.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Download the files with the prefix \emph{DS} from
-  \href{https://github.com/JuliaTurkuDataScience/MicrobiomeAnalysis.jl/tree/main/src/assets}{this directory}.
+  Fetch or download the files in \href{https://github.com/microbiome/data/tree/main/OKeefeDSData}{this directory}.
 \item
   Read in the csv files with \texttt{read.csv} and store them into the variables
   \texttt{assays}, \texttt{rowdata} and \texttt{coldata}, respectively.
 \item
-  Create a TreeSE from the individual components with \texttt{TreeSummarizedExperiment}.
-  Note that the function requires three arguments: assays, rowData and colData,
-  to which you can give the appropriate item.
+  Create a TreeSE from the individual components with
+  \texttt{TreeSummarizedExperiment}. Note that the function requires three arguments:
+  assays, rowData and colData, to which you can give the appropriate item.
 \item
-  Check that importing is done correctly. E.g., choose random samples and features,
-  and check that their values equal between raw files and TreeSE.
+  Check that importing is done correctly. E.g., choose random samples and
+  features, and check that their values equal between raw files and TreeSE.
 \end{enumerate}
 
 Usefuls functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colnames, SimpleList
@@ -10253,8 +10192,9 @@ shows a possible approach.
 \subsection{MAE reconstruction}\label{mae-reconstruction}}
 
 Next, we will try to reconstruct the same MAE from the files you created.
-Make sure you know their names and location! Alternatively, you can download
-\href{https://github.com/microbiome/course_2023_oulu/tree/main/data}{this directory}
+Make sure you know their names and location! Alternatively, you can fetch or
+download the CSV files in
+\href{https://github.com/microbiome/data/tree/main/HintikkaXOData}{this directory}
 with the readily disassembled components of HintikkaXOData.
 
 \begin{enumerate}
@@ -10572,7 +10512,7 @@ Printing a summary about the posterior:
 \end{Shaded}
 
 \begin{verbatim}
-## Proportions of Observations within 95% Credible Interval: 0.9978
+## Proportions of Observations within 95% Credible Interval: 0.9979
 \end{verbatim}
 
 Plotting the summary of the posterior distributions of the regression parameters:
