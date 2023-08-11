@@ -172,12 +172,12 @@ Let us here do aggregation to genus level, add relative abundance
 assay, and perform prevalence filtering.
 
 ```{r datasetup}
-tse <- agglomerateByRank(tse0,rank = "genus")
+tse <- agglomerateByRank(tse0,
+                         rank = "genus")
 
 tse <- transformCounts(tse,
                        assay.type = "counts",
-                       method = "relabundance",
-                       MARGIN = "samples")
+                       method = "relabundance")
 
 # Subset based on the relative abundance assay		       
 tse <- subsetByPrevalentFeatures(tse,
@@ -229,7 +229,7 @@ library(ALDEx2)
 # Convert each instance using the centered log-ratio transform.
 # This is the input for all further analyses.
 set.seed(254)
-x <- aldex.clr(assay(tse), tse$Geographical_location)     
+mc_samples <- aldex.clr(assay(tse), tse$Geographical_location)     
 ```
 
 
@@ -410,8 +410,8 @@ library(Maaslin2)
 
 # We can specify different GLMs/normalizations/transforms.
 # specifying a ref is especially important if you have more than 2 levels
-maaslin2_out <- Maaslin2(t(assay(tse)),
-                         data.frame(colData(tse)),
+maaslin2_out <- Maaslin2(input_data = t(assay(tse)),
+                         input_metadata = data.frame(colData(tse)),
                          output = "DAA example",
                          transform = "AST",
                          fixed_effects = "Geographical_location",
@@ -457,17 +457,14 @@ set sizes.
 # Load package
 library(MicrobiomeStat)
 
-# Store assay into a data.frame
-feature.dat <- as.data.frame(assay(tse))
-
 # Store independent variables into a data.frame
 meta.dat <- colData(tse) %>%
   as.data.frame() %>%
   dplyr::select(Geographical_location)
 
 # Run LinDA
-linda.res <- linda(feature.dat,
-                   meta.dat,
+linda.res <- linda(feature.dat = as.data.frame(assay(tse)),
+                   meta.dat = meta.dat,
                    formula = '~Geographical_location',
                    alpha = 0.05,
                    prev.filter = 0,
@@ -507,8 +504,8 @@ discovery rate, which has the following components:
 library(GUniFrac)
 
 set.seed(123)
-meta.dat <- as.data.frame(colData(tse))
-zicoseq.obj <- ZicoSeq(meta.dat, as.matrix(assay(tse)),
+zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
+                       meta.dat = as.data.frame(colData(tse)),
                        grp.name = 'Geographical_location',
                        adj.name = NULL, 
                        feature.dat.type = 'count',
@@ -629,16 +626,16 @@ linda.res %>%
 
 ```{r ZicoSeq_adj, eval=TRUE}
 set.seed(123)
-zicoseq.obj <- ZicoSeq(meta.dat = as.data.frame(colData(tse)) , 
-                       feature.dat = as.matrix(assay(tse)),
+zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
+                       meta.dat = as.data.frame(colData(tse)),
                        grp.name = 'Geographical_location',
                        adj.name = 'Gender', 
                        feature.dat.type = 'count',
+                       return.feature.dat = TRUE,
                        prev.filter = 0,
-                       perm.no = 999,
                        mean.abund.filter = 0,
                        max.abund.filter = 0,
-                       return.feature.dat = T)
+                       perm.no = 999)
 
 zicoseq_out <- cbind.data.frame(p.raw = zicoseq.obj$p.raw,
                                 p.adj.fdr = zicoseq.obj$p.adj.fdr) 
