@@ -8,7 +8,7 @@ chapterPreamble()
 This section provides an introduction to Differential Abundance Analysis (DAA),
 which is used to identify differences in the abundances of individual taxa (at
 any taxonomic level) between two or more groups, such as treatment and control.
-Here, we demonstrate its implementation on peerj13075, one of the [mia datasets](#package-data).
+Here, we demonstrate its implementation on Tengeler2020, described in chapter \@ref(tengeler-desc).
 
 The goal of DAA is to identify biomarkers of a certain phenotype or condition,
 and gain understanding of a complex system by looking at its isolated components.
@@ -95,58 +95,44 @@ if(!require(GUniFrac)){
 library(tidySummarizedExperiment)
 library(tidyverse)
 
-# Set seed
-set.seed(13253)
-
 # Import dataset
 library(mia)
-data("peerj13075", package = "mia")
-tse0 <- peerj13075
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
 
-# Select two locations for simplicity
-tse0 <- tse0[ , tse0$Geographical_location %in% c("Pune", "Nashik")]
-# Convert location from string to factor
-tse0$Geographical_location <- factor(tse0$Geographical_location)
-
-# Show number of observations by location
-table(colData(tse0)$Geographical_location) %>%
+# Show patient status by cohort
+table(tse$patient_status, tse$cohort) %>%
   knitr::kable()
 ```
 
-### Prevalence Filtering 
+### Preparing the data for DAA 
 
-Before we jump to our analyses, we may want to perform some data
-manipulation.
-
-Let us here do aggregation to genus level, add relative abundance
-assay, and perform prevalence filtering.
+Before starting the analysis, it is recommended to reduce the size and
+complexity of the data to make the results more reproducible. For this
+purpose, we agglomerate the features by genus and filter them by a prevalence
+threshold of 10%.
 
 ```{r datasetup}
-tse <- agglomerateByRank(tse0,
-                         rank = "genus")
+# Agglomerate by genus and subset by prevalence
+tse <- subsetByPrevalentTaxa(tse,
+                             rank = "Genus",
+                             prevalence = 10 / 100)
 
+# Apply relative abundance transformation
 tse <- transformAssay(tse,
                       assay.type = "counts",
                       method = "relabundance")
 
-# Subset based on the relative abundance assay		       
-tse <- subsetByPrevalentFeatures(tse,
-                                 detection = 0,
-                                 prevalence = 10 / 100,
-                                 assay.type = "relabundance")
-
-# Add clr abundances
+# Apply clr transformation
 tse <- transformAssay(tse,
+                      assay.type = "counts",
                       method = "clr",
                       pseudocount = 1)
 ```
 
-Regarding prevalence filtering, @Nearing2022 found that applying a 10%
-threshold for the prevalence of the taxa generally resulted in more
-robust results. Some tools have builtin arguments for that. By
-applying the threshold to our input data, we can make sure it is
-applied for all tools. 
-
+While some DAA tools provide optional arguments for prevalence filtering, here
+we filtered the tse object directly. This way, we ensure that the input data
+remains the same when multiple tools are used.
 
 
 ### ALDEx2
@@ -178,8 +164,8 @@ library(ALDEx2)
 # Generate Monte Carlo samples of the Dirichlet distribution for each sample.
 # Convert each instance using the centered log-ratio transform.
 # This is the input for all further analyses.
-set.seed(254)
-x <- aldex.clr(assay(tse), tse$Geographical_location)     
+set.seed(123)
+x <- aldex.clr(assay(tse), tse$patient_status)     
 ```
 
 
@@ -290,25 +276,16 @@ that we specify.
 
 
 ```{r ancombc2, warning = FALSE, eval=TRUE}
-# Agglomerate data to genus level and add this new abundance table to the altExp slot
-altExp(tse, "genus") <- agglomerateByRank(tse,
-                                          rank = "genus")
-
-# Identify prevalent genera
-prevalent.genera <- getPrevalentFeatures(altExp(tse, "genus"),
-                                         detection = 0,
-                                         prevalence = 30 / 100)
-
 # Load package
 library(ANCOMBC)
 
 # Run ANCOM-BC at the genus level and only including the prevalent genera
-out <- ancombc2(data = altExp(tse, "genus")[prevalent.genera, ],
+out <- ancombc2(data = tse,
                 assay_name = "counts",
-                fix_formula = "Geographical_location",
+                fix_formula = "patient_status",
                 p_adj_method = "fdr",
                 prv_cut = 0,
-                group = "Geographical_location",
+                group = "patient_status",
                 struc_zero = TRUE,
                 neg_lb = TRUE,
                 # multi group comparison is deactivated automatically
@@ -318,7 +295,7 @@ out <- ancombc2(data = altExp(tse, "genus")[prevalent.genera, ],
 ```{r ancombc2b, warning = FALSE, eval=TRUE}
 # store the FDR adjusted results [test on v2.0.3] 
 ancombc_result <- cbind.data.frame(taxid = out$res$taxon,
-                       ancombc = as.vector(out$res$q_Geographical_locationPune))
+                       ancombc = as.vector(out$res$q_patient_statusControl))
 ```
 
 ```{r ancombc2c, warning = FALSE, eval=TRUE}
@@ -361,13 +338,13 @@ library(Maaslin2)
 # We can specify different GLMs/normalizations/transforms.
 # specifying a ref is especially important if you have more than 2 levels
 maaslin2_out <- Maaslin2(input_data = t(assay(tse)),
-                         input_metadata = data.frame(colData(tse)),
+                         input_metadata = as.data.frame(colData(tse)),
                          output = "DAA example",
                          transform = "AST",
-                         fixed_effects = "Geographical_location",
+                         fixed_effects = "patient_status",
                          # you can also fit MLM by specifying random effects
                          # random_effects = c(...),
-                         reference = "Geographical_location,Pune",
+                         reference = "patient_status,Control",
                          normalization = "TSS",
                          standardize = FALSE,
                          # filtering was previously performed
@@ -410,17 +387,17 @@ library(MicrobiomeStat)
 # Store independent variables into a data.frame
 meta.dat <- colData(tse) %>%
   as.data.frame() %>%
-  dplyr::select(Geographical_location)
+  dplyr::select(patient_status)
 
 # Run LinDA
 linda.res <- linda(feature.dat = as.data.frame(assay(tse)),
                    meta.dat = meta.dat,
-                   formula = '~Geographical_location',
+                   formula = "~ patient_status",
                    alpha = 0.05,
                    prev.filter = 0,
                    mean.abund.filter = 0)
 
-linda_out <- linda.res$output$Geographical_locationPune
+linda_out <- linda.res$output$patient_statusControl
 ```
 
 ```{r linda2, eval=TRUE}
@@ -456,9 +433,8 @@ library(GUniFrac)
 set.seed(123)
 zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
                        meta.dat = as.data.frame(colData(tse)),
-                       grp.name = 'Geographical_location',
-                       adj.name = NULL, 
-                       feature.dat.type = 'count',
+                       grp.name = "patient_status",
+                       feature.dat.type = "count",
                        return.feature.dat = TRUE,
                        prev.filter = 0,
                        mean.abund.filter = 0,
@@ -510,13 +486,11 @@ classified into 3 types:
 - Confounder caused by experimental models, such as cage effect,
   sample background, etc.
 
-Adjusting confounder is necessary and important to reach a valid
+Adjusting confounders is an important practice to reach an unbiased
 conclusion. To perform causal inference, it is crucial that the method
 is able to include covariates in the model. This is not possible with
-e.g. the Wilcoxon test. Other methods such as DESeq2, edgeR, ANCOMBC,
-LDM, Aldex2, Corncob, MaAsLin2, ZicoSeq, fastANCOM and ZINQ allow
-this. Below we show how to include a confounder/covariate in ANCOMBC,
-LinDA and ZicoSeq.
+statistical tests of general use, such as the Wilcoxon test. In contrast,
+methods that target DAA, such as those described in this chapter, allow controlling for confounders. Below we show how to include a confounders in ANCOMBC, LinDA and ZicoSeq.
 
 
 ### ANCOMBC
@@ -525,20 +499,19 @@ LinDA and ZicoSeq.
 # perform the analysis 
 ancombc_cov <- ancombc2(tse,
                         assay_name = "counts",
-                        tax_level = "genus",
-                        fix_formula = "Geographical_location + Age",
+                        fix_formula = "patient_status + cohort",
                         p_adj_method = "fdr",
                         lib_cut = 0,
-                        group = "Geographical_location", 
+                        group = "patient_status", 
                         struc_zero = TRUE, 
                         neg_lb = TRUE,
                         alpha = 0.05,
                         # multi group comparison is deactivated automatically
                         global = TRUE)
 
-# now the model answers the question: holding Age constant, are 
-# bacterial taxa differentially abundant? Or, if that is of interest,
-# holding phenotype constant, is Age associated with bacterial abundance?
+# now the model answers the question: holding cohort constant, are bacterial
+# taxa differentially abundant? Or holding patient status constant, is cohort
+# associated with bacterial abundance?
 # Again we only show the first 6 entries.
 ```
 
@@ -555,12 +528,12 @@ ancombc_cov$res %>%
 ```{r linda_adj, eval=TRUE}
 linda_cov <- linda(as.data.frame(assay(tse, "counts")),
                    as.data.frame(colData(tse)),
-                   formula = '~ Geographical_location + Age',
+                   formula = "~ patient_status + cohort",
                    alpha = 0.05,
                    prev.filter = 0,
                    mean.abund.filter = 0)
 
-linda.res <- linda_cov$output$Geographical_locationPune
+linda.res <- linda_cov$output$patient_statusControl
 ```
 
 ```{r linda_adj2, eval=TRUE}
@@ -578,9 +551,9 @@ linda.res %>%
 set.seed(123)
 zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
                        meta.dat = as.data.frame(colData(tse)),
-                       grp.name = 'Geographical_location',
-                       adj.name = 'Gender', 
-                       feature.dat.type = 'count',
+                       grp.name = "patient_status",
+                       adj.name = "cohort", 
+                       feature.dat.type = "count",
                        return.feature.dat = TRUE,
                        prev.filter = 0,
                        mean.abund.filter = 0,
@@ -617,26 +590,26 @@ R/Bioconductor package.
 DAA can be performed by several means. Although most of them provide similar functionality, some may be more suitable than others given a certain study
 design or data type. Commonly used DAA tools include:
 
-- ALDEx2 [@Gloor2016] 
+- ALDEx2 [@Gloor2016]
+- ANCOM [@Mandal2015]
 - ANCOMBC [@ancombc2020]
 - corncob [@Martin2021]
-- DESeq2 [@Love2014] 
+- DACOMP [@Brill2019]
+- DESeq2 [@Love2014]
+- eBay [@Liu2020]
 - edgeR [@Chen2016]
+- fastANCOM [@fastANCOM2022]
+- LDM [@Hu2020]
 - lefser [@Khlebrodova2021]
-- MaAsLin2 [@Mallick2020]
-- metagenomeSeq [@Paulson2017]
 - limma [@Ritchie2015]
 - LinDA [@Zhou2022]
-- ZicoSeq [@Yang2022]
-- LDM [@Hu2020]
-- RAIDA [@Sohn2015]
-- DACOMP [@Brill2019]
+- MaAsLin2 [@Mallick2020]
+- metagenomeSeq [@Paulson2017]
 - Omnibus [@Omnibus2018]
-- eBay [@Liu2020]
+- RAIDA [@Sohn2015]
+- t-test
+- Wilcoxon test
+- ZicoSeq [@Yang2022]
 - ZINQ [@Ling2021]
-- ANCOM [@Mandal2015]
-- fastANCOM [@fastANCOM2022]
-- [t-test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/t.test)
-- [Wilcoxon test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/wilcox.test)
 
 
