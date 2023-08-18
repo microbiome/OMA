@@ -61,9 +61,10 @@ We recommend to have a look at @Nearing2022. In this study, multiple DAA methods
 were applied to 38 different datasets and their results were compared to one
 another. Because each method follows a slightly different approach in terms of
 assumptions and normalization techniques, it was shown that results on the same
-dataset may differ substantially depending on the method. More recently, @Yang2022 comprehensively evaluated DAA methods via a semi-parametric framework and 106 real datasets. This study also concluded that different methods can produce contradictory results, creating the risk of cherry-picking the most favorable options for one’s
-own hypothesis. Therefore, it is highly recommended to perform DAA with multiple
-methods to determine whether the findings can be reproduced by different approaches.
+dataset may differ substantially depending on the method. More recently, @Yang2022 comprehensively evaluated DAA methods via a semi-parametric framework and 106 real datasets. This study also concluded that different methods can produce contradictory results, creating the risk of cherry-picking the most
+favorable options for one’s own hypothesis. Therefore, it is highly recommended
+to perform DAA with multiple methods to determine whether the findings can be
+reproduced by different approaches.
 
 ## Using the tools
 
@@ -84,14 +85,14 @@ dataset that merely has microbial abundances in a TSE object as well
 as a grouping variable in the sample data. We simplify the examples by
 only including two of the three groups.
 
-```{r install-pkg, include = FALSE}
+```{r install-pkg, include=FALSE}
 if(!require(GUniFrac)){
   install.packages("GUniFrac")
 }
 ```
 
 
-```{r load-pkg-data}
+```{r import-daa-data}
 library(tidySummarizedExperiment)
 library(tidyverse)
 
@@ -112,7 +113,7 @@ complexity of the data to make the results more reproducible. For this
 purpose, we agglomerate the features by genus and filter them by a prevalence
 threshold of 10%.
 
-```{r datasetup}
+```{r prep-daa-data}
 # Agglomerate by genus and subset by prevalence
 tse <- subsetByPrevalentTaxa(tse,
                              rank = "Genus",
@@ -157,7 +158,7 @@ multiple testing. Below we show a simple example that illustrates the
 workflow.
 
 
-```{r, aldex2, eval=TRUE}
+```{r run-aldex2}
 # Load package
 library(ALDEx2)
 
@@ -171,7 +172,7 @@ x <- aldex.clr(assay(tse), tse$patient_status)
 
 The t-test:
 
-```{r, aldex2_ttest, eval=TRUE}
+```{r aldex2-ttest}
 # calculates expected values of the Welch's t-test and Wilcoxon rank
 # test on the data returned by aldex.clr
 x_tt <- aldex.ttest(x, paired.test = FALSE, verbose = FALSE)
@@ -180,7 +181,7 @@ x_tt <- aldex.ttest(x, paired.test = FALSE, verbose = FALSE)
 
 Effect sizes:
 
-```{r, aldex2_efs, eval=TRUE}
+```{r aldex2-effect}
 # Determines the median clr abundance of the feature in all samples and in
 # groups, the median difference between the two groups, the median variation
 # within each group and the effect size, which is the median of the ratio
@@ -199,7 +200,7 @@ differentially abundant ($q \leq 0.1$) between the 2 groups. Black points are
 rare taxa and grey ones are abundant taxa. The dashed line represent an effect
 size of 1. See @Gloor2016 to learn more about these plots.
 
-```{r, eval=TRUE}
+```{r plot-aldex2}
 par(mfrow = c(1, 2))
 
 aldex.plot(aldex_out,
@@ -231,12 +232,12 @@ CI is a better answer to the question we are typically interested in
 article](https://www.nature.com/articles/d41586-019-00857-9)).
 
 
-```{r, eval=TRUE}
+```{r aldex2-res}
 aldex_out %>%
-  rownames_to_column(var = "genus") %>%
+  rownames_to_column(var = "Genus") %>%
   # here we choose the wilcoxon output rather than t-test output
   filter(wi.eBH <= 0.05)  %>%
-  dplyr::select(genus, we.eBH, wi.eBH, effect, overlap) %>%
+  dplyr::select(Genus, we.eBH, wi.eBH, effect, overlap) %>%
   knitr::kable()
 ```
 
@@ -275,7 +276,7 @@ as well as the linked tutorials to learn about the additional arguments
 that we specify.
 
 
-```{r ancombc2, warning = FALSE, eval=TRUE}
+```{r run-ancombc, warning=FALSE}
 # Load package
 library(ANCOMBC)
 
@@ -292,14 +293,11 @@ out <- ancombc2(data = tse,
                 global = TRUE)
 ```
 
-```{r ancombc2b, warning = FALSE, eval=TRUE}
-# store the FDR adjusted results [test on v2.0.3] 
+```{r ancombc-res1}
+# store the FDR adjusted results 
 ancombc_result <- cbind.data.frame(taxid = out$res$taxon,
                        ancombc = as.vector(out$res$q_patient_statusControl))
-```
 
-```{r ancombc2c, warning = FALSE, eval=TRUE}
-# store the FDR adjusted results [test on v1.2.2]
 ancombc_result <- out$res %>%
   dplyr::select(starts_with(c("taxon", "lfc", "q")))
 ```
@@ -313,7 +311,7 @@ object, which contains dataframes with the coefficients, standard
 errors, p-values and q-values. Below we show the first entries of this
 dataframe.
 
-```{r ancom_kable, eval=TRUE}
+```{r ancombc-res2}
 ancombc_result %>%
   head() %>%
   knitr::kable()
@@ -328,7 +326,7 @@ generalized linear models and flexible for different study designs
 and covariate structures. For details, check their
 [Biobakery tutorial](https://github.com/biobakery/biobakery/wiki/maaslin2).
 
-```{r maaslin2, results = "hide", eval=TRUE}
+```{r run-maaslin2, warning=FALSE, results="hide"}
 # Load package
 library(Maaslin2)
 
@@ -337,7 +335,7 @@ library(Maaslin2)
 
 # We can specify different GLMs/normalizations/transforms.
 # specifying a ref is especially important if you have more than 2 levels
-maaslin2_out <- Maaslin2(input_data = t(assay(tse)),
+maaslin2_out <- Maaslin2(input_data = as.data.frame(t(assay(tse))),
                          input_metadata = as.data.frame(colData(tse)),
                          output = "DAA example",
                          transform = "AST",
@@ -353,7 +351,7 @@ maaslin2_out <- Maaslin2(input_data = t(assay(tse)),
 
 Which genera are identified as differentially abundant? (leave out "head" to see all).
 
-```{r, maaslin2kable, eval=TRUE}
+```{r, maaslin2-res}
 maaslin2_out$results %>%
   filter(qval <= 0.05) %>%
   head() %>%
@@ -380,7 +378,7 @@ critical especially for datasets that have higher sample or feature
 set sizes.
 
 
-```{r linda, eval=TRUE}
+```{r run-linda}
 # Load package
 library(MicrobiomeStat)
 
@@ -400,7 +398,7 @@ linda.res <- linda(feature.dat = as.data.frame(assay(tse)),
 linda_out <- linda.res$output$patient_statusControl
 ```
 
-```{r linda2, eval=TRUE}
+```{r linda-res}
 # to scan the table for genera where H0 could be rejected:
 linda_out %>%
   as.data.frame() %>%
@@ -426,7 +424,7 @@ discovery rate, which has the following components:
   compositional effects;
 
 
-```{r ZicoSeq, eval=TRUE}
+```{r run-zicoseq}
 # Load package
 library(GUniFrac)
 
@@ -442,7 +440,7 @@ zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
                        perm.no = 999)
 ```
 
-```{r ZicoSeq_kable, eval=TRUE}
+```{r zicoseq-res}
 zicoseq_out <- cbind.data.frame(p.raw = zicoseq.obj$p.raw,
                                 p.adj.fdr = zicoseq.obj$p.adj.fdr)
 
@@ -453,7 +451,7 @@ zicoseq_out %>%
 ```
 
 
-```{r ZicoSeqplot, eval=TRUE}
+```{r plot-zicoseq}
 ## x-axis is the effect size: R2 * direction of coefficient
 ZicoSeq.plot(ZicoSeq.obj = zicoseq.obj,
              meta.dat = meta.dat,
@@ -492,7 +490,7 @@ methods that target DAA, such as those described in this chapter, allow controll
 
 ### ANCOMBC
 
-```{r ancombc_adj, eval=TRUE}
+```{r run-adj-ancombc, warning=FALSE}
 # perform the analysis 
 ancombc_cov <- ancombc2(tse,
                         assay_name = "counts",
@@ -512,7 +510,7 @@ ancombc_cov <- ancombc2(tse,
 # Again we only show the first 6 entries.
 ```
 
-```{r ancombc_adj2, eval=TRUE}
+```{r adj-ancombc-res}
 ancombc_cov$res %>%
   dplyr::select(starts_with(c("taxon", "lfc", "q"))) %>%
   head() %>%
@@ -522,18 +520,18 @@ ancombc_cov$res %>%
 ### LinDA
 
 
-```{r linda_adj, eval=TRUE}
+```{r run-adj-linda}
 linda_cov <- linda(as.data.frame(assay(tse, "counts")),
                    as.data.frame(colData(tse)),
                    formula = "~ patient_status + cohort",
                    alpha = 0.05,
                    prev.filter = 0,
                    mean.abund.filter = 0)
-
-linda.res <- linda_cov$output$patient_statusControl
 ```
 
-```{r linda_adj2, eval=TRUE}
+```{r adj-linda-res}
+linda.res <- linda_cov$output$patient_statusControl
+
 linda.res %>%
   filter(reject) %>%
   head() %>%
@@ -544,7 +542,7 @@ linda.res %>%
 
 ### ZicoSeq
 
-```{r ZicoSeq_adj, eval=TRUE}
+```{r run-adj-zicoseq}
 set.seed(123)
 zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
                        meta.dat = as.data.frame(colData(tse)),
@@ -556,12 +554,12 @@ zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
                        mean.abund.filter = 0,
                        max.abund.filter = 0,
                        perm.no = 999)
-
-zicoseq_out <- cbind.data.frame(p.raw = zicoseq.obj$p.raw,
-                                p.adj.fdr = zicoseq.obj$p.adj.fdr) 
 ```
 
-```{r ZicoSeq_adj2, eval=TRUE}
+```{r adj-zicoseq-res}
+zicoseq_out <- cbind.data.frame(p.raw = zicoseq.obj$p.raw,
+                                p.adj.fdr = zicoseq.obj$p.adj.fdr)
+
 zicoseq_out %>%
   filter(p.adj.fdr < 0.05) %>%
   head() %>%
