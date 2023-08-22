@@ -955,7 +955,7 @@ Specific import functions are provided for:
 #### Biom import
 
 Here we show how [Biom files](https://biom-format.org/) are imported into
-a TreeSE object using as an example Tengeler2020, which is further described in section \@ref(#tengeler-desc). This dataset consists of 3 files, which can be
+a TreeSE object using as an example Tengeler2020, which is further described in section \@ref(tengeler-desc). This dataset consists of 3 files, which can be
 fetched or downloaded from
 [this repository](https://github.com/microbiome/data/tree/main/Tengeler2020):
 

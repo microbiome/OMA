@@ -61,12 +61,12 @@ similarities in an optimal way, which is defined in different ways by different
 methods. [TODO add references and/or link to ordination chapter instead?]
 
 Based on the type of algorithm, ordination methods in microbiome research can
-be generally divided in two categories: unsupervised and supervized ordination.
+be generally divided in two categories: unsupervised and supervised ordination.
 The former includes Principal Coordinate Analysis (PCoA), Principal Component
 Analysis (PCA) and Uniform Manifold Approximation and Projection for Dimension
 Reduction (UMAP), whereas the latter is mainly represented by distance-based
-Redundance Analysis (dbRDA). We will first discuss unsupervized ordination
-methods and then proceed to supervized ones.
+Redundancy Analysis (dbRDA). We will first discuss unsupervised ordination
+methods and then proceed to supervised ones.
 
 To run the examples in this chapter, the following packages should be imported:
 
@@ -78,9 +78,9 @@ To run the examples in this chapter, the following packages should be imported:
 
 
 
-## Unsupervized ordination
+## Unsupervised ordination
 
-Unsupervized ordination methods variation in the data without additional
+Unsupervised ordination methods variation in the data without additional
 information on covariates or other supervision of the model. Among the different
 approaches, Multi-Dimensional Scaling (MDS) and non-metric MDS (NMDS) can be
 regarded as the standard. They are jointly referred to as PCoA. For this
@@ -329,22 +329,21 @@ ggplot(df, aes(x = d0, y = dmds)) +
 
 ## Supervized ordination
 
-dbRDA is a supervized counterpart of PCoA, that is, it takes into account the
+dbRDA is a supervised counterpart of PCoA, that is, it takes into account the
 covariates specified by the user to maximize the variance with respect to the
 them. The result shows how much each covariate affects beta diversity. The table
-below illustrates the relation between supervized and unsupervized ordination
+below illustrates the relation between supervised and unsupervised ordination
 methods.
 
-|                           | supervized ordination  | unsupervized ordination  |
+|                           | supervised ordination  | unsupervised ordination  |
 |:-------------------------:|:----------------------:|:------------------------:|
 | Euclidean distance        | RDA                    | PCA                      |
-|                           |                        |                          | 
 | non-Euclidean distance    | dbRDA                  | PCoA                     |
 
 We demonstrate the usage of dbRDA with the enterotype TreeSE, where samples
 correspond to patients. The colData contains the clinical status of each patient
 as well as a few covariates such as their gender and age, which can be included
-in the supervized model together with the clinical status, the main outcome variable.
+in the supervised model together with the clinical status, the main outcome variable.
 dbRDA can be perfomed with the `calculateRDA` function, which lies at the center
 of the following workflow.
 

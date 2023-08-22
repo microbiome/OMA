@@ -1,4 +1,5 @@
 # Differential Abundance {#differential-abundance}
+
 <script>
 document.addEventListener("click", function (event) {
     if (event.target.classList.contains("rebook-collapse")) {
@@ -34,13 +35,11 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
-
-## Differential abundance analysis
-
 This section provides an introduction to Differential Abundance Analysis (DAA),
 which is used to identify differences in the abundances of individual taxa (at
 any taxonomic level) between two or more groups, such as treatment and control.
-Here, we demonstrate its implementation on peerj13075, one of the [mia datasets](#package-data).
+Here, we demonstrate its implementation on Tengeler2020, described in chapter
+\@ref(tengeler-desc).
 
 The goal of DAA is to identify biomarkers of a certain phenotype or condition,
 and gain understanding of a complex system by looking at its isolated components.
@@ -52,100 +51,59 @@ understand the system as a whole. Despite its relevance in current research,
 the DAA approach has also been subject to debate [@Quinn2021].
 
 
-### Examples and tools
+## Statistical challenges of microbiome data 
 
-Due to the size and complexity of microbiome sequencing data, in this field
-DAA still faces several statistical challenges [@Yang2022]. These include:
-  
-- High variability. The abundance of a specific taxon could range over
-  several orders of magnitude.
-  
-- Zero-inflation. In a typical microbiome dataset, more than 70% of the
-  values are zeros. Zeros could be due to either physical absence
-  (structural zeros) or insufficient sampling effort (sampling zeros).
-  
-- Compositionality. Increase or decrease in the (absolute) abundance of
-  one taxon at the sampling site will lead to apparent changes in the
-  relative abundances of other taxa in the sample.
+Microbiome data display unique properties that are exclusively addressed by DAA
+tools developed for microbiome analysis. Specifically, microbiome data are
+characterized by high variability, zero-inflation and compositionality.
+**High variability** expresses that abundance of taxa often varies by several
+orders of magnitude from sample to sample. **Zero-inflation** means that
+typically more than 70% of the values are zeros, which could be due to either
+physical absence (structural zeros) or insufficient sampling effort (sampling
+zeros). **Compositionality** implies that a change in the absolute abundance of
+one taxon will lead to apparent variations in the relative abundances of other
+taxa in the same sample. If neglected, such properties may cause significant
+bias in the results of DAA. Therefore, several approaches have been developed to
+address the unique properties of microbiome data and provide statistically
+useful results.
 
-As a consequence, the following approaches have been developed:
+The first approach to target zero-inflated data consists of specialized models,
+such as **over-dispersed count models** and **zero-inflated mixture models**.
+DESeq2, edgeR and corncorb are based on over-dispersed count models, whereas
+metagenomeSeq, RAIDA, ZIBB and Omnibus implement zero-inflated mixture models to
+address zero-inflation. Typically, these models assume a negative binomial,
+beta-binomial or normal/log-normal distribution. Alternatively, **zero imputation**
+also represents a valid approach to deal with zero-inflated data. ALDEx2 and
+eBay apply a Bayesian model to impute the zeros when working with proportion
+data, accounting for sampling variability and sequencing depth variation. Other
+methods, such as MaAsLin2 and ANCOMBC impute the zeros with a pseudo-count strategy.
 
-- Over-dispersed count models has been proposed to address zero
-  inflation, such as the negative binomial model used by edgeR
-  [@Chen2016] and DESeq2 [@Love2014], the beta-binomial model used by
-  corncorb [@Martin2021].
+Regarding the compositionality of microbiome data, several approaches have been
+developed to perform **robust normalization** with methods specifically designed
+to reduce the bias found in compositional data. Some examples include trimmed
+mean of M-values (TMM) normalization used by edgeR, relative log expression (RLE)
+normalization used by DESeq2, cumulative sum scaling (CSS) normalization used
+by metagenomeSeq, centered log-ratio transformation (CLR) normalization used
+by ALDEx2 and geometric mean of pairwise ratios (GMPR) normalization used by
+Omnibus and Wrench normalization [@Kumar2018], which corrects the compositional
+bias by an empirical Bayes approach. Other methods to deal with compositional
+data entail reference taxa approach used by DACOMP and RAIDA, analyzing the
+pattern of pairwise log ratios as done by ANCOM and bias-correction applied by
+ANCOMBC.
 
-- Zero-inflated mixture models has aslo been proposed to address zero
-  inflation, such as zero-inflated log-normal/normal mixture model
-  used by metagenomeSeq [@Paulson2017] and RAIDA [@Sohn2015],
-  zero-inflated beta-binomial model used by ZIBB [@ZIBB2018], and
-  zero-inflated negative binomial model used by Omnibus
-  [@Omnibus2018].
+We recommend to have a look at @Nearing2022. In this study, multiple DAA methods
+were applied to 38 different datasets and their results were compared to one
+another. Because each method follows a slightly different approach in terms of
+assumptions and normalization techniques, it was shown that results on the same
+dataset may differ substantially depending on the method. Recently, @Yang2022
+comprehensively evaluated DAA methods via a semi-parametric framework and 106
+real datasets. This study also concluded that different methods can produce
+contradictory results, creating the risk of cherry-picking the most favorable
+options for one’s own hypothesis. Therefore, it is highly recommended to perform
+DAA with multiple methods to determine whether the findings can be reproduced by
+different approaches.
 
-- Bayesian methods have been used to impute the zeros for methods
-  working on proportion data, accounting for sampling variability and
-  sequencing depth variation. Examples include ALDEx2 [@Gloor2016] and
-  eBay [@Liu2020].
-
-- Other methods use the pseudo-count approach to impute the zeros,
-  such as MaAsLin2 [@Mallick2020] and ANCOMBC [@ancombc2020].
-
-- Different strategies have been used to address compositional
-  effects, including:
-
-  - Robust normalization. For example, trimmed mean of M-values (TMM)
-    normalization used by edgeR, relative log expression (RLE)
-    normalization used by DESeq2 [@Love2014], cumulative sum scaling
-    (CSS) normalization used by metagenomeSeq, centered log-ratio
-    transformation (CLR) normalization used by ALDEx2 [@Gloor2016] and
-    geometric mean of pairwise ratios (GMPR) normalization used by
-    Omnibus [@Omnibus2018]. Wrench normalization [@Kumar2018] corrects
-    the compositional bias by an empirical Bayes approach, which has
-    been recommended in metagenomeSeq [@Paulson2017] tutorial.
-  
-  - Reference taxa approach used by DACOMP [@Brill2019] and RAIDA [@Sohn2015].
-  
-  - Analyzing the pattern of pairwise log ratios, such as ANCOM [@Mandal2015].
-  
-  - Bias-correction used by ANCOMBC [@ancombc2020].
-
-Some of the popular tools for differential abundance analysis include:
-
-- ALDEx2 [@Gloor2016] 
-- ANCOMBC [@ancombc2020]
-- corncob [@Martin2021]
-- DESeq2 [@Love2014] 
-- edgeR [@Chen2016]
-- lefser [@Khlebrodova2021]
-- MaAsLin2 [@Mallick2020]
-- metagenomeSeq [@Paulson2017]
-- limma [@Ritchie2015]
-- LinDA [@Zhou2022]
-- ZicoSeq [@Yang2022]
-- LDM [@Hu2020]
-- RAIDA [@Sohn2015]
-- DACOMP [@Brill2019]
-- Omnibus [@Omnibus2018]
-- eBay [@Liu2020]
-- ZINQ [@Ling2021]
-- ANCOM [@Mandal2015]
-- fastANCOM [@fastANCOM2022]
-- [t-test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/t.test)  
-- [Wilcoxon test](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/wilcox.test)  
-
-
-We recommend to have a look at @Nearing2022 who compared all these
-methods across 38 different datasets. Because different methods use
-different approaches (parametric vs non-parametric, different
-normalization techiniques, assumptions etc.), the results may differ
-between methods, sometimes substantially as @Nearing2022 pointed
-out. More recently @Yang2022 comprehensively evaluated these methods
-via a semi-parametric framework and 106 real datasets. @Yang2022 also
-concluded that different DA methods can sometimes produce discordant
-results, opening to the possibility for cherry-picking tools in favor
-of one’s own hypothesis. Therefore it is highly recommended to pick
-several methods to assess how robust and potentially reproducible your
-findings are with different methods.
+## Using the tools
 
 In this section we demonstrate the use of four methods that can be
 recommended based on recent literature (ANCOM-BC [@ancombc2020],
@@ -165,110 +123,81 @@ as a grouping variable in the sample data. We simplify the examples by
 only including two of the three groups.
 
 
-
-
-
 ```r
-library(mia)
-library(patchwork)
 library(tidySummarizedExperiment)
-library(knitr)
 library(tidyverse)
-library(ALDEx2)
-library(Maaslin2)
-library(MicrobiomeStat)
-library(ANCOMBC)
-library(GUniFrac)
 
-# set random seed because some tools can randomly vary and then produce 
-# different results:
-set.seed(13253)
+# Import dataset
+library(mia)
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
 
-# we use a demo dataset and restrict it to two geo locations
-# for easy illustration
-data(peerj13075)
-tse0 <- peerj13075
-tse0 <- tse0[ ,tse0$Geographical_location %in% c("Pune", "Nashik")]
-# Let us make this a factor
-tse0$Geographical_location <- factor(tse0$Geographical_location)
-
-# how many observations do we have per group?
-as.data.frame(colData(tse0)) %>% 
-count(Geographical_location) %>%
-  kable()
+# Show patient status by cohort
+table(tse$patient_status, tse$cohort) %>%
+  knitr::kable()
 ```
 
 
-\begin{tabular}{l|r}
+\begin{tabular}{l|r|r|r}
 \hline
-Geographical\_location & n\\
+  & Cohort\_1 & Cohort\_2 & Cohort\_3\\
 \hline
-Nashik & 11\\
+ADHD & 4 & 5 & 4\\
 \hline
-Pune & 36\\
+Control & 6 & 5 & 3\\
 \hline
 \end{tabular}
 
-### Prevalence Filtering 
+### Preparing the data for DAA 
 
-Before we jump to our analyses, we may want to perform some data
-manipulation.
-
-Let us here do aggregation to genus level, add relative abundance
-assay, and perform prevalence filtering.
+Before starting the analysis, it is recommended to reduce the size and
+complexity of the data to make the results more reproducible. For this
+purpose, we agglomerate the features by genus and filter them by a prevalence
+threshold of 10%.
 
 
 ```r
-tse <- mergeFeaturesByRank(tse0, rank = "genus") %>%
-       transformAssay(assay.type = "counts",
-                       method = "relabundance",
-		       MARGIN = "samples") %>%
-       # subset based on the relative abundance assay		       
-       subsetByPrevalentFeatures(detection = 0,
-                             prevalence = 10/100,
-			     assay.type = "relabundance")
+# Agglomerate by genus and subset by prevalence
+tse <- subsetByPrevalentTaxa(tse,
+                             rank = "Genus",
+                             prevalence = 10 / 100)
 
-# Add also clr abundances
-tse <- transformAssay(tse, method="clr", pseudocount=1) # not bale to run
+# Transform count assay to relative abundances
+tse <- transformAssay(tse,
+                      assay.type = "counts",
+                      method = "relabundance")
 ```
 
-Regarding prevalence filtering, @Nearing2022 found that applying a 10%
-threshold for the prevalence of the taxa generally resulted in more
-robust results. Some tools have builtin arguments for that. By
-applying the threshold to our input data, we can make sure it is
-applied for all tools. 
-
+While some DAA tools provide optional arguments for prevalence filtering, here
+we filtered the tse object directly. This way, we ensure that the input data
+remains the same when multiple tools are used.
 
 
 ### ALDEx2
 
-In this section, we will show how to perform a simple ALDEx2 analysis. 
-If you wanted to pick a single method, this method could be recommended to use.
-According to the developers experience, it tends to identify the common
-features identified by other methods. This statement is in line with a recent
-independent evaluation by @Nearing2022.  
-Please also have a look at the more extensive 
-[vignette](https://bioconductor.org/packages/release/bioc/vignettes/ALDEx2/inst/doc/ALDEx2_vignette.html) 
-that covers this flexible tool in more depth. ALDEx2 estimates technical
-variation within each sample per taxon by utilizing the Dirichlet distribution.
-It furthermore applies the centered-log-ratio transformation (or closely
-related log-ratio transforms). Depending on the experimental setup, it will
-perform a two sample Welch's T-test and Wilcoxon-test or a one-way ANOVA and
-Kruskal-Wallis-test. For more complex study designs, there is a possibility to 
-utilize the `glm` functionality within ALDEx2.
+In this section, we will show how to perform DAA with ALDEx2, which can be
+regarded as the method of choice for its consistency, as it normally identifies features that are also found by complementary methods [@Nearing2022]. A more
+extensive introduction to its functionality is available in the
+[ALDEx2 vignette](https://bioconductor.org/packages/release/bioc/vignettes/ALDEx2/inst/doc/ALDEx2_vignette.html). 
 
-The Benjamini-Hochberg procedure is applied by default to correct for
-multiple testing. Below we show a simple example that illustrates the
-workflow.
-
+ALDEx2 estimates technical variation within each sample per taxon by utilizing
+the Dirichlet distribution. It furthermore applies the CLR transformation (or
+closely related log-ratio transforms). Depending on the experimental setup, it
+will perform a two sample Welch's t-test and Wilcoxon test or a one-way ANOVA
+and Kruskal-Wallis test. For more complex study designs, there is a possibility
+to utilize the `glm` functionality within ALDEx2. The Benjamini-Hochberg
+procedure is applied by default to correct for multiple testing.
 
 
 ```r
+# Load package
+library(ALDEx2)
+
 # Generate Monte Carlo samples of the Dirichlet distribution for each sample.
 # Convert each instance using the centered log-ratio transform.
 # This is the input for all further analyses.
-set.seed(254)
-x <- aldex.clr(assay(tse), tse$Geographical_location)     
+set.seed(123)
+x <- aldex.clr(assay(tse), tse$patient_status)     
 ```
 
 
@@ -302,30 +231,28 @@ per sample. Next to that, we can also create a plot that shows the dispersion
 on the x-axis instead of log-ratio abundance. Red dots represent genera that are
 differentially abundant ($q \leq 0.1$) between the 2 groups. Black points are
 rare taxa and grey ones are abundant taxa. The dashed line represent an effect
-size of 1. See @Gloor2016 to learn more about these plots.
+size of 1. @Gloor2016 provides more information on these plots.
 
 
 ```r
 par(mfrow = c(1, 2))
-  aldex.plot(
-    aldex_out, 
-    type = "MA", 
-    test = "welch", 
-    xlab = "Log-ratio abundance",
-    ylab = "Difference",
-    cutoff = 0.05
-  )
-  aldex.plot(
-    aldex_out, 
-    type = "MW", 
-    test = "welch",
-    xlab = "Dispersion",
-    ylab = "Difference",
-    cutoff = 0.05
-  )
+
+aldex.plot(aldex_out,
+           type = "MA",
+           test = "welch",
+           xlab = "Log-ratio abundance",
+           ylab = "Difference",
+           cutoff = 0.05)
+
+aldex.plot(aldex_out,
+           type = "MW",
+           test = "welch",
+           xlab = "Dispersion",
+           ylab = "Difference",
+           cutoff = 0.05)
 ```
 
-![](30_differential_abundance_files/figure-latex/unnamed-chunk-1-1.pdf)<!-- --> 
+![](30_differential_abundance_files/figure-latex/plot-aldex2-1.pdf)<!-- --> 
 
 The evaluation as differential abundant in above plots is based on the
 corrected p-value. According to the ALDEx2 developers, the safest
@@ -336,41 +263,25 @@ indicates the proportion of overlap). Also, the authors recommend to
 focus on effect sizes and CIs rather than interpreting the p-value. To
 keep the comparison simple, we will here use the p-value as decision
 criterion. But please be aware that the effect size together with the
-CI is a better answer to the question we are typically interested in
-(see also [this
-article](https://www.nature.com/articles/d41586-019-00857-9)).
+CI is a better answer to the question we are typically interested in.
 
 
 
 ```r
-rownames_to_column(aldex_out, "genus") %>%
-  filter(wi.eBH <= 0.05)  %>% # here we chose the wilcoxon output rather than tt
-  dplyr::select(genus, we.eBH, wi.eBH, effect, overlap) %>%
-  kable()
+aldex_out %>%
+  rownames_to_column(var = "Genus") %>%
+  # here we choose the wilcoxon output rather than t-test output
+  filter(wi.eBH <= 0.05)  %>%
+  dplyr::select(Genus, we.eBH, wi.eBH, effect, overlap) %>%
+  knitr::kable()
 ```
 
 
 \begin{tabular}{l|r|r|r|r}
 \hline
-genus & we.eBH & wi.eBH & effect & overlap\\
+Genus & we.eBH & wi.eBH & effect & overlap\\
 \hline
-Anaerococcus & 0.0540 & 0.0150 & 0.9595 & 0.1546\\
-\hline
-Calditerricola & 0.0769 & 0.0299 & -0.7162 & 0.1702\\
-\hline
-Chitinivibrio & 0.1216 & 0.0484 & -0.7700 & 0.1776\\
-\hline
-Corynebacterium & 0.0280 & 0.0035 & 1.1857 & 0.1037\\
-\hline
-Desulfosporomusa & 0.0851 & 0.0359 & -0.8604 & 0.1733\\
-\hline
-Geobacillus & 0.0370 & 0.0081 & -1.0962 & 0.1293\\
-\hline
-Jeotgalicoccus & 0.0276 & 0.0251 & -0.9052 & 0.1676\\
-\hline
-Paenibacillus & 0.0837 & 0.0345 & -0.9380 & 0.1932\\
-\hline
-Virgibacillus & 0.1103 & 0.0443 & -0.8750 & 0.1960\\
+[Ruminococcus]\_gauvreauii\_group & 0.0664 & 0.0345 & 0.8184 & 0.1142\\
 \hline
 \end{tabular}
 
@@ -387,8 +298,8 @@ method operates quite differently compared to the former ANCOM method.
 As the only method, ANCOM-BC incorporates the so called *sampling
 fraction* into the model. The latter term could be empirically
 estimated by the ratio of the library size to the microbial
-load. According to the authors, variations in this sampling fraction
-would bias differential abundance analyses if ignored.  Furthermore,
+load. According to the authors, ignoring variations
+in this sampling fraction would bias DAA results. Furthermore,
 this method provides p-values and confidence intervals for each
 taxon. It also controls the FDR and it is computationally simple to
 implement.
@@ -411,41 +322,30 @@ that we specify.
 
 
 ```r
-# Agglomerate data to genus level and add this new abundance table to the altExp slot
-altExp(tse, "genus") <- mergeFeaturesByRank(tse, "genus")
-
-# Identify prevalent genera
-prevalent.genera <- getPrevalentFeatures(altExp(tse, "genus"), detection = 0, prevalence = 30/100)
+# Load package
+library(ANCOMBC)
 
 # Run ANCOM-BC at the genus level and only including the prevalent genera
-
-out <- ancombc2(
-  data = altExp(tse, "genus")[prevalent.genera, ],
-  assay_name = "counts", 
-  fix_formula = "Geographical_location", 
-  p_adj_method = "fdr", 
-  prv_cut = 0,
-  group = "Geographical_location", 
-  struc_zero = TRUE, 
-  neg_lb = TRUE,
-  global = TRUE # multi group comparison will be deactivated automatically 
-)
+out <- ancombc2(data = tse,
+                assay_name = "counts",
+                fix_formula = "patient_status",
+                p_adj_method = "fdr",
+                prv_cut = 0,
+                group = "patient_status",
+                struc_zero = TRUE,
+                neg_lb = TRUE,
+                # multi group comparison is deactivated automatically
+                global = TRUE)
 ```
 
 
 ```r
-# store the FDR adjusted results [test on v2.0.3] 
+# store the FDR adjusted results 
 ancombc_result <- cbind.data.frame(taxid = out$res$taxon,
-                       ancombc = as.vector(out$res$q_Geographical_locationPune))
-```
+                       ancombc = as.vector(out$res$q_patient_statusControl))
 
-
-
-
-
-```r
-# store the FDR adjusted results [test on v1.2.2]
-ancombc_result <- out$res %>% dplyr::select(starts_with(c("taxon", "lfc", "q")))
+ancombc_result <- out$res %>%
+  dplyr::select(starts_with(c("taxon", "lfc", "q")))
 ```
 
 The object `out` contains all model output. Again, see the
@@ -459,25 +359,27 @@ dataframe.
 
 
 ```r
-kable(head(ancombc_result))
+ancombc_result %>%
+  head() %>%
+  knitr::kable()
 ```
 
 
 \begin{tabular}{l|r|r|r|r}
 \hline
-taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & q\_(Intercept) & q\_Geographical\_locationPune\\
+taxon & lfc\_(Intercept) & lfc\_patient\_statusControl & q\_(Intercept) & q\_patient\_statusControl\\
 \hline
-Abyssicoccus & 0.0904 & 0.1619 & 0.7617 & 0.6060\\
+Bacteroides & -0.0020 & -0.1258 & 1 & 0.8535\\
 \hline
-Acidaminococcus & 0.2093 & -0.2665 & 0.7148 & 0.6066\\
+Parabacteroides & -0.5158 & 0.9631 & 1 & 0.0819\\
 \hline
-Acinetobacter & 1.5838 & -1.6285 & 0.0861 & 0.0725\\
+Akkermansia & -0.5596 & 0.8509 & 1 & 0.0173\\
 \hline
-Actinomyces & 0.2896 & -0.3084 & 0.6344 & 0.5269\\
+Escherichia-Shigella & -0.1854 & 0.0951 & 1 & 0.8535\\
 \hline
-Aerococcus & -0.2045 & 0.6671 & 0.5381 & 0.0366\\
+Subdoligranulum & -1.0327 & 1.9085 & 1 & 0.0010\\
 \hline
-Aeromonas & -0.3480 & 0.6383 & 0.5110 & 0.1952\\
+Lachnoclostridium & -0.5242 & 0.7511 & 1 & 0.2441\\
 \hline
 \end{tabular}
 
@@ -492,31 +394,36 @@ and covariate structures. For details, check their
 
 
 ```r
+# Load package
+library(Maaslin2)
+
 # maaslin expects features as columns and samples as rows 
 # for both the abundance table as well as metadata 
 
 # We can specify different GLMs/normalizations/transforms.
-# Let us use similar settings as in Nearing et al. (2021):
-maaslin2_out <- Maaslin2(
-  t(assay(tse)),
-  data.frame(colData(tse)),
-  output = "DAA example",
-  transform = "AST",
-  fixed_effects = "Geographical_location",
-  # random_effects = c(...), # you can also fit MLM by specifying random effects
-  # specifying a ref is especially important if you have more than 2 levels
-  reference = "Geographical_location,Pune",  
-  normalization = "TSS",
-  standardize = FALSE,
-  min_prevalence = 0 # prev filterin already done
-)
+# specifying a ref is especially important if you have more than 2 levels
+maaslin2_out <- Maaslin2(input_data = as.data.frame(t(assay(tse))),
+                         input_metadata = as.data.frame(colData(tse)),
+                         output = "DAA example",
+                         transform = "AST",
+                         fixed_effects = "patient_status",
+                         # you can also fit MLM by specifying random effects
+                         # random_effects = c(...),
+                         reference = "patient_status,Control",
+                         normalization = "TSS",
+                         standardize = FALSE,
+                         # filtering was previously performed
+                         min_prevalence = 0)
 ```
 
 Which genera are identified as differentially abundant? (leave out "head" to see all).
 
 
 ```r
-kable(head(filter(maaslin2_out$results, qval <= 0.05)))
+maaslin2_out$results %>%
+  filter(qval <= 0.05) %>%
+  head() %>%
+  knitr::kable()
 ```
 
 
@@ -524,17 +431,13 @@ kable(head(filter(maaslin2_out$results, qval <= 0.05)))
 \hline
 feature & metadata & value & coef & stderr & pval & name & qval & N & N.not.zero\\
 \hline
-Fructobacillus & Geographical\_location & Nashik & 0.0080 & 0.0011 & 0 & Geographical\_locationNashik & 0 & 47 & 9\\
+X.Ruminococcus.\_gauvreauii\_group & patient\_status & ADHD & -0.0674 & 0.0133 & 0.0000 & patient\_statusADHD & 0.0015 & 27 & 21\\
 \hline
-Desulfosporomusa & Geographical\_location & Nashik & 0.0373 & 0.0059 & 0 & Geographical\_locationNashik & 0 & 47 & 13\\
+Faecalibacterium & patient\_status & ADHD & 0.1223 & 0.0372 & 0.0030 & patient\_statusADHD & 0.0448 & 27 & 11\\
 \hline
-Geobacillus & Geographical\_location & Nashik & 0.1294 & 0.0207 & 0 & Geographical\_locationNashik & 0 & 47 & 27\\
+X.Clostridium.\_innocuum\_group & patient\_status & ADHD & -0.0692 & 0.0213 & 0.0033 & patient\_statusADHD & 0.0448 & 27 & 25\\
 \hline
-Pullulanibacillus & Geographical\_location & Nashik & 0.0395 & 0.0062 & 0 & Geographical\_locationNashik & 0 & 47 & 9\\
-\hline
-Chitinivibrio & Geographical\_location & Nashik & 0.0274 & 0.0045 & 0 & Geographical\_locationNashik & 0 & 47 & 10\\
-\hline
-Thermoanaerobacter & Geographical\_location & Nashik & 0.0089 & 0.0015 & 0 & Geographical\_locationNashik & 0 & 47 & 10\\
+Catabacter & patient\_status & ADHD & 0.0295 & 0.0092 & 0.0037 & patient\_statusADHD & 0.0448 & 27 & 9\\
 \hline
 \end{tabular}
 
@@ -560,32 +463,41 @@ set sizes.
 
 
 ```r
-meta <- as.data.frame(colData(tse)) %>% dplyr::select(Geographical_location)
-linda.res <- linda(
-  as.data.frame(assay(tse)), 
-  meta, 
-  formula = '~Geographical_location', 
-  alpha = 0.05, 
-  prev.filter = 0, 
-  mean.abund.filter = 0)
+# Load package
+library(MicrobiomeStat)
+
+# Store independent variables into a data.frame
+meta.dat <- colData(tse) %>%
+  as.data.frame() %>%
+  dplyr::select(patient_status)
+
+# Run LinDA
+linda.res <- linda(feature.dat = as.data.frame(assay(tse)),
+                   meta.dat = meta.dat,
+                   formula = "~ patient_status",
+                   alpha = 0.05,
+                   prev.filter = 0,
+                   mean.abund.filter = 0)
 ```
 
 ```
 ## 0  features are filtered!
-## The filtered data has  47  samples and  262  features will be tested!
+## The filtered data has  27  samples and  49  features will be tested!
 ## Pseudo-count approach is used.
 ## Fit linear models ...
 ## Completed.
 ```
 
-```r
-linda_out <- linda.res$output$Geographical_locationPune
-```
-
 
 ```r
-# to scan the table for genera where H0 could be rejected:
-kable(head(filter(as.data.frame(linda_out), reject)))
+linda_out <- linda.res$output$patient_statusControl
+
+# List genera for which H0 could be rejected:
+linda_out %>%
+  as.data.frame() %>%
+  filter(reject) %>%
+  head() %>%
+  knitr::kable()
 ```
 
 
@@ -593,58 +505,51 @@ kable(head(filter(as.data.frame(linda_out), reject)))
 \hline
   & baseMean & log2FoldChange & lfcSE & stat & pvalue & padj & reject & df\\
 \hline
-Acidaminococcus & 1194.7 & -1.9084 & 0.3579 & -5.332 & 0.0000 & 0.0000 & TRUE & 45\\
+Faecalibacterium & 6259.3 & -5.633 & 1.3252 & -4.250 & 0.0003 & 0.0092 & TRUE & 25\\
 \hline
-Aciditerrimonas & 393.5 & -0.6655 & 0.2184 & -3.048 & 0.0039 & 0.0165 & TRUE & 45\\
+[Ruminococcus]\_gauvreauii\_group & 1065.3 & 4.121 & 1.0028 & 4.110 & 0.0004 & 0.0092 & TRUE & 25\\
 \hline
-Actinomadura & 836.9 & -1.7985 & 0.3596 & -5.001 & 0.0000 & 0.0001 & TRUE & 45\\
-\hline
-Agromyces & 938.1 & -1.7530 & 0.3910 & -4.483 & 0.0001 & 0.0004 & TRUE & 45\\
-\hline
-Aminivibrio & 416.9 & -0.7489 & 0.2352 & -3.185 & 0.0026 & 0.0128 & TRUE & 45\\
-\hline
-Amycolatopsis & 556.1 & -0.9299 & 0.3320 & -2.801 & 0.0075 & 0.0302 & TRUE & 45\\
+Catabacter & 767.6 & -3.134 & 0.9274 & -3.379 & 0.0024 & 0.0390 & TRUE & 25\\
 \hline
 \end{tabular}
 
 ### ZicoSeq
 
-Subsequently, we add a linear model and permutation-based method, see
-details at [tutorial](https://cran.r-project.org/web/packages/GUniFrac/vignettes/ZicoSeq.html).
-
-This approach has been assessed to exhibit high power and a low false
-discovery rate, which has the following components:
+Subsequently, we demonstrate DAA with ZicoSeq, a method based on linear models
+and permutation. Further details can be found in
+[this tutorial](https://cran.r-project.org/web/packages/GUniFrac/vignettes/ZicoSeq.html).
+This approach has been assessed to exhibit high power and a low false discovery
+rate, which has the following components:
 
   1. Winsorization to decrease the influence of outliers;
-  
-  1. Posterior sampling based on a beta mixture prior to address
+  2. Posterior sampling based on a beta mixture prior to address
   sampling variability and zero inflation;
-  
-  1. Reference-based multiple-stage normalization to address
+  3. Reference-based multiple-stage normalization to address
   compositional effects;
 
 
 
 ```r
+# Load package
+library(GUniFrac)
+
 set.seed(123)
-meta <- as.data.frame(colData(tse))
-zicoseq.obj <- GUniFrac::ZicoSeq(meta.dat = meta, 
-                                 feature.dat = as.matrix(assay(tse)),
-                                 grp.name = 'Geographical_location',
-                                 adj.name = NULL, 
-                                 feature.dat.type = 'count',
-                                 prev.filter = 0,
-                                 perm.no = 999,
-                                 mean.abund.filter = 0,
-                                 max.abund.filter = 0,
-                                 return.feature.dat = T)
+zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
+                       meta.dat = as.data.frame(colData(tse)),
+                       grp.name = "patient_status",
+                       feature.dat.type = "count",
+                       return.feature.dat = TRUE,
+                       prev.filter = 0,
+                       mean.abund.filter = 0,
+                       max.abund.filter = 0,
+                       perm.no = 999)
 ```
 
 ```
+## For sample size less than 40, posterior sampling will not be used!
 ## 0  features are filtered!
-## The data has  47  samples and  262  features will be tested!
+## The data has  27  samples and  49  features will be tested!
 ## On average,  1  outlier counts will be replaced for each feature!
-## Fitting beta mixture ...
 ## Finding the references ...
 ## Permutation testing ...
 ## ...................................................................................................
@@ -656,12 +561,15 @@ zicoseq.obj <- GUniFrac::ZicoSeq(meta.dat = meta,
 ## Completed!
 ```
 
-```r
-zicoseq_out <- cbind.data.frame(p.raw=zicoseq.obj$p.raw, p.adj.fdr=zicoseq.obj$p.adj.fdr) 
-```
 
 ```r
-kable(head(filter(zicoseq_out, p.adj.fdr<0.05)))
+zicoseq_out <- cbind.data.frame(p.raw = zicoseq.obj$p.raw,
+                                p.adj.fdr = zicoseq.obj$p.adj.fdr)
+
+zicoseq_out %>%
+  filter(p.adj.fdr < 0.05) %>%
+  head() %>%
+  knitr::kable()
 ```
 
 
@@ -669,17 +577,13 @@ kable(head(filter(zicoseq_out, p.adj.fdr<0.05)))
 \hline
   & p.raw & p.adj.fdr\\
 \hline
-Actinomadura & 0.001 & 0.0001\\
+Faecalibacterium & 0.001 & 0.024\\
 \hline
-Agromyces & 0.001 & 0.0038\\
+[Clostridium]\_innocuum\_group & 0.003 & 0.024\\
 \hline
-Aneurinibacillus & 0.001 & 0.0071\\
+[Ruminococcus]\_gauvreauii\_group & 0.001 & 0.005\\
 \hline
-Anoxybacillus & 0.001 & 0.0001\\
-\hline
-Chitinispirillum & 0.001 & 0.0100\\
-\hline
-Chitinivibrio & 0.001 & 0.0001\\
+Catabacter & 0.006 & 0.043\\
 \hline
 \end{tabular}
 
@@ -688,45 +592,67 @@ Chitinivibrio & 0.001 & 0.0001\\
 ```r
 ## x-axis is the effect size: R2 * direction of coefficient
 ZicoSeq.plot(ZicoSeq.obj = zicoseq.obj,
-             meta.dat = meta,
-	     pvalue.type ='p.adj.fdr')
+             meta.dat = meta.dat,
+             pvalue.type ='p.adj.fdr')
 ```
 
-![](30_differential_abundance_files/figure-latex/ZicoSeqplot-1.pdf)<!-- --> 
+![](30_differential_abundance_files/figure-latex/plot-zicoseq-1.pdf)<!-- --> 
 
+### PhILR
 
+PhILR is a tree-based method that tests group-wise associations based on
+balances. A detailed introduction to this method is available in
+[this Bioconductor tutorial](https://www.bioconductor.org/packages/devel/bioc/vignettes/philr/inst/doc/philr-intro.html). 
 
 ### Comparison of methods
 
-The different methods yield somewhat different results but they could
-be also expected to overlap to a substantial degree. As an exercirse,
+Although the methods described above yield unidentical results, they are
+expected to agree on a few differentially abundant taxa. As an exercise,
 you can compare the outcomes between the different methods in terms of
 effect sizes, significances, or other aspects that are comparable
-between the methods.
+between them.
 
 
+## DAA with confounding
 
+Confounders can be defined as variables that are related to and affect the
+apparent dynamics between the response and the main independent variable.
+They are common in experimental studies. Generally, they can be classified
+into 3 groups:
 
-## Confounding variables
+- Biological confounders, such as age, sex, etc. 
 
-Confounders are common in experimental research. In general, these can be
-classified into 3 types:
-
-- Biological confounder, such as age, sex, etc. 
-
-- Technical confounder that caused by data collection, storage, DNA
+- Technical confounders produced by data collection, storage, DNA
   extraction, sequencing process, etc.
 
-- Confounder caused by experimental models, such as cage effect,
+- Confounders resulting from experimental models, such as cage effect,
   sample background, etc.
 
-Adjusting confounder is necessary and important to reach a valid
+Controlling for confounders is an important practice to reach an unbiased
 conclusion. To perform causal inference, it is crucial that the method
-is able to include covariates in the model. This is not possible with
-e.g. the Wilcoxon test. Other methods such as DESeq2, edgeR, ANCOMBC,
-LDM, Aldex2, Corncob, MaAsLin2, ZicoSeq, fastANCOM and ZINQ allow
-this. Below we show how to include a confounder/covariate in ANCOMBC,
-LinDA and ZicoSeq.
+is able to include confounders in the model. This is not possible with
+statistical tests of general use, such as the Wilcoxon test. In contrast,
+methods that target DAA, such as those described in this chapter, allow
+controlling for confounders. In the following examples, we will perform DAA
+with a main independent variable and a few confounders.
+
+### Selecting confounders
+
+In addition to patient status, we will now control for two confounders: cohort
+and library size. The former is a categorical variable with three factors,
+whereas the latter is a discrete numerical variable. Remarkably, most DAA
+methods accept these two and several other data types.
+
+For demonstration, library size is treated as a confounder and included
+in the formulas of the DAA methods. Although this is a satisfactory approach to
+control for uneven sequencing efforts across samples, rarefaction generally represents a better solution [@Schloss2023]. With that said, library size can be readily computed and added to the colData.
+
+
+
+```r
+# Compute and store library size in colData
+colData(tse)$library_size <- colSums(assay(tse, "counts"))
+```
 
 
 ### ANCOMBC
@@ -734,79 +660,79 @@ LinDA and ZicoSeq.
 
 ```r
 # perform the analysis 
-ancombc_cov <- ancombc2(
-  data = tse,
-  assay_name = "counts",
-  tax_level = "genus",
-  fix_formula = "Geographical_location + Age", 
-  p_adj_method = "fdr", 
-  lib_cut = 0, 
-  group = "Geographical_location", 
-  struc_zero = TRUE, 
-  neg_lb = TRUE,
-  alpha = 0.05, 
-  global = TRUE # multi group comparison will be deactivated automatically 
-)
-# now the model answers the question: holding Age constant, are 
-# bacterial taxa differentially abundant? Or, if that is of interest,
-# holding phenotype constant, is Age associated with bacterial abundance?
+ancombc_cov <- ancombc2(tse,
+                        assay_name = "counts",
+                        fix_formula = "patient_status + cohort + library_size",
+                        p_adj_method = "fdr",
+                        lib_cut = 0,
+                        group = "patient_status", 
+                        struc_zero = TRUE, 
+                        neg_lb = TRUE,
+                        alpha = 0.05,
+                        # multi group comparison is deactivated automatically
+                        global = TRUE)
+
+# now the model answers the question: holding cohort constant, are bacterial
+# taxa differentially abundant? Or holding patient status constant, is cohort
+# associated with bacterial abundance?
 # Again we only show the first 6 entries.
 ```
 
 
 ```r
-tab <- ancombc_cov$res %>% dplyr::select(starts_with(c("taxon", "lfc", "q")))
-kable(head(tab))
+ancombc_cov$res %>%
+  dplyr::select(starts_with(c("taxon", "lfc", "q"))) %>%
+  head() %>%
+  knitr::kable()
 ```
 
 
-\begin{tabular}{l|r|r|r|r|r|r|r|r}
+\begin{tabular}{l|r|r|r|r|r|r|r|r|r|r}
 \hline
-taxon & lfc\_(Intercept) & lfc\_Geographical\_locationPune & lfc\_AgeElderly & lfc\_AgeMiddle\_age & q\_(Intercept) & q\_Geographical\_locationPune & q\_AgeElderly & q\_AgeMiddle\_age\\
+taxon & lfc\_(Intercept) & lfc\_patient\_statusControl & lfc\_cohortCohort\_2 & lfc\_cohortCohort\_3 & lfc\_library\_size & q\_(Intercept) & q\_patient\_statusControl & q\_cohortCohort\_2 & q\_cohortCohort\_3 & q\_library\_size\\
 \hline
-Abyssicoccus & 0.0723 & 0.0319 & 0.3264 & 0.2208 & 0.7456 & 0.9763 & 0.7328 & 1.0000\\
+Bacteroides & -0.3081 & -0.7575 & 0.1482 & 0.7615 & 0e+00 & 0 & 0 & 0 & 0 & 0.9650\\
 \hline
-Acidaminococcus & 0.2364 & 0.0584 & -0.6752 & -0.3702 & 0.6251 & 0.9721 & 0.4517 & 0.9279\\
+Parabacteroides & -2.3164 & 0.5528 & 1.2162 & 1.1380 & 0e+00 & 0 & 0 & 0 & 0 & 0.0001\\
 \hline
-Acinetobacter & 1.5023 & -3.2362 & 2.2397 & 2.1993 & 0.0833 & 0.0013 & 0.1015 & 0.0639\\
+Akkermansia & -0.8599 & 0.2309 & 0.2876 & 0.4635 & 0e+00 & 0 & 0 & 0 & 0 & 0.9147\\
 \hline
-Actinomyces & 0.3740 & 0.0866 & -0.7335 & -0.6522 & 0.3437 & 0.9439 & 0.4352 & 0.7294\\
+Escherichia-Shigella & -1.1600 & -0.5157 & 1.3093 & 0.2340 & 0e+00 & 0 & 0 & 0 & 0 & 0.0397\\
 \hline
-Actinoplanes & 0.9135 & -1.1217 & -0.1497 & 0.0000 & 0.0020 & 0.0461 & 0.8662 & 1.0000\\
+Subdoligranulum & -0.1418 & 1.1380 & -0.2509 & 0.0252 & 0e+00 & 0 & 0 & 0 & 0 & 0.0002\\
 \hline
-Aerococcus & -0.2178 & 0.6432 & 0.0922 & 0.0864 & 0.3378 & 0.1375 & 0.8662 & 1.0000\\
+Lachnoclostridium & -2.7781 & 0.2807 & 1.6712 & 1.1817 & 1e-04 & 0 & 0 & 0 & 0 & 0.0000\\
 \hline
 \end{tabular}
 
 ### LinDA
 
 
-
 ```r
-linda_cov <- linda(
-  as.data.frame(assay(tse, "counts")), 
-  as.data.frame(colData(tse)), 
-  formula = '~ Geographical_location + Age', 
-  alpha = 0.05, 
-  prev.filter = 0, 
-  mean.abund.filter = 0)
+linda_cov <- linda(as.data.frame(assay(tse, "counts")),
+                   as.data.frame(colData(tse)),
+                   formula = "~ patient_status + cohort + library_size",
+                   alpha = 0.05,
+                   prev.filter = 0,
+                   mean.abund.filter = 0)
 ```
 
 ```
 ## 0  features are filtered!
-## The filtered data has  47  samples and  262  features will be tested!
-## Pseudo-count approach is used.
+## The filtered data has  27  samples and  49  features will be tested!
+## Imputation approach is used.
 ## Fit linear models ...
 ## Completed.
 ```
 
-```r
-linda.res <- linda_cov$output$Geographical_locationPune
-```
-
 
 ```r
-kable(head(filter(linda.res, reject==T)))
+linda.res <- linda_cov$output$patient_statusControl
+
+linda.res %>%
+  filter(reject) %>%
+  head() %>%
+  knitr::kable()
 ```
 
 
@@ -814,17 +740,17 @@ kable(head(filter(linda.res, reject==T)))
 \hline
   & baseMean & log2FoldChange & lfcSE & stat & pvalue & padj & reject & df\\
 \hline
-Acidaminococcus & 1140.5 & -1.438 & 0.4390 & -3.276 & 0.0021 & 0.0182 & TRUE & 43\\
+Faecalibacterium & 8776.7 & -5.921 & 1.3096 & -4.521 & 0.0002 & 0.0041 & TRUE & 22\\
 \hline
-Actinomadura & 804.7 & -1.520 & 0.4477 & -3.394 & 0.0015 & 0.0139 & TRUE & 43\\
+Erysipelatoclostridium & 180.7 & 3.743 & 1.2433 & 3.010 & 0.0064 & 0.0451 & TRUE & 22\\
 \hline
-Anaerococcus & 939.0 & 6.795 & 1.3978 & 4.861 & 0.0000 & 0.0004 & TRUE & 43\\
+[Ruminococcus]\_gauvreauii\_group & 541.4 & 4.240 & 0.9351 & 4.534 & 0.0002 & 0.0041 & TRUE & 22\\
 \hline
-Aneurinibacillus & 988.0 & -1.687 & 0.5426 & -3.110 & 0.0033 & 0.0256 & TRUE & 43\\
+Barnesiella & 2318.0 & -3.878 & 1.2443 & -3.116 & 0.0050 & 0.0411 & TRUE & 22\\
 \hline
-Anoxybacillus & 1712.8 & -2.727 & 0.5574 & -4.893 & 0.0000 & 0.0004 & TRUE & 43\\
+Ruminococcaceae\_UCG-014 & 375.9 & -3.062 & 0.8418 & -3.637 & 0.0015 & 0.0193 & TRUE & 22\\
 \hline
-Brachybacterium & 403.0 & 2.060 & 0.7303 & 2.821 & 0.0072 & 0.0450 & TRUE & 43\\
+Butyricicoccus & 439.9 & -2.357 & 0.7536 & -3.127 & 0.0049 & 0.0411 & TRUE & 22\\
 \hline
 \end{tabular}
 
@@ -835,23 +761,23 @@ Brachybacterium & 403.0 & 2.060 & 0.7303 & 2.821 & 0.0072 & 0.0450 & TRUE & 43\\
 
 ```r
 set.seed(123)
-zicoseq.obj <- GUniFrac::ZicoSeq(meta.dat = as.data.frame(colData(tse)) , 
-                                 feature.dat = as.matrix(assay(tse)),
-                                 grp.name = 'Geographical_location',
-                                 adj.name = 'Gender', 
-                                 feature.dat.type = 'count',
-                                 prev.filter = 0,
-                                 perm.no = 999,
-                                 mean.abund.filter = 0,
-                                 max.abund.filter = 0,
-                                 return.feature.dat = T)
+zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
+                       meta.dat = as.data.frame(colData(tse)),
+                       grp.name = "patient_status",
+                       adj.name = c("cohort", "library_size"), 
+                       feature.dat.type = "count",
+                       return.feature.dat = TRUE,
+                       prev.filter = 0,
+                       mean.abund.filter = 0,
+                       max.abund.filter = 0,
+                       perm.no = 999)
 ```
 
 ```
+## For sample size less than 40, posterior sampling will not be used!
 ## 0  features are filtered!
-## The data has  47  samples and  262  features will be tested!
+## The data has  27  samples and  49  features will be tested!
 ## On average,  1  outlier counts will be replaced for each feature!
-## Fitting beta mixture ...
 ## Finding the references ...
 ## Permutation testing ...
 ## ...................................................................................................
@@ -863,14 +789,15 @@ zicoseq.obj <- GUniFrac::ZicoSeq(meta.dat = as.data.frame(colData(tse)) ,
 ## Completed!
 ```
 
-```r
-zicoseq_out <- cbind.data.frame(p.raw=zicoseq.obj$p.raw,
-                                p.adj.fdr=zicoseq.obj$p.adj.fdr) 
-```
-
 
 ```r
-kable(head(filter(zicoseq_out, p.adj.fdr<0.05)))
+zicoseq_out <- cbind.data.frame(p.raw = zicoseq.obj$p.raw,
+                                p.adj.fdr = zicoseq.obj$p.adj.fdr)
+
+zicoseq_out %>%
+  filter(p.adj.fdr < 0.05) %>%
+  head() %>%
+  knitr::kable()
 ```
 
 
@@ -878,32 +805,46 @@ kable(head(filter(zicoseq_out, p.adj.fdr<0.05)))
 \hline
   & p.raw & p.adj.fdr\\
 \hline
-Actinomadura & 0.001 & 0.0004\\
+Faecalibacterium & 0.002 & 0.0224\\
 \hline
-Agromyces & 0.001 & 0.0030\\
+[Clostridium]\_innocuum\_group & 0.003 & 0.0238\\
 \hline
-Aneurinibacillus & 0.001 & 0.0036\\
+[Ruminococcus]\_gauvreauii\_group & 0.001 & 0.0005\\
 \hline
-Anoxybacillus & 0.001 & 0.0001\\
+Ruminococcus\_2 & 0.002 & 0.0300\\
 \hline
-Chitinispirillum & 0.001 & 0.0089\\
+Ruminococcaceae\_UCG-014 & 0.004 & 0.0369\\
 \hline
-Chitinivibrio & 0.001 & 0.0001\\
+Catabacter & 0.003 & 0.0224\\
 \hline
 \end{tabular}
 
+## Additional resources
 
+DAA can be performed by several means. Although most of them provide similar
+functionality, some may be more suitable than others given a certain study
+design or data type. Commonly used DAA tools include:
 
-## Tree-based methods
-
-Let us next cover phylogeny-aware methods to perform group-wise
-associations.
-
-### Group-wise associations testing based on balances
-
-For testing associations based on balances, check the philr
-R/Bioconductor package.
-
-
+- ALDEx2 [@Gloor2016]
+- ANCOM [@Mandal2015]
+- ANCOMBC [@ancombc2020]
+- corncob [@Martin2021]
+- DACOMP [@Brill2019]
+- DESeq2 [@Love2014]
+- eBay [@Liu2020]
+- edgeR [@Chen2016]
+- fastANCOM [@fastANCOM2022]
+- LDM [@Hu2020]
+- lefser [@Khlebrodova2021]
+- limma [@Ritchie2015]
+- LinDA [@Zhou2022]
+- MaAsLin2 [@Mallick2020]
+- metagenomeSeq [@Paulson2017]
+- Omnibus [@Omnibus2018]
+- RAIDA [@Sohn2015]
+- t-test
+- Wilcoxon test
+- ZicoSeq [@Yang2022]
+- ZINQ [@Ling2021]
 
 

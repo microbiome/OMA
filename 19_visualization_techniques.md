@@ -178,9 +178,7 @@ heterogeneity across them, therefore multidimensional plots, such as
 |                         | alpha diversity            | beta diversity            |
 |:-----------------------:|:--------------------------:|:-------------------------:|
 | used metrics            | diversity indices          | dissimilarity indices     |
-|                         |                            |                           | 
 | metric dimensionality   | one-dimensional            | multidimensional          |
-|                         |                            |                           | 
 | suitable visualization  | scatter, violin, box plots | Shepard, ordination plots |
 
 In conclusion, visualization techniques for alpha and beta diversity

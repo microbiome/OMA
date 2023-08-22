@@ -493,7 +493,7 @@ metadata(tse_dmm)$DMM$dmm
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7844 BIC: 8548 AIC: 8335 
+## Laplace: 7838 BIC: 8549 AIC: 8336 
 ## 
 ## [[6]]
 ## class: DMN 
