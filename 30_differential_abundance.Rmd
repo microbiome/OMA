@@ -93,11 +93,10 @@ as a grouping variable in the sample data. We simplify the examples by
 only including two of the three groups.
 
 ```{r import-daa-data}
-library(tidySummarizedExperiment)
+library(mia)
 library(tidyverse)
 
 # Import dataset
-library(mia)
 data("Tengeler2020", package = "mia")
 tse <- Tengeler2020
 
@@ -352,7 +351,7 @@ significant taxa.
 
 Lastly, we cover linear models for differential abundance analysis of
 microbiome compositional data (@Zhou2022). This is very similar to
-ANCOMBC with few differences: 1) LinDA correct for the compositional
+ANCOMBC with few differences: 1) LinDA corrects for the compositional
 bias differently using the mode of all regression coefficients. 2) it
 is faster (100x-1000x than ANCOMBC and according to the authors); 3)
 it supports hierarchical models. The latest ANCOMBC versions are also
@@ -388,6 +387,8 @@ linda_out <- linda.res$output$patient_statusControl
 linda_out %>%
   as.data.frame() %>%
   filter(reject) %>%
+  dplyr::select(stat, padj) %>%
+  rownames_to_column(var = "feature") %>%
   head() %>%
   knitr::kable()
 ```
@@ -463,13 +464,11 @@ apparent dynamics between the response and the main independent variable.
 They are common in experimental studies. Generally, they can be classified
 into 3 groups:
 
-- Biological confounders, such as age, sex, etc. 
+- Biological confounders, such as age and sex 
 
-- Technical confounders produced by data collection, storage, DNA
-  extraction, sequencing process, etc.
+- Technical confounders produced during sample collection, processing and analysis
 
-- Confounders resulting from experimental models, such as cage effect,
-  sample background, etc.
+- Confounders resulting from experimental models, such as batch effects and sample history
 
 Controlling for confounders is an important practice to reach an unbiased
 conclusion. To perform causal inference, it is crucial that the method
@@ -497,7 +496,12 @@ colData(tse)$library_size <- colSums(assay(tse, "counts"))
 ```
 
 
-### ANCOMBC
+### ANCOM-BC
+
+Here, confounders can be added to the formula along with patient status, the
+main outcome variable. This way, the model evaluates whether differentially
+abundant taxa are associated with one of the variables when the other two
+are kept constant.
 
 ```{r run-adj-ancombc, warning=FALSE}
 # perform the analysis 
@@ -510,14 +514,18 @@ ancombc_cov <- ancombc2(tse,
                         struc_zero = TRUE, 
                         neg_lb = TRUE,
                         alpha = 0.05,
-                        # multi group comparison is deactivated automatically
+                        # multi-group comparison is deactivated automatically
                         global = TRUE)
 
-# now the model answers the question: holding cohort constant, are bacterial
-# taxa differentially abundant? Or holding patient status constant, is cohort
-# associated with bacterial abundance?
 # Again we only show the first 6 entries.
 ```
+
+In the output, each taxon is assigned with several effect sizes (lfc, which
+stands for log-fold change) and adjusted p-values (q). For categorical variables such as patient status and cohort, the statistics indicate whether the abundance
+of a given taxon is significantly different between the specified group (column
+name) and the reference group (the group that does not appear in the column
+names), whereas for numerical variables such as library size, they indicate
+whether the abundance of a given taxon varies with that variable.
 
 ```{r adj-ancombc-res}
 ancombc_cov$res %>%
@@ -528,6 +536,9 @@ ancombc_cov$res %>%
 
 ### LinDA
 
+As in the previous method, confounders can be included in the formula with the
+main outcome variable.
+
 ```{r run-adj-linda}
 linda_cov <- linda(as.data.frame(assay(tse, "counts")),
                    as.data.frame(colData(tse)),
@@ -537,18 +548,30 @@ linda_cov <- linda(as.data.frame(assay(tse, "counts")),
                    mean.abund.filter = 0)
 ```
 
+The model returns an output for every variable included in the formula. Normally,
+only the results on the main outcome variable are relevant and can be retrieved
+as shown below. However, the statistics on the confounders can be similarly
+obtained by accessing the corresponding items from the output object.
+
 ```{r adj-linda-res}
+# Select results for the patient status
 linda.res <- linda_cov$output$patient_statusControl
 
 linda.res %>%
   filter(reject) %>%
+  dplyr::select(log2FoldChange, stat, padj) %>%
+  rownames_to_column(var = "feature") %>%
   head() %>%
   knitr::kable()
 ```
 
-
+The output shows effect sizes in terms of log-fold changes and a derived
+statistic (stat) as well as the corresponding adjusted p-values for differences
+in abundance of each taxon between the control and treated group.
 
 ### ZicoSeq
+
+For this method, confounders can be added as a list to the `adj.name` argument.
 
 ```{r run-adj-zicoseq}
 set.seed(123)
@@ -563,6 +586,8 @@ zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
                        max.abund.filter = 0,
                        perm.no = 999)
 ```
+
+The output shows the raw and adjusted p-values for clinical status.
 
 ```{r adj-zicoseq-res}
 zicoseq_out <- cbind.data.frame(p.raw = zicoseq.obj$p.raw,
