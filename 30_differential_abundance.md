@@ -124,11 +124,10 @@ only including two of the three groups.
 
 
 ```r
-library(tidySummarizedExperiment)
+library(mia)
 library(tidyverse)
 
 # Import dataset
-library(mia)
 data("Tengeler2020", package = "mia")
 tse <- Tengeler2020
 
@@ -450,7 +449,7 @@ significant taxa.
 
 Lastly, we cover linear models for differential abundance analysis of
 microbiome compositional data (@Zhou2022). This is very similar to
-ANCOMBC with few differences: 1) LinDA correct for the compositional
+ANCOMBC with few differences: 1) LinDA corrects for the compositional
 bias differently using the mode of all regression coefficients. 2) it
 is faster (100x-1000x than ANCOMBC and according to the authors); 3)
 it supports hierarchical models. The latest ANCOMBC versions are also
@@ -496,20 +495,22 @@ linda_out <- linda.res$output$patient_statusControl
 linda_out %>%
   as.data.frame() %>%
   filter(reject) %>%
+  dplyr::select(stat, padj) %>%
+  rownames_to_column(var = "feature") %>%
   head() %>%
   knitr::kable()
 ```
 
 
-\begin{tabular}{l|r|r|r|r|r|r|l|r}
+\begin{tabular}{l|r|r}
 \hline
-  & baseMean & log2FoldChange & lfcSE & stat & pvalue & padj & reject & df\\
+feature & stat & padj\\
 \hline
-Faecalibacterium & 6259.3 & -5.633 & 1.3252 & -4.250 & 0.0003 & 0.0092 & TRUE & 25\\
+Faecalibacterium & -4.250 & 0.0092\\
 \hline
-[Ruminococcus]\_gauvreauii\_group & 1065.3 & 4.121 & 1.0028 & 4.110 & 0.0004 & 0.0092 & TRUE & 25\\
+[Ruminococcus]\_gauvreauii\_group & 4.110 & 0.0092\\
 \hline
-Catabacter & 767.6 & -3.134 & 0.9274 & -3.379 & 0.0024 & 0.0390 & TRUE & 25\\
+Catabacter & -3.379 & 0.0390\\
 \hline
 \end{tabular}
 
@@ -620,13 +621,11 @@ apparent dynamics between the response and the main independent variable.
 They are common in experimental studies. Generally, they can be classified
 into 3 groups:
 
-- Biological confounders, such as age, sex, etc. 
+- Biological confounders, such as age and sex 
 
-- Technical confounders produced by data collection, storage, DNA
-  extraction, sequencing process, etc.
+- Technical confounders produced during sample collection, processing and analysis
 
-- Confounders resulting from experimental models, such as cage effect,
-  sample background, etc.
+- Confounders resulting from experimental models, such as batch effects and sample history
 
 Controlling for confounders is an important practice to reach an unbiased
 conclusion. To perform causal inference, it is crucial that the method
@@ -655,7 +654,12 @@ colData(tse)$library_size <- colSums(assay(tse, "counts"))
 ```
 
 
-### ANCOMBC
+### ANCOM-BC
+
+Here, confounders can be added to the formula along with patient status, the
+main outcome variable. This way, the model evaluates whether differentially
+abundant taxa are associated with one of the variables when the other two
+are kept constant.
 
 
 ```r
@@ -669,14 +673,18 @@ ancombc_cov <- ancombc2(tse,
                         struc_zero = TRUE, 
                         neg_lb = TRUE,
                         alpha = 0.05,
-                        # multi group comparison is deactivated automatically
+                        # multi-group comparison is deactivated automatically
                         global = TRUE)
 
-# now the model answers the question: holding cohort constant, are bacterial
-# taxa differentially abundant? Or holding patient status constant, is cohort
-# associated with bacterial abundance?
 # Again we only show the first 6 entries.
 ```
+
+In the output, each taxon is assigned with several effect sizes (lfc, which
+stands for log-fold change) and adjusted p-values (q). For categorical variables such as patient status and cohort, the statistics indicate whether the abundance
+of a given taxon is significantly different between the specified group (column
+name) and the reference group (the group that does not appear in the column
+names), whereas for numerical variables such as library size, they indicate
+whether the abundance of a given taxon varies with that variable.
 
 
 ```r
@@ -707,6 +715,9 @@ Lachnoclostridium & -2.7781 & 0.2807 & 1.6712 & 1.1817 & 1e-04 & 0 & 0 & 0 & 0 &
 
 ### LinDA
 
+As in the previous method, confounders can be included in the formula with the
+main outcome variable.
+
 
 ```r
 linda_cov <- linda(as.data.frame(assay(tse, "counts")),
@@ -725,38 +736,50 @@ linda_cov <- linda(as.data.frame(assay(tse, "counts")),
 ## Completed.
 ```
 
+The model returns an output for every variable included in the formula. Normally,
+only the results on the main outcome variable are relevant and can be retrieved
+as shown below. However, the statistics on the confounders can be similarly
+obtained by accessing the corresponding items from the output object.
+
 
 ```r
+# Select results for the patient status
 linda.res <- linda_cov$output$patient_statusControl
 
 linda.res %>%
   filter(reject) %>%
+  dplyr::select(log2FoldChange, stat, padj) %>%
+  rownames_to_column(var = "feature") %>%
   head() %>%
   knitr::kable()
 ```
 
 
-\begin{tabular}{l|r|r|r|r|r|r|l|r}
+\begin{tabular}{l|r|r|r}
 \hline
-  & baseMean & log2FoldChange & lfcSE & stat & pvalue & padj & reject & df\\
+feature & log2FoldChange & stat & padj\\
 \hline
-Faecalibacterium & 8776.7 & -5.921 & 1.3096 & -4.521 & 0.0002 & 0.0041 & TRUE & 22\\
+Faecalibacterium & -5.921 & -4.521 & 0.0041\\
 \hline
-Erysipelatoclostridium & 180.7 & 3.743 & 1.2433 & 3.010 & 0.0064 & 0.0451 & TRUE & 22\\
+Erysipelatoclostridium & 3.743 & 3.010 & 0.0451\\
 \hline
-[Ruminococcus]\_gauvreauii\_group & 541.4 & 4.240 & 0.9351 & 4.534 & 0.0002 & 0.0041 & TRUE & 22\\
+[Ruminococcus]\_gauvreauii\_group & 4.240 & 4.534 & 0.0041\\
 \hline
-Barnesiella & 2318.0 & -3.878 & 1.2443 & -3.116 & 0.0050 & 0.0411 & TRUE & 22\\
+Barnesiella & -3.878 & -3.116 & 0.0411\\
 \hline
-Ruminococcaceae\_UCG-014 & 375.9 & -3.062 & 0.8418 & -3.637 & 0.0015 & 0.0193 & TRUE & 22\\
+Ruminococcaceae\_UCG-014 & -3.062 & -3.637 & 0.0193\\
 \hline
-Butyricicoccus & 439.9 & -2.357 & 0.7536 & -3.127 & 0.0049 & 0.0411 & TRUE & 22\\
+Butyricicoccus & -2.357 & -3.127 & 0.0411\\
 \hline
 \end{tabular}
 
-
+The output shows effect sizes in terms of log-fold changes and a derived
+statistic (stat) as well as the corresponding adjusted p-values for differences
+in abundance of each taxon between the control and treated group.
 
 ### ZicoSeq
+
+For this method, confounders can be added as a list to the `adj.name` argument.
 
 
 ```r
@@ -788,6 +811,8 @@ zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
 ## ...................................................................................................
 ## Completed!
 ```
+
+The output shows the raw and adjusted p-values for clinical status.
 
 
 ```r

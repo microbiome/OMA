@@ -135,7 +135,7 @@
 
 \title{Orchestrating Microbiome Analysis with Bioconductor}
 \author{}
-\date{\vspace{-2.5em}\textbf{Authors:} Leo Lahti {[}aut{]}, Tuomas Borman {[}aut, cre{]}, Felix GM Ernst {[}aut{]}, and others (see the full list of contributors) {[}ctb{]} \textbf{Version:} 0.98.16 \textbf{Modified:} 2023-07-29 \textbf{Compiled:} 2023-08-22 \textbf{Environment:} R version 4.3.0 (2023-04-21), Bioconductor 3.17 \textbf{License:} CC BY-NC-SA 3.0 US \textbf{Copyright:} \textbf{Source:} \url{https://github.com/microbiome/OMA}}
+\date{\vspace{-2.5em}\textbf{Authors:} Leo Lahti {[}aut{]}, Tuomas Borman {[}aut, cre{]}, Felix GM Ernst {[}aut{]}, and others (see the full list of contributors) {[}ctb{]} \textbf{Version:} 0.98.16 \textbf{Modified:} 2023-07-29 \textbf{Compiled:} 2023-08-23 \textbf{Environment:} R version 4.3.0 (2023-04-21), Bioconductor 3.17 \textbf{License:} CC BY-NC-SA 3.0 US \textbf{Copyright:} \textbf{Source:} \url{https://github.com/microbiome/OMA}}
 
 \begin{document}
 \maketitle
@@ -2398,7 +2398,7 @@ New information can also be added to the experiment by creating a new variable.
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 0.7577 0.2918 0.5008 0.2279 0.2784 0.1997
+## [1] 0.45550 0.97905 0.05182 0.24221 0.53104 0.39568
 \end{verbatim}
 
 \hypertarget{merge-data}{%
@@ -4089,7 +4089,7 @@ much essential information from the data as possible and turn it into a lower
 dimensional representation. Dimension reduction is bound to lose information but
 commonly used ordination techniques can preserve relevant information of sample
 similarities in an optimal way, which is defined in different ways by different
-methods. {[}TODO add references and/or link to ordination chapter instead?{]}
+methods.
 
 Based on the type of algorithm, ordination methods in microbiome research can
 be generally divided in two categories: unsupervised and supervised ordination.
@@ -4135,7 +4135,7 @@ variation between stool samples and those with a different origin.
 
 \CommentTok{\# some beta diversity metrics are usually applied to relative abundances}
 \NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{transformAssay}\NormalTok{(tse,}
-                       \AttributeTok{method =} \StringTok{"relabundance"}\NormalTok{)}
+                      \AttributeTok{method =} \StringTok{"relabundance"}\NormalTok{)}
 
 \CommentTok{\# Add group information Feces yes/no}
 \NormalTok{tse}\SpecialCharTok{$}\NormalTok{Group }\OtherTok{\textless{}{-}}\NormalTok{ tse}\SpecialCharTok{$}\NormalTok{SampleType }\SpecialCharTok{==} \StringTok{"Feces"}
@@ -4402,8 +4402,8 @@ between the observations.
 
 \includegraphics{20_beta_diversity_files/figure-latex/shepard-1.png}
 
-\hypertarget{supervized-ordination}{%
-\section{Supervized ordination}\label{supervized-ordination}}
+\hypertarget{supervised-ordination}{%
+\section{Supervised ordination}\label{supervised-ordination}}
 
 dbRDA is a supervised counterpart of PCoA, that is, it takes into account the
 covariates specified by the user to maximize the variance with respect to the
@@ -4429,119 +4429,101 @@ non-Euclidean distance & dbRDA & PCoA \\
 \bottomrule()
 \end{longtable}
 
-We demonstrate the usage of dbRDA with the enterotype TreeSE, where samples
+We demonstrate the usage of dbRDA with the enterotype dataset, where samples
 correspond to patients. The colData contains the clinical status of each patient
-as well as a few covariates such as their gender and age, which can be included
-in the supervised model together with the clinical status, the main outcome variable.
-dbRDA can be perfomed with the \texttt{calculateRDA} function, which lies at the center
-of the following workflow.
+and a few covariates such as their gender and age.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Load packages}
-\FunctionTok{library}\NormalTok{(stringr)}
-
 \CommentTok{\# Load data}
 \FunctionTok{data}\NormalTok{(}\StringTok{"enterotype"}\NormalTok{, }\AttributeTok{package =} \StringTok{"mia"}\NormalTok{)}
+\NormalTok{tse2 }\OtherTok{\textless{}{-}}\NormalTok{ enterotype}
+
+\CommentTok{\# Apply relative transform}
+\NormalTok{tse2 }\OtherTok{\textless{}{-}} \FunctionTok{transformAssay}\NormalTok{(tse2,}
+                       \AttributeTok{method =} \StringTok{"relabundance"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+dbRDA can be perfomed with the \texttt{runRDA} function. In addition to the arguments
+previously defined for \protect\hyperlink{unsupervised-ordination}{unsupervised ordination}, this
+function takes a formula to control for variables and an action to treat missing
+values. Along with clinical status, which is the main outcome, we control for
+gender and age, and exclude observations where one of these variables is missing.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Perform RDA}
+\NormalTok{tse2 }\OtherTok{\textless{}{-}} \FunctionTok{runRDA}\NormalTok{(tse2,}
+               \AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{,}
+               \AttributeTok{formula =}\NormalTok{ assay }\SpecialCharTok{\textasciitilde{}}\NormalTok{ ClinicalStatus }\SpecialCharTok{+}\NormalTok{ Gender }\SpecialCharTok{+}\NormalTok{ Age,}
+               \AttributeTok{distance =} \StringTok{"bray"}\NormalTok{,}
+               \AttributeTok{na.action =}\NormalTok{ na.exclude)}
+
+\CommentTok{\# Store results of PERMANOVA test}
+\NormalTok{rda\_info }\OtherTok{\textless{}{-}} \FunctionTok{attr}\NormalTok{(}\FunctionTok{reducedDim}\NormalTok{(tse2, }\StringTok{"RDA"}\NormalTok{), }\StringTok{"significance"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+The importance of each variable on the similarity between samples can be
+assessed from the results of PERMANOVA, automatically provided by the \texttt{runRDA}
+function. We see that both clinical status and age explain more than 10\% of the
+variance, but only age shows statistical significance.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{rda\_info}\SpecialCharTok{$}\NormalTok{permanova}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                Df SumOfSqs     F Pr(>F) Total variance Explained variance
+## Model           6   1.1157 1.940  0.051          3.991            0.27952
+## ClinicalStatus  4   0.5837 1.522  0.123          3.991            0.14625
+## Gender          1   0.1679 1.751  0.125          3.991            0.04206
+## Age             1   0.5245 5.471  0.001          3.991            0.13140
+## Residual       30   2.8757    NA     NA          3.991            0.72048
+\end{verbatim}
+
+To ensure that the homogeneity assumption holds, we retrieve the corresponding
+information from the results of RDA. In this case, none of the p-values is lower
+than the significance threshold, and thus homogeneity is observed.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{rda\_info}\SpecialCharTok{$}\NormalTok{homogeneity}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                Df  Sum Sq Mean Sq       F N.Perm Pr(>F) Total variance
+## ClinicalStatus  4 0.25108 0.06277  2.7440    999  0.118         1.0288
+## Gender          1 0.01032 0.01032  0.4158    999  0.517         0.9283
+## Age            29 0.32723 0.01128 17.0256    999  0.406         0.3319
+##                Explained variance
+## ClinicalStatus            0.24404
+## Gender                    0.01111
+## Age                       0.98602
+\end{verbatim}
+
+Next, we proceed to visualize the weight and significance of each variable on
+the similarity between samples with an RDA plot, which can be generated with
+the following custom function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Load packages for plotting function}
+\FunctionTok{library}\NormalTok{(stringr)}
+\FunctionTok{library}\NormalTok{(ggord)}
+
+\NormalTok{rda }\OtherTok{\textless{}{-}} \FunctionTok{attr}\NormalTok{(}\FunctionTok{reducedDim}\NormalTok{(tse2, }\StringTok{"RDA"}\NormalTok{), }\StringTok{"rda"}\NormalTok{)}
 
 \CommentTok{\# Covariates that are being analyzed}
 \NormalTok{variable\_names }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"ClinicalStatus"}\NormalTok{, }\StringTok{"Gender"}\NormalTok{, }\StringTok{"Age"}\NormalTok{)}
 
-\CommentTok{\# Apply relative transform}
-\NormalTok{enterotype }\OtherTok{\textless{}{-}} \FunctionTok{transformAssay}\NormalTok{(enterotype, }\AttributeTok{method =} \StringTok{"relabundance"}\NormalTok{)}
-
-\CommentTok{\# Create a formula}
-\NormalTok{formula }\OtherTok{\textless{}{-}} \FunctionTok{as.formula}\NormalTok{(}\FunctionTok{paste0}\NormalTok{(}\StringTok{"assay \textasciitilde{} "}\NormalTok{, }\FunctionTok{str\_c}\NormalTok{(variable\_names, }\AttributeTok{collapse =} \StringTok{" + "}\NormalTok{)) )}
-
-\CommentTok{\# \# Perform RDA}
-\NormalTok{rda }\OtherTok{\textless{}{-}} \FunctionTok{calculateRDA}\NormalTok{(enterotype,}
-                    \AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{,}
-                    \AttributeTok{formula =}\NormalTok{ formula,}
-                    \AttributeTok{distance =} \StringTok{"bray"}\NormalTok{,}
-                    \AttributeTok{na.action =}\NormalTok{ na.exclude)}
-
-\CommentTok{\# Get the rda object}
-\NormalTok{rda }\OtherTok{\textless{}{-}} \FunctionTok{attr}\NormalTok{(rda, }\StringTok{"rda"}\NormalTok{)}
-\CommentTok{\# Calculate p{-}value and variance for whole model}
-\CommentTok{\# Recommendation: use 999 permutations instead of 99}
-\FunctionTok{set.seed}\NormalTok{(}\DecValTok{436}\NormalTok{)}
-\NormalTok{permanova }\OtherTok{\textless{}{-}} \FunctionTok{anova.cca}\NormalTok{(rda, }\AttributeTok{permutations =} \DecValTok{99}\NormalTok{)}
-\CommentTok{\# Create a data.frame for results}
-\NormalTok{rda\_info }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(permanova)[}\StringTok{"Model"}\NormalTok{, ]}
-
-\CommentTok{\# Calculate p{-}value and variance for each variable}
-\CommentTok{\# by = "margin" {-}{-}\textgreater{} the order or variables does not matter}
-\FunctionTok{set.seed}\NormalTok{(}\DecValTok{4585}\NormalTok{)}
-\NormalTok{permanova }\OtherTok{\textless{}{-}} \FunctionTok{anova.cca}\NormalTok{(rda, }\AttributeTok{by =} \StringTok{"margin"}\NormalTok{,  }\AttributeTok{permutations =} \DecValTok{99}\NormalTok{)}
-\CommentTok{\# Add results to data.frame}
-\NormalTok{rda\_info }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(rda\_info, permanova)}
-
-\CommentTok{\# Add info about total variance}
-\NormalTok{rda\_info[ , }\StringTok{"Total variance"}\NormalTok{] }\OtherTok{\textless{}{-}}\NormalTok{ rda\_info[}\StringTok{"Model"}\NormalTok{, }\DecValTok{2}\NormalTok{] }\SpecialCharTok{+}
-\NormalTok{    rda\_info[}\StringTok{"Residual"}\NormalTok{, }\DecValTok{2}\NormalTok{]}
-
-\CommentTok{\# Add info about explained variance}
-\NormalTok{rda\_info[ , }\StringTok{"Explained variance"}\NormalTok{] }\OtherTok{\textless{}{-}}\NormalTok{ rda\_info[ , }\DecValTok{2}\NormalTok{] }\SpecialCharTok{/} 
-\NormalTok{    rda\_info[ , }\StringTok{"Total variance"}\NormalTok{]}
-
-\CommentTok{\# Loop through variables, calculate homogeneity}
-\NormalTok{homogeneity }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{()}
-\CommentTok{\# Get colDtaa}
-\NormalTok{coldata }\OtherTok{\textless{}{-}} \FunctionTok{colData}\NormalTok{(enterotype)}
-\CommentTok{\# Get assay}
-\NormalTok{assay }\OtherTok{\textless{}{-}} \FunctionTok{t}\NormalTok{(}\FunctionTok{assay}\NormalTok{(enterotype, }\StringTok{"relabundance"}\NormalTok{))}
-\ControlFlowTok{for}\NormalTok{( variable\_name }\ControlFlowTok{in} \FunctionTok{rownames}\NormalTok{(rda\_info) )\{}
-    \CommentTok{\# If data is continuous or discrete}
-    \ControlFlowTok{if}\NormalTok{( variable\_name }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\StringTok{"Model"}\NormalTok{, }\StringTok{"Residual"}\NormalTok{) }\SpecialCharTok{||}
-        \FunctionTok{length}\NormalTok{(}\FunctionTok{unique}\NormalTok{(coldata[[variable\_name]])) }\SpecialCharTok{/}
-        \FunctionTok{length}\NormalTok{(coldata[[variable\_name]]) }\SpecialCharTok{\textgreater{}} \FloatTok{0.2}\NormalTok{ )\{}
-        \CommentTok{\# Do not calculate homogeneity for continuous data}
-\NormalTok{        temp }\OtherTok{\textless{}{-}} \ConstantTok{NA}
-\NormalTok{    \} }\ControlFlowTok{else}\NormalTok{\{}
-        \CommentTok{\# Calculate homogeneity for discrete data}
-        \CommentTok{\# Calculate homogeneity}
-        \FunctionTok{set.seed}\NormalTok{(}\DecValTok{413}\NormalTok{)}
-\NormalTok{        temp }\OtherTok{\textless{}{-}} \FunctionTok{anova}\NormalTok{(}
-            \FunctionTok{betadisper}\NormalTok{( }
-                \FunctionTok{vegdist}\NormalTok{(assay, }\AttributeTok{method =} \StringTok{"bray"}\NormalTok{),}
-                \AttributeTok{group =}\NormalTok{ coldata[[variable\_name]] ),}
-            \AttributeTok{permutations =}\NormalTok{ permutations )[}\StringTok{"Groups"}\NormalTok{, }\StringTok{"Pr(\textgreater{}F)"}\NormalTok{]}
-\NormalTok{    \}}
-    \CommentTok{\# Add info to the list}
-\NormalTok{    homogeneity[[variable\_name]] }\OtherTok{\textless{}{-}}\NormalTok{ temp}
-\NormalTok{\}}
-\CommentTok{\# Add homogeneity to information}
-\NormalTok{rda\_info[[}\StringTok{"Homogeneity p{-}value (NULL hyp: distinct/homogeneous {-}{-}\textgreater{} permanova suitable)"}\NormalTok{]] }\OtherTok{\textless{}{-}}
-\NormalTok{    homogeneity}
-
-\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(rda\_info)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{tabular}{l|r|r|r|r|r|r|l}
-\hline
-  & Df & SumOfSqs & F & Pr(>F) & Total variance & Explained variance & Homogeneity p-value (NULL hyp: distinct/homogeneous --> permanova suitable)\\
-\hline
-Model & 6 & 1.1157 & 1.940 & 0.05 & 3.991 & 0.2795 & NA\\
-\hline
-ClinicalStatus & 4 & 0.5837 & 1.522 & 0.15 & 3.991 & 0.1463 & 0.044277....\\
-\hline
-Gender & 1 & 0.1679 & 1.751 & 0.10 & 3.991 & 0.0421 & 0.522999....\\
-\hline
-Age & 1 & 0.5245 & 5.471 & 0.01 & 3.991 & 0.1314 & 0.000369....\\
-\hline
-Residual & 30 & 2.8757 & NA & NA & 3.991 & 0.7205 & NA\\
-\hline
-\end{tabular}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Load ggord for plotting}
-\FunctionTok{library}\NormalTok{(ggord)}
-
 \CommentTok{\# Since na.exclude was used, if there were rows missing information, they were }
 \CommentTok{\# dropped off. Subset coldata so that it matches with rda.}
-\NormalTok{coldata }\OtherTok{\textless{}{-}}\NormalTok{ coldata[ }\FunctionTok{rownames}\NormalTok{(rda}\SpecialCharTok{$}\NormalTok{CCA}\SpecialCharTok{$}\NormalTok{wa), ]}
+\NormalTok{coldata }\OtherTok{\textless{}{-}} \FunctionTok{colData}\NormalTok{(tse2)[ }\FunctionTok{rownames}\NormalTok{(rda}\SpecialCharTok{$}\NormalTok{CCA}\SpecialCharTok{$}\NormalTok{wa), ]}
 
 \CommentTok{\# Adjust names}
 \CommentTok{\# Get labels of vectors}
@@ -4563,9 +4545,9 @@ Residual & 30 & 2.8757 & NA & NA & 3.991 & 0.7205 & NA\\
 \NormalTok{    \}}
     \CommentTok{\# Add percentage how much this variable explains, and p{-}value}
 \NormalTok{    new\_name }\OtherTok{\textless{}{-}} \FunctionTok{expr}\NormalTok{(}\FunctionTok{paste}\NormalTok{(}\SpecialCharTok{!!}\NormalTok{new\_name, }\StringTok{" ("}\NormalTok{, }
-                           \SpecialCharTok{!!}\FunctionTok{format}\NormalTok{(}\FunctionTok{round}\NormalTok{( rda\_info[variable\_name, }\StringTok{"Explained variance"}\NormalTok{]}\SpecialCharTok{*}\DecValTok{100}\NormalTok{, }\DecValTok{1}\NormalTok{), }\AttributeTok{nsmall =} \DecValTok{1}\NormalTok{), }
+                           \SpecialCharTok{!!}\FunctionTok{format}\NormalTok{(}\FunctionTok{round}\NormalTok{( rda\_info}\SpecialCharTok{$}\NormalTok{permanova[variable\_name, }\StringTok{"Explained variance"}\NormalTok{]}\SpecialCharTok{*}\DecValTok{100}\NormalTok{, }\DecValTok{1}\NormalTok{), }\AttributeTok{nsmall =} \DecValTok{1}\NormalTok{), }
                            \StringTok{"\%, "}\NormalTok{,}\FunctionTok{italic}\NormalTok{(}\StringTok{"P"}\NormalTok{), }\StringTok{" = "}\NormalTok{, }
-                           \SpecialCharTok{!!}\FunctionTok{gsub}\NormalTok{(}\StringTok{"0}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{."}\NormalTok{,}\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{."}\NormalTok{, }\FunctionTok{format}\NormalTok{(}\FunctionTok{round}\NormalTok{( rda\_info[variable\_name, }\StringTok{"Pr(\textgreater{}F)"}\NormalTok{], }\DecValTok{3}\NormalTok{), }
+                           \SpecialCharTok{!!}\FunctionTok{gsub}\NormalTok{(}\StringTok{"0}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{."}\NormalTok{,}\StringTok{"}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{."}\NormalTok{, }\FunctionTok{format}\NormalTok{(}\FunctionTok{round}\NormalTok{( rda\_info}\SpecialCharTok{$}\NormalTok{permanova[variable\_name, }\StringTok{"Pr(\textgreater{}F)"}\NormalTok{], }\DecValTok{3}\NormalTok{), }
                                                        \AttributeTok{nsmall =} \DecValTok{3}\NormalTok{)), }\StringTok{")"}\NormalTok{))}
 
     \FunctionTok{return}\NormalTok{(new\_name)}
@@ -4597,9 +4579,11 @@ Residual & 30 & 2.8757 & NA & NA & 3.991 & 0.7205 & NA\\
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{20_beta_diversity_files/figure-latex/microbiome_RDA2-1.png}
+\includegraphics{20_beta_diversity_files/figure-latex/plot-rda-1.png}
 
-From RDA plot we can see that only age has significant affect on microbial profile.
+From the plot above, we can see that only age significantly describes
+differences between the microbial profiles of different samples. Such visual
+approach complements the previous results of PERMANOVA.
 
 \hypertarget{case-studies}{%
 \section{Case studies}\label{case-studies}}
@@ -4615,17 +4599,17 @@ data at the Genus level and get the dominant taxa per sample.
 \begin{Highlighting}[]
 \CommentTok{\# Agglomerate to genus level}
 \NormalTok{tse\_genus }\OtherTok{\textless{}{-}} \FunctionTok{mergeFeaturesByRank}\NormalTok{(tse,}
-                               \AttributeTok{rank =} \StringTok{"Genus"}\NormalTok{)}
+                                 \AttributeTok{rank =} \StringTok{"Genus"}\NormalTok{)}
 
 \CommentTok{\# Convert to relative abundances}
 \NormalTok{tse\_genus }\OtherTok{\textless{}{-}} \FunctionTok{transformAssay}\NormalTok{(tse,}
-                             \AttributeTok{method =} \StringTok{"relabundance"}\NormalTok{,}
-                             \AttributeTok{assay.type =} \StringTok{"counts"}\NormalTok{)}
+                            \AttributeTok{method =} \StringTok{"relabundance"}\NormalTok{,}
+                            \AttributeTok{assay.type =} \StringTok{"counts"}\NormalTok{)}
 
 \CommentTok{\# Add info on dominant genus per sample}
 \NormalTok{tse\_genus }\OtherTok{\textless{}{-}} \FunctionTok{addPerSampleDominantFeatures}\NormalTok{(tse\_genus,}
-                                      \AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{,}
-                                      \AttributeTok{name =} \StringTok{"dominant\_taxa"}\NormalTok{)}
+                                          \AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{,}
+                                          \AttributeTok{name =} \StringTok{"dominant\_taxa"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -4647,8 +4631,8 @@ that A 3D interactive version of the plot below can be found in \ref{extras}.
 \begin{Highlighting}[]
 \CommentTok{\# Getting the top taxa}
 \NormalTok{top\_taxa }\OtherTok{\textless{}{-}} \FunctionTok{getTopFeatures}\NormalTok{(tse\_genus,}
-                       \AttributeTok{top =} \DecValTok{6}\NormalTok{,}
-                       \AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{)}
+                           \AttributeTok{top =} \DecValTok{6}\NormalTok{,}
+                           \AttributeTok{assay.type =} \StringTok{"relabundance"}\NormalTok{)}
 
 \CommentTok{\# Naming all the rest of non top{-}taxa as "Other"}
 \NormalTok{most\_abundant }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\FunctionTok{colData}\NormalTok{(tse\_genus)}\SpecialCharTok{$}\NormalTok{dominant\_taxa,}
@@ -4751,7 +4735,7 @@ the variation between communities.
 \begin{Highlighting}[]
 \CommentTok{\# Agglomerate data to Species level}
 \NormalTok{tse }\OtherTok{\textless{}{-}} \FunctionTok{mergeFeaturesByRank}\NormalTok{(tse,}
-                         \AttributeTok{rank =} \StringTok{"Species"}\NormalTok{)}
+                           \AttributeTok{rank =} \StringTok{"Species"}\NormalTok{)}
 
 \CommentTok{\# Set seed for reproducibility}
 \FunctionTok{set.seed}\NormalTok{(}\DecValTok{1576}\NormalTok{)}
@@ -5692,7 +5676,7 @@ The following operation returns a list of DMM objects for closer investigation.
 ## class: DMN 
 ## k: 5 
 ## samples x taxa: 26 x 67 
-## Laplace: 7838 BIC: 8549 AIC: 8336 
+## Laplace: 7844 BIC: 8548 AIC: 8335 
 ## 
 ## [[6]]
 ## class: DMN 
@@ -5758,15 +5742,15 @@ Patient status is used for grouping.
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 \end{verbatim}
 
 Mixture weights (rough measure of the cluster size).
@@ -5779,7 +5763,7 @@ Mixture weights (rough measure of the cluster size).
 
 \begin{verbatim}
 ##       pi theta
-## 1 0.5385 20.58
+## 1 0.5385 20.59
 ## 2 0.4615 15.32
 \end{verbatim}
 
@@ -5795,12 +5779,12 @@ probable it is that each sample belongs to each cluster
 
 \begin{verbatim}
 ##                 1         2
-## CL3     1.000e+00 4.501e-17
-## CC1     1.000e+00 3.417e-22
-## SV1     1.000e+00 1.712e-12
-## M31Fcsw 7.425e-26 1.000e+00
-## M11Fcsw 1.093e-16 1.000e+00
-## M31Plmr 1.152e-13 1.000e+00
+## CL3     1.000e+00 4.594e-17
+## CC1     1.000e+00 3.526e-22
+## SV1     1.000e+00 1.735e-12
+## M31Fcsw 7.385e-26 1.000e+00
+## M11Fcsw 1.089e-16 1.000e+00
+## M31Plmr 1.150e-13 1.000e+00
 \end{verbatim}
 
 We can also know the contribution of each taxa to each component
@@ -5813,12 +5797,12 @@ We can also know the contribution of each taxa to each component
 
 \begin{verbatim}
 ##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30381 0.1354045
-## Phylum:Euryarchaeota  0.23114 0.1468879
-## Phylum:Actinobacteria 1.21375 1.0581523
-## Phylum:Spirochaetes   0.21393 0.1318064
-## Phylum:MVP-15         0.02982 0.0007669
-## Phylum:Proteobacteria 6.84470 1.8114033
+## Phylum:Crenarchaeota  0.30381 0.1354058
+## Phylum:Euryarchaeota  0.23114 0.1468923
+## Phylum:Actinobacteria 1.21375 1.0581803
+## Phylum:Spirochaetes   0.21393 0.1318079
+## Phylum:MVP-15         0.02983 0.0007714
+## Phylum:Proteobacteria 6.84670 1.8116041
 \end{verbatim}
 
 Finally, to be able to visualize our data and clusters, we start by
@@ -6484,11 +6468,10 @@ only including two of the three groups.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(tidySummarizedExperiment)}
+\FunctionTok{library}\NormalTok{(mia)}
 \FunctionTok{library}\NormalTok{(tidyverse)}
 
 \CommentTok{\# Import dataset}
-\FunctionTok{library}\NormalTok{(mia)}
 \FunctionTok{data}\NormalTok{(}\StringTok{"Tengeler2020"}\NormalTok{, }\AttributeTok{package =} \StringTok{"mia"}\NormalTok{)}
 \NormalTok{tse }\OtherTok{\textless{}{-}}\NormalTok{ Tengeler2020}
 
@@ -6815,7 +6798,7 @@ significant taxa.
 
 Lastly, we cover linear models for differential abundance analysis of
 microbiome compositional data (\citet{Zhou2022}). This is very similar to
-ANCOMBC with few differences: 1) LinDA correct for the compositional
+ANCOMBC with few differences: 1) LinDA corrects for the compositional
 bias differently using the mode of all regression coefficients. 2) it
 is faster (100x-1000x than ANCOMBC and according to the authors); 3)
 it supports hierarchical models. The latest ANCOMBC versions are also
@@ -6861,20 +6844,22 @@ set sizes.
 \NormalTok{linda\_out }\SpecialCharTok{\%\textgreater{}\%}
   \FunctionTok{as.data.frame}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
   \FunctionTok{filter}\NormalTok{(reject) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(stat, padj) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{rownames\_to\_column}\NormalTok{(}\AttributeTok{var =} \StringTok{"feature"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
   \FunctionTok{head}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
 \NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{tabular}{l|r|r|r|r|r|r|l|r}
+\begin{tabular}{l|r|r}
 \hline
-  & baseMean & log2FoldChange & lfcSE & stat & pvalue & padj & reject & df\\
+feature & stat & padj\\
 \hline
-Faecalibacterium & 6259.3 & -5.633 & 1.3252 & -4.250 & 0.0003 & 0.0092 & TRUE & 25\\
+Faecalibacterium & -4.250 & 0.0092\\
 \hline
-[Ruminococcus]\_gauvreauii\_group & 1065.3 & 4.121 & 1.0028 & 4.110 & 0.0004 & 0.0092 & TRUE & 25\\
+[Ruminococcus]\_gauvreauii\_group & 4.110 & 0.0092\\
 \hline
-Catabacter & 767.6 & -3.134 & 0.9274 & -3.379 & 0.0024 & 0.0390 & TRUE & 25\\
+Catabacter & -3.379 & 0.0390\\
 \hline
 \end{tabular}
 
@@ -6997,13 +6982,11 @@ into 3 groups:
 
 \begin{itemize}
 \item
-  Biological confounders, such as age, sex, etc.
+  Biological confounders, such as age and sex
 \item
-  Technical confounders produced by data collection, storage, DNA
-  extraction, sequencing process, etc.
+  Technical confounders produced during sample collection, processing and analysis
 \item
-  Confounders resulting from experimental models, such as cage effect,
-  sample background, etc.
+  Confounders resulting from experimental models, such as batch effects and sample history
 \end{itemize}
 
 Controlling for confounders is an important practice to reach an unbiased
@@ -7033,8 +7016,13 @@ control for uneven sequencing efforts across samples, rarefaction generally repr
 \end{Highlighting}
 \end{Shaded}
 
-\hypertarget{ancombc}{%
-\subsection{ANCOMBC}\label{ancombc}}
+\hypertarget{ancom-bc-1}{%
+\subsection{ANCOM-BC}\label{ancom-bc-1}}
+
+Here, confounders can be added to the formula along with patient status, the
+main outcome variable. This way, the model evaluates whether differentially
+abundant taxa are associated with one of the variables when the other two
+are kept constant.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7048,15 +7036,19 @@ control for uneven sequencing efforts across samples, rarefaction generally repr
                         \AttributeTok{struc\_zero =} \ConstantTok{TRUE}\NormalTok{, }
                         \AttributeTok{neg\_lb =} \ConstantTok{TRUE}\NormalTok{,}
                         \AttributeTok{alpha =} \FloatTok{0.05}\NormalTok{,}
-                        \CommentTok{\# multi group comparison is deactivated automatically}
+                        \CommentTok{\# multi{-}group comparison is deactivated automatically}
                         \AttributeTok{global =} \ConstantTok{TRUE}\NormalTok{)}
 
-\CommentTok{\# now the model answers the question: holding cohort constant, are bacterial}
-\CommentTok{\# taxa differentially abundant? Or holding patient status constant, is cohort}
-\CommentTok{\# associated with bacterial abundance?}
 \CommentTok{\# Again we only show the first 6 entries.}
 \end{Highlighting}
 \end{Shaded}
+
+In the output, each taxon is assigned with several effect sizes (lfc, which
+stands for log-fold change) and adjusted p-values (q). For categorical variables such as patient status and cohort, the statistics indicate whether the abundance
+of a given taxon is significantly different between the specified group (column
+name) and the reference group (the group that does not appear in the column
+names), whereas for numerical variables such as library size, they indicate
+whether the abundance of a given taxon varies with that variable.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7088,6 +7080,9 @@ Lachnoclostridium & -2.7781 & 0.2807 & 1.6712 & 1.1817 & 1e-04 & 0 & 0 & 0 & 0 &
 \hypertarget{linda-1}{%
 \subsection{LinDA}\label{linda-1}}
 
+As in the previous method, confounders can be included in the formula with the
+main outcome variable.
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{linda\_cov }\OtherTok{\textless{}{-}} \FunctionTok{linda}\NormalTok{(}\FunctionTok{as.data.frame}\NormalTok{(}\FunctionTok{assay}\NormalTok{(tse, }\StringTok{"counts"}\NormalTok{)),}
@@ -7107,37 +7102,51 @@ Lachnoclostridium & -2.7781 & 0.2807 & 1.6712 & 1.1817 & 1e-04 & 0 & 0 & 0 & 0 &
 ## Completed.
 \end{verbatim}
 
+The model returns an output for every variable included in the formula. Normally,
+only the results on the main outcome variable are relevant and can be retrieved
+as shown below. However, the statistics on the confounders can be similarly
+obtained by accessing the corresponding items from the output object.
+
 \begin{Shaded}
 \begin{Highlighting}[]
+\CommentTok{\# Select results for the patient status}
 \NormalTok{linda.res }\OtherTok{\textless{}{-}}\NormalTok{ linda\_cov}\SpecialCharTok{$}\NormalTok{output}\SpecialCharTok{$}\NormalTok{patient\_statusControl}
 
 \NormalTok{linda.res }\SpecialCharTok{\%\textgreater{}\%}
   \FunctionTok{filter}\NormalTok{(reject) }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{select}\NormalTok{(log2FoldChange, stat, padj) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{rownames\_to\_column}\NormalTok{(}\AttributeTok{var =} \StringTok{"feature"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
   \FunctionTok{head}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
 \NormalTok{  knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{tabular}{l|r|r|r|r|r|r|l|r}
+\begin{tabular}{l|r|r|r}
 \hline
-  & baseMean & log2FoldChange & lfcSE & stat & pvalue & padj & reject & df\\
+feature & log2FoldChange & stat & padj\\
 \hline
-Faecalibacterium & 8776.7 & -5.921 & 1.3096 & -4.521 & 0.0002 & 0.0041 & TRUE & 22\\
+Faecalibacterium & -5.921 & -4.521 & 0.0041\\
 \hline
-Erysipelatoclostridium & 180.7 & 3.743 & 1.2433 & 3.010 & 0.0064 & 0.0451 & TRUE & 22\\
+Erysipelatoclostridium & 3.743 & 3.010 & 0.0451\\
 \hline
-[Ruminococcus]\_gauvreauii\_group & 541.4 & 4.240 & 0.9351 & 4.534 & 0.0002 & 0.0041 & TRUE & 22\\
+[Ruminococcus]\_gauvreauii\_group & 4.240 & 4.534 & 0.0041\\
 \hline
-Barnesiella & 2318.0 & -3.878 & 1.2443 & -3.116 & 0.0050 & 0.0411 & TRUE & 22\\
+Barnesiella & -3.878 & -3.116 & 0.0411\\
 \hline
-Ruminococcaceae\_UCG-014 & 375.9 & -3.062 & 0.8418 & -3.637 & 0.0015 & 0.0193 & TRUE & 22\\
+Ruminococcaceae\_UCG-014 & -3.062 & -3.637 & 0.0193\\
 \hline
-Butyricicoccus & 439.9 & -2.357 & 0.7536 & -3.127 & 0.0049 & 0.0411 & TRUE & 22\\
+Butyricicoccus & -2.357 & -3.127 & 0.0411\\
 \hline
 \end{tabular}
 
+The output shows effect sizes in terms of log-fold changes and a derived
+statistic (stat) as well as the corresponding adjusted p-values for differences
+in abundance of each taxon between the control and treated group.
+
 \hypertarget{zicoseq-1}{%
 \subsection{ZicoSeq}\label{zicoseq-1}}
+
+For this method, confounders can be added as a list to the \texttt{adj.name} argument.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7170,6 +7179,8 @@ Butyricicoccus & 439.9 & -2.357 & 0.7536 & -3.127 & 0.0049 & 0.0411 & TRUE & 22\
 ## ...................................................................................................
 ## Completed!
 \end{verbatim}
+
+The output shows the raw and adjusted p-values for clinical status.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7255,7 +7266,7 @@ design or data type. Commonly used DAA tools include:
 \end{itemize}
 
 \hypertarget{machine_learning}{%
-\chapter{Machine learning}\label{machine_learning}}
+\chapter{Machine Learning}\label{machine_learning}}
 
 Machine learning (ML) is a part of artificial intelligence. There are multiple
 definitions, but ``machine'' refers to computation and ``learning'' to improving
@@ -7340,26 +7351,26 @@ package. We try to predict the diet type based on the data.
 ## 
 ##           Reference
 ## Prediction Mixed Veg
-##      Mixed    12   9
-##      Veg      11  15
+##      Mixed    10  10
+##      Veg      13  14
 ##                                         
-##                Accuracy : 0.574         
-##                  95% CI : (0.422, 0.717)
+##                Accuracy : 0.511         
+##                  95% CI : (0.361, 0.659)
 ##     No Information Rate : 0.511         
-##     P-Value [Acc > NIR] : 0.233         
+##     P-Value [Acc > NIR] : 0.558         
 ##                                         
-##                   Kappa : 0.147         
+##                   Kappa : 0.018         
 ##                                         
-##  Mcnemar's Test P-Value : 0.823         
+##  Mcnemar's Test P-Value : 0.677         
 ##                                         
-##             Sensitivity : 0.522         
-##             Specificity : 0.625         
-##          Pos Pred Value : 0.571         
-##          Neg Pred Value : 0.577         
+##             Sensitivity : 0.435         
+##             Specificity : 0.583         
+##          Pos Pred Value : 0.500         
+##          Neg Pred Value : 0.519         
 ##              Prevalence : 0.489         
-##          Detection Rate : 0.255         
-##    Detection Prevalence : 0.447         
-##       Balanced Accuracy : 0.573         
+##          Detection Rate : 0.213         
+##    Detection Prevalence : 0.426         
+##       Balanced Accuracy : 0.509         
 ##                                         
 ##        'Positive' Class : Mixed         
 ## 
@@ -7442,7 +7453,7 @@ For unsupervised machine learning, please refer to chapters that are listed belo
 \end{itemize}
 
 \hypertarget{multi-assay-analyses}{%
-\chapter{Multi-assay analyses}\label{multi-assay-analyses}}
+\chapter{Multi-Assay Analyses}\label{multi-assay-analyses}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7866,122 +7877,122 @@ The model is then prepared with \texttt{prepare\_mofa} and trained with \texttt{
 ## 
 ## ELBO before training: -22013.97 
 ## 
-## Iteration 1: time=0.00, ELBO=-4042.78, deltaELBO=17971.193 (81.63540218%), Factors=5
+## Iteration 1: time=0.00, ELBO=-4042.78, deltaELBO=17971.192 (81.63540032%), Factors=5
 ## Iteration 2: time=0.00, Factors=5
 ## Iteration 3: time=0.00, Factors=5
 ## Iteration 4: time=0.00, Factors=5
 ## Iteration 5: time=0.00, Factors=5
-## Iteration 6: time=0.00, ELBO=826.57, deltaELBO=4869.348 (22.11935301%), Factors=5
+## Iteration 6: time=0.00, ELBO=826.57, deltaELBO=4869.348 (22.11935643%), Factors=5
 ## Iteration 7: time=0.00, Factors=5
 ## Iteration 8: time=0.00, Factors=5
 ## Iteration 9: time=0.00, Factors=5
 ## Iteration 10: time=0.00, Factors=5
-## Iteration 11: time=0.00, ELBO=861.41, deltaELBO=34.839 (0.15826042%), Factors=5
+## Iteration 11: time=0.00, ELBO=861.41, deltaELBO=34.839 (0.15825956%), Factors=5
 ## Iteration 12: time=0.00, Factors=5
 ## Iteration 13: time=0.00, Factors=5
 ## Iteration 14: time=0.00, Factors=5
 ## Iteration 15: time=0.00, Factors=5
-## Iteration 16: time=0.00, ELBO=867.97, deltaELBO=6.560 (0.02980141%), Factors=5
+## Iteration 16: time=0.00, ELBO=867.97, deltaELBO=6.560 (0.02980063%), Factors=5
 ## Iteration 17: time=0.00, Factors=5
 ## Iteration 18: time=0.00, Factors=5
 ## Iteration 19: time=0.00, Factors=5
 ## Iteration 20: time=0.00, Factors=5
-## Iteration 21: time=0.00, ELBO=871.04, deltaELBO=3.072 (0.01395407%), Factors=5
+## Iteration 21: time=0.00, ELBO=871.04, deltaELBO=3.072 (0.01395293%), Factors=5
 ## Iteration 22: time=0.00, Factors=5
 ## Iteration 23: time=0.00, Factors=5
 ## Iteration 24: time=0.00, Factors=5
 ## Iteration 25: time=0.00, Factors=5
-## Iteration 26: time=0.00, ELBO=872.88, deltaELBO=1.842 (0.00836699%), Factors=5
+## Iteration 26: time=0.00, ELBO=872.88, deltaELBO=1.842 (0.00836904%), Factors=5
 ## Iteration 27: time=0.00, Factors=5
 ## Iteration 28: time=0.00, Factors=5
 ## Iteration 29: time=0.00, Factors=5
 ## Iteration 30: time=0.00, Factors=5
-## Iteration 31: time=0.00, ELBO=874.12, deltaELBO=1.240 (0.00563446%), Factors=5
+## Iteration 31: time=0.00, ELBO=874.12, deltaELBO=1.240 (0.00563399%), Factors=5
 ## Iteration 32: time=0.00, Factors=5
 ## Iteration 33: time=0.00, Factors=5
 ## Iteration 34: time=0.00, Factors=5
 ## Iteration 35: time=0.00, Factors=5
-## Iteration 36: time=0.00, ELBO=875.02, deltaELBO=0.896 (0.00406791%), Factors=5
+## Iteration 36: time=0.00, ELBO=875.02, deltaELBO=0.895 (0.00406653%), Factors=5
 ## Iteration 37: time=0.00, Factors=5
 ## Iteration 38: time=0.00, Factors=5
 ## Iteration 39: time=0.00, Factors=5
 ## Iteration 40: time=0.00, Factors=5
-## Iteration 41: time=0.01, ELBO=875.70, deltaELBO=0.678 (0.00307983%), Factors=5
+## Iteration 41: time=0.00, ELBO=875.70, deltaELBO=0.678 (0.00308090%), Factors=5
 ## Iteration 42: time=0.00, Factors=5
 ## Iteration 43: time=0.00, Factors=5
 ## Iteration 44: time=0.00, Factors=5
 ## Iteration 45: time=0.00, Factors=5
-## Iteration 46: time=0.00, ELBO=876.23, deltaELBO=0.531 (0.00241391%), Factors=5
+## Iteration 46: time=0.00, ELBO=876.23, deltaELBO=0.531 (0.00241399%), Factors=5
 ## Iteration 47: time=0.00, Factors=5
 ## Iteration 48: time=0.00, Factors=5
 ## Iteration 49: time=0.00, Factors=5
 ## Iteration 50: time=0.00, Factors=5
-## Iteration 51: time=0.00, ELBO=876.66, deltaELBO=0.431 (0.00195968%), Factors=5
+## Iteration 51: time=0.00, ELBO=876.66, deltaELBO=0.431 (0.00195876%), Factors=5
 ## Iteration 52: time=0.00, Factors=5
 ## Iteration 53: time=0.00, Factors=5
 ## Iteration 54: time=0.00, Factors=5
 ## Iteration 55: time=0.00, Factors=5
-## Iteration 56: time=0.00, ELBO=877.02, deltaELBO=0.355 (0.00161186%), Factors=5
+## Iteration 56: time=0.00, ELBO=877.02, deltaELBO=0.355 (0.00161258%), Factors=5
 ## Iteration 57: time=0.00, Factors=5
 ## Iteration 58: time=0.00, Factors=5
 ## Iteration 59: time=0.00, Factors=5
 ## Iteration 60: time=0.00, Factors=5
-## Iteration 61: time=0.00, ELBO=877.31, deltaELBO=0.299 (0.00135825%), Factors=5
+## Iteration 61: time=0.00, ELBO=877.31, deltaELBO=0.299 (0.00135840%), Factors=5
 ## Iteration 62: time=0.00, Factors=5
 ## Iteration 63: time=0.00, Factors=5
 ## Iteration 64: time=0.00, Factors=5
 ## Iteration 65: time=0.00, Factors=5
-## Iteration 66: time=0.00, ELBO=877.57, deltaELBO=0.259 (0.00117632%), Factors=5
+## Iteration 66: time=0.00, ELBO=877.57, deltaELBO=0.259 (0.00117674%), Factors=5
 ## Iteration 67: time=0.00, Factors=5
 ## Iteration 68: time=0.00, Factors=5
 ## Iteration 69: time=0.00, Factors=5
 ## Iteration 70: time=0.00, Factors=5
-## Iteration 71: time=0.00, ELBO=877.80, deltaELBO=0.224 (0.00101838%), Factors=5
+## Iteration 71: time=0.00, ELBO=877.80, deltaELBO=0.224 (0.00101856%), Factors=5
 ## Iteration 72: time=0.00, Factors=5
 ## Iteration 73: time=0.00, Factors=5
 ## Iteration 74: time=0.00, Factors=5
 ## Iteration 75: time=0.00, Factors=5
-## Iteration 76: time=0.00, ELBO=878.00, deltaELBO=0.199 (0.00090240%), Factors=5
+## Iteration 76: time=0.00, ELBO=878.00, deltaELBO=0.199 (0.00090239%), Factors=5
 ## Iteration 77: time=0.00, Factors=5
 ## Iteration 78: time=0.00, Factors=5
 ## Iteration 79: time=0.00, Factors=5
 ## Iteration 80: time=0.00, Factors=5
-## Iteration 81: time=0.00, ELBO=878.17, deltaELBO=0.177 (0.00080306%), Factors=5
+## Iteration 81: time=0.00, ELBO=878.17, deltaELBO=0.177 (0.00080298%), Factors=5
 ## Iteration 82: time=0.00, Factors=5
 ## Iteration 83: time=0.00, Factors=5
 ## Iteration 84: time=0.00, Factors=5
 ## Iteration 85: time=0.00, Factors=5
-## Iteration 86: time=0.00, ELBO=878.33, deltaELBO=0.161 (0.00073316%), Factors=5
+## Iteration 86: time=0.00, ELBO=878.33, deltaELBO=0.161 (0.00073358%), Factors=5
 ## Iteration 87: time=0.00, Factors=5
 ## Iteration 88: time=0.00, Factors=5
 ## Iteration 89: time=0.00, Factors=5
 ## Iteration 90: time=0.00, Factors=5
-## Iteration 91: time=0.00, ELBO=878.48, deltaELBO=0.144 (0.00065437%), Factors=5
+## Iteration 91: time=0.00, ELBO=878.48, deltaELBO=0.144 (0.00065322%), Factors=5
 ## Iteration 92: time=0.00, Factors=5
 ## Iteration 93: time=0.00, Factors=5
 ## Iteration 94: time=0.00, Factors=5
 ## Iteration 95: time=0.00, Factors=5
-## Iteration 96: time=0.00, ELBO=878.61, deltaELBO=0.132 (0.00060084%), Factors=5
+## Iteration 96: time=0.00, ELBO=878.61, deltaELBO=0.132 (0.00059933%), Factors=5
 ## Iteration 97: time=0.00, Factors=5
 ## Iteration 98: time=0.00, Factors=5
 ## Iteration 99: time=0.00, Factors=5
 ## Iteration 100: time=0.00, Factors=5
-## Iteration 101: time=0.00, ELBO=878.73, deltaELBO=0.121 (0.00055104%), Factors=5
+## Iteration 101: time=0.00, ELBO=878.73, deltaELBO=0.122 (0.00055240%), Factors=5
 ## Iteration 102: time=0.00, Factors=5
 ## Iteration 103: time=0.00, Factors=5
 ## Iteration 104: time=0.00, Factors=5
 ## Iteration 105: time=0.00, Factors=5
-## Iteration 106: time=0.00, ELBO=878.84, deltaELBO=0.112 (0.00050962%), Factors=5
+## Iteration 106: time=0.00, ELBO=878.84, deltaELBO=0.112 (0.00051068%), Factors=5
 ## Iteration 107: time=0.00, Factors=5
 ## Iteration 108: time=0.00, Factors=5
 ## Iteration 109: time=0.00, Factors=5
 ## Iteration 110: time=0.00, Factors=5
-## Iteration 111: time=0.00, ELBO=878.95, deltaELBO=0.103 (0.00046843%), Factors=5
+## Iteration 111: time=0.00, ELBO=878.95, deltaELBO=0.103 (0.00046697%), Factors=5
 ## Iteration 112: time=0.00, Factors=5
 ## Iteration 113: time=0.00, Factors=5
 ## Iteration 114: time=0.00, Factors=5
 ## Iteration 115: time=0.00, Factors=5
-## Iteration 116: time=0.00, ELBO=879.04, deltaELBO=0.094 (0.00042675%), Factors=5
+## Iteration 116: time=0.00, ELBO=879.04, deltaELBO=0.095 (0.00042938%), Factors=5
 ## 
 ## Converged!
 ## 
@@ -7992,7 +8003,7 @@ The model is then prepared with \texttt{prepare\_mofa} and trained with \texttt{
 ## #######################
 ## 
 ## 
-## Saving model in /tmp/RtmpgGLrsC/mofa_20230822-065539.hdf5...
+## Saving model in /tmp/RtmpEy1AUV/mofa_20230823-061900.hdf5...
 \end{verbatim}
 
 The explained variance is visualized with the \texttt{plot\_variance\_explained} function:
@@ -9042,8 +9053,8 @@ We support the \href{https://bioconductor.github.io/bioc_coc_multilingual/}{Bioc
 
 \href{http://girke.bioinformatics.ucr.edu/GEN242/tutorials/rsequences/rsequences/}{NGS Analysis Basics} provides a walk-through of the above-mentioned features with detailed examples.
 
-\hypertarget{alternative-containers-for-microbiome-data}{%
-\subsection{Alternative containers for microbiome data}\label{alternative-containers-for-microbiome-data}}
+\hypertarget{phyloseq-an-alternative-container-for-microbiome-data}{%
+\subsection{phyloseq: an alternative container for microbiome data}\label{phyloseq-an-alternative-container-for-microbiome-data}}
 
 The \texttt{phyloseq} package and class became the first widely used data
 container for microbiome data science in R. Many methods for taxonomic
@@ -9063,20 +9074,32 @@ information. \texttt{colData} : This slot is similar to
 related to samples. \texttt{rowTree} : This slot is similar
 to \texttt{phy\_tree} in \texttt{phyloseq} to store phylogenetic tree.
 
-In this book, you will come across terms like \texttt{FeatureIDs} and
+In this book, you will encounter terms such as \texttt{FeatureIDs} and
 \texttt{SampleIDs}. \texttt{FeatureIDs} : These are basically OTU/ASV ids which are
 row names in \texttt{assays} and \texttt{rowData}. \texttt{SampleIDs} : As the name
 suggests, these are sample ids which are column names in \texttt{assays} and
-row names in \texttt{colData}.
+row names in \texttt{colData}. \texttt{FeatureIDs} and \texttt{SampleIDs} are used but the
+technical terms \texttt{rownames} and \texttt{colnames} are encouraged to be used, since
+they relate to actual objects we work with.
 
-\texttt{FeatureIDs} and \texttt{SampleIDs} are used but the technical terms
-\texttt{rownames} and \texttt{colnames} are encouraged to be used, since they relate
-to actual objects we work with.
+\hypertarget{benchmarking-treese-with-phyloseq}{%
+\subsubsection{Benchmarking TreeSE with phyloseq}\label{benchmarking-treese-with-phyloseq}}
 
-\hypertarget{resources-for-phyloseq}{%
-\subsection{Resources for phyloseq}\label{resources-for-phyloseq}}
+TreeSE objects can be converted into phyloseq objects and vice versa, therefore
+it is possible to compare the two containers in terms of computational efficiency.
+Remarkably, TreeSE and phyloseq were benchmarked against one another in mia v1.2.3
+and phyloseq v1.38.0, respectively. 5 standard microbiome analysis operationswere
+applied to 4 datasets of varying size with both containers. In a nutshell, TreeSE
+and phyloseq showed a similar performance for datasets of small and medium size
+for most of the operations. However, TreeSE performed more efficiently as the size
+of the datasets increased. Further details on such results can be found in the
+\href{https://github.com/microbiome/benchmarking}{benchmarking repository}.
 
-The (Tree)SummarizedExperiment objects can be converted into the alternative phyloseq format, for which further methods are available.
+\hypertarget{resources-on-phyloseq}{%
+\subsubsection{Resources on phyloseq}\label{resources-on-phyloseq}}
+
+The phyloseq container provides analogous methods to TreeSE. The following
+material can be used to familiarize with such alternative methods:
 
 \begin{itemize}
 \tightlist
@@ -10616,7 +10639,7 @@ Printing a summary about the posterior:
 \end{Shaded}
 
 \begin{verbatim}
-## Proportions of Observations within 95% Credible Interval: 0.9978
+## Proportions of Observations within 95% Credible Interval: 0.9979
 \end{verbatim}
 
 Plotting the summary of the posterior distributions of the regression parameters:
