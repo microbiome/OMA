@@ -185,7 +185,7 @@ Usefuls functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colnam
 ### Importing data
 
 Raw data of different types can be imported as a TreeSE with a number of
-functions explained in chapter \@ref(#import-from-file). You can also check the
+functions explained in chapter \@ref(import-from-file). You can also check the
 [function reference in the mia package](https://microbiome.github.io/mia/reference/index.html).
 
 1. Get familiar with the
@@ -318,7 +318,7 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAs
 1. Import the mia package, load peerj13075 with `data` and store it into a
    variable named `tse`.
 2. Transform the counts assay into relative abundances with `transformAssay` and
-   store it into the TreeSE as an assay named `relabund` (see chapter \ref(assay-transform)).
+   store it into the TreeSE as an assay named `relabund` (see chapter \@ref(assay-transform)).
 3. Similarly, perform a clr transformation on the counts assay with a `pseudocount`
    of 1 and add it to the TreeSE as a new assay.
 4. List the available assays by name with `assays`.
@@ -570,11 +570,70 @@ walkthrough, which may be simplified in the future.
 Useful functions: runMDS, runRDA, anova.cca, transformAssay, mergeFeaturesByRank, ggplot, plotReducedDim, vegan::adonis2
 
 
-
-
 ## Differential abundance
 
-### Univariate analyses
+### Standard analysis with ALDEx2
+
+1. Import the mia and ALDEx2 packages, load peerj13075 with `data` and store it
+   into a variable named `tse`.
+2. Agglomerate the TreeSE by genus and filter by a prevalence of 10%. You can
+   perform both operations in one go with `subsetByPrevalentTaxa` by specifying
+   the `rank` and `prevalence` arguments.
+3. Model the counts assay of the TreeSE with `aldex.clr` and store it into the
+   variable `x`. As a second argument, provide the grouping variable `Diet`,
+   which is contained in a column of the colData.
+4. Feed `x` to the functions `aldex.ttest` to erform t-test and to `aldex.effect`
+   to estimate effect sizes. Store the output into `x_tt` and `x_effect`,
+   respectively.
+5. Create a data.frame named `aldex_out` which includes both `x_tt` and `x_effect`
+   and filter for the features with `wi.eBH < 0.05`. Are there any significantly
+   differential abundance taxa?
+6. **Extra**: If these results appear boring, repeat steps 1 - 5, but use
+   `Gender` or `Age` as the grouping variable. Do we have any better luck with
+   Gender? What is the problem with Age?
+
+### Controlling for confounders {#control-daa-confounders}
+
+1. Import the mia and MicrobiomeStat packages, load peerj13075 with `data` and
+   store it into a variable named `tse`.
+2. Agglomerate the TreeSE by genus and filter by a prevalence of 10%. You can
+   perform both operations in one go with `subsetByPrevalentTaxa` by specifying
+   the `rank` and `prevalence` arguments.
+3. Model the counts assay of the TreeSE with `linda` and store the output into
+   a variable named `linda_out`. Provide the colData converted into a data.frame
+   (with `as.data.frame`) as the second argument, and a `formula` with the Age,
+   Gender and Diet as variables. For example, `formula = "~ A + B"` represents a
+   formula with variables A and B.
+4. Extract the `output$AgeElderly` object from `linda_out` with `$` and store it
+   into a variable named `linda_res`.
+5. Filter `linda_res` for features with `reject == TRUE`. How many differentially
+   abundant taxa were found? What are their names and how significant are they
+   in terms of log-fold change and adjusted p-value?
+
+### Comparing methods {#compare-daa-methods}
+
+Here, we conduct DAA with identical parameters as in the
+[previous exercise](#control-daa-confounders), but with a different method,
+namely ZicoSeq. We aim to compare the results between these two methods and draw better informed conclusions from such comparative approach.
+
+1. Import the mia and GUniFrac packages, load peerj13075 with `data` and
+   store it into a variable named `tse`.
+2. Agglomerate the TreeSE by genus and filter by a prevalence of 10%. You can
+   perform both operations in one go with `subsetByPrevalentTaxa` by specifying
+   the `rank` and `prevalence` arguments.
+3. Model the counts assay of the TreeSE with `ZicoSeq` as the `feature.dat`
+   argument and store the output into a variable named `zicoseq_out`. Provide
+   also the colData converted to a data.frame (with `as.data.frame`) as
+   `meta.dat`. In addition, set `grp.name` to `"Age"`, `adj.name` to
+   `c("Diet", "Gender")`, `feature.dat.type` to `"count"`, `return.feature.dat`
+   to `TRUE` and `perm.no` to `999`.
+4. View the top six differentially abundant taxa and their adjusted p-values
+   with `head(sort(zicoseq_out$p.adj.fdr))`. Is there any significant taxon
+   according to ZicoSeq? Compared to the output of linda, do we see the same
+   taxa at the top in terms of significance? Overall, to what extent do the two
+   methods agree with one another?
+
+### Workflow 1
 
 1. Get the abundances for an individual feature (taxonomic group / row)
 2. Visualize the abundances per group with boxplot / jitterplot
@@ -588,7 +647,7 @@ Useful functions: runMDS, runRDA, anova.cca, transformAssay, mergeFeaturesByRank
 Useful functions: [], ggplot2::geom_boxplot, ggplot2::geom_jitter, wilcox.test, lm.test, transformAssay, p.adjust
 
 
-### Differential abundance analysis
+### Workflow 2
 
 1. install the latest development version of mia from GitHub.
 2. Load experimental dataset from mia.
@@ -598,7 +657,6 @@ Useful functions: [], ggplot2::geom_boxplot, ggplot2::geom_jitter, wilcox.test, 
 
 
 Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::Heatmap, ancombc, aldex2, maaslin2, mergeFeaturesByRank, transformAssay, subsetByPrevalentFeatures
-
 
 
 ## Visualization
