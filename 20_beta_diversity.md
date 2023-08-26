@@ -75,6 +75,7 @@ To run the examples in this chapter, the following packages should be imported:
 * vegan: ecological distances
 * ggplot2: plotting
 * patchwork: combining plots
+* dplyr: pipe operator
 
 
 
@@ -381,17 +382,26 @@ variance, but only age shows statistical significance.
 
 
 ```r
-rda_info$permanova
+rda_info$permanova %>%
+  knitr::kable()
 ```
 
-```
-##                Df SumOfSqs     F Pr(>F) Total variance Explained variance
-## Model           6   1.1157 1.940  0.051          3.991            0.27952
-## ClinicalStatus  4   0.5837 1.522  0.123          3.991            0.14625
-## Gender          1   0.1679 1.751  0.125          3.991            0.04206
-## Age             1   0.5245 5.471  0.001          3.991            0.13140
-## Residual       30   2.8757    NA     NA          3.991            0.72048
-```
+
+\begin{tabular}{l|r|r|r|r|r|r}
+\hline
+  & Df & SumOfSqs & F & Pr(>F) & Total variance & Explained variance\\
+\hline
+Model & 6 & 1.1157 & 1.940 & 0.026 & 3.991 & 0.2795\\
+\hline
+ClinicalStatus & 4 & 0.5837 & 1.522 & 0.136 & 3.991 & 0.1463\\
+\hline
+Gender & 1 & 0.1679 & 1.751 & 0.089 & 3.991 & 0.0421\\
+\hline
+Age & 1 & 0.5245 & 5.471 & 0.001 & 3.991 & 0.1314\\
+\hline
+Residual & 30 & 2.8757 & NA & NA & 3.991 & 0.7205\\
+\hline
+\end{tabular}
 
 To ensure that the homogeneity assumption holds, we retrieve the corresponding
 information from the results of RDA. In this case, none of the p-values is lower
@@ -399,19 +409,22 @@ than the significance threshold, and thus homogeneity is observed.
 
 
 ```r
-rda_info$homogeneity
+rda_info$homogeneity %>%
+  knitr::kable()
 ```
 
-```
-##                Df  Sum Sq Mean Sq       F N.Perm Pr(>F) Total variance
-## ClinicalStatus  4 0.25108 0.06277  2.7440    999  0.118         1.0288
-## Gender          1 0.01032 0.01032  0.4158    999  0.517         0.9283
-## Age            29 0.32723 0.01128 17.0256    999  0.406         0.3319
-##                Explained variance
-## ClinicalStatus            0.24404
-## Gender                    0.01111
-## Age                       0.98602
-```
+
+\begin{tabular}{l|r|r|r|r|r|r|r|r}
+\hline
+  & Df & Sum Sq & Mean Sq & F & N.Perm & Pr(>F) & Total variance & Explained variance\\
+\hline
+ClinicalStatus & 4 & 0.2511 & 0.0628 & 2.7440 & 999 & 0.122 & 1.0288 & 0.2440\\
+\hline
+Gender & 1 & 0.0103 & 0.0103 & 0.4158 & 999 & 0.521 & 0.9283 & 0.0111\\
+\hline
+Age & 29 & 0.3272 & 0.0113 & 17.0255 & 999 & 0.420 & 0.3319 & 0.9860\\
+\hline
+\end{tabular}
 
 Next, we proceed to visualize the weight and significance of each variable on
 the similarity between samples with an RDA plot, which can be generated with

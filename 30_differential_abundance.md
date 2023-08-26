@@ -325,26 +325,16 @@ that we specify.
 library(ANCOMBC)
 
 # Run ANCOM-BC at the genus level and only including the prevalent genera
-out <- ancombc2(data = tse,
-                assay_name = "counts",
-                fix_formula = "patient_status",
-                p_adj_method = "fdr",
-                prv_cut = 0,
-                group = "patient_status",
-                struc_zero = TRUE,
-                neg_lb = TRUE,
-                # multi group comparison is deactivated automatically
-                global = TRUE)
-```
-
-
-```r
-# store the FDR adjusted results 
-ancombc_result <- cbind.data.frame(taxid = out$res$taxon,
-                       ancombc = as.vector(out$res$q_patient_statusControl))
-
-ancombc_result <- out$res %>%
-  dplyr::select(starts_with(c("taxon", "lfc", "q")))
+ancombc2_out <- ancombc2(data = tse,
+                         assay_name = "counts",
+                         fix_formula = "patient_status",
+                         p_adj_method = "fdr",
+                         prv_cut = 0,
+                         group = "patient_status",
+                         struc_zero = TRUE,
+                         neg_lb = TRUE,
+                         # multi group comparison is deactivated automatically
+                         global = TRUE)
 ```
 
 The object `out` contains all model output. Again, see the
@@ -358,30 +348,33 @@ dataframe.
 
 
 ```r
-ancombc_result %>%
+# store the FDR adjusted results 
+ancombc2_out$res %>%
+  dplyr::select(taxon, lfc_patient_statusControl, q_patient_statusControl) %>%
+  filter(q_patient_statusControl < 0.05) %>%
+  arrange(q_patient_statusControl) %>%
   head() %>%
   knitr::kable()
 ```
 
 
-\begin{tabular}{l|r|r|r|r}
+\begin{tabular}{l|r|r}
 \hline
-taxon & lfc\_(Intercept) & lfc\_patient\_statusControl & q\_(Intercept) & q\_patient\_statusControl\\
+taxon & lfc\_patient\_statusControl & q\_patient\_statusControl\\
 \hline
-Bacteroides & -0.0020 & -0.1258 & 1 & 0.8535\\
+Subdoligranulum & 1.909 & 0.0010\\
 \hline
-Parabacteroides & -0.5158 & 0.9631 & 1 & 0.0819\\
+Ruminococcus\_1 & 2.915 & 0.0010\\
 \hline
-Akkermansia & -0.5596 & 0.8509 & 1 & 0.0173\\
+[Ruminococcus]\_gauvreauii\_group & 1.520 & 0.0014\\
 \hline
-Escherichia-Shigella & -0.1854 & 0.0951 & 1 & 0.8535\\
+[Eubacterium]\_rectale\_group & 1.361 & 0.0050\\
 \hline
-Subdoligranulum & -1.0327 & 1.9085 & 1 & 0.0010\\
+[Clostridium]\_innocuum\_group & 1.455 & 0.0052\\
 \hline
-Lachnoclostridium & -0.5242 & 0.7511 & 1 & 0.2441\\
+Dielma & 1.166 & 0.0052\\
 \hline
 \end{tabular}
-
 
 
 ### MaAsLin2 
@@ -420,8 +413,7 @@ Which genera are identified as differentially abundant? (leave out "head" to see
 
 ```r
 maaslin2_out$results %>%
-  filter(qval <= 0.05) %>%
-  head() %>%
+  filter(qval < 0.05) %>%
   knitr::kable()
 ```
 
@@ -465,14 +457,9 @@ set sizes.
 # Load package
 library(MicrobiomeStat)
 
-# Store independent variables into a data.frame
-meta.dat <- colData(tse) %>%
-  as.data.frame() %>%
-  dplyr::select(patient_status)
-
 # Run LinDA
-linda.res <- linda(feature.dat = as.data.frame(assay(tse)),
-                   meta.dat = meta.dat,
+linda_out <- linda(feature.dat = as.data.frame(assay(tse)),
+                   meta.dat = as.data.frame(colData(tse)),
                    formula = "~ patient_status",
                    alpha = 0.05,
                    prev.filter = 0,
@@ -489,15 +476,11 @@ linda.res <- linda(feature.dat = as.data.frame(assay(tse)),
 
 
 ```r
-linda_out <- linda.res$output$patient_statusControl
-
 # List genera for which H0 could be rejected:
-linda_out %>%
-  as.data.frame() %>%
+linda_out$output$patient_statusControl %>%
   filter(reject) %>%
   dplyr::select(stat, padj) %>%
   rownames_to_column(var = "feature") %>%
-  head() %>%
   knitr::kable()
 ```
 
@@ -535,7 +518,7 @@ rate, which has the following components:
 library(GUniFrac)
 
 set.seed(123)
-zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
+zicoseq_out <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
                        meta.dat = as.data.frame(colData(tse)),
                        grp.name = "patient_status",
                        feature.dat.type = "count",
@@ -564,12 +547,12 @@ zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
 
 
 ```r
-zicoseq_out <- cbind.data.frame(p.raw = zicoseq.obj$p.raw,
-                                p.adj.fdr = zicoseq.obj$p.adj.fdr)
+zicoseq_res <- cbind.data.frame(p.raw = zicoseq_out$p.raw,
+                                p.adj.fdr = zicoseq_out$p.adj.fdr)
 
-zicoseq_out %>%
+zicoseq_res %>%
   filter(p.adj.fdr < 0.05) %>%
-  head() %>%
+  arrange(p.adj.fdr) %>%
   knitr::kable()
 ```
 
@@ -578,11 +561,11 @@ zicoseq_out %>%
 \hline
   & p.raw & p.adj.fdr\\
 \hline
+[Ruminococcus]\_gauvreauii\_group & 0.001 & 0.005\\
+\hline
 Faecalibacterium & 0.001 & 0.024\\
 \hline
 [Clostridium]\_innocuum\_group & 0.003 & 0.024\\
-\hline
-[Ruminococcus]\_gauvreauii\_group & 0.001 & 0.005\\
 \hline
 Catabacter & 0.006 & 0.043\\
 \hline
@@ -592,9 +575,9 @@ Catabacter & 0.006 & 0.043\\
 
 ```r
 ## x-axis is the effect size: R2 * direction of coefficient
-ZicoSeq.plot(ZicoSeq.obj = zicoseq.obj,
-             meta.dat = meta.dat,
-             pvalue.type ='p.adj.fdr')
+ZicoSeq.plot(ZicoSeq.obj = zicoseq_out,
+             meta.dat = as.data.frame(colData(tse)),
+             pvalue.type = 'p.adj.fdr')
 ```
 
 ![](30_differential_abundance_files/figure-latex/plot-zicoseq-1.pdf)<!-- --> 
@@ -608,10 +591,9 @@ balances. A detailed introduction to this method is available in
 ### Comparison of methods
 
 Although the methods described above yield unidentical results, they are
-expected to agree on a few differentially abundant taxa. As an exercise,
-you can compare the outcomes between the different methods in terms of
-effect sizes, significances, or other aspects that are comparable
-between them.
+expected to agree on a few differentially abundant taxa. To draw more informed
+conclusions, it is good practice to compare the outcomes of different methods in terms of found features, their effect sizes and significances, as well as other method-specific aspects. Such comparative approach is outlined in
+[this exercise](#compare-daa-methods).
 
 
 ## DAA with confounding
@@ -664,19 +646,17 @@ are kept constant.
 
 ```r
 # perform the analysis 
-ancombc_cov <- ancombc2(tse,
-                        assay_name = "counts",
-                        fix_formula = "patient_status + cohort + library_size",
-                        p_adj_method = "fdr",
-                        lib_cut = 0,
-                        group = "patient_status", 
-                        struc_zero = TRUE, 
-                        neg_lb = TRUE,
-                        alpha = 0.05,
-                        # multi-group comparison is deactivated automatically
-                        global = TRUE)
-
-# Again we only show the first 6 entries.
+ancombc2_out <- ancombc2(tse,
+                         assay_name = "counts",
+                         fix_formula = "patient_status + cohort + library_size",
+                         p_adj_method = "fdr",
+                         lib_cut = 0,
+                         group = "patient_status", 
+                         struc_zero = TRUE, 
+                         neg_lb = TRUE,
+                         alpha = 0.05,
+                         # multi-group comparison is deactivated automatically
+                         global = TRUE)
 ```
 
 In the output, each taxon is assigned with several effect sizes (lfc, which
@@ -688,8 +668,9 @@ whether the abundance of a given taxon varies with that variable.
 
 
 ```r
-ancombc_cov$res %>%
+ancombc2_out$res %>%
   dplyr::select(starts_with(c("taxon", "lfc", "q"))) %>%
+  arrange(q_patient_statusControl) %>%
   head() %>%
   knitr::kable()
 ```
@@ -699,17 +680,17 @@ ancombc_cov$res %>%
 \hline
 taxon & lfc\_(Intercept) & lfc\_patient\_statusControl & lfc\_cohortCohort\_2 & lfc\_cohortCohort\_3 & lfc\_library\_size & q\_(Intercept) & q\_patient\_statusControl & q\_cohortCohort\_2 & q\_cohortCohort\_3 & q\_library\_size\\
 \hline
-Bacteroides & -0.3081 & -0.7575 & 0.1482 & 0.7615 & 0e+00 & 0 & 0 & 0 & 0 & 0.9650\\
+Akkermansia & -0.8599 & 0.2309 & 0.2876 & 0.4635 & 0 & 0 & 0 & 0 & 0 & 0.9147\\
 \hline
-Parabacteroides & -2.3164 & 0.5528 & 1.2162 & 1.1380 & 0e+00 & 0 & 0 & 0 & 0 & 0.0001\\
+Hungatella & -0.0695 & -0.3270 & -0.1397 & -0.1151 & 0 & 0 & 0 & 0 & 0 & 0.0593\\
 \hline
-Akkermansia & -0.8599 & 0.2309 & 0.2876 & 0.4635 & 0e+00 & 0 & 0 & 0 & 0 & 0.9147\\
+Ruminococcaceae\_UCG-013 & -0.9344 & -0.3371 & 0.6599 & -0.0231 & 0 & 0 & 0 & 0 & 0 & 0.0050\\
 \hline
-Escherichia-Shigella & -1.1600 & -0.5157 & 1.3093 & 0.2340 & 0e+00 & 0 & 0 & 0 & 0 & 0.0397\\
+Bacteroides & -0.3081 & -0.7575 & 0.1482 & 0.7615 & 0 & 0 & 0 & 0 & 0 & 0.9650\\
 \hline
-Subdoligranulum & -0.1418 & 1.1380 & -0.2509 & 0.0252 & 0e+00 & 0 & 0 & 0 & 0 & 0.0002\\
+Escherichia-Shigella & -1.1600 & -0.5157 & 1.3093 & 0.2340 & 0 & 0 & 0 & 0 & 0 & 0.0397\\
 \hline
-Lachnoclostridium & -2.7781 & 0.2807 & 1.6712 & 1.1817 & 1e-04 & 0 & 0 & 0 & 0 & 0.0000\\
+[Clostridium]\_innocuum\_group & -0.7590 & 0.7781 & -0.1629 & 0.1688 & 0 & 0 & 0 & 0 & 0 & 0.0593\\
 \hline
 \end{tabular}
 
@@ -720,7 +701,7 @@ main outcome variable.
 
 
 ```r
-linda_cov <- linda(as.data.frame(assay(tse, "counts")),
+linda_out <- linda(as.data.frame(assay(tse, "counts")),
                    as.data.frame(colData(tse)),
                    formula = "~ patient_status + cohort + library_size",
                    alpha = 0.05,
@@ -744,9 +725,9 @@ obtained by accessing the corresponding items from the output object.
 
 ```r
 # Select results for the patient status
-linda.res <- linda_cov$output$patient_statusControl
+linda_res <- linda_out$output$patient_statusControl
 
-linda.res %>%
+linda_res %>%
   filter(reject) %>%
   dplyr::select(log2FoldChange, stat, padj) %>%
   rownames_to_column(var = "feature") %>%
@@ -784,7 +765,7 @@ For this method, confounders can be added as a list to the `adj.name` argument.
 
 ```r
 set.seed(123)
-zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
+zicoseq_out <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
                        meta.dat = as.data.frame(colData(tse)),
                        grp.name = "patient_status",
                        adj.name = c("cohort", "library_size"), 
@@ -816,10 +797,10 @@ The output shows the raw and adjusted p-values for clinical status.
 
 
 ```r
-zicoseq_out <- cbind.data.frame(p.raw = zicoseq.obj$p.raw,
-                                p.adj.fdr = zicoseq.obj$p.adj.fdr)
+zicoseq_res <- cbind.data.frame(p.raw = zicoseq_out$p.raw,
+                                p.adj.fdr = zicoseq_out$p.adj.fdr)
 
-zicoseq_out %>%
+zicoseq_res %>%
   filter(p.adj.fdr < 0.05) %>%
   head() %>%
   knitr::kable()

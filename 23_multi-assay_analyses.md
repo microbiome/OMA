@@ -441,122 +441,122 @@ model.trained <- run_mofa(model.prepared, use_basilisk = TRUE)
 ## 
 ## ELBO before training: -22013.97 
 ## 
-## Iteration 1: time=0.00, ELBO=-4042.78, deltaELBO=17971.192 (81.63540032%), Factors=5
+## Iteration 1: time=0.00, ELBO=-4042.78, deltaELBO=17971.193 (81.63540218%), Factors=5
 ## Iteration 2: time=0.00, Factors=5
 ## Iteration 3: time=0.00, Factors=5
 ## Iteration 4: time=0.00, Factors=5
 ## Iteration 5: time=0.00, Factors=5
-## Iteration 6: time=0.00, ELBO=826.57, deltaELBO=4869.348 (22.11935643%), Factors=5
+## Iteration 6: time=0.00, ELBO=826.57, deltaELBO=4869.348 (22.11935301%), Factors=5
 ## Iteration 7: time=0.00, Factors=5
 ## Iteration 8: time=0.00, Factors=5
 ## Iteration 9: time=0.00, Factors=5
 ## Iteration 10: time=0.00, Factors=5
-## Iteration 11: time=0.00, ELBO=861.41, deltaELBO=34.839 (0.15825956%), Factors=5
+## Iteration 11: time=0.00, ELBO=861.41, deltaELBO=34.839 (0.15826042%), Factors=5
 ## Iteration 12: time=0.00, Factors=5
 ## Iteration 13: time=0.00, Factors=5
 ## Iteration 14: time=0.00, Factors=5
 ## Iteration 15: time=0.00, Factors=5
-## Iteration 16: time=0.00, ELBO=867.97, deltaELBO=6.560 (0.02980063%), Factors=5
+## Iteration 16: time=0.00, ELBO=867.97, deltaELBO=6.560 (0.02980141%), Factors=5
 ## Iteration 17: time=0.00, Factors=5
 ## Iteration 18: time=0.00, Factors=5
 ## Iteration 19: time=0.00, Factors=5
 ## Iteration 20: time=0.00, Factors=5
-## Iteration 21: time=0.00, ELBO=871.04, deltaELBO=3.072 (0.01395293%), Factors=5
+## Iteration 21: time=0.00, ELBO=871.04, deltaELBO=3.072 (0.01395407%), Factors=5
 ## Iteration 22: time=0.00, Factors=5
 ## Iteration 23: time=0.00, Factors=5
 ## Iteration 24: time=0.00, Factors=5
 ## Iteration 25: time=0.00, Factors=5
-## Iteration 26: time=0.00, ELBO=872.88, deltaELBO=1.842 (0.00836904%), Factors=5
+## Iteration 26: time=0.00, ELBO=872.88, deltaELBO=1.842 (0.00836699%), Factors=5
 ## Iteration 27: time=0.00, Factors=5
 ## Iteration 28: time=0.00, Factors=5
 ## Iteration 29: time=0.00, Factors=5
 ## Iteration 30: time=0.00, Factors=5
-## Iteration 31: time=0.00, ELBO=874.12, deltaELBO=1.240 (0.00563399%), Factors=5
+## Iteration 31: time=0.00, ELBO=874.12, deltaELBO=1.240 (0.00563446%), Factors=5
 ## Iteration 32: time=0.00, Factors=5
 ## Iteration 33: time=0.00, Factors=5
 ## Iteration 34: time=0.00, Factors=5
 ## Iteration 35: time=0.00, Factors=5
-## Iteration 36: time=0.00, ELBO=875.02, deltaELBO=0.895 (0.00406653%), Factors=5
+## Iteration 36: time=0.00, ELBO=875.02, deltaELBO=0.896 (0.00406791%), Factors=5
 ## Iteration 37: time=0.00, Factors=5
 ## Iteration 38: time=0.00, Factors=5
 ## Iteration 39: time=0.00, Factors=5
 ## Iteration 40: time=0.00, Factors=5
-## Iteration 41: time=0.00, ELBO=875.70, deltaELBO=0.678 (0.00308090%), Factors=5
+## Iteration 41: time=0.01, ELBO=875.70, deltaELBO=0.678 (0.00307983%), Factors=5
 ## Iteration 42: time=0.00, Factors=5
 ## Iteration 43: time=0.00, Factors=5
 ## Iteration 44: time=0.00, Factors=5
-## Iteration 45: time=0.00, Factors=5
-## Iteration 46: time=0.00, ELBO=876.23, deltaELBO=0.531 (0.00241399%), Factors=5
+## Iteration 45: time=0.01, Factors=5
+## Iteration 46: time=0.01, ELBO=876.23, deltaELBO=0.531 (0.00241391%), Factors=5
 ## Iteration 47: time=0.00, Factors=5
 ## Iteration 48: time=0.00, Factors=5
 ## Iteration 49: time=0.00, Factors=5
 ## Iteration 50: time=0.00, Factors=5
-## Iteration 51: time=0.00, ELBO=876.66, deltaELBO=0.431 (0.00195876%), Factors=5
+## Iteration 51: time=0.00, ELBO=876.66, deltaELBO=0.431 (0.00195968%), Factors=5
 ## Iteration 52: time=0.00, Factors=5
 ## Iteration 53: time=0.00, Factors=5
 ## Iteration 54: time=0.00, Factors=5
 ## Iteration 55: time=0.00, Factors=5
-## Iteration 56: time=0.00, ELBO=877.02, deltaELBO=0.355 (0.00161258%), Factors=5
+## Iteration 56: time=0.00, ELBO=877.02, deltaELBO=0.355 (0.00161186%), Factors=5
 ## Iteration 57: time=0.00, Factors=5
 ## Iteration 58: time=0.00, Factors=5
 ## Iteration 59: time=0.00, Factors=5
 ## Iteration 60: time=0.00, Factors=5
-## Iteration 61: time=0.00, ELBO=877.31, deltaELBO=0.299 (0.00135840%), Factors=5
+## Iteration 61: time=0.00, ELBO=877.31, deltaELBO=0.299 (0.00135825%), Factors=5
 ## Iteration 62: time=0.00, Factors=5
 ## Iteration 63: time=0.00, Factors=5
 ## Iteration 64: time=0.00, Factors=5
 ## Iteration 65: time=0.00, Factors=5
-## Iteration 66: time=0.00, ELBO=877.57, deltaELBO=0.259 (0.00117674%), Factors=5
+## Iteration 66: time=0.00, ELBO=877.57, deltaELBO=0.259 (0.00117632%), Factors=5
 ## Iteration 67: time=0.00, Factors=5
 ## Iteration 68: time=0.00, Factors=5
 ## Iteration 69: time=0.00, Factors=5
 ## Iteration 70: time=0.00, Factors=5
-## Iteration 71: time=0.00, ELBO=877.80, deltaELBO=0.224 (0.00101856%), Factors=5
+## Iteration 71: time=0.00, ELBO=877.80, deltaELBO=0.224 (0.00101838%), Factors=5
 ## Iteration 72: time=0.00, Factors=5
 ## Iteration 73: time=0.00, Factors=5
 ## Iteration 74: time=0.00, Factors=5
 ## Iteration 75: time=0.00, Factors=5
-## Iteration 76: time=0.00, ELBO=878.00, deltaELBO=0.199 (0.00090239%), Factors=5
+## Iteration 76: time=0.01, ELBO=878.00, deltaELBO=0.199 (0.00090240%), Factors=5
 ## Iteration 77: time=0.00, Factors=5
 ## Iteration 78: time=0.00, Factors=5
 ## Iteration 79: time=0.00, Factors=5
 ## Iteration 80: time=0.00, Factors=5
-## Iteration 81: time=0.00, ELBO=878.17, deltaELBO=0.177 (0.00080298%), Factors=5
+## Iteration 81: time=0.00, ELBO=878.17, deltaELBO=0.177 (0.00080306%), Factors=5
 ## Iteration 82: time=0.00, Factors=5
 ## Iteration 83: time=0.00, Factors=5
 ## Iteration 84: time=0.00, Factors=5
 ## Iteration 85: time=0.00, Factors=5
-## Iteration 86: time=0.00, ELBO=878.33, deltaELBO=0.161 (0.00073358%), Factors=5
+## Iteration 86: time=0.00, ELBO=878.33, deltaELBO=0.161 (0.00073316%), Factors=5
 ## Iteration 87: time=0.00, Factors=5
 ## Iteration 88: time=0.00, Factors=5
 ## Iteration 89: time=0.00, Factors=5
 ## Iteration 90: time=0.00, Factors=5
-## Iteration 91: time=0.00, ELBO=878.48, deltaELBO=0.144 (0.00065322%), Factors=5
+## Iteration 91: time=0.00, ELBO=878.48, deltaELBO=0.144 (0.00065437%), Factors=5
 ## Iteration 92: time=0.00, Factors=5
 ## Iteration 93: time=0.00, Factors=5
 ## Iteration 94: time=0.00, Factors=5
 ## Iteration 95: time=0.00, Factors=5
-## Iteration 96: time=0.00, ELBO=878.61, deltaELBO=0.132 (0.00059933%), Factors=5
+## Iteration 96: time=0.00, ELBO=878.61, deltaELBO=0.132 (0.00060084%), Factors=5
 ## Iteration 97: time=0.00, Factors=5
 ## Iteration 98: time=0.00, Factors=5
 ## Iteration 99: time=0.00, Factors=5
 ## Iteration 100: time=0.00, Factors=5
-## Iteration 101: time=0.00, ELBO=878.73, deltaELBO=0.122 (0.00055240%), Factors=5
+## Iteration 101: time=0.00, ELBO=878.73, deltaELBO=0.121 (0.00055104%), Factors=5
 ## Iteration 102: time=0.00, Factors=5
 ## Iteration 103: time=0.00, Factors=5
 ## Iteration 104: time=0.00, Factors=5
 ## Iteration 105: time=0.00, Factors=5
-## Iteration 106: time=0.00, ELBO=878.84, deltaELBO=0.112 (0.00051068%), Factors=5
+## Iteration 106: time=0.00, ELBO=878.84, deltaELBO=0.112 (0.00050962%), Factors=5
 ## Iteration 107: time=0.00, Factors=5
 ## Iteration 108: time=0.00, Factors=5
 ## Iteration 109: time=0.00, Factors=5
 ## Iteration 110: time=0.00, Factors=5
-## Iteration 111: time=0.00, ELBO=878.95, deltaELBO=0.103 (0.00046697%), Factors=5
+## Iteration 111: time=0.00, ELBO=878.95, deltaELBO=0.103 (0.00046843%), Factors=5
 ## Iteration 112: time=0.00, Factors=5
 ## Iteration 113: time=0.00, Factors=5
 ## Iteration 114: time=0.00, Factors=5
 ## Iteration 115: time=0.00, Factors=5
-## Iteration 116: time=0.00, ELBO=879.04, deltaELBO=0.095 (0.00042938%), Factors=5
+## Iteration 116: time=0.00, ELBO=879.04, deltaELBO=0.094 (0.00042675%), Factors=5
 ## 
 ## Converged!
 ## 
@@ -567,7 +567,7 @@ model.trained <- run_mofa(model.prepared, use_basilisk = TRUE)
 ## #######################
 ## 
 ## 
-## Saving model in /tmp/RtmpEy1AUV/mofa_20230823-061900.hdf5...
+## Saving model in /tmp/Rtmpnj1S7z/mofa_20230826-142344.hdf5...
 ```
 
 The explained variance is visualized with the `plot_variance_explained` function:
