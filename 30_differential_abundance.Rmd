@@ -265,25 +265,16 @@ that we specify.
 library(ANCOMBC)
 
 # Run ANCOM-BC at the genus level and only including the prevalent genera
-out <- ancombc2(data = tse,
-                assay_name = "counts",
-                fix_formula = "patient_status",
-                p_adj_method = "fdr",
-                prv_cut = 0,
-                group = "patient_status",
-                struc_zero = TRUE,
-                neg_lb = TRUE,
-                # multi group comparison is deactivated automatically
-                global = TRUE)
-```
-
-```{r ancombc-res1}
-# store the FDR adjusted results 
-ancombc_result <- cbind.data.frame(taxid = out$res$taxon,
-                       ancombc = as.vector(out$res$q_patient_statusControl))
-
-ancombc_result <- out$res %>%
-  dplyr::select(starts_with(c("taxon", "lfc", "q")))
+ancombc2_out <- ancombc2(data = tse,
+                         assay_name = "counts",
+                         fix_formula = "patient_status",
+                         p_adj_method = "fdr",
+                         prv_cut = 0,
+                         group = "patient_status",
+                         struc_zero = TRUE,
+                         neg_lb = TRUE,
+                         # multi group comparison is deactivated automatically
+                         global = TRUE)
 ```
 
 The object `out` contains all model output. Again, see the
@@ -295,12 +286,15 @@ object, which contains dataframes with the coefficients, standard
 errors, p-values and q-values. Below we show the first entries of this
 dataframe.
 
-```{r ancombc-res2}
-ancombc_result %>%
+```{r ancombc-res}
+# store the FDR adjusted results 
+ancombc2_out$res %>%
+  dplyr::select(taxon, lfc_patient_statusControl, q_patient_statusControl) %>%
+  filter(q_patient_statusControl < 0.05) %>%
+  arrange(q_patient_statusControl) %>%
   head() %>%
   knitr::kable()
 ```
-
 
 
 ### MaAsLin2 
@@ -337,8 +331,7 @@ Which genera are identified as differentially abundant? (leave out "head" to see
 
 ```{r, maaslin2-res}
 maaslin2_out$results %>%
-  filter(qval <= 0.05) %>%
-  head() %>%
+  filter(qval < 0.05) %>%
   knitr::kable()
 ```
 
@@ -366,14 +359,9 @@ set sizes.
 # Load package
 library(MicrobiomeStat)
 
-# Store independent variables into a data.frame
-meta.dat <- colData(tse) %>%
-  as.data.frame() %>%
-  dplyr::select(patient_status)
-
 # Run LinDA
-linda.res <- linda(feature.dat = as.data.frame(assay(tse)),
-                   meta.dat = meta.dat,
+linda_out <- linda(feature.dat = as.data.frame(assay(tse)),
+                   meta.dat = as.data.frame(colData(tse)),
                    formula = "~ patient_status",
                    alpha = 0.05,
                    prev.filter = 0,
@@ -381,15 +369,11 @@ linda.res <- linda(feature.dat = as.data.frame(assay(tse)),
 ```
 
 ```{r linda-res}
-linda_out <- linda.res$output$patient_statusControl
-
 # List genera for which H0 could be rejected:
-linda_out %>%
-  as.data.frame() %>%
+linda_out$output$patient_statusControl %>%
   filter(reject) %>%
   dplyr::select(stat, padj) %>%
   rownames_to_column(var = "feature") %>%
-  head() %>%
   knitr::kable()
 ```
 
@@ -413,7 +397,7 @@ rate, which has the following components:
 library(GUniFrac)
 
 set.seed(123)
-zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
+zicoseq_out <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
                        meta.dat = as.data.frame(colData(tse)),
                        grp.name = "patient_status",
                        feature.dat.type = "count",
@@ -425,21 +409,21 @@ zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
 ```
 
 ```{r zicoseq-res}
-zicoseq_out <- cbind.data.frame(p.raw = zicoseq.obj$p.raw,
-                                p.adj.fdr = zicoseq.obj$p.adj.fdr)
+zicoseq_res <- cbind.data.frame(p.raw = zicoseq_out$p.raw,
+                                p.adj.fdr = zicoseq_out$p.adj.fdr)
 
-zicoseq_out %>%
+zicoseq_res %>%
   filter(p.adj.fdr < 0.05) %>%
-  head() %>%
+  arrange(p.adj.fdr) %>%
   knitr::kable()
 ```
 
 
 ```{r plot-zicoseq}
 ## x-axis is the effect size: R2 * direction of coefficient
-ZicoSeq.plot(ZicoSeq.obj = zicoseq.obj,
-             meta.dat = meta.dat,
-             pvalue.type ='p.adj.fdr')
+ZicoSeq.plot(ZicoSeq.obj = zicoseq_out,
+             meta.dat = as.data.frame(colData(tse)),
+             pvalue.type = 'p.adj.fdr')
 ```
 
 ### PhILR
@@ -451,10 +435,9 @@ balances. A detailed introduction to this method is available in
 ### Comparison of methods
 
 Although the methods described above yield unidentical results, they are
-expected to agree on a few differentially abundant taxa. As an exercise,
-you can compare the outcomes between the different methods in terms of
-effect sizes, significances, or other aspects that are comparable
-between them.
+expected to agree on a few differentially abundant taxa. To draw more informed
+conclusions, it is good practice to compare the outcomes of different methods in terms of found features, their effect sizes and significances, as well as other method-specific aspects. Such comparative approach is outlined in
+[this exercise](#compare-daa-methods).
 
 
 ## DAA with confounding
@@ -505,19 +488,17 @@ are kept constant.
 
 ```{r run-adj-ancombc, warning=FALSE}
 # perform the analysis 
-ancombc_cov <- ancombc2(tse,
-                        assay_name = "counts",
-                        fix_formula = "patient_status + cohort + library_size",
-                        p_adj_method = "fdr",
-                        lib_cut = 0,
-                        group = "patient_status", 
-                        struc_zero = TRUE, 
-                        neg_lb = TRUE,
-                        alpha = 0.05,
-                        # multi-group comparison is deactivated automatically
-                        global = TRUE)
-
-# Again we only show the first 6 entries.
+ancombc2_out <- ancombc2(tse,
+                         assay_name = "counts",
+                         fix_formula = "patient_status + cohort + library_size",
+                         p_adj_method = "fdr",
+                         lib_cut = 0,
+                         group = "patient_status", 
+                         struc_zero = TRUE, 
+                         neg_lb = TRUE,
+                         alpha = 0.05,
+                         # multi-group comparison is deactivated automatically
+                         global = TRUE)
 ```
 
 In the output, each taxon is assigned with several effect sizes (lfc, which
@@ -528,8 +509,9 @@ names), whereas for numerical variables such as library size, they indicate
 whether the abundance of a given taxon varies with that variable.
 
 ```{r adj-ancombc-res}
-ancombc_cov$res %>%
+ancombc2_out$res %>%
   dplyr::select(starts_with(c("taxon", "lfc", "q"))) %>%
+  arrange(q_patient_statusControl) %>%
   head() %>%
   knitr::kable()
 ```
@@ -540,7 +522,7 @@ As in the previous method, confounders can be included in the formula with the
 main outcome variable.
 
 ```{r run-adj-linda}
-linda_cov <- linda(as.data.frame(assay(tse, "counts")),
+linda_out <- linda(as.data.frame(assay(tse, "counts")),
                    as.data.frame(colData(tse)),
                    formula = "~ patient_status + cohort + library_size",
                    alpha = 0.05,
@@ -555,9 +537,9 @@ obtained by accessing the corresponding items from the output object.
 
 ```{r adj-linda-res}
 # Select results for the patient status
-linda.res <- linda_cov$output$patient_statusControl
+linda_res <- linda_out$output$patient_statusControl
 
-linda.res %>%
+linda_res %>%
   filter(reject) %>%
   dplyr::select(log2FoldChange, stat, padj) %>%
   rownames_to_column(var = "feature") %>%
@@ -575,7 +557,7 @@ For this method, confounders can be added as a list to the `adj.name` argument.
 
 ```{r run-adj-zicoseq}
 set.seed(123)
-zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
+zicoseq_out <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
                        meta.dat = as.data.frame(colData(tse)),
                        grp.name = "patient_status",
                        adj.name = c("cohort", "library_size"), 
@@ -590,10 +572,10 @@ zicoseq.obj <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
 The output shows the raw and adjusted p-values for clinical status.
 
 ```{r adj-zicoseq-res}
-zicoseq_out <- cbind.data.frame(p.raw = zicoseq.obj$p.raw,
-                                p.adj.fdr = zicoseq.obj$p.adj.fdr)
+zicoseq_res <- cbind.data.frame(p.raw = zicoseq_out$p.raw,
+                                p.adj.fdr = zicoseq_out$p.adj.fdr)
 
-zicoseq_out %>%
+zicoseq_res %>%
   filter(p.adj.fdr < 0.05) %>%
   head() %>%
   knitr::kable()
