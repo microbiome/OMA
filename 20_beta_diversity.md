@@ -391,11 +391,11 @@ rda_info$permanova %>%
 \hline
   & Df & SumOfSqs & F & Pr(>F) & Total variance & Explained variance\\
 \hline
-Model & 6 & 1.1157 & 1.940 & 0.026 & 3.991 & 0.2795\\
+Model & 6 & 1.1157 & 1.940 & 0.033 & 3.991 & 0.2795\\
 \hline
-ClinicalStatus & 4 & 0.5837 & 1.522 & 0.136 & 3.991 & 0.1463\\
+ClinicalStatus & 4 & 0.5837 & 1.522 & 0.129 & 3.991 & 0.1463\\
 \hline
-Gender & 1 & 0.1679 & 1.751 & 0.089 & 3.991 & 0.0421\\
+Gender & 1 & 0.1679 & 1.751 & 0.108 & 3.991 & 0.0421\\
 \hline
 Age & 1 & 0.5245 & 5.471 & 0.001 & 3.991 & 0.1314\\
 \hline
@@ -418,11 +418,11 @@ rda_info$homogeneity %>%
 \hline
   & Df & Sum Sq & Mean Sq & F & N.Perm & Pr(>F) & Total variance & Explained variance\\
 \hline
-ClinicalStatus & 4 & 0.2511 & 0.0628 & 2.7440 & 999 & 0.122 & 1.0288 & 0.2440\\
+ClinicalStatus & 4 & 0.2511 & 0.0628 & 2.7440 & 999 & 0.107 & 1.0288 & 0.2440\\
 \hline
-Gender & 1 & 0.0103 & 0.0103 & 0.4158 & 999 & 0.521 & 0.9283 & 0.0111\\
+Gender & 1 & 0.0103 & 0.0103 & 0.4158 & 999 & 0.538 & 0.9283 & 0.0111\\
 \hline
-Age & 29 & 0.3272 & 0.0113 & 17.0255 & 999 & 0.420 & 0.3319 & 0.9860\\
+Age & 29 & 0.3272 & 0.0113 & 17.0256 & 999 & 0.406 & 0.3319 & 0.9860\\
 \hline
 \end{tabular}
 

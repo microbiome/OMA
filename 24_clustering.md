@@ -64,6 +64,7 @@ necessary, depending on your analysis goals.
 ```r
 # Load dependencies
 library(bluster)
+library(kableExtra)
 
 # Apply transformation
 tse <- transformAssay(tse, method = "relabundance")
@@ -88,90 +89,13 @@ tse <- cluster(tse, assay.type = "relabundance",
                MARGIN = "samples", HclustParam())
 
 # Check the result contained in the clusters part of colData
-colData(tse)$clusters
+
+head(colData(tse)$clusters)
 ```
 
 ```
-##    AM.AD.1    AM.AD.2  AM.F10.T1  AM.F10.T2    DA.AD.1   DA.AD.1T    DA.AD.2 
-##          1          1          1          1          1          1          1 
-##    DA.AD.3   DA.AD.3T    DA.AD.4    ES.AD.1    ES.AD.2    ES.AD.3    ES.AD.4 
-##          1          1          1          2          3          2          1 
-##    FR.AD.1    FR.AD.2    FR.AD.3    FR.AD.4    FR.AD.5    FR.AD.6    FR.AD.7 
-##          1          1          2          1          1          1          1 
-##    FR.AD.8    IT.AD.1    IT.AD.2    IT.AD.3    IT.AD.4    IT.AD.5    IT.AD.6 
-##          2          2          1          2          3          1          1 
-##    JP.AD.1    JP.AD.2    JP.AD.3    JP.AD.4    JP.AD.5    JP.AD.6    JP.AD.7 
-##          2          1          1          2          1          2          2 
-##    JP.AD.8    JP.AD.9    JP.IN.1    JP.IN.2    JP.IN.3    JP.IN.4     MH0001 
-##          2          2          1          4          4          1          3 
-##     MH0002     MH0003     MH0004     MH0005     MH0006     MH0007     MH0008 
-##          1          1          1          1          1          1          2 
-##     MH0009     MH0010     MH0011     MH0012     MH0013     MH0014     MH0015 
-##          1          2          1          1          1          1          1 
-##     MH0016     MH0017     MH0018     MH0019     MH0020     MH0021     MH0022 
-##          2          1          3          2          2          1          1 
-##     MH0023     MH0024     MH0025     MH0026     MH0027     MH0028     MH0030 
-##          1          1          1          1          2          1          1 
-##     MH0031     MH0032     MH0033     MH0034     MH0035     MH0036     MH0037 
-##          1          3          1          3          1          1          1 
-##     MH0038     MH0039     MH0040     MH0041     MH0042     MH0043     MH0044 
-##          1          1          1          2          1          1          1 
-##     MH0045     MH0046     MH0047     MH0048     MH0049     MH0050     MH0051 
-##          2          1          1          1          1          1          1 
-##     MH0052     MH0053     MH0054     MH0055     MH0056     MH0057     MH0058 
-##          1          1          1          1          1          1          1 
-##     MH0059     MH0060     MH0061     MH0062     MH0063     MH0064     MH0065 
-##          1          1          2          1          1          1          1 
-##     MH0066     MH0067     MH0068     MH0069     MH0070     MH0071     MH0072 
-##          1          1          2          1          1          1          2 
-##     MH0073     MH0074     MH0075     MH0076     MH0077     MH0078     MH0079 
-##          2          1          1          1          1          1          1 
-##     MH0080     MH0081     MH0082     MH0083     MH0084     MH0085     MH0086 
-##          1          1          1          1          3          2          1 
-##     TS1_V2    TS10_V2   TS100_V2 TS101.2_V2   TS103_V2   TS104_V2   TS105_V2 
-##          5          6          5          7          8          5          7 
-##   TS106_V2   TS107_V2   TS109_V2    TS11_V2   TS110_V2   TS111_V2   TS115_V2 
-##          6          8          5          5          7          6          3 
-##   TS116_V2   TS117_V2   TS118_V2   TS119_V2    TS12_V2   TS120_V2   TS124_V2 
-##          8          6          5          6          5          3          6 
-##   TS125_V2   TS126_V2   TS127_V2   TS128_V2   TS129_V2    TS13_V2   TS130_V2 
-##          6          8          6          5          5          5          5 
-##   TS131_V2   TS132_V2   TS133_V2   TS134_V2   TS135_V2   TS136_V2   TS137_V2 
-##          6          5          5          6          5          7          5 
-##   TS138_V2   TS139_V2    TS14_V2   TS140_V2   TS141_V2   TS142_V2   TS143_V2 
-##          7          7          7          3          5          6          6 
-##   TS144_V2   TS145_V2   TS146_V2   TS147_V2   TS148_V2   TS149_V2    TS15_V2 
-##          3          5          8          6          5          5          3 
-##   TS150_V2   TS151_V2   TS152_V2   TS153_V2 TS154.2_V2   TS155_V2   TS156_V2 
-##          7          6          6          6          8          8          5 
-##    TS16_V2   TS160_V2   TS161_V2   TS162_V2   TS163_V2   TS164_V2   TS165_V2 
-##          5          3          6          5          5          5          8 
-##   TS166_V2   TS167_V2   TS168_V2   TS169_V2    TS17_V2   TS170_V2   TS178_V2 
-##          5          8          6          8          5          7          8 
-##   TS179_V2   TS180_V2   TS181_V2   TS182_V2   TS183_V2   TS184_V2   TS185_V2 
-##          7          5          5          5          5          5          6 
-##   TS186_V2    TS19_V2   TS190_V2   TS191_V2   TS192_V2   TS193_V2   TS194_V2 
-##          5          5          6          5          6          6          6 
-##   TS195_V2     TS2_V2    TS20_V2    TS21_V2    TS22_V2    TS23_V2    TS25_V2 
-##          5          8          3          6          7          7          6 
-##    TS26_V2    TS27_V2    TS28_V2    TS29_V2     TS3_V2    TS30_V2    TS31_V2 
-##          5          8          6          7          6          7          6 
-##    TS32_V2    TS33_V2    TS34_V2    TS35_V2    TS37_V2    TS38_V2    TS39_V2 
-##          3          7          6          3          5          7          5 
-##     TS4_V2    TS43_V2    TS44_V2    TS49_V2     TS5_V2    TS50_V2    TS51_V2 
-##          5          8          8          7          7          7          8 
-##    TS55_V2    TS56_V2    TS57_V2     TS6_V2    TS61_V2    TS62_V2    TS63_V2 
-##          6          5          9          3          6          5          6 
-##    TS64_V2    TS65_V2    TS66_V2    TS67_V2    TS68_V2    TS69_V2     TS7_V2 
-##          8          8          8          6          5          8          3 
-##    TS70_V2    TS71_V2    TS72_V2    TS73_V2    TS74_V2    TS75_V2    TS76_V2 
-##          8          6          6          5          8          6          5 
-##    TS77_V2    TS78_V2     TS8_V2    TS82_V2    TS83_V2    TS84_V2    TS85_V2 
-##          6          3          5          3          6          3          6 
-##    TS86_V2    TS87_V2    TS88_V2    TS89_V2     TS9_V2    TS90_V2    TS91_V2 
-##          5          8          5          6          5          5          7 
-##    TS92_V2    TS94_V2    TS95_V2    TS96_V2    TS97_V2    TS98_V2  TS99.2_V2 
-##          6          5          5          5          5          5          5 
+##   AM.AD.1   AM.AD.2 AM.F10.T1 AM.F10.T2   DA.AD.1  DA.AD.1T 
+##         1         1         1         1         1         1 
 ## Levels: 1 2 3 4 5 6 7 8 9
 ```
 
@@ -342,60 +266,6 @@ plot(dend)
 
 ![](24_clustering_files/figure-latex/hclust6-1.pdf)<!-- --> 
 
-## K-means clustering
-
-Let's now try k-means clustering. Here observations are divided into clusters so
-that the distances between observations and cluster centers are
-minimized; an observation belongs to cluster whose center is the
-nearest.
-
-The algorithm starts by dividing observation to random clusters whose
-number is defined by user. The centroids of the clusters are then
-calculated. After that, observations' allocation to clusters are
-updated so that the means are minimized. Again, the centroids are
-calculated, and the algorithm continues iteratively until the assignments
-do not change.
-
-As an alternative to `NbClust` get the optimal number of clusters, we can 
-visualize the silhouette analysis thanks to the library `factoextra`.
-
-
-```r
-library(factoextra)
-
-# Convert dist object into matrix
-diss <- as.matrix(diss)
-
-# Perform silhouette analysis and plot the result
-fviz_nbclust(diss, kmeans, method = "silhouette")
-```
-
-![](24_clustering_files/figure-latex/kmeans1-1.pdf)<!-- --> 
-
-Based on the result of silhouette analysis, we confirm that 2 is the optimal
-number of clusters in k-means clustering.
-
-
-```r
-# The first step is random, add seed for reproducibility
-set.seed(15463)
-
-# Perform k-means clustering with 2 clusters
-km <- kmeans(diss, 2, nstart = 25)
-
-# Add the result to colData
-colData(tse)$clusters <- as.factor(km$cluster)
-
-# Perform PCoA so that we can visualize clusters
-tse <- runMDS(tse, assay.type = "relabundance", 
-              FUN = vegan::vegdist, method = "bray")
-
-# Plot PCoA and color clusters
-plotReducedDim(tse, "MDS", colour_by = "clusters")
-```
-
-![](24_clustering_files/figure-latex/kmeans2-1.pdf)<!-- --> 
-
 ## Dirichlet Multinomial Mixtures (DMM)
 
 This section focus on DMM analysis. 
@@ -461,7 +331,7 @@ The following operation returns a list of DMM objects for closer investigation.
 
 
 ```r
-metadata(tse_dmm)$DMM$dmm
+head(metadata(tse_dmm)$DMM$dmm,3)
 ```
 
 ```
@@ -481,31 +351,7 @@ metadata(tse_dmm)$DMM$dmm
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7689 BIC: 8076 AIC: 7948 
-## 
-## [[4]]
-## class: DMN 
-## k: 4 
-## samples x taxa: 26 x 67 
-## Laplace: 7792 BIC: 8357 AIC: 8187 
-## 
-## [[5]]
-## class: DMN 
-## k: 5 
-## samples x taxa: 26 x 67 
-## Laplace: 7844 BIC: 8548 AIC: 8335 
-## 
-## [[6]]
-## class: DMN 
-## k: 6 
-## samples x taxa: 26 x 67 
-## Laplace: 7942 BIC: 8822 AIC: 8566 
-## 
-## [[7]]
-## class: DMN 
-## k: 7 
-## samples x taxa: 26 x 67 
-## Laplace: 8076 BIC: 9100 AIC: 8801
+## Laplace: 7690 BIC: 8076 AIC: 7948
 ```
 
 We can see the Laplace approximation (model evidence)
@@ -555,15 +401,15 @@ dmm_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
-## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
+## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 ```
 
 Mixture weights (rough measure of the cluster size).
@@ -575,8 +421,8 @@ DirichletMultinomial::mixturewt(bestFit)
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.32
+## 1 0.5385 20.60
+## 2 0.4615 15.28
 ```
 
 It's also possible to get the samples-cluster assignment probabilities: how
@@ -590,12 +436,12 @@ head(prob)
 
 ```
 ##                 1         2
-## CL3     1.000e+00 4.501e-17
-## CC1     1.000e+00 3.417e-22
-## SV1     1.000e+00 1.712e-12
-## M31Fcsw 7.425e-26 1.000e+00
-## M11Fcsw 1.093e-16 1.000e+00
-## M31Plmr 1.152e-13 1.000e+00
+## CL3     1.000e+00 5.033e-17
+## CC1     1.000e+00 3.841e-22
+## SV1     1.000e+00 2.026e-12
+## M31Fcsw 7.308e-26 1.000e+00
+## M11Fcsw 1.062e-16 1.000e+00
+## M31Plmr 9.985e-14 1.000e+00
 ```
 
 We can also know the contribution of each taxa to each component
@@ -606,13 +452,13 @@ head(DirichletMultinomial::fitted(bestFit))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30381 0.1354045
-## Phylum:Euryarchaeota  0.23114 0.1468879
-## Phylum:Actinobacteria 1.21375 1.0581523
-## Phylum:Spirochaetes   0.21393 0.1318064
-## Phylum:MVP-15         0.02982 0.0007669
-## Phylum:Proteobacteria 6.84470 1.8114033
+##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354655
+## Phylum:Euryarchaeota  0.2314 0.1468629
+## Phylum:Actinobacteria 1.2106 1.0600208
+## Phylum:Spirochaetes   0.2141 0.1318415
+## Phylum:MVP-15         0.0299 0.0007669
+## Phylum:Proteobacteria 6.8423 1.8153138
 ```
 
 Finally, to be able to visualize our data and clusters, we start by 
@@ -651,86 +497,6 @@ euclidean_dmm_plot
 ```
 
 ![](24_clustering_files/figure-latex/dmm11-1.pdf)<!-- --> 
-
-## Graph-based clustering
-
-Another approach for discovering communities within the samples of the
-data, is to run community detection algorithms after building a
-graph. The following demonstration builds a graph based on the k
-nearest-neighbors and performs the community detection on the fly.
-
-Here, we will be using the `cluster` function with a graph-based clustering 
-function, enabling the community detection task.
-
-The algorithm used is "short random walks" [@Pons2006]. The graph is
-constructed using different k values (the number of nearest neighbors
-to consider during graph construction) using the robust centered log
-ratio (rclr) assay data. Then plotting the communities using UMAP
-[@McInnes2018] ordination as a visual exploration aid. Let us cluster the 
-`enterotype` dataset.
-
-
-```r
-library(patchwork) # For arranging several plots as a grid
-
-# Get enterotype dataset and transform data with rclr
-tse <- enterotype
-tse <- transformAssay(tse, method = "rclr")
-
-# Perform and store UMAP
-tse <- runUMAP(tse, name = "UMAP", assay.type = "rclr")
-
-# Set different k values to test
-k <- c(2, 3, 5, 10)
-
-ClustAndPlot <- function(x) {
-    # Add the clustering data from the short random walks algorithm to the TSE
-    tse <- cluster(tse, assay.type = "rclr", 
-                   MARGIN = "col", NNGraphParam(k = x))
-    
-    # Plot the results of the clustering as a color for each sample
-    plotUMAP(tse, colour_by = I(colData(tse)$clusters)) +
-    labs(title = paste0("k = ", x))
-}
-
-# Apply the function for different k values
-plots <- lapply(k, ClustAndPlot)
-
-# Display plots in a grid
-plots[[1]] + plots[[2]] + plots[[3]] + plots[[4]] + plot_layout(ncol = 4)
-```
-
-![](24_clustering_files/figure-latex/NNGraph1-1.pdf)<!-- --> 
-
-In this graph, we can clearly see the impact of the k choice on the quality
-of the clustering
-
-Similarly, the _`bluster`_ [@R_bluster] package offers clustering
-diagnostics that can be used for judging the clustering quality (see
-[Assorted clustering
-diagnostics](http://bioconductor.org/packages/release/bioc/vignettes/bluster/inst/doc/diagnostics.html)).
-In the following, Silhouette width as a diagnostic tool is computed
-and results are visualized for each case presented earlier. For more
-about Silhouettes read [@Rousseeuw1987].
-
-
-```r
-ClustDiagPlot <- function(x) {
-  # Get the clustering results
-    tse <- cluster(tse, assay.type = "rclr", 
-                   MARGIN = "col", NNGraphParam(k = x))
-
-    # Compute the diagnostic info
-    sil <- approxSilhouette(t(assays(tse)$rclr), colData(tse)$clusters)
-
-    # Plot as a boxplot to observe cluster separation
-    boxplot(split(sil$width, colData(tse)$clusters), main = paste0("k = ", x))
-}
-# Apply the function for different k values
-res <- lapply(k, ClustDiagPlot)
-```
-
-![](24_clustering_files/figure-latex/NNGraph2-1.pdf)<!-- --> ![](24_clustering_files/figure-latex/NNGraph2-2.pdf)<!-- --> ![](24_clustering_files/figure-latex/NNGraph2-3.pdf)<!-- --> ![](24_clustering_files/figure-latex/NNGraph2-4.pdf)<!-- --> 
 
 ## Biclustering
 
@@ -931,12 +697,12 @@ bc
 ## call:
 ## 	biclust(x = corr, method = BCPlaid(), verbose = FALSE)
 ## 
-## Number of Clusters found:  6 
+## Number of Clusters found:  5 
 ## 
 ## First  5  Cluster sizes:
 ##                    BC 1 BC 2 BC 3 BC 4 BC 5
-## Number of Rows:      11    9    6    3    2
-## Number of Columns:   15   13    9    9   15
+## Number of Rows:      11    9    8    4    2
+## Number of Columns:   14   13    8    8    9
 ```
 
 The object includes cluster information. However compared to
@@ -1021,13 +787,13 @@ head(bicluster_rows)
 ## D_5__uncultured               FALSE     FALSE     FALSE     FALSE     FALSE
 ## D_5__uncultured bacterium     FALSE     FALSE     FALSE     FALSE     FALSE
 ## D_5__Lactococcus              FALSE     FALSE     FALSE     FALSE     FALSE
-##                           cluster_6 cluster_7
-## D_5__Escherichia-Shigella     FALSE      TRUE
-## D_5__Ruminiclostridium 5      FALSE     FALSE
-## D_5__Lactobacillus            FALSE      TRUE
-## D_5__uncultured                TRUE     FALSE
-## D_5__uncultured bacterium     FALSE      TRUE
-## D_5__Lactococcus              FALSE      TRUE
+##                           cluster_6
+## D_5__Escherichia-Shigella      TRUE
+## D_5__Ruminiclostridium 5      FALSE
+## D_5__Lactobacillus             TRUE
+## D_5__uncultured                TRUE
+## D_5__uncultured bacterium      TRUE
+## D_5__Lactococcus               TRUE
 ```
 
 Let's collect information for the scatter plot. 
@@ -1096,14 +862,13 @@ for (i in seq_along(df)) {
 \includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-4} 
 \includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-5} 
 \includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-6} 
-\includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-7} 
 
 ```r
 pics[[1]] + pics[[2]] + pics[[3]]
 ```
 
 
-\includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-8} 
+\includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-7} 
 
 _pheatmap_ does not allow boolean values, so they must be converted into factors.
 
