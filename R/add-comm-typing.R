@@ -11,9 +11,9 @@ library(miaViz)
 # Only consider Forest samples
 tse <- tse[, colData(tse)$Country == "Finland"]
 # Agglomerate to phylum level
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 # Get top taxa
-rel_taxa <- getTopTaxa(tse, top = 8, assay.type = "counts")
+rel_taxa <- getTopFeatures(tse, top = 8, assay.type = "counts")
 # Take only the top taxa
 tse <- tse[is.element(rownames(tse), rel_taxa), ]
 
@@ -26,14 +26,14 @@ library(pheatmap)
 library(grid)
 library(RColorBrewer)
 # Agglomerate to phylum level
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 # Take only the top taxa
 tse <- tse[is.element(rownames(tse), rel_taxa),]
 
 # CLR and Z transforms
-tse <- transformCounts(tse, MARGIN = "samples", assay.type = "counts",
+tse <- transformAssay(tse, MARGIN = "samples", assay.type = "counts",
                        method = "clr", pseudocount=1)
-tse <- transformCounts(tse, MARGIN = "features", assay.type = "clr", method = "z")
+tse <- transformAssay(tse, MARGIN = "features", assay.type = "clr", method = "z")
 
 Countries <- data.frame("Country" = colData(tse)$Country)
 rownames(Countries) <- colData(tse)$Sample_ID
@@ -118,7 +118,7 @@ factoextra::fviz_nbclust(x, kmeans, method = "gap_stat", nboot = 50)+
 
 ## ----create clusters----------------------------------------------------------
 library(cluster)
-tse2 <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse2 <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 
 # assume 6 clusters
 K <- 6
@@ -163,9 +163,9 @@ scater::plotReducedDim(tse2, "NMDS_BC", colour_by = "CST", point_alpha = 1) + th
 
 ## ----message = FALSE, warning = FALSE, results = FALSE------------------------
 # Z transform of CLR counts
-tse2 <- transformCounts(tse2, MARGIN = "samples", assay.type = "counts",
+tse2 <- transformAssay(tse2, MARGIN = "samples", assay.type = "counts",
                         method = "clr", pseudocount=1)
-tse2 <- transformCounts(tse2, MARGIN = "features", assay.type = "clr", method = "z")
+tse2 <- transformAssay(tse2, MARGIN = "features", assay.type = "clr", method = "z")
 # get top taxa
 tse2 <- tse2[is.element(rownames(tse2), rel_taxa), ]
 
@@ -197,7 +197,7 @@ grid.text("Phylum", x = -0.04, y = 0.47, rot = 90, gp = gpar(fontsize = 16))
 # Runs model and calculates the most likely number of clusters from 1 to 7.
 # Since this is a large dataset it takes a long time to run
 # For this reason we use only a subset of the data agglomerated to the phylum level
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
 
 
@@ -254,7 +254,7 @@ vec <- colnames(prob)[max.col(prob,ties.method = "first")]
 
 ## -----------------------------------------------------------------------------
 # Calculate relative abundances
-tse_dmn <- transformCounts(tse_dmn, method = "relabundance")
+tse_dmn <- transformAssay(tse_dmn, method = "relabundance")
 # Does principal coordinate analysis
 bray_pcoa_df <- calculateMDS(tse_dmn, FUN = vegan::vegdist, method = "bray", 
                              assay.type = "relabundance")
@@ -283,10 +283,10 @@ bray_dmm_plot
 
 ## -----------------------------------------------------------------------------
 # get clr + z-transformed counts
-tse_dmn <- transformCounts(tse_dmn, MARGIN = "samples",
+tse_dmn <- transformAssay(tse_dmn, MARGIN = "samples",
                            assay.type = "counts", method = "clr",
 			   pseudocount = 1)
-tse_dmn <- transformCounts(tse_dmn, MARGIN = "features",
+tse_dmn <- transformAssay(tse_dmn, MARGIN = "features",
                            assay.type = "clr", method = "z")
 # objects containing dmm component information
 clust <- factor(vec)

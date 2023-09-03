@@ -23,7 +23,7 @@ assay(tse, "counts")[1:5,1:7]
 
 
 ## -----------------------------------------------------------------------------
-tse <- transformCounts(tse, assay.type = "counts", method = "relabundance")
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 assays(tse)
 
 
@@ -49,7 +49,7 @@ rowLinks(tse)
 
 ## -----------------------------------------------------------------------------
 # Agglomerate the data to Phylym level
-tse_phylum <- agglomerateByRank(tse, "Phylum")
+tse_phylum <- mergeFeaturesByRank(tse, "Phylum")
 # both have the same number of columns (samples)
 dim(tse)
 dim(tse_phylum)
@@ -90,7 +90,7 @@ availableDataSets()
 ## # mae <- HintikkaXOData()
 ## # Since HintikkaXOData is now added to mia, we can load it directly from there
 ## # We suggest to check other datasets from microbiomeDataSets
-## data(HintikkaXOData)
+## data(HintikkaXOData, package = "mia")
 ## mae <- HintikkaXOData
 
 
