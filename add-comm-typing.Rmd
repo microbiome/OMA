@@ -1,10 +1,134 @@
 # Additional Community Typing
 
+
+## K-means clustering
+
+Let's now try k-means clustering. Here observations are divided into clusters so
+that the distances between observations and cluster centers are
+minimized; an observation belongs to cluster whose center is the
+nearest.
+
+The algorithm starts by dividing observation to random clusters whose
+number is defined by user. The centroids of the clusters are then
+calculated. After that, observations' allocation to clusters are
+updated so that the means are minimized. Again, the centroids are
+calculated, and the algorithm continues iteratively until the assignments
+do not change.
+
+As an alternative to `NbClust` get the optimal number of clusters, we can 
+visualize the silhouette analysis thanks to the library `factoextra`.
+
+```{r kmeans1}
+library(factoextra)
+
+# Convert dist object into matrix
+diss <- as.matrix(diss)
+
+# Perform silhouette analysis and plot the result
+fviz_nbclust(diss, kmeans, method = "silhouette")
+```
+
+Based on the result of silhouette analysis, we confirm that 2 is the optimal
+number of clusters in k-means clustering.
+
+```{r kmeans2}
+# The first step is random, add seed for reproducibility
+set.seed(15463)
+
+# Perform k-means clustering with 2 clusters
+km <- kmeans(diss, 2, nstart = 25)
+
+# Add the result to colData
+colData(tse)$clusters <- as.factor(km$cluster)
+
+# Perform PCoA so that we can visualize clusters
+tse <- runMDS(tse, assay.type = "relabundance", 
+              FUN = vegan::vegdist, method = "bray")
+
+# Plot PCoA and color clusters
+plotReducedDim(tse, "MDS", colour_by = "clusters")
+```
+
 ```{r data, message=FALSE, warning=FALSE}
 # Load data
 library(mia)
 library(microbiomeDataSets)
 tse <- SprockettTHData()
+```
+
+
+## Graph-based clustering
+
+Another approach for discovering communities within the samples of the
+data, is to run community detection algorithms after building a
+graph. The following demonstration builds a graph based on the k
+nearest-neighbors and performs the community detection on the fly.
+
+Here, we will be using the `cluster` function with a graph-based clustering 
+function, enabling the community detection task.
+
+The algorithm used is "short random walks" [@Pons2006]. The graph is
+constructed using different k values (the number of nearest neighbors
+to consider during graph construction) using the robust centered log
+ratio (rclr) assay data. Then plotting the communities using UMAP
+[@McInnes2018] ordination as a visual exploration aid. Let us cluster the 
+`enterotype` dataset.
+
+```{r NNGraph1, message=FALSE, warning=FALSE}
+library(patchwork) # For arranging several plots as a grid
+
+# Get enterotype dataset and transform data with rclr
+tse <- enterotype
+tse <- transformAssay(tse, method = "rclr")
+
+# Perform and store UMAP
+tse <- runUMAP(tse, name = "UMAP", assay.type = "rclr")
+
+# Set different k values to test
+k <- c(2, 3, 5, 10)
+
+ClustAndPlot <- function(x) {
+    # Add the clustering data from the short random walks algorithm to the TSE
+    tse <- cluster(tse, assay.type = "rclr", 
+                   MARGIN = "col", NNGraphParam(k = x))
+    
+    # Plot the results of the clustering as a color for each sample
+    plotUMAP(tse, colour_by = I(colData(tse)$clusters)) +
+    labs(title = paste0("k = ", x))
+}
+
+# Apply the function for different k values
+plots <- lapply(k, ClustAndPlot)
+
+# Display plots in a grid
+plots[[1]] + plots[[2]] + plots[[3]] + plots[[4]] + plot_layout(ncol = 4)
+```
+
+In this graph, we can clearly see the impact of the k choice on the quality
+of the clustering
+
+Similarly, the _`bluster`_ [@R_bluster] package offers clustering
+diagnostics that can be used for judging the clustering quality (see
+[Assorted clustering
+diagnostics](http://bioconductor.org/packages/release/bioc/vignettes/bluster/inst/doc/diagnostics.html)).
+In the following, Silhouette width as a diagnostic tool is computed
+and results are visualized for each case presented earlier. For more
+about Silhouettes read [@Rousseeuw1987].
+
+```{r NNGraph2, message=FALSE, warning=FALSE}
+ClustDiagPlot <- function(x) {
+  # Get the clustering results
+    tse <- cluster(tse, assay.type = "rclr", 
+                   MARGIN = "col", NNGraphParam(k = x))
+
+    # Compute the diagnostic info
+    sil <- approxSilhouette(t(assays(tse)$rclr), colData(tse)$clusters)
+
+    # Plot as a boxplot to observe cluster separation
+    boxplot(split(sil$width, colData(tse)$clusters), main = paste0("k = ", x))
+}
+# Apply the function for different k values
+res <- lapply(k, ClustDiagPlot)
 ```
 
 ## Community composition
