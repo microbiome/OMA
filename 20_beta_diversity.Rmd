@@ -63,9 +63,16 @@ library(mia)
 data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 
-# some beta diversity metrics are usually applied to relative abundances
+# Beta diversity metrics like Bray-Curtis are often applied to relabundances
 tse <- transformAssay(tse,
+                      assay.type = "counts",
                       method = "relabundance")
+
+# Other metrics like Aitchison to clr-transformed data
+tse <- transformAssay(tse,
+                      assay.type = "relabundance",
+                      method = "clr",
+                      pseudocount = 1)
 
 # Add group information Feces yes/no
 tse$Group <- tse$SampleType == "Feces"
@@ -88,15 +95,12 @@ dimensions via an ordination method, the results of which can be stored in the
 and `runNMDS` functions.
 
 ```{r runMDS}
-# Load package to plot reducedDim
-library(scater)
-
-# Perform PCoA
+# Run PCoA on relabundance assay with Bray-Curtis distances
 tse <- runMDS(tse,
               FUN = vegan::vegdist,
               method = "bray",
-              name = "PCoA_BC",
-              assay.type = "relabundance")
+              assay.type = "relabundance",
+              name = "MDS_bray")
 ```
 
 Sample dissimilarity can be visualized on a lower-dimensional display (typically
@@ -105,12 +109,15 @@ provides tools to incorporate additional information encoded by color, shape,
 size and other aesthetics. Can you find any difference between the groups?
 
 ```{r plot-mds-bray-curtis, fig.cap = "MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."}
+# Load package to plot reducedDim
+library(scater)
+
 # Create ggplot object
-p <- plotReducedDim(tse, "PCoA_BC",
+p <- plotReducedDim(tse, "MDS_bray",
                     colour_by = "Group")
 
 # Calculate explained variance
-e <- attr(reducedDim(tse, "PCoA_BC"), "eig")
+e <- attr(reducedDim(tse, "MDS_bray"), "eig")
 rel_eig <- e / sum(e[e > 0])
 
 # Add explained variance for each axis
@@ -120,41 +127,54 @@ p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]], 1), "%", ")", sep 
 p
 ```
 
+A few combinations of beta diversity metrics and assay types are conventionally
+used. For instance, Bray-Curtis dissimilarity and Aitchison distance are often applied to the relative abundance and the clr assays, respectively. Besides
+**beta diversity metric** and **assay type**, the **PCoA algorithm** is also a variable that should be considered. Below, we show how the choice of these three
+factors can affect the resulting lower-dimensional data.
+
+```{r mds-nmds-comparison, warning=FALSE, message=FALSE}
+# Run NMDS on relabundance assay with Bray-Curtis distances
+tse <- runNMDS(tse,
+               FUN = vegan::vegdist,
+               method = "bray",
+               assay.type = "relabundance",
+               name = "NMDS_bray")
+
+# Run MDS on clr assay with Aitchison distances
+tse <- runMDS(tse,
+              FUN = vegan::vegdist,
+              method = "aitchison",
+              assay.type = "clr",
+              pseudocount = 1,
+              name = "MDS_aitchison")
+
+# Run NMDS on clr assay with Aitchison distances
+tse <- runNMDS(tse,
+               FUN = vegan::vegdist,
+               method = "aitchison",
+               assay.type = "clr",
+               pseudocount = 1,
+               name = "NMDS_aitchison")
+```
+
 Multiple ordination plots are combined into a multi-panel plot with the
 patchwork package, so that different methods can be compared to find similarities
 between them or select the most suitable one to visualize beta diversity in the
 light of the research question.
 
-```{r plot-mds-nmds-comparison, fig.cap = "Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset."}
-# Run MDS on counts assay with Euclidean distances
-tse <- runMDS(tse,
-              FUN = vegan::vegdist,
-              name = "MDS_euclidean",
-              method = "euclidean",
-              assay.type = "counts")
-
-# Run NMDS on counts assay with Bray-Curtis distances
-tse <- runNMDS(tse,
-               FUN = vegan::vegdist,
-               name = "NMDS_BC")
-
-# Run NMDS on counts assay with Euclidean distances
-tse <- runNMDS(tse,
-               FUN = vegan::vegdist,
-               name = "NMDS_euclidean",
-               method = "euclidean")
+```{r, fig.cap = "Comparison of MDS and NMDS plots based on the Bray-Curtis or Aitchison distances on the GlobalPattern dataset."}
+# Load package for multi-panel plotting
+library(patchwork)
 
 # Generate plots for all 4 reducedDims
-plots <- lapply(c("PCoA_BC", "MDS_euclidean", "NMDS_BC", "NMDS_euclidean"),
+plots <- lapply(c("MDS_bray", "NMDS_aitchison",
+                  "NMDS_bray", "NMDS_aitchison"),
                 plotReducedDim,
                 object = tse,
                 colour_by = "Group")
 
-# Load package for multi-panel plotting
-library(patchwork)
-
 # Generate multi-panel plot
-((plots[[1]] | plots[[2]]) / (plots[[3]] | plots[[4]])) +
+wrap_plots(plots) +
   plot_layout(guides = "collect")
 ```
 
