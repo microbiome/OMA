@@ -37,15 +37,15 @@ much essential information from the data as possible and turn it into a lower
 dimensional representation. Dimension reduction is bound to lose information but
 commonly used ordination techniques can preserve relevant information of sample
 similarities in an optimal way, which is defined in different ways by different
-methods. [TODO add references and/or link to ordination chapter instead?]
+methods.
 
 Based on the type of algorithm, ordination methods in microbiome research can
-be generally divided in two categories: unsupervised and supervized ordination.
+be generally divided in two categories: unsupervised and supervised ordination.
 The former includes Principal Coordinate Analysis (PCoA), Principal Component
 Analysis (PCA) and Uniform Manifold Approximation and Projection for Dimension
 Reduction (UMAP), whereas the latter is mainly represented by distance-based
-Redundance Analysis (dbRDA). We will first discuss unsupervized ordination
-methods and then proceed to supervized ones.
+Redundancy Analysis (dbRDA). We will first discuss unsupervised ordination
+methods and then proceed to supervised ones.
 
 To run the examples in this chapter, the following packages should be imported:
 
@@ -54,6 +54,7 @@ To run the examples in this chapter, the following packages should be imported:
 * vegan: ecological distances
 * ggplot2: plotting
 * patchwork: combining plots
+* dplyr: pipe operator
 
 ```{r betadiv-packages, include = FALSE}
 library(mia)
@@ -61,11 +62,12 @@ library(scater)
 library(vegan)
 library(ggplot2)
 library(patchwork)
+library(dplyr)
 ```
 
-## Unsupervized ordination
+## Unsupervised ordination {#unsupervised-ordination}
 
-Unsupervized ordination methods variation in the data without additional
+Unsupervised ordination methods variation in the data without additional
 information on covariates or other supervision of the model. Among the different
 approaches, Multi-Dimensional Scaling (MDS) and non-metric MDS (NMDS) can be
 regarded as the standard. They are jointly referred to as PCoA. For this
@@ -80,11 +82,11 @@ data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 
 # some beta diversity metrics are usually applied to relative abundances
-tse <- transformCounts(tse,
-                       method = "relabundance")
+tse <- transformAssay(tse,
+                      method = "relabundance")
 
 # Add group information Feces yes/no
-colData(tse)$Group <- colData(tse)$SampleType == "Feces"
+tse$Group <- tse$SampleType == "Feces"
 ```
 
 ### Comparing communities by beta diversity analysis
@@ -272,114 +274,87 @@ ggplot(df, aes(x = d0, y = dmds)) +
   theme_bw()
 ```
 
-## Supervized ordination
+## Supervised ordination
 
-dbRDA is a supervized counterpart of PCoA, that is, it takes into account the
+dbRDA is a supervised counterpart of PCoA, that is, it takes into account the
 covariates specified by the user to maximize the variance with respect to the
 them. The result shows how much each covariate affects beta diversity. The table
-below illustrates the relation between supervized and unsupervized ordination
+below illustrates the relation between supervised and unsupervised ordination
 methods.
 
-|                           | supervized ordination  | unsupervized ordination  |
+|                           | supervised ordination  | unsupervised ordination  |
 |:-------------------------:|:----------------------:|:------------------------:|
 | Euclidean distance        | RDA                    | PCA                      |
-|                           |                        |                          | 
 | non-Euclidean distance    | dbRDA                  | PCoA                     |
 
-We demonstrate the usage of dbRDA with the enterotype TreeSE, where samples
+We demonstrate the usage of dbRDA with the enterotype dataset, where samples
 correspond to patients. The colData contains the clinical status of each patient
-as well as a few covariates such as their gender and age, which can be included
-in the supervized model together with the clinical status, the main outcome variable.
-dbRDA can be perfomed with the `calculateRDA` function, which lies at the center
-of the following workflow.
+and a few covariates such as their gender and age.
 
-```{r microbiome_RDA1}
-# Load packages
-library(stringr)
-
+```{r import-rda-dataset}
 # Load data
 data("enterotype", package = "mia")
+tse2 <- enterotype
+
+# Apply relative transform
+tse2 <- transformAssay(tse2,
+                       method = "relabundance")
+```
+
+dbRDA can be perfomed with the `runRDA` function. In addition to the arguments
+previously defined for [unsupervised ordination](#unsupervised-ordination), this
+function takes a formula to control for variables and an action to treat missing
+values. Along with clinical status, which is the main outcome, we control for
+gender and age, and exclude observations where one of these variables is missing.
+
+```{r run-rda}
+# Perform RDA
+tse2 <- runRDA(tse2,
+               assay.type = "relabundance",
+               formula = assay ~ ClinicalStatus + Gender + Age,
+               distance = "bray",
+               na.action = na.exclude)
+
+# Store results of PERMANOVA test
+rda_info <- attr(reducedDim(tse2, "RDA"), "significance")
+```
+
+The importance of each variable on the similarity between samples can be
+assessed from the results of PERMANOVA, automatically provided by the `runRDA`
+function. We see that both clinical status and age explain more than 10% of the
+variance, but only age shows statistical significance.
+
+```{r rda-permanova-res}
+rda_info$permanova %>%
+  knitr::kable()
+```
+
+To ensure that the homogeneity assumption holds, we retrieve the corresponding
+information from the results of RDA. In this case, none of the p-values is lower
+than the significance threshold, and thus homogeneity is observed.
+
+```{r rda-homogeneity-res}
+rda_info$homogeneity %>%
+  knitr::kable()
+```
+
+Next, we proceed to visualize the weight and significance of each variable on
+the similarity between samples with an RDA plot, which can be generated with
+the following custom function.
+
+```{r plot-rda}
+# Load packages for plotting function
+library(stringr)
+library(ggord)
+
+rda <- attr(reducedDim(tse2, "RDA"), "rda")
 
 # Covariates that are being analyzed
 variable_names <- c("ClinicalStatus", "Gender", "Age")
 
-# Apply relative transform
-enterotype <- transformCounts(enterotype, method = "relabundance")
-
-# Create a formula
-formula <- as.formula(paste0("assay ~ ", str_c(variable_names, collapse = " + ")) )
-
-# # Perform RDA
-rda <- calculateRDA(enterotype,
-                    assay.type = "relabundance",
-                    formula = formula,
-                    distance = "bray",
-                    na.action = na.exclude)
-
-# Get the rda object
-rda <- attr(rda, "rda")
-# Calculate p-value and variance for whole model
-# Recommendation: use 999 permutations instead of 99
-set.seed(436)
-permanova <- anova.cca(rda, permutations = 99)
-# Create a data.frame for results
-rda_info <- as.data.frame(permanova)["Model", ]
-
-# Calculate p-value and variance for each variable
-# by = "margin" --> the order or variables does not matter
-set.seed(4585)
-permanova <- anova.cca(rda, by = "margin",  permutations = 99)
-# Add results to data.frame
-rda_info <- rbind(rda_info, permanova)
-
-# Add info about total variance
-rda_info[ , "Total variance"] <- rda_info["Model", 2] +
-    rda_info["Residual", 2]
-
-# Add info about explained variance
-rda_info[ , "Explained variance"] <- rda_info[ , 2] / 
-    rda_info[ , "Total variance"]
-
-# Loop through variables, calculate homogeneity
-homogeneity <- list()
-# Get colDtaa
-coldata <- colData(enterotype)
-# Get assay
-assay <- t(assay(enterotype, "relabundance"))
-for( variable_name in rownames(rda_info) ){
-    # If data is continuous or discrete
-    if( variable_name %in% c("Model", "Residual") ||
-        length(unique(coldata[[variable_name]])) /
-        length(coldata[[variable_name]]) > 0.2 ){
-        # Do not calculate homogeneity for continuous data
-        temp <- NA
-    } else{
-        # Calculate homogeneity for discrete data
-        # Calculate homogeneity
-        set.seed(413)
-        temp <- anova(
-            betadisper( 
-                vegdist(assay, method = "bray"),
-                group = coldata[[variable_name]] ),
-            permutations = permutations )["Groups", "Pr(>F)"]
-    }
-    # Add info to the list
-    homogeneity[[variable_name]] <- temp
-}
-# Add homogeneity to information
-rda_info[["Homogeneity p-value (NULL hyp: distinct/homogeneous --> permanova suitable)"]] <-
-    homogeneity
-
-knitr::kable(rda_info)
-```
-
-```{r microbiome_RDA2}
-# Load ggord for plotting
-library(ggord)
-
 # Since na.exclude was used, if there were rows missing information, they were 
 # dropped off. Subset coldata so that it matches with rda.
-coldata <- coldata[ rownames(rda$CCA$wa), ]
+coldata <- colData(tse2)[ rownames(rda$CCA$wa), ]
 
 # Adjust names
 # Get labels of vectors
@@ -401,9 +376,9 @@ vec_lab <- sapply(vec_lab_old, FUN = function(name){
     }
     # Add percentage how much this variable explains, and p-value
     new_name <- expr(paste(!!new_name, " (", 
-                           !!format(round( rda_info[variable_name, "Explained variance"]*100, 1), nsmall = 1), 
+                           !!format(round( rda_info$permanova[variable_name, "Explained variance"]*100, 1), nsmall = 1), 
                            "%, ",italic("P"), " = ", 
-                           !!gsub("0\\.","\\.", format(round( rda_info[variable_name, "Pr(>F)"], 3), 
+                           !!gsub("0\\.","\\.", format(round( rda_info$permanova[variable_name, "Pr(>F)"], 3), 
                                                        nsmall = 3)), ")"))
 
     return(new_name)
@@ -434,7 +409,9 @@ plot <- ggord(rda, grp_in = coldata[["ClinicalStatus"]], vec_lab = vec_lab,
 plot
 ```
 
-From RDA plot we can see that only age has significant affect on microbial profile.
+From the plot above, we can see that only age significantly describes
+differences between the microbial profiles of different samples. Such visual
+approach complements the previous results of PERMANOVA.
 
 ## Case studies
 
@@ -446,18 +423,18 @@ data at the Genus level and get the dominant taxa per sample.
 
 ```{r}
 # Agglomerate to genus level
-tse_genus <- agglomerateByRank(tse,
-                               rank = "Genus")
+tse_genus <- mergeFeaturesByRank(tse,
+                                 rank = "Genus")
 
 # Convert to relative abundances
-tse_genus <- transformCounts(tse,
-                             method = "relabundance",
-                             assay.type = "counts")
+tse_genus <- transformAssay(tse,
+                            method = "relabundance",
+                            assay.type = "counts")
 
 # Add info on dominant genus per sample
-tse_genus <- addPerSampleDominantTaxa(tse_genus,
-                                      assay.type = "relabundance",
-                                      name = "dominant_taxa")
+tse_genus <- addPerSampleDominantFeatures(tse_genus,
+                                          assay.type = "relabundance",
+                                          name = "dominant_taxa")
 ```
 
 Next, we perform PCoA with Bray-Curtis dissimilarity.
@@ -474,9 +451,9 @@ that A 3D interactive version of the plot below can be found in \@ref(extras).
 
 ```{r}
 # Getting the top taxa
-top_taxa <- getTopTaxa(tse_genus,
-                       top = 6,
-                       assay.type = "relabundance")
+top_taxa <- getTopFeatures(tse_genus,
+                           top = 6,
+                           assay.type = "relabundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_genus)$dominant_taxa,
@@ -563,8 +540,8 @@ the variation between communities.
 
 ```{r}
 # Agglomerate data to Species level
-tse <- agglomerateByRank(tse,
-                         rank = "Species")
+tse <- mergeFeaturesByRank(tse,
+                           rank = "Species")
 
 # Set seed for reproducibility
 set.seed(1576)

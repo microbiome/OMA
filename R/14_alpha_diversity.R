@@ -47,8 +47,7 @@ library(ggsignif)
 
 # Subsets the data. Takes only those samples that are from feces, skin, or tongue,
 # and creates data frame from the collected data
-df <- as.data.frame(colData(tse)[colData(tse)$SampleType %in% 
-                                  c("Feces", "Skin", "Tongue"), ])
+df <- as.data.frame(tse[ , tse$SampleType %in% c("Feces", "Skin", "Tongue")])
 
 # Changes old levels with new levels
 df$SampleType <- factor(df$SampleType)
