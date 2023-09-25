@@ -16,17 +16,26 @@ knitr::opts_chunk$set(
 
 # Community Similarity {#community-similarity}
 
-Whereas alpha diversity focuses on community variation within a community
-(one sample), beta diversity quantifies the dissimilarity between communities
-(multiple samples). In microbiome research, the most popular metrics of beta
+Beta diversity quantifies the dissimilarity between communities (multiple
+samples), as opposed to alpha diversity which focuses on variation within a
+community (one sample). In microbiome research, commonly used metrics of beta
 diversity include the Bray-Curtis index (for compositional data), Jaccard index
-(for presence / absence data, ignoring abundance information), Aitchison distance
+(for presence/absence data, ignoring abundance information), Aitchison distance
 (Euclidean distance for clr transformed abundances, aiming to avoid the
 compositionality bias), and the Unifrac distance (that takes into account the
 phylogenetic tree information). Notably, only some of these measures are actual
 _distances_, as this is a mathematical concept whose definition is not satisfied
 by certain ecological measure, such as the Bray-Curtis index. Therefore, the terms
 dissimilarity and beta diversity are preferred.
+
+| Method description         | Assay type         | Beta diversity metric |
+|:--------------------------:|:------------------:|:---------------------:|
+| Quantitative profiling     | Absolute counts     | Bray-Curtis           | 
+| Relative profiling         | Relative abundances | Bray-Curtis           |
+| Aitchison distance         | clr                 | Euclidean             |
+| Robust Aitchison distance  | rclr                | Euclidean             |
+| Present/Absence similarity | Absolute counts     | Jaccard               |
+| Phylogenetic distance      | Absolute counts     | Unifrac               |
 
 In practice, beta diversity is usually represented as a `dist` object, a
 triangular matrix where the distance between each pair of samples is encoded by
@@ -128,11 +137,13 @@ p
 ```
 
 A few combinations of beta diversity metrics and assay types are tipically
-used. For instance, Bray-Curtis dissimilarity and Aitchison distance are often applied to the relative abundance and the clr assays, respectively. Besides
-**beta diversity metric** and **assay type**, the **PCoA algorithm** is also a variable that should be considered. Below, we show how the choice of these three
+used. For instance, Bray-Curtis dissimilarity and Euclidean distance are often
+applied to the relative abundance and the clr assays, respectively. Besides
+**beta diversity metric** and **assay type**, the **PCoA algorithm** is also a
+variable that should be considered. Below, we show how the choice of these three
 factors can affect the resulting lower-dimensional data.
 
-```{r mds-nmds-comparison, warning=FALSE, message=FALSE}
+```{r mds-nmds-comparison, results='hide'}
 # Run NMDS on relabundance assay with Bray-Curtis distances
 tse <- runNMDS(tse,
                FUN = vegan::vegdist,
@@ -181,16 +192,14 @@ relationship of features in form on a `phylo` tree. `calculateUnifrac`
 performs the calculation to return a `dist` object, which can again be
 used within `runMDS`.
 
-```{r}
+```{r plot-unifrac, fig.cap = "Unifrac distances scaled by MDS of the GlobalPattern dataset."}
 tse <- runMDS(tse,
               FUN = mia::calculateUnifrac,
               name = "Unifrac",
               tree = rowTree(tse),
               ntop = nrow(tse),
               assay.type = "counts")
-```
 
-```{r plot-unifrac, fig.cap = "Unifrac distances scaled by MDS of the GlobalPattern dataset."}
 plotReducedDim(tse, "Unifrac",
                colour_by = "Group")
 ```
