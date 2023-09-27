@@ -98,7 +98,7 @@ Let us load example data and rename it as tse.
 
 ```r
 library(mia)
-data(hitchip1006, package="miaTime")
+data("hitchip1006", package = "miaTime")
 tse <- hitchip1006
 ```
 
@@ -994,7 +994,7 @@ tse
 ## metadata(0):
 ## assays(1): counts
 ## rownames(151): 1726470 1726471 ... 17264756 17264757
-## rowData names(6): Kingdom Phylum ... Family Genus
+## rowData names(6): taxonomy1 Phylum ... Family Genus
 ## colnames(27): A110 A111 ... A38 A39
 ## colData names(0):
 ## reducedDimNames(0):
@@ -1033,22 +1033,22 @@ head(rowData(tse))
 
 ```
 ## DataFrame with 6 rows and 6 columns
-##              Kingdom          Phylum            Class              Order
+##            taxonomy1          Phylum            Class              Order
 ##          <character>     <character>      <character>        <character>
-## 1726470     Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
-## 1726471     Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
-## 17264731    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
-## 17264726    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
-## 1726472     Bacteria Verrucomicrobia Verrucomicrobiae Verrucomicrobiales
-## 17264724    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
-##                       Family           Genus
-##                  <character>     <character>
-## 1726470       Bacteroidaceae     Bacteroides
-## 1726471       Bacteroidaceae     Bacteroides
-## 17264731  Porphyromonadaceae Parabacteroides
-## 17264726      Bacteroidaceae     Bacteroides
-## 1726472  Verrucomicrobiaceae     Akkermansia
-## 17264724      Bacteroidaceae     Bacteroides
+## 1726470    "Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726471    "Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 17264731   "Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 17264726   "Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726472    "Bacteria Verrucomicrobia Verrucomicrobiae Verrucomicrobiales
+## 17264724   "Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+##                       Family            Genus
+##                  <character>      <character>
+## 1726470       Bacteroidaceae     Bacteroides"
+## 1726471       Bacteroidaceae     Bacteroides"
+## 17264731  Porphyromonadaceae Parabacteroides"
+## 17264726      Bacteroidaceae     Bacteroides"
+## 1726472  Verrucomicrobiaceae     Akkermansia"
+## 17264724      Bacteroidaceae     Bacteroides"
 ```
 
 We further polish the feature names by removing unnecessary characters and then replace the original rowData with its updated version.
@@ -1070,7 +1070,7 @@ head(rowData(tse))
 
 ```
 ## DataFrame with 6 rows and 6 columns
-##              Kingdom          Phylum            Class              Order
+##            taxonomy1          Phylum            Class              Order
 ##          <character>     <character>      <character>        <character>
 ## 1726470     Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
 ## 1726471     Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
@@ -1154,7 +1154,7 @@ tse
 ## metadata(0):
 ## assays(1): counts
 ## rownames(151): 1726470 1726471 ... 17264756 17264757
-## rowData names(6): Kingdom Phylum ... Family Genus
+## rowData names(6): taxonomy1 Phylum ... Family Genus
 ## colnames(27): A110 A12 ... A35 A38
 ## colData names(4): Treatment Cohort TreatmentxCohort Description
 ## reducedDimNames(0):

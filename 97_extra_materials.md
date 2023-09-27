@@ -304,7 +304,7 @@ plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
 
 
 ```r
-# Installing libraryd packages
+# Load libraries
 library(rgl)
 library(plotly)
 ```
@@ -312,7 +312,6 @@ library(plotly)
 
 ```r
 library(knitr)
-library(rgl)
 knitr::knit_hooks$set(webgl = hook_webgl)
 ```
 
@@ -321,8 +320,6 @@ In this section we make a 3D version of the earlier  Visualizing the most domina
 
 
 ```r
-# Installing the package
-library(curatedMetagenomicData)
 # Importing necessary libraries
 library(curatedMetagenomicData)
 library(dplyr)

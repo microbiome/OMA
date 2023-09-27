@@ -576,7 +576,6 @@ Catabacter & 0.006 & 0.043\\
 ```r
 ## x-axis is the effect size: R2 * direction of coefficient
 ZicoSeq.plot(ZicoSeq.obj = zicoseq_out,
-             meta.dat = as.data.frame(colData(tse)),
              pvalue.type = 'p.adj.fdr')
 ```
 

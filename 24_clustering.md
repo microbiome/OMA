@@ -421,8 +421,8 @@ DirichletMultinomial::mixturewt(bestFit)
 
 ```
 ##       pi theta
-## 1 0.5385 20.60
-## 2 0.4615 15.28
+## 1 0.5385 20.59
+## 2 0.4615 15.32
 ```
 
 It's also possible to get the samples-cluster assignment probabilities: how
@@ -436,12 +436,12 @@ head(prob)
 
 ```
 ##                 1         2
-## CL3     1.000e+00 5.033e-17
-## CC1     1.000e+00 3.841e-22
-## SV1     1.000e+00 2.026e-12
-## M31Fcsw 7.308e-26 1.000e+00
-## M11Fcsw 1.062e-16 1.000e+00
-## M31Plmr 9.985e-14 1.000e+00
+## CL3     1.000e+00 4.537e-17
+## CC1     1.000e+00 3.465e-22
+## SV1     1.000e+00 1.722e-12
+## M31Fcsw 7.370e-26 1.000e+00
+## M11Fcsw 1.088e-16 1.000e+00
+## M31Plmr 1.153e-13 1.000e+00
 ```
 
 We can also know the contribution of each taxa to each component
@@ -452,13 +452,13 @@ head(DirichletMultinomial::fitted(bestFit))
 ```
 
 ```
-##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354655
-## Phylum:Euryarchaeota  0.2314 0.1468629
-## Phylum:Actinobacteria 1.2106 1.0600208
-## Phylum:Spirochaetes   0.2141 0.1318415
-## Phylum:MVP-15         0.0299 0.0007669
-## Phylum:Proteobacteria 6.8423 1.8153138
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30382 0.1354018
+## Phylum:Euryarchaeota  0.23115 0.1468867
+## Phylum:Actinobacteria 1.21383 1.0581251
+## Phylum:Spirochaetes   0.21393 0.1318039
+## Phylum:MVP-15         0.02982 0.0007686
+## Phylum:Proteobacteria 6.84629 1.8114900
 ```
 
 Finally, to be able to visualize our data and clusters, we start by 
@@ -574,8 +574,10 @@ clusters$classification
 
 ```
 ## $rowclass
-##  [1] 1 1 1 1 2 2 1 1 1 1 1 1 2 2 2 2 1 2 1 1 2 1 2 2 1 1 2 1 1 1 1 1 2 1 1 2 1 1
-## [39] 1 1 1 1 1 1 1 1 1 2 1 2 1 1 1 2 1 1 1
+##   [1] 1 1 1 1 1 1 1 1 1 2 2 1 2 1 1 1 2 1 2 1 1 1 2 2 1 1 2 2 1 2 2 1 1 2 1 1 2
+##  [38] 1 2 2 2 1 1 1 2 1 1 1 1 1 1 1 1 1 1 1 2 1 1 2 1 2 2 1 1 1 1 1 1 1 1 1 1 1
+##  [75] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 1 2 2 2 2 1 1 1 1 1 1 1 2 2 1 1 1 1
+## [112] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 ## 
 ## $colclass
 ##  C1  C2  C3  C4  C5  C6  C7  C8  C9 C10 C11 C12 C13 C14 C15 C16 C17 C18 C19 C20 
@@ -697,12 +699,12 @@ bc
 ## call:
 ## 	biclust(x = corr, method = BCPlaid(), verbose = FALSE)
 ## 
-## Number of Clusters found:  5 
+## Number of Clusters found:  4 
 ## 
-## First  5  Cluster sizes:
-##                    BC 1 BC 2 BC 3 BC 4 BC 5
-## Number of Rows:      11    9    8    4    2
-## Number of Columns:   14   13    8    8    9
+## First  4  Cluster sizes:
+##                    BC 1 BC 2 BC 3 BC 4
+## Number of Rows:      20   11   18    2
+## Number of Columns:   13   15   10    9
 ```
 
 The object includes cluster information. However compared to
@@ -781,19 +783,12 @@ head(bicluster_rows)
 
 ```
 ##                           cluster_1 cluster_2 cluster_3 cluster_4 cluster_5
-## D_5__Escherichia-Shigella     FALSE     FALSE     FALSE     FALSE     FALSE
-## D_5__Ruminiclostridium 5       TRUE     FALSE      TRUE     FALSE     FALSE
-## D_5__Lactobacillus            FALSE     FALSE     FALSE     FALSE     FALSE
-## D_5__uncultured               FALSE     FALSE     FALSE     FALSE     FALSE
-## D_5__uncultured bacterium     FALSE     FALSE     FALSE     FALSE     FALSE
-## D_5__Lactococcus              FALSE     FALSE     FALSE     FALSE     FALSE
-##                           cluster_6
-## D_5__Escherichia-Shigella      TRUE
-## D_5__Ruminiclostridium 5      FALSE
-## D_5__Lactobacillus             TRUE
-## D_5__uncultured                TRUE
-## D_5__uncultured bacterium      TRUE
-## D_5__Lactococcus               TRUE
+## D_5__Staphylococcus           FALSE     FALSE     FALSE     FALSE      TRUE
+## D_5__Klebsiella               FALSE     FALSE     FALSE     FALSE      TRUE
+## D_5__Streptococcus            FALSE     FALSE     FALSE     FALSE      TRUE
+## D_5__Escherichia-Shigella     FALSE     FALSE     FALSE     FALSE      TRUE
+## D_5__Ruminiclostridium 5      FALSE      TRUE      TRUE     FALSE     FALSE
+## D_5__Pseudomonas              FALSE     FALSE     FALSE     FALSE      TRUE
 ```
 
 Let's collect information for the scatter plot. 
@@ -861,14 +856,13 @@ for (i in seq_along(df)) {
 \includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-3} 
 \includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-4} 
 \includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-5} 
-\includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-6} 
 
 ```r
 pics[[1]] + pics[[2]] + pics[[3]]
 ```
 
 
-\includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-7} 
+\includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-6} 
 
 _pheatmap_ does not allow boolean values, so they must be converted into factors.
 

@@ -37,17 +37,28 @@ document.addEventListener("click", function (event) {
 
 # Community Similarity {#community-similarity}
 
-Whereas alpha diversity focuses on community variation within a community
-(one sample), beta diversity quantifies the dissimilarity between communities
-(multiple samples). In microbiome research, the most popular metrics of beta
+Beta diversity quantifies the dissimilarity between communities (multiple
+samples), as opposed to alpha diversity which focuses on variation within a
+community (one sample). In microbiome research, commonly used metrics of beta
 diversity include the Bray-Curtis index (for compositional data), Jaccard index
-(for presence / absence data, ignoring abundance information), Aitchison distance
+(for presence/absence data, ignoring abundance information), Aitchison distance
 (Euclidean distance for clr transformed abundances, aiming to avoid the
 compositionality bias), and the Unifrac distance (that takes into account the
 phylogenetic tree information). Notably, only some of these measures are actual
 _distances_, as this is a mathematical concept whose definition is not satisfied
 by certain ecological measure, such as the Bray-Curtis index. Therefore, the terms
 dissimilarity and beta diversity are preferred.
+
+| Method description          | Assay type          | Beta diversity metric |
+|:---------------------------:|:-------------------:|:---------------------:|
+| Quantitative profiling      | Absolute counts     | Bray-Curtis           | 
+| Relative profiling          | Relative abundances | Bray-Curtis           |
+| Aitchison distance          | Absolute counts     | Aitchison             |
+| Aitchison distance          | clr                 | Euclidean             |
+| Robust Aitchison distance   | rclr                | Euclidean             |
+| Presence/Absence similarity | Relative abundances | Jaccard               |
+| Presence/Absence similarity | Absolute counts     | Jaccard               |
+| Phylogenetic distance       | Rarefied counts     | Unifrac               |
 
 In practice, beta diversity is usually represented as a `dist` object, a
 triangular matrix where the distance between each pair of samples is encoded by
@@ -68,16 +79,6 @@ Reduction (UMAP), whereas the latter is mainly represented by distance-based
 Redundancy Analysis (dbRDA). We will first discuss unsupervised ordination
 methods and then proceed to supervised ones.
 
-To run the examples in this chapter, the following packages should be imported:
-
-* mia: microbiome analysis framework
-* scater: plotting reduced dimensions
-* vegan: ecological distances
-* ggplot2: plotting
-* patchwork: combining plots
-* dplyr: pipe operator
-
-
 
 ## Unsupervised ordination {#unsupervised-ordination}
 
@@ -90,15 +91,21 @@ variation between stool samples and those with a different origin.
 
 
 ```r
-# Example data
+# Load mia and import sample dataset
+library(mia)
 data("GlobalPatterns", package = "mia")
-
-# Data matrix (features x samples)
 tse <- GlobalPatterns
 
-# some beta diversity metrics are usually applied to relative abundances
+# Beta diversity metrics like Bray-Curtis are often applied to relabundances
 tse <- transformAssay(tse,
+                      assay.type = "counts",
                       method = "relabundance")
+
+# Other metrics like Aitchison to clr-transformed data
+tse <- transformAssay(tse,
+                      assay.type = "relabundance",
+                      method = "clr",
+                      pseudocount = TRUE)
 
 # Add group information Feces yes/no
 tse$Group <- tse$SampleType == "Feces"
@@ -122,12 +129,15 @@ and `runNMDS` functions.
 
 
 ```r
-# Perform PCoA
+# Load package to plot reducedDim
+library(scater)
+
+# Run PCoA on relabundance assay with Bray-Curtis distances
 tse <- runMDS(tse,
               FUN = vegan::vegdist,
               method = "bray",
-              name = "PCoA_BC",
-              assay.type = "relabundance")
+              assay.type = "relabundance",
+              name = "MDS_bray")
 ```
 
 Sample dissimilarity can be visualized on a lower-dimensional display (typically
@@ -138,11 +148,11 @@ size and other aesthetics. Can you find any difference between the groups?
 
 ```r
 # Create ggplot object
-p <- plotReducedDim(tse, "PCoA_BC",
+p <- plotReducedDim(tse, "MDS_bray",
                     colour_by = "Group")
 
 # Calculate explained variance
-e <- attr(reducedDim(tse, "PCoA_BC"), "eig")
+e <- attr(reducedDim(tse, "MDS_bray"), "eig")
 rel_eig <- e / sum(e[e > 0])
 
 # Add explained variance for each axis
@@ -154,55 +164,60 @@ p
 
 ![(\#fig:plot-mds-bray-curtis)MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset.](20_beta_diversity_files/figure-latex/plot-mds-bray-curtis-1.png) 
 
-With additional tools from the ggplot2 package, ordination methods can be 
-compared to find similarities between them or select the most suitable one to
-visualize beta diversity in the light of the research question.
+A few combinations of beta diversity metrics and assay types are typically
+used. For instance, Bray-Curtis dissimilarity and Euclidean distance are often
+applied to the relative abundance and the clr assays, respectively. Besides
+**beta diversity metric** and **assay type**, the **PCoA algorithm** is also a
+variable that should be considered. Below, we show how the choice of these three
+factors can affect the resulting lower-dimensional data.
 
 
 ```r
+# Run NMDS on relabundance assay with Bray-Curtis distances
+tse <- runNMDS(tse,
+               FUN = vegan::vegdist,
+               method = "bray",
+               assay.type = "relabundance",
+               name = "NMDS_bray")
+
+# Run MDS on clr assay with Aitchison distances
 tse <- runMDS(tse,
               FUN = vegan::vegdist,
-              name = "MDS_euclidean",
               method = "euclidean",
-              assay.type = "counts")
+              assay.type = "clr",
+              name = "MDS_aitchison")
 
+# Run NMDS on clr assay with Euclidean distances
 tse <- runNMDS(tse,
                FUN = vegan::vegdist,
-               name = "NMDS_BC")
+               method = "euclidean",
+               assay.type = "clr",
+               name = "NMDS_aitchison")
 ```
 
-```
-## initial  value 47.733208 
-## iter   5 value 33.853364
-## iter  10 value 32.891200
-## final  value 32.823570 
-## converged
-```
+Multiple ordination plots are combined into a multi-panel plot with the
+patchwork package, so that different methods can be compared to find similarities
+between them or select the most suitable one to visualize beta diversity in the
+light of the research question.
 
-```r
-tse <- runNMDS(tse,
-               FUN = vegan::vegdist,
-               name = "NMDS_euclidean",
-               method = "euclidean")
-```
-
-```
-## initial  value 31.882673 
-## final  value 31.882673 
-## converged
-```
 
 ```r
-plots <- lapply(c("PCoA_BC", "MDS_euclidean", "NMDS_BC", "NMDS_euclidean"),
+# Load package for multi-panel plotting
+library(patchwork)
+
+# Generate plots for all 4 reducedDims
+plots <- lapply(c("MDS_bray", "MDS_aitchison",
+                  "NMDS_bray", "NMDS_aitchison"),
                 plotReducedDim,
                 object = tse,
                 colour_by = "Group")
 
-((plots[[1]] | plots[[2]]) / (plots[[3]] | plots[[4]])) +
+# Generate multi-panel plot
+wrap_plots(plots) +
   plot_layout(guides = "collect")
 ```
 
-![(\#fig:plot-mds-nmds-comparison)Comparison of MDS and NMDS plots based on the Bray-Curtis or euclidean distances on the GlobalPattern dataset.](20_beta_diversity_files/figure-latex/plot-mds-nmds-comparison-1.png) 
+![(\#fig:unnamed-chunk-2)Comparison of MDS and NMDS plots based on the Bray-Curtis or Aitchison distances on the GlobalPattern dataset.](20_beta_diversity_files/figure-latex/unnamed-chunk-2-1.png) 
 
 The _Unifrac_ method is a special case, as it requires data on the
 relationship of features in form on a `phylo` tree. `calculateUnifrac`
@@ -217,10 +232,7 @@ tse <- runMDS(tse,
               tree = rowTree(tse),
               ntop = nrow(tse),
               assay.type = "counts")
-```
 
-
-```r
 plotReducedDim(tse, "Unifrac",
                colour_by = "Group")
 ```
@@ -291,6 +303,9 @@ if smaller. This can be calculated as shown below.
 
 
 ```r
+# Load vegan package
+library(vegan)
+
 # Quantify dissimilarities in the original feature space
 x <- assay(tse, "relabundance") # Pick relabunance assay separately
 d0 <- as.matrix(vegdist(t(x), "bray"))
@@ -336,10 +351,10 @@ them. The result shows how much each covariate affects beta diversity. The table
 below illustrates the relation between supervised and unsupervised ordination
 methods.
 
-|                           | supervised ordination  | unsupervised ordination  |
-|:-------------------------:|:----------------------:|:------------------------:|
-| Euclidean distance        | RDA                    | PCA                      |
-| non-Euclidean distance    | dbRDA                  | PCoA                     |
+|                          | supervised ordination  | unsupervised ordination  |
+|:------------------------:|:----------------------:|:------------------------:|
+| Euclidean distance       | RDA                    | PCA                      |
+| non-Euclidean distance   | dbRDA                  | PCoA/MDS, NMDS and UMAP  |
 
 We demonstrate the usage of dbRDA with the enterotype dataset, where samples
 correspond to patients. The colData contains the clinical status of each patient
@@ -382,7 +397,7 @@ variance, but only age shows statistical significance.
 
 
 ```r
-rda_info$permanova %>%
+rda_info$permanova |>
   knitr::kable()
 ```
 
@@ -391,11 +406,11 @@ rda_info$permanova %>%
 \hline
   & Df & SumOfSqs & F & Pr(>F) & Total variance & Explained variance\\
 \hline
-Model & 6 & 1.1157 & 1.940 & 0.033 & 3.991 & 0.2795\\
+Model & 6 & 1.1157 & 1.940 & 0.039 & 3.991 & 0.2795\\
 \hline
-ClinicalStatus & 4 & 0.5837 & 1.522 & 0.129 & 3.991 & 0.1463\\
+ClinicalStatus & 4 & 0.5837 & 1.522 & 0.142 & 3.991 & 0.1463\\
 \hline
-Gender & 1 & 0.1679 & 1.751 & 0.108 & 3.991 & 0.0421\\
+Gender & 1 & 0.1679 & 1.751 & 0.119 & 3.991 & 0.0421\\
 \hline
 Age & 1 & 0.5245 & 5.471 & 0.001 & 3.991 & 0.1314\\
 \hline
@@ -409,7 +424,7 @@ than the significance threshold, and thus homogeneity is observed.
 
 
 ```r
-rda_info$homogeneity %>%
+rda_info$homogeneity |>
   knitr::kable()
 ```
 
@@ -418,84 +433,25 @@ rda_info$homogeneity %>%
 \hline
   & Df & Sum Sq & Mean Sq & F & N.Perm & Pr(>F) & Total variance & Explained variance\\
 \hline
-ClinicalStatus & 4 & 0.2511 & 0.0628 & 2.7440 & 999 & 0.107 & 1.0288 & 0.2440\\
+ClinicalStatus & 4 & 0.2511 & 0.0628 & 2.7440 & 999 & 0.097 & 1.0288 & 0.2440\\
 \hline
-Gender & 1 & 0.0103 & 0.0103 & 0.4158 & 999 & 0.538 & 0.9283 & 0.0111\\
+Gender & 1 & 0.0103 & 0.0103 & 0.4158 & 999 & 0.548 & 0.9283 & 0.0111\\
 \hline
-Age & 29 & 0.3272 & 0.0113 & 17.0256 & 999 & 0.406 & 0.3319 & 0.9860\\
+Age & 29 & 0.3272 & 0.0113 & 17.0256 & 999 & 0.390 & 0.3319 & 0.9860\\
 \hline
 \end{tabular}
 
 Next, we proceed to visualize the weight and significance of each variable on
 the similarity between samples with an RDA plot, which can be generated with
-the following custom function.
+the `plotRDA` function from the miaViz package.
 
 
 ```r
 # Load packages for plotting function
-library(stringr)
-library(ggord)
+library(miaViz)
 
-rda <- attr(reducedDim(tse2, "RDA"), "rda")
-
-# Covariates that are being analyzed
-variable_names <- c("ClinicalStatus", "Gender", "Age")
-
-# Since na.exclude was used, if there were rows missing information, they were 
-# dropped off. Subset coldata so that it matches with rda.
-coldata <- colData(tse2)[ rownames(rda$CCA$wa), ]
-
-# Adjust names
-# Get labels of vectors
-vec_lab_old <- rownames(rda$CCA$biplot)
-
-# Loop through vector labels
-vec_lab <- sapply(vec_lab_old, FUN = function(name){
-    # Get the variable name
-    variable_name <- variable_names[ str_detect(name, variable_names) ]
-    # If the vector label includes also group name
-    if( !any(name %in% variable_names) ){
-        # Get the group names
-        group_name <- unique( coldata[[variable_name]] )[ 
-        which( paste0(variable_name, unique( coldata[[variable_name]] )) == name ) ]
-        # Modify vector so that group is separated from variable name
-        new_name <- paste0(variable_name, " \U2012 ", group_name)
-    } else{
-        new_name <- name
-    }
-    # Add percentage how much this variable explains, and p-value
-    new_name <- expr(paste(!!new_name, " (", 
-                           !!format(round( rda_info$permanova[variable_name, "Explained variance"]*100, 1), nsmall = 1), 
-                           "%, ",italic("P"), " = ", 
-                           !!gsub("0\\.","\\.", format(round( rda_info$permanova[variable_name, "Pr(>F)"], 3), 
-                                                       nsmall = 3)), ")"))
-
-    return(new_name)
-})
-# Add names
-names(vec_lab) <- vec_lab_old
-
-# Create labels for axis
-xlab <- paste0("RDA1 (", format(round( rda$CCA$eig[[1]]/rda$CCA$tot.chi*100, 1), nsmall = 1 ), "%)")
-ylab <- paste0("RDA2 (", format(round( rda$CCA$eig[[2]]/rda$CCA$tot.chi*100, 1), nsmall = 1 ), "%)")
-
-# Create a plot        
-plot <- ggord(rda, grp_in = coldata[["ClinicalStatus"]], vec_lab = vec_lab,
-              alpha = 0.5,
-              size = 4, addsize = -4,
-              #ext= 0.7, 
-              txt = 3.5, repel = TRUE, 
-              #coord_fix = FALSE
-          ) + 
-    # Adjust titles and labels
-    guides(colour = guide_legend("ClinicalStatus"),
-           fill = guide_legend("ClinicalStatus"),
-           group = guide_legend("ClinicalStatus"),
-           shape = guide_legend("ClinicalStatus"),
-           x = guide_axis(xlab),
-           y = guide_axis(ylab)) +
-    theme( axis.title = element_text(size = 10) )
-plot
+# Generate RDA plot coloured by clinical status
+plotRDA(tse2, "RDA", colour_by = "ClinicalStatus")
 ```
 
 ![](20_beta_diversity_files/figure-latex/plot-rda-1.png)<!-- --> 

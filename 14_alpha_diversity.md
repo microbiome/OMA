@@ -204,7 +204,7 @@ head(tse$faith)
 ```
 
 ```
-## [1] 250.5 262.3 208.5 117.9 119.8 135.8
+## [1] 0 0 0 0 0 0
 ```
 
 **Note**: because `tse` is a `TreeSummarizedExperiment` object, its phylogenetic tree is used by default. However, the optional argument `tree` must be provided if `tse` does not contain one.
