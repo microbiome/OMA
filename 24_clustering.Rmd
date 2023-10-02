@@ -226,19 +226,19 @@ the metadata thanks to the `name` parameter.
 
 ```{r dmm2}
 # Run the model and calculates the most likely number of clusters from 1 to 7
-tse_dmm <- cluster(tse, name = "DMM", DmmParam(k = 1:7, type = "laplace"), 
+tse <- cluster(tse, name = "DMM", DmmParam(k = 1:7, type = "laplace"), 
                    MARGIN = "samples", full = TRUE)
 ```
 
 ```{r dmm3}
 # The dmm info is stored in the metadata under the 'DMM' column
-tse_dmm
+tse
 ```
 
 The following operation returns a list of DMM objects for closer investigation.
 
 ```{r dmm4}
-head(metadata(tse_dmm)$DMM$dmm,3)
+head(metadata(tse)$DMM$dmm,3)
 ```
 
 We can see the Laplace approximation (model evidence)
@@ -247,7 +247,7 @@ for each model of the k models.
 ```{r dmm5}
 BiocManager::install("microbiome/miaViz")
 library(miaViz)
-plotDMNFit(tse_dmm, type = "laplace", name = "DMM")
+plotDMNFit(tse, type = "laplace", name = "DMM")
 ```
 
 On the graph, we can see that the best number of clusters is 2. We can confirm
@@ -255,7 +255,7 @@ that with the following operation.
 
 ```{r dmm6}
 # Get the model that has the best fit
-bestFit <- metadata(tse_dmm)$DMM$dmm[[metadata(tse_dmm)$DMM$best]]
+bestFit <- metadata(tse)$DMM$dmm[[metadata(tse)$DMM$best]]
 bestFit
 ```
 
@@ -265,7 +265,7 @@ Group samples and return DMNGroup object that contains a summary.
 Patient status is used for grouping.
 
 ```{r dmm_group}
-dmm_group <- calculateDMNgroup(tse_dmm, variable = "SampleType", 
+dmm_group <- calculateDMNgroup(tse, variable = "SampleType", 
                                assay.type = "counts", k = 2, 
                                seed = .Machine$integer.max)
 
@@ -282,7 +282,7 @@ It's also possible to get the samples-cluster assignment probabilities: how
 probable it is that each sample belongs to each cluster
 
 ```{r dmm8}
-prob <- metadata(tse_dmm)$DMM$prob
+prob <- metadata(tse)$DMM$prob
 head(prob)
 ```
 
@@ -309,9 +309,13 @@ euclidean_pcoa_df <- data.frame(pcoa1 = df[, 1], pcoa2 = df[, 2])
 ```
 
 ```{r dmm11}
+# Run the model and calculates the most likely number of clusters from 1 to 7
+
+tse <- cluster(tse, name = "DMM", DmmParam(k = 1:7, type = "laplace"), 
+                   MARGIN = "samples", full = TRUE)
 # Create a data frame that contains principal coordinates and DMM information
 euclidean_dmm_pcoa_df <- cbind(euclidean_pcoa_df,
-                               dmm_component = colData(tse_dmm)$clusters)
+                               dmm_component = colData(tse)$clusters)
 
 # Create a plot
 euclidean_dmm_plot <- ggplot(data = euclidean_dmm_pcoa_df,
