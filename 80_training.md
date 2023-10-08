@@ -45,7 +45,7 @@ The page provides practical information to support training and self-study.
 Brief checklist to prepare for training (see below for links).
 
  * Install the recommended software
- * Watch the short online videos and familiarize with the other available material
+ * If the time allows, watch the short online videos and familiarize with the other available material
  * Join Gitter online chat for support
 
 
@@ -71,17 +71,20 @@ components to install include:
   further examples from this tutorial, modifying and applying these
   techniques to your own data. Plain source code for the individual chapters of this book are available via [Github](https://github.com/microbiome/OMA/tree/master/R)
 
+
 ## Study material {#material}
 
-We encourage to familiarize with the material and test examples in advance:
+We encourage to familiarize with the material and test examples in advance but this is optional:
 
+ * [Introduction to data analysis with R and Bioconductor](https://carpentries-incubator.github.io/bioc-intro/) (for beginners with R)
+ 
  * [Short online videos](https://www.youtube.com/playlist?list=PLjiXAZO27elAJEptP59BN3whVJ61XIkST) on microbiome data science with R/Bioconductor  
 
  * [Quarto presentations](https://microbiome.github.io/outreach/index.html)
- 
- * [Other outreach material](https://github.com/microbiome/outreach)
 
  * [Orchestrating Microbiome Analysis with Bioconductor (OMA)](https://microbiome.github.io/OMA/) (this book)
+
+ * [Other outreach material](https://github.com/microbiome/outreach)
 
  * [Exercises](#exercises) for self-study
 
@@ -96,6 +99,18 @@ For online support on installation and other matters, join us at
 
 You are also welcome to connect through various channels with our
 broader [developer and user community](https://microbiome.github.io).
+
+
+## Further reading
+
+The following online books provide good general data science background:
+
+  * (Data science basics in R](https://r4ds.had.co.nz)
+  * (Modern Statistics for Modern Biology)[https://www.huber.embl.de/msmb/] open access book (Holmes S, Huber W)
+  * [The Bioconductor
+    project](https://carpentries-incubator.github.io/bioc-project/)
+    (background on the Bioconductor project; Carpentries workshop)
+
 
 
 ## Code of Conduct {#coc}

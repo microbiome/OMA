@@ -351,7 +351,7 @@ head(metadata(tse_dmm)$DMM$dmm,3)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7690 BIC: 8076 AIC: 7948
+## Laplace: 7751 BIC: 8194 AIC: 8067
 ```
 
 We can see the Laplace approximation (model evidence)
@@ -421,8 +421,8 @@ DirichletMultinomial::mixturewt(bestFit)
 
 ```
 ##       pi theta
-## 1 0.5385 20.59
-## 2 0.4615 15.32
+## 1 0.5385 20.58
+## 2 0.4615 15.28
 ```
 
 It's also possible to get the samples-cluster assignment probabilities: how
@@ -436,12 +436,12 @@ head(prob)
 
 ```
 ##                 1         2
-## CL3     1.000e+00 4.537e-17
-## CC1     1.000e+00 3.465e-22
-## SV1     1.000e+00 1.722e-12
-## M31Fcsw 7.370e-26 1.000e+00
-## M11Fcsw 1.088e-16 1.000e+00
-## M31Plmr 1.153e-13 1.000e+00
+## CL3     1.000e+00 5.055e-17
+## CC1     1.000e+00 3.908e-22
+## SV1     1.000e+00 1.955e-12
+## M31Fcsw 7.871e-26 1.000e+00
+## M11Fcsw 1.132e-16 1.000e+00
+## M31Plmr 1.122e-13 1.000e+00
 ```
 
 We can also know the contribution of each taxa to each component
@@ -453,12 +453,12 @@ head(DirichletMultinomial::fitted(bestFit))
 
 ```
 ##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30382 0.1354018
-## Phylum:Euryarchaeota  0.23115 0.1468867
-## Phylum:Actinobacteria 1.21383 1.0581251
-## Phylum:Spirochaetes   0.21393 0.1318039
-## Phylum:MVP-15         0.02982 0.0007686
-## Phylum:Proteobacteria 6.84629 1.8114900
+## Phylum:Crenarchaeota  0.30381 0.1354644
+## Phylum:Euryarchaeota  0.23114 0.1468596
+## Phylum:Actinobacteria 1.21371 1.0601186
+## Phylum:Spirochaetes   0.21392 0.1318401
+## Phylum:MVP-15         0.02981 0.0007677
+## Phylum:Proteobacteria 6.84388 1.8153128
 ```
 
 Finally, to be able to visualize our data and clusters, we start by 
@@ -699,12 +699,12 @@ bc
 ## call:
 ## 	biclust(x = corr, method = BCPlaid(), verbose = FALSE)
 ## 
-## Number of Clusters found:  4 
+## Number of Clusters found:  3 
 ## 
-## First  4  Cluster sizes:
-##                    BC 1 BC 2 BC 3 BC 4
-## Number of Rows:      20   11   18    2
-## Number of Columns:   13   15   10    9
+## First  3  Cluster sizes:
+##                    BC 1 BC 2 BC 3
+## Number of Rows:      16   16   16
+## Number of Columns:   13   14   10
 ```
 
 The object includes cluster information. However compared to
@@ -782,13 +782,13 @@ head(bicluster_rows)
 ```
 
 ```
-##                           cluster_1 cluster_2 cluster_3 cluster_4 cluster_5
-## D_5__Staphylococcus           FALSE     FALSE     FALSE     FALSE      TRUE
-## D_5__Klebsiella               FALSE     FALSE     FALSE     FALSE      TRUE
-## D_5__Streptococcus            FALSE     FALSE     FALSE     FALSE      TRUE
-## D_5__Escherichia-Shigella     FALSE     FALSE     FALSE     FALSE      TRUE
-## D_5__Ruminiclostridium 5      FALSE      TRUE      TRUE     FALSE     FALSE
-## D_5__Pseudomonas              FALSE     FALSE     FALSE     FALSE      TRUE
+##                           cluster_1 cluster_2 cluster_3 cluster_4
+## D_5__Staphylococcus           FALSE     FALSE     FALSE      TRUE
+## D_5__Klebsiella               FALSE     FALSE     FALSE      TRUE
+## D_5__Streptococcus            FALSE     FALSE     FALSE      TRUE
+## D_5__Escherichia-Shigella     FALSE     FALSE     FALSE      TRUE
+## D_5__Ruminiclostridium 5       TRUE     FALSE      TRUE     FALSE
+## D_5__Pseudomonas              FALSE     FALSE     FALSE      TRUE
 ```
 
 Let's collect information for the scatter plot. 
@@ -855,14 +855,13 @@ for (i in seq_along(df)) {
 \includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-2} 
 \includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-3} 
 \includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-4} 
-\includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-5} 
 
 ```r
 pics[[1]] + pics[[2]] + pics[[3]]
 ```
 
 
-\includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-6} 
+\includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-5} 
 
 _pheatmap_ does not allow boolean values, so they must be converted into factors.
 

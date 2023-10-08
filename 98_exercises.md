@@ -8,6 +8,15 @@ Here you can find assignments on different topics.
    - Interpret results by comparing them to literature. List main findings, so that results can easily be understood by others without advanced knowledge on data analytics.
    - Avoid hard-coding. Use variables which get values in the beginning of the pipeline. That way it is easier for you to modify parameters and reuse the code.
 
+## Basics of R/Bioconductor
+
+Bioconductor training material has been contributed to [Carpentries](https://carpentries.org/). You can check the following lessons for basic background of R and Bioconductor.
+
+ * [Introduction to data analysis with R and Bioconductor](https://carpentries-incubator.github.io/bioc-intro/)
+
+ * [Introduction to the Bioconductor project](https://carpentries-incubator.github.io/bioc-project/)
+
+
 ## Workflows
 
 ### Reproducible reporting with Quarto
@@ -234,9 +243,7 @@ got stuck, you can refer to chapter \@ref(assay-slot) of this book.
 3. List the information on samples available in colData with `names`.
 4. Visualize the colData with `View` and briefly look at the information stored
    in the different columns.
-3. Get the abundances of all features for a specific sample, such as `ID34`. You
-   can access sample-specific abundances with `getAbundaceSample`, specifying the
-   desired `sample_id` and `assay.type`.
+3. Get the abundances of all features for a specific sample, such as `ID34`, for an _assay_ of your choice.
 
 
 ### Feature information
@@ -248,8 +255,7 @@ got stuck, you can refer to chapter \@ref(assay-slot) of this book.
 4. Visualize the rowData with `View` and briefly look at the information stored
    in the different columns.
 5. Get the abundances for a specific feature, such as `OTU1810`, in all the
-   samples. You can access feature-specific abundances with `getAbundaceFeature`,
-   specifying the desired `feature_id` and `assay.type`.
+   samples. You can access feature-specific abundances for an _assay_ of your choice.
 6. **Extra**: Create a taxonomy tree based on the taxonomy mappings with
    `addTaxonomyTree` and display its content with `taxonomyTree` and `ggtree`.
 

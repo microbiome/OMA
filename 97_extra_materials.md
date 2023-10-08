@@ -37,6 +37,11 @@ document.addEventListener("click", function (event) {
 }
 </style>
 
+## Slides
+
+[Outreach material](https://microbiome.github.io/outreach/) includes
+slide sets for training events.
+
 
 ## PERMANOVA comparison {#compare-permanova}
 
