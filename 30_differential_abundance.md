@@ -101,7 +101,7 @@ real datasets. This study also concluded that different methods can produce
 contradictory results, creating the risk of cherry-picking the most favorable
 options for one’s own hypothesis. Therefore, it is highly recommended to perform
 DAA with multiple methods to determine whether the findings can be reproduced by
-different approaches.
+different approaches. Built on the findings of @Calgaro2020, the *benchdamic* [@Calgaro2022] package could offer a valuable support in this regard. Through a comprehensive evaluation process it serves both practitioners by comparing DA methods from existing literature, and method developers by providing an impartial tool to evaluate their new approaches in comparison to what is already available. For details, check its extensive [vignette](https://www.bioconductor.org/packages/release/bioc/vignettes/benchdamic/inst/doc/intro.html).
 
 ## Using the tools
 

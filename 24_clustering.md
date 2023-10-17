@@ -351,7 +351,7 @@ head(metadata(tse_dmm)$DMM$dmm,3)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7751 BIC: 8194 AIC: 8067
+## Laplace: 7689 BIC: 8076 AIC: 7948
 ```
 
 We can see the Laplace approximation (model evidence)
@@ -421,8 +421,8 @@ DirichletMultinomial::mixturewt(bestFit)
 
 ```
 ##       pi theta
-## 1 0.5385 20.58
-## 2 0.4615 15.28
+## 1 0.5385 20.60
+## 2 0.4615 15.32
 ```
 
 It's also possible to get the samples-cluster assignment probabilities: how
@@ -436,12 +436,12 @@ head(prob)
 
 ```
 ##                 1         2
-## CL3     1.000e+00 5.055e-17
-## CC1     1.000e+00 3.908e-22
-## SV1     1.000e+00 1.955e-12
-## M31Fcsw 7.871e-26 1.000e+00
-## M11Fcsw 1.132e-16 1.000e+00
-## M31Plmr 1.122e-13 1.000e+00
+## CL3     1.000e+00 4.500e-17
+## CC1     1.000e+00 3.372e-22
+## SV1     1.000e+00 1.777e-12
+## M31Fcsw 6.889e-26 1.000e+00
+## M11Fcsw 1.025e-16 1.000e+00
+## M31Plmr 1.027e-13 1.000e+00
 ```
 
 We can also know the contribution of each taxa to each component
@@ -453,12 +453,12 @@ head(DirichletMultinomial::fitted(bestFit))
 
 ```
 ##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30381 0.1354644
-## Phylum:Euryarchaeota  0.23114 0.1468596
-## Phylum:Actinobacteria 1.21371 1.0601186
-## Phylum:Spirochaetes   0.21392 0.1318401
-## Phylum:MVP-15         0.02981 0.0007677
-## Phylum:Proteobacteria 6.84388 1.8153128
+## Phylum:Crenarchaeota  0.30433 0.1354059
+## Phylum:Euryarchaeota  0.23143 0.1468898
+## Phylum:Actinobacteria 1.21059 1.0580795
+## Phylum:Spirochaetes   0.21410 0.1318079
+## Phylum:MVP-15         0.02991 0.0007663
+## Phylum:Proteobacteria 6.84271 1.8113590
 ```
 
 Finally, to be able to visualize our data and clusters, we start by 
@@ -703,7 +703,7 @@ bc
 ## 
 ## First  3  Cluster sizes:
 ##                    BC 1 BC 2 BC 3
-## Number of Rows:      16   16   16
+## Number of Rows:      17   14   15
 ## Number of Columns:   13   14   10
 ```
 
