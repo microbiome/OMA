@@ -131,10 +131,9 @@ colData(tse)
 
 
 ## ----plot-viz-lib-size-1, fig.width=8, fig.height=4, fig.cap="Library size distribution."----
-pak::pak("tidyverse/ggplot2")
-library(tidyverse)
+library(ggplot2)
 
-p1 <- ggplot(colData(tse)) +
+p1 <- ggplot(as.data.frame(colData(tse))) +
         geom_histogram(aes(x = sum), color = "black", fill = "gray", bins = 30) +
         labs(x = "Library size", y = "Frequency (n)") + 
         # scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x), 
