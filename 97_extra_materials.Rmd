@@ -250,7 +250,7 @@ knitr::knit_hooks$set(webgl = hook_webgl)
 
 In this section we make a 3D version of the earlier  Visualizing the most dominant genus on PCoA (see \@ref(quality-control)), with the help of the plotly [@Sievert2020].
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, eval=FALSE}
 # Importing necessary libraries
 library(curatedMetagenomicData)
 library(dplyr)
@@ -288,5 +288,326 @@ most_abundant_percent <- round(most_abundant_freq/sum(most_abundant_freq)*100, 1
 # Retrieving the explained variance
 e <- attr(reducedDim(tse_Genus, "PCoA_BC"), "eig");
 var_explained <- e/sum(e[e>0])*100
+```
+
+## Phyloseq vs TreeSE cheatsheet
+
+This section will have a cheatsheet for translating common functions in Phyloseq to TreeSE/mia
+
+```{r}
+# Download libraries
+library(phyloseq)
+library(dplyr)
+library(ggplot2)
+```
+
+Start by loading data as a Phyloseq object PHY and as TreeSE object TSE.
+
+```{r}
+# Loading example data
+# Using GlobalPatterns dataset
+
+data(package = "phyloseq", "GlobalPatterns") # Phyloseq object
+PHY <- GlobalPatterns # Rename
+PHY # Check the phyloseq object
+
+data(package = "mia", "GlobalPatterns") # TreeSE object
+TSE <- GlobalPatterns # Rename
+TSE # Check the TSE object
+```
+
+### Accessing different types of data in phyloseq versus TreeSE
+
+**Accessing the table of taxonomic names: tax_table = rowData**
+
+Phyloseq and TreeSE objects' taxonomy tables can be accessed with tax_table and rowData commands.
+
+```{r}
+PHY_taxtable <-
+  tax_table(PHY)  %>% # Access the phyloseq taxonomic name table
+  data.frame # Make into a data frame
+
+TSE_taxtable <- rowData(TSE) %>% # Same for TSE
+  data.frame
+
+```
+
+**Accessing sample data: sample_data = colData**
+
+Sample data can be accessed with sample_data and colData commands.
+
+```{r}
+PHY_sampledata <-
+  sample_data(PHY) %>% data.frame
+
+TSE_sampledata <-
+  colData(TSE) %>% data.frame
+
+```
+
+**Accessing operational taxonomic unit (OTU) abundance objects: otu_table = assay**
+
+OTU tables can be accessed with otu_table and assay commands. The assay can also hold other types of information like taxa abundances from shotgun metagenomic annotation, or functional gene abundances.
+```{r}
+PHY_otutable <-
+  otu_table(PHY) %>% data.frame
+
+TSE_otutable <-
+  assay(TSE) %>% data.frame
+
+```
+
+### Building phyloseq objects vs TreeSE objects: phyloseq = TreeSummarizedExperiment
+After learning how to access various data types from TreeSE, let's see how creating TreeSE objects compares to creating Phyloseq objects. We will use the vanilla data frames we created from the Phyloseq object to demonstrate making both types od data objects.
+
+
+```{r}
+OTU_PHY <- otu_table(PHY_otutable %>% as.matrix, taxa_are_rows = TRUE) # Make OTU table
+TAX_PHY <- tax_table(PHY_taxtable %>% as.matrix) # Make TAX table
+SAMPLE_PHY <- sample_data(PHY_sampledata) # Make sample data table
+
+PHY <- phyloseq(OTU_PHY, TAX_PHY, SAMPLE_PHY) # Combine into phyloseq object
+PHY # Inspect
+
+```
+
+Let's start by checking our otu table, and see if it is counts or already normalized. We will use the same data frame extracted from the PHY object as before.
+
+```{r}
+# Check if we have counts or normalized data
+
+PHY_otutable %>% head
+
+```
+
+We have counts!
+
+Since TreeSEs can hold many different versions of the OTU table, most commonly either relative abundances or counts, we will need to give our assay a name and list the different types of assays we have. In this example we only have one item 'counts' in the list.
+
+Let's convert the data frame to a matrix and make the list of assays.
+
+```{r}
+# Create TreeSE
+counts <- as.matrix(PHY_otutable) # Convert to a matrix
+assays <- SimpleList(counts = counts)
+
+TSE <- TreeSummarizedExperiment(assays = assays, 
+                                colData = PHY_sampledata,
+                                rowData = PHY_taxtable
+)
+
+```
+Let's check the different assay names we have.
+
+```{r}
+assayNames(TSE)
+```
+
+
+### Handling different OTU table normalizations in Phyloseq vs TreeSE
+
+Adding the assays as a list might seem inconvenient if you only have one type of OTU table (counts in our example), but let's see why it is actually very convenient to be able to hold multiple assays in one data object. 
+
+Here we'll show an exampe of how to add relative abundances and CLR normalized OTU tables to your TSE assays.
+
+With Phyloseq you would need three different Phyloseq objects, each taking up 7.7 MB of memory, whilst the TSE with the three assays takes up only 18.3 MB.
+
+```{r}
+# We can also add an other assay that holds the relative abundance normalized OTU table
+
+TSE <- transformAssay(TSE, assay.type = "counts", method = "relabundance")
+assays(TSE) # Let's check
+
+# With phyloseq you would need to have two different phyloseq objects
+
+PHY_relab  = transform_sample_counts(PHY, function(x) x / sum(x) )
+
+# Let's add clr transformed data just for the fun of it :)
+
+TSE <- transformAssay(TSE, assay.type = "counts", method = "clr", pseudocount = 1)
+assays(TSE) # Let's check
+
+# With phyloseq tiy would need to have a third phyloseq object
+
+PHY_CLR <- microbiome::transform(PHY, 'clr')
+
+```
+### Subsetting samples and taxa
+
+**Subsetting samples: subset_samples = indexing columns**
+
+Next let's learn how to subset samples. In Phyloseq we use subset_samples command, but since the sample data is stored in columns in the TreeSe, we can access it by indexing columns.
+
+In this section we will remove the "Mock" samples and make new data objects.
+
+```{r}
+PHY_nomock <-
+  subset_samples(PHY,!SampleType == "Mock") # Removing mock samples in phyloseq
+
+TSE_nomock <-
+  TSE[, !TSE$SampleType == "Mock"] # TSE uses indexing columns
+
+```
+
+Let's see what we have now.
+
+```{r}
+PHY %>% sample_names() %>% length()
+PHY_nomock %>% sample_names() %>% length()
+colnames(TSE) %>% length()
+colnames(TSE_nomock) %>% length()
+```
+We have removed three samples that where SampleType "Mock".
+
+**Subsetting taxa: subset_taxa = indexing rows**
+
+Taxa are stored in rows in TreeSE and the TreeSE equivalent to subset_taxa is indexing rows.
+
+```{r}
+PHY_nomock_bacteria <- 
+  subset_taxa(PHY_nomock, Kingdom == "Bacteria")
+
+TSE_nomock_bacteria <- 
+  TSE[TSE$Kingdom == "Bacteria",]
+
+PHY_nomock_bacteria # Inspect, now we have 19008 taxa (only bacteria), before it was 19216
+TSE_nomock_bacteria 
+
+
+```
+
+### Calculating alpha diversity: estimate_richness = estimateDiversity
+
+Now we know how data stored in TreeSE can be accessed and the TreeSE data objects created. Let's look at how we can calculate alpha diversity using mia compared to phyloseq package. 
+
+
+
+The mia command estimateDiversity will return a TreeSE and the results are stored in colData, unlike the phyloseq command that outputs a data frame with just the diversity estimates.
+
+In phyloseq you would need to add the alpha diversity separately to your sample data to keep it safe with the other sample level data.
+
+```{r}
+
+# Alpha diversity with Phyloseq
+df <- estimate_richness(PHY, measures = "Shannon") # Phyloseq uses estimate_richness 
+
+head(df) # Inspect
+
+# Add Shannon alpha diversity to the sample data to keep it safe with other sample level data
+PHY_sampledata <- sample_data(PHY) %>% data.frame
+PHY_sampledata$shannon <- df$Shannon
+
+sample_data(PHY) <- PHY_sampledata
+
+sample_data(PHY) %>% head  # Inspect
+
+```
+
+For the TSE we will need to specify which assay (which normalization of the OTU table) we want to use, since we have three options now with the counts, relative abundance and CLR. We can check the assay names first.
+
+```{r}
+assayNames(TSE) # Check the assay names
+
+TSE <- estimateDiversity(TSE, assay.type = "counts", index = "shannon") # Let's use counts
+# Inspect the new colData with added alpha diversity estimate
+colData(TSE) %>% names # shannon has been added to the colData
+
+```
+
+If we want to extract a data frame that only has the alpha diversity it can be done easily.
+
+```{r}
+# Extract
+df <- colData(TSE) %>% data.frame %>% dplyr::select(matches("shannon"))
+
+```
+
+
+### Calculating beta diversity: ordinate = runMDS
+
+We can calculate PcoA with Bray-Curtis distances in Phyloseq using the ordiate command. This 
+The beta diversity calculation in mia  outputs a TreeSE with a new type of data, reduced dimensions or reducedDim. Here we will use the scater package that runs the PcoA with runMDS. (PcoA and MDS mean the same thing)
+
+In Phyloseq you would again need to add the dimensions to the sample data if you want to keep them safe with other metadata.
+
+```{r}
+# Run PCoA on the relative abundance data and store in PHY_ord list
+PHY_ord <- ordinate(PHY_relab, method = "PCoA", distance = "bray")
+
+library(scater)
+
+# For the ordination using mia we use runMDDS from the scater package and implement the vegan bray distance calculation
+TSE <- runMDS(TSE,
+              FUN = vegan::vegdist,
+              method = "bray",
+              assay.type = "relabundance",
+              name = "MDS_bray",
+              ncomponents = 10) # Let's also define how many dimensions
+TSE # Inspect, now we have new reducedDim "MDS_bray"
+
+```
+
+### Plotting ordinations: plot_ordination = plotReducedDim
+Phyloseq has it's own plotting fuction for ordinations.
+
+```{r}
+plot_ordination(physeq = PHY, ordination = PHY_ord, color = "SampleType")
+```
+
+It is also easy to plot the ordination stored in reducedDim in the TSE using the plotReducedDim. We can first check what the name of the Bray-Curtis MDS/PCoA was.
+```{r}
+# Check reduced dim names
+reducedDimNames(TSE)
+
+```
+Ok, let's plot.
+```{r}
+# Plot
+plotReducedDim(TSE, "MDS_bray", color_by = "SampleType")
+
+# The sign is given arbitrarily so we can change it to match the plot_ordination
+
+reducedDim(TSE)[,1] <- -reducedDim(TSE)[,1]
+reducedDim(TSE)[,2] <- -reducedDim(TSE)[,2]
+
+plotReducedDim(TSE, "MDS_bray", color_by = "SampleType")
+```
+
+
+### Agglomerating taxa: tax_glom=mergeFeaturesByRank
+
+Often you might want to study your data using different taxonomic ranks, for example check if you see differences in the abundances of higher taxonomic levels.
+
+This data object can again be conveniently stored in a TSE object under altExp.
+
+
+
+```{r}
+PHY_fam <- tax_glom(PHY, taxrank = "Family")
+
+
+```
+
+Tax glom removes the taxa which have not been assigned to the level given in taxrank by default. NArm = TRUE so we will add the onRankOnly = TRUE which is equivalent to the mergeFeaturesByRank.
+
+```{r}
+altExp(TSE, "Family") <-
+  mergeFeaturesByRank(TSE,
+                      rank = "Family",
+                      onRankOnly = TRUE, # Let's add the equivalent option to NArm =TRUE
+                      agglomerateTree = TRUE)
+altExp(TSE, "Family")
+```
+
+
+### Cheatsheet
+
+```{r}
+library(knitr)
+df <- data.frame(Functionality=c("Access sample data", "Access tax table", "Access OTU table", "Build data object", "Calculate alpha diversity", "Calculate beta diversity", "Plot ordination", "Subset taxa", "Subset samples", "Aggromerate taxa"), phyloseq=c("sample_data()", "tax_table()", "otu_table()", "phyloseq()", "estimate_richness()", "ordinate()", "plot_ordination()", "subset_taxa()", "subset_samples()", "tax_glom()"), miaTreeSE = c("Index columns", "Index rows", "assays()", "TreeSummarizedExperiment()", "estimateDiversity()", "runMDS()", "plotReducedDim()", "Index rows", "Index columns", "mergeFeaturesByRank()"))
+
+df2 <- data.frame(Data_type=c("OTU table", "Taxonomy table", "Sample data table"),phyloseq=c("otu_table", "tax_table", "sample_data"), TreeSE=c("assay","rowData","colData"))
+kable(df)
+kable(df2)
 ```
 
