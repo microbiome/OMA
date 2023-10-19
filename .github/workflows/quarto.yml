@@ -1,49 +1,49 @@
-name: renderbook-quarto
-
+# .github/workflows/render-and-publish.yaml
+name: Render and deploy Quarto files
 on:
   push:
-    branches:
-      - main  # Adjust this to your repository's main branch
+  pull_request:
 
 jobs:
-  render-book:
+  quarto-render-and-deploy:
     runs-on: ubuntu-latest
-
+    env:
+      RENV_PATHS_ROOT: ~/.local/share/renv
     steps:
-      - name: Check Out Repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Set up R
-        uses: r-lib/actions/setup-r@v2
-        with:
-          use-public-rspm: true
+      - uses: actions/setup-python@v2
 
-      - name: Install Dependencies
+      - name: "Install Python deps"
         run: |
-          # Install 'rebook' package if it's required
-          if ! R -e "library('rebook', logical.return = TRUE)" ; then
-            R -e "install.packages('rebook')"
-          fi
+          pip install -r requirements.txt
+
+      - uses: r-lib/actions/setup-r@v1
+
+      - name: "Install curl for Bioconductor"
+        run: |
+          sudo apt -y install libcurl4-openssl-dev
+
+      - name: "Install R Packages: Cache packages"
+        uses: actions/cache@v1
+        with:
+          path: ${{ env.RENV_PATHS_ROOT }}
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
+
+      - name: "Install R Packages: Restore packages"
         shell: Rscript {0}
-
-      - name: Set up Pandoc
-        uses: r-lib/actions/setup-pandoc@v2
-
-      - name: Set up Quarto
-        uses: quarto-dev/quarto-actions/setup@v2
-
-      - name: Render and Publish Quarto
-        uses: quarto-dev/quarto-actions/publish@v2
-        with:
-          target: gh-pages
-          path: _book
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Deploy Package
         run: |
-          git config --local user.name "$GITHUB_ACTOR"
-          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git add .
-          git commit -m "Re-render bookdown documents" || echo "No changes to commit"
-          git push origin || echo "No changes to commit"
+          if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
+          renv::restore()
+
+      - name: "Install Quarto and render"
+        uses: pommevilla/quarto-render@main
+
+      - name: "Deploy to gh-pages"
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
