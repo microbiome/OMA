@@ -75,7 +75,7 @@ pkgs_all <- setdiff(pkgs_all, "Maaslin2")
 
 # Customization
 # Github packages must be installed separately
-pkgs_github <- c("miaTime", "ggord")
+pkgs_github <- c("miaTime")
 pkgs_nongithub <- setdiff(pkgs_all, pkgs_github)
 
 # Maaslin2 needs an update, see
@@ -102,8 +102,6 @@ for(i in seq_along(chapter_pkgs)) {
 
 # Github packages
 devtools::install_github("microbiome/miaTime")
-devtools::install_github("fawda123/ggord")
-devtools::install_github("YuLab-SMU/MicrobiotaProcess")
 
 ## report packages no installed
 ## find only those not currently installed
