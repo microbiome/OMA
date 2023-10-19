@@ -8,16 +8,18 @@
  * SingleCellExperiment [@R_SingleCellExperiment]
    + [Online tutorial](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html)
    + [Project page](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html)
+   + [Publication](https://doi.org/10.1038/s41592-019-0654-x)
  * SummarizedExperiment [@R_SummarizedExperiment]
    + [Online tutorial](https://bioconductor.org/packages/release/bioc/vignettes/SummarizedExperiment/inst/doc/SummarizedExperiment.html)
    + [Project page](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)
  * TreeSummarizedExperiment [@R_TreeSummarizedExperiment]
    + [Online tutorial](https://bioconductor.org/packages/release/bioc/vignettes/TreeSummarizedExperiment/inst/doc/Introduction_to_treeSummarizedExperiment.html)
    + [Project page](https://www.bioconductor.org/packages/release/bioc/html/TreeSummarizedExperiment.html)
-   + Publication: [@Huang2021]
+   + [Publication](https://doi.org/10.12688/f1000research.26669.2)
 * MultiAssayExperiment [@Ramos2017]
    + [Online tutorial](https://www.bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html)
    + [Project page](https://bioconductor.org/packages/release/bioc/html/MultiAssayExperiment.html)   
+   + [Publication](https://doi.org/10.1158/0008-5472.CAN-17-0344)
 
 ### Other relevant containers
 
