@@ -406,11 +406,11 @@ rda_info$permanova |>
 \hline
   & Df & SumOfSqs & F & Pr(>F) & Total variance & Explained variance\\
 \hline
-Model & 6 & 1.1157 & 1.940 & 0.038 & 3.991 & 0.2795\\
+Model & 6 & 1.1157 & 1.940 & 0.032 & 3.991 & 0.2795\\
 \hline
-ClinicalStatus & 4 & 0.5837 & 1.522 & 0.132 & 3.991 & 0.1463\\
+ClinicalStatus & 4 & 0.5837 & 1.522 & 0.123 & 3.991 & 0.1463\\
 \hline
-Gender & 1 & 0.1679 & 1.751 & 0.097 & 3.991 & 0.0421\\
+Gender & 1 & 0.1679 & 1.751 & 0.104 & 3.991 & 0.0421\\
 \hline
 Age & 1 & 0.5245 & 5.471 & 0.001 & 3.991 & 0.1314\\
 \hline
@@ -433,11 +433,11 @@ rda_info$homogeneity |>
 \hline
   & Df & Sum Sq & Mean Sq & F & N.Perm & Pr(>F) & Total variance & Explained variance\\
 \hline
-ClinicalStatus & 4 & 0.2511 & 0.0628 & 2.7440 & 999 & 0.126 & 1.0288 & 0.2440\\
+ClinicalStatus & 4 & 0.2511 & 0.0628 & 2.7440 & 999 & 0.118 & 1.0288 & 0.2440\\
 \hline
-Gender & 1 & 0.0103 & 0.0103 & 0.4158 & 999 & 0.535 & 0.9283 & 0.0111\\
+Gender & 1 & 0.0103 & 0.0103 & 0.4158 & 999 & 0.544 & 0.9283 & 0.0111\\
 \hline
-Age & 29 & 0.3272 & 0.0113 & 17.0256 & 999 & 0.420 & 0.3319 & 0.9860\\
+Age & 29 & 0.3272 & 0.0113 & 17.0256 & 999 & 0.404 & 0.3319 & 0.9860\\
 \hline
 \end{tabular}
 
@@ -483,6 +483,31 @@ tse_genus <- transformAssay(tse,
 tse_genus <- addPerSampleDominantFeatures(tse_genus,
                                           assay.type = "relabundance",
                                           name = "dominant_taxa")
+# Overview
+countDominantFeatures(tse_genus, rank = "Genus", digits = 3, name = "dominant_taxa")
+```
+
+```
+## # A tibble: 17 x 3
+##    dominant_taxa                  n rel_freq
+##    <chr>                      <int>    <dbl>
+##  1 Genus:Bacteroides              5    0.192
+##  2 Order:Stramenopiles            4    0.154
+##  3 Family:Desulfobulbaceae        2    0.077
+##  4 Genus:Streptococcus            2    0.077
+##  5 Class:Chloracidobacteria       1    0.038
+##  6 Family:ACK-M1                  1    0.038
+##  7 Family:Flavobacteriaceae       1    0.038
+##  8 Family:Moraxellaceae           1    0.038
+##  9 Family:Ruminococcaceae         1    0.038
+## 10 Genus:CandidatusSolibacter     1    0.038
+## 11 Genus:Dolichospermum           1    0.038
+## 12 Genus:Faecalibacterium         1    0.038
+## 13 Genus:MC18                     1    0.038
+## 14 Genus:Neisseria                1    0.038
+## 15 Genus:Prochlorococcus          1    0.038
+## 16 Genus:Veillonella              1    0.038
+## 17 Order:Chromatiales             1    0.038
 ```
 
 Next, we perform PCoA with Bray-Curtis dissimilarity.

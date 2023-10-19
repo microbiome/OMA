@@ -33,5 +33,5 @@ sessionInfo()
 ## 
 ## loaded via a namespace (and not attached):
 ## [1] knitr_1.44        shiny_1.7.5.1     htmltools_0.5.6.1 rmarkdown_2.25   
-## [5] bookdown_0.35     miniUI_0.1.1.1    tools_4.3.1
+## [5] bookdown_0.36     miniUI_0.1.1.1    tools_4.3.1
 ```

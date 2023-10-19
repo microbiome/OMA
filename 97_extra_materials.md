@@ -2,40 +2,12 @@
 
 # Extra material {#extras}
 
-<script>
-document.addEventListener("click", function (event) {
-    if (event.target.classList.contains("rebook-collapse")) {
-        event.target.classList.toggle("active");
-        var content = event.target.nextElementSibling;
-        if (content.style.display === "block") {
-            content.style.display = "none";
-        } else {
-            content.style.display = "block";
-        }
-    }
-})
-</script>
 
-<style>
-.rebook-collapse {
-  background-color: #eee;
-  color: #444;
-  cursor: pointer;
-  padding: 18px;
-  width: 100%;
-  border: none;
-  text-align: left;
-  outline: none;
-  font-size: 15px;
-}
+```r
+knitr::opts_chunk$set(eval=FALSE)
+```
 
-.rebook-content {
-  padding: 0 18px;
-  display: none;
-  overflow: hidden;
-  background-color: #f1f1f1;
-}
-</style>
+
 
 ## Slides
 
@@ -148,25 +120,6 @@ knitr::kable(df)
 ```
 
 
-\begin{tabular}{l|r|r|r|r|r|r}
-\hline
-Formula & ClinicalStatus (terms) & Gender (terms) & Nationality (terms) & ClinicalStatus (margin) & Gender (margin) & Nationality (margin)\\
-\hline
-ClinicalStatus + Gender + Nationality & 0.20 & 0.70 & 0.04 & 0.53 & 0.29 & 0.04\\
-\hline
-ClinicalStatus + Nationality + Gender & 0.20 & 0.29 & 0.05 & 0.53 & 0.29 & 0.04\\
-\hline
-Gender + ClinicalStatus + Nationality & 0.17 & 0.79 & 0.04 & 0.53 & 0.29 & 0.04\\
-\hline
-Gender + Nationality + ClinicalStatus & 0.53 & 0.79 & 0.03 & 0.53 & 0.29 & 0.04\\
-\hline
-Nationality + ClinicalStatus + Gender & 0.61 & 0.29 & 0.04 & 0.53 & 0.29 & 0.04\\
-\hline
-Nationality + Gender + ClinicalStatus & 0.53 & 0.39 & 0.04 & 0.53 & 0.29 & 0.04\\
-\hline
-\end{tabular}
-
-
 ## Bayesian Multinomial Logistic-Normal Models
 
 Analysis using such model could be performed with the function
@@ -263,8 +216,6 @@ names_covariates(priors) <- rownames(X)
 plot(priors, pars="Lambda") + ggplot2::xlim(c(-5, 5))
 ```
 
-![](97_extra_materials_files/figure-latex/unnamed-chunk-10-1.pdf)<!-- --> 
-
 Estimating the posterior by including our response data `Y`.
 Note: Some computational failures could occur (see [discussion](https://github-wiki-see.page/m/jsilve24/fido/wiki/Frequently-Asked-Questions))
 the arguments `multDirichletBoot` `calcGradHess` could be passed in such case.
@@ -281,10 +232,6 @@ Printing a summary about the posterior:
 ```r
 ppc_summary(posterior)
 ```
-
-```
-## Proportions of Observations within 95% Credible Interval: 0.9979
-```
 Plotting the summary of the posterior distributions of the regression parameters:
 
 
@@ -293,16 +240,12 @@ names_categories(posterior) <- rownames(Y)
 plot(posterior,par="Lambda",focus.cov=rownames(X)[2:4])
 ```
 
-![](97_extra_materials_files/figure-latex/unnamed-chunk-13-1.pdf)<!-- --> 
-
 Taking a closer look at "Sex" and "Delivery_Mode":
 
 
 ```r
 plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
 ```
-
-![](97_extra_materials_files/figure-latex/unnamed-chunk-14-1.pdf)<!-- --> 
 
 
 ## Interactive 3D Plots

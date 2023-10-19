@@ -351,7 +351,7 @@ head(metadata(tse_dmm)$DMM$dmm,3)
 ## class: DMN 
 ## k: 3 
 ## samples x taxa: 26 x 67 
-## Laplace: 7689 BIC: 8076 AIC: 7948
+## Laplace: 7690 BIC: 8076 AIC: 7948
 ```
 
 We can see the Laplace approximation (model evidence)
@@ -401,15 +401,15 @@ dmm_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
+## Feces              2       4   67 1078.3 -106.14   901.2 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.17   717.0  936.4 1025
 ## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
 ## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
 ## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
 ## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
 ## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
+## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
 ```
 
 Mixture weights (rough measure of the cluster size).
@@ -436,12 +436,12 @@ head(prob)
 
 ```
 ##                 1         2
-## CL3     1.000e+00 4.500e-17
-## CC1     1.000e+00 3.372e-22
-## SV1     1.000e+00 1.777e-12
-## M31Fcsw 6.889e-26 1.000e+00
-## M11Fcsw 1.025e-16 1.000e+00
-## M31Plmr 1.027e-13 1.000e+00
+## CL3     1.000e+00 4.504e-17
+## CC1     1.000e+00 3.376e-22
+## SV1     1.000e+00 1.779e-12
+## M31Fcsw 6.907e-26 1.000e+00
+## M11Fcsw 1.026e-16 1.000e+00
+## M31Plmr 1.025e-13 1.000e+00
 ```
 
 We can also know the contribution of each taxa to each component
@@ -452,13 +452,13 @@ head(DirichletMultinomial::fitted(bestFit))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30433 0.1354059
-## Phylum:Euryarchaeota  0.23143 0.1468898
-## Phylum:Actinobacteria 1.21059 1.0580795
-## Phylum:Spirochaetes   0.21410 0.1318079
-## Phylum:MVP-15         0.02991 0.0007663
-## Phylum:Proteobacteria 6.84271 1.8113590
+##                         [,1]      [,2]
+## Phylum:Crenarchaeota  0.3043 0.1354063
+## Phylum:Euryarchaeota  0.2314 0.1468902
+## Phylum:Actinobacteria 1.2105 1.0581165
+## Phylum:Spirochaetes   0.2141 0.1318081
+## Phylum:MVP-15         0.0299 0.0007665
+## Phylum:Proteobacteria 6.8418 1.8113624
 ```
 
 Finally, to be able to visualize our data and clusters, we start by 
@@ -699,12 +699,12 @@ bc
 ## call:
 ## 	biclust(x = corr, method = BCPlaid(), verbose = FALSE)
 ## 
-## Number of Clusters found:  3 
+## Number of Clusters found:  4 
 ## 
-## First  3  Cluster sizes:
-##                    BC 1 BC 2 BC 3
-## Number of Rows:      17   14   15
-## Number of Columns:   13   14   10
+## First  4  Cluster sizes:
+##                    BC 1 BC 2 BC 3 BC 4
+## Number of Rows:      15   17   16    2
+## Number of Columns:   13   14   10    9
 ```
 
 The object includes cluster information. However compared to
@@ -782,13 +782,13 @@ head(bicluster_rows)
 ```
 
 ```
-##                           cluster_1 cluster_2 cluster_3 cluster_4
-## D_5__Staphylococcus           FALSE     FALSE     FALSE      TRUE
-## D_5__Klebsiella               FALSE     FALSE     FALSE      TRUE
-## D_5__Streptococcus            FALSE     FALSE     FALSE      TRUE
-## D_5__Escherichia-Shigella     FALSE     FALSE     FALSE      TRUE
-## D_5__Ruminiclostridium 5       TRUE     FALSE      TRUE     FALSE
-## D_5__Pseudomonas              FALSE     FALSE     FALSE      TRUE
+##                           cluster_1 cluster_2 cluster_3 cluster_4 cluster_5
+## D_5__Staphylococcus           FALSE     FALSE     FALSE     FALSE      TRUE
+## D_5__Klebsiella               FALSE     FALSE     FALSE     FALSE      TRUE
+## D_5__Streptococcus            FALSE     FALSE     FALSE     FALSE      TRUE
+## D_5__Escherichia-Shigella     FALSE     FALSE     FALSE     FALSE      TRUE
+## D_5__Ruminiclostridium 5       TRUE     FALSE      TRUE     FALSE     FALSE
+## D_5__Pseudomonas              FALSE     FALSE     FALSE     FALSE      TRUE
 ```
 
 Let's collect information for the scatter plot. 
@@ -855,13 +855,14 @@ for (i in seq_along(df)) {
 \includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-2} 
 \includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-3} 
 \includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-4} 
+\includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-5} 
 
 ```r
 pics[[1]] + pics[[2]] + pics[[3]]
 ```
 
 
-\includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-5} 
+\includegraphics[width=0.33\linewidth]{24_clustering_files/figure-latex/biclust_7-6} 
 
 _pheatmap_ does not allow boolean values, so they must be converted into factors.
 
