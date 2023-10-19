@@ -298,14 +298,14 @@ the metadata thanks to the `name` parameter.
 
 ```r
 # Run the model and calculates the most likely number of clusters from 1 to 7
-tse_dmm <- cluster(tse, name = "DMM", DmmParam(k = 1:7, type = "laplace"), 
+tse <- cluster(tse, name = "DMM", DmmParam(k = 1:7, type = "laplace"), 
                    MARGIN = "samples", full = TRUE)
 ```
 
 
 ```r
 # The dmm info is stored in the metadata under the 'DMM' column
-tse_dmm
+tse
 ```
 
 ```
@@ -331,7 +331,7 @@ The following operation returns a list of DMM objects for closer investigation.
 
 
 ```r
-head(metadata(tse_dmm)$DMM$dmm,3)
+head(metadata(tse)$DMM$dmm,3)
 ```
 
 ```
@@ -361,7 +361,7 @@ for each model of the k models.
 ```r
 BiocManager::install("microbiome/miaViz")
 library(miaViz)
-plotDMNFit(tse_dmm, type = "laplace", name = "DMM")
+plotDMNFit(tse, type = "laplace", name = "DMM")
 ```
 
 ![](24_clustering_files/figure-latex/dmm5-1.pdf)<!-- --> 
@@ -372,7 +372,7 @@ that with the following operation.
 
 ```r
 # Get the model that has the best fit
-bestFit <- metadata(tse_dmm)$DMM$dmm[[metadata(tse_dmm)$DMM$best]]
+bestFit <- metadata(tse)$DMM$dmm[[metadata(tse)$DMM$best]]
 bestFit
 ```
 
@@ -390,7 +390,7 @@ Patient status is used for grouping.
 
 
 ```r
-dmm_group <- calculateDMNgroup(tse_dmm, variable = "SampleType", 
+dmm_group <- calculateDMNgroup(tse, variable = "SampleType", 
                                assay.type = "counts", k = 2, 
                                seed = .Machine$integer.max)
 
@@ -401,15 +401,15 @@ dmm_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.14   901.2 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.17   717.0  936.4 1025
+## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
 ## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
 ## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
 ## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
 ## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
 ## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
+## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
 ```
 
 Mixture weights (rough measure of the cluster size).
@@ -421,8 +421,8 @@ DirichletMultinomial::mixturewt(bestFit)
 
 ```
 ##       pi theta
-## 1 0.5385 20.60
-## 2 0.4615 15.32
+## 1 0.5385 20.58
+## 2 0.4615 15.28
 ```
 
 It's also possible to get the samples-cluster assignment probabilities: how
@@ -430,18 +430,18 @@ probable it is that each sample belongs to each cluster
 
 
 ```r
-prob <- metadata(tse_dmm)$DMM$prob
+prob <- metadata(tse)$DMM$prob
 head(prob)
 ```
 
 ```
 ##                 1         2
-## CL3     1.000e+00 4.504e-17
-## CC1     1.000e+00 3.376e-22
-## SV1     1.000e+00 1.779e-12
-## M31Fcsw 6.907e-26 1.000e+00
-## M11Fcsw 1.026e-16 1.000e+00
-## M31Plmr 1.025e-13 1.000e+00
+## CL3     1.000e+00 5.086e-17
+## CC1     1.000e+00 3.952e-22
+## SV1     1.000e+00 1.963e-12
+## M31Fcsw 7.866e-26 1.000e+00
+## M11Fcsw 1.132e-16 1.000e+00
+## M31Plmr 1.124e-13 1.000e+00
 ```
 
 We can also know the contribution of each taxa to each component
@@ -452,13 +452,13 @@ head(DirichletMultinomial::fitted(bestFit))
 ```
 
 ```
-##                         [,1]      [,2]
-## Phylum:Crenarchaeota  0.3043 0.1354063
-## Phylum:Euryarchaeota  0.2314 0.1468902
-## Phylum:Actinobacteria 1.2105 1.0581165
-## Phylum:Spirochaetes   0.2141 0.1318081
-## Phylum:MVP-15         0.0299 0.0007665
-## Phylum:Proteobacteria 6.8418 1.8113624
+##                          [,1]      [,2]
+## Phylum:Crenarchaeota  0.30381 0.1354642
+## Phylum:Euryarchaeota  0.23114 0.1468592
+## Phylum:Actinobacteria 1.21362 1.0600992
+## Phylum:Spirochaetes   0.21393 0.1318398
+## Phylum:MVP-15         0.02982 0.0007691
+## Phylum:Proteobacteria 6.84528 1.8152025
 ```
 
 Finally, to be able to visualize our data and clusters, we start by 
@@ -482,7 +482,7 @@ euclidean_pcoa_df <- data.frame(pcoa1 = df[, 1], pcoa2 = df[, 2])
 ```r
 # Create a data frame that contains principal coordinates and DMM information
 euclidean_dmm_pcoa_df <- cbind(euclidean_pcoa_df,
-                               dmm_component = colData(tse_dmm)$clusters)
+                               dmm_component = colData(tse)$clusters)
 
 # Create a plot
 euclidean_dmm_plot <- ggplot(data = euclidean_dmm_pcoa_df,
@@ -703,8 +703,8 @@ bc
 ## 
 ## First  4  Cluster sizes:
 ##                    BC 1 BC 2 BC 3 BC 4
-## Number of Rows:      15   17   16    2
-## Number of Columns:   13   14   10    9
+## Number of Rows:      16   16   16    3
+## Number of Columns:   13   14    9    9
 ```
 
 The object includes cluster information. However compared to

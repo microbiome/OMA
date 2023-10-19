@@ -157,7 +157,7 @@ threshold of 10%.
 
 ```r
 # Agglomerate by genus and subset by prevalence
-tse <- subsetByPrevalentTaxa(tse,
+tse <- subsetByPrevalentFeatures(tse,
                              rank = "Genus",
                              prevalence = 10 / 100)
 
