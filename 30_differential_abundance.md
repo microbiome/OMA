@@ -326,7 +326,7 @@ library(ANCOMBC)
 
 # Run ANCOM-BC at the genus level and only including the prevalent genera
 ancombc2_out <- ancombc2(data = tse,
-                         assay_name = "counts",
+                         assay.type = "counts",
                          fix_formula = "patient_status",
                          p_adj_method = "fdr",
                          prv_cut = 0,
@@ -646,7 +646,7 @@ are kept constant.
 ```r
 # perform the analysis 
 ancombc2_out <- ancombc2(tse,
-                         assay_name = "counts",
+                         assay.type = "counts",
                          fix_formula = "patient_status + cohort + library_size",
                          p_adj_method = "fdr",
                          lib_cut = 0,

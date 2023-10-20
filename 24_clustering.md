@@ -436,12 +436,12 @@ head(prob)
 
 ```
 ##                 1         2
-## CL3     1.000e+00 5.086e-17
-## CC1     1.000e+00 3.952e-22
-## SV1     1.000e+00 1.963e-12
-## M31Fcsw 7.866e-26 1.000e+00
-## M11Fcsw 1.132e-16 1.000e+00
-## M31Plmr 1.124e-13 1.000e+00
+## CL3     1.000e+00 5.062e-17
+## CC1     1.000e+00 3.913e-22
+## SV1     1.000e+00 1.961e-12
+## M31Fcsw 7.860e-26 1.000e+00
+## M11Fcsw 1.130e-16 1.000e+00
+## M31Plmr 1.123e-13 1.000e+00
 ```
 
 We can also know the contribution of each taxa to each component
@@ -453,12 +453,12 @@ head(DirichletMultinomial::fitted(bestFit))
 
 ```
 ##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30381 0.1354642
-## Phylum:Euryarchaeota  0.23114 0.1468592
-## Phylum:Actinobacteria 1.21362 1.0600992
-## Phylum:Spirochaetes   0.21393 0.1318398
-## Phylum:MVP-15         0.02982 0.0007691
-## Phylum:Proteobacteria 6.84528 1.8152025
+## Phylum:Crenarchaeota  0.30383 0.1354643
+## Phylum:Euryarchaeota  0.23115 0.1468621
+## Phylum:Actinobacteria 1.21378 1.0600093
+## Phylum:Spirochaetes   0.21393 0.1318405
+## Phylum:MVP-15         0.02982 0.0007672
+## Phylum:Proteobacteria 6.84439 1.8151071
 ```
 
 Finally, to be able to visualize our data and clusters, we start by 
@@ -703,8 +703,8 @@ bc
 ## 
 ## First  4  Cluster sizes:
 ##                    BC 1 BC 2 BC 3 BC 4
-## Number of Rows:      16   16   16    3
-## Number of Columns:   13   14    9    9
+## Number of Rows:      18   14   20    3
+## Number of Columns:   14   14   10    6
 ```
 
 The object includes cluster information. However compared to
@@ -787,7 +787,7 @@ head(bicluster_rows)
 ## D_5__Klebsiella               FALSE     FALSE     FALSE     FALSE      TRUE
 ## D_5__Streptococcus            FALSE     FALSE     FALSE     FALSE      TRUE
 ## D_5__Escherichia-Shigella     FALSE     FALSE     FALSE     FALSE      TRUE
-## D_5__Ruminiclostridium 5       TRUE     FALSE      TRUE     FALSE     FALSE
+## D_5__Ruminiclostridium 5      FALSE      TRUE      TRUE     FALSE     FALSE
 ## D_5__Pseudomonas              FALSE     FALSE     FALSE     FALSE      TRUE
 ```
 
