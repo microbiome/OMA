@@ -1,9 +1,19 @@
-## ----setup, echo=FALSE, results="asis"----------------------------------------
+## ----setup, echo=FALSE, results="asis"---------------------------------------------------------------------------------
 library(rebook)
 chapterPreamble()
 
 
-## ----superML1-----------------------------------------------------------------
+## ----install-pkg, include = FALSE--------------------------------------------------------------------------------------
+if(!require(mikropml)){
+  install.packages("mikropml")
+}
+
+if(!require(MLeval)){
+  install.packages("MLeval")
+}
+
+
+## ----superML1----------------------------------------------------------------------------------------------------------
 library(mia)
 
 # Load experimental data
@@ -11,7 +21,7 @@ data(peerj13075, package="mia")
 tse <- peerj13075
 
 
-## ----super2-------------------------------------------------------------------
+## ----super2------------------------------------------------------------------------------------------------------------
 # Agglomerate data
 tse <- mergeFeaturesByRank(tse, rank = "order")
 
@@ -35,14 +45,11 @@ df$diet <- labels
 df[5, 5]
 
 
-## ----super3-------------------------------------------------------------------
-if( !require("mikropml") ){
-    install.packages("mikropml")
-    library(mikropml)
-}
+## ----super3------------------------------------------------------------------------------------------------------------
+library(mikropml)
 
 # Run random forest 
-results <- run_ml(df, "rf", outcome_colname = 'diet', 
+results <- run_ml(df, "rf", outcome_colname = "diet", 
                   kfold = 2, cv_times = 5, training_frac = 0.8)
 
 # Print result
@@ -50,7 +57,7 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
                 reference = results$trained_model$finalModel$y)
 
 
-## ----super4-------------------------------------------------------------------
+## ----super4------------------------------------------------------------------------------------------------------------
 # Set seed for reproducibility
 set.seed(6358)
 
@@ -83,7 +90,7 @@ model <- train(x = assay,
 
 
 
-## ----super5-------------------------------------------------------------------
+## ----super5------------------------------------------------------------------------------------------------------------
 library(MLeval)
 
 # Calculate different evaluation metrics
@@ -93,8 +100,4 @@ res <- evalm(model, showplots = FALSE)
 library(patchwork)
 res$roc + res$proc + 
     plot_layout(guides = "collect") & theme(legend.position = 'bottom')
-
-
-## ----sessionInfo, echo=FALSE, results='asis'----------------------------------
-prettySessionInfo()
 

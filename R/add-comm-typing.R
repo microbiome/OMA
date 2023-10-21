@@ -1,11 +1,85 @@
-## ----data, message=FALSE, warning=FALSE---------------------------------------
+## ----kmeans1-----------------------------------------------------------------------------------------------------------
+library(factoextra)
+
+# Convert dist object into matrix
+diss <- as.matrix(diss)
+
+# Perform silhouette analysis and plot the result
+fviz_nbclust(diss, kmeans, method = "silhouette")
+
+
+## ----kmeans2-----------------------------------------------------------------------------------------------------------
+# The first step is random, add seed for reproducibility
+set.seed(15463)
+
+# Perform k-means clustering with 2 clusters
+km <- kmeans(diss, 2, nstart = 25)
+
+# Add the result to colData
+colData(tse)$clusters <- as.factor(km$cluster)
+
+# Perform PCoA so that we can visualize clusters
+tse <- runMDS(tse, assay.type = "relabundance", 
+              FUN = vegan::vegdist, method = "bray")
+
+# Plot PCoA and color clusters
+plotReducedDim(tse, "MDS", colour_by = "clusters")
+
+
+## ----data, message=FALSE, warning=FALSE--------------------------------------------------------------------------------
 # Load data
 library(mia)
 library(microbiomeDataSets)
 tse <- SprockettTHData()
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ----NNGraph1, message=FALSE, warning=FALSE----------------------------------------------------------------------------
+library(patchwork) # For arranging several plots as a grid
+
+# Get enterotype dataset and transform data with rclr
+tse <- enterotype
+tse <- transformAssay(tse, method = "rclr")
+
+# Perform and store UMAP
+tse <- runUMAP(tse, name = "UMAP", assay.type = "rclr")
+
+# Set different k values to test
+k <- c(2, 3, 5, 10)
+
+ClustAndPlot <- function(x) {
+    # Add the clustering data from the short random walks algorithm to the TSE
+    tse <- cluster(tse, assay.type = "rclr", 
+                   MARGIN = "col", NNGraphParam(k = x))
+    
+    # Plot the results of the clustering as a color for each sample
+    plotUMAP(tse, colour_by = I(colData(tse)$clusters)) +
+    labs(title = paste0("k = ", x))
+}
+
+# Apply the function for different k values
+plots <- lapply(k, ClustAndPlot)
+
+# Display plots in a grid
+plots[[1]] + plots[[2]] + plots[[3]] + plots[[4]] + plot_layout(ncol = 4)
+
+
+## ----NNGraph2, message=FALSE, warning=FALSE----------------------------------------------------------------------------
+ClustDiagPlot <- function(x) {
+  # Get the clustering results
+    tse <- cluster(tse, assay.type = "rclr", 
+                   MARGIN = "col", NNGraphParam(k = x))
+
+    # Compute the diagnostic info
+    sil <- approxSilhouette(t(assays(tse)$rclr), colData(tse)$clusters)
+
+    # Plot as a boxplot to observe cluster separation
+    boxplot(split(sil$width, colData(tse)$clusters), main = paste0("k = ", x))
+}
+# Apply the function for different k values
+res <- lapply(k, ClustDiagPlot)
+
+
+## ---- message=FALSE, warning=FALSE-------------------------------------------------------------------------------------
 library(miaViz)
 
 # Only consider Forest samples
@@ -21,7 +95,7 @@ tse <- tse[is.element(rownames(tse), rel_taxa), ]
 plotAbundance(tse, rank = "Phylum", order_rank_by = "abund", order_sample_by = "Firmicutes")
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ---- message=FALSE, warning=FALSE-------------------------------------------------------------------------------------
 library(pheatmap)
 library(grid)
 library(RColorBrewer)
@@ -56,7 +130,7 @@ grid.text("Sample", x = 0.39, y = -0.04, gp = gpar(fontsize = 16))
 grid.text("Phylum", x = -0.04, y = 0.47, rot = 90, gp = gpar(fontsize = 16))
 
 
-## ----scree--------------------------------------------------------------------
+## ----scree-------------------------------------------------------------------------------------------------------------
 library(ggplot2); th <- theme_bw()
 
 # Only consider Finland samples
@@ -82,16 +156,16 @@ p <- ggplot(df, aes(x, y)) +
 p
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 # histogram of MDS eigenvalues from the fifth dimension onward
 h <- hist(eigs[3:length(eigs)], 100)
 
 
-## ----message = FALSE, warning = FALSE-----------------------------------------
+## ----message = FALSE, warning = FALSE----------------------------------------------------------------------------------
 plot(h$mids, h$count, log = "y", type = "h", lwd = 10, lend = 2)
 
 
-## ----elbow, message = FALSE---------------------------------------------------
+## ----elbow, message = FALSE--------------------------------------------------------------------------------------------
 library(factoextra)
 
 # take only first 5 dimensions
@@ -104,19 +178,19 @@ factoextra::fviz_nbclust(x, kmeans, method = "wss") +
                          labs(subtitle = "Elbow Method") + th
 
 
-## ----silhouette---------------------------------------------------------------
+## ----silhouette--------------------------------------------------------------------------------------------------------
 # Silhouette method
 factoextra::fviz_nbclust(x, kmeans, method = "silhouette") +
                          labs(subtitle = "Silhouette method") + th
 
 
-## ----gap-statistic------------------------------------------------------------
+## ----gap-statistic-----------------------------------------------------------------------------------------------------
 # Gap Statistic Method
 factoextra::fviz_nbclust(x, kmeans, method = "gap_stat", nboot = 50)+
                          labs(subtitle = "Gap Statistic Method") + th
 
 
-## ----create clusters----------------------------------------------------------
+## ----create clusters---------------------------------------------------------------------------------------------------
 library(cluster)
 tse2 <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 
@@ -130,7 +204,7 @@ colData(tse2)$CST <- clust
 CSTs <- as.character(seq(K))
 
 
-## ----message = FALSE, warning = FALSE-----------------------------------------
+## ----message = FALSE, warning = FALSE----------------------------------------------------------------------------------
 library(scater)
 library(RColorBrewer)
 library(patchwork)
@@ -153,7 +227,7 @@ p2 <- scater::plotReducedDim(tse2, "MDS_BC", colour_by = "CST", point_alpha = 1,
 (p1 + CSTColorScale) / (p2 + CSTColorScale)
 
 
-## ----message = FALSE, warning = FALSE-----------------------------------------
+## ----message = FALSE, warning = FALSE----------------------------------------------------------------------------------
 tse2  <- runNMDS(tse2, FUN = vegan::vegdist, method = "bray", 
                 name = "NMDS_BC", assay.type = "counts", ncomponents = 20)
 scater::plotReducedDim(tse2, "NMDS_BC", colour_by = "CST", point_alpha = 1) + th + 
@@ -161,7 +235,8 @@ scater::plotReducedDim(tse2, "NMDS_BC", colour_by = "CST", point_alpha = 1) + th
         theme(plot.title = element_text(hjust = 0.5)) + CSTColorScale
 
 
-## ----message = FALSE, warning = FALSE, results = FALSE------------------------
+## ----message = FALSE, warning = FALSE, results = FALSE-----------------------------------------------------------------
+
 # Z transform of CLR counts
 tse2 <- transformAssay(tse2, MARGIN = "samples", assay.type = "counts",
                         method = "clr", pseudocount=1)
@@ -177,7 +252,7 @@ colnames(mat) <- names(sort(clust))
 rownames(mat) <- stringr::str_remove(rownames(mat), "Phylum:")
 
 
-## ----messages = FALSE, warning = FALSE----------------------------------------
+## ----messages = FALSE, warning = FALSE---------------------------------------------------------------------------------
 # Plot
 CSTs        <- as.data.frame(sort(clust))
 names(CSTs) <- "CST"
@@ -193,7 +268,7 @@ grid.text("Sample", x = 0.39, y = -0.04, gp = gpar(fontsize = 16))
 grid.text("Phylum", x = -0.04, y = 0.47, rot = 90, gp = gpar(fontsize = 16))
 
 
-## ----dmm----------------------------------------------------------------------
+## ----dmm---------------------------------------------------------------------------------------------------------------
 # Runs model and calculates the most likely number of clusters from 1 to 7.
 # Since this is a large dataset it takes a long time to run
 # For this reason we use only a subset of the data agglomerated to the phylum level
@@ -201,48 +276,48 @@ tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 # It is stored in metadata
 tse_dmn
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 names(metadata(tse_dmn))
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 getDMN(tse_dmn)
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 library(miaViz)
 plotDMNFit(tse_dmn, type = "laplace")
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 getBestDMNFit(tse_dmn, type = "laplace")
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 dmn_group <- calculateDMNgroup(tse_dmn, variable = "Country",  assay.type = "counts",
                                k = 3, seed=.Machine$integer.max)
 
 dmn_group
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 prob <- DirichletMultinomial::mixture(getBestDMNFit(tse_dmn))
 # Add column names
 colnames(prob) <- paste0("comp", seq_len(ncol(prob)))
@@ -252,7 +327,7 @@ colnames(prob) <- paste0("comp", seq_len(ncol(prob)))
 vec <- colnames(prob)[max.col(prob,ties.method = "first")]
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 # Calculate relative abundances
 tse_dmn <- transformAssay(tse_dmn, method = "relabundance")
 # Does principal coordinate analysis
@@ -265,7 +340,7 @@ colnames(bray_pcoa_df) <- c("pcoa1", "pcoa2")
 head(bray_pcoa_df)
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 # Creates a data frame that contains principal coordinates and DMM information
 bray_dmm_pcoa_df <- bray_pcoa_df 
 bray_dmm_pcoa_df$dmm_component <- vec
@@ -281,7 +356,7 @@ bray_dmm_plot <- ggplot(data = bray_dmm_pcoa_df,
 bray_dmm_plot
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 # get clr + z-transformed counts
 tse_dmn <- transformAssay(tse_dmn, MARGIN = "samples",
                            assay.type = "counts", method = "clr",
@@ -314,6 +389,6 @@ grid.text("Sample", x = 0.39, y = -0.04, gp = gpar(fontsize = 16))
 grid.text("Phylum", x = -0.04, y = 0.47, rot = 90, gp = gpar(fontsize = 16))
 
 
-## -----------------------------------------------------------------------------
+## ----------------------------------------------------------------------------------------------------------------------
 sessionInfo()
 

@@ -1,61 +1,52 @@
-## ----setup, echo=FALSE, results="asis"----------------------------------------
+## ----setup, echo=FALSE, results="asis"---------------------------------------------------------------------------------
 library(rebook)
 chapterPreamble()
 
 
-## ----load-pkg-data------------------------------------------------------------
+## ----import-daa-data---------------------------------------------------------------------------------------------------
 library(mia)
-library(patchwork)
-library(tidySummarizedExperiment)
-library(knitr)
 library(tidyverse)
+
+# Import dataset
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# Show patient status by cohort
+table(tse$patient_status, tse$cohort) %>%
+  knitr::kable()
+
+
+## ----prep-daa-data-----------------------------------------------------------------------------------------------------
+# Agglomerate by genus and subset by prevalence
+tse <- subsetByPrevalentFeatures(tse,
+                             rank = "Genus",
+                             prevalence = 10 / 100)
+
+# Transform count assay to relative abundances
+tse <- transformAssay(tse,
+                      assay.type = "counts",
+                      method = "relabundance")
+
+
+## ----run-aldex2--------------------------------------------------------------------------------------------------------
+# Load package
 library(ALDEx2)
-library(Maaslin2)
-library(MicrobiomeStat)
-library(ANCOMBC)
-library(GUniFrac)
 
-# set random seed because some tools can randomly vary and then produce 
-# different results:
-set.seed(13253)
-
-# we use a demo dataset and restrict it to two geo locations
-# for easy illustration
-data(peerj13075)
-tse0 <- peerj13075
-tse0 <- tse0[ ,tse0$Geographical_location %in% c("Pune", "Nashik")]
-# Let us make this a factor
-tse0$Geographical_location <- factor(tse0$Geographical_location)
-
-# how many observations do we have per group?
-count(as.data.frame(colData(tse0)), Geographical_location) %>% kable()
-
-
-## -----------------------------------------------------------------------------
-tse <- mergeFeaturesByRank(tse0, rank = "genus") %>%
-       transformAssay(assay.type = "counts", method = "relabundance", MARGIN = "samples") %>%
-       subsetByPrevalentFeatures(detection = 0, prevalence = 10/100, assay.type = "relabundance")
-
-# Add also clr abundances
-tse <- transformAssay(tse, method="clr", pseudocount=1) # not bale to run
-
-
-## ---- aldex2, eval=TRUE-------------------------------------------------------
 # Generate Monte Carlo samples of the Dirichlet distribution for each sample.
 # Convert each instance using the centered log-ratio transform.
 # This is the input for all further analyses.
-set.seed(254)
-x <- aldex.clr(assay(tse), tse$Geographical_location)     
+set.seed(123)
+x <- aldex.clr(assay(tse), tse$patient_status)     
 
 
-## ---- aldex2_ttest, eval=TRUE-------------------------------------------------
+## ----aldex2-ttest------------------------------------------------------------------------------------------------------
 # calculates expected values of the Welch's t-test and Wilcoxon rank
 # test on the data returned by aldex.clr
 x_tt <- aldex.ttest(x, paired.test = FALSE, verbose = FALSE)
 
 
-## ---- aldex2_efs, eval=TRUE---------------------------------------------------
-# determines the median clr abundance of the feature in all samples and in
+## ----aldex2-effect-----------------------------------------------------------------------------------------------------
+# Determines the median clr abundance of the feature in all samples and in
 # groups, the median difference between the two groups, the median variation
 # within each group and the effect size, which is the median of the ratio
 # of the between group difference and the larger of the variance within groups
@@ -65,249 +56,212 @@ x_effect <- aldex.effect(x, CI = TRUE, verbose = FALSE)
 aldex_out <- data.frame(x_tt, x_effect)
 
 
-## ---- eval=TRUE---------------------------------------------------------------
+## ----plot-aldex2-------------------------------------------------------------------------------------------------------
 par(mfrow = c(1, 2))
-  aldex.plot(
-    aldex_out, 
-    type = "MA", 
-    test = "welch", 
-    xlab = "Log-ratio abundance",
-    ylab = "Difference",
-    cutoff = 0.05
-  )
-  aldex.plot(
-    aldex_out, 
-    type = "MW", 
-    test = "welch",
-    xlab = "Dispersion",
-    ylab = "Difference",
-    cutoff = 0.05
-  )
+
+aldex.plot(aldex_out,
+           type = "MA",
+           test = "welch",
+           xlab = "Log-ratio abundance",
+           ylab = "Difference",
+           cutoff = 0.05)
+
+aldex.plot(aldex_out,
+           type = "MW",
+           test = "welch",
+           xlab = "Dispersion",
+           ylab = "Difference",
+           cutoff = 0.05)
 
 
-## ---- eval=TRUE---------------------------------------------------------------
-rownames_to_column(aldex_out, "genus") %>%
-  filter(wi.eBH <= 0.05)  %>% # here we chose the wilcoxon output rather than tt
-  dplyr::select(genus, we.eBH, wi.eBH, effect, overlap) %>%
-  kable()
+## ----aldex2-res--------------------------------------------------------------------------------------------------------
+aldex_out %>%
+  rownames_to_column(var = "Genus") %>%
+  # here we choose the wilcoxon output rather than t-test output
+  filter(wi.eBH <= 0.05)  %>%
+  dplyr::select(Genus, we.eBH, wi.eBH, effect, overlap) %>%
+  knitr::kable()
 
 
-## ----ancombc2, warning = FALSE, eval=TRUE-------------------------------------
-# Run ANCOM-BC 
-out <- ancombc2(
-  data = tse,
-  assay.type = "counts", 
-  tax_level = "genus", 
-  fix_formula = "Geographical_location", 
-  p_adj_method = "fdr", 
-  lib_cut = 0,
-  prv_cut = 0,
-  group = "Geographical_location", 
-  struc_zero = TRUE, 
-  neg_lb = TRUE,
-  alpha = 0.05, 
-  global = TRUE # multi group comparison will be deactivated automatically 
-)
+## ----run-ancombc, warning=FALSE----------------------------------------------------------------------------------------
+# Load package
+library(ANCOMBC)
 
-# store the FDR adjusted results [test on v2.0.3] 
-ancombc_result <- cbind.data.frame(taxid = out$res$taxon,
-                                   ancombc = as.vector(out$res$q_Geographical_locationPune))
-
-# store the FDR adjusted results [test on v1.2.2] 
-# ancombc_result <- out$res$q_val %>% rownames_to_column('taxid') %>% dplyr::rename(ancombc = 2)
+# Run ANCOM-BC at the genus level and only including the prevalent genera
+ancombc2_out <- ancombc2(data = tse,
+                         assay.type = "counts",
+                         fix_formula = "patient_status",
+                         p_adj_method = "fdr",
+                         prv_cut = 0,
+                         group = "patient_status",
+                         struc_zero = TRUE,
+                         neg_lb = TRUE,
+                         # multi group comparison is deactivated automatically
+                         global = TRUE)
 
 
-## ---- eval=TRUE---------------------------------------------------------------
-kable(head(ancombc_result))
+## ----ancombc-res-------------------------------------------------------------------------------------------------------
+# store the FDR adjusted results 
+ancombc2_out$res %>%
+  dplyr::select(taxon, lfc_patient_statusControl, q_patient_statusControl) %>%
+  filter(q_patient_statusControl < 0.05) %>%
+  arrange(q_patient_statusControl) %>%
+  head() %>%
+  knitr::kable()
 
 
-## ----maaslin2, results = "hide", eval=TRUE------------------------------------
+## ----run-maaslin2, warning=FALSE, results="hide"-----------------------------------------------------------------------
+# Load package
+library(Maaslin2)
+
 # maaslin expects features as columns and samples as rows 
 # for both the abundance table as well as metadata 
 
 # We can specify different GLMs/normalizations/transforms.
-# Let us use similar settings as in Nearing et al. (2021):
-maaslin2_out <- Maaslin2(
-  t(assay(tse)),
-  data.frame(colData(tse)),
-  output = "DAA example",
-  transform = "AST",
-  fixed_effects = "Geographical_location",
-  # random_effects = c(...), # you can also fit MLM by specifying random effects
-  # specifying a ref is especially important if you have more than 2 levels
-  reference = "Geographical_location,Pune",  
-  normalization = "TSS",
-  standardize = FALSE,
-  min_prevalence = 0 # prev filterin already done
-)
+# specifying a ref is especially important if you have more than 2 levels
+maaslin2_out <- Maaslin2(input_data = as.data.frame(t(assay(tse))),
+                         input_metadata = as.data.frame(colData(tse)),
+                         output = "DAA example",
+                         transform = "AST",
+                         fixed_effects = "patient_status",
+                         # you can also fit MLM by specifying random effects
+                         # random_effects = c(...),
+                         reference = "patient_status,Control",
+                         normalization = "TSS",
+                         standardize = FALSE,
+                         # filtering was previously performed
+                         min_prevalence = 0)
 
 
-## ---- maaslin2kable, eval=TRUE------------------------------------------------
-kable(head(filter(maaslin2_out$results, qval <= 0.05)))
+## ---- maaslin2-res-----------------------------------------------------------------------------------------------------
+maaslin2_out$results %>%
+  filter(qval < 0.05) %>%
+  knitr::kable()
 
 
-## ----linda, eval=TRUE---------------------------------------------------------
-meta <- as.data.frame(colData(tse)) %>% dplyr::select(Geographical_location)
-linda.res <- linda(
-  as.data.frame(assay(tse)), 
-  meta, 
-  formula = '~Geographical_location', 
-  alpha = 0.05, 
-  prev.filter = 0, 
-  mean.abund.filter = 0)
+## ----run-linda---------------------------------------------------------------------------------------------------------
+# Load package
+library(MicrobiomeStat)
 
-linda_out <- linda.res$output$Geographical_locationPune
-# to scan the table for genera where H0 could be rejected:
-kable(head(filter(as.data.frame(linda_out), reject)))
+# Run LinDA
+linda_out <- linda(feature.dat = as.data.frame(assay(tse)),
+                   meta.dat = as.data.frame(colData(tse)),
+                   formula = "~ patient_status",
+                   alpha = 0.05,
+                   prev.filter = 0,
+                   mean.abund.filter = 0)
 
 
-## ----ZicoSeq, eval=TRUE-------------------------------------------------------
+## ----linda-res---------------------------------------------------------------------------------------------------------
+# List genera for which H0 could be rejected:
+linda_out$output$patient_statusControl %>%
+  filter(reject) %>%
+  dplyr::select(stat, padj) %>%
+  rownames_to_column(var = "feature") %>%
+  knitr::kable()
+
+
+## ----run-zicoseq-------------------------------------------------------------------------------------------------------
+# Load package
+library(GUniFrac)
+
 set.seed(123)
-meta <- as.data.frame(colData(tse))
-zicoseq.obj <- GUniFrac::ZicoSeq(meta.dat = meta, 
-                                 feature.dat = as.matrix(assay(tse)),
-                                 grp.name = 'Geographical_location',
-                                 adj.name = NULL, 
-                                 feature.dat.type = 'count',
-                                 prev.filter = 0,
-                                 perm.no = 999,
-                                 mean.abund.filter = 0,
-                                 max.abund.filter = 0,
-                                 return.feature.dat = T)
-zicoseq_out <- cbind.data.frame(p.raw=zicoseq.obj$p.raw, p.adj.fdr=zicoseq.obj$p.adj.fdr) 
-kable(head(filter(zicoseq_out, p.adj.fdr<0.05)))
+zicoseq_out <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
+                       meta.dat = as.data.frame(colData(tse)),
+                       grp.name = "patient_status",
+                       feature.dat.type = "count",
+                       return.feature.dat = TRUE,
+                       prev.filter = 0,
+                       mean.abund.filter = 0,
+                       max.abund.filter = 0,
+                       perm.no = 999)
 
 
-## ----ZicoSeqplot, eval=TRUE---------------------------------------------------
+## ----zicoseq-res-------------------------------------------------------------------------------------------------------
+zicoseq_res <- cbind.data.frame(p.raw = zicoseq_out$p.raw,
+                                p.adj.fdr = zicoseq_out$p.adj.fdr)
+
+zicoseq_res %>%
+  filter(p.adj.fdr < 0.05) %>%
+  arrange(p.adj.fdr) %>%
+  knitr::kable()
+
+
+## ----plot-zicoseq------------------------------------------------------------------------------------------------------
 ## x-axis is the effect size: R2 * direction of coefficient
-ZicoSeq.plot(ZicoSeq.obj = zicoseq.obj, meta.dat = meta, pvalue.type ='p.adj.fdr')
+ZicoSeq.plot(ZicoSeq.obj = zicoseq_out,
+             pvalue.type = 'p.adj.fdr')
 
 
-## ----comparison, eval=TRUE----------------------------------------------------
-aldex_result <- rownames_to_column(aldex_out, "taxid") %>% dplyr::select(taxid, aldex2 = wi.eBH)
-summ <- full_join(aldex_result, ancombc_result, by = "taxid") %>%
-  full_join(
-    dplyr::select(maaslin2_out$results, taxid = feature, maaslin2 = qval), 
-    by = "taxid") %>%
-    full_join(linda_out %>% rename(LinDA=padj) %>% dplyr::select(LinDA)%>% rownames_to_column('taxid') ) %>%
-  full_join(zicoseq_out %>% dplyr::select(p.adj.fdr) %>% rename(ZicoSeq = p.adj.fdr) %>% rownames_to_column('taxid')) %>%
-  mutate(
-    across(c(aldex2: ZicoSeq), ~ .x <= 0.05),
-    # the following line would be necessary without prevalence filtering 
-    # as some methods output NA
-    #across(-taxid, function(x) ifelse(is.na(x), FALSE, x)),
-    score = rowSums(across(c(aldex2, ancombc, maaslin2, LinDA, ZicoSeq)))
-  )
-
-# Mark all NAs as FALSE
-summ[is.na(summ)] <- FALSE
-
-# This is how it looks like:
-kable(head(summ))
+## ----daa-data-libsize--------------------------------------------------------------------------------------------------
+# Compute and store library size in colData
+colData(tse)$library_size <- colSums(assay(tse, "counts"))
 
 
-## ---- eval=TRUE---------------------------------------------------------------
-# how many genera were identified by each method?
-summarise(summ, across(where(is.logical), sum)) %>%
-  kable()
-# which genera are identified by all methods?
-filter(summ, score == 5) %>% kable()
-
-
-## ---- daplotting, eval=TRUE, fig.width=20,fig.height=4------------------------
-# Create a jittered boxplot for each genus 
-assay.type <- "relabundance"
-plot_data <- data.frame(t(assay(tse, assay.type)))
-plot_data$Geographical_location <- tse$Geographical_location
-plots <- pmap(dplyr::select(summ, taxid, score), function(taxid, score) {
-  ggplot(plot_data, aes_string(x="Geographical_location", y=taxid)) +
-    geom_boxplot(outlier.shape = NA) +
-    geom_jitter(width = 0.2) +
-    # scale_y_log10() + # log trans will cause 0 values missing 
-    scale_y_sqrt() + 
-    labs(title=glue::glue("{taxid}"), x="", y=glue::glue("Abundance ({assay.type})")) +    
-    theme_bw() +
-    theme(legend.position = "none")
-})
-
-# now we can show only those genera that have at least score 5 (or 4 or 3 or 2 or 1)
-robust_plots <- plots[summ$score == 4 & !is.na(summ$score)] 
-
-# to display this nicely in the book we use patchwork here:
-# (we show first ones)
-robust_plots[[1]] + 
-  robust_plots[[2]] + 
-  robust_plots[[3]] + 
-  robust_plots[[4]] +
-  robust_plots[[5]] +
-  plot_layout(nrow = 1)
-  
-# or if we have most trust in any specific method we can show genera that 
-# are differentially abundant according to that method and then look in the
-# title how many methods also identified it (we only show first 6 here):
-ancombc_plots <- plots[summ$ancombc & !is.na(summ$score)] 
-ancombc_plots[[1]] + 
-  ancombc_plots[[2]] + 
-  ancombc_plots[[3]] + 
-  ancombc_plots[[4]] +
-  ancombc_plots[[5]] +
-  ancombc_plots[[6]] +
-  plot_layout(nrow = 1)
-
-
-## ----ancombc_adj, eval=TRUE---------------------------------------------------
+## ----run-adj-ancombc, warning=FALSE------------------------------------------------------------------------------------
 # perform the analysis 
-ancombc_cov <- ancombc2(
-  data = tse,
-  assay.type = "counts",
-  tax_level = "genus",
-  fix_formula = "Geographical_location + Age", 
-  p_adj_method = "fdr", 
-  lib_cut = 0, 
-  group = "Geographical_location", 
-  struc_zero = TRUE, 
-  neg_lb = TRUE,
-  alpha = 0.05, 
-  global = TRUE # multi group comparison will be deactivated automatically 
-)
-# now the model answers the question: holding Age constant, are 
-# bacterial taxa differentially abundant? Or, if that is of interest,
-# holding phenotype constant, is Age associated with bacterial abundance?
-# Again we only show the first 6 entries.
-kable(head(ancombc_cov$res$q_val))
+ancombc2_out <- ancombc2(tse,
+                         assay.type = "counts",
+                         fix_formula = "patient_status + cohort + library_size",
+                         p_adj_method = "fdr",
+                         lib_cut = 0,
+                         group = "patient_status", 
+                         struc_zero = TRUE, 
+                         neg_lb = TRUE,
+                         alpha = 0.05,
+                         # multi-group comparison is deactivated automatically
+                         global = TRUE)
 
 
-## ----linda_adj, eval=TRUE-----------------------------------------------------
-otu.tab <- as.data.frame(assay(tse))
-meta <- as.data.frame(colData(tse))
-linda_cov <- linda(
-  otu.tab, 
-  meta, 
-  formula = '~ Geographical_location + Age', 
-  alpha = 0.05, 
-  prev.filter = 0, 
-  mean.abund.filter = 0)
-linda.res <- linda_cov$output$Geographical_locationPune
-kable(head(filter(linda.res, reject==T)))
+## ----adj-ancombc-res---------------------------------------------------------------------------------------------------
+ancombc2_out$res %>%
+  dplyr::select(starts_with(c("taxon", "lfc", "q"))) %>%
+  arrange(q_patient_statusControl) %>%
+  head() %>%
+  knitr::kable()
 
 
+## ----run-adj-linda-----------------------------------------------------------------------------------------------------
+linda_out <- linda(as.data.frame(assay(tse, "counts")),
+                   as.data.frame(colData(tse)),
+                   formula = "~ patient_status + cohort + library_size",
+                   alpha = 0.05,
+                   prev.filter = 0,
+                   mean.abund.filter = 0)
 
-## ----ZicoSeq_adj, eval=TRUE---------------------------------------------------
+
+## ----adj-linda-res-----------------------------------------------------------------------------------------------------
+# Select results for the patient status
+linda_res <- linda_out$output$patient_statusControl
+
+linda_res %>%
+  filter(reject) %>%
+  dplyr::select(log2FoldChange, stat, padj) %>%
+  rownames_to_column(var = "feature") %>%
+  head() %>%
+  knitr::kable()
+
+
+## ----run-adj-zicoseq---------------------------------------------------------------------------------------------------
 set.seed(123)
-zicoseq.obj <- GUniFrac::ZicoSeq(meta.dat = as.data.frame(colData(tse)) , 
-                                 feature.dat = as.matrix(assay(tse)),
-                                 grp.name = 'Geographical_location',
-                                 adj.name = 'Gender', 
-                                 feature.dat.type = 'count',
-                                 prev.filter = 0,
-                                 perm.no = 999,
-                                 mean.abund.filter = 0,
-                                 max.abund.filter = 0,
-                                 return.feature.dat = T)
-zicoseq_out <- cbind.data.frame(p.raw=zicoseq.obj$p.raw, p.adj.fdr=zicoseq.obj$p.adj.fdr) 
-kable(head(filter(zicoseq_out, p.adj.fdr<0.05)))
+zicoseq_out <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
+                       meta.dat = as.data.frame(colData(tse)),
+                       grp.name = "patient_status",
+                       adj.name = c("cohort", "library_size"), 
+                       feature.dat.type = "count",
+                       return.feature.dat = TRUE,
+                       prev.filter = 0,
+                       mean.abund.filter = 0,
+                       max.abund.filter = 0,
+                       perm.no = 999)
 
 
-## ----sessionInfo, echo=FALSE, results='asis'----------------------------------
-prettySessionInfo()
+## ----adj-zicoseq-res---------------------------------------------------------------------------------------------------
+zicoseq_res <- cbind.data.frame(p.raw = zicoseq_out$p.raw,
+                                p.adj.fdr = zicoseq_out$p.adj.fdr)
+
+zicoseq_res %>%
+  filter(p.adj.fdr < 0.05) %>%
+  head() %>%
+  knitr::kable()
 
