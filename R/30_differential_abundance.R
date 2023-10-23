@@ -96,7 +96,7 @@ rownames_to_column(aldex_out, "genus") %>%
 # Run ANCOM-BC 
 out <- ancombc2(
   data = tse,
-  assay_name = "counts", 
+  assay.type = "counts", 
   tax_level = "genus", 
   fix_formula = "Geographical_location", 
   p_adj_method = "fdr", 
@@ -259,7 +259,7 @@ ancombc_plots[[1]] +
 # perform the analysis 
 ancombc_cov <- ancombc2(
   data = tse,
-  assay_name = "counts",
+  assay.type = "counts",
   tax_level = "genus",
   fix_formula = "Geographical_location + Age", 
   p_adj_method = "fdr", 
