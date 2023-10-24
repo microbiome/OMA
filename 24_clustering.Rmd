@@ -211,26 +211,26 @@ tse_dmm
 
 The plot below represents the Laplace approximation to the model evidence for each of the k models. We can see that the best number of clusters is two. 
 
-```{r dmm5}
+```{r dmm4}
 library(miaViz)
 plotDMNFit(tse_dmm, type = "laplace", name = "DMM")
 ```
 
 The best model can be confirmed with the following operation. 
 
-```{r dmm6}
+```{r dmm5}
 # Get the the best model
 bestFit <- metadata(tse_dmm)$DMM$dmm[[metadata(tse_dmm)$DMM$best]]
 bestFit
 ```
 The clusters for the best model are saved in the colData under 'cluster' column.
 
-```{r dmm7}
+```{r dmm6}
 head(colData(tse_dmm)$clusters, 10)
 ```
 More detailed information about the clusters can be accessed in the metadata. The metadata contains samples-cluster assignment probabilities that tell us the likelihood for each sample to belong to each cluster.
 
-```{r dmm8}
+```{r dmm7}
 head(metadata(tse_dmm)$DMM$prob, 10) 
 # Can be accessed from in best model infromation as well using:
 # metadata(tse_dmm)$DMM$dmm[2][[1]]@group
@@ -239,7 +239,7 @@ head(metadata(tse_dmm)$DMM$prob, 10)
 
 Once the optimal model have been confirmed, we can find out which samples are grouped with each other. The table below shows one sample of each sample type clustered in either of the groups. We can notice that DMM can distinguish environmental samples into one group, and mock and human samples into another. For clarity, in this example, the probabilities for each sample to belong in each cluster have been rounded. 
 
-```{r dmm9}
+```{r dmm8}
 library(dplyr)
 
 clusters <- round(metadata(tse_dmm)$DMM$prob, 1)
@@ -254,7 +254,7 @@ clusters %>%
 
 We can also plot the driver Phyla in each group. In this case, it reflects the differences between environmental and human samples. 
 
-```{r dmm10, fig.width=8, fig.height=4}
+```{r dmm9, fig.width=8, fig.height=4}
 # Get the estimates on how much each phyla contributes on each cluster
 best_model <- metadata(tse_dmm)$DMM$dmm[2]
 drivers <- as.data.frame(best_model[[1]]@fit$Estimate)
@@ -285,7 +285,7 @@ dmm_group
 
 Mixture weights can be used for having a rough approximation of the cluster size.
 
-```{r dmm11}
+```{r dmm10}
 DirichletMultinomial::mixturewt(bestFit)
 ```
 
@@ -293,7 +293,7 @@ DirichletMultinomial::mixturewt(bestFit)
 
 In this section we show how to calculate principal coordinates for clr transformed abundance data. We use Aitchison distance as a distance metrics that calculates Euclidean distances for clr transformed compositions. In the visualization section, the samples are coloured based on their DMM clusters to demonstrate the distances between samples included in each DMM cluster.
 
-```{r dmm12}
+```{r dmm11}
 # pseudocount is added, because data contains zeros
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
 tse <- transformAssay(tse, assay.type = "pseudo", method = "relabundance")
@@ -308,7 +308,7 @@ df <- calculateMDS(tse, assay.type = "clr", method = "euclidean")
 euclidean_pcoa_df <- data.frame(pcoa1 = df[, 1], pcoa2 = df[, 2])
 ```
 
-```{r dmm13}
+```{r dmm12}
 # Create a data frame that contains principal coordinates and DMM information
 euclidean_dmm_pcoa_df <- cbind(euclidean_pcoa_df,
                                dmm_component = colData(tse_dmm)$clusters)
