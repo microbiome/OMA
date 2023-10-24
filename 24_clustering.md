@@ -401,15 +401,15 @@ dmm_group
 ## class: DMNGroup 
 ## summary:
 ##                    k samples taxa    NLE  LogDet Laplace    BIC  AIC
-## Feces              2       4   67 1078.3 -106.19   901.1 1171.9 1213
-## Freshwater         2       2   67  889.6  -97.28   716.9  936.4 1025
-## Freshwater (creek) 2       3   67 1600.3  860.08  1906.3 1674.5 1735
-## Mock               2       3   67 1008.4  -55.37   856.6 1082.5 1143
-## Ocean              2       3   67 1096.7  -56.21   944.6 1170.9 1232
+## Feces              2       4   67 1078.3 -106.26   901.1 1171.9 1213
+## Freshwater         2       2   67  889.6  -97.20   716.9  936.4 1025
+## Freshwater (creek) 2       3   67 1600.3  862.19  1907.3 1674.5 1735
+## Mock               2       3   67 1008.4  -55.40   856.6 1082.5 1143
+## Ocean              2       3   67 1096.7  -56.66   944.3 1170.9 1232
 ## Sediment (estuary) 2       3   67 1195.5   18.63  1080.8 1269.7 1331
-## Skin               2       3   67  992.6  -84.81   826.2 1066.8 1128
-## Soil               2       3   67 1380.3   11.21  1261.8 1454.5 1515
-## Tongue             2       2   67  783.0 -107.74   605.1  829.8  918
+## Skin               2       3   67  992.6  -85.05   826.1 1066.8 1128
+## Soil               2       3   67 1380.3   11.20  1261.8 1454.5 1515
+## Tongue             2       2   67  783.0 -107.79   605.0  829.8  918
 ```
 
 Mixture weights (rough measure of the cluster size).
@@ -436,12 +436,12 @@ head(prob)
 
 ```
 ##                 1         2
-## CL3     1.000e+00 5.062e-17
-## CC1     1.000e+00 3.913e-22
-## SV1     1.000e+00 1.961e-12
-## M31Fcsw 7.860e-26 1.000e+00
-## M11Fcsw 1.130e-16 1.000e+00
-## M31Plmr 1.123e-13 1.000e+00
+## CL3     1.000e+00 5.078e-17
+## CC1     1.000e+00 3.935e-22
+## SV1     1.000e+00 1.962e-12
+## M31Fcsw 7.879e-26 1.000e+00
+## M11Fcsw 1.132e-16 1.000e+00
+## M31Plmr 1.124e-13 1.000e+00
 ```
 
 We can also know the contribution of each taxa to each component
@@ -452,13 +452,13 @@ head(DirichletMultinomial::fitted(bestFit))
 ```
 
 ```
-##                          [,1]      [,2]
-## Phylum:Crenarchaeota  0.30383 0.1354643
-## Phylum:Euryarchaeota  0.23115 0.1468621
-## Phylum:Actinobacteria 1.21378 1.0600093
-## Phylum:Spirochaetes   0.21393 0.1318405
-## Phylum:MVP-15         0.02982 0.0007672
-## Phylum:Proteobacteria 6.84439 1.8151071
+##                          [,1]     [,2]
+## Phylum:Crenarchaeota  0.30381 0.135466
+## Phylum:Euryarchaeota  0.23114 0.146859
+## Phylum:Actinobacteria 1.21366 1.060109
+## Phylum:Spirochaetes   0.21393 0.131841
+## Phylum:MVP-15         0.02982 0.000768
+## Phylum:Proteobacteria 6.84512 1.815492
 ```
 
 Finally, to be able to visualize our data and clusters, we start by 
@@ -703,8 +703,8 @@ bc
 ## 
 ## First  4  Cluster sizes:
 ##                    BC 1 BC 2 BC 3 BC 4
-## Number of Rows:      18   14   20    3
-## Number of Columns:   14   14   10    6
+## Number of Rows:      15   15   17    3
+## Number of Columns:   13   14   10   10
 ```
 
 The object includes cluster information. However compared to
@@ -787,7 +787,7 @@ head(bicluster_rows)
 ## D_5__Klebsiella               FALSE     FALSE     FALSE     FALSE      TRUE
 ## D_5__Streptococcus            FALSE     FALSE     FALSE     FALSE      TRUE
 ## D_5__Escherichia-Shigella     FALSE     FALSE     FALSE     FALSE      TRUE
-## D_5__Ruminiclostridium 5      FALSE      TRUE      TRUE     FALSE     FALSE
+## D_5__Ruminiclostridium 5       TRUE     FALSE      TRUE     FALSE     FALSE
 ## D_5__Pseudomonas              FALSE     FALSE     FALSE     FALSE      TRUE
 ```
 
