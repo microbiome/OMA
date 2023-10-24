@@ -1,15 +1,15 @@
-## ----setup, echo=FALSE, results="asis"---------------------------------------------------------------------------------
+## ----setup, echo=FALSE, results="asis"-----------------
 library(rebook)
 chapterPreamble()
 
 
-## ----load-pkg-data1----------------------------------------------------------------------------------------------------
+## ----load-pkg-data1------------------------------------
 library(mia)
 data("enterotype", package = "mia")
 tse <- enterotype
 
 
-## ----load_bluster------------------------------------------------------------------------------------------------------
+## ----load_bluster--------------------------------------
 # Load dependencies
 library(bluster)
 library(kableExtra)
@@ -18,7 +18,7 @@ library(kableExtra)
 tse <- transformAssay(tse, method = "relabundance")
 
 
-## ----bluster_sample_hclust1--------------------------------------------------------------------------------------------
+## ----bluster_sample_hclust1----------------------------
 # Simple use of the hierarchical clustering. Here, the default parameters
 # set the cut height to half of the dendrogram height.
 tse <- cluster(tse, assay.type = "relabundance", 
@@ -29,7 +29,7 @@ tse <- cluster(tse, assay.type = "relabundance",
 head(colData(tse)$clusters)
 
 
-## ----bluster_sample_plot-----------------------------------------------------------------------------------------------
+## ----bluster_sample_plot-------------------------------
 library(scater)
 
 # Add the MDS dimensions for plotting
@@ -40,14 +40,14 @@ tse <- runMDS(tse, assay.type = "relabundance",
 plotReducedDim(tse, "MDS", colour_by = "clusters")
 
 
-## ----hclust1-----------------------------------------------------------------------------------------------------------
+## ----hclust1-------------------------------------------
 library(vegan)
 
 # Load experimental data
 tse <- enterotype
 
 
-## ----hclust2-----------------------------------------------------------------------------------------------------------
+## ----hclust2-------------------------------------------
 # Apply transformation
 tse <- transformAssay(tse, method = "relabundance")
 
@@ -62,7 +62,7 @@ tse <- cluster(tse,
                clust.col = "Hclust")
 
 
-## ----hclust3-----------------------------------------------------------------------------------------------------------
+## ----hclust3-------------------------------------------
 library(dendextend)
 
 # Get hclust data from metadata
@@ -76,12 +76,12 @@ dendro <- as.dendrogram(hclust_data)
 dendro %>% set("labels", NULL) %>% plot()
 
 
-## ----hclust4-----------------------------------------------------------------------------------------------------------
+## ----hclust4-------------------------------------------
 # Get the clusters
 head(colData(tse)$Hclust)
 
 
-## ----hclust5-----------------------------------------------------------------------------------------------------------
+## ----hclust5-------------------------------------------
 library(NbClust)
 diss <- metadata(tse)$clusters$dist
 
@@ -92,7 +92,7 @@ res <- NbClust(diss = diss, distance = NULL, method = "ward.D2",
 res$Best.nc
 
 
-## ----hclust6-----------------------------------------------------------------------------------------------------------
+## ----hclust6-------------------------------------------
 library(dendextend)
 
 # Get optimal number of clusters
@@ -108,7 +108,7 @@ labels(dend) <- NULL
 plot(dend)
 
 
-## ----dmm1--------------------------------------------------------------------------------------------------------------
+## ----dmm1----------------------------------------------
 # Get the data
 data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
@@ -117,34 +117,34 @@ tse <- GlobalPatterns
 tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
 
 
-## ----dmm2--------------------------------------------------------------------------------------------------------------
+## ----dmm2----------------------------------------------
 # Run the model and calculates the most likely number of clusters from 1 to 7
 tse <- cluster(tse, name = "DMM", DmmParam(k = 1:7, type = "laplace"), 
                    MARGIN = "samples", full = TRUE)
 
 
-## ----dmm3--------------------------------------------------------------------------------------------------------------
+## ----dmm3----------------------------------------------
 # The dmm info is stored in the metadata under the 'DMM' column
 tse
 
 
-## ----dmm4--------------------------------------------------------------------------------------------------------------
+## ----dmm4----------------------------------------------
 head(metadata(tse)$DMM$dmm,3)
 
 
-## ----dmm5--------------------------------------------------------------------------------------------------------------
+## ----dmm5----------------------------------------------
 BiocManager::install("microbiome/miaViz")
 library(miaViz)
 plotDMNFit(tse, type = "laplace", name = "DMM")
 
 
-## ----dmm6--------------------------------------------------------------------------------------------------------------
+## ----dmm6----------------------------------------------
 # Get the model that has the best fit
 bestFit <- metadata(tse)$DMM$dmm[[metadata(tse)$DMM$best]]
 bestFit
 
 
-## ----dmm_group---------------------------------------------------------------------------------------------------------
+## ----dmm_group-----------------------------------------
 dmm_group <- calculateDMNgroup(tse, variable = "SampleType", 
                                assay.type = "counts", k = 2, 
                                seed = .Machine$integer.max)
@@ -152,20 +152,20 @@ dmm_group <- calculateDMNgroup(tse, variable = "SampleType",
 dmm_group
 
 
-## ----dmm7--------------------------------------------------------------------------------------------------------------
+## ----dmm7----------------------------------------------
 DirichletMultinomial::mixturewt(bestFit)
 
 
-## ----dmm8--------------------------------------------------------------------------------------------------------------
+## ----dmm8----------------------------------------------
 prob <- metadata(tse)$DMM$prob
 head(prob)
 
 
-## ----dmm9--------------------------------------------------------------------------------------------------------------
+## ----dmm9----------------------------------------------
 head(DirichletMultinomial::fitted(bestFit))
 
 
-## ----dmm10-------------------------------------------------------------------------------------------------------------
+## ----dmm10---------------------------------------------
 # Do clr transformation. Pseudocount is added, because data contains zeros.
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
 tse <- transformAssay(tse, assay.type = "pseudo", method = "relabundance")
@@ -178,7 +178,7 @@ df <- calculateMDS(tse, assay.type = "clr", method = "euclidean")
 euclidean_pcoa_df <- data.frame(pcoa1 = df[, 1], pcoa2 = df[, 2])
 
 
-## ----dmm11-------------------------------------------------------------------------------------------------------------
+## ----dmm11---------------------------------------------
 # Create a data frame that contains principal coordinates and DMM information
 euclidean_dmm_pcoa_df <- cbind(euclidean_pcoa_df,
                                dmm_component = colData(tse)$clusters)
@@ -195,13 +195,13 @@ euclidean_dmm_plot <- ggplot(data = euclidean_dmm_pcoa_df,
 euclidean_dmm_plot
 
 
-## ----load-pkg-data2----------------------------------------------------------------------------------------------------
+## ----load-pkg-data2------------------------------------
 library(cobiclust)
 data("HintikkaXOData")
 mae <- HintikkaXOData
 
 
-## ----cobiclust_1-------------------------------------------------------------------------------------------------------
+## ----cobiclust_1---------------------------------------
 # Subset data in the first experiment
 mae[[1]] <- subsetByPrevalentFeatures(mae[[1]], rank = "Genus", 
                                       prevalence = 0.2, 
@@ -211,7 +211,7 @@ mae[[1]] <- subsetByPrevalentFeatures(mae[[1]], rank = "Genus",
 mae[[1]] <- transformAssay(mae[[1]], method = "rclr")
 
 
-## ----cobiclust_2-------------------------------------------------------------------------------------------------------
+## ----cobiclust_2---------------------------------------
 # Do clustering using counts table
 clusters <- cobiclust(assay(mae[[1]], "counts"))
 
@@ -231,7 +231,7 @@ mae[[1]] <- mae[[1]][order(rowData(mae[[1]])$clusters),
 clusters$classification
 
 
-## ----cobiclust_3a, fig.width=14, fig.height=12-------------------------------------------------------------------------
+## ----cobiclust_3a, fig.width=14, fig.height=12---------
 library(pheatmap)
 # z-transform for heatmap
 mae[[1]] <- transformAssay(mae[[1]], assay.type = "rclr",
@@ -247,12 +247,12 @@ annotation_row <- data.frame(rowData(mae[[1]])[, "clusters", drop = F])
 colnames(annotation_row) <- "row_clusters"
 
 
-## ----cobiclust_3b, fig.width=14, fig.height=12-------------------------------------------------------------------------
+## ----cobiclust_3b, fig.width=14, fig.height=12---------
 pheatmap(assay(mae[[1]], "rclr_z"), cluster_rows = F, cluster_cols = F,
          annotation_col = annotation_col, annotation_row = annotation_row)
 
 
-## ----cobiclust_4-------------------------------------------------------------------------------------------------------
+## ----cobiclust_4---------------------------------------
 library(ggplot2)
 library(patchwork)
 
@@ -272,7 +272,7 @@ p2 <- ggplot(melt_assay) +
 p1 + p2
 
 
-## ----biclust_1---------------------------------------------------------------------------------------------------------
+## ----biclust_1-----------------------------------------
 # Samples must be in equal order
 # (Only 1st experiment was ordered in cobiclust step leading to unequal order)
 mae[[1]] <- mae[[1]][, colnames(mae[[2]])]
@@ -293,14 +293,14 @@ replace_na <- function(row) {
 assay(mae[[2]], "log10") <- t(apply(assay(mae[[2]], "log10"), 1, replace_na))
 
 
-## ----biclust_2---------------------------------------------------------------------------------------------------------
+## ----biclust_2-----------------------------------------
 # Calculate correlations
 corr <- getExperimentCrossCorrelation(mae, 1, 2, assay.type1 = "rclr",
                                       assay.type2 = "log10", mode = "matrix",
                                       correlation = "spearman")
 
 
-## ----biclust_3---------------------------------------------------------------------------------------------------------
+## ----biclust_3-----------------------------------------
 library(biclust)
 # Set seed for reproducibility
 set.seed(3973)
@@ -311,7 +311,7 @@ bc <- biclust(corr, method = BCPlaid(), verbose = FALSE)
 bc
 
 
-## ----biclust_4---------------------------------------------------------------------------------------------------------
+## ----biclust_4-----------------------------------------
 # Functions for obtaining biclust information
 
 # Get clusters for rows and columns
@@ -364,7 +364,7 @@ bc
 }
 
 
-## ----biclust_5---------------------------------------------------------------------------------------------------------
+## ----biclust_5-----------------------------------------
 # Get biclusters
 bcs <- .get_biclusters_from_biclust(bc, corr)
 
@@ -375,7 +375,7 @@ bicluster_columns <- bcs$bc_columns
 head(bicluster_rows)
 
 
-## ----biclust_6---------------------------------------------------------------------------------------------------------
+## ----biclust_6-----------------------------------------
 # Function for obtaining sample-wise sum, mean, median, and mean variance
 # for each cluster
 
@@ -410,7 +410,7 @@ head(bicluster_rows)
 df <- .sum_mean_median_var(mae[[1]], mae[[2]], "rclr", "log10", bicluster_rows, bicluster_columns)
 
 
-## ----biclust_7, fig.width=14, fig.height=6, fig.show="keep", out.width="33%"-------------------------------------------
+## ----biclust_7, fig.width=14, fig.height=6, fig.show="keep", out.width="33%"----
 pics <- list()
 for (i in seq_along(df)) {
     pics[[i]] <- ggplot(df[[i]]) +
@@ -422,12 +422,12 @@ for (i in seq_along(df)) {
 pics[[1]] + pics[[2]] + pics[[3]]
 
 
-## ----biclust_8---------------------------------------------------------------------------------------------------------
+## ----biclust_8-----------------------------------------
 bicluster_columns <- data.frame(apply(bicluster_columns, 2, as.factor))
 bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
 
 
-## ----biclust_9, fig.width=10, fig.height=10----------------------------------------------------------------------------
+## ----biclust_9, fig.width=10, fig.height=10------------
 # Adjust colors for all clusters
 if (ncol(bicluster_rows) > ncol(bicluster_columns)) {
     cluster_names <- colnames(bicluster_rows)

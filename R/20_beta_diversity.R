@@ -1,9 +1,9 @@
-## ----setup, echo = FALSE, results = "asis"-----------------------------------------------------------------------------
+## ----setup, echo = FALSE, results = "asis"-------------
 library(rebook)
 chapterPreamble()
 
 
-## ----include = FALSE---------------------------------------------------------------------------------------------------
+## ----include = FALSE-----------------------------------
 # global knitr options
 knitr::opts_chunk$set(
   message = FALSE,
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 
 
-## ----prep-tse----------------------------------------------------------------------------------------------------------
+## ----prep-tse------------------------------------------
 # Load mia and import sample dataset
 library(mia)
 data("GlobalPatterns", package = "mia")
@@ -35,7 +35,7 @@ tse <- transformAssay(tse,
 tse$Group <- tse$SampleType == "Feces"
 
 
-## ----runMDS------------------------------------------------------------------------------------------------------------
+## ----runMDS--------------------------------------------
 # Load package to plot reducedDim
 library(scater)
 
@@ -47,7 +47,7 @@ tse <- runMDS(tse,
               name = "MDS_bray")
 
 
-## ----plot-mds-bray-curtis, fig.cap = "MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."-------
+## ----plot-mds-bray-curtis, fig.cap = "MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."----
 # Create ggplot object
 p <- plotReducedDim(tse, "MDS_bray",
                     colour_by = "Group")
@@ -63,7 +63,7 @@ p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]], 1), "%", ")", sep 
 p
 
 
-## ----mds-nmds-comparison, results='hide'-------------------------------------------------------------------------------
+## ----mds-nmds-comparison, results='hide'---------------
 # Run NMDS on relabundance assay with Bray-Curtis distances
 tse <- runNMDS(tse,
                FUN = vegan::vegdist,
@@ -102,7 +102,7 @@ wrap_plots(plots) +
   plot_layout(guides = "collect")
 
 
-## ----plot-unifrac, fig.cap = "Unifrac distances scaled by MDS of the GlobalPattern dataset."---------------------------
+## ----plot-unifrac, fig.cap = "Unifrac distances scaled by MDS of the GlobalPattern dataset."----
 tse <- runMDS(tse,
               FUN = mia::calculateUnifrac,
               name = "Unifrac",
@@ -114,7 +114,7 @@ plotReducedDim(tse, "Unifrac",
                colour_by = "Group")
 
 
-## ----plot-pca, fig.cap = "PCA plot on the GlobalPatterns data set containing sample from different sources."-----------
+## ----plot-pca, fig.cap = "PCA plot on the GlobalPatterns data set containing sample from different sources."----
 tse <- runPCA(tse,
               name = "PCA",
               assay.type = "counts",
@@ -124,7 +124,7 @@ plotReducedDim(tse, "PCA",
                colour_by = "Group")
 
 
-## ----plot-umap, fig.cap = "UMAP plot on the GlobalPatterns data set containing sample from different sources."---------
+## ----plot-umap, fig.cap = "UMAP plot on the GlobalPatterns data set containing sample from different sources."----
 tse <- runUMAP(tse,
                name = "UMAP",
                assay.type = "counts",
@@ -135,7 +135,7 @@ plotReducedDim(tse, "UMAP",
                ncomponents = c(1:3))
 
 
-## ----relstress---------------------------------------------------------------------------------------------------------
+## ----relstress-----------------------------------------
 # Load vegan package
 library(vegan)
 
@@ -155,7 +155,7 @@ dp <- as.matrix(dist(pcoa))
 stress <- sum((dp - d0)^2) / sum(d0^2)
 
 
-## ----shepard-----------------------------------------------------------------------------------------------------------
+## ----shepard-------------------------------------------
 ord <- order(as.vector(d0))
 df <- data.frame(d0 = as.vector(d0)[ord],
                  dmds = as.vector(dp)[ord])
@@ -170,7 +170,7 @@ ggplot(df, aes(x = d0, y = dmds)) +
   theme_bw()
 
 
-## ----import-rda-dataset------------------------------------------------------------------------------------------------
+## ----import-rda-dataset--------------------------------
 # Load data
 data("enterotype", package = "mia")
 tse2 <- enterotype
@@ -180,7 +180,7 @@ tse2 <- transformAssay(tse2,
                        method = "relabundance")
 
 
-## ----run-rda-----------------------------------------------------------------------------------------------------------
+## ----run-rda-------------------------------------------
 # Perform RDA
 tse2 <- runRDA(tse2,
                assay.type = "relabundance",
@@ -192,17 +192,17 @@ tse2 <- runRDA(tse2,
 rda_info <- attr(reducedDim(tse2, "RDA"), "significance")
 
 
-## ----rda-permanova-res-------------------------------------------------------------------------------------------------
+## ----rda-permanova-res---------------------------------
 rda_info$permanova |>
   knitr::kable()
 
 
-## ----rda-homogeneity-res-----------------------------------------------------------------------------------------------
+## ----rda-homogeneity-res-------------------------------
 rda_info$homogeneity |>
   knitr::kable()
 
 
-## ----plot-rda----------------------------------------------------------------------------------------------------------
+## ----plot-rda------------------------------------------
 # Load packages for plotting function
 library(miaViz)
 
@@ -210,7 +210,7 @@ library(miaViz)
 plotRDA(tse2, "RDA", colour_by = "ClinicalStatus")
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 # Agglomerate to genus level
 tse_genus <- mergeFeaturesByRank(tse,
                                  rank = "Genus")
@@ -228,14 +228,14 @@ tse_genus <- addPerSampleDominantFeatures(tse_genus,
 countDominantFeatures(tse_genus, rank = "Genus", digits = 3, name = "dominant_taxa")
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 tse_genus <- runMDS(tse_genus,
                     FUN = vegan::vegdist,
                     name = "PCoA_BC",
                     assay.type = "relabundance")
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 # Getting the top taxa
 top_taxa <- getTopFeatures(tse_genus,
                            top = 6,
@@ -271,7 +271,7 @@ plot <-plotReducedDim(tse_genus, "PCoA_BC",
 plot
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 # Calculating the frequencies and percentages for both categories
 freq_TRUE <- table(as.character(most_abundant[colData(tse_genus)$Group == TRUE]))
 freq_FALSE <- table(as.character(most_abundant[colData(tse_genus)$Group == FALSE]))
@@ -296,7 +296,7 @@ plotReducedDim(tse_genus[ , colData(tse_genus)$Group == FALSE], "PCoA_BC",
        title = "Group = FALSE", color = "")
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 # Agglomerate data to Species level
 tse <- mergeFeaturesByRank(tse,
                            rank = "Species")
@@ -329,7 +329,7 @@ rownames(p_values) <- c("adonis2", "dbRDA+anova.cca")
 p_values
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 # Add taxa info
 sppscores(dbrda) <- t(assay(tse, "relabundance"))
 # Get coefficients
@@ -342,7 +342,7 @@ top.coef <- top.coef[order(top.coef), ]
 top_names <- names(top.coef)[order(abs(top.coef), decreasing = TRUE)]
 
 
-## ----plot-top-coef-anova, fig.cap = ""---------------------------------------------------------------------------------
+## ----plot-top-coef-anova, fig.cap = ""-----------------
 df <- data.frame(x = top.coef,
                  y = factor(names(top.coef), unique(names(top.coef))))
 
@@ -352,6 +352,6 @@ ggplot(df, aes(x = x, y = y)) +
   theme_bw()
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 anova(betadisper(vegdist(t(assay(tse, "counts"))), colData(tse)$Group))
 

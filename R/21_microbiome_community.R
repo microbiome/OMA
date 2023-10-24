@@ -1,15 +1,15 @@
-## ----setup, echo=FALSE, results="asis"---------------------------------------------------------------------------------
+## ----setup, echo=FALSE, results="asis"-----------------
 library(rebook)
 chapterPreamble()
 
 
-## ----load-pkg-data-----------------------------------------------------------------------------------------------------
+## ----load-pkg-data-------------------------------------
 library(mia)
 data("GlobalPatterns", package="mia")
 tse <- GlobalPatterns
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 library(miaViz)
 # Computing relative abundance
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
@@ -29,7 +29,7 @@ plotAbundance(tse, assay.type="relabundance", rank = "Phylum",
               order_sample_by = "Bacteroidetes")
 
 
-## ----heatmap-----------------------------------------------------------------------------------------------------------
+## ----heatmap-------------------------------------------
 library(ggplot2)
 
 # Add clr-transformation on samples
@@ -45,7 +45,7 @@ tse_phylum <- transformAssay(tse_phylum, assay.type = "clr",
                               method = "z", name = "clr_z")
 
 
-## ----heatmapvisu-------------------------------------------------------------------------------------------------------
+## ----heatmapvisu---------------------------------------
 # Melt the assay for plotting purposes
 df <- meltAssay(tse_phylum, assay.type = "clr_z")
 
@@ -66,7 +66,7 @@ ggplot(df, aes(x = SampleID, y = FeatureID, fill = clr_z)) +
   labs(x = "Samples", y = "Taxa")
 
 
-## ----pheatmap1---------------------------------------------------------------------------------------------------------
+## ----pheatmap1-----------------------------------------
 library(pheatmap)
 
 # Takes subset: only samples from feces, skin, or tongue
@@ -92,7 +92,7 @@ mat <- assay(tse_phylum_subset, "clr_z")
 pheatmap(mat)
 
 
-## ----pheatmap2---------------------------------------------------------------------------------------------------------
+## ----pheatmap2-----------------------------------------
 library(ape)
 
 # Hierarchical clustering
@@ -102,7 +102,7 @@ taxa_hclust <- hclust(dist(mat), method = "complete")
 taxa_tree <- as.phylo(taxa_hclust)
 
 
-## ----pheatmap3---------------------------------------------------------------------------------------------------------
+## ----pheatmap3-----------------------------------------
 library(ggtree)
 
 # Plot taxa tree
@@ -115,7 +115,7 @@ taxa_ordered <- get_taxa_name(taxa_tree)
 taxa_tree
 
 
-## ----pheatmap4---------------------------------------------------------------------------------------------------------
+## ----pheatmap4-----------------------------------------
 # Creates clusters
 taxa_clusters <- cutree(tree = taxa_hclust, k = 3)
 
@@ -130,7 +130,7 @@ taxa_clusters <- taxa_clusters[taxa_ordered, , drop = FALSE]
 taxa_clusters
 
 
-## ----pheatmap5---------------------------------------------------------------------------------------------------------
+## ----pheatmap5-----------------------------------------
 # Adds information to rowData
 rowData(tse_phylum_subset)$clusters <- taxa_clusters[order(match(rownames(taxa_clusters), rownames(tse_phylum_subset))), ]
 
@@ -138,7 +138,7 @@ rowData(tse_phylum_subset)$clusters <- taxa_clusters[order(match(rownames(taxa_c
 rowData(tse_phylum_subset)$clusters
 
 
-## ----pheatmap6---------------------------------------------------------------------------------------------------------
+## ----pheatmap6-----------------------------------------
 # Hierarchical clustering
 sample_hclust <- hclust(dist(t(mat)), method = "complete")
 
@@ -155,7 +155,7 @@ samples_ordered <- rev(get_taxa_name(sample_tree))
 sample_tree
 
 
-## ----pheatmap7---------------------------------------------------------------------------------------------------------
+## ----pheatmap7-----------------------------------------
 # Creates clusters
 sample_clusters <- factor(cutree(tree = sample_hclust, k = 3))
 
@@ -174,7 +174,7 @@ sample_data$sample_types <- unfactor(colData(tse_phylum_subset)$SampleType)
 sample_data
 
 
-## ----pheatmap8---------------------------------------------------------------------------------------------------------
+## ----pheatmap8-----------------------------------------
 # Determines the scaling of colorss
 # Scale colors
 breaks <- seq(-ceiling(max(abs(mat))), ceiling(max(abs(mat))), 

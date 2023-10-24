@@ -1,19 +1,19 @@
-## ----setup, echo=FALSE, results="asis"---------------------------------------------------------------------------------
+## ----setup, echo=FALSE, results="asis"-----------------
 library(rebook)
 chapterPreamble()
 
 
-## ----load-pkg-data-----------------------------------------------------------------------------------------------------
+## ----load-pkg-data-------------------------------------
 library(mia)
 
 
-## ----cross-correlation1------------------------------------------------------------------------------------------------
+## ----cross-correlation1--------------------------------
 # Load the data
 data(HintikkaXOData, package = "mia")
 mae <- HintikkaXOData
 
 
-## ----cross-correlation2------------------------------------------------------------------------------------------------
+## ----cross-correlation2--------------------------------
 library(stringr)
 # Drop off those bacteria that do not include information in Phylum or lower levels
 mae[[1]] <- mae[[1]][!is.na(rowData(mae[[1]])$Phylum), ]
@@ -22,27 +22,27 @@ rowData(mae[[1]]) <- DataFrame(apply(rowData(mae[[1]]), 2,
                                      str_remove, pattern = "._[0-9]__"))
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 # Available alternative experiments
 experiments(mae)
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 # Microbiome data
 getWithColData(mae, "microbiota")
 
 
-## ----cross-correlation3------------------------------------------------------------------------------------------------
+## ----cross-correlation3--------------------------------
 # Metabolite data
 getWithColData(mae, "metabolites")
 
 
-## ----cross-correlation4------------------------------------------------------------------------------------------------
+## ----cross-correlation4--------------------------------
 # Biomarker data
 getWithColData(mae, "biomarkers")
 
 
-## ----cross-correlation5------------------------------------------------------------------------------------------------
+## ----cross-correlation5--------------------------------
 # Agglomerate microbiome data at family level
 mae[[1]] <- mergeFeaturesByPrevalence(mae[[1]], rank = "Family")
 # Does log10 transform for microbiome data
@@ -66,7 +66,7 @@ correlations <- testExperimentCrossCorrelation(mae,
                                                show_warnings = FALSE)
 
 
-## ----cross-correlation6, fig.width=10, fig.height=8--------------------------------------------------------------------
+## ----cross-correlation6, fig.width=10, fig.height=8----
 library(ComplexHeatmap) 
 
 # Create a heatmap and store it
@@ -84,7 +84,7 @@ plot <- Heatmap(correlations$cor,
 plot
 
 
-## ----MOFA2, message=FALSE, warning=FALSE-------------------------------------------------------------------------------
+## ----MOFA2, message=FALSE, warning=FALSE---------------
 library(MOFA2)
 
 # For inter-operability between Python and R, and setting Python dependencies,
@@ -96,7 +96,7 @@ library(reticulate)
 #reticulate::py_install(packages = c("mofapy2"), pip = TRUE, python_version=3.6)
 
 
-## ---- message=FALSE, warning=FALSE-------------------------------------------------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 library(MOFA2)
 # For simplicity, classify all high-fat diets as high-fat, and all the low-fat 
 # diets as low-fat diets
@@ -131,18 +131,18 @@ model <- create_mofa_from_MultiAssayExperiment(mae,
 model
 
 
-## ---- message=FALSE, warning=FALSE-------------------------------------------------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 model_opts <- get_default_model_options(model)
 model_opts$num_factors <- 5
 head(model_opts)
 
 
-## ---- message=FALSE, warning=FALSE-------------------------------------------------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 train_opts <- get_default_training_options(model)
 head(train_opts)
 
 
-## ---- message=FALSE, warning=FALSE-------------------------------------------------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 model.prepared <- prepare_mofa(
   object = model,
   model_options = model_opts
@@ -153,7 +153,7 @@ model.prepared <- prepare_mofa(
 model.trained <- run_mofa(model.prepared, use_basilisk = TRUE)
 
 
-## ---- message=FALSE, warning=FALSE, fig.height=8, fig.width=10---------------------------------------------------------
+## ---- message=FALSE, warning=FALSE, fig.height=8, fig.width=10----
 library(patchwork)
 library(ggplot2)
 
@@ -166,7 +166,7 @@ wrap_plots(plot_list, nrow = 2) +
                   theme = theme(plot.title = element_text(hjust = 0.5)))
 
 
-## ---- warning=FALSE, message=FALSE, fig.height=10, fig.width=10--------------------------------------------------------
+## ---- warning=FALSE, message=FALSE, fig.height=10, fig.width=10----
 custom_plotter <- function(name) {
   
   p <- plot_top_weights(model.trained,

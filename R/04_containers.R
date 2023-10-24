@@ -1,59 +1,59 @@
-## ----setup, echo=FALSE, results="asis"---------------------------------------------------------------------------------
+## ----setup, echo=FALSE, results="asis"-----------------
 library(rebook)
 chapterPreamble()
 
 
-## ----echo=FALSE--------------------------------------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------
 knitr::include_graphics("general/figures/FigureOverviewV2_mod.png")
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 library(mia)
 data("hitchip1006", package = "miaTime")
 tse <- hitchip1006
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 assays(tse)
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 assay(tse, "counts")[1:5,1:7]
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 assays(tse)
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 assay(tse, "relabundance")[1:5,1:7]
 
 
-## ----coldata-----------------------------------------------------------------------------------------------------------
+## ----coldata-------------------------------------------
 colData(tse)
 
 
-## ----rowdata-----------------------------------------------------------------------------------------------------------
+## ----rowdata-------------------------------------------
 rowData(tse)
 
 
-## ----rowtree-----------------------------------------------------------------------------------------------------------
+## ----rowtree-------------------------------------------
 rowTree(tse)
 
 
-## ----rowlinks----------------------------------------------------------------------------------------------------------
+## ----rowlinks------------------------------------------
 rowLinks(tse)
 
 
-## ----altexp_agglomerate------------------------------------------------------------------------------------------------
+## ----altexp_agglomerate--------------------------------
 tse_phylum <- mergeFeaturesByRank(tse, "Phylum", na.rm=TRUE)
 # Both have the same number of columns (samples)
 dim(tse)
 dim(tse_phylum)
 
 
-## ----altexp_agglomerate2-----------------------------------------------------------------------------------------------
+## ----altexp_agglomerate2-------------------------------
 # Add the new data object to the original data object as an alternative experiment with the name "Phylum"
 altExp(tse, "Phylum") <- tse_phylum
 
@@ -61,31 +61,31 @@ altExp(tse, "Phylum") <- tse_phylum
 altExpNames(tse)
 
 
-## ----altexp_agglomerate3-----------------------------------------------------------------------------------------------
+## ----altexp_agglomerate3-------------------------------
 tse[,1:10]
 dim(altExp(tse[,1:10],"Phylum"))
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 #TODO: Find the right dataset to explain a non 1:1 sample relationship
 
 
-## ---- message=FALSE, eval=FALSE----------------------------------------------------------------------------------------
+## ---- message=FALSE, eval=FALSE------------------------
 ## library(mia)
 ## data(package="mia")
 
 
-## ---- message=FALSE----------------------------------------------------------------------------------------------------
+## ---- message=FALSE------------------------------------
 data("GlobalPatterns", package="mia")
 GlobalPatterns
 
 
-## ---- message=FALSE----------------------------------------------------------------------------------------------------
+## ---- message=FALSE------------------------------------
 library(microbiomeDataSets)
 availableDataSets()
 
 
-## ----eval=FALSE, message=FALSE-----------------------------------------------------------------------------------------
+## ----eval=FALSE, message=FALSE-------------------------
 ## # mae <- HintikkaXOData()
 ## # Since HintikkaXOData is now added to mia, we can load it directly from there
 ## # We suggest to check other datasets from microbiomeDataSets
@@ -93,30 +93,30 @@ availableDataSets()
 ## mae <- HintikkaXOData
 
 
-## ---- message=FALSE, eval=FALSE----------------------------------------------------------------------------------------
+## ---- message=FALSE, eval=FALSE------------------------
 ## library(curatedMetagenomicData)
 ## tse <- curatedMetagenomicData("Vatanen*", dryrun = FALSE, counts = TRUE)
 
 
-## ---- message=FALSE, eval=FALSE----------------------------------------------------------------------------------------
+## ---- message=FALSE, eval=FALSE------------------------
 ## library(MicroBioMap)
 ## cpd <- getCompendium()
 
 
-## ----dada2_1, include=FALSE--------------------------------------------------------------------------------------------
+## ----dada2_1, include=FALSE----------------------------
 # Load objects
 seqtab.nochim <- readRDS("data/dada2_seqtab.nochim")
 taxa <- readRDS("data/dada2_taxa")
 
 
-## ----dada2_2-----------------------------------------------------------------------------------------------------------
+## ----dada2_2-------------------------------------------
 library(mia)
 library(ggplot2)
 library(BiocManager)
 library(Biostrings)
 
 
-## ----dada2_3-----------------------------------------------------------------------------------------------------------
+## ----dada2_3-------------------------------------------
 samples.out <- rownames(seqtab.nochim)
 subject <- sapply(strsplit(samples.out, "D"), `[`, 1)
 gender <- substr(subject,1,1)
@@ -128,7 +128,7 @@ samdf$When[samdf$Day>100] <- "Late"
 rownames(samdf) <- samples.out
 
 
-## ----dada2_4-----------------------------------------------------------------------------------------------------------
+## ----dada2_4-------------------------------------------
 # Create a list that contains assays
 counts <- t(seqtab.nochim)
 counts <- as.matrix(counts)
@@ -148,7 +148,7 @@ tse <- TreeSummarizedExperiment(assays = assays,
 tse <- tse[ , colnames(tse) != "mock"]
 
 
-## ----dada2_5-----------------------------------------------------------------------------------------------------------
+## ----dada2_5-------------------------------------------
 # Convert sequences into right format
 dna <- Biostrings::DNAStringSet( rownames(tse) )
 # Add sequences into referenceSeq slot
@@ -158,7 +158,7 @@ rownames(tse) <- paste0("ASV", seq( nrow(tse) ))
 tse
 
 
-## ----importingcsv1, message=FALSE--------------------------------------------------------------------------------------
+## ----importingcsv1, message=FALSE----------------------
 count_file  <- "data/assay_taxa.csv"
 tax_file    <- "data/rowdata_taxa.csv"
 sample_file <- "data/coldata.csv"
@@ -169,7 +169,7 @@ tax     <- read.csv(tax_file, row.names=1)     # Taxonomy table (to rowData)
 samples <- read.csv(sample_file, row.names=1)  # Sample data (to colData)
 
 
-## ----importingcsv2-----------------------------------------------------------------------------------------------------
+## ----importingcsv2-------------------------------------
 # Match rows and columns
 counts <- counts[rownames(tax), rownames(samples)]
 
@@ -177,7 +177,7 @@ counts <- counts[rownames(tax), rownames(samples)]
 counts <- as.matrix(counts)
 
 
-## ----demodata, message=FALSE-------------------------------------------------------------------------------------------
+## ----demodata, message=FALSE---------------------------
 # coldata rownames match assay colnames
 all(rownames(samples) == colnames(counts)) # our dataset
 class(samples) # should be data.frame or DataFrame
@@ -190,7 +190,7 @@ class(tax) # should be data.frame or DataFrame
 class(counts) # should be a numeric matrix
 
 
-## ----importingcsv3-----------------------------------------------------------------------------------------------------
+## ----importingcsv3-------------------------------------
 # Create a TreeSE
 tse_taxa <- TreeSummarizedExperiment(assays =  SimpleList(counts = counts),
                                      colData = DataFrame(samples),
@@ -199,7 +199,7 @@ tse_taxa <- TreeSummarizedExperiment(assays =  SimpleList(counts = counts),
 tse_taxa
 
 
-## ----importingcsv4, message=FALSE--------------------------------------------------------------------------------------
+## ----importingcsv4, message=FALSE----------------------
 count_file <- "data/assay_metabolites.csv"
 sample_file <- "data/coldata.csv"
 
@@ -214,7 +214,7 @@ tse_metabolite <- TreeSummarizedExperiment(assays = SimpleList(concs = as.matrix
 tse_metabolite
 
 
-## ----importingcsv5-----------------------------------------------------------------------------------------------------
+## ----importingcsv5-------------------------------------
 # Create an ExperimentList that includes experiments
 experiments <- ExperimentList(microbiome = tse_taxa, 
                               metabolite = tse_metabolite)
@@ -225,13 +225,13 @@ mae <- MultiAssayExperiment(experiments = experiments)
 mae
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 biom_file_path <- "data/Aggregated_humanization2.biom"
 sample_meta_file_path <- "data/Mapping_file_ADHD_aggregated.csv"
 tree_file_path <- "data/Data_humanization_phylo_aggregation.tre"
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 library(mia)
 
 # read biom and convert it to TreeSE
@@ -243,15 +243,15 @@ tse <- loadFromBiom(biom_file_path,
 tse
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 assay(tse, "counts")[1:3, 1:3]
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 head(rowData(tse))
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 # Genus level has additional '\"', so let's delete that also
 rowdata_modified <- BiocParallel::bplapply(rowData(tse), 
                                            FUN = stringr::str_remove, 
@@ -265,11 +265,11 @@ rowData(tse) <- DataFrame(rowdata_modified)
 head(rowData(tse))
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 head(colData(tse))
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 # CSV file with colnames in the first row and rownames in the first column
 sample_meta <- read.csv(sample_meta_file_path,
                         sep = ",", row.names = 1)
@@ -279,11 +279,11 @@ sample_meta <- read.csv(sample_meta_file_path,
 colData(tse) <- DataFrame(sample_meta)
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 head(colData(tse))
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 # Reads the tree file
 tree <- ape::read.tree(tree_file_path)
 
@@ -294,11 +294,11 @@ rowTree(tse) <- tree
 tse
 
 
-## ---- eval=FALSE-------------------------------------------------------------------------------------------------------
+## ---- eval=FALSE---------------------------------------
 ## head(rowTree(tse))
 
 
-## ---- message=FALSE----------------------------------------------------------------------------------------------------
+## ---- message=FALSE------------------------------------
 library(mia)
 
 # phyloseq example data
@@ -307,13 +307,13 @@ GlobalPatterns_phyloseq <- GlobalPatterns
 GlobalPatterns_phyloseq
 
 
-## ---- message=FALSE----------------------------------------------------------------------------------------------------
+## ---- message=FALSE------------------------------------
 # convert phyloseq to TSE
 GlobalPatterns_TSE <- makeTreeSummarizedExperimentFromPhyloseq(GlobalPatterns_phyloseq) 
 GlobalPatterns_TSE
 
 
-## ---- message=FALSE----------------------------------------------------------------------------------------------------
+## ---- message=FALSE------------------------------------
 # convert TSE to phyloseq
 GlobalPatterns_phyloseq2 <- makePhyloseqFromTreeSummarizedExperiment(GlobalPatterns_TSE) 
 GlobalPatterns_phyloseq2

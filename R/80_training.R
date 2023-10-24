@@ -1,4 +1,4 @@
-## ----setup, echo=FALSE, results="asis"---------------------------------------------------------------------------------
+## ----setup, echo=FALSE, results="asis"-----------------
 library(rebook)
 chapterPreamble()
 

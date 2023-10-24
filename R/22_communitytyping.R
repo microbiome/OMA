@@ -1,15 +1,15 @@
-## ----setup, echo=FALSE, results="asis"---------------------------------------------------------------------------------
+## ----setup, echo=FALSE, results="asis"-----------------
 library(rebook)
 chapterPreamble()
 
 
-## ----load-pkg-data-----------------------------------------------------------------------------------------------------
+## ----load-pkg-data-------------------------------------
 library(mia)
 data("GlobalPatterns", package="mia")
 tse <- GlobalPatterns
 
 
-## ----dmm---------------------------------------------------------------------------------------------------------------
+## ----dmm-----------------------------------------------
 # Runs model and calculates the most likely number of clusters from 1 to 7.
 # Since this is a large dataset it takes long computational time.
 # For this reason we use only a subset of the data; agglomerated by Phylum as a rank.
@@ -18,48 +18,48 @@ tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 # It is stored in metadata
 tse_dmn
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 names(metadata(tse_dmn))
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 getDMN(tse_dmn)
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 library(miaViz)
 plotDMNFit(tse_dmn, type = "laplace")
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 getBestDMNFit(tse_dmn, type = "laplace")
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 dmn_group <- calculateDMNgroup(tse_dmn, variable = "SampleType",  assay.type = "counts",
                                k = 2, seed=.Machine$integer.max)
 
 dmn_group
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 prob <- DirichletMultinomial::mixture(getBestDMNFit(tse_dmn))
 # Add column names
 colnames(prob) <- c("comp1", "comp2")
@@ -72,7 +72,7 @@ vec <- colnames(prob)[max.col(prob,ties.method = "first")]
 colData(tse)$dmm_component <- vec 
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 # Does clr transformation. Pseudocount is added, because data contains zeros.
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
 tse <- transformAssay(tse, assay.type = "pseudo", method = "relabundance")
@@ -84,7 +84,7 @@ tse <- runMDS(tse, assay.type = "clr", method = "euclidean")
 
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 # Create a plot
 euclidean_dmm_plot <- plotReducedDim(tse, "MDS", colour_by = "dmm_component") +
     labs(x = "Coordinate 1",
@@ -95,11 +95,11 @@ euclidean_dmm_plot <- plotReducedDim(tse, "MDS", colour_by = "dmm_component") +
 euclidean_dmm_plot
 
 
-## ----------------------------------------------------------------------------------------------------------------------
+## ------------------------------------------------------
 library(bluster)
 
 
-## ---- message=FALSE, warning=FALSE-------------------------------------------------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 library(bluster)
 library(patchwork) # For arranging several plots as a grid
 library(scater)
@@ -129,7 +129,7 @@ plots <- lapply(k,ClustAndPlot)
 (plots[[1]] + plots[[2]]) / (plots[[3]] + plots[[4]])
 
 
-## ---- message=FALSE, warning=FALSE-------------------------------------------------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 
 ClustDiagPlot <- function(x) {
   # Getting the clustering results

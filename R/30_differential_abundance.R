@@ -1,9 +1,9 @@
-## ----setup, echo=FALSE, results="asis"---------------------------------------------------------------------------------
+## ----setup, echo=FALSE, results="asis"-----------------
 library(rebook)
 chapterPreamble()
 
 
-## ----import-daa-data---------------------------------------------------------------------------------------------------
+## ----import-daa-data-----------------------------------
 library(mia)
 library(tidyverse)
 
@@ -16,7 +16,7 @@ table(tse$patient_status, tse$cohort) %>%
   knitr::kable()
 
 
-## ----prep-daa-data-----------------------------------------------------------------------------------------------------
+## ----prep-daa-data-------------------------------------
 # Agglomerate by genus and subset by prevalence
 tse <- subsetByPrevalentFeatures(tse,
                              rank = "Genus",
@@ -28,7 +28,7 @@ tse <- transformAssay(tse,
                       method = "relabundance")
 
 
-## ----run-aldex2--------------------------------------------------------------------------------------------------------
+## ----run-aldex2----------------------------------------
 # Load package
 library(ALDEx2)
 
@@ -39,13 +39,13 @@ set.seed(123)
 x <- aldex.clr(assay(tse), tse$patient_status)     
 
 
-## ----aldex2-ttest------------------------------------------------------------------------------------------------------
+## ----aldex2-ttest--------------------------------------
 # calculates expected values of the Welch's t-test and Wilcoxon rank
 # test on the data returned by aldex.clr
 x_tt <- aldex.ttest(x, paired.test = FALSE, verbose = FALSE)
 
 
-## ----aldex2-effect-----------------------------------------------------------------------------------------------------
+## ----aldex2-effect-------------------------------------
 # Determines the median clr abundance of the feature in all samples and in
 # groups, the median difference between the two groups, the median variation
 # within each group and the effect size, which is the median of the ratio
@@ -56,7 +56,7 @@ x_effect <- aldex.effect(x, CI = TRUE, verbose = FALSE)
 aldex_out <- data.frame(x_tt, x_effect)
 
 
-## ----plot-aldex2-------------------------------------------------------------------------------------------------------
+## ----plot-aldex2---------------------------------------
 par(mfrow = c(1, 2))
 
 aldex.plot(aldex_out,
@@ -74,7 +74,7 @@ aldex.plot(aldex_out,
            cutoff = 0.05)
 
 
-## ----aldex2-res--------------------------------------------------------------------------------------------------------
+## ----aldex2-res----------------------------------------
 aldex_out %>%
   rownames_to_column(var = "Genus") %>%
   # here we choose the wilcoxon output rather than t-test output
@@ -83,7 +83,7 @@ aldex_out %>%
   knitr::kable()
 
 
-## ----run-ancombc, warning=FALSE----------------------------------------------------------------------------------------
+## ----run-ancombc, warning=FALSE------------------------
 # Load package
 library(ANCOMBC)
 
@@ -100,7 +100,7 @@ ancombc2_out <- ancombc2(data = tse,
                          global = TRUE)
 
 
-## ----ancombc-res-------------------------------------------------------------------------------------------------------
+## ----ancombc-res---------------------------------------
 # store the FDR adjusted results 
 ancombc2_out$res %>%
   dplyr::select(taxon, lfc_patient_statusControl, q_patient_statusControl) %>%
@@ -110,7 +110,7 @@ ancombc2_out$res %>%
   knitr::kable()
 
 
-## ----run-maaslin2, warning=FALSE, results="hide"-----------------------------------------------------------------------
+## ----run-maaslin2, warning=FALSE, results="hide"-------
 # Load package
 library(Maaslin2)
 
@@ -133,13 +133,13 @@ maaslin2_out <- Maaslin2(input_data = as.data.frame(t(assay(tse))),
                          min_prevalence = 0)
 
 
-## ---- maaslin2-res-----------------------------------------------------------------------------------------------------
+## ---- maaslin2-res-------------------------------------
 maaslin2_out$results %>%
   filter(qval < 0.05) %>%
   knitr::kable()
 
 
-## ----run-linda---------------------------------------------------------------------------------------------------------
+## ----run-linda-----------------------------------------
 # Load package
 library(MicrobiomeStat)
 
@@ -152,7 +152,7 @@ linda_out <- linda(feature.dat = as.data.frame(assay(tse)),
                    mean.abund.filter = 0)
 
 
-## ----linda-res---------------------------------------------------------------------------------------------------------
+## ----linda-res-----------------------------------------
 # List genera for which H0 could be rejected:
 linda_out$output$patient_statusControl %>%
   filter(reject) %>%
@@ -161,7 +161,7 @@ linda_out$output$patient_statusControl %>%
   knitr::kable()
 
 
-## ----run-zicoseq-------------------------------------------------------------------------------------------------------
+## ----run-zicoseq---------------------------------------
 # Load package
 library(GUniFrac)
 
@@ -177,7 +177,7 @@ zicoseq_out <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
                        perm.no = 999)
 
 
-## ----zicoseq-res-------------------------------------------------------------------------------------------------------
+## ----zicoseq-res---------------------------------------
 zicoseq_res <- cbind.data.frame(p.raw = zicoseq_out$p.raw,
                                 p.adj.fdr = zicoseq_out$p.adj.fdr)
 
@@ -187,18 +187,18 @@ zicoseq_res %>%
   knitr::kable()
 
 
-## ----plot-zicoseq------------------------------------------------------------------------------------------------------
+## ----plot-zicoseq--------------------------------------
 ## x-axis is the effect size: R2 * direction of coefficient
 ZicoSeq.plot(ZicoSeq.obj = zicoseq_out,
              pvalue.type = 'p.adj.fdr')
 
 
-## ----daa-data-libsize--------------------------------------------------------------------------------------------------
+## ----daa-data-libsize----------------------------------
 # Compute and store library size in colData
 colData(tse)$library_size <- colSums(assay(tse, "counts"))
 
 
-## ----run-adj-ancombc, warning=FALSE------------------------------------------------------------------------------------
+## ----run-adj-ancombc, warning=FALSE--------------------
 # perform the analysis 
 ancombc2_out <- ancombc2(tse,
                          assay.type = "counts",
@@ -213,7 +213,7 @@ ancombc2_out <- ancombc2(tse,
                          global = TRUE)
 
 
-## ----adj-ancombc-res---------------------------------------------------------------------------------------------------
+## ----adj-ancombc-res-----------------------------------
 ancombc2_out$res %>%
   dplyr::select(starts_with(c("taxon", "lfc", "q"))) %>%
   arrange(q_patient_statusControl) %>%
@@ -221,7 +221,7 @@ ancombc2_out$res %>%
   knitr::kable()
 
 
-## ----run-adj-linda-----------------------------------------------------------------------------------------------------
+## ----run-adj-linda-------------------------------------
 linda_out <- linda(as.data.frame(assay(tse, "counts")),
                    as.data.frame(colData(tse)),
                    formula = "~ patient_status + cohort + library_size",
@@ -230,7 +230,7 @@ linda_out <- linda(as.data.frame(assay(tse, "counts")),
                    mean.abund.filter = 0)
 
 
-## ----adj-linda-res-----------------------------------------------------------------------------------------------------
+## ----adj-linda-res-------------------------------------
 # Select results for the patient status
 linda_res <- linda_out$output$patient_statusControl
 
@@ -242,7 +242,7 @@ linda_res %>%
   knitr::kable()
 
 
-## ----run-adj-zicoseq---------------------------------------------------------------------------------------------------
+## ----run-adj-zicoseq-----------------------------------
 set.seed(123)
 zicoseq_out <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
                        meta.dat = as.data.frame(colData(tse)),
@@ -256,7 +256,7 @@ zicoseq_out <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
                        perm.no = 999)
 
 
-## ----adj-zicoseq-res---------------------------------------------------------------------------------------------------
+## ----adj-zicoseq-res-----------------------------------
 zicoseq_res <- cbind.data.frame(p.raw = zicoseq_out$p.raw,
                                 p.adj.fdr = zicoseq_out$p.adj.fdr)
 

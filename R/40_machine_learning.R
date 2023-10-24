@@ -1,9 +1,9 @@
-## ----setup, echo=FALSE, results="asis"---------------------------------------------------------------------------------
+## ----setup, echo=FALSE, results="asis"-----------------
 library(rebook)
 chapterPreamble()
 
 
-## ----install-pkg, include = FALSE--------------------------------------------------------------------------------------
+## ----install-pkg, include = FALSE----------------------
 if(!require(mikropml)){
   install.packages("mikropml")
 }
@@ -13,7 +13,7 @@ if(!require(MLeval)){
 }
 
 
-## ----superML1----------------------------------------------------------------------------------------------------------
+## ----superML1------------------------------------------
 library(mia)
 
 # Load experimental data
@@ -21,7 +21,7 @@ data(peerj13075, package="mia")
 tse <- peerj13075
 
 
-## ----super2------------------------------------------------------------------------------------------------------------
+## ----super2--------------------------------------------
 # Agglomerate data
 tse <- mergeFeaturesByRank(tse, rank = "order")
 
@@ -45,7 +45,7 @@ df$diet <- labels
 df[5, 5]
 
 
-## ----super3------------------------------------------------------------------------------------------------------------
+## ----super3--------------------------------------------
 library(mikropml)
 
 # Run random forest 
@@ -57,7 +57,7 @@ confusionMatrix(data = results$trained_model$finalModel$predicted,
                 reference = results$trained_model$finalModel$y)
 
 
-## ----super4------------------------------------------------------------------------------------------------------------
+## ----super4--------------------------------------------
 # Set seed for reproducibility
 set.seed(6358)
 
@@ -90,7 +90,7 @@ model <- train(x = assay,
 
 
 
-## ----super5------------------------------------------------------------------------------------------------------------
+## ----super5--------------------------------------------
 library(MLeval)
 
 # Calculate different evaluation metrics
