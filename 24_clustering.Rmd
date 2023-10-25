@@ -13,7 +13,7 @@ tse <- enterotype
 
 Clustering techniques are unsupervised machine learning that aims to find groups, called clusters, that share a pattern in the data. In the microbiome context, clustering techniques are included in microbiome community typing methods. For example, clustering allow samples to be distinguished from each other based on their microbiome community composition. There are multiple clustering algorithms available.
 
-The data can be clustered either based on features or samples. Hence, depending on the analysis goal the data might require transformation. The examples below are focused on sample clustering. To learn about feature clustering, check out chapter 6.3.
+The data can be clustered either based on features or samples. Hence, depending on the analysis goal the data might require transformation. The examples below are focused on sample clustering. To learn about feature clustering, check out chapter \@ref(taxa-clustering).
 
 ## Custom tools
 
@@ -232,8 +232,6 @@ More detailed information about the clusters can be accessed in the metadata. Th
 
 ```{r dmm7}
 head(metadata(tse_dmm)$DMM$prob, 10) 
-# Can be accessed from in best model infromation as well using:
-# metadata(tse_dmm)$DMM$dmm[2][[1]]@group
 ```
 
 
@@ -243,7 +241,7 @@ Once the optimal model have been confirmed, we can find out which samples are gr
 library(dplyr)
 
 clusters <- round(metadata(tse_dmm)$DMM$prob, 1)
-clusters <- as.data.frame(cbind(clusters, levels(colData(tse_dmm)$SampleType)[colData(tse_dmm)$SampleType])) # add sample type information
+clusters <- as.data.frame(cbind(clusters, levels(tse_dmm$SampleType)[tse_dmm$SampleType])) # add sample type information
 colnames(clusters) <- c("Group1", "Group2", "SampleType")
 
 clusters %>%
@@ -266,19 +264,20 @@ for (i in 1:2) {
   drivers <- drivers[order(drivers[[i]], decreasing = TRUE),]
   p <- ggplot(head(drivers, 10), aes(x = reorder(head(phyla, 10), + head(drivers[[i]], 10)), y = head(drivers[[i]], 10))) +
           geom_bar(stat = "identity", fill = "deeppink4", alpha = 0.5) +
-          coord_flip() + labs(title = paste("Top phyla in a group", i)) +
-          theme_light(base_size = 15) + xlab("") + ylab("") + ylim(0, 7)
+          coord_flip() + labs(title = paste("Top phyla in group", i)) +
+          theme_light(base_size = 15) + labs(x="", y="") + scale_y_continuous(limits=c(0,7))
+
   print(p)
 }
 ```
 
 
-We use `calculateDMNgroup` function to have an overview of the best model. The function groups samples by sample type and returns DMNGroup object that contains a summary.
+We use `calculateDMNgroup` function to have an overview of the best model. The function groups samples by `SampleType` column from colData and returns DMNGroup object that contains a summary.
 
 ```{r dmm_group}
 dmm_group <- calculateDMNgroup(tse_dmm, variable = "SampleType", 
                                assay.type = "counts", k = 2, 
-                               seed = .Machine$integer.max)
+                               seed = 123)
 
 dmm_group
 ```
@@ -291,10 +290,12 @@ DirichletMultinomial::mixturewt(bestFit)
 
 ### PCoA with DMM clusters
 
-In this section we show how to calculate principal coordinates for clr transformed abundance data. We use Aitchison distance as a distance metrics that calculates Euclidean distances for clr transformed compositions. In the visualization section, the samples are coloured based on their DMM clusters to demonstrate the distances between samples included in each DMM cluster.
+In this section we show how to calculate principal coordinates for clr transformed abundance data. To calculate PCoA, we use Aitchison distance as a distance metrics that calculates Euclidean distances for clr transformed compositions. 
+
+In the visualization section, we project the sample distances on two dimensional space of first two principal coordinates. We colour the samples based on their DMM clusters. The visualization demonstrates that the DMM clusters can be distinguished on a PCoA plot, although the clusters are not coherent. This means that two-dimensional representation of the data created by PCoA preserves similar information that drives the DMM cluster division.
 
 ```{r dmm11}
-# pseudocount is added, because data contains zeros
+# add pseudocount, because data contains zeros
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
 tse <- transformAssay(tse, assay.type = "pseudo", method = "relabundance")
 
