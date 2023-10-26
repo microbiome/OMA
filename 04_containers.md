@@ -1033,14 +1033,14 @@ head(rowData(tse))
 
 ```
 ## DataFrame with 6 rows and 6 columns
-##            taxonomy1          Phylum            Class              Order
-##          <character>     <character>      <character>        <character>
-## 1726470    "Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
-## 1726471    "Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
-## 17264731   "Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
-## 17264726   "Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
-## 1726472    "Bacteria Verrucomicrobia Verrucomicrobiae Verrucomicrobiales
-## 17264724   "Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+##             taxonomy1          Phylum            Class              Order
+##           <character>     <character>      <character>        <character>
+## 1726470  "k__Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726471  "k__Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 17264731 "k__Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 17264726 "k__Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726472  "k__Bacteria Verrucomicrobia Verrucomicrobiae Verrucomicrobiales
+## 17264724 "k__Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
 ##                       Family            Genus
 ##                  <character>      <character>
 ## 1726470       Bacteroidaceae     Bacteroides"
@@ -1072,12 +1072,12 @@ head(rowData(tse))
 ## DataFrame with 6 rows and 6 columns
 ##            taxonomy1          Phylum            Class              Order
 ##          <character>     <character>      <character>        <character>
-## 1726470     Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
-## 1726471     Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
-## 17264731    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
-## 17264726    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
-## 1726472     Bacteria Verrucomicrobia Verrucomicrobiae Verrucomicrobiales
-## 17264724    Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726470  k__Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726471  k__Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 17264731 k__Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 17264726 k__Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
+## 1726472  k__Bacteria Verrucomicrobia Verrucomicrobiae Verrucomicrobiales
+## 17264724 k__Bacteria   Bacteroidetes      Bacteroidia      Bacteroidales
 ##                       Family           Genus
 ##                  <character>     <character>
 ## 1726470       Bacteroidaceae     Bacteroides
