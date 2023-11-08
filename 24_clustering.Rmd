@@ -5,59 +5,53 @@ library(rebook)
 chapterPreamble()
 ```
 
-```{r load-pkg-data1}
-library(mia)
-data("enterotype", package = "mia")
-tse <- enterotype
-```
+Clustering techniques are unsupervised machine learning that aims to find groups, called clusters, that share a pattern in the data. In the microbiome context, clustering techniques are included in microbiome community typing methods. For example, clustering allow samples to be distinguished from each other based on their microbiome community composition. There are multiple clustering algorithms available.
 
-Clustering is an unsupervised machine learning technique. The idea of
-it is to find clusters in the data. A cluster is a group of
-features/samples that share a pattern.  For example, with clustering, we
-can find group of samples that share similar community
-composition. There are multiple clustering algorithms available.
-
-As mentioned before, clustering can be done either features or samples.
-We will focus on the latter here. To learn about feature clustering,
-check out chapter 6.3.
+The data can be clustered either based on features or samples. Hence, depending on the analysis goal the data might require transformation. The examples below are focused on sample clustering. To learn about feature clustering, check out chapter \@ref(taxa-clustering).
 
 ## Custom tools
 
 *bluster* is a Bioconductor package providing tools for clustering data in 
 in the `SummarizedExperiment` container. It offers multiple algorithms such 
-as hierarchical clustering, DBSCAN, K-means, amongst others. The first thing 
-to do when using this package is to load it, and transform the data if 
-necessary, depending on your analysis goals.
+as hierarchical clustering, DBSCAN, and K-means. 
 
 ```{r load_bluster}
 # Load dependencies
 library(bluster)
 library(kableExtra)
+```
+
+In the first examples of microbiome community typing we use `enterotype` data.
+
+```{r load-pkg-data1}
+library(mia)
+data("enterotype", package = "mia")
+tse <- enterotype
 
 # Apply transformation
 tse <- transformAssay(tse, method = "relabundance")
 ```
 
-The main focus here will be how to use mia's `cluster` function to 
-cluster. It has multiple parameters that allow you to shape the result.
-* The main new parameter allows you to choose the algorithm you want to use. 
-In this example, we will use HclustParam which does the hierarchical 
-clustering. This parameter itself has parameters on its own, you can check
-them in the
+The main focus in this example is to show how to use mia's `cluster` function to 
+cluster enterotype data. `cluster` function allows to choose a clustering algorithm and offers multiple parameters to shape the result. 
+
+In this example, HclustParam() parameter is chosen for hierarchical clustering. 
+HclustParam() parameter itself has parameters on its own 
 [HclustParam documentation](https://rdrr.io/github/LTLA/bluster/man/HclustParam-class.html).
-* Another parameter is `MARGIN`, which allows us to choose whether we want to
-cluster the features or samples . Here we will cluster the latter.
-* We will see the other parameters as we go along.
+A parameter is `MARGIN` defines whether to cluster features or samples .
 
 ```{r bluster_sample_hclust1}
 # Simple use of the hierarchical clustering. Here, the default parameters
-# set the cut height to half of the dendrogram height.
-tse <- cluster(tse, assay.type = "relabundance", 
+# Set the cut height to half of the dendrogram height
+
+# Save as an alternative experiment that contains clustering information
+altExp(tse, "hclust") <- cluster(tse, assay.type = "relabundance", 
                MARGIN = "samples", HclustParam())
 
-# Check the result contained in the clusters part of colData
+# The result can be found in 'clusters' column of colData
 
-head(colData(tse)$clusters)
+# The number of samples included in each cluster
+summary(colData(altExp(tse, "hclust"))$clusters)
 ```
 
 Once the clustering on the samples is done, we can also plot the clusters.
@@ -66,53 +60,41 @@ Once the clustering on the samples is done, we can also plot the clusters.
 library(scater)
 
 # Add the MDS dimensions for plotting
-tse <- runMDS(tse, assay.type = "relabundance", 
+altExp(tse, "hclust") <- runMDS(altExp(tse, "hclust"), assay.type = "relabundance", 
               FUN = vegan::vegdist, method = "bray")
 
 # Plot the clusters
-plotReducedDim(tse, "MDS", colour_by = "clusters")
+plotReducedDim(altExp(tse, "hclust"), "MDS", colour_by = "clusters")
 ```
-
-We will now see different common algorithms and how to use them.
 
 ## Hierarchical clustering
 
 The hierarchical clustering algorithm aims to find hierarchy between
 samples/features. There are to approaches: agglomerative ("bottom-up")
-and divisive ("top-down").
-
-In agglomerative approach, each observation is first in a unique cluster.
-The algorithm continues by agglomerating similar clusters. The divisive
-approach starts with one cluster that contains all the observations. 
-Clusters are split recursively to clusters that differ the most. 
-The clustering ends when each cluster contains only one observation. 
-In this algorithm, the similarity of two clusters is based on the distance
+and divisive ("top-down"). In agglomerative approach, each observation is first in a unique cluster. The algorithm continues by agglomerating similar clusters. The divisive approach, instead, starts with one cluster that contains all observations. Clusters are split recursively into clusters that differ the most. The clustering ends when each cluster contains only one observation. In this algorithm, the similarity of two clusters is based on the distance
 between them.
 
 Hierarchical clustering can be visualized with a dendrogram tree. In each
 splitting point, the tree is divided into two clusters leading to the
 hierarchy.
 
-```{r hclust1}
-library(vegan)
-
-# Load experimental data
-tse <- enterotype
-```
-
-Hierarchical clustering requires 2 steps. 
+Hierarchical clustering requires two steps. 
 1. Computation of the dissimilarities with a given distance.  
 2. Clustering based on dissimilarities. 
 
-Additionally, since sequencing data is compositional, we'll apply relative
+Additionally, since sequencing data is compositional, we apply relative
 transformation (as seen in the previous example).
 
-```{r hclust2}
-# Apply transformation
-tse <- transformAssay(tse, method = "relabundance")
+In this example, we want to add information on the clustering. To do so, 
+we use the `full` parameter. We also compute the dissimilarities with the 
+bray distance. Finally, the `clust.col` parameter allows us to choose the name
+of the column in the colData (default name is `clusters`).
 
-# Do the clustering
-tse <- cluster(tse,
+```{r hclust2}
+library(vegan)
+
+# Save another alternative experiment that contains full clustering information
+altExp(tse, "hclust_full") <- cluster(tse,
                assay.type = "relabundance",
                MARGIN = "samples",
                HclustParam(method = "complete",
@@ -122,25 +104,19 @@ tse <- cluster(tse,
                clust.col = "Hclust")
 ```
 
-In this example, we wanted additional information on the clustering. To do so, 
-we used the `full` parameter. We also computed the dissimilarities with the 
-bray distance. Finally, the `clust.col` parameter allows us to choose the name
-of the column in the colData (default name is `clusters`).
-
-Next, we will plot the dendrogram, which is possible since we got the 
+We plot the dendrogram, which is possible since we got the 
 additional information from the clustering.
 
 ```{r hclust3}
 library(dendextend)
 
 # Get hclust data from metadata
-hclust_data <- metadata(tse)$clusters$hclust
+hclust_data <- metadata(altExp(tse, "hclust_full"))$clusters$hclust
 
 # Get the dendrogram object
 dendro <- as.dendrogram(hclust_data)
 
 # Plot dendrogram
-
 dendro %>% set("labels", NULL) %>% plot()
 ```
 
@@ -149,11 +125,11 @@ we have, we can check the colData.
 
 ```{r hclust4}
 # Get the clusters
-head(colData(tse)$Hclust)
+summary(colData(altExp(tse, "hclust_full"))$Hclust)
 ```
 
-We can see that there are 26 clusters, but that probably isn't optimal since the 
-the number of clusters was chosen arbitrarily. To determine the number of 
+We can see that there are 26 clusters, but that probably is not optimal since the 
+the number of clusters has been chosen arbitrarily. To determine the number of 
 clusters, we can use the dendrogram. Usually the tree is split where the branch
 length is the largest. However, as we can see from the dendrogram, clusters are
 not clear. There are algorithms to identify the optimal number of clusters.
@@ -169,7 +145,7 @@ optimal number of clusters.
 
 ```{r hclust5}
 library(NbClust)
-diss <- metadata(tse)$clusters$dist
+diss <- metadata(altExp(tse, "hclust_full"))$clusters$dist
 
 # Apply the silhouette analysis on the distance matrix
 res <- NbClust(diss = diss, distance = NULL, method = "ward.D2",
@@ -198,19 +174,16 @@ plot(dend)
 
 ## Dirichlet Multinomial Mixtures (DMM)
 
-This section focus on DMM analysis. 
+This section focus on [Dirichlet-Multinomial Mixture
+Model](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030126) analysis. It is a probabilistic technique that allows to search for sample patterns that 
+reflect sample similarity in the data. DMM has a property of determining an optimal number of clusters (k) to obtain the best model. 
+The minimum value of Laplace approximation to the negative log model evidence for DMM models as a function of k, determines an optimal k. The optimal k suggests to fit a model with k mixtures of Dirichlet distributions. For the best model, k probabilities for each sample to belong to each cluster are obtained.
 
-One technique that allows to search for groups of samples that are
-similar to each other is the [Dirichlet-Multinomial Mixture
-Model](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030126)
-. In DMM, we first determine the number of clusters (k) that best fit the
-data (model evidence) using Laplace approximation. After fitting the
-model with k clusters, we obtain for each sample k probabilities that
-reflect the probability that a sample belongs to the given cluster.
+In this example, we cluster the data with DMM clustering. Since the data set is large, the 
+algorithm requires a lot of computational capacity. Therefore, we use only a subset 
+of the data that is agglomerated by Phylum as a rank.
 
-Let's cluster the data with DMM clustering. Since the dataset is large, the 
-algorithm will take long computational time. Therefore, we use only a subset 
-of the data; agglomerated by Phylum as a rank.
+In the example of DMM we use `GlobalPatterns` data.
 
 ```{r dmm1}
 # Get the data
@@ -221,97 +194,125 @@ tse <- GlobalPatterns
 tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
 ```
 
-Here we will further our use of `cluster` by renaming the clusters column in 
-the metadata thanks to the `name` parameter.
+In the example below, we calculate model fit using Laplace approximation. The cluster information is added in the metadata with an optional `name`.
 
 ```{r dmm2}
 # Run the model and calculates the most likely number of clusters from 1 to 7
-tse_dmm <- cluster(tse, name = "DMM", DmmParam(k = 1:7, type = "laplace"), 
+
+# Save as an alternative experiment that contains clustering information
+altExp(tse, "dmm") <- cluster(tse, name = "DMM", DmmParam(k = 1:7, type = "laplace"), 
                    MARGIN = "samples", full = TRUE)
 ```
 
 ```{r dmm3}
-# The dmm info is stored in the metadata under the 'DMM' column
-tse_dmm
+# The dmm information is stored in the metadata under the 'DMM' column that includes information about all seven models 
+altExp(tse, "dmm")
 ```
 
-The following operation returns a list of DMM objects for closer investigation.
+The plot below represents the Laplace approximation to the model evidence for each of the k models. We can see that the best number of clusters is two. 
 
 ```{r dmm4}
-head(metadata(tse_dmm)$DMM$dmm,3)
+library(miaViz)
+plotDMNFit(altExp(tse, "dmm"), type = "laplace", name = "DMM")
 ```
 
-We can see the Laplace approximation (model evidence)
-for each model of the k models.
+The best model can be confirmed with the following operation. 
 
 ```{r dmm5}
-BiocManager::install("microbiome/miaViz")
-library(miaViz)
-plotDMNFit(tse_dmm, type = "laplace", name = "DMM")
-```
-
-On the graph, we can see that the best number of clusters is 2. We can confirm
-that with the following operation.
-
-```{r dmm6}
-# Get the model that has the best fit
-bestFit <- metadata(tse_dmm)$DMM$dmm[[metadata(tse_dmm)$DMM$best]]
+# Get the the best model
+bestFit <- metadata(altExp(tse, "dmm"))$DMM$dmm[[metadata(altExp(tse, "dmm"))$DMM$best]]
 bestFit
 ```
+The clusters for the best model are saved in the colData under 'cluster' column.
 
-### PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors
+```{r dmm6}
+head(colData(altExp(tse, "dmm"))$clusters, 10)
+```
+More detailed information about the clusters can be accessed in the metadata. The metadata contains samples-cluster assignment probabilities that tell us the likelihood for each sample to belong to each cluster.
 
-Group samples and return DMNGroup object that contains a summary.
-Patient status is used for grouping.
+```{r dmm7}
+head(metadata(altExp(tse, "dmm"))$DMM$prob, 10) 
+```
+
+
+Once the optimal model have been confirmed, we can find out which samples are grouped with each other. The table below shows one sample of each sample type clustered in either of the groups. We can notice that DMM can distinguish environmental samples into one group, and mock and human samples into another. For clarity, in this example, the probabilities for each sample to belong in each cluster have been rounded. 
+
+```{r dmm8}
+library(dplyr)
+
+clusters <- round(metadata(altExp(tse, "dmm"))$DMM$prob, 1)
+clusters <- as.data.frame(cbind(clusters, levels(altExp(tse, "dmm")$SampleType)[altExp(tse, "dmm")$SampleType])) # add sample type information
+colnames(clusters) <- c("Group1", "Group2", "SampleType")
+
+clusters %>%
+  group_by(SampleType) %>%
+  arrange(Group1) %>%
+  filter(row_number()==1)
+```
+
+We can also plot the driver Phyla in each group. In this case, it reflects the differences between environmental and human samples. 
+
+```{r dmm9, fig.width=8, fig.height=4}
+# Get the estimates on how much each phyla contributes on each cluster
+best_model <- metadata(altExp(tse, "dmm"))$DMM$dmm[2]
+drivers <- as.data.frame(best_model[[1]]@fit$Estimate)
+
+drivers$phyla <- gsub("Phylum:", "", rownames(drivers)) # Clean phylum names
+
+plots <- c()
+for (i in 1:2) {
+  drivers <- drivers[order(drivers[[i]], decreasing = TRUE),]
+  p <- ggplot(head(drivers, 10), aes(x = reorder(head(phyla, 10), + head(drivers[[i]], 10)), y = head(drivers[[i]], 10))) +
+          geom_bar(stat = "identity", fill = "deeppink4", alpha = 0.5) +
+          coord_flip() + labs(title = paste("Top phyla in group", i)) +
+          theme_light(base_size = 15) + labs(x="", y="") + scale_y_continuous(limits=c(0,7))
+
+  print(p)
+}
+```
+
+
+We use `calculateDMNgroup` function to have an overview of the best model. The function groups samples by `SampleType` column from colData and returns DMNGroup object that contains a summary.
 
 ```{r dmm_group}
-dmm_group <- calculateDMNgroup(tse_dmm, variable = "SampleType", 
+dmm_group <- calculateDMNgroup(altExp(tse, "dmm"), variable = "SampleType", 
                                assay.type = "counts", k = 2, 
                                seed = .Machine$integer.max)
 
 dmm_group
 ```
 
-Mixture weights (rough measure of the cluster size).
+Mixture weights can be used for having a rough approximation of the cluster size.
 
-```{r dmm7}
+```{r dmm10}
 DirichletMultinomial::mixturewt(bestFit)
 ```
 
-It's also possible to get the samples-cluster assignment probabilities: how
-probable it is that each sample belongs to each cluster
+### PCoA with DMM clusters
 
-```{r dmm8}
-prob <- metadata(tse_dmm)$DMM$prob
-head(prob)
-```
+In this section we show how to calculate principal coordinates for clr transformed abundance data. To calculate PCoA, we use Aitchison distance as a distance metrics that calculates Euclidean distances for clr transformed compositions. 
 
-We can also know the contribution of each taxa to each component
+In the visualization section, we project the sample distances on two dimensional space of first two principal coordinates. We colour the samples based on their DMM clusters. The visualization demonstrates that the DMM clusters can be distinguished on a PCoA plot, although the clusters are not coherent. This means that two-dimensional representation of the data created by PCoA preserves similar information that drives the DMM cluster division.
 
-```{r dmm9}
-head(DirichletMultinomial::fitted(bestFit))
-```
-
-Finally, to be able to visualize our data and clusters, we start by 
-computing the euclidean PCoA and storing it as a data frame.
-
-```{r dmm10}
-# Do clr transformation. Pseudocount is added, because data contains zeros.
+```{r dmm11}
+# add pseudocount, because data contains zeros
 assay(tse, "pseudo") <- assay(tse, "counts") + 1
 tse <- transformAssay(tse, assay.type = "pseudo", method = "relabundance")
+
+# clr transformation
 tse <- transformAssay(tse, "relabundance", method = "clr")
 
-# Do principal coordinate analysis
+# principal coordinate analysis
 df <- calculateMDS(tse, assay.type = "clr", method = "euclidean")
 
 # Create a data frame from principal coordinates
 euclidean_pcoa_df <- data.frame(pcoa1 = df[, 1], pcoa2 = df[, 2])
 ```
 
-```{r dmm11}
+```{r dmm12}
 # Create a data frame that contains principal coordinates and DMM information
 euclidean_dmm_pcoa_df <- cbind(euclidean_pcoa_df,
-                               dmm_component = colData(tse_dmm)$clusters)
+                               dmm_component = colData(altExp(tse, "dmm"))$clusters)
 
 # Create a plot
 euclidean_dmm_plot <- ggplot(data = euclidean_dmm_pcoa_df,
