@@ -21,20 +21,9 @@ Two approaches for comparing networks between two conditions are considered in t
 - **Differential network analysis**, which analyzes differences in network metrics and network structure. 
 - **Differential association analysis**, which focuses on differences in the strength of individual associations.
 
-While many approaches exist for the detection of **differential correlations**, e.g. [@yu2019new; @mckenzie2016dgca; @siska2017differential], the literature on the more general case of **differential association** detection is scarce. @bhuva2019differential compare various methods in a simulation study, which again includes many differential correlation approaches, but also more general methods such as latent differential graphical models. @gill2010statistical introduce an approach to analyze whether the connectivity of individual nodes is different between two groups using permutation tests, which is applicable to any kind of association. @he2019statistical propose a test to infer the differential network structure for two conditional dependence networks.
+See Section \@ref(netcomp-methods) for further details on these two approaches and the methods used in this chapter.
 
-Performing **differential network analysis** is challenging because network measures do not follow classical statistical distributions. @shojaie2021differential provide an overview of differential network analysis methods, but focus only on changes in edge sets. @lichtblau2017comparative compare differential network analysis methods that incorporate multiple local and global network measures. @jardim2019bionetstat present a tool "BioNetStat" for differential analysis of biological networks, which is able to compare certain network measures between groups. 
-
-Here we use [NetCoMi](https://github.com/stefpeschel/NetCoMi) [@peschel2021netcomi] for network comparison, which includes the following **differential network analysis approaches:**
-
-- **Permutation approach** to test global network measures (e.g., transitivity, connectivity, or average path length) as well as centrality measures for group differences.
-- **Jaccard** index to assess the similarity between sets of most central nodes
-- **Adjusted Rand index** to assess the similarity between clusterings
-- **Graphlet Correlation Distance** (GCM)
-
-See [@peschel2021netcomi] for an explanation of the first three approaches. The GCM was proposed by @yaverouglu2014revealing.
-
-Two methods (Fisher's z-test [@fisher1970statistical] and the Discordant method [@siska2016discordant]) are available for identifying differential correlations, and **permutation tests** for the more general case of identifying **differential associations**. See [@peschel2021netcomi] for details. NetCoMi offers also a function for plotting a differential network. How to install NetCoMi from GitHub is explained in chapter \@ref(network-learning). 
+Here we use [NetCoMi](https://github.com/stefpeschel/NetCoMi) [@peschel2021netcomi] for network comparison, which includes several **differential network analysis approaches** as well as functionality for *differential association analysis**, i.e., generating a differential network. How to install NetCoMi from GitHub is explained in chapter \@ref(network-learning). 
 
 The **PeerJ data set** [@potbhare2022skin] containing skin microbial profiles for 58 subjects is again used in this chapter. The dataset also includes information on the subjects' geographic location, gender, age and diet. Whether the **skin microbiome differs** between people with **different diets** is an interesting question that will be explored in this chapter.
 
@@ -49,24 +38,30 @@ library(mia)
 
 ```{r load_data}
 data("peerj13075", package = "mia")
-tse <- peerj13075
+tse0 <- peerj13075
 ```
 
 ```{r preprocessing}
-# Agglomerate by genus and subset by prevalence
+# Agglomerate to genus level
+tse <- agglomerateByRank(tse0, rank = "genus") 
+
+# Add relative abundances
+tse <- transformAssay(tse, 
+                      assay.type = "counts", 
+                      method = "relabundance",
+                      MARGIN = "samples") 
+
+# Filter by prevalence
 tse <- subsetByPrevalentFeatures(tse,
-                                 rank = "genus",
                                  prevalence = 0.2,
-                                 detection = 0)
+                                 detection = 0,
+                                 assay.type = "relabundance")
+
+# Add log10-transformed abundances
+tse <- transformAssay(tse, method = "log10", pseudocount = 1)
 
 # Add clr-transformed abundances
-tse <- transformAssay(tse, method="clr", pseudocount=1)
-
-# Assign low abundant phyla to a "Other" class
-phyla <- rowData(tse)$phylum
-low_abundant <- names(table(phyla)[table(phyla) <= 3])
-phyla[phyla %in% low_abundant] <- "Other"
-rowData(tse)$phylum <- phyla
+tse <- transformAssay(tse, method = "clr", pseudocount = 1)
 ```
 
 Based on "Diet", the `tse` object is then split into two groups: One with mixed diet subjects, and one with vegetarian subjects. Both subsets have nearly the same sample size and are therefore comparable.
@@ -75,7 +70,6 @@ Based on "Diet", the `tse` object is then split into two groups: One with mixed 
 table(tse$Diet)
 tse_list <- splitOn(tse, f = "Diet", use_names = TRUE, MARGIN = 2)
 ```
-
 
 ## Network learning and analysis
 
@@ -188,20 +182,19 @@ legend(-0.2, -0.8, cex = 1.7, title = "estimated correlation:",
 -   Clusters must share at least two nodes (`sameColThresh` argument) to be colored equally in both networks, which is why the color of some clusters differs between the groups.
 -   The clustering generally differs markedly. In particular, the cluster assignment of many of the nodes in the largest connected component differs between the two groups.
 
-We also generate a network plot using phylum names to color the nodes and clr-transformed abundances for scaling node sizes.
+As in Chapter \@ref(network-learning), we also generate a network plot using phylum names to color the nodes and mclr-transformed abundances to scale node sizes.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
+library(RColorBrewer)
+```
+
+```{r network_plot_diet_phyla, fig.width=17, fig.height=8}
 # Generate vector with phylum names for node coloring
 phyla <- as.factor(rowData(tse)$phylum)
 names(phyla) <- rowData(tse)$genus
-length(levels(phyla))
-```
 
-`r length(levels(phyla))` colors are needed.
-
-```{r network_plot_diet_phyla, fig.width=17, fig.height=8}
-# Color vector
-colvec <- c("cyan",  "red", "blue3", "lawngreen")
+# Create color vector
+colvec <- RColorBrewer::brewer.pal(length(levels(phyla)), "Set3")
 
 p_diet <- plot(spring_netprops_diet,
                sameLayout = TRUE,
@@ -212,6 +205,7 @@ p_diet <- plot(spring_netprops_diet,
                nodeColor = "feature", 
                featVecCol = phyla, 
                colorVec =  colvec,
+               nodeTransp = 20,
                sameColThresh = 2,
                highlightHubs = FALSE,
                cexNodes = 2,
@@ -224,7 +218,7 @@ p_diet <- plot(spring_netprops_diet,
 
 # Add legends
 # Colors used in the legend should be equally transparent as in the plot
-col_transp <- colToTransp(colvec, 60)
+col_transp <- colToTransp(colvec, 20)
 
 par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), mar=c(0, 0, 0, 0), new=TRUE)
 plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
@@ -321,3 +315,21 @@ Edge colors represent the direction of the associations in the two groups. For e
 save(spring_diffnet, spring_net_diet, spring_netcomp_diet, 
      file = "general/network_data/networks_diet.RData")
 ```
+
+
+## Network comparison methods {#netcomp-methods}
+
+While many approaches exist for the detection of **differential correlations**, e.g. [@yu2019new; @mckenzie2016dgca; @siska2017differential], the literature on the more general case of **differential association** detection is scarce. @bhuva2019differential compare various methods in a simulation study, which again includes many differential correlation approaches, but also more general methods such as latent differential graphical models. @gill2010statistical introduce an approach to analyze whether the connectivity of individual nodes is different between two groups using permutation tests, which is applicable to any kind of association. @he2019statistical propose a test to infer the differential network structure for two conditional dependence networks.
+
+Performing **differential network analysis** is challenging because network measures do not follow classical statistical distributions. @shojaie2021differential provide an overview of differential network analysis methods, but focus only on changes in edge sets. @lichtblau2017comparative compare differential network analysis methods that incorporate multiple local and global network measures. @jardim2019bionetstat present a tool "BioNetStat" for differential analysis of biological networks, which is able to compare certain network measures between groups. 
+
+The [NetCoMi](https://github.com/stefpeschel/NetCoMi) package used for network comparison in this chapter includes the following **differential network analysis approaches:**:
+
+- **Permutation approach** to test global network measures (e.g., transitivity, connectivity, or average path length) as well as centrality measures for group differences.
+- **Jaccard** index to assess the similarity between sets of most central nodes
+- **Adjusted Rand index** to assess the similarity between clusterings
+- **Graphlet Correlation Distance** (GCM)
+
+See [@peschel2021netcomi] for an explanation of the first three approaches. The GCM was proposed by @yaverouglu2014revealing.
+
+Two methods (Fisher's z-test [@fisher1970statistical] and the Discordant method [@siska2016discordant]) are available for identifying differential correlations, and **permutation tests** for the more general case of identifying **differential associations**. See [@peschel2021netcomi] for details. NetCoMi offers also a function for plotting a differential network. 
