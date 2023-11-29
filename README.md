@@ -6,7 +6,7 @@
 
 **README from [microbiome/OMA](https://github.com/microbiome/OMA)**
 
-# Orchestrating Microbiome Analysis Book <img src="general/figures/mia_logo.png" align="right" width="120" />
+# Orchestrating Microbiome Analysis Book <img src="images/mia_logo.png" align="right" width="120" />
 
 ## Overview
 
