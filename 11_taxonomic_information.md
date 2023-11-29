@@ -400,10 +400,11 @@ altExp(tse, "Species_byPrevalence")
 
 ```
 ## class: TreeSummarizedExperiment 
-## dim: 92 26 
+## dim: 113 26 
 ## metadata(2): agglomerated_by_rank agglomerated_by_rank
 ## assays(2): counts relabundance
-## rownames(92): pIVWA5 SCA1145 ... Desulfitobacteriumhafniense Other
+## rownames(113): Family:MarinegroupII Order:Actinomycetales ...
+##   Species:Veillonellaparvula Other
 ## rowData names(7): Kingdom Phylum ... Genus Species
 ## colnames(26): CL3 CC1 ... Even2 Even3
 ## colData names(7): X.SampleID Primer ... SampleType Description
@@ -421,18 +422,18 @@ assay(altExp(tse, "Species_byPrevalence"), "relabundance")[88:92, 1:7]
 ```
 
 ```
-##                                   CL3       CC1       SV1   M31Fcsw   M11Fcsw
-## Streptococcusthermophilus   5.787e-06 2.290e-05 1.290e-05 6.032e-04 1.122e-04
-## Mitsuokellamultacida        8.101e-06 7.046e-06 1.147e-05 6.479e-07 9.632e-07
-## Veillonellaparvula          1.736e-05 1.673e-05 1.720e-05 7.645e-05 1.589e-05
-## Desulfitobacteriumhafniense 1.620e-05 1.585e-05 8.602e-06 1.296e-06 9.632e-07
-## Other                       8.622e-03 6.787e-03 4.325e-02 2.763e-02 2.682e-03
-##                               M31Plmr  M11Plmr
-## Streptococcusthermophilus   1.225e-02 0.002478
-## Mitsuokellamultacida        2.782e-06 0.000000
-## Veillonellaparvula          2.075e-02 0.001143
-## Desulfitobacteriumhafniense 0.000e+00 0.000000
-## Other                       7.077e-02 0.070752
+##                           CL3       CC1       SV1   M31Fcsw   M11Fcsw   M31Plmr
+## Genus:Luteolibacter 9.837e-05 8.076e-04 0.0001233 3.239e-06 5.297e-06 4.034e-05
+## Genus:MC18          5.664e-02 2.110e-01 0.0289530 4.471e-05 2.649e-05 1.071e-04
+## Class:Phycisphaerae 6.958e-03 1.816e-02 0.0585985 5.831e-06 4.816e-06 4.729e-05
+## Order:envOPS12      2.315e-05 7.046e-06 0.0000000 1.296e-06 4.816e-07 1.391e-06
+## Order:Clostridiales 1.017e-03 1.629e-04 0.0003857 1.473e-02 2.005e-02 1.647e-03
+##                       M11Plmr
+## Genus:Luteolibacter 1.291e-04
+## Genus:MC18          7.882e-04
+## Class:Phycisphaerae 4.033e-04
+## Order:envOPS12      4.609e-06
+## Order:Clostridiales 1.719e-03
 ```
 
 

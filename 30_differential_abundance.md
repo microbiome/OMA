@@ -280,7 +280,7 @@ aldex_out %>%
 \hline
 Genus & we.eBH & wi.eBH & effect & overlap\\
 \hline
-[Ruminococcus]\_gauvreauii\_group & 0.0664 & 0.0345 & 0.8184 & 0.1142\\
+Genus:[Ruminococcus]\_gauvreauii\_group & 0.073 & 0.0379 & 0.8151 & 0.1357\\
 \hline
 \end{tabular}
 
@@ -362,17 +362,17 @@ ancombc2_out$res %>%
 \hline
 taxon & lfc\_patient\_statusControl & q\_patient\_statusControl\\
 \hline
-Subdoligranulum & 1.909 & 0.0010\\
+Genus:Subdoligranulum & 1.817 & 0.0011\\
 \hline
-Ruminococcus\_1 & 2.915 & 0.0010\\
+Genus:Ruminococcus\_1 & 2.819 & 0.0011\\
 \hline
-[Ruminococcus]\_gauvreauii\_group & 1.520 & 0.0014\\
+Genus:[Ruminococcus]\_gauvreauii\_group & 1.442 & 0.0016\\
 \hline
-[Eubacterium]\_rectale\_group & 1.361 & 0.0050\\
+Genus:[Clostridium]\_innocuum\_group & 1.388 & 0.0053\\
 \hline
-[Clostridium]\_innocuum\_group & 1.455 & 0.0052\\
+Genus:[Eubacterium]\_rectale\_group & 1.259 & 0.0053\\
 \hline
-Dielma & 1.166 & 0.0052\\
+Genus:Coprobacter & -1.185 & 0.0053\\
 \hline
 \end{tabular}
 
@@ -422,13 +422,15 @@ maaslin2_out$results %>%
 \hline
 feature & metadata & value & coef & stderr & pval & name & qval & N & N.not.zero\\
 \hline
-X.Ruminococcus.\_gauvreauii\_group & patient\_status & ADHD & -0.0674 & 0.0133 & 0.0000 & patient\_statusADHD & 0.0015 & 27 & 21\\
+Genus..Ruminococcus.\_gauvreauii\_group & patient\_status & ADHD & -0.0662 & 0.0131 & 0.0000 & patient\_statusADHD & 0.0017 & 27 & 21\\
 \hline
-Faecalibacterium & patient\_status & ADHD & 0.1223 & 0.0372 & 0.0030 & patient\_statusADHD & 0.0448 & 27 & 11\\
+Genus.Faecalibacterium & patient\_status & ADHD & 0.1195 & 0.0363 & 0.0030 & patient\_statusADHD & 0.0391 & 27 & 11\\
 \hline
-X.Clostridium.\_innocuum\_group & patient\_status & ADHD & -0.0692 & 0.0213 & 0.0033 & patient\_statusADHD & 0.0448 & 27 & 25\\
+Genus..Clostridium.\_innocuum\_group & patient\_status & ADHD & -0.0678 & 0.0209 & 0.0033 & patient\_statusADHD & 0.0391 & 27 & 25\\
 \hline
-Catabacter & patient\_status & ADHD & 0.0295 & 0.0092 & 0.0037 & patient\_statusADHD & 0.0448 & 27 & 9\\
+Order.Bacteroidales & patient\_status & ADHD & 0.0447 & 0.0139 & 0.0035 & patient\_statusADHD & 0.0391 & 27 & 6\\
+\hline
+Genus.Catabacter & patient\_status & ADHD & 0.0288 & 0.0090 & 0.0036 & patient\_statusADHD & 0.0391 & 27 & 9\\
 \hline
 \end{tabular}
 
@@ -468,7 +470,7 @@ linda_out <- linda(feature.dat = as.data.frame(assay(tse)),
 
 ```
 ## 0  features are filtered!
-## The filtered data has  27  samples and  49  features will be tested!
+## The filtered data has  27  samples and  54  features will be tested!
 ## Pseudo-count approach is used.
 ## Fit linear models ...
 ## Completed.
@@ -489,11 +491,19 @@ linda_out$output$patient_statusControl %>%
 \hline
 feature & stat & padj\\
 \hline
-Faecalibacterium & -4.250 & 0.0092\\
+Genus:Faecalibacterium & -4.194 & 0.0101\\
 \hline
-[Ruminococcus]\_gauvreauii\_group & 4.110 & 0.0092\\
+Genus:Erysipelatoclostridium & 3.031 & 0.0474\\
 \hline
-Catabacter & -3.379 & 0.0390\\
+Genus:[Ruminococcus]\_gauvreauii\_group & 4.108 & 0.0101\\
+\hline
+Genus:Barnesiella & -3.091 & 0.0474\\
+\hline
+Order:Bacteroidales & -3.606 & 0.0243\\
+\hline
+Genus:Ruminococcaceae\_UCG-014 & -2.993 & 0.0474\\
+\hline
+Genus:Catabacter & -3.387 & 0.0316\\
 \hline
 \end{tabular}
 
@@ -532,7 +542,7 @@ zicoseq_out <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
 ```
 ## For sample size less than 40, posterior sampling will not be used!
 ## 0  features are filtered!
-## The data has  27  samples and  49  features will be tested!
+## The data has  27  samples and  54  features will be tested!
 ## On average,  1  outlier counts will be replaced for each feature!
 ## Finding the references ...
 ## Permutation testing ...
@@ -561,13 +571,15 @@ zicoseq_res %>%
 \hline
   & p.raw & p.adj.fdr\\
 \hline
-[Ruminococcus]\_gauvreauii\_group & 0.001 & 0.005\\
+Genus:[Ruminococcus]\_gauvreauii\_group & 0.001 & 0.0040\\
 \hline
-Faecalibacterium & 0.001 & 0.024\\
+Genus:[Clostridium]\_innocuum\_group & 0.003 & 0.0210\\
 \hline
-[Clostridium]\_innocuum\_group & 0.003 & 0.024\\
+Genus:Faecalibacterium & 0.001 & 0.0230\\
 \hline
-Catabacter & 0.006 & 0.043\\
+Order:Bacteroidales & 0.011 & 0.0358\\
+\hline
+Genus:Catabacter & 0.005 & 0.0366\\
 \hline
 \end{tabular}
 
@@ -679,17 +691,17 @@ ancombc2_out$res %>%
 \hline
 taxon & lfc\_(Intercept) & lfc\_patient\_statusControl & lfc\_cohortCohort\_2 & lfc\_cohortCohort\_3 & lfc\_library\_size & q\_(Intercept) & q\_patient\_statusControl & q\_cohortCohort\_2 & q\_cohortCohort\_3 & q\_library\_size\\
 \hline
-Akkermansia & -0.8599 & 0.2309 & 0.2876 & 0.4635 & 0 & 0 & 0 & 0 & 0 & 0.9147\\
+Genus:Hungatella & -0.2343 & -0.7177 & -0.1473 & -0.0996 & 0e+00 & 0 & 0 & 0 & 0 & 0.0000\\
 \hline
-Hungatella & -0.0695 & -0.3270 & -0.1397 & -0.1151 & 0 & 0 & 0 & 0 & 0 & 0.0593\\
+Genus:Ruminococcaceae\_UCG-013 & -1.0393 & -0.7369 & 0.6178 & -0.0217 & 1e-04 & 0 & 0 & 0 & 0 & 0.0000\\
 \hline
-Ruminococcaceae\_UCG-013 & -0.9344 & -0.3371 & 0.6599 & -0.0231 & 0 & 0 & 0 & 0 & 0 & 0.0050\\
+Family:Lachnospiraceae & -0.9455 & -0.6247 & 0.5917 & 0.5393 & 0e+00 & 0 & 0 & 0 & 0 & 0.0000\\
 \hline
-Bacteroides & -0.3081 & -0.7575 & 0.1482 & 0.7615 & 0 & 0 & 0 & 0 & 0 & 0.9650\\
+Genus:Alistipes & -0.0252 & -0.4359 & -0.4571 & 0.0100 & 0e+00 & 0 & 0 & 0 & 0 & 0.0035\\
 \hline
-Escherichia-Shigella & -1.1600 & -0.5157 & 1.3093 & 0.2340 & 0 & 0 & 0 & 0 & 0 & 0.0397\\
+Genus:Bacteroides & -0.3896 & -1.1519 & 0.0942 & 0.7381 & 0e+00 & 0 & 0 & 0 & 0 & 0.0001\\
 \hline
-[Clostridium]\_innocuum\_group & -0.7590 & 0.7781 & -0.1629 & 0.1688 & 0 & 0 & 0 & 0 & 0 & 0.0593\\
+Genus:Escherichia-Shigella & -1.3544 & -0.9021 & 1.3086 & 0.2621 & 1e-04 & 0 & 0 & 0 & 0 & 0.0000\\
 \hline
 \end{tabular}
 
@@ -710,7 +722,7 @@ linda_out <- linda(as.data.frame(assay(tse, "counts")),
 
 ```
 ## 0  features are filtered!
-## The filtered data has  27  samples and  49  features will be tested!
+## The filtered data has  27  samples and  54  features will be tested!
 ## Imputation approach is used.
 ## Fit linear models ...
 ## Completed.
@@ -739,17 +751,17 @@ linda_res %>%
 \hline
 feature & log2FoldChange & stat & padj\\
 \hline
-Faecalibacterium & -5.921 & -4.521 & 0.0041\\
+Genus:Faecalibacterium & -5.843 & -4.473 & 0.0051\\
 \hline
-Erysipelatoclostridium & 3.743 & 3.010 & 0.0451\\
+Genus:Erysipelatoclostridium & 3.827 & 3.048 & 0.0398\\
 \hline
-[Ruminococcus]\_gauvreauii\_group & 4.240 & 4.534 & 0.0041\\
+Genus:[Ruminococcus]\_gauvreauii\_group & 4.303 & 4.494 & 0.0051\\
 \hline
-Barnesiella & -3.878 & -3.116 & 0.0411\\
+Genus:Barnesiella & -3.802 & -3.067 & 0.0398\\
 \hline
-Ruminococcaceae\_UCG-014 & -3.062 & -3.637 & 0.0193\\
+Order:Bacteroidales & -4.098 & -3.938 & 0.0126\\
 \hline
-Butyricicoccus & -2.357 & -3.127 & 0.0411\\
+Genus:Ruminococcaceae\_UCG-014 & -2.980 & -3.592 & 0.0175\\
 \hline
 \end{tabular}
 
@@ -779,7 +791,7 @@ zicoseq_out <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
 ```
 ## For sample size less than 40, posterior sampling will not be used!
 ## 0  features are filtered!
-## The data has  27  samples and  49  features will be tested!
+## The data has  27  samples and  54  features will be tested!
 ## On average,  1  outlier counts will be replaced for each feature!
 ## Finding the references ...
 ## Permutation testing ...
@@ -810,17 +822,17 @@ zicoseq_res %>%
 \hline
   & p.raw & p.adj.fdr\\
 \hline
-Faecalibacterium & 0.002 & 0.0224\\
+Genus:Faecalibacterium & 0.002 & 0.0167\\
 \hline
-[Clostridium]\_innocuum\_group & 0.003 & 0.0238\\
+Genus:[Clostridium]\_innocuum\_group & 0.003 & 0.0206\\
 \hline
-[Ruminococcus]\_gauvreauii\_group & 0.001 & 0.0005\\
+Genus:[Ruminococcus]\_gauvreauii\_group & 0.001 & 0.0005\\
 \hline
-Ruminococcus\_2 & 0.002 & 0.0300\\
+Order:Bacteroidales & 0.004 & 0.0167\\
 \hline
-Ruminococcaceae\_UCG-014 & 0.004 & 0.0369\\
+Genus:Ruminococcus\_2 & 0.003 & 0.0264\\
 \hline
-Catabacter & 0.003 & 0.0224\\
+Genus:Ruminococcaceae\_UCG-014 & 0.004 & 0.0316\\
 \hline
 \end{tabular}
 
