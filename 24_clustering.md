@@ -321,7 +321,7 @@ bestFit
 ## class: DMN 
 ## k: 2 
 ## samples x taxa: 26 x 67 
-## Laplace: 7680 BIC: 7902 AIC: 7818
+## Laplace: 7673 BIC: 7927 AIC: 7842
 ```
 The clusters for the best model are saved in the colData under 'cluster' column.
 
@@ -332,7 +332,7 @@ head(colData(altExp(tse, "dmm"))$clusters, 10)
 
 ```
 ##     CL3     CC1     SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr F21Plmr M31Tong M11Tong 
-##       1       1       1       1       1       1       1       1       1       1 
+##       1       1       1       2       2       2       2       2       2       2 
 ## Levels: 1 2
 ```
 More detailed information about the clusters can be accessed in the metadata. The metadata contains samples-cluster assignment probabilities that tell us the likelihood for each sample to belong to each cluster.
@@ -343,17 +343,17 @@ head(metadata(altExp(tse, "dmm"))$DMM$prob, 10)
 ```
 
 ```
-##         1          2
-## CL3     1  0.000e+00
-## CC1     1  0.000e+00
-## SV1     1 2.756e-281
-## M31Fcsw 1  0.000e+00
-## M11Fcsw 1 3.589e-299
-## M31Plmr 1  0.000e+00
-## M11Plmr 1 3.672e-218
-## F21Plmr 1 1.663e-283
-## M31Tong 1  0.000e+00
-## M11Tong 1 2.675e-166
+##                 1         2
+## CL3     1.000e+00 5.050e-17
+## CC1     1.000e+00 3.848e-22
+## SV1     1.000e+00 2.034e-12
+## M31Fcsw 7.338e-26 1.000e+00
+## M11Fcsw 1.062e-16 1.000e+00
+## M31Plmr 9.982e-14 1.000e+00
+## M11Plmr 2.191e-06 1.000e+00
+## F21Plmr 2.852e-11 1.000e+00
+## M31Tong 1.303e-08 1.000e+00
+## M11Tong 2.083e-06 1.000e+00
 ```
 
 
@@ -378,15 +378,15 @@ clusters %>%
 ## # Groups:   SampleType [9]
 ##   Group1 Group2 SampleType        
 ##   <chr>  <chr>  <chr>             
-## 1 0      1      Freshwater (creek)
-## 2 1      0      Soil              
-## 3 1      0      Feces             
-## 4 1      0      Skin              
-## 5 1      0      Tongue            
+## 1 0      1      Feces             
+## 2 0      1      Skin              
+## 3 0      1      Tongue            
+## 4 0      1      Mock              
+## 5 1      0      Soil              
 ## 6 1      0      Freshwater        
-## 7 1      0      Ocean             
-## 8 1      0      Sediment (estuary)
-## 9 1      0      Mock
+## 7 1      0      Freshwater (creek)
+## 8 1      0      Ocean             
+## 9 1      0      Sediment (estuary)
 ```
 
 We can also plot the driver Phyla in each group. In this case, it reflects the differences between environmental and human samples. 
@@ -448,9 +448,9 @@ DirichletMultinomial::mixturewt(bestFit)
 ```
 
 ```
-##       pi  theta
-## 1 0.8846  10.76
-## 2 0.1154 349.05
+##       pi theta
+## 1 0.5385 20.60
+## 2 0.4615 15.28
 ```
 
 ### PCoA with DMM clusters
@@ -700,8 +700,8 @@ bc
 ## 
 ## First  4  Cluster sizes:
 ##                    BC 1 BC 2 BC 3 BC 4
-## Number of Rows:      19   20    7    5
-## Number of Columns:   13   11   12    7
+## Number of Rows:      22   21    6    2
+## Number of Columns:   13   10   12    8
 ```
 
 The object includes cluster information. However compared to
@@ -803,14 +803,14 @@ head(bicluster_rows)
 ##                                                                                                                       cluster_4
 ## D_1__Firmicutes_D_2__Bacilli_D_3__Bacillales_D_4__Staphylococcaceae_D_5__Staphylococcus                                   FALSE
 ## D_1__Proteobacteria_D_2__Gammaproteobacteria_D_3__Enterobacteriales_D_4__Enterobacteriaceae_D_5__Klebsiella               FALSE
-## D_1__Firmicutes_D_2__Bacilli_D_3__Lactobacillales_D_4__Streptococcaceae_D_5__Streptococcus                                 TRUE
+## D_1__Firmicutes_D_2__Bacilli_D_3__Lactobacillales_D_4__Streptococcaceae_D_5__Streptococcus                                FALSE
 ## D_1__Proteobacteria_D_2__Gammaproteobacteria_D_3__Enterobacteriales_D_4__Enterobacteriaceae_D_5__Escherichia-Shigella     FALSE
 ## D_1__Firmicutes_D_2__Clostridia_D_3__Clostridiales_D_4__Ruminococcaceae_D_5__Ruminiclostridium 5                          FALSE
 ## D_1__Proteobacteria_D_2__Gammaproteobacteria_D_3__Pseudomonadales_D_4__Pseudomonadaceae_D_5__Pseudomonas                  FALSE
 ##                                                                                                                       cluster_5
 ## D_1__Firmicutes_D_2__Bacilli_D_3__Bacillales_D_4__Staphylococcaceae_D_5__Staphylococcus                                    TRUE
 ## D_1__Proteobacteria_D_2__Gammaproteobacteria_D_3__Enterobacteriales_D_4__Enterobacteriaceae_D_5__Klebsiella                TRUE
-## D_1__Firmicutes_D_2__Bacilli_D_3__Lactobacillales_D_4__Streptococcaceae_D_5__Streptococcus                                FALSE
+## D_1__Firmicutes_D_2__Bacilli_D_3__Lactobacillales_D_4__Streptococcaceae_D_5__Streptococcus                                 TRUE
 ## D_1__Proteobacteria_D_2__Gammaproteobacteria_D_3__Enterobacteriales_D_4__Enterobacteriaceae_D_5__Escherichia-Shigella      TRUE
 ## D_1__Firmicutes_D_2__Clostridia_D_3__Clostridiales_D_4__Ruminococcaceae_D_5__Ruminiclostridium 5                          FALSE
 ## D_1__Proteobacteria_D_2__Gammaproteobacteria_D_3__Pseudomonadales_D_4__Pseudomonadaceae_D_5__Pseudomonas                   TRUE

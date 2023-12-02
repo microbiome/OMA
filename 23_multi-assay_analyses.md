@@ -441,7 +441,7 @@ model.trained <- run_mofa(model.prepared, use_basilisk = TRUE)
 ## 
 ## ELBO before training: -22197.07 
 ## 
-## Iteration 1: time=0.01, ELBO=-4038.83, deltaELBO=18158.238 (81.80467202%), Factors=5
+## Iteration 1: time=0.00, ELBO=-4038.83, deltaELBO=18158.238 (81.80467202%), Factors=5
 ## Iteration 2: time=0.00, Factors=5
 ## Iteration 3: time=0.00, Factors=5
 ## Iteration 4: time=0.00, Factors=5
@@ -521,7 +521,7 @@ model.trained <- run_mofa(model.prepared, use_basilisk = TRUE)
 ## Iteration 78: time=0.00, Factors=5
 ## Iteration 79: time=0.00, Factors=5
 ## Iteration 80: time=0.00, Factors=5
-## Iteration 81: time=0.01, ELBO=991.17, deltaELBO=0.176 (0.00079169%), Factors=5
+## Iteration 81: time=0.00, ELBO=991.17, deltaELBO=0.176 (0.00079169%), Factors=5
 ## Iteration 82: time=0.00, Factors=5
 ## Iteration 83: time=0.00, Factors=5
 ## Iteration 84: time=0.00, Factors=5
@@ -567,7 +567,7 @@ model.trained <- run_mofa(model.prepared, use_basilisk = TRUE)
 ## #######################
 ## 
 ## 
-## Saving model in /tmp/RtmpJxGVqn/mofa_20231129-102852.hdf5...
+## Saving model in /tmp/RtmpbJjycq/mofa_20231202-183457.hdf5...
 ```
 
 The explained variance is visualized with the `plot_variance_explained` function:
