@@ -79,7 +79,7 @@ load("general/network_data/spring_networks.RData")
 
 Three packages used in this chapter are available on GitHub only: `SpiecEasi`, `SPRING`, and `NetCoMi`. We recommend that you install these packages before proceeding.
 
-```{r install_packages}
+```{r install_packages, message=FALSE, warning=FALSE}
 if(!require(SpiecEasi)){
   devtools::install_github("zdk123/SpiecEasi")
 }
@@ -213,27 +213,6 @@ transform_asso <- function(assoMat, thresh = NULL, dissTrans = "signed") {
 spring_graph <- transform_asso(spring_cor)$graph
 ```
 
-The graph object can now be plotted using the [igraph](https://r.igraph.org/) package, which is a state-of-the-art package for network analysis and visualization. Other packages that could be used for network plotting are the [qgraph](https://rdrr.io/cran/qgraph/) package or the [ggnet2](https://briatte.github.io/ggnet/) package. Since we will use igraph for network analysis later on, we are using its plotting function here as well.
-
-We use the Fruchterman-Reingold layout (a force-directed layout) for node placement. By placing strongly connected nodes close together and those with low edge weight far apart, this layout results in an easy-to-read network plot.
-
-The node size is proportional to a taxon's log10-transformed abundance, which we previously added to the `tse` object, averaged across all samples. The values are rescaled to be visually distinguishable.
-
-```{r, message=FALSE, warning=FALSE}
-library(igraph)
-```
-
-```{r nets_sparcc_prop_se, fig.height=5, fig.width=5}
-# Node sizes
-vsize <- (colMeans(t(assay(tse, "log10"))) + 1) * 3
-
-# Fruchterman-Reingold layout from igraph package
-set.seed(13075)
-lay_fr <- layout_with_fr(spring_graph)
-
-plot(spring_graph, layout = lay_fr, vertex.size = vsize, vertex.label = NA, 
-     main = "Conditional dependence graph\n(generated with SPRING)")
-```
 
 ### NetCoMi network {#netcomi-spring}
 
@@ -277,7 +256,36 @@ As before, the adjacency matrix is converted into an `igraph` object. Further st
 netcomi_graph <- SpiecEasi::adj2igraph(abs(netcomi_net$adjaMat1))
 ```
 
-```{r nets_sparcc_se_spring, fig.height=4, fig.width=8}
+```{r, eval=FALSE, echo=FALSE}
+save(spring_est, netcomi_net, file = "general/network_data/spring_networks.RData")
+```
+
+## Network analysis with igraph {#network-analysis}
+
+The computed network is now analyzed using appropriate methods. We will first use the `igraph` package to analyze the `SPRING` network. NetCoMi's `netAnalyze()` function will be used later to analyze the constructed `microNet` object.
+
+### Network plot
+
+To get an overview of the network structure, a first common analysis method is to plot the network. We here use the [igraph](https://r.igraph.org/) package, which is a state-of-the-art package for network analysis and visualization. Other packages that could be used for network plotting are the [qgraph](https://rdrr.io/cran/qgraph/) package or the [ggnet2](https://briatte.github.io/ggnet/) package. Since we will use igraph for network analysis later on, we are using its plotting function here as well.
+
+We use the Fruchterman-Reingold layout (a force-directed layout) for node placement. By placing strongly connected nodes close together and those with low edge weight far apart, this layout results in an easy-to-read network plot.
+
+The node sizes are proportional to a taxon's log10-transformed abundance, which we previously added to the `tse` object, averaged across all samples. The values are rescaled to be visually distinguishable.
+
+Since we created two graph objects, one with SPRING and one with NetCoMi, we plot them side by side. The two plots should be identical.
+
+```{r, message=FALSE, warning=FALSE}
+library(igraph)
+```
+
+```{r plots_spring_netcomi, fig.height=4, fig.width=8}
+# Node sizes
+vsize <- (colMeans(t(assay(tse, "log10"))) + 1) * 3
+
+# Fruchterman-Reingold layout from igraph package
+set.seed(13075)
+lay_fr <- layout_with_fr(spring_graph)
+
 par(mfrow = c(1,2))
 plot(spring_graph, layout = lay_fr, vertex.size = vsize, 
      vertex.label = NA, main = "SPRING network")
@@ -285,54 +293,49 @@ plot(netcomi_graph, layout = lay_fr, vertex.size = vsize,
      vertex.label = NA, main = "NetCoMi network\n(with SPRING associations)")
 ```
 
-The left network constructed directly with the `SPRING()` function and the right network constructed with `NetCoMi` are exactly the same.
+### Centrality measures
 
-```{r, eval=FALSE, echo=FALSE}
-save(spring_est, netcomi_net, file = "general/network_data/spring_networks.RData")
-```
-
-## Network analysis {#network-analysis}
-
-The computed network is now analyzed using appropriate methods. We will first use the `igraph` package to analyze the `SPRING` network. NetCoMi's `netAnalyze()` function will be used later to analyze the constructed `microNet` object.
-
-### Network analysis with igraph
-
-#### Centrality measures
-
-Centrality measures express the importance of nodes within the network. Common measures are the degree, betweenness, closeness, and eigenvector centrality. The `igraph` package provides functions to compute these measures.
+Centrality measures express the importance of nodes within the network. Common measures are the degree, betweenness, closeness, and eigenvector centrality. The `igraph` package provides functions to compute these measures. We wrap a function around the code to reuse it later.
 
 ```{r}
-# We access igraph directly with "::" because there are more packages loaded in 
-# this chapter that contain a degree() function.
-centr_df <- data.frame(Degree = igraph::degree(spring_graph))
-centr_df$Betweenness <- betweenness(spring_graph)
-centr_df$Closeness <- closeness(spring_graph)
-centr_df$Eigenvector <- eigen_centrality(spring_graph)$vector
+get_centr <- function(graph_obj) {
+  # We access igraph directly with "::" because there are more packages loaded in 
+  # this chapter that contain a degree() function.
+  df <- data.frame(Degree = igraph::degree(graph_obj))
+  df$Betweenness <- betweenness(graph_obj)
+  df$Closeness <- closeness(graph_obj, normalized = TRUE)
+  df$Eigenvector <- eigen_centrality(graph_obj)$vector
+  return(df)
+}
 
+centr_df <- get_centr(spring_graph)
 rownames(centr_df) <- rownames(spring_cor)
 head(centr_df, 15)
 ```
 
 The closeness centrality is "NaN" for some genera. These are unconnected nodes, as can be seen by the zero degree and betweenness centrality.
 
-#### Scale node sizes by degree
+### Scale node sizes by centrality
 
 Centrality measures can be visualized in the network plot by scaling the node sizes according to one of these measures. We plot the `Spring` graph using the same layout as before and with the node sizes scaled according to all four centrality measures.
 
 Of the four centrality measures, only the degree has a range suitable to be used as node size. The other centrality measures must be rescaled because their range is either too small or too large. The following scaling is a suggestion that works for this example. The values might be adapted for other data sets.
 
 ```{r netplot_degree}
-vsize_df <- as.matrix(centr_df)
-vsize_df[, "Betweenness"] <- log(vsize_df[, "Betweenness"])
-vsize_df[, "Closeness"] <- log(vsize_df[, "Closeness"] * 1000)
-vsize_df[, "Eigenvector"] <- vsize_df[, "Eigenvector"] * 10
+get_vsizes <- function(centr_df) {
+  df <- as.matrix(centr_df)
+  df[, "Betweenness"] <- log(df[, "Betweenness"])
+  df[, "Closeness"] <- df[, "Closeness"] * 10
+  df[, "Eigenvector"] <- df[, "Eigenvector"] * 10
+  df[is.infinite(df) | is.na(df)] <- 0
+  return(df)
+}
 
-vsize_df[is.infinite(vsize_df) | is.na(vsize_df)] <- 0
-
+vsize_df <- get_vsizes(centr_df )
 head(vsize_df)
 ```
 
-```{r, fig.height=10, fig.width=10}
+```{r plots_centrality, fig.height=10, fig.width=10}
 par(mfrow = c(2,2))
 for (i in seq_along(centr_df)) {
   plot(spring_graph, layout = lay_fr, vertex.size = vsize_df[, i], 
@@ -340,7 +343,37 @@ for (i in seq_along(centr_df)) {
 }
 ```
 
-#### Degree distribution
+We observe that the two-node component at the bottom has a much higher closeness centrality than the nodes belonging to the main component of the network. Obviously, closeness centrality as commonly defined is misleading when the network consists of disconnected components. Nodes belonging to smaller components are seen as closer to others than in larger components. To overcome this problem, centrality values, and especially closeness centrality, are often calculated only for the largest connected component (LCC), which we will do below.
+
+```{r}
+# Extract the LCC
+dg_net <- igraph::decompose.graph(spring_graph)
+idx_lcc <- which.max(unlist(lapply(dg_net, function(x) length(igraph::V(x)))))
+lcc <- dg_net[[idx_lcc]]
+
+# Compute centrality values for the LCC
+centr_df_lcc <- get_centr(lcc)
+
+# Replace centrality values by those for LCC and set all others to zero
+lcc_nodes <- as.numeric(rownames(centr_df_lcc))
+centr_df[lcc_nodes, ] <- centr_df_lcc
+centr_df[-lcc_nodes, ] <- 0
+
+# Node/vertex sizes
+vsize_df <- get_vsizes(centr_df)
+```
+
+```{r plots_centrality_lcc, fig.height=10, fig.width=10}
+par(mfrow = c(2,2))
+for (i in seq_along(centr_df)) {
+  plot(spring_graph, layout = lay_fr, vertex.size = vsize_df[, i], 
+     vertex.label = NA, main = colnames(centr_df)[i])
+}
+```
+
+Note that `NetCoMi` follows a different approach to overcome this problem. `NetCoMi` uses the definition of closeness centrality proposed by [Tore Opsahl](https://toreopsahl.com/2010/03/20/closeness-centrality-in-networks-with-disconnected-components/), which is well defined even for disconnected networks and assigns higher closeness centrality values to nodes in larger components. This is more intuitive because nodes in a larger component are connected to a larger number of other nodes than in small components.
+
+### Degree distribution
 
 The degree distribution is another popular measure that expresses the probability distribution of degrees over the entire network. It thus provides insight into the overall network structure. We plot the degree distribution for all four association estimation methods to compare the network structure.
 
@@ -348,7 +381,7 @@ The degree distribution is another popular measure that expresses the probabilit
 library(ggplot2)
 ```
 
-```{r, fig.height=4, fig.width=7}
+```{r degree_dist_spring, fig.height=4, fig.width=7}
 # Compute degree distribution
 ddist<- igraph::degree.distribution(spring_graph)
 
@@ -364,7 +397,7 @@ ggplot(data = df, aes(x = Degree, y = Fraction, group = 1)) +
 
 The network has a large number of singletons and sparsely connected nodes, and only a small number of nodes with a higher degree of 7 or more.
 
-#### Clustered heatmaps
+### Clustered heatmaps
 
 Using the `ComplexHeatmap` package, we plot a heatmap of the association matrix estimated with `SPRING`. Rows and columns are sorted according to the clusters identified via hierarchical clustering.
 
@@ -396,11 +429,11 @@ Heatmap(adja_sel,
 
 The associations are generally quite low, and there are no prominent clusters detected by hierarchical clustering.
 
-#### Global network measures
+### Global network measures
 
 Global measures describe the overall network structure. We take a look at three common measures: density, transitivity, and average path length. The values are again computed with `igraph` functions.
 
-##### Density
+#### Density
 
 Definition: Proportion of present edges from all possible edges.
 
@@ -408,7 +441,7 @@ Definition: Proportion of present edges from all possible edges.
 edge_density(spring_graph)
 ```
 
-##### Transitivity (clustering coefficient)
+#### Transitivity (clustering coefficient)
 
 Here, we consider only the global clustering coefficient, which is defined as the ratio of triangles to connected triples.
 
@@ -416,7 +449,7 @@ Here, we consider only the global clustering coefficient, which is defined as th
 transitivity(spring_graph)
 ```
 
-##### Average path length
+#### Average path length
 
 Definition: Mean of the shortest distance between each pair of nodes.
 
@@ -424,7 +457,7 @@ Definition: Mean of the shortest distance between each pair of nodes.
 average.path.length(spring_graph)
 ```
 
-### Network analysis with NetCoMi
+## Network analysis with NetCoMi
 
 The `netcomi_net` object of class `microNet` created before is now passed to `netAnalyze()` to perform network analysis with `NetCoMi`.
 
@@ -685,7 +718,7 @@ plot(se_mb_graph, layout = lay_fr, vertex.size = vsize,
      vertex.label = NA, main = "SpiecEasi (MB)")
 ```
 
-**A view observations:**  
+**A few observations:**  
 The density of SparCC (threshold 0.4), proportionality and SpiecEasi is comparable, while the SparCC correlation network with threshold 0.3 is much denser. However, there are edges in the proportionality and SpiecEasi networks that are not present in the two SparCC networks. The SpiecEasi network has less highly connected nodes than the other three networks, but more nodes with one or two connections.
 
 We will look at the degree distribution in the next section to quantify these observations.
@@ -709,7 +742,7 @@ The degree distribution is plotted for all four measures to compare the overall 
 library(ggplot2)
 ```
 
-```{r}
+```{r degree_dist}
 # Compute degree distributions
 ddlist <- lapply(graphlist, igraph::degree.distribution)
 
