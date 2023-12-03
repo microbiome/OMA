@@ -1,8 +1,8 @@
-## ---- echo=FALSE--------------------------------------------------------------
+## ---- echo=FALSE---------------------------------------
 .gh_url <- file.path('https://github.com', rmarkdown::metadata[['github-repo']])
 
 
-## ----include=FALSE------------------------------------------------------------
+## ----include=FALSE-------------------------------------
 library(Cairo)
 
 # global knitr options

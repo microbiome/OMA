@@ -1,15 +1,15 @@
-## ----setup, echo=FALSE, results="asis"----------------------------------------
+## ----setup, echo=FALSE, results="asis"-----------------
 library(rebook)
 chapterPreamble()
 
 
-## ----load-pkg-data------------------------------------------------------------
+## ----load-pkg-data-------------------------------------
 library(mia)
 data(HintikkaXOData, package="mia")
 mae <- HintikkaXOData
 
 
-## ----cobiclust_1--------------------------------------------------------------
+## ----cobiclust_1---------------------------------------
 # Subset data in the first experiment
 mae[[1]] <- subsetByPrevalentFeatures(mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
 # clr-transform in the first experiment
@@ -17,11 +17,8 @@ mae[[1]] <- transformAssay(mae[[1]], method = "relabundance")
 mae[[1]] <- transformAssay(mae[[1]], "relabundance", method = "rclr")
 
 
-## ----cobiclust_2--------------------------------------------------------------
-if(!require(cobiclust)){
-    install.packages("cobiclust")
-    library(cobiclust)
-}
+## ----cobiclust_2---------------------------------------
+library(cobiclust)
 
 # Do clustering; use counts table´
 clusters <- cobiclust(assay(mae[[1]], "counts"))
@@ -41,11 +38,10 @@ mae[[1]] <- mae[[1]][order(rowData(mae[[1]])$clusters), order(colData(mae[[1]])$
 clusters$classification
 
 
-## ----cobiclust_3, fig.width=14, fig.height=12---------------------------------
-if(!require(pheatmap)){
-    install.packages("pheatmap")
-    library(pheatmap)
-}
+## ----cobiclust_3, fig.width=14, fig.height=12----------
+
+library(pheatmap)
+
 # z-transform for heatmap
 mae[[1]] <- transformAssay(mae[[1]], assay.type = "rclr",
                             MARGIN = "features",
@@ -67,17 +63,10 @@ pheatmap(assay(mae[[1]], "clr_z"), cluster_rows = F, cluster_cols = F,
 
 
 
-## ----cobiclust_4--------------------------------------------------------------
-if(!require(ggplot2)){
-    install.packages("ggplot2")
-    library(ggplot2)
-}
-if(!require(patchwork)){
-    install.packages("patchwork")
-    library(patchwork)
-}
-
-# ggplot requires data in melted format
+## ----cobiclust_4---------------------------------------
+library(ggplot2)
+library(patchwork)
+# ggplot librarys data in melted format
 melt_assay <- meltAssay(mae[[1]], assay.type = "rclr", add_col_data = T, add_row_data = T)
 
 # patchwork two plots side-by-side
@@ -92,7 +81,7 @@ p2 <- ggplot(melt_assay) +
 p1 + p2
 
 
-## ----biclust_1----------------------------------------------------------------
+## ----biclust_1-----------------------------------------
 # Samples must be in equal order 
 # (Only 1st experiment  was ordered in cobiclust step leading to unequal order)
 mae[[1]] <- mae[[1]][ , colnames(mae[[2]]) ]
@@ -108,7 +97,7 @@ corr <- getExperimentCrossCorrelation(mae, 1, 2,
 
 
 
-## ----biclust_2----------------------------------------------------------------
+## ----biclust_2-----------------------------------------
 # Load package
 library(biclust)
 
@@ -123,7 +112,7 @@ bc <- biclust(corr, method=BCPlaid(), fit.model = y ~ m,
 bc
 
 
-## ----biclust_3----------------------------------------------------------------
+## ----biclust_3-----------------------------------------
 # Functions for obtaining biclust information
 
 # Get clusters for rows and columns
@@ -172,7 +161,7 @@ bc
 }
 
 
-## ----biclust_4----------------------------------------------------------------
+## ----biclust_4-----------------------------------------
 # Get biclusters
 bcs <- .get_biclusters_from_biclust(bc, corr)
 
@@ -183,7 +172,7 @@ bicluster_columns <- bcs$bc_columns
 head(bicluster_rows)
 
 
-## ----biclust_5----------------------------------------------------------------
+## ----biclust_5-----------------------------------------
 # Function for obtaining sample-wise sum, mean, median, and mean variance for each cluster
 .sum_mean_median_var <- function(tse1, tse2, assay.type1, assay.type2, clusters1, clusters2){
   
@@ -231,12 +220,12 @@ for(i in seq_along(df)){
 # pics[[1]] + pics[[2]] + pics[[3]]
 
 
-## ----biclust_7----------------------------------------------------------------
+## ----biclust_7-----------------------------------------
 bicluster_columns <- data.frame(apply(bicluster_columns, 2, as.factor))
 bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
 
 
-## ----biclust_8, fig.width=10, fig.height=10-----------------------------------
+## ----biclust_8, fig.width=10, fig.height=10------------
 # Adjust colors for all clusters
 if( ncol(bicluster_rows) > ncol(bicluster_columns) ){
   cluster_names <- colnames(bicluster_rows)
@@ -255,7 +244,7 @@ pheatmap(corr, cluster_cols = F, cluster_rows = F,
          annotation_colors = annotation_colors)
 
 
-## ----biclust_9----------------------------------------------------------------
+## ----biclust_9-----------------------------------------
 # Calculate cross-correlation
 corr <- getExperimentCrossCorrelation(mae, 1, 1, 
                                       assay.type1 = "rclr", assay.type2 = "rclr", 
@@ -268,7 +257,7 @@ bc <- biclust(corr, method=BCPlaid(), fit.model = y ~ m,
               iter.startup = 10, iter.layer = 100, verbose = FALSE)
 
 
-## ----biclust_10---------------------------------------------------------------
+## ----biclust_10----------------------------------------
 # Get biclusters
 bcs <- .get_biclusters_from_biclust(bc, corr)
 
@@ -276,7 +265,7 @@ bicluster_rows <- bcs$bc_rows
 bicluster_columns <- bcs$bc_columns
 
 
-## ----biclust_11---------------------------------------------------------------
+## ----biclust_11----------------------------------------
 # Create a column that combines information
 # If row/column includes in multiple clusters, cluster numbers are separated with "_&_"
 bicluster_columns$clusters <- apply(bicluster_columns, 1, 
@@ -288,7 +277,7 @@ bicluster_rows$clusters <- apply(bicluster_rows, 1,
 bicluster_rows <- bicluster_rows[, "clusters", drop = FALSE]
 
 
-## ----biclust_12, fig.width=14, fig.height=12----------------------------------
+## ----biclust_12, fig.width=14, fig.height=12-----------
 # Convert boolean values into factor
 bicluster_columns <- data.frame(apply(bicluster_columns, 2, as.factor))
 bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
@@ -296,8 +285,4 @@ bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
 pheatmap(corr, cluster_cols = F, cluster_rows = F,
          annotation_col = bicluster_columns, 
          annotation_row = bicluster_rows)
-
-
-## ----sessionInfo, echo=FALSE, results='asis'----------------------------------
-prettySessionInfo()
 

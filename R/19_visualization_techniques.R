@@ -1,9 +1,9 @@
-## ----setup, echo=FALSE, results="asis"----------------------------------------
+## ----setup, echo=FALSE, results="asis"-----------------
 library(rebook)
 chapterPreamble()
 
 
-## ---- include = FALSE---------------------------------------------------------
+## ---- include = FALSE----------------------------------
 library(ggplot2)
 theme_set(theme_classic())
 library(mia)
@@ -20,14 +20,14 @@ data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------
 # list row meta data
 names(rowData(tse))
 # list column meta data
 names(colData(tse))
 
 
-## ---- warning = FALSE---------------------------------------------------------
+## ---- warning = FALSE----------------------------------
 # obtain QC data
 tse <- addPerCellQC(tse)
 tse <- addPerFeatureQC(tse)
@@ -41,7 +41,7 @@ plotColData(tse, "sum", "X.SampleID", colour_by = "SampleType") +
   labs(x = "Sample ID", y = "QC Sum")
 
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------
 # store colData into a data frame
 coldata <- as.data.frame(colData(tse))
 # plot Number of Samples against Sampling Site
@@ -52,7 +52,7 @@ ggplot(coldata, aes(x = SampleType)) +
        y = "Number of Samples")
 
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------
 # estimate shannon diversity index
 tse <- mia::estimateDiversity(tse, 
                               assay.type = "counts",
@@ -62,7 +62,7 @@ tse <- mia::estimateDiversity(tse,
 plotColData(tse, "shannon", colour_by = "SampleType")
 
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------
 # estimate faith diversity index
 tse <- mia::estimateFaith(tse,
                           assay.type = "counts")
@@ -79,7 +79,7 @@ plots <- lapply(c("shannon", "faith"),
 plots[[1]] + plots[[2]]
 
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------
 # perform NMDS coordination method
 tse <- runNMDS(tse,
                FUN = vegan::vegdist,
@@ -89,7 +89,7 @@ tse <- runNMDS(tse,
 plotReducedDim(tse, "NMDS", colour_by = "shannon")
 
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------
 # perform MDS coordination method
 tse <- runMDS(tse,
               FUN = vegan::vegdist,
@@ -102,7 +102,7 @@ tse <- runMDS(tse,
 plotReducedDim(tse, "MDS", ncomponents = c(1:3), colour_by = "faith")
 
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------
 # generate plots for MDS and NMDS methods
 # and store them into a list
 plots <- lapply(c("MDS", "NMDS"),
@@ -114,7 +114,7 @@ plots[[1]] + plots[[2]] +
   plot_layout(guides = "collect")
 
 
-## ----plotAbundance1-----------------------------------------------------------
+## ----plotAbundance1------------------------------------
 # agglomerate tse by Order
 tse_order <- mergeFeaturesByRank(tse,
                                 rank = "Order",
@@ -139,7 +139,7 @@ plotAbundance(tse_order,
               order_sample_by = "Clostridiales")
 
 
-## ----plotAbundance2-----------------------------------------------------------
+## ----plotAbundance2------------------------------------
 # Create plots
 plots <- plotAbundance(tse_order,
       	    assay.type = "relabundance",
@@ -163,16 +163,8 @@ plots[[2]] <- plots[[2]] +
           legend.direction = "vertical")
 
 # Load required packages
-if( !require("ggpubr") ){
-    install.packages("ggpubr")
-    library("ggpubr")
-}
-# Load required packages
-if( !require("patchwork") ){
-    install.packages("patchwork")
-    library("patchwork")
-}
-
+library(ggpubr)
+library(patchwork) 
 # Combine legends
 legend <- wrap_plots(as_ggplot(get_legend(plots[[1]])), as_ggplot(get_legend(plots[[2]])), ncol = 1) 
 
@@ -186,7 +178,7 @@ plot <- wrap_plots(plots[[2]], plots[[1]], ncol = 1, heights = c(2, 10))
 wrap_plots(plot, legend, nrow = 1, widths = c(2, 1))
 
 
-## ----pheatmap1----------------------------------------------------------------
+## ----pheatmap1-----------------------------------------
 # Agglomerate tse by phylum
 tse_phylum <- mergeFeaturesByRank(tse,
                                 rank = "Phylum",
@@ -223,7 +215,7 @@ mat <- assay(tse_phylum_subset, "clr_z")
 pheatmap(mat)
 
 
-## ----pheatmap2----------------------------------------------------------------
+## ----pheatmap2-----------------------------------------
 # Hierarchical clustering
 taxa_hclust <- hclust(dist(mat), method = "complete")
 
@@ -241,7 +233,7 @@ taxa_ordered <- get_taxa_name(taxa_tree)
 # taxa_tree
 
 
-## ----pheatmap3----------------------------------------------------------------
+## ----pheatmap3-----------------------------------------
 # Creates clusters
 taxa_clusters <- cutree(tree = taxa_hclust, k = 3)
 
@@ -256,7 +248,7 @@ taxa_clusters <- taxa_clusters[taxa_ordered, , drop = FALSE]
 taxa_clusters
 
 
-## ----pheatmap4----------------------------------------------------------------
+## ----pheatmap4-----------------------------------------
 # Adds information to rowData
 rowData(tse_phylum_subset)$clusters <- taxa_clusters[order(match(rownames(taxa_clusters), rownames(tse_phylum_subset))), ]
 
@@ -264,7 +256,7 @@ rowData(tse_phylum_subset)$clusters <- taxa_clusters[order(match(rownames(taxa_c
 rowData(tse_phylum_subset)$clusters
 
 
-## ----pheatmap5----------------------------------------------------------------
+## ----pheatmap5-----------------------------------------
 # Hierarchical clustering
 sample_hclust <- hclust(dist(t(mat)), method = "complete")
 
@@ -299,7 +291,7 @@ sample_data$sample_types <- unfactor(colData(tse_phylum_subset)$SampleType)
 sample_data
 
 
-## ----pheatmap6----------------------------------------------------------------
+## ----pheatmap6-----------------------------------------
 # Determines the scaling of colorss
 # Scale colors
 breaks <- seq(-ceiling(max(abs(mat))), ceiling(max(abs(mat))), 
@@ -312,7 +304,7 @@ pheatmap(mat, annotation_row = taxa_clusters,
          color = colors)
 
 
-## ----sechm--------------------------------------------------------------------
+## ----sechm---------------------------------------------
 # Stores annotation colros to metadata
 metadata(tse_phylum_subset)$anno_colors$SampleType <- c(Feces = "blue", 
                                                         Skin = "red", 
@@ -328,7 +320,7 @@ sechm(tse_phylum_subset,
       cluster_cols = TRUE, cluster_rows = TRUE)
 
 
-## ----more_complex_heatmap-----------------------------------------------------
+## ----more_complex_heatmap------------------------------
 # Add feature names to column as a factor
 taxa_clusters$Feature <- rownames(taxa_clusters)
 taxa_clusters$Feature <- factor(taxa_clusters$Feature, levels = taxa_clusters$Feature)
@@ -420,7 +412,7 @@ heatmap <- ggplot(melted_mat) +
 heatmap
 
 
-## ----more_complex_heatmap2, fig.width = 10, fig.height = 8, eval=FALSE--------
+## ----more_complex_heatmap2, fig.width = 10, fig.height = 8, eval=FALSE----
 ## library(patchwork)
 ## 
 ## # Create layout
@@ -457,7 +449,7 @@ heatmap
 ## # plot
 
 
-## ----more_complex_heatmap3, fig.width = 10, fig.height = 8, eval=FALSE--------
+## ----more_complex_heatmap3, fig.width = 10, fig.height = 8, eval=FALSE----
 ## # Create layout
 ## design <- c(
 ##   patchwork::area(4, 1, 5, 1),
@@ -483,8 +475,4 @@ heatmap
 ##                 heights = c(0.1, 0.15, 0.15, 0.25, 1, 1))
 ## 
 ## plot
-
-
-## ----sessionInfo, echo = FALSE, results = "asis"------------------------------
-prettySessionInfo()
 

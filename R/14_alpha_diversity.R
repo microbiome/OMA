@@ -1,21 +1,21 @@
-## ----setup, echo=FALSE, results="asis"----------------------------------------
+## ----setup, echo=FALSE, results="asis"-----------------
 library(rebook)
 chapterPreamble()
 
 
-## ----load-pkg-data------------------------------------------------------------
+## ----load-pkg-data-------------------------------------
 library(mia)
 data("GlobalPatterns", package="mia")
 tse <- GlobalPatterns
 
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------
 tse <- mia::estimateRichness(tse, 
                              assay.type = "counts", 
                              index = "observed", 
                              name="observed")
 
-head(colData(tse)$observed)
+head(tse$observed)
 
 
 ## ----plot-div-shannon, message=FALSE, fig.cap="Shannon diversity estimates plotted grouped by sample type with colour-labeled barcode."----
@@ -29,25 +29,24 @@ plotColData(tse,
 
 
 
-## ----estimate-shannon---------------------------------------------------------
+## ----estimate-shannon----------------------------------
 tse <- mia::estimateDiversity(tse, 
                               assay.type = "counts",
                               index = "shannon", 
                               name = "shannon")
-head(colData(tse)$shannon)
+head(tse$shannon)
 
 
-## ----visualize-shannon--------------------------------------------------------
-if( !require(ggsignif) ){
-  install.packages("ggsignif")
-}
+## ----visualize-shannon---------------------------------
+library(ggsignif)
 library(ggplot2)
 library(patchwork)
 library(ggsignif)
 
 # Subsets the data. Takes only those samples that are from feces, skin, or tongue,
 # and creates data frame from the collected data
-df <- as.data.frame(tse[ , tse$SampleType %in% c("Feces", "Skin", "Tongue")])
+df <- as.data.frame(colData(tse)[tse$SampleType %in% 
+                 c("Feces", "Skin", "Tongue"), ])
 
 # Changes old levels with new levels
 df$SampleType <- factor(df$SampleType)
@@ -65,13 +64,13 @@ ggplot(df, aes(x = SampleType, y = shannon)) +
   theme(text = element_text(size = 10))
 
 
-## ----phylo-div-1--------------------------------------------------------------
+## ----phylo-div-1---------------------------------------
 tse <- mia::estimateFaith(tse,
                           assay.type = "counts")
-head(colData(tse)$faith)
+head(tse$faith)
 
 
-## ----phylo-div-2--------------------------------------------------------------
+## ----phylo-div-2---------------------------------------
 plots <- lapply(c("shannon", "faith"),
                 plotColData,
                 object = tse, colour_by = "SampleType")
@@ -79,44 +78,44 @@ plots[[1]] + plots[[2]] +
   plot_layout(guides = "collect")
 
 
-## ----phylo-div-3--------------------------------------------------------------
+## ----phylo-div-3---------------------------------------
 tse <- mia::estimateDiversity(tse, 
                               assay.type = "counts",
                               index = "faith", 
                               name = "faith")
 
 
-## ----evenness-1---------------------------------------------------------------
+## ----evenness-1----------------------------------------
 tse <- estimateEvenness(tse, 
                         assay.type = "counts", 
                         index="simpson")
-head(colData(tse)$simpson)
+head(tse$simpson)
 
 
-## ----dominance-1--------------------------------------------------------------
+## ----dominance-1---------------------------------------
 tse <- estimateDominance(tse, 
                          assay.type = "counts", 
                          index="relative")
 
-head(colData(tse)$relative)
+head(tse$relative)
 
 
-## ----rarity-1-----------------------------------------------------------------
+## ----rarity-1------------------------------------------
 tse <- mia::estimateDiversity(tse, 
                               assay.type = "counts",
                               index = "log_modulo_skewness")
 
-head(colData(tse)$log_modulo_skewness)
+head(tse$log_modulo_skewness)
 
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------
 tse <- mia::estimateDivergence(tse,
                                assay.type = "counts",
                                reference = "median",
                                FUN = vegan::vegdist)
 
 
-## ----plot-all-diversities, fig.width = 6.5------------------------------------
+## ----plot-all-diversities, fig.width = 6.5-------------
 plots <- lapply(c("observed", "shannon", "simpson", "relative", "faith", "log_modulo_skewness"),
                 plotColData,
                 object = tse,
@@ -131,8 +130,4 @@ plots <- lapply(plots, "+",
 ((plots[[1]] | plots[[2]] | plots[[3]]) / 
 (plots[[4]] | plots[[5]] | plots[[6]])) +
   plot_layout(guides = "collect")
-
-
-## ----sessionInfo, echo=FALSE, results='asis'----------------------------------
-prettySessionInfo()
 

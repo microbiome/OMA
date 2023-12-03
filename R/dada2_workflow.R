@@ -1,15 +1,15 @@
-## ----dada2_1------------------------------------------------------------------
+## ----dada2_1-------------------------------------------
 # GETTING READY
 
 library(dada2); packageVersion("dada2")
 
 
-## ----dada2_2------------------------------------------------------------------
+## ----dada2_2-------------------------------------------
 path <- "data/MiSeq_SOP" # CHANGE ME to the directory containing the fastq files after unzipping.
 list.files(path)
 
 
-## ----dada2_3------------------------------------------------------------------
+## ----dada2_3-------------------------------------------
 # Forward and reverse fastq filenames have format: SAMPLENAME_R1_001.fastq and SAMPLENAME_R2_001.fastq
 fnFs <- sort(list.files(path, pattern="_R1_001.fastq", full.names = TRUE))
 fnRs <- sort(list.files(path, pattern="_R2_001.fastq", full.names = TRUE))
@@ -17,17 +17,17 @@ fnRs <- sort(list.files(path, pattern="_R2_001.fastq", full.names = TRUE))
 sample.names <- sapply(strsplit(basename(fnFs), "_"), `[`, 1)
 
 
-## ----dada2_4------------------------------------------------------------------
+## ----dada2_4-------------------------------------------
 # INSPECT READ QUALITY PROFILES
 
 plotQualityProfile(fnFs[1:2])
 
 
-## ----dada2_5------------------------------------------------------------------
+## ----dada2_5-------------------------------------------
 plotQualityProfile(fnRs[1:2])
 
 
-## ----dada2_6------------------------------------------------------------------
+## ----dada2_6-------------------------------------------
 # FILTER AND TRIM
 
 # Place filtered files in filtered/ subdirectory
@@ -37,42 +37,42 @@ names(filtFs) <- sample.names
 names(filtRs) <- sample.names
 
 
-## ----dada2_7------------------------------------------------------------------
+## ----dada2_7-------------------------------------------
 out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs, truncLen=c(240,160),
               maxN=0, maxEE=c(2,2), truncQ=2, rm.phix=TRUE,
               compress=TRUE, multithread=TRUE) # On Windows set multithread=FALSE
 head(out)
 
 
-## ----dada2_8------------------------------------------------------------------
+## ----dada2_8-------------------------------------------
 # LEARN THE ERROR RATES
 
 errF <- learnErrors(filtFs, multithread=TRUE)
 
 
-## ----dada2_9------------------------------------------------------------------
+## ----dada2_9-------------------------------------------
 errR <- learnErrors(filtRs, multithread=TRUE)
 
 
-## ----dada2_10-----------------------------------------------------------------
+## ----dada2_10------------------------------------------
 plotErrors(errF, nominalQ=TRUE)
 
 
-## ----dada2_11-----------------------------------------------------------------
+## ----dada2_11------------------------------------------
 # SAMPLE INFERENCE
 
 dadaFs <- dada(filtFs, err=errF, multithread=TRUE)
 
 
-## ----dada2_12-----------------------------------------------------------------
+## ----dada2_12------------------------------------------
 dadaRs <- dada(filtRs, err=errR, multithread=TRUE)
 
 
-## ----dada2_13-----------------------------------------------------------------
+## ----dada2_13------------------------------------------
 dadaFs[[1]]
 
 
-## ----dada2_14-----------------------------------------------------------------
+## ----dada2_14------------------------------------------
 # MERGE PAIRED READS
 
 mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE)
@@ -80,30 +80,30 @@ mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE)
 head(mergers[[1]])
 
 
-## ----dada2_15-----------------------------------------------------------------
+## ----dada2_15------------------------------------------
 # CONSTRUCT SEQUENCE TABLE
 
 seqtab <- makeSequenceTable(mergers)
 dim(seqtab)
 
 
-## ----dada2_16-----------------------------------------------------------------
+## ----dada2_16------------------------------------------
 # Inspect distribution of sequence lengths
 table(nchar(getSequences(seqtab)))
 
 
-## ----dada2_17-----------------------------------------------------------------
+## ----dada2_17------------------------------------------
 # REMOVE CHIMERAS
 
 seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=TRUE, verbose=TRUE)
 dim(seqtab.nochim)
 
 
-## ----dada2_18-----------------------------------------------------------------
+## ----dada2_18------------------------------------------
 sum(seqtab.nochim)/sum(seqtab)
 
 
-## ----dada2_19-----------------------------------------------------------------
+## ----dada2_19------------------------------------------
 # TRACK READS THROUGH THE PIPELINE
 
 getN <- function(x) sum(getUniques(x))
@@ -114,7 +114,7 @@ rownames(track) <- sample.names
 head(track)
 
 
-## ----dada_20------------------------------------------------------------------
+## ----dada_20-------------------------------------------
 # ASSIGN TAXONOMY
 
 # You can find updated reference databases from 
@@ -124,18 +124,18 @@ head(track)
 taxa <- assignTaxonomy(seqtab.nochim, "data/silva_nr_v132_train_set.fa.gz", multithread=TRUE)
 
 
-## ----dada2_21-----------------------------------------------------------------
+## ----dada2_21------------------------------------------
 # Change path
 taxa <- addSpecies(taxa, "data/silva_species_assignment_v132.fa.gz")
 
 
-## ----dada2_22-----------------------------------------------------------------
+## ----dada2_22------------------------------------------
 taxa.print <- taxa # Removing sequence rownames for display only
 rownames(taxa.print) <- NULL
 head(taxa.print)
 
 
-## ----dada2_23-----------------------------------------------------------------
+## ----dada2_23------------------------------------------
 # EVALUATE ACCURACY
 
 unqs.mock <- seqtab.nochim["Mock",]
@@ -143,29 +143,21 @@ unqs.mock <- sort(unqs.mock[unqs.mock>0], decreasing=TRUE) # Drop ASVs absent in
 cat("DADA2 inferred", length(unqs.mock), "sample sequences present in the Mock community.\n")
 
 
-## ----dada2_24-----------------------------------------------------------------
+## ----dada2_24------------------------------------------
 mock.ref <- getSequences(file.path(path, "HMP_MOCK.v35.fasta"))
 match.ref <- sum(sapply(names(unqs.mock), function(x) any(grepl(x, mock.ref))))
 cat("Of those,", sum(match.ref), "were exact matches to the expected reference sequences.\n")
 
 
-## ----dada2_25-----------------------------------------------------------------
+## ----dada2_25------------------------------------------
 library(mia)
 library(ggplot2)
-
-if( !require("BiocManager") ){
-    install.packages("BiocManager")
-    library("BiocManager")
-}
-
-if( !require("Biostrings") ){
-    BiocManager::install("Biostrings")
-    library("Biostrings")
-}
+library(BiocManager)
+library(Biostrings)
 library(Biostrings)
 
 
-## ----dada2_26-----------------------------------------------------------------
+## ----dada2_26------------------------------------------
 samples.out <- rownames(seqtab.nochim)
 subject <- sapply(strsplit(samples.out, "D"), `[`, 1)
 gender <- substr(subject,1,1)
@@ -177,7 +169,7 @@ samdf$When[samdf$Day>100] <- "Late"
 rownames(samdf) <- samples.out
 
 
-## ----dada2_27-----------------------------------------------------------------
+## ----dada2_27------------------------------------------
 tse <- TreeSummarizedExperiment(assays = SimpleList(counts = t(seqtab.nochim)),
                                 colData = DataFrame(samdf),
                                 rowData = DataFrame(taxa)
@@ -187,7 +179,7 @@ tse <- TreeSummarizedExperiment(assays = SimpleList(counts = t(seqtab.nochim)),
 tse <- tse[ , colnames(tse) != "mock"]
 
 
-## ----dada2_38-----------------------------------------------------------------
+## ----dada2_38------------------------------------------
 dna <- Biostrings::DNAStringSet( rownames(tse) )
 referenceSeq(tse) <- dna
 rownames(tse) <- paste0("ASV", seq( nrow(tse) ))

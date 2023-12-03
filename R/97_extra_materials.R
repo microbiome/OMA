@@ -1,22 +1,22 @@
-## ----setup, echo=FALSE, results="asis"----------------------------------------
+## ------------------------------------------------------
+knitr::opts_chunk$set(eval=FALSE)
+
+
+## ----setup, echo=FALSE, results="asis"-----------------
 library(rebook)
 chapterPreamble()
 
 
-## ----permanova_import, warning = FALSE, message = FALSE-----------------------
+## ----permanova_import, warning = FALSE, message = FALSE----
 # import necessary packages
-if (!require(gtools)){
-  install.packages("gtools")  
-}
-if (!require(purrr)){
-  install.packages("purrr")  
-}
+library(gtools)
+library(purrr)
 library(vegan)
 library(gtools)
 library(purrr)
 
 
-## ----permanova_prep, message = FALSE, warning = FALSE-------------------------
+## ----permanova_prep, message = FALSE, warning = FALSE----
 # load and prepare data
 library(mia)
 data("enterotype", package="mia")
@@ -38,7 +38,7 @@ margin_df <- data.frame("Formula" = formulas,
                         "Nationality" = rep(0, 6))
 
 
-## ----permanova_loop, message = FALSE, warning = FALSE-------------------------
+## ----permanova_loop, message = FALSE, warning = FALSE----
 for (row_idx in 1:nrow(var_perm)) {
   
   # generate temporary formula (i.e. "assay ~ ClinicalStatus + Nationality + Gender")
@@ -77,7 +77,7 @@ for (row_idx in 1:nrow(var_perm)) {
 }
 
 
-## ----permanova_table, message = FALSE, warning = FALSE------------------------
+## ----permanova_table, message = FALSE, warning = FALSE----
 
 df <- terms_df %>%
   dplyr::inner_join(margin_df, by = "Formula", suffix = c(" (terms)", " (margin)"))
@@ -85,45 +85,42 @@ df <- terms_df %>%
 knitr::kable(df)
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
-if (!require(fido)){
-  # installing the fido package
-  devtools::install_github("jsilve24/fido")
-}
-
-
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 library(fido)
 
 
-## ---- message=FALSE, warning=FALSE, eval=FALSE--------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
+library(fido)
+
+
+## ---- message=FALSE, warning=FALSE, eval=FALSE---------
 ## library(microbiomeDataSets)
 ## tse <- SprockettTHData()
 
 
-## ---- message=FALSE, warning=FALSE, echo=FALSE--------------------------------
+## ---- message=FALSE, warning=FALSE, echo=FALSE---------
 # saveRDS(tse, file="data/SprockettTHData.Rds")
 # Hidden reading of the saved data
 tse <- readRDS("data/SprockettTHData.Rds")
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 library(mia)
 cov_names <- c("Sex","Age_Years","Delivery_Mode")
 na_counts <- apply(is.na(colData(tse)[,cov_names]), 2, sum)
 na_summary<-as.data.frame(na_counts,row.names=cov_names)
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 tse <- tse[ , !is.na(colData(tse)$Delivery_Mode) ]
 tse <- tse[ , !is.na(colData(tse)$Age_Years) ]
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 tse_phylum <- mergeFeaturesByRank(tse, "Phylum")
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 Y <- assays(tse_phylum)$counts
 # design matrix
 # taking 3 covariates
@@ -131,7 +128,7 @@ sample_data<-as.data.frame(colData(tse_phylum)[,cov_names])
 X <- t(model.matrix(~Sex+Age_Years+Delivery_Mode,data=sample_data))
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 n_taxa<-nrow(Y)
 upsilon <- n_taxa+3
 Omega <- diag(n_taxa)
@@ -141,51 +138,42 @@ Theta <- matrix(0, n_taxa-1, nrow(X))
 Gamma <- diag(nrow(X))
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 priors <- pibble(NULL, X, upsilon, Theta, Gamma, Xi)
 names_covariates(priors) <- rownames(X)
 plot(priors, pars="Lambda") + ggplot2::xlim(c(-5, 5))
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 priors$Y <- Y 
 posterior <- refit(priors, optim_method="adam", multDirichletBoot=0.5) #calcGradHess=FALSE
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 ppc_summary(posterior)
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 names_categories(posterior) <- rownames(Y)
 plot(posterior,par="Lambda",focus.cov=rownames(X)[2:4])
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
-# Installing required packages
-if (!require(rgl)){
-  BiocManager::install("rgl")  
-}
-if (!require(plotly)){
-  BiocManager::install("plotly")  
-}
-
-
-## ----setup2, warning=FALSE, message=FALSE-------------------------------------
-library(knitr)
+## ---- message=FALSE, warning=FALSE---------------------
+# Load libraries
 library(rgl)
+library(plotly)
+
+
+## ----setup2, warning=FALSE, message=FALSE--------------
+library(knitr)
 knitr::knit_hooks$set(webgl = hook_webgl)
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
-# Installing the package
-if (!require(curatedMetagenomicData)){
-  BiocManager::install("curatedMetagenomicData")  
-}
+## ---- message=FALSE, warning=FALSE---------------------
 # Importing necessary libraries
 library(curatedMetagenomicData)
 library(dplyr)

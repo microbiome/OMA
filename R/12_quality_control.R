@@ -1,13 +1,13 @@
-## ----setup, echo=FALSE, results="asis"----------------------------------------
+## ----setup, echo=FALSE, results="asis"-----------------
 library(rebook)
 chapterPreamble()
 
 
-## ---- message=FALSE-----------------------------------------------------------
+## ---- message=FALSE------------------------------------
 library(mia)
 
 
-## ---- warning=FALSE, message=FALSE--------------------------------------------
+## ---- warning=FALSE, message=FALSE---------------------
 # Load example data
 library(miaTime)
 library(miaViz)
@@ -25,22 +25,22 @@ plotAbundanceDensity(tse, layout = "jitter", assay.type = "relabundance",
                      scale_x_log10(label=scales::percent)
 
 
-## ---- warning=FALSE, message=FALSE--------------------------------------------
+## ---- warning=FALSE, message=FALSE---------------------
 plotAbundanceDensity(tse, layout = "density", assay.type = "relabundance",
                      n = 5, colour_by="nationality", point_alpha=1/10) +
     scale_x_log10()
 
 
-## ----exploration-prevalence---------------------------------------------------
+## ----exploration-prevalence----------------------------
 head(getPrevalence(tse, detection = 1/100, sort = TRUE, as_relative = TRUE))
 
 
-## ----concepts_prevalence2-----------------------------------------------------
+## ----concepts_prevalence2------------------------------
 head(getPrevalence(tse, detection = 1, sort = TRUE, assay.type = "counts",
                    as_relative = FALSE))
 
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------
 # Agglomerate taxa abundances to Phylum level, and add the new table
 # to the altExp slot
 altExp(tse,"Phylum") <- mergeFeaturesByRank(tse, "Phylum")
@@ -49,30 +49,30 @@ head(getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = TRUE,
                    assay.type = "counts", as_relative = TRUE))
 
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------
 head(getPrevalence(tse, rank = "Phylum", detection = 1/100, sort = TRUE,
                    assay.type = "counts", as_relative = TRUE))
 
 
-## ----core-members, message=FALSE, warning=FALSE, eval = FALSE-----------------
+## ----core-members, message=FALSE, warning=FALSE, eval = FALSE----
 ## getPrevalentFeatures(tse, detection = 0, prevalence = 50/100)
 ## prev <- getPrevalentFeatures(tse, detection = 0, prevalence = 50/100,
 ##                          rank = "Phylum", sort = TRUE)
 ## prev
 
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------
 rowData(altExp(tse,"Phylum"))$prevalence <- 
     getPrevalence(altExp(tse,"Phylum"), detection = 1/100, sort = FALSE,
                   assay.type = "counts", as_relative = TRUE)
 
 
-## ---- message=FALSE, warning=FALSE--------------------------------------------
+## ---- message=FALSE, warning=FALSE---------------------
 library(scater)
 plotRowData(altExp(tse,"Phylum"), "prevalence", colour_by = "Phylum")
 
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------
 altExps(tse) <- splitByRanks(tse)
 altExps(tse) <-
    lapply(altExps(tse),
@@ -109,13 +109,13 @@ plotRowTree(x[rowData(x)$Phylum %in% top_phyla_mean,],
             node_colour_by = "prevalence")
 
 
-## ---- message=FALSE-----------------------------------------------------------
+## ---- message=FALSE------------------------------------
 library(mia)
 data("GlobalPatterns", package="mia")
 tse <- GlobalPatterns 
 
 
-## ----top-feature-taxo---------------------------------------------------------
+## ----top-feature-taxo----------------------------------
 # Pick the top taxa
 top_features <- getTopFeatures(tse, method="median", top=10)
 
@@ -123,7 +123,7 @@ top_features <- getTopFeatures(tse, method="median", top=10)
 rowData(tse)[top_features, taxonomyRanks(tse)]
 
 
-## ----lib-size-----------------------------------------------------------------
+## ----lib-size------------------------------------------
 library(scater)
 perCellQCMetrics(tse)
 tse <- addPerCellQC(tse)
@@ -179,8 +179,4 @@ plotColData(tse,"sum","X.SampleID", colour_by = "SampleType") +
 ## ----plot-viz-lib-size-3, fig.width=8, fig.height=4, fig.cap="Library sizes per sample type."----
 plotColData(tse,"sum","SampleType", colour_by = "SampleType") + 
     theme(axis.text.x = element_text(angle = 45, hjust=1))
-
-
-## ----sessionInfo, echo=FALSE, results='asis'----------------------------------
-prettySessionInfo()
 
