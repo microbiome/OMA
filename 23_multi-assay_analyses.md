@@ -567,7 +567,7 @@ model.trained <- run_mofa(model.prepared, use_basilisk = TRUE)
 ## #######################
 ## 
 ## 
-## Saving model in /tmp/RtmpbJjycq/mofa_20231202-183457.hdf5...
+## Saving model in /tmp/Rtmp44jyLj/mofa_20231203-164529.hdf5...
 ```
 
 The explained variance is visualized with the `plot_variance_explained` function:

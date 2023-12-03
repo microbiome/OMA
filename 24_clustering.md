@@ -344,16 +344,16 @@ head(metadata(altExp(tse, "dmm"))$DMM$prob, 10)
 
 ```
 ##                 1         2
-## CL3     1.000e+00 5.050e-17
-## CC1     1.000e+00 3.848e-22
-## SV1     1.000e+00 2.034e-12
-## M31Fcsw 7.338e-26 1.000e+00
-## M11Fcsw 1.062e-16 1.000e+00
-## M31Plmr 9.982e-14 1.000e+00
-## M11Plmr 2.191e-06 1.000e+00
-## F21Plmr 2.852e-11 1.000e+00
-## M31Tong 1.303e-08 1.000e+00
-## M11Tong 2.083e-06 1.000e+00
+## CL3     1.000e+00 5.080e-17
+## CC1     1.000e+00 3.936e-22
+## SV1     1.000e+00 1.963e-12
+## M31Fcsw 7.914e-26 1.000e+00
+## M11Fcsw 1.130e-16 1.000e+00
+## M31Plmr 1.121e-13 1.000e+00
+## M11Plmr 3.441e-06 1.000e+00
+## F21Plmr 4.360e-11 1.000e+00
+## M31Tong 1.449e-08 1.000e+00
+## M11Tong 2.223e-06 1.000e+00
 ```
 
 
@@ -449,8 +449,8 @@ DirichletMultinomial::mixturewt(bestFit)
 
 ```
 ##       pi theta
-## 1 0.5385 20.60
-## 2 0.4615 15.28
+## 1 0.5385 20.58
+## 2 0.4615 15.29
 ```
 
 ### PCoA with DMM clusters
@@ -700,8 +700,8 @@ bc
 ## 
 ## First  4  Cluster sizes:
 ##                    BC 1 BC 2 BC 3 BC 4
-## Number of Rows:      22   21    6    2
-## Number of Columns:   13   10   12    8
+## Number of Rows:      21   20    7    2
+## Number of Columns:   13   10   10    9
 ```
 
 The object includes cluster information. However compared to

@@ -196,7 +196,8 @@ div.csl-indent {
 <li class="chapter" data-level="3.3.1" data-path="containers.html"><a href="containers.html#package-data"><i class="fa fa-check"></i><b>3.3.1</b> Package data</a></li>
 <li class="chapter" data-level="3.3.2" data-path="containers.html"><a href="containers.html#experimenthub-data"><i class="fa fa-check"></i><b>3.3.2</b> ExperimentHub data</a></li>
 <li class="chapter" data-level="3.3.3" data-path="containers.html"><a href="containers.html#curated-metagenomic-data"><i class="fa fa-check"></i><b>3.3.3</b> Curated metagenomic data</a></li>
-<li class="chapter" data-level="3.3.4" data-path="containers.html"><a href="containers.html#other-data-sources"><i class="fa fa-check"></i><b>3.3.4</b> Other data sources</a></li>
+<li class="chapter" data-level="3.3.4" data-path="containers.html"><a href="containers.html#human-microbiome-compendium"><i class="fa fa-check"></i><b>3.3.4</b> Human microbiome compendium</a></li>
+<li class="chapter" data-level="3.3.5" data-path="containers.html"><a href="containers.html#other-data-sources"><i class="fa fa-check"></i><b>3.3.5</b> Other data sources</a></li>
 </ul></li>
 <li class="chapter" data-level="3.4" data-path="containers.html"><a href="containers.html#loading-experimental-microbiome-data"><i class="fa fa-check"></i><b>3.4</b> Loading experimental microbiome data</a>
 <ul>
@@ -629,29 +630,29 @@ Figure 12.1: The typical input is a <span class="math inline">\(p\)</span> x <sp
 <p>The main association measure used in this chapter is the <a href="https://github.com/GraceYoon/SPRING">SPRING</a> (“Semi-Parametric Rank-based approach for INference in Graphical model”) method proposed by <span class="citation">Yoon, Gaynanova, and Müller (2019)</span>. <code>SPRING</code> learns conditional dependency graphs for compositional data and follows the neighborhood selection method introduced by <span class="citation">Meinshausen and Bühlmann (2006)</span> (“MB”). We will show how to apply the method directly, as well as how to use it in conjunction with the R package <a href="https://github.com/stefpeschel/NetCoMi">NetCoMi</a>, which is specifically designed for the construction and analysis of networks for microbiome data.</p>
 <p>See Section <a href="network-learning.html#more-about-association">12.6</a> for a comparison of all three association types (correlation, partial correlation, and proportionality) with more information on each measure and applications.</p>
 <p>We demonstrate the workflow using the the <strong>PeerJ data set</strong> <span class="citation">(Potbhare et al. 2022)</span>. It contains skin microbial profiles of 58 subjects.</p>
-<div class="sourceCode" id="cb354"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb354-1"><a href="network-learning.html#cb354-1" tabindex="-1"></a><span class="fu">library</span>(mia)</span></code></pre></div>
-<div class="sourceCode" id="cb355"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb355-1"><a href="network-learning.html#cb355-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;peerj13075&quot;</span>, <span class="at">package =</span> <span class="st">&quot;mia&quot;</span>)</span>
-<span id="cb355-2"><a href="network-learning.html#cb355-2" tabindex="-1"></a>tse0 <span class="ot">&lt;-</span> peerj13075</span>
-<span id="cb355-3"><a href="network-learning.html#cb355-3" tabindex="-1"></a><span class="fu">dim</span>(tse0)</span></code></pre></div>
+<div class="sourceCode" id="cb355"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb355-1"><a href="network-learning.html#cb355-1" tabindex="-1"></a><span class="fu">library</span>(mia)</span></code></pre></div>
+<div class="sourceCode" id="cb356"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb356-1"><a href="network-learning.html#cb356-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;peerj13075&quot;</span>, <span class="at">package =</span> <span class="st">&quot;mia&quot;</span>)</span>
+<span id="cb356-2"><a href="network-learning.html#cb356-2" tabindex="-1"></a>tse0 <span class="ot">&lt;-</span> peerj13075</span>
+<span id="cb356-3"><a href="network-learning.html#cb356-3" tabindex="-1"></a><span class="fu">dim</span>(tse0)</span></code></pre></div>
 <pre><code>## [1] 674  58</code></pre>
 </div>
 <div id="install-packages" class="section level3 hasAnchor" number="12.1.2">
 <h3><span class="header-section-number">12.1.2</span> Install packages<a href="network-learning.html#install-packages" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Three packages used in this chapter are available on GitHub only: <code>SpiecEasi</code>, <code>SPRING</code>, and <code>NetCoMi</code>. We recommend that you install these packages before proceeding.</p>
-<div class="sourceCode" id="cb357"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb357-1"><a href="network-learning.html#cb357-1" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(SpiecEasi)){</span>
-<span id="cb357-2"><a href="network-learning.html#cb357-2" tabindex="-1"></a>  devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;zdk123/SpiecEasi&quot;</span>)</span>
-<span id="cb357-3"><a href="network-learning.html#cb357-3" tabindex="-1"></a>}</span>
-<span id="cb357-4"><a href="network-learning.html#cb357-4" tabindex="-1"></a></span>
-<span id="cb357-5"><a href="network-learning.html#cb357-5" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(SPRING)){</span>
-<span id="cb357-6"><a href="network-learning.html#cb357-6" tabindex="-1"></a>  devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;GraceYoon/SPRING&quot;</span>)</span>
-<span id="cb357-7"><a href="network-learning.html#cb357-7" tabindex="-1"></a>}</span>
-<span id="cb357-8"><a href="network-learning.html#cb357-8" tabindex="-1"></a></span>
-<span id="cb357-9"><a href="network-learning.html#cb357-9" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(NetCoMi)){</span>
-<span id="cb357-10"><a href="network-learning.html#cb357-10" tabindex="-1"></a>  devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;stefpeschel/NetCoMi&quot;</span>, <span class="at">force =</span> <span class="cn">TRUE</span>, <span class="at">ref =</span> <span class="st">&quot;TSE&quot;</span>,</span>
-<span id="cb357-11"><a href="network-learning.html#cb357-11" tabindex="-1"></a>                           <span class="at">dependencies =</span> <span class="fu">c</span>(<span class="st">&quot;Depends&quot;</span>, <span class="st">&quot;Imports&quot;</span>, <span class="st">&quot;LinkingTo&quot;</span>),</span>
-<span id="cb357-12"><a href="network-learning.html#cb357-12" tabindex="-1"></a>                           <span class="at">repos =</span> <span class="fu">c</span>(<span class="st">&quot;https://cloud.r-project.org/&quot;</span>,</span>
-<span id="cb357-13"><a href="network-learning.html#cb357-13" tabindex="-1"></a>                                     BiocManager<span class="sc">::</span><span class="fu">repositories</span>()))</span>
-<span id="cb357-14"><a href="network-learning.html#cb357-14" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb358"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb358-1"><a href="network-learning.html#cb358-1" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(SpiecEasi)){</span>
+<span id="cb358-2"><a href="network-learning.html#cb358-2" tabindex="-1"></a>  devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;zdk123/SpiecEasi&quot;</span>)</span>
+<span id="cb358-3"><a href="network-learning.html#cb358-3" tabindex="-1"></a>}</span>
+<span id="cb358-4"><a href="network-learning.html#cb358-4" tabindex="-1"></a></span>
+<span id="cb358-5"><a href="network-learning.html#cb358-5" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(SPRING)){</span>
+<span id="cb358-6"><a href="network-learning.html#cb358-6" tabindex="-1"></a>  devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;GraceYoon/SPRING&quot;</span>)</span>
+<span id="cb358-7"><a href="network-learning.html#cb358-7" tabindex="-1"></a>}</span>
+<span id="cb358-8"><a href="network-learning.html#cb358-8" tabindex="-1"></a></span>
+<span id="cb358-9"><a href="network-learning.html#cb358-9" tabindex="-1"></a><span class="cf">if</span>(<span class="sc">!</span><span class="fu">require</span>(NetCoMi)){</span>
+<span id="cb358-10"><a href="network-learning.html#cb358-10" tabindex="-1"></a>  devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;stefpeschel/NetCoMi&quot;</span>, <span class="at">force =</span> <span class="cn">TRUE</span>, <span class="at">ref =</span> <span class="st">&quot;TSE&quot;</span>,</span>
+<span id="cb358-11"><a href="network-learning.html#cb358-11" tabindex="-1"></a>                           <span class="at">dependencies =</span> <span class="fu">c</span>(<span class="st">&quot;Depends&quot;</span>, <span class="st">&quot;Imports&quot;</span>, <span class="st">&quot;LinkingTo&quot;</span>),</span>
+<span id="cb358-12"><a href="network-learning.html#cb358-12" tabindex="-1"></a>                           <span class="at">repos =</span> <span class="fu">c</span>(<span class="st">&quot;https://cloud.r-project.org/&quot;</span>,</span>
+<span id="cb358-13"><a href="network-learning.html#cb358-13" tabindex="-1"></a>                                     BiocManager<span class="sc">::</span><span class="fu">repositories</span>()))</span>
+<span id="cb358-14"><a href="network-learning.html#cb358-14" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div id="data-preparation" class="section level3 hasAnchor" number="12.1.3">
 <h3><span class="header-section-number">12.1.3</span> Data preparation<a href="network-learning.html#data-preparation" class="anchor-section" aria-label="Anchor link to header"></a></h3>
@@ -663,28 +664,28 @@ Figure 12.1: The typical input is a <span class="math inline">\(p\)</span> x <sp
 <li>Add assay with log10 transformed abundances</li>
 <li>Add assay with clr transformed abundances</li>
 </ul>
-<div class="sourceCode" id="cb358"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb358-1"><a href="network-learning.html#cb358-1" tabindex="-1"></a><span class="co"># Agglomerate to genus level</span></span>
-<span id="cb358-2"><a href="network-learning.html#cb358-2" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(tse0, <span class="at">rank =</span> <span class="st">&quot;genus&quot;</span>) </span>
-<span id="cb358-3"><a href="network-learning.html#cb358-3" tabindex="-1"></a></span>
-<span id="cb358-4"><a href="network-learning.html#cb358-4" tabindex="-1"></a><span class="co"># Add relative abundances</span></span>
-<span id="cb358-5"><a href="network-learning.html#cb358-5" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformAssay</span>(tse, </span>
-<span id="cb358-6"><a href="network-learning.html#cb358-6" tabindex="-1"></a>                      <span class="at">assay.type =</span> <span class="st">&quot;counts&quot;</span>, </span>
-<span id="cb358-7"><a href="network-learning.html#cb358-7" tabindex="-1"></a>                      <span class="at">method =</span> <span class="st">&quot;relabundance&quot;</span>,</span>
-<span id="cb358-8"><a href="network-learning.html#cb358-8" tabindex="-1"></a>                      <span class="at">MARGIN =</span> <span class="st">&quot;samples&quot;</span>) </span>
-<span id="cb358-9"><a href="network-learning.html#cb358-9" tabindex="-1"></a></span>
-<span id="cb358-10"><a href="network-learning.html#cb358-10" tabindex="-1"></a><span class="co"># Filter by prevalence</span></span>
-<span id="cb358-11"><a href="network-learning.html#cb358-11" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">subsetByPrevalentFeatures</span>(tse,</span>
-<span id="cb358-12"><a href="network-learning.html#cb358-12" tabindex="-1"></a>                                 <span class="at">prevalence =</span> <span class="fl">0.2</span>,</span>
-<span id="cb358-13"><a href="network-learning.html#cb358-13" tabindex="-1"></a>                                 <span class="at">detection =</span> <span class="dv">0</span>,</span>
-<span id="cb358-14"><a href="network-learning.html#cb358-14" tabindex="-1"></a>                                 <span class="at">assay.type =</span> <span class="st">&quot;relabundance&quot;</span>)</span>
-<span id="cb358-15"><a href="network-learning.html#cb358-15" tabindex="-1"></a></span>
-<span id="cb358-16"><a href="network-learning.html#cb358-16" tabindex="-1"></a><span class="co"># Add log10-transformed abundances</span></span>
-<span id="cb358-17"><a href="network-learning.html#cb358-17" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformAssay</span>(tse, <span class="at">method =</span> <span class="st">&quot;log10&quot;</span>, <span class="at">pseudocount =</span> <span class="dv">1</span>)</span>
-<span id="cb358-18"><a href="network-learning.html#cb358-18" tabindex="-1"></a></span>
-<span id="cb358-19"><a href="network-learning.html#cb358-19" tabindex="-1"></a><span class="co"># Add clr-transformed abundances</span></span>
-<span id="cb358-20"><a href="network-learning.html#cb358-20" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformAssay</span>(tse, <span class="at">method =</span> <span class="st">&quot;clr&quot;</span>, <span class="at">pseudocount =</span> <span class="dv">1</span>)</span>
-<span id="cb358-21"><a href="network-learning.html#cb358-21" tabindex="-1"></a></span>
-<span id="cb358-22"><a href="network-learning.html#cb358-22" tabindex="-1"></a><span class="fu">dim</span>(tse)</span></code></pre></div>
+<div class="sourceCode" id="cb359"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb359-1"><a href="network-learning.html#cb359-1" tabindex="-1"></a><span class="co"># Agglomerate to genus level</span></span>
+<span id="cb359-2"><a href="network-learning.html#cb359-2" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">agglomerateByRank</span>(tse0, <span class="at">rank =</span> <span class="st">&quot;genus&quot;</span>) </span>
+<span id="cb359-3"><a href="network-learning.html#cb359-3" tabindex="-1"></a></span>
+<span id="cb359-4"><a href="network-learning.html#cb359-4" tabindex="-1"></a><span class="co"># Add relative abundances</span></span>
+<span id="cb359-5"><a href="network-learning.html#cb359-5" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformAssay</span>(tse, </span>
+<span id="cb359-6"><a href="network-learning.html#cb359-6" tabindex="-1"></a>                      <span class="at">assay.type =</span> <span class="st">&quot;counts&quot;</span>, </span>
+<span id="cb359-7"><a href="network-learning.html#cb359-7" tabindex="-1"></a>                      <span class="at">method =</span> <span class="st">&quot;relabundance&quot;</span>,</span>
+<span id="cb359-8"><a href="network-learning.html#cb359-8" tabindex="-1"></a>                      <span class="at">MARGIN =</span> <span class="st">&quot;samples&quot;</span>) </span>
+<span id="cb359-9"><a href="network-learning.html#cb359-9" tabindex="-1"></a></span>
+<span id="cb359-10"><a href="network-learning.html#cb359-10" tabindex="-1"></a><span class="co"># Filter by prevalence</span></span>
+<span id="cb359-11"><a href="network-learning.html#cb359-11" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">subsetByPrevalentFeatures</span>(tse,</span>
+<span id="cb359-12"><a href="network-learning.html#cb359-12" tabindex="-1"></a>                                 <span class="at">prevalence =</span> <span class="fl">0.2</span>,</span>
+<span id="cb359-13"><a href="network-learning.html#cb359-13" tabindex="-1"></a>                                 <span class="at">detection =</span> <span class="dv">0</span>,</span>
+<span id="cb359-14"><a href="network-learning.html#cb359-14" tabindex="-1"></a>                                 <span class="at">assay.type =</span> <span class="st">&quot;relabundance&quot;</span>)</span>
+<span id="cb359-15"><a href="network-learning.html#cb359-15" tabindex="-1"></a></span>
+<span id="cb359-16"><a href="network-learning.html#cb359-16" tabindex="-1"></a><span class="co"># Add log10-transformed abundances</span></span>
+<span id="cb359-17"><a href="network-learning.html#cb359-17" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformAssay</span>(tse, <span class="at">method =</span> <span class="st">&quot;log10&quot;</span>, <span class="at">pseudocount =</span> <span class="dv">1</span>)</span>
+<span id="cb359-18"><a href="network-learning.html#cb359-18" tabindex="-1"></a></span>
+<span id="cb359-19"><a href="network-learning.html#cb359-19" tabindex="-1"></a><span class="co"># Add clr-transformed abundances</span></span>
+<span id="cb359-20"><a href="network-learning.html#cb359-20" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformAssay</span>(tse, <span class="at">method =</span> <span class="st">&quot;clr&quot;</span>, <span class="at">pseudocount =</span> <span class="dv">1</span>)</span>
+<span id="cb359-21"><a href="network-learning.html#cb359-21" tabindex="-1"></a></span>
+<span id="cb359-22"><a href="network-learning.html#cb359-22" tabindex="-1"></a><span class="fu">dim</span>(tse)</span></code></pre></div>
 <pre><code>## [1] 147  58</code></pre>
 </div>
 <div id="spring-network" class="section level3 hasAnchor" number="12.1.4">
@@ -693,78 +694,78 @@ Figure 12.1: The typical input is a <span class="math inline">\(p\)</span> x <sp
 <p>Neither zero replacement nor normalization (steps 1 and 2 in our workflow) are required because SPRING uses a modified clr (mclr) transformation that can handle zero counts, and the correlation estimation method itself can also deal with zeros in the data. mclr is similar to the clr transformation except that mclr considers only the non-zero values. More precisely, the geometric mean is derived from positive values only, and zero counts remain zero after the transformation. This approach is similar to the “robust clr” (rclr) transformation included in the <code>vegan</code> package, except that mclr applies a positive shift to all non-zero values to make them strictly positive. See <span class="citation">(Yoon, Gaynanova, and Müller 2019)</span> for details.</p>
 <p>The <code>Rmethod</code> argument is set to “approx” to estimate the correlations using a hybrid multi-linear interpolation approach proposed by <span class="citation">Yoon, Müller, and Gaynanova (2021)</span>. This method considerably reduces the runtime while controlling the approximation error.</p>
 <p><code>SPRING</code> uses the StARS (“Stability Approach to Regularization Selection”) method <span class="citation">(H. Liu, Roeder, and Wasserman 2010)</span> to obtain a sparse association matrix. Thus, also step 4 of our workflow is already included. We set the StARS threshold to 0.05 to get a sparser graph.</p>
-<div class="sourceCode" id="cb360"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb360-1"><a href="network-learning.html#cb360-1" tabindex="-1"></a><span class="fu">library</span>(SPRING)</span></code></pre></div>
-<div class="sourceCode" id="cb361"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb361-1"><a href="network-learning.html#cb361-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13075</span>)</span>
-<span id="cb361-2"><a href="network-learning.html#cb361-2" tabindex="-1"></a>spring_est <span class="ot">&lt;-</span> <span class="fu">SPRING</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;counts&quot;</span>)), </span>
-<span id="cb361-3"><a href="network-learning.html#cb361-3" tabindex="-1"></a>                     <span class="at">Rmethod =</span> <span class="st">&quot;approx&quot;</span>, </span>
-<span id="cb361-4"><a href="network-learning.html#cb361-4" tabindex="-1"></a>                     <span class="at">thresh =</span> <span class="fl">0.05</span>,</span>
-<span id="cb361-5"><a href="network-learning.html#cb361-5" tabindex="-1"></a>                     <span class="at">lambdaseq =</span> <span class="st">&quot;data-specific&quot;</span>)</span></code></pre></div>
-<div class="sourceCode" id="cb362"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb362-1"><a href="network-learning.html#cb362-1" tabindex="-1"></a><span class="co"># Get index of the optimal lambda selected by StARS</span></span>
-<span id="cb362-2"><a href="network-learning.html#cb362-2" tabindex="-1"></a>opt.K <span class="ot">&lt;-</span> spring_est<span class="sc">$</span>output<span class="sc">$</span>stars<span class="sc">$</span>opt.index</span>
-<span id="cb362-3"><a href="network-learning.html#cb362-3" tabindex="-1"></a></span>
-<span id="cb362-4"><a href="network-learning.html#cb362-4" tabindex="-1"></a><span class="co"># Store partial correlation matrix belonging to the optimal lambda as matrix</span></span>
-<span id="cb362-5"><a href="network-learning.html#cb362-5" tabindex="-1"></a>spring_cor <span class="ot">&lt;-</span> SpiecEasi<span class="sc">::</span><span class="fu">symBeta</span>(<span class="fu">as.matrix</span>(spring_est<span class="sc">$</span>output<span class="sc">$</span>est<span class="sc">$</span>beta[[opt.K]]))</span>
-<span id="cb362-6"><a href="network-learning.html#cb362-6" tabindex="-1"></a>spring_cor <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(spring_cor)</span>
-<span id="cb362-7"><a href="network-learning.html#cb362-7" tabindex="-1"></a><span class="fu">rownames</span>(spring_cor) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(spring_cor) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(tse)</span>
-<span id="cb362-8"><a href="network-learning.html#cb362-8" tabindex="-1"></a><span class="fu">diag</span>(spring_cor) <span class="ot">&lt;-</span> <span class="dv">1</span></span></code></pre></div>
+<div class="sourceCode" id="cb361"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb361-1"><a href="network-learning.html#cb361-1" tabindex="-1"></a><span class="fu">library</span>(SPRING)</span></code></pre></div>
+<div class="sourceCode" id="cb362"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb362-1"><a href="network-learning.html#cb362-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13075</span>)</span>
+<span id="cb362-2"><a href="network-learning.html#cb362-2" tabindex="-1"></a>spring_est <span class="ot">&lt;-</span> <span class="fu">SPRING</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;counts&quot;</span>)), </span>
+<span id="cb362-3"><a href="network-learning.html#cb362-3" tabindex="-1"></a>                     <span class="at">Rmethod =</span> <span class="st">&quot;approx&quot;</span>, </span>
+<span id="cb362-4"><a href="network-learning.html#cb362-4" tabindex="-1"></a>                     <span class="at">thresh =</span> <span class="fl">0.05</span>,</span>
+<span id="cb362-5"><a href="network-learning.html#cb362-5" tabindex="-1"></a>                     <span class="at">lambdaseq =</span> <span class="st">&quot;data-specific&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb363"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb363-1"><a href="network-learning.html#cb363-1" tabindex="-1"></a><span class="co"># Get index of the optimal lambda selected by StARS</span></span>
+<span id="cb363-2"><a href="network-learning.html#cb363-2" tabindex="-1"></a>opt.K <span class="ot">&lt;-</span> spring_est<span class="sc">$</span>output<span class="sc">$</span>stars<span class="sc">$</span>opt.index</span>
+<span id="cb363-3"><a href="network-learning.html#cb363-3" tabindex="-1"></a></span>
+<span id="cb363-4"><a href="network-learning.html#cb363-4" tabindex="-1"></a><span class="co"># Store partial correlation matrix belonging to the optimal lambda as matrix</span></span>
+<span id="cb363-5"><a href="network-learning.html#cb363-5" tabindex="-1"></a>spring_cor <span class="ot">&lt;-</span> SpiecEasi<span class="sc">::</span><span class="fu">symBeta</span>(<span class="fu">as.matrix</span>(spring_est<span class="sc">$</span>output<span class="sc">$</span>est<span class="sc">$</span>beta[[opt.K]]))</span>
+<span id="cb363-6"><a href="network-learning.html#cb363-6" tabindex="-1"></a>spring_cor <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(spring_cor)</span>
+<span id="cb363-7"><a href="network-learning.html#cb363-7" tabindex="-1"></a><span class="fu">rownames</span>(spring_cor) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(spring_cor) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(tse)</span>
+<span id="cb363-8"><a href="network-learning.html#cb363-8" tabindex="-1"></a><span class="fu">diag</span>(spring_cor) <span class="ot">&lt;-</span> <span class="dv">1</span></span></code></pre></div>
 <p>As explained in Section <a href="network-learning.html#network-learning-workflow">12.1.1</a>, the estimated associations are sparsified, transformed into dissimilarities, and finally transformed into similarities, which are the adjacency values. We write a function for these steps, which will be reused later.</p>
 <p>Since <code>SPRING</code> already includes a sparsification approach, the <code>thresh</code> argument is not needed here, but will be needed in Section <a href="network-learning.html#more-about-association">12.6</a> for other association measures.</p>
 <p>To be consistent with the workflow, we provide two dissimilarity transformations: “signed” and “unsigned” (see Section <a href="network-learning.html#network-learning-workflow">12.1.1</a> for an explanation). These transformations were introduced by <span class="citation">Dongen and Enright (2012)</span>. We use the “signed” transformation in our examples so that strongly negatively associated genera have low edge weights.</p>
 <p>The output of the function is an <code>igraph</code> object, which can be plotted and analyzed using functions from the <code>igraph</code> package.</p>
-<div class="sourceCode" id="cb363"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb363-1"><a href="network-learning.html#cb363-1" tabindex="-1"></a><span class="co"># Arguments:</span></span>
-<span id="cb363-2"><a href="network-learning.html#cb363-2" tabindex="-1"></a><span class="co"># - assoMat: association matrix</span></span>
-<span id="cb363-3"><a href="network-learning.html#cb363-3" tabindex="-1"></a><span class="co"># - threshold: associations below the threshold are set to zero</span></span>
-<span id="cb363-4"><a href="network-learning.html#cb363-4" tabindex="-1"></a><span class="co"># - dissTrans: dissimilarity transformation (&quot;signed&quot; or &quot;unsigned&quot;)</span></span>
-<span id="cb363-5"><a href="network-learning.html#cb363-5" tabindex="-1"></a></span>
-<span id="cb363-6"><a href="network-learning.html#cb363-6" tabindex="-1"></a>transform_asso <span class="ot">&lt;-</span> <span class="cf">function</span>(assoMat, <span class="at">thresh =</span> <span class="cn">NULL</span>, <span class="at">dissTrans =</span> <span class="st">&quot;signed&quot;</span>) {</span>
-<span id="cb363-7"><a href="network-learning.html#cb363-7" tabindex="-1"></a>  <span class="co"># Sparsification</span></span>
-<span id="cb363-8"><a href="network-learning.html#cb363-8" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(thresh)) {</span>
-<span id="cb363-9"><a href="network-learning.html#cb363-9" tabindex="-1"></a>    assoMat[<span class="fu">abs</span>(assoMat) <span class="sc">&lt;</span> thresh] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb363-10"><a href="network-learning.html#cb363-10" tabindex="-1"></a>  }</span>
-<span id="cb363-11"><a href="network-learning.html#cb363-11" tabindex="-1"></a>  </span>
-<span id="cb363-12"><a href="network-learning.html#cb363-12" tabindex="-1"></a>  <span class="co"># Compute dissimilarity matrix</span></span>
-<span id="cb363-13"><a href="network-learning.html#cb363-13" tabindex="-1"></a>  <span class="cf">if</span> (dissTrans <span class="sc">==</span> <span class="st">&quot;signed&quot;</span>) {</span>
-<span id="cb363-14"><a href="network-learning.html#cb363-14" tabindex="-1"></a>    dissMat <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fl">0.5</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> assoMat))</span>
-<span id="cb363-15"><a href="network-learning.html#cb363-15" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb363-16"><a href="network-learning.html#cb363-16" tabindex="-1"></a>    dissMat <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="dv">1</span> <span class="sc">-</span> assoMat<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb363-17"><a href="network-learning.html#cb363-17" tabindex="-1"></a>  }</span>
-<span id="cb363-18"><a href="network-learning.html#cb363-18" tabindex="-1"></a>  </span>
-<span id="cb363-19"><a href="network-learning.html#cb363-19" tabindex="-1"></a>  <span class="co"># Dissimilarity between nodes with zero correlation is set to 1</span></span>
-<span id="cb363-20"><a href="network-learning.html#cb363-20" tabindex="-1"></a>  <span class="co"># (these nodes are unconnected and thus should have maximum dissimilarity)</span></span>
-<span id="cb363-21"><a href="network-learning.html#cb363-21" tabindex="-1"></a>  dissMat[assoMat <span class="sc">==</span> <span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb363-22"><a href="network-learning.html#cb363-22" tabindex="-1"></a>  </span>
-<span id="cb363-23"><a href="network-learning.html#cb363-23" tabindex="-1"></a>  <span class="co"># Compute similarity matrix</span></span>
-<span id="cb363-24"><a href="network-learning.html#cb363-24" tabindex="-1"></a>  simMat <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> dissMat</span>
-<span id="cb363-25"><a href="network-learning.html#cb363-25" tabindex="-1"></a>  </span>
-<span id="cb363-26"><a href="network-learning.html#cb363-26" tabindex="-1"></a>  <span class="co"># Turn into igraph object</span></span>
-<span id="cb363-27"><a href="network-learning.html#cb363-27" tabindex="-1"></a>  graphObj <span class="ot">&lt;-</span> SpiecEasi<span class="sc">::</span><span class="fu">adj2igraph</span>(simMat)</span>
-<span id="cb363-28"><a href="network-learning.html#cb363-28" tabindex="-1"></a>  </span>
-<span id="cb363-29"><a href="network-learning.html#cb363-29" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">graph =</span> graphObj, <span class="at">adja =</span> simMat, <span class="at">asso =</span> assoMat, <span class="at">diss =</span> dissMat))</span>
-<span id="cb363-30"><a href="network-learning.html#cb363-30" tabindex="-1"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb364"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb364-1"><a href="network-learning.html#cb364-1" tabindex="-1"></a><span class="co"># Create graph object</span></span>
-<span id="cb364-2"><a href="network-learning.html#cb364-2" tabindex="-1"></a>spring_graph <span class="ot">&lt;-</span> <span class="fu">transform_asso</span>(spring_cor)<span class="sc">$</span>graph</span></code></pre></div>
+<div class="sourceCode" id="cb364"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb364-1"><a href="network-learning.html#cb364-1" tabindex="-1"></a><span class="co"># Arguments:</span></span>
+<span id="cb364-2"><a href="network-learning.html#cb364-2" tabindex="-1"></a><span class="co"># - assoMat: association matrix</span></span>
+<span id="cb364-3"><a href="network-learning.html#cb364-3" tabindex="-1"></a><span class="co"># - threshold: associations below the threshold are set to zero</span></span>
+<span id="cb364-4"><a href="network-learning.html#cb364-4" tabindex="-1"></a><span class="co"># - dissTrans: dissimilarity transformation (&quot;signed&quot; or &quot;unsigned&quot;)</span></span>
+<span id="cb364-5"><a href="network-learning.html#cb364-5" tabindex="-1"></a></span>
+<span id="cb364-6"><a href="network-learning.html#cb364-6" tabindex="-1"></a>transform_asso <span class="ot">&lt;-</span> <span class="cf">function</span>(assoMat, <span class="at">thresh =</span> <span class="cn">NULL</span>, <span class="at">dissTrans =</span> <span class="st">&quot;signed&quot;</span>) {</span>
+<span id="cb364-7"><a href="network-learning.html#cb364-7" tabindex="-1"></a>  <span class="co"># Sparsification</span></span>
+<span id="cb364-8"><a href="network-learning.html#cb364-8" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(thresh)) {</span>
+<span id="cb364-9"><a href="network-learning.html#cb364-9" tabindex="-1"></a>    assoMat[<span class="fu">abs</span>(assoMat) <span class="sc">&lt;</span> thresh] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb364-10"><a href="network-learning.html#cb364-10" tabindex="-1"></a>  }</span>
+<span id="cb364-11"><a href="network-learning.html#cb364-11" tabindex="-1"></a>  </span>
+<span id="cb364-12"><a href="network-learning.html#cb364-12" tabindex="-1"></a>  <span class="co"># Compute dissimilarity matrix</span></span>
+<span id="cb364-13"><a href="network-learning.html#cb364-13" tabindex="-1"></a>  <span class="cf">if</span> (dissTrans <span class="sc">==</span> <span class="st">&quot;signed&quot;</span>) {</span>
+<span id="cb364-14"><a href="network-learning.html#cb364-14" tabindex="-1"></a>    dissMat <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fl">0.5</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> assoMat))</span>
+<span id="cb364-15"><a href="network-learning.html#cb364-15" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb364-16"><a href="network-learning.html#cb364-16" tabindex="-1"></a>    dissMat <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="dv">1</span> <span class="sc">-</span> assoMat<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb364-17"><a href="network-learning.html#cb364-17" tabindex="-1"></a>  }</span>
+<span id="cb364-18"><a href="network-learning.html#cb364-18" tabindex="-1"></a>  </span>
+<span id="cb364-19"><a href="network-learning.html#cb364-19" tabindex="-1"></a>  <span class="co"># Dissimilarity between nodes with zero correlation is set to 1</span></span>
+<span id="cb364-20"><a href="network-learning.html#cb364-20" tabindex="-1"></a>  <span class="co"># (these nodes are unconnected and thus should have maximum dissimilarity)</span></span>
+<span id="cb364-21"><a href="network-learning.html#cb364-21" tabindex="-1"></a>  dissMat[assoMat <span class="sc">==</span> <span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb364-22"><a href="network-learning.html#cb364-22" tabindex="-1"></a>  </span>
+<span id="cb364-23"><a href="network-learning.html#cb364-23" tabindex="-1"></a>  <span class="co"># Compute similarity matrix</span></span>
+<span id="cb364-24"><a href="network-learning.html#cb364-24" tabindex="-1"></a>  simMat <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> dissMat</span>
+<span id="cb364-25"><a href="network-learning.html#cb364-25" tabindex="-1"></a>  </span>
+<span id="cb364-26"><a href="network-learning.html#cb364-26" tabindex="-1"></a>  <span class="co"># Turn into igraph object</span></span>
+<span id="cb364-27"><a href="network-learning.html#cb364-27" tabindex="-1"></a>  graphObj <span class="ot">&lt;-</span> SpiecEasi<span class="sc">::</span><span class="fu">adj2igraph</span>(simMat)</span>
+<span id="cb364-28"><a href="network-learning.html#cb364-28" tabindex="-1"></a>  </span>
+<span id="cb364-29"><a href="network-learning.html#cb364-29" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">graph =</span> graphObj, <span class="at">adja =</span> simMat, <span class="at">asso =</span> assoMat, <span class="at">diss =</span> dissMat))</span>
+<span id="cb364-30"><a href="network-learning.html#cb364-30" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb365"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb365-1"><a href="network-learning.html#cb365-1" tabindex="-1"></a><span class="co"># Create graph object</span></span>
+<span id="cb365-2"><a href="network-learning.html#cb365-2" tabindex="-1"></a>spring_graph <span class="ot">&lt;-</span> <span class="fu">transform_asso</span>(spring_cor)<span class="sc">$</span>graph</span></code></pre></div>
 </div>
 <div id="netcomi-spring" class="section level3 hasAnchor" number="12.1.5">
 <h3><span class="header-section-number">12.1.5</span> NetCoMi network<a href="network-learning.html#netcomi-spring" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>The <a href="https://github.com/stefpeschel/NetCoMi">NetCoMi</a> <span class="citation">(Peschel et al. 2021)</span> package is specifically designed to construct, analyze, and compare networks for microbiome data and implements the complete workflow described in Section <a href="network-learning.html#network-learning-workflow">12.1.1</a>. Instead of using several functions for each of the steps, <code>NetCoMi</code> provides a single function for network construction (<code>netConstruct()</code>), so the package streamlines the workflow considerably. The user can choose from a variety of methods for data preprocessing, association estimation, sparsification, and transformation. The returned <code>microNet</code> object can then be passed to <code>netAnalyze()</code> (the network analysis function) so that all necessary information is available for the network analysis workflow.</p>
-<div class="sourceCode" id="cb365"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb365-1"><a href="network-learning.html#cb365-1" tabindex="-1"></a><span class="fu">library</span>(NetCoMi)</span></code></pre></div>
+<div class="sourceCode" id="cb366"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb366-1"><a href="network-learning.html#cb366-1" tabindex="-1"></a><span class="fu">library</span>(NetCoMi)</span></code></pre></div>
 <p>We again use <code>SPRING</code> as one of the association measures available in NetCoMi to construct a conditional dependency graph.</p>
 <p>To demonstrate how taxa are filtered with <code>netConstruct()</code>, we will use the unfiltered <code>tse</code> object this time. The filtering is the same as before: Taxa occurring in less than 20% of the samples are removed.</p>
-<div class="sourceCode" id="cb366"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb366-1"><a href="network-learning.html#cb366-1" tabindex="-1"></a>netcomi_net <span class="ot">&lt;-</span> <span class="fu">netConstruct</span>(tse,</span>
-<span id="cb366-2"><a href="network-learning.html#cb366-2" tabindex="-1"></a>                            <span class="at">taxRank =</span> <span class="st">&quot;genus&quot;</span>,</span>
-<span id="cb366-3"><a href="network-learning.html#cb366-3" tabindex="-1"></a>                            <span class="at">filtTax =</span> <span class="st">&quot;numbSamp&quot;</span>,</span>
-<span id="cb366-4"><a href="network-learning.html#cb366-4" tabindex="-1"></a>                            <span class="at">filtTaxPar =</span> <span class="fu">list</span>(<span class="at">numbSamp =</span> <span class="fl">0.2</span>),</span>
-<span id="cb366-5"><a href="network-learning.html#cb366-5" tabindex="-1"></a>                            <span class="at">measure =</span> <span class="st">&quot;spring&quot;</span>,</span>
-<span id="cb366-6"><a href="network-learning.html#cb366-6" tabindex="-1"></a>                            <span class="at">measurePar =</span> <span class="fu">list</span>(<span class="at">thresh =</span> <span class="fl">0.05</span>,</span>
-<span id="cb366-7"><a href="network-learning.html#cb366-7" tabindex="-1"></a>                                              <span class="at">Rmethod =</span> <span class="st">&quot;approx&quot;</span>),</span>
-<span id="cb366-8"><a href="network-learning.html#cb366-8" tabindex="-1"></a>                            <span class="at">sparsMethod =</span> <span class="st">&quot;none&quot;</span>, </span>
-<span id="cb366-9"><a href="network-learning.html#cb366-9" tabindex="-1"></a>                            <span class="at">dissFunc =</span> <span class="st">&quot;signed&quot;</span>,</span>
-<span id="cb366-10"><a href="network-learning.html#cb366-10" tabindex="-1"></a>                            <span class="at">seed =</span> <span class="dv">13075</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb367"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb367-1"><a href="network-learning.html#cb367-1" tabindex="-1"></a>netcomi_net <span class="ot">&lt;-</span> <span class="fu">netConstruct</span>(tse,</span>
+<span id="cb367-2"><a href="network-learning.html#cb367-2" tabindex="-1"></a>                            <span class="at">taxRank =</span> <span class="st">&quot;genus&quot;</span>,</span>
+<span id="cb367-3"><a href="network-learning.html#cb367-3" tabindex="-1"></a>                            <span class="at">filtTax =</span> <span class="st">&quot;numbSamp&quot;</span>,</span>
+<span id="cb367-4"><a href="network-learning.html#cb367-4" tabindex="-1"></a>                            <span class="at">filtTaxPar =</span> <span class="fu">list</span>(<span class="at">numbSamp =</span> <span class="fl">0.2</span>),</span>
+<span id="cb367-5"><a href="network-learning.html#cb367-5" tabindex="-1"></a>                            <span class="at">measure =</span> <span class="st">&quot;spring&quot;</span>,</span>
+<span id="cb367-6"><a href="network-learning.html#cb367-6" tabindex="-1"></a>                            <span class="at">measurePar =</span> <span class="fu">list</span>(<span class="at">thresh =</span> <span class="fl">0.05</span>,</span>
+<span id="cb367-7"><a href="network-learning.html#cb367-7" tabindex="-1"></a>                                              <span class="at">Rmethod =</span> <span class="st">&quot;approx&quot;</span>),</span>
+<span id="cb367-8"><a href="network-learning.html#cb367-8" tabindex="-1"></a>                            <span class="at">sparsMethod =</span> <span class="st">&quot;none&quot;</span>, </span>
+<span id="cb367-9"><a href="network-learning.html#cb367-9" tabindex="-1"></a>                            <span class="at">dissFunc =</span> <span class="st">&quot;signed&quot;</span>,</span>
+<span id="cb367-10"><a href="network-learning.html#cb367-10" tabindex="-1"></a>                            <span class="at">seed =</span> <span class="dv">13075</span>)</span></code></pre></div>
 <p><code>netConstruct()</code> returns an object of the class <code>microNet</code>, which contains all matrices generated during network construction.</p>
 <p>The object also contains an edge list, giving each edge’s estimated association, dissimilarity, and adjacency. Let’s take a quick look at the edges with the highest and lowest edge weights:</p>
-<div class="sourceCode" id="cb367"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb367-1"><a href="network-learning.html#cb367-1" tabindex="-1"></a>edgelist <span class="ot">&lt;-</span> netcomi_net<span class="sc">$</span>edgelist1[<span class="fu">order</span>(netcomi_net<span class="sc">$</span>edgelist1<span class="sc">$</span>adja, </span>
-<span id="cb367-2"><a href="network-learning.html#cb367-2" tabindex="-1"></a>                                        <span class="at">decreasing =</span> <span class="cn">TRUE</span>), ]</span>
-<span id="cb367-3"><a href="network-learning.html#cb367-3" tabindex="-1"></a><span class="fu">head</span>(edgelist)</span></code></pre></div>
+<div class="sourceCode" id="cb368"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb368-1"><a href="network-learning.html#cb368-1" tabindex="-1"></a>edgelist <span class="ot">&lt;-</span> netcomi_net<span class="sc">$</span>edgelist1[<span class="fu">order</span>(netcomi_net<span class="sc">$</span>edgelist1<span class="sc">$</span>adja, </span>
+<span id="cb368-2"><a href="network-learning.html#cb368-2" tabindex="-1"></a>                                        <span class="at">decreasing =</span> <span class="cn">TRUE</span>), ]</span>
+<span id="cb368-3"><a href="network-learning.html#cb368-3" tabindex="-1"></a><span class="fu">head</span>(edgelist)</span></code></pre></div>
 <pre><code>##                 v1                    v2   asso   diss   adja
 ## 73     Citrobacter           Escherichia 0.3682 0.5621 0.4379
 ## 63    Buttiauxella              Serratia 0.2426 0.6154 0.3846
@@ -772,7 +773,7 @@ Figure 12.1: The typical input is a <span class="math inline">\(p\)</span> x <sp
 ## 19        Algicola           Siccibacter 0.2193 0.6248 0.3752
 ## 111     Haliangium          Marinobacter 0.2148 0.6266 0.3734
 ## 143 Planomicrobium         Virgibacillus 0.2006 0.6322 0.3678</code></pre>
-<div class="sourceCode" id="cb369"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb369-1"><a href="network-learning.html#cb369-1" tabindex="-1"></a><span class="fu">tail</span>(edgelist)</span></code></pre></div>
+<div class="sourceCode" id="cb370"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb370-1"><a href="network-learning.html#cb370-1" tabindex="-1"></a><span class="fu">tail</span>(edgelist)</span></code></pre></div>
 <pre><code>##                v1             v2       asso   diss   adja
 ## 132 Mycobacterium Salinibacillus  0.0017483 0.7065 0.2935
 ## 24      Amphritea    Providencia  0.0014085 0.7066 0.2934
@@ -781,7 +782,7 @@ Figure 12.1: The typical input is a <span class="math inline">\(p\)</span> x <sp
 ## 17       Algicola     Lysobacter  0.0005191 0.7069 0.2931
 ## 95   Enterobacter     Janibacter -0.0013921 0.7076 0.2924</code></pre>
 <p>As before, the adjacency matrix is converted into an <code>igraph</code> object. Further steps like sparsification and transformation are not necessary because they are done internally by <code>netConstruct()</code>.</p>
-<div class="sourceCode" id="cb371"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb371-1"><a href="network-learning.html#cb371-1" tabindex="-1"></a>netcomi_graph <span class="ot">&lt;-</span> SpiecEasi<span class="sc">::</span><span class="fu">adj2igraph</span>(<span class="fu">abs</span>(netcomi_net<span class="sc">$</span>adjaMat1))</span></code></pre></div>
+<div class="sourceCode" id="cb372"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb372-1"><a href="network-learning.html#cb372-1" tabindex="-1"></a>netcomi_graph <span class="ot">&lt;-</span> SpiecEasi<span class="sc">::</span><span class="fu">adj2igraph</span>(<span class="fu">abs</span>(netcomi_net<span class="sc">$</span>adjaMat1))</span></code></pre></div>
 </div>
 </div>
 <div id="network-analysis" class="section level2 hasAnchor" number="12.2">
@@ -793,37 +794,37 @@ Figure 12.1: The typical input is a <span class="math inline">\(p\)</span> x <sp
 <p>We use the Fruchterman-Reingold layout (a force-directed layout) for node placement. By placing strongly connected nodes close together and those with low edge weight far apart, this layout results in an easy-to-read network plot.</p>
 <p>The node sizes are proportional to a taxon’s log10-transformed abundance, which we previously added to the <code>tse</code> object, averaged across all samples. The values are rescaled to be visually distinguishable.</p>
 <p>Since we created two graph objects, one with SPRING and one with NetCoMi, we plot them side by side. The two plots should be identical.</p>
-<div class="sourceCode" id="cb372"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb372-1"><a href="network-learning.html#cb372-1" tabindex="-1"></a><span class="fu">library</span>(igraph)</span></code></pre></div>
-<div class="sourceCode" id="cb373"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb373-1"><a href="network-learning.html#cb373-1" tabindex="-1"></a><span class="co"># Node sizes</span></span>
-<span id="cb373-2"><a href="network-learning.html#cb373-2" tabindex="-1"></a>vsize <span class="ot">&lt;-</span> (<span class="fu">colMeans</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;log10&quot;</span>))) <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="dv">3</span></span>
-<span id="cb373-3"><a href="network-learning.html#cb373-3" tabindex="-1"></a></span>
-<span id="cb373-4"><a href="network-learning.html#cb373-4" tabindex="-1"></a><span class="co"># Fruchterman-Reingold layout from igraph package</span></span>
-<span id="cb373-5"><a href="network-learning.html#cb373-5" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13075</span>)</span>
-<span id="cb373-6"><a href="network-learning.html#cb373-6" tabindex="-1"></a>lay_fr <span class="ot">&lt;-</span> <span class="fu">layout_with_fr</span>(spring_graph)</span>
-<span id="cb373-7"><a href="network-learning.html#cb373-7" tabindex="-1"></a></span>
-<span id="cb373-8"><a href="network-learning.html#cb373-8" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
-<span id="cb373-9"><a href="network-learning.html#cb373-9" tabindex="-1"></a><span class="fu">plot</span>(spring_graph, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize, </span>
-<span id="cb373-10"><a href="network-learning.html#cb373-10" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="st">&quot;SPRING network&quot;</span>)</span>
-<span id="cb373-11"><a href="network-learning.html#cb373-11" tabindex="-1"></a><span class="fu">plot</span>(netcomi_graph, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize, </span>
-<span id="cb373-12"><a href="network-learning.html#cb373-12" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="st">&quot;NetCoMi network</span><span class="sc">\n</span><span class="st">(with SPRING associations)&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb373"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb373-1"><a href="network-learning.html#cb373-1" tabindex="-1"></a><span class="fu">library</span>(igraph)</span></code></pre></div>
+<div class="sourceCode" id="cb374"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb374-1"><a href="network-learning.html#cb374-1" tabindex="-1"></a><span class="co"># Node sizes</span></span>
+<span id="cb374-2"><a href="network-learning.html#cb374-2" tabindex="-1"></a>vsize <span class="ot">&lt;-</span> (<span class="fu">colMeans</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;log10&quot;</span>))) <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="dv">3</span></span>
+<span id="cb374-3"><a href="network-learning.html#cb374-3" tabindex="-1"></a></span>
+<span id="cb374-4"><a href="network-learning.html#cb374-4" tabindex="-1"></a><span class="co"># Fruchterman-Reingold layout from igraph package</span></span>
+<span id="cb374-5"><a href="network-learning.html#cb374-5" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13075</span>)</span>
+<span id="cb374-6"><a href="network-learning.html#cb374-6" tabindex="-1"></a>lay_fr <span class="ot">&lt;-</span> <span class="fu">layout_with_fr</span>(spring_graph)</span>
+<span id="cb374-7"><a href="network-learning.html#cb374-7" tabindex="-1"></a></span>
+<span id="cb374-8"><a href="network-learning.html#cb374-8" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb374-9"><a href="network-learning.html#cb374-9" tabindex="-1"></a><span class="fu">plot</span>(spring_graph, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize, </span>
+<span id="cb374-10"><a href="network-learning.html#cb374-10" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="st">&quot;SPRING network&quot;</span>)</span>
+<span id="cb374-11"><a href="network-learning.html#cb374-11" tabindex="-1"></a><span class="fu">plot</span>(netcomi_graph, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize, </span>
+<span id="cb374-12"><a href="network-learning.html#cb374-12" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="st">&quot;NetCoMi network</span><span class="sc">\n</span><span class="st">(with SPRING associations)&quot;</span>)</span></code></pre></div>
 <p><img src="60_network_learning_files/figure-html/plots_spring_netcomi-1.png" width="768" /></p>
 </div>
 <div id="centrality-measures" class="section level3 hasAnchor" number="12.2.2">
 <h3><span class="header-section-number">12.2.2</span> Centrality measures<a href="network-learning.html#centrality-measures" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Centrality measures express the importance of nodes within the network. Common measures are the degree, betweenness, closeness, and eigenvector centrality. The <code>igraph</code> package provides functions to compute these measures. We wrap a function around the code to reuse it later.</p>
-<div class="sourceCode" id="cb374"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb374-1"><a href="network-learning.html#cb374-1" tabindex="-1"></a>get_centr <span class="ot">&lt;-</span> <span class="cf">function</span>(graph_obj) {</span>
-<span id="cb374-2"><a href="network-learning.html#cb374-2" tabindex="-1"></a>  <span class="co"># We access igraph directly with &quot;::&quot; because there are more packages loaded in </span></span>
-<span id="cb374-3"><a href="network-learning.html#cb374-3" tabindex="-1"></a>  <span class="co"># this chapter that contain a degree() function.</span></span>
-<span id="cb374-4"><a href="network-learning.html#cb374-4" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Degree =</span> igraph<span class="sc">::</span><span class="fu">degree</span>(graph_obj))</span>
-<span id="cb374-5"><a href="network-learning.html#cb374-5" tabindex="-1"></a>  df<span class="sc">$</span>Betweenness <span class="ot">&lt;-</span> <span class="fu">betweenness</span>(graph_obj)</span>
-<span id="cb374-6"><a href="network-learning.html#cb374-6" tabindex="-1"></a>  df<span class="sc">$</span>Closeness <span class="ot">&lt;-</span> <span class="fu">closeness</span>(graph_obj, <span class="at">normalized =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb374-7"><a href="network-learning.html#cb374-7" tabindex="-1"></a>  df<span class="sc">$</span>Eigenvector <span class="ot">&lt;-</span> <span class="fu">eigen_centrality</span>(graph_obj)<span class="sc">$</span>vector</span>
-<span id="cb374-8"><a href="network-learning.html#cb374-8" tabindex="-1"></a>  <span class="fu">return</span>(df)</span>
-<span id="cb374-9"><a href="network-learning.html#cb374-9" tabindex="-1"></a>}</span>
-<span id="cb374-10"><a href="network-learning.html#cb374-10" tabindex="-1"></a></span>
-<span id="cb374-11"><a href="network-learning.html#cb374-11" tabindex="-1"></a>centr_df <span class="ot">&lt;-</span> <span class="fu">get_centr</span>(spring_graph)</span>
-<span id="cb374-12"><a href="network-learning.html#cb374-12" tabindex="-1"></a><span class="fu">rownames</span>(centr_df) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(spring_cor)</span>
-<span id="cb374-13"><a href="network-learning.html#cb374-13" tabindex="-1"></a><span class="fu">head</span>(centr_df, <span class="dv">15</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb375"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb375-1"><a href="network-learning.html#cb375-1" tabindex="-1"></a>get_centr <span class="ot">&lt;-</span> <span class="cf">function</span>(graph_obj) {</span>
+<span id="cb375-2"><a href="network-learning.html#cb375-2" tabindex="-1"></a>  <span class="co"># We access igraph directly with &quot;::&quot; because there are more packages loaded in </span></span>
+<span id="cb375-3"><a href="network-learning.html#cb375-3" tabindex="-1"></a>  <span class="co"># this chapter that contain a degree() function.</span></span>
+<span id="cb375-4"><a href="network-learning.html#cb375-4" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Degree =</span> igraph<span class="sc">::</span><span class="fu">degree</span>(graph_obj))</span>
+<span id="cb375-5"><a href="network-learning.html#cb375-5" tabindex="-1"></a>  df<span class="sc">$</span>Betweenness <span class="ot">&lt;-</span> <span class="fu">betweenness</span>(graph_obj)</span>
+<span id="cb375-6"><a href="network-learning.html#cb375-6" tabindex="-1"></a>  df<span class="sc">$</span>Closeness <span class="ot">&lt;-</span> <span class="fu">closeness</span>(graph_obj, <span class="at">normalized =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb375-7"><a href="network-learning.html#cb375-7" tabindex="-1"></a>  df<span class="sc">$</span>Eigenvector <span class="ot">&lt;-</span> <span class="fu">eigen_centrality</span>(graph_obj)<span class="sc">$</span>vector</span>
+<span id="cb375-8"><a href="network-learning.html#cb375-8" tabindex="-1"></a>  <span class="fu">return</span>(df)</span>
+<span id="cb375-9"><a href="network-learning.html#cb375-9" tabindex="-1"></a>}</span>
+<span id="cb375-10"><a href="network-learning.html#cb375-10" tabindex="-1"></a></span>
+<span id="cb375-11"><a href="network-learning.html#cb375-11" tabindex="-1"></a>centr_df <span class="ot">&lt;-</span> <span class="fu">get_centr</span>(spring_graph)</span>
+<span id="cb375-12"><a href="network-learning.html#cb375-12" tabindex="-1"></a><span class="fu">rownames</span>(centr_df) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(spring_cor)</span>
+<span id="cb375-13"><a href="network-learning.html#cb375-13" tabindex="-1"></a><span class="fu">head</span>(centr_df, <span class="dv">15</span>)</span></code></pre></div>
 <pre><code>##                  Degree Betweenness Closeness Eigenvector
 ## Abyssicoccus          0           0       NaN   9.278e-18
 ## Acidaminococcus       2           0    0.6464   1.862e-01
@@ -846,17 +847,17 @@ Figure 12.1: The typical input is a <span class="math inline">\(p\)</span> x <sp
 <h3><span class="header-section-number">12.2.3</span> Scale node sizes by centrality<a href="network-learning.html#scale-node-sizes-by-centrality" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Centrality measures can be visualized in the network plot by scaling the node sizes according to one of these measures. We plot the <code>Spring</code> graph using the same layout as before and with the node sizes scaled according to all four centrality measures.</p>
 <p>Of the four centrality measures, only the degree has a range suitable to be used as node size. The other centrality measures must be rescaled because their range is either too small or too large. The following scaling is a suggestion that works for this example. The values might be adapted for other data sets.</p>
-<div class="sourceCode" id="cb376"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb376-1"><a href="network-learning.html#cb376-1" tabindex="-1"></a>get_vsizes <span class="ot">&lt;-</span> <span class="cf">function</span>(centr_df) {</span>
-<span id="cb376-2"><a href="network-learning.html#cb376-2" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(centr_df)</span>
-<span id="cb376-3"><a href="network-learning.html#cb376-3" tabindex="-1"></a>  df[, <span class="st">&quot;Betweenness&quot;</span>] <span class="ot">&lt;-</span> <span class="fu">log</span>(df[, <span class="st">&quot;Betweenness&quot;</span>])</span>
-<span id="cb376-4"><a href="network-learning.html#cb376-4" tabindex="-1"></a>  df[, <span class="st">&quot;Closeness&quot;</span>] <span class="ot">&lt;-</span> df[, <span class="st">&quot;Closeness&quot;</span>] <span class="sc">*</span> <span class="dv">10</span></span>
-<span id="cb376-5"><a href="network-learning.html#cb376-5" tabindex="-1"></a>  df[, <span class="st">&quot;Eigenvector&quot;</span>] <span class="ot">&lt;-</span> df[, <span class="st">&quot;Eigenvector&quot;</span>] <span class="sc">*</span> <span class="dv">10</span></span>
-<span id="cb376-6"><a href="network-learning.html#cb376-6" tabindex="-1"></a>  df[<span class="fu">is.infinite</span>(df) <span class="sc">|</span> <span class="fu">is.na</span>(df)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb376-7"><a href="network-learning.html#cb376-7" tabindex="-1"></a>  <span class="fu">return</span>(df)</span>
-<span id="cb376-8"><a href="network-learning.html#cb376-8" tabindex="-1"></a>}</span>
-<span id="cb376-9"><a href="network-learning.html#cb376-9" tabindex="-1"></a></span>
-<span id="cb376-10"><a href="network-learning.html#cb376-10" tabindex="-1"></a>vsize_df <span class="ot">&lt;-</span> <span class="fu">get_vsizes</span>(centr_df )</span>
-<span id="cb376-11"><a href="network-learning.html#cb376-11" tabindex="-1"></a><span class="fu">head</span>(vsize_df)</span></code></pre></div>
+<div class="sourceCode" id="cb377"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb377-1"><a href="network-learning.html#cb377-1" tabindex="-1"></a>get_vsizes <span class="ot">&lt;-</span> <span class="cf">function</span>(centr_df) {</span>
+<span id="cb377-2"><a href="network-learning.html#cb377-2" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(centr_df)</span>
+<span id="cb377-3"><a href="network-learning.html#cb377-3" tabindex="-1"></a>  df[, <span class="st">&quot;Betweenness&quot;</span>] <span class="ot">&lt;-</span> <span class="fu">log</span>(df[, <span class="st">&quot;Betweenness&quot;</span>])</span>
+<span id="cb377-4"><a href="network-learning.html#cb377-4" tabindex="-1"></a>  df[, <span class="st">&quot;Closeness&quot;</span>] <span class="ot">&lt;-</span> df[, <span class="st">&quot;Closeness&quot;</span>] <span class="sc">*</span> <span class="dv">10</span></span>
+<span id="cb377-5"><a href="network-learning.html#cb377-5" tabindex="-1"></a>  df[, <span class="st">&quot;Eigenvector&quot;</span>] <span class="ot">&lt;-</span> df[, <span class="st">&quot;Eigenvector&quot;</span>] <span class="sc">*</span> <span class="dv">10</span></span>
+<span id="cb377-6"><a href="network-learning.html#cb377-6" tabindex="-1"></a>  df[<span class="fu">is.infinite</span>(df) <span class="sc">|</span> <span class="fu">is.na</span>(df)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb377-7"><a href="network-learning.html#cb377-7" tabindex="-1"></a>  <span class="fu">return</span>(df)</span>
+<span id="cb377-8"><a href="network-learning.html#cb377-8" tabindex="-1"></a>}</span>
+<span id="cb377-9"><a href="network-learning.html#cb377-9" tabindex="-1"></a></span>
+<span id="cb377-10"><a href="network-learning.html#cb377-10" tabindex="-1"></a>vsize_df <span class="ot">&lt;-</span> <span class="fu">get_vsizes</span>(centr_df )</span>
+<span id="cb377-11"><a href="network-learning.html#cb377-11" tabindex="-1"></a><span class="fu">head</span>(vsize_df)</span></code></pre></div>
 <pre><code>##                 Degree Betweenness Closeness Eigenvector
 ## Abyssicoccus         0       0.000     0.000   9.278e-17
 ## Acidaminococcus      2       0.000     6.464   1.862e+00
@@ -864,72 +865,72 @@ Figure 12.1: The typical input is a <span class="math inline">\(p\)</span> x <sp
 ## Actinomyces          0       0.000     0.000   9.278e-17
 ## Actinoplanes         2       4.595     5.104   1.099e-01
 ## Aerococcus           0       0.000     0.000   9.278e-17</code></pre>
-<div class="sourceCode" id="cb378"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb378-1"><a href="network-learning.html#cb378-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
-<span id="cb378-2"><a href="network-learning.html#cb378-2" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(centr_df)) {</span>
-<span id="cb378-3"><a href="network-learning.html#cb378-3" tabindex="-1"></a>  <span class="fu">plot</span>(spring_graph, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize_df[, i], </span>
-<span id="cb378-4"><a href="network-learning.html#cb378-4" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="fu">colnames</span>(centr_df)[i])</span>
-<span id="cb378-5"><a href="network-learning.html#cb378-5" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb379"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb379-1"><a href="network-learning.html#cb379-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
+<span id="cb379-2"><a href="network-learning.html#cb379-2" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(centr_df)) {</span>
+<span id="cb379-3"><a href="network-learning.html#cb379-3" tabindex="-1"></a>  <span class="fu">plot</span>(spring_graph, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize_df[, i], </span>
+<span id="cb379-4"><a href="network-learning.html#cb379-4" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="fu">colnames</span>(centr_df)[i])</span>
+<span id="cb379-5"><a href="network-learning.html#cb379-5" tabindex="-1"></a>}</span></code></pre></div>
 <p><img src="60_network_learning_files/figure-html/plots_centrality-1.png" width="960" /></p>
 <p>We observe that the two-node component at the bottom has a much higher closeness centrality than the nodes belonging to the main component of the network. Obviously, closeness centrality as commonly defined is misleading when the network consists of disconnected components. Nodes belonging to smaller components are seen as closer to others than in larger components. To overcome this problem, centrality values, and especially closeness centrality, are often calculated only for the largest connected component (LCC), which we will do below.</p>
-<div class="sourceCode" id="cb379"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb379-1"><a href="network-learning.html#cb379-1" tabindex="-1"></a><span class="co"># Extract the LCC</span></span>
-<span id="cb379-2"><a href="network-learning.html#cb379-2" tabindex="-1"></a>dg_net <span class="ot">&lt;-</span> igraph<span class="sc">::</span><span class="fu">decompose.graph</span>(spring_graph)</span>
-<span id="cb379-3"><a href="network-learning.html#cb379-3" tabindex="-1"></a>idx_lcc <span class="ot">&lt;-</span> <span class="fu">which.max</span>(<span class="fu">unlist</span>(<span class="fu">lapply</span>(dg_net, <span class="cf">function</span>(x) <span class="fu">length</span>(igraph<span class="sc">::</span><span class="fu">V</span>(x)))))</span>
-<span id="cb379-4"><a href="network-learning.html#cb379-4" tabindex="-1"></a>lcc <span class="ot">&lt;-</span> dg_net[[idx_lcc]]</span>
-<span id="cb379-5"><a href="network-learning.html#cb379-5" tabindex="-1"></a></span>
-<span id="cb379-6"><a href="network-learning.html#cb379-6" tabindex="-1"></a><span class="co"># Compute centrality values for the LCC</span></span>
-<span id="cb379-7"><a href="network-learning.html#cb379-7" tabindex="-1"></a>centr_df_lcc <span class="ot">&lt;-</span> <span class="fu">get_centr</span>(lcc)</span>
-<span id="cb379-8"><a href="network-learning.html#cb379-8" tabindex="-1"></a></span>
-<span id="cb379-9"><a href="network-learning.html#cb379-9" tabindex="-1"></a><span class="co"># Replace centrality values by those for LCC and set all others to zero</span></span>
-<span id="cb379-10"><a href="network-learning.html#cb379-10" tabindex="-1"></a>lcc_nodes <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">rownames</span>(centr_df_lcc))</span>
-<span id="cb379-11"><a href="network-learning.html#cb379-11" tabindex="-1"></a>centr_df[lcc_nodes, ] <span class="ot">&lt;-</span> centr_df_lcc</span>
-<span id="cb379-12"><a href="network-learning.html#cb379-12" tabindex="-1"></a>centr_df[<span class="sc">-</span>lcc_nodes, ] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb379-13"><a href="network-learning.html#cb379-13" tabindex="-1"></a></span>
-<span id="cb379-14"><a href="network-learning.html#cb379-14" tabindex="-1"></a><span class="co"># Node/vertex sizes</span></span>
-<span id="cb379-15"><a href="network-learning.html#cb379-15" tabindex="-1"></a>vsize_df <span class="ot">&lt;-</span> <span class="fu">get_vsizes</span>(centr_df)</span></code></pre></div>
-<div class="sourceCode" id="cb380"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb380-1"><a href="network-learning.html#cb380-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
-<span id="cb380-2"><a href="network-learning.html#cb380-2" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(centr_df)) {</span>
-<span id="cb380-3"><a href="network-learning.html#cb380-3" tabindex="-1"></a>  <span class="fu">plot</span>(spring_graph, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize_df[, i], </span>
-<span id="cb380-4"><a href="network-learning.html#cb380-4" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="fu">colnames</span>(centr_df)[i])</span>
-<span id="cb380-5"><a href="network-learning.html#cb380-5" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb380"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb380-1"><a href="network-learning.html#cb380-1" tabindex="-1"></a><span class="co"># Extract the LCC</span></span>
+<span id="cb380-2"><a href="network-learning.html#cb380-2" tabindex="-1"></a>dg_net <span class="ot">&lt;-</span> igraph<span class="sc">::</span><span class="fu">decompose.graph</span>(spring_graph)</span>
+<span id="cb380-3"><a href="network-learning.html#cb380-3" tabindex="-1"></a>idx_lcc <span class="ot">&lt;-</span> <span class="fu">which.max</span>(<span class="fu">unlist</span>(<span class="fu">lapply</span>(dg_net, <span class="cf">function</span>(x) <span class="fu">length</span>(igraph<span class="sc">::</span><span class="fu">V</span>(x)))))</span>
+<span id="cb380-4"><a href="network-learning.html#cb380-4" tabindex="-1"></a>lcc <span class="ot">&lt;-</span> dg_net[[idx_lcc]]</span>
+<span id="cb380-5"><a href="network-learning.html#cb380-5" tabindex="-1"></a></span>
+<span id="cb380-6"><a href="network-learning.html#cb380-6" tabindex="-1"></a><span class="co"># Compute centrality values for the LCC</span></span>
+<span id="cb380-7"><a href="network-learning.html#cb380-7" tabindex="-1"></a>centr_df_lcc <span class="ot">&lt;-</span> <span class="fu">get_centr</span>(lcc)</span>
+<span id="cb380-8"><a href="network-learning.html#cb380-8" tabindex="-1"></a></span>
+<span id="cb380-9"><a href="network-learning.html#cb380-9" tabindex="-1"></a><span class="co"># Replace centrality values by those for LCC and set all others to zero</span></span>
+<span id="cb380-10"><a href="network-learning.html#cb380-10" tabindex="-1"></a>lcc_nodes <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">rownames</span>(centr_df_lcc))</span>
+<span id="cb380-11"><a href="network-learning.html#cb380-11" tabindex="-1"></a>centr_df[lcc_nodes, ] <span class="ot">&lt;-</span> centr_df_lcc</span>
+<span id="cb380-12"><a href="network-learning.html#cb380-12" tabindex="-1"></a>centr_df[<span class="sc">-</span>lcc_nodes, ] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb380-13"><a href="network-learning.html#cb380-13" tabindex="-1"></a></span>
+<span id="cb380-14"><a href="network-learning.html#cb380-14" tabindex="-1"></a><span class="co"># Node/vertex sizes</span></span>
+<span id="cb380-15"><a href="network-learning.html#cb380-15" tabindex="-1"></a>vsize_df <span class="ot">&lt;-</span> <span class="fu">get_vsizes</span>(centr_df)</span></code></pre></div>
+<div class="sourceCode" id="cb381"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb381-1"><a href="network-learning.html#cb381-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
+<span id="cb381-2"><a href="network-learning.html#cb381-2" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(centr_df)) {</span>
+<span id="cb381-3"><a href="network-learning.html#cb381-3" tabindex="-1"></a>  <span class="fu">plot</span>(spring_graph, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize_df[, i], </span>
+<span id="cb381-4"><a href="network-learning.html#cb381-4" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="fu">colnames</span>(centr_df)[i])</span>
+<span id="cb381-5"><a href="network-learning.html#cb381-5" tabindex="-1"></a>}</span></code></pre></div>
 <p><img src="60_network_learning_files/figure-html/plots_centrality_lcc-1.png" width="960" /></p>
 <p>Note that <code>NetCoMi</code> follows a different approach to overcome this problem. <code>NetCoMi</code> uses the definition of closeness centrality proposed by <a href="https://toreopsahl.com/2010/03/20/closeness-centrality-in-networks-with-disconnected-components/">Tore Opsahl</a>, which is well defined even for disconnected networks and assigns higher closeness centrality values to nodes in larger components. This is more intuitive because nodes in a larger component are connected to a larger number of other nodes than in small components.</p>
 </div>
 <div id="degree-distribution" class="section level3 hasAnchor" number="12.2.4">
 <h3><span class="header-section-number">12.2.4</span> Degree distribution<a href="network-learning.html#degree-distribution" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>The degree distribution is another popular measure that expresses the probability distribution of degrees over the entire network. It thus provides insight into the overall network structure. We plot the degree distribution for all four association estimation methods to compare the network structure.</p>
-<div class="sourceCode" id="cb381"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb381-1"><a href="network-learning.html#cb381-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
-<div class="sourceCode" id="cb382"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb382-1"><a href="network-learning.html#cb382-1" tabindex="-1"></a><span class="co"># Compute degree distribution</span></span>
-<span id="cb382-2"><a href="network-learning.html#cb382-2" tabindex="-1"></a>ddist<span class="ot">&lt;-</span> igraph<span class="sc">::</span><span class="fu">degree.distribution</span>(spring_graph)</span>
-<span id="cb382-3"><a href="network-learning.html#cb382-3" tabindex="-1"></a></span>
-<span id="cb382-4"><a href="network-learning.html#cb382-4" tabindex="-1"></a><span class="co"># Data frame needed for ggplot2</span></span>
-<span id="cb382-5"><a href="network-learning.html#cb382-5" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Degree =</span> <span class="fu">as.factor</span>((<span class="fu">seq_along</span>(ddist)) <span class="sc">-</span> <span class="dv">1</span>),</span>
-<span id="cb382-6"><a href="network-learning.html#cb382-6" tabindex="-1"></a>                 <span class="at">Fraction =</span> ddist)</span>
-<span id="cb382-7"><a href="network-learning.html#cb382-7" tabindex="-1"></a></span>
-<span id="cb382-8"><a href="network-learning.html#cb382-8" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> df, <span class="fu">aes</span>(<span class="at">x =</span> Degree, <span class="at">y =</span> Fraction, <span class="at">group =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb382-9"><a href="network-learning.html#cb382-9" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb382-10"><a href="network-learning.html#cb382-10" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb382-11"><a href="network-learning.html#cb382-11" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb382"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb382-1"><a href="network-learning.html#cb382-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
+<div class="sourceCode" id="cb383"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb383-1"><a href="network-learning.html#cb383-1" tabindex="-1"></a><span class="co"># Compute degree distribution</span></span>
+<span id="cb383-2"><a href="network-learning.html#cb383-2" tabindex="-1"></a>ddist<span class="ot">&lt;-</span> igraph<span class="sc">::</span><span class="fu">degree.distribution</span>(spring_graph)</span>
+<span id="cb383-3"><a href="network-learning.html#cb383-3" tabindex="-1"></a></span>
+<span id="cb383-4"><a href="network-learning.html#cb383-4" tabindex="-1"></a><span class="co"># Data frame needed for ggplot2</span></span>
+<span id="cb383-5"><a href="network-learning.html#cb383-5" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Degree =</span> <span class="fu">as.factor</span>((<span class="fu">seq_along</span>(ddist)) <span class="sc">-</span> <span class="dv">1</span>),</span>
+<span id="cb383-6"><a href="network-learning.html#cb383-6" tabindex="-1"></a>                 <span class="at">Fraction =</span> ddist)</span>
+<span id="cb383-7"><a href="network-learning.html#cb383-7" tabindex="-1"></a></span>
+<span id="cb383-8"><a href="network-learning.html#cb383-8" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> df, <span class="fu">aes</span>(<span class="at">x =</span> Degree, <span class="at">y =</span> Fraction, <span class="at">group =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb383-9"><a href="network-learning.html#cb383-9" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb383-10"><a href="network-learning.html#cb383-10" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb383-11"><a href="network-learning.html#cb383-11" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div>
 <p><img src="60_network_learning_files/figure-html/degree_dist_spring-1.png" width="672" /></p>
 <p>The network has a large number of singletons and sparsely connected nodes, and only a small number of nodes with a higher degree of 7 or more.</p>
 </div>
 <div id="clustered-heatmaps" class="section level3 hasAnchor" number="12.2.5">
 <h3><span class="header-section-number">12.2.5</span> Clustered heatmaps<a href="network-learning.html#clustered-heatmaps" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Using the <code>ComplexHeatmap</code> package, we plot a heatmap of the association matrix estimated with <code>SPRING</code>. Rows and columns are sorted according to the clusters identified via hierarchical clustering.</p>
-<div class="sourceCode" id="cb383"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb383-1"><a href="network-learning.html#cb383-1" tabindex="-1"></a><span class="fu">library</span>(ComplexHeatmap)</span>
-<span id="cb383-2"><a href="network-learning.html#cb383-2" tabindex="-1"></a><span class="fu">library</span>(circlize)</span></code></pre></div>
+<div class="sourceCode" id="cb384"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb384-1"><a href="network-learning.html#cb384-1" tabindex="-1"></a><span class="fu">library</span>(ComplexHeatmap)</span>
+<span id="cb384-2"><a href="network-learning.html#cb384-2" tabindex="-1"></a><span class="fu">library</span>(circlize)</span></code></pre></div>
 <p>We select the 50 nodes with the highest sum of edge weights to get a smaller heatmap.</p>
-<div class="sourceCode" id="cb384"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb384-1"><a href="network-learning.html#cb384-1" tabindex="-1"></a>sel <span class="ot">&lt;-</span> <span class="fu">names</span>(<span class="fu">sort</span>(<span class="fu">rowSums</span>(spring_cor), <span class="at">decreasing =</span> <span class="cn">TRUE</span>))[<span class="fu">seq_len</span>(<span class="dv">50</span>)]</span>
-<span id="cb384-2"><a href="network-learning.html#cb384-2" tabindex="-1"></a>adja_sel <span class="ot">&lt;-</span> spring_cor[sel, sel]</span></code></pre></div>
-<div class="sourceCode" id="cb385"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb385-1"><a href="network-learning.html#cb385-1" tabindex="-1"></a><span class="co"># Color vector</span></span>
-<span id="cb385-2"><a href="network-learning.html#cb385-2" tabindex="-1"></a>col <span class="ot">&lt;-</span> <span class="fu">colorRamp2</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">0</span>, <span class="fl">0.5</span>, <span class="dv">1</span>), </span>
-<span id="cb385-3"><a href="network-learning.html#cb385-3" tabindex="-1"></a>                  <span class="fu">c</span>(<span class="st">&quot;royalblue4&quot;</span>, <span class="st">&quot;lightblue&quot;</span>, <span class="st">&quot;white&quot;</span>, <span class="st">&quot;orange&quot;</span>, <span class="st">&quot;firebrick3&quot;</span>))</span>
-<span id="cb385-4"><a href="network-learning.html#cb385-4" tabindex="-1"></a></span>
-<span id="cb385-5"><a href="network-learning.html#cb385-5" tabindex="-1"></a><span class="fu">Heatmap</span>(adja_sel, </span>
-<span id="cb385-6"><a href="network-learning.html#cb385-6" tabindex="-1"></a>        <span class="at">col =</span> col, </span>
-<span id="cb385-7"><a href="network-learning.html#cb385-7" tabindex="-1"></a>        <span class="at">rect_gp =</span> <span class="fu">gpar</span>(<span class="at">col =</span> <span class="st">&quot;gray&quot;</span>, <span class="at">lwd =</span> <span class="dv">1</span>),</span>
-<span id="cb385-8"><a href="network-learning.html#cb385-8" tabindex="-1"></a>        <span class="at">show_row_names =</span> <span class="cn">FALSE</span>, </span>
-<span id="cb385-9"><a href="network-learning.html#cb385-9" tabindex="-1"></a>        <span class="at">show_column_names =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb385-10"><a href="network-learning.html#cb385-10" tabindex="-1"></a>        <span class="at">name =</span> <span class="st">&quot;Association&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb385"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb385-1"><a href="network-learning.html#cb385-1" tabindex="-1"></a>sel <span class="ot">&lt;-</span> <span class="fu">names</span>(<span class="fu">sort</span>(<span class="fu">rowSums</span>(spring_cor), <span class="at">decreasing =</span> <span class="cn">TRUE</span>))[<span class="fu">seq_len</span>(<span class="dv">50</span>)]</span>
+<span id="cb385-2"><a href="network-learning.html#cb385-2" tabindex="-1"></a>adja_sel <span class="ot">&lt;-</span> spring_cor[sel, sel]</span></code></pre></div>
+<div class="sourceCode" id="cb386"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb386-1"><a href="network-learning.html#cb386-1" tabindex="-1"></a><span class="co"># Color vector</span></span>
+<span id="cb386-2"><a href="network-learning.html#cb386-2" tabindex="-1"></a>col <span class="ot">&lt;-</span> <span class="fu">colorRamp2</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">0</span>, <span class="fl">0.5</span>, <span class="dv">1</span>), </span>
+<span id="cb386-3"><a href="network-learning.html#cb386-3" tabindex="-1"></a>                  <span class="fu">c</span>(<span class="st">&quot;royalblue4&quot;</span>, <span class="st">&quot;lightblue&quot;</span>, <span class="st">&quot;white&quot;</span>, <span class="st">&quot;orange&quot;</span>, <span class="st">&quot;firebrick3&quot;</span>))</span>
+<span id="cb386-4"><a href="network-learning.html#cb386-4" tabindex="-1"></a></span>
+<span id="cb386-5"><a href="network-learning.html#cb386-5" tabindex="-1"></a><span class="fu">Heatmap</span>(adja_sel, </span>
+<span id="cb386-6"><a href="network-learning.html#cb386-6" tabindex="-1"></a>        <span class="at">col =</span> col, </span>
+<span id="cb386-7"><a href="network-learning.html#cb386-7" tabindex="-1"></a>        <span class="at">rect_gp =</span> <span class="fu">gpar</span>(<span class="at">col =</span> <span class="st">&quot;gray&quot;</span>, <span class="at">lwd =</span> <span class="dv">1</span>),</span>
+<span id="cb386-8"><a href="network-learning.html#cb386-8" tabindex="-1"></a>        <span class="at">show_row_names =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb386-9"><a href="network-learning.html#cb386-9" tabindex="-1"></a>        <span class="at">show_column_names =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb386-10"><a href="network-learning.html#cb386-10" tabindex="-1"></a>        <span class="at">name =</span> <span class="st">&quot;Association&quot;</span>)</span></code></pre></div>
 <p><img src="60_network_learning_files/figure-html/clustered_heatmap-1.png" width="556.8" /></p>
 <p>The associations are generally quite low, and there are no prominent clusters detected by hierarchical clustering.</p>
 </div>
@@ -939,19 +940,19 @@ Figure 12.1: The typical input is a <span class="math inline">\(p\)</span> x <sp
 <div id="density" class="section level4 hasAnchor" number="12.2.6.1">
 <h4><span class="header-section-number">12.2.6.1</span> Density<a href="network-learning.html#density" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <p>Definition: Proportion of present edges from all possible edges.</p>
-<div class="sourceCode" id="cb386"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb386-1"><a href="network-learning.html#cb386-1" tabindex="-1"></a><span class="fu">edge_density</span>(spring_graph)</span></code></pre></div>
+<div class="sourceCode" id="cb387"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb387-1"><a href="network-learning.html#cb387-1" tabindex="-1"></a><span class="fu">edge_density</span>(spring_graph)</span></code></pre></div>
 <pre><code>## [1] 0.01444</code></pre>
 </div>
 <div id="transitivity-clustering-coefficient" class="section level4 hasAnchor" number="12.2.6.2">
 <h4><span class="header-section-number">12.2.6.2</span> Transitivity (clustering coefficient)<a href="network-learning.html#transitivity-clustering-coefficient" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <p>Here, we consider only the global clustering coefficient, which is defined as the ratio of triangles to connected triples.</p>
-<div class="sourceCode" id="cb388"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb388-1"><a href="network-learning.html#cb388-1" tabindex="-1"></a><span class="fu">transitivity</span>(spring_graph)</span></code></pre></div>
+<div class="sourceCode" id="cb389"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb389-1"><a href="network-learning.html#cb389-1" tabindex="-1"></a><span class="fu">transitivity</span>(spring_graph)</span></code></pre></div>
 <pre><code>## [1] 0.1456</code></pre>
 </div>
 <div id="average-path-length" class="section level4 hasAnchor" number="12.2.6.3">
 <h4><span class="header-section-number">12.2.6.3</span> Average path length<a href="network-learning.html#average-path-length" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <p>Definition: Mean of the shortest distance between each pair of nodes.</p>
-<div class="sourceCode" id="cb390"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb390-1"><a href="network-learning.html#cb390-1" tabindex="-1"></a><span class="fu">average.path.length</span>(spring_graph)</span></code></pre></div>
+<div class="sourceCode" id="cb391"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb391-1"><a href="network-learning.html#cb391-1" tabindex="-1"></a><span class="fu">average.path.length</span>(spring_graph)</span></code></pre></div>
 <pre><code>## [1] 1.699</code></pre>
 </div>
 </div>
@@ -962,12 +963,12 @@ Figure 12.1: The typical input is a <span class="math inline">\(p\)</span> x <sp
 <p>The function computes several common network characteristics such as centrality measures, cluster assignment, the graphlet correlation matrix, as well as global network measures.</p>
 <p>The user has several options to choose from, such as a clustering method, how to define hubs, and whether or not to normalize centrality values. See the help page <code>?netAnalyze</code> for a description of the arguments.</p>
 <p>By default, a heatmap of the Graphlet Correlation Matrix (GCM) is returned (with graphlet correlations in the upper triangle and significance codes resulting from Student’s t-test in the lower triangle). See <code>?calcGCM</code> and <code>?testGCM</code> for details.</p>
-<div class="sourceCode" id="cb392"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb392-1"><a href="network-learning.html#cb392-1" tabindex="-1"></a>netcomi_netprops <span class="ot">&lt;-</span> <span class="fu">netAnalyze</span>(netcomi_net, </span>
-<span id="cb392-2"><a href="network-learning.html#cb392-2" tabindex="-1"></a>                               <span class="at">clustMethod =</span> <span class="st">&quot;cluster_fast_greedy&quot;</span>,</span>
-<span id="cb392-3"><a href="network-learning.html#cb392-3" tabindex="-1"></a>                               <span class="at">hubPar =</span> <span class="st">&quot;eigenvector&quot;</span>,</span>
-<span id="cb392-4"><a href="network-learning.html#cb392-4" tabindex="-1"></a>                               <span class="at">normDeg =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb393"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb393-1"><a href="network-learning.html#cb393-1" tabindex="-1"></a>netcomi_netprops <span class="ot">&lt;-</span> <span class="fu">netAnalyze</span>(netcomi_net, </span>
+<span id="cb393-2"><a href="network-learning.html#cb393-2" tabindex="-1"></a>                               <span class="at">clustMethod =</span> <span class="st">&quot;cluster_fast_greedy&quot;</span>,</span>
+<span id="cb393-3"><a href="network-learning.html#cb393-3" tabindex="-1"></a>                               <span class="at">hubPar =</span> <span class="st">&quot;eigenvector&quot;</span>,</span>
+<span id="cb393-4"><a href="network-learning.html#cb393-4" tabindex="-1"></a>                               <span class="at">normDeg =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <p><img src="60_network_learning_files/figure-html/netAnalyze_single-1.png" width="75%" /></p>
-<div class="sourceCode" id="cb393"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb393-1"><a href="network-learning.html#cb393-1" tabindex="-1"></a><span class="fu">summary</span>(netcomi_netprops, <span class="at">numbNodes =</span> <span class="dv">5</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb394"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb394-1"><a href="network-learning.html#cb394-1" tabindex="-1"></a><span class="fu">summary</span>(netcomi_netprops, <span class="at">numbNodes =</span> <span class="dv">5</span>)</span></code></pre></div>
 <pre><code>## 
 ## Component sizes
 ## ```````````````              
@@ -1076,66 +1077,66 @@ Figure 12.1: The typical input is a <span class="math inline">\(p\)</span> x <sp
 <h3><span class="header-section-number">12.4.1</span> Highlight node properties<a href="network-learning.html#highlight-node-properties" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>In the first plot, node colors represent the detected clusters and node sizes are scaled by eigenvector centrality. Hub nodes are highlighted by default. Singletons are not included in the plot. To improve the readability, NetCoMi’s “intelligent” label shortening approach is used.</p>
 <p>Note that nodes are sometimes placed too close together so that the labels overlap. You may need to play around with the repulsion argument until you find a value where the labels are legible, but also the clusters are still well recognizable.</p>
-<div class="sourceCode" id="cb395"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb395-1"><a href="network-learning.html#cb395-1" tabindex="-1"></a><span class="fu">plot</span>(netcomi_netprops,</span>
-<span id="cb395-2"><a href="network-learning.html#cb395-2" tabindex="-1"></a>     <span class="at">repulsion =</span> <span class="fl">0.98</span>,</span>
-<span id="cb395-3"><a href="network-learning.html#cb395-3" tabindex="-1"></a>     <span class="at">rmSingles =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb395-4"><a href="network-learning.html#cb395-4" tabindex="-1"></a>     <span class="at">shortenLabels =</span> <span class="st">&quot;intelligent&quot;</span>,</span>
-<span id="cb395-5"><a href="network-learning.html#cb395-5" tabindex="-1"></a>     <span class="at">labelScale =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb395-6"><a href="network-learning.html#cb395-6" tabindex="-1"></a>     <span class="at">nodeSize =</span> <span class="st">&quot;eigenvector&quot;</span>,</span>
-<span id="cb395-7"><a href="network-learning.html#cb395-7" tabindex="-1"></a>     <span class="at">nodeSizeSpread =</span> <span class="dv">3</span>,</span>
-<span id="cb395-8"><a href="network-learning.html#cb395-8" tabindex="-1"></a>     <span class="at">nodeColor =</span> <span class="st">&quot;cluster&quot;</span>, </span>
-<span id="cb395-9"><a href="network-learning.html#cb395-9" tabindex="-1"></a>     <span class="at">hubBorderCol =</span> <span class="st">&quot;gray40&quot;</span>,</span>
-<span id="cb395-10"><a href="network-learning.html#cb395-10" tabindex="-1"></a>     <span class="at">cexNodes =</span> <span class="fl">1.8</span>,</span>
-<span id="cb395-11"><a href="network-learning.html#cb395-11" tabindex="-1"></a>     <span class="at">edgeTranspHigh =</span> <span class="dv">20</span>,</span>
-<span id="cb395-12"><a href="network-learning.html#cb395-12" tabindex="-1"></a>     <span class="at">title1 =</span> <span class="st">&quot;Network properties highlighted&quot;</span>, </span>
-<span id="cb395-13"><a href="network-learning.html#cb395-13" tabindex="-1"></a>     <span class="at">showTitle =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb395-14"><a href="network-learning.html#cb395-14" tabindex="-1"></a>     <span class="at">cexTitle =</span> <span class="fl">2.3</span>,</span>
-<span id="cb395-15"><a href="network-learning.html#cb395-15" tabindex="-1"></a>     <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">8</span>))</span>
-<span id="cb395-16"><a href="network-learning.html#cb395-16" tabindex="-1"></a></span>
-<span id="cb395-17"><a href="network-learning.html#cb395-17" tabindex="-1"></a><span class="fu">legend</span>(<span class="fl">0.7</span>, <span class="fl">1.1</span>, <span class="at">cex =</span> <span class="fl">1.7</span>, <span class="at">title =</span> <span class="st">&quot;estimated correlation:&quot;</span>,</span>
-<span id="cb395-18"><a href="network-learning.html#cb395-18" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;+&quot;</span>,<span class="st">&quot;-&quot;</span>), <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="fu">c</span>(<span class="st">&quot;#009900&quot;</span>,<span class="st">&quot;red&quot;</span>), </span>
-<span id="cb395-19"><a href="network-learning.html#cb395-19" tabindex="-1"></a>       <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>, <span class="at">horiz =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb396"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb396-1"><a href="network-learning.html#cb396-1" tabindex="-1"></a><span class="fu">plot</span>(netcomi_netprops,</span>
+<span id="cb396-2"><a href="network-learning.html#cb396-2" tabindex="-1"></a>     <span class="at">repulsion =</span> <span class="fl">0.98</span>,</span>
+<span id="cb396-3"><a href="network-learning.html#cb396-3" tabindex="-1"></a>     <span class="at">rmSingles =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb396-4"><a href="network-learning.html#cb396-4" tabindex="-1"></a>     <span class="at">shortenLabels =</span> <span class="st">&quot;intelligent&quot;</span>,</span>
+<span id="cb396-5"><a href="network-learning.html#cb396-5" tabindex="-1"></a>     <span class="at">labelScale =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb396-6"><a href="network-learning.html#cb396-6" tabindex="-1"></a>     <span class="at">nodeSize =</span> <span class="st">&quot;eigenvector&quot;</span>,</span>
+<span id="cb396-7"><a href="network-learning.html#cb396-7" tabindex="-1"></a>     <span class="at">nodeSizeSpread =</span> <span class="dv">3</span>,</span>
+<span id="cb396-8"><a href="network-learning.html#cb396-8" tabindex="-1"></a>     <span class="at">nodeColor =</span> <span class="st">&quot;cluster&quot;</span>, </span>
+<span id="cb396-9"><a href="network-learning.html#cb396-9" tabindex="-1"></a>     <span class="at">hubBorderCol =</span> <span class="st">&quot;gray40&quot;</span>,</span>
+<span id="cb396-10"><a href="network-learning.html#cb396-10" tabindex="-1"></a>     <span class="at">cexNodes =</span> <span class="fl">1.8</span>,</span>
+<span id="cb396-11"><a href="network-learning.html#cb396-11" tabindex="-1"></a>     <span class="at">edgeTranspHigh =</span> <span class="dv">20</span>,</span>
+<span id="cb396-12"><a href="network-learning.html#cb396-12" tabindex="-1"></a>     <span class="at">title1 =</span> <span class="st">&quot;Network properties highlighted&quot;</span>, </span>
+<span id="cb396-13"><a href="network-learning.html#cb396-13" tabindex="-1"></a>     <span class="at">showTitle =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb396-14"><a href="network-learning.html#cb396-14" tabindex="-1"></a>     <span class="at">cexTitle =</span> <span class="fl">2.3</span>,</span>
+<span id="cb396-15"><a href="network-learning.html#cb396-15" tabindex="-1"></a>     <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">8</span>))</span>
+<span id="cb396-16"><a href="network-learning.html#cb396-16" tabindex="-1"></a></span>
+<span id="cb396-17"><a href="network-learning.html#cb396-17" tabindex="-1"></a><span class="fu">legend</span>(<span class="fl">0.7</span>, <span class="fl">1.1</span>, <span class="at">cex =</span> <span class="fl">1.7</span>, <span class="at">title =</span> <span class="st">&quot;estimated correlation:&quot;</span>,</span>
+<span id="cb396-18"><a href="network-learning.html#cb396-18" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;+&quot;</span>,<span class="st">&quot;-&quot;</span>), <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="fu">c</span>(<span class="st">&quot;#009900&quot;</span>,<span class="st">&quot;red&quot;</span>), </span>
+<span id="cb396-19"><a href="network-learning.html#cb396-19" tabindex="-1"></a>       <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>, <span class="at">horiz =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p><img src="60_network_learning_files/figure-html/network_plot_single_cluster-1.png" width="1248" /></p>
 </div>
 <div id="highlight-data-features" class="section level3 hasAnchor" number="12.4.2">
 <h3><span class="header-section-number">12.4.2</span> Highlight data features<a href="network-learning.html#highlight-data-features" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>We now color nodes according to their phylum. The node sizes are proportional to a taxon’s sum of mclr-transformed abundances. As already mentioned in Section <a href="network-learning.html#spring-network">12.1.4</a>, this is the normalization method used by <code>SPRING</code>. A color palette from <code>RColorBrewer</code> is used here.</p>
-<div class="sourceCode" id="cb396"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb396-1"><a href="network-learning.html#cb396-1" tabindex="-1"></a><span class="fu">library</span>(RColorBrewer)</span></code></pre></div>
-<div class="sourceCode" id="cb397"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb397-1"><a href="network-learning.html#cb397-1" tabindex="-1"></a><span class="co"># Generate vector with phylum names for node coloring</span></span>
-<span id="cb397-2"><a href="network-learning.html#cb397-2" tabindex="-1"></a>phyla <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(<span class="fu">rowData</span>(tse)<span class="sc">$</span>phylum)</span>
-<span id="cb397-3"><a href="network-learning.html#cb397-3" tabindex="-1"></a><span class="fu">names</span>(phyla) <span class="ot">&lt;-</span> <span class="fu">rowData</span>(tse)<span class="sc">$</span>genus</span>
-<span id="cb397-4"><a href="network-learning.html#cb397-4" tabindex="-1"></a></span>
-<span id="cb397-5"><a href="network-learning.html#cb397-5" tabindex="-1"></a><span class="co"># Create color vector</span></span>
-<span id="cb397-6"><a href="network-learning.html#cb397-6" tabindex="-1"></a>colvec <span class="ot">&lt;-</span> RColorBrewer<span class="sc">::</span><span class="fu">brewer.pal</span>(<span class="fu">length</span>(<span class="fu">levels</span>(phyla)), <span class="st">&quot;Set3&quot;</span>)</span>
-<span id="cb397-7"><a href="network-learning.html#cb397-7" tabindex="-1"></a></span>
-<span id="cb397-8"><a href="network-learning.html#cb397-8" tabindex="-1"></a><span class="fu">plot</span>(netcomi_netprops,</span>
-<span id="cb397-9"><a href="network-learning.html#cb397-9" tabindex="-1"></a>     <span class="at">repulsion =</span> <span class="fl">0.98</span>,</span>
-<span id="cb397-10"><a href="network-learning.html#cb397-10" tabindex="-1"></a>     <span class="at">rmSingles =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb397-11"><a href="network-learning.html#cb397-11" tabindex="-1"></a>     <span class="at">shortenLabels =</span> <span class="st">&quot;intelligent&quot;</span>,</span>
-<span id="cb397-12"><a href="network-learning.html#cb397-12" tabindex="-1"></a>     <span class="at">labelScale =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb397-13"><a href="network-learning.html#cb397-13" tabindex="-1"></a>     <span class="at">nodeSize =</span> <span class="st">&quot;mclr&quot;</span>,</span>
-<span id="cb397-14"><a href="network-learning.html#cb397-14" tabindex="-1"></a>     <span class="at">nodeColor =</span> <span class="st">&quot;feature&quot;</span>, </span>
-<span id="cb397-15"><a href="network-learning.html#cb397-15" tabindex="-1"></a>     <span class="at">featVecCol =</span> phyla, </span>
-<span id="cb397-16"><a href="network-learning.html#cb397-16" tabindex="-1"></a>     <span class="at">colorVec =</span>  colvec,</span>
-<span id="cb397-17"><a href="network-learning.html#cb397-17" tabindex="-1"></a>     <span class="at">nodeTransp =</span> <span class="dv">20</span>,</span>
-<span id="cb397-18"><a href="network-learning.html#cb397-18" tabindex="-1"></a>     <span class="at">highlightHubs =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb397-19"><a href="network-learning.html#cb397-19" tabindex="-1"></a>     <span class="at">cexNodes =</span> <span class="fl">1.8</span>,</span>
-<span id="cb397-20"><a href="network-learning.html#cb397-20" tabindex="-1"></a>     <span class="at">edgeTranspHigh =</span> <span class="dv">20</span>,</span>
-<span id="cb397-21"><a href="network-learning.html#cb397-21" tabindex="-1"></a>     <span class="at">title1 =</span> <span class="st">&quot;Data features highlighted&quot;</span>, </span>
-<span id="cb397-22"><a href="network-learning.html#cb397-22" tabindex="-1"></a>     <span class="at">showTitle =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb397-23"><a href="network-learning.html#cb397-23" tabindex="-1"></a>     <span class="at">cexTitle =</span> <span class="fl">2.3</span>,</span>
-<span id="cb397-24"><a href="network-learning.html#cb397-24" tabindex="-1"></a>     <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">4</span>, <span class="dv">6</span>))</span>
-<span id="cb397-25"><a href="network-learning.html#cb397-25" tabindex="-1"></a></span>
-<span id="cb397-26"><a href="network-learning.html#cb397-26" tabindex="-1"></a><span class="co"># Add legends</span></span>
-<span id="cb397-27"><a href="network-learning.html#cb397-27" tabindex="-1"></a><span class="fu">legend</span>(<span class="fl">0.7</span>, <span class="fl">1.1</span>, <span class="at">cex =</span> <span class="fl">1.7</span>, <span class="at">title =</span> <span class="st">&quot;estimated correlation:&quot;</span>,</span>
-<span id="cb397-28"><a href="network-learning.html#cb397-28" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;+&quot;</span>,<span class="st">&quot;-&quot;</span>), <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="fu">c</span>(<span class="st">&quot;#009900&quot;</span>,<span class="st">&quot;red&quot;</span>), </span>
-<span id="cb397-29"><a href="network-learning.html#cb397-29" tabindex="-1"></a>       <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>, <span class="at">horiz =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb397-30"><a href="network-learning.html#cb397-30" tabindex="-1"></a></span>
-<span id="cb397-31"><a href="network-learning.html#cb397-31" tabindex="-1"></a><span class="co"># Colors used in the legend should be equally transparent as in the plot</span></span>
-<span id="cb397-32"><a href="network-learning.html#cb397-32" tabindex="-1"></a>col_transp <span class="ot">&lt;-</span> <span class="fu">colToTransp</span>(colvec, <span class="dv">20</span>)</span>
-<span id="cb397-33"><a href="network-learning.html#cb397-33" tabindex="-1"></a></span>
-<span id="cb397-34"><a href="network-learning.html#cb397-34" tabindex="-1"></a><span class="fu">legend</span>(<span class="sc">-</span><span class="fl">1.8</span>, <span class="fl">1.1</span>, <span class="at">cex =</span> <span class="fl">1.7</span>, <span class="at">pt.cex =</span> <span class="fl">2.5</span>, <span class="at">title =</span> <span class="st">&quot;Phylum:&quot;</span>, </span>
-<span id="cb397-35"><a href="network-learning.html#cb397-35" tabindex="-1"></a>       <span class="at">legend=</span><span class="fu">levels</span>(phyla), <span class="at">col =</span> col_transp, <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>, <span class="at">pch =</span> <span class="dv">16</span>) </span></code></pre></div>
+<div class="sourceCode" id="cb397"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb397-1"><a href="network-learning.html#cb397-1" tabindex="-1"></a><span class="fu">library</span>(RColorBrewer)</span></code></pre></div>
+<div class="sourceCode" id="cb398"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb398-1"><a href="network-learning.html#cb398-1" tabindex="-1"></a><span class="co"># Generate vector with phylum names for node coloring</span></span>
+<span id="cb398-2"><a href="network-learning.html#cb398-2" tabindex="-1"></a>phyla <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(<span class="fu">rowData</span>(tse)<span class="sc">$</span>phylum)</span>
+<span id="cb398-3"><a href="network-learning.html#cb398-3" tabindex="-1"></a><span class="fu">names</span>(phyla) <span class="ot">&lt;-</span> <span class="fu">rowData</span>(tse)<span class="sc">$</span>genus</span>
+<span id="cb398-4"><a href="network-learning.html#cb398-4" tabindex="-1"></a></span>
+<span id="cb398-5"><a href="network-learning.html#cb398-5" tabindex="-1"></a><span class="co"># Create color vector</span></span>
+<span id="cb398-6"><a href="network-learning.html#cb398-6" tabindex="-1"></a>colvec <span class="ot">&lt;-</span> RColorBrewer<span class="sc">::</span><span class="fu">brewer.pal</span>(<span class="fu">length</span>(<span class="fu">levels</span>(phyla)), <span class="st">&quot;Set3&quot;</span>)</span>
+<span id="cb398-7"><a href="network-learning.html#cb398-7" tabindex="-1"></a></span>
+<span id="cb398-8"><a href="network-learning.html#cb398-8" tabindex="-1"></a><span class="fu">plot</span>(netcomi_netprops,</span>
+<span id="cb398-9"><a href="network-learning.html#cb398-9" tabindex="-1"></a>     <span class="at">repulsion =</span> <span class="fl">0.98</span>,</span>
+<span id="cb398-10"><a href="network-learning.html#cb398-10" tabindex="-1"></a>     <span class="at">rmSingles =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb398-11"><a href="network-learning.html#cb398-11" tabindex="-1"></a>     <span class="at">shortenLabels =</span> <span class="st">&quot;intelligent&quot;</span>,</span>
+<span id="cb398-12"><a href="network-learning.html#cb398-12" tabindex="-1"></a>     <span class="at">labelScale =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb398-13"><a href="network-learning.html#cb398-13" tabindex="-1"></a>     <span class="at">nodeSize =</span> <span class="st">&quot;mclr&quot;</span>,</span>
+<span id="cb398-14"><a href="network-learning.html#cb398-14" tabindex="-1"></a>     <span class="at">nodeColor =</span> <span class="st">&quot;feature&quot;</span>, </span>
+<span id="cb398-15"><a href="network-learning.html#cb398-15" tabindex="-1"></a>     <span class="at">featVecCol =</span> phyla, </span>
+<span id="cb398-16"><a href="network-learning.html#cb398-16" tabindex="-1"></a>     <span class="at">colorVec =</span>  colvec,</span>
+<span id="cb398-17"><a href="network-learning.html#cb398-17" tabindex="-1"></a>     <span class="at">nodeTransp =</span> <span class="dv">20</span>,</span>
+<span id="cb398-18"><a href="network-learning.html#cb398-18" tabindex="-1"></a>     <span class="at">highlightHubs =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb398-19"><a href="network-learning.html#cb398-19" tabindex="-1"></a>     <span class="at">cexNodes =</span> <span class="fl">1.8</span>,</span>
+<span id="cb398-20"><a href="network-learning.html#cb398-20" tabindex="-1"></a>     <span class="at">edgeTranspHigh =</span> <span class="dv">20</span>,</span>
+<span id="cb398-21"><a href="network-learning.html#cb398-21" tabindex="-1"></a>     <span class="at">title1 =</span> <span class="st">&quot;Data features highlighted&quot;</span>, </span>
+<span id="cb398-22"><a href="network-learning.html#cb398-22" tabindex="-1"></a>     <span class="at">showTitle =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb398-23"><a href="network-learning.html#cb398-23" tabindex="-1"></a>     <span class="at">cexTitle =</span> <span class="fl">2.3</span>,</span>
+<span id="cb398-24"><a href="network-learning.html#cb398-24" tabindex="-1"></a>     <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">4</span>, <span class="dv">6</span>))</span>
+<span id="cb398-25"><a href="network-learning.html#cb398-25" tabindex="-1"></a></span>
+<span id="cb398-26"><a href="network-learning.html#cb398-26" tabindex="-1"></a><span class="co"># Add legends</span></span>
+<span id="cb398-27"><a href="network-learning.html#cb398-27" tabindex="-1"></a><span class="fu">legend</span>(<span class="fl">0.7</span>, <span class="fl">1.1</span>, <span class="at">cex =</span> <span class="fl">1.7</span>, <span class="at">title =</span> <span class="st">&quot;estimated correlation:&quot;</span>,</span>
+<span id="cb398-28"><a href="network-learning.html#cb398-28" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;+&quot;</span>,<span class="st">&quot;-&quot;</span>), <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">lwd =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="fu">c</span>(<span class="st">&quot;#009900&quot;</span>,<span class="st">&quot;red&quot;</span>), </span>
+<span id="cb398-29"><a href="network-learning.html#cb398-29" tabindex="-1"></a>       <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>, <span class="at">horiz =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb398-30"><a href="network-learning.html#cb398-30" tabindex="-1"></a></span>
+<span id="cb398-31"><a href="network-learning.html#cb398-31" tabindex="-1"></a><span class="co"># Colors used in the legend should be equally transparent as in the plot</span></span>
+<span id="cb398-32"><a href="network-learning.html#cb398-32" tabindex="-1"></a>col_transp <span class="ot">&lt;-</span> <span class="fu">colToTransp</span>(colvec, <span class="dv">20</span>)</span>
+<span id="cb398-33"><a href="network-learning.html#cb398-33" tabindex="-1"></a></span>
+<span id="cb398-34"><a href="network-learning.html#cb398-34" tabindex="-1"></a><span class="fu">legend</span>(<span class="sc">-</span><span class="fl">1.8</span>, <span class="fl">1.1</span>, <span class="at">cex =</span> <span class="fl">1.7</span>, <span class="at">pt.cex =</span> <span class="fl">2.5</span>, <span class="at">title =</span> <span class="st">&quot;Phylum:&quot;</span>, </span>
+<span id="cb398-35"><a href="network-learning.html#cb398-35" tabindex="-1"></a>       <span class="at">legend=</span><span class="fu">levels</span>(phyla), <span class="at">col =</span> col_transp, <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>, <span class="at">pch =</span> <span class="dv">16</span>) </span></code></pre></div>
 <p><img src="60_network_learning_files/figure-html/network_plot_single_phylum-1.png" width="1440" /></p>
 <p><strong>A few things to observe:</strong></p>
 <ul>
@@ -1170,78 +1171,78 @@ Figure 12.1: The typical input is a <span class="math inline">\(p\)</span> x <sp
 <div id="sparcc-correlation" class="section level3 hasAnchor" number="12.7.1">
 <h3><span class="header-section-number">12.7.1</span> SparCC<a href="network-learning.html#sparcc-correlation" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>The first association measure we look at is SparCC (“Sparse Correlations for Compositional data”), introduced by <span class="citation">J. Friedman and Alm (2012)</span>. It estimates Pearson correlations while taking into account the compositional structure of the data. The <a href="https://rdrr.io/github/zdk123/SpiecEasi/man/sparcc.html">SpiecEasi</a> package provides an implementation of this method.</p>
-<div class="sourceCode" id="cb398"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb398-1"><a href="network-learning.html#cb398-1" tabindex="-1"></a><span class="co"># Set seed for reproducibility</span></span>
-<span id="cb398-2"><a href="network-learning.html#cb398-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13075</span>)</span>
-<span id="cb398-3"><a href="network-learning.html#cb398-3" tabindex="-1"></a><span class="co"># Compute correlation matrix</span></span>
-<span id="cb398-4"><a href="network-learning.html#cb398-4" tabindex="-1"></a>sparcc_cor <span class="ot">&lt;-</span> SpiecEasi<span class="sc">::</span><span class="fu">sparcc</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;counts&quot;</span>)))<span class="sc">$</span>Cor</span>
-<span id="cb398-5"><a href="network-learning.html#cb398-5" tabindex="-1"></a><span class="fu">rownames</span>(sparcc_cor) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(sparcc_cor) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(tse)</span></code></pre></div>
+<div class="sourceCode" id="cb399"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb399-1"><a href="network-learning.html#cb399-1" tabindex="-1"></a><span class="co"># Set seed for reproducibility</span></span>
+<span id="cb399-2"><a href="network-learning.html#cb399-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13075</span>)</span>
+<span id="cb399-3"><a href="network-learning.html#cb399-3" tabindex="-1"></a><span class="co"># Compute correlation matrix</span></span>
+<span id="cb399-4"><a href="network-learning.html#cb399-4" tabindex="-1"></a>sparcc_cor <span class="ot">&lt;-</span> SpiecEasi<span class="sc">::</span><span class="fu">sparcc</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;counts&quot;</span>)))<span class="sc">$</span>Cor</span>
+<span id="cb399-5"><a href="network-learning.html#cb399-5" tabindex="-1"></a><span class="fu">rownames</span>(sparcc_cor) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(sparcc_cor) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(tse)</span></code></pre></div>
 <p>We reuse the <code>transform_asso()</code> function created in Section <a href="network-learning.html#spring-network">12.1.4</a>, which sparsifies the association matrix, transforms it into a similarity matrix, and finally returns an <code>igraph</code> object.</p>
 <p>Two threshold values are used to see the effect of sparsification later in the network plot.</p>
-<div class="sourceCode" id="cb399"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb399-1"><a href="network-learning.html#cb399-1" tabindex="-1"></a>sparcc_trans03 <span class="ot">&lt;-</span> <span class="fu">transform_asso</span>(sparcc_cor, <span class="at">thresh =</span> <span class="fl">0.3</span>)</span>
-<span id="cb399-2"><a href="network-learning.html#cb399-2" tabindex="-1"></a>sparcc_trans04 <span class="ot">&lt;-</span> <span class="fu">transform_asso</span>(sparcc_cor, <span class="at">thresh =</span> <span class="fl">0.4</span>)</span>
-<span id="cb399-3"><a href="network-learning.html#cb399-3" tabindex="-1"></a></span>
-<span id="cb399-4"><a href="network-learning.html#cb399-4" tabindex="-1"></a>sparcc_graph03 <span class="ot">&lt;-</span> sparcc_trans03<span class="sc">$</span>graph</span>
-<span id="cb399-5"><a href="network-learning.html#cb399-5" tabindex="-1"></a>sparcc_graph04 <span class="ot">&lt;-</span> sparcc_trans04<span class="sc">$</span>graph</span></code></pre></div>
+<div class="sourceCode" id="cb400"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb400-1"><a href="network-learning.html#cb400-1" tabindex="-1"></a>sparcc_trans03 <span class="ot">&lt;-</span> <span class="fu">transform_asso</span>(sparcc_cor, <span class="at">thresh =</span> <span class="fl">0.3</span>)</span>
+<span id="cb400-2"><a href="network-learning.html#cb400-2" tabindex="-1"></a>sparcc_trans04 <span class="ot">&lt;-</span> <span class="fu">transform_asso</span>(sparcc_cor, <span class="at">thresh =</span> <span class="fl">0.4</span>)</span>
+<span id="cb400-3"><a href="network-learning.html#cb400-3" tabindex="-1"></a></span>
+<span id="cb400-4"><a href="network-learning.html#cb400-4" tabindex="-1"></a>sparcc_graph03 <span class="ot">&lt;-</span> sparcc_trans03<span class="sc">$</span>graph</span>
+<span id="cb400-5"><a href="network-learning.html#cb400-5" tabindex="-1"></a>sparcc_graph04 <span class="ot">&lt;-</span> sparcc_trans04<span class="sc">$</span>graph</span></code></pre></div>
 </div>
 <div id="shrinkage-prop" class="section level3 hasAnchor" number="12.7.2">
 <h3><span class="header-section-number">12.7.2</span> Shrinkage proportionality<a href="network-learning.html#shrinkage-prop" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>In the second example, microbial associations are measured by proportionality, originally introduced by <span class="citation">Lovell et al. (2015)</span>. We use the shrinkage proportionality estimator proposed by <span class="citation">Badri et al. (2020)</span>, which gives consistent results even for small sample sizes. Since there is no R package implementing this estimator, we use the <code>rho_shrink_est()</code> function provided in the <a href="https://github.com/MichelleBadri/NormCorr-manuscript/blob/master/code/helpers/norm_functions.R">GitHub repository</a> associated with the paper. The function is slightly modified to take normalized counts as input.</p>
-<div class="sourceCode" id="cb400"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb400-1"><a href="network-learning.html#cb400-1" tabindex="-1"></a><span class="fu">library</span>(corpcor)</span></code></pre></div>
-<div class="sourceCode" id="cb401"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb401-1"><a href="network-learning.html#cb401-1" tabindex="-1"></a><span class="co"># norm_counts: clr-transformed count matrix with samples in rows</span></span>
-<span id="cb401-2"><a href="network-learning.html#cb401-2" tabindex="-1"></a>rho_shrink_est <span class="ot">&lt;-</span> <span class="cf">function</span>(norm_counts, ...) {</span>
-<span id="cb401-3"><a href="network-learning.html#cb401-3" tabindex="-1"></a>  shrunk_cov <span class="ot">&lt;-</span> <span class="fu">cov.shrink</span>(norm_counts, ...)</span>
-<span id="cb401-4"><a href="network-learning.html#cb401-4" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(norm_counts)</span>
-<span id="cb401-5"><a href="network-learning.html#cb401-5" tabindex="-1"></a>  J <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rep</span>(<span class="fu">diag</span>(shrunk_cov), p), p)</span>
-<span id="cb401-6"><a href="network-learning.html#cb401-6" tabindex="-1"></a>  rho <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> shrunk_cov <span class="sc">/</span> (J <span class="sc">+</span> <span class="fu">t</span>(J))</span>
-<span id="cb401-7"><a href="network-learning.html#cb401-7" tabindex="-1"></a>  (rho <span class="sc">+</span> <span class="fu">t</span>(rho)) <span class="sc">/</span> <span class="dv">2</span></span>
-<span id="cb401-8"><a href="network-learning.html#cb401-8" tabindex="-1"></a>}</span></code></pre></div>
-<div class="sourceCode" id="cb402"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb402-1"><a href="network-learning.html#cb402-1" tabindex="-1"></a><span class="co"># Apply the shrinkage proportionality estimator to the clr-transformed counts</span></span>
-<span id="cb402-2"><a href="network-learning.html#cb402-2" tabindex="-1"></a>prop_est <span class="ot">&lt;-</span> <span class="fu">as</span>(<span class="fu">rho_shrink_est</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;clr&quot;</span>))), <span class="st">&quot;matrix&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb401"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb401-1"><a href="network-learning.html#cb401-1" tabindex="-1"></a><span class="fu">library</span>(corpcor)</span></code></pre></div>
+<div class="sourceCode" id="cb402"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb402-1"><a href="network-learning.html#cb402-1" tabindex="-1"></a><span class="co"># norm_counts: clr-transformed count matrix with samples in rows</span></span>
+<span id="cb402-2"><a href="network-learning.html#cb402-2" tabindex="-1"></a>rho_shrink_est <span class="ot">&lt;-</span> <span class="cf">function</span>(norm_counts, ...) {</span>
+<span id="cb402-3"><a href="network-learning.html#cb402-3" tabindex="-1"></a>  shrunk_cov <span class="ot">&lt;-</span> <span class="fu">cov.shrink</span>(norm_counts, ...)</span>
+<span id="cb402-4"><a href="network-learning.html#cb402-4" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ncol</span>(norm_counts)</span>
+<span id="cb402-5"><a href="network-learning.html#cb402-5" tabindex="-1"></a>  J <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rep</span>(<span class="fu">diag</span>(shrunk_cov), p), p)</span>
+<span id="cb402-6"><a href="network-learning.html#cb402-6" tabindex="-1"></a>  rho <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> shrunk_cov <span class="sc">/</span> (J <span class="sc">+</span> <span class="fu">t</span>(J))</span>
+<span id="cb402-7"><a href="network-learning.html#cb402-7" tabindex="-1"></a>  (rho <span class="sc">+</span> <span class="fu">t</span>(rho)) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb402-8"><a href="network-learning.html#cb402-8" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb403"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb403-1"><a href="network-learning.html#cb403-1" tabindex="-1"></a><span class="co"># Apply the shrinkage proportionality estimator to the clr-transformed counts</span></span>
+<span id="cb403-2"><a href="network-learning.html#cb403-2" tabindex="-1"></a>prop_est <span class="ot">&lt;-</span> <span class="fu">as</span>(<span class="fu">rho_shrink_est</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;clr&quot;</span>))), <span class="st">&quot;matrix&quot;</span>)</span></code></pre></div>
 <pre><code>## Estimating optimal shrinkage intensity lambda.var (variance vector): 0.0857 
 ## 
 ## Estimating optimal shrinkage intensity lambda (correlation matrix): 0.3634</code></pre>
 <p>Again, we use our transformation function to convert the association matrix into a graph object.</p>
-<div class="sourceCode" id="cb404"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb404-1"><a href="network-learning.html#cb404-1" tabindex="-1"></a>prop_trans <span class="ot">&lt;-</span> <span class="fu">transform_asso</span>(prop_est, <span class="at">thresh =</span> <span class="fl">0.4</span>)</span>
-<span id="cb404-2"><a href="network-learning.html#cb404-2" tabindex="-1"></a>prop_graph <span class="ot">&lt;-</span> prop_trans<span class="sc">$</span>graph</span></code></pre></div>
+<div class="sourceCode" id="cb405"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb405-1"><a href="network-learning.html#cb405-1" tabindex="-1"></a>prop_trans <span class="ot">&lt;-</span> <span class="fu">transform_asso</span>(prop_est, <span class="at">thresh =</span> <span class="fl">0.4</span>)</span>
+<span id="cb405-2"><a href="network-learning.html#cb405-2" tabindex="-1"></a>prop_graph <span class="ot">&lt;-</span> prop_trans<span class="sc">$</span>graph</span></code></pre></div>
 </div>
 <div id="spieceasi-mb" class="section level3 hasAnchor" number="12.7.3">
 <h3><span class="header-section-number">12.7.3</span> SpiecEasi - MB<a href="network-learning.html#spieceasi-mb" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>As third example, we use the SpiecEasi (“Sparse InversE Covariance estimation for Ecological Association and Statistical Inference”) approach proposed by <span class="citation">Kurtz et al. (2015)</span> to estimate a sparse conditional dependency graph. The neighborhood selection method (“MB”) introduced by <span class="citation">Meinshausen and Bühlmann (2006)</span> is used for network learning. The approach is implemented in the R package <a href="https://github.com/zdk123/SpiecEasi">SpiecEasi</a>.</p>
-<div class="sourceCode" id="cb405"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb405-1"><a href="network-learning.html#cb405-1" tabindex="-1"></a><span class="fu">library</span>(SpiecEasi)</span></code></pre></div>
-<div class="sourceCode" id="cb406"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb406-1"><a href="network-learning.html#cb406-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13075</span>)</span>
-<span id="cb406-2"><a href="network-learning.html#cb406-2" tabindex="-1"></a>se_mb_est <span class="ot">&lt;-</span> <span class="fu">spiec.easi</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;counts&quot;</span>)), </span>
-<span id="cb406-3"><a href="network-learning.html#cb406-3" tabindex="-1"></a>                        <span class="at">method =</span> <span class="st">&#39;mb&#39;</span>, <span class="at">nlambda =</span> <span class="dv">20</span>, </span>
-<span id="cb406-4"><a href="network-learning.html#cb406-4" tabindex="-1"></a>                        <span class="at">pulsar.params =</span> <span class="fu">list</span>(<span class="at">rep.num =</span> <span class="dv">20</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb406"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb406-1"><a href="network-learning.html#cb406-1" tabindex="-1"></a><span class="fu">library</span>(SpiecEasi)</span></code></pre></div>
+<div class="sourceCode" id="cb407"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb407-1"><a href="network-learning.html#cb407-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13075</span>)</span>
+<span id="cb407-2"><a href="network-learning.html#cb407-2" tabindex="-1"></a>se_mb_est <span class="ot">&lt;-</span> <span class="fu">spiec.easi</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;counts&quot;</span>)), </span>
+<span id="cb407-3"><a href="network-learning.html#cb407-3" tabindex="-1"></a>                        <span class="at">method =</span> <span class="st">&#39;mb&#39;</span>, <span class="at">nlambda =</span> <span class="dv">20</span>, </span>
+<span id="cb407-4"><a href="network-learning.html#cb407-4" tabindex="-1"></a>                        <span class="at">pulsar.params =</span> <span class="fu">list</span>(<span class="at">rep.num =</span> <span class="dv">20</span>))</span></code></pre></div>
 <p>Since <code>SpiecEasi</code> uses the StARS (“Stability Approach to Regularization Selection”) method <span class="citation">(H. Liu, Roeder, and Wasserman 2010)</span> to obtain a sparse association matrix, we don’t need to set a threshold here. We store the partial correlations corresponding to the StARS-optimal lambda and convert them into an <code>igraph</code> object.</p>
-<div class="sourceCode" id="cb407"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb407-1"><a href="network-learning.html#cb407-1" tabindex="-1"></a><span class="co"># Get optimal matrix with partial correlations</span></span>
-<span id="cb407-2"><a href="network-learning.html#cb407-2" tabindex="-1"></a>se_mb_cor <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">getOptBeta</span>(se_mb_est))</span>
-<span id="cb407-3"><a href="network-learning.html#cb407-3" tabindex="-1"></a>se_mb_cor <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">symBeta</span>(se_mb_cor))</span>
-<span id="cb407-4"><a href="network-learning.html#cb407-4" tabindex="-1"></a><span class="fu">rownames</span>(se_mb_cor) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(se_mb_cor) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(tse)</span>
-<span id="cb407-5"><a href="network-learning.html#cb407-5" tabindex="-1"></a><span class="fu">diag</span>(se_mb_cor) <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb407-6"><a href="network-learning.html#cb407-6" tabindex="-1"></a></span>
-<span id="cb407-7"><a href="network-learning.html#cb407-7" tabindex="-1"></a><span class="co"># Create graph object</span></span>
-<span id="cb407-8"><a href="network-learning.html#cb407-8" tabindex="-1"></a>se_mb_graph <span class="ot">&lt;-</span> <span class="fu">transform_asso</span>(se_mb_cor)<span class="sc">$</span>graph</span></code></pre></div>
+<div class="sourceCode" id="cb408"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb408-1"><a href="network-learning.html#cb408-1" tabindex="-1"></a><span class="co"># Get optimal matrix with partial correlations</span></span>
+<span id="cb408-2"><a href="network-learning.html#cb408-2" tabindex="-1"></a>se_mb_cor <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">getOptBeta</span>(se_mb_est))</span>
+<span id="cb408-3"><a href="network-learning.html#cb408-3" tabindex="-1"></a>se_mb_cor <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">symBeta</span>(se_mb_cor))</span>
+<span id="cb408-4"><a href="network-learning.html#cb408-4" tabindex="-1"></a><span class="fu">rownames</span>(se_mb_cor) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(se_mb_cor) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(tse)</span>
+<span id="cb408-5"><a href="network-learning.html#cb408-5" tabindex="-1"></a><span class="fu">diag</span>(se_mb_cor) <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb408-6"><a href="network-learning.html#cb408-6" tabindex="-1"></a></span>
+<span id="cb408-7"><a href="network-learning.html#cb408-7" tabindex="-1"></a><span class="co"># Create graph object</span></span>
+<span id="cb408-8"><a href="network-learning.html#cb408-8" tabindex="-1"></a>se_mb_graph <span class="ot">&lt;-</span> <span class="fu">transform_asso</span>(se_mb_cor)<span class="sc">$</span>graph</span></code></pre></div>
 </div>
 <div id="network-plots" class="section level3 hasAnchor" number="12.7.4">
 <h3><span class="header-section-number">12.7.4</span> Network plots<a href="network-learning.html#network-plots" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>The graph objects can now be plotted using the <a href="https://r.igraph.org/">igraph</a> package. The same layout is used in all four plots so that the networks are comparable.</p>
-<div class="sourceCode" id="cb408"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb408-1"><a href="network-learning.html#cb408-1" tabindex="-1"></a><span class="fu">library</span>(igraph)</span></code></pre></div>
-<div class="sourceCode" id="cb409"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb409-1"><a href="network-learning.html#cb409-1" tabindex="-1"></a><span class="co"># Node sizes</span></span>
-<span id="cb409-2"><a href="network-learning.html#cb409-2" tabindex="-1"></a>vsize <span class="ot">&lt;-</span> (<span class="fu">colMeans</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;log10&quot;</span>))) <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="dv">3</span></span>
-<span id="cb409-3"><a href="network-learning.html#cb409-3" tabindex="-1"></a></span>
-<span id="cb409-4"><a href="network-learning.html#cb409-4" tabindex="-1"></a><span class="co"># Use Fruchterman-Reingold (force-directed) layout</span></span>
-<span id="cb409-5"><a href="network-learning.html#cb409-5" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13075</span>)</span>
-<span id="cb409-6"><a href="network-learning.html#cb409-6" tabindex="-1"></a>lay_fr <span class="ot">&lt;-</span> <span class="fu">layout_with_fr</span>(se_mb_graph)</span>
-<span id="cb409-7"><a href="network-learning.html#cb409-7" tabindex="-1"></a></span>
-<span id="cb409-8"><a href="network-learning.html#cb409-8" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
-<span id="cb409-9"><a href="network-learning.html#cb409-9" tabindex="-1"></a><span class="fu">plot</span>(sparcc_graph03, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize, </span>
-<span id="cb409-10"><a href="network-learning.html#cb409-10" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="st">&quot;SparCC (thresh 0.3)&quot;</span>)</span>
-<span id="cb409-11"><a href="network-learning.html#cb409-11" tabindex="-1"></a><span class="fu">plot</span>(sparcc_graph04, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize, </span>
-<span id="cb409-12"><a href="network-learning.html#cb409-12" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="st">&quot;SparCC (thresh 0.4)&quot;</span>)</span>
-<span id="cb409-13"><a href="network-learning.html#cb409-13" tabindex="-1"></a><span class="fu">plot</span>(prop_graph, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize, </span>
-<span id="cb409-14"><a href="network-learning.html#cb409-14" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="st">&quot;Shrinkage proportionality</span><span class="sc">\n</span><span class="st">(thresh 0.4)&quot;</span>)</span>
-<span id="cb409-15"><a href="network-learning.html#cb409-15" tabindex="-1"></a><span class="fu">plot</span>(se_mb_graph, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize, </span>
-<span id="cb409-16"><a href="network-learning.html#cb409-16" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="st">&quot;SpiecEasi (MB)&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb409"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb409-1"><a href="network-learning.html#cb409-1" tabindex="-1"></a><span class="fu">library</span>(igraph)</span></code></pre></div>
+<div class="sourceCode" id="cb410"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb410-1"><a href="network-learning.html#cb410-1" tabindex="-1"></a><span class="co"># Node sizes</span></span>
+<span id="cb410-2"><a href="network-learning.html#cb410-2" tabindex="-1"></a>vsize <span class="ot">&lt;-</span> (<span class="fu">colMeans</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;log10&quot;</span>))) <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="dv">3</span></span>
+<span id="cb410-3"><a href="network-learning.html#cb410-3" tabindex="-1"></a></span>
+<span id="cb410-4"><a href="network-learning.html#cb410-4" tabindex="-1"></a><span class="co"># Use Fruchterman-Reingold (force-directed) layout</span></span>
+<span id="cb410-5"><a href="network-learning.html#cb410-5" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">13075</span>)</span>
+<span id="cb410-6"><a href="network-learning.html#cb410-6" tabindex="-1"></a>lay_fr <span class="ot">&lt;-</span> <span class="fu">layout_with_fr</span>(se_mb_graph)</span>
+<span id="cb410-7"><a href="network-learning.html#cb410-7" tabindex="-1"></a></span>
+<span id="cb410-8"><a href="network-learning.html#cb410-8" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
+<span id="cb410-9"><a href="network-learning.html#cb410-9" tabindex="-1"></a><span class="fu">plot</span>(sparcc_graph03, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize, </span>
+<span id="cb410-10"><a href="network-learning.html#cb410-10" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="st">&quot;SparCC (thresh 0.3)&quot;</span>)</span>
+<span id="cb410-11"><a href="network-learning.html#cb410-11" tabindex="-1"></a><span class="fu">plot</span>(sparcc_graph04, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize, </span>
+<span id="cb410-12"><a href="network-learning.html#cb410-12" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="st">&quot;SparCC (thresh 0.4)&quot;</span>)</span>
+<span id="cb410-13"><a href="network-learning.html#cb410-13" tabindex="-1"></a><span class="fu">plot</span>(prop_graph, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize, </span>
+<span id="cb410-14"><a href="network-learning.html#cb410-14" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="st">&quot;Shrinkage proportionality</span><span class="sc">\n</span><span class="st">(thresh 0.4)&quot;</span>)</span>
+<span id="cb410-15"><a href="network-learning.html#cb410-15" tabindex="-1"></a><span class="fu">plot</span>(se_mb_graph, <span class="at">layout =</span> lay_fr, <span class="at">vertex.size =</span> vsize, </span>
+<span id="cb410-16"><a href="network-learning.html#cb410-16" tabindex="-1"></a>     <span class="at">vertex.label =</span> <span class="cn">NA</span>, <span class="at">main =</span> <span class="st">&quot;SpiecEasi (MB)&quot;</span>)</span></code></pre></div>
 <p><img src="60_network_learning_files/figure-html/netplots-1.png" width="960" /></p>
 <p><strong>A few observations:</strong><br />
 The density of SparCC (threshold 0.4), proportionality and SpiecEasi is comparable, while the SparCC correlation network with threshold 0.3 is much denser. However, there are edges in the proportionality and SpiecEasi networks that are not present in the two SparCC networks. The SpiecEasi network has less highly connected nodes than the other three networks, but more nodes with one or two connections.</p>
@@ -1250,98 +1251,98 @@ The density of SparCC (threshold 0.4), proportionality and SpiecEasi is comparab
 <div id="network-analysis-1" class="section level3 hasAnchor" number="12.7.5">
 <h3><span class="header-section-number">12.7.5</span> Network analysis<a href="network-learning.html#network-analysis-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
 <p>Here we repeat some of the network analysis approaches explained in Section <a href="network-learning.html#network-analysis">12.2</a>. The analyses are performed simultaneously for the three association measures as well as the SPRING network constructed in Section <a href="network-learning.html#spring-network">12.1.4</a>. Therefore, we start by creating a list of all the graph objects we need for the analyses.</p>
-<div class="sourceCode" id="cb410"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb410-1"><a href="network-learning.html#cb410-1" tabindex="-1"></a>graphlist <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">SparCC =</span> sparcc_graph04, </span>
-<span id="cb410-2"><a href="network-learning.html#cb410-2" tabindex="-1"></a>                  <span class="at">Proportionality =</span> prop_graph,</span>
-<span id="cb410-3"><a href="network-learning.html#cb410-3" tabindex="-1"></a>                  <span class="at">SpiecEasi =</span> se_mb_graph,</span>
-<span id="cb410-4"><a href="network-learning.html#cb410-4" tabindex="-1"></a>                  <span class="at">SPRING =</span> spring_graph)</span></code></pre></div>
+<div class="sourceCode" id="cb411"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb411-1"><a href="network-learning.html#cb411-1" tabindex="-1"></a>graphlist <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">SparCC =</span> sparcc_graph04, </span>
+<span id="cb411-2"><a href="network-learning.html#cb411-2" tabindex="-1"></a>                  <span class="at">Proportionality =</span> prop_graph,</span>
+<span id="cb411-3"><a href="network-learning.html#cb411-3" tabindex="-1"></a>                  <span class="at">SpiecEasi =</span> se_mb_graph,</span>
+<span id="cb411-4"><a href="network-learning.html#cb411-4" tabindex="-1"></a>                  <span class="at">SPRING =</span> spring_graph)</span></code></pre></div>
 <div id="degree-distribution-1" class="section level4 hasAnchor" number="12.7.5.1">
 <h4><span class="header-section-number">12.7.5.1</span> Degree distribution<a href="network-learning.html#degree-distribution-1" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <p>The degree distribution is plotted for all four measures to compare the overall network structure.</p>
-<div class="sourceCode" id="cb411"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb411-1"><a href="network-learning.html#cb411-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
-<div class="sourceCode" id="cb412"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb412-1"><a href="network-learning.html#cb412-1" tabindex="-1"></a><span class="co"># Compute degree distributions</span></span>
-<span id="cb412-2"><a href="network-learning.html#cb412-2" tabindex="-1"></a>ddlist <span class="ot">&lt;-</span> <span class="fu">lapply</span>(graphlist, igraph<span class="sc">::</span>degree.distribution)</span>
-<span id="cb412-3"><a href="network-learning.html#cb412-3" tabindex="-1"></a></span>
-<span id="cb412-4"><a href="network-learning.html#cb412-4" tabindex="-1"></a><span class="co"># Maximum degree</span></span>
-<span id="cb412-5"><a href="network-learning.html#cb412-5" tabindex="-1"></a>maxdeg <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">lengths</span>(ddlist))</span>
-<span id="cb412-6"><a href="network-learning.html#cb412-6" tabindex="-1"></a></span>
-<span id="cb412-7"><a href="network-learning.html#cb412-7" tabindex="-1"></a><span class="co"># Make list elements the same length</span></span>
-<span id="cb412-8"><a href="network-learning.html#cb412-8" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_along</span>(graphlist)) {</span>
-<span id="cb412-9"><a href="network-learning.html#cb412-9" tabindex="-1"></a>  <span class="fu">length</span>(ddlist[[i]]) <span class="ot">&lt;-</span> maxdeg</span>
-<span id="cb412-10"><a href="network-learning.html#cb412-10" tabindex="-1"></a>}</span>
-<span id="cb412-11"><a href="network-learning.html#cb412-11" tabindex="-1"></a></span>
-<span id="cb412-12"><a href="network-learning.html#cb412-12" tabindex="-1"></a><span class="co"># Data frame needed for ggplot2</span></span>
-<span id="cb412-13"><a href="network-learning.html#cb412-13" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Degree =</span> <span class="fu">rep</span>(<span class="fu">seq_len</span>(maxdeg), <span class="fu">length</span>(graphlist)), </span>
-<span id="cb412-14"><a href="network-learning.html#cb412-14" tabindex="-1"></a>                 <span class="at">Fraction =</span> <span class="fu">unlist</span>(ddlist), </span>
-<span id="cb412-15"><a href="network-learning.html#cb412-15" tabindex="-1"></a>                 <span class="at">Method =</span> <span class="fu">rep</span>(<span class="fu">names</span>(graphlist), <span class="at">each =</span> maxdeg))</span>
-<span id="cb412-16"><a href="network-learning.html#cb412-16" tabindex="-1"></a></span>
-<span id="cb412-17"><a href="network-learning.html#cb412-17" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Degree, <span class="at">y =</span> Fraction, <span class="at">group =</span> Method)) <span class="sc">+</span></span>
-<span id="cb412-18"><a href="network-learning.html#cb412-18" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">color =</span> Method)) <span class="sc">+</span></span>
-<span id="cb412-19"><a href="network-learning.html#cb412-19" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> Method)) <span class="sc">+</span></span>
-<span id="cb412-20"><a href="network-learning.html#cb412-20" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb412"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb412-1"><a href="network-learning.html#cb412-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code></pre></div>
+<div class="sourceCode" id="cb413"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb413-1"><a href="network-learning.html#cb413-1" tabindex="-1"></a><span class="co"># Compute degree distributions</span></span>
+<span id="cb413-2"><a href="network-learning.html#cb413-2" tabindex="-1"></a>ddlist <span class="ot">&lt;-</span> <span class="fu">lapply</span>(graphlist, igraph<span class="sc">::</span>degree.distribution)</span>
+<span id="cb413-3"><a href="network-learning.html#cb413-3" tabindex="-1"></a></span>
+<span id="cb413-4"><a href="network-learning.html#cb413-4" tabindex="-1"></a><span class="co"># Maximum degree</span></span>
+<span id="cb413-5"><a href="network-learning.html#cb413-5" tabindex="-1"></a>maxdeg <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">lengths</span>(ddlist))</span>
+<span id="cb413-6"><a href="network-learning.html#cb413-6" tabindex="-1"></a></span>
+<span id="cb413-7"><a href="network-learning.html#cb413-7" tabindex="-1"></a><span class="co"># Make list elements the same length</span></span>
+<span id="cb413-8"><a href="network-learning.html#cb413-8" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_along</span>(graphlist)) {</span>
+<span id="cb413-9"><a href="network-learning.html#cb413-9" tabindex="-1"></a>  <span class="fu">length</span>(ddlist[[i]]) <span class="ot">&lt;-</span> maxdeg</span>
+<span id="cb413-10"><a href="network-learning.html#cb413-10" tabindex="-1"></a>}</span>
+<span id="cb413-11"><a href="network-learning.html#cb413-11" tabindex="-1"></a></span>
+<span id="cb413-12"><a href="network-learning.html#cb413-12" tabindex="-1"></a><span class="co"># Data frame needed for ggplot2</span></span>
+<span id="cb413-13"><a href="network-learning.html#cb413-13" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Degree =</span> <span class="fu">rep</span>(<span class="fu">seq_len</span>(maxdeg), <span class="fu">length</span>(graphlist)), </span>
+<span id="cb413-14"><a href="network-learning.html#cb413-14" tabindex="-1"></a>                 <span class="at">Fraction =</span> <span class="fu">unlist</span>(ddlist), </span>
+<span id="cb413-15"><a href="network-learning.html#cb413-15" tabindex="-1"></a>                 <span class="at">Method =</span> <span class="fu">rep</span>(<span class="fu">names</span>(graphlist), <span class="at">each =</span> maxdeg))</span>
+<span id="cb413-16"><a href="network-learning.html#cb413-16" tabindex="-1"></a></span>
+<span id="cb413-17"><a href="network-learning.html#cb413-17" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> Degree, <span class="at">y =</span> Fraction, <span class="at">group =</span> Method)) <span class="sc">+</span></span>
+<span id="cb413-18"><a href="network-learning.html#cb413-18" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">color =</span> Method)) <span class="sc">+</span></span>
+<span id="cb413-19"><a href="network-learning.html#cb413-19" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> Method)) <span class="sc">+</span></span>
+<span id="cb413-20"><a href="network-learning.html#cb413-20" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div>
 <p><img src="60_network_learning_files/figure-html/degree_dist-1.png" width="672" /></p>
 <p>The SparCC and shrinkage proportionality networks have a considerably higher proportion of singletons (zero-degree nodes) than the two conditional dependency graphs, but a lower proportion of nodes with degrees between one and five. The SpiecEasi and SPRING graphs, on the other hand, have a higher proportion of low degree nodes, but no highly connected nodes with a degree greater than eleven.</p>
 </div>
 <div id="clustered-heatmaps-1" class="section level4 hasAnchor" number="12.7.5.2">
 <h4><span class="header-section-number">12.7.5.2</span> Clustered heatmaps<a href="network-learning.html#clustered-heatmaps-1" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <p>Using the <code>ComplexHeatmap</code> package, we plot heatmaps of the association matrices for the four considered association measures. Rows and columns are sorted according to the clusters identified via hierarchical clustering.</p>
-<div class="sourceCode" id="cb413"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb413-1"><a href="network-learning.html#cb413-1" tabindex="-1"></a><span class="fu">library</span>(ComplexHeatmap)</span>
-<span id="cb413-2"><a href="network-learning.html#cb413-2" tabindex="-1"></a><span class="fu">library</span>(circlize)</span>
-<span id="cb413-3"><a href="network-learning.html#cb413-3" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span></code></pre></div>
+<div class="sourceCode" id="cb414"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb414-1"><a href="network-learning.html#cb414-1" tabindex="-1"></a><span class="fu">library</span>(ComplexHeatmap)</span>
+<span id="cb414-2"><a href="network-learning.html#cb414-2" tabindex="-1"></a><span class="fu">library</span>(circlize)</span>
+<span id="cb414-3"><a href="network-learning.html#cb414-3" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span></code></pre></div>
 <p>For each association measure, we select the 50 nodes with the highest sum of edge weights.</p>
-<div class="sourceCode" id="cb414"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb414-1"><a href="network-learning.html#cb414-1" tabindex="-1"></a><span class="co"># Function for selecting taxa with highest sum of edge weights</span></span>
-<span id="cb414-2"><a href="network-learning.html#cb414-2" tabindex="-1"></a>select_taxa <span class="ot">&lt;-</span> <span class="cf">function</span>(adja, <span class="at">ntaxa =</span> <span class="dv">50</span>) {</span>
-<span id="cb414-3"><a href="network-learning.html#cb414-3" tabindex="-1"></a>  sel <span class="ot">&lt;-</span> <span class="fu">names</span>(<span class="fu">sort</span>(<span class="fu">rowSums</span>(adja), <span class="at">decreasing =</span> <span class="cn">TRUE</span>))[<span class="fu">seq_len</span>(ntaxa)]</span>
-<span id="cb414-4"><a href="network-learning.html#cb414-4" tabindex="-1"></a>  adja[sel, sel]</span>
-<span id="cb414-5"><a href="network-learning.html#cb414-5" tabindex="-1"></a>}</span>
-<span id="cb414-6"><a href="network-learning.html#cb414-6" tabindex="-1"></a></span>
-<span id="cb414-7"><a href="network-learning.html#cb414-7" tabindex="-1"></a>assolist <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb414-8"><a href="network-learning.html#cb414-8" tabindex="-1"></a>assolist<span class="sc">$</span>SparCC <span class="ot">&lt;-</span> <span class="fu">select_taxa</span>(sparcc_trans04<span class="sc">$</span>adja)</span>
-<span id="cb414-9"><a href="network-learning.html#cb414-9" tabindex="-1"></a>assolist<span class="sc">$</span>Proportionality <span class="ot">&lt;-</span> <span class="fu">select_taxa</span>(prop_trans<span class="sc">$</span>adja)</span>
-<span id="cb414-10"><a href="network-learning.html#cb414-10" tabindex="-1"></a>assolist<span class="sc">$</span>SpiecEasi <span class="ot">&lt;-</span> <span class="fu">select_taxa</span>(se_mb_cor)</span>
-<span id="cb414-11"><a href="network-learning.html#cb414-11" tabindex="-1"></a>assolist<span class="sc">$</span>SPRING <span class="ot">&lt;-</span> <span class="fu">select_taxa</span>(spring_cor)</span></code></pre></div>
-<div class="sourceCode" id="cb415"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb415-1"><a href="network-learning.html#cb415-1" tabindex="-1"></a><span class="co"># Color vector for the legend</span></span>
-<span id="cb415-2"><a href="network-learning.html#cb415-2" tabindex="-1"></a>col <span class="ot">&lt;-</span> <span class="fu">colorRamp2</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">0</span>, <span class="fl">0.5</span>, <span class="dv">1</span>), </span>
-<span id="cb415-3"><a href="network-learning.html#cb415-3" tabindex="-1"></a>                  <span class="fu">c</span>(<span class="st">&quot;royalblue4&quot;</span>, <span class="st">&quot;lightblue&quot;</span>, <span class="st">&quot;white&quot;</span>, <span class="st">&quot;orange&quot;</span>, <span class="st">&quot;firebrick3&quot;</span>))</span>
-<span id="cb415-4"><a href="network-learning.html#cb415-4" tabindex="-1"></a></span>
-<span id="cb415-5"><a href="network-learning.html#cb415-5" tabindex="-1"></a>hm_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<div class="sourceCode" id="cb415"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb415-1"><a href="network-learning.html#cb415-1" tabindex="-1"></a><span class="co"># Function for selecting taxa with highest sum of edge weights</span></span>
+<span id="cb415-2"><a href="network-learning.html#cb415-2" tabindex="-1"></a>select_taxa <span class="ot">&lt;-</span> <span class="cf">function</span>(adja, <span class="at">ntaxa =</span> <span class="dv">50</span>) {</span>
+<span id="cb415-3"><a href="network-learning.html#cb415-3" tabindex="-1"></a>  sel <span class="ot">&lt;-</span> <span class="fu">names</span>(<span class="fu">sort</span>(<span class="fu">rowSums</span>(adja), <span class="at">decreasing =</span> <span class="cn">TRUE</span>))[<span class="fu">seq_len</span>(ntaxa)]</span>
+<span id="cb415-4"><a href="network-learning.html#cb415-4" tabindex="-1"></a>  adja[sel, sel]</span>
+<span id="cb415-5"><a href="network-learning.html#cb415-5" tabindex="-1"></a>}</span>
 <span id="cb415-6"><a href="network-learning.html#cb415-6" tabindex="-1"></a></span>
-<span id="cb415-7"><a href="network-learning.html#cb415-7" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_along</span>(assolist)) {</span>
-<span id="cb415-8"><a href="network-learning.html#cb415-8" tabindex="-1"></a>  <span class="cf">if</span> (i <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>)) {</span>
-<span id="cb415-9"><a href="network-learning.html#cb415-9" tabindex="-1"></a>    showlegend <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
-<span id="cb415-10"><a href="network-learning.html#cb415-10" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb415-11"><a href="network-learning.html#cb415-11" tabindex="-1"></a>    showlegend <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
-<span id="cb415-12"><a href="network-learning.html#cb415-12" tabindex="-1"></a>  }</span>
-<span id="cb415-13"><a href="network-learning.html#cb415-13" tabindex="-1"></a>  </span>
-<span id="cb415-14"><a href="network-learning.html#cb415-14" tabindex="-1"></a>  hm_list[[i]] <span class="ot">&lt;-</span> <span class="fu">Heatmap</span>(assolist[[i]], </span>
-<span id="cb415-15"><a href="network-learning.html#cb415-15" tabindex="-1"></a>                          <span class="at">col =</span> col, </span>
-<span id="cb415-16"><a href="network-learning.html#cb415-16" tabindex="-1"></a>                          <span class="at">rect_gp =</span> <span class="fu">gpar</span>(<span class="at">col =</span> <span class="st">&quot;gray&quot;</span>, <span class="at">lwd =</span> <span class="dv">1</span>),</span>
-<span id="cb415-17"><a href="network-learning.html#cb415-17" tabindex="-1"></a>                          <span class="at">show_row_names =</span> <span class="cn">FALSE</span>, </span>
-<span id="cb415-18"><a href="network-learning.html#cb415-18" tabindex="-1"></a>                          <span class="at">show_column_names =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb415-19"><a href="network-learning.html#cb415-19" tabindex="-1"></a>                          <span class="at">column_title =</span> <span class="fu">names</span>(assolist)[i], </span>
-<span id="cb415-20"><a href="network-learning.html#cb415-20" tabindex="-1"></a>                          <span class="at">name =</span> <span class="st">&quot;Association&quot;</span>,</span>
-<span id="cb415-21"><a href="network-learning.html#cb415-21" tabindex="-1"></a>                          <span class="at">show_heatmap_legend =</span> showlegend) <span class="sc">%&gt;%</span> </span>
-<span id="cb415-22"><a href="network-learning.html#cb415-22" tabindex="-1"></a>    <span class="fu">draw</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb415-23"><a href="network-learning.html#cb415-23" tabindex="-1"></a>    <span class="fu">grid.grabExpr</span>()</span>
-<span id="cb415-24"><a href="network-learning.html#cb415-24" tabindex="-1"></a>}</span>
-<span id="cb415-25"><a href="network-learning.html#cb415-25" tabindex="-1"></a></span>
-<span id="cb415-26"><a href="network-learning.html#cb415-26" tabindex="-1"></a><span class="co"># Plot with wrap_plots() function from patchwork package</span></span>
-<span id="cb415-27"><a href="network-learning.html#cb415-27" tabindex="-1"></a><span class="fu">wrap_plots</span>(hm_list, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">widths =</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">10</span>, <span class="dv">8</span>, <span class="dv">10</span>))</span></code></pre></div>
+<span id="cb415-7"><a href="network-learning.html#cb415-7" tabindex="-1"></a>assolist <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb415-8"><a href="network-learning.html#cb415-8" tabindex="-1"></a>assolist<span class="sc">$</span>SparCC <span class="ot">&lt;-</span> <span class="fu">select_taxa</span>(sparcc_trans04<span class="sc">$</span>adja)</span>
+<span id="cb415-9"><a href="network-learning.html#cb415-9" tabindex="-1"></a>assolist<span class="sc">$</span>Proportionality <span class="ot">&lt;-</span> <span class="fu">select_taxa</span>(prop_trans<span class="sc">$</span>adja)</span>
+<span id="cb415-10"><a href="network-learning.html#cb415-10" tabindex="-1"></a>assolist<span class="sc">$</span>SpiecEasi <span class="ot">&lt;-</span> <span class="fu">select_taxa</span>(se_mb_cor)</span>
+<span id="cb415-11"><a href="network-learning.html#cb415-11" tabindex="-1"></a>assolist<span class="sc">$</span>SPRING <span class="ot">&lt;-</span> <span class="fu">select_taxa</span>(spring_cor)</span></code></pre></div>
+<div class="sourceCode" id="cb416"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb416-1"><a href="network-learning.html#cb416-1" tabindex="-1"></a><span class="co"># Color vector for the legend</span></span>
+<span id="cb416-2"><a href="network-learning.html#cb416-2" tabindex="-1"></a>col <span class="ot">&lt;-</span> <span class="fu">colorRamp2</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">0</span>, <span class="fl">0.5</span>, <span class="dv">1</span>), </span>
+<span id="cb416-3"><a href="network-learning.html#cb416-3" tabindex="-1"></a>                  <span class="fu">c</span>(<span class="st">&quot;royalblue4&quot;</span>, <span class="st">&quot;lightblue&quot;</span>, <span class="st">&quot;white&quot;</span>, <span class="st">&quot;orange&quot;</span>, <span class="st">&quot;firebrick3&quot;</span>))</span>
+<span id="cb416-4"><a href="network-learning.html#cb416-4" tabindex="-1"></a></span>
+<span id="cb416-5"><a href="network-learning.html#cb416-5" tabindex="-1"></a>hm_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb416-6"><a href="network-learning.html#cb416-6" tabindex="-1"></a></span>
+<span id="cb416-7"><a href="network-learning.html#cb416-7" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="fu">seq_along</span>(assolist)) {</span>
+<span id="cb416-8"><a href="network-learning.html#cb416-8" tabindex="-1"></a>  <span class="cf">if</span> (i <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>)) {</span>
+<span id="cb416-9"><a href="network-learning.html#cb416-9" tabindex="-1"></a>    showlegend <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb416-10"><a href="network-learning.html#cb416-10" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb416-11"><a href="network-learning.html#cb416-11" tabindex="-1"></a>    showlegend <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
+<span id="cb416-12"><a href="network-learning.html#cb416-12" tabindex="-1"></a>  }</span>
+<span id="cb416-13"><a href="network-learning.html#cb416-13" tabindex="-1"></a>  </span>
+<span id="cb416-14"><a href="network-learning.html#cb416-14" tabindex="-1"></a>  hm_list[[i]] <span class="ot">&lt;-</span> <span class="fu">Heatmap</span>(assolist[[i]], </span>
+<span id="cb416-15"><a href="network-learning.html#cb416-15" tabindex="-1"></a>                          <span class="at">col =</span> col, </span>
+<span id="cb416-16"><a href="network-learning.html#cb416-16" tabindex="-1"></a>                          <span class="at">rect_gp =</span> <span class="fu">gpar</span>(<span class="at">col =</span> <span class="st">&quot;gray&quot;</span>, <span class="at">lwd =</span> <span class="dv">1</span>),</span>
+<span id="cb416-17"><a href="network-learning.html#cb416-17" tabindex="-1"></a>                          <span class="at">show_row_names =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb416-18"><a href="network-learning.html#cb416-18" tabindex="-1"></a>                          <span class="at">show_column_names =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb416-19"><a href="network-learning.html#cb416-19" tabindex="-1"></a>                          <span class="at">column_title =</span> <span class="fu">names</span>(assolist)[i], </span>
+<span id="cb416-20"><a href="network-learning.html#cb416-20" tabindex="-1"></a>                          <span class="at">name =</span> <span class="st">&quot;Association&quot;</span>,</span>
+<span id="cb416-21"><a href="network-learning.html#cb416-21" tabindex="-1"></a>                          <span class="at">show_heatmap_legend =</span> showlegend) <span class="sc">%&gt;%</span> </span>
+<span id="cb416-22"><a href="network-learning.html#cb416-22" tabindex="-1"></a>    <span class="fu">draw</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb416-23"><a href="network-learning.html#cb416-23" tabindex="-1"></a>    <span class="fu">grid.grabExpr</span>()</span>
+<span id="cb416-24"><a href="network-learning.html#cb416-24" tabindex="-1"></a>}</span>
+<span id="cb416-25"><a href="network-learning.html#cb416-25" tabindex="-1"></a></span>
+<span id="cb416-26"><a href="network-learning.html#cb416-26" tabindex="-1"></a><span class="co"># Plot with wrap_plots() function from patchwork package</span></span>
+<span id="cb416-27"><a href="network-learning.html#cb416-27" tabindex="-1"></a><span class="fu">wrap_plots</span>(hm_list, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">widths =</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">10</span>, <span class="dv">8</span>, <span class="dv">10</span>))</span></code></pre></div>
 <p><img src="60_network_learning_files/figure-html/clustered_heatmap_all-1.png" width="960" /></p>
 <p>The SparCC and the proportionality network show a block structure, where each block corresponds to a cluster. The clusters are less pronounced in the conditional dependence networks. The latter also generally have lower edge weights.</p>
 </div>
 <div id="global-network-measures-1" class="section level4 hasAnchor" number="12.7.5.3">
 <h4><span class="header-section-number">12.7.5.3</span> Global network measures<a href="network-learning.html#global-network-measures-1" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <p>For each association measure, the three global network measures density, transitivity, and average path length are computed and stored in a data frame for comparison.</p>
-<div class="sourceCode" id="cb416"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb416-1"><a href="network-learning.html#cb416-1" tabindex="-1"></a><span class="co"># Compute density and store in a data frame</span></span>
-<span id="cb416-2"><a href="network-learning.html#cb416-2" tabindex="-1"></a>glob <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Density =</span> <span class="fu">unlist</span>(<span class="fu">lapply</span>(graphlist, edge_density)))</span>
-<span id="cb416-3"><a href="network-learning.html#cb416-3" tabindex="-1"></a></span>
-<span id="cb416-4"><a href="network-learning.html#cb416-4" tabindex="-1"></a><span class="co"># Transitivity</span></span>
-<span id="cb416-5"><a href="network-learning.html#cb416-5" tabindex="-1"></a>glob<span class="sc">$</span>Transitivity <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">lapply</span>(graphlist, transitivity))</span>
-<span id="cb416-6"><a href="network-learning.html#cb416-6" tabindex="-1"></a></span>
-<span id="cb416-7"><a href="network-learning.html#cb416-7" tabindex="-1"></a><span class="co"># Average path length</span></span>
-<span id="cb416-8"><a href="network-learning.html#cb416-8" tabindex="-1"></a>glob<span class="sc">$</span>Av.path <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">lapply</span>(graphlist, average.path.length))</span>
-<span id="cb416-9"><a href="network-learning.html#cb416-9" tabindex="-1"></a></span>
-<span id="cb416-10"><a href="network-learning.html#cb416-10" tabindex="-1"></a>glob</span></code></pre></div>
+<div class="sourceCode" id="cb417"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb417-1"><a href="network-learning.html#cb417-1" tabindex="-1"></a><span class="co"># Compute density and store in a data frame</span></span>
+<span id="cb417-2"><a href="network-learning.html#cb417-2" tabindex="-1"></a>glob <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Density =</span> <span class="fu">unlist</span>(<span class="fu">lapply</span>(graphlist, edge_density)))</span>
+<span id="cb417-3"><a href="network-learning.html#cb417-3" tabindex="-1"></a></span>
+<span id="cb417-4"><a href="network-learning.html#cb417-4" tabindex="-1"></a><span class="co"># Transitivity</span></span>
+<span id="cb417-5"><a href="network-learning.html#cb417-5" tabindex="-1"></a>glob<span class="sc">$</span>Transitivity <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">lapply</span>(graphlist, transitivity))</span>
+<span id="cb417-6"><a href="network-learning.html#cb417-6" tabindex="-1"></a></span>
+<span id="cb417-7"><a href="network-learning.html#cb417-7" tabindex="-1"></a><span class="co"># Average path length</span></span>
+<span id="cb417-8"><a href="network-learning.html#cb417-8" tabindex="-1"></a>glob<span class="sc">$</span>Av.path <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">lapply</span>(graphlist, average.path.length))</span>
+<span id="cb417-9"><a href="network-learning.html#cb417-9" tabindex="-1"></a></span>
+<span id="cb417-10"><a href="network-learning.html#cb417-10" tabindex="-1"></a>glob</span></code></pre></div>
 <pre><code>##                 Density Transitivity Av.path
 ## SparCC          0.01510       0.5458  0.8932
 ## Proportionality 0.01295       0.5402  1.1847
