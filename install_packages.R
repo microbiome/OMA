@@ -119,3 +119,4 @@ if(length(pkgsToInstall)) {
 }
 
 Sys.unsetenv("R_REMOTES_UPGRADE")
+
