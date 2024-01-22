@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 11 Differential Abundance | Orchestrating Microbiome Analysis with Bioconductor</title>
+  <meta name="description" content="Chapter 11 Differential Abundance | Orchestrating Microbiome Analysis with Bioconductor" />
+  <meta name="generator" content="bookdown 0.36 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 11 Differential Abundance | Orchestrating Microbiome Analysis with Bioconductor" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta name="github-repo" content="microbiome/OMA" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 11 Differential Abundance | Orchestrating Microbiome Analysis with Bioconductor" />
+  
+  
+  
+
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="clustering.html"/>
+<link rel="next" href="network-learning.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<script src="libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Orchestrating Microbiome Analysis with Bioconductor</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Welcome</a></li>
+<li class="part"><span><b>I Introduction</b></span></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a></li>
+<li class="chapter" data-level="2" data-path="packages.html"><a href="packages.html"><i class="fa fa-check"></i><b>2</b> Packages</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="packages.html"><a href="packages.html#package-installation"><i class="fa fa-check"></i><b>2.1</b> Package installation</a>
+<ul>
+<li class="chapter" data-level="2.1.1" data-path="packages.html"><a href="packages.html#packages_specific"><i class="fa fa-check"></i><b>2.1.1</b> Installing specific packages</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="packages.html"><a href="packages.html#ecosystem"><i class="fa fa-check"></i><b>2.2</b> Package ecosystem</a>
+<ul>
+<li class="chapter" data-level="2.2.1" data-path="packages.html"><a href="packages.html#mia-package-family"><i class="fa fa-check"></i><b>2.2.1</b> mia package family</a></li>
+<li class="chapter" data-level="2.2.2" data-path="packages.html"><a href="packages.html#sub-diff-abund"><i class="fa fa-check"></i><b>2.2.2</b> Differential abundance</a></li>
+<li class="chapter" data-level="2.2.3" data-path="packages.html"><a href="packages.html#other-packages"><i class="fa fa-check"></i><b>2.2.3</b> Other packages</a></li>
+<li class="chapter" data-level="2.2.4" data-path="packages.html"><a href="packages.html#open-microbiome-data"><i class="fa fa-check"></i><b>2.2.4</b> Open microbiome data</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="containers.html"><a href="containers.html"><i class="fa fa-check"></i><b>3</b> Microbiome Data</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="containers.html"><a href="containers.html#data-science-framework"><i class="fa fa-check"></i><b>3.1</b> Data science framework</a></li>
+<li class="chapter" data-level="3.2" data-path="containers.html"><a href="containers.html#data-containers"><i class="fa fa-check"></i><b>3.2</b> Data containers</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="containers.html"><a href="containers.html#assay-slot"><i class="fa fa-check"></i><b>3.2.1</b> Assay data</a></li>
+<li class="chapter" data-level="3.2.2" data-path="containers.html"><a href="containers.html#coldata"><i class="fa fa-check"></i><b>3.2.2</b> colData</a></li>
+<li class="chapter" data-level="3.2.3" data-path="containers.html"><a href="containers.html#rowdata"><i class="fa fa-check"></i><b>3.2.3</b> rowData</a></li>
+<li class="chapter" data-level="3.2.4" data-path="containers.html"><a href="containers.html#rowtree"><i class="fa fa-check"></i><b>3.2.4</b> rowTree</a></li>
+<li class="chapter" data-level="3.2.5" data-path="containers.html"><a href="containers.html#alt-exp"><i class="fa fa-check"></i><b>3.2.5</b> Alternative experiments</a></li>
+<li class="chapter" data-level="3.2.6" data-path="containers.html"><a href="containers.html#mae"><i class="fa fa-check"></i><b>3.2.6</b> MultiAssayExperiments</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="containers.html"><a href="containers.html#example-data"><i class="fa fa-check"></i><b>3.3</b> Demonstration data</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="containers.html"><a href="containers.html#package-data"><i class="fa fa-check"></i><b>3.3.1</b> Package data</a></li>
+<li class="chapter" data-level="3.3.2" data-path="containers.html"><a href="containers.html#experimenthub-data"><i class="fa fa-check"></i><b>3.3.2</b> ExperimentHub data</a></li>
+<li class="chapter" data-level="3.3.3" data-path="containers.html"><a href="containers.html#curated-metagenomic-data"><i class="fa fa-check"></i><b>3.3.3</b> Curated metagenomic data</a></li>
+<li class="chapter" data-level="3.3.4" data-path="containers.html"><a href="containers.html#human-microbiome-compendium"><i class="fa fa-check"></i><b>3.3.4</b> Human microbiome compendium</a></li>
+<li class="chapter" data-level="3.3.5" data-path="containers.html"><a href="containers.html#other-data-sources"><i class="fa fa-check"></i><b>3.3.5</b> Other data sources</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="containers.html"><a href="containers.html#loading-experimental-microbiome-data"><i class="fa fa-check"></i><b>3.4</b> Loading experimental microbiome data</a>
+<ul>
+<li class="chapter" data-level="3.4.1" data-path="containers.html"><a href="containers.html#s-workflow"><i class="fa fa-check"></i><b>3.4.1</b> 16S workflow</a></li>
+<li class="chapter" data-level="3.4.2" data-path="containers.html"><a href="containers.html#import-from-file"><i class="fa fa-check"></i><b>3.4.2</b> Import from external files</a></li>
+<li class="chapter" data-level="3.4.3" data-path="containers.html"><a href="containers.html#constructing-treesummarizedexperiment"><i class="fa fa-check"></i><b>3.4.3</b> Constructing TreeSummarizedExperiment</a></li>
+<li class="chapter" data-level="3.4.4" data-path="containers.html"><a href="containers.html#constructing-multiassayexperiment"><i class="fa fa-check"></i><b>3.4.4</b> Constructing MultiAssayExperiment</a></li>
+<li class="chapter" data-level="3.4.5" data-path="containers.html"><a href="containers.html#import-functions-for-standard-formats"><i class="fa fa-check"></i><b>3.4.5</b> Import functions for standard formats</a></li>
+<li class="chapter" data-level="3.4.6" data-path="containers.html"><a href="containers.html#conversions-between-data-formats-in-r"><i class="fa fa-check"></i><b>3.4.6</b> Conversions between data formats in R</a></li>
+</ul></li>
+</ul></li>
+<li class="part"><span><b>II Focus Topics</b></span></li>
+<li class="chapter" data-level="4" data-path="datamanipulation.html"><a href="datamanipulation.html"><i class="fa fa-check"></i><b>4</b> Data Manipulation</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="datamanipulation.html"><a href="datamanipulation.html#tidying-and-subsetting"><i class="fa fa-check"></i><b>4.1</b> Tidying and subsetting</a>
+<ul>
+<li class="chapter" data-level="4.1.1" data-path="datamanipulation.html"><a href="datamanipulation.html#tidy-data"><i class="fa fa-check"></i><b>4.1.1</b> Tidy data</a></li>
+<li class="chapter" data-level="4.1.2" data-path="datamanipulation.html"><a href="datamanipulation.html#subsetting"><i class="fa fa-check"></i><b>4.1.2</b> Subsetting</a></li>
+<li class="chapter" data-level="4.1.3" data-path="datamanipulation.html"><a href="datamanipulation.html#splitting"><i class="fa fa-check"></i><b>4.1.3</b> Splitting</a></li>
+</ul></li>
+<li class="chapter" data-level="4.2" data-path="datamanipulation.html"><a href="datamanipulation.html#add-or-modify-data"><i class="fa fa-check"></i><b>4.2</b> Add or modify data</a></li>
+<li class="chapter" data-level="4.3" data-path="datamanipulation.html"><a href="datamanipulation.html#merge-data"><i class="fa fa-check"></i><b>4.3</b> Merge data</a>
+<ul>
+<li class="chapter" data-level="4.3.1" data-path="datamanipulation.html"><a href="datamanipulation.html#additional-functions"><i class="fa fa-check"></i><b>4.3.1</b> Additional functions</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="quality-control.html"><a href="quality-control.html"><i class="fa fa-check"></i><b>5</b> Exploration and Quality Control</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="quality-control.html"><a href="quality-control.html#abundance"><i class="fa fa-check"></i><b>5.1</b> Abundance</a></li>
+<li class="chapter" data-level="5.2" data-path="quality-control.html"><a href="quality-control.html#prevalence"><i class="fa fa-check"></i><b>5.2</b> Prevalence</a>
+<ul>
+<li class="chapter" data-level="5.2.1" data-path="quality-control.html"><a href="quality-control.html#prevalence-analysis"><i class="fa fa-check"></i><b>5.2.1</b> Prevalence analysis</a></li>
+<li class="chapter" data-level="5.2.2" data-path="quality-control.html"><a href="quality-control.html#rare-taxa"><i class="fa fa-check"></i><b>5.2.2</b> Rare taxa</a></li>
+<li class="chapter" data-level="5.2.3" data-path="quality-control.html"><a href="quality-control.html#plotting-prevalence"><i class="fa fa-check"></i><b>5.2.3</b> Plotting prevalence</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="quality-control.html"><a href="quality-control.html#qc"><i class="fa fa-check"></i><b>5.3</b> Quality control</a>
+<ul>
+<li class="chapter" data-level="5.3.1" data-path="quality-control.html"><a href="quality-control.html#top-taxa"><i class="fa fa-check"></i><b>5.3.1</b> Top taxa</a></li>
+<li class="chapter" data-level="5.3.2" data-path="quality-control.html"><a href="quality-control.html#library-size-read-count"><i class="fa fa-check"></i><b>5.3.2</b> Library size / read count</a></li>
+<li class="chapter" data-level="5.3.3" data-path="quality-control.html"><a href="quality-control.html#contaminant-sequences"><i class="fa fa-check"></i><b>5.3.3</b> Contaminant sequences</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="taxonomic-information.html"><a href="taxonomic-information.html"><i class="fa fa-check"></i><b>6</b> Taxonomic Information</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="taxonomic-information.html"><a href="taxonomic-information.html#assigning-taxonomic-information."><i class="fa fa-check"></i><b>6.1</b> Assigning taxonomic information.</a>
+<ul>
+<li class="chapter" data-level="6.1.1" data-path="taxonomic-information.html"><a href="taxonomic-information.html#dada2"><i class="fa fa-check"></i><b>6.1.1</b> dada2</a></li>
+<li class="chapter" data-level="6.1.2" data-path="taxonomic-information.html"><a href="taxonomic-information.html#decipher"><i class="fa fa-check"></i><b>6.1.2</b> DECIPHER</a></li>
+</ul></li>
+<li class="chapter" data-level="6.2" data-path="taxonomic-information.html"><a href="taxonomic-information.html#functions-to-access-taxonomic-information"><i class="fa fa-check"></i><b>6.2</b> Functions to access taxonomic information</a>
+<ul>
+<li class="chapter" data-level="6.2.1" data-path="taxonomic-information.html"><a href="taxonomic-information.html#fly-tree"><i class="fa fa-check"></i><b>6.2.1</b> Generate a taxonomic tree on the fly</a></li>
+</ul></li>
+<li class="chapter" data-level="6.3" data-path="taxonomic-information.html"><a href="taxonomic-information.html#data-agglomeration"><i class="fa fa-check"></i><b>6.3</b> Data agglomeration</a>
+<ul>
+<li class="chapter" data-level="6.3.1" data-path="taxonomic-information.html"><a href="taxonomic-information.html#taxa-clustering"><i class="fa fa-check"></i><b>6.3.1</b> Taxa clustering</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="taxonomic-information.html"><a href="taxonomic-information.html#assay-transform"><i class="fa fa-check"></i><b>6.4</b> Data transformation</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="community-diversity.html"><a href="community-diversity.html"><i class="fa fa-check"></i><b>7</b> Community Diversity</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="community-diversity.html"><a href="community-diversity.html#estimation"><i class="fa fa-check"></i><b>7.1</b> Estimation</a>
+<ul>
+<li class="chapter" data-level="7.1.1" data-path="community-diversity.html"><a href="community-diversity.html#richness"><i class="fa fa-check"></i><b>7.1.1</b> Richness</a></li>
+<li class="chapter" data-level="7.1.2" data-path="community-diversity.html"><a href="community-diversity.html#estimate-diversity"><i class="fa fa-check"></i><b>7.1.2</b> Diversity</a></li>
+<li class="chapter" data-level="7.1.3" data-path="community-diversity.html"><a href="community-diversity.html#faith-diversity"><i class="fa fa-check"></i><b>7.1.3</b> Faith phylogenetic diversity</a></li>
+<li class="chapter" data-level="7.1.4" data-path="community-diversity.html"><a href="community-diversity.html#evenness"><i class="fa fa-check"></i><b>7.1.4</b> Evenness</a></li>
+<li class="chapter" data-level="7.1.5" data-path="community-diversity.html"><a href="community-diversity.html#dominance"><i class="fa fa-check"></i><b>7.1.5</b> Dominance</a></li>
+<li class="chapter" data-level="7.1.6" data-path="community-diversity.html"><a href="community-diversity.html#rarity"><i class="fa fa-check"></i><b>7.1.6</b> Rarity</a></li>
+<li class="chapter" data-level="7.1.7" data-path="community-diversity.html"><a href="community-diversity.html#divergence"><i class="fa fa-check"></i><b>7.1.7</b> Divergence</a></li>
+</ul></li>
+<li class="chapter" data-level="7.2" data-path="community-diversity.html"><a href="community-diversity.html#visualization"><i class="fa fa-check"></i><b>7.2</b> Visualization</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="community-similarity.html"><a href="community-similarity.html"><i class="fa fa-check"></i><b>8</b> Community Similarity</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="community-similarity.html"><a href="community-similarity.html#unsupervised-ordination"><i class="fa fa-check"></i><b>8.1</b> Unsupervised ordination</a>
+<ul>
+<li class="chapter" data-level="8.1.1" data-path="community-similarity.html"><a href="community-similarity.html#comparing-communities-by-beta-diversity-analysis"><i class="fa fa-check"></i><b>8.1.1</b> Comparing communities by beta diversity analysis</a></li>
+<li class="chapter" data-level="8.1.2" data-path="community-similarity.html"><a href="community-similarity.html#other-ord-methods"><i class="fa fa-check"></i><b>8.1.2</b> Other ordination methods</a></li>
+<li class="chapter" data-level="8.1.3" data-path="community-similarity.html"><a href="community-similarity.html#explained-variance"><i class="fa fa-check"></i><b>8.1.3</b> Explained variance</a></li>
+</ul></li>
+<li class="chapter" data-level="8.2" data-path="community-similarity.html"><a href="community-similarity.html#supervised-ordination"><i class="fa fa-check"></i><b>8.2</b> Supervised ordination</a></li>
+<li class="chapter" data-level="8.3" data-path="community-similarity.html"><a href="community-similarity.html#case-studies"><i class="fa fa-check"></i><b>8.3</b> Case studies</a>
+<ul>
+<li class="chapter" data-level="8.3.1" data-path="community-similarity.html"><a href="community-similarity.html#dbrda-workflow"><i class="fa fa-check"></i><b>8.3.1</b> Testing differences in community composition between sample groups</a></li>
+<li class="chapter" data-level="8.3.2" data-path="community-similarity.html"><a href="community-similarity.html#checking-the-homogeneity-condition"><i class="fa fa-check"></i><b>8.3.2</b> Checking the homogeneity condition</a></li>
+</ul></li>
+<li class="chapter" data-level="8.4" data-path="community-similarity.html"><a href="community-similarity.html#summary"><i class="fa fa-check"></i><b>8.4</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="microbiome-community.html"><a href="microbiome-community.html"><i class="fa fa-check"></i><b>9</b> Community Composition</a>
+<ul>
+<li class="chapter" data-level="9.1" data-path="microbiome-community.html"><a href="microbiome-community.html#visual-composition"><i class="fa fa-check"></i><b>9.1</b> Visualizing taxonomic composition</a>
+<ul>
+<li class="chapter" data-level="9.1.1" data-path="microbiome-community.html"><a href="microbiome-community.html#composition-barplot"><i class="fa fa-check"></i><b>9.1.1</b> Composition barplot</a></li>
+<li class="chapter" data-level="9.1.2" data-path="microbiome-community.html"><a href="microbiome-community.html#composition-heatmap"><i class="fa fa-check"></i><b>9.1.2</b> Composition heatmap</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="10" data-path="clustering.html"><a href="clustering.html"><i class="fa fa-check"></i><b>10</b> Community Typing (Clustering)</a>
+<ul>
+<li class="chapter" data-level="10.1" data-path="clustering.html"><a href="clustering.html#custom-tools"><i class="fa fa-check"></i><b>10.1</b> Custom tools</a></li>
+<li class="chapter" data-level="10.2" data-path="clustering.html"><a href="clustering.html#hierarchical-clustering"><i class="fa fa-check"></i><b>10.2</b> Hierarchical clustering</a></li>
+<li class="chapter" data-level="10.3" data-path="clustering.html"><a href="clustering.html#dirichlet-multinomial-mixtures-dmm"><i class="fa fa-check"></i><b>10.3</b> Dirichlet Multinomial Mixtures (DMM)</a>
+<ul>
+<li class="chapter" data-level="10.3.1" data-path="clustering.html"><a href="clustering.html#pcoa-with-dmm-clusters"><i class="fa fa-check"></i><b>10.3.1</b> PCoA with DMM clusters</a></li>
+</ul></li>
+<li class="chapter" data-level="10.4" data-path="clustering.html"><a href="clustering.html#biclustering"><i class="fa fa-check"></i><b>10.4</b> Biclustering</a>
+<ul>
+<li class="chapter" data-level="10.4.1" data-path="clustering.html"><a href="clustering.html#taxa-vs-samples"><i class="fa fa-check"></i><b>10.4.1</b> Taxa vs samples</a></li>
+<li class="chapter" data-level="10.4.2" data-path="clustering.html"><a href="clustering.html#taxa-vs-biomolecules"><i class="fa fa-check"></i><b>10.4.2</b> Taxa vs biomolecules</a></li>
+</ul></li>
+<li class="chapter" data-level="10.5" data-path="clustering.html"><a href="clustering.html#additional-community-typing"><i class="fa fa-check"></i><b>10.5</b> Additional Community Typing</a></li>
+</ul></li>
+<li class="chapter" data-level="11" data-path="differential-abundance.html"><a href="differential-abundance.html"><i class="fa fa-check"></i><b>11</b> Differential Abundance</a>
+<ul>
+<li class="chapter" data-level="11.1" data-path="differential-abundance.html"><a href="differential-abundance.html#statistical-challenges-of-microbiome-data"><i class="fa fa-check"></i><b>11.1</b> Statistical challenges of microbiome data</a></li>
+<li class="chapter" data-level="11.2" data-path="differential-abundance.html"><a href="differential-abundance.html#using-the-tools"><i class="fa fa-check"></i><b>11.2</b> Using the tools</a>
+<ul>
+<li class="chapter" data-level="11.2.1" data-path="differential-abundance.html"><a href="differential-abundance.html#preparing-the-data-for-daa"><i class="fa fa-check"></i><b>11.2.1</b> Preparing the data for DAA</a></li>
+<li class="chapter" data-level="11.2.2" data-path="differential-abundance.html"><a href="differential-abundance.html#aldex2"><i class="fa fa-check"></i><b>11.2.2</b> ALDEx2</a></li>
+<li class="chapter" data-level="11.2.3" data-path="differential-abundance.html"><a href="differential-abundance.html#ancom-bc"><i class="fa fa-check"></i><b>11.2.3</b> ANCOM-BC</a></li>
+<li class="chapter" data-level="11.2.4" data-path="differential-abundance.html"><a href="differential-abundance.html#maaslin2"><i class="fa fa-check"></i><b>11.2.4</b> MaAsLin2</a></li>
+<li class="chapter" data-level="11.2.5" data-path="differential-abundance.html"><a href="differential-abundance.html#linda"><i class="fa fa-check"></i><b>11.2.5</b> LinDA</a></li>
+<li class="chapter" data-level="11.2.6" data-path="differential-abundance.html"><a href="differential-abundance.html#zicoseq"><i class="fa fa-check"></i><b>11.2.6</b> ZicoSeq</a></li>
+<li class="chapter" data-level="11.2.7" data-path="differential-abundance.html"><a href="differential-abundance.html#philr"><i class="fa fa-check"></i><b>11.2.7</b> PhILR</a></li>
+<li class="chapter" data-level="11.2.8" data-path="differential-abundance.html"><a href="differential-abundance.html#comparison-of-methods"><i class="fa fa-check"></i><b>11.2.8</b> Comparison of methods</a></li>
+</ul></li>
+<li class="chapter" data-level="11.3" data-path="differential-abundance.html"><a href="differential-abundance.html#daa-with-confounding"><i class="fa fa-check"></i><b>11.3</b> DAA with confounding</a>
+<ul>
+<li class="chapter" data-level="11.3.1" data-path="differential-abundance.html"><a href="differential-abundance.html#selecting-confounders"><i class="fa fa-check"></i><b>11.3.1</b> Selecting confounders</a></li>
+<li class="chapter" data-level="11.3.2" data-path="differential-abundance.html"><a href="differential-abundance.html#ancom-bc-1"><i class="fa fa-check"></i><b>11.3.2</b> ANCOM-BC</a></li>
+<li class="chapter" data-level="11.3.3" data-path="differential-abundance.html"><a href="differential-abundance.html#linda-1"><i class="fa fa-check"></i><b>11.3.3</b> LinDA</a></li>
+<li class="chapter" data-level="11.3.4" data-path="differential-abundance.html"><a href="differential-abundance.html#zicoseq-1"><i class="fa fa-check"></i><b>11.3.4</b> ZicoSeq</a></li>
+</ul></li>
+<li class="chapter" data-level="11.4" data-path="differential-abundance.html"><a href="differential-abundance.html#additional-resources"><i class="fa fa-check"></i><b>11.4</b> Additional resources</a></li>
+</ul></li>
+<li class="chapter" data-level="12" data-path="network-learning.html"><a href="network-learning.html"><i class="fa fa-check"></i><b>12</b> Network learning and analysis</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="network-learning.html"><a href="network-learning.html#network-learning-1"><i class="fa fa-check"></i><b>12.1</b> Network learning</a>
+<ul>
+<li class="chapter" data-level="12.1.1" data-path="network-learning.html"><a href="network-learning.html#network-learning-workflow"><i class="fa fa-check"></i><b>12.1.1</b> Typical workflow</a></li>
+<li class="chapter" data-level="12.1.2" data-path="network-learning.html"><a href="network-learning.html#install-packages"><i class="fa fa-check"></i><b>12.1.2</b> Install packages</a></li>
+<li class="chapter" data-level="12.1.3" data-path="network-learning.html"><a href="network-learning.html#data-preparation"><i class="fa fa-check"></i><b>12.1.3</b> Data preparation</a></li>
+<li class="chapter" data-level="12.1.4" data-path="network-learning.html"><a href="network-learning.html#spring-network"><i class="fa fa-check"></i><b>12.1.4</b> SPRING network</a></li>
+<li class="chapter" data-level="12.1.5" data-path="network-learning.html"><a href="network-learning.html#netcomi-spring"><i class="fa fa-check"></i><b>12.1.5</b> NetCoMi network</a></li>
+</ul></li>
+<li class="chapter" data-level="12.2" data-path="network-learning.html"><a href="network-learning.html#network-analysis"><i class="fa fa-check"></i><b>12.2</b> Network analysis with igraph</a>
+<ul>
+<li class="chapter" data-level="12.2.1" data-path="network-learning.html"><a href="network-learning.html#network-plot"><i class="fa fa-check"></i><b>12.2.1</b> Network plot</a></li>
+<li class="chapter" data-level="12.2.2" data-path="network-learning.html"><a href="network-learning.html#centrality-measures"><i class="fa fa-check"></i><b>12.2.2</b> Centrality measures</a></li>
+<li class="chapter" data-level="12.2.3" data-path="network-learning.html"><a href="network-learning.html#scale-node-sizes-by-centrality"><i class="fa fa-check"></i><b>12.2.3</b> Scale node sizes by centrality</a></li>
+<li class="chapter" data-level="12.2.4" data-path="network-learning.html"><a href="network-learning.html#degree-distribution"><i class="fa fa-check"></i><b>12.2.4</b> Degree distribution</a></li>
+<li class="chapter" data-level="12.2.5" data-path="network-learning.html"><a href="network-learning.html#clustered-heatmaps"><i class="fa fa-check"></i><b>12.2.5</b> Clustered heatmaps</a></li>
+<li class="chapter" data-level="12.2.6" data-path="network-learning.html"><a href="network-learning.html#global-network-measures"><i class="fa fa-check"></i><b>12.2.6</b> Global network measures</a></li>
+</ul></li>
+<li class="chapter" data-level="12.3" data-path="network-learning.html"><a href="network-learning.html#network-analysis-with-netcomi"><i class="fa fa-check"></i><b>12.3</b> Network analysis with NetCoMi</a></li>
+<li class="chapter" data-level="12.4" data-path="network-learning.html"><a href="network-learning.html#network-visualization"><i class="fa fa-check"></i><b>12.4</b> Network visualization</a>
+<ul>
+<li class="chapter" data-level="12.4.1" data-path="network-learning.html"><a href="network-learning.html#highlight-node-properties"><i class="fa fa-check"></i><b>12.4.1</b> Highlight node properties</a></li>
+<li class="chapter" data-level="12.4.2" data-path="network-learning.html"><a href="network-learning.html#highlight-data-features"><i class="fa fa-check"></i><b>12.4.2</b> Highlight data features</a></li>
+</ul></li>
+<li class="chapter" data-level="12.5" data-path="network-learning.html"><a href="network-learning.html#which-methods-to-choose"><i class="fa fa-check"></i><b>12.5</b> Which method(s) to choose?</a></li>
+<li class="chapter" data-level="12.6" data-path="network-learning.html"><a href="network-learning.html#more-about-association"><i class="fa fa-check"></i><b>12.6</b> More about association measures</a></li>
+<li class="chapter" data-level="12.7" data-path="network-learning.html"><a href="network-learning.html#comparison-of-association-measures"><i class="fa fa-check"></i><b>12.7</b> Comparison of association measures</a>
+<ul>
+<li class="chapter" data-level="12.7.1" data-path="network-learning.html"><a href="network-learning.html#sparcc-correlation"><i class="fa fa-check"></i><b>12.7.1</b> SparCC</a></li>
+<li class="chapter" data-level="12.7.2" data-path="network-learning.html"><a href="network-learning.html#shrinkage-prop"><i class="fa fa-check"></i><b>12.7.2</b> Shrinkage proportionality</a></li>
+<li class="chapter" data-level="12.7.3" data-path="network-learning.html"><a href="network-learning.html#spieceasi-mb"><i class="fa fa-check"></i><b>12.7.3</b> SpiecEasi - MB</a></li>
+<li class="chapter" data-level="12.7.4" data-path="network-learning.html"><a href="network-learning.html#network-plots"><i class="fa fa-check"></i><b>12.7.4</b> Network plots</a></li>
+<li class="chapter" data-level="12.7.5" data-path="network-learning.html"><a href="network-learning.html#network-analysis-1"><i class="fa fa-check"></i><b>12.7.5</b> Network analysis</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="network-comparison.html"><a href="network-comparison.html"><i class="fa fa-check"></i><b>13</b> Network comparison</a>
+<ul>
+<li class="chapter" data-level="13.1" data-path="network-comparison.html"><a href="network-comparison.html#data-preparation-1"><i class="fa fa-check"></i><b>13.1</b> Data preparation</a></li>
+<li class="chapter" data-level="13.2" data-path="network-comparison.html"><a href="network-comparison.html#network-learning-and-analysis"><i class="fa fa-check"></i><b>13.2</b> Network learning and analysis</a></li>
+<li class="chapter" data-level="13.3" data-path="network-comparison.html"><a href="network-comparison.html#differential-network-analysis"><i class="fa fa-check"></i><b>13.3</b> Differential network analysis</a>
+<ul>
+<li class="chapter" data-level="13.3.1" data-path="network-comparison.html"><a href="network-comparison.html#visual-comparison"><i class="fa fa-check"></i><b>13.3.1</b> Visual comparison</a></li>
+<li class="chapter" data-level="13.3.2" data-path="network-comparison.html"><a href="network-comparison.html#quantitative-comparison"><i class="fa fa-check"></i><b>13.3.2</b> Quantitative comparison</a></li>
+</ul></li>
+<li class="chapter" data-level="13.4" data-path="network-comparison.html"><a href="network-comparison.html#differential-association-analysis"><i class="fa fa-check"></i><b>13.4</b> Differential association analysis</a></li>
+<li class="chapter" data-level="13.5" data-path="network-comparison.html"><a href="network-comparison.html#netcomp-methods"><i class="fa fa-check"></i><b>13.5</b> Network comparison methods</a></li>
+</ul></li>
+<li class="chapter" data-level="14" data-path="machine_learning.html"><a href="machine_learning.html"><i class="fa fa-check"></i><b>14</b> Machine Learning</a>
+<ul>
+<li class="chapter" data-level="14.1" data-path="machine_learning.html"><a href="machine_learning.html#supervised-machine-learning"><i class="fa fa-check"></i><b>14.1</b> Supervised machine learning</a></li>
+<li class="chapter" data-level="14.2" data-path="machine_learning.html"><a href="machine_learning.html#unsupervised-machine-learning"><i class="fa fa-check"></i><b>14.2</b> Unsupervised machine learning</a></li>
+</ul></li>
+<li class="chapter" data-level="15" data-path="multi-assay-analyses.html"><a href="multi-assay-analyses.html"><i class="fa fa-check"></i><b>15</b> Multi-Assay Analyses</a>
+<ul>
+<li class="chapter" data-level="15.1" data-path="multi-assay-analyses.html"><a href="multi-assay-analyses.html#cross-correlation"><i class="fa fa-check"></i><b>15.1</b> Cross-correlation Analysis</a></li>
+<li class="chapter" data-level="15.2" data-path="multi-assay-analyses.html"><a href="multi-assay-analyses.html#mofa"><i class="fa fa-check"></i><b>15.2</b> Multi-Omics Factor Analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="16" data-path="viz-chapter.html"><a href="viz-chapter.html"><i class="fa fa-check"></i><b>16</b> Visualization</a>
+<ul>
+<li class="chapter" data-level="16.1" data-path="viz-chapter.html"><a href="viz-chapter.html#pre-analysis-exploration"><i class="fa fa-check"></i><b>16.1</b> Pre-analysis exploration</a>
+<ul>
+<li class="chapter" data-level="16.1.1" data-path="viz-chapter.html"><a href="viz-chapter.html#accessing-row-and-column-data"><i class="fa fa-check"></i><b>16.1.1</b> Accessing row and column data</a></li>
+<li class="chapter" data-level="16.1.2" data-path="viz-chapter.html"><a href="viz-chapter.html#viewing-abundance-and-prevalence-patterns"><i class="fa fa-check"></i><b>16.1.2</b> Viewing abundance and prevalence patterns</a></li>
+</ul></li>
+<li class="chapter" data-level="16.2" data-path="viz-chapter.html"><a href="viz-chapter.html#diversity-estimation"><i class="fa fa-check"></i><b>16.2</b> Diversity estimation</a>
+<ul>
+<li class="chapter" data-level="16.2.1" data-path="viz-chapter.html"><a href="viz-chapter.html#alpha-diversity-with-scatter-violin-and-box-plots"><i class="fa fa-check"></i><b>16.2.1</b> Alpha diversity with scatter, violin and box plots</a></li>
+<li class="chapter" data-level="16.2.2" data-path="viz-chapter.html"><a href="viz-chapter.html#beta-diversity-with-shepard-and-coordination-plots"><i class="fa fa-check"></i><b>16.2.2</b> Beta diversity with Shepard and coordination plots</a></li>
+</ul></li>
+<li class="chapter" data-level="16.3" data-path="viz-chapter.html"><a href="viz-chapter.html#statistical-analysis"><i class="fa fa-check"></i><b>16.3</b> Statistical analysis</a>
+<ul>
+<li class="chapter" data-level="16.3.1" data-path="viz-chapter.html"><a href="viz-chapter.html#heatmaps"><i class="fa fa-check"></i><b>16.3.1</b> Heatmaps</a></li>
+</ul></li>
+</ul></li>
+<li class="part"><span><b>III Training</b></span></li>
+<li class="chapter" data-level="17" data-path="training.html"><a href="training.html"><i class="fa fa-check"></i><b>17</b> Training</a>
+<ul>
+<li class="chapter" data-level="17.1" data-path="training.html"><a href="training.html#checklist"><i class="fa fa-check"></i><b>17.1</b> Checklist</a></li>
+<li class="chapter" data-level="17.2" data-path="training.html"><a href="training.html#software"><i class="fa fa-check"></i><b>17.2</b> Recommended software</a></li>
+<li class="chapter" data-level="17.3" data-path="training.html"><a href="training.html#material"><i class="fa fa-check"></i><b>17.3</b> Study material</a></li>
+<li class="chapter" data-level="17.4" data-path="training.html"><a href="training.html#support-and-resources"><i class="fa fa-check"></i><b>17.4</b> Support and resources</a></li>
+<li class="chapter" data-level="17.5" data-path="training.html"><a href="training.html#further-reading"><i class="fa fa-check"></i><b>17.5</b> Further reading</a></li>
+<li class="chapter" data-level="17.6" data-path="training.html"><a href="training.html#coc"><i class="fa fa-check"></i><b>17.6</b> Code of Conduct</a></li>
+</ul></li>
+<li class="chapter" data-level="18" data-path="resources.html"><a href="resources.html"><i class="fa fa-check"></i><b>18</b> Resources</a>
+<ul>
+<li class="chapter" data-level="18.1" data-path="resources.html"><a href="resources.html#data-containers-1"><i class="fa fa-check"></i><b>18.1</b> Data containers</a>
+<ul>
+<li class="chapter" data-level="18.1.1" data-path="resources.html"><a href="resources.html#data-container-documentation"><i class="fa fa-check"></i><b>18.1.1</b> Data container documentation</a></li>
+<li class="chapter" data-level="18.1.2" data-path="resources.html"><a href="resources.html#other-relevant-containers"><i class="fa fa-check"></i><b>18.1.2</b> Other relevant containers</a></li>
+<li class="chapter" data-level="18.1.3" data-path="resources.html"><a href="resources.html#phyloseq-an-alternative-container-for-microbiome-data"><i class="fa fa-check"></i><b>18.1.3</b> phyloseq: an alternative container for microbiome data</a></li>
+</ul></li>
+<li class="chapter" data-level="18.2" data-path="resources.html"><a href="resources.html#r-programming-resources"><i class="fa fa-check"></i><b>18.2</b> R programming resources</a>
+<ul>
+<li class="chapter" data-level="18.2.1" data-path="resources.html"><a href="resources.html#base-r-and-rstudio"><i class="fa fa-check"></i><b>18.2.1</b> Base R and RStudio</a></li>
+<li class="chapter" data-level="18.2.2" data-path="resources.html"><a href="resources.html#bioc_intro"><i class="fa fa-check"></i><b>18.2.2</b> Bioconductor Classes</a></li>
+</ul></li>
+<li class="chapter" data-level="18.3" data-path="resources.html"><a href="resources.html#quarto"><i class="fa fa-check"></i><b>18.3</b> Reproducible reporting with Quarto</a>
+<ul>
+<li class="chapter" data-level="18.3.1" data-path="resources.html"><a href="resources.html#learn-quarto"><i class="fa fa-check"></i><b>18.3.1</b> Learn Quarto</a></li>
+<li class="chapter" data-level="18.3.2" data-path="resources.html"><a href="resources.html#additional-material-on-rmarkdown"><i class="fa fa-check"></i><b>18.3.2</b> Additional material on Rmarkdown</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="19" data-path="exercises.html"><a href="exercises.html"><i class="fa fa-check"></i><b>19</b> Exercises</a>
+<ul>
+<li class="chapter" data-level="19.1" data-path="exercises.html"><a href="exercises.html#basics-of-rbioconductor"><i class="fa fa-check"></i><b>19.1</b> Basics of R/Bioconductor</a></li>
+<li class="chapter" data-level="19.2" data-path="exercises.html"><a href="exercises.html#workflows"><i class="fa fa-check"></i><b>19.2</b> Workflows</a>
+<ul>
+<li class="chapter" data-level="19.2.1" data-path="exercises.html"><a href="exercises.html#reproducible-reporting-with-quarto"><i class="fa fa-check"></i><b>19.2.1</b> Reproducible reporting with Quarto</a></li>
+</ul></li>
+<li class="chapter" data-level="19.3" data-path="exercises.html"><a href="exercises.html#data-containers-treese"><i class="fa fa-check"></i><b>19.3</b> Data containers: TreeSE</a>
+<ul>
+<li class="chapter" data-level="19.3.1" data-path="exercises.html"><a href="exercises.html#construct-TreeSE"><i class="fa fa-check"></i><b>19.3.1</b> Constructing a data object</a></li>
+<li class="chapter" data-level="19.3.2" data-path="exercises.html"><a href="exercises.html#importing-data"><i class="fa fa-check"></i><b>19.3.2</b> Importing data</a></li>
+<li class="chapter" data-level="19.3.3" data-path="exercises.html"><a href="exercises.html#preliminary-exploration"><i class="fa fa-check"></i><b>19.3.3</b> Preliminary exploration</a></li>
+<li class="chapter" data-level="19.3.4" data-path="exercises.html"><a href="exercises.html#assay-retrieval"><i class="fa fa-check"></i><b>19.3.4</b> Assay retrieval</a></li>
+<li class="chapter" data-level="19.3.5" data-path="exercises.html"><a href="exercises.html#sample-information"><i class="fa fa-check"></i><b>19.3.5</b> Sample information</a></li>
+<li class="chapter" data-level="19.3.6" data-path="exercises.html"><a href="exercises.html#feature-information"><i class="fa fa-check"></i><b>19.3.6</b> Feature information</a></li>
+<li class="chapter" data-level="19.3.7" data-path="exercises.html"><a href="exercises.html#other-elements"><i class="fa fa-check"></i><b>19.3.7</b> Other elements</a></li>
+</ul></li>
+<li class="chapter" data-level="19.4" data-path="exercises.html"><a href="exercises.html#data-manipulation"><i class="fa fa-check"></i><b>19.4</b> Data manipulation</a>
+<ul>
+<li class="chapter" data-level="19.4.1" data-path="exercises.html"><a href="exercises.html#subsetting-1"><i class="fa fa-check"></i><b>19.4.1</b> Subsetting</a></li>
+<li class="chapter" data-level="19.4.2" data-path="exercises.html"><a href="exercises.html#library-sizes"><i class="fa fa-check"></i><b>19.4.2</b> Library sizes</a></li>
+<li class="chapter" data-level="19.4.3" data-path="exercises.html"><a href="exercises.html#prevalent-and-core-taxonomic-features"><i class="fa fa-check"></i><b>19.4.3</b> Prevalent and core taxonomic features</a></li>
+<li class="chapter" data-level="19.4.4" data-path="exercises.html"><a href="exercises.html#data-exploration"><i class="fa fa-check"></i><b>19.4.4</b> Data exploration</a></li>
+<li class="chapter" data-level="19.4.5" data-path="exercises.html"><a href="exercises.html#other-functions"><i class="fa fa-check"></i><b>19.4.5</b> Other functions</a></li>
+<li class="chapter" data-level="19.4.6" data-path="exercises.html"><a href="exercises.html#assay-transformation"><i class="fa fa-check"></i><b>19.4.6</b> Assay transformation</a></li>
+</ul></li>
+<li class="chapter" data-level="19.5" data-path="exercises.html"><a href="exercises.html#abundance-tables"><i class="fa fa-check"></i><b>19.5</b> Abundance tables</a>
+<ul>
+<li class="chapter" data-level="19.5.1" data-path="exercises.html"><a href="exercises.html#taxonomic-levels"><i class="fa fa-check"></i><b>19.5.1</b> Taxonomic levels</a></li>
+<li class="chapter" data-level="19.5.2" data-path="exercises.html"><a href="exercises.html#alternative-experiments"><i class="fa fa-check"></i><b>19.5.2</b> Alternative experiments</a></li>
+</ul></li>
+<li class="chapter" data-level="19.6" data-path="exercises.html"><a href="exercises.html#community-alpha-diversity"><i class="fa fa-check"></i><b>19.6</b> Community (alpha) diversity</a>
+<ul>
+<li class="chapter" data-level="19.6.1" data-path="exercises.html"><a href="exercises.html#estimation-1"><i class="fa fa-check"></i><b>19.6.1</b> Estimation</a></li>
+<li class="chapter" data-level="19.6.2" data-path="exercises.html"><a href="exercises.html#visualization-1"><i class="fa fa-check"></i><b>19.6.2</b> Visualization</a></li>
+<li class="chapter" data-level="19.6.3" data-path="exercises.html"><a href="exercises.html#correlation"><i class="fa fa-check"></i><b>19.6.3</b> Correlation</a></li>
+<li class="chapter" data-level="19.6.4" data-path="exercises.html"><a href="exercises.html#differences-between-groups"><i class="fa fa-check"></i><b>19.6.4</b> Differences between groups</a></li>
+</ul></li>
+<li class="chapter" data-level="19.7" data-path="exercises.html"><a href="exercises.html#community-similarity-1"><i class="fa fa-check"></i><b>19.7</b> Community similarity</a>
+<ul>
+<li class="chapter" data-level="19.7.1" data-path="exercises.html"><a href="exercises.html#reduced-dimensions-retrieval"><i class="fa fa-check"></i><b>19.7.1</b> Reduced dimensions retrieval</a></li>
+<li class="chapter" data-level="19.7.2" data-path="exercises.html"><a href="exercises.html#visualization-basics-with-pca"><i class="fa fa-check"></i><b>19.7.2</b> Visualization basics with PCA</a></li>
+<li class="chapter" data-level="19.7.3" data-path="exercises.html"><a href="exercises.html#principal-coordinate-analysis-pcoa"><i class="fa fa-check"></i><b>19.7.3</b> Principal Coordinate Analysis (PCoA)</a></li>
+<li class="chapter" data-level="19.7.4" data-path="exercises.html"><a href="exercises.html#permanova-analysis"><i class="fa fa-check"></i><b>19.7.4</b> PERMANOVA analysis</a></li>
+<li class="chapter" data-level="19.7.5" data-path="exercises.html"><a href="exercises.html#redundancy-analysis-rda"><i class="fa fa-check"></i><b>19.7.5</b> Redundancy analysis (RDA)</a></li>
+<li class="chapter" data-level="19.7.6" data-path="exercises.html"><a href="exercises.html#beta-diversity-analysis"><i class="fa fa-check"></i><b>19.7.6</b> Beta diversity analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="19.8" data-path="exercises.html"><a href="exercises.html#differential-abundance-1"><i class="fa fa-check"></i><b>19.8</b> Differential abundance</a>
+<ul>
+<li class="chapter" data-level="19.8.1" data-path="exercises.html"><a href="exercises.html#standard-analysis-with-aldex2"><i class="fa fa-check"></i><b>19.8.1</b> Standard analysis with ALDEx2</a></li>
+<li class="chapter" data-level="19.8.2" data-path="exercises.html"><a href="exercises.html#control-daa-confounders"><i class="fa fa-check"></i><b>19.8.2</b> Controlling for confounders</a></li>
+<li class="chapter" data-level="19.8.3" data-path="exercises.html"><a href="exercises.html#compare-daa-methods"><i class="fa fa-check"></i><b>19.8.3</b> Comparing methods</a></li>
+<li class="chapter" data-level="19.8.4" data-path="exercises.html"><a href="exercises.html#workflow-1"><i class="fa fa-check"></i><b>19.8.4</b> Workflow 1</a></li>
+<li class="chapter" data-level="19.8.5" data-path="exercises.html"><a href="exercises.html#workflow-2"><i class="fa fa-check"></i><b>19.8.5</b> Workflow 2</a></li>
+</ul></li>
+<li class="chapter" data-level="19.9" data-path="exercises.html"><a href="exercises.html#visualization-2"><i class="fa fa-check"></i><b>19.9</b> Visualization</a>
+<ul>
+<li class="chapter" data-level="19.9.1" data-path="exercises.html"><a href="exercises.html#multivariate-ordination"><i class="fa fa-check"></i><b>19.9.1</b> Multivariate ordination</a></li>
+<li class="chapter" data-level="19.9.2" data-path="exercises.html"><a href="exercises.html#heatmap-visualization"><i class="fa fa-check"></i><b>19.9.2</b> Heatmap visualization</a></li>
+</ul></li>
+<li class="chapter" data-level="19.10" data-path="exercises.html"><a href="exercises.html#multiomics"><i class="fa fa-check"></i><b>19.10</b> Multiomics</a>
+<ul>
+<li class="chapter" data-level="19.10.1" data-path="exercises.html"><a href="exercises.html#basic-exploration"><i class="fa fa-check"></i><b>19.10.1</b> Basic exploration</a></li>
+<li class="chapter" data-level="19.10.2" data-path="exercises.html"><a href="exercises.html#experiment-agglomeration"><i class="fa fa-check"></i><b>19.10.2</b> Experiment agglomeration</a></li>
+<li class="chapter" data-level="19.10.3" data-path="exercises.html"><a href="exercises.html#experiment-transformation"><i class="fa fa-check"></i><b>19.10.3</b> Experiment transformation</a></li>
+<li class="chapter" data-level="19.10.4" data-path="exercises.html"><a href="exercises.html#assay-extraction"><i class="fa fa-check"></i><b>19.10.4</b> Assay extraction</a></li>
+<li class="chapter" data-level="19.10.5" data-path="exercises.html"><a href="exercises.html#mae-reconstruction"><i class="fa fa-check"></i><b>19.10.5</b> MAE reconstruction</a></li>
+<li class="chapter" data-level="19.10.6" data-path="exercises.html"><a href="exercises.html#cross-correlation-analysis"><i class="fa fa-check"></i><b>19.10.6</b> Cross-correlation analysis</a></li>
+</ul></li>
+</ul></li>
+<li class="part"><span><b>IV Appendix</b></span></li>
+<li class="chapter" data-level="20" data-path="extras.html"><a href="extras.html"><i class="fa fa-check"></i><b>20</b> Extra material</a>
+<ul>
+<li class="chapter" data-level="20.1" data-path="extras.html"><a href="extras.html#slides"><i class="fa fa-check"></i><b>20.1</b> Slides</a></li>
+<li class="chapter" data-level="20.2" data-path="extras.html"><a href="extras.html#compare-permanova"><i class="fa fa-check"></i><b>20.2</b> PERMANOVA comparison</a></li>
+<li class="chapter" data-level="20.3" data-path="extras.html"><a href="extras.html#bayesian-multinomial-logistic-normal-models"><i class="fa fa-check"></i><b>20.3</b> Bayesian Multinomial Logistic-Normal Models</a></li>
+<li class="chapter" data-level="20.4" data-path="extras.html"><a href="extras.html#interactive-3d-plots"><i class="fa fa-check"></i><b>20.4</b> Interactive 3D Plots</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="developers.html"><a href="developers.html"><i class="fa fa-check"></i>Developers</a>
+<ul>
+<li class="chapter" data-level="" data-path="developers.html"><a href="developers.html#core-team"><i class="fa fa-check"></i>Core team</a></li>
+<li class="chapter" data-level="" data-path="developers.html"><a href="developers.html#contributors"><i class="fa fa-check"></i>Contributors</a></li>
+<li class="chapter" data-level="" data-path="developers.html"><a href="developers.html#acknowledgments"><i class="fa fa-check"></i>Acknowledgments</a></li>
+<li class="chapter" data-level="20.4.1" data-path="developers.html"><a href="developers.html#how-to-contribute"><i class="fa fa-check"></i><b>20.4.1</b> How to contribute</a></li>
+<li class="chapter" data-level="" data-path="developers.html"><a href="developers.html#support"><i class="fa fa-check"></i>Support</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="sessioninfo.html"><a href="sessioninfo.html"><i class="fa fa-check"></i>Sessioninfo</a></li>
+<li class="chapter" data-level="" data-path="bibliography.html"><a href="bibliography.html"><i class="fa fa-check"></i>Bibliography</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Orchestrating Microbiome Analysis with Bioconductor</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="differential-abundance" class="section level1 hasAnchor" number="11">
+<h1><span class="header-section-number">Chapter 11</span> Differential Abundance<a href="differential-abundance.html#differential-abundance" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<script>
+document.addEventListener("click", function (event) {
+    if (event.target.classList.contains("rebook-collapse")) {
+        event.target.classList.toggle("active");
+        var content = event.target.nextElementSibling;
+        if (content.style.display === "block") {
+            content.style.display = "none";
+        } else {
+            content.style.display = "block";
+        }
+    }
+})
+</script>
+<style>
+.rebook-collapse {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.rebook-content {
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #f1f1f1;
+}
+</style>
+<p>This section provides an introduction to Differential Abundance Analysis (DAA),
+which is used to identify differences in the abundances of individual taxa (at
+any taxonomic level) between two or more groups, such as treatment and control.
+Here, we demonstrate its implementation on Tengeler2020, described in chapter
+<a href="containers.html#tengeler-desc">3.3.1.1</a>.</p>
+<p>The goal of DAA is to identify biomarkers of a certain phenotype or condition,
+and gain understanding of a complex system by looking at its isolated components.
+For example, the identification of a bacterial taxon that is differentially
+abundant between healthy patients and diseased patients can lead to important
+insights into the pathophysiology of the disease. In other words, differentially
+abundant taxa can be involved in the dynamics of the disease, which in turn helps
+understand the system as a whole. Despite its relevance in current research,
+the DAA approach has also been subject to debate <span class="citation">(Quinn, Gordon-Rodriguez, and Erb 2021)</span>.</p>
+<div id="statistical-challenges-of-microbiome-data" class="section level2 hasAnchor" number="11.1">
+<h2><span class="header-section-number">11.1</span> Statistical challenges of microbiome data<a href="differential-abundance.html#statistical-challenges-of-microbiome-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Microbiome data display unique properties that are exclusively addressed by DAA
+tools developed for microbiome analysis. Specifically, microbiome data are
+characterized by high variability, zero-inflation and compositionality.
+<strong>High variability</strong> expresses that abundance of taxa often varies by several
+orders of magnitude from sample to sample. <strong>Zero-inflation</strong> means that
+typically more than 70% of the values are zeros, which could be due to either
+physical absence (structural zeros) or insufficient sampling effort (sampling
+zeros). <strong>Compositionality</strong> implies that a change in the absolute abundance of
+one taxon will lead to apparent variations in the relative abundances of other
+taxa in the same sample. If neglected, such properties may cause significant
+bias in the results of DAA. Therefore, several approaches have been developed to
+address the unique properties of microbiome data and provide statistically
+useful results.</p>
+<p>The first approach to target zero-inflated data consists of specialized models,
+such as <strong>over-dispersed count models</strong> and <strong>zero-inflated mixture models</strong>.
+DESeq2, edgeR and corncorb are based on over-dispersed count models, whereas
+metagenomeSeq, RAIDA, ZIBB and Omnibus implement zero-inflated mixture models to
+address zero-inflation. Typically, these models assume a negative binomial,
+beta-binomial or normal/log-normal distribution. Alternatively, <strong>zero imputation</strong>
+also represents a valid approach to deal with zero-inflated data. ALDEx2 and
+eBay apply a Bayesian model to impute the zeros when working with proportion
+data, accounting for sampling variability and sequencing depth variation. Other
+methods, such as MaAsLin2 and ANCOMBC impute the zeros with a pseudo-count strategy.</p>
+<p>Regarding the compositionality of microbiome data, several approaches have been
+developed to perform <strong>robust normalization</strong> with methods specifically designed
+to reduce the bias found in compositional data. Some examples include trimmed
+mean of M-values (TMM) normalization used by edgeR, relative log expression (RLE)
+normalization used by DESeq2, cumulative sum scaling (CSS) normalization used
+by metagenomeSeq, centered log-ratio transformation (CLR) normalization used
+by ALDEx2 and geometric mean of pairwise ratios (GMPR) normalization used by
+Omnibus and Wrench normalization <span class="citation">(Kumar et al. 2018)</span>, which corrects the compositional
+bias by an empirical Bayes approach. Other methods to deal with compositional
+data entail reference taxa approach used by DACOMP and RAIDA, analyzing the
+pattern of pairwise log ratios as done by ANCOM and bias-correction applied by
+ANCOMBC.</p>
+<p>We recommend to have a look at <span class="citation">Nearing et al. (2022)</span>. In this study, multiple DAA methods
+were applied to 38 different datasets and their results were compared to one
+another. Because each method follows a slightly different approach in terms of
+assumptions and normalization techniques, it was shown that results on the same
+dataset may differ substantially depending on the method. Recently, <span class="citation">Yang and Chen (2022)</span>
+comprehensively evaluated DAA methods via a semi-parametric framework and 106
+real datasets. This study also concluded that different methods can produce
+contradictory results, creating the risk of cherry-picking the most favorable
+options for one’s own hypothesis. Therefore, it is highly recommended to perform
+DAA with multiple methods to determine whether the findings can be reproduced by
+different approaches. Built on the findings of <span class="citation">Calgaro et al. (2020)</span>, the <em>benchdamic</em> <span class="citation">(Calgaro et al. 2022)</span> package could offer a valuable support in this regard. Through a comprehensive evaluation process it serves both practitioners by comparing DA methods from existing literature, and method developers by providing an impartial tool to evaluate their new approaches in comparison to what is already available. For details, check its extensive <a href="https://www.bioconductor.org/packages/release/bioc/vignettes/benchdamic/inst/doc/intro.html">vignette</a>.</p>
+</div>
+<div id="using-the-tools" class="section level2 hasAnchor" number="11.2">
+<h2><span class="header-section-number">11.2</span> Using the tools<a href="differential-abundance.html#using-the-tools" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>In this section we demonstrate the use of four methods that can be
+recommended based on recent literature (ANCOM-BC <span class="citation">(Lin and Peddada 2020)</span>,
+<em>ALDEx2</em> <span class="citation">(Gloor, Macklaim, and Fernandes 2016)</span>, <em>Maaslin2</em> <span class="citation">(Mallick, Rahnavard, and McIver 2020)</span>, <em>LinDA</em> <span class="citation">(H. Zhou et al. 2022)</span>
+and <em>ZicoSeq</em> <span class="citation">(Yang and Chen 2022)</span>).</p>
+<p>The purpose of this section is to show how to perform DAA in R, not
+how to correctly do causal inference. Depending on your experimental
+setup and your theory, you must determine how to specify any model
+exactly. E.g., there might be confounding factors that might drive
+(the absence of) differences between the shown groups that we ignore
+here for simplicity. Or your dataset is repeated sampling design,
+matched-pair design or the general longitudianl design. We will
+demonstrate how to include covariates in those models. We picked a
+dataset that merely has microbial abundances in a TSE object as well
+as a grouping variable in the sample data. We simplify the examples by
+only including two of the three groups.</p>
+<div class="sourceCode" id="cb328"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb328-1"><a href="differential-abundance.html#cb328-1" tabindex="-1"></a><span class="fu">library</span>(mia)</span>
+<span id="cb328-2"><a href="differential-abundance.html#cb328-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb328-3"><a href="differential-abundance.html#cb328-3" tabindex="-1"></a></span>
+<span id="cb328-4"><a href="differential-abundance.html#cb328-4" tabindex="-1"></a><span class="co"># Import dataset</span></span>
+<span id="cb328-5"><a href="differential-abundance.html#cb328-5" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;Tengeler2020&quot;</span>, <span class="at">package =</span> <span class="st">&quot;mia&quot;</span>)</span>
+<span id="cb328-6"><a href="differential-abundance.html#cb328-6" tabindex="-1"></a>tse <span class="ot">&lt;-</span> Tengeler2020</span>
+<span id="cb328-7"><a href="differential-abundance.html#cb328-7" tabindex="-1"></a></span>
+<span id="cb328-8"><a href="differential-abundance.html#cb328-8" tabindex="-1"></a><span class="co"># Show patient status by cohort</span></span>
+<span id="cb328-9"><a href="differential-abundance.html#cb328-9" tabindex="-1"></a><span class="fu">table</span>(tse<span class="sc">$</span>patient_status, tse<span class="sc">$</span>cohort) <span class="sc">%&gt;%</span></span>
+<span id="cb328-10"><a href="differential-abundance.html#cb328-10" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">Cohort_1</th>
+<th align="right">Cohort_2</th>
+<th align="right">Cohort_3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ADHD</td>
+<td align="right">4</td>
+<td align="right">5</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">Control</td>
+<td align="right">6</td>
+<td align="right">5</td>
+<td align="right">3</td>
+</tr>
+</tbody>
+</table>
+<div id="preparing-the-data-for-daa" class="section level3 hasAnchor" number="11.2.1">
+<h3><span class="header-section-number">11.2.1</span> Preparing the data for DAA<a href="differential-abundance.html#preparing-the-data-for-daa" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Before starting the analysis, it is recommended to reduce the size and
+complexity of the data to make the results more reproducible. For this
+purpose, we agglomerate the features by genus and filter them by a prevalence
+threshold of 10%.</p>
+<div class="sourceCode" id="cb329"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb329-1"><a href="differential-abundance.html#cb329-1" tabindex="-1"></a><span class="co"># Agglomerate by genus and subset by prevalence</span></span>
+<span id="cb329-2"><a href="differential-abundance.html#cb329-2" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">subsetByPrevalentFeatures</span>(tse,</span>
+<span id="cb329-3"><a href="differential-abundance.html#cb329-3" tabindex="-1"></a>                             <span class="at">rank =</span> <span class="st">&quot;Genus&quot;</span>,</span>
+<span id="cb329-4"><a href="differential-abundance.html#cb329-4" tabindex="-1"></a>                             <span class="at">prevalence =</span> <span class="dv">10</span> <span class="sc">/</span> <span class="dv">100</span>)</span>
+<span id="cb329-5"><a href="differential-abundance.html#cb329-5" tabindex="-1"></a></span>
+<span id="cb329-6"><a href="differential-abundance.html#cb329-6" tabindex="-1"></a><span class="co"># Transform count assay to relative abundances</span></span>
+<span id="cb329-7"><a href="differential-abundance.html#cb329-7" tabindex="-1"></a>tse <span class="ot">&lt;-</span> <span class="fu">transformAssay</span>(tse,</span>
+<span id="cb329-8"><a href="differential-abundance.html#cb329-8" tabindex="-1"></a>                      <span class="at">assay.type =</span> <span class="st">&quot;counts&quot;</span>,</span>
+<span id="cb329-9"><a href="differential-abundance.html#cb329-9" tabindex="-1"></a>                      <span class="at">method =</span> <span class="st">&quot;relabundance&quot;</span>)</span></code></pre></div>
+<p>While some DAA tools provide optional arguments for prevalence filtering, here
+we filtered the tse object directly. This way, we ensure that the input data
+remains the same when multiple tools are used.</p>
+</div>
+<div id="aldex2" class="section level3 hasAnchor" number="11.2.2">
+<h3><span class="header-section-number">11.2.2</span> ALDEx2<a href="differential-abundance.html#aldex2" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>In this section, we will show how to perform DAA with ALDEx2, which can be
+regarded as the method of choice for its consistency, as it normally identifies features that are also found by complementary methods <span class="citation">(Nearing et al. 2022)</span>. A more
+extensive introduction to its functionality is available in the
+<a href="https://bioconductor.org/packages/release/bioc/vignettes/ALDEx2/inst/doc/ALDEx2_vignette.html">ALDEx2 vignette</a>.</p>
+<p>ALDEx2 estimates technical variation within each sample per taxon by utilizing
+the Dirichlet distribution. It furthermore applies the CLR transformation (or
+closely related log-ratio transforms). Depending on the experimental setup, it
+will perform a two sample Welch’s t-test and Wilcoxon test or a one-way ANOVA
+and Kruskal-Wallis test. For more complex study designs, there is a possibility
+to utilize the <code>glm</code> functionality within ALDEx2. The Benjamini-Hochberg
+procedure is applied by default to correct for multiple testing.</p>
+<div class="sourceCode" id="cb330"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb330-1"><a href="differential-abundance.html#cb330-1" tabindex="-1"></a><span class="co"># Load package</span></span>
+<span id="cb330-2"><a href="differential-abundance.html#cb330-2" tabindex="-1"></a><span class="fu">library</span>(ALDEx2)</span>
+<span id="cb330-3"><a href="differential-abundance.html#cb330-3" tabindex="-1"></a></span>
+<span id="cb330-4"><a href="differential-abundance.html#cb330-4" tabindex="-1"></a><span class="co"># Generate Monte Carlo samples of the Dirichlet distribution for each sample.</span></span>
+<span id="cb330-5"><a href="differential-abundance.html#cb330-5" tabindex="-1"></a><span class="co"># Convert each instance using the centered log-ratio transform.</span></span>
+<span id="cb330-6"><a href="differential-abundance.html#cb330-6" tabindex="-1"></a><span class="co"># This is the input for all further analyses.</span></span>
+<span id="cb330-7"><a href="differential-abundance.html#cb330-7" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb330-8"><a href="differential-abundance.html#cb330-8" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">aldex.clr</span>(<span class="fu">assay</span>(tse), tse<span class="sc">$</span>patient_status)     </span></code></pre></div>
+<p>The t-test:</p>
+<div class="sourceCode" id="cb331"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb331-1"><a href="differential-abundance.html#cb331-1" tabindex="-1"></a><span class="co"># calculates expected values of the Welch&#39;s t-test and Wilcoxon rank</span></span>
+<span id="cb331-2"><a href="differential-abundance.html#cb331-2" tabindex="-1"></a><span class="co"># test on the data returned by aldex.clr</span></span>
+<span id="cb331-3"><a href="differential-abundance.html#cb331-3" tabindex="-1"></a>x_tt <span class="ot">&lt;-</span> <span class="fu">aldex.ttest</span>(x, <span class="at">paired.test =</span> <span class="cn">FALSE</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p>Effect sizes:</p>
+<div class="sourceCode" id="cb332"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb332-1"><a href="differential-abundance.html#cb332-1" tabindex="-1"></a><span class="co"># Determines the median clr abundance of the feature in all samples and in</span></span>
+<span id="cb332-2"><a href="differential-abundance.html#cb332-2" tabindex="-1"></a><span class="co"># groups, the median difference between the two groups, the median variation</span></span>
+<span id="cb332-3"><a href="differential-abundance.html#cb332-3" tabindex="-1"></a><span class="co"># within each group and the effect size, which is the median of the ratio</span></span>
+<span id="cb332-4"><a href="differential-abundance.html#cb332-4" tabindex="-1"></a><span class="co"># of the between group difference and the larger of the variance within groups</span></span>
+<span id="cb332-5"><a href="differential-abundance.html#cb332-5" tabindex="-1"></a>x_effect <span class="ot">&lt;-</span> <span class="fu">aldex.effect</span>(x, <span class="at">CI =</span> <span class="cn">TRUE</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb332-6"><a href="differential-abundance.html#cb332-6" tabindex="-1"></a></span>
+<span id="cb332-7"><a href="differential-abundance.html#cb332-7" tabindex="-1"></a><span class="co"># combine all outputs </span></span>
+<span id="cb332-8"><a href="differential-abundance.html#cb332-8" tabindex="-1"></a>aldex_out <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(x_tt, x_effect)</span></code></pre></div>
+<p>Now, we can create a so called Bland-Altman or MA plot (left). It shows the
+association between the relative abundance and the magnitude of the difference
+per sample. Next to that, we can also create a plot that shows the dispersion
+on the x-axis instead of log-ratio abundance. Red dots represent genera that are
+differentially abundant (<span class="math inline">\(q \leq 0.1\)</span>) between the 2 groups. Black points are
+rare taxa and grey ones are abundant taxa. The dashed line represent an effect
+size of 1. <span class="citation">Gloor, Macklaim, and Fernandes (2016)</span> provides more information on these plots.</p>
+<div class="sourceCode" id="cb333"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb333-1"><a href="differential-abundance.html#cb333-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb333-2"><a href="differential-abundance.html#cb333-2" tabindex="-1"></a></span>
+<span id="cb333-3"><a href="differential-abundance.html#cb333-3" tabindex="-1"></a><span class="fu">aldex.plot</span>(aldex_out,</span>
+<span id="cb333-4"><a href="differential-abundance.html#cb333-4" tabindex="-1"></a>           <span class="at">type =</span> <span class="st">&quot;MA&quot;</span>,</span>
+<span id="cb333-5"><a href="differential-abundance.html#cb333-5" tabindex="-1"></a>           <span class="at">test =</span> <span class="st">&quot;welch&quot;</span>,</span>
+<span id="cb333-6"><a href="differential-abundance.html#cb333-6" tabindex="-1"></a>           <span class="at">xlab =</span> <span class="st">&quot;Log-ratio abundance&quot;</span>,</span>
+<span id="cb333-7"><a href="differential-abundance.html#cb333-7" tabindex="-1"></a>           <span class="at">ylab =</span> <span class="st">&quot;Difference&quot;</span>,</span>
+<span id="cb333-8"><a href="differential-abundance.html#cb333-8" tabindex="-1"></a>           <span class="at">cutoff =</span> <span class="fl">0.05</span>)</span>
+<span id="cb333-9"><a href="differential-abundance.html#cb333-9" tabindex="-1"></a></span>
+<span id="cb333-10"><a href="differential-abundance.html#cb333-10" tabindex="-1"></a><span class="fu">aldex.plot</span>(aldex_out,</span>
+<span id="cb333-11"><a href="differential-abundance.html#cb333-11" tabindex="-1"></a>           <span class="at">type =</span> <span class="st">&quot;MW&quot;</span>,</span>
+<span id="cb333-12"><a href="differential-abundance.html#cb333-12" tabindex="-1"></a>           <span class="at">test =</span> <span class="st">&quot;welch&quot;</span>,</span>
+<span id="cb333-13"><a href="differential-abundance.html#cb333-13" tabindex="-1"></a>           <span class="at">xlab =</span> <span class="st">&quot;Dispersion&quot;</span>,</span>
+<span id="cb333-14"><a href="differential-abundance.html#cb333-14" tabindex="-1"></a>           <span class="at">ylab =</span> <span class="st">&quot;Difference&quot;</span>,</span>
+<span id="cb333-15"><a href="differential-abundance.html#cb333-15" tabindex="-1"></a>           <span class="at">cutoff =</span> <span class="fl">0.05</span>)</span></code></pre></div>
+<p><img src="30_differential_abundance_files/figure-html/plot-aldex2-1.png" width="672" /></p>
+<p>The evaluation as differential abundant in above plots is based on the
+corrected p-value. According to the ALDEx2 developers, the safest
+approach is to identify those features where the 95% CI of the effect
+size does not cross 0. As we can see in below table, this is not the
+case for any of the identified genera (see overlap column, which
+indicates the proportion of overlap). Also, the authors recommend to
+focus on effect sizes and CIs rather than interpreting the p-value. To
+keep the comparison simple, we will here use the p-value as decision
+criterion. But please be aware that the effect size together with the
+CI is a better answer to the question we are typically interested in.</p>
+<div class="sourceCode" id="cb334"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb334-1"><a href="differential-abundance.html#cb334-1" tabindex="-1"></a>aldex_out <span class="sc">%&gt;%</span></span>
+<span id="cb334-2"><a href="differential-abundance.html#cb334-2" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">&quot;Genus&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb334-3"><a href="differential-abundance.html#cb334-3" tabindex="-1"></a>  <span class="co"># here we choose the wilcoxon output rather than t-test output</span></span>
+<span id="cb334-4"><a href="differential-abundance.html#cb334-4" tabindex="-1"></a>  <span class="fu">filter</span>(wi.eBH <span class="sc">&lt;=</span> <span class="fl">0.05</span>)  <span class="sc">%&gt;%</span></span>
+<span id="cb334-5"><a href="differential-abundance.html#cb334-5" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Genus, we.eBH, wi.eBH, effect, overlap) <span class="sc">%&gt;%</span></span>
+<span id="cb334-6"><a href="differential-abundance.html#cb334-6" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table style="width:100%;">
+<colgroup>
+<col width="56%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Genus</th>
+<th align="right">we.eBH</th>
+<th align="right">wi.eBH</th>
+<th align="right">effect</th>
+<th align="right">overlap</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Genus:[Ruminococcus]_gauvreauii_group</td>
+<td align="right">0.073</td>
+<td align="right">0.0379</td>
+<td align="right">0.8151</td>
+<td align="right">0.1357</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="ancom-bc" class="section level3 hasAnchor" number="11.2.3">
+<h3><span class="header-section-number">11.2.3</span> ANCOM-BC<a href="differential-abundance.html#ancom-bc" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>The analysis of composition of microbiomes with bias correction
+(ANCOM-BC) <span class="citation">(Lin and Peddada 2020)</span> is a recently developed method for differential
+abundance testing. It is based on an earlier published approach
+<span class="citation">(Mandal et al. 2015)</span>. The previous version of ANCOM was among the methods
+that produced the most consistent results and is probably a
+conservative approach <span class="citation">(Nearing et al. 2022)</span>. However, the new ANCOM-BC
+method operates quite differently compared to the former ANCOM method.</p>
+<p>As the only method, ANCOM-BC incorporates the so called <em>sampling
+fraction</em> into the model. The latter term could be empirically
+estimated by the ratio of the library size to the microbial
+load. According to the authors, ignoring variations
+in this sampling fraction would bias DAA results. Furthermore,
+this method provides p-values and confidence intervals for each
+taxon. It also controls the FDR and it is computationally simple to
+implement.</p>
+<p>Note that the original method was implemented in the <code>ancombc()</code> function (see
+<a href="https://www.bioconductor.org/packages/release/bioc/vignettes/ANCOMBC/inst/doc/ANCOMBC.html">extended tutorial</a>).
+The method has since then been updated and new features have been added to enable
+multi-group comparisons and repeated measurements among other improvements.
+We do not cover the more advanced features of ANCOMBC in this tutorial
+as these features are documented in detail in this
+<a href="https://www.bioconductor.org/packages/release/bioc/vignettes/ANCOMBC/inst/doc/ANCOMBC2.html">tutorial</a>.</p>
+<p>We now proceed with a simple example. First, we specify a formula. In this
+formula, other covariates could potentially be included to adjust for
+confounding. We show this further below. Again, please make sure to check the
+<a href="https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html">function documentation</a>
+as well as the linked tutorials to learn about the additional arguments
+that we specify.</p>
+<div class="sourceCode" id="cb335"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb335-1"><a href="differential-abundance.html#cb335-1" tabindex="-1"></a><span class="co"># Load package</span></span>
+<span id="cb335-2"><a href="differential-abundance.html#cb335-2" tabindex="-1"></a><span class="fu">library</span>(ANCOMBC)</span>
+<span id="cb335-3"><a href="differential-abundance.html#cb335-3" tabindex="-1"></a></span>
+<span id="cb335-4"><a href="differential-abundance.html#cb335-4" tabindex="-1"></a><span class="co"># Run ANCOM-BC at the genus level and only including the prevalent genera</span></span>
+<span id="cb335-5"><a href="differential-abundance.html#cb335-5" tabindex="-1"></a>ancombc2_out <span class="ot">&lt;-</span> <span class="fu">ancombc2</span>(<span class="at">data =</span> tse,</span>
+<span id="cb335-6"><a href="differential-abundance.html#cb335-6" tabindex="-1"></a>                         <span class="at">assay.type =</span> <span class="st">&quot;counts&quot;</span>,</span>
+<span id="cb335-7"><a href="differential-abundance.html#cb335-7" tabindex="-1"></a>                         <span class="at">fix_formula =</span> <span class="st">&quot;patient_status&quot;</span>,</span>
+<span id="cb335-8"><a href="differential-abundance.html#cb335-8" tabindex="-1"></a>                         <span class="at">p_adj_method =</span> <span class="st">&quot;fdr&quot;</span>,</span>
+<span id="cb335-9"><a href="differential-abundance.html#cb335-9" tabindex="-1"></a>                         <span class="at">prv_cut =</span> <span class="dv">0</span>,</span>
+<span id="cb335-10"><a href="differential-abundance.html#cb335-10" tabindex="-1"></a>                         <span class="at">group =</span> <span class="st">&quot;patient_status&quot;</span>,</span>
+<span id="cb335-11"><a href="differential-abundance.html#cb335-11" tabindex="-1"></a>                         <span class="at">struc_zero =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb335-12"><a href="differential-abundance.html#cb335-12" tabindex="-1"></a>                         <span class="at">neg_lb =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb335-13"><a href="differential-abundance.html#cb335-13" tabindex="-1"></a>                         <span class="co"># multi group comparison is deactivated automatically</span></span>
+<span id="cb335-14"><a href="differential-abundance.html#cb335-14" tabindex="-1"></a>                         <span class="at">global =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>The object <code>out</code> contains all model output. Again, see the
+<a href="https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html">documentation of the
+function</a>
+under <strong>Value</strong> for details. Our question whether taxa are
+differentially abundant can be answered by looking at the <code>res</code>
+object, which contains dataframes with the coefficients, standard
+errors, p-values and q-values. Below we show the first entries of this
+dataframe.</p>
+<div class="sourceCode" id="cb336"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb336-1"><a href="differential-abundance.html#cb336-1" tabindex="-1"></a><span class="co"># store the FDR adjusted results </span></span>
+<span id="cb336-2"><a href="differential-abundance.html#cb336-2" tabindex="-1"></a>ancombc2_out<span class="sc">$</span>res <span class="sc">%&gt;%</span></span>
+<span id="cb336-3"><a href="differential-abundance.html#cb336-3" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(taxon, lfc_patient_statusControl, q_patient_statusControl) <span class="sc">%&gt;%</span></span>
+<span id="cb336-4"><a href="differential-abundance.html#cb336-4" tabindex="-1"></a>  <span class="fu">filter</span>(q_patient_statusControl <span class="sc">&lt;</span> <span class="fl">0.05</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb336-5"><a href="differential-abundance.html#cb336-5" tabindex="-1"></a>  <span class="fu">arrange</span>(q_patient_statusControl) <span class="sc">%&gt;%</span></span>
+<span id="cb336-6"><a href="differential-abundance.html#cb336-6" tabindex="-1"></a>  <span class="fu">head</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb336-7"><a href="differential-abundance.html#cb336-7" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<colgroup>
+<col width="43%" />
+<col width="29%" />
+<col width="27%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">taxon</th>
+<th align="right">lfc_patient_statusControl</th>
+<th align="right">q_patient_statusControl</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Genus:Subdoligranulum</td>
+<td align="right">1.817</td>
+<td align="right">0.0011</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Ruminococcus_1</td>
+<td align="right">2.819</td>
+<td align="right">0.0011</td>
+</tr>
+<tr class="odd">
+<td align="left">Genus:[Ruminococcus]_gauvreauii_group</td>
+<td align="right">1.442</td>
+<td align="right">0.0016</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:[Clostridium]_innocuum_group</td>
+<td align="right">1.388</td>
+<td align="right">0.0053</td>
+</tr>
+<tr class="odd">
+<td align="left">Genus:[Eubacterium]_rectale_group</td>
+<td align="right">1.259</td>
+<td align="right">0.0053</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Coprobacter</td>
+<td align="right">-1.185</td>
+<td align="right">0.0053</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="maaslin2" class="section level3 hasAnchor" number="11.2.4">
+<h3><span class="header-section-number">11.2.4</span> MaAsLin2<a href="differential-abundance.html#maaslin2" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Let us next illustrate MaAsLin2 <span class="citation">(Mallick, Rahnavard, and McIver 2020)</span>. This method is based on
+generalized linear models and flexible for different study designs
+and covariate structures. For details, check their
+<a href="https://github.com/biobakery/biobakery/wiki/maaslin2">Biobakery tutorial</a>.</p>
+<div class="sourceCode" id="cb337"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb337-1"><a href="differential-abundance.html#cb337-1" tabindex="-1"></a><span class="co"># Load package</span></span>
+<span id="cb337-2"><a href="differential-abundance.html#cb337-2" tabindex="-1"></a><span class="fu">library</span>(Maaslin2)</span>
+<span id="cb337-3"><a href="differential-abundance.html#cb337-3" tabindex="-1"></a></span>
+<span id="cb337-4"><a href="differential-abundance.html#cb337-4" tabindex="-1"></a><span class="co"># maaslin expects features as columns and samples as rows </span></span>
+<span id="cb337-5"><a href="differential-abundance.html#cb337-5" tabindex="-1"></a><span class="co"># for both the abundance table as well as metadata </span></span>
+<span id="cb337-6"><a href="differential-abundance.html#cb337-6" tabindex="-1"></a></span>
+<span id="cb337-7"><a href="differential-abundance.html#cb337-7" tabindex="-1"></a><span class="co"># We can specify different GLMs/normalizations/transforms.</span></span>
+<span id="cb337-8"><a href="differential-abundance.html#cb337-8" tabindex="-1"></a><span class="co"># specifying a ref is especially important if you have more than 2 levels</span></span>
+<span id="cb337-9"><a href="differential-abundance.html#cb337-9" tabindex="-1"></a>maaslin2_out <span class="ot">&lt;-</span> <span class="fu">Maaslin2</span>(<span class="at">input_data =</span> <span class="fu">as.data.frame</span>(<span class="fu">t</span>(<span class="fu">assay</span>(tse))),</span>
+<span id="cb337-10"><a href="differential-abundance.html#cb337-10" tabindex="-1"></a>                         <span class="at">input_metadata =</span> <span class="fu">as.data.frame</span>(<span class="fu">colData</span>(tse)),</span>
+<span id="cb337-11"><a href="differential-abundance.html#cb337-11" tabindex="-1"></a>                         <span class="at">output =</span> <span class="st">&quot;DAA example&quot;</span>,</span>
+<span id="cb337-12"><a href="differential-abundance.html#cb337-12" tabindex="-1"></a>                         <span class="at">transform =</span> <span class="st">&quot;AST&quot;</span>,</span>
+<span id="cb337-13"><a href="differential-abundance.html#cb337-13" tabindex="-1"></a>                         <span class="at">fixed_effects =</span> <span class="st">&quot;patient_status&quot;</span>,</span>
+<span id="cb337-14"><a href="differential-abundance.html#cb337-14" tabindex="-1"></a>                         <span class="co"># you can also fit MLM by specifying random effects</span></span>
+<span id="cb337-15"><a href="differential-abundance.html#cb337-15" tabindex="-1"></a>                         <span class="co"># random_effects = c(...),</span></span>
+<span id="cb337-16"><a href="differential-abundance.html#cb337-16" tabindex="-1"></a>                         <span class="at">reference =</span> <span class="st">&quot;patient_status,Control&quot;</span>,</span>
+<span id="cb337-17"><a href="differential-abundance.html#cb337-17" tabindex="-1"></a>                         <span class="at">normalization =</span> <span class="st">&quot;TSS&quot;</span>,</span>
+<span id="cb337-18"><a href="differential-abundance.html#cb337-18" tabindex="-1"></a>                         <span class="at">standardize =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb337-19"><a href="differential-abundance.html#cb337-19" tabindex="-1"></a>                         <span class="co"># filtering was previously performed</span></span>
+<span id="cb337-20"><a href="differential-abundance.html#cb337-20" tabindex="-1"></a>                         <span class="at">min_prevalence =</span> <span class="dv">0</span>)</span></code></pre></div>
+<p>Which genera are identified as differentially abundant? (leave out “head” to see all).</p>
+<div class="sourceCode" id="cb338"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb338-1"><a href="differential-abundance.html#cb338-1" tabindex="-1"></a>maaslin2_out<span class="sc">$</span>results <span class="sc">%&gt;%</span></span>
+<span id="cb338-2"><a href="differential-abundance.html#cb338-2" tabindex="-1"></a>  <span class="fu">filter</span>(qval <span class="sc">&lt;</span> <span class="fl">0.05</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb338-3"><a href="differential-abundance.html#cb338-3" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<colgroup>
+<col width="31%" />
+<col width="12%" />
+<col width="4%" />
+<col width="6%" />
+<col width="5%" />
+<col width="5%" />
+<col width="15%" />
+<col width="5%" />
+<col width="2%" />
+<col width="9%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">feature</th>
+<th align="left">metadata</th>
+<th align="left">value</th>
+<th align="right">coef</th>
+<th align="right">stderr</th>
+<th align="right">pval</th>
+<th align="left">name</th>
+<th align="right">qval</th>
+<th align="right">N</th>
+<th align="right">N.not.zero</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Genus..Ruminococcus._gauvreauii_group</td>
+<td align="left">patient_status</td>
+<td align="left">ADHD</td>
+<td align="right">-0.0662</td>
+<td align="right">0.0131</td>
+<td align="right">0.0000</td>
+<td align="left">patient_statusADHD</td>
+<td align="right">0.0017</td>
+<td align="right">27</td>
+<td align="right">21</td>
+</tr>
+<tr class="even">
+<td align="left">Genus.Faecalibacterium</td>
+<td align="left">patient_status</td>
+<td align="left">ADHD</td>
+<td align="right">0.1195</td>
+<td align="right">0.0363</td>
+<td align="right">0.0030</td>
+<td align="left">patient_statusADHD</td>
+<td align="right">0.0391</td>
+<td align="right">27</td>
+<td align="right">11</td>
+</tr>
+<tr class="odd">
+<td align="left">Genus..Clostridium._innocuum_group</td>
+<td align="left">patient_status</td>
+<td align="left">ADHD</td>
+<td align="right">-0.0678</td>
+<td align="right">0.0209</td>
+<td align="right">0.0033</td>
+<td align="left">patient_statusADHD</td>
+<td align="right">0.0391</td>
+<td align="right">27</td>
+<td align="right">25</td>
+</tr>
+<tr class="even">
+<td align="left">Order.Bacteroidales</td>
+<td align="left">patient_status</td>
+<td align="left">ADHD</td>
+<td align="right">0.0447</td>
+<td align="right">0.0139</td>
+<td align="right">0.0035</td>
+<td align="left">patient_statusADHD</td>
+<td align="right">0.0391</td>
+<td align="right">27</td>
+<td align="right">6</td>
+</tr>
+<tr class="odd">
+<td align="left">Genus.Catabacter</td>
+<td align="left">patient_status</td>
+<td align="left">ADHD</td>
+<td align="right">0.0288</td>
+<td align="right">0.0090</td>
+<td align="right">0.0036</td>
+<td align="left">patient_statusADHD</td>
+<td align="right">0.0391</td>
+<td align="right">27</td>
+<td align="right">9</td>
+</tr>
+</tbody>
+</table>
+<p>This will create a folder that is called like in the output specified
+above. It contains also figures to visualize difference between
+significant taxa.</p>
+</div>
+<div id="linda" class="section level3 hasAnchor" number="11.2.5">
+<h3><span class="header-section-number">11.2.5</span> LinDA<a href="differential-abundance.html#linda" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Lastly, we cover linear models for differential abundance analysis of
+microbiome compositional data (<span class="citation">H. Zhou et al. (2022)</span>). This is very similar to
+ANCOMBC with few differences: 1) LinDA corrects for the compositional
+bias differently using the mode of all regression coefficients. 2) it
+is faster (100x-1000x than ANCOMBC and according to the authors); 3)
+it supports hierarchical models. The latest ANCOMBC versions are also
+supporting hierarchical models. Nevertheless, LinDA seems a promising
+tool that achieves a very good power/fdr trade-off together with
+ANCOMBC according to the review. The speed improvements might make it
+critical especially for datasets that have higher sample or feature
+set sizes.</p>
+<div class="sourceCode" id="cb339"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb339-1"><a href="differential-abundance.html#cb339-1" tabindex="-1"></a><span class="co"># Load package</span></span>
+<span id="cb339-2"><a href="differential-abundance.html#cb339-2" tabindex="-1"></a><span class="fu">library</span>(MicrobiomeStat)</span>
+<span id="cb339-3"><a href="differential-abundance.html#cb339-3" tabindex="-1"></a></span>
+<span id="cb339-4"><a href="differential-abundance.html#cb339-4" tabindex="-1"></a><span class="co"># Run LinDA</span></span>
+<span id="cb339-5"><a href="differential-abundance.html#cb339-5" tabindex="-1"></a>linda_out <span class="ot">&lt;-</span> <span class="fu">linda</span>(<span class="at">feature.dat =</span> <span class="fu">as.data.frame</span>(<span class="fu">assay</span>(tse)),</span>
+<span id="cb339-6"><a href="differential-abundance.html#cb339-6" tabindex="-1"></a>                   <span class="at">meta.dat =</span> <span class="fu">as.data.frame</span>(<span class="fu">colData</span>(tse)),</span>
+<span id="cb339-7"><a href="differential-abundance.html#cb339-7" tabindex="-1"></a>                   <span class="at">formula =</span> <span class="st">&quot;~ patient_status&quot;</span>,</span>
+<span id="cb339-8"><a href="differential-abundance.html#cb339-8" tabindex="-1"></a>                   <span class="at">alpha =</span> <span class="fl">0.05</span>,</span>
+<span id="cb339-9"><a href="differential-abundance.html#cb339-9" tabindex="-1"></a>                   <span class="at">prev.filter =</span> <span class="dv">0</span>,</span>
+<span id="cb339-10"><a href="differential-abundance.html#cb339-10" tabindex="-1"></a>                   <span class="at">mean.abund.filter =</span> <span class="dv">0</span>)</span></code></pre></div>
+<pre><code>## 0  features are filtered!
+## The filtered data has  27  samples and  54  features will be tested!
+## Pseudo-count approach is used.
+## Fit linear models ...
+## Completed.</code></pre>
+<div class="sourceCode" id="cb341"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb341-1"><a href="differential-abundance.html#cb341-1" tabindex="-1"></a><span class="co"># List genera for which H0 could be rejected:</span></span>
+<span id="cb341-2"><a href="differential-abundance.html#cb341-2" tabindex="-1"></a>linda_out<span class="sc">$</span>output<span class="sc">$</span>patient_statusControl <span class="sc">%&gt;%</span></span>
+<span id="cb341-3"><a href="differential-abundance.html#cb341-3" tabindex="-1"></a>  <span class="fu">filter</span>(reject) <span class="sc">%&gt;%</span></span>
+<span id="cb341-4"><a href="differential-abundance.html#cb341-4" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(stat, padj) <span class="sc">%&gt;%</span></span>
+<span id="cb341-5"><a href="differential-abundance.html#cb341-5" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">&quot;feature&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb341-6"><a href="differential-abundance.html#cb341-6" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">feature</th>
+<th align="right">stat</th>
+<th align="right">padj</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Genus:Faecalibacterium</td>
+<td align="right">-4.194</td>
+<td align="right">0.0101</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Erysipelatoclostridium</td>
+<td align="right">3.031</td>
+<td align="right">0.0474</td>
+</tr>
+<tr class="odd">
+<td align="left">Genus:[Ruminococcus]_gauvreauii_group</td>
+<td align="right">4.108</td>
+<td align="right">0.0101</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Barnesiella</td>
+<td align="right">-3.091</td>
+<td align="right">0.0474</td>
+</tr>
+<tr class="odd">
+<td align="left">Order:Bacteroidales</td>
+<td align="right">-3.606</td>
+<td align="right">0.0243</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Ruminococcaceae_UCG-014</td>
+<td align="right">-2.993</td>
+<td align="right">0.0474</td>
+</tr>
+<tr class="odd">
+<td align="left">Genus:Catabacter</td>
+<td align="right">-3.387</td>
+<td align="right">0.0316</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="zicoseq" class="section level3 hasAnchor" number="11.2.6">
+<h3><span class="header-section-number">11.2.6</span> ZicoSeq<a href="differential-abundance.html#zicoseq" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Subsequently, we demonstrate DAA with ZicoSeq, a method based on linear models
+and permutation. Further details can be found in
+<a href="https://cran.r-project.org/web/packages/GUniFrac/vignettes/ZicoSeq.html">this tutorial</a>.
+This approach has been assessed to exhibit high power and a low false discovery
+rate, which has the following components:</p>
+<ol style="list-style-type: decimal">
+<li>Winsorization to decrease the influence of outliers;</li>
+<li>Posterior sampling based on a beta mixture prior to address
+sampling variability and zero inflation;</li>
+<li>Reference-based multiple-stage normalization to address
+compositional effects;</li>
+</ol>
+<div class="sourceCode" id="cb342"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb342-1"><a href="differential-abundance.html#cb342-1" tabindex="-1"></a><span class="co"># Load package</span></span>
+<span id="cb342-2"><a href="differential-abundance.html#cb342-2" tabindex="-1"></a><span class="fu">library</span>(GUniFrac)</span>
+<span id="cb342-3"><a href="differential-abundance.html#cb342-3" tabindex="-1"></a></span>
+<span id="cb342-4"><a href="differential-abundance.html#cb342-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb342-5"><a href="differential-abundance.html#cb342-5" tabindex="-1"></a>zicoseq_out <span class="ot">&lt;-</span> <span class="fu">ZicoSeq</span>(<span class="at">feature.dat =</span> <span class="fu">as.matrix</span>(<span class="fu">assay</span>(tse)),</span>
+<span id="cb342-6"><a href="differential-abundance.html#cb342-6" tabindex="-1"></a>                       <span class="at">meta.dat =</span> <span class="fu">as.data.frame</span>(<span class="fu">colData</span>(tse)),</span>
+<span id="cb342-7"><a href="differential-abundance.html#cb342-7" tabindex="-1"></a>                       <span class="at">grp.name =</span> <span class="st">&quot;patient_status&quot;</span>,</span>
+<span id="cb342-8"><a href="differential-abundance.html#cb342-8" tabindex="-1"></a>                       <span class="at">feature.dat.type =</span> <span class="st">&quot;count&quot;</span>,</span>
+<span id="cb342-9"><a href="differential-abundance.html#cb342-9" tabindex="-1"></a>                       <span class="at">return.feature.dat =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb342-10"><a href="differential-abundance.html#cb342-10" tabindex="-1"></a>                       <span class="at">prev.filter =</span> <span class="dv">0</span>,</span>
+<span id="cb342-11"><a href="differential-abundance.html#cb342-11" tabindex="-1"></a>                       <span class="at">mean.abund.filter =</span> <span class="dv">0</span>,</span>
+<span id="cb342-12"><a href="differential-abundance.html#cb342-12" tabindex="-1"></a>                       <span class="at">max.abund.filter =</span> <span class="dv">0</span>,</span>
+<span id="cb342-13"><a href="differential-abundance.html#cb342-13" tabindex="-1"></a>                       <span class="at">perm.no =</span> <span class="dv">999</span>)</span></code></pre></div>
+<pre><code>## For sample size less than 40, posterior sampling will not be used!
+## 0  features are filtered!
+## The data has  27  samples and  54  features will be tested!
+## On average,  1  outlier counts will be replaced for each feature!
+## Finding the references ...
+## Permutation testing ...
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## Completed!</code></pre>
+<div class="sourceCode" id="cb344"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb344-1"><a href="differential-abundance.html#cb344-1" tabindex="-1"></a>zicoseq_res <span class="ot">&lt;-</span> <span class="fu">cbind.data.frame</span>(<span class="at">p.raw =</span> zicoseq_out<span class="sc">$</span>p.raw,</span>
+<span id="cb344-2"><a href="differential-abundance.html#cb344-2" tabindex="-1"></a>                                <span class="at">p.adj.fdr =</span> zicoseq_out<span class="sc">$</span>p.adj.fdr)</span>
+<span id="cb344-3"><a href="differential-abundance.html#cb344-3" tabindex="-1"></a></span>
+<span id="cb344-4"><a href="differential-abundance.html#cb344-4" tabindex="-1"></a>zicoseq_res <span class="sc">%&gt;%</span></span>
+<span id="cb344-5"><a href="differential-abundance.html#cb344-5" tabindex="-1"></a>  <span class="fu">filter</span>(p.adj.fdr <span class="sc">&lt;</span> <span class="fl">0.05</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb344-6"><a href="differential-abundance.html#cb344-6" tabindex="-1"></a>  <span class="fu">arrange</span>(p.adj.fdr) <span class="sc">%&gt;%</span></span>
+<span id="cb344-7"><a href="differential-abundance.html#cb344-7" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">p.raw</th>
+<th align="right">p.adj.fdr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Genus:[Ruminococcus]_gauvreauii_group</td>
+<td align="right">0.001</td>
+<td align="right">0.0040</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:[Clostridium]_innocuum_group</td>
+<td align="right">0.003</td>
+<td align="right">0.0210</td>
+</tr>
+<tr class="odd">
+<td align="left">Genus:Faecalibacterium</td>
+<td align="right">0.001</td>
+<td align="right">0.0230</td>
+</tr>
+<tr class="even">
+<td align="left">Order:Bacteroidales</td>
+<td align="right">0.011</td>
+<td align="right">0.0358</td>
+</tr>
+<tr class="odd">
+<td align="left">Genus:Catabacter</td>
+<td align="right">0.005</td>
+<td align="right">0.0366</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb345"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb345-1"><a href="differential-abundance.html#cb345-1" tabindex="-1"></a><span class="do">## x-axis is the effect size: R2 * direction of coefficient</span></span>
+<span id="cb345-2"><a href="differential-abundance.html#cb345-2" tabindex="-1"></a><span class="fu">ZicoSeq.plot</span>(<span class="at">ZicoSeq.obj =</span> zicoseq_out,</span>
+<span id="cb345-3"><a href="differential-abundance.html#cb345-3" tabindex="-1"></a>             <span class="at">pvalue.type =</span> <span class="st">&#39;p.adj.fdr&#39;</span>)</span></code></pre></div>
+<p><img src="30_differential_abundance_files/figure-html/plot-zicoseq-1.png" width="672" /></p>
+</div>
+<div id="philr" class="section level3 hasAnchor" number="11.2.7">
+<h3><span class="header-section-number">11.2.7</span> PhILR<a href="differential-abundance.html#philr" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>PhILR is a tree-based method that tests group-wise associations based on
+balances. A detailed introduction to this method is available in
+<a href="https://www.bioconductor.org/packages/devel/bioc/vignettes/philr/inst/doc/philr-intro.html">this Bioconductor tutorial</a>.</p>
+</div>
+<div id="comparison-of-methods" class="section level3 hasAnchor" number="11.2.8">
+<h3><span class="header-section-number">11.2.8</span> Comparison of methods<a href="differential-abundance.html#comparison-of-methods" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Although the methods described above yield unidentical results, they are
+expected to agree on a few differentially abundant taxa. To draw more informed
+conclusions, it is good practice to compare the outcomes of different methods in terms of found features, their effect sizes and significances, as well as other method-specific aspects. Such comparative approach is outlined in
+<a href="exercises.html#compare-daa-methods">this exercise</a>.</p>
+</div>
+</div>
+<div id="daa-with-confounding" class="section level2 hasAnchor" number="11.3">
+<h2><span class="header-section-number">11.3</span> DAA with confounding<a href="differential-abundance.html#daa-with-confounding" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Confounders can be defined as variables that are related to and affect the
+apparent dynamics between the response and the main independent variable.
+They are common in experimental studies. Generally, they can be classified
+into 3 groups:</p>
+<ul>
+<li><p>Biological confounders, such as age and sex</p></li>
+<li><p>Technical confounders produced during sample collection, processing and analysis</p></li>
+<li><p>Confounders resulting from experimental models, such as batch effects and sample history</p></li>
+</ul>
+<p>Controlling for confounders is an important practice to reach an unbiased
+conclusion. To perform causal inference, it is crucial that the method
+is able to include confounders in the model. This is not possible with
+statistical tests of general use, such as the Wilcoxon test. In contrast,
+methods that target DAA, such as those described in this chapter, allow
+controlling for confounders. In the following examples, we will perform DAA
+with a main independent variable and a few confounders.</p>
+<div id="selecting-confounders" class="section level3 hasAnchor" number="11.3.1">
+<h3><span class="header-section-number">11.3.1</span> Selecting confounders<a href="differential-abundance.html#selecting-confounders" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>In addition to patient status, we will now control for two confounders: cohort
+and library size. The former is a categorical variable with three factors,
+whereas the latter is a discrete numerical variable. Remarkably, most DAA
+methods accept these two and several other data types.</p>
+<p>For demonstration, library size is treated as a confounder and included
+in the formulas of the DAA methods. Although this is a satisfactory approach to
+control for uneven sequencing efforts across samples, rarefaction generally represents a better solution <span class="citation">(Schloss 2023)</span>. With that said, library size can be readily computed and added to the colData.</p>
+<div class="sourceCode" id="cb346"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb346-1"><a href="differential-abundance.html#cb346-1" tabindex="-1"></a><span class="co"># Compute and store library size in colData</span></span>
+<span id="cb346-2"><a href="differential-abundance.html#cb346-2" tabindex="-1"></a><span class="fu">colData</span>(tse)<span class="sc">$</span>library_size <span class="ot">&lt;-</span> <span class="fu">colSums</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;counts&quot;</span>))</span></code></pre></div>
+</div>
+<div id="ancom-bc-1" class="section level3 hasAnchor" number="11.3.2">
+<h3><span class="header-section-number">11.3.2</span> ANCOM-BC<a href="differential-abundance.html#ancom-bc-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Here, confounders can be added to the formula along with patient status, the
+main outcome variable. This way, the model evaluates whether differentially
+abundant taxa are associated with one of the variables when the other two
+are kept constant.</p>
+<div class="sourceCode" id="cb347"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb347-1"><a href="differential-abundance.html#cb347-1" tabindex="-1"></a><span class="co"># perform the analysis </span></span>
+<span id="cb347-2"><a href="differential-abundance.html#cb347-2" tabindex="-1"></a>ancombc2_out <span class="ot">&lt;-</span> <span class="fu">ancombc2</span>(tse,</span>
+<span id="cb347-3"><a href="differential-abundance.html#cb347-3" tabindex="-1"></a>                         <span class="at">assay.type =</span> <span class="st">&quot;counts&quot;</span>,</span>
+<span id="cb347-4"><a href="differential-abundance.html#cb347-4" tabindex="-1"></a>                         <span class="at">fix_formula =</span> <span class="st">&quot;patient_status + cohort + library_size&quot;</span>,</span>
+<span id="cb347-5"><a href="differential-abundance.html#cb347-5" tabindex="-1"></a>                         <span class="at">p_adj_method =</span> <span class="st">&quot;fdr&quot;</span>,</span>
+<span id="cb347-6"><a href="differential-abundance.html#cb347-6" tabindex="-1"></a>                         <span class="at">lib_cut =</span> <span class="dv">0</span>,</span>
+<span id="cb347-7"><a href="differential-abundance.html#cb347-7" tabindex="-1"></a>                         <span class="at">group =</span> <span class="st">&quot;patient_status&quot;</span>, </span>
+<span id="cb347-8"><a href="differential-abundance.html#cb347-8" tabindex="-1"></a>                         <span class="at">struc_zero =</span> <span class="cn">TRUE</span>, </span>
+<span id="cb347-9"><a href="differential-abundance.html#cb347-9" tabindex="-1"></a>                         <span class="at">neg_lb =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb347-10"><a href="differential-abundance.html#cb347-10" tabindex="-1"></a>                         <span class="at">alpha =</span> <span class="fl">0.05</span>,</span>
+<span id="cb347-11"><a href="differential-abundance.html#cb347-11" tabindex="-1"></a>                         <span class="co"># multi-group comparison is deactivated automatically</span></span>
+<span id="cb347-12"><a href="differential-abundance.html#cb347-12" tabindex="-1"></a>                         <span class="at">global =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>In the output, each taxon is assigned with several effect sizes (lfc, which
+stands for log-fold change) and adjusted p-values (q). For categorical variables such as patient status and cohort, the statistics indicate whether the abundance
+of a given taxon is significantly different between the specified group (column
+name) and the reference group (the group that does not appear in the column
+names), whereas for numerical variables such as library size, they indicate
+whether the abundance of a given taxon varies with that variable.</p>
+<div class="sourceCode" id="cb348"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb348-1"><a href="differential-abundance.html#cb348-1" tabindex="-1"></a>ancombc2_out<span class="sc">$</span>res <span class="sc">%&gt;%</span></span>
+<span id="cb348-2"><a href="differential-abundance.html#cb348-2" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="fu">c</span>(<span class="st">&quot;taxon&quot;</span>, <span class="st">&quot;lfc&quot;</span>, <span class="st">&quot;q&quot;</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb348-3"><a href="differential-abundance.html#cb348-3" tabindex="-1"></a>  <span class="fu">arrange</span>(q_patient_statusControl) <span class="sc">%&gt;%</span></span>
+<span id="cb348-4"><a href="differential-abundance.html#cb348-4" tabindex="-1"></a>  <span class="fu">head</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb348-5"><a href="differential-abundance.html#cb348-5" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table style="width:100%;">
+<colgroup>
+<col width="14%" />
+<col width="7%" />
+<col width="12%" />
+<col width="8%" />
+<col width="8%" />
+<col width="7%" />
+<col width="6%" />
+<col width="11%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">taxon</th>
+<th align="right">lfc_(Intercept)</th>
+<th align="right">lfc_patient_statusControl</th>
+<th align="right">lfc_cohortCohort_2</th>
+<th align="right">lfc_cohortCohort_3</th>
+<th align="right">lfc_library_size</th>
+<th align="right">q_(Intercept)</th>
+<th align="right">q_patient_statusControl</th>
+<th align="right">q_cohortCohort_2</th>
+<th align="right">q_cohortCohort_3</th>
+<th align="right">q_library_size</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Genus:Hungatella</td>
+<td align="right">-0.2343</td>
+<td align="right">-0.7177</td>
+<td align="right">-0.1473</td>
+<td align="right">-0.0996</td>
+<td align="right">0e+00</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0.0000</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Ruminococcaceae_UCG-013</td>
+<td align="right">-1.0393</td>
+<td align="right">-0.7369</td>
+<td align="right">0.6178</td>
+<td align="right">-0.0217</td>
+<td align="right">1e-04</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0.0000</td>
+</tr>
+<tr class="odd">
+<td align="left">Family:Lachnospiraceae</td>
+<td align="right">-0.9455</td>
+<td align="right">-0.6247</td>
+<td align="right">0.5917</td>
+<td align="right">0.5393</td>
+<td align="right">0e+00</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0.0000</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Alistipes</td>
+<td align="right">-0.0252</td>
+<td align="right">-0.4359</td>
+<td align="right">-0.4571</td>
+<td align="right">0.0100</td>
+<td align="right">0e+00</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0.0035</td>
+</tr>
+<tr class="odd">
+<td align="left">Genus:Bacteroides</td>
+<td align="right">-0.3896</td>
+<td align="right">-1.1519</td>
+<td align="right">0.0942</td>
+<td align="right">0.7381</td>
+<td align="right">0e+00</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0.0001</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Escherichia-Shigella</td>
+<td align="right">-1.3544</td>
+<td align="right">-0.9021</td>
+<td align="right">1.3086</td>
+<td align="right">0.2621</td>
+<td align="right">1e-04</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0.0000</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="linda-1" class="section level3 hasAnchor" number="11.3.3">
+<h3><span class="header-section-number">11.3.3</span> LinDA<a href="differential-abundance.html#linda-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>As in the previous method, confounders can be included in the formula with the
+main outcome variable.</p>
+<div class="sourceCode" id="cb349"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb349-1"><a href="differential-abundance.html#cb349-1" tabindex="-1"></a>linda_out <span class="ot">&lt;-</span> <span class="fu">linda</span>(<span class="fu">as.data.frame</span>(<span class="fu">assay</span>(tse, <span class="st">&quot;counts&quot;</span>)),</span>
+<span id="cb349-2"><a href="differential-abundance.html#cb349-2" tabindex="-1"></a>                   <span class="fu">as.data.frame</span>(<span class="fu">colData</span>(tse)),</span>
+<span id="cb349-3"><a href="differential-abundance.html#cb349-3" tabindex="-1"></a>                   <span class="at">formula =</span> <span class="st">&quot;~ patient_status + cohort + library_size&quot;</span>,</span>
+<span id="cb349-4"><a href="differential-abundance.html#cb349-4" tabindex="-1"></a>                   <span class="at">alpha =</span> <span class="fl">0.05</span>,</span>
+<span id="cb349-5"><a href="differential-abundance.html#cb349-5" tabindex="-1"></a>                   <span class="at">prev.filter =</span> <span class="dv">0</span>,</span>
+<span id="cb349-6"><a href="differential-abundance.html#cb349-6" tabindex="-1"></a>                   <span class="at">mean.abund.filter =</span> <span class="dv">0</span>)</span></code></pre></div>
+<pre><code>## 0  features are filtered!
+## The filtered data has  27  samples and  54  features will be tested!
+## Imputation approach is used.
+## Fit linear models ...
+## Completed.</code></pre>
+<p>The model returns an output for every variable included in the formula. Normally,
+only the results on the main outcome variable are relevant and can be retrieved
+as shown below. However, the statistics on the confounders can be similarly
+obtained by accessing the corresponding items from the output object.</p>
+<div class="sourceCode" id="cb351"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb351-1"><a href="differential-abundance.html#cb351-1" tabindex="-1"></a><span class="co"># Select results for the patient status</span></span>
+<span id="cb351-2"><a href="differential-abundance.html#cb351-2" tabindex="-1"></a>linda_res <span class="ot">&lt;-</span> linda_out<span class="sc">$</span>output<span class="sc">$</span>patient_statusControl</span>
+<span id="cb351-3"><a href="differential-abundance.html#cb351-3" tabindex="-1"></a></span>
+<span id="cb351-4"><a href="differential-abundance.html#cb351-4" tabindex="-1"></a>linda_res <span class="sc">%&gt;%</span></span>
+<span id="cb351-5"><a href="differential-abundance.html#cb351-5" tabindex="-1"></a>  <span class="fu">filter</span>(reject) <span class="sc">%&gt;%</span></span>
+<span id="cb351-6"><a href="differential-abundance.html#cb351-6" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(log2FoldChange, stat, padj) <span class="sc">%&gt;%</span></span>
+<span id="cb351-7"><a href="differential-abundance.html#cb351-7" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">&quot;feature&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb351-8"><a href="differential-abundance.html#cb351-8" tabindex="-1"></a>  <span class="fu">head</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb351-9"><a href="differential-abundance.html#cb351-9" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">feature</th>
+<th align="right">log2FoldChange</th>
+<th align="right">stat</th>
+<th align="right">padj</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Genus:Faecalibacterium</td>
+<td align="right">-5.843</td>
+<td align="right">-4.473</td>
+<td align="right">0.0051</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Erysipelatoclostridium</td>
+<td align="right">3.827</td>
+<td align="right">3.048</td>
+<td align="right">0.0398</td>
+</tr>
+<tr class="odd">
+<td align="left">Genus:[Ruminococcus]_gauvreauii_group</td>
+<td align="right">4.303</td>
+<td align="right">4.494</td>
+<td align="right">0.0051</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Barnesiella</td>
+<td align="right">-3.802</td>
+<td align="right">-3.067</td>
+<td align="right">0.0398</td>
+</tr>
+<tr class="odd">
+<td align="left">Order:Bacteroidales</td>
+<td align="right">-4.098</td>
+<td align="right">-3.938</td>
+<td align="right">0.0126</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Ruminococcaceae_UCG-014</td>
+<td align="right">-2.980</td>
+<td align="right">-3.592</td>
+<td align="right">0.0175</td>
+</tr>
+</tbody>
+</table>
+<p>The output shows effect sizes in terms of log-fold changes and a derived
+statistic (stat) as well as the corresponding adjusted p-values for differences
+in abundance of each taxon between the control and treated group.</p>
+</div>
+<div id="zicoseq-1" class="section level3 hasAnchor" number="11.3.4">
+<h3><span class="header-section-number">11.3.4</span> ZicoSeq<a href="differential-abundance.html#zicoseq-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>For this method, confounders can be added as a list to the <code>adj.name</code> argument.</p>
+<div class="sourceCode" id="cb352"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb352-1"><a href="differential-abundance.html#cb352-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb352-2"><a href="differential-abundance.html#cb352-2" tabindex="-1"></a>zicoseq_out <span class="ot">&lt;-</span> <span class="fu">ZicoSeq</span>(<span class="at">feature.dat =</span> <span class="fu">as.matrix</span>(<span class="fu">assay</span>(tse)),</span>
+<span id="cb352-3"><a href="differential-abundance.html#cb352-3" tabindex="-1"></a>                       <span class="at">meta.dat =</span> <span class="fu">as.data.frame</span>(<span class="fu">colData</span>(tse)),</span>
+<span id="cb352-4"><a href="differential-abundance.html#cb352-4" tabindex="-1"></a>                       <span class="at">grp.name =</span> <span class="st">&quot;patient_status&quot;</span>,</span>
+<span id="cb352-5"><a href="differential-abundance.html#cb352-5" tabindex="-1"></a>                       <span class="at">adj.name =</span> <span class="fu">c</span>(<span class="st">&quot;cohort&quot;</span>, <span class="st">&quot;library_size&quot;</span>), </span>
+<span id="cb352-6"><a href="differential-abundance.html#cb352-6" tabindex="-1"></a>                       <span class="at">feature.dat.type =</span> <span class="st">&quot;count&quot;</span>,</span>
+<span id="cb352-7"><a href="differential-abundance.html#cb352-7" tabindex="-1"></a>                       <span class="at">return.feature.dat =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb352-8"><a href="differential-abundance.html#cb352-8" tabindex="-1"></a>                       <span class="at">prev.filter =</span> <span class="dv">0</span>,</span>
+<span id="cb352-9"><a href="differential-abundance.html#cb352-9" tabindex="-1"></a>                       <span class="at">mean.abund.filter =</span> <span class="dv">0</span>,</span>
+<span id="cb352-10"><a href="differential-abundance.html#cb352-10" tabindex="-1"></a>                       <span class="at">max.abund.filter =</span> <span class="dv">0</span>,</span>
+<span id="cb352-11"><a href="differential-abundance.html#cb352-11" tabindex="-1"></a>                       <span class="at">perm.no =</span> <span class="dv">999</span>)</span></code></pre></div>
+<pre><code>## For sample size less than 40, posterior sampling will not be used!
+## 0  features are filtered!
+## The data has  27  samples and  54  features will be tested!
+## On average,  1  outlier counts will be replaced for each feature!
+## Finding the references ...
+## Permutation testing ...
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## ...................................................................................................
+## Completed!</code></pre>
+<p>The output shows the raw and adjusted p-values for clinical status.</p>
+<div class="sourceCode" id="cb354"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb354-1"><a href="differential-abundance.html#cb354-1" tabindex="-1"></a>zicoseq_res <span class="ot">&lt;-</span> <span class="fu">cbind.data.frame</span>(<span class="at">p.raw =</span> zicoseq_out<span class="sc">$</span>p.raw,</span>
+<span id="cb354-2"><a href="differential-abundance.html#cb354-2" tabindex="-1"></a>                                <span class="at">p.adj.fdr =</span> zicoseq_out<span class="sc">$</span>p.adj.fdr)</span>
+<span id="cb354-3"><a href="differential-abundance.html#cb354-3" tabindex="-1"></a></span>
+<span id="cb354-4"><a href="differential-abundance.html#cb354-4" tabindex="-1"></a>zicoseq_res <span class="sc">%&gt;%</span></span>
+<span id="cb354-5"><a href="differential-abundance.html#cb354-5" tabindex="-1"></a>  <span class="fu">filter</span>(p.adj.fdr <span class="sc">&lt;</span> <span class="fl">0.05</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb354-6"><a href="differential-abundance.html#cb354-6" tabindex="-1"></a>  <span class="fu">head</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb354-7"><a href="differential-abundance.html#cb354-7" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">p.raw</th>
+<th align="right">p.adj.fdr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Genus:Faecalibacterium</td>
+<td align="right">0.002</td>
+<td align="right">0.0167</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:[Clostridium]_innocuum_group</td>
+<td align="right">0.003</td>
+<td align="right">0.0206</td>
+</tr>
+<tr class="odd">
+<td align="left">Genus:[Ruminococcus]_gauvreauii_group</td>
+<td align="right">0.001</td>
+<td align="right">0.0005</td>
+</tr>
+<tr class="even">
+<td align="left">Order:Bacteroidales</td>
+<td align="right">0.004</td>
+<td align="right">0.0167</td>
+</tr>
+<tr class="odd">
+<td align="left">Genus:Ruminococcus_2</td>
+<td align="right">0.003</td>
+<td align="right">0.0264</td>
+</tr>
+<tr class="even">
+<td align="left">Genus:Ruminococcaceae_UCG-014</td>
+<td align="right">0.004</td>
+<td align="right">0.0316</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="additional-resources" class="section level2 hasAnchor" number="11.4">
+<h2><span class="header-section-number">11.4</span> Additional resources<a href="differential-abundance.html#additional-resources" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>DAA can be performed by several means. Although most of them provide similar
+functionality, some may be more suitable than others given a certain study
+design or data type. Commonly used DAA tools include:</p>
+<ul>
+<li>ALDEx2 <span class="citation">(Gloor, Macklaim, and Fernandes 2016)</span></li>
+<li>ANCOM <span class="citation">(Mandal et al. 2015)</span></li>
+<li>ANCOMBC <span class="citation">(Lin and Peddada 2020)</span></li>
+<li>corncob <span class="citation">(Martin, Witten, and Willis 2021)</span></li>
+<li>DACOMP <span class="citation">(Brill, Amnon, and Ruth 2022)</span></li>
+<li>DESeq2 <span class="citation">(Love, Huber, and Anders 2014)</span></li>
+<li>eBay <span class="citation">(T. Liu, Zhao, and Wang 2020)</span></li>
+<li>edgeR <span class="citation">(Y. Chen, Lun, and Smyth 2016)</span></li>
+<li>fastANCOM <span class="citation">(C. Zhou et al. 2022)</span></li>
+<li>LDM <span class="citation">(Hu and Satten 2020)</span></li>
+<li>lefser <span class="citation">(Khleborodova 2021)</span></li>
+<li>limma <span class="citation">(Ritchie et al. 2015)</span></li>
+<li>LinDA <span class="citation">(H. Zhou et al. 2022)</span></li>
+<li>MaAsLin2 <span class="citation">(Mallick, Rahnavard, and McIver 2020)</span></li>
+<li>metagenomeSeq <span class="citation">(Paulson, Talukder, and Bravo 2017)</span></li>
+<li>Omnibus <span class="citation">(J. Chen et al. 2018)</span></li>
+<li>RAIDA <span class="citation">(Sohn, Du, and An 2015)</span></li>
+<li>t-test</li>
+<li>Wilcoxon test</li>
+<li>ZicoSeq <span class="citation">(Yang and Chen 2022)</span></li>
+<li>ZINQ <span class="citation">(Ling et al. 2021)</span></li>
+</ul>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="clustering.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="network-learning.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": true,
+"facebook": false,
+"twitter": true,
+"linkedin": true,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/microbiome/OMA/blob/master/30_differential_abundance.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": "https://github.com/microbiome/OMA/commits/master/30_differential_abundance.Rmd",
+"text": null
+},
+"view": {
+"link": "https://github.com/microbiome/OMA/blob/master/30_differential_abundance.Rmd",
+"text": null
+},
+"download": ["OMA.pdf"],
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/latest.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
