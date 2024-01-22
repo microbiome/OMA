@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Orchestrating Microbiome Analysis - 7&nbsp; Community Similarity</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../pages/21_microbiome_community.html" rel="next">
+<link href="../pages/14_alpha_diversity.html" rel="prev">
+<link href="../assets/favicon.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+</head>
+<body class="nav-sidebar docked slimcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../pages/10_manipulation.html">Focus topics</a></li><li class="breadcrumb-item"><a href="../pages/20_beta_diversity.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Community Similarity</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Orchestrating Microbiome Analysis</a> 
+        <div class="sidebar-tools-main">
+    <div class="dropdown">
+      <a href="" title="" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label=""><i class="bi bi-git"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+<li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://github.com/microbiome/OMA/">
+            Source Code
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://microbiome.github.io/OMA/docs/devel/">
+            Browse version `devel`
+            </a>
+          </li>
+      </ul>
+</div>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/01_intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preamble</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">OMA ecosystem</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/06_packages.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Packages</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/04_containers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Microbiome Data</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Focus topics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/10_manipulation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Data Manipulation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/12_quality_control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Exploration and Quality Control</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/11_taxonomic_information.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Taxonomic Information</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/14_alpha_diversity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Community Diversity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/20_beta_diversity.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Community Similarity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/21_microbiome_community.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Community Composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/24_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Community Typing (Clustering)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/30_differential_abundance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Differential Abundance</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/60_network_learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Network learning and analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/61_network_comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Network comparison</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/40_machine_learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Machine Learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/23_multi-assay_analyses.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Multi-Assay Analyses</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/19_visualization_techniques.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Visualization</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Training</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/80_training.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/95_resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Resources</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/98_exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Exercises</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/97_extra_materials.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Extra material</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/90_acknowledgments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Contributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/Session_info.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Session info</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li>
+<a href="#sec-unsupervised-ordination" id="toc-sec-unsupervised-ordination" class="nav-link active" data-scroll-target="#sec-unsupervised-ordination"><span class="header-section-number">7.1</span> Unsupervised ordination</a>
+  <ul class="collapse">
+<li><a href="#comparing-communities-by-beta-diversity-analysis" id="toc-comparing-communities-by-beta-diversity-analysis" class="nav-link" data-scroll-target="#comparing-communities-by-beta-diversity-analysis"><span class="header-section-number">7.1.1</span> Comparing communities by beta diversity analysis</a></li>
+  <li><a href="#sec-other-ord-methods" id="toc-sec-other-ord-methods" class="nav-link" data-scroll-target="#sec-other-ord-methods"><span class="header-section-number">7.1.2</span> Other ordination methods</a></li>
+  <li><a href="#explained-variance" id="toc-explained-variance" class="nav-link" data-scroll-target="#explained-variance"><span class="header-section-number">7.1.3</span> Explained variance</a></li>
+  </ul>
+</li>
+  <li><a href="#supervised-ordination" id="toc-supervised-ordination" class="nav-link" data-scroll-target="#supervised-ordination"><span class="header-section-number">7.2</span> Supervised ordination</a></li>
+  <li>
+<a href="#case-studies" id="toc-case-studies" class="nav-link" data-scroll-target="#case-studies"><span class="header-section-number">7.3</span> Case studies</a>
+  <ul class="collapse">
+<li><a href="#sec-dbrda-workflow" id="toc-sec-dbrda-workflow" class="nav-link" data-scroll-target="#sec-dbrda-workflow"><span class="header-section-number">7.3.1</span> Testing differences in community composition between sample groups</a></li>
+  <li><a href="#checking-the-homogeneity-condition" id="toc-checking-the-homogeneity-condition" class="nav-link" data-scroll-target="#checking-the-homogeneity-condition"><span class="header-section-number">7.3.2</span> Checking the homogeneity condition</a></li>
+  </ul>
+</li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">7.4</span> Summary</a></li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title"><span id="sec-community-similarity" class="quarto-section-identifier"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Community Similarity</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header><div class="cell" data-layout-align="center">
+<script>
+document.addEventListener("click", function (event) {
+    if (event.target.classList.contains("rebook-collapse")) {
+        event.target.classList.toggle("active");
+        var content = event.target.nextElementSibling;
+        if (content.style.display === "block") {
+            content.style.display = "none";
+        } else {
+            content.style.display = "block";
+        }
+    }
+})
+</script><style>
+.rebook-collapse {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.rebook-content {
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+  background-color: #f1f1f1;
+}
+</style>
+</div>
+<p>Beta diversity quantifies the dissimilarity between communities (multiple samples), as opposed to alpha diversity which focuses on variation within a community (one sample). In microbiome research, commonly used metrics of beta diversity include the Bray-Curtis index (for compositional data), Jaccard index (for presence/absence data, ignoring abundance information), Aitchison distance (Euclidean distance for clr transformed abundances, aiming to avoid the compositionality bias), and the Unifrac distance (that takes into account the phylogenetic tree information). Notably, only some of these measures are actual <em>distances</em>, as this is a mathematical concept whose definition is not satisfied by certain ecological measure, such as the Bray-Curtis index. Therefore, the terms dissimilarity and beta diversity are preferred.</p>
+<table class="table">
+<colgroup>
+<col style="width: 39%">
+<col style="width: 28%">
+<col style="width: 31%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: center;">Method description</th>
+<th style="text-align: center;">Assay type</th>
+<th style="text-align: center;">Beta diversity metric</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Quantitative profiling</td>
+<td style="text-align: center;">Absolute counts</td>
+<td style="text-align: center;">Bray-Curtis</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Relative profiling</td>
+<td style="text-align: center;">Relative abundances</td>
+<td style="text-align: center;">Bray-Curtis</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Aitchison distance</td>
+<td style="text-align: center;">Absolute counts</td>
+<td style="text-align: center;">Aitchison</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Aitchison distance</td>
+<td style="text-align: center;">clr</td>
+<td style="text-align: center;">Euclidean</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Robust Aitchison distance</td>
+<td style="text-align: center;">rclr</td>
+<td style="text-align: center;">Euclidean</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Presence/Absence similarity</td>
+<td style="text-align: center;">Relative abundances</td>
+<td style="text-align: center;">Jaccard</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Presence/Absence similarity</td>
+<td style="text-align: center;">Absolute counts</td>
+<td style="text-align: center;">Jaccard</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Phylogenetic distance</td>
+<td style="text-align: center;">Rarefied counts</td>
+<td style="text-align: center;">Unifrac</td>
+</tr>
+</tbody>
+</table>
+<p>In practice, beta diversity is usually represented as a <code>dist</code> object, a triangular matrix where the distance between each pair of samples is encoded by a specific cell. This distance matrix can then undergo ordination, which is an important ecological tool to reduce the dimensionality of data for a more efficient analysis and visualization. Ordination techniques aim to capture as much essential information from the data as possible and turn it into a lower dimensional representation. Dimension reduction is bound to lose information but commonly used ordination techniques can preserve relevant information of sample similarities in an optimal way, which is defined in different ways by different methods.</p>
+<p>Based on the type of algorithm, ordination methods in microbiome research can be generally divided in two categories: unsupervised and supervised ordination. The former includes Principal Coordinate Analysis (PCoA), Principal Component Analysis (PCA) and Uniform Manifold Approximation and Projection for Dimension Reduction (UMAP), whereas the latter is mainly represented by distance-based Redundancy Analysis (dbRDA). We will first discuss unsupervised ordination methods and then proceed to supervised ones.</p>
+<section id="sec-unsupervised-ordination" class="level2" data-number="7.1"><h2 data-number="7.1" class="anchored" data-anchor-id="sec-unsupervised-ordination">
+<span class="header-section-number">7.1</span> Unsupervised ordination</h2>
+<p>Unsupervised ordination methods variation in the data without additional information on covariates or other supervision of the model. Among the different approaches, Multi-Dimensional Scaling (MDS) and non-metric MDS (NMDS) can be regarded as the standard. They are jointly referred to as PCoA. For this demonstration we will analyse beta diversity in GlobalPatterns, and observe the variation between stool samples and those with a different origin.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/prep-tse_e8fb33764f33877afb662939c22711b2">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load mia and import sample dataset</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"GlobalPatterns"</span>, package <span class="op">=</span> <span class="st">"mia"</span><span class="op">)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">GlobalPatterns</span></span>
+<span></span>
+<span><span class="co"># Beta diversity metrics like Bray-Curtis are often applied to relabundances</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<span>                      assay.type <span class="op">=</span> <span class="st">"counts"</span>,</span>
+<span>                      method <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Other metrics like Aitchison to clr-transformed data</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<span>                      assay.type <span class="op">=</span> <span class="st">"relabundance"</span>,</span>
+<span>                      method <span class="op">=</span> <span class="st">"clr"</span>,</span>
+<span>                      pseudocount <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Add group information Feces yes/no</span></span>
+<span><span class="va">tse</span><span class="op">$</span><span class="va">Group</span> <span class="op">&lt;-</span> <span class="va">tse</span><span class="op">$</span><span class="va">SampleType</span> <span class="op">==</span> <span class="st">"Feces"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="comparing-communities-by-beta-diversity-analysis" class="level3" data-number="7.1.1"><h3 data-number="7.1.1" class="anchored" data-anchor-id="comparing-communities-by-beta-diversity-analysis">
+<span class="header-section-number">7.1.1</span> Comparing communities by beta diversity analysis</h3>
+<p>A typical comparison of community compositions starts with a visual representation of the groups by a 2D ordination. Then we estimate relative abundances and MDS ordination based on Bray-Curtis index between the groups, and visualize the results.</p>
+<p>In the following examples dissimilarity is calculated with the function supplied to the <code>FUN</code> argument. Several metrics of beta diversity are defined by the <code>vegdist</code> function of the vegan package, which is often used in this context. However, such custom functions created by the user also work, as long as they return a <code>dist</code> object. In either case, this function is then applied to calculate reduced dimensions via an ordination method, the results of which can be stored in the <code>reducedDim</code> slot of the TreeSE. This entire process is contained by the <code>runMDS</code> and <code>runNMDS</code> functions.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/runMDS_b7194bb743abd93f9d49526dbf564070">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package to plot reducedDim</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/">scater</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Run PCoA on relabundance assay with Bray-Curtis distances</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/runMDS.html">runMDS</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<span>              FUN <span class="op">=</span> <span class="fu">vegan</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/vegan/man/vegdist.html">vegdist</a></span>,</span>
+<span>              method <span class="op">=</span> <span class="st">"bray"</span>,</span>
+<span>              assay.type <span class="op">=</span> <span class="st">"relabundance"</span>,</span>
+<span>              name <span class="op">=</span> <span class="st">"MDS_bray"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Sample dissimilarity can be visualized on a lower-dimensional display (typically 2D) using the <code>plotReducedDim</code> function from the scater package. This also provides tools to incorporate additional information encoded by color, shape, size and other aesthetics. Can you find any difference between the groups?</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/plot-mds-bray-curtis_e890db711a56a5268cf7043a9f4564bb">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create ggplot object</span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"MDS_bray"</span>,</span>
+<span>                    colour_by <span class="op">=</span> <span class="st">"Group"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Calculate explained variance</span></span>
+<span><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDim</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"MDS_bray"</span><span class="op">)</span>, <span class="st">"eig"</span><span class="op">)</span></span>
+<span><span class="va">rel_eig</span> <span class="op">&lt;-</span> <span class="va">e</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">e</span><span class="op">[</span><span class="va">e</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Add explained variance for each axis</span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="va">p</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"PCoA 1 ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="va">rel_eig</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%"</span>, <span class="st">")"</span>, sep <span class="op">=</span> <span class="st">""</span><span class="op">)</span>,</span>
+<span>              y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"PCoA 2 ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="va">rel_eig</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%"</span>, <span class="st">")"</span>, sep <span class="op">=</span> <span class="st">""</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">p</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="20_beta_diversity_files/figure-html/plot-mds-bray-curtis-1.png" class="img-fluid figure-img" width="3000"></p>
+<figcaption class="figure-caption">MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset.</figcaption></figure>
+</div>
+</div>
+</div>
+<p>A few combinations of beta diversity metrics and assay types are typically used. For instance, Bray-Curtis dissimilarity and Euclidean distance are often applied to the relative abundance and the clr assays, respectively. Besides <strong>beta diversity metric</strong> and <strong>assay type</strong>, the <strong>PCoA algorithm</strong> is also a variable that should be considered. Below, we show how the choice of these three factors can affect the resulting lower-dimensional data.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/mds-nmds-comparison_a1428ab5a18ba46977c9e78f2a9eaf45">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Run NMDS on relabundance assay with Bray-Curtis distances</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/runNMDS.html">runNMDS</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<span>               FUN <span class="op">=</span> <span class="fu">vegan</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/vegan/man/vegdist.html">vegdist</a></span>,</span>
+<span>               method <span class="op">=</span> <span class="st">"bray"</span>,</span>
+<span>               assay.type <span class="op">=</span> <span class="st">"relabundance"</span>,</span>
+<span>               name <span class="op">=</span> <span class="st">"NMDS_bray"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Run MDS on clr assay with Aitchison distances</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/runMDS.html">runMDS</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<span>              FUN <span class="op">=</span> <span class="fu">vegan</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/vegan/man/vegdist.html">vegdist</a></span>,</span>
+<span>              method <span class="op">=</span> <span class="st">"euclidean"</span>,</span>
+<span>              assay.type <span class="op">=</span> <span class="st">"clr"</span>,</span>
+<span>              name <span class="op">=</span> <span class="st">"MDS_aitchison"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Run NMDS on clr assay with Euclidean distances</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/runNMDS.html">runNMDS</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<span>               FUN <span class="op">=</span> <span class="fu">vegan</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/vegan/man/vegdist.html">vegdist</a></span>,</span>
+<span>               method <span class="op">=</span> <span class="st">"euclidean"</span>,</span>
+<span>               assay.type <span class="op">=</span> <span class="st">"clr"</span>,</span>
+<span>               name <span class="op">=</span> <span class="st">"NMDS_aitchison"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Multiple ordination plots are combined into a multi-panel plot with the patchwork package, so that different methods can be compared to find similarities between them or select the most suitable one to visualize beta diversity in the light of the research question.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/unnamed-chunk-2_796c8a98aa624d030980cae24e27e0cf">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load package for multi-panel plotting</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com">patchwork</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Generate plots for all 4 reducedDims</span></span>
+<span><span class="va">plots</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"MDS_bray"</span>, <span class="st">"MDS_aitchison"</span>,</span>
+<span>                  <span class="st">"NMDS_bray"</span>, <span class="st">"NMDS_aitchison"</span><span class="op">)</span>,</span>
+<span>                <span class="va">plotReducedDim</span>,</span>
+<span>                object <span class="op">=</span> <span class="va">tse</span>,</span>
+<span>                colour_by <span class="op">=</span> <span class="st">"Group"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Generate multi-panel plot</span></span>
+<span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_plots.html">wrap_plots</a></span><span class="op">(</span><span class="va">plots</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html">plot_layout</a></span><span class="op">(</span>guides <span class="op">=</span> <span class="st">"collect"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="20_beta_diversity_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="3000"></p>
+<figcaption class="figure-caption">Comparison of MDS and NMDS plots based on the Bray-Curtis or Aitchison distances on the GlobalPattern dataset.</figcaption></figure>
+</div>
+</div>
+</div>
+<p>The <em>Unifrac</em> method is a special case, as it requires data on the relationship of features in form on a <code>phylo</code> tree. <code>calculateUnifrac</code> performs the calculation to return a <code>dist</code> object, which can again be used within <code>runMDS</code>.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/plot-unifrac_632ab6d7676c3112060e4666af78c264">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/runMDS.html">runMDS</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<span>              FUN <span class="op">=</span> <span class="fu">mia</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/mia/man/calculateUnifrac.html">calculateUnifrac</a></span>,</span>
+<span>              name <span class="op">=</span> <span class="st">"Unifrac"</span>,</span>
+<span>              tree <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-accessor.html">rowTree</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span>,</span>
+<span>              ntop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span>,</span>
+<span>              assay.type <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"Unifrac"</span>,</span>
+<span>               colour_by <span class="op">=</span> <span class="st">"Group"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="20_beta_diversity_files/figure-html/plot-unifrac-1.png" class="img-fluid figure-img" width="3000"></p>
+<figcaption class="figure-caption">Unifrac distances scaled by MDS of the GlobalPattern dataset.</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="sec-other-ord-methods" class="level3" data-number="7.1.2"><h3 data-number="7.1.2" class="anchored" data-anchor-id="sec-other-ord-methods">
+<span class="header-section-number">7.1.2</span> Other ordination methods</h3>
+<p>Other dimension reduction methods, such as PCA and UMAP, are inherited from the scater package.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/plot-pca_50ce3e1d0d7cff69650674e6f5650ae2">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocSingular/man/runPCA.html">runPCA</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<span>              name <span class="op">=</span> <span class="st">"PCA"</span>,</span>
+<span>              assay.type <span class="op">=</span> <span class="st">"counts"</span>,</span>
+<span>              ncomponents <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"PCA"</span>,</span>
+<span>               colour_by <span class="op">=</span> <span class="st">"Group"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="20_beta_diversity_files/figure-html/plot-pca-1.png" class="img-fluid figure-img" width="3000"></p>
+<figcaption class="figure-caption">PCA plot on the GlobalPatterns data set containing sample from different sources.</figcaption></figure>
+</div>
+</div>
+</div>
+<p>As mentioned before, applicability of the different methods depends on your sample set and research question.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/plot-umap_4107b69413af32fd0b06f3c033ca4880">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/runUMAP.html">runUMAP</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<span>               name <span class="op">=</span> <span class="st">"UMAP"</span>,</span>
+<span>               assay.type <span class="op">=</span> <span class="st">"counts"</span>,</span>
+<span>               ncomponents <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"UMAP"</span>,</span>
+<span>               colour_by <span class="op">=</span> <span class="st">"Group"</span>,</span>
+<span>               ncomponents <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="20_beta_diversity_files/figure-html/plot-umap-1.png" class="img-fluid figure-img" width="3000"></p>
+<figcaption class="figure-caption">UMAP plot on the GlobalPatterns data set containing sample from different sources.</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="explained-variance" class="level3" data-number="7.1.3"><h3 data-number="7.1.3" class="anchored" data-anchor-id="explained-variance">
+<span class="header-section-number">7.1.3</span> Explained variance</h3>
+<p>The percentage of explained variance is typically shown for PCA ordination plots. This quantifies the proportion of overall variance in the data that is captured by the PCA axes, or how well the ordination axes reflect the original distances.</p>
+<p>Sometimes a similar measure is shown for MDS/PCoA. The interpretation is generally different, however, and hence we do not recommend using it. PCA is a special case of PCoA with Euclidean distances. With non-Euclidean dissimilarities PCoA uses a trick where the pointwise dissimilarities are first cast into similarities in a Euclidean space (with some information loss i.e.&nbsp;stress) and then projected to the maximal variance axes. In this case, the maximal variance axes do not directly reflect the correspondence of the projected distances and original distances, as they do for PCA.</p>
+<p>In typical use cases, we would like to know how well the ordination reflects the original similarity structures; then the quantity of interest is the so-called “stress” function, which measures the difference in pairwise similarities between the data points in the original (high-dimensional) vs.&nbsp;projected (low-dimensional) space.</p>
+<p>Hence, we propose that for PCoA and other ordination methods, users would report relative stress, which varies in the unit interval and is better if smaller. This can be calculated as shown below.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/relstress_15425b921a265215a62a2013d277e0ef">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load vegan package</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/vegandevs/vegan">vegan</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Quantify dissimilarities in the original feature space</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"relabundance"</span><span class="op">)</span> <span class="co"># Pick relabunance assay separately</span></span>
+<span><span class="va">d0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/vegan/man/vegdist.html">vegdist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="st">"bray"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># PCoA Ordination</span></span>
+<span><span class="va">pcoa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cmdscale.html">cmdscale</a></span><span class="op">(</span><span class="va">d0</span>, k <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">pcoa</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PCoA1"</span>, <span class="st">"PCoA2"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Quantify dissimilarities in the ordination space</span></span>
+<span><span class="va">dp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/dist.html">dist</a></span><span class="op">(</span><span class="va">pcoa</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Calculate stress i.e. relative difference in the original and</span></span>
+<span><span class="co"># projected dissimilarities</span></span>
+<span><span class="va">stress</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">dp</span> <span class="op">-</span> <span class="va">d0</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">d0</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>A Shepard plot visualizes the original versus the ordinated dissimilarity between the observations.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/shepard_f9a5ddb088f84ccc0e19365027097e43">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html">as.vector</a></span><span class="op">(</span><span class="va">d0</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>d0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html">as.vector</a></span><span class="op">(</span><span class="va">d0</span><span class="op">)</span><span class="op">[</span><span class="va">ord</span><span class="op">]</span>,</span>
+<span>                 dmds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html">as.vector</a></span><span class="op">(</span><span class="va">dp</span><span class="op">)</span><span class="op">[</span><span class="va">ord</span><span class="op">]</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">d0</span>, y <span class="op">=</span> <span class="va">dmds</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>    </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Shepard plot"</span>,</span>
+<span>       x <span class="op">=</span> <span class="st">"Original distance"</span>,</span>
+<span>       y <span class="op">=</span> <span class="st">"MDS distance"</span>,   </span>
+<span>       subtitle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"Stress:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">stress</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="20_beta_diversity_files/figure-html/shepard-1.png" class="img-fluid figure-img" width="3000"></p>
+</figure>
+</div>
+</div>
+</div>
+</section></section><section id="supervised-ordination" class="level2" data-number="7.2"><h2 data-number="7.2" class="anchored" data-anchor-id="supervised-ordination">
+<span class="header-section-number">7.2</span> Supervised ordination</h2>
+<p>dbRDA is a supervised counterpart of PCoA, that is, it takes into account the covariates specified by the user to maximize the variance with respect to the them. The result shows how much each covariate affects beta diversity. The table below illustrates the relation between supervised and unsupervised ordination methods.</p>
+<table class="table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 31%">
+<col style="width: 34%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: center;"></th>
+<th style="text-align: center;">supervised ordination</th>
+<th style="text-align: center;">unsupervised ordination</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Euclidean distance</td>
+<td style="text-align: center;">RDA</td>
+<td style="text-align: center;">PCA</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">non-Euclidean distance</td>
+<td style="text-align: center;">dbRDA</td>
+<td style="text-align: center;">PCoA/MDS, NMDS and UMAP</td>
+</tr>
+</tbody>
+</table>
+<p>We demonstrate the usage of dbRDA with the enterotype dataset, where samples correspond to patients. The colData contains the clinical status of each patient and a few covariates such as their gender and age.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/import-rda-dataset_b0388124be21bf4b88421e250a0fdd99">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"enterotype"</span>, package <span class="op">=</span> <span class="st">"mia"</span><span class="op">)</span></span>
+<span><span class="va">tse2</span> <span class="op">&lt;-</span> <span class="va">enterotype</span></span>
+<span></span>
+<span><span class="co"># Apply relative transform</span></span>
+<span><span class="va">tse2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse2</span>,</span>
+<span>                       method <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>dbRDA can be perfomed with the <code>runRDA</code> function. In addition to the arguments previously defined for <a href="#unsupervised-ordination">unsupervised ordination</a>, this function takes a formula to control for variables and an action to treat missing values. Along with clinical status, which is the main outcome, we control for gender and age, and exclude observations where one of these variables is missing.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/run-rda_31c6354f429eada80f7cf0da146f7638">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Perform RDA</span></span>
+<span><span class="va">tse2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/runCCA.html">runRDA</a></span><span class="op">(</span><span class="va">tse2</span>,</span>
+<span>               assay.type <span class="op">=</span> <span class="st">"relabundance"</span>,</span>
+<span>               formula <span class="op">=</span> <span class="va">assay</span> <span class="op">~</span> <span class="va">ClinicalStatus</span> <span class="op">+</span> <span class="va">Gender</span> <span class="op">+</span> <span class="va">Age</span>,</span>
+<span>               distance <span class="op">=</span> <span class="st">"bray"</span>,</span>
+<span>               na.action <span class="op">=</span> <span class="va">na.exclude</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Store results of PERMANOVA test</span></span>
+<span><span class="va">rda_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDim</a></span><span class="op">(</span><span class="va">tse2</span>, <span class="st">"RDA"</span><span class="op">)</span>, <span class="st">"significance"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The importance of each variable on the similarity between samples can be assessed from the results of PERMANOVA, automatically provided by the <code>runRDA</code> function. We see that both clinical status and age explain more than 10% of the variance, but only age shows statistical significance.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/rda-permanova-res_1192bb076653ebffd4699478bd11d150">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">rda_info</span><span class="op">$</span><span class="va">permanova</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 4%">
+<col style="width: 12%">
+<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 20%">
+<col style="width: 25%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Df</th>
+<th style="text-align: right;">SumOfSqs</th>
+<th style="text-align: right;">F</th>
+<th style="text-align: right;">Pr(&gt;F)</th>
+<th style="text-align: right;">Total variance</th>
+<th style="text-align: right;">Explained variance</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Model</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1.1157</td>
+<td style="text-align: right;">1.940</td>
+<td style="text-align: right;">0.030</td>
+<td style="text-align: right;">3.991</td>
+<td style="text-align: right;">0.2795</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ClinicalStatus</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.5837</td>
+<td style="text-align: right;">1.522</td>
+<td style="text-align: right;">0.135</td>
+<td style="text-align: right;">3.991</td>
+<td style="text-align: right;">0.1463</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Gender</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.1679</td>
+<td style="text-align: right;">1.751</td>
+<td style="text-align: right;">0.112</td>
+<td style="text-align: right;">3.991</td>
+<td style="text-align: right;">0.0421</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Age</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.5245</td>
+<td style="text-align: right;">5.471</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">3.991</td>
+<td style="text-align: right;">0.1314</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Residual</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">2.8757</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">3.991</td>
+<td style="text-align: right;">0.7205</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>To ensure that the homogeneity assumption holds, we retrieve the corresponding information from the results of RDA. In this case, none of the p-values is lower than the significance threshold, and thus homogeneity is observed.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/rda-homogeneity-res_6bfd0386bf01cca0a3e34fba5a9c909c">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">rda_info</span><span class="op">$</span><span class="va">homogeneity</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 3%">
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 8%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 16%">
+<col style="width: 21%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Df</th>
+<th style="text-align: right;">Sum Sq</th>
+<th style="text-align: right;">Mean Sq</th>
+<th style="text-align: right;">F</th>
+<th style="text-align: right;">N.Perm</th>
+<th style="text-align: right;">Pr(&gt;F)</th>
+<th style="text-align: right;">Total variance</th>
+<th style="text-align: right;">Explained variance</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">ClinicalStatus</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.2511</td>
+<td style="text-align: right;">0.0628</td>
+<td style="text-align: right;">2.7440</td>
+<td style="text-align: right;">999</td>
+<td style="text-align: right;">0.109</td>
+<td style="text-align: right;">1.0288</td>
+<td style="text-align: right;">0.2440</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Gender</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.0103</td>
+<td style="text-align: right;">0.0103</td>
+<td style="text-align: right;">0.4158</td>
+<td style="text-align: right;">999</td>
+<td style="text-align: right;">0.512</td>
+<td style="text-align: right;">0.9283</td>
+<td style="text-align: right;">0.0111</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Age</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.3272</td>
+<td style="text-align: right;">0.0113</td>
+<td style="text-align: right;">17.0255</td>
+<td style="text-align: right;">999</td>
+<td style="text-align: right;">0.439</td>
+<td style="text-align: right;">0.3319</td>
+<td style="text-align: right;">0.9860</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Next, we proceed to visualize the weight and significance of each variable on the similarity between samples with an RDA plot, which can be generated with the <code>plotRDA</code> function from the miaViz package.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/plot-rda_39f7d3af008f54d2c0254c717d0be5be">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load packages for plotting function</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">miaViz</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Generate RDA plot coloured by clinical status</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/miaViz/man/plotCCA.html">plotRDA</a></span><span class="op">(</span><span class="va">tse2</span>, <span class="st">"RDA"</span>, colour_by <span class="op">=</span> <span class="st">"ClinicalStatus"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="20_beta_diversity_files/figure-html/plot-rda-1.png" class="img-fluid figure-img" width="3000"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>From the plot above, we can see that only age significantly describes differences between the microbial profiles of different samples. Such visual approach complements the previous results of PERMANOVA.</p>
+</section><section id="case-studies" class="level2 page-columns page-full" data-number="7.3"><h2 data-number="7.3" class="anchored" data-anchor-id="case-studies">
+<span class="header-section-number">7.3</span> Case studies</h2>
+<section id="sec-pcoa-genus" class="level4 page-columns page-full" data-number="7.3.0.1"><h4 data-number="7.3.0.1" class="anchored" data-anchor-id="sec-pcoa-genus">
+<span class="header-section-number">7.3.0.1</span> Visualizing the most dominant genus on PCoA</h4>
+<p>In this section, we visualize the most dominant genus on PCoA. A similar visualization was proposed by <span class="citation" data-cites="Salosensaari2021">(<a href="#ref-Salosensaari2021" role="doc-biblioref">2021</a>)</span>. First, we agglomerate the data at the Genus level and get the dominant taxa per sample.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-Salosensaari2021" class="csl-entry" role="listitem">
+Salosensaari, Aaro, Ville Laitinen, Aki Havulinna, Guillaume Méric, Susan Cheng, Markus Perola, Liisa Valsta, et al. 2021. <span>“Taxonomic Signatures of Cause-Specific Mortality Risk in Human Gut Microbiome.”</span> <em>Nature Communications</em> 12: 1–8. <a href="https://www.nature.com/articles/s41467-021-22962-y">https://www.nature.com/articles/s41467-021-22962-y</a>.
+</div></div><div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/unnamed-chunk-3_9080f7091817ee39376bb5314595e5eb">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Agglomerate to genus level</span></span>
+<span><span class="va">tse_genus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">mergeFeaturesByRank</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<span>                                 rank <span class="op">=</span> <span class="st">"Genus"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Convert to relative abundances</span></span>
+<span><span class="va">tse_genus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<span>                            method <span class="op">=</span> <span class="st">"relabundance"</span>,</span>
+<span>                            assay.type <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Add info on dominant genus per sample</span></span>
+<span><span class="va">tse_genus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/perSampleDominantTaxa.html">addPerSampleDominantFeatures</a></span><span class="op">(</span><span class="va">tse_genus</span>,</span>
+<span>                                          assay.type <span class="op">=</span> <span class="st">"relabundance"</span>,</span>
+<span>                                          name <span class="op">=</span> <span class="st">"dominant_taxa"</span><span class="op">)</span></span>
+<span><span class="co"># Overview</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/mia/man/summaries.html">countDominantFeatures</a></span><span class="op">(</span><span class="va">tse_genus</span>, rank <span class="op">=</span> <span class="st">"Genus"</span>, digits <span class="op">=</span> <span class="fl">3</span>, name <span class="op">=</span> <span class="st">"dominant_taxa"</span><span class="op">)</span></span>
+<span><span class="co">##  # A tibble: 17 × 3</span></span>
+<span><span class="co">##    dominant_taxa                n rel_freq</span></span>
+<span><span class="co">##    &lt;chr&gt;                    &lt;int&gt;    &lt;dbl&gt;</span></span>
+<span><span class="co">##  1 Genus:Bacteroides            5    0.192</span></span>
+<span><span class="co">##  2 Order:Stramenopiles          4    0.154</span></span>
+<span><span class="co">##  3 Family:Desulfobulbaceae      2    0.077</span></span>
+<span><span class="co">##  4 Genus:Streptococcus          2    0.077</span></span>
+<span><span class="co">##  5 Class:Chloracidobacteria     1    0.038</span></span>
+<span><span class="co">##  6 Family:ACK-M1                1    0.038</span></span>
+<span><span class="co">##  # ℹ 11 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, we perform PCoA with Bray-Curtis dissimilarity.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/unnamed-chunk-4_34dd22ac641e67bc68093e09627f0a21">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse_genus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/runMDS.html">runMDS</a></span><span class="op">(</span><span class="va">tse_genus</span>,</span>
+<span>                    FUN <span class="op">=</span> <span class="fu">vegan</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/vegan/man/vegdist.html">vegdist</a></span>,</span>
+<span>                    name <span class="op">=</span> <span class="st">"PCoA_BC"</span>,</span>
+<span>                    assay.type <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Finally, we get the top taxa and and visualize their abundances on PCoA. Note that A 3D interactive version of the plot below can be found in <a href="97_extra_materials.html"><span>Appendix&nbsp;A</span></a>.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/unnamed-chunk-5_acc856c074d12456b4da292bb9fd8e0e">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Getting the top taxa</span></span>
+<span><span class="va">top_taxa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/summaries.html">getTopFeatures</a></span><span class="op">(</span><span class="va">tse_genus</span>,</span>
+<span>                           top <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>                           assay.type <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Naming all the rest of non top-taxa as "Other"</span></span>
+<span><span class="va">most_abundant</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse_genus</span><span class="op">)</span><span class="op">$</span><span class="va">dominant_taxa</span>,</span>
+<span>                        <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span><span class="kw">if</span> <span class="op">(</span><span class="va">x</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="va">top_taxa</span><span class="op">)</span> <span class="op">{</span><span class="va">x</span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span><span class="st">"Other"</span><span class="op">}</span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Storing the previous results as a new column within colData</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse_genus</span><span class="op">)</span><span class="op">$</span><span class="va">most_abundant</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">most_abundant</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Calculating percentage of the most abundant</span></span>
+<span><span class="va">most_abundant_freq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">most_abundant</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">most_abundant_percent</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">most_abundant_freq</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">most_abundant_freq</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Retrieving the explained variance</span></span>
+<span><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDim</a></span><span class="op">(</span><span class="va">tse_genus</span>, <span class="st">"PCoA_BC"</span><span class="op">)</span>, <span class="st">"eig"</span><span class="op">)</span></span>
+<span><span class="va">var_explained</span> <span class="op">&lt;-</span> <span class="va">e</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">e</span><span class="op">[</span><span class="va">e</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span></span>
+<span></span>
+<span><span class="co"># Define colors for visualization</span></span>
+<span><span class="va">my_colors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="st">"blue"</span>, <span class="st">"lightblue"</span>, <span class="st">"darkgray"</span>, <span class="st">"magenta"</span>, <span class="st">"darkgreen"</span>, <span class="st">"red"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Visualization</span></span>
+<span><span class="va">plot</span> <span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">tse_genus</span>, <span class="st">"PCoA_BC"</span>,</span>
+<span>                      colour_by <span class="op">=</span> <span class="st">"most_abundant"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html">scale_colour_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">my_colors</span>,</span>
+<span>                      labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">most_abundant_percent</span><span class="op">)</span>, <span class="st">"("</span>, <span class="va">most_abundant_percent</span>, <span class="st">"%)"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"PC 1 ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">var_explained</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%)"</span><span class="op">)</span>,</span>
+<span>       y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"PC 2 ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">var_explained</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%)"</span><span class="op">)</span>,</span>
+<span>       color <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">plot</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="20_beta_diversity_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="3000"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Similarly, we visualize and compare the sub-population.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/unnamed-chunk-6_9e55c969dc1de4411c49f4ce7dc81c4e">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculating the frequencies and percentages for both categories</span></span>
+<span><span class="va">freq_TRUE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">most_abundant</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse_genus</span><span class="op">)</span><span class="op">$</span><span class="va">Group</span> <span class="op">==</span> <span class="cn">TRUE</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">freq_FALSE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">most_abundant</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse_genus</span><span class="op">)</span><span class="op">$</span><span class="va">Group</span> <span class="op">==</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">percent_TRUE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">freq_TRUE</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">freq_TRUE</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">percent_FALSE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">freq_FALSE</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">freq_FALSE</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Visualization</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">tse_genus</span><span class="op">[</span> , <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse_genus</span><span class="op">)</span><span class="op">$</span><span class="va">Group</span> <span class="op">==</span> <span class="cn">TRUE</span><span class="op">]</span>, <span class="st">"PCoA_BC"</span>,</span>
+<span>               colour_by <span class="op">=</span> <span class="st">"most_abundant"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html">scale_colour_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">my_colors</span>,</span>
+<span>                      labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">percent_TRUE</span><span class="op">)</span>, <span class="st">"("</span>, <span class="va">percent_TRUE</span>, <span class="st">"%)"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"PC 1 ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">var_explained</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%)"</span><span class="op">)</span>,</span>
+<span>       y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"PC 2 ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">var_explained</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%)"</span><span class="op">)</span>,</span>
+<span>       title <span class="op">=</span> <span class="st">"Group = TRUE"</span>, color <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="20_beta_diversity_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="3000"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">tse_genus</span><span class="op">[</span> , <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse_genus</span><span class="op">)</span><span class="op">$</span><span class="va">Group</span> <span class="op">==</span> <span class="cn">FALSE</span><span class="op">]</span>, <span class="st">"PCoA_BC"</span>,</span>
+<span>               colour_by <span class="op">=</span> <span class="st">"most_abundant"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html">scale_colour_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="va">my_colors</span>,</span>
+<span>                      labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">percent_FALSE</span><span class="op">)</span>, <span class="st">"("</span>, <span class="va">percent_FALSE</span>, <span class="st">"%)"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"PC 1 ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">var_explained</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%)"</span><span class="op">)</span>,</span>
+<span>       y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"PC 2 ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">var_explained</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%)"</span><span class="op">)</span>,</span>
+<span>       title <span class="op">=</span> <span class="st">"Group = FALSE"</span>, color <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="20_beta_diversity_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid figure-img" width="3000"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="sec-dbrda-workflow" class="level3 page-columns page-full" data-number="7.3.1"><h3 data-number="7.3.1" class="anchored" data-anchor-id="sec-dbrda-workflow">
+<span class="header-section-number">7.3.1</span> Testing differences in community composition between sample groups</h3>
+<p>Permutational Analysis of Variance (PERMANOVA; <span class="citation" data-cites="Anderson2001">(<a href="#ref-Anderson2001" role="doc-biblioref">2001</a>)</span>) is a widely used non-parametric multivariate method that aims to estimate the actual statistical significance of differences in the observed community composition between two groups of samples.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-Anderson2001" class="csl-entry" role="listitem">
+Anderson, Marti J. 2001. <span>“A New Method for Non-Parametric Multivariate Analysis of Variance.”</span> <em>Austral Ecology</em> 26 (1): 32–46. <a href="https://doi.org/10.1111/j.1442-9993.2001.01070.pp.x">https://doi.org/10.1111/j.1442-9993.2001.01070.pp.x</a>.
+</div></div><p>PERMANOVA tests the hypothesis that the centroids and dispersion of the community are equivalent between the compared groups. A p-value smaller than the significance threshold indicates that the groups have a different community composition. This method is implemented with the <a href="https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis"><code>adonis2</code></a> function from the vegan package.</p>
+<p>By default, the argument <code>by</code> is set to <code>"terms"</code>, in which the order of variables in the formula matters. In this case, each variable is analyzed sequentially, and the result is different when more than 1 variable is introduced and their order differs. Therefore, it is recommended to set <code>by = "margin"</code>, which specifies that the marginal effect of each variable is analyzed individually. You can view a comparison between the two designs in chapter <a href="97_extra_materials.html#sec-compare-permanova"><span>Section&nbsp;A.2</span></a>.</p>
+<p>We can perform PERMANOVA either with <code>adonis2</code> function or by first performing dbRDA and then applying permutational test its results. An advantage of the latter approach is that by doing so we can get coefficients: how much each taxa affects the variation between communities.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/unnamed-chunk-7_e6f9e862b08a09180a72a6868a79846b">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Agglomerate data to Species level</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">mergeFeaturesByRank</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<span>                           rank <span class="op">=</span> <span class="st">"Species"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Set seed for reproducibility</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1576</span><span class="op">)</span></span>
+<span><span class="co"># We choose 99 random permutations. Consider applying more (999 or 9999) in your</span></span>
+<span><span class="co"># analysis. </span></span>
+<span><span class="va">permanova</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/vegan/man/adonis.html">adonis2</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"relabundance"</span><span class="op">)</span><span class="op">)</span> <span class="op">~</span> <span class="va">Group</span>,</span>
+<span>                     by <span class="op">=</span> <span class="st">"margin"</span>, <span class="co"># each term (here only 'Group') analyzed individually</span></span>
+<span>                     data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span>,</span>
+<span>                     method <span class="op">=</span> <span class="st">"euclidean"</span>,</span>
+<span>                     permutations <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Set seed for reproducibility</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1576</span><span class="op">)</span></span>
+<span><span class="co"># Perform dbRDA</span></span>
+<span><span class="va">dbrda</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/vegan/man/capscale.html">dbrda</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span>,<span class="st">"relabundance"</span><span class="op">)</span><span class="op">)</span> <span class="op">~</span> <span class="va">Group</span>, </span>
+<span>               data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># Perform permutational analysis</span></span>
+<span><span class="va">permanova2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/vegan/man/anova.cca.html">anova.cca</a></span><span class="op">(</span><span class="va">dbrda</span>,</span>
+<span>                        by <span class="op">=</span> <span class="st">"margin"</span>, <span class="co"># each term (here only 'Group') analyzed individually</span></span>
+<span>                        method <span class="op">=</span> <span class="st">"euclidean"</span>,</span>
+<span>                        permutations <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Get p-values</span></span>
+<span><span class="va">p_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">permanova</span><span class="op">[</span><span class="st">"Group"</span>, <span class="st">"Pr(&gt;F)"</span><span class="op">]</span>, <span class="va">permanova2</span><span class="op">[</span><span class="st">"Group"</span>, <span class="st">"Pr(&gt;F)"</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">p_values</span> <span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">p_values</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">p_values</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"adonis2"</span>, <span class="st">"dbRDA+anova.cca"</span><span class="op">)</span></span>
+<span><span class="va">p_values</span></span>
+<span><span class="co">##                  p_values</span></span>
+<span><span class="co">##  adonis2             0.02</span></span>
+<span><span class="co">##  dbRDA+anova.cca     0.02</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>As we can see, the community composition is significantly different between the groups (p &lt; 0.05), and these two methods give equal p-values.</p>
+<p>Let us visualize the model coefficients for species that exhibit the largest differences between the groups. This gives some insights into how the groups tend to differ from each other in terms of community composition.</p>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/unnamed-chunk-8_6c2dc7800026627cf0b22b9dc67b7a26">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add taxa info</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/vegan/man/sppscores.html">sppscores</a></span><span class="op">(</span><span class="va">dbrda</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"relabundance"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># Get coefficients</span></span>
+<span><span class="va">coef</span> <span class="op">&lt;-</span> <span class="va">dbrda</span><span class="op">$</span><span class="va">CCA</span><span class="op">$</span><span class="va">v</span></span>
+<span><span class="co"># Get the taxa with biggest weights</span></span>
+<span><span class="va">top.coef</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">coef</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/rev.html">rev</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">coef</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>, <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="co"># Sort weights in increasing order</span></span>
+<span><span class="va">top.coef</span> <span class="op">&lt;-</span> <span class="va">top.coef</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="va">top.coef</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="co"># Get top names</span></span>
+<span><span class="va">top_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">top.coef</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">top.coef</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/plot-top-coef-anova_48415148ac9ad768bdec642e676e9169">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">top.coef</span>,</span>
+<span>                 y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">top.coef</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">top.coef</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html">geom_bar</a></span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, y<span class="op">=</span> <span class="st">""</span>, title <span class="op">=</span> <span class="st">"Top Taxa"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="20_beta_diversity_files/figure-html/plot-top-coef-anova-1.png" class="img-fluid figure-img" width="3000"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In the example above, the largest differences between the two groups can be attributed to <em>Genus:Bacteroides</em> (elevated in the first group) and <em>Family:Ruminococcaceae</em> (elevated in the second group), and many other co-varying species.</p>
+</section><section id="checking-the-homogeneity-condition" class="level3 page-columns page-full" data-number="7.3.2"><h3 data-number="7.3.2" class="anchored" data-anchor-id="checking-the-homogeneity-condition">
+<span class="header-section-number">7.3.2</span> Checking the homogeneity condition</h3>
+<p>It is important to note that the application of PERMANOVA assumes homogeneous group dispersions (variances). This can be tested with the PERMDISP2 method <span class="citation" data-cites="Anderson2006">(<a href="#ref-Anderson2006" role="doc-biblioref">Anderson 2006</a>)</span> by using the same assay and distance method than in PERMANOVA.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-Anderson2006" class="csl-entry" role="listitem">
+———. 2006. <span>“Distance-Based Tests for Homogeneity of Multivariate Dispersions.”</span> <em>Biometrics</em> 62: 245–53. <a href="https://doi.org/10.1111/j.1541-0420.2005.00440.x">https://doi.org/10.1111/j.1541-0420.2005.00440.x</a>.
+</div></div><div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/unnamed-chunk-9_2ca5bfec8feb5e2cb1fd1be440821518">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/anova.html">anova</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/vegan/man/betadisper.html">betadisper</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/vegan/man/vegdist.html">vegdist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"counts"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">$</span><span class="va">Group</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">##  Analysis of Variance Table</span></span>
+<span><span class="co">##  </span></span>
+<span><span class="co">##  Response: Distances</span></span>
+<span><span class="co">##            Df Sum Sq Mean Sq F value  Pr(&gt;F)    </span></span>
+<span><span class="co">##  Groups     1 0.2385  0.2385     103 3.6e-10 ***</span></span>
+<span><span class="co">##  Residuals 24 0.0554  0.0023                    </span></span>
+<span><span class="co">##  ---</span></span>
+<span><span class="co">##  Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>If the groups have similar dispersion, PERMANOVA can be seen as an appropriate choice for comparing community compositions.</p>
+</section></section><section id="summary" class="level2" data-number="7.4"><h2 data-number="7.4" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">7.4</span> Summary</h2>
+<p>As a final note, we provide a comprehensive list of functions for the evaluation of dissimilarity indices available in the mia and scater packages. The <code>calculate</code> methods return a reducedDim object as an output, whereas the <code>run</code> methods store the reducedDim object into the specified TreeSE.</p>
+<ul>
+<li>Canonical Correspondence Analysis (CCA): <code>calculateCCA</code> and <code>runCCA</code>
+</li>
+<li>dbRDA: <code>calculateRDA</code> and <code>runRDA</code>
+</li>
+<li>Double Principal Coordinate Analysis (DPCoA): <code>calculateDPCoA</code> and <code>runDPCoA</code>
+</li>
+<li>Jensen-Shannon Divergence (JSD): <code>calculateJSD</code> and <code>runJSD</code>
+</li>
+<li>MDS: <code>calculateMDS</code> and <code>runMDS</code>
+</li>
+<li>NMDS: <code>calculateNMDS</code> and <code>runNMDS</code>
+</li>
+<li>Overlap: <code>calculateOverlap</code> and <code>runOverlap</code>
+</li>
+<li>t-distributed Stochastic Neighbor Embedding (t-SNE): <code>calculateTSNE</code> and <code>runTSNE</code>
+</li>
+<li>UMAP: <code>calculateUMAP</code> and <code>runUMAP</code>
+</li>
+</ul>
+<p>For more information on clustering samples by beta diversity, you can refer to:</p>
+<ul>
+<li>
+<a href="http://bioconductor.org/books/release/OSCA/clustering.html">How to extract information from clusters</a><br>
+</li>
+<li>Chapter <a href="24_clustering.html"><span>Chapter&nbsp;9</span></a> on community typing</li>
+</ul>
+
+
+
+</section><a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="../pages/14_alpha_diversity.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Community Diversity</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../pages/21_microbiome_community.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Community Composition</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left"><a href="./">Orchestrating Microbiome Analysis with Bioconductor</a></div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">This book was built with <a href="https://github.com/js2264/BiocBook/">BiocBook</a> with <span class="emoji" data-emoji="heart">❤️</span></div>
+  </div>
+</footer>
+
+
+</body></html>
