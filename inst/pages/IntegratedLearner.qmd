@@ -7,16 +7,34 @@ chapterPreamble()
 
 ## Multi-omics Integration
 
-In multiview data analysis, there are two main types of approaches: early fusion and late fusion. \underline{Early fusion} combines all datasets into a single representation, which then serves as input for a supervised learning model. In contrast, \underline{late fusion} builds individual models for each data view and combines their predictions using a second-level model as the final predictor. However, these traditional paradigms treat the data views in isolation and do not allow for interactions or dependencies between them. A more advanced method, called cooperative learning (Ding et al., 2022, \emph{PNAS}$^1$), which is also known as \underline{intermediate fusion}, combines the best of both worlds by encouraging predictions from different data views to align through an agreement parameter ($\rho$).
+In multiview data analysis, there are two main types of approaches: early fusion
+and late fusion. \underline{Early fusion} combines all datasets into a single
+representation, which then serves as input for a supervised learning model. In
+contrast, \underline{late fusion} builds individual models for each data view
+and combines their predictions using a second-level model as the final
+predictor. However, these traditional paradigms treat the data views in
+isolation and do not allow for interactions or dependencies between them. A more
+advanced method, called cooperative learning (Ding et al., 2022,
+\emph{PNAS}$^1$), which is also known as \underline{intermediate fusion},
+combines the best of both worlds by encouraging predictions from different data
+views to align through an agreement parameter ($\rho$).
 
 ## Multi-omics Prediction and Classification of Binary IBD Disease Status
 
-In this chapter, we showcase examples of various integration paradigms (early, late, and intermediate fusion) using the R packages `multiview`$^1$ and   `SuperLearner`$^2$. We make use of the publicly available source code from the multi-omics integrated framework (`IntegratedLearner`) proposed by Mallick et al. (2024)$^3$.
+In this chapter, we showcase examples of various integration paradigms (early,
+late, and intermediate fusion) using the R packages `multiview`$^1$ and
+`SuperLearner`$^2$. We make use of the publicly available source code from the
+multi-omics integrated framework (`IntegratedLearner`) proposed by Mallick et 
+al. (2024)$^3$.
 
 ## Input data
-We use the publicly available Inflammatory Bowel Diseases (IBD) data from the curatedMetagenomicData package (Lloyd-Price et al., 2019)$^4$, where we aim to predict IBD disease status based on both taxonomic (species abundances) and functional (pathway abundances) profiles.
 
-```{r message=FALSE, warning=FALSE}
+We use the publicly available Inflammatory Bowel Diseases (IBD) data from the 
+curatedMetagenomicData package (Lloyd-Price et al., 2019)$^4$, where we aim to 
+predict IBD disease status based on both taxonomic (species abundances) and 
+functional (pathway abundances) profiles.
+
+```{r message=FALSE, warning=FALSE load-pkg-data}
 
 #####################
 # Load example data #
@@ -24,31 +42,38 @@ We use the publicly available Inflammatory Bowel Diseases (IBD) data from the cu
 
 library(tidyverse)
 library(curatedMetagenomicData)
-library(curatedMetagenomicAnalyses)
 
 cond <- 'IBD'
-se_relative <-curatedMetagenomicAnalyses::makeSEforCondition(cond, 
-                                                             dataType = "relative_abundance",
-                                                             removestudies = c('HallAB_2017', 'IaniroG_2022', 'IjazUZ_2017', 'LiJ_2014', 'NielsenHB_2014', 'VilaAV_2018'))
-se_pathway <-curatedMetagenomicAnalyses::makeSEforCondition(cond, 
-                                                            dataType = "pathway_abundance",
-                                                            removestudies = c('HallAB_2017', 'IaniroG_2022', 'IjazUZ_2017', 'LiJ_2014', 'NielsenHB_2014', 'VilaAV_2018'))
+se_relative <- makeSEforCondition(
+  cond, 
+  dataType = "relative_abundance",
+  removestudies = c('HallAB_2017', 'IaniroG_2022', 'IjazUZ_2017', 'LiJ_2014', 'NielsenHB_2014', 'VilaAV_2018'))
+
+
+?curatedMetagenomicData
+
+
+
+se_pathway <- makeSEforCondition(
+  cond, 
+  dataType = "pathway_abundance",
+  removestudies = c('HallAB_2017', 'IaniroG_2022', 'IjazUZ_2017', 'LiJ_2014', 'NielsenHB_2014', 'VilaAV_2018'))
 
 ```
 
 We will first prepare the input sample metadata and feature table for both relative abundance and pathway abundance data.
 
-```{r}
+```{r prepare-metadata-feature}
 
 ##########################
 # Create sample metadata #
 ##########################
 
-sample_metadata <- dplyr::select(as.data.frame(colData(se_relative)), c("study_name", "disease", "subject_id"))
+sample_metadata <- select(as.data.frame(colData(se_relative)), c("study_name", "disease", "subject_id"))
 
 # Define response variable & sample id
 sample_metadata$Y <- ifelse(sample_metadata$disease == "IBD", 1, 0)
-sample_metadata<- sample_metadata %>% dplyr::select(subject_id, Y)%>% rename(subjectID = subject_id)
+sample_metadata<- sample_metadata %>% dplyr::select(subject_id, Y) %>% rename(subjectID = subject_id)
 
 ###########################
 # Create Species Features #
@@ -85,7 +110,7 @@ all(rownames(feature_table) == rownames(sample_metadata))
 
 We will then create a metadata table for the features. This table captures high-level information related to the features (e.g., which layer they belong to).
 
-```{r}
+```{r create-metadata-table}
 
 ######################################
 # Create metadata table for features #
@@ -106,7 +131,7 @@ all(colnames(feature_table) == rownames(sample_metadata)) # TRUE
 
 Further data pre-processing is necessary to handle near-zero-variance features in this dataset. Ultimately, 483 features are retained, consisting of 360 pathways and 123 species. A combination of variance and prevalence filtering is applied to the feature table, while related metadata is cleaned to ensure the retention of matching samples.
 
-```{r}
+```{r create-feature-table}
 
 library(caret)
 
@@ -139,9 +164,14 @@ all(colnames(feature_table) == rownames(sample_metadata)) # TRUE
 
 ```
 
-Following the preprocessing, we conduct additional input data preparation, which includes configuring parameters for sample splitting and 5-fold cross-validation. It's important to note that this dataset contains repeated measures (i.e., multiple samples per subject). To address this, we will conduct 5-fold cross-validation at the subject level. The source code is derived from the `IntegratedLearner` R package$^3$.
+Following the preprocessing, we conduct additional input data preparation,
+which includes configuring parameters for sample splitting and 5-fold
+cross-validation. It's important to note that this dataset contains repeated
+measures (i.e., multiple samples per subject). To address this, we will conduct
+5-fold cross-validation at the subject level. The source code is derived from
+the `IntegratedLearner` R package$^3$.
 
-```{r}
+```{r additional-data-preprocessing}
 # Set parameters and extract subject IDs for sample splitting
 seed <- 1
 set.seed(seed)
@@ -187,9 +217,13 @@ names(layer_wise_predictions_train) <- name_layers
 
 ```
 
-Next, we run the late fusion algorithm described in Mallick et al., 2024$^3$. To this end, we subset the data for each feature type and conduct the analysis on each layer for the first-stage learning to predict the outcome. In other words, we fit a machine learning algorithm per layer (called a 'base learner'), utilizing the SuperLearner R package.
+Next, we run the late fusion algorithm described in Mallick et al., 2024$^3$.
+To this end, we subset the data for each feature type and conduct the analysis
+on each layer for the first-stage learning to predict the outcome. In other
+words, we fit a machine learning algorithm per layer (called a 'base learner'),
+utilizing the SuperLearner R package.
 
-```{r}
+```{r late-fusion}
 
 ########################################################
 # Subset data per omics and run each individual layers #
@@ -231,9 +265,12 @@ for (i in seq_along(name_layers)){
 
 ```
 
-The next step of the analysis is to combine the layer-wise cross-validated predictions with a meta-model (meta_learner) to generate final predictions based on all available data points for the stacked model. Here, we will use `glmnet` as the meta-learner. However, other choices are also possible.
+The next step of the analysis is to combine the layer-wise cross-validated
+predictions with a meta-model (meta_learner) to generate final predictions
+based on all available data points for the stacked model. Here, we will use
+`glmnet` as the meta-learner. However, other choices are also possible.
 
-```{r}
+```{r layer-wise-cross-validated-prediction}
 ##############################
 # Prepare stacked input data #
 ##############################
@@ -270,9 +307,11 @@ SL_fit_stacked$X <- combo
 
 ```
 
-In contrast to late fusion, in early fusion, we will simply supply a combined representation of the data and we will use the `random forest` method for building an integrated prediction model.
+In contrast to late fusion, in early fusion, we will simply supply a combined 
+representation of the data and we will use the `random forest` method for 
+building an integrated prediction model.
 
-```{r}
+```{r early-fusion}
 
 #####################################
 # EARLY FUSION (CONCATENATED MODEL) #
@@ -296,13 +335,22 @@ SL_fit_concat$X <- fulldat
 
 ```
 
-Finally, we consider the intermediate fusion approach, which combines ideas from both late fusion and early fusion by integrating the usual squared-error loss of predictions with an "agreement" (fusion) penalty ($\rho$) so that the predictions from different data views agree.
+Finally, we consider the intermediate fusion approach, which combines ideas 
+from both late fusion and early fusion by integrating the usual squared-error 
+loss of predictions with an "agreement" (fusion) penalty ($\rho$) so that the 
+predictions from different data views agree.
 
-The intermediate fusion adjusts the degree of fusion in an adaptive manner, where the test set prediction error is estimated with a cross-validation method. By varying the weight of the fusion penalty - hyperparameter $\rho$, we obtain the early and late fusion approaches as special cases. If $\rho = 0$, we have a simple form of early fusion; if $\rho = 1$, we obtain a simple form of late fusion. For $0 < \rho < 1$, we obtain the intermediate fusion.
+The intermediate fusion adjusts the degree of fusion in an adaptive manner,
+where the test set prediction error is estimated with a cross-validation method.
+By varying the weight of the fusion penalty - hyperparameter $\rho$, we obtain
+the early and late fusion approaches as special cases. If $\rho = 0$, we have a
+simple form of early fusion; if $\rho = 1$, we obtain a simple form of late 
+fusion. For $0 < \rho < 1$, we obtain the intermediate fusion.
 
-Here, as examples, we will prepare the input data, fit the multiview model, and run the cross-validation in this section.
+Here, as examples, we will prepare the input data, fit the multiview model, and
+run the cross-validation in this section.
 
-```{r}
+```{r prepare-input-data}
 ##############################
 # Prepare data for multiview #
 ##############################
@@ -337,9 +385,11 @@ DD$coef <- as.numeric(DD$coef)
 
 ```
 
-In this section, we visualize the prediction performance by gathering all predictions and extracting the data necessary for ROC plotting, corresponding to each integration paradigm.
+In this section, we visualize the prediction performance by gathering all 
+predictions and extracting the data necessary for ROC plotting, corresponding 
+to each integration paradigm.
 
-```{r}
+```{r visualization1}
 #########################################################
 # Gather all predictions and ROC curve data preparation #
 #########################################################
@@ -369,10 +419,15 @@ ROC_table <- do.call('rbind', list.ROC)
 
 ```
 
-Based on the ROC plot described below, we observe that the AUC is 0.65 when considering only the pathway abundance data in the model, and 0.64 for the model including only the species abundance data. The AUC increases to 0.67 when using the early fusion model and reaches 1 with the late fusion model. In contrast, the intermediate fusion model achieves an AUC of 0.99. Overall, most integrated classifiers outperform individual layers in distinguishing between IBD and non-IBD controls.
+Based on the ROC plot described below, we observe that the AUC is 0.65 when 
+considering only the pathway abundance data in the model, and 0.64 for the model
+including only the species abundance data. The AUC increases to 0.67 when using
+the early fusion model and reaches 1 with the late fusion model. In contrast, 
+the intermediate fusion model achieves an AUC of 0.99. Overall, most integrated
+classifiers outperform individual layers in distinguishing between IBD and 
+non-IBD controls.
 
-
-```{r}
+```{r visualization2}
 # Prepare data for plotting
 plot_data <- ROC_table
 plot_data$displayItem <- paste(plot_data$layer, " AUC = ", plot_data$AUC, sep="")
@@ -399,9 +454,10 @@ print(p)
 
 ```
 
-Finally, we visualize the results for the top 20 features for each layer based on the intermediate fusion. 
+Finally, we visualize the results for the top 20 features for each layer based
+on the intermediate fusion.
 
-```{r}
+```{r visualization3}
 # Only plot UP TO TOP 20 PER LAYER
 DD <- DD %>%
   group_by(view) %>%
@@ -428,13 +484,23 @@ p <- DD %>%
 p
 
 ```
-Based on the bar plot, we observe that \emph{Proteobacteria_bacterium_CAG.139} is the species most positively associated, while \emph{Gemmiger_formicilis} is the most negatively associated species. Additionally, L-lysine biosynthesis VI is the pathway most positively associated, and PYRIDNUSCYN-PWY: NAD biosynthesis I (from aspartate) is the pathway most positively associated, respectively.
+
+Based on the bar plot, we observe that \emph{Proteobacteria_bacterium_CAG.139}
+is the species most positively associated, while \emph{Gemmiger_formicilis} is
+the most negatively associated species. Additionally, L-lysine biosynthesis VI
+is the pathway most positively associated, and PYRIDNUSCYN-PWY: NAD biosynthesis
+I (from aspartate) is the pathway most positively associated, respectively.
 
 ## Reference
-1. Ding DY, Li S, Narasimhan B, Tibshirani R. Cooperative learning for multiview analysis. Proc Natl Acad Sci U S A. 2022;119(38):e2202113119. doi:10.1073/pnas.2202113119.
-2. van der Laan MJ, Polley EC, Hubbard AE. Super learner. Stat Appl Genet Mol Biol. 2007;6:Article25. doi:10.2202/1544-6115.1309.
-3. Mallick H, Porwal A, Saha S, Basak P, Svetnik V, Paul E. An integrated Bayesian framework for multi-omics prediction and classification. Stat Med. Published online December 26, 2023. doi:10.1002/sim.9953.
-4. Lloyd-Price J, Arze C, Ananthakrishnan AN, et al. Multi-omics of the gut microbial ecosystem in inflammatory bowel diseases. Nature. 2019;569(7758):655-662. doi:10.1038/s41586-019-1237-9.
 
-
-
+1.  Ding DY, Li S, Narasimhan B, Tibshirani R. Cooperative learning for 
+multiview analysis. Proc Natl Acad Sci U S A. 2022;119(38):e2202113119. 
+doi:10.1073/pnas.2202113119.
+2.  van der Laan MJ, Polley EC, Hubbard AE. Super learner. Stat Appl Genet Mol 
+Biol. 2007;6:Article25. doi:10.2202/1544-6115.1309.
+3.  Mallick H, Porwal A, Saha S, Basak P, Svetnik V, Paul E. An integrated 
+Bayesian framework for multi-omics prediction and classification. Stat Med. 
+Published online December 26, 2023. doi:10.1002/sim.9953.
+4.  Lloyd-Price J, Arze C, Ananthakrishnan AN, et al. Multi-omics of the gut 
+microbial ecosystem in inflammatory bowel diseases. Nature. 2
+019;569(7758):655-662. doi:10.1038/s41586-019-1237-9.
