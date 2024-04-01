@@ -3,6 +3,7 @@
 ```{r setup, echo=FALSE, results="asis"}
 library(rebook)
 chapterPreamble()
+
 ```
 
 Meta-analysis is a statistical analysis that combines the results of multiple 
@@ -55,7 +56,7 @@ both taxonomic and functional profiles with ICI response.
 
 ```{r load_curatedMetagenomicData}
 library(curatedMetagenomicData)
-library(curatedMetagenomicAnalyses)
+
 ```
 In the following section, we provide detailed examples of how to perform batch 
 effect correction and meta-analytic differential abundance testing on publicly 
@@ -80,10 +81,23 @@ datasets are available from the curatedMetagenomicData package, with a total of
 285 subjects included.
 
 ```{r load-pkg-data}
-# Load example data
-cond <- 'melanoma'
-se_relative <-curatedMetagenomicAnalyses::makeSEforCondition(cond, removestudies = "HMP_2019_ibdmdb", dataType = "relative_abundance")
-se_pathway <-curatedMetagenomicAnalyses::makeSEforCondition(cond, removestudies = "HMP_2019_ibdmdb", dataType = "pathway_abundance")
+
+######################
+# Load melanoma data #
+######################
+
+library(curatedMetagenomicData)
+library(dplyr)
+
+se_relative <- sampleMetadata |>
+  filter(study_name %in% c("FrankelAE_2017", "GopalakrishnanV_2018", "LeeKA_2022", 
+                         "MatsonV_2018", "PetersBA_2019", "WindTT_2020")) |>
+  returnSamples("relative_abundance", rownames = "short")
+
+se_pathway <- sampleMetadata |>
+  filter(study_name %in% c("FrankelAE_2017", "GopalakrishnanV_2018", "LeeKA_2022", 
+                         "MatsonV_2018", "PetersBA_2019", "WindTT_2020")) |>
+  returnSamples("pathway_abundance", rownames = "short")
 
 ```
 First, let's look into the relative abundance data.
@@ -98,12 +112,14 @@ progression-free survival at 12 months (PFS12), as well as the response to
 anti-PD-1 (anti_PD_1) as the response variable. By the end of this step, we
 obtain a batch-adjusted relative abundance matrix.
 
-```{r message=FALSE, warning=FALSE prepare-input-data}
-# Load library
+```{r prepare-input-data}
+
 library(dplyr)
 library(MMUPHin)
 
-# Prepare the meta data
+##########################
+# Create sample metadata #
+##########################
 data_meta <- select(as.data.frame(colData(se_relative)), c("study_name", "ORR", "PFS12", "anti_PD_1"))
 
 # Define response variable
@@ -120,10 +136,12 @@ data_meta <- data_meta[!is.na(data_meta$resvar), c("study_name", "resvar")]
 # Convert the "study_name" to factor variable
 data_meta$study_name <- as.factor(data_meta$study_name)
 
-# Prepare the abundance data
+###########################
+# Create Species Features #
+###########################
 # Transpose the abundance matrix and change the value of abundance data to proportion unit
 data_abd <- assay(se_relative)
-data_abd <- data_abd/100
+data_abd <- data_abd / 100
 
 # Match the individuals in the data_abd
 data_abd <- data_abd[, colnames(data_abd) %in% rownames(data_meta)]
@@ -152,14 +170,14 @@ scatter plot on the right represents the change in mean abundance between the
 original and adjusted ones, displaying an obvious decrease after the batch
 effect adjustment analysis.
 
-### Evaluation for the batch effect adjustment {#sec-batch-adjustment-evaluation}
+### Evaluation for batch effect adjustment {#sec-batch-adjustment-evaluation}
 
 After obtaining the adjusted abundance matrix, we can evaluate the improvement
 of the batch effect adjustment. Here, the total variation from study difference
 will be assessed through the PERMANOVA$^14$ test. 
 
 ```{r message=FALSE, warning=FALSE batch-effect-evaluation}
-# Load library
+
 library(vegan)
 
 D_before <- vegdist(t(data_abd))
@@ -180,11 +198,13 @@ study effect adjustment, whereas after adjustment this was reduced to 2.806%
 
 Let's visualize the results of the PERMANOVA test. 
 ```{r visualization}
-# Load library
+
 library(ggplot2)
 library(cowplot)
 
-# Ordination
+##############
+# Ordination #
+##############
 # Before
 R2_before <- round(fit_adonis_before$aov.tab[1, 5]*100, 1)
 pcoa_before <- cmdscale(D_before, eig = TRUE)
@@ -240,7 +260,10 @@ testing. We have several choices for the analysis methods. First, we apply
 linear models (LM) for individual study-specific analyses with various
 transformations.
 
-```{r message=FALSE, warning=FALSE model-selection1}
+```{r model-selection1}
+
+library(Maaslin2)
+
 transform <- c("NONE", "AST", "LOGIT", "LOG")
 num <- NULL
 
