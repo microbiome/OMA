@@ -36,28 +36,21 @@ functional (pathway abundances) profiles.
 
 ```{r message=FALSE, warning=FALSE load-pkg-data}
 
-#####################
-# Load example data #
-#####################
+##################
+# Load iHMP data #
+##################
 
-library(tidyverse)
 library(curatedMetagenomicData)
+library(dplyr)
+library(tidyverse)
 
-cond <- 'IBD'
-se_relative <- makeSEforCondition(
-  cond, 
-  dataType = "relative_abundance",
-  removestudies = c('HallAB_2017', 'IaniroG_2022', 'IjazUZ_2017', 'LiJ_2014', 'NielsenHB_2014', 'VilaAV_2018'))
+se_relative <- sampleMetadata |>
+  filter(study_name == "HMP_2019_ibdmdb") |>
+  returnSamples("relative_abundance", rownames = "short")
 
-
-?curatedMetagenomicData
-
-
-
-se_pathway <- makeSEforCondition(
-  cond, 
-  dataType = "pathway_abundance",
-  removestudies = c('HallAB_2017', 'IaniroG_2022', 'IjazUZ_2017', 'LiJ_2014', 'NielsenHB_2014', 'VilaAV_2018'))
+se_pathway <- sampleMetadata |>
+  filter(study_name == "HMP_2019_ibdmdb") |>
+  returnSamples("pathway_abundance", rownames = "short")
 
 ```
 
@@ -73,7 +66,7 @@ sample_metadata <- select(as.data.frame(colData(se_relative)), c("study_name", "
 
 # Define response variable & sample id
 sample_metadata$Y <- ifelse(sample_metadata$disease == "IBD", 1, 0)
-sample_metadata<- sample_metadata %>% dplyr::select(subject_id, Y) %>% rename(subjectID = subject_id)
+sample_metadata <- sample_metadata %>% select(subject_id, Y) %>% rename(subjectID = subject_id)
 
 ###########################
 # Create Species Features #
@@ -172,6 +165,7 @@ measures (i.e., multiple samples per subject). To address this, we will conduct
 the `IntegratedLearner` R package$^3$.
 
 ```{r additional-data-preprocessing}
+
 # Set parameters and extract subject IDs for sample splitting
 seed <- 1
 set.seed(seed)
@@ -181,7 +175,7 @@ subjectID <- unique(sample_metadata$subjectID)
 # Trigger 5-fold CV (Outer Loop) #
 ##################################
 
-subjectCvFoldsIN <- caret::createFolds(1:length(subjectID), k = 5, returnTrain=TRUE)
+subjectCvFoldsIN <- createFolds(1:length(subjectID), k = 5, returnTrain=TRUE)
 
 #########################################
 # Curate subject-level samples per fold #
@@ -232,7 +226,7 @@ utilizing the SuperLearner R package.
 for (i in seq_along(name_layers)){
   
   # Prepare single-omic input data
-  include_list <- feature_metadata %>% dplyr::filter(featureType == name_layers[i]) 
+  include_list <- feature_metadata %>% filter(featureType == name_layers[i]) 
   t_dat_slice <- feature_table[rownames(feature_table) %in% include_list$featureID, ]
   dat_slice <- as.data.frame(t(t_dat_slice))
   Y = sample_metadata$Y
@@ -242,11 +236,11 @@ for (i in seq_along(name_layers)){
   # Run user-specified base learner
   library(SuperLearner)
   
-  SL_fit_layers[[i]] <- SuperLearner::SuperLearner(Y = Y, 
-                                                   X = X,
-                                                   cvControl = cvControl,    
-                                                   SL.library = c('SL.randomForest'),
-                                                   family = binomial())
+  SL_fit_layers[[i]] <- SuperLearner(Y = Y, 
+                                     X = X,
+                                     cvControl = cvControl,  
+                                     SL.library = c('SL.randomForest'),
+                                     family = binomial())
   
   # Append the corresponding y and X to the results
   SL_fit_layers[[i]]$Y <- sample_metadata['Y']
@@ -271,6 +265,7 @@ based on all available data points for the stacked model. Here, we will use
 `glmnet` as the meta-learner. However, other choices are also possible.
 
 ```{r layer-wise-cross-validated-prediction}
+
 ##############################
 # Prepare stacked input data #
 ##############################
@@ -290,12 +285,12 @@ names(combo_final) <- name_layers
 ####################
 
 # Run user-specified meta learner
-SL_fit_stacked<-SuperLearner::SuperLearner(Y = Y, 
-                                           X = combo, 
-                                           cvControl = cvControl,    
-                                           verbose = TRUE,
-                                           SL.library = 'SL.glmnet',
-                                           family = binomial())
+SL_fit_stacked <- SuperLearner(Y = Y, 
+                               X = combo, 
+                               cvControl = cvControl,    
+                               verbose = TRUE,
+                               SL.library = 'SL.glmnet',
+                               family = binomial())
 
 # Extract the fit object from superlearner
 model_stacked <- SL_fit_stacked$fitLibrary[[1]]$object
@@ -320,11 +315,11 @@ building an integrated prediction model.
 fulldat<-as.data.frame(t(feature_table))
 
 # Early Fusion using Random Forest
-SL_fit_concat <- SuperLearner::SuperLearner(Y = Y, 
-                                          X = fulldat, 
-                                          cvControl = cvControl,    
-                                          SL.library = 'SL.randomForest',
-                                          family = binomial())
+SL_fit_concat <- SuperLearner(Y = Y, 
+                              X = fulldat,
+                              cvControl = cvControl,   
+                              SL.library = 'SL.randomForest',
+                              family = binomial())
 
 # Extract the fit object from SuperLearner
 model_concat <- SL_fit_concat$fitLibrary[[1]]$object
@@ -351,6 +346,7 @@ Here, as examples, we will prepare the input data, fit the multiview model, and
 run the cross-validation in this section.
 
 ```{r prepare-input-data}
+
 ##############################
 # Prepare data for multiview #
 ##############################
@@ -403,13 +399,15 @@ list.ROC <- vector("list", length = ncol(yhat.train))
 names(list.ROC) <- colnames(yhat.train)
     
 # Loop over layers 
+library(ROCR)
+
 for(k in 1:length(list.ROC)){
   preds <- yhat.train[ ,k]
-  pred <- ROCR::prediction(preds, Y)
-  AUC <- round(ROCR::performance(pred, "auc")@y.values[[1]], 2)
-  perf <- ROCR::performance(pred, "sens", "spec") 
-  list.ROC[[k]] <- data.frame(sensitivity = methods::slot(perf, "y.values")[[1]],
-                              specificity = 1 - methods::slot(perf, "x.values")[[1]],
+  pred <- prediction(preds, Y)
+  AUC <- round(performance(pred, "auc")@y.values[[1]], 2)
+  perf <- performance(pred, "sens", "spec") 
+  list.ROC[[k]] <- data.frame(sensitivity = slot(perf, "y.values")[[1]],
+                              specificity = 1 - slot(perf, "x.values")[[1]],
                               AUC = AUC,
                               layer = names(list.ROC)[k])
     }
@@ -428,6 +426,7 @@ classifiers outperform individual layers in distinguishing between IBD and
 non-IBD controls.
 
 ```{r visualization2}
+
 # Prepare data for plotting
 plot_data <- ROC_table
 plot_data$displayItem <- paste(plot_data$layer, " AUC = ", plot_data$AUC, sep="")
@@ -458,6 +457,7 @@ Finally, we visualize the results for the top 20 features for each layer based
 on the intermediate fusion.
 
 ```{r visualization3}
+
 # Only plot UP TO TOP 20 PER LAYER
 DD <- DD %>%
   group_by(view) %>%
@@ -467,7 +467,7 @@ DD <- DD %>%
 library(forcats)
 
 p <- DD %>% 
-  mutate(view_col = forcats::fct_reorder(view_col, standardized_coef)) %>% 
+  mutate(view_col = fct_reorder(view_col, standardized_coef)) %>% 
   ggplot(aes(x = view_col, y = standardized_coef, fill = view, width = 0.75)) + 
   geom_bar(stat = "identity", show.legend = FALSE, width = 1) +
   coord_flip() +
