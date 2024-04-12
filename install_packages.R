@@ -97,7 +97,17 @@ for(i in seq_along(chapter_pkgs)) {
     message("### CHAPTER: ", i, " ###")
     pkgsAvailable <- installed.packages()[, "Package"]
     pkgsToInstall <- setdiff(chapter_pkgs[[i]], c(pkgsAvailable, pkgs_github))
-    BiocManager::install(pkgsToInstall, update = FALSE, upgrade = FALSE, ask = FALSE, type = pkg_type)
+    #installs the devel versions of mia, miaViz and bluster
+    devel_pkgs <- c("mia", "miaViz", "bluster")
+    if (any(devel_pkgs %in% pkgsToInstall)) {
+        BiocManager::install(devel_pkgs[devel_pkgs %in% pkgsToInstall], update = FALSE, upgrade = FALSE, ask = FALSE, type = pkg_type, version = "devel")
+    }
+    #removes them from pkgsToInstall and then only installs if there are remaining packages
+    other_pkgs <- setdiff(pkgsToInstall, devel_pkgs)
+    
+    if (length(other_pkgs) > 0) {
+        BiocManager::install(other_pkgs, update = FALSE, upgrade = FALSE, ask = FALSE, type = pkg_type)
+    }
 }
 
 # Github packages
