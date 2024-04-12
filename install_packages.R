@@ -97,10 +97,14 @@ for(i in seq_along(chapter_pkgs)) {
     message("### CHAPTER: ", i, " ###")
     pkgsAvailable <- installed.packages()[, "Package"]
     pkgsToInstall <- setdiff(chapter_pkgs[[i]], c(pkgsAvailable, pkgs_github))
+  
+    #removed installation step to make sure devel versions of following packages are installed
+  
     #installs the devel versions of mia, miaViz and bluster
     devel_pkgs <- c("mia", "miaViz", "bluster")
     if (any(devel_pkgs %in% pkgsToInstall)) {
-        BiocManager::install(devel_pkgs[devel_pkgs %in% pkgsToInstall], update = FALSE, upgrade = FALSE, ask = FALSE, type = pkg_type, version = "devel")
+        remotes::install_deps(devel_pkgs[devel_pkgs %in% pkgsToInstall], dependencies = TRUE,
+                          update = FALSE, upgrade = FALSE, ask = FALSE, type = pkg_type)
     }
     #removes them from pkgsToInstall and then only installs if there are remaining packages
     other_pkgs <- setdiff(pkgsToInstall, devel_pkgs)
