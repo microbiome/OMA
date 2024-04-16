@@ -98,12 +98,13 @@ for (i in seq_along(chapter_pkgs)) {
   pkgsAvailable <- installed.packages()[, "Package"]
   pkgsToInstall <- setdiff(chapter_pkgs[[i]], c(pkgsAvailable, pkgs_github))
   
-  devel_pkgs <- c("mia", "miaViz", "bluster")
+  microbiome_devel_pkgs <- c("mia", "miaViz")
+  other_devel_pkgs <- c("bluster")
   
   # Check if any development packages are in pkgsToInstall
-  if (any(devel_pkgs %in% pkgsToInstall)) {
+  if (any(microbiome_devel_pkgs %in% pkgsToInstall)) {
     # Filter out only development packages from pkgsToInstall
-    devel_to_install <- devel_pkgs[devel_pkgs %in% pkgsToInstall]
+    devel_to_install <- microbiome_devel_pkgs[microbiome_devel_pkgs %in% pkgsToInstall]
     # Install development packages from GitHub
     for (pkg in devel_to_install) {
       github_url <- paste0("https://github.com/microbiome/", pkg, ".git")
@@ -115,7 +116,14 @@ for (i in seq_along(chapter_pkgs)) {
     pkgsToInstall <- setdiff(pkgsToInstall, devel_pkgs)
   }
   
-  # Install other packages (non-development)
+  # Install other development packages
+    for (pkg in other_devel_pkgs) {
+      BiocManager::install(pkgsToInstall, update = FALSE, upgrade = FALSE, 
+                           ask = FALSE, type = pkg_type, devel=TRUE)
+    }
+    pkgsToInstall <- setdiff(pkgsToInstall, other_devel_pkgs)
+  
+  # Install remaining packages (non-development)
   if (length(pkgsToInstall) > 0) {
     # Install non-development packages from CRAN or Bioconductor
     BiocManager::install(pkgsToInstall, update = FALSE, upgrade = FALSE, 
