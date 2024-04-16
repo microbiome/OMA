@@ -93,12 +93,37 @@ chapter_pkgs <- list(all=pkgs_all)
 #  chapter_pkgs <- chapter_pkgs[ chapter_index ]
 #}
 
-for(i in seq_along(chapter_pkgs)) {
-    message("### CHAPTER: ", i, " ###")
-    pkgsAvailable <- installed.packages()[, "Package"]
-    pkgsToInstall <- setdiff(chapter_pkgs[[i]], c(pkgsAvailable, pkgs_github))
-    BiocManager::install(pkgsToInstall, update = FALSE, upgrade = FALSE, ask = FALSE, type = pkg_type)
+for (i in seq_along(chapter_pkgs)) {
+  message("### CHAPTER: ", i, " ###")
+  pkgsAvailable <- installed.packages()[, "Package"]
+  pkgsToInstall <- setdiff(chapter_pkgs[[i]], c(pkgsAvailable, pkgs_github))
+  
+  devel_pkgs <- c("mia", "miaViz", "bluster")
+  
+  # Check if any development packages are in pkgsToInstall
+  if (any(devel_pkgs %in% pkgsToInstall)) {
+    # Filter out only development packages from pkgsToInstall
+    devel_to_install <- devel_pkgs[devel_pkgs %in% pkgsToInstall]
+    # Install development packages from GitHub
+    for (pkg in devel_to_install) {
+      github_url <- paste0("https://github.com/microbiome/", pkg, ".git")
+      remotes::install_github(repo = github_url, 
+                              dependencies = TRUE, update = FALSE, 
+                              upgrade = FALSE, ask = FALSE, type = pkg_type)
+    }
+    # Remove installed development packages from pkgsToInstall
+    pkgsToInstall <- setdiff(pkgsToInstall, devel_pkgs)
+  }
+  
+  # Install other packages (non-development)
+  if (length(pkgsToInstall) > 0) {
+    # Install non-development packages from CRAN or Bioconductor
+    BiocManager::install(pkgsToInstall, update = FALSE, upgrade = FALSE, 
+                         ask = FALSE, type = pkg_type)
+  }
 }
+
+
 
 # Github packages
 devtools::install_github("microbiome/miaTime")
