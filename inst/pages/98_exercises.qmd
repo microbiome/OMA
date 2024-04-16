@@ -211,8 +211,8 @@ functions explained in chapter [@sec-import-from-file]. You can also check the
    and read the instructions in its
    [README](https://github.com/microbiome/data#training-microbiome-datasets)
    to import and construct datasets from there.  
-2. Import data from another format (functions: loadFromMetaphlan | loadFromMothur | loadFromQIIME2 | makeTreeSummarizedExperimentFromBiom | makeTreeSummarizedExperimentFromDADA2 ...)  
-3. Try out conversions between TreeSE and phyloseq data containers (makeTreeSummarizedExperimentFromPhyloseq; makephyloseqFromTreeSummarizedExperiment)  
+2. Import data from another format using Mia. (functions: loadFromMetaphlan | loadFromMothur | loadFromQIIME2 | makeTreeSummarizedExperimentFromBiom | makeTreeSummarizedExperimentFromDADA2 ...)  
+3. Try out conversions between TreeSE and phyloseq data containers. (makeTreeSummarizedExperimentFromPhyloseq; makephyloseqFromTreeSummarizedExperiment)  
 
 ### Preliminary exploration
 
@@ -387,7 +387,7 @@ However, such data are not always included.
 1. Calculate library sizes  
 2. Subsample / rarify the counts (see: subsampleCounts)  
 
-Useful functions: nrow, ncol, dim, summary, table, quantile, unique, addPerCellQC, mergeFeaturesByRank
+Useful functions: nrow, ncol, dim, summary, table, quantile, unique, scater::addPerCellQC, mia::mergeFeaturesByRank
 
 ### Prevalent and core taxonomic features
 
@@ -396,7 +396,7 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, addPerCellQ
 3. Report the thresholds and the dimensionality of the data before and after subsetting  
 4. Visualize prevalence  
 
-Useful functions: getPrevalence, getPrevalentFeatures, subsetByPrevalentFeatures
+Useful functions from mia: getPrevalence, getPrevalentFeatures, subsetByPrevalentFeatures
 
 
 ### Data exploration
@@ -405,7 +405,7 @@ Useful functions: getPrevalence, getPrevalentFeatures, subsetByPrevalentFeatures
 2. Create two histograms. Another shows the distribution of absolute counts, another shows how CLR transformed values are distributed.  
 3. Visualize how relative abundances are distributed between taxa in samples.  
 
-Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAssay, ggplot, wilcox.test, mergeFeaturesByRank, plotAbundance
+Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAssay, ggplot, wilcox.test, mergeFeaturesByRank, miaViz::plotAbundance
 
 ### Other functions
 
@@ -485,7 +485,7 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAs
 2. Calculate Shannon diversity index and Faith's phylogenetic diversity with
    `estimateDiversity` and the appropriate arguments for `index`.
 3. Make a boxplot of Shannon diversity on the y axis and sample type on the x
-   axis with `plotColData`.
+   axis using `scater::plotColData`.
 4. Repeat the previous point with Faith's phylogenetic diversity and compare the
    sample distributions of the two alpha diversity indices. How greatly do they
    differ?
@@ -545,12 +545,12 @@ represent an important analysis in several studies.
    variable named `tse`.
 2. List all available reduced dimensions with `reducedDims`. At this point, no
    reducedDims are likely found, because we haven't created any yet.
-3. Perform PCA and store its output in the TreeSE by running
+3. Perform PCA using the scater library and store its output in the TreeSE by running
    `tse <- runPCA(tse, assay.type = "counts")`. Note that it is required to
    specify the assay on which dimensionality reduction should be conducted.
 4. View the names of all available reduced dimensions with `reducedDimNames`.
    Has something new appeared?
-5. **Extra**: Access the `PCA` reducedDim object with `reducedDim` and explore
+5. **Extra**: Access the `scater::PCA` reducedDim object with `reducedDim` and explore
    its content. How are the different dimensions stored? Extract an
    array with only the values from the second dimension by indexing the object
    with `[ , 2]`.
@@ -562,7 +562,7 @@ represent an important analysis in several studies.
 2. Perform a 3-component PCA based on the `counts` assay. You can use `runPCA`
    and set the optional arguments `ncomponents` and `assay.type` to the
    appropriate values.
-3. Plot the first two dimensions of PCA with `plotReducedDim`, to which you
+3. Plot the first two dimensions of PCA with `scater::plotReducedDim`, to which you
    should give the appropriate reducedDim name as the second argument. Note that
    by default only the first two dimensions are shown.
 4. Check which information is stored in the ColData of the TreeSE. What would
@@ -570,7 +570,7 @@ represent an important analysis in several studies.
 5. Make the same plot again, but this time colour the observations by Enterotype.
    You can do that by setting `colour_by` to the appropriate colname in the
    colData of the TreeSE.
-6. **Extra**: Plot all three dimensions of PCA with `plotReducedDim` and the
+6. **Extra**: Plot all three dimensions of PCA with `scater::plotReducedDim` and the
    optional argument `ncomponents`. Colour observations by Enterotype. Which
    pair of dimensions best explains the variance between Enterotypes?
 
@@ -586,12 +586,12 @@ find many of them under methods in the vignettes of `vegan::vegdist`.
    into a variable named `tse`.
 2. Transform the counts assay to relative abundances with `transformAssay`.
 3. Perform a Multi-Dimensional Scaling (MDS) based on the relative abundance
-   assay in terms of Bray-Curtis dissimilarity. You can use `runMDS` with the
+   assay in terms of Bray-Curtis dissimilarity. You can use `scater::runMDS` with the
    compulsory argument `FUN = vegan::vegdist`.
 4. Plot the first two dimensions of PCA with `plotReducedDim`, to which you
    should give the appropriate reducedDim name as the second argument. Colour
    the observations by Enterotype with `colour_by`.
-5. **Extra**: Perform MDS again with `runMDS`, but this time use Jaccard
+5. **Extra**: Perform MDS again with `scater::runMDS`, but this time use Jaccard
    dissimilarity. The distance metric to use can be defined with the optional
    argument `method`, choosing from the methods in `?vegan::vegdist`. If you
    don't want to overwrite the reducedDim object made in point 3, set `name` to
@@ -613,7 +613,7 @@ PERMDISP2 analysis (point 5).
 2. Transform the `counts` assay into relative abundances with `transformAssay`.
 3. Extract the relative abundance assay, transpose it and save it into
    a variable named `relabund_assay`.
-4. Perform PERMANOVA with `adonis2` to see how much Diet can explain the relative
+4. Perform PERMANOVA with `vegan::adonis2` to see how much Diet can explain the relative
    abundance assay (`formula = relabund_assay ~ Diet`) in terms of Bray-Curtis
    dissimilarity (`method = "bray"`). Also set `data = colData(tse)`
    `by = "margin"` and `permutations = 99`. What do the results tell you about
@@ -647,7 +647,7 @@ down into steps below will hopefully make more sense.
 4. Extract the RDA dimensions from the appropriate reducedDim slot with
    `attr(reducedDim(tse, "RDA"), "rda)` and store it into `rda`.
 5. Test the effect and significance of Diet on beta diversity by PERMANOVA with
-   `anova.cca`. Feed this function with `rda` and set `by = "margin"` and
+   `vegan::anova.cca`. Feed this function with `rda` and set `by = "margin"` and
    `permutations = 99`, respectively. What do the results tell you about Diet?
 6. **Extra**: Check what other parameters are stored in the colData of peerj13075,
    add them to the formula (`formula = assay ~ Diet + ...`) of `calculateRDA`
@@ -669,7 +669,7 @@ walkthrough, which may be simplified in the future.
 5. Analyze diets' association on beta diversity. Calculate dbRDA and then PERMANOVA. Visualize coefficients. Which taxa's abundances differ the most between samples? 
 6. Interpret your results. Is there association between community composition and location? What are those taxa that differ the most; find information from literature.
 
-Useful functions: runMDS, runRDA, anova.cca, transformAssay, mergeFeaturesByRank, ggplot, plotReducedDim, vegan::adonis2
+Useful functions: scater::runMDS, runRDA, vegan::anova.cca, transformAssay, mergeFeaturesByRank, ggplot, scater::plotReducedDim, vegan::adonis2
 
 
 ## Differential abundance
@@ -940,7 +940,7 @@ Useful functions: [], ggplot2::geom_boxplot, ggplot2::geom_jitter, wilcox.test, 
 5. Choose statistically significant taxa and visualize their abundances with boxplot & jitterplot.
 
 
-Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::Heatmap, ancombc, aldex2, maaslin2, mergeFeaturesByRank, transformAssay, subsetByPrevalentFeatures
+Useful functions: wilcox.test, kruskal.test, ggplot, ComplexHeatMap::pheatmap, ComplexHeatMap::Heatmap, ancombc, aldex2, maaslin2, mergeFeaturesByRank, transformAssay, subsetByPrevalentFeatures
 
 
 ## Visualization
@@ -953,14 +953,14 @@ Useful functions: wilcox.test, kruskal.test, ggplot, pheatmap, ComplexHeatMap::H
 4. Visualize and compare both
 5. Test other transformations, dissimilarities, and ordination methods
 
-Useful functions: runMDS, runNMDS, transformAssay, ggplot, plotReducedDim
+Useful functions: scater::runMDS, runNMDS, transformAssay, ggplot, scater::plotReducedDim
 
 
 ### Heatmap visualization
 
 1. Load experimental dataset from mia.
-2. Visualize abundances with heatmap
-3. Visualize abundances with heatmap after CLR + Z transformation 
+2. Visualize abundances with heatmap.
+3. Visualize abundances with heatmap after CLR + Z transformation.
 
 See the OMA book for examples.
 

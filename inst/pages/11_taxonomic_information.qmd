@@ -11,7 +11,7 @@ data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 ```
 
-Taxonomic information is a key part of analyzing microbiome data and without
+Taxonomic information is a key part of analyzing microbiome data. Without
 it, any type of data analysis probably will not make much sense. However,
 the degree of detail of taxonomic information differs depending on the dataset
 and annotation data used.
@@ -25,14 +25,14 @@ and assumes certain key aspects:
 `kingdom`, `phylum`, `class`, `order`, `family`, `genus`, `species` or with
 a capital first letter.
 * the columns must be given in the order shown above
-* column can be omited, but the order must remain
+* a column can be omitted, but the order must remain
 
 In this chapter, we will refer to co-abundant groups as CAGs, which are
 clusters of taxa that co-vary across samples.
 
 ## Assigning taxonomic information.
 
-There are a number of methods to assign taxonomic information. We like to give
+There are a number of methods to assign taxonomic information. Here you may find
 a short introduction about the methods available without ranking one over the 
 other. This has to be your choice based on the result for the individual 
 dataset.
@@ -63,13 +63,14 @@ Since the `rowData` can contain other data, `taxonomyRanks` will return the
 columns `mia` assumes to contain the taxonomic information.
 
 ```{r}
-taxonomyRanks(tse)
+cat(paste(taxonomyRanks(tse), collapse = "\n"))
 ```
 
 This can then be used to subset the `rowData` to columns needed.
 
 ```{r}
-rowData(tse)[, taxonomyRanks(tse)]
+# Show only first lines and columns
+rowData(tse)[, taxonomyRanks(tse)][1:5,1:4]
 ```
 
 `taxonomyRankEmpty` checks for empty values in the given `rank` and returns a 
@@ -94,9 +95,11 @@ this part is omitted, but can be added by setting `with_rank = TRUE`.
 
 ```{r}
 phylum <- !is.na(rowData(tse)$Phylum) &
-    vapply(data.frame(apply(rowData(tse)[, taxonomyRanks(tse)[3:7]], 1L, is.na)), all, logical(1))
+    vapply(data.frame(apply(rowData(tse)[, taxonomyRanks(tse)[3:7]], 
+                            1L, is.na)), all, logical(1))
 head(getTaxonomyLabels(tse[phylum,]))
-head(getTaxonomyLabels(tse[phylum,], with_rank = TRUE))
+head(getTaxonomyLabels(tse[phylum,], 
+                       with_rank = TRUE))
 ```
 
 By default the return value of `getTaxonomyLabels` contains only
@@ -104,7 +107,8 @@ unique elements by passing it through `make.unique`. This step can be
 omitted by setting `make_unique = FALSE`.
 
 ```{r}
-head(getTaxonomyLabels(tse[phylum,], with_rank = TRUE, make_unique = FALSE))
+head(getTaxonomyLabels(tse[phylum,], with_rank = TRUE, 
+                       make_unique = FALSE))
 ```
 
 To apply the loop resolving function `resolveLoop` from the
@@ -144,9 +148,11 @@ changing conditions through these levels. For this `mia` contains the
 is as an alternative experiment.
 
 ```{r}
-tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
-altExp(tse, "Family") <- mergeFeaturesByRank(tse, rank = "Family",
-                                           agglomerateTree = TRUE)
+tse <- transformAssay(tse, assay.type = "counts", 
+                      method = "relabundance")
+altExp(tse, "Family") <- mergeFeaturesByRank(tse, 
+                                 rank = "Family",
+                               agglomerateTree = TRUE)
 altExp(tse, "Family")
 ```
 
@@ -174,15 +180,17 @@ The number of rare taxa is higher on the species level, which causes the need
 for data agglomeration by prevalence.
 
 ```{r}
-altExp(tse, "Species_byPrevalence") <- mergeFeaturesByPrevalence(tse, 
-                                                               rank = "Species", 
-                                                               other_label = "Other", 
-                                                               prevalence = 5 / 100, 
-                                                               detection = 1 / 100, 
-                                                               as_relative = T)
+altExp(tse, "Species_byPrevalence") <- 
+  mergeFeaturesByPrevalence(tse, 
+                 rank = "Species", 
+                 other_label = "Other", 
+                 prevalence = 5 / 100, 
+                 detection = 1 / 100, 
+                 as_relative = T)
 altExp(tse, "Species_byPrevalence")
 
-assay(altExp(tse, "Species_byPrevalence"), "relabundance")[88:92, 1:7]
+assay(altExp(tse, "Species_byPrevalence"), 
+      "relabundance")[88:92, 1:7]
 ```
 
 ```{r}
@@ -218,24 +226,28 @@ tse <- transformAssay(tse, method = "clr", pseudocount = 1)
 tse <- transformAssay(tse, assay.type = "clr", method = "z", 
                       MARGIN = "features")
 
-# Cluster (with euclidean distance) on the features of the z assay
+# Cluster (with euclidean distance) on the features of the 
+# z assay
 tse <- addCluster(tse,
                assay.type = "z",
                clust.col = "hclustEuclidean",
 	       MARGIN = "features",
-               HclustParam(dist.fun = stats::dist, method = "ward.D2"))
+               HclustParam(dist.fun = 
+                             stats::dist, method = "ward.D2"))
 
 # Declare the Kendall dissimilarity computation function
 kendall_dissimilarity <- function(x) {
     as.dist(1 - cor(t(x), method = "kendall"))
 }
 
-# Cluster (with Kendall dissimilarity) on the features of the z assay
+# Cluster (with Kendall dissimilarity) on the features of the 
+# z assay
 tse <- addCluster(tse,
                assay.type = "z",
                clust.col = "hclustKendall",
        	       MARGIN = "features", 	       
-               HclustParam(dist.fun = kendall_dissimilarity, method = "ward.D2"))
+               HclustParam(dist.fun = kendall_dissimilarity, 
+                           method = "ward.D2"))
 ```
 
 Let us store the resulting cluster indices in the `rowData` column specified 
@@ -295,8 +307,10 @@ For a complete list of available transformations and parameters, see function
 
 ```{r}
 tse <- tseGlobalPatterns
-tse <- transformAssay(tse, assay.type = "counts", method = "relabundance", pseudocount = 1)
-tse <- transformAssay(x = tse, assay.type = "relabundance", method = "clr", 
+tse <- transformAssay(tse, assay.type = "counts", 
+                      method = "relabundance", pseudocount = 1)
+tse <- transformAssay(x = tse, assay.type = "relabundance", 
+                      method = "clr", 
                       pseudocount = TRUE, name = "clr")
 
 head(assay(tse, "clr"))
