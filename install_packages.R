@@ -75,7 +75,7 @@ pkgs_all <- setdiff(pkgs_all, "Maaslin2")
 
 # Customization
 # Github packages must be installed separately
-pkgs_github <- c("miaTime", "ggord")
+pkgs_github <- "miaTime"
 pkgs_nongithub <- setdiff(pkgs_all, pkgs_github)
 
 # Maaslin2 needs an update, see

@@ -276,27 +276,32 @@ at the Phylum level are available in the aforementioned chapter.
 ```{r}
 #| label = "plotAbundance1"
 # agglomerate tse by Order
-tse_order <- mergeFeaturesByRank(tse,
-                                rank = "Order",
-                                onRankOnly = TRUE)
+tse_phylum <- mergeFeaturesByRank(tse,
+                                  rank = "Phylum",
+                                  onRankOnly = TRUE)
+
 # transform counts into relative abundance
-tse_order <- transformAssay(tse_order,
-                              assay.type = "counts",
-                              method = "relabundance")
+tse_phylum <- transformAssay(tse_phylum,
+                             assay.type = "counts",
+                             method = "relabundance")
+
 # get top orders
-top_taxa <- getTopFeatures(tse_order,
-                       top = 10,
-                       assay.type = "relabundance")
+top_taxa <- getTopFeatures(tse_phylum,
+                           top = 5,
+                           assay.type = "relabundance")
+
 # leave only names for top 10 orders and label the rest with "Other"
-order_renamed <- lapply(rowData(tse_order)$Order,
-                   function(x){if (x %in% top_taxa) {x} else {"Other"}})
-rowData(tse_order)$Order <- as.character(order_renamed)
+rowData(tse_phylum)$Phylum[!rowData(tse_phylum)$Phylum %in% top_taxa] <- "Other"
+
 # plot composition as a bar plot
-plotAbundance(tse_order,
-              assay.type = "relabundance",
-              rank = "Order",
-              order_rank_by = "abund",
-              order_sample_by = "Clostridiales")
+plots <- plotAbundance(tse_phylum,
+                       assay.type = "relabundance",
+                       rank = "Phylum",
+                       order_rank_by = "abund",
+                       order_sample_by = "Proteobacteria",
+                       features = "SampleType")
+
+plots[[1]]
 ```
 
 To add a sample annotation, you can combine plots that you get from the output
@@ -304,13 +309,6 @@ of _plotAbundance_.
 
 ```{r}
 #| label = "plotAbundance2"
-# Create plots
-plots <- plotAbundance(tse_order,
-      	    assay.type = "relabundance",
-	    rank = "Order",
-            order_rank_by = "abund",
-	    order_sample_by = "Clostridiales",
-            features = "SampleType")
 
 # Modify the legend of the first plot to be smaller 
 plots[[1]] <- plots[[1]] +
@@ -326,9 +324,9 @@ plots[[2]] <- plots[[2]] +
           legend.title = element_text(size = 8),
           legend.direction = "vertical")
 
-# Load required packages
 library(ggpubr)
-library(patchwork) 
+library(patchwork)
+
 # Combine legends
 legend <- wrap_plots(as_ggplot(get_legend(plots[[1]])), as_ggplot(get_legend(plots[[2]])), ncol = 1) 
 
@@ -348,37 +346,28 @@ feature and sample clusters in a heatmap, along with further functionality.
 
 ```{r}
 #| label = "pheatmap1"
-# Agglomerate tse by phylum
-tse_phylum <- mergeFeaturesByRank(tse,
-                                rank = "Phylum",
-                                onRankOnly = TRUE)
-
-# Add clr-transformation on samples
-tse_phylum <- transformAssay(tse_phylum, MARGIN = "samples", method = "clr", assay.type = "counts", pseudocount=1)
-
-# Add z-transformation on features (taxa)
-tse_phylum <- transformAssay(tse_phylum, assay.type = "clr",
-                              MARGIN = "features", 
-                              method = "z", name = "clr_z")
 
 # Take subset: only samples from feces, skin, or tongue
-tse_phylum_subset <- tse_phylum[ , tse_phylum$SampleType %in% c("Feces", "Skin", "Tongue") ]
+tse_phylum <- tse_phylum[ , tse_phylum$SampleType %in% c("Feces", "Skin", "Tongue")]
 
 # Add clr-transformation
-tse_phylum_subset <- transformAssay(tse_phylum_subset, method = "clr",
-                                     MARGIN="samples",
-                                     assay.type = "counts", pseudocount=1)
+tse_phylum <- transformAssay(tse_phylum,
+                             method = "clr",
+                             assay.type = "counts",
+                             MARGIN = "samples",
+                             pseudocount = 1)
 # Does z-transformation
-tse_phylum_subset <- transformAssay(tse_phylum_subset, assay.type = "clr",
-                                     MARGIN = "features", 
-                                     method = "z", name = "clr_z")
+tse_phylum <- transformAssay(tse_phylum,
+                             method = "z",
+                             assay.type = "clr",
+                             MARGIN = "features", 
+                             name = "clr_z")
 
 # Get n most abundant taxa, and subsets the data by them
-top_taxa <- getTopFeatures(tse_phylum_subset, top = 20)
-tse_phylum_subset <- tse_phylum_subset[top_taxa, ]
+top_taxa <- getTopFeatures(tse_phylum, top = 20)
+tse_phylum <- tse_phylum[top_taxa, ]
 
-# Gets the assay table
-mat <- assay(tse_phylum_subset, "clr_z")
+mat <- assay(tse_phylum, "clr_z")
 
 # Creates the heatmap
 pheatmap(mat)
@@ -429,10 +418,10 @@ The information on the clusters is then added to the feature meta data.
 ```{r}
 #| label = "pheatmap4"
 # Adds information to rowData
-rowData(tse_phylum_subset)$clusters <- taxa_clusters[order(match(rownames(taxa_clusters), rownames(tse_phylum_subset))), ]
+rowData(tse_phylum)$clusters <- taxa_clusters[order(match(rownames(taxa_clusters), rownames(tse_phylum))), ]
 
 # Prints taxa and their clusters
-rowData(tse_phylum_subset)$clusters
+rowData(tse_phylum)$clusters
 ```
 
 Similarly, samples are hierarchically grouped into clusters, the most suitable
@@ -467,10 +456,10 @@ sample_data <- data.frame(clusters = sample_clusters)
 sample_data <- sample_data[samples_ordered, , drop = FALSE] 
 
 # Order data based on 
-tse_phylum_subset <- tse_phylum_subset[ , rownames(sample_data)]
+tse_phylum <- tse_phylum[ , rownames(sample_data)]
 
 # Add sample type data
-sample_data$sample_types <- unfactor(colData(tse_phylum_subset)$SampleType)
+sample_data$sample_types <- unfactor(colData(tse_phylum)$SampleType)
 
 sample_data
 ```
@@ -498,16 +487,16 @@ function and does not need to be executed in advance.
 ```{r}
 #| label = "sechm"
 # Stores annotation colros to metadata
-metadata(tse_phylum_subset)$anno_colors$SampleType <- c(Feces = "blue", 
-                                                        Skin = "red", 
-                                                        Tongue = "gray")
+metadata(tse_phylum)$anno_colors$SampleType <- c(Feces = "blue", 
+                                                 Skin = "red", 
+                                                 Tongue = "gray")
 
 # Create a plot
-sechm(tse_phylum_subset, 
-      features = rownames(tse_phylum_subset), 
+sechm(tse_phylum, 
+      features = rownames(tse_phylum), 
       assayName = "clr", 
       do.scale = TRUE, 
-      top_annotation = c("SampleType"), 
+      top_annotation = "SampleType", 
       gaps_at = "SampleType",
       cluster_cols = TRUE, cluster_rows = TRUE)
 ```
