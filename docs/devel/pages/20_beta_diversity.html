@@ -354,12 +354,13 @@ div.csl-indent {
   <li><a href="#explained-variance" id="toc-explained-variance" class="nav-link" data-scroll-target="#explained-variance"><span class="header-section-number">7.1.3</span> Explained variance</a></li>
   </ul>
 </li>
-  <li><a href="#supervised-ordination" id="toc-supervised-ordination" class="nav-link" data-scroll-target="#supervised-ordination"><span class="header-section-number">7.2</span> Supervised ordination</a></li>
+  <li><a href="#supervised-constrained-ordination" id="toc-supervised-constrained-ordination" class="nav-link" data-scroll-target="#supervised-constrained-ordination"><span class="header-section-number">7.2</span> Supervised / constrained ordination</a></li>
   <li>
 <a href="#case-studies" id="toc-case-studies" class="nav-link" data-scroll-target="#case-studies"><span class="header-section-number">7.3</span> Case studies</a>
   <ul class="collapse">
 <li><a href="#sec-dbrda-workflow" id="toc-sec-dbrda-workflow" class="nav-link" data-scroll-target="#sec-dbrda-workflow"><span class="header-section-number">7.3.1</span> Testing differences in community composition between sample groups</a></li>
-  <li><a href="#checking-the-homogeneity-condition" id="toc-checking-the-homogeneity-condition" class="nav-link" data-scroll-target="#checking-the-homogeneity-condition"><span class="header-section-number">7.3.2</span> Checking the homogeneity condition</a></li>
+  <li><a href="#retrieving-feature-loadings" id="toc-retrieving-feature-loadings" class="nav-link" data-scroll-target="#retrieving-feature-loadings"><span class="header-section-number">7.3.2</span> Retrieving feature loadings</a></li>
+  <li><a href="#checking-the-homogeneity-condition" id="toc-checking-the-homogeneity-condition" class="nav-link" data-scroll-target="#checking-the-homogeneity-condition"><span class="header-section-number">7.3.3</span> Checking the homogeneity condition</a></li>
   </ul>
 </li>
   <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">7.4</span> Summary</a></li>
@@ -675,9 +676,9 @@ document.addEventListener("click", function (event) {
 </div>
 </div>
 </div>
-</section></section><section id="supervised-ordination" class="level2" data-number="7.2"><h2 data-number="7.2" class="anchored" data-anchor-id="supervised-ordination">
-<span class="header-section-number">7.2</span> Supervised ordination</h2>
-<p>dbRDA is a supervised counterpart of PCoA, that is, it takes into account the covariates specified by the user to maximize the variance with respect to the them. The result shows how much each covariate affects beta diversity. The table below illustrates the relation between supervised and unsupervised ordination methods.</p>
+</section></section><section id="supervised-constrained-ordination" class="level2" data-number="7.2"><h2 data-number="7.2" class="anchored" data-anchor-id="supervised-constrained-ordination">
+<span class="header-section-number">7.2</span> Supervised / constrained ordination</h2>
+<p>dbRDA is a supervised counterpart of PCoA. It maximize the variance with respect to the covariates provided by the user. This can be used to quantify associations between each covariate and community composition (beta diversity). The table below summarizes the relations between the supervised and unsupervised ordination methods.</p>
 <table class="table">
 <colgroup>
 <col style="width: 34%">
@@ -698,11 +699,12 @@ document.addEventListener("click", function (event) {
 <tr class="even">
 <td style="text-align: center;">non-Euclidean distance</td>
 <td style="text-align: center;">dbRDA</td>
-<td style="text-align: center;">PCoA/MDS, NMDS and UMAP</td>
+<td style="text-align: center;">PCoA/MDS, NMDS, UMAP</td>
 </tr>
 </tbody>
 </table>
-<p>We demonstrate the usage of dbRDA with the enterotype dataset, where samples correspond to patients. The colData contains the clinical status of each patient and a few covariates such as their gender and age.</p>
+<p>In summary, the dbRDA is the more general method that allows a wider variety dissimilarity, or beta diversity, indices. This method is available via <code><a href="https://rdrr.io/pkg/mia/man/runCCA.html">mia::runRDA</a></code>, which calls <code><a href="https://rdrr.io/pkg/vegan/man/capscale.html">vegan::dbrda</a></code>. By default, this uses Euclidean distances, which is equivalent to the ordinary RDA. However, the dbRDA method (<code><a href="https://rdrr.io/pkg/mia/man/runCCA.html">mia::runRDA</a></code>) allows the use of other dissimilarity indices as well.</p>
+<p>Let us next demonstrate dbRDA with the enterotype dataset. Here samples correspond to patients. The <code>colData</code> lists the clinical status of each patient and a few covariates such as gender and age.</p>
 <div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/import-rda-dataset_b0388124be21bf4b88421e250a0fdd99">
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"enterotype"</span>, package <span class="op">=</span> <span class="st">"mia"</span><span class="op">)</span></span>
@@ -724,7 +726,7 @@ document.addEventListener("click", function (event) {
 <span><span class="co"># Store results of PERMANOVA test</span></span>
 <span><span class="va">rda_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDim</a></span><span class="op">(</span><span class="va">tse2</span>, <span class="st">"RDA"</span><span class="op">)</span>, <span class="st">"significance"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The importance of each variable on the similarity between samples can be assessed from the results of PERMANOVA, automatically provided by the <code>runRDA</code> function. We see that both clinical status and age explain more than 10% of the variance, but only age shows statistical significance.</p>
+<p>The importance of each variable on the similarity between samples can be assessed from the results of PERMANOVA, automatically provided by the <code>runRDA</code> function. We see that both clinical status and age explain more than 10% of the variance, but only age has statistical significance.</p>
 <div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/rda-permanova-res_1192bb076653ebffd4699478bd11d150">
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">rda_info</span><span class="op">$</span><span class="va">permanova</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -763,7 +765,7 @@ document.addEventListener("click", function (event) {
 <td style="text-align: right;">4</td>
 <td style="text-align: right;">0.5837</td>
 <td style="text-align: right;">1.522</td>
-<td style="text-align: right;">0.144</td>
+<td style="text-align: right;">0.149</td>
 <td style="text-align: right;">3.991</td>
 <td style="text-align: right;">0.1463</td>
 </tr>
@@ -772,7 +774,7 @@ document.addEventListener("click", function (event) {
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">0.1679</td>
 <td style="text-align: right;">1.751</td>
-<td style="text-align: right;">0.120</td>
+<td style="text-align: right;">0.102</td>
 <td style="text-align: right;">3.991</td>
 <td style="text-align: right;">0.0421</td>
 </tr>
@@ -798,7 +800,7 @@ document.addEventListener("click", function (event) {
 </table>
 </div>
 </div>
-<p>To ensure that the homogeneity assumption holds, we retrieve the corresponding information from the results of RDA. In this case, none of the p-values is lower than the significance threshold, and thus homogeneity is observed.</p>
+<p>To ensure that the homogeneity assumption holds, we retrieve the corresponding information from the results of RDA. None of the p-values is lower than the significance threshold, and thus homogeneity is observed.</p>
 <div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/rda-homogeneity-res_6bfd0386bf01cca0a3e34fba5a9c909c">
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">rda_info</span><span class="op">$</span><span class="va">homogeneity</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -834,7 +836,7 @@ document.addEventListener("click", function (event) {
 <td style="text-align: right;">0.0628</td>
 <td style="text-align: right;">2.7440</td>
 <td style="text-align: right;">999</td>
-<td style="text-align: right;">0.119</td>
+<td style="text-align: right;">0.104</td>
 <td style="text-align: right;">1.0288</td>
 <td style="text-align: right;">0.2440</td>
 </tr>
@@ -845,7 +847,7 @@ document.addEventListener("click", function (event) {
 <td style="text-align: right;">0.0103</td>
 <td style="text-align: right;">0.4158</td>
 <td style="text-align: right;">999</td>
-<td style="text-align: right;">0.568</td>
+<td style="text-align: right;">0.533</td>
 <td style="text-align: right;">0.9283</td>
 <td style="text-align: right;">0.0111</td>
 </tr>
@@ -856,7 +858,7 @@ document.addEventListener("click", function (event) {
 <td style="text-align: right;">0.0113</td>
 <td style="text-align: right;">17.0255</td>
 <td style="text-align: right;">999</td>
-<td style="text-align: right;">0.427</td>
+<td style="text-align: right;">0.434</td>
 <td style="text-align: right;">0.3319</td>
 <td style="text-align: right;">0.9860</td>
 </tr>
@@ -878,12 +880,12 @@ document.addEventListener("click", function (event) {
 </div>
 </div>
 </div>
-<p>From the plot above, we can see that only age significantly describes differences between the microbial profiles of different samples. Such visual approach complements the previous results of PERMANOVA.</p>
+<p>From above, we can see that only age significantly describes differences between the microbial profiles of different samples. Such visual approach complements the previous results obtained with PERMANOVA.</p>
 </section><section id="case-studies" class="level2 page-columns page-full" data-number="7.3"><h2 data-number="7.3" class="anchored" data-anchor-id="case-studies">
 <span class="header-section-number">7.3</span> Case studies</h2>
 <section id="sec-pcoa-genus" class="level4 page-columns page-full" data-number="7.3.0.1"><h4 data-number="7.3.0.1" class="anchored" data-anchor-id="sec-pcoa-genus">
 <span class="header-section-number">7.3.0.1</span> Visualizing the most dominant genus on PCoA</h4>
-<p>In this section, we visualize the most dominant genus on PCoA. A similar visualization was proposed by <span class="citation" data-cites="Salosensaari2021">(<a href="#ref-Salosensaari2021" role="doc-biblioref">2021</a>)</span>. First, we agglomerate the data at the Genus level and get the dominant taxa per sample.</p>
+<p>In this section, we visualize the most dominant genus on PCoA. A similar visualization was proposed by <span class="citation" data-cites="Salosensaari2021">(<a href="#ref-Salosensaari2021" role="doc-biblioref">2021</a>)</span>. First, let us agglomerate the data at the Genus level and identify the dominant taxa for each sample.</p>
 <div class="no-row-height column-margin column-container"><div id="ref-Salosensaari2021" class="csl-entry" role="listitem">
 Salosensaari, Aaro, Ville Laitinen, Aki Havulinna, Guillaume Méric, Susan Cheng, Markus Perola, Liisa Valsta, et al. 2021. <span>“Taxonomic Signatures of Cause-Specific Mortality Risk in Human Gut Microbiome.”</span> <em>Nature Communications</em> 12: 1–8. <a href="https://www.nature.com/articles/s41467-021-22962-y">https://www.nature.com/articles/s41467-021-22962-y</a>.
 </div></div><div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/unnamed-chunk-3_9080f7091817ee39376bb5314595e5eb">
@@ -963,11 +965,11 @@ Salosensaari, Aaro, Ville Laitinen, Aki Havulinna, Guillaume Méric, Susan Cheng
 </div>
 </div>
 <p>Similarly, we visualize and compare the sub-population.</p>
-<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/unnamed-chunk-6_9e55c969dc1de4411c49f4ce7dc81c4e">
+<div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/unnamed-chunk-6_71bbf74435b4cc8d014af2e25542b73f">
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculating the frequencies and percentages for both categories</span></span>
-<span><span class="va">freq_TRUE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">most_abundant</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse_genus</span><span class="op">)</span><span class="op">$</span><span class="va">Group</span> <span class="op">==</span> <span class="cn">TRUE</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">freq_FALSE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">most_abundant</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse_genus</span><span class="op">)</span><span class="op">$</span><span class="va">Group</span> <span class="op">==</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">percent_TRUE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">freq_TRUE</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">freq_TRUE</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">freq_TRUE</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">most_abundant</span><span class="op">[</span><span class="va">tse_genus</span><span class="op">$</span><span class="va">Group</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">freq_FALSE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="va">most_abundant</span><span class="op">[</span><span class="op">!</span><span class="va">tse_genus</span><span class="op">$</span><span class="va">Group</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">percent_TRUE</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">freq_TRUE</span>  <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">freq_TRUE</span><span class="op">)</span>  <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">percent_FALSE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">freq_FALSE</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">freq_FALSE</span><span class="op">)</span> <span class="op">*</span> <span class="fl">100</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Visualization</span></span>
@@ -1005,7 +1007,7 @@ Salosensaari, Aaro, Ville Laitinen, Aki Havulinna, Guillaume Méric, Susan Cheng
 <div class="no-row-height column-margin column-container"><div id="ref-Anderson2001" class="csl-entry" role="listitem">
 Anderson, Marti J. 2001. <span>“A New Method for Non-Parametric Multivariate Analysis of Variance.”</span> <em>Austral Ecology</em> 26 (1): 32–46. <a href="https://doi.org/10.1111/j.1442-9993.2001.01070.pp.x">https://doi.org/10.1111/j.1442-9993.2001.01070.pp.x</a>.
 </div></div><p>PERMANOVA tests the hypothesis that the centroids and dispersion of the community are equivalent between the compared groups. A p-value smaller than the significance threshold indicates that the groups have a different community composition. This method is implemented with the <a href="https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis"><code>adonis2</code></a> function from the vegan package.</p>
-<p>By default, the argument <code>by</code> is set to <code>"terms"</code>, in which the order of variables in the formula matters. In this case, each variable is analyzed sequentially, and the result is different when more than 1 variable is introduced and their order differs. Therefore, it is recommended to set <code>by = "margin"</code>, which specifies that the marginal effect of each variable is analyzed individually. You can view a comparison between the two designs in chapter <a href="97_extra_materials.html#sec-compare-permanova"><span>Section&nbsp;A.2</span></a>.</p>
+<p>By default, the argument <code>by</code> is set to <code>"terms"</code>, in which the order of variables in the formula matters. In this case, each variable is analyzed sequentially, and the result is different when more than 1 variable is introduced and their order differs. Therefore, it is recommended to set <code>by = "margin"</code>, which specifies that the marginal effect of each variable is analyzed individually. You can view a comparison between the two designs in chapter <span class="quarto-unresolved-ref">?sec-compare-permanova</span>.</p>
 <p>We can perform PERMANOVA either with <code>adonis2</code> function or by first performing dbRDA and then applying permutational test its results. An advantage of the latter approach is that by doing so we can get coefficients: how much each taxa affects the variation between communities.</p>
 <div class="cell" data-layout-align="center" data-hash="20_beta_diversity_cache/html/unnamed-chunk-7_e6f9e862b08a09180a72a6868a79846b">
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Agglomerate data to Species level</span></span>
@@ -1072,8 +1074,11 @@ Anderson, Marti J. 2001. <span>“A New Method for Non-Parametric Multivariate A
 </div>
 </div>
 <p>In the example above, the largest differences between the two groups can be attributed to <em>Genus:Bacteroides</em> (elevated in the first group) and <em>Family:Ruminococcaceae</em> (elevated in the second group), and many other co-varying species.</p>
-</section><section id="checking-the-homogeneity-condition" class="level3 page-columns page-full" data-number="7.3.2"><h3 data-number="7.3.2" class="anchored" data-anchor-id="checking-the-homogeneity-condition">
-<span class="header-section-number">7.3.2</span> Checking the homogeneity condition</h3>
+</section><section id="retrieving-feature-loadings" class="level3" data-number="7.3.2"><h3 data-number="7.3.2" class="anchored" data-anchor-id="retrieving-feature-loadings">
+<span class="header-section-number">7.3.2</span> Retrieving feature loadings</h3>
+<p>The functions <code><a href="https://rdrr.io/pkg/vegan/man/capscale.html">vegan::dbrda</a></code> and <code><a href="https://rdrr.io/pkg/vegan/man/capscale.html">vegan::capscale</a></code> are exchangeable with <code><a href="https://rdrr.io/pkg/vegan/man/adonis.html">vegan::adonis2</a></code> with certain settings, and can be used to retrieve feature loadings.</p>
+</section><section id="checking-the-homogeneity-condition" class="level3 page-columns page-full" data-number="7.3.3"><h3 data-number="7.3.3" class="anchored" data-anchor-id="checking-the-homogeneity-condition">
+<span class="header-section-number">7.3.3</span> Checking the homogeneity condition</h3>
 <p>It is important to note that the application of PERMANOVA assumes homogeneous group dispersions (variances). This can be tested with the PERMDISP2 method <span class="citation" data-cites="Anderson2006">(<a href="#ref-Anderson2006" role="doc-biblioref">Anderson 2006</a>)</span> by using the same assay and distance method than in PERMANOVA.</p>
 <div class="no-row-height column-margin column-container"><div id="ref-Anderson2006" class="csl-entry" role="listitem">
 ———. 2006. <span>“Distance-Based Tests for Homogeneity of Multivariate Dispersions.”</span> <em>Biometrics</em> 62: 245–53. <a href="https://doi.org/10.1111/j.1541-0420.2005.00440.x">https://doi.org/10.1111/j.1541-0420.2005.00440.x</a>.
@@ -1095,8 +1100,7 @@ Anderson, Marti J. 2001. <span>“A New Method for Non-Parametric Multivariate A
 <ul>
 <li>Canonical Correspondence Analysis (CCA): <code>calculateCCA</code> and <code>runCCA</code>
 </li>
-<li>dbRDA: <code>calculateRDA</code> and <code>runRDA</code>
-</li>
+<li>dbRDA: <code>calculateRDA</code> and <code>runRDA</code>; our recommended default method to assess differences in community composition (beta diversity)</li>
 <li>Double Principal Coordinate Analysis (DPCoA): <code>calculateDPCoA</code> and <code>runDPCoA</code>
 </li>
 <li>Jensen-Shannon Divergence (JSD): <code>calculateJSD</code> and <code>runJSD</code>
@@ -1107,12 +1111,13 @@ Anderson, Marti J. 2001. <span>“A New Method for Non-Parametric Multivariate A
 </li>
 <li>Overlap: <code>calculateOverlap</code> and <code>runOverlap</code>
 </li>
+<li>PERMANOVA: (e.g.&nbsp;from <code><a href="https://rdrr.io/pkg/vegan/man/adonis.html">vegan::adonis2</a></code>) can be used to assess significance when comparing community composition between groups. Retrieving the loadings and components is more tricky, however.</li>
 <li>t-distributed Stochastic Neighbor Embedding (t-SNE): <code>calculateTSNE</code> and <code>runTSNE</code>
 </li>
 <li>UMAP: <code>calculateUMAP</code> and <code>runUMAP</code>
 </li>
 </ul>
-<p>For more information on clustering samples by beta diversity, you can refer to:</p>
+<p>For more information on sample clustering, you can refer to:</p>
 <ul>
 <li>
 <a href="http://bioconductor.org/books/release/OSCA/clustering.html">How to extract information from clusters</a><br>
