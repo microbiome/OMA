@@ -1,10 +1,3 @@
----
-title: "MSEA"
-format: html
-editor: visual
-author: Yihan Liu, Himel Mallick
----
-
 # **Microbe** Set **Enrichment Analysis** (MSEA) {#sec-MSEA}
 
 ```{r setup, echo=FALSE, results="asis"}
@@ -13,37 +6,37 @@ chapterPreamble()
 
 ```
 
-Similar to gene set enrichment analyses for genes$^1$, an obvious next step
-following differential abundance analysis in microbiome studies is to conduct
-enrichment analysis for microbe sets, known as microbe set enrichment analysis
-(MSEA)$^2$. Similar to GSEA, the primary goal of MSEA is to detect the modest
-but coordinated changes in pre-specified sets of related microbial features.
-Such a set might include all the microbes in a specific pathway or microbial
-genes that have been shown to be co-regulated based on previously published
-studies. Like GSEA, MSEA aggregates the per-feature statistics across microbes
-within a microbe set. This corresponds to the hypothesis that many relevant
-phenotype differences are manifested by small but consistent changes in a set of
-features.
+Similar to gene set enrichment analyses for genes [@Subramanian2005], an obvious
+next step following differential abundance analysis in microbiome studies is to
+conduct enrichment analysis for microbe sets, known as microbe set enrichment
+analysis (MSEA) [@Kou2020]. Similar to GSEA, the primary goal of MSEA is to
+detect the modest but coordinated changes in pre-specified sets of related
+microbial features. Such a set might include all the microbes in a specific
+pathway or microbial genes that have been shown to be co-regulated based on
+previously published studies. Like GSEA, MSEA aggregates the per-feature
+statistics across microbes within a microbe set. This corresponds to the 
+hypothesis that many relevant phenotype differences are manifested by small but
+consistent changes in a set of features.
 
 The goal of the MSEA approach is to determine if the members of S (microbe set)
 are randomly distributed throughout the ranked list of features (L) or primarily
 found at the top or bottom. We will use the R package `gsEasy` to conduct the
-GSEA test described by Subramanian et al., 2005$^1$
+MSEA test described by @Subramanian2005.
 
-## Input data for MSEA using microbiome abundance data
+## Input data for MSEA using species relative abundance data
 
 In this chapter, we will use the publicly available Inflammatory Bowel Diseases
 (IBD) microbiome data from the integrative Human Microbiome Project (iHMP)
-available from the `curatedMetagenomicData` package (Lloyd-Price et al.,
-2019$^3$). We aim to conduct MSEA analysis based on both taxonomic profiles
-(species relative abundances) and functional profiles (pathway relative
-abundances).
+available from the `curatedMetagenomicData` package [@Lloyd-Price2019]. We aim
+to conduct MSEA analysis based on both taxonomic profiles (species relative
+abundances) and functional profiles (pathway relative abundances).
 
 ## Performing the MSEA analysis with species relative abundance data
 
 We will first prepare the input feature table and sample metadata for
-differential abundance analysis using `MaAsLin2`$^4$. The ranked feature list from
-the differential abundance analysis serves as an input for the MSEA.
+differential abundance analysis using `MaAsLin2` [@Mallick2021]. The ranked
+feature list from the differential abundance analysis serves as an input for the
+MSEA.
 
 ```{r load-pkg-data}
 
@@ -92,10 +85,11 @@ rm(feature_species_t); rm(se_relative)
 
 ```
 
-In the next step, we will use `MaAsLin2` to fit a multivariable regression
-model for testing the association between microbial species abundance versus IBD
-diagnosis. The analysis method we use here is "LM", which is the default setting.
-We also adjust for age and antibiotic usage, following the original study.
+In the next step, we will use `MaAsLin2` to fit a multivariable regression model
+for testing the association between microbial species abundance versus IBD
+diagnosis. The analysis method we use here is "LM", which is the default
+setting. We also adjust for age and antibiotic usage, following the original
+study.
 
 ```{r fit-model-Maaslin2}
 
@@ -111,10 +105,11 @@ fit_data = Maaslin2(input_data     = feature_species,
 
 Unlike gene expression studies, we do not have well-defined signatures or
 modules for microbiome data. Here, we will construct data-driven modules using
-weighted gene co-expression network analysis (WGCNA)${^5^,^6}$. By working on 
-the residuals, we want to ensure that the effect of disease and other covariates
-has been removed. Following the WGCNA tutorial, we will first check whether
-there are outliers in our data.
+weighted gene co-expression network analysis (WGCNA) [@Langfelder2008,
+@Geistlinger2023]. We aim to ensure that the effect of disease and other
+covariates has been removed by working on the residuals. Following the WGCNA
+tutorial, our first step will be to check whether there are any outliers in our
+data.
 
 ```{r extract-residuals}
 
@@ -150,7 +145,7 @@ connectivity graphic for the selection of this power parameter.
 
 # Choose a set of soft threshold parameters
 powers = c(c(1:20), seq(from = 22, to=30, by=2))
-sft = pickSoftThreshold(datExpr, powerVector = powers, verbose = 5, dataIsExpr = T, RsquaredCut = 0.30) 
+sft = pickSoftThreshold(datExpr, powerVector = powers, verbose = 5, dataIsExpr = TRUE, RsquaredCut = 0.30) 
 
 ```
 
@@ -276,7 +271,7 @@ run_MSEA <- function(microbeSet, # A list
 
 Before running the MSEA, we also need to rank the differential analysis results
 from `MaAsLin2`. We use the `topGo` package to create a list of microbe sets
-from the mapping.
+from the mapping file created above.
 
 ```{r MSEA-processing}
 
@@ -301,7 +296,7 @@ microbeSet
 ```
 
 We are now ready to run the MSEA analysis. We run $100,000$ permutations to
-calculate the enrichment scores. 
+calculate the enrichment scores.
 
 ```{r calculate-enrichment-scores}
 
@@ -333,7 +328,7 @@ print(p)
 Based on the MSEA results, we obtain 13 enriched modules of microbial species.
 We can also examine the members of the top enriched modules.
 
-## Print the most significant modules for relative abundance data
+## Print the most significant modules for species relative abundance data
 
 ```{r module-print}
 
@@ -433,7 +428,7 @@ gsg$allOK # TRUE
 ###################################
 
 powers = c(c(1:20), seq(from = 22, to=30, by=2))
-sft = pickSoftThreshold(datExpr, powerVector = powers, verbose = 5, dataIsExpr = T, RsquaredCut = 0.30)
+sft = pickSoftThreshold(datExpr, powerVector = powers, verbose = 5, dataIsExpr = TRUE, RsquaredCut = 0.30)
 
 ##############################
 #  One-step module detection #
@@ -488,7 +483,7 @@ features_mapping$Module <- paste('ME', features_mapping$Module, sep = '')
 
 ```
 
-Similarly, we perform the MSEA as before using the modules from the WGCNA analysis on the
+We perform the MSEA as before using the modules from the WGCNA analysis on the
 pathways.
 
 ```{r perform-MSEA-and-visualization}
@@ -550,25 +545,3 @@ microbeSet[["MEpurple"]]
 microbeSet[["MEbrown"]]
 
 ```
-
-## Reference
-
-1.  Subramanian A, Tamayo P, Mootha VK, et al. Gene set enrichment analysis: a
-knowledge-based approach for interpreting genome-wide expression profiles. Proc
-Natl Acad Sci U S A. 2005;102(43):15545-15550. doi:10.1073/pnas.0506580102.
-2.  Kou, Y., Xu, X., Zhu, Z. *et al.* Microbe-set enrichment analysis
-facilitates functional interpretation of microbiome profiling data. *Sci Rep*
-**10**, 21466 (2020). https://doi.org/10.1038/s41598-020-78511-y.
-3. Lloyd-Price J, Arze C, Ananthakrishnan AN, et al. Multi-omics of the gut
-microbial ecosystem in inflammatory bowel diseases. Nature. 2019;569(7758):655-
-662. doi:10.1038/s41586-019-1237-9.
-4. Mallick H, Rahnavard A, McIver LJ, et al. Multivariable association discovery
-in population-scale meta-omics studies. PLoS Comput Biol. 2021;17(11):e1009442.
-Published 2021 Nov 16. doi:10.1371/journal.pcbi.1009442.
-5. Langfelder P, Horvath S. WGCNA: an R package for weighted correlation network
-analysis. BMC Bioinformatics. 2008;9:559. Published 2008 Dec 29. doi:10.1186/
-1471-2105-9-559.
-6. Geistlinger L, Mirzayi C, Zohra F, et al. BugSigDB captures patterns of
-differential abundance across a broad range of host-associated microbial
-signatures. Nat Biotechnol. Published online September 11, 2023. doi:10.1038/
-s41587-023-01872-y.
