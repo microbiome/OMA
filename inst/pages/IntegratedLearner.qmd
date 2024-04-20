@@ -14,27 +14,27 @@ contrast, \underline{late fusion} builds individual models for each data view
 and combines their predictions using a second-level model as the final
 predictor. However, these traditional paradigms treat the data views in
 isolation and do not allow for interactions or dependencies between them. A more
-advanced method, called cooperative learning (Ding et al., 2022,
-\emph{PNAS}$^1$), which is also known as \underline{intermediate fusion},
-combines the best of both worlds by encouraging predictions from different data
-views to align through an agreement parameter ($\rho$).
+advanced method, called cooperative learning [@Ding2022], which is also known as
+\underline{intermediate fusion}, combines the best of both worlds by encouraging
+predictions from different data views to align through an agreement parameter
+($\rho$).
 
 ## Multi-omics Prediction and Classification of Binary IBD Disease Status
 
 In this chapter, we showcase examples of various integration paradigms (early,
-late, and intermediate fusion) using the R packages `multiview`$^1$ and
-`SuperLearner`$^2$. We make use of the publicly available source code from the
-multi-omics integrated framework (`IntegratedLearner`) proposed by Mallick et 
-al. (2024)$^3$.
+late, and intermediate fusion) using the R packages `multiview` [[@Ding2022]]
+and `SuperLearner` [@Van]. We make use of the publicly available source code
+from the multi-omics integrated framework (`IntegratedLearner`) proposed by
+@Mallick2023.
 
 ## Input data
 
 We use the publicly available Inflammatory Bowel Diseases (IBD) data from the 
-curatedMetagenomicData package (Lloyd-Price et al., 2019)$^4$, where we aim to 
+curatedMetagenomicData package [@Lloyd-Price2019], where we aim to 
 predict IBD disease status based on both taxonomic (species abundances) and 
 functional (pathway abundances) profiles.
 
-```{r message=FALSE, warning=FALSE load-pkg-data}
+```{r load-pkg-data}
 
 ##################
 # Load iHMP data #
@@ -54,7 +54,8 @@ se_pathway <- sampleMetadata |>
 
 ```
 
-We will first prepare the input sample metadata and feature table for both relative abundance and pathway abundance data.
+We will first prepare the input sample metadata and feature table for both
+relative abundance and pathway abundance data.
 
 ```{r prepare-metadata-feature}
 
@@ -97,11 +98,13 @@ feature_table <- bind_rows(feature_species, feature_pwys)
 # Check row names of feature_table and sample_metadata #
 ########################################################
 
-all(rownames(feature_table) == rownames(sample_metadata))
+all(colnames(feature_table) == rownames(sample_metadata))
 
 ```
 
-We will then create a metadata table for the features. This table captures high-level information related to the features (e.g., which layer they belong to).
+We will then create a metadata table for the features. This table captures
+high-level information related to the features (e.g., which layer they belong
+to).
 
 ```{r create-metadata-table}
 
@@ -122,22 +125,26 @@ all(colnames(feature_table) == rownames(sample_metadata)) # TRUE
 
 ```
 
-Further data pre-processing is necessary to handle near-zero-variance features in this dataset. Ultimately, 483 features are retained, consisting of 360 pathways and 123 species. A combination of variance and prevalence filtering is applied to the feature table, while related metadata is cleaned to ensure the retention of matching samples.
+Further data pre-processing is necessary to handle near-zero-variance features
+in this dataset. Ultimately, 483 features are retained, consisting of 360
+pathways and 123 species. A combination of variance and prevalence filtering
+is applied to the feature table, while related metadata is cleaned to ensure the
+retention of matching samples.
 
 ```{r create-feature-table}
-
-library(caret)
 
 #################
 # feature_table #
 #################
+
+library(caret)
 
 feature_table_t <- as.data.frame(t(feature_table))
 abd_threshold = 0
 prev_threshold = 0.1
 nzv <- nearZeroVar(feature_table_t) 
 features_var_filtered <- feature_table_t[, -nzv] 
-features_var_filtered<-as.data.frame(features_var_filtered) 
+features_var_filtered <- as.data.frame(features_var_filtered) 
 features_filtered <- features_var_filtered[, colSums(features_var_filtered > abd_threshold) > nrow(features_var_filtered) * prev_threshold]
 feature_table <- as.data.frame(t(features_filtered))
 
@@ -162,9 +169,11 @@ which includes configuring parameters for sample splitting and 5-fold
 cross-validation. It's important to note that this dataset contains repeated
 measures (i.e., multiple samples per subject). To address this, we will conduct
 5-fold cross-validation at the subject level. The source code is derived from
-the `IntegratedLearner` R package$^3$.
+the `IntegratedLearner` R package [@Mallick2023].
 
 ```{r additional-data-preprocessing}
+
+library(caret)
 
 # Set parameters and extract subject IDs for sample splitting
 seed <- 1
@@ -211,7 +220,7 @@ names(layer_wise_predictions_train) <- name_layers
 
 ```
 
-Next, we run the late fusion algorithm described in Mallick et al., 2024$^3$.
+Next, we run the late fusion algorithm described in @Mallick2023.
 To this end, we subset the data for each feature type and conduct the analysis
 on each layer for the first-stage learning to predict the outcome. In other
 words, we fit a machine learning algorithm per layer (called a 'base learner'),
@@ -359,8 +368,8 @@ name_layers <- with(droplevels(feature_metadata), list(levels = levels(featureTy
 dataList <- vector("list", length = length(name_layers))
 names(dataList) <- name_layers
 table(feature_metadata$featureType)
-dataList[[1]] <- t(feature_table[1:123, ])
-dataList[[2]] <- t(feature_table[124:nrow(feature_table), ])
+dataList[[1]] <- t(feature_table[124:nrow(feature_table), ])
+dataList[[2]] <- t(feature_table[1:123, ])
 
 # Extract y and X's
 dataList <- lapply(dataList, as.matrix)
@@ -419,7 +428,7 @@ ROC_table <- do.call('rbind', list.ROC)
 
 Based on the ROC plot described below, we observe that the AUC is 0.65 when 
 considering only the pathway abundance data in the model, and 0.64 for the model
-including only the species abundance data. The AUC increases to 0.67 when using
+including only the species abundance data. The AUC increases to 0.68 when using
 the early fusion model and reaches 1 with the late fusion model. In contrast, 
 the intermediate fusion model achieves an AUC of 0.99. Overall, most integrated
 classifiers outperform individual layers in distinguishing between IBD and 
@@ -456,12 +465,14 @@ print(p)
 Finally, we visualize the results for the top 20 features for each layer based
 on the intermediate fusion.
 
-```{r visualization3}
-
-# Only plot UP TO TOP 20 PER LAYER
+```{r visualization3, fig.width = 6, fig.height = 3}
+#### Change the pathway 
+# Only plot tp to 20 per layer
 DD <- DD %>%
   group_by(view) %>%
   top_n(n = 20, wt = abs(standardized_coef))
+
+DD$view_col <- gsub(":.*", "", DD$view_col)
 
 # Visualization
 library(forcats)
@@ -472,7 +483,7 @@ p <- DD %>%
   geom_bar(stat = "identity", show.legend = FALSE, width = 1) +
   coord_flip() +
   facet_wrap(~ view, scales = 'free_y', nrow = 2) +
-  ylab('Standardized LFC (2 years vs. baseline)') +
+  ylab('Standardized LFC') +
   xlab('') +
   ggtitle('IBD-associated multi-omics features') + 
   theme_bw() + theme(strip.background  = element_blank(),
@@ -491,16 +502,4 @@ the most negatively associated species. Additionally, L-lysine biosynthesis VI
 is the pathway most positively associated, and PYRIDNUSCYN-PWY: NAD biosynthesis
 I (from aspartate) is the pathway most positively associated, respectively.
 
-## Reference
 
-1.  Ding DY, Li S, Narasimhan B, Tibshirani R. Cooperative learning for 
-multiview analysis. Proc Natl Acad Sci U S A. 2022;119(38):e2202113119. 
-doi:10.1073/pnas.2202113119.
-2.  van der Laan MJ, Polley EC, Hubbard AE. Super learner. Stat Appl Genet Mol 
-Biol. 2007;6:Article25. doi:10.2202/1544-6115.1309.
-3.  Mallick H, Porwal A, Saha S, Basak P, Svetnik V, Paul E. An integrated 
-Bayesian framework for multi-omics prediction and classification. Stat Med. 
-Published online December 26, 2023. doi:10.1002/sim.9953.
-4.  Lloyd-Price J, Arze C, Ananthakrishnan AN, et al. Multi-omics of the gut 
-microbial ecosystem in inflammatory bowel diseases. Nature. 2
-019;569(7758):655-662. doi:10.1038/s41586-019-1237-9.
