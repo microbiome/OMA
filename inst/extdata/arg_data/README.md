@@ -13,3 +13,14 @@ https://zenodo.org/records/7383076/files/cpg_table.20220516_scg_valid_only.tsv
 
 3) assembly-based normalized ARG abundance table
 https://zenodo.org/records/7383076/files/DS3.SCG_normalized_ARG_abund.columns_CARD_ref.n_6104.tsv
+
+**The following files were received from Kihyun Lee on April 19, 2024 (personal communication).**
+
+4) taxonomic abundance table
+samples_with_1k_core_COG_ORFs.adult_stool.SGB_level.tsv
+
+5) rowData for taxonomic abundances
+SGB_info.taxonomy.tsv
+
+6) rowData for ARG info 
+ARG_family_info.tsv
