@@ -1,3 +1,9 @@
+---
+editor: 
+  markdown: 
+    wrap: 72
+---
+
 # Meta-analyses {#sec-meta-analyses}
 
 ```{r setup, echo=FALSE, results="asis"}
@@ -6,79 +12,88 @@ chapterPreamble()
 
 ```
 
-Meta-analysis is a statistical analysis that combines the results of multiple 
-scientific studies by appropriately weighting the individual study-specific 
-effect sizes$^{1, 2, 3}$. A common meta-analytic combination strategy is to 
-take a weighted average of the study-specific summary measures. In fixed-effects
-meta-analysis, the weights are based on the assumption that there is a single
-true parameter underlying all the studies, while in random-effects 
-meta-analysis, the weights are based on a model where the true parameter varies
-across studies according to a probability distribution.
+Meta-analysis is a statistical analysis that combines the results of
+multiple scientific studies by appropriately weighting the individual
+study-specific effect sizes [@Lee2019, @Finckh2008, @Israel2011]. A
+common meta-analytic combination strategy is to take a weighted average
+of the study-specific summary measures. In fixed-effects meta-analysis,
+the weights are based on the assumption that there is a single true
+parameter underlying all the studies, while in random-effects
+meta-analysis, the weights are based on a model where the true parameter
+varies across studies according to a probability distribution.
 
-Meta-analysis is particularly useful when individual studies are small, and a 
-joint analysis of these studies can enhance the precision of effect size 
-estimation and improve statistical power. Especially in microbiome studies, 
-individual effect sizes from each study tend to be small$^{4, 5, 6}$. Only 
-through meta-analysis can these small effects reach statistical significance. 
-Therefore, by jointly analyzing these studies, we amplify the collective voice 
-of the data, offering a more comprehensive understanding of the effects under 
+Meta-analysis is particularly useful when individual studies are small,
+and a joint analysis of these studies can enhance the precision of
+effect size estimation and improve statistical power. Especially in
+microbiome studies, individual effect sizes from each study tend to be
+small [@Hoffman2019, @Haidich2010, @Ma2022]. Only through meta-analysis
+can these small effects reach statistical significance. Therefore, by
+jointly analyzing these studies, we amplify the collective voice of the
+data, offering a more comprehensive understanding of the effects under
 investigation.
 
-In this chapter, our focus is on using the R/Bioconductor package [MMUPHin]$^6$
-(Meta-Analysis Methods with a Uniform Pipeline for Heterogeneity in microbiome
-studies) to perform the meta-analysis of microbiome data. We utilize publicly
-available cancer microbiome datasets from the R/Bioconductor package
-[curatedMetagenomicData]$^7$
+In this chapter, our focus is on using the R/Bioconductor package
+\[MMUPHin\] (Meta-Analysis Methods with a Uniform Pipeline for
+Heterogeneity in microbiome studies) [@Ma2022] to perform the
+meta-analysis of microbiome data. We utilize publicly available cancer
+microbiome datasets from the R/Bioconductor package
+\[curatedMetagenomicData\] [@Pasolli2017].
 
 ## Meta-analysis of cancer microbiome studies using relative abundance data
 
-Recent work has indicated a possible involvement of the gut microbiome in 
-influencing the efficacy of immune checkpoint inhibitor (ICI) treatment 
-strategies for PD-1/PD-L1 (Programmed Cell Death Protein 1/Programmed Cell Death
-Ligand 1) targeting checkpoint inhibitors$^{8, 9, 10, 11, 12}$. Several 
-investigations into the microbiome have provided clinical data suggesting that
-the gut microbiome modulates the response to inhibitors of the PD-1/PD-L1 axis.
-However, published cancer microbiome studies face challenges, such as limited
-sample sizes, inconsistent data analysis methods, and a lack of functionally
-relevant consensus signatures.
+Recent work has indicated a possible involvement of the gut microbiome
+in influencing the efficacy of immune checkpoint inhibitor (ICI)
+treatment strategies for PD-1/PD-L1 (Programmed Cell Death Protein
+1/Programmed Cell Death Ligand 1) targeting checkpoint inhibitors
+[@Frankel2017, @Lee2022, @Matson2018, @Peters2019]. Several
+investigations into the microbiome have provided clinical data
+suggesting that the gut microbiome modulates the response to inhibitors
+of the PD-1/PD-L1 axis. However, published cancer microbiome studies
+face challenges, such as limited sample sizes, inconsistent data
+analysis methods, and a lack of functionally relevant consensus
+signatures.
 
-Elucidation of the mechanisms by which the gut microbiome alters the function of
-the immune system to enable or promote cancer development may reveal novel 
-pathways to explore in cancer therapy. Consequently, a high-quality re-analysis
-of public cancer microbiome data through a systematic meta-analysis approach 
-could provide valuable insights into the microbiome's role in cancer development
-and progression in a rapid and cost-effective manner.
+Elucidation of the mechanisms by which the gut microbiome alters the
+function of the immune system to enable or promote cancer development
+may reveal novel pathways to explore in cancer therapy. Consequently, a
+high-quality re-analysis of public cancer microbiome data through a
+systematic meta-analysis approach could provide valuable insights into
+the microbiome's role in cancer development and progression in a rapid
+and cost-effective manner.
 
-Using advanced melanoma as a model, extensively studied in the context of 
-PD-1/PD-L1 immune checkpoint inhibitors, our aim is to identify functional 
-biomarkers positively and negatively associated with ICI response by analyzing
-both taxonomic and functional profiles with ICI response.
+Using advanced melanoma as a model, extensively studied in the context
+of PD-1/PD-L1 immune checkpoint inhibitors, our aim is to identify
+functional biomarkers positively and negatively associated with ICI
+response by analyzing both taxonomic and functional profiles with ICI
+response.
 
 ```{r load_curatedMetagenomicData}
 library(curatedMetagenomicData)
 
 ```
-In the following section, we provide detailed examples of how to perform batch 
-effect correction and meta-analytic differential abundance testing on publicly 
-available cancer microbiome data from multiple studies. We use the R package 
-MMUPHin for these tasks. MMUPHin is a recently developed R/Bioconductor package
-designed for meta-analysis of microbiome taxonomic and functional profiles. It
-is agnostic to the data type and leverages another R/Bioconductor package, 
-MaAsLin2$^8$, as a backend to conduct the meta-analysis. MaAsLin2 is 
-particularly designed to be applicable to various microbial community data types
-(taxonomy or functional profiles) and environments (human or otherwise). It is
-modular, including implementations of alternative normalization/transformation
-schemes and statistical models (e.g., for amplicon vs. shotgun metagenomic
-profiles). Leveraging this flexible framework under the hood, MMUPHin performs
-normalization, batch effect correction, and meta-analysis using the default
-random effects meta-regression.
 
-Here, we will first perform the batch effect correction analysis. We use both
-the relative abundance data and the pathway abundance data from 5 public
-datasets: Frankel et al. (2017)$^9$, LeeK et al. (2022)$^10$, Matson et al.
-(2018)$^11$, Peters et al. (2019)$^12$, and Wind et al. (2020)$^13$. All these
-datasets are available from the curatedMetagenomicData package, with a total of
-285 subjects included.
+In the following section, we provide detailed examples of how to perform
+batch (study) effect correction and meta-analytic differential abundance
+testing on publicly available cancer microbiome data from multiple
+studies. We use the R package MMUPHin for these tasks. MMUPHin is a
+recently developed R/Bioconductor package designed for meta-analysis of
+microbiome taxonomic and functional profiles. It is agnostic to the data
+type and leverages another R/Bioconductor package, MaAsLin2
+[@Mallick2021], as a backend to conduct the meta-analysis. MaAsLin2 is
+particularly designed to be applicable to various microbial community
+data types (taxonomy or functional profiles) and environments (human or
+otherwise). It is modular, including implementations of alternative
+normalization/transformation schemes and statistical models (e.g.,
+amplicon vs. shotgun metagenomic profiles). Leveraging this flexible
+framework under the hood, MMUPHin performs normalization, study (batch)
+effect correction, and meta-analysis using the default random effects
+meta-regression.
+
+Here, we will first perform the batch effect correction analysis. We use
+both the relative abundance data and the pathway abundance data from 5
+public datasets: @Frankel2017, @Lee2022, @Matson2018, @Peters2019, and
+@Wind2020. All these datasets are available from the
+curatedMetagenomicData package, with a total of 285 subjects included.
 
 ```{r load-pkg-data}
 
@@ -86,7 +101,6 @@ datasets are available from the curatedMetagenomicData package, with a total of
 # Load melanoma data #
 ######################
 
-library(curatedMetagenomicData)
 library(dplyr)
 
 se_relative <- sampleMetadata |>
@@ -100,21 +114,20 @@ se_pathway <- sampleMetadata |>
   returnSamples("pathway_abundance", rownames = "short")
 
 ```
+
 First, let's look into the relative abundance data.
 
 ### Performing batch (study) effect adjustment with adjust_batch for relative abundance {#sec-batch-effect-adjustment}
 
-In this analysis, we are using two input files. The first input file is the
-relative abundance data file, which consists of a feature-by-sample matrix. The
-second input is the metadata associated with the relative abundance file, which
-includes the study names and combines overall response rate (ORR),
-progression-free survival at 12 months (PFS12), as well as the response to
-anti-PD-1 (anti_PD_1) as the response variable. By the end of this step, we
-obtain a batch-adjusted relative abundance matrix.
+In this analysis, we are using two input files. The first input file is
+the relative abundance data file, which consists of a feature-by-sample
+matrix. The second input is the metadata associated with the relative
+abundance file, which includes the study names and overall response rate
+(ORR) the response variable along with other metadata. By the end of
+this step, we obtain a batch-adjusted relative abundance matrix.
 
 ```{r prepare-input-data}
 
-library(dplyr)
 library(MMUPHin)
 
 ##########################
@@ -159,24 +172,27 @@ fit_adjust_batch <- adjust_batch(feature_abd = data_abd,
 data_abd_adj <- fit_adjust_batch$feature_abd_adj
 
 ```
+
 ![](https://github.com/microbiome/OMA/blob/master/inst/pages/images/adjust_batch_diagnostic_relative_abundance)
 
-The first figure shows the relationship between the original batch mean 
-parameters (Gamma) and the shrunk (regularized) batch mean parameters (Gamma 
-(shrinked)). The points represent the 5 different study groups within the
-dataset. The var_batch points represent the variance within each batch, with
-different colors indicating different levels or categories of variance. The
-scatter plot on the right represents the change in mean abundance between the
-original and adjusted ones, displaying an obvious decrease after the batch
-effect adjustment analysis.
+The first figure shows the relationship between the original batch mean
+parameters (Gamma) and the shrunk (regularized) batch mean parameters
+(Gamma (shrunken)). The points represent the 5 different study groups
+within the dataset. The var_batch points represent the variance within
+each batch, with different colors indicating different levels or
+categories of variance. The scatter plot on the right represents the
+change in mean abundance between the original and adjusted ones,
+displaying an obvious decrease after the batch effect adjustment
+analysis.
 
 ### Evaluation for batch effect adjustment {#sec-batch-adjustment-evaluation}
 
-After obtaining the adjusted abundance matrix, we can evaluate the improvement
-of the batch effect adjustment. Here, the total variation from study difference
-will be assessed through the PERMANOVA$^14$ test. 
+After obtaining the adjusted abundance matrix, we can evaluate the
+improvement of the batch effect adjustment. Here, the total variation
+from study difference will be assessed through the PERMANOVA test
+[@Tang2016].
 
-```{r message=FALSE, warning=FALSE batch-effect-evaluation}
+```{r batch-effect-evaluation}
 
 library(vegan)
 
@@ -191,12 +207,14 @@ print(fit_adonis_before$aov.tab)
 print(fit_adonis_after$aov.tab)
 
 ```
-Based on the results, we can see that the study differences can explain a total
-of 11.922% ($R^2$) of the variability in microbial abundance profiles before
-study effect adjustment, whereas after adjustment this was reduced to 2.806%
-($R^2$).
 
-Let's visualize the results of the PERMANOVA test. 
+Based on the results, we can see that the study differences can explain
+a total of 11.922% ($R^2$) of the variability in microbial abundance
+profiles before study effect adjustment, whereas after adjustment this
+was reduced to 2.806% ($R^2$).
+
+Let's visualize the results of the PERMANOVA test.
+
 ```{r visualization}
 
 library(ggplot2)
@@ -255,10 +273,10 @@ p
 
 ### Meta-analytical differential abundance testing with lm_meta {#sec-differential-abundance-testing}
 
-Here, we illustrate the details of the meta-analytical differential abundance
-testing. We have several choices for the analysis methods. First, we apply
-linear models (LM) for individual study-specific analyses with various
-transformations.
+Here, we illustrate the details of the meta-analytical differential
+abundance testing. We have several choices for the analysis methods.
+First, we apply linear models (LM) for individual study-specific
+analyses with various transformations.
 
 ```{r model-selection1}
 
@@ -281,11 +299,12 @@ print(num)
 
 ```
 
-Since none of the linear models can generate significant results, we next apply
-the Tweedie model (using the "CPLM" analysis method in `MaAsLin2`, also
-implemented in the R package `Tweedieverse`$^15$.
+Since none of the linear models are able to generate significant
+results, we next apply the Tweedie model (using the "CPLM" analysis
+method in `MaAsLin2`, also implemented in the R package `Tweedieverse`
+[@Mallick2022].
 
-```{r message=FALSE, warning=FALSE model-selection2}
+```{r model-selection2}
 fit_lm_meta <- lm_meta(feature_abd = data_abd_adj,
                        batch = "study_name",
                        exposure = "resvar",
@@ -293,9 +312,6 @@ fit_lm_meta <- lm_meta(feature_abd = data_abd_adj,
                        control = list(analysis_method = 'CPLM', transform = 'NONE'))
 
 meta_fits <- fit_lm_meta$meta_fits
-
-# Load library
-library(ggplot2)
 
 meta_fits %>%
   filter(qval.fdr < 0.05) %>%
@@ -307,18 +323,18 @@ meta_fits %>%
 
 ```
 
-Based on the results, we see that there are 22 significant features in total,
-among which the \emph{kluyvera ascorbata} has the strongest positive effect,
-while the \emph{pseudomonas putida} species has the strongest negative effect. 
+Based on the results, we see that there are 22 significant features in
+total, among which the \emph{kluyvera ascorbata} has the strongest
+positive effect, while the \emph{pseudomonas putida} species has the
+strongest negative effect.
 
 ## Meta-analysis for pathway abundance data {#sec-meta-analysis-pathway}
-In this section, we repeat all the analysis mentioned above using the pathway
-relative abundance data. We first prepare the input data for the analysis. 
 
-```{r message=FALSE, warning=FALSE prepare-input-data-pathway-abundance}
-# Load library
-library(dplyr)
-library(MMUPHin)
+In this section, we repeat all the analysis mentioned above using the
+pathway relative abundance data. We first prepare the input data for the
+analysis.
+
+```{r prepare-input-data-pathway-abundance}
 
 # Prepare the meta data
 data_meta <- select(as.data.frame(colData(se_pathway)), c("study_name", "ORR", "PFS12", "anti_PD_1"))
@@ -360,14 +376,13 @@ fit_adjust_batch <- adjust_batch(feature_abd = data_abd,
 data_abd_adj <- fit_adjust_batch$feature_abd_adj
 
 ```
+
 ![](https://github.com/microbiome/OMA/tree/master/inst/pages/images/adjust_batch_diagnostic_pathway_abundance)
 
+Next, we will evaluate the improvement of the batch effect adjustment
+and apply the PERMANOVA test.
 
-Next, we will evaluate the improvement of the batch effect adjustment and
-applying the PERMANOVA test.
-```{r message=FALSE, warning=FALSE batch-effect-evaluation-pathway-abundance}
-# Load library
-library(vegan)
+```{r batch-effect-evaluation-pathway-abundance}
 
 D_before <- vegdist(t(data_abd))
 D_after <- vegdist(t(data_abd_adj))
@@ -380,15 +395,15 @@ print(fit_adonis_before$aov.tab)
 print(fit_adonis_after$aov.tab)
 
 ```
-Based on the results, wesee that the study differences can explain a total of
-15.508% ($R^2$) of the variability in microbial pathway profiles before study
-effect adjustment, whereas after adjustment this was reduced to 5.037% ($R^2$).
 
-Let's also visualize the results of the PERMANOVA test. 
+Based on the results, we see that the study differences can explain a
+total of 15.508% ($R^2$) of the variability in microbial pathway
+profiles before study effect adjustment, whereas after adjustment this
+was reduced to 5.037% ($R^2$).
+
+Let's also visualize the results of the PERMANOVA test.
+
 ```{r visualization-pathway-abundance}
-# Load library
-library(ggplot2)
-library(cowplot)
 
 # Ordination
 # Before
@@ -439,11 +454,11 @@ p
 
 ```
 
-As before, we have several choices on the analysis methods. However, since we
-don't have significance at the FDR level, we use the unadjusted p-values to
-showcase the ``top hits''.
+As before, we have several choices on the analysis methods. However,
+since we don't have significance at the FDR level, we use the unadjusted
+p-values to showcase the \`\`top hits''.
 
-```{r message=FALSE, warning=FALSE pathway-abundance-model-selection1}
+```{r pathway-abundance-model-selection1}
 transform <- c("NONE", "AST", "LOGIT", "LOG")
 num <- NULL
 
@@ -472,23 +487,30 @@ num <- sum(fit_lm_meta2$meta_fits$pval < 0.05, na.rm = T)
 print(num)
 
 ```
-Here is the summary table for the number of significant pathways using various
-meta-analytic differential analysis methods and transformations:
 
-| Analysis Method | Transform Parameter | Number of Significant Pathways
-| :----------- | :----------- | :-----------
-| LM | NONE | 11
-| LM | AST | 10
-| LM | LOGIT | 9
-| LM | LOG | 11
-| CPLM | NONE | 15
+Here is the summary table for the number of significant pathways using
+various meta-analytic differential analysis methods and transformations:
 
-Let's than visualize the results using the "CPLM" analysis method, which
-identified largest number of significant pathways. 
+```{r create-summary-table}
 
-```{rvisualization-pathway-abundance}
-# Load library
-library(ggplot2)
+library(knitr)
+
+analysis_data <- data.frame(
+  Analysis_Method = c("LM", "LM", "LM", "LM", "CPLM"),
+  Transform_Parameter = c("NONE", "AST", "LOGIT", "LOG", "NONE"),
+  Number_Of_Significant_Pathways = c(11, 10, 9, 11, 15)
+)
+
+names(analysis_data) <- c("Analysis Method   ", "   Transformation   ", "   Number of Significant Pathways")
+
+kable(analysis_data, caption = "Analysis Results", align = c('l','l','r'))
+
+```
+
+Finally, let's visualize the results using the "CPLM" analysis method,
+which identified largest number of significant pathways.
+
+```{r visualization-pathway-abundance}
 
 # Extract the results
 meta_fits2 <- fit_lm_meta2$meta_fits
@@ -506,54 +528,8 @@ meta_fits2 %>%
 
 ```
 
-Based on the results, we observe 15 significant features in total. Among these,
-the queuosine biosynthesis bacteroides group exhibits the strongest negative
-effects. Additionally, L-lysine degradation XI is the most positively
-significant pathway, while xylose degradation IV is the most negatively
-significant pathway.
-
-## Reference
-1. Young LH. Strengths and Limitations of Meta-Analysis. Korean J Med. 
-2019;94(5):391-395. doi: https://doi.org/10.3904/kjm.2019.94.5.391.
-2. Finckh A, Tramèr MR. Primer: strengths and weaknesses of meta-analysis. 
-Nat Clin Pract Rheumatol. 2008;4(3):146-152. doi:10.1038/ncprheum0732.
-3. Israel H, Richter RR. A guide to understanding meta-analysis. J Orthop Sports
-Phys Ther. 2011;41(7):496-504. doi:10.2519/jospt.2011.3333. 
-4. Hoffman JIE. Meta-analysis. Basic Biostatistics for Medical and Biomedical
-Practitioners. 2nd ed. Academic Press; 2019:621-629. 
-doi:10.1016/B978-0-12-817084-7.00036-X. 
-5. Haidich AB. Meta-analysis in medical research. Hippokratia. 
-2010;14(Suppl 1):29-37.
-6. Ma S, Shungin D, Mallick H, et al. Population structure discovery in 
-meta-analyzed microbial communities and inflammatory bowel disease using 
-MMUPHin. Genome Biol. 2022;23(1):208. Published 2022 Oct 3. 
-doi:10.1186/s13059-022-02753-4.
-7. Pasolli E, Schiffer L, Manghi P, et al. “Accessible, curated metagenomic data
-through ExperimentHub.” Nat. Methods. 2017;14(11):1023–1024. 
-doi:10.1038/nmeth.4468.
-8. Mallick H, Rahnavard A, McIver LJ, et al. Multivariable Association Discovery
-in Population-scale Meta-omics Studies. PLoS Computational Biology. 
-2021:17(11):e1009442.
-9. Frankel AE, Coughlin LA, Kim J, et al. Metagenomic Shotgun Sequencing and 
-Unbiased Metabolomic Profiling Identify Specific Human Gut Microbiota and 
-Metabolites Associated with Immune Checkpoint Therapy Efficacy in Melanoma 
-Patients. Neoplasia. 2017;19(10):848-855. doi:10.1016/j.neo.2017.08.004.
-10. Lee KA, Thomas AM, Bolte LA, et al. Cross-cohort gut microbiome associations
-with immune checkpoint inhibitor response in advanced melanoma. Nat Med. 
-2022;28(3):535-544. doi:10.1038/s41591-022-01695-5.
-11. Matson V, Fessler J, Bao R, et al. The commensal microbiome is associated 
-with anti-PD-1 efficacy in metastatic melanoma patients. Science. 
-2018;359(6371):104-108. doi:10.1126/science.aao3290.
-12. Peters BA, Wilson M, Moran U, et al. Relating the gut metagenome and 
-metatranscriptome to immunotherapy responses in melanoma patients. Genome Med.
-2019;11(1):61. Published 2019 Oct 9. doi:10.1186/s13073-019-0672-4.
-13. Wind TT, Gacesa R, Vich Vila A, et al. Gut microbial species and metabolic
-pathways associated with response to treatment with immune checkpoint inhibitors
-in metastatic melanoma. Melanoma Res. 2020;30(3):235-246. 
-doi:10.1097/CMR.0000000000000656.
-14. Tang ZZ, Chen G, Alekseyenko AV. PERMANOVA-S: association test for microbial
-community composition that accommodates confounders and multiple distances.
-Bioinformatics. 2016;32(17):2618-2625. doi:10.1093/bioinformatics/btw311.
-15. Mallick, H, Chatterjee, S, Chowdhury, S, Chatterjee, S, Rahnavard, A, Hicks,
-SC. Differential expression of single-cell RNA-seq data using Tweedie models.
-Statistics in Medicine. 2022; 41( 18): 3492- 3510. doi:10.1002/sim.9430.
+Based on the results, we observe 15 significant features in total. Among
+these, queuosine biosynthesis exhibits the strongest negative effects.
+Additionally, L-lysine degradation XI is the most positively significant
+pathway, while xylose degradation IV is the most negatively significant
+pathway.
