@@ -39,7 +39,6 @@ feature list from the differential abundance analysis serves as an input for the
 MSEA.
 
 ```{r load-pkg-data}
-
 ##################
 # Load iHMP data #
 ##################
@@ -82,7 +81,6 @@ feature_species <- as.data.frame(t(feature_species_t))
 feature_species <- feature_species[rownames(sample_metadata),]
 feature_species <- feature_species / 100
 rm(feature_species_t); rm(se_relative)
-
 ```
 
 In the next step, we will use `MaAsLin2` to fit a multivariable regression model
@@ -92,7 +90,6 @@ setting. We also adjust for age and antibiotic usage, following the original
 study.
 
 ```{r fit-model-Maaslin2}
-
 library(Maaslin2)
 
 fit_data = Maaslin2(input_data     = feature_species, 
@@ -112,7 +109,6 @@ tutorial, our first step will be to check whether there are any outliers in our
 data.
 
 ```{r extract-residuals}
-
 library(WGCNA)
 
 datExpr <- as.data.frame(t(fit_data$residuals))
@@ -125,7 +121,6 @@ If the last statement returns TRUE, no outliers are identified. If not, we need
 to remove the outliers from the data.
 
 ```{r check-outliers1}
-
 if (!gsg$allOK)
 {if (sum(!gsg$goodGenes) > 0)
   printFlush(paste("Removing genes:", paste(names(datExpr)[!gsg$goodGenes], collapse = ", ")));
@@ -133,7 +128,6 @@ if (!gsg$allOK)
     printFlush(paste("Removing samples:", paste(rownames(datExpr)[!gsg$goodSamples], collapse =", ")))
   datExpr = datExpr[gsg$goodSamples, gsg$goodGenes]
 }
-
 ```
 
 After removing the outliers, we need to choose a suitable soft threshold
@@ -142,7 +136,6 @@ value must produce a graph similar to a scale-free network. We can use the mean
 connectivity graphic for the selection of this power parameter.
 
 ```{r choose-soft-threshold}
-
 # Choose a set of soft threshold parameters
 powers = c(c(1:20), seq(from = 22, to=30, by=2))
 sft = pickSoftThreshold(datExpr, powerVector = powers, verbose = 5, dataIsExpr = TRUE, RsquaredCut = 0.30) 
@@ -153,7 +146,6 @@ In this step, we will conduct a one-step module detection based on the selected
 soft threshold parameter selected above.
 
 ```{r module-detection}
-
 power = sft$powerEstimate
 net = blockwiseModules(datExpr, 
                        power = power,
@@ -173,13 +165,11 @@ net = blockwiseModules(datExpr,
 
 ncol(net$MEs)
 table(net$colors)
-
 ```
 
 The WGCNA algorithm produced 14 modules which we can visualize as follows.
 
 ```{r visualization}
-
 ##########################
 # Plot module dendrogram #
 ##########################
@@ -195,7 +185,6 @@ Next, we calculate hub genes for the modules and create the mapping files to
 proceed with the MSEA.
 
 ```{r create-mapping-files}
-
 ###########################################
 # Re-calculate modules and find hub genes #
 ###########################################
@@ -223,7 +212,6 @@ WGCNA. Here, we first create a wrapper for the MSEA analysis using the `gsEasy`
 package.
 
 ```{r MSEA-wrapper}
-
 library(reshape2)
 library(gsEasy)
 
@@ -274,7 +262,6 @@ from `MaAsLin2`. We use the `topGo` package to create a list of microbe sets
 from the mapping file created above.
 
 ```{r MSEA-processing}
-
 ###################
 # Rank DA results #
 ###################
@@ -299,18 +286,15 @@ We are now ready to run the MSEA analysis. We run $100,000$ permutations to
 calculate the enrichment scores.
 
 ```{r calculate-enrichment-scores}
-
 MSEA <- run_MSEA(microbeSet, results$feature)
 MSEA <- MSEA[, c('Set', 'Freq', 'ES', setdiff(names(MSEA), c('Set', 'Freq', 'ES')))]
 colnames(MSEA) <- c('ID', 'Size', 'pval', 'qval')
 MSEA$ID <- paste(MSEA$ID, ' (', MSEA$Size, ')', sep = '')
-
 ```
 
 We can plot the enrichment scores to visualize the MSEA results.
 
 ```{r visualzation}
-
 p <- MSEA %>% 
   arrange(-pval) %>% 
   mutate(ID = factor(ID, levels = ID)) %>% 
@@ -322,7 +306,6 @@ p <- MSEA %>%
   ylab('MSEA enrichment score')
 
 print(p)
-
 ```
 
 Based on the MSEA results, we obtain 13 enriched modules of microbial species.
@@ -331,10 +314,8 @@ We can also examine the members of the top enriched modules.
 ## Print the most significant modules for species relative abundance data
 
 ```{r module-print}
-
 microbeSet[["MEpurple"]]
 microbeSet[["MEbrown"]]
-
 ```
 
 ## Performing the MSEA analysis with pathway relative abundance data
@@ -343,7 +324,6 @@ Next, we repeat the MSEA with the pathway relative abundance data from the iHMP
 project and follow the same steps as before.
 
 ```{r input-data}
-
 ##########################
 # Load HMP2 pathway data # 
 ##########################
@@ -359,7 +339,7 @@ se_pathway <- sampleMetadata |>
 sample_metadata <- 
   colData(se_pathway) %>% 
   as.data.frame() %>% filter(visit_number == 1) %>% 
-  select("age", "disease", "antibiotics_current_use")
+  dplyr::select("age", "disease", "antibiotics_current_use")
 
 # Set reference
 sample_metadata$disease <- as.factor(sample_metadata$disease)
@@ -392,7 +372,6 @@ As before, we first run a `MaAsLin2` analysis using default settings and
 construct the modules using residuals from the `MaAsLin2` models.
 
 ```{r MSEA-preparation}
-
 fit_data = Maaslin2(input_data     = feature_pwys, 
                     input_metadata = sample_metadata, 
                     normalization  = "NONE",
@@ -480,14 +459,12 @@ feature_by_modules <- rownames_to_column(feature_by_modules)
 colnames(feature_by_modules) <- c('Feature', 'Module')
 features_mapping <- feature_by_modules
 features_mapping$Module <- paste('ME', features_mapping$Module, sep = '')
-
 ```
 
 We perform the MSEA as before using the modules from the WGCNA analysis on the
 pathways.
 
 ```{r perform-MSEA-and-visualization}
-
 ###################
 # Rank DA results #
 ###################
@@ -539,9 +516,7 @@ We can similarly examine the members of the top enriched modules.
 ## Print the most significant modules for pathway abundance data
 
 ```{r significant-results}
-
 # Print the most significant modules
 microbeSet[["MEpurple"]]
 microbeSet[["MEbrown"]]
-
 ```
