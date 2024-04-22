@@ -3,7 +3,6 @@
 ```{r setup, echo=FALSE, results="asis"}
 library(rebook)
 chapterPreamble()
-
 ```
 
 Meta-analysis is a statistical analysis that combines the results of
@@ -61,11 +60,6 @@ functional biomarkers positively and negatively associated with ICI
 response by analyzing both taxonomic and functional profiles with ICI
 response.
 
-```{r load_curatedMetagenomicData}
-library(curatedMetagenomicData)
-
-```
-
 In the following section, we provide detailed examples of how to perform
 batch (study) effect correction and meta-analytic differential abundance
 testing on publicly available cancer microbiome data from multiple
@@ -90,11 +84,10 @@ public datasets: @Frankel2017, @Lee2022, @Matson2018, @Peters2019, and
 curatedMetagenomicData package, with a total of 285 subjects included.
 
 ```{r load-pkg-data}
-
 ######################
 # Load melanoma data #
 ######################
-
+library(curatedMetagenomicData)
 library(dplyr)
 
 se_relative <- sampleMetadata |>
@@ -121,7 +114,6 @@ abundance file, which includes the study names and overall response rate
 this step, we obtain a batch-adjusted relative abundance matrix.
 
 ```{r prepare-input-data}
-
 library(MMUPHin)
 
 ##########################
@@ -164,7 +156,6 @@ fit_adjust_batch <- adjust_batch(feature_abd = data_abd,
                                  control = list(verbose = FALSE))
 
 data_abd_adj <- fit_adjust_batch$feature_abd_adj
-
 ```
 
 ![](https://github.com/microbiome/OMA/blob/master/inst/pages/images/adjust_batch_diagnostic_relative_abundance)
@@ -187,7 +178,6 @@ from study difference will be assessed through the PERMANOVA test
 [@Tang2016].
 
 ```{r batch-effect-evaluation}
-
 library(vegan)
 
 D_before <- vegdist(t(data_abd))
@@ -210,7 +200,6 @@ was reduced to 2.806% ($R^2$).
 Let's visualize the results of the PERMANOVA test.
 
 ```{r visualization}
-
 library(ggplot2)
 library(cowplot)
 
@@ -273,7 +262,6 @@ First, we apply linear models (LM) for individual study-specific
 analyses with various transformations.
 
 ```{r model-selection1}
-
 library(Maaslin2)
 
 transform <- c("NONE", "AST", "LOGIT", "LOG")
@@ -329,7 +317,6 @@ pathway relative abundance data. We first prepare the input data for the
 analysis.
 
 ```{r prepare-input-data-pathway-abundance}
-
 # Prepare the meta data
 data_meta <- select(as.data.frame(colData(se_pathway)), c("study_name", "ORR", "PFS12", "anti_PD_1"))
 
@@ -377,7 +364,6 @@ Next, we will evaluate the improvement of the batch effect adjustment
 and apply the PERMANOVA test.
 
 ```{r batch-effect-evaluation-pathway-abundance}
-
 D_before <- vegdist(t(data_abd))
 D_after <- vegdist(t(data_abd_adj))
 
@@ -398,7 +384,6 @@ was reduced to 5.037% ($R^2$).
 Let's also visualize the results of the PERMANOVA test.
 
 ```{r visualization-pathway-abundance}
-
 # Ordination
 # Before
 R2_before <- round(fit_adonis_before$aov.tab[1, 5]*100, 1)
@@ -445,7 +430,6 @@ p_after <- ggplot(ord_after, aes(x = PC1, y = PC2, color = Study)) +
 
 p <- plot_grid(p_before, p_after, ncol = 2)
 p
-
 ```
 
 As before, we have several choices on the analysis methods. However,
@@ -486,7 +470,6 @@ Here is the summary table for the number of significant pathways using
 various meta-analytic differential analysis methods and transformations:
 
 ```{r create-summary-table}
-
 library(knitr)
 
 analysis_data <- data.frame(
@@ -504,8 +487,7 @@ kable(analysis_data, caption = "Analysis Results", align = c('l','l','r'))
 Finally, let's visualize the results using the "CPLM" analysis method,
 which identified largest number of significant pathways.
 
-```{r visualization-pathway-abundance}
-
+```{r visualization-pathway-abundance2}
 # Extract the results
 meta_fits2 <- fit_lm_meta2$meta_fits
 # meta_fits3 <- meta_fits2[meta_fits2$pval < 0.05 & !is.na(meta_fits2$pval), ]
@@ -519,7 +501,6 @@ meta_fits2 %>%
   theme(axis.text.y = element_text(size = 10)) +
   geom_bar(stat = "identity") +
   coord_flip()
-
 ```
 
 Based on the results, we observe 15 significant features in total. Among
