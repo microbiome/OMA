@@ -5,249 +5,205 @@ library(rebook)
 chapterPreamble()
 ```
 
-Community diversity is a central concept in microbiome data analysis. 
+Community diversity is a central concept in microbiome research. A
+number of diversity indices are available in ecological literature.
 
-There are three commonly employed levels of diversity measurements,
-which are trying to put a number on different aspects of the questions
-associated with diversity [@Whittaker1960].
+The main categories of diversity indices include species richness,
+evenness, and diversity; each of them emphasizes different aspects of
+the community heterogeneity [@Whittaker1960], [@Willis2019]. The _Hill
+coefficient_ combines many standard indices into a single equation
+that provides observed richness, inverse Simpson, Shannon diversity,
+and generalized diversity as special cases, with varying levels of
+emphasis on species abundance values. Thus, the term _alpha diversity_
+is often used to refer collectively to all these variants.
 
-Many different ways for estimating such diversity measurements have been 
-described in the literature. Which measurement is best or applicable for your 
-samples, is not the aim of the following sections.
 
-```{r load-pkg-data}
-library(mia)
-data("GlobalPatterns", package="mia")
-tse <- GlobalPatterns
-```
+**Diversity** (`estimateDiversity`), summarizes the distribution of
+  species abundances in a given sample into a single number that
+  depends on both species richness and evenness (see below). Diversity
+  indices measure the overall community heterogeneity that considers
+  both of these aspects simultaneously. A number of ecological
+  diversity measures are available. In general, diversity increases
+  together with increasing richness and evenness. **Phylogenetic
+  diversity** (PD), [@Faith1992] is a variant that incorporates
+  information from phylogenetic relationships between species, unlike
+  most other commonly used diversity indices. The `estimateDiversity`
+  function uses a faster re-implementation of the widely used function
+  in _`picante`_ [@R_picante, @Kembel2010]. The method uses the
+  default rowTree from the `TreeSummarizedExperiment` object (`tse`).
 
-**_Alpha diversity_**, also sometimes interchangeably used with the
-term **_species diversity_**, summarizes the distribution of species
-abundances in a given sample into a single number that depends on
-species richness and evenness. Diversity indices measure the overall
-community heterogeneity. A number of ecological diversity measures are
-available. The Hill coefficient combines many standard indices into a
-single equation that provides observed richness, inverse Simpson, and
-Shannon diversity, and generalized diversity as special cases. In
-general, diversity increases together with increasing richness and
-evenness. Sometimes richness, phylogenetic diversity, evenness, dominance, 
-and rarity are considered to be variants of alpha diversity.
+**Richness** (`estimateRichness`) refers to the total number of species in a community
+  (sample). The simplest richness index is the number of species
+  observed in a sample (observed richness). Assuming limited sampling
+  from the community, however, this may underestimate the true species
+  richness. Several estimators have been developed to address this,
+  including for instance ACE [@Chao1992] and Chao1 [@Chao1984]
+  indices. Richness estimates do not aim to characterize variations in
+  species abundances.
 
-**Richness** refers to the total number of species in a community
-(sample). The simplest richness index is the number of observed
-species (observed richness). Assuming limited sampling from the
-community, however, this may underestimate the true species
-richness. Several estimators are available, including for instance ACE
-[@Chao1992] and Chao1 [@Chao1984]. Richness estimates are unaffected
-by species abundances.
+**Evenness** (`estimateEvenness`) focuses on the distribution of species abundances, and it
+  can thus complement the number of species. Pielou's evenness is a
+  commonly used index, obtained by normalizing Shannon diversity by
+  (the natural logarithm of) observed richness.
+
+
+These main classes of alpha diversity are sometimes complemented by
+indices of dominance or rarity:
+
+**Dominance** (`estimateDominance`) indices are in general negatively correlated with alpha
+  diversity. A high dominance is obtained when one or few species have
+  a high share of the total species abundance in the community. Note
+  that dominance indices are generally inversely correlated with other
+  alpha diversity indices.
   
-**Phylogenetic diversity** was first proposed by [@Faith1992]. Unlike the 
-  diversity measures mentioned above, Phylogenetic diversity (PD) 
-  measure incorporates information from phylogenetic relationships 
-  stored in `phylo` tree between species in a community (sample). The 
-  Faith's PD is calculated as the sum of branch length of all species in 
-  a community (sample).
+**Rarity** (`estimateRarity`) indices characterize the concentration of species at low
+  abundance.  Prevalence and detection thresholds determine rare
+  species whose total concentration will determine the value of a
+  rarity index.
 
-**Evenness** focuses on species abundances, and can thus complement
-  the number of species. A typical evenness index is the Pielou's
-  evenness, which is Shannon diversity normalized by the observed
-  richness.
 
-**Dominance** indices are in general negatively correlated with
-  diversity, and sometimes used in ecological literature. High
-  dominance is obtained when one or few species have a high share of
-  the total species abundance in the community.  
-  
-**Rarity** indices characterize the concentration of taxa at low abundance. 
-  Prevalence and detection thresholds determine rare taxa whose total concentration
-  is represented as a rarity index.
-  
-## Estimation 
+
+## Alpha diversity estimation in practice
 
 Alpha diversity can be estimated with wrapper functions that interact
 with other packages implementing the calculation, such as _`vegan`_
 [@R_vegan].
 
-### Richness {#sec-richness}
+These functions calculate the given indices, and add them to the
+`colData` slot of the `SummarizedExperiment` object with the given
+`name`.
 
-Richness gives the number of features present within a community and can be calculated with `estimateRichness`. Each of the estimate diversity/richness/evenness/dominance functions adds the calculated measure(s) to the `colData` of the `SummarizedExperiment` under the given column `name`. Here, we calculate `observed` features as a measure of richness.     
+The estimated values can then be retrieved and analyzed directly from
+the `colData`, for example by plotting them using `plotColData` from
+the _`scater`_ package [@R_scater]. Here, we use the `observed`
+species as a measure of richness.
 
-```{r}
+
+```{r plot-richness, message=FALSE, cache=TRUE}
+#| context: setup
+
+# Let us first load some example data.
+library(mia)
+data("GlobalPatterns", package="mia")
+tse <- GlobalPatterns
+
+# Estimate (observed) richness
 tse <- mia::estimateRichness(tse, 
                              assay.type = "counts", 
                              index = "observed", 
                              name="observed")
 
+# Check some of the first values in colData
 head(tse$observed)
 ```
 
-This allows access to the values to be analyzed directly from the `colData`, for example
-by plotting them using `plotColData` from the _`scater`_ package [@R_scater].
 
-```{r plot-div-shannon, message=FALSE, fig.cap="Shannon diversity estimates plotted grouped by sample type with colour-labeled barcode."}
+Let us visualize results against selected `colData` variables (sample
+type and final barcode).
+
+```{r plot-div-obs, message=FALSE, fig.cap="Shannon diversity estimates plotted grouped by sample type with colour-labeled barcode.", cache=TRUE}
 library(scater)
 plotColData(tse, 
             "observed", 
             "SampleType", 
             colour_by = "Final_Barcode") +
     theme(axis.text.x = element_text(angle=45,hjust=1)) + 
-  ylab(expression(Richness[Observed]))
-
+  labs(y=expression(Richness[Observed]))
 ```
 
-### Diversity {#sec-estimate-diversity}  
 
-The main function, `estimateDiversity`, calculates the selected
-diversity index based on the selected assay data.  
+  
 
-```{r estimate-shannon}
+
+
+## Visualizing alpha diversities
+
+
+### Comparing alpha diversity measures 
+
+Let us now compare the estimated Shannon and Faith indices across
+samples. First we add Shannon and Faith indices.
+
+```{r phylo-div-3}
 tse <- mia::estimateDiversity(tse, 
                               assay.type = "counts",
-                              index = "shannon", 
-                              name = "shannon")
-head(tse$shannon)
+                              index = c("shannon", "faith"), 
+                              name = c("shannon", "faith"))
 ```
 
-Alpha diversities are commonly visualized using boxplots.
-
-Here, let us compare Shannon index between sample groups. Individual
-data points can be visualized with `geom_jitter`.
-
-The `geom_signif` function tests whether these differences are
-statistically significant and adds (adjusted) p-values to plot. See
-also the [ggpubr package](http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/76-add-p-values-and-significance-levels-to-ggplots/)
-for additional flexibility in group-wise comparison plots and
-associated p-values.
 
 
+Scatterplot for the estimated Shannon and Faith indices across
+samples.
+
+```{r compare-diversities, fig.width = 6.5}
+ggplot(colData(tse), aes(x=shannon, y=faith)) +
+  geom_point() +
+  labs(x="Shannon index", y="Faith (phylogenetic) index")
+```
+
+
+
+### Alpha diversity measures and sample grouping
+
+Let us visualize results from all alpha diversity measures calculated
+above against a given sample grouping available in `colData` (here,
+sample type). These have been readily stored in the `colData` slot,
+and they are thus directly available for plotting.
+
+```{r plot-all-diversities, fig.width = 6.5}
+# Create the plots
+plots <- lapply(c("observed", "shannon", "faith"),
+                plotColData,
+                object = tse,
+                x = "SampleType",
+                colour_by = "SampleType")
+
+# Fine-tune visual appearance
+plots <- lapply(plots, "+", 
+                theme(axis.text.x = element_blank(),
+                      axis.title.x = element_blank(),
+                      axis.ticks.x = element_blank()))
+
+# Plot the figures
+(plots[[1]] | plots[[2]] | plots[[3]]) +
+  plot_layout(guides = "collect")
+```
+
+
+
+### Visualizing significance in group-wise comparisons 
+
+Let us next compare Shannon index between sample groups using the
+standard ggplot tools, and illustrate individual data points with
+`geom_jitter`.
+
+The `geom_signif` function provides tools to test whether these
+differences are statistically significant; the function adds
+(adjusted) p-values in the plot.
 
 ```{r visualize-shannon}
 library(ggsignif)
 library(ggplot2)
 library(patchwork)
 
-# Subsets the data. Takes only those samples that are from
-# feces, skin, or tongue, and creates data frame from the collected data.
-df <- as.data.frame(colData(tse)[tse$SampleType %in% 
-                 c("Feces", "Skin", "Tongue"), ])
+# Determine the different combinations for significance testing
+comb <- split(t(combn(levels(tse$SampleType), 2)), 
+           seq(nrow(t(combn(levels(tse$SampleType), 2)))))
 
-# Changes old levels with new levels
-df$SampleType <- factor(df$SampleType)
-
-# For significance testing, all different combinations are determined
-comb <- split(t(combn(levels(df$SampleType), 2)), 
-           seq(nrow(t(combn(levels(df$SampleType), 2)))))
-
-ggplot(df, aes(x = SampleType, y = shannon)) +
+ggplot(colData(tse), aes(x = SampleType, y = shannon)) +
   # Outliers are removed, because otherwise each 
   # data point would be plotted twice; 
   # as an outlier of boxplot and as a point of dotplot.
   geom_boxplot(outlier.shape = NA) + 
   geom_jitter(width = 0.2) + 
-  geom_signif(comparisons = comb, map_signif_level = FALSE,
+  geom_signif(comparisons = comb,
+              map_signif_level = FALSE,
               correction="fdr") + #corrects the p-values
   theme(text = element_text(size = 10))
 ```
 
 
-### Faith phylogenetic diversity {#sec-faith-diversity}
-
-The Faith index is returned by the function `estimateFaith`.
-
-```{r phylo-div-1}
-tse <- mia::estimateFaith(tse,
-                          assay.type = "counts")
-head(tse$faith)
-```
-
-**Note**: because `tse` is a `TreeSummarizedExperiment` object, its phylogenetic tree is used by default. However, the optional argument `tree` must be provided if `tse` does not contain one.
-
-Below a visual comparison between shannon and faith indices is shown with a violin plot.
-
-```{r phylo-div-2}
-plots <- lapply(c("shannon", "faith"),
-                plotColData,
-                object = tse, colour_by = "SampleType")
-plots[[1]] + plots[[2]] +
-  plot_layout(guides = "collect")
-```
- 
-Alternatively, the phylogenetic diversity can be calculated by `mia::estimateDiversity`. This is a faster re-implementation of   
-the widely used function in _`picante`_ [@R_picante, @Kembel2010].  
-
-Load `picante` R package and get the `phylo` stored in `rowTree`.
-
-```{r phylo-div-3}
-tse <- mia::estimateDiversity(tse, 
-                              assay.type = "counts",
-                              index = "faith", 
-                              name = "faith")
-```
-
-### Evenness  
-
-Evenness can be calculated with `estimateEvenness`.  
-
-```{r evenness-1}
-tse <- estimateEvenness(tse, 
-                        assay.type = "counts", 
-                        index="simpson")
-head(tse$simpson)
-```
-
-### Dominance  
-
-Dominance can be calculated with `estimateDominance`. Here, the `Relative index` is calculated which is the relative abundance of the most dominant species in the sample.   
-
-```{r dominance-1}
-tse <- estimateDominance(tse, 
-                         assay.type = "counts", 
-                         index="relative")
-
-head(tse$relative)
-```
-
-### Rarity  
-
-`mia` package provides one rarity index called log-modulo skewness. It can be 
-calculated with `estimateDiversity`.
-
-```{r rarity-1}
-tse <- mia::estimateDiversity(tse, 
-                              assay.type = "counts",
-                              index = "log_modulo_skewness")
-
-head(tse$log_modulo_skewness)
-```
-
-### Divergence
-
-Divergence can be evaluated with `estimateDivergence`. Reference and algorithm for the calculation of divergence can be specified as `reference` and `FUN`, respectively. 
-
-```{r}
-tse <- mia::estimateDivergence(tse,
-                               assay.type = "counts",
-                               reference = "median",
-                               FUN = vegan::vegdist)
-```
-
-## Visualization
-
-A plot comparing all the diversity measures calculated above and stored in `colData` can then be constructed directly.
-
-```{r plot-all-diversities, fig.width = 6.5}
-plots <- lapply(c("observed", "shannon", "simpson", "relative", "faith", "log_modulo_skewness"),
-                plotColData,
-                object = tse,
-                x = "SampleType",
-                colour_by = "SampleType")
-
-plots <- lapply(plots, "+", 
-                theme(axis.text.x = element_blank(),
-                      axis.title.x = element_blank(),
-                      axis.ticks.x = element_blank()))
-
-((plots[[1]] | plots[[2]] | plots[[3]]) / 
-(plots[[4]] | plots[[5]] | plots[[6]])) +
-  plot_layout(guides = "collect")
-```
+The [ggpubr
+package](http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/76-add-p-values-and-significance-levels-to-ggplots/)
+provides further flexibility for estimating and highlighting the significances.
