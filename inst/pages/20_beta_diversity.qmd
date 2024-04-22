@@ -299,22 +299,35 @@ ggplot(df, aes(x = d0, y = dmds)) +
   theme_bw()
 ```
 
-## Supervised ordination
 
-dbRDA is a supervised counterpart of PCoA, that is, it takes into account the
-covariates specified by the user to maximize the variance with respect to the
-them. The result shows how much each covariate affects beta diversity. The table
-below illustrates the relation between supervised and unsupervised ordination
-methods.
+## Supervised / constrained ordination
+
+dbRDA is a supervised counterpart of PCoA. It maximize the variance
+with respect to the covariates provided by the user. This can be used
+to quantify associations between each covariate and community
+composition (beta diversity). The table below summarizes the relations
+between the supervised and unsupervised ordination methods.
+
 
 |                          | supervised ordination  | unsupervised ordination  |
 |:------------------------:|:----------------------:|:------------------------:|
 | Euclidean distance       | RDA                    | PCA                      |
-| non-Euclidean distance   | dbRDA                  | PCoA/MDS, NMDS and UMAP  |
+| non-Euclidean distance   | dbRDA                  | PCoA/MDS, NMDS, UMAP     | 
 
-We demonstrate the usage of dbRDA with the enterotype dataset, where samples
-correspond to patients. The colData contains the clinical status of each patient
-and a few covariates such as their gender and age.
+
+In summary, the dbRDA is the more general method that allows a wider
+variety dissimilarity, or beta diversity, indices. This method is
+available via `mia::runRDA`, which calls `vegan::dbrda`. By default,
+this uses Euclidean distances, which is equivalent to the ordinary
+RDA. However, the dbRDA method (`mia::runRDA`) allows the use of other
+dissimilarity indices as well.
+
+
+Let us next demonstrate dbRDA with the enterotype dataset. Here
+samples correspond to patients. The `colData` lists the clinical
+status of each patient and a few covariates such as gender and
+age.
+
 
 ```{r import-rda-dataset}
 # Load data
@@ -347,7 +360,7 @@ rda_info <- attr(reducedDim(tse2, "RDA"), "significance")
 The importance of each variable on the similarity between samples can be
 assessed from the results of PERMANOVA, automatically provided by the `runRDA`
 function. We see that both clinical status and age explain more than 10% of the
-variance, but only age shows statistical significance.
+variance, but only age has statistical significance.
 
 ```{r rda-permanova-res}
 rda_info$permanova |>
@@ -355,7 +368,7 @@ rda_info$permanova |>
 ```
 
 To ensure that the homogeneity assumption holds, we retrieve the corresponding
-information from the results of RDA. In this case, none of the p-values is lower
+information from the results of RDA. None of the p-values is lower
 than the significance threshold, and thus homogeneity is observed.
 
 ```{r rda-homogeneity-res}
@@ -375,17 +388,18 @@ library(miaViz)
 plotRDA(tse2, "RDA", colour_by = "ClinicalStatus")
 ```
 
-From the plot above, we can see that only age significantly describes
+From above, we can see that only age significantly describes
 differences between the microbial profiles of different samples. Such visual
-approach complements the previous results of PERMANOVA.
+approach complements the previous results obtained with PERMANOVA.
+
 
 ## Case studies
 
 #### Visualizing the most dominant genus on PCoA {#sec-pcoa-genus}
 
 In this section, we visualize the most dominant genus on PCoA. A similar
-visualization was proposed by [-@Salosensaari2021]. First, we agglomerate the
-data at the Genus level and get the dominant taxa per sample.
+visualization was proposed by [-@Salosensaari2021]. First, let us agglomerate the
+data at the Genus level and identify the dominant taxa for each sample.
 
 ```{r}
 # Agglomerate to genus level
@@ -457,9 +471,9 @@ Similarly, we visualize and compare the sub-population.
 
 ```{r}
 # Calculating the frequencies and percentages for both categories
-freq_TRUE <- table(as.character(most_abundant[colData(tse_genus)$Group == TRUE]))
-freq_FALSE <- table(as.character(most_abundant[colData(tse_genus)$Group == FALSE]))
-percent_TRUE <- round(freq_TRUE / sum(freq_TRUE) * 100, 1)
+freq_TRUE  <- table(as.character(most_abundant[tse_genus$Group]))
+freq_FALSE <- table(as.character(most_abundant[!tse_genus$Group]))
+percent_TRUE  <- round(freq_TRUE  / sum(freq_TRUE)  * 100, 1)
 percent_FALSE <- round(freq_FALSE / sum(freq_FALSE) * 100, 1)
 
 # Visualization
@@ -482,29 +496,32 @@ plotReducedDim(tse_genus[ , colData(tse_genus)$Group == FALSE], "PCoA_BC",
 
 ### Testing differences in community composition between sample groups {#sec-dbrda-workflow}
 
-Permutational Analysis of Variance (PERMANOVA; [-@Anderson2001]) is
-a widely used non-parametric multivariate method that aims to
-estimate the actual statistical significance of differences in the
-observed community composition between two groups of samples.
+Permutational Analysis of Variance (PERMANOVA; [-@Anderson2001]) is a
+widely used non-parametric multivariate method that aims to estimate
+the actual statistical significance of differences in the observed
+community composition between two groups of samples.
 
-PERMANOVA tests the hypothesis that the centroids and dispersion
-of the community are equivalent between the compared groups. A p-value
-smaller than the significance threshold indicates that the groups have a
-different community composition. This method is implemented with the
+PERMANOVA tests the hypothesis that the centroids and dispersion of
+the community are equivalent between the compared groups. A p-value
+smaller than the significance threshold indicates that the groups have
+a different community composition. This method is implemented with the
 [`adonis2`](https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis)
 function from the vegan package.
 
-By default, the argument `by` is set to `"terms"`, in which the order of variables
-in the formula matters. In this case, each variable is analyzed sequentially, and
-the result is different when more than 1 variable is introduced and their order differs.
-Therefore, it is recommended to set `by = "margin"`, which specifies that the
-marginal effect of each variable is analyzed individually. You can view a
-comparison between the two designs in chapter [@sec-compare-permanova].
+By default, the argument `by` is set to `"terms"`, in which the order
+of variables in the formula matters. In this case, each variable is
+analyzed sequentially, and the result is different when more than 1
+variable is introduced and their order differs.  Therefore, it is
+recommended to set `by = "margin"`, which specifies that the marginal
+effect of each variable is analyzed individually. You can view a
+comparison between the two designs in chapter
+[@sec-compare-permanova].
 
-We can perform PERMANOVA either with `adonis2` function or by first performing
-dbRDA and then applying permutational test its results. An advantage of the latter
-approach is that by doing so we can get coefficients: how much each taxa affects
-the variation between communities.
+We can perform PERMANOVA either with `adonis2` function or by first
+performing dbRDA and then applying permutational test its results. An
+advantage of the latter approach is that by doing so we can get
+coefficients: how much each taxa affects the variation between
+communities.
 
 ```{r}
 # Agglomerate data to Species level
@@ -575,6 +592,14 @@ can be attributed to _`r top_names[1] `_ (elevated in the first
 group) and _`r top_names[2] `_ (elevated in the second
 group), and many other co-varying species.
 
+
+### Retrieving feature loadings
+
+The functions `vegan::dbrda` and `vegan::capscale` are exchangeable
+with `vegan::adonis2` with certain settings, and can be used to
+retrieve feature loadings.
+
+
 ### Checking the homogeneity condition 
 
 It is important to note that the application of PERMANOVA assumes
@@ -589,7 +614,9 @@ anova(betadisper(vegdist(t(assay(tse, "counts"))), colData(tse)$Group))
 If the groups have similar dispersion, PERMANOVA can be seen as an
 appropriate choice for comparing community compositions.
 
+
 ## Summary
+
 
 As a final note, we provide a comprehensive list of functions for the evaluation
 of dissimilarity indices available in the mia and scater packages. The
@@ -597,16 +624,26 @@ of dissimilarity indices available in the mia and scater packages. The
 methods store the reducedDim object into the specified TreeSE.
 
 * Canonical Correspondence Analysis (CCA): `calculateCCA` and `runCCA`
-* dbRDA: `calculateRDA` and `runRDA`
+* dbRDA: `calculateRDA` and `runRDA`; our recommended default method
+  to assess differences in community composition (beta diversity)
 * Double Principal Coordinate Analysis (DPCoA): `calculateDPCoA` and `runDPCoA`
 * Jensen-Shannon Divergence (JSD): `calculateJSD` and `runJSD`
 * MDS: `calculateMDS` and `runMDS`
 * NMDS: `calculateNMDS` and `runNMDS`
 * Overlap: `calculateOverlap` and `runOverlap`
+* PERMANOVA: (e.g. from `vegan::adonis2`) can be used to assess
+  significance when comparing community composition between
+  groups. Retrieving the loadings and components is more tricky,
+  however.
 * t-distributed Stochastic Neighbor Embedding (t-SNE): `calculateTSNE` and `runTSNE`
 * UMAP: `calculateUMAP` and `runUMAP`
 
-For more information on clustering samples by beta diversity, you can refer to:
+
+For more information on sample clustering, you can refer to:
 
 * [How to extract information from clusters](http://bioconductor.org/books/release/OSCA/clustering.html)  
 * Chapter [@sec-clustering] on community typing  
+
+
+
+
