@@ -23,7 +23,29 @@ jobs:
           # Loop through each HTML file
           for file in $html_files; do
             echo "Checking links in $file"
-          # Loop through each link not matching the pattern
+
+            # Loop through each link matching the pattern
+            for link in $pattern_links; do
+              # Extract the path from the link
+              path=$(echo "$link" | awk -F'=' '{print $2}')
+              path="${path//..}"
+
+              # Remove leading slash from the path
+              path="${path#/}"
+
+              # Adjust path to output.tables directory
+              path="docs/devel/pages/$path"
+
+              # Check if the file exists
+              if [ -f "$path" ]; then
+                echo "    [✓] File exists: $path"
+              else
+                echo "    [✖] File not found: $path"
+                failure=true
+              fi
+            done
+
+            # Loop through each link not matching the pattern
             for link in $other_links; do
               # Check if the link starts with "http://" or "https://"
               if [[ $link == http://* ]] || [[ $link == https://* ]]; then
