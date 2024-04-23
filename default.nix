@@ -201,6 +201,10 @@ let
     packages = rpkgs ++ miatime ++ mia ++ spieceasi ++ spring ++ netcomi ++ oma;
   };
 
+  rstudio_pkgs = pkgs.rstudioWrapper.override {
+    packages = [ rpkgs miatime mia spieceasi spring netcomi oma ];
+  };
+
 in
 # Build R environment
 pkgs.mkShell {
@@ -214,6 +218,7 @@ pkgs.mkShell {
 
   buildInputs = [
     R
+    rstudio_pkgs
     system_packages
   ];
 }
