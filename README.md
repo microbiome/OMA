@@ -40,6 +40,44 @@ devtools::install('.')
 BiocBook::preview(BiocBook::BiocBook('.'))
 ```
 
+### Nix
+
+Nix is a programming language and a package manager that allows building
+(relatively) isolated project-specific environments with all R and system
+dependencies necessary to run the project. It is not necessary to have
+R or any R package installed on the system to build the OMA book with Nix.
+
+#### How?
+
+1. Nix supports all Linux distributions, macOS and Windows via [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install)
+2. It is recommended for beginners to install Nix with [Determinate Systems installer](https://github.com/DeterminateSystems/nix-installer)
+3. Before you proceed with piping the script into the
+shell, examine the script's [code](https://install.determinate.systems/nix)
+4. Run `nix --version` in the terminal to check if `nix` was installed
+5. This repository contains the `default.nix` file, which is written in Nix language and declares the dependencies for the OMA book
+6. Run `nix-shell` in the directory with `default.nix`. The installation of will begin
+7. After the installation, you will be dropped into the `nix` shell, where you can open R, even if you do not have it installed on the system
+8. Run `R`, and then `BiocBook::preview(BiocBook::BiocBook('.'))`. The compilation of the book will begin
+
+#### Troubleshooting
+
+1. If your system does not have a writable `/usr` directory
+(for example, one of Fedora Atomic Desktops [distributions](https://fedoraproject.org/atomic-desktops/)), and you ran `install.packages()` at any point, it is possible that R will attempt 
+to install packages to the `R` directory in the home
+directory. `nix-shell` will prioritize package version installed there,
+which
+will break full reproducibility. The solution is to delete the
+`R` directory,
+and use R from the `nix` shell
+2. The current `nixpkgs` repository for `nix` packages
+uses a [fork](https://github.com/rstats-on-nix/nixpkgs)
+instead of the [official repository](https://github.com/NixOS/nixpkgs).
+It is because the official repository is not fast
+enough to update all the dependencies required to build R
+packages. Thus, the building process might fail.
+The current file uses the fork, but you can change
+it to the official repository. If it fails, switch back to the fork
+
 ## Development and Contributions
 
 To contribute reports, follow the Git flow procedure (you can see instructions
