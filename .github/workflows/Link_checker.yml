@@ -24,38 +24,29 @@ jobs:
           for file in $html_files; do
             echo "Checking links in $file"
             
-            # Extract URLs matching the specified pattern
-            pattern_links=$(grep -oP 'href="\K[^"]*' "$file"
+            # Extract all href links from HTML file
+            links=$(grep -oP 'href="\K[^"]*' "$file")
 
-            # Loop through each link matching the pattern
-            for link in $pattern_links; do
-              # Extract the path from the link
-              path=$(echo "$link" | awk -F'=' '{print $2}')
-              path="${path//..}"
+            # Loop through each extracted link
+            for link in $links; do
+              # Check if the link is local (does not start with http:// or https://)
+              if [[ ! "$link" =~ ^https?:// ]]; then
+                # Normalize the path to check for file existence
+                path=${link//..}
+                path="${path#/}"
+                path="docs/devel/pages/$path"
 
-              # Remove leading slash from the path
-              path="${path#/}"
-
-              # Adjust path to output.tables directory
-              path="docs/devel/pages/$path"
-
-              # Check if the file exists
-              if [ -f "$path" ]; then
-                echo "    [✓] File exists: $path"
+                # Check if the file exists
+                if [ -f "$path" ]; then
+                  echo "    [✓] File exists: $path"
+                else
+                  echo "    [✖] File not found: $path"
+                  failure=true
+                fi
               else
-                echo "    [✖] File not found: $path"
-                failure=true
-              fi
-            done
-
-            # Loop through each link not matching the pattern
-            for link in $other_links; do
-              # Check if the link starts with "http://" or "https://"
-              if [[ $link == http://* ]] || [[ $link == https://* ]]; then
                 # Check the return code of the HTTP link
                 status_code=$(curl -s -o /dev/null -w "%{http_code}" "$link")
-
-                if [ "$status_code" -eq 200 ] || [ "$status_code" -ge 300 ] && [ "$status_code" -lt 400 ]; then
+                if [ "$status_code" -eq 200 ] || ([ "$status_code" -ge 300 ] && [ "$status_code" -lt 400 ]); then
                   echo "    [✓] Link is valid: $link"
                 else
                   echo "    [✖] Link is invalid: $link (HTTP $status_code)"
@@ -63,8 +54,8 @@ jobs:
                 fi
               fi
             done
-          done || failure=true
-          
+          done
+
           # Exit the workflow with a failure status if any failure occurred
           if [ "$failure" = true ]; then
             echo "Error: At least one link doesn't work"
