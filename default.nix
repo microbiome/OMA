@@ -7,7 +7,7 @@ let
     BiocBook
   ];
 
-  # Download and build mia package from GitHub
+  # Build mia package
   mia = [(pkgs.rPackages.buildRPackage {
      name = "mia";
      src = pkgs.fetchgit {
@@ -48,7 +48,7 @@ let
     };
   }) ];
 
-  # Download and build miaTime within the scope of oma package
+  # Build miaTime package
   miatime = [(pkgs.rPackages.buildRPackage {
       name = "miaTime";
       src = pkgs.fetchgit {
@@ -57,6 +57,7 @@ let
         rev = "9fe9771f7329fc991796eb79cc1e17ee06e1bc24";
         sha256 = "sha256-IL9CbL0HWKlpmMHq1Rxen7+utzpw4qfb4NuVvM0N0oA=";
     };
+    # miaTime dependencies (see DESCRIPTION)
     propagatedBuildInputs = builtins.attrValues {
       inherit (pkgs.rPackages)
       dplyr
@@ -145,7 +146,7 @@ let
     } ++ [spring];
   }) ];
 
-  # Download and build OMA book/package from GitHub
+  # Build OMA book/package
   oma = [(pkgs.rPackages.buildRPackage {
      name = "oma";
      src = pkgs.fetchgit {
