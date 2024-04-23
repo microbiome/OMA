@@ -3,7 +3,7 @@
 
 
 # Source location for the up-to-date package list:
-packages <- url("https://raw.githubusercontent.com/microbiome/OMA/devel/oma_packages.csv")
+packages <- url("https://raw.githubusercontent.com/microbiome/OMA/master/oma_packages.csv")
 #packages <- "oma_packages.csv"
 
 # -------------------------------------------------------------------------------------------
@@ -13,55 +13,55 @@ options(install.packages.compile.from.source = "never")
 Sys.setenv(R_REMOTES_UPGRADE = "never")
 
 pkg_type <- switch (Sys.info()["sysname"],
-                    "Linux" = "source", 
-                    "both")
+                "Linux" = "source", 
+                "both")
 
 ## Function to install packages one at a time with indication of time left
 ## Overall probably slower than install.packages if everything works
 ## but doesn't require downloading all packages first before trying to install any
 installer_with_progress <- function(pkgs) {
-    
-    if(length(pkgs) == 0) { invisible(return(NULL)) }
-    
-    toInstall <- pkgs
-    bp <- progress::progress_bar$new(total = length(toInstall),
-                                     format = "Installed :current of :total (:percent ) - current package: :package",
-                                     show_after = 0,
-                                     clear = FALSE)
-    
+  
+  if(length(pkgs) == 0) { invisible(return(NULL)) }
+  
+  toInstall <- pkgs
+  bp <- progress::progress_bar$new(total = length(toInstall),
+                                   format = "Installed :current of :total (:percent ) - current package: :package",
+                                   show_after = 0,
+                                   clear = FALSE)
+  
+  length_prev <- length(toInstall)
+  fail <- NULL
+  while(length(toInstall)) {
+    pkg <- toInstall[1]
+    bp$tick(length_prev - length(toInstall),  tokens = list(package = pkg))
     length_prev <- length(toInstall)
-    fail <- NULL
-    while(length(toInstall)) {
-        pkg <- toInstall[1]
-        bp$tick(length_prev - length(toInstall),  tokens = list(package = pkg))
-        length_prev <- length(toInstall)
-        tryCatch(
-            suppressMessages( BiocManager::install(pkg, quiet = TRUE, update = FALSE, ask = FALSE, type = "binary") ),
-            error = function(e) { fail <<- c(fail, pkg) },
-            warning = function(w) { fail <<- c(fail, pkg) },
-            ## remove current package, otherwise we loop in event of failure
-            ## update the list to reflect any dependencies that are now installed
-            finally = { toInstall <- setdiff(toInstall, installed.packages()[, "Package"]) }
-        )
-    }
-    bp$tick(length_prev - length(toInstall),  tokens = list(package = "DONE!"))
-    
-    return(fail)
+    tryCatch(
+      suppressMessages( BiocManager::install(pkg, quiet = TRUE, update = FALSE, ask = FALSE, type = "binary") ),
+      error = function(e) { fail <<- c(fail, pkg) },
+      warning = function(w) { fail <<- c(fail, pkg) },
+      ## remove current package, otherwise we loop in event of failure
+      ## update the list to reflect any dependencies that are now installed
+      finally = { toInstall <- setdiff(toInstall, installed.packages()[, "Package"]) }
+    )
+  }
+  bp$tick(length_prev - length(toInstall),  tokens = list(package = "DONE!"))
+  
+  return(fail)
 }
 
 ## these packages are needed prior to the installation
 if(!requireNamespace("BiocManager", quietly = TRUE)) {
-    install.packages(c('BiocManager'), repos = "https://cloud.r-project.org",
-                     quiet = TRUE, update = FALSE, ask = FALSE, type = pkg_type)
+  install.packages(c('BiocManager'), repos = "https://cloud.r-project.org",
+                   quiet = TRUE, update = FALSE, ask = FALSE, type = pkg_type)
 }
 ## update any existing packages
 BiocManager::install(update = TRUE, ask = FALSE)
 
 if(!requireNamespace("remotes", quietly = TRUE)) {
-    install.packages(c('remotes'), quiet = TRUE, update = FALSE, ask = FALSE, type = pkg_type)
+  install.packages(c('remotes'), quiet = TRUE, update = FALSE, ask = FALSE, type = pkg_type)
 }
 if(!requireNamespace("magrittr", quietly = TRUE)) {
-    BiocManager::install('magrittr', quiet = TRUE, update = FALSE, ask = FALSE, type = pkg_type)
+  BiocManager::install('magrittr', quiet = TRUE, update = FALSE, ask = FALSE, type = pkg_type)
 }
 
 # ---------------------------
@@ -94,10 +94,10 @@ chapter_pkgs <- list(all=pkgs_all)
 #}
 
 for(i in seq_along(chapter_pkgs)) {
-    message("### CHAPTER: ", i, " ###")
-    pkgsAvailable <- installed.packages()[, "Package"]
-    pkgsToInstall <- setdiff(chapter_pkgs[[i]], c(pkgsAvailable, pkgs_github))
-    BiocManager::install(pkgsToInstall, update = FALSE, upgrade = FALSE, ask = FALSE, type = pkg_type)
+  message("### CHAPTER: ", i, " ###")
+  pkgsAvailable <- installed.packages()[, "Package"]
+  pkgsToInstall <- setdiff(chapter_pkgs[[i]], c(pkgsAvailable, pkgs_github))
+  BiocManager::install(pkgsToInstall, update = FALSE, upgrade = FALSE, ask = FALSE, type = pkg_type)
 }
 
 # Github packages
@@ -110,13 +110,12 @@ pkgsAvailable <- installed.packages()[, "Package"]
 pkgsNeeded <- unique(unlist(chapter_pkgs))
 pkgsToInstall <- setdiff(pkgsNeeded, pkgsAvailable)
 if(length(pkgsToInstall)) {
-    message("The following packages failed to install: \n",
-            paste(pkgsToInstall, collapse = ", "))
-    message("You can try re-running this installation script.\n",
-            "It will only try to install the missing packages.\n",
-            "This may make it easier to see the information R gives about why the installation failed.\n",
-            "Please contact microbiome@utu.fi for additional help.")
+  message("The following packages failed to install: \n",
+          paste(pkgsToInstall, collapse = ", "))
+  message("You can try re-running this installation script.\n",
+  "It will only try to install the missing packages.\n",
+  "This may make it easier to see the information R gives about why the installation failed.\n",
+  "Please contact microbiome@utu.fi for additional help.")
 }
 
 Sys.unsetenv("R_REMOTES_UPGRADE")
-
