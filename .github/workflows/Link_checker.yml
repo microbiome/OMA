@@ -31,10 +31,13 @@ jobs:
             for link in $links; do
               # Check if the link is local (does not start with http:// or https://)
               if [[ ! "$link" =~ ^https?:// ]]; then
-                # Normalize the path to check for file existence
-                path=${link//..}
-                path="${path#/}"
-                path="docs/devel/pages/$path"
+                # Normalize the path to remove unwanted './' and excessive slashes
+                path="${link/.\//}"  # Removes './' from the path
+                path="${path#/}"     # Removes any leading slash
+                path="docs/devel/pages/$path"  # Prefix the base path
+
+                # Normalize further to resolve any redundancy in path formation
+                path=$(echo $path | sed 's#//#/#g')  # Replaces '//' with '/'
 
                 # Check if the file exists
                 if [ -f "$path" ]; then
