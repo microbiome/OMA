@@ -196,7 +196,7 @@ let
     inherit (pkgs) R glibcLocales quarto ;
  };
 
-  # RStudio wraper for nix
+  # RStudio wrapper for nix
   rstudio_pkgs = pkgs.rstudioWrapper.override {
     packages = [ rpkgs miatime mia spieceasi spring netcomi oma ];
   };
