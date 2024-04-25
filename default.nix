@@ -162,6 +162,7 @@ let
         glue
         sessioninfo
         microbiomeDataSets
+        curatedMetagenomicData
         microbiome
         ggsignif
         SummarizedExperiment
