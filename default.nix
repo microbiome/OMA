@@ -191,7 +191,8 @@ let
         SuperLearner
         multiview
         MMUPHin
-        gsEasy;
+        gsEasy
+        topGO;
      } ++ [ miatime spieceasi];
    })
 ];
