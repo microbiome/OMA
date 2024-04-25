@@ -61,7 +61,7 @@ shell, examine the script's [code](https://install.determinate.systems/nix)
 
 #### Use Cachix for faster builds
 
-Cachix is a Nix binary cache hosting platform to pre-build
+[Cachix]((https://www.cachix.org)) is a Nix binary cache hosting platform to pre-build
 Nix packages to avoid long waiting times associated with source-code
 compiling. We have built all packages required to run OMA on [Cachix](https://app.cachix.org/cache/oma). To take advantage of the cache:
 
