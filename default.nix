@@ -187,7 +187,8 @@ let
         ggpubr
         fido
         rgl
-        miaViz;
+        miaViz
+        SuperLearner;
      } ++ [ miatime spieceasi];
    })
 ];
