@@ -91,6 +91,9 @@ enough to update all the dependencies required to build R
 packages. Thus, the building process might fail.
 The current file uses the fork, but you can change
 it to the official repository. If it fails, switch back to the fork
+3. On non-NixOS systems, RStudio might not launch due to OpenGL issues.
+It usually says `Could not initialize GLX`. You should install [nixGL](https://github.com/nix-community/nixGL) (use `nix-channel` installation). RStudio
+should launch with `nixGL rstudio` from the Nix shell
 
 ## Development and Contributions
 
