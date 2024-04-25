@@ -189,7 +189,8 @@ let
         rgl
         miaViz
         SuperLearner
-        multiview;
+        multiview
+        MMUPHin;
      } ++ [ miatime spieceasi];
    })
 ];
