@@ -188,7 +188,8 @@ let
         fido
         rgl
         miaViz
-        SuperLearner;
+        SuperLearner
+        multiview;
      } ++ [ miatime spieceasi];
    })
 ];
