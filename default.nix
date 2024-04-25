@@ -190,7 +190,8 @@ let
         miaViz
         SuperLearner
         multiview
-        MMUPHin;
+        MMUPHin
+        gsEasy;
      } ++ [ miatime spieceasi];
    })
 ];
