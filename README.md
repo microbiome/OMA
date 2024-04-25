@@ -59,6 +59,20 @@ shell, examine the script's [code](https://install.determinate.systems/nix)
 7. After the installation, you will be dropped into the `nix` shell, where you can open R, even if you do not have it installed on the system
 8. Run `R`, and then `BiocBook::preview(BiocBook::BiocBook('.'))`. The compilation of the book will begin
 
+#### Use Cachix for faster builds
+
+Cachix is a Nix binary cache hosting platform to pre-build
+Nix packages to avoid long waiting times associated with source-code
+compiling. We have built all packages required to run OMA on [Cachix](https://app.cachix.org/cache/oma). To take advantage of the cache:
+
+1. Install Cachix `nix-env -iA cachix -f https://cachix.org/api/v1/install`
+2. Use OMA cache `cachix use oma`
+3. Follow the instructions
+
+Now, `nix-shell` will use packages from cache instead of building them
+from source. Thus, it should take only a few minutes before the shell
+is available.
+
 #### Troubleshooting
 
 1. If your system does not have a writable `/usr` directory
