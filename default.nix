@@ -196,6 +196,11 @@ let
     inherit (pkgs) R glibcLocales quarto ;
  };
 
+  # R wrapper for nix
+  R = pkgs.rWrapper.override {
+    packages = [ rpkgs miatime mia spieceasi spring netcomi oma ];
+  };
+
   # RStudio wrapper for nix
   rstudio_pkgs = pkgs.rstudioWrapper.override {
     packages = [ rpkgs miatime mia spieceasi spring netcomi oma ];
@@ -213,6 +218,7 @@ pkgs.mkShell {
   LC_MEASUREMENT = "en_US.UTF-8";
 
   buildInputs = [
+    R
     rstudio_pkgs
     system_packages
   ];
