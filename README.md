@@ -76,7 +76,7 @@ is available.
 #### Troubleshooting
 
 1. If your system does not have a writable `/usr` directory
-(for example, one of Fedora Atomic Desktops [distributions](https://fedoraproject.org/atomic-desktops/)), and you have ran `install.packages()` at any point, it is possible that R will attempt 
+(for example, one of Fedora Atomic Desktops [distributions](https://fedoraproject.org/atomic-desktops/)), and you have run `install.packages()` at any point, it is possible that R will attempt
 to install packages to the `R` directory in the home
 directory. `nix-shell` will prioritize package version installed there,
 which
