@@ -1,7 +1,7 @@
 # Extra material {#sec-extras} 
 
 ```{r}
-knitr::opts_chunk$set(eval=TRUE)
+knitr::opts_chunk$set(eval=TRUE, warning=FALSE, message=FALSE)
 ```
 
 
@@ -17,7 +17,7 @@ Here we present two possible uses of the `adonis2` function which performs PERMA
 optional argument `by` has an effect on the statistical outcome, so its two options are
 compared here.
 
-```{r permanova_import, warning = FALSE, message = FALSE}
+```{r permanova_import}
 # import necessary packages
 library(gtools)
 library(purrr)
@@ -31,7 +31,7 @@ different orders of three variables with two different approaches:
 `by = "margin"` or `by = "terms"`.
 
 
-```{r permanova_prep, message = FALSE, warning = FALSE}
+```{r permanova_prep}
 # load and prepare data
 library(mia)
 data("enterotype", package="mia")
@@ -55,7 +55,7 @@ margin_df <- data.frame("Formula" = formulas,
 
 
 
-```{r permanova_loop, message = FALSE, warning = FALSE}
+```{r permanova_loop}
 for (row_idx in 1:nrow(var_perm)) {
   
   # generate temporary formula (i.e. "assay ~ ClinicalStatus + Nationality + Gender")
@@ -104,7 +104,7 @@ ClinicalStatus, Gender and Nationality obtained by PERMANOVA with
 formula when `by = "terms"` (default).
 
 
-```{r permanova_table, message = FALSE, warning = FALSE}
+```{r permanova_table}
 
 df <- terms_df %>%
   dplyr::inner_join(margin_df, by = "Formula", suffix = c(" (terms)", " (margin)"))
@@ -127,22 +127,22 @@ data of @Sprockett2020 available
 through `microbiomeDataSets` package.
 
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 library(fido)
 ```
 
 Loading the libraries and importing data:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 library(fido)
 ```
 
-```{r, message=FALSE, warning=FALSE, eval=FALSE}
+```{r, eval=FALSE}
 library(microbiomeDataSets)
 tse <- SprockettTHData()
 ```
 
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
+```{r, echo=FALSE}
 # saveRDS(tse, file="data/SprockettTHData.Rds")
 # Hidden reading of the saved data
 tse <- readRDS("../extdata/SprockettTHData.Rds")
@@ -154,7 +154,7 @@ We pick three covariates ("Sex","Age_Years","Delivery_Mode") during this
 analysis as an example, and beforehand we check for missing data:
 
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 library(mia)
 cov_names <- c("Sex","Age_Years","Delivery_Mode")
 na_counts <- apply(is.na(colData(tse)[,cov_names]), 2, sum)
@@ -163,21 +163,21 @@ na_summary<-as.data.frame(na_counts,row.names=cov_names)
 
 We drop missing values of the covariates:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 tse <- tse[ , !is.na(colData(tse)$Delivery_Mode) ]
 tse <- tse[ , !is.na(colData(tse)$Age_Years) ]
 ```
 
 We agglomerate microbiome data to Phylum:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 tse_phylum <- mergeFeaturesByRank(tse, "Phylum")
 ```
 
 We extract the counts assay and covariate data to build the model
 matrix:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 Y <- assays(tse_phylum)$counts
 # design matrix
 # taking 3 covariates
@@ -187,7 +187,7 @@ X <- t(model.matrix(~Sex+Age_Years+Delivery_Mode,data=sample_data))
 
 Building the parameters for the `pibble` call to build the model; see more at [vignette](https://jsilve24.github.io/fido/articles/introduction-to-fido.html):
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 n_taxa<-nrow(Y)
 upsilon <- n_taxa+3
 Omega <- diag(n_taxa)
@@ -199,7 +199,7 @@ Gamma <- diag(nrow(X))
 
 Automatically initializing the priors and visualizing their distributions:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 priors <- pibble(NULL, X, upsilon, Theta, Gamma, Xi)
 names_covariates(priors) <- rownames(X)
 plot(priors, pars="Lambda") + ggplot2::xlim(c(-5, 5))
@@ -209,39 +209,39 @@ Estimating the posterior by including our response data `Y`.
 Note: Some computational failures could occur (see [discussion](https://github-wiki-see.page/m/jsilve24/fido/wiki/Frequently-Asked-Questions))
 the arguments `multDirichletBoot` `calcGradHess` could be passed in such case.
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 priors$Y <- Y 
 posterior <- refit(priors, optim_method="adam", multDirichletBoot=0.5) #calcGradHess=FALSE
 ```
 
 Printing a summary about the posterior:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 ppc_summary(posterior)
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 names_categories(posterior) <- rownames(Y)
 plot(posterior,par="Lambda",focus.cov=rownames(X)[2:4])
 ```
 
 Taking a closer look at "Sex" and "Delivery_Mode":
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
 ```
 
 
 ## Interactive 3D Plots
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 # Load libraries
 library(rgl)
 library(plotly)
 ```
 
-```{r setup2, warning=FALSE, message=FALSE}
+```{r setup2}
 library(knitr)
 knitr::knit_hooks$set(webgl = hook_webgl)
 ```
@@ -249,7 +249,7 @@ knitr::knit_hooks$set(webgl = hook_webgl)
 
 In this section we make a 3D version of the earlier  Visualizing the most dominant genus on PCoA (see \@ref(quality-control)), with the help of the plotly [@Sievert2020].
 
-```{r, message=FALSE, warning=FALSE, eval=FALSE}
+```{r, eval=FALSE}
 # Importing necessary libraries
 library(curatedMetagenomicData)
 library(dplyr)
@@ -294,7 +294,7 @@ var_explained <- e/sum(e[e>0])*100
 This section has a cheatsheet for translating common functions in phyloseq
 to TreeSE/mia with example code.
 
-```{r,message=FALSE, warning=FALSE, eval=FALSE}
+```{r}
 #| label = "download_libs"
 
 # Download libraries
@@ -306,7 +306,7 @@ library(ggplot2)
 Start by loading data as a phyloseq object phy and as TreeSE object tse.
 
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "load_data"
 
 # Loading example data
@@ -332,7 +332,7 @@ There are slightly different names for these tables in phyloseq and tse, but the
 phyloseq and TreeSE objects' taxonomy tables can be accessed with tax_table and
 rowData commands.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 phy_taxtable <-
   tax_table(phy)  %>% # Access the phyloseq taxonomic name table
   data.frame # Make into a data frame
@@ -346,7 +346,7 @@ tse_taxtable <- rowData(tse) %>% # Same for tse
 
 Sample data can be accessed with sample_data and colData commands.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "access_sampledata"
 
 phy_sampledata <-
@@ -363,7 +363,7 @@ OTU tables can be accessed with otu_table and assay commands. The assay can also
 hold other types of information like taxa abundances from shotgun metagenomic
 annotation, or functional gene abundances.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "access_otutable"
 
 phy_otutable <-
@@ -379,7 +379,7 @@ After learning how to access various data types from TreeSE, let's see how creat
 
 Let's start by checking what we have.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 phy_otutable %>% head
 phy_sampledata %>% head
 phy_taxtable %>% head
@@ -388,7 +388,7 @@ Ok, these are all normal data frames which could come from upstream bioinformati
 
 Let's demo how to create the treeSE object, how it compares to creating phyloseq and how assay in treeSE compares to otu_table in phyloseq.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "build_dataobjects"
 
 
@@ -404,7 +404,7 @@ phy # Inspect
 
 Let's start by checking our otu table, and see if it is counts or already normalized. We will use the same data frame extracted from the phy object as before.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "check_otutable"
 
 # Check if we have counts or normalized data
@@ -422,7 +422,7 @@ item 'counts' in the list.
 
 Let's convert the data frame to a matrix and make the list of assays.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 # Create TreeSE
 counts <- as.matrix(phy_otutable) # Convert to a matrix
 assays <- SimpleList(counts = counts)
@@ -434,7 +434,7 @@ tse <- TreeSummarizedExperiment(assays = assays,
 ```
 Let's check the different assay names we have.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 assayNames(tse)
 ```
 
@@ -450,7 +450,7 @@ OTU tables to your tse assays.
 With phyloseq you would need three different phyloseq objects, each taking up
 7.7 MB of memory, whilst the tse with the three assays takes up only 18.3 MB.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 # Add another assay that holds the relative abundance normalized OTU table
 tse <-
   transformAssay(tse, assay.type = "counts", method = "relabundance")
@@ -479,7 +479,7 @@ Next let's learn how to subset samples. In phyloseq we use subset_samples comman
 
 In this section we will remove the "Mock" samples and make new data objects.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 phy_nomock <-
   subset_samples(phy, !SampleType == "Mock") # Removing mock samples in phyloseq
 
@@ -489,7 +489,7 @@ tse_nomock <-
 
 Let's see what we have now.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "check_removed_samples"
 
 phy %>% sample_names() %>% length()
@@ -503,7 +503,7 @@ We have removed three samples that where SampleType "Mock".
 
 Taxa are stored in rows in TreeSE and the TreeSE equivalent to subset_taxa is indexing rows.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "take_only_bact"
 
 phy_nomock_bacteria <-
@@ -523,7 +523,7 @@ The mia command estimateDiversity will return a TreeSE and the results are store
 
 In phyloseq you would need to add the alpha diversity separately to your sample data to keep it safe with the other sample level data.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "alpha_div"
 
 # Alpha diversity with phyloseq
@@ -539,7 +539,7 @@ sample_data(phy) %>% head  # Inspect
 
 For the tse we will need to specify which assay (which normalization of the OTU table) we want to use, since we have three options now with the counts, relative abundance and CLR. We can check the assay names first.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "mia_alpha_div"
 
 assayNames(tse) # Check the assay names
@@ -552,7 +552,7 @@ colData(tse) %>% names # shannon has been added to the colData
 
 If we want to extract a data frame that only has the alpha diversity it can be done easily.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "extract_alpha"
 # Extract
 df <- colData(tse) %>% data.frame %>% dplyr::select(matches("shannon"))
@@ -571,7 +571,7 @@ MDS mean the same thing)
 In phyloseq you would again need to add the dimensions to the sample data if you
 want to keep them safe with other metadata.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "beta_div"
 
 # Run PCoA on the relative abundance data and store in phy_ord list
@@ -593,7 +593,7 @@ tse # Inspect, now we have new reducedDim "MDS_bray"
 ### Plotting ordinations: plot_ordination = plotReducedDim
 phyloseq has it's own plotting fuction for ordinations.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "plot_ord"
 
 plot_ordination(physeq = phy, ordination = phy_ord, color = "SampleType")
@@ -603,18 +603,17 @@ It is also easy to plot the ordination stored in reducedDim in the tse using the
 plotReducedDim function. We can first check what the name of the Bray-Curtis
 MDS/PCoA was incase we forgot.
 
-```{,message=FALSE, warning=FALSEr}
+```{r}
 #| label = "check_reducedDimNames"
 # Check reduced dim names
 reducedDimNames(tse)
 ```
 Ok, let's plot.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "plot_red_dim"
 # Plot
 plotReducedDim(tse, "MDS_bray", color_by = "SampleType")
-
 # The sign is given arbitrarily. We can change it to match the plot_ordination
 reducedDim(tse)[, 1] <- -reducedDim(tse)[, 1]
 reducedDim(tse)[, 2] <- -reducedDim(tse)[, 2]
@@ -625,7 +624,7 @@ plotReducedDim(tse, "MDS_bray", color_by = "SampleType")
 
 Often you might want to study your data using different taxonomic ranks, for example check if you see differences in the abundances of higher taxonomic levels.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "tax_glom"
 
 phy_fam <- tax_glom(phy, taxrank = "Family")
@@ -639,7 +638,7 @@ taxrank by default (NArm = TRUE).
 So we will add the onRankOnly = TRUE to mergeFeaturesByRank function which is
 equivalent to the default behaviour of tax_glom.
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "mergeFeaturesByRank"
 
 altExp(tse, "Family") <-
@@ -652,7 +651,7 @@ altExp(tse, "Family")
 
 ### Cheatsheet
 
-```{r,message=FALSE, warning=FALSE}
+```{r}
 #| label = "cheatsheet"
 
 library(knitr)
