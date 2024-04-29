@@ -1,8 +1,9 @@
 # Extra material {#sec-extras} 
 
 ```{r}
-knitr::opts_chunk$set(eval=FALSE)
+knitr::opts_chunk$set(eval=TRUE)
 ```
+
 
 ## Slides
 
@@ -144,7 +145,8 @@ tse <- SprockettTHData()
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
 # saveRDS(tse, file="data/SprockettTHData.Rds")
 # Hidden reading of the saved data
-tse <- readRDS("data/SprockettTHData.Rds")
+tse <- readRDS("../extdata/SprockettTHData.Rds")
+
 ```
 
 
@@ -292,7 +294,9 @@ var_explained <- e/sum(e[e>0])*100
 This section has a cheatsheet for translating common functions in phyloseq
 to TreeSE/mia with example code.
 
-```{r download_libs}
+```{r}
+#| label = "download_libs"
+
 # Download libraries
 library(phyloseq)
 library(dplyr)
@@ -301,7 +305,10 @@ library(ggplot2)
 
 Start by loading data as a phyloseq object phy and as TreeSE object tse.
 
-```{r load_data}
+
+```{r}
+#| label = "load_data"
+
 # Loading example data
 # Using GlobalPatterns dataset
 
@@ -339,7 +346,9 @@ tse_taxtable <- rowData(tse) %>% # Same for tse
 
 Sample data can be accessed with sample_data and colData commands.
 
-```{r access_sampledata}
+```{r}
+#| label = "access_sampledata"
+
 phy_sampledata <-
   sample_data(phy) %>% data.frame
 
@@ -353,7 +362,10 @@ tse_sampledata <-
 OTU tables can be accessed with otu_table and assay commands. The assay can also
 hold other types of information like taxa abundances from shotgun metagenomic
 annotation, or functional gene abundances.
-```{r access_otutable}
+
+```{r}
+#| label = "access_otutable"
+
 phy_otutable <-
   otu_table(phy) %>% data.frame
 
@@ -376,7 +388,9 @@ Ok, these are all normal data frames which could come from upstream bioinformati
 
 Let's demo how to create the treeSE object, how it compares to creating phyloseq and how assay in treeSE compares to otu_table in phyloseq.
 
-```{r build_dataobjects}
+```{r}
+#| label = "build_dataobjects"
+
 
 # Create phyloseq object
 OTU_phy <- otu_table(phy_otutable %>% as.matrix, taxa_are_rows = TRUE) # Make OTU table
@@ -390,7 +404,9 @@ phy # Inspect
 
 Let's start by checking our otu table, and see if it is counts or already normalized. We will use the same data frame extracted from the phy object as before.
 
-```{r check_otutable}
+```{r}
+#| label = "check_otutable"
+
 # Check if we have counts or normalized data
 
 phy_otutable %>% head
@@ -473,7 +489,9 @@ tse_nomock <-
 
 Let's see what we have now.
 
-```{r check_removed_samples}
+```{r}
+#| label = "check_removed_samples"
+
 phy %>% sample_names() %>% length()
 phy_nomock %>% sample_names() %>% length()
 colnames(tse) %>% length()
@@ -485,7 +503,9 @@ We have removed three samples that where SampleType "Mock".
 
 Taxa are stored in rows in TreeSE and the TreeSE equivalent to subset_taxa is indexing rows.
 
-```{r take_only_bact}
+```{r}
+#| label = "take_only_bact"
+
 phy_nomock_bacteria <-
   subset_taxa(phy_nomock, Kingdom == "Bacteria")
 tse_nomock_bacteria <-
@@ -503,7 +523,9 @@ The mia command estimateDiversity will return a TreeSE and the results are store
 
 In phyloseq you would need to add the alpha diversity separately to your sample data to keep it safe with the other sample level data.
 
-```{r alpha_div}
+```{r}
+#| label = "alpha_div"
+
 # Alpha diversity with phyloseq
 df <- estimate_richness(phy, measures = "Shannon") 
 head(df) # Inspect
@@ -517,7 +539,9 @@ sample_data(phy) %>% head  # Inspect
 
 For the tse we will need to specify which assay (which normalization of the OTU table) we want to use, since we have three options now with the counts, relative abundance and CLR. We can check the assay names first.
 
-```{r mia_alpha_div}
+```{r}
+#| label = "mia_alpha_div"
+
 assayNames(tse) # Check the assay names
 
 tse <- estimateDiversity(tse, assay.type = "counts", index = "shannon") # Let's use counts
@@ -528,7 +552,8 @@ colData(tse) %>% names # shannon has been added to the colData
 
 If we want to extract a data frame that only has the alpha diversity it can be done easily.
 
-```{r extract_alpha}
+```{r}
+#| label = "extract_alpha"
 # Extract
 df <- colData(tse) %>% data.frame %>% dplyr::select(matches("shannon"))
 
@@ -546,7 +571,9 @@ MDS mean the same thing)
 In phyloseq you would again need to add the dimensions to the sample data if you
 want to keep them safe with other metadata.
 
-```{r beta_div}
+```{r}
+#| label = "beta_div"
+
 # Run PCoA on the relative abundance data and store in phy_ord list
 phy_ord <- ordinate(phy_relab, method = "PCoA", distance = "bray")
 
@@ -566,19 +593,25 @@ tse # Inspect, now we have new reducedDim "MDS_bray"
 ### Plotting ordinations: plot_ordination = plotReducedDim
 phyloseq has it's own plotting fuction for ordinations.
 
-```{r plot_ord}
+```{r}
+#| label = "plot_ord"
+
 plot_ordination(physeq = phy, ordination = phy_ord, color = "SampleType")
 ```
 
 It is also easy to plot the ordination stored in reducedDim in the tse using the
 plotReducedDim function. We can first check what the name of the Bray-Curtis
 MDS/PCoA was incase we forgot.
-```{r check_reducedDimNames}
+
+```{r}
+#| label = "check_reducedDimNames"
 # Check reduced dim names
 reducedDimNames(tse)
 ```
 Ok, let's plot.
-```{r plot_red_dim}
+
+```{r}
+#| label = "plot_red_dim"
 # Plot
 plotReducedDim(tse, "MDS_bray", color_by = "SampleType")
 
@@ -592,7 +625,9 @@ plotReducedDim(tse, "MDS_bray", color_by = "SampleType")
 
 Often you might want to study your data using different taxonomic ranks, for example check if you see differences in the abundances of higher taxonomic levels.
 
-```{r tax_glom}
+```{r}
+#| label = "tax_glom"
+
 phy_fam <- tax_glom(phy, taxrank = "Family")
 ```
 
@@ -604,7 +639,9 @@ taxrank by default (NArm = TRUE).
 So we will add the onRankOnly = TRUE to mergeFeaturesByRank function which is
 equivalent to the default behaviour of tax_glom.
 
-```{r mergeFeaturesByRank}
+```{r}
+#| label = "mergeFeaturesByRank"
+
 altExp(tse, "Family") <-
   mergeFeaturesByRank(tse,
                       rank = "Family",
@@ -615,7 +652,9 @@ altExp(tse, "Family")
 
 ### Cheatsheet
 
-```{r cheatsheet}
+```{r}
+#| label = "cheatsheet"
+
 library(knitr)
 df <-
   data.frame(
