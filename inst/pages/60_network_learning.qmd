@@ -9,13 +9,13 @@ Learning and analyzing microbial association networks is another common explorat
 
 A typical workflow for estimating a microbial network involves several steps, including data preprocessing, estimating microbial associations, and transforming them into edge weights. The resulting network can be analyzed using local network properties, such as centrality measures, or global measures that describe the overall structure of the network. Network plots provide further insight into the microbial community structure and allow for exploratory analysis of microbial relationships.
 
-In this chapter, we go through the complete workflow of constructing and analyzing a single microbial network, step by step. A potential next analysis task is to compare networks between groups, such as patients and controls, different environmental conditions, or different time points. How to compare networks between two groups is explained in [@network-comparison].
+In this chapter, we go through the complete workflow of constructing and analyzing a single microbial network, step by step. A potential next analysis task is to compare networks between groups, such as patients and controls, different environmental conditions, or different time points. How to compare networks between two groups is explained in [@sec-network-comparison].
 
 ## Network learning
 
 ### Typical workflow {#sec-network-learning-workflow}
 
-Figure [@fig-network-workflow] shows the workflow for learning/constructing a microbial association network as proposed by @peschel2021netcomi. The respective steps are explained below.
+[@fig-network-workflow] shows the workflow for learning/constructing a microbial association network as proposed by @peschel2021netcomi. The respective steps are explained below.
 
 ```{r network-workflow, echo=FALSE, out.width='100%', fig.cap='The typical input is a $p$ x $n$ dimensional count matrix coming from a sequencing process, where $n$ is the number of samples and $p$ the number of features / ASVs / OTUs. Steps 1 through 6 are explained below. Each matrix resulting from steps 4, 5, and 6 plays a specific role in the final network: The adjacency matrix is used for edge colors, dissimilarity for layout, and similarity for edge weights. In weighted networks, the similarity matrix equals the adjacency matrix.'}
 #| label: fig-network-workflow
@@ -26,22 +26,22 @@ knitr::include_graphics("images/FigureNetworkLearning.png")
 
 2.  **Normalization:** To avoid compositional effects, the data are normalized using a compositionality aware transformation. A common approach is the centered log-ratio (clr) transformation, which moves the data from a $p$-dimensional simplex to Euclidean space so that standard statistical analysis methods are valid. A variance stabilizing transformation (vst) is also a suitable approach for normalizing microbial count data [@badri2020shrinkage].
 
-3.  **Association estimation:** This is the crucial step in network learning to obtain statistical relations between the taxa. Common association measures include correlation, conditional dependence (which we will equate to partial correlation), and proportionality. Further information on these three types of association and their application can be found in Section [@sec-more-about-association]. The following list gives a selection of compositionality aware approaches:
+3.  **Association estimation:** This is the crucial step in network learning to obtain statistical relations between the taxa. Common association measures include correlation, conditional dependence (which we will equate to partial correlation), and proportionality. Further information on these three types of association and their application can be found in [@sec-more-about-association]. The following list gives a selection of compositionality aware approaches:
     + **Compositionality aware correlation estimation methods:**
       -   Pearson's correlation coefficient (+ normalization)
       -   Spearman's rank correlation coefficient (+ normalization)
       -   Covariance shrinkage ([corpcor](https://strimmerlab.github.io/software/corpcor/) package) (+ normalization)
-      -   SparCC (implemented in [SpiecEasi](https://rdrr.io/github/zdk123/SpiecEasi/man/sparcc.html)); applied in Section \@ref(sparcc-correlation)
+      -   SparCC (implemented in [SpiecEasi](https://rdrr.io/github/zdk123/SpiecEasi/man/sparcc.html)); applied in [@sec-sparcc-correlation]
       -   CCREPE ([ccrepe](https://bioconductor.org/packages/release/bioc/html/ccrepe.html) package)
       -   CCLasso ([R code on GitHub](https://github.com/huayingfang/CCLasso))
     + **Compositionality aware measures of conditional dependence / partial correlation:**
-      -   [SpiecEasi](https://github.com/zdk123/SpiecEasi) with Meinshausen and Bühlmann (MB) neighborhood selection; applied in Section \@ref(spieceasi-mb)
+      -   [SpiecEasi](https://github.com/zdk123/SpiecEasi) with Meinshausen and Bühlmann (MB) neighborhood selection; applied in [@sec-spieceasi-mb]
       -   [SpiecEasi](https://github.com/zdk123/SpiecEasi) with the graphical lasso (glasso)
       -   gCoda ([R code on GitHub](https://github.com/huayingfang/gCoda))
-      -   [SPRING](https://github.com/GraceYoon/SPRING); applied in Section \@ref(netcomi-spring)
+      -   [SPRING](https://github.com/GraceYoon/SPRING); applied in [@sec-spring-network]
     + **Proportionality measures (proportionality aware by definition):**
       - [propr](https://github.com/tpq/propr)
-      - [Shrinkage proportionality estimator](https://github.com/MichelleBadri/NormCorr-manuscript/blob/master/code/helpers/norm_functions.R); applied in Section \@ref(shrinkage-prop)    
+      - [Shrinkage proportionality estimator](https://github.com/MichelleBadri/NormCorr-manuscript/blob/master/code/helpers/norm_functions.R); applied in [@sec-shrinkage-prop]
         
 4.  **Sparsification:** Transforming the estimated associations directly into adjacencies would lead to a dense network where all nodes are connected and only weighted network measures are meaningful. Therefore, the association matrix is usually sparsified to select edges of interest. A common sparsification approach for correlations is thresholding, where correlations with a magnitude below the threshold are set to zero. Another possibility is a statistical test (Student's t-test or permutation test) with the null hypothesis that the correlation is equal to zero. SpiecEasi uses the StARS stability selection approach [@liu2010stability] to decide on an appropriate sparsification level of the inferred conditional dependence graph.
 
@@ -55,7 +55,7 @@ knitr::include_graphics("images/FigureNetworkLearning.png")
 
 The main association measure used in this chapter is the [SPRING](https://github.com/GraceYoon/SPRING) ("Semi-Parametric Rank-based approach for INference in Graphical model") method proposed by @yoon2019microbial. `SPRING` learns conditional dependency graphs for compositional data and follows the neighborhood selection method introduced by @meinshausen2006high ("MB"). We will show how to apply the method directly, as well as how to use it in conjunction with the R package [NetCoMi](https://github.com/stefpeschel/NetCoMi), which is specifically designed for the construction and analysis of networks for microbiome data.
 
-See Section [@sec-more-about-association] for a comparison of all three association types (correlation, partial correlation, and proportionality) with more information on each measure and applications.
+See [@sec-more-about-association] for a comparison of all three association types (correlation, partial correlation, and proportionality) with more information on each measure and applications.
 
 We demonstrate the workflow using the the **PeerJ data set** [@potbhare2022skin]. It contains skin microbial profiles of 58 subjects.
 
@@ -136,7 +136,7 @@ dim(tse)
 
 ### SPRING network {#sec-spring-network}
 
-As explained in Section [@sec-network-learning-workflow], we use [SPRING](https://github.com/GraceYoon/SPRING) ("Semi-Parametric Rank-based approach for INference in Graphical model") as association measure. We first use the `SPRING` function directly to construct a conditional dependency graph. 
+As explained in [@sec-network-learning-workflow], we use [SPRING](https://github.com/GraceYoon/SPRING) ("Semi-Parametric Rank-based approach for INference in Graphical model") as association measure. We first use the `SPRING` function directly to construct a conditional dependency graph. 
 
 Neither zero replacement nor normalization (steps 1 and 2 in our workflow) are required because SPRING uses a modified clr (mclr) transformation that can handle zero counts, and the correlation estimation method itself can also deal with zeros in the data. mclr is similar to the clr transformation except that mclr considers only the non-zero values. More precisely, the geometric mean is derived from positive values only, and zero counts remain zero after the transformation. This approach is similar to the "robust clr" (rclr) transformation included in the `vegan` package, except that mclr applies a positive shift to all non-zero values to make them strictly positive. See [@yoon2019microbial] for details.
 
@@ -168,11 +168,11 @@ rownames(spring_cor) <- colnames(spring_cor) <- rownames(tse)
 diag(spring_cor) <- 1
 ```
 
-As explained in Section [@sec-network-learning-workflow], the estimated associations are sparsified, transformed into dissimilarities, and finally transformed into similarities, which are the adjacency values. We write a function for these steps, which will be reused later.
+As explained in [@sec-network-learning-workflow], the estimated associations are sparsified, transformed into dissimilarities, and finally transformed into similarities, which are the adjacency values. We write a function for these steps, which will be reused later.
 
-Since `SPRING` already includes a sparsification approach, the `thresh` argument is not needed here, but will be needed in Section [@sec-more-about-association] for other association measures.
+Since `SPRING` already includes a sparsification approach, the `thresh` argument is not needed here, but will be needed in [@sec-more-about-association] for other association measures.
 
-To be consistent with the workflow, we provide two dissimilarity transformations: "signed" and "unsigned" (see Section [@sec-network-learning-workflow] for an explanation). These transformations were introduced by @vanDongen2012metric. We use the "signed" transformation in our examples so that strongly negatively associated genera have low edge weights.
+To be consistent with the workflow, we provide two dissimilarity transformations: "signed" and "unsigned" (see [@sec-network-learning-workflow] for an explanation). These transformations were introduced by @vanDongen2012metric. We use the "signed" transformation in our examples so that strongly negatively associated genera have low edge weights.
 
 The output of the function is an `igraph` object, which can be plotted and analyzed using functions from the `igraph` package.
 
@@ -217,7 +217,7 @@ spring_graph <- transform_asso(spring_cor)$graph
 
 ### NetCoMi network {#sec-netcomi-spring}
 
-The [NetCoMi](https://github.com/stefpeschel/NetCoMi) [@peschel2021netcomi] package is specifically designed to construct, analyze, and compare networks for microbiome data and implements the complete workflow described in Section [@sec-network-learning-workflow]. Instead of using several functions for each of the steps, `NetCoMi` provides a single function for network construction (`netConstruct()`), so the package streamlines the workflow considerably. The user can choose from a variety of methods for data preprocessing, association estimation, sparsification, and transformation. The returned `microNet` object can then be passed to `netAnalyze()` (the network analysis function) so that all necessary information is available for the network analysis workflow.
+The [NetCoMi](https://github.com/stefpeschel/NetCoMi) [@peschel2021netcomi] package is specifically designed to construct, analyze, and compare networks for microbiome data and implements the complete workflow described in [@sec-network-learning-workflow]. Instead of using several functions for each of the steps, `NetCoMi` provides a single function for network construction (`netConstruct()`), so the package streamlines the workflow considerably. The user can choose from a variety of methods for data preprocessing, association estimation, sparsification, and transformation. The returned `microNet` object can then be passed to `netAnalyze()` (the network analysis function) so that all necessary information is available for the network analysis workflow.
  
 ```{r, message=FALSE, warning=FALSE}
 library(NetCoMi)
@@ -260,6 +260,7 @@ netcomi_graph <- SpiecEasi::adj2igraph(abs(netcomi_net$adjaMat1))
 ```{r, eval=FALSE, echo=FALSE}
 save(spring_est, netcomi_net, file = "general/network_data/spring_networks.RData")
 ```
+
 ## Network analysis with igraph {#sec-network-analysis}
 
 The computed network is now analyzed using appropriate methods. We will first use the `igraph` package to analyze the `SPRING` network. NetCoMi's `netAnalyze()` function will be used later to analyze the constructed `microNet` object.
@@ -520,7 +521,7 @@ legend(0.7, 1.1, cex = 1.7, title = "estimated correlation:",
 
 ### Highlight data features
 
-We now color nodes according to their phylum. The node sizes are proportional to a taxon's sum of mclr-transformed abundances. As already mentioned in Section \@ref(spring-network), this is the normalization method used by `SPRING`. A color palette from `RColorBrewer` is used here.
+We now color nodes according to their phylum. The node sizes are proportional to a taxon's sum of mclr-transformed abundances. As already mentioned in [@sec-spring-network], this is the normalization method used by `SPRING`. A color palette from `RColorBrewer` is used here.
 
 ```{r, message=FALSE, warning=FALSE}
 library(RColorBrewer)
@@ -615,7 +616,7 @@ sparcc_cor <- SpiecEasi::sparcc(t(assay(tse, "counts")))$Cor
 rownames(sparcc_cor) <- colnames(sparcc_cor) <- rownames(tse)
 ```
 
-We reuse the `transform_asso()` function created in Section \@ref(spring-network), which sparsifies the association matrix, transforms it into a similarity matrix, and finally returns an `igraph` object.
+We reuse the `transform_asso()` function created in [@sec-spring-network], which sparsifies the association matrix, transforms it into a similarity matrix, and finally returns an `igraph` object.
 
 Two threshold values are used to see the effect of sparsification later in the network plot.
 
@@ -726,7 +727,7 @@ We will look at the degree distribution in the next section to quantify these ob
 
 ### Network analysis
 
-Here we repeat some of the network analysis approaches explained in Section \@ref(network-analysis). The analyses are performed simultaneously for the three association measures as well as the SPRING network constructed in Section \@ref(spring-network). Therefore, we start by creating a list of all the graph objects we need for the analyses.
+Here we repeat some of the network analysis approaches explained in [@sec-network-analysis]. The analyses are performed simultaneously for the three association measures as well as the SPRING network constructed in [@sec-spring-network]. Therefore, we start by creating a list of all the graph objects we need for the analyses.
 
 ```{r graphlist}
 graphlist <- list(SparCC = sparcc_graph04, 
