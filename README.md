@@ -65,7 +65,7 @@ shell, examine the script's [code](https://install.determinate.systems/nix)
 Nix packages to avoid long waiting times associated with source-code
 compiling. We have built all packages required to run OMA on [Cachix](https://app.cachix.org/cache/oma). To take advantage of the cache:
 
-1. Install Cachix `nix profile install nixpkgs#cachix`
+1. Install Cachix with `nix-env -iA cachix -f https://cachix.org/api/v1/install` or `nix profile install nixpkgs#cachix`. Note that if you opt for `nix profile` installation, `nix-env` becomes unavailable
 2. Use OMA cache `cachix use oma`
 3. Follow the instructions
 
