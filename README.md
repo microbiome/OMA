@@ -59,6 +59,29 @@ shell, examine the script's [code](https://install.determinate.systems/nix)
 7. After the installation, you will be dropped into the `nix` shell, where you can open R, even if you do not have it installed on the system
 8. Run `R`, and then `BiocBook::preview(BiocBook::BiocBook('.'))`. The compilation of the book will begin
 
+#### Use `direnv` shell extension as an alternative to `nix-shell`
+
+It is possible to use (`direnv`)[https://direnv.net] shell extension to run the project commands without the requirement
+to enter the shell with `nix-shell`. With this setup, every time you enter a project directory, you will have access
+to the packages and system dependencies specific to that project.
+
+1. [Install](https://direnv.net/docs/installation.html) `direnv` for your system
+2. [Hook](https://direnv.net/docs/hook.html) `direnv` into the shell
+3. On non-NixOS systems, it is required to tell `direnv` to use settings from `~/.nix-profile/share/nix-direnv/direnvrc`. The command with overwrite the `direnvrc` file:
+```bash
+echo 'source ~/.nix-profile/share/nix-direnv/direnvrc' > ~/.config/direnv/direnvrc
+```
+4. In the `OMA` directory run
+
+```bash
+echo 'use nix' > .envrc
+direnv allow
+```
+5. If nothing happens, exit and re-enter the directory
+6. The first time it might take some time to install the packages, but `direnv` will create a `.direnv` in the current directory with cache for
+this project
+7. You now have access to R and its packages in the directory with `.envrc` file without running `nix-shell` every time
+
 #### Use Cachix for faster builds
 
 [Cachix]((https://www.cachix.org)) is a Nix binary cache hosting platform to pre-build
