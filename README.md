@@ -55,7 +55,7 @@ R or any R package installed on the system to build the OMA book with Nix.
 shell, examine the script's [code](https://install.determinate.systems/nix)
 4. Run `nix --version` in the terminal to check if `nix` was installed
 5. This repository contains the `default.nix` file, which is written in Nix language and declares the dependencies for the OMA book
-6. Run `nix-shell` in the directory with `default.nix`. The installation of will begin
+6. Run `nix-shell` in the directory with `default.nix`. The installation of packages and system dependencies will begin
 7. After the installation, you will be dropped into the `nix` shell, where you can open R, even if you do not have it installed on the system
 8. Run `R`, and then `BiocBook::preview(BiocBook::BiocBook('.'))`. The compilation of the book will begin
 
