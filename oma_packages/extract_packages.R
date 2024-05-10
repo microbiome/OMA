@@ -1,5 +1,5 @@
 packages <- function() {
-  lines <- readLines("DESCRIPTION")
+  lines <- readLines("../DESCRIPTION")
   
   extract_packages <- function(lines, section_name) {
     section_index <- grep(paste0("^", section_name, ":"), lines)
