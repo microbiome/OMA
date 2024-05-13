@@ -740,3 +740,39 @@ Conversion is possible between other data formats. Interested readers can refer 
 * [makeSummarizedExperimentFromBiom](https://microbiome.github.io/mia/reference/makeSummarizedExperimentFromBiom.html)  
 * [importMetaPhlAn](https://microbiome.github.io/mia/reference/importMetaPhlAn.html)  
 * [importQZA](https://microbiome.github.io/mia/reference/importQIIME2.html)
+
+## Exporting data container {#sec-exporting-data-container}
+
+### Export TreeSummarizedExperiment
+
+Exporting a `TreeSE` data container can be done using *feather* package. TSE object has to be converted into a dataframe (`DataFrame`) to be converted. The output file is .feather file, which can be imported in other languages such as Julia or Python. For information, have a look at the [FeatherFile](https://juliapackages.com/p/featherfiles) Julia package and [feather-format](https://pypi.org/project/feather-format/) Python library.
+
+```{r}
+# Import TSE
+library(mia)
+data(GlobalPatterns, package="mia")
+tse <- GlobalPatterns
+# Convert into a DataFrame
+tse <- transformAssay(tse, MARGIN = "samples", method="relabundance")
+molten_tse <- mia::meltAssay(tse,
+                        add_row_data = TRUE,
+                        add_col_data = TRUE,
+                        assay.type = "relabundance")
+# Export as a feather file
+library(feather)
+path <- "dirname(rstudioapi::getSourceEditorContext()$path)/../../../tse.feather"
+write_feather(molten_tse,path)
+```
+
+### Export MultiAssayExperiment
+
+Exporting a `MultiAssayExperiment` data container can also be done using *feather* package.
+
+```{r}
+# Convert into a DataFrame
+molten_mae <- longFormat(mae)
+molten_mae <- data.frame(molten_mae)
+path <- "dirname(rstudioapi::getSourceEditorContext()$path)/../../../mae.feather"
+write_feather(molten_mae,path)
+```
+
