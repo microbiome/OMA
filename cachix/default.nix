@@ -13,8 +13,8 @@ let
      src = pkgs.fetchgit {
       url = "https://github.com/microbiome/mia";
       branchName = "devel";
-      rev = "58cc49bd118ff2b75d12b2eca006cfd48c307933";
-      sha256 = "sha256-BsQ7/nJBLadF2NQgGpHhAC10AFQaiK+HbMCIjfOH6d4=";
+      rev = "7a0b0ead9d82087f86e29e4867b3412f88303cd7";
+      sha256 = "sha256-rs0pY27HvtC3fs8DsT/82uMzmEhVgwauW+9//i6uTUA=";
   };
     # mia dependencies (see DESCRIPTION)
     propagatedBuildInputs = builtins.attrValues {
@@ -43,8 +43,8 @@ let
       tibble
       tidyr
       bluster
-      rgl
-      MatrixGenerics;
+      MatrixGenerics
+      mediation;
     };
   }) ];
 
