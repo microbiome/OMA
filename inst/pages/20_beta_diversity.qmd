@@ -226,15 +226,15 @@ plotReducedDim(tse, "Unifrac",
                colour_by = "Group")
 ```
 
-### Rarefaction to mitigate impact of uneven sequencing effort
+### Rarefaction to mitigate impacts of uneven sequencing effort
 
 The sequencing depth of a sample refers to the number of gene sequences read 
 during the sequencing process. A variation in sequencing depth across the 
 samples of a study may impact the calculation of alpha and beta diversity 
 metrics [@Schloss2023]. 
 It is common to find significant variation in sequencing depth between samples.
-For instance, the samples of the TreeSummarizedExperiment `GlobalPatterns` show 
-up to a 40-fold difference in the number of gene sequences.
+For instance, the samples of the TreeSummarizedExperiment dataset 
+`GlobalPatterns` show up to a 40-fold difference in the number of gene sequences.
 
 ```{r rarefaction_1}
 # Calculate the list of sequencing depths across samples
@@ -246,17 +246,17 @@ depth_variation
 
 To address uneven sequencing effort, rarefaction aims to normalize sequence 
 counts using subsampling. 
-First, the user chooses the rarefaction depth and a number of iterations N. All the samples with sequence count below the rarefaction depth are removed and gene sequences are randomly drawn from other samples to reach the threshold. Then a beta diversity metric is calculated from those samples and the process is performed N times. Finally, beta diversity is estimated with the mean of all N beta diversity values calculated on subsampled data.
+First, the user chooses the rarefaction depth and a number of iterations N. All the samples with sequence count below the rarefaction depth are removed and gene sequences are randomly drawn from the samples left to get subsamples fitting the rarefaction depth. Then a beta diversity metric is calculated from those subsamples and the process is iterated N times. Finally, beta diversity is estimated with the mean of all beta diversity values calculated on subsampled data.
 
 There has been a long-lasting controversy surrounding the use of rarefaction in
-microbial ecology. The main concern was that rarefaction would omit data. 
+microbial ecology. The main concern is that rarefaction would omit data. 
 However, if the subsampling process is repeated a sufficient number of times, 
-and if the threshold is set to the lowest sequence count found across all samples, no data will be omitted. 
+and if the rarefaction depth is set to the lowest sequence count found across all samples, no data will be omitted. 
 Moreover, Patrick Schloss has demonstrated that rarefaction is "the only method that could control for variation in uneven sequencing effort when measuring commonly used alpha and beta diversity metrics" [@Schloss2023].
 
-The function `avgdist` from the vegan package is a function that uses rarefaction to compute beta diversity.
+The function `vegan::avgdist` uses rarefaction to compute beta diversity :
 
-```{r rarefaction_2}
+```{r, fig.cap = "MDS plot based on the Bray-Curtis distances using rarefaction on the GlobalPatterns dataset."}
 
 tse <- runMDS(tse, 
               assay.type="counts",
@@ -265,13 +265,46 @@ tse <- runMDS(tse,
               sample = min(colSums(assay(tse, "counts"))), # rarefaction depth
 			        distfun = vegan::vegdist, # Use vegdist distance function
 			        dmethod = "bray", # Bray-Curtis dissimilarity (vegdist argument)
-			        iterations = 10 # Default at 100 (avgdist argument)
+			        iterations = 10 # 10 iterations should be enough for distance calculations
 )
 
 plotReducedDim(tse, "MDS")
 ```
 
+`ntop` is a `runMDS` option. Here it is set to total number of features in `GlobalPatterns` dataset so that they are not filtered.
 
+The argument `sample` is by default set to the smallest sequence count across 
+all samples. This ensures that no sample will be removed during the rarefaction 
+process.
+
+The argument `iterations` is by default set to 100. 10 iterations should be 
+sufficient for distance calculations.
+
+To use transformations after the rarefaction of the samples and before the beta diversity calculation, `vegan::avgdist` has the argument `transf` :
+
+```{r, fig.cap = "MDS plot based on the Bray-Curtis distances using rarefaction with clr transformation on the GlobalPatterns dataset."}
+# Define custom transformation function..
+clr <- function (x) {
+  vegan::decostand(x, method="clr", pseudocount=1)
+}
+
+# Run transformation after rarefactions before calculating the distances..
+tse <- runMDS(tse, assay.type="counts",
+                           ntop=nrow(GlobalPatterns), 
+                           FUN = vegan::avgdist, # Custom distance that includes rarefaction
+                           sample=min(colSums(assay(tse, "counts"))), # rarefaction depth 
+			                     distfun=vegdist,  # Use vegdist distance function
+                           dmethod = "euclidean", # euclidean dissimilarity
+			                     iterations = 10, 
+			                     transf=clr) 
+
+plotReducedDim(tse, "MDS")
+```
+
+The mia package has the rarefaction function `subsampleCounts` that randomly
+subsamples one of the assays of a TreeSummarizedExperiment dataset. However, the 
+iterations and dissimilarity calculations are not included and must be added 
+manually.
 
 ### Other ordination methods {#sec-other-ord-methods}
 
