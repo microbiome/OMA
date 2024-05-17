@@ -1,6 +1,5 @@
 # Use a specific version of nixpkgs from an bleeding-edge fork of github.com/NixOS/nixpkgs
 let
-  pkgs = import (fetchTarball "https://github.com/rstats-on-nix/nixpkgs/archive/c68fb0f3730abab90db6bd70e9fda5493315876a.tar.gz") {};
   pkgs = import (fetchTarball "https://github.com/rstats-on-nix/nixpkgs/archive/0a6b0ea0f895208a490ec7fb3fe63232117511b7.tar.gz") {};
   # Add generic R packages required for this build
   rpkgs = with pkgs.rPackages; [
