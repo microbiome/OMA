@@ -226,6 +226,53 @@ plotReducedDim(tse, "Unifrac",
                colour_by = "Group")
 ```
 
+### Rarefaction to mitigate impact of uneven sequencing effort
+
+The sequencing depth of a sample refers to the number of gene sequences read 
+during the sequencing process. A variation in sequencing depth across the 
+samples of a study may impact the calculation of alpha and beta diversity 
+metrics [@Schloss2023]. 
+It is common to find significant variation in sequencing depth between samples.
+For instance, the samples of the TreeSummarizedExperiment `GlobalPatterns` show 
+up to a 40-fold difference in the number of gene sequences.
+
+```{r rarefaction_1}
+# Calculate the list of sequencing depths across samples
+sequencing_depths <- colSums(assay(tse))
+# Calculate variation between highest and lowest sequencing depth 
+depth_variation <- max(sequencing_depths)/min(sequencing_depths)
+depth_variation
+```
+
+To address uneven sequencing effort, rarefaction aims to normalize sequence 
+counts using subsampling. 
+First, the user chooses the rarefaction depth and a number of iterations N. All the samples with sequence count below the rarefaction depth are removed and gene sequences are randomly drawn from other samples to reach the threshold. Then a beta diversity metric is calculated from those samples and the process is performed N times. Finally, beta diversity is estimated with the mean of all N beta diversity values calculated on subsampled data.
+
+There has been a long-lasting controversy surrounding the use of rarefaction in
+microbial ecology. The main concern was that rarefaction would omit data. 
+However, if the subsampling process is repeated a sufficient number of times, 
+and if the threshold is set to the lowest sequence count found across all samples, no data will be omitted. 
+Moreover, Patrick Schloss has demonstrated that rarefaction is "the only method that could control for variation in uneven sequencing effort when measuring commonly used alpha and beta diversity metrics" [@Schloss2023].
+
+The function `avgdist` from the vegan package is a function that uses rarefaction to compute beta diversity.
+
+```{r rarefaction_2}
+
+tse <- runMDS(tse, 
+              assay.type="counts",
+              ntop = nrow(GlobalPatterns),
+              FUN = avgdist,
+              sample = min(colSums(assay(tse, "counts"))), # rarefaction depth
+			        distfun = vegan::vegdist, # Use vegdist distance function
+			        dmethod = "bray", # Bray-Curtis dissimilarity (vegdist argument)
+			        iterations = 10 # Default at 100 (avgdist argument)
+)
+
+plotReducedDim(tse, "MDS")
+```
+
+
+
 ### Other ordination methods {#sec-other-ord-methods}
 
 Other dimension reduction methods, such as PCA and UMAP, are inherited from the
@@ -283,8 +330,6 @@ would report relative stress, which varies in the unit interval and is better
 if smaller. This can be calculated as shown below.
 
 ```{r relstress}
-# Load vegan package
-library(vegan)
 
 # Quantify dissimilarities in the original feature space
 x <- assay(tse, "relabundance") # Pick relabunance assay separately
