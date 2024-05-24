@@ -190,13 +190,60 @@ Here we cover how to construct a TreeSE from CSV files, using the components
 of OKeefeDSData from the microbiomeDataSets package as an example dataset.
 
 1. Fetch or download the files in [this directory](https://github.com/microbiome/data/tree/main/OKeefeDSData).  
+```{r}
+#| label: Data-containers-ex1
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+url_to_assay <- url("https://github.com/microbiome/data/raw/main/OKeefeDSData/okeefe_assay.csv")
+url_to_coldata <- url("https://github.com/microbiome/data/raw/main/OKeefeDSData/okeefe_coldata.csv")
+url_to_rowdata <- url("https://github.com/microbiome/data/raw/main/OKeefeDSData/okeefe_rowdata.csv")
+
+```
+
 2. Read in the csv files with `read.csv` and store them into the variables
    `assays`, `rowdata` and `coldata`, respectively.  
+   
+```{r}
+#| label: Data-containers-ex2
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+okeefe_assay <- read.csv(url_to_assay, row.names = 1)
+okeefe_coldata <- read.csv(url_to_coldata, row.names = 1)
+okeefe_rowdata <- read.csv(url_to_rowdata, row.names = 1)
+```
+
 3. Create a TreeSE from the individual components with
    `TreeSummarizedExperiment`. Note that the function requires three arguments:
-   assays, rowData and colData, to which you can give the appropriate item.  
+   assays, rowData and colData, to which you can give the appropriate item.
+   
+```{r}
+#| label: Data-containers-ex3
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+tse <- TreeSummarizedExperiment(assays = list(counts = okeefe_assay),
+                                colData = okeefe_coldata,
+                                rowData = okeefe_rowdata)
+```
+
 4. Check that importing is done correctly. E.g., choose random samples and
    features, and check that their values equal between raw files and TreeSE.  
+
+```{r}
+#| label: Data-containers-ex4
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+okeefe_assay[1:5, 1:7]
+assay(tse, "counts")[1:5,1:7]
+
+```
 
 Usefuls functions: DataFrame, TreeSummarizedExperiment, matrix, rownames, colnames, SimpleList
 
@@ -211,34 +258,135 @@ functions explained in chapter [@sec-import-from-file]. You can also check the
    and read the instructions in its
    [README](https://github.com/microbiome/data#training-microbiome-datasets)
    to import and construct datasets from there.  
-2. Import data from another format (functions: importMetaPhlAn | importMothur | 
-importQIIME2 | makeTreeSummarizedExperimentFromBiom | 
-makeTreeSummarizedExperimentFromDADA2 ...)  
-3. Try out conversions between TreeSE and phyloseq data containers (makeTreeSummarizedExperimentFromPhyloseq; makephyloseqFromTreeSummarizedExperiment)  
+   
+
+2. Import data from another format (functions: [importMetaPhlAn](https://microbiome.github.io/mia/reference/loadFromMetaphlan.html) | [importMothur](https://microbiome.github.io/mia/reference/importMothur.html) | 
+[importQIIME2](https://microbiome.github.io/mia/reference/importQIIME2.html) | [makeTreeSummarizedExperimentFromBiom](https://microbiome.github.io/mia/reference/makeTreeSEFromBiom.html) | 
+[makeTreeSummarizedExperimentFromDADA2](https://microbiome.github.io/mia/reference/makeTreeSEFromDADA2.html) ...)  
+
+
+3. Try out conversions between TreeSE and phyloseq data containers ([makeTreeSummarizedExperimentFromPhyloseq](https://microbiome.github.io/mia/reference/makeTreeSEFromPhyloseq.html); [makephyloseqFromTreeSummarizedExperiment](https://microbiome.github.io/mia/reference/makePhyloseqFromTreeSE.html))  
+
+
 
 ### Preliminary exploration
 
 1. Import the mia package, load any of the example data sets mentioned in Chapter 3.3
-   with `data` and store it into a variable named `tse`.  
+   with `data` and store it into a variable named `tse`. 
+```{r}
+#| label: Preliminary-exploration-ex1
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+library(mia)
+data(GlobalPatterns, package="mia")
+tse <- GlobalPatterns
+```
 2. Get a summary about the TreeSE with `summary`. What is the mean count across
    samples? How many features recur only once (singletons)?  
+```{r}
+#| label: Preliminary-exploration-ex2
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+summary(tse)
+```
 3. Check the dimensions of the TreeSE with `dim` or alternatively with `nrow`
-   and `ncol`. How many samples and features are present?  
-4. List sample and features names with `rownames` and `colnames`.  
+   and `ncol`. How many samples and features are present? 
+```{r}
+#| label: Preliminary-exploration-ex3
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+dim(tse)
+```
+4. List sample and features names with `rownames` and `colnames`. 
+
+```{r}
+#| label: Preliminary-exploration-ex4
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+rownames(tse)
+colnames(tse)
+```
+
 5. Check what information about samples and features is contained by the
    `colData` and `rowData` of the TreeSE with `names`.  
-5. **Extra**: Calculate the number of unique taxa for each taxonomic rank. You
+```{r}
+#| label: Preliminary-exploration-ex5
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+names(colData(tse))
+names(rowData(tse))
+```
+6. **Extra**: Calculate the number of unique taxa for each taxonomic rank. You
    can use `apply` to count unique elements for each column of rowData.  
+
+```{r}
+#| label: Preliminary-exploration-ex6
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+
+```
 
 ### Assay retrieval
 
 1. Import the mia package, load any of the example data sets mentioned in Chapter 3.3
-   with `data` and store it into a variable named `tse`.  
-2. List the names of all available assays with `assayNames`.  
+   with `data` and store it into a variable named `tse`.
+   
+```{r}
+#| label: Assay-retrieval-ex1
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+library(mia)
+data(GlobalPatterns, package="mia")
+tse <- GlobalPatterns
+```
+2. List the names of all available assays with `assayNames`.
+
+```{r}
+#| label: Assay-retrieval-ex2
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+assayNames(tse)
+```
+
 3. Fetch the list of assays with `assays`.  
+
+```{r}
+#| label: Assay-retrieval-ex3
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+assays(tse)
+```
+
 4. Retrieve the first assay of the TreeSE with `assay`, where the second
    argument can be either the name or the index of the desired assay.  
-   
+
+```{r}
+#| label: Assay-retrieval-ex4
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+assay(tse, "counts")[1:5,1:7]
+```
+
 Well done! You can now locate and retrieve individual assays of a TreeSE. If you
 got stuck, you can refer to chapter [@sec-assay-slot] of this book.
 
@@ -364,14 +512,60 @@ However, such data are not always included.
 
 1. Import the mia package, load any of the example data sets mentioned in Chapter 3.3
    and store it into a variable named `tse`.  
-2. Fetch the metadata of the TreeSE. Is there any information available?  
+   
+```{r}
+#| label: Other-elements-ex1
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+library(mia)
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+```   
+
+2. Fetch the metadata of the TreeSE. Is there any information available?
+```{r}
+#| label: Other-elements-ex2
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+names(metadata(tse))
+```   
+
 3. Access the phylogenetic tree with `rowTree`. How big is it in terms of tips
-   and nodes. If you like you can visualize it with `ggtree`.  
+   and nodes. If you like you can visualize it with `ggtree`. 
+   
+```{r}
+#| label: Other-elements-ex3
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+rowTree(tse) 
+```   
 4. Check if a sample tree is available with `colTree`, which is suitable for
-   hierarchical or nested study designs.  
+   hierarchical or nested study designs.
+   
+```{r}
+#| label: Other-elements-ex4
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+colTree(tse)
+```   
 5. If present, obtain the information on feature DNA sequences from the DNA
    sequence slot.  
+```{r}
+#| label: Other-elements-ex5
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
 
+colData(tse)$Barcode_full_length
+```   
 
 ## Data manipulation
 
