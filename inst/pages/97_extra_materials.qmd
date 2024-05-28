@@ -247,9 +247,9 @@ knitr::knit_hooks$set(webgl = hook_webgl)
 ```
 
 
-In this section we make a 3D version of the earlier  Visualizing the most dominant genus on PCoA (see \@ref(quality-control)), with the help of the plotly [@Sievert2020].
+In this section we make a 3D version of the earlier PCoA plot (see \@ref(quality-control)), with the help of the plotly [@Sievert2020].
 
-```{r, eval=FALSE}
+```{r}
 # Importing necessary libraries
 library(curatedMetagenomicData)
 library(dplyr)
@@ -264,29 +264,33 @@ tse <- sampleMetadata %>%
     returnSamples("relative_abundance")
 
 tse_Genus <- mergeFeaturesByRank(tse, rank="genus")
-tse_Genus <- addDominant(tse_Genus,assay.type="relative_abundance", name = "dominant_taxa")
 
 # Performing PCoA with Bray-Curtis dissimilarity.
-tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist, ncomponents = 3,
-              name = "PCoA_BC", assay.type = "relative_abundance")
+tse_Genus <- runMDS(tse_Genus, #adds reduced dimensionalities to tse_Genus
+              FUN = vegan::vegdist,
+              method = "bray",
+              ncomponents = 3, # calculates three principal coordinates
+              assay.type = "relative_abundance", # calculates Bray-Curtis from relative abundace
+              name = "MDS_bray") #name of the PCoA within the tse 
 
-# Getting the 6 top taxa
-top_taxa <- getTop(tse_Genus,top = 6, assay.type = "relative_abundance")
+e <- attr(reducedDim(tse_Genus, "MDS_bray"), "eig")
+rel_eig <- e / sum(e[e > 0])
 
-# Naming all the rest of non top-taxa as "Other"
-most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
-                   function(x){if (x %in% top_taxa) {x} else {"Other"}})
+# Extract the coordinates as a dataframe
+coordinates <- as.data.frame(reducedDim(tse_Genus,"MDS_bray"))
 
-# Storing the previous results as a new column within colData
-colData(tse_Genus)$most_abundant <- as.character(most_abundant)
+head(coordinates)
 
-# Calculating percentage of the most abundant
-most_abundant_freq <- table(as.character(most_abundant))
-most_abundant_percent <- round(most_abundant_freq/sum(most_abundant_freq)*100, 1)
-
-# Retrieving the explained variance
-e <- attr(reducedDim(tse_Genus, "PCoA_BC"), "eig");
-var_explained <- e/sum(e[e>0])*100
+# plot the coordinates using plotly and add the explained variance to the axes
+plot_ly(coordinates, x = ~V1, y = ~V2, z = ~V3, color = ~V3) %>%
+  add_markers() %>%
+  layout(
+    scene = list(
+      xaxis = list(title = paste("PCoA 1 (", round(100 * rel_eig[1], 1), "%)", sep = "")),
+      yaxis = list(title = paste("PCoA 2 (", round(100 * rel_eig[2], 1), "%)", sep = "")),
+      zaxis = list(title = paste("PCoA 3 (", round(100 * rel_eig[3], 1), "%)", sep = ""))
+    )
+  )
 ```
 
 ## phyloseq vs TreeSE cheatsheet
