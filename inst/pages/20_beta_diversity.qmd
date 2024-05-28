@@ -15,15 +15,14 @@ knitr::opts_chunk$set(
   dev.args = list(type = "cairo-png")
 )
 ```
+Beta diversity quantifies the dissimilarity between communities (multiple samples), as opposed to alpha diversity which focuses on variation within a community (one sample). In microbiome research, commonly used metrics of beta diversity include:
 
-Beta diversity quantifies the dissimilarity between communities (multiple
-samples), as opposed to alpha diversity which focuses on variation within a
-community (one sample). In microbiome research, commonly used metrics of beta
-diversity include the Bray-Curtis index (for compositional data), Jaccard index
-(for presence/absence data, ignoring abundance information), Aitchison distance
-(Euclidean distance for clr transformed abundances, aiming to avoid the
-compositionality bias), and the Unifrac distance (that takes into account the
-phylogenetic tree information). Notably, only some of these measures are actual
+- Bray-Curtis index (for compositional data)
+- Jaccard index (for presence/absence data, ignoring abundance information)
+- Aitchison distance (Euclidean distance for clr transformed abundances, aiming to avoid the compositionality bias)
+- Unifrac distance (takes into account the phylogenetic tree information).
+
+Notably, only some of these measures are actual
 _distances_, as this is a mathematical concept whose definition is not satisfied
 by certain ecological measure, such as the Bray-Curtis index. Therefore, the terms
 dissimilarity and beta diversity are preferred.
@@ -39,9 +38,9 @@ dissimilarity and beta diversity are preferred.
 | Presence/Absence similarity | Absolute counts     | Jaccard               |
 | Phylogenetic distance       | Rarefied counts     | Unifrac               |
 
-In practice, beta diversity is usually represented as a `dist` object, a
-triangular matrix where the distance between each pair of samples is encoded by
-a specific cell. This distance matrix can then undergo ordination, which is an
+In practice, beta diversity is usually represented as a `dist` object. Such an 
+object is a triangular matrix where the distance between each pair of samples is encoded by a specific cell. 
+This distance matrix can then undergo ordination, which is an
 important ecological tool to reduce the dimensionality of data for a more
 efficient analysis and visualization. Ordination techniques aim to capture as
 much essential information from the data as possible and turn it into a lower
@@ -51,7 +50,11 @@ similarities in an optimal way, which is defined in different ways by different
 methods.
 
 Based on the type of algorithm, ordination methods in microbiome research can
-be generally divided in two categories: unsupervised and supervised ordination.
+be generally divided in two categories: 
+
+- unsupervised ordination
+- supervised ordination
+
 The former includes Principal Coordinate Analysis (PCoA), Principal Component
 Analysis (PCA) and Uniform Manifold Approximation and Projection for Dimension
 Reduction (UMAP), whereas the latter is mainly represented by distance-based
@@ -66,7 +69,8 @@ library(mia)
 data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 
-# Beta diversity metrics like Bray-Curtis are often applied to relabundances
+# Beta diversity metrics like Bray-Curtis are often 
+# applied to relabundances
 tse <- transformAssay(tse,
                       assay.type = "counts",
                       method = "relabundance")
@@ -152,8 +156,10 @@ e <- attr(reducedDim(tse, "MDS_bray"), "eig")
 rel_eig <- e / sum(e[e > 0])
 
 # Add explained variance for each axis
-p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]], 1), "%", ")", sep = ""),
-              y = paste("PCoA 2 (", round(100 * rel_eig[[2]], 1), "%", ")", sep = ""))
+p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]], 1),
+                        "%", ")", sep = ""),
+              y = paste("PCoA 2 (", round(100 * rel_eig[[2]], 1), 
+                        "%", ")", sep = ""))
 
 p
 ```
@@ -287,7 +293,8 @@ if smaller. This can be calculated as shown below.
 library(vegan)
 
 # Quantify dissimilarities in the original feature space
-x <- assay(tse, "relabundance") # Pick relabunance assay separately
+# Pick relabunance assay separately
+x <- assay(tse, "relabundance") 
 d0 <- as.matrix(vegdist(t(x), "bray"))
 
 # PCoA Ordination
@@ -297,8 +304,8 @@ names(pcoa) <- c("PCoA1", "PCoA2")
 # Quantify dissimilarities in the ordination space
 dp <- as.matrix(dist(pcoa))
 
-# Calculate stress i.e. relative difference in the original and
-# projected dissimilarities
+# Calculate stress i.e. relative difference 
+# in the original and projected dissimilarities
 stress <- sum((dp - d0)^2) / sum(d0^2)
 ```
 
@@ -433,11 +440,11 @@ tse_genus <- transformAssay(tse,
                             assay.type = "counts")
 
 # Add info on dominant genus per sample
-tse_genus <- addPerSampleDominantFeatures(tse_genus,
-                                          assay.type = "relabundance",
-                                          name = "dominant_taxa")
+tse_genus <- addDominant(tse_genus,
+                         assay.type = "relabundance",
+                         name = "dominant_taxa")
 # Overview
-countDominantFeatures(tse_genus, rank = "Genus", digits = 3, name = "dominant_taxa")
+summarizeDominance(tse_genus, rank = "Genus", digits = 3, name = "dominant_taxa")
 ```
 
 Next, we perform PCoA with Bray-Curtis dissimilarity.
@@ -460,21 +467,24 @@ top_taxa <- getTop(tse_genus,
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(colData(tse_genus)$dominant_taxa,
-                        function(x) {if (x %in% top_taxa) {x} else {"Other"}})
+                        function(x) {if (x %in% top_taxa) {x} 
+                          else {"Other"}})
 
 # Storing the previous results as a new column within colData
 colData(tse_genus)$most_abundant <- as.character(most_abundant)
 
 # Calculating percentage of the most abundant
 most_abundant_freq <- table(as.character(most_abundant))
-most_abundant_percent <- round(most_abundant_freq / sum(most_abundant_freq) * 100, 1)
+most_abundant_percent <- round(most_abundant_freq / 
+                                 sum(most_abundant_freq) * 100, 1)
 
 # Retrieving the explained variance
 e <- attr(reducedDim(tse_genus, "PCoA_BC"), "eig")
 var_explained <- e / sum(e[e > 0]) * 100
 
 # Define colors for visualization
-my_colors <- c("black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red")
+my_colors <- c("black", "blue", "lightblue", "darkgray",
+               "magenta", "darkgreen", "red")
 
 # Visualization
 plot <-plotReducedDim(tse_genus, "PCoA_BC",
@@ -535,8 +545,7 @@ analyzed sequentially, and the result is different when more than 1
 variable is introduced and their order differs.  Therefore, it is
 recommended to set `by = "margin"`, which specifies that the marginal
 effect of each variable is analyzed individually. You can view a
-comparison between the two designs in chapter
-[@sec-compare-permanova].
+comparison between the two designs in chapter [PERMANOVA comparison](https://microbiome.github.io/OMA/docs/devel/pages/97_extra_materials.html#compare-permanova).
 
 We can perform PERMANOVA either with `adonis2` function or by first
 performing dbRDA and then applying permutational test its results. An

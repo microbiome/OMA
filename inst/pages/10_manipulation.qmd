@@ -11,23 +11,24 @@ chapterPreamble()
 
 For several custom analysis and visualization packages, such as those from
 `tidyverse`, the `SE` data can be converted to a long data.frame format with 
-`meltAssay`.    
+`meltSE`.    
 
 ```{r}
 library(mia)
 data(GlobalPatterns, package="mia")
 tse <- GlobalPatterns
 tse <- transformAssay(tse, MARGIN = "samples", method="relabundance")
-molten_tse <- mia::meltAssay(tse,
+molten_tse <- mia::meltSE(tse,
                         add_row_data = TRUE,
                         add_col_data = TRUE,
                         assay.type = "relabundance")
-molten_tse
+# Show the first five columns
+molten_tse[,1:5]
 ```
 
 ### Subsetting
 
-**Subsetting** data helps to draw the focus of analysis on particular
+**Subsetting** data helps to draw the focus of an analysis on particular
   sets of samples and / or features. When dealing with large datasets, 
   the subset of interest can be extracted and investigated
   separately. This might improve performance and reduce the
@@ -59,7 +60,7 @@ dim(tse)
 
 #### Subset by sample (column-wise)
 
-For the sake of demonstration, here we will extract a subset containing only the samples of human origin (feces, skin or tongue), stored as `SampleType` within `colData(tse)` and also in `tse`.
+For the sake of demonstration, here we will extract a subset containing only the samples of human origin (feces, skin or tongue), stored as `SampleType` within `colData(tse)` as well as in `tse`.
 
 First, we would like to see all the possible values that `SampleType` can take on and how frequent those are: 
 
@@ -91,7 +92,8 @@ samples from the meta data `colData(tse)`.
 
 ```{r}
 # Subset by sample
-tse_subset_by_sample <- tse[ , tse$SampleType %in% c("Feces", "Skin", "Tongue")]
+tse_subset_by_sample <- tse[ , tse$SampleType %in% 
+                               c("Feces", "Skin", "Tongue")]
 
 # Show dimensions
 dim(tse_subset_by_sample)
@@ -123,19 +125,18 @@ As previously, we would first like to see all the possible values that
   
 ```{r}
 # Inspect possible values for phylum
-unique(rowData(tse)$Phylum)
+# and show the first five values
+cat(paste(unique(rowData(tse)$Phylum)[1:5], collapse = "\n"))
+
 ```
 
-```{r eval = FALSE}
+```{r}
 # Show the frequency of each value
-rowData(tse)$Phylum %>% table()
-```
+rowData(tse)$Phylum %>% table() %>% head() %>% 
+  kable() %>%
+  kableExtra::kable_styling("striped", latex_options="scale_down") %>% 
+  kableExtra::scroll_box(width = "100%")
 
-```{r echo = FALSE}
-# Show te frequency of each value
-rowData(tse)$Phylum %>% table() %>% kable() %>%
-    kableExtra::kable_styling("striped", latex_options="scale_down") %>% 
-    kableExtra::scroll_box(width = "100%")
 ```
 
 **Note**: after subsetting, expect the number of columns to equal the
@@ -146,7 +147,7 @@ rowData(tse)$Phylum %>% table() %>% kable() %>%
 Depending on your research question, you might or might not need to
 agglomerate the data in the first place: if you want to find the
 abundance of each and every feature that belongs to Actinobacteria and
-Chlamydiae, agglomeration is not needed; if you want to find the total
+Chlamydiae, agglomeration is not needed. However, if you want to find the total
 abundance of all features that belong to Actinobacteria or
 Chlamydiae, agglomeration is recommended.
 
@@ -164,7 +165,9 @@ filters out all features that have an `NA` in place of the phylum variable.
 
 ```{r}
 # Subset by feature
-tse_subset_by_feature <- tse[rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(tse)$Phylum), ]
+tse_subset_by_feature <- tse[rowData(tse)$Phylum %in% 
+                            c("Actinobacteria","Chlamydiae") 
+                             , ]
 
 # Show dimensions
 dim(tse_subset_by_feature)
@@ -181,7 +184,11 @@ When total abundances of certain phyla are of relevance, the data is initially a
 tse_phylum <- tse %>% mergeFeaturesByRank(rank = "Phylum")
 
 # Subset by feature and remove NAs
-tse_phylum_subset_by_feature <- tse_phylum[rowData(tse_phylum)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(tse_phylum)$Phylum), ]
+tse_phylum_subset_by_feature <- tse_phylum[
+                                rowData(tse_phylum)$Phylum %in% 
+                                c("Actinobacteria", "Chlamydiae")
+                                &!is.na(rowData(tse_phylum)$Phylum),
+                                ]
 
 # Show dimensions
 dim(tse_phylum_subset_by_feature)
@@ -219,13 +226,16 @@ features of phyla Actinobacteria or Chlamydiae.
 
 ```{r}
 # Subset by sample and feature and remove NAs
-tse_subset_by_sample_feature <- tse[rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") & !is.na(rowData(tse)$Phylum), tse$SampleType %in% c("Feces", "Skin", "Tongue")]
+tse_subset_by_sample_feature <- tse[
+  rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") 
+  & !is.na(rowData(tse)$Phylum), 
+  tse$SampleType %in% c("Feces", "Skin", "Tongue")]
 
 # Show dimensions
 dim(tse_subset_by_sample_feature)
 ```
 
-**Note**: the dimensions of `tse_subset_by_sample_feature` agree with
+**Note**: the dimensions of `tse_subset_by_sample_feature` are on par with
   those of the previous subsets (9 columns filtered by sample and 1652
   rows filtered by feature).
 
@@ -244,7 +254,9 @@ remove those instances.
 # Agglomerate data at Genus level 
 tse_genus <- mergeFeaturesByRank(tse, rank = "Genus")
 # List bacteria that we want to include
-genera <- c("Class:Thermoprotei", "Genus:Sulfolobus", "Genus:Sediminicola")
+genera <- c("Class:Thermoprotei", 
+            "Genus:Sulfolobus", 
+            "Genus:Sediminicola")
 # Subset data
 tse_genus_sub <- tse_genus[genera, ]
 
@@ -253,14 +265,17 @@ tse_genus_sub
 
 ```{r}
 # List total counts of each sample
-colSums(assay(tse_genus_sub, "counts"))
+colSums(assay(tse_genus_sub, "counts"))[1:5]
 ```
 
 Now we can see that certain samples do not include any bacteria. We can remove those.
 
 ```{r}
 # Remove samples that do not contain any bacteria
-tse_genus_sub <- tse_genus_sub[ , colSums(assay(tse_genus_sub, "counts")) != 0 ]
+tse_genus_sub <- tse_genus_sub[ , 
+                                colSums(assay(
+                                  tse_genus_sub, "counts")) != 0 
+                                ]
 tse_genus_sub
 ```
 
@@ -268,7 +283,8 @@ The same action can also be applied to the features.
 
 ```{r}
 # Take only those samples that are collected from feces, skin, or tongue
-tse_genus_sub <- tse_genus[ , tse_genus$SampleType %in% c("Feces", "Skin", "Tongue")]
+tse_genus_sub <- tse_genus[ , tse_genus$SampleType %in% 
+                              c("Feces", "Skin", "Tongue")]
 
 tse_genus_sub
 ```
@@ -278,26 +294,29 @@ tse_genus_sub
 sum(rowSums(assay(tse_genus_sub, "counts")) == 0)
 ```
 
-We can see that there are bacteria that are not present in these samples we chose.
+We can see that there are bacteria that are not present in the samples we chose.
 We can remove those bacteria from the data. 
 
 ```{r}
 # Take only those bacteria that are present
-tse_genus_sub <- tse_genus_sub[rowSums(assay(tse_genus_sub, "counts")) > 0, ]
+tse_genus_sub <- tse_genus_sub[rowSums(assay
+                                       (tse_genus_sub, 
+                                         "counts")) > 0, ]
 
 tse_genus_sub
 ```
 
 ### Splitting
 
-You can split the data based on variables by using the functions `splitByRanks` 
-and `splitOn`.
+You can split the data based on variables by using the functions 
+`agglomerateByRanks` and `splitOn`.
 
-`splitByRanks` splits the data based on taxonomic ranks. Since the elements of the output list
-share columns, they can be stored into `altExp`. 
+`agglomerateByRanks` splits the data based on taxonomic ranks. Since the 
+elements of the output list share columns, they can be stored into `altExp` by
+setting `as.list = FALSE`.
 
-```{r splitbyRanks}
-altExps(tse) <- splitByRanks(tse)
+```{r agglomerateByRanks}
+tse <- agglomerateByRanks(tse)
 altExps(tse)
 ```
 
@@ -315,7 +334,9 @@ accessing the desired variables.
 
 ```{r modify-coldata}
 # modify the Description entries
-colData(tse)$Description <- paste(colData(tse)$Description, "modified description")
+colData(tse)$Description <- paste(
+  colData(tse)$Description, 
+  "modified description")
 
 # view modified variable
 head(tse$Description)
