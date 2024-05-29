@@ -17,8 +17,8 @@ let
       src = pkgs.fetchgit {
         url = "https://github.com/microbiome/mia";
         branchName = "devel";
-        rev = "7a0b0ead9d82087f86e29e4867b3412f88303cd7";
-        sha256 = "sha256-rs0pY27HvtC3fs8DsT/82uMzmEhVgwauW+9//i6uTUA=";
+        rev = "b627edce620807af20d3ed85c6667f4b8ef8f2ea";
+        sha256 = "sha256-VJVQfl7LQzooc1NHgu0qAstPFiC9d/8hH23KODV1V0Y=";
       };
       # mia dependencies (see DESCRIPTION)
       propagatedBuildInputs = builtins.attrValues {
