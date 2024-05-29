@@ -753,3 +753,50 @@ Conversion is possible between other data formats. Interested readers can refer 
 * [makeTreeSEFromBiom](https://microbiome.github.io/mia/reference/makeTreeSEFromBiom.html)  
 * [importMetaPhlAn](https://microbiome.github.io/mia/reference/importMetaPhlAn.html)  
 * [importQZA](https://microbiome.github.io/mia/reference/importQIIME2.html)
+
+## Exporting data container {#sec-exporting-data-container}
+
+### Export TreeSummarizedExperiment
+
+Exporting a `TreeSE` data container can be done using *feather* package. TSE object has to be converted into a dataframe (`data.frame` and not `DataFrame`) . The output file is a .feather file, which can be imported in other languages such as Julia or Python. For information, have a look at the [FeatherFile](https://juliapackages.com/p/featherfiles) Julia package and [feather-format](https://pypi.org/project/feather-format/) Python library.
+
+```{r, eval=FALSE}
+# Import TSE
+library(mia)
+data(GlobalPatterns, package="mia")
+tse <- GlobalPatterns
+# Convert into a data.frame 
+tse <- transformAssay(tse, MARGIN = "samples", method="relabundance")
+molten_tse <- meltAssay(tse,
+                        add_row_data = TRUE,
+                        add_col_data = TRUE,
+                        assay.type = "relabundance")
+# Export as a feather file
+library(feather)
+path <- "path/to/tse.feather"
+write_feather(molten_tse,path)
+```
+
+Another way could be using a CSV file. This works  the same as for a feather file, make sure you have converted your `TreeSE` data container as a dataframe. Here note that you can decide whether you want to write the row names or not. 
+
+```{r, eval=FALSE}
+write.csv(molten_tse, "path/to/tse.csv", row.names=FALSE)
+```
+
+### Export MultiAssayExperiment
+
+Exporting a `MultiAssayExperiment` data container can also be done using *feather* package.
+
+```{r, eval=FALSE}
+# Convert into a data.frame
+molten_mae <- longFormat(mae)
+molten_mae <- data.frame(molten_mae)
+path <- "path/to/mae.feather"
+write_feather(molten_mae,path)
+```
+
+And as a CSV file.
+
+```{r, eval=FALSE}
+write.csv(molten_mae, "path/to/mae.csv", row.names=FALSE)
+```
