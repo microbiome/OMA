@@ -437,6 +437,13 @@ div.csl-indent {
   <li><a href="#conversions-between-data-formats-in-r" id="toc-conversions-between-data-formats-in-r" class="nav-link" data-scroll-target="#conversions-between-data-formats-in-r"><span class="header-section-number">2.4.6</span> Conversions between data formats in R</a></li>
   </ul>
 </li>
+  <li>
+<a href="#sec-exporting-data-container" id="toc-sec-exporting-data-container" class="nav-link" data-scroll-target="#sec-exporting-data-container"><span class="header-section-number">2.5</span> Exporting data container</a>
+  <ul class="collapse">
+<li><a href="#export-treesummarizedexperiment" id="toc-export-treesummarizedexperiment" class="nav-link" data-scroll-target="#export-treesummarizedexperiment"><span class="header-section-number">2.5.1</span> Export TreeSummarizedExperiment</a></li>
+  <li><a href="#export-multiassayexperiment" id="toc-export-multiassayexperiment" class="nav-link" data-scroll-target="#export-multiassayexperiment"><span class="header-section-number">2.5.2</span> Export MultiAssayExperiment</a></li>
+  </ul>
+</li>
   </ul></nav>
     </div>
 <!-- main -->
@@ -1323,7 +1330,45 @@ Vatanen, Tommi, Aleksandar D. Kostic, Eva d’Hennezel, Heli Siljander, Eric A. 
 <a href="https://microbiome.github.io/mia/reference/importMetaPhlAn.html">importMetaPhlAn</a><br>
 </li>
 <li><a href="https://microbiome.github.io/mia/reference/importQIIME2.html">importQZA</a></li>
-</ul>
+</ul></section></section><section id="sec-exporting-data-container" class="level2" data-number="2.5"><h2 data-number="2.5" class="anchored" data-anchor-id="sec-exporting-data-container">
+<span class="header-section-number">2.5</span> Exporting data container</h2>
+<section id="export-treesummarizedexperiment" class="level3" data-number="2.5.1"><h3 data-number="2.5.1" class="anchored" data-anchor-id="export-treesummarizedexperiment">
+<span class="header-section-number">2.5.1</span> Export TreeSummarizedExperiment</h3>
+<p>Exporting a <code>TreeSE</code> data container can be done using <em>feather</em> package. TSE object has to be converted into a dataframe (<code>data.frame</code> and not <code>DataFrame</code>) . The output file is a .feather file, which can be imported in other languages such as Julia or Python. For information, have a look at the <a href="https://juliapackages.com/p/featherfiles">FeatherFile</a> Julia package and <a href="https://pypi.org/project/feather-format/">feather-format</a> Python library.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Import TSE</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">GlobalPatterns</span>, package<span class="op">=</span><span class="st">"mia"</span><span class="op">)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">GlobalPatterns</span></span>
+<span><span class="co"># Convert into a data.frame </span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse</span>, MARGIN <span class="op">=</span> <span class="st">"samples"</span>, method<span class="op">=</span><span class="st">"relabundance"</span><span class="op">)</span></span>
+<span><span class="va">molten_tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/deprecate.html">meltAssay</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<span>                        add_row_data <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                        add_col_data <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                        assay.type <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span>
+<span><span class="co"># Export as a feather file</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/wesm/feather">feather</a></span><span class="op">)</span></span>
+<span><span class="va">path</span> <span class="op">&lt;-</span> <span class="st">"path/to/tse.feather"</span></span>
+<span><span class="fu">write_feather</span><span class="op">(</span><span class="va">molten_tse</span>,<span class="va">path</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Another way could be using a CSV file. This works the same as for a feather file, make sure you have converted your <code>TreeSE</code> data container as a dataframe. Here note that you can decide whether you want to write the row names or not.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html">write.csv</a></span><span class="op">(</span><span class="va">molten_tse</span>, <span class="st">"path/to/tse.csv"</span>, row.names<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="export-multiassayexperiment" class="level3" data-number="2.5.2"><h3 data-number="2.5.2" class="anchored" data-anchor-id="export-multiassayexperiment">
+<span class="header-section-number">2.5.2</span> Export MultiAssayExperiment</h3>
+<p>Exporting a <code>MultiAssayExperiment</code> data container can also be done using <em>feather</em> package.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Convert into a data.frame</span></span>
+<span><span class="va">molten_mae</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://waldronlab.io/MultiAssayExperiment/reference/MultiAssayExperiment-helpers.html">longFormat</a></span><span class="op">(</span><span class="va">mae</span><span class="op">)</span></span>
+<span><span class="va">molten_mae</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">molten_mae</span><span class="op">)</span></span>
+<span><span class="va">path</span> <span class="op">&lt;-</span> <span class="st">"path/to/mae.feather"</span></span>
+<span><span class="fu">write_feather</span><span class="op">(</span><span class="va">molten_mae</span>,<span class="va">path</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And as a CSV file.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html">write.csv</a></span><span class="op">(</span><span class="va">molten_mae</span>, <span class="st">"path/to/mae.csv"</span>, row.names<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
 
