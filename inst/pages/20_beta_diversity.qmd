@@ -266,7 +266,7 @@ The function `vegan::avgdist` can use rarefaction to compute beta diversity:
 tse <- runMDS(tse, 
         	assay.type="counts",
                 ntop = nrow(GlobalPatterns),
-        	FUN = avgdist,
+        	FUN = vegan::avgdist,
                 sample = min(colSums(assay(tse, "counts"))), # rarefaction depth
 		distfun = vegan::vegdist, # Use vegdist beta diversity function
 		dmethod = "bray", # Bray-Curtis beta diversity (vegdist argument)
@@ -282,6 +282,13 @@ plots <- lapply(c("MDS_bray", "MDS_bray_rarefied"),
 # Generate multi-panel plot
 wrap_plots(plots) +
   plot_layout(guides = "collect")
+```
+```{r rarefaction_2}
+# Check correlation between non-rarefied and rarefied Bray-Curtis distances
+all.equal(current = cor(as.vector(reducedDim(tse, "MDS_bray")),
+                        as.vector(reducedDim(tse, "MDS_bray_rarefied"))),
+          target = 1,
+          tolerance = 10**-2)
 ```
 
 `ntop` is a `runMDS` option. Here it is set to total number of features in `GlobalPatterns` dataset so that they are not filtered. If ntop was not set to the total number of features, only the ntop features with highest variance would be used for dimensionality reduction and the other features would be filtered.
