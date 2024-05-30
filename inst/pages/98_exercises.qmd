@@ -508,7 +508,7 @@ However, such data are not always included.
    
 ```{r}
 #| label: Other-elements-ex1
-#| eval: FALSE
+#| eval: TRUE
 #| code-fold: true
 #| code-summary: "Show solution"
 
@@ -565,10 +565,59 @@ colData(tse)$Barcode_full_length
 
 ### Subsetting
 
+In this exercise, we'll go over the basics of subsetting a TSE object.
+Keep in mind that it's good practice to always keep the original data intact.
+Therefore, we suggest creating a new tse object whenever you subset.
+
+Please have a try at the following exercises. 
+
 1. Subset the TreeSE object to specific samples.  
+
+```{r}
+#| label: subsetting-ex1
+#| eval: True
+#| code-fold: true
+#| code-summary: "Show solution"
+
+tse_subset_by_sample <- tse[ , tse$SampleType %in% 
+                               c("Feces", "Skin", "Tongue")]
+
+unique(tse_subset_by_sample$SampleType)
+```   
+
 2. Subset the TreeSE object to specific features.  
+
+```{r}
+#| label: subsetting-ex2
+#| eval: True
+#| code-fold: true
+#| code-summary: "Show solution"
+
+tse_subset_by_sample_and_feature <- tse[rowData(tse)$Phylum %in% c("Crenarchaeota", 
+                                                       "Euryarchaeota",
+                                                       "Actinobacteria")
+                             ,]
+
+dim(tse_subset_by_sample_and_feature)
+```   
+
 3. Subset the TreeSE object to specific samples and features.  
 
+```{r}
+#| label: subsetting-ex3
+#| eval: True
+#| code-fold: true
+#| code-summary: "Show solution"
+
+tse_subset_by_feature <- tse[rowData(tse)$Phylum %in% c("Crenarchaeota", 
+                                                       "Euryarchaeota",
+                                                       "Actinobacteria")
+                             ,
+                             tse$SampleType %in% 
+                               c("Feces", "Skin", "Tongue")]
+
+unique(rowData(tse_subset_by_feature)$Phylum)
+```   
 
 
 ### Library sizes
@@ -580,12 +629,64 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, scater::add
 
 ### Prevalent and core taxonomic features
 
-1. Estimate prevalence for your chosen feature (row, taxonomic group)  
-2. Identify all prevalent features and subset the data accordingly   
-3. Report the thresholds and the dimensionality of the data before and after subsetting  
-4. Visualize prevalence  
+1. Estimate prevalence for your chosen feature (specific row and taxonomic group)
+```{r}
+#| label: prevalence-ex1
+#| eval: True
+#| code-fold: true
+#| code-summary: "Show solution"
 
-Useful functions: getPrevalence, getPrevalent, subsetByPrevalent
+# First, merge the features by rank
+altExp(tse,"Phylum") <- mergeFeaturesByRank(tse, "Phylum") 
+
+# Then get the prevalence for a specific sample 
+getPrevalence(altExp(tse,"Phylum"), detection = 1/100, 
+                   sort = TRUE, assay.type = "counts",
+                   as_relative = TRUE)["Phylum:Proteobacteria"]
+```   
+2. Identify all prevalent features and subset the data accordingly.
+
+```{r}
+#| label: prevalence-ex2
+#| eval: True
+#| code-fold: true
+#| code-summary: "Show solution"
+
+# Get the prevalent features
+prevalentFeatures <- getPrevalentFeatures(altExp(tse,"Phylum"), detection = 0, 
+                                          prevalence = 50/100)
+# Subset the data to the prevalent features
+prevalenceTse <- tse[rowData(tse)$Phylum %in% prevalentFeatures,]
+
+# Alternatively subsetByPrevalentFeatures can be used to subset directly
+prevalenceTse <- subsetByPrevalentFeatures(altExp(tse,"Phylum"), detection = 0, 
+                                          prevalence = 50/100)
+```  
+3. Visualize prevalence using a violin/bean plot.
+
+```{r}
+#| label: prevalence-ex3
+#| eval: False
+#| code-fold: true
+#| code-summary: "Show solution"
+
+# Import the scater library
+library(scater)
+
+# Store the prevalence of each taxon
+rowData(altExp(tse,"Phylum"))$prevalence <- 
+    getPrevalence(altExp(tse,"Phylum"), detection = 1/100, 
+                  sort = FALSE,
+                  assay.type = "counts", as_relative = TRUE)
+
+# Then plot the row data
+plotRowData(altExp(tse,"Phylum"), "prevalence", 
+            colour_by = "Phylum")
+```   
+
+
+
+Useful functions: getPrevalence, getPrevalentFeatures, subsetByPrevalentFeatures
 
 ### Data exploration
 
@@ -650,6 +751,86 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAs
 5. Retrieve the data agglomerated by genus from the corresponding `altExp`.
    As for assays, you can access the desired altExp by name or index.  
 6. **Extra**: Split the data based on other features with `splitOn`.  
+
+### Beta Diversity using Alternative experiments
+
+This Exercise will focus on calcuating dissimilarities or beta diversity using alternative experiments.
+
+1. Import the mia and vegan packages and load a dataset. This can be your own or one of the packages built in to mia.
+
+```{r}
+#| label: beta-AltExp-ex1
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+library(mia)
+library(vegan)
+
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+```
+
+2. Calculate relative abundances and create alternative experiments using `splitByRanks` or `splitOn`
+
+
+```{r}
+#| label: beta-AltExp-ex2
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+tse <- transformAssay(tse, MARGIN = "samples", method="relabundance")
+
+altExps(tse) <- splitByRanks(tse)
+altExps(tse)
+```
+
+3. Run PCoA on on one of the created alternative experiments using Bray-Curtis dissimilarity.
+
+```{r}
+#| label: beta-AltExp-ex3
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+tse <- runMDS(tse,
+              FUN = vegan::vegdist,
+              method = "bray",
+              assay.type = "relabundance",
+              name = "MDS_bray")
+```
+
+4. Import the scater library, to plot the first two coordinates using the `reducedDim`function and plot the coordinates.
+
+```{r}
+#| label: beta-AltExp-ex4
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+p <- plotReducedDim(tse, "MDS_bray")
+p
+```
+
+5. Add the explained variance ratios for each coordinate on the axes labels and plot the PCoA again.
+
+```{r}
+#| label: beta-AltExp-ex5
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+# Calculate explained variance
+e <- attr(reducedDim(tse, "MDS_bray"), "eig")
+rel_eig <- e / sum(e[e > 0])
+
+# Add explained variance for each axis
+p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]], 1), "%", ")", sep = ""),
+              y = paste("PCoA 2 (", round(100 * rel_eig[[2]], 1), "%", ")", sep = ""))
+
+p
+```
 
 
 ## Community (alpha) diversity
@@ -848,15 +1029,88 @@ the contributions to beta diversity.
 
 ### Beta diversity analysis
 
-This exercise prompts you to implement a workflow with distance-based RDA
-(dbRDA). You can refer to chapter [@sec-dbrda-workflow] for a step-by-step
+In this exercise, we'll ask you to implement a distance-based Redundancy Analysis
+(dbRDA) to understand the relationships between microbial community composition and various environmental or experimental factors within your dataset. You can refer to chapter [@sec-dbrda-workflow] for a step-by-step
 walkthrough, which may be simplified in the future.
 
 1. Import the mia and vegan packages, load any of the example data sets mentioned in Chapter 3.3
    with `data` and store it into a variable named `tse`.
-4. Create dbRDA with Bray-Curtis dissimilarities on relative abundances. Use PERMANOVA. Can differences between samples be explained with variables of sample meta data? 
-5. Analyze diets' association on beta diversity. Calculate dbRDA and then PERMANOVA. Visualize coefficients. Which taxa's abundances differ the most between samples? 
-6. Interpret your results. Is there association between community composition and location? What are those taxa that differ the most; find information from literature.
+   
+```{r}
+#| label: dbRDA-ex1
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+library(mia)
+library(vegan)
+
+data("GlobalPatterns", package = "mia") # Feel free to use any dataset
+tse <- GlobalPatterns
+```
+   
+2. Create a new assay with the relative abundance for your dataset and merge the 
+features by a rank of your choice.
+
+```{r}
+#| label: dbRDA-ex2
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+tse <- transformAssay(tse, MARGIN = "samples", method="relabundance")
+
+tse <- mergeFeaturesByRank(tse,
+                           rank = "Species")
+```
+
+3. Select a group of samples and perform a permutational analysis on the calculated relative abundance using Bray-Curtis dissimilarities 
+
+```{r}
+#| label: dbRDA-ex3
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+tse$Group <- tse$SampleType == "Feces"
+
+permanova <- adonis2(t(assay(tse, "relabundance")) ~ Group,
+                     by = "margin", # each term (here only 'Group') analyzed individually
+                     data = colData(tse),
+                     method = "bray",
+                     permutations = 99)
+```
+
+4. Implement dbRDA on relative abundances and perform another permutational analysis on the redundancy analysis. 
+
+```{r}
+#| label: dbRDA-ex4
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+dbrda <- dbrda(t(assay(tse,"relabundance")) ~ Group, 
+               data = colData(tse))
+
+permanova2 <- anova.cca(dbrda,
+                        by = "margin",
+                        method = "bray",
+                        permutations = 99)
+```
+
+5. Extract the p-values. Can the differences between samples be explained with variables from their metadata? 
+```{r}
+#| label: dbRDA-ex5
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+p_values <- c(permanova["Group", "Pr(>F)"], permanova2["Group", "Pr(>F)"])
+
+p_values <-as.data.frame(p_values)
+
+rownames(p_values) <- c("adonis2", "dbRDA+anova.cca")
+```
 
 Useful functions: scater::runMDS, runRDA, vegan::anova.cca, transformAssay, mergeFeaturesByRank, ggplot, scater::plotReducedDim, vegan::adonis2
 
