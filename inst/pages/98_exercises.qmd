@@ -603,18 +603,33 @@ dim(tse_subset_by_sample_and_feature)
 
 3. Subset the TreeSE object to specific samples and features.  
 
+3.1. Find some samples and features to subset with.
+
 ```{r}
-#| label: subsetting-ex3
+#| label: subsetting-ex3.1
 #| eval: True
 #| code-fold: true
 #| code-summary: "Show solution"
 
-tse_subset_by_feature <- tse[rowData(tse)$Phylum %in% c("Crenarchaeota", 
-                                                       "Euryarchaeota",
-                                                       "Actinobacteria")
+head(unique(rowData(tse)$Phylum)) # Features
+
+unique(tse$SampleType) # Samples
+```
+
+3.2. Subset the TreeSE with your found samples and features.
+
+```{r}
+#| label: subsetting-ex3.2
+#| eval: True
+#| code-fold: true
+#| code-summary: "Show solution"
+
+features <- c("Crenarchaeota","Euryarchaeota","Actinobacteria")
+samples <- c("Feces", "Skin", "Tongue")
+
+tse_subset_by_feature <- tse[rowData(tse)$Phylum %in% features
                              ,
-                             tse$SampleType %in% 
-                               c("Feces", "Skin", "Tongue")]
+                             tse$SampleType %in% samples]
 
 unique(rowData(tse_subset_by_feature)$Phylum)
 ```   
@@ -1084,8 +1099,7 @@ features by a rank of your choice.
 
 tse <- transformAssay(tse, MARGIN = "samples", method="relabundance")
 
-tse <- agglomerateByRank(tse,
-                           rank = "Species")
+tse <- agglomerateByRank(tse, rank = "Species")
 ```
 
 3. Select a group of samples and perform a permutational analysis on the calculated relative abundance using Bray-Curtis dissimilarities 
@@ -1107,20 +1121,21 @@ tse$Group <- tse$SampleType == "Feces"
 #| code-fold: true
 #| code-summary: "Show solution"
 
-dbrda <- dbrda(t(assay(tse,"relabundance")) ~ Group, 
-               data = colData(tse))
+tse2 <- runRDA(tse,
+               assay.type = "relabundance",
+               formula = assay ~ Group,
+               distance = "bray",
+               na.action = na.exclude)
 
-permanova2 <- anova.cca(dbrda,
-                        by = "margin",
-                        method = "bray",
-                        permutations = 99)
-permanova2
+rda_info <- attr(reducedDim(tse2, "RDA"), "significance")
+
+rda_info
 ```
 
-The output of the anova holds information on the variation differences between 
-the chosen groups, in our case w have a p-value of 0.01, indicating that 
-the groups are statistically different and are unlikely to be due to random 
-variation
+rda_info now holds information on the variation differences between 
+the chosen groups, in our case, the homogeneity test has a p-value of 0.01, 
+indicating that the groups are statistically different and it's unlikely to be 
+due to random variation
 
 5. Extract the p-values. Can the differences between samples be explained with variables from their metadata? 
 ```{r}
