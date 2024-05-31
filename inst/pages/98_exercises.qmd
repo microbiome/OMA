@@ -565,9 +565,9 @@ colData(tse)$Barcode_full_length
 
 ### Subsetting
 
-In this exercise, we'll go over the basics of subsetting a TSE object.
+In this exercise, we'll go over the basics of subsetting a TreeSE object.
 Keep in mind that it's good practice to always keep the original data intact.
-Therefore, we suggest creating a new tse object whenever you subset.
+Therefore, we suggest creating a new TreeSE object whenever you subset.
 
 Please have a try at the following exercises. 
 
@@ -625,7 +625,7 @@ unique(rowData(tse_subset_by_feature)$Phylum)
 1. Calculate library sizes  
 2. Subsample / rarify the counts (see: rarefyAssay)
 
-Useful functions: nrow, ncol, dim, summary, table, quantile, unique, scater::addPerCellQC, mia::mergeFeaturesByRank
+Useful functions: nrow, ncol, dim, summary, table, quantile, unique, scater::addPerCellQC, mia::agglomerateByRank
 
 ### Prevalent and core taxonomic features
 
@@ -637,7 +637,7 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, scater::add
 #| code-summary: "Show solution"
 
 # First, merge the features by rank and add it as an alternative experiment.
-altExp(tse,"Phylum") <- mergeFeaturesByRank(tse, "Phylum") 
+altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum") 
 
 # Then get the prevalence for a specific sample 
 getPrevalence(altExp(tse,"Phylum"), detection = 1/100, 
@@ -702,8 +702,8 @@ length(assay(prevalenceTse, "relabundance"))
 library(scater)
 
 # Store the prevalence of each taxon
-rowData(tse)$prevalence <- 
-    getPrevalence(tse, detection = 1/100, 
+rowData(prevalenceTse)$prevalence <- 
+    getPrevalence(prevalenceTse, detection = 1/100, 
                   sort = FALSE,
                   assay.type = "counts", as_relative = TRUE)
 
@@ -711,8 +711,6 @@ rowData(tse)$prevalence <-
 plotRowData(tse, "prevalence", 
             colour_by = "Phylum")
 ```   
-
-
 
 Useful functions: getPrevalence, getPrevalentFeatures, subsetByPrevalentFeatures
 
@@ -722,13 +720,12 @@ Useful functions: getPrevalence, getPrevalentFeatures, subsetByPrevalentFeatures
 2. Create two histograms. Another shows the distribution of absolute counts, another shows how CLR transformed values are distributed.  
 3. Visualize how relative abundances are distributed between taxa in samples.  
 
-Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAssay, ggplot, wilcox.test, mergeFeaturesByRank, miaViz::plotAbundance
+Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAssay, ggplot, wilcox.test, agglomerateByRank, miaViz::plotAbundance
 
 ### Other functions
 
 1. Merge data objects (merge, mergeSEs)  
 2. Melt the data for visualization purposes (meltSE)  
-
 
 ### Assay transformation
 
@@ -754,7 +751,7 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAs
    with `data` (you need one with taxonomic information at Phylum level)
    and store it into a variable named `tse`.  
 2. List the available taxonomic ranks in the data with `taxonomyRanks`.  
-3. Agglomerate the data to Phylum level with `mergeFeaturesByRank` and the
+3. Agglomerate the data to Phylum level with `agglomerateByRank` and the
    appropriate value for `Rank`.  
 4. Report the dimensions of the TreeSE before and after agglomerating. You can
    use `dim` for that.  
@@ -800,7 +797,6 @@ tse <- Tengeler2020
 ```
 
 2. Calculate relative abundances and create alternative experiments using `splitByRanks` or `splitOn`
-
 
 ```{r}
 #| label: beta-AltExp-ex2
@@ -873,7 +869,7 @@ p
    contain the alpha diversity indices?
 4. **Extra**: Agglomerate the TreeSE by phylum and compare the mean Shannon
    diversity of the original experiment with its agglomerated version. You can
-   use `mergeFeaturesByRank` to perform agglomeration and `mean` to calculate the
+   use `agglomerateByRank` to perform agglomeration and `mean` to calculate the
    mean values of the respective columns in colData.
 
 ### Visualization 
@@ -1088,7 +1084,7 @@ features by a rank of your choice.
 
 tse <- transformAssay(tse, MARGIN = "samples", method="relabundance")
 
-tse <- mergeFeaturesByRank(tse,
+tse <- agglomerateByRank(tse,
                            rank = "Species")
 ```
 
@@ -1101,12 +1097,6 @@ tse <- mergeFeaturesByRank(tse,
 #| code-summary: "Show solution"
 
 tse$Group <- tse$SampleType == "Feces"
-
-permanova <- adonis2(t(assay(tse, "relabundance")) ~ Group,
-                     by = "margin", # each term (here only 'Group') analyzed individually
-                     data = colData(tse),
-                     method = "bray",
-                     permutations = 99)
 ```
 
 4. Implement dbRDA on relative abundances and perform another permutational analysis on the redundancy analysis. 
@@ -1124,7 +1114,13 @@ permanova2 <- anova.cca(dbrda,
                         by = "margin",
                         method = "bray",
                         permutations = 99)
+permanova2
 ```
+
+The output of the anova holds information on the variation differences between 
+the chosen groups, in our case w have a p-value of 0.01, indicating that 
+the groups are statistically different and are unlikely to be due to random 
+variation
 
 5. Extract the p-values. Can the differences between samples be explained with variables from their metadata? 
 ```{r}
@@ -1140,7 +1136,7 @@ p_values <-as.data.frame(p_values)
 rownames(p_values) <- c("adonis2", "dbRDA+anova.cca")
 ```
 
-Useful functions: scater::runMDS, runRDA, vegan::anova.cca, transformAssay, mergeFeaturesByRank, ggplot, scater::plotReducedDim, vegan::adonis2
+Useful functions: scater::runMDS, runRDA, vegan::anova.cca, transformAssay, agglomerateByRank, ggplot, scater::plotReducedDim, vegan::adonis2
 
 
 ## Differential abundance
