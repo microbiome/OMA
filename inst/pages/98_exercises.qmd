@@ -1434,13 +1434,145 @@ Useful functions: scater::runMDS, runNMDS, transformAssay, ggplot, scater::plotR
 
 ### Heatmap visualization
 
-1. Load experimental dataset from mia.
-2. Visualize abundances with heatmap.
-3. Visualize abundances with heatmap after CLR + Z transformation.
+1. Load one of the datasets from mia as well as miaViz.
 
-See the OMA book for examples.
+```{r}
+#| label: heatmap-ex1
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+library(mia)
+library(miaViz)
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+```
+
+2. Add a relative abundance assay to the TSE.
+
+```{r}
+#| label: heatmap-ex2
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+```
+
+3. Melt the tse into a dataframe, order it by decreasing relative abundance and subset to the first 25 rows for better visibility when plotting the heatmap.
+
+```{r}
+#| label: heatmap-ex3
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+df <- meltAssay(tse, assay.type = "relabundance")
+
+df <- df[order(abs(df$relabundance), decreasing=TRUE), ]
+
+top_taxa_samples <- df[1:20,1:2]
+
+df <- df[df$FeatureID %in%top_taxa_samples$FeatureID & 
+             df$SampleID %in%top_taxa_samples$SampleID, ]
+```
+
+4. Calculate and store the limits for the heatmap's color scale as well as it's colors breaks and the colors to be used for the color scale.
+
+```{r}
+#| label: heatmap-ex4
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+maxval <- max(abs(df$relabundance))
+limits <- c(0, maxval)
+breaks <- seq(from = 0, to = max(limits), by = 0.05)
+colours <- c("#F0F0FF", "#007562")
+```
+
+5. Visualize the relative abundances using the previously created variables.
+
+```{r}
+#| label: heatmap-ex5
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+ggplot(df, aes(x = SampleID, y = FeatureID, fill = relabundance)) +
+    geom_tile() +
+    scale_fill_gradientn(name = "Relative abundance", 
+                         breaks = breaks, limits = limits, colours = colours) + 
+    theme(text = element_text(size=10),
+          axis.text.x = element_text(angle=45, hjust=1),
+          legend.key.size = unit(1, "cm")) +
+    labs(x = "Samples", y = "Taxa")
+```
+
+### Advanced Heatmaps
+
+1. Import mia, Miaviz, complexHeatmap as well as a dataset of your choice
 
 
+```{r}
+#| label: advanced-heatmap-ex1
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+library(mia)
+library(miaViz)
+library(ComplexHeatmap)
+
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+```
+
+
+2. Create an assay with relative abundance, then merge the feature by rank Òrder`.
+
+```{r}
+#| label: advanced-heatmap-ex2
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+tse <- transformAssay(tse, assay.type = "counts",
+                             method = "relabundance", pseudocount = 1)
+
+tse <- mergeFeaturesByRank(tse, rank = "Order")
+
+```
+
+3. Add CLR-Z transformation to the TreeSE.
+
+```{r}
+#| label: heatmap-ex6
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+tse<- transformAssay(tse, assay.type = "relabundance",
+                             method = "clr", pseudocount = TRUE)
+
+# Add z-transformation on features (taxa)
+tse <- transformAssay(tse, assay.type = "clr", 
+                             MARGIN = "features",
+                             method = "z", name = "clr_z")
+```
+
+4. plot a heatmap using the CLR-Z transformation
+
+
+
+```{r}
+#| label: heatmap-ex6
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+Heatmap(assay(tse, "clr_z"), name = "clr-z")
+```
 
 ## Multiomics
 
