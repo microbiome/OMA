@@ -508,7 +508,7 @@ However, such data are not always included.
    
 ```{r}
 #| label: Other-elements-ex1
-#| eval: TRUE
+#| eval: FALSE
 #| code-fold: true
 #| code-summary: "Show solution"
 
@@ -575,7 +575,7 @@ Please have a try at the following exercises.
 
 ```{r}
 #| label: subsetting-ex1
-#| eval: True
+#| eval: true
 #| code-fold: true
 #| code-summary: "Show solution"
 
@@ -811,7 +811,7 @@ data("Tengeler2020", package = "mia")
 tse <- Tengeler2020
 ```
 
-2. Calculate relative abundances and create alternative experiments using `splitByRanks` or `splitOn`
+2. Agglomerate data to all available taxonomy ranks by using `agglomerateByRanks()`
 
 ```{r}
 #| label: beta-AltExp-ex2
@@ -819,9 +819,12 @@ tse <- Tengeler2020
 #| code-fold: true
 #| code-summary: "Show solution"
 
+
+
+altExps(tse) <- agglomerateByRanks(tse)
+
 tse <- transformAssay(tse, MARGIN = "samples", method="relabundance")
 
-altExps(tse) <- splitByRanks(tse)
 altExps(tse)
 ```
 
@@ -1434,7 +1437,7 @@ Useful functions: scater::runMDS, runNMDS, transformAssay, ggplot, scater::plotR
 
 ### Heatmap visualization
 
-1. Load one of the datasets from mia as well as miaViz.
+1. Load one of the datasets from mia and the miaViz and sechm packages.
 
 ```{r}
 #| label: heatmap-ex1
@@ -1448,18 +1451,7 @@ data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 ```
 
-2. Add a relative abundance assay to the TSE.
-
-```{r}
-#| label: heatmap-ex2
-#| code-fold: true
-#| code-summary: "Show solution"
-#| eval: false
-
-tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
-```
-
-3. Melt the tse into a dataframe, order it by decreasing relative abundance and subset to the first 25 rows for better visibility when plotting the heatmap.
+2. Get the most prevalent features. Subset your TreeSe to those features and the first twenty taxa.
 
 ```{r}
 #| label: heatmap-ex3
@@ -1467,31 +1459,23 @@ tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 #| code-summary: "Show solution"
 #| eval: false
 
-df <- meltAssay(tse, assay.type = "relabundance")
+most_prevalent <-  names(head(getPrevalence(tse,sort=TRUE)))
 
-df <- df[order(abs(df$relabundance), decreasing=TRUE), ]
-
-top_taxa_samples <- df[1:20,1:2]
-
-df <- df[df$FeatureID %in%top_taxa_samples$FeatureID & 
-             df$SampleID %in%top_taxa_samples$SampleID, ]
+tse <- tse[most_prevalent, 1:20]
 ```
 
-4. Calculate and store the limits for the heatmap's color scale as well as it's colors breaks and the colors to be used for the color scale.
+3. Add a relative abundance assay to the TreeSE.
 
 ```{r}
-#| label: heatmap-ex4
+#| label: heatmap-ex3
 #| code-fold: true
 #| code-summary: "Show solution"
 #| eval: false
 
-maxval <- max(abs(df$relabundance))
-limits <- c(0, maxval)
-breaks <- seq(from = 0, to = max(limits), by = 0.05)
-colours <- c("#F0F0FF", "#007562")
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 ```
 
-5. Visualize the relative abundances using the previously created variables.
+5. Visualize the relative abundances with a heatmap using the sechm library
 
 ```{r}
 #| label: heatmap-ex5
@@ -1499,19 +1483,14 @@ colours <- c("#F0F0FF", "#007562")
 #| code-summary: "Show solution"
 #| eval: false
 
-ggplot(df, aes(x = SampleID, y = FeatureID, fill = relabundance)) +
-    geom_tile() +
-    scale_fill_gradientn(name = "Relative abundance", 
-                         breaks = breaks, limits = limits, colours = colours) + 
-    theme(text = element_text(size=10),
-          axis.text.x = element_text(angle=45, hjust=1),
-          legend.key.size = unit(1, "cm")) +
-    labs(x = "Samples", y = "Taxa")
+setSechmOption("hmcols", value=c("#F0F0FF","#007562"))
+
+sechm(tse,features = most_prevalent , assayName="relabundance",        show_colnames=TRUE)
 ```
 
 ### Advanced Heatmaps
 
-1. Import mia, Miaviz, complexHeatmap as well as a dataset of your choice
+1. Import mia, miaviz, complexHeatmap as well as a dataset of your choice
 
 ```{r}
 #| label: advanced-heatmap-ex1
@@ -1538,7 +1517,7 @@ tse <- Tengeler2020
 tse <- transformAssay(tse, assay.type = "counts",
                              method = "relabundance", pseudocount = 1)
 
-tse <- mergeFeaturesByRank(tse, rank = "Order")
+tse <- agglomerateByRank(tse, rank = "Order")
 
 ```
 
