@@ -119,9 +119,6 @@ knitr::kable(head(colData(tse)))
 4. Set `include: false` in the `setup` chunk, `fig-width: 10` in the `fig-box`
    chunk and `echo: false` in the `tbl-coldata` chunk. Render the document again
    and find the differences from before.  
-
-The setup code and output are no longer visible, resulting in a cleaner document without initialization details. Figures in the fig-box chunk are now wider, providing better visibility and detail in the graphics. The code in the tbl-coldata chunk is hidden, making the document more concise and focused on the results rather than the code implementation.
-
 5. Add the options `fig-cap` and `tab-cap` to the `fig-box` and `tbl-coldata`
    chunks, respectively. They require some text input, which makes for the
    caption of the figures or tables.  
@@ -1190,30 +1187,30 @@ PCoA object).
 
 ```{r}
 # Load necessary libraries
-library(SummarizedExperiment)
-library(pheatmap)
+library(TreeSummarizedExperiment)
+library(sechm)
 
-# Example data creation
-# Assuming enterotype is a SummarizedExperiment object with sample metadata
-# and assay_data is a matrix containing assay data
-
-# Create example SummarizedExperiment object
+# Create example data
 example_data <- matrix(runif(200), nrow = 20, ncol = 10) # Example assay data
 col_data <- DataFrame(Sample = paste0("Sample", 1:10), Group = rep(c("A", "B"), each = 5)) # Example sample metadata
-enterotype <- SummarizedExperiment(assays = list(counts = example_data), colData = col_data)
+row_data <- DataFrame(GeneID = 1:20) # Row metadata
+phylo_tree <- rtree(n=20) # Generating a random phylogenetic tree for demonstration
 
-# Extract sample metadata
-sample_metadata <- colData(enterotype)
+# Extract sample metadata for annotation directly from the tse object
+sample_metadata <- colData(tse)   
 
-# Extract assay data
-assay_data <- assay(enterotype, "counts")
+# Create TreeSummarizedExperiment object
+tse <- TreeSummarizedExperiment(assays = list(counts = example_data),
+                                       colData = col_data,
+                                       rowData = row_data,
+                                       rowTree = phylo_tree)
 
-# Plot heatmap with clustering and sample annotations
-pheatmap(assay_data, cluster_rows = TRUE, cluster_cols = TRUE, annotation_col = as.data.frame(sample_metadata))
+# Generate heatmap with clustering and sample annotations
+heatmap <- draw(tse, data = "counts", metaData = "Group", showRowDendro = TRUE, 
+               showColDendro = TRUE, cluster_rows = TRUE, cluster_cols = TRUE,
+               annotation_col = as.data.frame(sample_metadata))
+print(heatmap)
 ```
-
-Make sure to replace the example data with your actual data. 
-
 
 ## Multiomics
 
