@@ -575,7 +575,7 @@ Please have a try at the following exercises.
 
 ```{r}
 #| label: subsetting-ex1
-#| eval: true
+#| eval: FALSE
 #| code-fold: true
 #| code-summary: "Show solution"
 
@@ -589,7 +589,7 @@ unique(tse_subset_by_sample$SampleType)
 
 ```{r}
 #| label: subsetting-ex2
-#| eval: True
+#| eval: FALSE
 #| code-fold: true
 #| code-summary: "Show solution"
 
@@ -607,7 +607,7 @@ dim(tse_subset_by_sample_and_feature)
 
 ```{r}
 #| label: subsetting-ex3.1
-#| eval: True
+#| eval: FALSE
 #| code-fold: true
 #| code-summary: "Show solution"
 
@@ -620,7 +620,7 @@ unique(tse$SampleType) # Samples
 
 ```{r}
 #| label: subsetting-ex3.2
-#| eval: True
+#| eval: FALSE
 #| code-fold: true
 #| code-summary: "Show solution"
 
@@ -647,7 +647,7 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, scater::add
 1. Estimate prevalence for your chosen feature (specific row and taxonomic group)
 ```{r}
 #| label: prevalence-ex1
-#| eval: True
+#| eval: FALSE
 #| code-fold: true
 #| code-summary: "Show solution"
 
@@ -663,7 +663,7 @@ getPrevalence(altExp(tse,"Phylum"), detection = 1/100,
 
 ```{r}
 #| label: prevalence-ex2
-#| eval: True
+#| eval: FALSE
 #| code-fold: true
 #| code-summary: "Show solution"
 
@@ -681,7 +681,7 @@ prevalenceTse <- subsetByPrevalentFeatures(tse, detection = 0,
 
 ```{r}
 #| label: prevalence-ex3
-#| eval: True
+#| eval: FALSE
 #| code-fold: true
 #| code-summary: "Show solution"
 
@@ -693,7 +693,7 @@ How many are left?
 
 ```{r}
 #| label: prevalence-ex4
-#| eval: True
+#| eval: FALSE
 #| code-fold: true
 #| code-summary: "Show solution"
 
@@ -1453,17 +1453,15 @@ data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 ```
 
-2. Get the most prevalent features. Subset your TreeSe to those features and the first twenty taxa.
+2. Get the most prevalent features. Subset your TreeSe to those features and the first 5.
 
 ```{r}
-#| label: heatmap-ex3
+#| label: heatmap-ex2
 #| code-fold: true
 #| code-summary: "Show solution"
 #| eval: false
 
-most_prevalent <-  names(head(getPrevalence(tse,sort=TRUE)))
-
-tse <- tse[most_prevalent, 1:20]
+tse <- subsetByPrevalent(tse,prevalence=0.99999)[1:5,]
 ```
 
 3. Add a relative abundance assay to the TreeSE.
@@ -1477,10 +1475,10 @@ tse <- tse[most_prevalent, 1:20]
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 ```
 
-5. Visualize the relative abundances with a heatmap using the sechm library
+4. Visualize the relative abundances with a heatmap using the sechm library
 
 ```{r}
-#| label: heatmap-ex5
+#| label: heatmap-ex4
 #| code-fold: true
 #| code-summary: "Show solution"
 #| eval: false
@@ -1492,7 +1490,7 @@ sechm(tse,features = most_prevalent , assayName="relabundance",        show_coln
 
 ### Advanced Heatmaps
 
-1. Import mia, miaviz, complexHeatmap as well as a dataset of your choice
+1. Import mia, miaviz, complexHeatmap, shadowtext as well as a dataset of your choice
 
 ```{r}
 #| label: advanced-heatmap-ex1
@@ -1502,13 +1500,14 @@ sechm(tse,features = most_prevalent , assayName="relabundance",        show_coln
 
 library(mia)
 library(miaViz)
-library(ComplexHeatmap)
+library(shadowtext)
+library(ComplexHeatmap) 
 
 data("Tengeler2020", package = "mia")
 tse <- Tengeler2020
 ```
 
-2. Create an assay with relative abundance, then merge the feature by rank Òrder`.
+2. Agglomerate the data by prevalence to a rank of your choice, apply log10 transformation and assure unique rownames for when we plot the heatmap.
 
 ```{r}
 #| label: advanced-heatmap-ex2
@@ -1516,39 +1515,55 @@ tse <- Tengeler2020
 #| code-summary: "Show solution"
 #| eval: false
 
-tse <- transformAssay(tse, assay.type = "counts",
-                             method = "relabundance", pseudocount = 1)
+tse <- agglomerateByPrevalence(tse, rank = "Family")
 
-tse <- agglomerateByRank(tse, rank = "Order")
+tse <- transformAssay(tse, method = "log10", pseudocount = TRUE)
+
+rownames(tse) <- getTaxonomyLabels(tse)
 
 ```
 
-3. Add CLR-Z transformation to the TreeSE.
+3. Calculate the correlations and their respective p-values between the log0 and count assays.
 
 ```{r}
-#| label: heatmap-ex6
+#| label: advanced-heatmap-ex3
 #| code-fold: true
 #| code-summary: "Show solution"
 #| eval: false
 
-tse<- transformAssay(tse, assay.type = "relabundance",
-                             method = "clr", pseudocount = TRUE)
-
-# Add z-transformation on features (taxa)
-tse <- transformAssay(tse, assay.type = "clr", 
-                             MARGIN = "features",
-                             method = "z", name = "clr_z")
+correlations <- getCrossAssociation(tse, 
+                                   test_significance=TRUE,            
+                                   assay.type1 = "log10", 
+                                   assay.type2 = "counts",
+                                   method = "spearman", 
+                                   p_adj_threshold = NULL,
+                                   cor_threshold = NULL,
+                                   # Remove when mia is fixed
+                                   mode = "matrix",
+                                   sort = TRUE,
+                                   show_warnings = FALSE)
 ```
 
-4. plot a heatmap using the CLR-Z transformation
-
+4. plot a heatmap using the correlations and mark significant correlations (p<0.05)with a cross.
 ```{r}
-#| label: heatmap-ex6
+#| label: advanced-heatmap-ex4
 #| code-fold: true
 #| code-summary: "Show solution"
 #| eval: false
 
-Heatmap(assay(tse, "clr_z"), name = "clr-z")
+# Create a heatmap and store it
+plot <- Heatmap(correlations$cor,
+                # Print values to cells
+                cell_fun = function(j, i, x, y, width, height, fill) {
+                  # If the p-value is under threshold
+                  if( !is.na(correlations$pval[i, j]) &                                        correlations$pval[i, j] < 0.05 ){
+                    # Print "X"
+                    grid.shadowtext(sprintf("%s", "X"), x, y, gp =                           gpar(fontsize = 8, col = "#f5f5f5"))
+                  }
+                },
+                heatmap_legend_param = list(title = "", legend_height = unit(5, "cm"))
+)
+plot
 ```
 
 ## Multiomics
