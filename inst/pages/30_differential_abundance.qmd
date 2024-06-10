@@ -129,7 +129,7 @@ threshold of 10%.
 
 ```{r prep-daa-data}
 # Agglomerate by genus and subset by prevalence
-tse <- subsetByPrevalent(tse,
+tse <- subsetByPrevalentFeatures(tse,
                             rank = "Genus",
                             prevalence = 10 / 100)
 
@@ -348,89 +348,6 @@ This will create a folder that is called like in the output specified
 above. It contains also figures to visualize difference between
 significant taxa.
 
-### LinDA 
-
-Lastly, we cover linear models for differential abundance analysis of
-microbiome compositional data (@Zhou2022). This is very similar to
-ANCOMBC with few differences: 1) LinDA corrects for the compositional
-bias differently using the mode of all regression coefficients. 2) it
-is faster (100x-1000x than ANCOMBC and according to the authors); 3)
-it supports hierarchical models. The latest ANCOMBC versions are also
-supporting hierarchical models. Nevertheless, LinDA seems a promising
-tool that achieves a very good power/fdr trade-off together with
-ANCOMBC according to the review. The speed improvements might make it
-critical especially for datasets that have higher sample or feature
-set sizes.
-
-```{r run-linda}
-# Load package
-library(MicrobiomeStat)
-
-# Run LinDA
-linda_out <- linda(feature.dat = as.data.frame(assay(tse)),
-                   meta.dat = as.data.frame(colData(tse)),
-                   formula = "~ patient_status",
-                   alpha = 0.05,
-                   prev.filter = 0,
-                   mean.abund.filter = 0)
-```
-
-```{r linda-res}
-# List genera for which H0 could be rejected:
-linda_out$output$patient_statusControl %>%
-  filter(reject) %>%
-  dplyr::select(stat, padj) %>%
-  rownames_to_column(var = "feature") %>%
-  knitr::kable()
-```
-
-### ZicoSeq
-
-Subsequently, we demonstrate DAA with ZicoSeq, a method based on linear models
-and permutation. Further details can be found in
-[this tutorial](https://cran.r-project.org/web/packages/GUniFrac/vignettes/ZicoSeq.html).
-This approach has been assessed to exhibit high power and a low false discovery
-rate, which has the following components:
-
-  1. Winsorization to decrease the influence of outliers;
-  2. Posterior sampling based on a beta mixture prior to address
-  sampling variability and zero inflation;
-  3. Reference-based multiple-stage normalization to address
-  compositional effects;
-
-```{r run-zicoseq}
-# Load package
-library(GUniFrac)
-
-set.seed(123)
-zicoseq_out <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
-                       meta.dat = as.data.frame(colData(tse)),
-                       grp.name = "patient_status",
-                       feature.dat.type = "count",
-                       return.feature.dat = TRUE,
-                       prev.filter = 0,
-                       mean.abund.filter = 0,
-                       max.abund.filter = 0,
-                       perm.no = 999)
-```
-
-```{r zicoseq-res}
-zicoseq_res <- cbind.data.frame(p.raw = zicoseq_out$p.raw,
-                                p.adj.fdr = zicoseq_out$p.adj.fdr)
-
-zicoseq_res %>%
-  filter(p.adj.fdr < 0.05) %>%
-  arrange(p.adj.fdr) %>%
-  knitr::kable()
-```
-
-
-```{r plot-zicoseq}
-## x-axis is the effect size: R2 * direction of coefficient
-ZicoSeq.plot(ZicoSeq.obj = zicoseq_out,
-             pvalue.type = 'p.adj.fdr')
-```
-
 ### PhILR
 
 PhILR is a tree-based method that tests group-wise associations based on
@@ -518,71 +435,30 @@ ancombc2_out$res %>%
   head() %>%
   knitr::kable()
 ```
+### Further information on tools for DAA : 
+  
+#### LinDA
+  
+LinDA covers linear models for differential abundance analysis of microbiome compositional data (@Zhou2022). This is very similar to ANCOMBC with few differences: 
+    
+  1. LinDA corrects for the compositional bias differently using the mode of all regression coefficients. 
+  
+  2. It is faster (100x-1000x than ANCOMBC and according to the authors); 
+  
+  3. It supports hierarchical models. The latest ANCOMBC versions are also supporting hierarchical models.
+  
+Nevertheless, LinDA seems a promising tool that achieves a very good power/fdr trade-off together with ANCOMBC according to the review. The speed improvements might make it critical especially for datasets that have higher sample or feature set sizes.
+  
+#### ZicoSeq
+  
+Subsequently, we demonstrate DAA with ZicoSeq, a method based on linear models and permutation. Further details can be found in this tutorial. This approach has been assessed to exhibit high power and a low false discovery rate, which has the following components:
+    
+  1. Winsorization to decrease the influence of outliers;
+  
+  2. Posterior sampling based on a beta mixture prior to address sampling variability and zero inflation;
+  
+  3. Reference-based multiple-stage normalization to address compositional effects;Additional resources
 
-### LinDA
-
-As in the previous method, confounders can be included in the formula with the
-main outcome variable.
-
-```{r run-adj-linda}
-linda_out <- linda(as.data.frame(assay(tse, "counts")),
-                   as.data.frame(colData(tse)),
-                   formula = "~ patient_status + cohort + library_size",
-                   alpha = 0.05,
-                   prev.filter = 0,
-                   mean.abund.filter = 0)
-```
-
-The model returns an output for every variable included in the formula. Normally,
-only the results on the main outcome variable are relevant and can be retrieved
-as shown below. However, the statistics on the confounders can be similarly
-obtained by accessing the corresponding items from the output object.
-
-```{r adj-linda-res}
-# Select results for the patient status
-linda_res <- linda_out$output$patient_statusControl
-
-linda_res %>%
-  filter(reject) %>%
-  dplyr::select(log2FoldChange, stat, padj) %>%
-  rownames_to_column(var = "feature") %>%
-  head() %>%
-  knitr::kable()
-```
-
-The output shows effect sizes in terms of log-fold changes and a derived
-statistic (stat) as well as the corresponding adjusted p-values for differences
-in abundance of each taxon between the control and treated group.
-
-### ZicoSeq
-
-For this method, confounders can be added as a list to the `adj.name` argument.
-
-```{r run-adj-zicoseq}
-set.seed(123)
-zicoseq_out <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
-                       meta.dat = as.data.frame(colData(tse)),
-                       grp.name = "patient_status",
-                       adj.name = c("cohort", "library_size"), 
-                       feature.dat.type = "count",
-                       return.feature.dat = TRUE,
-                       prev.filter = 0,
-                       mean.abund.filter = 0,
-                       max.abund.filter = 0,
-                       perm.no = 999)
-```
-
-The output shows the raw and adjusted p-values for clinical status.
-
-```{r adj-zicoseq-res}
-zicoseq_res <- cbind.data.frame(p.raw = zicoseq_out$p.raw,
-                                p.adj.fdr = zicoseq_out$p.adj.fdr)
-
-zicoseq_res %>%
-  filter(p.adj.fdr < 0.05) %>%
-  head() %>%
-  knitr::kable()
-```
 
 ## Additional resources
 
