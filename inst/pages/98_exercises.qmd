@@ -1155,61 +1155,144 @@ See the OMA book for examples.
 **Extra** Cool Exercise : Identify Patterns and Clusters
 To make the exercise more engaging, let's do an exploratory data analysis task:
 
-#### 1. Cluster Analysis on PCoA/PCA Results:
+### 1: k-means Clustering on Reduced Dimensions and Visualization
 
-i. Perform clustering on the ordination results (e.g., k-means clustering).
-ii. Visualize the clusters on the ordination plots.
-
-```{r}
-# Setting seed for reproducibility
-set.seed(123)
-
-# Perform k-means clustering on the reduced dimensions of pcoa_bray
-pcoa_bray_clusters <- kmeans(reducedDim(pcoa_bray), centers = 3)$cluster
-
-# Plot the reduced dimensions of pcoa_bray with clusters as colors
-plotReducedDim(pcoa_bray, colour_by = pcoa_bray_clusters)
-
-# Perform k-means clustering on the reduced dimensions of pca_aitchison
-pca_aitchison_clusters <- kmeans(reducedDim(pca_aitchison), centers = 3)$cluster
-
-# Plot the reduced dimensions of pca_aitchison with clusters as colors
-plotReducedDim(pca_aitchison, colour_by = pca_aitchison_clusters)
-```
-Where : 
-'reducedDim' is a function that extracts the reduced dimensionality representation of your data (e.g., from a PCA or 
-PCoA object).
-'plotReducedDim' is a function that can plot these reduced dimensions and has a 'colour_by argument' that accepts a vector of cluster assignments.
-
-#### 2. Heatmap with Annotations:
-
-* Annotate the heatmap with additional metadata (e.g., subject groups or sample types).
+- Performs k-means clustering on reduced dimensional data obtained from PCoA.
+- Visualizes the clusters in a scatter plot of the reduced dimensions.
 
 ```{r}
+#| label: heatmap-visualization-ex3
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
 # Load necessary libraries
-library(TreeSummarizedExperiment)
-library(sechm)
+library(mia)
+library(SummarizedExperiment)
+library(vegan)
+library(ggplot2)
+library(cluster)
 
-# Create example data
-example_data <- matrix(runif(200), nrow = 20, ncol = 10) # Example assay data
-col_data <- DataFrame(Sample = paste0("Sample", 1:10), Group = rep(c("A", "B"), each = 5)) # Example sample metadata
-row_data <- DataFrame(GeneID = 1:20) # Row metadata
-phylo_tree <- rtree(n=20) # Generating a random phylogenetic tree for demonstration
+# Generate a sample SummarizedExperiment object
+data(GlobalPatterns)
+se <- SummarizedExperiment(assays = list(counts = assay(GlobalPatterns)),
+                           colData = colData(GlobalPatterns),
+                           rowData = rowData(GlobalPatterns))
 
-# Extract sample metadata for annotation directly from the tse object
-sample_metadata <- colData(tse)   
+# Perform PCoA on the abundance data
+distance_matrix <- vegdist(t(assay(se)), method = "bray")
+pcoa_results <- cmdscale(distance_matrix, k = 2)
+pcoa_data <- data.frame(pcoa_results)
+colnames(pcoa_data) <- c("PCoA1", "PCoA2")
 
-# Create TreeSummarizedExperiment object
-tse <- TreeSummarizedExperiment(assays = list(counts = example_data),
-                                       colData = col_data,
-                                       rowData = row_data,
-                                       rowTree = phylo_tree)
+# Perform k-means clustering (k = 3)
+set.seed(123)
+kmeans_result <- kmeans(pcoa_data, centers = 3)
+pcoa_data$cluster <- as.factor(kmeans_result$cluster)
 
-# Generate heatmap with clustering and sample annotations
-heatmap <- draw(tse, data = "counts", metaData = "Group", showRowDendro = TRUE, 
-               showColDendro = TRUE, cluster_rows = TRUE, cluster_cols = TRUE,
-               annotation_col = as.data.frame(sample_metadata))
-print(heatmap)
+# Visualize PCoA with clusters
+ggplot(pcoa_data, aes(x = PCoA1, y = PCoA2, color = cluster)) +
+  geom_point(size = 3) +
+  labs(title = "PCoA with k-means Clustering", x = "PCoA Axis 1", y = "PCoA Axis 2") +
+  theme_minimal() +
+  scale_color_manual(values = c("red", "blue", "green"))
+```
+
+### 2: Cluster Analysis with Heatmap Visualization
+
+- Hierarchical clustering of samples based on abundance data.
+- Visualizes the clustered data using a heatmap, with cluster information added to metadata.
+
+```{r}
+#| label: heatmap-visualization-ex1
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+# Load necessary libraries
+library(mia)
+library(SummarizedExperiment)
+library(pheatmap)
+library(cluster)
+
+# Generate a sample SummarizedExperiment object 
+data(GlobalPatterns)
+se <- SummarizedExperiment(assays = list(counts = assay(GlobalPatterns)),
+                           colData = colData(GlobalPatterns),
+                           rowData = rowData(GlobalPatterns))
+
+# Extract the abundance data matrix
+abundance_data <- assay(se, "counts")
+
+# Perform hierarchical clustering on the samples
+distance_matrix <- dist(t(abundance_data), method = "euclidean")
+clustering <- hclust(distance_matrix, method = "average")
+
+# Cut the dendrogram to form clusters (k = 3 for this example)
+clusters <- cutree(clustering, k = 3)
+
+# Add cluster information to colData
+colData(se)$cluster <- as.factor(clusters)
+
+# Visualize the heatmap with clusters
+heatmap_data <- assay(se, "counts")
+pheatmap(heatmap_data, 
+         cluster_rows = clustering, 
+         cluster_cols = clustering, 
+         annotation_col = data.frame(Cluster = colData(se)$cluster),
+         main = "Heatmap with Clustering",
+         show_rownames = FALSE, 
+         show_colnames = FALSE)
+```
+
+
+### 3: Heatmap with Annotations
+
+- Uses heatmaps to visualize high-dimensional data, such as abundance data.
+- Annotations add context to the heatmap, linking clustering patterns to metadata like sample groups or experimental conditions.
+
+```{r}
+#| label: heatmap-visualization-ex2
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+# Load necessary libraries
+library(mia)
+library(SummarizedExperiment)
+library(pheatmap)
+
+# Generate a sample SummarizedExperiment object
+data(GlobalPatterns)
+se <- SummarizedExperiment(assays = list(counts = assay(GlobalPatterns)),
+                           colData = colData(GlobalPatterns),
+                           rowData = rowData(GlobalPatterns))
+
+# Extract the abundance data matrix
+abundance_data <- assay(se, "counts")
+
+# Ensure cluster information is correctly added to colData
+# Perform hierarchical clustering on the samples
+distance_matrix <- dist(t(abundance_data), method = "euclidean")
+clustering <- hclust(distance_matrix, method = "average")
+
+# Cut the dendrogram to form clusters (k = 3 for this example)
+clusters <- cutree(clustering, k = 3)
+
+# Add cluster information to colData
+colData(se)$cluster <- as.factor(clusters)
+
+# Create a sample metadata annotation (e.g., SampleType)
+sample_metadata <- data.frame(SampleType = colData(se)$SampleType,
+                              Cluster = colData(se)$cluster)
+rownames(sample_metadata) <- colnames(abundance_data)
+
+# Visualize the heatmap with annotations
+pheatmap(abundance_data, 
+         annotation_col = sample_metadata,
+         main = "Heatmap with Annotations",
+         show_rownames = FALSE, 
+         show_colnames = FALSE)
 ```
 
 ## Multiomics
