@@ -6,7 +6,7 @@
 
 **README from [microbiome/OMA](https://github.com/microbiome/OMA)**
 
-# Orchestrating Microbiome Analysis Book <img src="images/mia_logo.png" align="right" width="120" />
+# Orchestrating Microbiome Analysis Book <img src="inst/pages/images/mia_logo.png" align="right" width="120" />
 
 ## Overview
 
@@ -112,7 +112,7 @@ Please note that chapters should be independent of each other.
 
 - Create the relevant `.qmd` file; follow the numbering logic.
 - Add it also to the list in file [inst/assets/_book.yml](inst/assets/_book.yml). 
-- **Add any new dependency you uese to the [DESCRIPTION](DESCRIPTION) file**.
+- **Add any new dependency you use to the [DESCRIPTION](DESCRIPTION) file**.
 
 # Code of conduct
 

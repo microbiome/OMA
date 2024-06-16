@@ -11,7 +11,7 @@ data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 ```
 
-Taxonomic information is a key part of analyzing microbiome data and without
+Taxonomic information is a key part of analyzing microbiome data, and without
 it, any type of data analysis probably will not make much sense. However,
 the degree of detail of taxonomic information differs depending on the dataset
 and annotation data used.
@@ -25,19 +25,19 @@ and assumes certain key aspects:
 `kingdom`, `phylum`, `class`, `order`, `family`, `genus`, `species` or with
 a capital first letter.
 * the columns must be given in the order shown above
-* column can be omited, but the order must remain
+* column can be omitted, but the order must remain
 
 In this chapter, we will refer to co-abundant groups as CAGs, which are
 clusters of taxa that co-vary across samples.
 
-## Assigning taxonomic information.
+## Assigning taxonomic information
 
 There are a number of methods to assign taxonomic information. We like to give
 a short introduction about the methods available without ranking one over the 
 other. This has to be your choice based on the result for the individual 
 dataset.
 
-### dada2
+### DADA2
 
 The dada2 package [@Callahan2016dada2] implements the `assignTaxonomy`
 function, which takes as input the ASV sequences associated with each
@@ -111,14 +111,26 @@ To apply the loop resolving function `resolveLoop` from the
 `TreeSummarizedExperiment` package [@R_TreeSummarizedExperiment] within
 `getTaxonomyLabels`, set `resolve_loops = TRUE`.
 
-The function `getUniqueFeatures` gives a list of unique taxa for the
+The function `getUnique` gives a list of unique taxa for the
 specified taxonomic rank.
 
 ```{r}
-head(getUniqueFeatures(tse, rank = "Phylum"))
+head(getUnique(tse, rank = "Phylum"))
 ```
 
 ### Generate a hierarchy tree on the fly {#sec-fly-tree}
+
+A hierarchy tree is not an actual phylogenetic tree.
+A hierarchy tree shows mapping between the taxonomic levels in taxonomic rank table (included in rowData), rather than the detailed phylogenetic relations included in a phylogenetic tree
+
+For instance, the TreeSummarizedExperiment dataset Tengeler2020 contains an actual phylogenetic tree.
+
+```{r}
+data(Tengeler2020)
+tse2 <- Tengeler2020
+phylo_tree <- rowTree(tse2)
+phylo_tree
+```
 
 To create a hierarchy tree, `getHierarchyTree` used the information and returns a
 `phylo` object. Duplicate information from the `rowData` is removed.
@@ -182,7 +194,7 @@ altExp(tse, "Species_byPrevalence") <- mergeFeaturesByPrevalence(tse,
                                                                as_relative = T)
 altExp(tse, "Species_byPrevalence")
 
-assay(altExp(tse, "Species_byPrevalence"), "relabundance")[88:92, 1:7]
+assay(altExp(tse, "Species_byPrevalence"), "relabundance")[1:5, 1:3]
 ```
 
 ```{r}
@@ -325,15 +337,15 @@ references.
    Karwowska2024].
 
  * 'z' Z transformation scales data to zero mean and unit variance;
-   this us used to bring features (or samples) to more comparable
+   this is used to bring features (or samples) to more comparable
    levels in terms of mean and scale of the values. This can enhance
    visualization and interpretation of the data
 
 * 'log', 'log2', 'log10' Logarithmic transformations; used e.g. to
-   reduce data skewness; with compositional data the `clr` (or `rclr`)
+   reduce data skewness; with compositional data, the `clr` (or `rclr`)
    transformation is often preferred.
    
- * 'hellinger' Hellinger transformation equals to the square root of
+ * 'hellinger' Hellinger transformation is equal to the square root of
    relative abundances. This ecological transformation can be useful
    if we are interested in changes in relative abundances.
 
