@@ -53,11 +53,11 @@ Quarto documents.
 #### Code chunks
 
 While customizable text is nothing new by itself, the advantage of Quarto (and
-previously Rmakdown) is to combine text with code in R or other programming
+previously Rmarkdown) is to combine text with code in R or other programming
 languages, so that both the analytical pipeline and verbal description can be
 put in one place. In this exercise, we learn how to write and run code in Quarto.
 
-1. Open RStudio and create a new Quarto file.  
+1. Open RStudio and create a new Quarto file (click on File tab - New File - Quarto document).  
 2. Initialize a code chunk by pressing `alt` + `cmd` + `i` and define the variables
    `A <- "my name"` and `B <- 0` in it.  
 3. Write the text `Below is my first code chunk` just above the code chunk.  
@@ -119,6 +119,9 @@ knitr::kable(head(colData(tse)))
 4. Set `include: false` in the `setup` chunk, `fig-width: 10` in the `fig-box`
    chunk and `echo: false` in the `tbl-coldata` chunk. Render the document again
    and find the differences from before.  
+
+The setup code and output are no longer visible, resulting in a cleaner document without initialization details. Figures in the fig-box chunk are now wider, providing better visibility and detail in the graphics. The code in the tbl-coldata chunk is hidden, making the document more concise and focused on the results rather than the code implementation.
+
 5. Add the options `fig-cap` and `tab-cap` to the `fig-box` and `tbl-coldata`
    chunks, respectively. They require some text input, which makes for the
    caption of the figures or tables.  
@@ -1326,7 +1329,7 @@ namely ZicoSeq. We aim to compare the results between these two methods and draw
    mentioned in Chapter 3.3 with `data` and store it into a variable named `tse`.
 
 ```{r}
-#| label: compating-methods-ex1
+#| label: comparing-methods-ex1
 #| eval: FALSE
 #| code-fold: true
 #| code-summary: "Show solution"
@@ -1343,7 +1346,7 @@ tse <- peerj13075
    the `rank` and `prevalence` arguments.
 
 ```{r}
-#| label: compating-methods-ex2
+#| label: comparing-methods-ex2
 #| eval: FALSE
 #| code-fold: true
 #| code-summary: "Show solution"
@@ -1361,7 +1364,7 @@ tse <- subsetByPrevalent(tse,
    to `TRUE` and `perm.no` to `999`.
 
 ```{r}
-#| label: compating-methods-ex3
+#| label: comparing-methods-ex3
 #| eval: FALSE
 #| code-fold: true
 #| code-summary: "Show solution"
@@ -1382,7 +1385,7 @@ zicoseq_out <- ZicoSeq(feature.dat = as.matrix(assay(tse)),
    methods agree with one another?
 
 ```{r}
-#| label: compating-methods-ex4
+#| label: comparing-methods-ex4
 #| eval: FALSE
 #| code-fold: true
 #| code-summary: "Show solution"
@@ -1399,21 +1402,21 @@ zicoseq_res %>%
 
 ### Workflow 1
 
-1. Get the abundances for an individual feature (taxonomic group / row)
-2. Visualize the abundances per group with boxplot / jitterplot
+1. Get the abundances for an individual feature (taxonomic group / row).
+2. Visualize the abundances per group with boxplot / jitterplot.
 3. Is the difference significant (Wilcoxon test)?
 4. Is the difference significant (linear model with covariates)? 
 5. How do transformations affect the outcome (log10, clr..)?
-6. Get p-values for all features (taxa), for instance with a for loop
-7. Do multiple testing correction
-9. Compare the results from different tests with a scatterplot
+6. Get p-values for all features (taxa), for instance with a for loop.
+7. Do multiple testing correction.
+9. Compare the results from different tests with a scatterplot.
 
 Useful functions: [], ggplot2::geom_boxplot, ggplot2::geom_jitter, wilcox.test, lm.test, transformAssay, p.adjust
 
 
 ### Workflow 2
 
-1. install the latest development version of mia from GitHub.
+1. Install the latest development version of mia from GitHub.
 2. Load experimental dataset from mia.
 3. Compare abundances of each taxa between groups. First, use Wilcoxon or Kruskall-Wallis test. Then use some other method dedicated to microbiome data. 
 4. Summarize findings by plotting a taxa vs samples heatmap. Add column annotation that tells the group of each sample, and row annotation that tells whether the difference of certain taxa was statistically significant.
@@ -1427,10 +1430,10 @@ Useful functions: wilcox.test, kruskal.test, ggplot2::ggplot, pheatmap::pheatmap
 ### Multivariate ordination
 
 1. Load experimental dataset from mia.
-2. Create PCoA with Bray-Curtis dissimilarities
-3. Create PCA with Aitchison dissimilarities
-4. Visualize and compare both
-5. Test other transformations, dissimilarities, and ordination methods
+2. Create PCoA with Bray-Curtis dissimilarities.
+3. Create PCA with Aitchison dissimilarities.
+4. Visualize and compare both.
+5. Test other transformations, dissimilarities, and ordination methods.
 
 Useful functions: scater::runMDS, runNMDS, transformAssay, ggplot, scater::plotReducedDim
 
@@ -1565,6 +1568,37 @@ plot <- Heatmap(correlations$cor,
 )
 plot
 ```
+
+
+=======
+**Extra** Cool Exercise : Identify Patterns and Clusters
+To make the exercise more engaging, let's do an exploratory data analysis task:
+
+#### 1. Cluster Analysis on PCoA/PCA Results:
+
+i. Perform clustering on the ordination results (e.g., k-means clustering).
+ii. Visualize the clusters on the ordination plots.
+
+```{r}
+# Setting seed for reproducibility
+set.seed(123)
+
+# Perform k-means clustering on the reduced dimensions of pcoa_bray
+pcoa_bray_clusters <- kmeans(reducedDim(pcoa_bray), centers = 3)$cluster
+
+# Plot the reduced dimensions of pcoa_bray with clusters as colors
+plotReducedDim(pcoa_bray, colour_by = pcoa_bray_clusters)
+
+# Perform k-means clustering on the reduced dimensions of pca_aitchison
+pca_aitchison_clusters <- kmeans(reducedDim(pca_aitchison), centers = 3)$cluster
+
+# Plot the reduced dimensions of pca_aitchison with clusters as colors
+plotReducedDim(pca_aitchison, colour_by = pca_aitchison_clusters)
+```
+Where : 
+'reducedDim' is a function that extracts the reduced dimensionality representation of your data (e.g., from a PCA or 
+PCoA object).
+'plotReducedDim' is a function that can plot these reduced dimensions and has a 'colour_by argument' that accepts a vector of cluster assignments.
 
 ## Multiomics
 
