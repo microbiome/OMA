@@ -582,10 +582,10 @@ Please have a try at the following exercises.
 #| code-fold: true
 #| code-summary: "Show solution"
 
-tse_subset_by_sample <- tse[ , tse$SampleType %in% 
+tse.sub <- tse[ , tse$SampleType %in% 
                                c("Feces", "Skin", "Tongue")]
 
-unique(tse_subset_by_sample$SampleType)
+unique(tse.sub$SampleType)
 ```   
 
 2. Subset the TreeSE object to specific features.  
@@ -596,12 +596,12 @@ unique(tse_subset_by_sample$SampleType)
 #| code-fold: true
 #| code-summary: "Show solution"
 
-tse_subset_by_sample_and_feature <- tse[rowData(tse)$Phylum %in% c("Crenarchaeota", 
+tse.sub.feat <- tse[rowData(tse)$Phylum %in% c("Crenarchaeota", 
                                                        "Euryarchaeota",
                                                        "Actinobacteria")
                              ,]
 
-dim(tse_subset_by_sample_and_feature)
+dim(tse.sub.feat)
 ```   
 
 3. Subset the TreeSE object to specific samples and features.  
@@ -657,7 +657,7 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, scater::add
 # First, merge the features by rank and add it as an alternative experiment.
 altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum") 
 
-# Then get the prevalence for a specific sample 
+# Then get the prevalence for a specific feature 
 getPrevalence(altExp(tse,"Phylum"), detection = 1/100, 
                    sort = TRUE, assay.type = "counts",
                    as_relative = TRUE)["Phylum:Proteobacteria"]
@@ -671,14 +671,15 @@ getPrevalence(altExp(tse,"Phylum"), detection = 1/100,
 #| code-summary: "Show solution"
 
 # Get the prevalent features
-prevalentFeatures <- getPrevalentFeatures(tse, detection = 0, 
-                                          prevalence = 50/100)
+prevalentFeatures <- as.integer(getPrevalentFeatures(tse, detection = 1, 
+                                          prevalence = 50/100))
 # Subset the data to the prevalent features
-prevalenceTse <- tse[rowData(tse)$Phylum %in% prevalentFeatures,]
+tse.prevalent <- tse[rownames(rowData(tse)) %in% prevalentFeatures,]
 
 # Alternatively subsetByPrevalentFeatures can be used to subset directly
-prevalenceTse <- subsetByPrevalentFeatures(tse, detection = 0, 
-                                          prevalence = 50/100)
+tse.prevalent2 <- subsetByPrevalentFeatures(tse, detection = 1, 
+                                           prevalence = 50/100)
+identical(tse.prevalent,tse.prevalent2)
 ```  
 3. How many features are left ?
 
@@ -688,7 +689,7 @@ prevalenceTse <- subsetByPrevalentFeatures(tse, detection = 0,
 #| code-fold: true
 #| code-summary: "Show solution"
 
-length(assay(prevalenceTse, "counts"))
+length(assay(tse.prevalent, "counts"))
 ```  
 
 4. Recalculate the most prevalent features based on relative abundance. 
@@ -702,7 +703,7 @@ How many are left?
 
 tse <- transformAssay(tse, MARGIN = "samples", method="relabundance")
 
-prevalenceTse <- subsetByPrevalentFeatures(tse, detection = 0, 
+prevalenceTse <- subsetByPrevalentFeatures(tse, detection = 0.1/100, 
                                            prevalence = 50/100)
 
 length(assay(prevalenceTse, "relabundance"))
@@ -723,10 +724,10 @@ library(scater)
 rowData(prevalenceTse)$prevalence <- 
     getPrevalence(prevalenceTse, detection = 1/100, 
                   sort = FALSE,
-                  assay.type = "counts", as_relative = TRUE)
+                  assay.type = "relabundance")
 
 # Then plot the row data
-plotRowData(tse, "prevalence", 
+plotRowData(prevalenceTse, "prevalence", 
             colour_by = "Phylum")
 ```   
 
@@ -1485,9 +1486,7 @@ tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 #| code-fold: true
 #| code-summary: "Show solution"
 #| eval: false
-
 setSechmOption("hmcols", value=c("#F0F0FF","#007562"))
-
 sechm(tse,features = most_prevalent , assayName="relabundance",        show_colnames=TRUE)
 ```
 
@@ -1568,8 +1567,6 @@ plot <- Heatmap(correlations$cor,
 )
 plot
 ```
-
-
 =======
 **Extra** Cool Exercise : Identify Patterns and Clusters
 To make the exercise more engaging, let's do an exploratory data analysis task:
