@@ -223,6 +223,55 @@ pheatmap(mat, annotation_row = taxa_clusters,
          color = colors)
 ```
 
+### Composition heatmap using the NeatMap method {#sec-composition-neatmap}
+
+Another method to visualize community composition is by plotting a NeatMap, which means we use radial theta sorting when plotting the heatmap [@Rajaram2010]. The `getNeatOrder` function in the `miaViz` package allows us to achieve this. This method sorts data points based on their angular position in a 2D space, typically after an ordination technique such as PCA or NMDS has been applied.
+
+The `getNeatOrder` method calculates the angle (theta) for each point relative to the centroid and sorts data points based on these theta values in ascending order. This approach preserves the relationships between data points according to the ordination method's spatial configuration, rather than relying on hierarchical clustering.
+
+Now we can create a NeatMap using our original tse object.
+
+```{r neatmap}
+library(mia)
+library(miaViz)
+library(ComplexHeatmap)
+library(circlize)
+
+# Add a pseudocount to the counts data
+assay(tse, "counts") <- assay(tse, "counts") + 1
+
+# Transform the samples into relative abundances using CLR
+tse <- transformAssay(tse, assay.type = "counts", method = "clr", MARGIN = "samples", name = "clr")
+
+# Transform the features (taxa) into zero mean, unit variance (z transformation)
+tse <- transformAssay(tse, assay.type = "clr", method = "z", MARGIN = "features", name = "z")
+
+# Perform PCA on the dataset
+reducedDim(tse, "PCA") <- calculatePCA(tse, ncomponents = 10, assay.type = "z")
+
+# Sort by radial theta using the first two principal components
+sorted_order <- getNeatOrder(reducedDim(tse, "PCA")[, c(1, 2)], centering = "mean")
+tse <- tse[, sorted_order]
+
+# Define the color function and cap the colors at [-5, 5]
+col_fun <- colorRamp2(c(-5, 0, 5), c("blue", "white", "red"))
+
+# Create the heatmap
+heatmap <- Heatmap(assay(tse, "z"),
+                   name = "NeatMap",
+                   col = col_fun,
+                   cluster_rows = FALSE,  # Do not cluster rows
+                   cluster_columns = FALSE,  # Do not cluster columns
+                   show_row_dend = FALSE,
+                   show_column_dend = FALSE,
+                   row_names_gp = gpar(fontsize = 4),
+                   column_names_gp = gpar(fontsize = 6),
+                   heatmap_width = unit(20, "cm"),
+                   heatmap_height = unit(15, "cm"))
+
+heatmap
+```
+
 In addition, there are also other packages that provide functions for
 more complex heatmaps, such as those provided by
 [_iheatmapr_](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html)
