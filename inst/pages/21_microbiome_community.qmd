@@ -34,7 +34,7 @@ tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 
 # Getting top taxa on a Phylum level
 tse_phylum <- mergeFeaturesByRank(tse, rank ="Phylum", onRankOnly=TRUE)
-top_taxa <- getTop(tse_phylum,top = 5, assay.type = "relabundance")
+top_taxa <- getTopTaxa(tse_phylum,top = 5, assay.type = "relabundance")
 
 # Renaming the "Phylum" rank to keep only top taxa and the rest to "Other"
 phylum_renamed <- lapply(rowData(tse)$Phylum,
@@ -246,14 +246,24 @@ values in ascending order. This approach preserves the relationships
 between data points according to the ordination method's spatial
 configuration, rather than relying on hierarchical clustering.
 
-Now we can create a NeatMap using our original tse object and the ComplexHeatmap package.
+First, we will load the necessary libraries and create the `tse` object from the `GlobalPatterns` dataset.
 
-```{r neatmap}
+```{r setup-libraries-data}
+# Load the required libraries
 library(mia)
 library(miaViz)
+library(scater)
 library(ComplexHeatmap)
 library(circlize)
 
+# Load the data
+data("GlobalPatterns", package="mia")
+tse <- GlobalPatterns
+```
+
+Now, we'll create the NeatMap using the `ComplexHeatmap` package and the `getNeatOrder` function.
+
+```{r NeatMap}
 # Add a pseudocount to the counts data
 assay(tse, "counts") <- assay(tse, "counts") + 1
 
