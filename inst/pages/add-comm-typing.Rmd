@@ -45,7 +45,7 @@ tse <- runMDS(tse, assay.type = "relabundance",
               FUN = vegan::vegdist, method = "bray")
 
 # Plot PCoA and color clusters
-plotReducedDim(tse, "MDS", colour_by = "clusters")
+plotReducedDim(tse, "MDS", colour.by = "clusters")
 ```
 
 ```{r data, message=FALSE, warning=FALSE}
@@ -92,7 +92,7 @@ ClustAndPlot <- function(x) {
                    MARGIN = "col", NNGraphParam(k = x))
     
     # Plot the results of the clustering as a color for each sample
-    plotUMAP(tse, colour_by = I(colData(tse)$clusters)) +
+    plotUMAP(tse, colour.by = I(colData(tse)$clusters)) +
     labs(title = paste0("k = ", x))
 }
 
@@ -143,14 +143,14 @@ library(miaViz)
 # Only consider Forest samples
 tse <- tse[, colData(tse)$Country == "Finland"]
 # Agglomerate to phylum level
-tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 # Get top taxa
 rel_taxa <- getTop(tse, top = 8, assay.type = "counts")
 # Take only the top taxa
 tse <- tse[is.element(rownames(tse), rel_taxa), ]
 
 # Visualise composition barplot, with samples order by "Firmicutes"
-plotAbundance(tse, rank = "Phylum", order_rank_by = "abund", order_sample_by = "Firmicutes")
+plotAbundance(tse, rank = "Phylum", order.row.by = "abund", order.col.by = "Firmicutes")
 ```
 
 ### Composition heatmap
@@ -164,7 +164,7 @@ library(pheatmap)
 library(grid)
 library(RColorBrewer)
 # Agglomerate to phylum level
-tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 # Take only the top taxa
 tse <- tse[is.element(rownames(tse), rel_taxa),]
 
@@ -288,13 +288,13 @@ Now, let's divide the subjects into their respective clusters.
 
 ```{r create clusters}
 library(cluster)
-tse2 <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse2 <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 
 # assume 6 clusters
 K <- 6
 x <- ord[, 1:NDIM]
 
-clust <- as.factor(pam(x, k = K, cluster.only = T))
+clust <- as.factor(pam(x, k = K, cluster.only = TRUE))
 # assign CSTs
 colData(tse2)$CST <- clust
 CSTs <- as.character(seq(K))
@@ -315,11 +315,11 @@ CSTColorScale <- scale_colour_manual(name = "CST", values = CSTColors)
 CSTFillScale <- scale_fill_manual(name = "CST", values = CSTColors)
 
 # plot MDS with Bray-Curtis dimensions 1 and 2
-p1 <- scater::plotReducedDim(tse2, "MDS_BC", colour_by = "CST", point_alpha = 1, 
+p1 <- scater::plotReducedDim(tse2, "MDS_BC", colour.by = "CST", point.alpha = 1, 
                              percentVar = var[c(1, 2)]*100) + th + labs(title = "Ordination by Cluster") +
                              theme(plot.title = element_text(hjust = 0.5))
 # plot MDS with Bray-Curtis dimensions 3 and 4
-p2 <- scater::plotReducedDim(tse2, "MDS_BC", colour_by = "CST", point_alpha = 1, 
+p2 <- scater::plotReducedDim(tse2, "MDS_BC", colour.by = "CST", point.alpha = 1, 
                              ncomponents = c(3, 4), percentVar = var[c(1, 2, 3, 4)]*100) + th
 # show results
 (p1 + CSTColorScale) / (p2 + CSTColorScale)
@@ -330,7 +330,7 @@ And now nMDS.
 ```{r message = FALSE, warning = FALSE}
 tse2  <- runNMDS(tse2, FUN = vegan::vegdist, method = "bray", 
                 name = "NMDS_BC", assay.type = "counts", ncomponents = 20)
-scater::plotReducedDim(tse2, "NMDS_BC", colour_by = "CST", point_alpha = 1) + th + 
+scater::plotReducedDim(tse2, "NMDS_BC", colour.by = "CST", point.alpha = 1) + th + 
         labs(title = "NMDS Bray-Curtis by Cluster") +
         theme(plot.title = element_text(hjust = 0.5)) + CSTColorScale
 ```
@@ -390,7 +390,7 @@ Let's cluster the data with DMM clustering.
 # Runs model and calculates the most likely number of clusters from 1 to 7.
 # Since this is a large dataset it takes a long time to run
 # For this reason we use only a subset of the data agglomerated to the phylum level
-tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
 ```
 
