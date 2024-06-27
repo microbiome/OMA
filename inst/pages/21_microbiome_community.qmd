@@ -250,25 +250,22 @@ First, we will load the necessary libraries and load `GlobalPatterns`, which is 
 
 ```{r setup-libraries-data}
 # Load the required libraries
+# Load necessary libraries
 library(mia)
 library(miaViz)
 library(scater)
-library(ComplexHeatmap)
-library(circlize)
+library(sechm)
 
 # Load the data
 data("GlobalPatterns", package="mia")
 tse <- GlobalPatterns
 ```
 
-Now, we'll create the NeatMap using the `ComplexHeatmap` package and the `getNeatOrder` function.
+Now, we'll create the NeatMap using the `sechm` package and the `getNeatOrder` function.
 
 ```{r NeatMap}
-# Add a pseudocount to the counts data
-assay(tse, "counts") <- assay(tse, "counts") + 1
-
 # Transform the samples into relative abundances using CLR
-tse <- transformAssay(tse, assay.type = "counts", method = "clr", MARGIN = "samples", name = "clr")
+tse <- transformAssay(tse, assay.type = "counts", method = "clr", MARGIN = "samples", name = "clr", pseudocount = TRUE)
 
 # Transform the features (taxa) into zero mean, unit variance (standardize transformation)
 tse <- transformAssay(tse, assay.type = "clr", method = "standardize", MARGIN = "features", name = "standardized")
@@ -280,23 +277,11 @@ reducedDim(tse, "PCA") <- calculatePCA(tse, ncomponents = 10, assay.type = "stan
 sorted_order <- getNeatOrder(reducedDim(tse, "PCA")[, c(1, 2)], centering = "mean")
 tse <- tse[, sorted_order]
 
-# Define the color function and cap the colors at [-5, 5]
-col_fun <- colorRamp2(c(-5, 0, 5), c("blue", "white", "red"))
-
-# Create the heatmap
-heatmap <- Heatmap(assay(tse, "standardized"),
-                   name = "NeatMap",
-                   col = col_fun,
-                   cluster_rows = FALSE,  # Do not cluster rows
-                   cluster_columns = FALSE,  # Do not cluster columns
-                   show_row_dend = FALSE,
-                   show_column_dend = FALSE,
-                   row_names_gp = gpar(fontsize = 4),
-                   column_names_gp = gpar(fontsize = 6),
-                   heatmap_width = unit(20, "cm"),
-                   heatmap_height = unit(15, "cm"))
-
-heatmap
+# Plot NeatMap with sechm
+sechm_neatmap <- sechm(tse, assayName = "standardized", features=rownames(tse), show_rownames = TRUE, 
+                       show_colnames = TRUE, do.scale=FALSE, cluster_rows=FALSE, sortRowsOn = NULL,
+                       row_names_gp = gpar(fontsize = 4), column_names_gp = gpar(fontsize = 6))
+sechm_neatmap
 ```
 
 In addition, there are also other packages that provide functions for
