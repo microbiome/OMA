@@ -1,8 +1,8 @@
-# Introductory
+## Introductory
 
 <div id="workflow">
 
-<img src="images/logo.svg" alt="logo workflow" id="banner"/>
+<img src="images/intro_workflow_logo.svg" alt="logo workflow" id="banner"/>
 
 # Introduction
 
@@ -10,19 +10,41 @@ Hello and welcome to a complete workflow using the latest R/Bioconductor tools f
 
 # Importing data
 
-When using microbiome packages, there are many different ways to import your data. Let's first load the mia package:
+When using microbiome packages, there are many different ways to import your data. Let's first load the required package:
 
-```{r}
-#| label: loadMia
-#| output: false
-library(mia)
-```
+```{r setup}
+#| output: FALSE
+# List of packages that we need
+packages <- c(
+    "ggplot2", "knitr", "mia", "dplyr", "miaViz", "vegan", "DT",
+    "scater", "patchwork", "sechm", "plotly"
+    )
 
-```{r}
-#| label: loadDT
-#| echo: false 
-#| output: false
-library(DT)
+# Get packages that are already installed installed
+packages_already_installed <- packages[ packages %in% installed.packages() ]
+
+# Get packages that need to be installed
+packages_need_to_install <- setdiff( packages, packages_already_installed )
+
+# Loads BiocManager into the session. Install it if it not already installed.
+if( !require("BiocManager") ){
+    install.packages("BiocManager")
+    library("BiocManager")
+}
+
+# If there are packages that need to be installed, installs them with BiocManager
+# Updates old packages.
+if( length(packages_need_to_install) > 0 ) {
+   install(packages_need_to_install, ask = FALSE)
+}
+
+# Load all packages into session. Stop if there are packages that were not
+# successfully loaded
+pkgs_not_loaded <- !sapply(packages, require, character.only = TRUE)
+pkgs_not_loaded <- names(pkgs_not_loaded)[ pkgs_not_loaded ]
+if( length(pkgs_not_loaded) > 0 ){
+    stop("Error in loading the following packages into the session: '", paste0(pkgs_not_loaded, collapse = "', '"), "'")
+}
 ```
 
 You can either choose to use your own data or one of the built-in datasets provided by mia which you may find here @sec-example-data:
@@ -35,7 +57,7 @@ data("Tengeler2020", package="mia")
 tse <- Tengeler2020
 ```
 
-There are of course other ways to import your data using the [**mia package**](https://microbiome.github.io/mia/). These include: using either **your own data** @sec-import-from-file or by converting an existing object to a *TreeSummarizedExperiment* object as stated in @sec-conversions-between-data-formats-in-r.
+There are of course other ways to import your data using the [**mia package**](https://microbiome.github.io/mia/). These include: using either [**your own data**](https://microbiome.github.io/OMA/docs/devel/pages/04_containers.html#sec-import-from-file) or by converting an existing object to a *TreeSummarizedExperiment* object as stated in [**this section**](https://microbiome.github.io/OMA/docs/devel/pages/04_containers.html#conversions-between-data-formats-in-r).
 
 <hr>
 
@@ -66,23 +88,10 @@ datatable(tse_df_colData,options = list(pageLength = 5),rownames = FALSE)
 [**rowData**](https://microbiome.github.io/OMA/docs/devel/pages/04_containers.html#rowdata) contains data on sample characteristics, particularly taxonomic information.
 
 ```{r}
-#| label: setWarning
-#| echo: false 
-#| output: false
-options(warn = -1)
-```
-
-```{r}
+#| warning: FALSE
 #| label: showRowdata
 tse_df_rowData <- as.data.frame(rowData(tse))
 datatable(tse_df_rowData, options = list(pageLength = 5))
-```
-
-```{r}
-#| label: setWarning2
-#| echo: false 
-#| output: false
-options(warn = 0)
 ```
 
 Here `rowData(tse)` returns a DataFrame with 151 rows and 7 columns. Each row represents an organism and each column a taxonomic level.
@@ -138,10 +147,9 @@ The **coefficient of @Hill** combines these measures into a single equation. All
 
 ```{r}
 #| label: calculateRichness
-tse_alpha <- Tengeler2020
 
 # Estimate (observed) richness
-tse_alpha <- mia::estimateRichness(tse_alpha, 
+tse_alpha <- estimateRichness(tse, 
                              assay.type = "counts", 
                              index = "observed", 
                              name="observed")
@@ -153,12 +161,6 @@ head(tse_alpha$observed)
 The result is showing the estimated richness values for different samples or locations within the dataset. It gives an idea of how diverse each sample is in terms of the number of different species present. We can then create a graph to visualize this.
 
 ```{r}
-#| label: loadScater
-#| output: false
-library(scater)
-```
-
-```{r}
 #| label: plotColdata
 plotColData(tse_alpha, 
             "observed", 
@@ -168,7 +170,7 @@ plotColData(tse_alpha,
   labs(y=expression(Richness[Observed]))
 ```
 
-To go even further, we can also compare the estimated Shannon index to the observed richness . Shannon quantifies the diversity in terms of both the number of different species (richness) and the evenness of their distribution (abundance) and is calculated as such:
+To go even further, we can also compare the estimated Shannon index to the observed richness. Shannon quantifies the diversity in terms of both the number of different species (richness) and the evenness of their distribution (abundance) and is calculated as such:
 
 $$
 H' = -\sum_{i=1}^{R} p_i \ln(p_i)
@@ -180,7 +182,7 @@ First, we can easily calculate this measure and add them to our TreeSE.
 
 ```{r}
 #| label: calculateDiversity
-tse_alpha <- mia::estimateDiversity(tse_alpha, 
+tse_alpha <- estimateDiversity(tse_alpha, 
                               assay.type = "counts",
                               index = c("shannon"), 
                               name = c("shannon"))
@@ -190,7 +192,6 @@ We can also compare the two measures of diversity by producing the following gra
 
 ```{r}
 #| label: violinPlots
-library(patchwork)
 
 # Create the plots
 plots <- lapply(c("observed", "shannon"),
@@ -242,31 +243,20 @@ Then we can add the Bray-Curtis dissimilarity :
 ```{r}
 #| label: calculateBrayCurtis
 #| output: false
-# Load package to plot reducedDim
-library(scater)
 
 # Run PCoA on relabundance assay with Bray-Curtis distances
 tse <- runMDS(tse,
-              FUN = vegan::vegdist,
+              FUN = vegdist,
               method = "bray",
               assay.type = "relabundance",
               name = "MDS_bray")
 ```
-
-
 
 In our case, the assay contains 151 rows and 27 columns. Having so many columns and thus dimensions can be troublesome for visualizing dissimilarity.
 
 In order to visualize the dissimilarity between the different samples, we can conduct a Principal Coordinate analysis on the newly created assay. This essentially projects the Bray-curtis dimensions onto a lower space whilst maintaining as much of the variation as possible, the projected values are called principal coordinates. You can read more on @Multidimensional-scaling here.
 
 mia provides some dimension reduction techniques, such as dbRDA. Additionally, we can use Bioconductor's scater package and the vegan package, made by @R_vegan to turn the dissimilarity into actual distances that can be visualized:
-
-```{r}
-#| label: loadPlotly
-#| output: false
-# Makes the plots interactive
-library(plotly)
-```
 
 ```{r}
 #| label: showPCoA
@@ -298,32 +288,24 @@ There we have it! Each axis shows the amount of variance or in our case dissimil
 
 <hr>
 
-# Datavisualization using heatmaps
+# Datavisualisation using heatmaps
 
 Heatmaps are one of the most versatile ways to visualise your data. In this section we'll cover how to create a basic heatmap to visualise the most prevalent features using the [**sechm library**](https://bioconductor.org/packages/release/bioc/html/sechm.html). For a more detailed heatmap, please revert to [**this section**](https://microbiome.github.io/OMA/docs/devel/pages/23_multi-assay_analyses.html) of the OMA book.
 
-Let's first load the library:
-
-```{r}
-#| label: load-sechm
-#| output: false
-library(sechm)
-```
-
-Then, let's subset the TreeSE to the most prevalent taxa:
+Then, let's subset the TreeSE to the most prevalent taxa using an alternative experiment:
 
 ```{r}
 #| label: most-prevalent
-tse.subset <- subsetByPrevalent(tse,prevalence=0.5)[1:5,]
+altExp(tse, "prevalence-subset") <- subsetByPrevalent(tse,prevalence=0.5)[1:5,]
 ```
 
 When subsetting with this function, the resulting object no longer contains the correct relative abundances because these abundances were originally calculated based on the full dataset, not the subsetted one. Therefore, we need to recalculate the values to reflect the subset accurately. For the sake of readability, we'll also subset to the first five taxa after the initial subset.
 
 ```{r}
 #| label: recalculate-relabundance
-tse.subset <- transformAssay(tse.subset, assay.type = "counts", 
-                             method = "relabundance")
-
+altExp(tse, "prevalence-subset") <- transformAssay(altExp(tse,                                                "prevalence-subset"),
+                                       assay.type = "counts",
+                                       method = "relabundance")
 ```
 
 Now that we have prepared the data, we can use the previously loaded sechm library to plot the heatmap:
@@ -334,20 +316,11 @@ Now that we have prepared the data, we can use the previously loaded sechm libra
 setSechmOption("hmcols", value=c("#F0F0FF","#007562"))
 
 # Plots the actual heatmap.
-sechm(tse.subset, features = rownames(rowData(tse.subset)),
+sechm(altExp(tse, "prevalence-subset"), features =
+      rownames(rowData(altExp(tse, "prevalence-subset"))),
       assayName="relabundance",show_colnames=TRUE)
 ```
 
 In the heatmap above, it is apparent that Parabacteroides are relatively common in some samples while Akkermansia is detected very seldom.
-
-<h2>Acknowledgements</h2>
-
-This notebook has been carefully crafted by:
-
-![](images/profile-pics/axel.webp){.profilepic} **Axel Dagnaud**
-
-![](images/profile-pics/noah.png){.profilepic} **Noah de Gunst**
-
--   **Leo Lahti**
 
 </div>
