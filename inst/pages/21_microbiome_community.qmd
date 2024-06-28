@@ -1,3 +1,9 @@
+---
+editor: 
+  markdown: 
+    wrap: 72
+---
+
 # Community Composition {#sec-microbiome-community}
 
 ```{r setup, echo=FALSE, results="asis"}
@@ -16,10 +22,10 @@ tse <- GlobalPatterns
 ### Composition barplot
 
 A typical way to visualize microbiome composition is by using a
-composition barplot. In the following, relative abundance is
-calculated, and top taxa are retrieved for the Phylum rank. Thereafter,
-the barplot is visualized ordering rank by abundance values and
-samples by "Bacteroidetes":
+composition barplot. In the following, relative abundance is calculated,
+and top taxa are retrieved for the Phylum rank. Thereafter, the barplot
+is visualized ordering rank by abundance values and samples by
+"Bacteroidetes":
 
 ```{r}
 library(miaViz)
@@ -28,7 +34,7 @@ tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 
 # Getting top taxa on a Phylum level
 tse_phylum <- mergeFeaturesByRank(tse, rank ="Phylum", onRankOnly=TRUE)
-top_taxa <- getTop(tse_phylum,top = 5, assay.type = "relabundance")
+top_taxa <- getTopTaxa(tse_phylum,top = 5, assay.type = "relabundance")
 
 # Renaming the "Phylum" rank to keep only top taxa and the rest to "Other"
 phylum_renamed <- lapply(rowData(tse)$Phylum,
@@ -44,15 +50,15 @@ plotAbundance(tse_phylum, assay.type="relabundance", rank = "Phylum",
 ### Composition heatmap {#sec-composition-heatmap}
 
 Community composition can be visualized with heatmap, where the
-horizontal axis represents samples and the vertical axis the
-taxa. The color of each intersection point represents abundance of a taxon
-in a specific sample.
+horizontal axis represents samples and the vertical axis the taxa. The
+color of each intersection point represents abundance of a taxon in a
+specific sample.
 
-Here,  abundances are  first CLR  (centered log-ratio)  transformed to
-remove  compositionality bias. Then  Z  transformation  is applied  to
-CLR-transformed  data. This  shifts all  taxa  to zero  mean and  unit
-variance, allowing visual comparison  between taxa that have different
-absolute  abundance  levels.  After  these  rough  visual  exploration
+Here, abundances are first CLR (centered log-ratio) transformed to
+remove compositionality bias. Then standardize transformation is applied to
+CLR-transformed data. This shifts all taxa to zero mean and unit
+variance, allowing visual comparison between taxa that have different
+absolute abundance levels. After these rough visual exploration
 techniques, we can visualize the abundances at Phylum level.
 
 ```{r heatmap}
@@ -94,7 +100,8 @@ ggplot(df, aes(x = SampleID, y = FeatureID, fill = clr_z)) +
   labs(x = "Samples", y = "Taxa")
 ```
 
-_pheatmap_ is a package that provides methods to plot clustered heatmaps. 
+*pheatmap* is a package that provides methods to plot clustered
+heatmaps.
 
 ```{r pheatmap1}
 library(pheatmap)
@@ -122,7 +129,8 @@ mat <- assay(tse_phylum_subset, "clr_z")
 pheatmap(mat)
 ```
 
-We can create clusters by hierarchical clustering and add them to the plot.
+We can create clusters by hierarchical clustering and add them to the
+plot.
 
 ```{r pheatmap2}
 library(ape)
@@ -147,7 +155,7 @@ taxa_ordered <- get_taxa_name(taxa_tree)
 taxa_tree
 ```
 
-Based on the phylo tree, we decide to create three clusters. 
+Based on the phylo tree, we decide to create three clusters.
 
 ```{r pheatmap4}
 # Creates clusters
@@ -223,11 +231,65 @@ pheatmap(mat, annotation_row = taxa_clusters,
          color = colors)
 ```
 
+### Composition heatmap using the NeatMap method {#sec-composition-neatmap}
+
+Another method to visualize community composition is by plotting a
+NeatMap, which means we use radial theta sorting when plotting the
+heatmap [@Rajaram2010]. The `getNeatOrder` function in the `miaViz`
+package allows us to achieve this. This method sorts data points based
+on their angular position in a 2D space, typically after an ordination
+technique such as PCA or NMDS has been applied.
+
+The `getNeatOrder` method calculates the angle (theta) for each point
+relative to the centroid and sorts data points based on these theta
+values in ascending order. This approach preserves the relationships
+between data points according to the ordination method's spatial
+configuration, rather than relying on hierarchical clustering.
+
+First, we will load the necessary libraries and load `GlobalPatterns`, which is a `TreeSE` object.
+
+```{r setup-libraries-data}
+# Load the required libraries
+# Load necessary libraries
+library(mia)
+library(miaViz)
+library(scater)
+library(sechm)
+
+# Load the data
+data("GlobalPatterns", package="mia")
+tse <- GlobalPatterns
+```
+
+Now, we'll create the NeatMap using the `sechm` package and the `getNeatOrder` function.
+
+```{r NeatMap}
+# Transform the samples into relative abundances using CLR
+tse <- transformAssay(tse, assay.type = "counts", method = "clr", MARGIN = "samples", name = "clr", pseudocount = TRUE)
+
+# Transform the features (taxa) into zero mean, unit variance (standardize transformation)
+tse <- transformAssay(tse, assay.type = "clr", method = "standardize", MARGIN = "features", name = "standardized")
+
+# Perform PCA on the dataset
+reducedDim(tse, "PCA") <- calculatePCA(tse, ncomponents = 10, assay.type = "standardized")
+
+# Sort by radial theta using the first two principal components
+sorted_order <- getNeatOrder(reducedDim(tse, "PCA")[, c(1, 2)], centering = "mean")
+tse <- tse[, sorted_order]
+
+# Plot NeatMap with sechm
+sechm_neatmap <- sechm(tse, assayName = "standardized", features=rownames(tse), show_rownames = TRUE, 
+                       show_colnames = TRUE, do.scale=FALSE, cluster_rows=FALSE, sortRowsOn = NULL,
+                       row_names_gp = gpar(fontsize = 4), column_names_gp = gpar(fontsize = 6), 
+                       breaks = 0.985)
+sechm_neatmap
+```
+
 In addition, there are also other packages that provide functions for
 more complex heatmaps, such as those provided by
-[_iheatmapr_](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html)
+[*iheatmapr*](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html)
 and ComplexHeatmap [@ComplexHeatmap]. The
 [sechm](http://www.bioconductor.org/packages/release/bioc/vignettes/sechm/inst/doc/sechm.html)
-package provides wrapper for _ComplexHeatmap_ and its usage is
-explained in chapter [@sec-viz-chapter] along with the `pheatmap`
-package for clustered heatmaps.
+package provides wrapper for *ComplexHeatmap* and its usage is explained
+in chapter [@sec-viz-chapter] along with the `pheatmap` package for
+clustered heatmaps.
