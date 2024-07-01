@@ -568,10 +568,48 @@ colData(tse)$Barcode_full_length
 
 ### Subsetting
 
-1. Subset the TreeSE object to specific samples.  
-2. Subset the TreeSE object to specific features.  
-3. Subset the TreeSE object to specific samples and features.  
+In this exercise, we'll go over the basics of subsetting a TreeSE object.
+Keep in mind that it's good practice to always keep the original data intact.
+Therefore, we suggest creating a new TreeSE object whenever you subset.
 
+Please have a try at the following exercises. 
+
+1. Subset the TreeSE object to specific samples and features.  
+
+1.1. Find some samples and features to subset with.
+
+```{r}
+#| label: subsetting-ex3.1
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+library(mia)
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+
+head(unique(rowData(tse)$Phylum)) # Features
+
+unique(tse$SampleType) # Samples
+```
+
+1.2. Subset the TreeSE with your found samples and features.
+
+```{r}
+#| label: subsetting-ex3.2
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+features <- c("Crenarchaeota", "Euryarchaeota", "Actinobacteria")
+samples <- c("Feces", "Skin", "Tongue")
+
+rows <- rowData(tse)$Phylum %in% features
+cols <- tse$SampleType %in% samples
+tse_subset_by_feature <- tse[rows, cols]
+
+unique(rowData(tse_subset_by_feature)$Phylum)
+```   
 
 
 ### Library sizes
@@ -579,14 +617,99 @@ colData(tse)$Barcode_full_length
 1. Calculate library sizes  
 2. Subsample / rarify the counts (see: rarefyAssay)
 
-Useful functions: nrow, ncol, dim, summary, table, quantile, unique, scater::addPerCellQC, mia::mergeFeaturesByRank
+Useful functions: nrow, ncol, dim, summary, table, quantile, unique, scater::addPerCellQC, mia::agglomerateByRank
 
 ### Prevalent and core taxonomic features
 
-1. Estimate prevalence for your chosen feature (row, taxonomic group)  
-2. Identify all prevalent features and subset the data accordingly   
-3. Report the thresholds and the dimensionality of the data before and after subsetting  
-4. Visualize prevalence  
+1. Estimate prevalence for your chosen feature (specific row and taxonomic group)
+
+```{r}
+#| label: prevalence-ex1
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+library(mia)
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+
+# First, merge the features by rank and add it as an alternative experiment.
+tse_phylum <- agglomerateByRank(tse, "Phylum") 
+
+# Calculate relative abundance
+tse_phylum <- transformAssay(tse_phylum, method = "relabundance")
+
+# Then get the prevalence for a specific feature
+res <- getPrevalence(tse_phylum, detection = 1/100,  sort = TRUE, assay.type = "relabundance")
+res["Proteobacteria"]
+```
+
+2. Identify all prevalent features and subset the data accordingly.
+
+```{r}
+#| label: prevalence-ex2
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+# Get the prevalent features
+prevalent <- getPrevalent(tse, assay.type = "counts", detection = 1, prevalence = 0.1)
+# Subset the data to the prevalent features
+tse_prevalent1 <- tse[rownames(tse) %in% prevalent, ]
+
+# Alternatively subsetByPrevalentFeatures can be used to subset directly
+tse_prevalent2 <- subsetByPrevalent(tse, assay.type = "counts", detection = 1, prevalence = 0.1)
+
+identical(tse_prevalent1, tse_prevalent2)
+```  
+
+3. How many features are left ?
+
+```{r}
+#| label: prevalence-ex3
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+nrow(tse_prevalent1)
+``` 
+
+4. Recalculate the most prevalent features based on relative abundance. 
+How many are left?
+
+```{r}
+#| label: prevalence-ex4
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+tse <- transformAssay(tse, MARGIN = "samples", method="relabundance")
+
+tse_prevalent <- subsetByPrevalent(tse, assay.type = "relabundance", detection = 0.01/100, prevalence = 50/100)
+
+nrow(tse_prevalent)
+```  
+
+5. Visualize prevalence of most prevalent Phyla using a violin/bean plot.
+
+```{r}
+#| label: prevalence-ex5
+#| eval: False
+#| code-fold: true
+#| code-summary: "Show solution"
+
+# Import the scater library
+library(scater)
+
+# Agglomerate based on prevalence. Agglomerate to Phylum level.
+tse_phylum <- subsetByPrevalent(tse, rank = "Phylum", assay.type = "relabundance", detection = 0.001, prevalence = 0.2)
+# Store the prevalence of each taxon
+res <- getPrevalence(tse_phylum, detection = 0.001, sort = FALSE, assay.type = "relabundance")
+rowData(tse_phylum)$prevalence <- res
+
+# Then plot the row data
+plotRowData(tse_phylum, "prevalence", colour_by = "Phylum")
+```   
 
 Useful functions: getPrevalence, getPrevalent, subsetByPrevalent
 
@@ -596,13 +719,12 @@ Useful functions: getPrevalence, getPrevalent, subsetByPrevalent
 2. Create two histograms. Another shows the distribution of absolute counts, another shows how CLR transformed values are distributed.  
 3. Visualize how relative abundances are distributed between taxa in samples.  
 
-Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAssay, ggplot, wilcox.test, mergeFeaturesByRank, miaViz::plotAbundance
+Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAssay, ggplot, wilcox.test, agglomerateByRank, miaViz::plotAbundance
 
 ### Other functions
 
 1. Merge data objects (merge, mergeSEs)  
 2. Melt the data for visualization purposes (meltSE)  
-
 
 ### Assay transformation
 
@@ -628,7 +750,7 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAs
    with `data` (you need one with taxonomic information at Phylum level)
    and store it into a variable named `tse`.  
 2. List the available taxonomic ranks in the data with `taxonomyRanks`.  
-3. Agglomerate the data to Phylum level with `mergeFeaturesByRank` and the
+3. Agglomerate the data to Phylum level with `agglomerateByRank` and the
    appropriate value for `Rank`.  
 4. Report the dimensions of the TreeSE before and after agglomerating. You can
    use `dim` for that.  
@@ -654,6 +776,94 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAs
    As for assays, you can access the desired altExp by name or index.  
 6. **Extra**: Split the data based on other features with `splitOn`.  
 
+### Beta Diversity
+
+This Exercise will focus on calculating dissimilarities or beta diversity.
+
+1. Import the mia and vegan packages and load a dataset. This can be your own or one of the packages built in to mia.
+
+```{r}
+#| label: beta-AltExp-ex1
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+library(mia)
+library(vegan)
+
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+```
+
+2. Agglomerate data to all available taxonomy ranks by using `agglomerateByRanks()`
+
+```{r}
+#| label: beta-AltExp-ex2
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+tse <- agglomerateByRanks(tse)
+altExpNames(tse)
+```
+
+3. Import the scater library and run PCoA on on one of the created alternative experiments using Bray-Curtis dissimilarity.
+
+```{r}
+#| label: beta-AltExp-ex3
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+# We use scater library for calculating ordination
+library(scater)
+
+# Choose rank
+rank <- "Genus"
+# Calculate relative abundance
+altExp(tse, rank) <- transformAssay(altExp(tse, rank), MARGIN = "samples", method="relabundance")
+
+# Calculate ordination
+altExp(tse, rank) <- runMDS(
+    altExp(tse, rank),
+    FUN = vegan::vegdist,
+    method = "bray",
+    assay.type = "relabundance",
+    name = "MDS_bray")
+```
+
+4. Plot the first two coordinates using the `reducedDim` function and plot the coordinates.
+
+```{r}
+#| label: beta-AltExp-ex4
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+p <- plotReducedDim(altExp(tse, rank), "MDS_bray")
+p
+```
+
+5. Add the explained variance ratios for each coordinate on the axes labels and plot the PCoA again.
+
+```{r}
+#| label: beta-AltExp-ex5
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+# Calculate explained variance
+e <- attr(reducedDim(altExp(tse, rank), "MDS_bray"), "eig")
+rel_eig <- e / sum(e[e > 0])
+
+# Add explained variance for each axis
+p <- p +
+   labs(
+      x = paste("PCoA 1 (", round(100 * rel_eig[[1]], 1), "%", ")", sep = ""),
+      y = paste("PCoA 2 (", round(100 * rel_eig[[2]], 1), "%", ")", sep = ""))
+
+p
+```
 
 ## Community (alpha) diversity
 
@@ -667,7 +877,7 @@ Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAs
    contain the alpha diversity indices?
 4. **Extra**: Agglomerate the TreeSE by phylum and compare the mean Shannon
    diversity of the original experiment with its agglomerated version. You can
-   use `mergeFeaturesByRank` to perform agglomeration and `mean` to calculate the
+   use `agglomerateByRank` to perform agglomeration and `mean` to calculate the
    mean values of the respective columns in colData.
 
 ### Visualization 
@@ -727,7 +937,6 @@ represent an important analysis in several studies.
 6. **Extra**: Repeat points 3 through 5, this time for age groups. Make sure
    that you are using an appropriate statistical test for the number of groups
    and distribution.
-
 
 ## Community similarity
 
@@ -851,18 +1060,87 @@ the contributions to beta diversity.
 
 ### Beta diversity analysis
 
-This exercise prompts you to implement a workflow with distance-based RDA
-(dbRDA). You can refer to chapter [@sec-dbrda-workflow] for a step-by-step
+In this exercise, we'll ask you to implement a distance-based Redundancy Analysis
+(dbRDA) to understand the relationships between microbial community composition and various environmental or experimental factors within your dataset. You can refer to chapter [@sec-dbrda-workflow] for a step-by-step
 walkthrough, which may be simplified in the future.
 
 1. Import the mia and vegan packages, load any of the example data sets mentioned in Chapter 3.3
    with `data` and store it into a variable named `tse`.
-4. Create dbRDA with Bray-Curtis dissimilarities on relative abundances. Use PERMANOVA. Can differences between samples be explained with variables of sample meta data? 
-5. Analyze diets' association on beta diversity. Calculate dbRDA and then PERMANOVA. Visualize coefficients. Which taxa's abundances differ the most between samples? 
-6. Interpret your results. Is there association between community composition and location? What are those taxa that differ the most; find information from literature.
+   
+```{r}
+#| label: dbRDA-ex1
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
 
-Useful functions: scater::runMDS, runRDA, vegan::anova.cca, transformAssay, mergeFeaturesByRank, ggplot, scater::plotReducedDim, vegan::adonis2
+library(mia)
+library(vegan)
 
+data("GlobalPatterns", package = "mia") # Feel free to use any dataset
+tse <- GlobalPatterns
+```
+   
+2. Create a new assay with the relative abundance for your dataset and merge the 
+features by a rank of your choice.
+
+```{r}
+#| label: dbRDA-ex2
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+tse <- transformAssay(tse, MARGIN = "samples", method="relabundance")
+```
+
+3. Select a group of samples and perform a permutational analysis on the calculated relative abundance using Bray-Curtis dissimilarities 
+
+```{r}
+#| label: dbRDA-ex3
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+tse$Group <- tse$SampleType == "Feces"
+```
+
+4. Implement dbRDA on relative abundances and perform another permutational analysis on the redundancy analysis. 
+
+```{r}
+#| label: dbRDA-ex4
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+tse <- runRDA(
+    tse,
+    assay.type = "relabundance",
+    formula = assay ~ Group,
+    distance = "bray",
+    na.action = na.exclude)
+
+rda_info <- attr(reducedDim(tse, "RDA"), "significance")
+
+rda_info
+```
+
+rda_info now holds information on the variation differences between 
+the chosen groups, in our case, the homogeneity test has a p-value of 0.01, 
+indicating that the groups have different  variances, making it so that the 
+permanova results are compromised and do not correctly explain whether there are
+significant differences between groups.
+
+5. Nevertheless, extract the p-values. Can the differences between samples be explained with variables from their metadata?
+
+```{r}
+#| label: dbRDA-ex5
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+rda_info[["permanova"]][["Pr(>F)"]]
+```
+
+Useful functions: scater::runMDS, runRDA, transformAssay, agglomerateByRank
 
 ## Differential abundance
 
@@ -1149,11 +1427,165 @@ Useful functions: scater::runMDS, runNMDS, transformAssay, ggplot, scater::plotR
 
 ### Heatmap visualization
 
-1. Load experimental dataset from mia.
-2. Visualize abundances with heatmap.
-3. Visualize abundances with heatmap after CLR + Z transformation.
+1. Load one of the datasets from mia and the miaViz and sechm packages.
 
-See the OMA book for examples.
+```{r}
+#| label: heatmap-ex1
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+library(mia)
+library(miaViz)
+library(sechm)
+
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+```
+
+2. Agglomerate your TreeSE to include the most prevalent Phyla.
+
+```{r}
+#| label: heatmap-ex2
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+tse <- agglomerateByPrevalence(tse, rank = "Phylum", prevalence = 0.9)
+```
+
+3. Add a relative abundance assay to the TreeSE.
+
+```{r}
+#| label: heatmap-ex3
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+```
+
+4. Visualize the relative abundances with a heatmap using the sechm library
+
+```{r}
+#| label: heatmap-ex4
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+setSechmOption("hmcols", value=c("#F0F0FF","#007562"))
+sechm(tse, features = rownames(tse), assayName="relabundance", show_colnames=TRUE)
+```
+
+### Advanced Heatmaps
+
+1. Import mia, miaviz, complexHeatmap, shadowtext as well as a dataset of your choice
+
+```{r}
+#| label: advanced-heatmap-ex1
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+library(mia)
+library(miaViz)
+library(shadowtext)
+library(ComplexHeatmap) 
+
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+```
+
+2. Agglomerate the data by prevalence to a rank of your choice, apply log10 transformation and assure unique rownames for when we plot the heatmap.
+
+```{r}
+#| label: advanced-heatmap-ex2
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+tse <- agglomerateByPrevalence(tse, rank = "Family")
+
+tse <- transformAssay(tse, method = "log10", pseudocount = TRUE)
+
+rownames(tse) <- getTaxonomyLabels(tse)
+```
+
+3. Calculate the correlations and their respective p-values between the log10 and count assays.
+
+```{r}
+#| label: advanced-heatmap-ex3
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+correlations <- getCrossAssociation(
+    tse, 
+    test.signif=TRUE,            
+    assay.type1 = "log10", 
+    assay.type2 = "counts",
+    method = "spearman", 
+    p.adj.threshold = NULL,
+    cor.threshold = NULL,
+    # Remove when mia is fixed
+    mode = "matrix",
+    sort = TRUE,
+    show.warnings = FALSE)
+```
+
+4. plot a heatmap using the correlations and mark significant correlations (p<0.05) with a cross.
+
+```{r}
+#| label: advanced-heatmap-ex4
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+# Create a heatmap and store it
+p <- Heatmap(
+    correlations$cor,
+    # Print values to cells
+    cell_fun = function(j, i, x, y, width, height, fill) {
+      # If the p-value is under threshold
+      if( !is.na(correlations$pval[i, j]) & correlations$pval[i, j] < 0.05 ){
+          # Print "X"
+          grid.shadowtext(sprintf("%s", "X"), x, y, gp = gpar(fontsize = 8, col = "#f5f5f5"))
+      }
+    },
+    heatmap_legend_param = list(title = "", legend_height = unit(5, "cm"))
+)
+p
+```
+
+5. Plot similar heatmap but adjust color scale to ensure that 0 is in the middle
+
+Hint: utilize circlize::colorRamp2()
+
+```{r}
+#| label: advanced-heatmap-ex5
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+library(circlize)
+# Update color scale to ensure 0 is in the middle
+col_fun<-colorRamp2(c(-1, -0.5, 0, 0.5, 1), c("darkblue","skyblue","white", "brown1", "darkred"))
+
+# Create a heatmap and store it
+p <- Heatmap(
+    correlations$cor,
+    # Print values to cells
+    cell_fun = function(j, i, x, y, width, height, fill) {
+      # If the p-value is under threshold
+      if( !is.na(correlations$pval[i, j]) & correlations$pval[i, j] < 0.05 ){
+          # Print "X"
+          grid.shadowtext(sprintf("%s", "X"), x, y, gp = gpar(fontsize = 8, col = "#f5f5f5"))
+      }
+    },
+    heatmap_legend_param = list(title = "", legend_height = unit(5, "cm")),
+    col = col_fun
+)
+p
+```
 
 **Extra** Cool Exercise : Identify Patterns and Clusters
 To make the exercise more engaging, let's do an exploratory data analysis task:
@@ -1213,9 +1645,6 @@ assay_data <- assay(enterotype, "counts")
 # Plot heatmap with clustering and sample annotations
 pheatmap(assay_data, cluster_rows = TRUE, cluster_cols = TRUE, annotation_col = as.data.frame(sample_metadata))
 ```
-
-Make sure to replace the example data with your actual data. 
-
 
 ## Multiomics
 
