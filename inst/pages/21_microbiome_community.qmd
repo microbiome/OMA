@@ -15,9 +15,9 @@ tse <- GlobalPatterns
 
 ### Composition barplot
 
-A typical way to visualize microbiome composition is by using
+A typical way to visualize microbiome composition is by using a
 composition barplot. In the following, relative abundance is
-calculated and top taxa are retrieved for the Phylum rank. Thereafter,
+calculated, and top taxa are retrieved for the Phylum rank. Thereafter,
 the barplot is visualized ordering rank by abundance values and
 samples by "Bacteroidetes":
 
@@ -28,7 +28,7 @@ tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 
 # Getting top taxa on a Phylum level
 tse_phylum <- mergeFeaturesByRank(tse, rank ="Phylum", onRankOnly=TRUE)
-top_taxa <- getTopFeatures(tse_phylum,top = 5, assay.type = "relabundance")
+top_taxa <- getTop(tse_phylum,top = 5, assay.type = "relabundance")
 
 # Renaming the "Phylum" rank to keep only top taxa and the rest to "Other"
 phylum_renamed <- lapply(rowData(tse)$Phylum,
@@ -36,7 +36,7 @@ phylum_renamed <- lapply(rowData(tse)$Phylum,
 rowData(tse)$Phylum <- as.character(phylum_renamed)
 
 # Visualizing the composition barplot, with samples order by "Bacteroidetes"
-plotAbundance(tse, assay.type="relabundance", rank = "Phylum",
+plotAbundance(tse_phylum, assay.type="relabundance", rank = "Phylum",
               order_rank_by="abund", 
               order_sample_by = "Bacteroidetes")
 ```
@@ -45,7 +45,7 @@ plotAbundance(tse, assay.type="relabundance", rank = "Phylum",
 
 Community composition can be visualized with heatmap, where the
 horizontal axis represents samples and the vertical axis the
-taxa. Color of each intersection point represents abundance of a taxon
+taxa. The color of each intersection point represents abundance of a taxon
 in a specific sample.
 
 Here,  abundances are  first CLR  (centered log-ratio)  transformed to
@@ -71,11 +71,11 @@ tse_phylum <- transformAssay(tse_phylum, assay.type = "clr",
                               method = "z", name = "clr_z")
 ```
 
-Visualize as heatmap.
+Visualize as a heatmap.
 
 ```{r heatmapvisu}
 # Melt the assay for plotting purposes
-df <- meltAssay(tse_phylum, assay.type = "clr_z")
+df <- meltSE(tse_phylum, assay.type = "clr_z")
 
 # Determines the scaling of colours
 maxval <- round(max(abs(df$clr_z)))
@@ -112,7 +112,7 @@ tse_phylum_subset <- transformAssay(tse_phylum_subset, assay.type = "clr",
                                      method = "z", name = "clr_z")
 
 # Get n most abundant taxa, and subsets the data by them
-top_taxa <- getTopFeatures(tse_phylum_subset, top = 20)
+top_taxa <- getTop(tse_phylum_subset, top = 20)
 tse_phylum_subset <- tse_phylum_subset[top_taxa, ]
 
 # Gets the assay table
@@ -147,7 +147,7 @@ taxa_ordered <- get_taxa_name(taxa_tree)
 taxa_tree
 ```
 
-Based on phylo tree, we decide to create three clusters. 
+Based on the phylo tree, we decide to create three clusters. 
 
 ```{r pheatmap4}
 # Creates clusters
@@ -208,7 +208,7 @@ sample_data$sample_types <- unfactor(colData(tse_phylum_subset)$SampleType)
 sample_data
 ```
 
-Now we can create heatmap with additional annotations.
+Now we can create a heatmap with additional annotations.
 
 ```{r pheatmap8}
 # Determines the scaling of colorss
@@ -224,9 +224,9 @@ pheatmap(mat, annotation_row = taxa_clusters,
 ```
 
 In addition, there are also other packages that provide functions for
-more complex heatmaps, such as
+more complex heatmaps, such as those provided by
 [_iheatmapr_](https://docs.ropensci.org/iheatmapr/articles/full_vignettes/iheatmapr.html)
-and ComplexHeatmap [@ComplexHeatmap].
+and ComplexHeatmap [@ComplexHeatmap]. The
 [sechm](http://www.bioconductor.org/packages/release/bioc/vignettes/sechm/inst/doc/sechm.html)
 package provides wrapper for _ComplexHeatmap_ and its usage is
 explained in chapter [@sec-viz-chapter] along with the `pheatmap`
