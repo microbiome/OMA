@@ -418,6 +418,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
 <li><a href="#taxonomic-levels" id="toc-taxonomic-levels" class="nav-link" data-scroll-target="#taxonomic-levels"><span class="header-section-number">21.5.1</span> Taxonomic levels</a></li>
   <li><a href="#alternative-experiments" id="toc-alternative-experiments" class="nav-link" data-scroll-target="#alternative-experiments"><span class="header-section-number">21.5.2</span> Alternative experiments</a></li>
+  <li><a href="#beta-diversity" id="toc-beta-diversity" class="nav-link" data-scroll-target="#beta-diversity"><span class="header-section-number">21.5.3</span> Beta Diversity</a></li>
   </ul>
 </li>
   <li>
@@ -455,6 +456,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
 <li><a href="#multivariate-ordination" id="toc-multivariate-ordination" class="nav-link" data-scroll-target="#multivariate-ordination"><span class="header-section-number">21.9.1</span> Multivariate ordination</a></li>
   <li><a href="#heatmap-visualization" id="toc-heatmap-visualization" class="nav-link" data-scroll-target="#heatmap-visualization"><span class="header-section-number">21.9.2</span> Heatmap visualization</a></li>
+  <li><a href="#advanced-heatmaps" id="toc-advanced-heatmaps" class="nav-link" data-scroll-target="#advanced-heatmaps"><span class="header-section-number">21.9.3</span> Advanced Heatmaps</a></li>
   </ul>
 </li>
   <li>
@@ -848,31 +850,113 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="header-section-number">21.4</span> Data manipulation</h2>
 <section id="subsetting" class="level3" data-number="21.4.1"><h3 data-number="21.4.1" class="anchored" data-anchor-id="subsetting">
 <span class="header-section-number">21.4.1</span> Subsetting</h3>
+<p>In this exercise, we’ll go over the basics of subsetting a TreeSE object. Keep in mind that it’s good practice to always keep the original data intact. Therefore, we suggest creating a new TreeSE object whenever you subset.</p>
+<p>Please have a try at the following exercises.</p>
 <ol type="1">
-<li>Subset the TreeSE object to specific samples.<br>
-</li>
-<li>Subset the TreeSE object to specific features.<br>
-</li>
 <li>Subset the TreeSE object to specific samples and features.</li>
-</ol></section><section id="library-sizes" class="level3" data-number="21.4.2"><h3 data-number="21.4.2" class="anchored" data-anchor-id="library-sizes">
+</ol>
+<p>1.1. Find some samples and features to subset with.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"GlobalPatterns"</span>, package <span class="op">=</span> <span class="st">"mia"</span><span class="op">)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">GlobalPatterns</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">$</span><span class="va">Phylum</span><span class="op">)</span><span class="op">)</span> <span class="co"># Features</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">tse</span><span class="op">$</span><span class="va">SampleType</span><span class="op">)</span> <span class="co"># Samples</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>1.2. Subset the TreeSE with your found samples and features.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">features</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Crenarchaeota"</span>, <span class="st">"Euryarchaeota"</span>, <span class="st">"Actinobacteria"</span><span class="op">)</span></span>
+<span><span class="va">samples</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Feces"</span>, <span class="st">"Skin"</span>, <span class="st">"Tongue"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">$</span><span class="va">Phylum</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="va">features</span></span>
+<span><span class="va">cols</span> <span class="op">&lt;-</span> <span class="va">tse</span><span class="op">$</span><span class="va">SampleType</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="va">samples</span></span>
+<span><span class="va">tse_subset_by_feature</span> <span class="op">&lt;-</span> <span class="va">tse</span><span class="op">[</span><span class="va">rows</span>, <span class="va">cols</span><span class="op">]</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">tse_subset_by_feature</span><span class="op">)</span><span class="op">$</span><span class="va">Phylum</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="library-sizes" class="level3" data-number="21.4.2"><h3 data-number="21.4.2" class="anchored" data-anchor-id="library-sizes">
 <span class="header-section-number">21.4.2</span> Library sizes</h3>
 <ol type="1">
 <li>Calculate library sizes<br>
 </li>
 <li>Subsample / rarify the counts (see: rarefyAssay)</li>
 </ol>
-<p>Useful functions: nrow, ncol, dim, summary, table, quantile, unique, scater::addPerCellQC, mia::mergeFeaturesByRank</p>
+<p>Useful functions: nrow, ncol, dim, summary, table, quantile, unique, scater::addPerCellQC, mia::agglomerateByRank</p>
 </section><section id="prevalent-and-core-taxonomic-features" class="level3" data-number="21.4.3"><h3 data-number="21.4.3" class="anchored" data-anchor-id="prevalent-and-core-taxonomic-features">
 <span class="header-section-number">21.4.3</span> Prevalent and core taxonomic features</h3>
 <ol type="1">
-<li>Estimate prevalence for your chosen feature (row, taxonomic group)<br>
-</li>
-<li>Identify all prevalent features and subset the data accordingly<br>
-</li>
-<li>Report the thresholds and the dimensionality of the data before and after subsetting<br>
-</li>
-<li>Visualize prevalence</li>
+<li>Estimate prevalence for your chosen feature (specific row and taxonomic group)</li>
 </ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"GlobalPatterns"</span>, package <span class="op">=</span> <span class="st">"mia"</span><span class="op">)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">GlobalPatterns</span></span>
+<span></span>
+<span><span class="co"># First, merge the features by rank and add it as an alternative experiment.</span></span>
+<span><span class="va">tse_phylum</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">agglomerateByRank</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"Phylum"</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="co"># Calculate relative abundance</span></span>
+<span><span class="va">tse_phylum</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse_phylum</span>, method <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Then get the prevalence for a specific feature</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/getPrevalence.html">getPrevalence</a></span><span class="op">(</span><span class="va">tse_phylum</span>, detection <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fl">100</span>,  sort <span class="op">=</span> <span class="cn">TRUE</span>, assay.type <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span>
+<span><span class="va">res</span><span class="op">[</span><span class="st">"Proteobacteria"</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="2" type="1">
+<li>Identify all prevalent features and subset the data accordingly.</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Get the prevalent features</span></span>
+<span><span class="va">prevalent</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/getPrevalence.html">getPrevalent</a></span><span class="op">(</span><span class="va">tse</span>, assay.type <span class="op">=</span> <span class="st">"counts"</span>, detection <span class="op">=</span> <span class="fl">1</span>, prevalence <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
+<span><span class="co"># Subset the data to the prevalent features</span></span>
+<span><span class="va">tse_prevalent1</span> <span class="op">&lt;-</span> <span class="va">tse</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="va">prevalent</span>, <span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Alternatively subsetByPrevalentFeatures can be used to subset directly</span></span>
+<span><span class="va">tse_prevalent2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/getPrevalence.html">subsetByPrevalent</a></span><span class="op">(</span><span class="va">tse</span>, assay.type <span class="op">=</span> <span class="st">"counts"</span>, detection <span class="op">=</span> <span class="fl">1</span>, prevalence <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/identical.html">identical</a></span><span class="op">(</span><span class="va">tse_prevalent1</span>, <span class="va">tse_prevalent2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="3" type="1">
+<li>How many features are left ?</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">tse_prevalent1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="4" type="1">
+<li>Recalculate the most prevalent features based on relative abundance. How many are left?</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse</span>, MARGIN <span class="op">=</span> <span class="st">"samples"</span>, method<span class="op">=</span><span class="st">"relabundance"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tse_prevalent</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/getPrevalence.html">subsetByPrevalent</a></span><span class="op">(</span><span class="va">tse</span>, assay.type <span class="op">=</span> <span class="st">"relabundance"</span>, detection <span class="op">=</span> <span class="fl">0.01</span><span class="op">/</span><span class="fl">100</span>, prevalence <span class="op">=</span> <span class="fl">50</span><span class="op">/</span><span class="fl">100</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">tse_prevalent</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="5" type="1">
+<li>Visualize prevalence of most prevalent Phyla using a violin/bean plot.</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Import the scater library</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/">scater</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Agglomerate based on prevalence. Agglomerate to Phylum level.</span></span>
+<span><span class="va">tse_phylum</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/getPrevalence.html">subsetByPrevalent</a></span><span class="op">(</span><span class="va">tse</span>, rank <span class="op">=</span> <span class="st">"Phylum"</span>, assay.type <span class="op">=</span> <span class="st">"relabundance"</span>, detection <span class="op">=</span> <span class="fl">0.001</span>, prevalence <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span>
+<span><span class="co"># Store the prevalence of each taxon</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/getPrevalence.html">getPrevalence</a></span><span class="op">(</span><span class="va">tse_phylum</span>, detection <span class="op">=</span> <span class="fl">0.001</span>, sort <span class="op">=</span> <span class="cn">FALSE</span>, assay.type <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">tse_phylum</span><span class="op">)</span><span class="op">$</span><span class="va">prevalence</span> <span class="op">&lt;-</span> <span class="va">res</span></span>
+<span></span>
+<span><span class="co"># Then plot the row data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotRowData.html">plotRowData</a></span><span class="op">(</span><span class="va">tse_phylum</span>, <span class="st">"prevalence"</span>, colour_by <span class="op">=</span> <span class="st">"Phylum"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 <p>Useful functions: getPrevalence, getPrevalent, subsetByPrevalent</p>
 </section><section id="data-exploration" class="level3" data-number="21.4.4"><h3 data-number="21.4.4" class="anchored" data-anchor-id="data-exploration">
 <span class="header-section-number">21.4.4</span> Data exploration</h3>
@@ -883,7 +967,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
 <li>Visualize how relative abundances are distributed between taxa in samples.</li>
 </ol>
-<p>Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAssay, ggplot, wilcox.test, mergeFeaturesByRank, miaViz::plotAbundance</p>
+<p>Useful functions: nrow, ncol, dim, summary, table, quantile, unique, transformAssay, ggplot, wilcox.test, agglomerateByRank, miaViz::plotAbundance</p>
 </section><section id="other-functions" class="level3" data-number="21.4.5"><h3 data-number="21.4.5" class="anchored" data-anchor-id="other-functions">
 <span class="header-section-number">21.4.5</span> Other functions</h3>
 <ol type="1">
@@ -916,7 +1000,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
 <li>List the available taxonomic ranks in the data with <code>taxonomyRanks</code>.<br>
 </li>
-<li>Agglomerate the data to Phylum level with <code>mergeFeaturesByRank</code> and the appropriate value for <code>Rank</code>.<br>
+<li>Agglomerate the data to Phylum level with <code>agglomerateByRank</code> and the appropriate value for <code>Rank</code>.<br>
 </li>
 <li>Report the dimensions of the TreeSE before and after agglomerating. You can use <code>dim</code> for that.<br>
 </li>
@@ -939,7 +1023,76 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
 <li>
 <strong>Extra</strong>: Split the data based on other features with <code>splitOn</code>.</li>
-</ol></section></section><section id="community-alpha-diversity" class="level2" data-number="21.6"><h2 data-number="21.6" class="anchored" data-anchor-id="community-alpha-diversity">
+</ol></section><section id="beta-diversity" class="level3" data-number="21.5.3"><h3 data-number="21.5.3" class="anchored" data-anchor-id="beta-diversity">
+<span class="header-section-number">21.5.3</span> Beta Diversity</h3>
+<p>This Exercise will focus on calculating dissimilarities or beta diversity.</p>
+<ol type="1">
+<li>Import the mia and vegan packages and load a dataset. This can be your own or one of the packages built in to mia.</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/vegandevs/vegan">vegan</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"Tengeler2020"</span>, package <span class="op">=</span> <span class="st">"mia"</span><span class="op">)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">Tengeler2020</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="2" type="1">
+<li>Agglomerate data to all available taxonomy ranks by using <code><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">agglomerateByRanks()</a></code>
+</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">agglomerateByRanks</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html">altExpNames</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="3" type="1">
+<li>Import the scater library and run PCoA on on one of the created alternative experiments using Bray-Curtis dissimilarity.</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># We use scater library for calculating ordination</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/">scater</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Choose rank</span></span>
+<span><span class="va">rank</span> <span class="op">&lt;-</span> <span class="st">"Genus"</span></span>
+<span><span class="co"># Calculate relative abundance</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html">altExp</a></span><span class="op">(</span><span class="va">tse</span>, <span class="va">rank</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html">altExp</a></span><span class="op">(</span><span class="va">tse</span>, <span class="va">rank</span><span class="op">)</span>, MARGIN <span class="op">=</span> <span class="st">"samples"</span>, method<span class="op">=</span><span class="st">"relabundance"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Calculate ordination</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html">altExp</a></span><span class="op">(</span><span class="va">tse</span>, <span class="va">rank</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/runMDS.html">runMDS</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html">altExp</a></span><span class="op">(</span><span class="va">tse</span>, <span class="va">rank</span><span class="op">)</span>,</span>
+<span>    FUN <span class="op">=</span> <span class="fu">vegan</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/vegan/man/vegdist.html">vegdist</a></span>,</span>
+<span>    method <span class="op">=</span> <span class="st">"bray"</span>,</span>
+<span>    assay.type <span class="op">=</span> <span class="st">"relabundance"</span>,</span>
+<span>    name <span class="op">=</span> <span class="st">"MDS_bray"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="4" type="1">
+<li>Plot the first two coordinates using the <code>reducedDim</code> function and plot the coordinates.</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html">altExp</a></span><span class="op">(</span><span class="va">tse</span>, <span class="va">rank</span><span class="op">)</span>, <span class="st">"MDS_bray"</span><span class="op">)</span></span>
+<span><span class="va">p</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="5" type="1">
+<li>Add the explained variance ratios for each coordinate on the axes labels and plot the PCoA again.</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate explained variance</span></span>
+<span><span class="va">e</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html">altExp</a></span><span class="op">(</span><span class="va">tse</span>, <span class="va">rank</span><span class="op">)</span>, <span class="st">"MDS_bray"</span><span class="op">)</span>, <span class="st">"eig"</span><span class="op">)</span></span>
+<span><span class="va">rel_eig</span> <span class="op">&lt;-</span> <span class="va">e</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">e</span><span class="op">[</span><span class="va">e</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Add explained variance for each axis</span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="va">p</span> <span class="op">+</span></span>
+<span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span></span>
+<span>      x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"PCoA 1 ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="va">rel_eig</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%"</span>, <span class="st">")"</span>, sep <span class="op">=</span> <span class="st">""</span><span class="op">)</span>,</span>
+<span>      y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"PCoA 2 ("</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="va">rel_eig</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, <span class="st">"%"</span>, <span class="st">")"</span>, sep <span class="op">=</span> <span class="st">""</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">p</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section></section><section id="community-alpha-diversity" class="level2" data-number="21.6"><h2 data-number="21.6" class="anchored" data-anchor-id="community-alpha-diversity">
 <span class="header-section-number">21.6</span> Community (alpha) diversity</h2>
 <section id="estimation" class="level3" data-number="21.6.1"><h3 data-number="21.6.1" class="anchored" data-anchor-id="estimation">
 <span class="header-section-number">21.6.1</span> Estimation</h3>
@@ -948,7 +1101,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Calculate multiple alpha diversity indices with <code>estimateDiversity</code> without any additional arguments.</li>
 <li>Check the names of colData with <code>names</code>. Can you identify which columns contain the alpha diversity indices?</li>
 <li>
-<strong>Extra</strong>: Agglomerate the TreeSE by phylum and compare the mean Shannon diversity of the original experiment with its agglomerated version. You can use <code>mergeFeaturesByRank</code> to perform agglomeration and <code>mean</code> to calculate the mean values of the respective columns in colData.</li>
+<strong>Extra</strong>: Agglomerate the TreeSE by phylum and compare the mean Shannon diversity of the original experiment with its agglomerated version. You can use <code>agglomerateByRank</code> to perform agglomeration and <code>mean</code> to calculate the mean values of the respective columns in colData.</li>
 </ol></section><section id="visualization" class="level3" data-number="21.6.2"><h3 data-number="21.6.2" class="anchored" data-anchor-id="visualization">
 <span class="header-section-number">21.6.2</span> Visualization</h3>
 <ol type="1">
@@ -1039,14 +1192,57 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Well done! You went through an RDA analysis followed by significance testing with PERMANOVA and BETADISPER2. In the next exercise we’ll go deeper quantify the contributions to beta diversity.</p>
 </section><section id="beta-diversity-analysis" class="level3" data-number="21.7.6"><h3 data-number="21.7.6" class="anchored" data-anchor-id="beta-diversity-analysis">
 <span class="header-section-number">21.7.6</span> Beta diversity analysis</h3>
-<p>This exercise prompts you to implement a workflow with distance-based RDA (dbRDA). You can refer to chapter <a href="20_beta_diversity.html#sec-dbrda-workflow" class="quarto-xref"><span>Section 7.4.1</span></a> for a step-by-step walkthrough, which may be simplified in the future.</p>
+<p>In this exercise, we’ll ask you to implement a distance-based Redundancy Analysis (dbRDA) to understand the relationships between microbial community composition and various environmental or experimental factors within your dataset. You can refer to chapter <a href="20_beta_diversity.html#sec-dbrda-workflow" class="quarto-xref"><span>Section 7.4.1</span></a> for a step-by-step walkthrough, which may be simplified in the future.</p>
 <ol type="1">
 <li>Import the mia and vegan packages, load any of the example data sets mentioned in Chapter 3.3 with <code>data</code> and store it into a variable named <code>tse</code>.</li>
-<li>Create dbRDA with Bray-Curtis dissimilarities on relative abundances. Use PERMANOVA. Can differences between samples be explained with variables of sample meta data?</li>
-<li>Analyze diets’ association on beta diversity. Calculate dbRDA and then PERMANOVA. Visualize coefficients. Which taxa’s abundances differ the most between samples?</li>
-<li>Interpret your results. Is there association between community composition and location? What are those taxa that differ the most; find information from literature.</li>
 </ol>
-<p>Useful functions: scater::runMDS, runRDA, vegan::anova.cca, transformAssay, mergeFeaturesByRank, ggplot, scater::plotReducedDim, vegan::adonis2</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/vegandevs/vegan">vegan</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"GlobalPatterns"</span>, package <span class="op">=</span> <span class="st">"mia"</span><span class="op">)</span> <span class="co"># Feel free to use any dataset</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">GlobalPatterns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="2" type="1">
+<li>Create a new assay with the relative abundance for your dataset and merge the features by a rank of your choice.</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse</span>, MARGIN <span class="op">=</span> <span class="st">"samples"</span>, method<span class="op">=</span><span class="st">"relabundance"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="3" type="1">
+<li>Select a group of samples and perform a permutational analysis on the calculated relative abundance using Bray-Curtis dissimilarities</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span><span class="op">$</span><span class="va">Group</span> <span class="op">&lt;-</span> <span class="va">tse</span><span class="op">$</span><span class="va">SampleType</span> <span class="op">==</span> <span class="st">"Feces"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="4" type="1">
+<li>Implement dbRDA on relative abundances and perform another permutational analysis on the redundancy analysis.</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/runCCA.html">runRDA</a></span><span class="op">(</span></span>
+<span>    <span class="va">tse</span>,</span>
+<span>    assay.type <span class="op">=</span> <span class="st">"relabundance"</span>,</span>
+<span>    formula <span class="op">=</span> <span class="va">assay</span> <span class="op">~</span> <span class="va">Group</span>,</span>
+<span>    distance <span class="op">=</span> <span class="st">"bray"</span>,</span>
+<span>    na.action <span class="op">=</span> <span class="va">na.exclude</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rda_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDim</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"RDA"</span><span class="op">)</span>, <span class="st">"significance"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rda_info</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>rda_info now holds information on the variation differences between the chosen groups, in our case, the homogeneity test has a p-value of 0.01, indicating that the groups have different variances, making it so that the permanova results are compromised and do not correctly explain whether there are significant differences between groups.</p>
+<ol start="5" type="1">
+<li>Nevertheless, extract the p-values. Can the differences between samples be explained with variables from their metadata?</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb46"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">rda_info</span><span class="op">[[</span><span class="st">"permanova"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="st">"Pr(&gt;F)"</span><span class="op">]</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Useful functions: scater::runMDS, runRDA, transformAssay, agglomerateByRank</p>
 </section></section><section id="differential-abundance" class="level2" data-number="21.8"><h2 data-number="21.8" class="anchored" data-anchor-id="differential-abundance">
 <span class="header-section-number">21.8</span> Differential abundance</h2>
 <section id="standard-analysis-with-aldex2" class="level3" data-number="21.8.1"><h3 data-number="21.8.1" class="anchored" data-anchor-id="standard-analysis-with-aldex2">
@@ -1055,7 +1251,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Import the mia and ALDEx2 packages, load any of the example data sets mentioned in Chapter 3.3 with <code>data</code> and store it into a variable named <code>tse</code>.</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ggloor/ALDEx_bioc">ALDEx2</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"peerj13075"</span>, package <span class="op">=</span> <span class="st">"mia"</span><span class="op">)</span></span>
@@ -1066,7 +1262,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Agglomerate the TreeSE by genus and filter by a prevalence of 10%. You can perform both operations in one go with <code>subsetByPrevalent</code> by specifying the <code>rank</code> and <code>prevalence</code> arguments.</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/getPrevalence.html">subsetByPrevalent</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb48"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/getPrevalence.html">subsetByPrevalent</a></span><span class="op">(</span><span class="va">tse</span>,</span>
 <span>                                 rank <span class="op">=</span> <span class="st">"genus"</span>,</span>
 <span>                                 prevalence <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -1075,14 +1271,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Model the counts assay of the TreeSE with <code>aldex.clr</code> and store it into the variable <code>x</code>. As a second argument, provide the grouping variable <code>Diet</code>, which is contained in a column of the colData.</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ALDEx2/man/aldex.clr.function.html">aldex.clr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span>, <span class="va">tse</span><span class="op">$</span><span class="va">Gender</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb49"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ALDEx2/man/aldex.clr.function.html">aldex.clr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span>, <span class="va">tse</span><span class="op">$</span><span class="va">Gender</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <ol start="4" type="1">
 <li>Feed <code>x</code> to the functions <code>aldex.ttest</code> to perform t-test and to <code>aldex.effect</code> to estimate effect sizes. Store the output into <code>x_tt</code> and <code>x_effect</code>, respectively.</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x_tt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ALDEx2/man/aldex.ttest.html">aldex.ttest</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb50"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x_tt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ALDEx2/man/aldex.ttest.html">aldex.ttest</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span><span class="va">x_effect</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ALDEx2/man/aldex.effect.html">aldex.effect</a></span><span class="op">(</span><span class="va">x</span>, CI <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -1090,7 +1286,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Create a data.frame named <code>aldex_out</code> which includes both <code>x_tt</code> and <code>x_effect</code> and filter for the features with <code>wi.eBH &lt; 0.05</code>. Are there any significantly differential abundance taxa?</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">aldex_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">x_tt</span>, <span class="va">x_effect</span><span class="op">)</span></span>
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">aldex_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="va">x_tt</span>, <span class="va">x_effect</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">aldex_out</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">rownames_to_column</span><span class="op">(</span>var <span class="op">=</span> <span class="st">"Genus"</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
@@ -1107,7 +1303,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Import the mia and MicrobiomeStat packages, load any of the example data sets mentioned in Chapter 3.3 with <code>data</code> and store it into a variable named <code>tse</code>.</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb52"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">MicrobiomeStat</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"peerj13075"</span>, package <span class="op">=</span> <span class="st">"mia"</span><span class="op">)</span></span>
@@ -1118,7 +1314,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Agglomerate the TreeSE by genus and filter by a prevalence of 10%. You can perform both operations in one go with <code>subsetByPrevalent</code> by specifying the <code>rank</code> and <code>prevalence</code> arguments.</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/getPrevalence.html">subsetByPrevalent</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/getPrevalence.html">subsetByPrevalent</a></span><span class="op">(</span><span class="va">tse</span>,</span>
 <span>                                 rank <span class="op">=</span> <span class="st">"genus"</span>,</span>
 <span>                                 prevalence <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -1127,7 +1323,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Model the counts assay of the TreeSE with <code>linda</code> and store the output into a variable named <code>linda_out</code>. Provide the colData converted into a data.frame (with <code>as.data.frame</code>) as the second argument, and a <code>formula</code> with the Age, Gender and Diet as variables. For example, <code>formula = "~ A + B"</code> represents a formula with variables A and B.</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb37"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">linda_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MicrobiomeStat/man/linda.html">linda</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"counts"</span><span class="op">)</span><span class="op">)</span>,</span>
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb54"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">linda_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MicrobiomeStat/man/linda.html">linda</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"counts"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                   <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                   formula <span class="op">=</span> <span class="st">"~ Diet + Gender + Age"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -1136,14 +1332,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Extract the <code>output$AgeElderly</code> object from <code>linda_out</code> with <code>$</code> and store it into a variable named <code>linda_res</code>.</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">linda_res</span> <span class="op">&lt;-</span> <span class="va">linda_out</span><span class="op">$</span><span class="va">output</span><span class="op">$</span><span class="va">AgeElderly</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">linda_res</span> <span class="op">&lt;-</span> <span class="va">linda_out</span><span class="op">$</span><span class="va">output</span><span class="op">$</span><span class="va">AgeElderly</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <ol start="5" type="1">
 <li>Filter <code>linda_res</code> for features with <code>reject == TRUE</code>. How many differentially abundant taxa were found? What are their names and how significant are they in terms of log-fold change and adjusted p-value?</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">linda_res</span> <span class="op">%&gt;%</span></span>
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">linda_res</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">reject</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">log2FoldChange</span>, <span class="va">stat</span>, <span class="va">padj</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
 <span>  <span class="fu">rownames_to_column</span><span class="op">(</span>var <span class="op">=</span> <span class="st">"feature"</span><span class="op">)</span></span>
@@ -1158,7 +1354,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Import the mia and GUniFrac packages, load any of the example data sets mentioned in Chapter 3.3 with <code>data</code> and store it into a variable named <code>tse</code>.</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">GUniFrac</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"peerj13075"</span>, package <span class="op">=</span> <span class="st">"mia"</span><span class="op">)</span></span>
@@ -1169,7 +1365,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Agglomerate the TreeSE by genus and filter by a prevalence of 10%. You can perform both operations in one go with <code>subsetByPrevalent</code> by specifying the <code>rank</code> and <code>prevalence</code> arguments.</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/getPrevalence.html">subsetByPrevalent</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/getPrevalence.html">subsetByPrevalent</a></span><span class="op">(</span><span class="va">tse</span>,</span>
 <span>                            rank <span class="op">=</span> <span class="st">"genus"</span>,</span>
 <span>                            prevalence <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -1178,7 +1374,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Model the counts assay of the TreeSE with <code>ZicoSeq</code> as the <code>feature.dat</code> argument and store the output into a variable named <code>zicoseq_out</code>. Provide also the colData converted to a data.frame (with <code>as.data.frame</code>) as <code>meta.dat</code>. In addition, set <code>grp.name</code> to <code>"Age"</code>, <code>adj.name</code> to <code>c("Diet", "Gender")</code>, <code>feature.dat.type</code> to <code>"count"</code>, <code>return.feature.dat</code> to <code>TRUE</code> and <code>perm.no</code> to <code>999</code>.</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb42"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">zicoseq_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GUniFrac/man/ZicoSeq.html">ZicoSeq</a></span><span class="op">(</span>feature.dat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">)</span>,</span>
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb59"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">zicoseq_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GUniFrac/man/ZicoSeq.html">ZicoSeq</a></span><span class="op">(</span>feature.dat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                       meta.dat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                       grp.name <span class="op">=</span> <span class="st">"Age"</span>,</span>
 <span>                       adj.name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Diet"</span>, <span class="st">"Gender"</span><span class="op">)</span>, </span>
@@ -1191,7 +1387,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>View the top six differentially abundant taxa and their adjusted p-values with <code>head(sort(zicoseq_out$p.adj.fdr))</code>. Is there any significant taxon according to ZicoSeq? Compared to the output of linda, do we see the same taxa at the top in terms of significance? Overall, to what extent do the two methods agree with one another?</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">zicoseq_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind.data.frame</a></span><span class="op">(</span>p.raw <span class="op">=</span> <span class="va">zicoseq_out</span><span class="op">$</span><span class="va">p.raw</span>,</span>
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">zicoseq_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind.data.frame</a></span><span class="op">(</span>p.raw <span class="op">=</span> <span class="va">zicoseq_out</span><span class="op">$</span><span class="va">p.raw</span>,</span>
 <span>                                p.adj.fdr <span class="op">=</span> <span class="va">zicoseq_out</span><span class="op">$</span><span class="va">p.adj.fdr</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">zicoseq_res</span> <span class="op">%&gt;%</span></span>
@@ -1238,20 +1434,138 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section><section id="heatmap-visualization" class="level3" data-number="21.9.2"><h3 data-number="21.9.2" class="anchored" data-anchor-id="heatmap-visualization">
 <span class="header-section-number">21.9.2</span> Heatmap visualization</h3>
 <ol type="1">
-<li>Load experimental dataset from mia.</li>
-<li>Visualize abundances with heatmap.</li>
-<li>Visualize abundances with heatmap after CLR + Z transformation.</li>
+<li>Load one of the datasets from mia and the miaViz and sechm packages.</li>
 </ol>
-<p>See the OMA book for examples.</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb61"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">miaViz</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">sechm</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"GlobalPatterns"</span>, package <span class="op">=</span> <span class="st">"mia"</span><span class="op">)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">GlobalPatterns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="2" type="1">
+<li>Agglomerate your TreeSE to include the most prevalent Phyla.</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">agglomerateByPrevalence</a></span><span class="op">(</span><span class="va">tse</span>, rank <span class="op">=</span> <span class="st">"Phylum"</span>, prevalence <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="3" type="1">
+<li>Add a relative abundance assay to the TreeSE.</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse</span>, assay.type <span class="op">=</span> <span class="st">"counts"</span>, method <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="4" type="1">
+<li>Visualize the relative abundances with a heatmap using the sechm library</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/sechm/man/setSechmOption.html">setSechmOption</a></span><span class="op">(</span><span class="st">"hmcols"</span>, value<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"#F0F0FF"</span>,<span class="st">"#007562"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/sechm/man/sechm.html">sechm</a></span><span class="op">(</span><span class="va">tse</span>, features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span>, assayName<span class="op">=</span><span class="st">"relabundance"</span>, show_colnames<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="advanced-heatmaps" class="level3" data-number="21.9.3"><h3 data-number="21.9.3" class="anchored" data-anchor-id="advanced-heatmaps">
+<span class="header-section-number">21.9.3</span> Advanced Heatmaps</h3>
+<ol type="1">
+<li>Import mia, miaviz, complexHeatmap, shadowtext as well as a dataset of your choice</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">miaViz</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/GuangchuangYu/shadowtext/">shadowtext</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jokergoo/ComplexHeatmap">ComplexHeatmap</a></span><span class="op">)</span> </span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"Tengeler2020"</span>, package <span class="op">=</span> <span class="st">"mia"</span><span class="op">)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">Tengeler2020</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="2" type="1">
+<li>Agglomerate the data by prevalence to a rank of your choice, apply log10 transformation and assure unique rownames for when we plot the heatmap.</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">agglomerateByPrevalence</a></span><span class="op">(</span><span class="va">tse</span>, rank <span class="op">=</span> <span class="st">"Family"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse</span>, method <span class="op">=</span> <span class="st">"log10"</span>, pseudocount <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/taxonomy-methods.html">getTaxonomyLabels</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="3" type="1">
+<li>Calculate the correlations and their respective p-values between the log10 and count assays.</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">correlations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/getCrossAssociation.html">getCrossAssociation</a></span><span class="op">(</span></span>
+<span>    <span class="va">tse</span>, </span>
+<span>    test.signif<span class="op">=</span><span class="cn">TRUE</span>,            </span>
+<span>    assay.type1 <span class="op">=</span> <span class="st">"log10"</span>, </span>
+<span>    assay.type2 <span class="op">=</span> <span class="st">"counts"</span>,</span>
+<span>    method <span class="op">=</span> <span class="st">"spearman"</span>, </span>
+<span>    p.adj.threshold <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    cor.threshold <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    <span class="co"># Remove when mia is fixed</span></span>
+<span>    mode <span class="op">=</span> <span class="st">"matrix"</span>,</span>
+<span>    sort <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    show.warnings <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="4" type="1">
+<li>plot a heatmap using the correlations and mark significant correlations (p&lt;0.05) with a cross.</li>
+</ol>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb68"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a heatmap and store it</span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ComplexHeatmap/man/Heatmap.html">Heatmap</a></span><span class="op">(</span></span>
+<span>    <span class="va">correlations</span><span class="op">$</span><span class="va">cor</span>,</span>
+<span>    <span class="co"># Print values to cells</span></span>
+<span>    cell_fun <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">j</span>, <span class="va">i</span>, <span class="va">x</span>, <span class="va">y</span>, <span class="va">width</span>, <span class="va">height</span>, <span class="va">fill</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="co"># If the p-value is under threshold</span></span>
+<span>      <span class="kw">if</span><span class="op">(</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">correlations</span><span class="op">$</span><span class="va">pval</span><span class="op">[</span><span class="va">i</span>, <span class="va">j</span><span class="op">]</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">correlations</span><span class="op">$</span><span class="va">pval</span><span class="op">[</span><span class="va">i</span>, <span class="va">j</span><span class="op">]</span> <span class="op">&lt;</span> <span class="fl">0.05</span> <span class="op">)</span><span class="op">{</span></span>
+<span>          <span class="co"># Print "X"</span></span>
+<span>          <span class="fu">grid.shadowtext</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html">sprintf</a></span><span class="op">(</span><span class="st">"%s"</span>, <span class="st">"X"</span><span class="op">)</span>, <span class="va">x</span>, <span class="va">y</span>, gp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/gpar.html">gpar</a></span><span class="op">(</span>fontsize <span class="op">=</span> <span class="fl">8</span>, col <span class="op">=</span> <span class="st">"#f5f5f5"</span><span class="op">)</span><span class="op">)</span></span>
+<span>      <span class="op">}</span></span>
+<span>    <span class="op">}</span>,</span>
+<span>    heatmap_legend_param <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">""</span>, legend_height <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fl">5</span>, <span class="st">"cm"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">p</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="5" type="1">
+<li>Plot similar heatmap but adjust color scale to ensure that 0 is in the middle</li>
+</ol>
+<p>Hint: utilize circlize::colorRamp2()</p>
+<div class="cell" data-layout-align="center">
+<details class="code-fold"><summary>Show solution</summary><div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jokergoo/circlize">circlize</a></span><span class="op">)</span></span>
+<span><span class="co"># Update color scale to ensure 0 is in the middle</span></span>
+<span><span class="va">col_fun</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/pkg/circlize/man/colorRamp2.html">colorRamp2</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"darkblue"</span>,<span class="st">"skyblue"</span>,<span class="st">"white"</span>, <span class="st">"brown1"</span>, <span class="st">"darkred"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create a heatmap and store it</span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ComplexHeatmap/man/Heatmap.html">Heatmap</a></span><span class="op">(</span></span>
+<span>    <span class="va">correlations</span><span class="op">$</span><span class="va">cor</span>,</span>
+<span>    <span class="co"># Print values to cells</span></span>
+<span>    cell_fun <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">j</span>, <span class="va">i</span>, <span class="va">x</span>, <span class="va">y</span>, <span class="va">width</span>, <span class="va">height</span>, <span class="va">fill</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="co"># If the p-value is under threshold</span></span>
+<span>      <span class="kw">if</span><span class="op">(</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">correlations</span><span class="op">$</span><span class="va">pval</span><span class="op">[</span><span class="va">i</span>, <span class="va">j</span><span class="op">]</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">correlations</span><span class="op">$</span><span class="va">pval</span><span class="op">[</span><span class="va">i</span>, <span class="va">j</span><span class="op">]</span> <span class="op">&lt;</span> <span class="fl">0.05</span> <span class="op">)</span><span class="op">{</span></span>
+<span>          <span class="co"># Print "X"</span></span>
+<span>          <span class="fu">grid.shadowtext</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html">sprintf</a></span><span class="op">(</span><span class="st">"%s"</span>, <span class="st">"X"</span><span class="op">)</span>, <span class="va">x</span>, <span class="va">y</span>, gp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/gpar.html">gpar</a></span><span class="op">(</span>fontsize <span class="op">=</span> <span class="fl">8</span>, col <span class="op">=</span> <span class="st">"#f5f5f5"</span><span class="op">)</span><span class="op">)</span></span>
+<span>      <span class="op">}</span></span>
+<span>    <span class="op">}</span>,</span>
+<span>    heatmap_legend_param <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">""</span>, legend_height <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/unit.html">unit</a></span><span class="op">(</span><span class="fl">5</span>, <span class="st">"cm"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    col <span class="op">=</span> <span class="va">col_fun</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">p</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 <p><strong>Extra</strong> Cool Exercise : Identify Patterns and Clusters To make the exercise more engaging, let’s do an exploratory data analysis task:</p>
-<section id="cluster-analysis-on-pcoapca-results" class="level4" data-number="21.9.2.1"><h4 data-number="21.9.2.1" class="anchored" data-anchor-id="cluster-analysis-on-pcoapca-results">
-<span class="header-section-number">21.9.2.1</span> 1. Cluster Analysis on PCoA/PCA Results:</h4>
+<section id="cluster-analysis-on-pcoapca-results" class="level4" data-number="21.9.3.1"><h4 data-number="21.9.3.1" class="anchored" data-anchor-id="cluster-analysis-on-pcoapca-results">
+<span class="header-section-number">21.9.3.1</span> 1. Cluster Analysis on PCoA/PCA Results:</h4>
 <ol type="i">
 <li>Perform clustering on the ordination results (e.g., k-means clustering).</li>
 <li>Visualize the clusters on the ordination plots.</li>
 </ol>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/">scater</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/">scater</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Setting seed for reproducibility</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
@@ -1269,13 +1583,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">pca_aitchison</span>, colour_by <span class="op">=</span> <span class="va">pca_aitchison_clusters</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Where : ‘reducedDim’ is a function that extracts the reduced dimensionality representation of your data (e.g., from a PCA or PCoA object). ‘plotReducedDim’ is a function that can plot these reduced dimensions and has a ‘colour_by argument’ that accepts a vector of cluster assignments.</p>
-</section><section id="heatmap-with-annotations" class="level4" data-number="21.9.2.2"><h4 data-number="21.9.2.2" class="anchored" data-anchor-id="heatmap-with-annotations">
-<span class="header-section-number">21.9.2.2</span> 2. Heatmap with Annotations:</h4>
+</section><section id="heatmap-with-annotations" class="level4" data-number="21.9.3.2"><h4 data-number="21.9.3.2" class="anchored" data-anchor-id="heatmap-with-annotations">
+<span class="header-section-number">21.9.3.2</span> 2. Heatmap with Annotations:</h4>
 <ul>
 <li>Annotate the heatmap with additional metadata (e.g., subject groups or sample types).</li>
 </ul>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load necessary libraries</span></span>
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load necessary libraries</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment">SummarizedExperiment</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">pheatmap</span><span class="op">)</span></span>
 <span></span>
@@ -1286,7 +1600,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co"># Create example SummarizedExperiment object</span></span>
 <span><span class="va">example_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">200</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">20</span>, ncol <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="co"># Example assay data</span></span>
 <span><span class="va">col_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/DataFrame-class.html">DataFrame</a></span><span class="op">(</span>Sample <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"Sample"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span>, Group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span> <span class="co"># Example sample metadata</span></span>
-<span><span class="va">enterotype</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/RangedSummarizedExperiment-class.html">SummarizedExperiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">example_data</span><span class="op">)</span>, colData <span class="op">=</span> <span class="va">col_data</span><span class="op">)</span></span>
+<span><span class="va">enterotype</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">SummarizedExperiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">example_data</span><span class="op">)</span>, colData <span class="op">=</span> <span class="va">col_data</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Extract sample metadata</span></span>
 <span><span class="va">sample_metadata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">enterotype</span><span class="op">)</span></span>
@@ -1297,7 +1611,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co"># Plot heatmap with clustering and sample annotations</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html">pheatmap</a></span><span class="op">(</span><span class="va">assay_data</span>, cluster_rows <span class="op">=</span> <span class="cn">TRUE</span>, cluster_cols <span class="op">=</span> <span class="cn">TRUE</span>, annotation_col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">sample_metadata</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Make sure to replace the example data with your actual data.</p>
 </section></section></section><section id="multiomics" class="level2" data-number="21.10"><h2 data-number="21.10" class="anchored" data-anchor-id="multiomics">
 <span class="header-section-number">21.10</span> Multiomics</h2>
 <section id="basic-exploration" class="level3" data-number="21.10.1"><h3 data-number="21.10.1" class="anchored" data-anchor-id="basic-exploration">
