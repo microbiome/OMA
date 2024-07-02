@@ -77,7 +77,7 @@ tse <- transformAssay(tse,
 
 # Other metrics like Aitchison to clr-transformed data
 tse <- transformAssay(tse,
-                      assay.type = "relabundance",
+                      assay.type = "counts",
                       method = "clr",
                       pseudocount = TRUE)
 
@@ -137,7 +137,7 @@ library(scater)
 tse <- runMDS(tse,
               FUN = vegan::vegdist,
               method = "bray",
-              assay.type = "relabundance",
+              assay.type = "counts",
               name = "MDS_bray")
 ```
 
@@ -232,6 +232,135 @@ plotReducedDim(tse, "Unifrac",
                colour_by = "Group")
 ```
 
+### Rarefaction to mitigate impacts of uneven sequencing effort
+
+The sequencing depth of a sample refers to the number of gene sequences read 
+during the sequencing process. A variation in sequencing depth across the 
+samples of a study may impact the calculation of alpha and beta diversity 
+metrics [@Schloss2023]. 
+It is common to find significant variation in sequencing depth between samples.
+For instance, the samples of the *TreeSummarizedExperiment* dataset 
+`GlobalPatterns` show up to a 40-fold difference in the number of gene sequences.
+
+```{r rarefaction_1}
+# Calculate the list of sequencing depths across samples
+sequencing_depths <- colSums(assay(tse))
+# Calculate variation between highest and lowest sequencing depth 
+depth_variation <- max(sequencing_depths)/min(sequencing_depths)
+depth_variation
+```
+
+To address uneven sequencing effort, rarefaction aims to normalize sequence 
+counts using subsampling. 
+First, the user chooses the rarefaction depth and a number of iterations N. All the samples with sequence count below the rarefaction depth are removed and gene sequences are randomly drawn from the samples left to get subsamples fitting the rarefaction depth. Then a beta diversity metric is calculated from those subsamples and the process is iterated N times. Finally, beta diversity is estimated with the mean of all beta diversity values calculated on subsampled data.
+
+There has been a long-lasting controversy surrounding the use of rarefaction in
+microbial ecology. The main concern is that rarefaction would omit data. 
+However, if the subsampling process is repeated a sufficient number of times, 
+and if the rarefaction depth is set to the lowest sequence count found across all samples, no data will be omitted. 
+Moreover, Patrick Schloss has demonstrated that rarefaction is "the only method that could control for variation in uneven sequencing effort when measuring commonly used alpha and beta diversity metrics" [@Schloss2023].
+
+Before applying rarefaction, one can select the most variable features to reduce the variation caused by random subsampling. This approach allows for comparing the results between non-rarefied and rarefied distance calculations later on.
+
+```{r, select highest variance features}
+tse0 <- GlobalPatterns
+
+# Let us see what happens when we operate with ntop highest variance features
+ntop <- 20
+tse0 <- tse0[head(rev(order(rowSds(assay(tse0, "counts")))), ntop), ]
+```
+
+Let us first convert the count assay to clr assay and calculate Aitchison distance without rarefaction:
+
+```{r, Aitchison distance without rarefaction}
+# Rarify data for comparisons
+
+tse0 <- transformAssay(tse0,
+                      assay.type = "counts",		      
+                      method = "clr",
+                      pseudocount = 1)
+
+# Run MDS on clr assay with Aitchison distances
+tse0 <- runMDS(tse0,
+              FUN = vegan::vegdist,
+              method = "euclidean",
+              assay.type = "clr",
+              name = "MDS_aitchison")
+```
+
+The function `vegan::avgdist` can use rarefaction to compute beta diversity:
+
+```{r, fig.cap = "MDS plot based on the Bray-Curtis distances using rarefaction with clr transformation on the GlobalPatterns dataset."}
+# Define custom transformation function..
+clr <- function (x) {
+  vegan::decostand(x, method="clr", pseudocount=1)
+}
+
+# Run transformation after rarefactions before calculating the beta diversity..
+tse0 <- runMDS(tse0, 
+              assay.type="counts",
+              ntop=nrow(tse0), 
+              FUN = vegan::avgdist, # Custom beta diversity function that includes rarefaction
+              sample=min(colSums(assay(tse0, "counts"))), # rarefaction depth 
+              distfun=vegdist,  # Use vegdist beta diversity function
+              dmethod = "euclidean", # euclidean beta diversity
+              iterations = 10,
+              transf=clr,
+	      replace=TRUE,
+              name = "MDS_aitchison_rarefied") 
+
+plotReducedDim(tse0, "MDS_aitchison_rarefied")
+
+# Generate plots for non-rarefied and rarefied Bray-Curtis distances scaled by MDS
+plots <- lapply(c("MDS_aitchison", "MDS_aitchison_rarefied"),
+                plotReducedDim,
+                object = tse0)
+
+# Generate multi-panel plot
+wrap_plots(plots) +
+  plot_layout(guides = "collect")
+```
+
+```{r rarefaction_2}
+# Check correlation between non-rarefied and rarefied Aichitson distances
+print(all.equal(current = cor(as.vector(reducedDim(tse0, "MDS_aitchison")),
+                        as.vector(reducedDim(tse0, "MDS_aitchison_rarefied"))),
+          target = 1,
+          tolerance = 0.05))
+```
+
+`ntop` is a `runMDS` option. Here it is set to total number of features in `GlobalPatterns` dataset so that they are not filtered. If ntop was not set to the total number of features, only the ntop features with highest variance would be used for dimensionality reduction and the other features would be filtered.
+
+The argument `sample` is set to the smallest sequence count across 
+all samples. This ensures that no sample will be removed during the rarefaction 
+process. 
+
+The argument `iterations` is by default set to 100 but 10 iterations is often sufficient for beta diversity calculations.
+
+To use transformations after the rarefaction of the samples and before the beta diversity calculation, `vegan::avgdist` has the argument `transf`.
+
+We can also plot the correlation between principal coordinates PCx and PCy for both the rarefied and non-rarefied distance calculations:
+
+```{r PC_correlation}
+par(mfrow=c(1, 2))
+for (k in 1:2) {
+
+  # Principal axes are sign invariant;
+  # align the signs; if the correlation is negative then swap the other axis
+  pcx <- reducedDim(tse0, "MDS_aitchison")[,k]
+  pcy <- reducedDim(tse0, "MDS_aitchison_rarefied")[,k]
+  pcy <- sign(cor(pcx, pcy)) * pcy
+  r <- cor(pcx, pcy)
+
+  plot(pcx, pcy, main=paste0("PC", k, "; r=",round(r, 3)));
+  abline(0, 1)
+}
+```
+
+The mia package includes the rarefaction function `rarefyAssay` that randomly
+subsamples a given assay of a *TreeSummarizedExperiment* dataset. However, the 
+iterations and beta diversity calculations are not included.
+
 ### Other ordination methods {#sec-other-ord-methods}
 
 Other dimension reduction methods, such as PCA and UMAP, are inherited from the
@@ -289,8 +418,6 @@ would report relative stress, which varies within the unit interval and is bette
 if smaller. This can be calculated as shown below.
 
 ```{r relstress}
-# Load vegan package
-library(vegan)
 
 # Quantify dissimilarities in the original feature space
 # Pick relabunance assay separately
