@@ -6,9 +6,8 @@ chapterPreamble()
 ```
 
 Community typing in microbial ecology involves identifying distinct microbial 
-communities by recognizing patterns in the data.The community types are 
-described based on representative taxa characteristics, distinguished 
-from the characteristics of the other community types. The samples are described 
+communities by recognizing patterns in the data. The community types are 
+described based on taxa characteristics, representing each community. The samples are described 
 by community type assignments, which are defined by the ecosystem features in 
 the sample. Community typing techniques can typically be divided into unsupervised 
 clustering and dimensionality reduction techniques, where clustering is more 
@@ -26,12 +25,11 @@ microbiome community typing methods. For example, clustering allow samples to be
 distinguished from each other based on their microbiome community composition.
 Clustering scheme consists of two steps, the first is to compute the sample 
 dissimilarities with a given distance metrics, and the second is to form the 
-clusters based on the dissimilarity matrix. There are multiple clustering 
-algorithms available, some of which are introduced in this 
-chapter.The data can be clustered either based on features or samples. The examples below 
+clusters based on the dissimilarity matrix. The data can be clustered either based on features or samples. The examples below 
 are focused on sample clustering.
 
-*bluster* is a Bioconductor package providing tools for clustering data in the 
+There are multiple clustering algorithms available. *bluster* is a 
+Bioconductor package providing tools for clustering data in the 
 `SummarizedExperiment` container. It offers multiple algorithms such 
 as hierarchical clustering, DBSCAN, and K-means. 
 
@@ -41,7 +39,7 @@ library(bluster)
 library(kableExtra)
 ```
 
-In the examples of this chapter we use 'peerj13075' data for microbiota community 
+In the examples of this chapter we use *peerj13075* data for microbiota community 
 typing. This chapter illustrates how different results can be obtained depending 
 on the choice of the algorithm. To reduce calculation time we decided to 
 agglomerate taxa onto 'Class' level and filter out the least prevalent taxa as 
@@ -53,15 +51,15 @@ library(mia)
 data("peerj13075", package = "mia")
 tse <- peerj13075
 
-# Filter out most taxa for faster calculation
+# Filter out most taxa to ease the calculation
 altExp(tse, "prevalent") <- agglomerateByPrevalence(tse, rank = "class", 
                                                     prevalence = 20/100, 
                                                     detection = 1/100)
 ```
 
-## Hierarchical clustering
+### Hierarchical clustering
 
-The hierarchical clustering algorithm aims to find hierarchy between
+The hierarchical clustering aims to find hierarchy between
 samples/features. There are two approaches: agglomerative ("bottom-up")
 and divisive ("top-down"). In agglomerative approach, each observation is first 
 in a unique cluster, after which the algorithm continues to agglomerate similar 
@@ -72,8 +70,8 @@ cluster contains only one observation.
 
 In this example we use `addCluster` function from mia to  cluster the data. 
 `addCluster` function allows to choose a clustering algorithm and offers multiple 
-parameters to shape the result. HclustParam() parameter is chosen for hierarchical 
-clustering. HclustParam() parameter itself has parameters on its own 
+parameters to shape the result. ``HclustParam()` parameter is chosen for hierarchical 
+clustering. ``HclustParam()` parameter itself has parameters on its own 
 [HclustParam documentation](https://rdrr.io/github/LTLA/bluster/man/HclustParam-class.html).
 A parameter is `MARGIN` defines whether to cluster features or samples. Here we 
 cluster counts data, for which we compute the dissimilarities with the 
@@ -135,10 +133,7 @@ dend %>% set("labels_cex", 0.8) %>% plot()
 
 We can also visualize the clusters by by projecting the data onto two-dimensional 
 surface that captures the most variability in the data. In this example, we use
-multi-dimensional scaling (MDS). The visualization demonstrates that 
-the clusters can be distinguished on a two-dimensional plot, although the 
-technique does not preserve detailed information about the cluster division
-process.
+multi-dimensional scaling (MDS).
 
 ```{r hclust3}
 library (scater)
@@ -154,10 +149,10 @@ altExp(tse, "prevalent") <- runMDS(altExp(tse, "prevalent"),
 plotReducedDim(altExp(tse, "prevalent"), "MDS", theme_size = 13) + 
               geom_point(size = 3, alpha = 0.6, 
                       aes(color = altExp(tse, "prevalent")$hclust)) +
-              labs(color = "HClust", title = "Hclust")
+              labs(color = "HClust", title = "Hclust") + theme_minimal()
 ```
 
-## Dirichlet Multinomial Mixtures (DMM)
+### Dirichlet Multinomial Mixtures (DMM)
 
 This section focuses on [Dirichlet-Multinomial Mixture
 Model](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030126) 
@@ -167,11 +162,12 @@ and the data.
 
 In this example, we cluster the data with DMM clustering. In the example below, 
 we calculate model fit using Laplace approximation ro reduce the calculation time. 
-The cluster information is added in the metadata with an optional `name`. 
+The cluster information is added in the metadata with an optional `name`. In this
+example, we use a prior assumption that the optimal number of clusters to
+describe the data would be in the range from 1 to 6.
 
 ```{r dmm1}
 # Run the model and calculates the most likely number of clusters from 1 to 6
-
 set.seed(123)
 altExp(tse, "prevalent") <- addCluster(altExp(tse, "prevalent"), 
                                       assay.type = "counts", 
@@ -195,7 +191,7 @@ p + theme_minimal(base_size = 11)
 ```
 
 The plot above suggests that two clusters describe the data the best. Now 
-we can plot, which taxa define the cluster features.
+we can plot, which taxa define the key cluster features.
 
 ```{r dmm3, fig.width=6, fig.height=2}
 # Get the estimates on how much each phyla contributes on each cluster
@@ -219,7 +215,7 @@ for (i in 1:2) {
                     alpha = 0.6) +
                     coord_flip() + 
                     labs(title = paste("Top phyla in group", i)) +
-                    theme_light(base_size = 11) + 
+                    theme_minimal(base_size = 11) + 
                     labs(x="", y="") + 
                     scale_y_continuous(limits=c(0,1))
   print(p)
