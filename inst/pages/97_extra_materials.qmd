@@ -1,7 +1,7 @@
 # Extra material {#sec-extras} 
 
 ```{r}
-knitr::opts_chunk$set(eval=TRUE)
+knitr::opts_chunk$set(eval=TRUE, warning=FALSE, message=FALSE)
 ```
 
 
@@ -13,11 +13,11 @@ slide sets for training events.
 
 ## PERMANOVA comparison {#compare-permanova}
 
-Here we present two possible uses of the `adonis2` function which performs PERMANOVA. The
+Here, we present two possible uses of the `adonis2` function, that performs PERMANOVA. The
 optional argument `by` has an effect on the statistical outcome, so its two options are
 compared here.
 
-```{r permanova_import, warning = FALSE, message = FALSE}
+```{r permanova_import}
 # import necessary packages
 library(gtools)
 library(purrr)
@@ -31,12 +31,12 @@ different orders of three variables with two different approaches:
 `by = "margin"` or `by = "terms"`.
 
 
-```{r permanova_prep, message = FALSE, warning = FALSE}
+```{r permanova_prep}
 # load and prepare data
 library(mia)
 data("enterotype", package="mia")
 enterotype <- transformAssay(enterotype, method = "relabundance")
-# drop samples missing meta data
+# drop samples missing metadata
 enterotype <- enterotype[ , !rowSums(is.na(colData(enterotype)[, c("Nationality", "Gender", "ClinicalStatus")]) > 0)]
 # define variables and list all possible combinations
 vars <- c("Nationality", "Gender", "ClinicalStatus")
@@ -55,7 +55,7 @@ margin_df <- data.frame("Formula" = formulas,
 
 
 
-```{r permanova_loop, message = FALSE, warning = FALSE}
+```{r permanova_loop}
 for (row_idx in 1:nrow(var_perm)) {
   
   # generate temporary formula (i.e. "assay ~ ClinicalStatus + Nationality + Gender")
@@ -104,7 +104,7 @@ ClinicalStatus, Gender and Nationality obtained by PERMANOVA with
 formula when `by = "terms"` (default).
 
 
-```{r permanova_table, message = FALSE, warning = FALSE}
+```{r permanova_table}
 
 df <- terms_df %>%
   dplyr::inner_join(margin_df, by = "Formula", suffix = c(" (terms)", " (margin)"))
@@ -127,22 +127,22 @@ data of @Sprockett2020 available
 through `microbiomeDataSets` package.
 
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 library(fido)
 ```
 
 Loading the libraries and importing data:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 library(fido)
 ```
 
-```{r, message=FALSE, warning=FALSE, eval=FALSE}
+```{r, eval=FALSE}
 library(microbiomeDataSets)
 tse <- SprockettTHData()
 ```
 
-```{r, message=FALSE, warning=FALSE, echo=FALSE}
+```{r, echo=FALSE}
 # saveRDS(tse, file="data/SprockettTHData.Rds")
 # Hidden reading of the saved data
 tse <- readRDS("../extdata/SprockettTHData.Rds")
@@ -154,7 +154,7 @@ We pick three covariates ("Sex","Age_Years","Delivery_Mode") during this
 analysis as an example, and beforehand we check for missing data:
 
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 library(mia)
 cov_names <- c("Sex","Age_Years","Delivery_Mode")
 na_counts <- apply(is.na(colData(tse)[,cov_names]), 2, sum)
@@ -163,21 +163,21 @@ na_summary<-as.data.frame(na_counts,row.names=cov_names)
 
 We drop missing values of the covariates:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 tse <- tse[ , !is.na(colData(tse)$Delivery_Mode) ]
 tse <- tse[ , !is.na(colData(tse)$Age_Years) ]
 ```
 
 We agglomerate microbiome data to Phylum:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 tse_phylum <- mergeFeaturesByRank(tse, "Phylum")
 ```
 
 We extract the counts assay and covariate data to build the model
 matrix:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 Y <- assays(tse_phylum)$counts
 # design matrix
 # taking 3 covariates
@@ -187,7 +187,7 @@ X <- t(model.matrix(~Sex+Age_Years+Delivery_Mode,data=sample_data))
 
 Building the parameters for the `pibble` call to build the model; see more at [vignette](https://jsilve24.github.io/fido/articles/introduction-to-fido.html):
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 n_taxa<-nrow(Y)
 upsilon <- n_taxa+3
 Omega <- diag(n_taxa)
@@ -199,7 +199,7 @@ Gamma <- diag(nrow(X))
 
 Automatically initializing the priors and visualizing their distributions:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 priors <- pibble(NULL, X, upsilon, Theta, Gamma, Xi)
 names_covariates(priors) <- rownames(X)
 plot(priors, pars="Lambda") + ggplot2::xlim(c(-5, 5))
@@ -209,47 +209,47 @@ Estimating the posterior by including our response data `Y`.
 Note: Some computational failures could occur (see [discussion](https://github-wiki-see.page/m/jsilve24/fido/wiki/Frequently-Asked-Questions))
 the arguments `multDirichletBoot` `calcGradHess` could be passed in such case.
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 priors$Y <- Y 
 posterior <- refit(priors, optim_method="adam", multDirichletBoot=0.5) #calcGradHess=FALSE
 ```
 
 Printing a summary about the posterior:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 ppc_summary(posterior)
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 names_categories(posterior) <- rownames(Y)
 plot(posterior,par="Lambda",focus.cov=rownames(X)[2:4])
 ```
 
 Taking a closer look at "Sex" and "Delivery_Mode":
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
 ```
 
 
 ## Interactive 3D Plots
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 # Load libraries
 library(rgl)
 library(plotly)
 ```
 
-```{r setup2, warning=FALSE, message=FALSE}
+```{r setup2}
 library(knitr)
 knitr::knit_hooks$set(webgl = hook_webgl)
 ```
 
 
-In this section we make a 3D version of the earlier  Visualizing the most dominant genus on PCoA (see \@ref(quality-control)), with the help of the plotly [@Sievert2020].
+In this section we make a 3D version of the earlier PCoA plot (see \@ref(quality-control)), with the help of the plotly [@Sievert2020].
 
-```{r, message=FALSE, warning=FALSE, eval=FALSE}
+```{r}
 # Importing necessary libraries
 library(curatedMetagenomicData)
 library(dplyr)
@@ -264,29 +264,33 @@ tse <- sampleMetadata %>%
     returnSamples("relative_abundance")
 
 tse_Genus <- mergeFeaturesByRank(tse, rank="genus")
-tse_Genus <- addPerSampleDominantFeatures(tse_Genus,assay.type="relative_abundance", name = "dominant_taxa")
 
 # Performing PCoA with Bray-Curtis dissimilarity.
-tse_Genus <- runMDS(tse_Genus, FUN = vegan::vegdist, ncomponents = 3,
-              name = "PCoA_BC", assay.type = "relative_abundance")
+tse_Genus <- runMDS(tse_Genus, #adds reduced dimensionalities to tse_Genus
+              FUN = vegan::vegdist,
+              method = "bray",
+              ncomponents = 3, # calculates three principal coordinates
+              assay.type = "relative_abundance", # calculates Bray-Curtis from relative abundace
+              name = "MDS_bray") #name of the PCoA within the tse 
 
-# Getting the 6 top taxa
-top_taxa <- getTopFeatures(tse_Genus,top = 6, assay.type = "relative_abundance")
+e <- attr(reducedDim(tse_Genus, "MDS_bray"), "eig")
+rel_eig <- e / sum(e[e > 0])
 
-# Naming all the rest of non top-taxa as "Other"
-most_abundant <- lapply(colData(tse_Genus)$dominant_taxa,
-                   function(x){if (x %in% top_taxa) {x} else {"Other"}})
+# Extract the coordinates as a dataframe
+coordinates <- as.data.frame(reducedDim(tse_Genus,"MDS_bray"))
 
-# Storing the previous results as a new column within colData
-colData(tse_Genus)$most_abundant <- as.character(most_abundant)
+head(coordinates)
 
-# Calculating percentage of the most abundant
-most_abundant_freq <- table(as.character(most_abundant))
-most_abundant_percent <- round(most_abundant_freq/sum(most_abundant_freq)*100, 1)
-
-# Retrieving the explained variance
-e <- attr(reducedDim(tse_Genus, "PCoA_BC"), "eig");
-var_explained <- e/sum(e[e>0])*100
+# plot the coordinates using plotly and add the explained variance to the axes
+plot_ly(coordinates, x = ~V1, y = ~V2, z = ~V3, color = ~V3) %>%
+  add_markers() %>%
+  layout(
+    scene = list(
+      xaxis = list(title = paste("PCoA 1 (", round(100 * rel_eig[1], 1), "%)", sep = "")),
+      yaxis = list(title = paste("PCoA 2 (", round(100 * rel_eig[2], 1), "%)", sep = "")),
+      zaxis = list(title = paste("PCoA 3 (", round(100 * rel_eig[3], 1), "%)", sep = ""))
+    )
+  )
 ```
 
 ## phyloseq vs TreeSE cheatsheet
@@ -614,7 +618,6 @@ Ok, let's plot.
 #| label = "plot_red_dim"
 # Plot
 plotReducedDim(tse, "MDS_bray", color_by = "SampleType")
-
 # The sign is given arbitrarily. We can change it to match the plot_ordination
 reducedDim(tse)[, 1] <- -reducedDim(tse)[, 1]
 reducedDim(tse)[, 2] <- -reducedDim(tse)[, 2]
@@ -646,7 +649,7 @@ altExp(tse, "Family") <-
   mergeFeaturesByRank(tse,
                       rank = "Family",
                       onRankOnly = TRUE, # Let's add the equivalent option to NArm =TRUE
-                      agglomerateTree = TRUE)
+                      agglomerateTree = FALSE)
 altExp(tse, "Family")
 ```
 
