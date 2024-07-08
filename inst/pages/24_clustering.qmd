@@ -235,13 +235,62 @@ plotReducedDim(altExp(tse, "prevalent"), "MDS", theme_size = 13) +
 ```
 ## Dimensionality reduction
 
-Dimensionality reduction is part of community typing, where the aim is to find underlying 
-structure in the data. Dimensionality reduction relies in the idea that the data can be describe in a
+Dimensionality reduction can be considered as a part of community typing, 
+where the aim is to find underlying structure in the data. Dimensionality 
+reduction relies in the idea that the data can be describe in a
 lower rank representation, where latent features with different loads of the 
-observed ones describe the sample set. This representation stores the information about sample
-dissimilarity with significantly reduced amount of data dimensions. Unlike
-clustering, where each sample is assigned into one cluster, dimensionality
-reduction allows continuous memberships for all samples into all community types.
+observed ones describe the sample set. This representation stores the 
+information about sample dissimilarity with significantly reduced amount of 
+data dimensions. Unlike clustering, where each sample is assigned into one 
+cluster, dimensionality reduction allows continuous memberships for all samples 
+into all community types. Dimensionality reduction techniques are explained in 
+chapter @ref{sec-community-similarity} in more detail.
+
+### Non-negative matrix factorization
+
+In this section, we will particularly focus on Non-negative Matrix Factorization
+(NMF). NMF decomposes the original data *X* into two lower rank  matrices: *H*
+representing key taxa characteristics of each community type and *W* representing
+continuous sample memberships across all community types. NMF algorithm 
+calculates the minimum distance between the original data and it's approximation
+using Kullback-Leibler divergence.
+
+Here, we use functions in `NMF` package. To reduce calculation time,
+we set the number of components in four instead of optimizing the number of
+components that describe the original data the best.
+
+```{r}
+library(NMF)
+
+# Optimize the number of communities required to describe the data
+set.seed(3221)
+res <- nmf(t(assay(altExp(tse, "prevalent"), "counts")), 4)
+```
+```{r}
+# Pick low-rank representations
+H <- res@fit@H
+W <- res@fit@W
+
+# Add NMF loadings in the metadata
+metadata(altExp(tse, "prevalent"))$NMF_loadings <- H
+
+# Obtain the relative abundance of ES in each sample
+wrel <- t(apply(W, 1, function (x) {x/sum(x)}))
+
+# Define the community type of a sample with the highest relative abundance
+altExp(tse, "prevalent")$NMFcomponent <- as.factor(apply(wrel, 1, which.max))
+table(altExp(tse, "prevalent")$NMFcomponent)
+```
+Now, we can plot the NMF community types calculated based on maximum membership
+for each sample onto a two-dimensional surface.
+
+```{r}
+# NMF community types
+plotReducedDim(altExp(tse, "prevalent"), "MDS", theme_size = 13) + 
+              geom_point(size = 3, alpha = 0.6, 
+                      aes(color = altExp(tse, "prevalent")$NMFcomponent)) +
+              labs(color = "NMFcomponent", title = "NMF") + theme_minimal()
+```
 
 ## Additional Community Typing
 
