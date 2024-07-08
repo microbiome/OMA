@@ -260,17 +260,17 @@ However, if the subsampling process is repeated a sufficient number of times,
 and if the rarefaction depth is set to the lowest sequence count found across all samples, no data will be omitted. 
 Moreover, Patrick Schloss has demonstrated that rarefaction is "the only method that could control for variation in uneven sequencing effort when measuring commonly used alpha and beta diversity metrics" [@Schloss2023].
 
-Before applying rarefaction, one can select the most variable features to reduce the variation caused by random subsampling. This approach allows for comparing the results between non-rarefied and rarefied distance calculations later on.
+Before applying rarefaction, selecting the most variable features can help minimize variation caused by random subsampling. These features have the highest read counts, while rare features tend to increase sampling variation. This approach facilitates comparison of results between non-rarefied and rarefied distance calculations later on.  
 
 ```{r, select highest variance features}
 tse0 <- GlobalPatterns
 
 # Let us see what happens when we operate with ntop highest variance features
-ntop <- 20
+ntop <- 5
 tse0 <- tse0[head(rev(order(rowSds(assay(tse0, "counts")))), ntop), ]
 ```
 
-Let us first convert the count assay to clr assay and calculate Aitchison distance without rarefaction:
+Let us first convert the count assay to centered log ratio (clr) assay and calculate Aitchison distance without rarefaction:
 
 ```{r, Aitchison distance without rarefaction}
 # Rarify data for comparisons
@@ -299,10 +299,10 @@ clr <- function (x) {
 # Run transformation after rarefactions before calculating the beta diversity..
 tse0 <- runMDS(tse0, 
               assay.type="counts",
-              ntop=nrow(tse0), 
+              ntop = nrow(tse0), 
               FUN = vegan::avgdist, # Custom beta diversity function that includes rarefaction
-              sample=min(colSums(assay(tse0, "counts"))), # rarefaction depth 
-              distfun=vegdist,  # Use vegdist beta diversity function
+              sample = min(colSums(assay(tse0, "counts"))), # rarefaction depth 
+              distfun = vegan::vegdist,  # Use vegdist beta diversity function
               dmethod = "euclidean", # euclidean beta diversity
               iterations = 10,
               transf=clr,
