@@ -3,9 +3,8 @@
 
 
 # Source location for the up-to-date package list:
-packages <- url("https://raw.githubusercontent.com/microbiome/OMA/devel/oma_packages.csv")
+packages <- url("https://raw.githubusercontent.com/microbiome/OMA/devel/oma_packages/oma_packages.csv")
 #packages <- "oma_packages.csv"
-
 # -------------------------------------------------------------------------------------------
 
 options(install.packages.check.source = "no")
