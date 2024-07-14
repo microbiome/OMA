@@ -89,7 +89,7 @@ k <- c(2, 3, 5, 10)
 ClustAndPlot <- function(x) {
     # Add the clustering data from the short random walks algorithm to the TSE
     tse <- addCluster(tse, assay.type = "rclr", 
-                   MARGIN = "col", NNGraphParam(k = x))
+                   by = "cols", NNGraphParam(k = x))
     
     # Plot the results of the clustering as a color for each sample
     plotUMAP(tse, colour_by = I(colData(tse)$clusters)) +
@@ -118,7 +118,7 @@ about Silhouettes read [@Rousseeuw1987].
 ClustDiagPlot <- function(x) {
   # Get the clustering results
     tse <- addCluster(tse, assay.type = "rclr", 
-                   MARGIN = "col", NNGraphParam(k = x))
+                   by = "cols", NNGraphParam(k = x))
 
     # Compute the diagnostic info
     sil <- approxSilhouette(t(assays(tse)$rclr), colData(tse)$clusters)
@@ -169,9 +169,9 @@ tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 tse <- tse[is.element(rownames(tse), rel_taxa),]
 
 # CLR and Z transforms
-tse <- transformAssay(tse, MARGIN = "samples", assay.type = "counts",
+tse <- transformAssay(tse, MARGIN = "cols", assay.type = "counts",
                        method = "clr", pseudocount=1)
-tse <- transformAssay(tse, MARGIN = "features", assay.type = "clr", method = "z")
+tse <- transformAssay(tse, MARGIN = "rows", assay.type = "clr", method = "standardize")
 
 Countries <- data.frame("Country" = colData(tse)$Country)
 rownames(Countries) <- colData(tse)$Sample_ID
@@ -342,9 +342,9 @@ Looking at heatmaps of the CSTs can reveal structure on a different level. Using
 ```{r message = FALSE, warning = FALSE, results = FALSE}
 
 # Z transform of CLR counts
-tse2 <- transformAssay(tse2, MARGIN = "samples", assay.type = "counts",
+tse2 <- transformAssay(tse2, MARGIN = "cols", assay.type = "counts",
                         method = "clr", pseudocount=1)
-tse2 <- transformAssay(tse2, MARGIN = "features", assay.type = "clr", method = "z")
+tse2 <- transformAssay(tse2, MARGIN = "rows", assay.type = "clr", method = "standardize")
 # get top taxa
 tse2 <- tse2[is.element(rownames(tse2), rel_taxa), ]
 
@@ -503,11 +503,11 @@ Visualise dmm clusters in a heatmap.
 
 ```{r}
 # get clr + z-transformed counts
-tse_dmn <- transformAssay(tse_dmn, MARGIN = "samples",
+tse_dmn <- transformAssay(tse_dmn, MARGIN = "cols",
                            assay.type = "counts", method = "clr",
 			   pseudocount = 1)
-tse_dmn <- transformAssay(tse_dmn, MARGIN = "features",
-                           assay.type = "clr", method = "z")
+tse_dmn <- transformAssay(tse_dmn, MARGIN = "rows",
+                           assay.type = "clr", method = "standardize")
 # objects containing dmm component information
 clust <- factor(vec)
 names(clust) <- colnames(tse_dmn)
