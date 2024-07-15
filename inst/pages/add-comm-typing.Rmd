@@ -168,7 +168,7 @@ tse <- mergeFeaturesByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
 # Take only the top taxa
 tse <- tse[is.element(rownames(tse), rel_taxa),]
 
-# CLR and Z transforms
+# CLR and standardize transforms
 tse <- transformAssay(tse, MARGIN = "cols", assay.type = "counts",
                        method = "clr", pseudocount=1)
 tse <- transformAssay(tse, MARGIN = "rows", assay.type = "clr", method = "standardize")
@@ -176,7 +176,7 @@ tse <- transformAssay(tse, MARGIN = "rows", assay.type = "clr", method = "standa
 Countries <- data.frame("Country" = colData(tse)$Country)
 rownames(Countries) <- colData(tse)$Sample_ID
 # count matrix for pheatmap
-mat <- assays(tse)$z
+mat <- assay(tse, "standardize")
 
 # Order community types
 mat <- mat[, order(Countries$Country)]
@@ -337,7 +337,7 @@ scater::plotReducedDim(tse2, "NMDS_BC", colour_by = "CST", point_alpha = 1) + th
 
 ## CST Analysis
 
-Looking at heatmaps of the CSTs can reveal structure on a different level. Using all of the data again (for the top 8 taxa) and taking the z transformation of the clr transformed counts, we have
+Looking at heatmaps of the CSTs can reveal structure on a different level. Using all of the data again (for the top 8 taxa) and taking the `standardize` transformation of the clr transformed counts, we have
 
 ```{r message = FALSE, warning = FALSE, results = FALSE}
 
@@ -348,7 +348,7 @@ tse2 <- transformAssay(tse2, MARGIN = "rows", assay.type = "clr", method = "stan
 # get top taxa
 tse2 <- tse2[is.element(rownames(tse2), rel_taxa), ]
 
-mat <- assays(tse2)$z
+mat <- assay(tse2, "standardize")
 
 # Order CSTs
 mat <- mat[, order(clust)]
@@ -502,7 +502,7 @@ bray_dmm_plot
 Visualise dmm clusters in a heatmap.
 
 ```{r}
-# get clr + z-transformed counts
+# CLR and standardize transforms
 tse_dmn <- transformAssay(tse_dmn, MARGIN = "cols",
                            assay.type = "counts", method = "clr",
 			   pseudocount = 1)
@@ -514,7 +514,7 @@ names(clust) <- colnames(tse_dmn)
 # get top taxa
 tse_dmn <- tse_dmn[is.element(rownames(tse_dmn), rel_taxa), ]
 # get just counts
-mat <- assays(tse_dmn)$z
+mat <- assay(tse_dmn, "standardize")
 # order according to dmm component
 mat <- mat[, order(clust)]
 colnames(mat) <- names(sort(clust))
