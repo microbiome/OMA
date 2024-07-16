@@ -15,10 +15,6 @@ should at least be aware of potential challenges, such as outliers,
 biases, unexpected patterns, and so forth. Standard summaries and
 visualizations can help, and the rest comes with experience. Moreover, exploration and quality control often entail iterative processes.
 
-```{r, message=FALSE}
-library(mia)
-```
-
 ## Abundance
 
 Abundance visualization is an important data exploration
@@ -46,8 +42,8 @@ tse <- transformAssay(tse, MARGIN = "cols",
 # depending on the mia package version
 plotAbundanceDensity(tse, layout = "jitter", 
                      assay.type = "relabundance",
-                     n = 40, point_size=1, point_shape=19, 
-                     point_alpha=0.1) + 
+                     n = 40, point_size=1, point.shape=19, 
+                     point.alpha=0.1) + 
                      scale_x_log10(label=scales::percent)
 ```
 
@@ -58,8 +54,8 @@ visualized as a density plot over a log-scaled axis, with
 ```{r, warning=FALSE, message=FALSE}
 plotAbundanceDensity(tse, layout = "density", 
                      assay.type = "relabundance",
-                     n = 5, colour_by="nationality", 
-                     point_alpha=1/10) +
+                     n = 5, colour.by="nationality", 
+                     point.alpha=1/10) +
     scale_x_log10()
 ```
 
@@ -74,24 +70,24 @@ pertain to the majority of the samples, or identify rare microbes,
 which may be _conditionally abundant_ in a small number of samples.
 
 The population prevalence (frequency) at a 1% relative abundance
-threshold (`detection = 1/100` and `as_relative = TRUE`) can look
+threshold (`detection = 1/100` and `as.relative = TRUE`) can look
 like this. 
 
 ```{r exploration-prevalence}
 head(getPrevalence(tse, detection = 1/100, 
-                   sort = TRUE, as_relative = TRUE))
+                   sort = TRUE, as.relative = TRUE))
 ```
 
-The function arguments `detection` and `as_relative` can also be used
+The function arguments `detection` and `as.relative` can also be used
 to access how many samples pass a threshold for raw counts. Here,
 the population prevalence (frequency) at the absolute abundance
-threshold (`as_relative = FALSE`) with a read count of 1 (`detection = 1`) is
+threshold (`as.relative = FALSE`) with a read count of 1 (`detection = 1`) is
 accessed.
 
 ```{r concepts_prevalence2}
 head(getPrevalence(tse, detection = 1, sort = TRUE, 
                    assay.type = "counts",
-                   as_relative = FALSE))
+                   as.relative = FALSE))
 ```
 
 If the output is to be used for subsetting or storing the data in the
@@ -108,12 +104,12 @@ can be applied to the resulting object.
 ```{r}
 # Agglomerate taxa abundances to Phylum level
 #and add the new table to the altExp slot
-altExp(tse,"Phylum") <- mergeFeaturesByRank(tse, "Phylum")
+altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
 # Check prevalence for the Phylum abundance table 
 #from the altExp slot
 head(getPrevalence(altExp(tse,"Phylum"), detection = 1/100, 
                    sort = TRUE, assay.type = "counts",
-                   as_relative = TRUE))
+                   as.relative = TRUE))
 ```
 
 Alternatively, the `rank` argument can be set to perform the
@@ -122,11 +118,11 @@ agglomeration on the fly.
 ```{r}
 head(getPrevalence(tse, rank = "Phylum", detection = 1/100, 
                    sort = TRUE, assay.type = "counts",
-                   as_relative = TRUE))
+                   as.relative = TRUE))
 ```
 
 Note that, by default, `na.rm = TRUE` is used for agglomeration in
-`getPrevalence`, whereas the default for `mergeFeaturesByRank` is
+`getPrevalence`, whereas the default for `agglomerateByRank` is
 `FALSE` to prevent accidental data loss.
 
 If you only need the names of the prevalent taxa, `getPrevalent`
@@ -142,7 +138,7 @@ prev
 
 Note that the `detection` and `prevalence` thresholds are not the same, as
 `detection` can be applied to relative counts or absolute counts depending on 
-whether `as_relative` is set `TRUE` or `FALSE`
+whether `as.relative` is set `TRUE` or `FALSE`
 
 The function `getPrevalentAbundance` can be used to check the total
 relative abundance of the prevalent taxa (between 0 and 1).
@@ -163,7 +159,7 @@ are stored in the `altExp` slot.
 rowData(altExp(tse,"Phylum"))$prevalence <- 
     getPrevalence(altExp(tse,"Phylum"), detection = 1/100, 
                   sort = FALSE,
-                  assay.type = "counts", as_relative = TRUE)
+                  assay.type = "counts", as.relative = TRUE)
 ```
 
 The prevalences can then be plotted using the plotting functions from
@@ -187,7 +183,7 @@ altExps(tse) <-
                   getPrevalence(y, detection = 1/100, 
                                 sort = FALSE,
                                 assay.type = "counts", 
-                                as_relative = TRUE)
+                                as.relative = TRUE)
               y
           })
 top_phyla <- getTop(altExp(tse,"Phylum"),
@@ -208,17 +204,17 @@ After some preparation, the data are assembled and can be plotted with
 ```{r plot-prev-prev, message=FALSE, fig.cap="Prevalence of top phyla as judged by prevalence"}
 library(miaViz)
 plotRowTree(x[rowData(x)$Phylum %in% top_phyla,],
-            edge_colour_by = "Phylum",
-            tip_colour_by = "prevalence",
-            node_colour_by = "prevalence")
+            edge.colour.by = "Phylum",
+            tip.colour.by = "prevalence",
+            node.colour.by = "prevalence")
 ```
 
 
 ```{r plot-prev-mean, message=FALSE, fig.cap="Prevalence of top phyla as judged by mean abundance"}
 plotRowTree(x[rowData(x)$Phylum %in% top_phyla_mean,],
-            edge_colour_by = "Phylum",
-            tip_colour_by = "prevalence",
-            node_colour_by = "prevalence")
+            edge.colour.by = "Phylum",
+            tip.colour.by = "prevalence",
+            node.colour.by = "prevalence")
 ```
 
 ## Quality control {#sec-qc}

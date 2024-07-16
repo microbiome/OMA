@@ -90,26 +90,26 @@ head(getTaxonomyLabels(tse))
 
 By default, this will use the lowest non-empty information to construct a
 string with the following scheme `level:value`. If all levels are the same,
-this part is omitted, but can be added by setting `with_rank = TRUE`.
+this part is omitted, but can be added by setting `with.rank = TRUE`.
 
 ```{r}
 phylum <- !is.na(rowData(tse)$Phylum) &
     vapply(data.frame(apply(rowData(tse)[, taxonomyRanks(tse)[3:7]], 1L, is.na)), all, logical(1))
 head(getTaxonomyLabels(tse[phylum,]))
-head(getTaxonomyLabels(tse[phylum,], with_rank = TRUE))
+head(getTaxonomyLabels(tse[phylum,], with.rank = TRUE))
 ```
 
 By default the return value of `getTaxonomyLabels` contains only
 unique elements by passing it through `make.unique`. This step can be
-omitted by setting `make_unique = FALSE`.
+omitted by setting `make.unique = FALSE`.
 
 ```{r}
-head(getTaxonomyLabels(tse[phylum,], with_rank = TRUE, make_unique = FALSE))
+head(getTaxonomyLabels(tse[phylum,], with.rank = TRUE, make.unique = FALSE))
 ```
 
 To apply the loop resolving function `resolveLoop` from the
 `TreeSummarizedExperiment` package [@R_TreeSummarizedExperiment] within
-`getTaxonomyLabels`, set `resolve_loops = TRUE`.
+`getTaxonomyLabels`, set `resolve.loops = TRUE`.
 
 The function `getUnique` gives a list of unique taxa for the
 specified taxonomic rank.
@@ -181,17 +181,17 @@ assay(altExp(tse, "Family"), "counts")[1:5, 1:7]
 any taxonomic level listed in `mia::taxonomyRanks(tse)`.
 
 Rare taxa can also be aggregated into a single group "Other" instead of 
-filtering them out. A suitable function for this is `mergeFeaturesByPrevalence`.
+filtering them out. A suitable function for this is `agglomerateByRank`.
 The number of rare taxa is higher on the species level, which causes the need 
 for data agglomeration by prevalence.
 
 ```{r}
-altExp(tse, "Species_byPrevalence") <- mergeFeaturesByPrevalence(tse, 
+altExp(tse, "Species_byPrevalence") <- agglomerateByRank(tse, 
                                                                rank = "Species", 
-                                                               other_label = "Other", 
+                                                               other.label = "Other", 
                                                                prevalence = 5 / 100, 
                                                                detection = 1 / 100, 
-                                                               as_relative = T)
+                                                               as.relative = TRUE)
 altExp(tse, "Species_byPrevalence")
 
 assay(altExp(tse, "Species_byPrevalence"), "relabundance")[1:5, 1:3]
