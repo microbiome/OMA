@@ -326,7 +326,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../pages/MSEA.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title"><strong>Microbe</strong> Set <strong>Enrichment Analysis</strong> (MSEA)</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Microbe Set Enrichment Analysis (MSEA)</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -437,6 +437,7 @@ div.csl-indent {
   <ul class="collapse">
 <li><a href="#composition-barplot" id="toc-composition-barplot" class="nav-link" data-scroll-target="#composition-barplot"><span class="header-section-number">8.1.1</span> Composition barplot</a></li>
   <li><a href="#sec-composition-heatmap" id="toc-sec-composition-heatmap" class="nav-link" data-scroll-target="#sec-composition-heatmap"><span class="header-section-number">8.1.2</span> Composition heatmap</a></li>
+  <li><a href="#sec-composition-neatmap" id="toc-sec-composition-neatmap" class="nav-link" data-scroll-target="#sec-composition-neatmap"><span class="header-section-number">8.1.3</span> Composition heatmap using the NeatMap method</a></li>
   </ul>
 </li>
   </ul></nav>
@@ -507,7 +508,7 @@ document.addEventListener("click", function (event) {
 <span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse</span>, assay.type <span class="op">=</span> <span class="st">"counts"</span>, method <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Getting top taxa on a Phylum level</span></span>
-<span><span class="va">tse_phylum</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/deprecate.html">mergeFeaturesByRank</a></span><span class="op">(</span><span class="va">tse</span>, rank <span class="op">=</span><span class="st">"Phylum"</span>, onRankOnly<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">tse_phylum</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">agglomerateByRank</a></span><span class="op">(</span><span class="va">tse</span>, rank <span class="op">=</span><span class="st">"Phylum"</span>, disable.taxonomy<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">top_taxa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/summaries.html">getTop</a></span><span class="op">(</span><span class="va">tse_phylum</span>,top <span class="op">=</span> <span class="fl">5</span>, assay.type <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Renaming the "Phylum" rank to keep only top taxa and the rest to "Other"</span></span>
@@ -517,8 +518,8 @@ document.addEventListener("click", function (event) {
 <span></span>
 <span><span class="co"># Visualizing the composition barplot, with samples order by "Bacteroidetes"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/miaViz/man/plotAbundance.html">plotAbundance</a></span><span class="op">(</span><span class="va">tse_phylum</span>, assay.type<span class="op">=</span><span class="st">"relabundance"</span>, rank <span class="op">=</span> <span class="st">"Phylum"</span>,</span>
-<span>              order_rank_by<span class="op">=</span><span class="st">"abund"</span>, </span>
-<span>              order_sample_by <span class="op">=</span> <span class="st">"Bacteroidetes"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>              order.row.by<span class="op">=</span><span class="st">"abund"</span>, </span>
+<span>              order.col.by <span class="op">=</span> <span class="st">"Bacteroidetes"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure"><p><img src="21_microbiome_community_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
@@ -526,10 +527,10 @@ document.addEventListener("click", function (event) {
 </div>
 </div>
 </div>
-</section><section id="sec-composition-heatmap" class="level3 page-columns page-full" data-number="8.1.2"><h3 data-number="8.1.2" class="anchored" data-anchor-id="sec-composition-heatmap">
+</section><section id="sec-composition-heatmap" class="level3" data-number="8.1.2"><h3 data-number="8.1.2" class="anchored" data-anchor-id="sec-composition-heatmap">
 <span class="header-section-number">8.1.2</span> Composition heatmap</h3>
 <p>Community composition can be visualized with heatmap, where the horizontal axis represents samples and the vertical axis the taxa. The color of each intersection point represents abundance of a taxon in a specific sample.</p>
-<p>Here, abundances are first CLR (centered log-ratio) transformed to remove compositionality bias. Then Z transformation is applied to CLR-transformed data. This shifts all taxa to zero mean and unit variance, allowing visual comparison between taxa that have different absolute abundance levels. After these rough visual exploration techniques, we can visualize the abundances at Phylum level.</p>
+<p>Here, abundances are first CLR (centered log-ratio) transformed to remove compositionality bias. Then standardize transformation is applied to CLR-transformed data. This shifts all taxa to zero mean and unit variance, allowing visual comparison between taxa that have different absolute abundance levels. After these rough visual exploration techniques, we can visualize the abundances at Phylum level.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
 <span></span>
@@ -540,10 +541,10 @@ document.addEventListener("click", function (event) {
 <span><span class="va">tse_phylum</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse_phylum</span>, assay.type <span class="op">=</span> <span class="st">"relabundance"</span>,</span>
 <span>                              method <span class="op">=</span> <span class="st">"clr"</span>, pseudocount <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Add z-transformation on features (taxa)</span></span>
+<span><span class="co"># Add standardize-transformation on features (taxa)</span></span>
 <span><span class="va">tse_phylum</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse_phylum</span>, assay.type <span class="op">=</span> <span class="st">"clr"</span>, </span>
-<span>                              MARGIN <span class="op">=</span> <span class="st">"features"</span>,</span>
-<span>                              method <span class="op">=</span> <span class="st">"z"</span>, name <span class="op">=</span> <span class="st">"clr_z"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span>                              MARGIN <span class="op">=</span> <span class="st">"rows"</span>,</span>
+<span>                              method <span class="op">=</span> <span class="st">"standardize"</span>, name <span class="op">=</span> <span class="st">"clr_z"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Visualize as a heatmap.</p>
 <div class="cell" data-layout-align="center">
@@ -572,9 +573,9 @@ document.addEventListener("click", function (event) {
 </div>
 </div>
 </div>
-<p><em>pheatmap</em> is a package that provides methods to plot clustered heatmaps.</p>
+<p><em>ComplexHeatmap</em> is a package that provides methods to plot clustered heatmaps.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">pheatmap</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jokergoo/ComplexHeatmap">ComplexHeatmap</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Takes subset: only samples from feces, skin, or tongue</span></span>
 <span><span class="va">tse_phylum_subset</span> <span class="op">&lt;-</span> <span class="va">tse_phylum</span><span class="op">[</span> , <span class="va">tse_phylum</span><span class="op">$</span><span class="va">SampleType</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Feces"</span>, <span class="st">"Skin"</span>, <span class="st">"Tongue"</span><span class="op">)</span> <span class="op">]</span></span>
@@ -585,8 +586,8 @@ document.addEventListener("click", function (event) {
 <span>                 pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">tse_phylum_subset</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse_phylum_subset</span>, assay.type <span class="op">=</span> <span class="st">"clr"</span>,</span>
-<span>                                     MARGIN <span class="op">=</span> <span class="st">"features"</span>, </span>
-<span>                                     method <span class="op">=</span> <span class="st">"z"</span>, name <span class="op">=</span> <span class="st">"clr_z"</span><span class="op">)</span></span>
+<span>                                     MARGIN <span class="op">=</span> <span class="st">"rows"</span>, </span>
+<span>                                     method <span class="op">=</span> <span class="st">"standardize"</span>, name <span class="op">=</span> <span class="st">"clr_z"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Get n most abundant taxa, and subsets the data by them</span></span>
 <span><span class="va">top_taxa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/summaries.html">getTop</a></span><span class="op">(</span><span class="va">tse_phylum_subset</span>, top <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
@@ -596,7 +597,7 @@ document.addEventListener("click", function (event) {
 <span><span class="va">mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse_phylum_subset</span>, <span class="st">"clr_z"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Creates the heatmap</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html">pheatmap</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu">ComplexHeatmap</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ComplexHeatmap/man/pheatmap.html">pheatmap</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure"><p><img src="21_microbiome_community_files/figure-html/pheatmap1-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
@@ -641,7 +642,7 @@ document.addEventListener("click", function (event) {
 <span><span class="va">taxa_clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>clusters <span class="op">=</span> <span class="va">taxa_clusters</span><span class="op">)</span></span>
 <span><span class="va">taxa_clusters</span><span class="op">$</span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">taxa_clusters</span><span class="op">$</span><span class="va">clusters</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Order data so that it's same as in phylo tree</span></span>
+<span><span class="co"># Order data so that it's same as in the phylo tree</span></span>
 <span><span class="va">taxa_clusters</span> <span class="op">&lt;-</span> <span class="va">taxa_clusters</span><span class="op">[</span><span class="va">taxa_ordered</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span> </span>
 <span></span>
 <span><span class="co"># Prints taxa and their clusters</span></span>
@@ -709,7 +710,7 @@ document.addEventListener("click", function (event) {
 <span><span class="co"># Order data so that it's same as in phylo tree</span></span>
 <span><span class="va">sample_data</span> <span class="op">&lt;-</span> <span class="va">sample_data</span><span class="op">[</span><span class="va">samples_ordered</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span> </span>
 <span></span>
-<span><span class="co"># Order data based on </span></span>
+<span><span class="co"># Order data based on the phylo tree</span></span>
 <span><span class="va">tse_phylum_subset</span> <span class="op">&lt;-</span> <span class="va">tse_phylum_subset</span><span class="op">[</span> , <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">sample_data</span><span class="op">)</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># Add sample type data</span></span>
@@ -729,19 +730,66 @@ document.addEventListener("click", function (event) {
 </div>
 <p>Now we can create a heatmap with additional annotations.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Determines the scaling of colorss</span></span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Determines the scaling of colors</span></span>
 <span><span class="co"># Scale colors</span></span>
 <span><span class="va">breaks</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">ceiling</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">ceiling</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, </span>
 <span>              length.out <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span><span class="op">)</span><span class="op">&gt;</span><span class="fl">5</span>, <span class="fl">2</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">ceiling</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="fl">10</span> <span class="op">)</span> <span class="op">)</span></span>
 <span><span class="va">colors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/colorRamp.html">colorRampPalette</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"darkblue"</span>, <span class="st">"blue"</span>, <span class="st">"white"</span>, <span class="st">"red"</span>, <span class="st">"darkred"</span><span class="op">)</span><span class="op">)</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">breaks</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/pheatmap/man/pheatmap.html">pheatmap</a></span><span class="op">(</span><span class="va">mat</span>, annotation_row <span class="op">=</span> <span class="va">taxa_clusters</span>, </span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/ComplexHeatmap/man/pheatmap.html">pheatmap</a></span><span class="op">(</span><span class="va">mat</span>, annotation_row <span class="op">=</span> <span class="va">taxa_clusters</span>, </span>
 <span>         annotation_col <span class="op">=</span> <span class="va">sample_data</span>,</span>
 <span>         breaks <span class="op">=</span> <span class="va">breaks</span>,</span>
 <span>         color <span class="op">=</span> <span class="va">colors</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure"><p><img src="21_microbiome_community_files/figure-html/pheatmap8-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="sec-composition-neatmap" class="level3 page-columns page-full" data-number="8.1.3"><h3 data-number="8.1.3" class="anchored" data-anchor-id="sec-composition-neatmap">
+<span class="header-section-number">8.1.3</span> Composition heatmap using the NeatMap method</h3>
+<p>Another method to visualize community composition is by plotting a NeatMap, which means we use radial theta sorting when plotting the heatmap <span class="citation" data-cites="Rajaram2010">(<a href="#ref-Rajaram2010" role="doc-biblioref">Rajaram and Oono 2010</a>)</span>. The <code>getNeatOrder</code> function in the <code>miaViz</code> package allows us to achieve this. This method sorts data points based on their angular position in a 2D space, typically after an ordination technique such as PCA or NMDS has been applied.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-Rajaram2010" class="csl-entry" role="listitem">
+Rajaram, Satwik, and Yoshi Oono. 2010. <span>“<span>NeatMap</span> - Non-Clustering Heat Map Alternatives in <span>R</span>.”</span> <em>BMC Bioinformatics</em> 11: 45. <a href="https://doi.org/10.1186/1471-2105-11-45">https://doi.org/10.1186/1471-2105-11-45</a>.
+</div></div><p>The <code>getNeatOrder</code> method calculates the angle (theta) for each point relative to the centroid and sorts data points based on these theta values in ascending order. This approach preserves the relationships between data points according to the ordination method’s spatial configuration, rather than relying on hierarchical clustering.</p>
+<p>First, we will load the necessary libraries and load <code>GlobalPatterns</code>, which is a <code>TreeSE</code> object.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load the required libraries</span></span>
+<span><span class="co"># Load necessary libraries</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">miaViz</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/">scater</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">sechm</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Load the data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"GlobalPatterns"</span>, package<span class="op">=</span><span class="st">"mia"</span><span class="op">)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">GlobalPatterns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, we’ll create the NeatMap using the <code>sechm</code> package and the <code>getNeatOrder</code> function.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Transform the samples into relative abundances using CLR</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse</span>, assay.type <span class="op">=</span> <span class="st">"counts"</span>, method <span class="op">=</span> <span class="st">"clr"</span>, MARGIN <span class="op">=</span> <span class="st">"samples"</span>, name <span class="op">=</span> <span class="st">"clr"</span>, pseudocount <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Transform the features (taxa) into zero mean, unit variance (standardize transformation)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse</span>, assay.type <span class="op">=</span> <span class="st">"clr"</span>, method <span class="op">=</span> <span class="st">"standardize"</span>, MARGIN <span class="op">=</span> <span class="st">"features"</span>, name <span class="op">=</span> <span class="st">"standardized"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Perform PCA on the dataset</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocSingular/man/runPCA.html">runPCA</a></span><span class="op">(</span><span class="va">tse</span>, ncomponents <span class="op">=</span> <span class="fl">10</span>, assay.type <span class="op">=</span> <span class="st">"standardized"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Sort by radial theta using the first two principal components</span></span>
+<span><span class="va">sorted_order</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/miaViz/man/getNeatOrder.html">getNeatOrder</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDim</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"PCA"</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">]</span>, centering <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">tse</span><span class="op">[</span>, <span class="va">sorted_order</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Plot NeatMap with sechm</span></span>
+<span><span class="va">sechm_neatmap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/sechm/man/sechm.html">sechm</a></span><span class="op">(</span><span class="va">tse</span>, assayName <span class="op">=</span> <span class="st">"standardized"</span>, features<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span>, show_rownames <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>                       show_colnames <span class="op">=</span> <span class="cn">TRUE</span>, do.scale<span class="op">=</span><span class="cn">FALSE</span>, cluster_rows<span class="op">=</span><span class="cn">FALSE</span>, sortRowsOn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>                       row_names_gp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/gpar.html">gpar</a></span><span class="op">(</span>fontsize <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>, column_names_gp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grid/gpar.html">gpar</a></span><span class="op">(</span>fontsize <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>, </span>
+<span>                       breaks <span class="op">=</span> <span class="fl">0.985</span><span class="op">)</span></span>
+<span><span class="va">sechm_neatmap</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="21_microbiome_community_files/figure-html/NeatMap-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
 </figure>
 </div>
 </div>
