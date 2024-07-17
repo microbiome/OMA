@@ -87,13 +87,12 @@ data("GlobalPatterns", package="mia")
 tse <- GlobalPatterns
 
 # Estimate (observed) richness
-tse <- mia::estimateRichness(tse, 
-                             assay.type = "counts", 
-                             index = "observed", 
-                             name="observed")
+tse <- addAlpha(tse, 
+                assay.type = "counts", 
+                index = "observed_richness")
 
 # Check some of the first values in colData
-head(tse$observed)
+head(tse$observed_richness)
 ```
 
 
@@ -103,7 +102,7 @@ type and final barcode).
 ```{r plot-div-obs, message=FALSE, fig.cap="Shannon diversity estimates plotted grouped by sample type with colour-labeled barcode.", cache=TRUE}
 library(scater)
 plotColData(tse, 
-            "observed", 
+            "observed_richness", 
             "SampleType", 
             colour_by = "Final_Barcode") +
     theme(axis.text.x = element_text(angle=45,hjust=1)) + 
@@ -117,10 +116,9 @@ The main function, `estimateDiversity`, calculates the selected
 diversity index based on the selected assay data.  
 
 ```{r estimate-shannon}
-tse <- mia::estimateDiversity(tse, 
-                              assay.type = "counts",
-                              index = "shannon", 
-                              name = "shannon")
+tse <- mia::addAlpha(tse, 
+                assay.type = "counts",
+                index = "shannon")
 head(tse$shannon)
 ```
 
@@ -164,9 +162,10 @@ ggplot(df, aes(x = SampleType, y = shannon)) +
 The Faith index is returned by the function `estimateFaith`.
 
 ```{r phylo-div-1}
-tse <- mia::estimateFaith(tse,
-                          assay.type = "counts")
-head(tse$faith)
+tse <- mia::addAlpha(tse,                    
+                    assay.type = "counts",
+                    index = "faith_diversity")
+head(tse$faith_diversity)
 ```
 
 **Note**: because `tse` is a `TreeSummarizedExperiment` object, its phylogenetic tree is used by default. However, the optional argument `tree` must be provided if `tse` does not contain one.
@@ -174,7 +173,7 @@ head(tse$faith)
 Below, a visual comparison between shannon and faith indices is shown with a violin plot.
 
 ```{r phylo-div-2}
-plots <- lapply(c("shannon", "faith"),
+plots <- lapply(c("shannon", "faith_diversity"),
                 plotColData,
                 object = tse, colour_by = "SampleType")
 plots[[1]] + plots[[2]] +
@@ -187,10 +186,9 @@ the widely used function in _`picante`_ [@R_picante, @Kembel2010].
 Load `picante` R package and get the `phylo` stored in `rowTree`.
 
 ```{r phylo-div-3}
-tse <- mia::estimateDiversity(tse, 
-                              assay.type = "counts",
-                              index = c("shannon", "faith"), 
-                              name = c("shannon", "faith"))
+tse <- mia::addAlpha(tse, 
+                    assay.type = "counts",
+                    index = c("shannon", "faith_diversity"))
 ```
 
 
@@ -199,7 +197,7 @@ Scatterplot for the estimated Shannon and Faith indices across
 samples.
 
 ```{r compare-diversities, fig.width = 6.5}
-ggplot(colData(tse), aes(x=shannon, y=faith)) +
+ggplot(colData(tse), aes(x=shannon, y=faith_diversity)) +
   geom_point() +
   labs(x="Shannon index", y="Faith (phylogenetic) index")
 ```
@@ -217,7 +215,7 @@ and they are thus directly available for plotting.
 library(patchwork)
 
 # Create the plots
-plots <- lapply(c("observed", "shannon", "faith"),
+plots <- lapply(c("observed_richness", "shannon", "faith_diversity"),
                 plotColData,
                 object = tse,
                 x = "SampleType",
