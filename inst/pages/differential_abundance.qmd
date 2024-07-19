@@ -8,8 +8,9 @@ chapterPreamble()
 Differential Abundance Analysis (DAA) is a method used to identify
 differences in the abundances of individual taxa (at any taxonomic level) 
 between two or more groups, such as treatment versus control groups.
-Here, we demonstrate its implementation on [Tengeler2020]
-(https://microbiome.github.io/mia/reference/Tengeler2020.html) data set.
+Here, we demonstrate its implementation on
+[Tengeler2020](https://microbiome.github.io/mia/reference/Tengeler2020.html)
+data set.
 
 The goal of DAA is to identify biomarkers of a certain phenotype or condition,
 and gain understanding of a complex system by looking at its isolated components.
@@ -18,23 +19,34 @@ abundant between healthy patients and diseased patients can lead to important
 insights into the underlying mechanisms of the disease. In other words, 
 differentially abundant taxa can be involved in the dynamics of the 
 disease, which in turn helps understand the system as a whole. Despite its 
-relevance in current research, the DAA approach has also been subject to debate [@Quinn2021].
+relevance in current research, the DAA approach has also been subject to
+debate [@Quinn2021].
 
 ## Statistical challenges of microbiome data 
 
-Microbiome data display unique properties that are exclusively addressed by DAA
-tools developed for microbiome analysis. Specifically, microbiome data are
-characterized by high variability, zero-inflation and compositionality.
-**High variability** expresses that abundance of taxa often varies by several
-orders of magnitude from sample to sample. **Zero-inflation** means that
-typically more than 70% of the values are zeros, which could be due to either
-physical absence (structural zeros) or insufficient sampling effort (sampling
-zeros). **Compositionality** means that a change in the absolute abundance of
-one taxon will lead to apparent variations in the relative abundances of other
-taxa in the same sample. If neglected, such properties may cause significant
-bias in the results of DAA. Therefore, several approaches have been developed to
-address the unique properties of microbiome data and provide statistically
-reliable results.
+As discussed in [@sec-stat-challenges], data display unique properties that are
+exclusively addressed by DAA tools developed for microbiome analysis.
+
+We recommend to have a look at @Nearing2022. In this study, multiple DAA methods
+were applied to 38 different datasets and their results were compared to one
+another. The study highlighted that different methods might yield varying results 
+due to differing assumptions and normalization techniques. Interestingly,
+@pelto2024 concluded that elementary DAA methods achieve the highest
+consistency.
+
+Recently, @Yang2022 comprehensively evaluated DAA methods via a
+semi-parametric framework and 106 real 
+datasets, concluding that different methods can produce contradictory results,
+creating the risk of cherry-picking the most favorable options for one’s
+own hypothesis. Therefore, it is highly recommended to perform DAA with
+multiple methods to verify if the findings are consistent across different approaches.
+
+Built on the findings of @Calgaro2020,
+the benchdamic [@Calgaro2022] package could offer a valuable support in this regard
+through a comprehensive evaluation process. It serves both practitioners by comparing
+DA methods from existing literature, and method developers by providing an impartial
+tool to evaluate their new approaches in comparison to what is already available. For
+more details, refer to its extensive [vignette](https://www.bioconductor.org/packages/release/bioc/vignettes/benchdamic/inst/doc/intro.html).
 
 #### Approaches to Handle Zero-Inflated Data :
 
@@ -72,21 +84,6 @@ by an empirical Bayes approach.
 Other methods to deal with compositional data entail reference taxa approach 
 used by DACOMP and RAIDA, analyzing the pattern of pairwise log ratios as done 
 by ANCOM and bias-correction applied by ANCOMBC.
-
-We recommend to have a look at @Nearing2022. In this study, multiple DAA methods
-were applied to 38 different datasets and their results were compared to one
-another. The study highlighted that different methods might yield varying results 
-due to differing assumptions and normalization techniques. Recently, @Yang2022 
-comprehensively evaluated DAA methods via a semi-parametric framework and 106 real 
-datasets, concluding that different methods can produce contradictory results, creating
-the risk of cherry-picking the most favorable options for one’s own hypothesis. Therefore,
-it is highly recommended to perform DAA with multiple methods to verify if the findings
-are consistent across different approaches.  Built on the findings of @Calgaro2020,
-the benchdamic [@Calgaro2022] package could offer a valuable support in this regard
-through a comprehensive evaluation process. It serves both practitioners by comparing
-DA methods from existing literature, and method developers by providing an impartial
-tool to evaluate their new approaches in comparison to what is already available. For
-more details, refer to its extensive [vignette](https://www.bioconductor.org/packages/release/bioc/vignettes/benchdamic/inst/doc/intro.html).
 
 ## Using the tools
 
@@ -132,9 +129,7 @@ threshold of 10%.
 tse <- subsetByPrevalent(tse, rank = "Genus", prevalence = 10/100)
 
 # Transform count assay to relative abundances
-tse <- transformAssay(tse,
-                      assay.type = "counts",
-                      method = "relabundance")
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 ```
 
 While some DAA tools provide optional arguments for prevalence filtering, here
@@ -199,19 +194,21 @@ size of 1. @Gloor2016 provides more information on these plots.
 ```{r plot-aldex2}
 par(mfrow = c(1, 2))
 
-aldex.plot(aldex_out,
-           type = "MA",
-           test = "welch",
-           xlab = "Log-ratio abundance",
-           ylab = "Difference",
-           cutoff = 0.05)
+aldex.plot(
+    aldex_out,
+    type = "MA",
+    test = "welch",
+    xlab = "Log-ratio abundance",
+    ylab = "Difference",
+    cutoff = 0.05)
 
-aldex.plot(aldex_out,
-           type = "MW",
-           test = "welch",
-           xlab = "Dispersion",
-           ylab = "Difference",
-           cutoff = 0.05)
+aldex.plot(
+    aldex_out,
+    type = "MW",
+    test = "welch",
+    xlab = "Dispersion",
+    ylab = "Difference",
+    cutoff = 0.05)
 ```
 
 The evaluation as differential abundant in above plots is based on the
@@ -273,16 +270,17 @@ that we specify.
 library(ANCOMBC)
 
 # Run ANCOM-BC at the genus level and only including the prevalent genera
-ancombc2_out <- ancombc2(data = tse,
-                         assay.type = "counts",
-                         fix_formula = "patient_status",
-                         p_adj_method = "fdr",
-                         prv_cut = 0,
-                         group = "patient_status",
-                         struc_zero = TRUE,
-                         neg_lb = TRUE,
-                         # multi group comparison is deactivated automatically
-                         global = TRUE)
+ancombc2_out <- ancombc2(
+    data = tse,
+    assay.type = "counts",
+    fix_formula = "patient_status",
+    p_adj_method = "fdr",
+    prv_cut = 0,
+    group = "patient_status",
+    struc_zero = TRUE,
+    neg_lb = TRUE,
+    # multi group comparison is deactivated automatically
+    global = TRUE)
 ```
 
 The object `out` contains all model output. Again, see the
@@ -320,18 +318,19 @@ library(Maaslin2)
 
 # We can specify different GLMs/normalizations/transforms.
 # specifying a ref is especially important if you have more than 2 levels
-maaslin2_out <- Maaslin2(input_data = as.data.frame(t(assay(tse))),
-                         input_metadata = as.data.frame(colData(tse)),
-                         output = "DAA example",
-                         transform = "AST",
-                         fixed_effects = "patient_status",
-                         # you can also fit MLM by specifying random effects
-                         # random_effects = c(...),
-                         reference = "patient_status,Control",
-                         normalization = "TSS",
-                         standardize = FALSE,
-                         # filtering was previously performed
-                         min_prevalence = 0)
+maaslin2_out <- Maaslin2(
+    input_data = as.data.frame(t(assay(tse))),
+    input_metadata = as.data.frame(colData(tse)),
+    output = "DAA example",
+    transform = "AST",
+    fixed_effects = "patient_status",
+    # you can also fit MLM by specifying random effects
+    # random_effects = c(...),
+    reference = "patient_status,Control",
+    normalization = "TSS",
+    standardize = FALSE,
+    # filtering was previously performed
+    min_prevalence = 0)
 ```
 
 Which genera are identified as differentially abundant? (leave out "head" to see all).
@@ -356,7 +355,9 @@ balances. A detailed introduction to this method is available in
 
 Although the methods described above yield unidentical results, they are
 expected to agree on a few differentially abundant taxa. To draw more informed
-conclusions, it is good practice to compare the outcomes of different methods in terms of found features, their effect sizes and significances, as well as other method-specific aspects. Such comparative approach is outlined in
+conclusions, it is good practice to compare the outcomes of different methods
+in terms of found features, their effect sizes and significances, as well as
+other method-specific aspects. Such comparative approach is outlined in
 [this exercise](#compare-daa-methods).
 
 ## DAA with confounding
@@ -389,7 +390,9 @@ methods accept these two and several other data types.
 
 For demonstration, library size is treated as a confounder and included
 in the formulas of the DAA methods. Although this is a satisfactory approach to
-control for uneven sequencing efforts across samples, rarefaction generally represents a better solution [@Schloss2023]. With that said, library size can be readily computed and added to the colData.
+control for uneven sequencing efforts across samples, rarefaction generally
+represents a better solution [@Schloss2023]. With that said, library size can
+be readily computed and added to the colData.
 
 
 ```{r daa-data-libsize}
@@ -406,21 +409,23 @@ are kept constant.
 
 ```{r run-adj-ancombc, warning=FALSE}
 # perform the analysis 
-ancombc2_out <- ancombc2(tse,
-                         assay.type = "counts",
-                         fix_formula = "patient_status + cohort + library_size",
-                         p_adj_method = "fdr",
-                         lib_cut = 0,
-                         group = "patient_status", 
-                         struc_zero = TRUE, 
-                         neg_lb = TRUE,
-                         alpha = 0.05,
-                         # multi-group comparison is deactivated automatically
-                         global = TRUE)
+ancombc2_out <- ancombc2(
+    tse,
+    assay.type = "counts",
+    fix_formula = "patient_status + cohort + library_size",
+    p_adj_method = "fdr",
+    lib_cut = 0,
+    group = "patient_status", 
+    struc_zero = TRUE, 
+    neg_lb = TRUE,
+    alpha = 0.05,
+    # multi-group comparison is deactivated automatically
+    global = TRUE)
 ```
 
 In the output, each taxon is assigned with several effect sizes (lfc, which
-stands for log-fold change) and adjusted p-values (q). For categorical variables such as patient status and cohort, the statistics indicate whether the abundance
+stands for log-fold change) and adjusted p-values (q). For categorica
+variables such as patient status and cohort, the statistics indicate whether the abundance
 of a given taxon is significantly different between the specified group (column
 name) and the reference group (the group that does not appear in the column
 names), whereas for numerical variables such as library size, they indicate
@@ -433,11 +438,13 @@ ancombc2_out$res %>%
   head() %>%
   knitr::kable()
 ```
-### Further information on tools for DAA : 
+
+## Further information on tools for DAA : 
   
 #### LinDA
   
-LinDA covers linear models for differential abundance analysis of microbiome compositional data (@Zhou2022). This is very similar to ANCOMBC with few differences: 
+LinDA covers linear models for differential abundance analysis of microbiome
+compositional data (@Zhou2022). This is very similar to ANCOMBC with few differences: 
     
   1. LinDA corrects for the compositional bias differently using the mode of all regression coefficients. 
   
@@ -445,7 +452,10 @@ LinDA covers linear models for differential abundance analysis of microbiome com
   
   3. It supports hierarchical models. The latest ANCOMBC versions are also supporting hierarchical models.
   
-Nevertheless, LinDA seems a promising tool that achieves a very good power/fdr trade-off together with ANCOMBC according to the review. The speed improvements might make it critical especially for datasets that have higher sample or feature set sizes.
+Nevertheless, LinDA seems a promising tool that achieves a very good power/fdr
+trade-off together with ANCOMBC according to the review. The speed improvements
+might make it critical especially for datasets that have higher sample or
+feature set sizes.
   
 #### ZicoSeq
   
@@ -458,6 +468,7 @@ Subsequently, we demonstrate DAA with ZicoSeq, a method based on linear models a
   3. Reference-based multiple-stage normalization to address compositional effects;Additional resources
 
 
+::: {.callout-tip}
 ## Additional resources
 
 DAA can be performed by several means. Although most of them provide similar
@@ -485,5 +496,5 @@ design or data type. Commonly used DAA tools include:
 - Wilcoxon test
 - ZicoSeq [@Yang2022]
 - ZINQ [@Ling2021]
-
-
+- BIRDMAn [@Rahman2023]
+:::

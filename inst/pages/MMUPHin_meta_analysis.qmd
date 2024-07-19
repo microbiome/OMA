@@ -98,14 +98,16 @@ curatedMetagenomicData package, with a total of 285 subjects included.
 library(dplyr)
 
 se_relative <- sampleMetadata |>
-  filter(study_name %in% c("FrankelAE_2017", "GopalakrishnanV_2018", "LeeKA_2022", 
-                         "MatsonV_2018", "PetersBA_2019", "WindTT_2020")) |>
-  returnSamples("relative_abundance", rownames = "short")
+    filter(study_name %in% c(
+        "FrankelAE_2017", "GopalakrishnanV_2018", "LeeKA_2022", 
+        "MatsonV_2018", "PetersBA_2019", "WindTT_2020")) |>
+    returnSamples("relative_abundance", rownames = "short")
 
 se_pathway <- sampleMetadata |>
-  filter(study_name %in% c("FrankelAE_2017", "GopalakrishnanV_2018", "LeeKA_2022", 
-                         "MatsonV_2018", "PetersBA_2019", "WindTT_2020")) |>
-  returnSamples("pathway_abundance", rownames = "short")
+    filter(study_name %in% c(
+        "FrankelAE_2017", "GopalakrishnanV_2018", "LeeKA_2022", 
+        "MatsonV_2018", "PetersBA_2019", "WindTT_2020")) |>
+    returnSamples("pathway_abundance", rownames = "short")
 
 ```
 
@@ -127,14 +129,18 @@ library(MMUPHin)
 ##########################
 # Create sample metadata #
 ##########################
-data_meta <- select(as.data.frame(colData(se_relative)), c("study_name", "ORR", "PFS12", "anti_PD_1"))
+data_meta <- select(
+    as.data.frame(colData(se_relative)),
+    c("study_name", "ORR", "PFS12", "anti_PD_1"))
 
 # Define response variable
 data_meta$resvar <- NA
 data_meta$anti_PD_1[data_meta$anti_PD_1 == "responder"] <- "yes"
 data_meta$anti_PD_1[data_meta$anti_PD_1 == "non_responder"] <- "no"
-data_meta$resvar[!is.na(data_meta$anti_PD_1)] <- data_meta$anti_PD_1[!is.na(data_meta$anti_PD_1)]
-data_meta$resvar[!is.na(data_meta$PFS12)] <- data_meta$PFS12[!is.na(data_meta$PFS12)]
+data_meta$resvar[!is.na(data_meta$anti_PD_1)] <- data_meta$anti_PD_1[
+    !is.na(data_meta$anti_PD_1)]
+data_meta$resvar[!is.na(data_meta$PFS12)] <- data_meta$PFS12[
+    !is.na(data_meta$PFS12)]
 data_meta$resvar[!is.na(data_meta$ORR)] <- data_meta$ORR[!is.na(data_meta$ORR)]
 
 # Filter individuals without response variable
@@ -146,7 +152,8 @@ data_meta$study_name <- as.factor(data_meta$study_name)
 ###########################
 # Create Species Features #
 ###########################
-# Transpose the abundance matrix and change the value of abundance data to proportion unit
+# Transpose the abundance matrix and change the value of abundance data to
+# proportion unit
 data_abd <- assay(se_relative)
 data_abd <- data_abd / 100
 
@@ -156,12 +163,14 @@ data_abd <- data_abd[, colnames(data_abd) %in% rownames(data_meta)]
 #  Change the rownames names for variables of interest
 rownames(data_abd) <- sub('.*s__', '', rownames(data_abd))
 
-# Use adjust_batch to correct for differences in the five studies, while controlling for the effect of cases versus control (variable resvar in data_meta).
-fit_adjust_batch <- adjust_batch(feature_abd = data_abd,
-                                 batch = "study_name",
-                                 covariates = "resvar",
-                                 data = data_meta,
-                                 control = list(verbose = FALSE, diagnostic_plot = NULL))
+# Use adjust_batch to correct for differences in the five studies, while
+# controlling for the effect of cases versus control (variable resvar in data_meta).
+fit_adjust_batch <- adjust_batch(
+    feature_abd = data_abd,
+    batch = "study_name",
+    covariates = "resvar",
+    data = data_meta,
+    control = list(verbose = FALSE, diagnostic_plot = NULL))
 
 data_abd_adj <- fit_adjust_batch$feature_abd_adj
 
@@ -221,8 +230,9 @@ R2_before <- round(fit_adonis_before$aov.tab[1, 5]*100, 1)
 pcoa_before <- cmdscale(D_before, eig = TRUE)
 ord_before <- as.data.frame(pcoa_before$points)
 percent_var_before <- round(pcoa_before$eig / sum(pcoa_before$eig) * 100, 1)[1:2]
-before_labels <- c(paste('Axis 1 (', percent_var_before[1], '%)', sep = ''), 
-                 paste('Axis 2 (', percent_var_before[2], '%)', sep = ''))
+before_labels <- c(
+    paste('Axis 1 (', percent_var_before[1], '%)', sep = ''), 
+    paste('Axis 2 (', percent_var_before[2], '%)', sep = ''))
 
 before_phrase <- paste('Before (PERMANOVA R2 = ', R2_before, '%)', sep = '')
 colnames(ord_before) <- c('PC1', 'PC2')
@@ -242,22 +252,22 @@ ord_after$Study <- data_meta$study_name
 
 # Ordination Plot
 p_before <- ggplot(ord_before, aes(x = PC1, y = PC2, color = Study)) + 
-  geom_point(size = 4) + 
-  theme_bw() + 
-  xlab(before_labels[1]) + 
-  ylab(before_labels[2]) + 
-  ggtitle(before_phrase) + 
-  theme(plot.title = element_text(hjust = 0.5)) + 
-  theme(legend.position ="none")
+    geom_point(size = 4) + 
+    theme_bw() + 
+    xlab(before_labels[1]) + 
+    ylab(before_labels[2]) + 
+    ggtitle(before_phrase) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(legend.position ="none")
 
 p_after <- ggplot(ord_after, aes(x = PC1, y = PC2, color = Study)) + 
-  geom_point(size = 4) + 
-  theme_bw() + 
-  xlab(after_labels[1]) + 
-  ylab(after_labels[2]) + 
-  ggtitle(after_phrase) + 
-  theme(plot.title = element_text(hjust = 0.5)) + 
-  theme(legend.position ="none")
+    geom_point(size = 4) + 
+    theme_bw() + 
+    xlab(after_labels[1]) + 
+    ylab(after_labels[2]) + 
+    ggtitle(after_phrase) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(legend.position ="none")
 
 p_before + p_after
 
@@ -278,13 +288,14 @@ transform <- c("NONE", "AST", "LOGIT", "LOG")
 num <- NULL
 
 for (i in 1:length(transform)) {
-  fit_lm_meta <- lm_meta(feature_abd = data_abd_adj,
-                       batch = "study_name",
-                       exposure = "resvar",
-                       data = data_meta,
-                       control = list(analysis_method = 'LM', transform = transform[i]))
+    fit_lm_meta <- lm_meta(
+        feature_abd = data_abd_adj,
+        batch = "study_name",
+        exposure = "resvar",
+        data = data_meta,
+        control = list(analysis_method = 'LM', transform = transform[i]))
   
-  num[i] <- sum(fit_lm_meta$meta_fits$qval.fdr < 0.05, na.rm = TRUE)
+    num[i] <- sum(fit_lm_meta$meta_fits$qval.fdr < 0.05, na.rm = TRUE)
 }
 
 print(num)
@@ -297,21 +308,22 @@ method in `MaAsLin2`, also implemented in the R package `Tweedieverse`
 [@Mallick2022].
 
 ```{r model-selection2}
-fit_lm_meta <- lm_meta(feature_abd = data_abd_adj,
-                       batch = "study_name",
-                       exposure = "resvar",
-                       data = data_meta,
-                       control = list(analysis_method = 'CPLM', transform = 'NONE'))
+fit_lm_meta <- lm_meta(
+    feature_abd = data_abd_adj,
+    batch = "study_name",
+    exposure = "resvar",
+    data = data_meta,
+    control = list(analysis_method = 'CPLM', transform = 'NONE'))
 
 meta_fits <- fit_lm_meta$meta_fits
 
 meta_fits %>%
-  filter(qval.fdr < 0.05) %>%
-  arrange(coef) %>% 
-  mutate(feature = factor(feature, levels = feature)) %>%
-  ggplot(aes(y = coef, x = feature)) +
-  geom_bar(stat = "identity") +
-  coord_flip()
+    filter(qval.fdr < 0.05) %>%
+    arrange(coef) %>% 
+    mutate(feature = factor(feature, levels = feature)) %>%
+    ggplot(aes(y = coef, x = feature)) +
+    geom_bar(stat = "identity") +
+    coord_flip()
 
 ```
 
@@ -329,14 +341,18 @@ analysis.
 ```{r prepare-input-data-pathway-abundance}
 
 # Prepare the meta data
-data_meta <- select(as.data.frame(colData(se_pathway)), c("study_name", "ORR", "PFS12", "anti_PD_1"))
+data_meta <- select(
+    as.data.frame(colData(se_pathway)),
+    c("study_name", "ORR", "PFS12", "anti_PD_1"))
 
 # Define response variable
 data_meta$resvar <- NA
 data_meta$anti_PD_1[data_meta$anti_PD_1 == "responder"] <- "yes"
 data_meta$anti_PD_1[data_meta$anti_PD_1 == "non_responder"] <- "no"
-data_meta$resvar[!is.na(data_meta$anti_PD_1)] <- data_meta$anti_PD_1[!is.na(data_meta$anti_PD_1)]
-data_meta$resvar[!is.na(data_meta$PFS12)] <- data_meta$PFS12[!is.na(data_meta$PFS12)]
+data_meta$resvar[!is.na(data_meta$anti_PD_1)] <- data_meta$anti_PD_1[
+    !is.na(data_meta$anti_PD_1)]
+data_meta$resvar[!is.na(data_meta$PFS12)] <- data_meta$PFS12[
+    !is.na(data_meta$PFS12)]
 data_meta$resvar[!is.na(data_meta$ORR)] <- data_meta$ORR[!is.na(data_meta$ORR)]
 
 # Filter individuals without response variable
@@ -346,7 +362,8 @@ data_meta <- data_meta[!is.na(data_meta$resvar), c("study_name", "resvar")]
 data_meta$study_name <- as.factor(data_meta$study_name)
 
 # Prepare the abundance data
-# Transpose the abundance matrix and change the value of abundance data to proportion unit
+# Transpose the abundance matrix and change the value of abundance data to
+# proportion unit
 data_abd <- assay(se_pathway)
 data_abd <- data_abd/100
 
@@ -358,12 +375,15 @@ data_abd<-data_abd[-c(1:2), ]
 # Match the individuals in the data_abd
 data_abd <- data_abd[, colnames(data_abd) %in% rownames(data_meta)]
 
-# Use adjust_batch to correct for differences in the five studies, while controlling for the effect of cases versus control (variable resvar in data_meta).
-fit_adjust_batch <- adjust_batch(feature_abd = data_abd,
-                                 batch = "study_name",
-                                 covariates = "resvar",
-                                 data = data_meta,
-                                 control = list(verbose = FALSE, diagnostic_plot = NULL))
+# Use adjust_batch to correct for differences in the five studies, while
+# controlling for the effect of cases versus control (variable resvar in
+# data_meta).
+fit_adjust_batch <- adjust_batch(
+    feature_abd = data_abd,
+    batch = "study_name",
+    covariates = "resvar",
+    data = data_meta,
+    control = list(verbose = FALSE, diagnostic_plot = NULL))
 
 data_abd_adj <- fit_adjust_batch$feature_abd_adj
 
@@ -401,8 +421,9 @@ R2_before <- round(fit_adonis_before$aov.tab[1, 5]*100, 1)
 pcoa_before <- cmdscale(D_before, eig = TRUE)
 ord_before <- as.data.frame(pcoa_before$points)
 percent_var_before <- round(pcoa_before$eig / sum(pcoa_before$eig) * 100, 1)[1:2]
-before_labels <- c(paste('Axis 1 (', percent_var_before[1], '%)', sep = ''), 
-                 paste('Axis 2 (', percent_var_before[2], '%)', sep = ''))
+before_labels <- c(
+    paste('Axis 1 (', percent_var_before[1], '%)', sep = ''), 
+    paste('Axis 2 (', percent_var_before[2], '%)', sep = ''))
 
 before_phrase <- paste('Before (PERMANOVA R2 = ', R2_before, '%)', sep = '')
 colnames(ord_before) <- c('PC1', 'PC2')
@@ -413,8 +434,9 @@ R2_after <- round(fit_adonis_after$aov.tab[1, 5]*100, 1)
 pcoa_after <- cmdscale(D_after, eig = TRUE)
 ord_after <- as.data.frame(pcoa_after$points)
 percent_var_after <- round(pcoa_after$eig / sum(pcoa_after$eig) * 100, 1)[1:2]
-after_labels <- c(paste('Axis 1 (', percent_var_after[1], '%)', sep = ''), 
-                paste('Axis 2 (', percent_var_after[2], '%)', sep = ''))
+after_labels <- c(
+    paste('Axis 1 (', percent_var_after[1], '%)', sep = ''), 
+    paste('Axis 2 (', percent_var_after[2], '%)', sep = ''))
 
 after_phrase <- paste('After (PERMANOVA R2 = ', R2_after, '%)', sep = '')
 colnames(ord_after) <- c('PC1', 'PC2')
@@ -422,22 +444,22 @@ ord_after$Study <- data_meta$study_name
 
 # Ordination Plot
 p_before <- ggplot(ord_before, aes(x = PC1, y = PC2, color = Study)) + 
-  geom_point(size = 4) + 
-  theme_bw() + 
-  xlab(before_labels[1]) + 
-  ylab(before_labels[2]) + 
-  ggtitle(before_phrase) + 
-  theme(plot.title = element_text(hjust = 0.5)) + 
-  theme(legend.position ="none")
+    geom_point(size = 4) + 
+    theme_bw() + 
+    xlab(before_labels[1]) + 
+    ylab(before_labels[2]) + 
+    ggtitle(before_phrase) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(legend.position ="none")
 
 p_after <- ggplot(ord_after, aes(x = PC1, y = PC2, color = Study)) + 
-  geom_point(size = 4) + 
-  theme_bw() + 
-  xlab(after_labels[1]) + 
-  ylab(after_labels[2]) + 
-  ggtitle(after_phrase) + 
-  theme(plot.title = element_text(hjust = 0.5)) + 
-  theme(legend.position ="none")
+    geom_point(size = 4) + 
+    theme_bw() + 
+    xlab(after_labels[1]) + 
+    ylab(after_labels[2]) + 
+    ggtitle(after_phrase) + 
+    theme(plot.title = element_text(hjust = 0.5)) + 
+    theme(legend.position ="none")
 
 p <- p_before + p_after
 p
@@ -453,13 +475,14 @@ transform <- c("NONE", "AST", "LOGIT", "LOG")
 num <- NULL
 
 for (i in 1:length(transform)) {
-  fit_lm_meta <- lm_meta(feature_abd = data_abd_adj,
-                       batch = "study_name",
-                       exposure = "resvar",
-                       data = data_meta,
-                       control = list(analysis_method = 'LM', transform = transform[i]))
+    fit_lm_meta <- lm_meta(
+        feature_abd = data_abd_adj,
+        batch = "study_name",
+        exposure = "resvar",
+        data = data_meta,
+        control = list(analysis_method = 'LM', transform = transform[i]))
   
-  num[i] <- sum(fit_lm_meta$meta_fits$pval < 0.05, na.rm = TRUE)
+    num[i] <- sum(fit_lm_meta$meta_fits$pval < 0.05, na.rm = TRUE)
 }
 
 print(num)
@@ -467,11 +490,12 @@ print(num)
 ```
 
 ```{r pathway-abundance-model-selection2}
-fit_lm_meta2 <- lm_meta(feature_abd = data_abd_adj,
-                       batch = "study_name",
-                       exposure = "resvar",
-                       data = data_meta,
-                       control = list(analysis_method = 'CPLM', transform = 'NONE'))
+fit_lm_meta2 <- lm_meta(
+    feature_abd = data_abd_adj,
+    batch = "study_name",
+    exposure = "resvar",
+    data = data_meta,
+    control = list(analysis_method = 'CPLM', transform = 'NONE'))
 
 num <- sum(fit_lm_meta2$meta_fits$pval < 0.05, na.rm = TRUE)
 print(num)
@@ -486,12 +510,13 @@ various meta-analytic differential analysis methods and transformations:
 library(knitr)
 
 analysis_data <- data.frame(
-  Analysis_Method = c("LM", "LM", "LM", "LM", "CPLM"),
-  Transform_Parameter = c("NONE", "AST", "LOGIT", "LOG", "NONE"),
-  Number_Of_Significant_Pathways = c(11, 10, 9, 11, 15)
+    Analysis_Method = c("LM", "LM", "LM", "LM", "CPLM"),
+    Transform_Parameter = c("NONE", "AST", "LOGIT", "LOG", "NONE"),
+    Number_Of_Significant_Pathways = c(11, 10, 9, 11, 15)
 )
 
-names(analysis_data) <- c("Analysis Method   ", "   Transformation   ", "   Number of Significant Pathways")
+names(analysis_data) <- c(
+    "Analysis Method", "Transformation", "Number of Significant Pathways")
 
 kable(analysis_data, caption = "Analysis Results", align = c('l','l','r'))
 
@@ -508,13 +533,13 @@ meta_fits2 <- fit_lm_meta2$meta_fits
 
 # Create the figure
 meta_fits2 %>%
-  filter(pval < 0.05) %>%
-  arrange(coef) %>% 
-  mutate(feature = factor(feature, levels = feature)) %>%
-  ggplot(aes(y = coef, x = feature)) +
-  theme(axis.text.y = element_text(size = 10)) +
-  geom_bar(stat = "identity") +
-  coord_flip()
+    filter(pval < 0.05) %>%
+    arrange(coef) %>% 
+    mutate(feature = factor(feature, levels = feature)) %>%
+    ggplot(aes(y = coef, x = feature)) +
+    theme(axis.text.y = element_text(size = 10)) +
+    geom_bar(stat = "identity") +
+    coord_flip()
 
 ```
 

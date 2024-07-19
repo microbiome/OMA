@@ -19,13 +19,14 @@ techniques based on data dimensionality reduction.
 
 ## Clustering 
 
-Clustering techniques aim to find groups,  called clusters, that share a pattern
+Clustering techniques aim to find groups, called clusters, that share a pattern
 in the data. In the microbiome context, clustering techniques are included in 
 microbiome community typing methods. For example, clustering allow samples to be 
 distinguished from each other based on their microbiome community composition.
 Clustering scheme consists of two steps, the first is to compute the sample 
 dissimilarities with a given distance metrics, and the second is to form the 
-clusters based on the dissimilarity matrix. The data can be clustered either based on features or samples. The examples below 
+clusters based on the dissimilarity matrix. The data can be clustered either
+based on features or samples. The examples below 
 are focused on sample clustering.
 
 There are multiple clustering algorithms available. *bluster* is a 
@@ -52,9 +53,8 @@ data("peerj13075", package = "mia")
 tse <- peerj13075
 
 # Filter out most taxa to ease the calculation
-altExp(tse, "prevalent") <- agglomerateByPrevalence(tse, rank = "class", 
-                                                    prevalence = 20/100, 
-                                                    detection = 1/100)
+altExp(tse, "prevalent") <- agglomerateByPrevalence(
+    tse, rank = "class", prevalence = 20/100, detection = 1/100)
 ```
 
 ### Hierarchical clustering
@@ -83,15 +83,14 @@ name of the column in the colData (default name is `clusters`).
 ```{r hclust1}
 library(vegan)
 
-set.seed(123)
-altExp(tse, "prevalent") <- addCluster(altExp(tse, "prevalent"),
-               assay.type = "counts",
-               by = "cols",
-               HclustParam(method = "ward.D2",
-                           dist.fun = vegdist,
-                           metric = "bray"),
-               full = TRUE,
-               clust.col = "hclust")
+set.seed(174923)
+altExp(tse, "prevalent") <- addCluster(
+    altExp(tse, "prevalent"),
+    assay.type = "counts",
+    by = "cols",
+    HclustParam(method = "ward.D2", dist.fun = vegdist, metric = "bray"),
+    full = TRUE,
+    clust.col = "hclust")
 
 table(altExp(tse, "prevalent")$hclust)
 ```
@@ -139,18 +138,80 @@ multi-dimensional scaling (MDS).
 library (scater)
 
 # Add the MDS dimensions for plotting
-altExp(tse, "prevalent") <- runMDS(altExp(tse, "prevalent"), 
-                                    assay.type = "counts", 
-                                    FUN = vegan::vegdist, 
-                                    method = "bray")
+altExp(tse, "prevalent") <- runMDS(
+    altExp(tse, "prevalent"),
+    assay.type = "counts", 
+    FUN = vegan::vegdist, 
+    method = "bray")
 ```
 
 ```{r hclust4, fig.width=6, fig.height=4}
-plotReducedDim(altExp(tse, "prevalent"), "MDS", theme_size = 13) + 
-              geom_point(size = 3, alpha = 0.6, 
-                      aes(color = altExp(tse, "prevalent")$hclust)) +
-              labs(color = "HClust", title = "Hclust") + theme_minimal()
+plotReducedDim(
+    altExp(tse, "prevalent"), "MDS", colour_by = "hclust",
+    theme_size = 13, point_size = 4) + 
+    
+    labs(color = "HClust", title = "Hclust") + theme_minimal()
 ```
+
+### Agglomeration based on clusters {#sec-taxa-clustering}
+
+Another way to agglomerate the data is to cluster the taxa. To do so,
+we usually start by doing a compositionality aware transformation such as CLR, 
+followed by the application of a standard clustering method.
+
+Here is an example that does a CLR transformation followed by the hierarchical
+clustering algorithm. We will use the kendall dissimilarity.
+
+```{r taxa_clustering}
+# The result of the CLR transform is stored in the assay clr
+tse <- transformAssay(tse, method = "clr", pseudocount = 1)
+
+tse <- transformAssay(
+    tse, assay.type = "clr", method = "standardize", MARGIN = "rows")
+
+# Declare the Kendall dissimilarity computation function
+kendall_dissimilarity <- function(x) {
+    as.dist(1 - cor(t(x), method = "kendall"))
+}
+
+# Cluster (with Kendall dissimilarity) on the features of the `standardize`
+# assay
+tse <- addCluster(
+    tse,
+    assay.type = "standardize",
+    clust.col = "hclustKendall",
+    MARGIN = "rows", 	       
+    HclustParam(dist.fun = kendall_dissimilarity, method = "ward.D2"))
+```
+
+Results are stored in the `rowData` column specified 
+with the `clust.col` parameter.
+
+To better visualize the results and the distribution of the clusters, we can 
+plot the histogram of the clusters.
+
+```{r taxa_clustering_histogram}
+library(ggplot2)
+
+p <- ggplot(rowData(tse), aes(x = hclustKendall)) +
+    geom_bar() +
+    labs(title = "CAG size distribution (1 - tau)",
+         x = "Clusters", y = "Feature count (n)")
+p
+```
+
+Then we can merge data to clusters.
+
+```{r taxa_clustering_row_merge}
+# Aggregate clusters as a sum of each cluster values
+tse_merged <- agglomerateByVariable(tse, by = "rows", f = "hclustKendall")
+tse_merged
+```
+
+We can note that it worked as planned since there are now as many rows as there
+were clusters.
+
+You can find more information on agglomeration from [@sec-agglomeration].
 
 ### Dirichlet Multinomial Mixtures (DMM)
 
@@ -168,14 +229,15 @@ describe the data would be in the range from 1 to 6.
 
 ```{r dmm1}
 # Run the model and calculates the most likely number of clusters from 1 to 6
-set.seed(123)
-altExp(tse, "prevalent") <- addCluster(altExp(tse, "prevalent"), 
-                                      assay.type = "counts", 
-                                      name = "DMM", 
-                                      DmmParam(k = 1:6, type = "laplace"), 
-                                      MARGIN = "samples", 
-                                      full = TRUE, 
-                                      clust.col = "dmmclust")
+set.seed(1495723)
+altExp(tse, "prevalent") <- addCluster(
+    altExp(tse, "prevalent"), 
+    assay.type = "counts", 
+    name = "DMM", 
+    DmmParam(k = 1:6, type = "laplace"), 
+    MARGIN = "samples", 
+    full = TRUE, 
+    clust.col = "dmmclust")
 ```
 
 The plot below represents the Laplace approximation to the model evidence for 
@@ -206,18 +268,16 @@ for (i in 1:2) {
   drivers[i] <- drivers[i]/sum(drivers[i])
   
   drivers <- drivers[order(drivers[[i]], decreasing = TRUE),]
-  p <- ggplot(head(drivers, 5), 
-              aes(x = reorder(head(class, 5), + 
-                    head(drivers[[i]], 5)), 
-                    y = head(drivers[[i]], 5))) +
-              geom_bar(stat = "identity", 
-                    fill = scales::hue_pal()(1), 
-                    alpha = 0.6) +
-                    coord_flip() + 
-                    labs(title = paste("Top phyla in group", i)) +
-                    theme_minimal(base_size = 11) + 
-                    labs(x="", y="") + 
-                    scale_y_continuous(limits=c(0,1))
+  p <- ggplot(head(drivers, 5), aes(
+      x = reorder(head(class, 5), + head(drivers[[i]], 5)),
+      y = head(drivers[[i]], 5))) +
+      
+      geom_bar(stat = "identity", fill = scales::hue_pal()(1), alpha = 0.6) +
+      coord_flip() + 
+      labs(title = paste("Top phyla in group", i)) +
+      theme_minimal(base_size = 11) + 
+      labs(x="", y="") + 
+      scale_y_continuous(limits=c(0,1))
   print(p)
 }
 ```
@@ -233,6 +293,7 @@ plotReducedDim(altExp(tse, "prevalent"), "MDS", theme_size = 13) +
                       aes(color = altExp(tse, "prevalent")$dmmclust)) +
               labs(color = "DMMclust", title = "DMM") + theme_minimal()
 ```
+
 ## Dimensionality reduction
 
 Dimensionality reduction can be considered as a part of community typing, 
@@ -281,17 +342,125 @@ wrel <- t(apply(W, 1, function (x) {x/sum(x)}))
 altExp(tse, "prevalent")$NMFcomponent <- as.factor(apply(wrel, 1, which.max))
 table(altExp(tse, "prevalent")$NMFcomponent)
 ```
+
 Now, we can plot the NMF community types calculated based on maximum membership
 for each sample onto a two-dimensional surface.
 
 ```{r nmf2}
 # NMF community types
-plotReducedDim(altExp(tse, "prevalent"), "MDS", theme_size = 13) + 
-              geom_point(size = 3, alpha = 0.6, 
-                      aes(color = altExp(tse, "prevalent")$NMFcomponent)) +
-              labs(color = "NMFcomponent", title = "NMF") + theme_minimal()
+plotReducedDim(
+    altExp(tse, "prevalent"), "MDS", colour_by = "NMFcomponent",
+    point_size = 3, theme_size = 13) +
+    
+    labs(color = "NMFcomponent", title = "NMF") + theme_minimal()
 ```
 
+## Heatmaps with clusters {#sec-clustered-heatmap}
+
+In [@sec-composition-heatmap], we visualized community composition with
+heatmaps. We can visualize the data similarly but add addition information on
+clusters.
+
+```{r pheatmap1}
+library(ComplexHeatmap)
+
+# Agglomerate to Genus level
+tse <- agglomerateByPrevalence(tse, rank = "genus")
+
+# Apply clr and scale data
+tse <- transformAssay(tse, method = "clr", pseudocount = TRUE)
+tse <-  transformAssay(
+    tse, assay.type = "clr", method = "standardize", MARGIN = "rows")
+# Gets the assay table
+mat <- assay(tse, "standardize")
+```
+
+Now we can cluster rows.
+
+```{r pheatmap2}
+library(ape)
+library(ggtree)
+
+# Hierarchical clustering
+tse <- addCluster(
+    tse, assay.type = "standardize", HclustParam(method = "complete"),
+    full = TRUE)
+taxa_hclust <- metadata(tse)[["clusters"]][["hclust"]]
+# Creates a phylogenetic tree
+taxa_tree <- as.phylo(taxa_hclust)
+ggtree(taxa_tree)
+```
+
+Based on the phylo tree, we decide to create eight clusters.
+
+```{r pheatmap4}
+# Hierarchical clustering with k = 3
+tse <- addCluster(
+    tse, assay.type = "standardize",
+    HclustParam(method = "complete", cut.fun = cutree, k = 8))
+```
+
+For columns, we can utilize k-mean clustering. First we have to specify the
+number of clusters.
+
+
+
+```{r pheatmap6}
+library(factoextra)
+library(NbClust)
+library(patchwork)
+
+# Elbow method
+p1 <- fviz_nbclust(assay(tse, "standardize"), kmeans, method = "wss")
+# Silhouette method
+p2 <- fviz_nbclust(assay(tse, "standardize"), kmeans, method = "silhouette") 
+
+p1 + p2
+```
+
+Based on the results, we split the columns into six clusters.
+
+```{r pheatmap7}
+# Hierarchical clustering with k = 4
+tse <- addCluster(
+    tse, assay.type = "standardize", by = "cols",
+    KmeansParam(centers = 6))
+
+# Prints samples and their clusters
+colData(tse)[["clusters"]]
+```
+
+Now we can create a heatmap with additional annotations.
+
+```{r pheatmap8}
+# Order the data based on clusters
+tse <- tse[
+    order(rowData(tse)[["clusters"]]),
+    order(colData(tse)[["clusters"]])]
+# Get data for plotting
+mat <- assay(tse, "standardize")
+taxa_clusters <- rowData(tse)[, "clusters", drop = FALSE] |>
+  as.data.frame()
+sample_data <- colData(tse)[, c("clusters", "Gender"), drop = FALSE] |>
+  as.data.frame()
+colnames(sample_data) <- c("clusters_col", "gender")
+
+# Determines the scaling of colors
+# Scale colors
+breaks <- seq(
+    -ceiling(max(abs(mat))), ceiling(max(abs(mat))),
+    length.out = ifelse( max(abs(mat))>5, 2*ceiling(max(abs(mat))), 10 ) )
+colors <- colorRampPalette(c("darkblue", "blue", "white", "red", "darkred"))(length(breaks)-1)
+
+pheatmap(
+    mat, annotation_row = taxa_clusters, 
+    annotation_col = sample_data,
+    cluster_cols = FALSE, cluster_rows = FALSE,
+    breaks = breaks,
+    color = colors)
+```
+
+::: {.callout-tip}
 ## Additional Community Typing
 
 For more community typing techniques applied to the 'SprockettTHData'
@@ -299,4 +468,6 @@ data set, see the attached .Rmd file.
 
 Link:
 
-   * [Rmd](add-comm-typing.Rmd)
+   * [Rmd](extra_material/add-comm-typing.Rmd)
+
+:::

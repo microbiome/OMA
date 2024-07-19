@@ -1,4 +1,4 @@
-# Exploration and Quality Control {#sec-quality-control}
+# Exploration & Quality Control {#sec-quality-control}
 
 ```{r setup, echo=FALSE, results="asis"}
 library(rebook)
@@ -13,7 +13,8 @@ essential for data analysis and model building.
 The dataset should not suffer from severe technical biases, and you
 should at least be aware of potential challenges, such as outliers,
 biases, unexpected patterns, and so forth. Standard summaries and
-visualizations can help, and the rest comes with experience. Moreover, exploration and quality control often entail iterative processes.
+visualizations can help, and the rest comes with experience. Moreover,
+exploration and quality control often entail iterative processes.
 
 ## Abundance
 
@@ -34,17 +35,17 @@ data(hitchip1006)
 tse <- hitchip1006
 
 # Add relative abundances
-tse <- transformAssay(tse, MARGIN = "cols", 
-                      method = "relabundance")
+tse <- transformAssay(tse, MARGIN = "cols", method = "relabundance")
 
 # Use argument names
 # assay.type / assay.type / assay.type
 # depending on the mia package version
-plotAbundanceDensity(tse, layout = "jitter", 
-                     assay.type = "relabundance",
-                     n = 40, point_size=1, point.shape=19, 
-                     point.alpha=0.1) + 
-                     scale_x_log10(label=scales::percent)
+plotAbundanceDensity(
+    tse, layout = "jitter", 
+    assay.type = "relabundance",
+    n = 40, point_size=1, point.shape=19, 
+    point.alpha=0.1) + 
+    scale_x_log10(label=scales::percent)
 ```
 
 The relative abundance values for the top-5 taxonomic features can be
@@ -52,10 +53,11 @@ visualized as a density plot over a log-scaled axis, with
 "nationality" indicated by colors:
 
 ```{r, warning=FALSE, message=FALSE}
-plotAbundanceDensity(tse, layout = "density", 
-                     assay.type = "relabundance",
-                     n = 5, colour.by="nationality", 
-                     point.alpha=1/10) +
+plotAbundanceDensity(
+    tse, layout = "density", 
+    assay.type = "relabundance",
+    n = 5, colour.by="nationality", 
+    point.alpha=1/10) +
     scale_x_log10()
 ```
 
@@ -74,8 +76,8 @@ threshold (`detection = 1/100` and `as.relative = TRUE`) can look
 like this. 
 
 ```{r exploration-prevalence}
-head(getPrevalence(tse, detection = 1/100, 
-                   sort = TRUE, as.relative = TRUE))
+getPrevalence(tse, detection = 1/100, sort = TRUE, as.relative = TRUE) |>
+    head()
 ```
 
 The function arguments `detection` and `as.relative` can also be used
@@ -85,9 +87,10 @@ threshold (`as.relative = FALSE`) with a read count of 1 (`detection = 1`) is
 accessed.
 
 ```{r concepts_prevalence2}
-head(getPrevalence(tse, detection = 1, sort = TRUE, 
-                   assay.type = "counts",
-                   as.relative = FALSE))
+getPrevalence(
+    tse, detection = 1, sort = TRUE, assay.type = "counts",
+    as.relative = FALSE) |>
+    head()
 ```
 
 If the output is to be used for subsetting or storing the data in the
@@ -98,8 +101,8 @@ If the output is to be used for subsetting or storing the data in the
 To investigate microbiome prevalence at a selected taxonomic level, two 
 approaches are available.
 
-First, the data can be agglomerated to the taxonomic level and then `getPrevalence` 
-can be applied to the resulting object.
+First, the data can be agglomerated to the taxonomic level and then
+`getPrevalence`  can be applied to the resulting object.
 
 ```{r}
 # Agglomerate taxa abundances to Phylum level
@@ -107,23 +110,29 @@ can be applied to the resulting object.
 altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
 # Check prevalence for the Phylum abundance table 
 #from the altExp slot
-head(getPrevalence(altExp(tse,"Phylum"), detection = 1/100, 
-                   sort = TRUE, assay.type = "counts",
-                   as.relative = TRUE))
+getPrevalence(
+    altExp(tse,"Phylum"), detection = 1/100, sort = TRUE,
+    assay.type = "counts", as.relative = TRUE) |>
+    head()
 ```
 
 Alternatively, the `rank` argument can be set to perform the
 agglomeration on the fly.
 
 ```{r}
-head(getPrevalence(tse, rank = "Phylum", detection = 1/100, 
-                   sort = TRUE, assay.type = "counts",
-                   as.relative = TRUE))
+getPrevalence(
+    tse, rank = "Phylum", detection = 1/100, sort = TRUE,
+    assay.type = "counts", as.relative = TRUE) |>
+    head()
 ```
 
-Note that, by default, `na.rm = TRUE` is used for agglomeration in
+::: {.callout-note}
+## Note
+
+By default, `na.rm = TRUE` is used for agglomeration in
 `getPrevalence`, whereas the default for `agglomerateByRank` is
 `FALSE` to prevent accidental data loss.
+:::
 
 If you only need the names of the prevalent taxa, `getPrevalent`
 is available. This returns the taxa that exceed the given prevalence
@@ -131,14 +140,18 @@ and detection thresholds.
 
 ```{r core-members, message=FALSE, warning=FALSE, eval = FALSE}
 getPrevalent(tse, detection = 0, prevalence = 50/100)
-prev <- getPrevalent(tse, detection = 0, prevalence = 50/100,
-                     rank = "Phylum", sort = TRUE)
+prev <- getPrevalent(
+    tse, detection = 0, prevalence = 50/100, rank = "Phylum", sort = TRUE)
 prev
 ```
 
-Note that the `detection` and `prevalence` thresholds are not the same, as
+::: {.callout-note}
+## Note
+
+The `detection` and `prevalence` thresholds are not the same, as
 `detection` can be applied to relative counts or absolute counts depending on 
 whether `as.relative` is set `TRUE` or `FALSE`
+:::
 
 The function `getPrevalentAbundance` can be used to check the total
 relative abundance of the prevalent taxa (between 0 and 1).
@@ -156,10 +169,10 @@ To plot the prevalence, add the prevalence of each taxon to
 are stored in the `altExp` slot.
 
 ```{r}
-rowData(altExp(tse,"Phylum"))$prevalence <- 
-    getPrevalence(altExp(tse,"Phylum"), detection = 1/100, 
-                  sort = FALSE,
-                  assay.type = "counts", as.relative = TRUE)
+rowData(altExp(tse,"Phylum"))$prevalence <- getPrevalence(
+    altExp(tse,"Phylum"), detection = 1/100, 
+    sort = FALSE,
+    assay.type = "counts", as.relative = TRUE)
 ```
 
 The prevalences can then be plotted using the plotting functions from
@@ -167,8 +180,7 @@ the `scater` package.
  
 ```{r, message=FALSE, warning=FALSE}
 library(scater)
-plotRowData(altExp(tse,"Phylum"), "prevalence", 
-            colour_by = "Phylum")
+plotRowData(altExp(tse,"Phylum"), "prevalence", colour_by = "Phylum")
 ```
 
 The prevalence can also be visualized on the taxonomic tree with the
@@ -176,24 +188,26 @@ The prevalence can also be visualized on the taxonomic tree with the
 
 ```{r}
 tse <- agglomerateByRanks(tse)
-altExps(tse) <-
-   lapply(altExps(tse),
-          function(y){
-              rowData(y)$prevalence <- 
-                  getPrevalence(y, detection = 1/100, 
-                                sort = FALSE,
-                                assay.type = "counts", 
-                                as.relative = TRUE)
-              y
-          })
-top_phyla <- getTop(altExp(tse,"Phylum"),
-                        method="prevalence",
-                        top=5L,
-                        assay.type="counts")
-top_phyla_mean <- getTop(altExp(tse,"Phylum"),
-                             method="mean",
-                             top=5L,
-                             assay.type="counts")
+altExps(tse) <- lapply(
+    altExps(tse), function(y){
+        rowData(y)$prevalence <- getPrevalence(
+            y, detection = 1/100, 
+            sort = FALSE,
+            assay.type = "counts", 
+            as.relative = TRUE)
+        return(y)
+    })
+top_phyla <- getTop(
+    altExp(tse,"Phylum"),
+    method="prevalence",
+    top=5L,
+    assay.type="counts")
+top_phyla_mean <- getTop(
+    altExp(tse,"Phylum"),
+    method="mean",
+    top=5L,
+    assay.type="counts")
+
 x <- unsplitByRanks(tse, ranks = taxonomyRanks(tse)[1:6])
 x <- addHierarchyTree(x)
 ```
@@ -203,18 +217,20 @@ After some preparation, the data are assembled and can be plotted with
 
 ```{r plot-prev-prev, message=FALSE, fig.cap="Prevalence of top phyla as judged by prevalence"}
 library(miaViz)
-plotRowTree(x[rowData(x)$Phylum %in% top_phyla,],
-            edge.colour.by = "Phylum",
-            tip.colour.by = "prevalence",
-            node.colour.by = "prevalence")
+plotRowTree(
+    x[rowData(x)$Phylum %in% top_phyla,],
+    edge.colour.by = "Phylum",
+    tip.colour.by = "prevalence",
+    node.colour.by = "prevalence")
 ```
 
 
 ```{r plot-prev-mean, message=FALSE, fig.cap="Prevalence of top phyla as judged by mean abundance"}
-plotRowTree(x[rowData(x)$Phylum %in% top_phyla_mean,],
-            edge.colour.by = "Phylum",
-            tip.colour.by = "prevalence",
-            node.colour.by = "prevalence")
+plotRowTree(
+    x[rowData(x)$Phylum %in% top_phyla_mean,],
+    edge.colour.by = "Phylum",
+    tip.colour.by = "prevalence",
+    node.colour.by = "prevalence")
 ```
 
 ## Quality control {#sec-qc}
@@ -321,7 +337,8 @@ plotColData(tse,"sum","SampleType", colour_by = "SampleType") +
 In addition, data can be rarefied with
 [rarefyAssay](https://microbiome.github.io/mia/reference/rarefyAssay.html),
 which normalizes the samples to an equal number of reads. 
-This remains controversial, however, and strategies to mitigate the information loss in rarefaction have been proposed [@Schloss2024rarefaction1] [@Schloss2024rarefaction2].
+This remains controversial, however, and strategies to mitigate the information
+loss in rarefaction have been proposed [@Schloss2024rarefaction1] [@Schloss2024rarefaction2].
 Moreover, this practice has been discouraged for the analysis of differentially
 abundant microorganisms (see [@mcmurdie2014waste]).
 
@@ -337,4 +354,3 @@ are based on [@davis2018simple] and support such functionality:
 
 * `isContaminant`, `isNotContaminant`  
 * `addContaminantQC`, `addNotContaminantQC`  
-

@@ -63,11 +63,14 @@ relative abundance and pathway abundance data.
 # Create sample metadata #
 ##########################
 
-sample_metadata <- select(as.data.frame(colData(se_relative)), c("study_name", "disease", "subject_id"))
+sample_metadata <- select(
+    as.data.frame(colData(se_relative)),
+    c("study_name", "disease", "subject_id"))
 
 # Define response variable & sample id
 sample_metadata$Y <- ifelse(sample_metadata$disease == "IBD", 1, 0)
-sample_metadata <- sample_metadata %>% select(subject_id, Y) %>% rename(subjectID = subject_id)
+sample_metadata <- sample_metadata %>%
+    select(subject_id, Y) %>% rename(subjectID = subject_id)
 
 ###########################
 # Create Species Features #
@@ -112,8 +115,11 @@ to).
 # Create metadata table for features #
 ######################################
 
-rowID <- rep(c('Species', 'Pathways'), c(nrow(feature_species), nrow(feature_pwys)))
-feature_metadata <- cbind.data.frame(featureID = rownames(feature_table), featureType = rowID)
+rowID <- rep(
+    c('Species', 'Pathways'),
+    c(nrow(feature_species), nrow(feature_pwys)))
+feature_metadata <- cbind.data.frame(
+    featureID = rownames(feature_table), featureType = rowID)
 rownames(feature_metadata) <- feature_metadata$featureID
 
 ################
@@ -145,7 +151,10 @@ prev_threshold = 0.1
 nzv <- nearZeroVar(feature_table_t) 
 features_var_filtered <- feature_table_t[, -nzv] 
 features_var_filtered <- as.data.frame(features_var_filtered) 
-features_filtered <- features_var_filtered[, colSums(features_var_filtered > abd_threshold) > nrow(features_var_filtered) * prev_threshold]
+features_filtered <- features_var_filtered[
+  , colSums(features_var_filtered > abd_threshold) >
+    nrow(features_var_filtered) * prev_threshold
+  ]
 feature_table <- as.data.frame(t(features_filtered))
 
 ####################
@@ -208,7 +217,9 @@ cvControl = list(V = 5, shuffle = FALSE, validRows = obsIndexIn)
 #################################################
 
 feature_metadata$featureType <- as.factor(feature_metadata$featureType)
-name_layers <- with(droplevels(feature_metadata), list(levels = levels(featureType)), nlevels = nlevels(featureType))$levels
+name_layers <- with(
+    droplevels(feature_metadata),
+    list(levels = levels(featureType)), nlevels = nlevels(featureType))$levels
 SL_fit_predictions <- vector("list", length(name_layers))
 SL_fit_layers <- vector("list", length(name_layers)) 
 names(SL_fit_layers) <- name_layers
@@ -234,35 +245,37 @@ utilizing the SuperLearner R package.
 
 for (i in seq_along(name_layers)){
   
-  # Prepare single-omic input data
-  include_list <- feature_metadata %>% filter(featureType == name_layers[i]) 
-  t_dat_slice <- feature_table[rownames(feature_table) %in% include_list$featureID, ]
-  dat_slice <- as.data.frame(t(t_dat_slice))
-  Y = sample_metadata$Y
-  X = dat_slice
-  X_train_layers[[i]] <- X
-  
-  # Run user-specified base learner
-  library(SuperLearner)
-  
-  SL_fit_layers[[i]] <- SuperLearner(Y = Y, 
-                                     X = X,
-                                     cvControl = cvControl,  
-                                     SL.library = c('SL.randomForest'),
-                                     family = binomial())
-  
-  # Append the corresponding y and X to the results
-  SL_fit_layers[[i]]$Y <- sample_metadata['Y']
-  SL_fit_layers[[i]]$X <- X
-  
-  # Remove redundant data frames and collect pre-stack predictions
-  rm(t_dat_slice)
-  rm(dat_slice)
-  rm(X)
-  SL_fit_predictions[[i]] <- SL_fit_layers[[i]]$Z
-  
-  # Re-fit to entire dataset for final predictions
-  layer_wise_predictions_train[[i]] <- SL_fit_layers[[i]]$SL.predict
+    # Prepare single-omic input data
+    include_list <- feature_metadata %>% filter(featureType == name_layers[i]) 
+    t_dat_slice <- feature_table[
+        rownames(feature_table) %in% include_list$featureID, ]
+    dat_slice <- as.data.frame(t(t_dat_slice))
+    Y = sample_metadata$Y
+    X = dat_slice
+    X_train_layers[[i]] <- X
+    
+    # Run user-specified base learner
+    library(SuperLearner)
+    
+    SL_fit_layers[[i]] <- SuperLearner(
+        Y = Y, 
+        X = X,
+        cvControl = cvControl,  
+        SL.library = c('SL.randomForest'),
+        family = binomial())
+    
+    # Append the corresponding y and X to the results
+    SL_fit_layers[[i]]$Y <- sample_metadata['Y']
+    SL_fit_layers[[i]]$X <- X
+    
+    # Remove redundant data frames and collect pre-stack predictions
+    rm(t_dat_slice)
+    rm(dat_slice)
+    rm(X)
+    SL_fit_predictions[[i]] <- SL_fit_layers[[i]]$Z
+    
+    # Re-fit to entire dataset for final predictions
+    layer_wise_predictions_train[[i]] <- SL_fit_layers[[i]]$SL.predict
   
 }
 
@@ -294,16 +307,18 @@ names(combo_final) <- name_layers
 ####################
 
 # Run user-specified meta learner
-SL_fit_stacked <- SuperLearner(Y = Y, 
-                               X = combo, 
-                               cvControl = cvControl,    
-                               verbose = TRUE,
-                               SL.library = 'SL.glmnet',
-                               family = binomial())
+SL_fit_stacked <- SuperLearner(
+    Y = Y, 
+    X = combo, 
+    cvControl = cvControl,    
+    verbose = TRUE,
+    SL.library = 'SL.glmnet',
+    family = binomial())
 
 # Extract the fit object from superlearner
 model_stacked <- SL_fit_stacked$fitLibrary[[1]]$object
-stacked_prediction_train <- predict.SuperLearner(SL_fit_stacked, newdata = combo_final)$pred
+stacked_prediction_train <- predict.SuperLearner(
+    SL_fit_stacked, newdata = combo_final)$pred
 
 # Append the corresponding y and X to the results
 SL_fit_stacked$Y <- sample_metadata['Y']
@@ -324,11 +339,12 @@ building an integrated prediction model.
 fulldat<-as.data.frame(t(feature_table))
 
 # Early Fusion using Random Forest
-SL_fit_concat <- SuperLearner(Y = Y, 
-                              X = fulldat,
-                              cvControl = cvControl,   
-                              SL.library = 'SL.randomForest',
-                              family = binomial())
+SL_fit_concat <- SuperLearner(
+    Y = Y, 
+    X = fulldat,
+    cvControl = cvControl,   
+    SL.library = 'SL.randomForest',
+    family = binomial())
 
 # Extract the fit object from SuperLearner
 model_concat <- SL_fit_concat$fitLibrary[[1]]$object
@@ -362,7 +378,11 @@ run the cross-validation in this section.
 
 # Separate omics layers
 feature_metadata$featureType <- as.factor(feature_metadata$featureType)
-name_layers <- with(droplevels(feature_metadata), list(levels = levels(featureType)), nlevels = nlevels(featureType))$levels
+name_layers <- with(
+    droplevels(feature_metadata),
+    list(levels = levels(featureType)),
+    nlevels = nlevels(featureType)
+    )$levels
 
 # Define a list
 dataList <- vector("list", length = length(name_layers))
@@ -399,9 +419,13 @@ to each integration paradigm.
 # Gather all predictions and ROC curve data preparation #
 #########################################################
 
-coop_pred <- predict(cvfit, newx = dataList, s = "lambda.min", alpha = 0.5, type = "response")
-yhat.train <- cbind(combo, stacked_prediction_train, SL_fit_concat$Z, coop_pred)
-colnames(yhat.train) <- c(colnames(combo), "Late Fusion", "Early Fusion", "Intermediate Fusion")
+coop_pred <- predict(
+    cvfit, newx = dataList, s = "lambda.min",
+    alpha = 0.5, type = "response")
+yhat.train <- cbind(
+    combo,stacked_prediction_train, SL_fit_concat$Z, coop_pred)
+colnames(yhat.train) <- c(
+    colnames(combo), "Late Fusion", "Early Fusion", "Intermediate Fusion")
 
 # Extract ROC plot data 
 list.ROC <- vector("list", length = ncol(yhat.train))
@@ -411,15 +435,16 @@ names(list.ROC) <- colnames(yhat.train)
 library(ROCR)
 
 for(k in 1:length(list.ROC)){
-  preds <- yhat.train[ ,k]
-  pred <- prediction(preds, Y)
-  AUC <- round(performance(pred, "auc")@y.values[[1]], 2)
-  perf <- performance(pred, "sens", "spec") 
-  list.ROC[[k]] <- data.frame(sensitivity = slot(perf, "y.values")[[1]],
-                              specificity = 1 - slot(perf, "x.values")[[1]],
-                              AUC = AUC,
-                              layer = names(list.ROC)[k])
-    }
+    preds <- yhat.train[ ,k]
+    pred <- prediction(preds, Y)
+    AUC <- round(performance(pred, "auc")@y.values[[1]], 2)
+    perf <- performance(pred, "sens", "spec") 
+    list.ROC[[k]] <- data.frame(
+        sensitivity = slot(perf, "y.values")[[1]],
+        specificity = 1 - slot(perf, "x.values")[[1]],
+        AUC = AUC,
+        layer = names(list.ROC)[k])
+}
     
 # Combine
 ROC_table <- do.call('rbind', list.ROC)
@@ -439,23 +464,25 @@ non-IBD controls.
 # Prepare data for plotting
 plot_data <- ROC_table
 plot_data$displayItem <- paste(plot_data$layer, " AUC = ", plot_data$AUC, sep="")
-plot_data$displayItem <- factor(plot_data$displayItem,
-                                    levels = unique(plot_data$displayItem))
+plot_data$displayItem <- factor(
+    plot_data$displayItem, levels = unique(plot_data$displayItem))
     
 # ROC curves
-p <- ggplot(plot_data,
-            aes(x = specificity,
-            y = sensitivity,
-            group = displayItem)) + 
-  geom_line(aes(x = specificity,y = sensitivity,color = displayItem)) +
-  theme(legend.position = "bottom", 
+p <- ggplot(
+    plot_data,
+    aes(x = specificity,
+    y = sensitivity,
+    group = displayItem)) + 
+    geom_line(aes(x = specificity,y = sensitivity,color = displayItem)) +
+    theme(
+        legend.position = "bottom", 
         legend.background=element_blank(),
         legend.box.background=element_rect(colour = "black")) + 
-  theme_bw() +
-  xlab("False Positive Rate") +
-  ylab("True Positive Rate") +
-  theme(legend.position = "right", legend.direction = "vertical") +
-  labs(color = '') 
+    theme_bw() +
+    xlab("False Positive Rate") +
+    ylab("True Positive Rate") +
+    theme(legend.position = "right", legend.direction = "vertical") +
+    labs(color = '') 
     
 # Print
 print(p)
@@ -478,20 +505,21 @@ DD$view_col <- gsub(":.*", "", DD$view_col)
 library(forcats)
 
 p <- DD %>% 
-  mutate(view_col = fct_reorder(view_col, standardized_coef)) %>% 
-  ggplot(aes(x = view_col, y = standardized_coef, fill = view, width = 0.75)) + 
-  geom_bar(stat = "identity", show.legend = FALSE, width = 1) +
-  coord_flip() +
-  facet_wrap(~ view, scales = 'free_y', nrow = 2) +
-  ylab('Standardized LFC') +
-  xlab('') +
-  ggtitle('IBD-associated multi-omics features') + 
-  theme_bw() + theme(strip.background  = element_blank(),
-                     panel.grid.major = element_line(colour = "grey80"),
-                     panel.border = element_blank(),
-                     axis.ticks = element_line(size = 0),
-                     panel.grid.minor.y = element_blank(),
-                     panel.grid.major.y = element_blank())
+    mutate(view_col = fct_reorder(view_col, standardized_coef)) %>% 
+    ggplot(aes(x = view_col, y = standardized_coef, fill = view, width = 0.75)) + 
+    geom_bar(stat = "identity", show.legend = FALSE, width = 1) +
+    coord_flip() +
+    facet_wrap(~ view, scales = 'free_y', nrow = 2) +
+    ylab('Standardized LFC') +
+    xlab('') +
+    ggtitle('IBD-associated multi-omics features') + 
+    theme_bw() + theme(
+        strip.background  = element_blank(),
+        panel.grid.major = element_line(colour = "grey80"),
+        panel.border = element_blank(),
+        axis.ticks = element_line(size = 0),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.major.y = element_blank())
 p
 
 ```
@@ -501,5 +529,3 @@ is the species most positively associated, while \emph{Gemmiger_formicilis} is
 the most negatively associated species. Additionally, L-lysine biosynthesis VI
 is the pathway most positively associated, and PYRIDNUSCYN-PWY: NAD biosynthesis
 I (from aspartate) is the pathway most positively associated, respectively.
-
-

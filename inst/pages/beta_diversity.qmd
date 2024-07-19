@@ -15,11 +15,16 @@ knitr::opts_chunk$set(
   dev.args = list(type = "cairo-png")
 )
 ```
-Beta diversity quantifies the dissimilarity between communities (multiple samples), as opposed to alpha diversity, which focuses on variation within a community (one sample). In microbiome research, commonly used metrics of beta diversity include:
+
+Beta diversity quantifies the dissimilarity between communities
+(multiple samples), as opposed to alpha diversity, which focuses on variation
+within a community (one sample). In microbiome research, commonly used metrics
+of beta diversity include:
 
 - Bray-Curtis index (for compositional data)
 - Jaccard index (for presence/absence data, ignoring abundance information)
-- Aitchison distance (Euclidean distance for clr transformed abundances, aiming to avoid the compositionality bias)
+- Aitchison distance (Euclidean distance for clr transformed abundances, aiming
+to avoid the compositionality bias)
 - Unifrac distance (takes into account the phylogenetic tree information).
 
 Notably, only some of these measures are actual
@@ -39,7 +44,8 @@ dissimilarity and beta diversity are preferred.
 | Phylogenetic distance       | Rarefied counts     | Unifrac               |
 
 In practice, beta diversity is usually represented as a `dist` object. Such an 
-object is a triangular matrix where the distance between each pair of samples is encoded by a specific cell. 
+object is a triangular matrix where the distance between each pair of samples
+is encoded by a specific cell. 
 This distance matrix can then undergo ordination, which is an
 important ecological tool to reduce the dimensionality of data for a more
 efficient analysis and visualization. Ordination techniques aim to capture as
@@ -71,21 +77,16 @@ tse <- GlobalPatterns
 
 # Beta diversity metrics like Bray-Curtis are often 
 # applied to relabundances
-tse <- transformAssay(tse,
-                      assay.type = "counts",
-                      method = "relabundance")
+tse <- transformAssay(
+    tse, assay.type = "counts", method = "relabundance")
 
 # Other metrics like Aitchison to clr-transformed data
-tse <- transformAssay(tse,
-                      assay.type = "relabundance",
-                      method = "clr",
-                      pseudocount = TRUE)
+tse <- transformAssay(
+    tse, assay.type = "relabundance", method = "clr", pseudocount = TRUE)
 
 # Add group information Feces yes/no
 tse$Group <- tse$SampleType == "Feces"
 ```
-
-
 
 ## Divergence
 
@@ -96,12 +97,12 @@ calculation of divergence can be specified as `reference` and `FUN`,
 respectively.
 
 ```{r}
-tse <- mia::addDivergence(tse,
-                               assay.type = "counts",
-                               reference = "median",
-                               FUN = vegan::vegdist)
+tse <- addDivergence(
+    tse,
+    assay.type = "counts",
+    reference = "median",
+    FUN = vegan::vegdist)
 ```
-
 
 ## Unsupervised ordination {#sec-unsupervised-ordination}
 
@@ -111,7 +112,6 @@ approaches, Multi-Dimensional Scaling (MDS) and non-metric MDS (NMDS) can be
 regarded as the standard. They are jointly referred to as PCoA. For this
 demonstration, we will analyse beta diversity in GlobalPatterns, and observe the
 variation between stool samples and those with a different origin.
-
 
 ### Comparing communities by beta diversity analysis {#sec-comparing-communities-by-beta-diversity-analysis}
 
@@ -134,11 +134,12 @@ and `runNMDS` functions.
 library(scater)
 
 # Run PCoA on relabundance assay with Bray-Curtis distances
-tse <- runMDS(tse,
-              FUN = vegan::vegdist,
-              method = "bray",
-              assay.type = "relabundance",
-              name = "MDS_bray")
+tse <- runMDS(
+    tse,
+    FUN = vegan::vegdist,
+    method = "bray",
+    assay.type = "relabundance",
+    name = "MDS_bray")
 ```
 
 Sample dissimilarity can be visualized on a lower-dimensional display (typically
@@ -148,18 +149,17 @@ size and other aesthetics. Can you find any difference between the groups?
 
 ```{r plot-mds-bray-curtis, fig.cap = "MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."}
 # Create ggplot object
-p <- plotReducedDim(tse, "MDS_bray",
-                    colour_by = "Group")
+p <- plotReducedDim(tse, "MDS_bray", colour_by = "Group")
 
 # Calculate explained variance
 e <- attr(reducedDim(tse, "MDS_bray"), "eig")
 rel_eig <- e / sum(e[e > 0])
 
 # Add explained variance for each axis
-p <- p + labs(x = paste("PCoA 1 (", round(100 * rel_eig[[1]], 1),
-                        "%", ")", sep = ""),
-              y = paste("PCoA 2 (", round(100 * rel_eig[[2]], 1), 
-                        "%", ")", sep = ""))
+p <- p + labs(
+    x = paste("PCoA 1 (", round(100 * rel_eig[[1]], 1), "%", ")", sep = ""),
+    y = paste("PCoA 2 (", round(100 * rel_eig[[2]], 1), "%", ")", sep = "")
+    )
 
 p
 ```
@@ -173,25 +173,28 @@ factors can affect the resulting lower-dimensional data.
 
 ```{r mds-nmds-comparison, results='hide'}
 # Run NMDS on relabundance assay with Bray-Curtis distances
-tse <- runNMDS(tse,
-               FUN = vegan::vegdist,
-               method = "bray",
-               assay.type = "relabundance",
-               name = "NMDS_bray")
+tse <- runNMDS(
+    tse,
+    FUN = vegan::vegdist,
+    method = "bray",
+    assay.type = "relabundance",
+    name = "NMDS_bray")
 
 # Run MDS on clr assay with Aitchison distances
-tse <- runMDS(tse,
-              FUN = vegan::vegdist,
-              method = "euclidean",
-              assay.type = "clr",
-              name = "MDS_aitchison")
+tse <- runMDS(
+    tse,
+    FUN = vegan::vegdist,
+    method = "euclidean",
+    assay.type = "clr",
+    name = "MDS_aitchison")
 
 # Run NMDS on clr assay with Euclidean distances
-tse <- runNMDS(tse,
-               FUN = vegan::vegdist,
-               method = "euclidean",
-               assay.type = "clr",
-               name = "NMDS_aitchison")
+tse <- runNMDS(
+    tse,
+    FUN = vegan::vegdist,
+    method = "euclidean",
+    assay.type = "clr",
+    name = "NMDS_aitchison")
 ```
 
 Multiple ordination plots are combined into a multi-panel plot with the
@@ -204,15 +207,15 @@ light of the research question.
 library(patchwork)
 
 # Generate plots for all 4 reducedDims
-plots <- lapply(c("MDS_bray", "MDS_aitchison",
-                  "NMDS_bray", "NMDS_aitchison"),
-                plotReducedDim,
-                object = tse,
-                colour_by = "Group")
+plots <- lapply(
+    c("MDS_bray", "MDS_aitchison", "NMDS_bray", "NMDS_aitchison"),
+    plotReducedDim,
+    object = tse,
+    colour_by = "Group")
 
 # Generate multi-panel plot
 wrap_plots(plots) +
-  plot_layout(guides = "collect")
+    plot_layout(guides = "collect")
 ```
 
 The _Unifrac_ method is a special case, as it requires data on the
@@ -221,15 +224,15 @@ performs the calculation to return a `dist` object, which can again be
 used within `runMDS`.
 
 ```{r plot-unifrac, fig.cap = "Unifrac distances scaled by MDS of the GlobalPattern dataset."}
-tse <- runMDS(tse,
-              FUN = mia::calculateUnifrac,
-              name = "Unifrac",
-              tree = rowTree(tse),
-              ntop = nrow(tse),
-              assay.type = "counts")
+tse <- runMDS(
+    tse,
+    FUN = mia::calculateUnifrac,
+    name = "Unifrac",
+    tree = rowTree(tse),
+    ntop = nrow(tse),
+    assay.type = "counts")
 
-plotReducedDim(tse, "Unifrac",
-               colour_by = "Group")
+plotReducedDim(tse, "Unifrac", colour_by = "Group")
 ```
 
 ### Other ordination methods {#sec-other-ord-methods}
@@ -238,27 +241,26 @@ Other dimension reduction methods, such as PCA and UMAP, are inherited from the
 scater package.
 
 ```{r plot-pca, fig.cap = "PCA plot on the GlobalPatterns data set containing sample from different sources."}
-tse <- runPCA(tse,
-              name = "PCA",
-              assay.type = "counts",
-              ncomponents = 10)
+tse <- runPCA(
+    tse,
+    name = "PCA",
+    assay.type = "counts",
+    ncomponents = 10)
 
-plotReducedDim(tse, "PCA",
-               colour_by = "Group")
+plotReducedDim(tse, "PCA", colour_by = "Group")
 ```
 
 As mentioned before, applicability of the different methods depends on your
 sample set and research question.
 
 ```{r plot-umap, fig.cap = "UMAP plot on the GlobalPatterns data set containing sample from different sources."}
-tse <- runUMAP(tse,
-               name = "UMAP",
-               assay.type = "counts",
-               ncomponents = 3)
+tse <- runUMAP(
+    tse,
+    name = "UMAP",
+    assay.type = "counts",
+    ncomponents = 3)
 
-plotReducedDim(tse, "UMAP",
-               colour_by = "Group",
-               ncomponents = c(1:3))
+plotReducedDim(tse, "UMAP", colour_by = "Group", ncomponents = c(1:3))
 ```
 
 ### Explained variance
@@ -327,7 +329,6 @@ ggplot(df, aes(x = d0, y = dmds)) +
   theme_bw()
 ```
 
-
 ## Supervised / constrained ordination
 
 dbRDA is a supervised counterpart of PCoA. It maximize the variance
@@ -336,26 +337,22 @@ to quantify associations between each covariate and community
 composition (beta diversity). The table below summarizes the relations
 between the supervised and unsupervised ordination methods.
 
-
 |                          | supervised ordination  | unsupervised ordination  |
 |:------------------------:|:----------------------:|:------------------------:|
 | Euclidean distance       | RDA                    | PCA                      |
 | non-Euclidean distance   | dbRDA                  | PCoA/MDS, NMDS, UMAP     | 
 
-
 In summary, the dbRDA is the more general method that allows a wider
 variety dissimilarity, or beta diversity, indices. This method is
-available via `mia::runRDA`, which calls `vegan::dbrda`. By default,
+available via `mia::getRDA`, which calls `vegan::dbrda`. By default,
 this uses Euclidean distances, which is equivalent to the ordinary
-RDA. However, the dbRDA method (`mia::runRDA`) allows the use of other
+RDA. However, the dbRDA method (`mia::getRDA`) allows the use of other
 dissimilarity indices as well.
-
 
 Let us next demonstrate dbRDA with the enterotype dataset. Here
 samples correspond to patients. The `colData` lists the clinical
 status of each patient and a few covariates such as gender and
 age.
-
 
 ```{r import-rda-dataset}
 # Load data
@@ -363,11 +360,12 @@ data("enterotype", package = "mia")
 tse2 <- enterotype
 
 # Apply relative transform
-tse2 <- transformAssay(tse2,
-                       method = "relabundance")
+tse2 <- transformAssay(tse2, method = "relabundance")
 ```
 
-dbRDA can be perfomed with the `runRDA` function. In addition to the arguments
+### Redundancy analysis
+
+dbRDA can be perfomed with the `addRDA` function. In addition to the arguments
 previously defined for [unsupervised ordination](#unsupervised-ordination), this
 function takes a formula to control for variables and an action to treat missing
 values. Along with clinical status, which is the main outcome, we control for
@@ -375,33 +373,40 @@ gender and age, and exclude observations where one of these variables is missing
 
 ```{r run-rda}
 # Perform RDA
-tse2 <- runRDA(tse2,
-               assay.type = "relabundance",
-               formula = assay ~ ClinicalStatus + Gender + Age,
-               distance = "bray",
-               na.action = na.exclude)
+tse2 <- addRDA(
+    tse2,
+    assay.type = "relabundance",
+    formula = assay ~ ClinicalStatus + Gender + Age,
+    distance = "bray",
+    na.action = na.exclude)
 
 # Store results of PERMANOVA test
 rda_info <- attr(reducedDim(tse2, "RDA"), "significance")
 ```
 
-The importance of each variable on the similarity between samples can be
-assessed from the results of PERMANOVA, automatically provided by the `runRDA`
-function. We see that both clinical status and age explain more than 10% of the
+The importance of each variable on the similarity between samples (i.e. loadings)
+can be assessed from the results of PERMANOVA, automatically provided by the `addRDA`
+function. It performs first dbRDA and then applies permutational test to its
+results.
+
+Permutational Analysis of Variance (PERMANOVA; [-@Anderson2001]) is a
+widely used non-parametric multivariate method that aims to estimate
+the actual statistical significance of differences in the observed
+community composition between two groups of samples.
+
+PERMANOVA tests the hypothesis that the centroids and dispersion of
+the community are equivalent between the compared groups. A p-value
+smaller than the significance threshold indicates that the groups have
+a different community composition. This method is implemented with the
+[`adonis2`](https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis)
+function from the vegan package. You can find more on PERMANOVA from [here](https://microbiome.github.io/OMA/docs/devel/pages/97_extra_materials.html#compare-permanova).
+
+We see that both clinical status and age explain more than 10% of the
 variance, but only age has statistical significance.
 
 ```{r rda-permanova-res}
 rda_info$permanova |>
-  knitr::kable()
-```
-
-To ensure that the homogeneity assumption holds, we retrieve the corresponding
-information from the results of RDA. None of the p-values is lower
-than the significance threshold, and thus homogeneity is observed.
-
-```{r rda-homogeneity-res}
-rda_info$homogeneity |>
-  knitr::kable()
+   knitr::kable()
 ```
 
 Next, we proceed to visualize the weight and significance of each variable on
@@ -420,6 +425,71 @@ From above, we can see that only age significantly describes
 differences between the microbial profiles of different samples. Such visual
 approach complements the previous results obtained with PERMANOVA.
 
+### Visualize dbRDA loadings {#sec-dbrda-workflow}
+
+Let us visualize the model coefficients or loadings for species that exhibit the
+largest differences between the groups. This gives some insights into
+how the groups tend to differ from each other in terms of community
+composition.
+
+```{r plot-top-coef-anova, fig.cap = ""}
+# Extract loadings for first eigenvector
+rda <- reducedDim(tse2, "RDA")
+rda <- attr(rda, "rda")
+coef <- rda$CCA$v
+coef <- coef[, 1, drop = FALSE]
+
+# Get the taxa with biggest weights
+top_coef <- head(coef[rev(order(abs(coef))), , drop = FALSE], 20)
+# Sort weights in increasing order
+top_coef <- top_coef[order(top_coef), ]
+
+# Create data.frame
+df <- data.frame(
+    x = top_coef,
+    y = factor(names(top_coef), unique(names(top_coef))))
+
+# Create a plot
+ggplot(df, aes(x = x, y = y)) +
+    geom_bar(stat = "identity") +
+    labs(x = "", y= "", title = "Top Taxa") +
+    theme_bw()
+```
+
+In the example above, the largest differences between the two groups
+can be attributed to _`r names(sort(abs(top_coef), decreasing = TRUE))[[1]]`_ 
+and
+_`r names(sort(abs(top_coef), decreasing = TRUE))[[2]] `_.
+
+### Checking the homogeneity condition 
+
+It is important to note that the application of PERMANOVA assumes
+homogeneous group dispersions (variances). This can be tested with the
+PERMDISP2 method [@Anderson2006] by using the same assay and distance
+method than in PERMANOVA.
+
+To ensure that the homogeneity assumption holds, we retrieve the corresponding
+information from the results of RDA. None of the p-values is lower
+than the significance threshold, and thus homogeneity is observed.
+
+::: {.callout-note}
+## Note
+
+PERMANOVA assumes that the group dispersion is homogeneous. Homogeneous
+dispersion means that the variation within groups is smaller than the variation
+between groups, making the groups distinct. If this assumption is not met,
+the results can be misleading.
+
+`addRDA` performs homogeneity test automatically.
+:::
+
+```{r rda-homogeneity-res}
+rda_info$homogeneity |>
+    knitr::kable()
+```
+
+As the group dispersion is homogenic, PERMANOVA can be seen as an
+appropriate choice for comparing community compositions.
 
 ## Case studies
 
@@ -431,29 +501,28 @@ data at the Genus level and identify the dominant taxa for each sample.
 
 ```{r}
 # Agglomerate to genus level
-tse_genus <- agglomerateByRank(tse,
-                                 rank = "Genus")
+tse_genus <- agglomerateByRank(tse, rank = "Genus")
 
 # Convert to relative abundances
-tse_genus <- transformAssay(tse,
-                            method = "relabundance",
-                            assay.type = "counts")
+tse_genus <- transformAssay(
+    tse, method = "relabundance", assay.type = "counts")
 
 # Add info on dominant genus per sample
-tse_genus <- addDominant(tse_genus,
-                         assay.type = "relabundance",
-                         name = "dominant_taxa")
+tse_genus <- addDominant(
+    tse_genus, assay.type = "relabundance", name = "dominant_taxa")
 # Overview
-summarizeDominance(tse_genus, rank = "Genus", digits = 3, name = "dominant_taxa")
+summarizeDominance(
+    tse_genus, rank = "Genus", digits = 3, name = "dominant_taxa")
 ```
 
 Next, we perform PCoA with Bray-Curtis dissimilarity.
 
 ```{r}
-tse_genus <- runMDS(tse_genus,
-                    FUN = vegan::vegdist,
-                    name = "PCoA_BC",
-                    assay.type = "relabundance")
+tse_genus <- runMDS(
+    tse_genus,
+    FUN = vegan::vegdist,
+    name = "PCoA_BC",
+    assay.type = "relabundance")
 ```
 
 Finally, we get the top taxa and and visualize their abundances on PCoA. Note
@@ -461,41 +530,42 @@ that A 3D interactive version of the plot below can be found in [@sec-extras].
 
 ```{r}
 # Getting the top taxa
-top_taxa <- getTop(tse_genus,
-                           top = 6,
-                           assay.type = "relabundance")
+top_taxa <- getTop(tse_genus, top = 6, assay.type = "relabundance")
 
 # Naming all the rest of non top-taxa as "Other"
-most_abundant <- lapply(colData(tse_genus)$dominant_taxa,
-                        function(x) {if (x %in% top_taxa) {x} 
-                          else {"Other"}})
+most_abundant <- lapply(
+    colData(tse_genus)$dominant_taxa, function(x){
+        if (x %in% top_taxa) {x} else {"Other"}
+    })
 
 # Storing the previous results as a new column within colData
 colData(tse_genus)$most_abundant <- as.character(most_abundant)
 
 # Calculating percentage of the most abundant
 most_abundant_freq <- table(as.character(most_abundant))
-most_abundant_percent <- round(most_abundant_freq / 
-                                 sum(most_abundant_freq) * 100, 1)
+most_abundant_percent <- round(
+    most_abundant_freq / sum(most_abundant_freq) * 100,
+    1)
 
 # Retrieving the explained variance
 e <- attr(reducedDim(tse_genus, "PCoA_BC"), "eig")
 var_explained <- e / sum(e[e > 0]) * 100
 
 # Define colors for visualization
-my_colors <- c("black", "blue", "lightblue", "darkgray",
-               "magenta", "darkgreen", "red")
+my_colors <- c(
+    "black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red")
 
 # Visualization
-plot <-plotReducedDim(tse_genus, "PCoA_BC",
-                      colour_by = "most_abundant") +
-  scale_colour_manual(values = my_colors,
-                      labels = paste0(names(most_abundant_percent), "(", most_abundant_percent, "%)")) +
-  labs(x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
-       y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
-       color = "")
+p <- plotReducedDim(tse_genus, "PCoA_BC", colour_by = "most_abundant") +
+    scale_colour_manual(
+        values = my_colors,
+        labels = paste0(names(most_abundant_percent), "(", most_abundant_percent, "%)")) +
+    labs(
+        x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
+        y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
+        color = "")
 
-plot
+p
 ```
 
 Similarly, we visualize and compare the sub-population.
@@ -508,145 +578,35 @@ percent_TRUE  <- round(freq_TRUE  / sum(freq_TRUE)  * 100, 1)
 percent_FALSE <- round(freq_FALSE / sum(freq_FALSE) * 100, 1)
 
 # Visualization
-plotReducedDim(tse_genus[ , colData(tse_genus)$Group == TRUE], "PCoA_BC",
-               colour_by = "most_abundant") +
-  scale_colour_manual(values = my_colors,
-                      labels = paste0(names(percent_TRUE), "(", percent_TRUE, "%)")) +
-  labs(x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
-       y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
-       title = "Group = TRUE", color = "")
+plotReducedDim(
+    tse_genus[ , colData(tse_genus)$Group == TRUE], "PCoA_BC",
+    colour_by = "most_abundant") +
+    
+    scale_colour_manual(
+        values = my_colors,
+        labels = paste0(names(percent_TRUE), "(", percent_TRUE, "%)")) +
+  
+  labs(
+      x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
+      y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
+      title = "Group = TRUE", color = "")
 
-plotReducedDim(tse_genus[ , colData(tse_genus)$Group == FALSE], "PCoA_BC",
-               colour_by = "most_abundant") +
-  scale_colour_manual(values = my_colors,
-                      labels = paste0(names(percent_FALSE), "(", percent_FALSE, "%)")) +
-  labs(x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
-       y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
-       title = "Group = FALSE", color = "")
+plotReducedDim(
+    tse_genus[ , colData(tse_genus)$Group == FALSE], "PCoA_BC",
+    colour_by = "most_abundant") +
+    
+    scale_colour_manual(
+        values = my_colors,
+        labels = paste0(names(percent_FALSE), "(", percent_FALSE, "%)")) +
+    
+    labs(
+        x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
+        y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
+        title = "Group = FALSE", color = "")
 ```
 
-### Testing differences in community composition between sample groups {#sec-dbrda-workflow}
-
-Permutational Analysis of Variance (PERMANOVA; [-@Anderson2001]) is a
-widely used non-parametric multivariate method that aims to estimate
-the actual statistical significance of differences in the observed
-community composition between two groups of samples.
-
-PERMANOVA tests the hypothesis that the centroids and dispersion of
-the community are equivalent between the compared groups. A p-value
-smaller than the significance threshold indicates that the groups have
-a different community composition. This method is implemented with the
-[`adonis2`](https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis)
-function from the vegan package.
-
-By default, the argument `by` is set to `"terms"`, in which the order
-of variables in the formula matters. In this case, each variable is
-analyzed sequentially, and the result is different when more than 1
-variable is introduced and their order differs.  Therefore, it is
-recommended to set `by = "margin"`, which specifies that the marginal
-effect of each variable is analyzed individually. You can view a
-comparison between the two designs in chapter [PERMANOVA comparison](https://microbiome.github.io/OMA/docs/devel/pages/97_extra_materials.html#compare-permanova).
-
-We can perform PERMANOVA either with `adonis2` function or by first
-performing dbRDA and then applying permutational test its results. An
-advantage of the latter approach is that by doing so we can get
-coefficients: how much each taxa affects the variation between
-communities.
-
-```{r}
-# Agglomerate data to Species level
-tse <- agglomerateByRank(tse,
-                           rank = "Species")
-
-# Set seed for reproducibility
-set.seed(1576)
-# We choose 99 random permutations. Consider applying more (999 or 9999) in your
-# analysis. 
-permanova <- adonis2(t(assay(tse, "relabundance")) ~ Group,
-                     by = "margin", # each term (here only 'Group') analyzed individually
-                     data = colData(tse),
-                     method = "euclidean",
-                     permutations = 99)
-
-# Set seed for reproducibility
-set.seed(1576)
-# Perform dbRDA
-dbrda <- dbrda(t(assay(tse,"relabundance")) ~ Group, 
-               data = colData(tse))
-# Perform permutational analysis
-permanova2 <- anova.cca(dbrda,
-                        by = "margin", # each term (here only 'Group') analyzed individually
-                        method = "euclidean",
-                        permutations = 99)
-
-# Get p-values
-p_values <- c(permanova["Group", "Pr(>F)"], permanova2["Group", "Pr(>F)"])
-p_values <-as.data.frame(p_values)
-rownames(p_values) <- c("adonis2", "dbRDA+anova.cca")
-p_values
-```
-
-As we can see, the community composition is significantly different
-between the groups (p < 0.05), and these two methods give equal p-values.
-
-Let us visualize the model coefficients for species that exhibit the
-largest differences between the groups. This gives some insights into
-how the groups tend to differ from each other in terms of community
-composition.
-
-```{r}
-# Add taxa info
-sppscores(dbrda) <- t(assay(tse, "relabundance"))
-# Get coefficients
-coef <- dbrda$CCA$v
-# Get the taxa with biggest weights
-top.coef <- head(coef[rev(order(abs(coef))), , drop = FALSE], 20)
-# Sort weights in increasing order
-top.coef <- top.coef[order(top.coef), ]
-# Get top names
-top_names <- names(top.coef)[order(abs(top.coef), decreasing = TRUE)]
-```
-
-```{r plot-top-coef-anova, fig.cap = ""}
-df <- data.frame(x = top.coef,
-                 y = factor(names(top.coef), unique(names(top.coef))))
-
-ggplot(df, aes(x = x, y = y)) +
-  geom_bar(stat = "identity") +
-  labs(x = "", y= "", title = "Top Taxa") +
-  theme_bw()
-```
-
-In the example above, the largest differences between the two groups
-can be attributed to _`r top_names[1] `_ (elevated in the first
-group) and _`r top_names[2] `_ (elevated in the second
-group), and many other co-varying species.
-
-
-### Retrieving feature loadings
-
-The functions `vegan::dbrda` and `vegan::capscale` are exchangeable
-with `vegan::adonis2` with certain settings, and can be used to
-retrieve feature loadings.
-
-
-### Checking the homogeneity condition 
-
-It is important to note that the application of PERMANOVA assumes
-homogeneous group dispersions (variances). This can be tested with the
-PERMDISP2 method [@Anderson2006] by using the same assay and distance
-method than in PERMANOVA.
-
-```{r}
-anova(betadisper(vegdist(t(assay(tse, "counts"))), colData(tse)$Group))
-```
-
-If the groups have similar dispersion, PERMANOVA can be seen as an
-appropriate choice for comparing community compositions.
-
-
+::: {.callout-tip}
 ## Summary
-
 
 As a final note, we provide a comprehensive list of functions for the evaluation
 of dissimilarity indices available in the mia and scater packages. The
@@ -672,8 +632,5 @@ methods store the reducedDim object into the specified TreeSE.
 For more information on sample clustering, you can refer to:
 
 * [How to extract information from clusters](http://bioconductor.org/books/release/OSCA/clustering.html)  
-* Chapter [@sec-clustering] on community typing  
-
-
-
-
+* Chapter [@sec-clustering] on community typing
+:::
