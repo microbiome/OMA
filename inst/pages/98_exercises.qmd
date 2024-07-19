@@ -1161,11 +1161,6 @@ To make the exercise more engaging, let's do an exploratory data analysis task:
 - Visualizes the clusters in a scatter plot of the reduced dimensions.
 
 ```{r}
-#| label: heatmap-visualization-ex3
-#| eval: FALSE
-#| code-fold: true
-#| code-summary: "Show solution"
-
 #| label: heatmap-visualization-ex1
 #| eval: FALSE
 #| code-fold: true
@@ -1210,44 +1205,36 @@ plotReducedDim(tse, dimred = "MDS", colour_by = "cluster") +
 #| code-summary: "Show solution"
 
 # Load necessary libraries
-library(mia)
 library(SummarizedExperiment)
-library(vegan)
-library(bluster)
-library(scater)
-library(ComplexHeatmap)
-library(circlize)
+library(sechm)
 library(compositions)
 
 # Generate a sample SummarizedExperiment object 
 data(GlobalPatterns)
 tse <- GlobalPatterns
 
-# Extract the abundance data matrix and perform CLR transformation
-clr_data <- transformAssay(se, method = "clr", assay = "counts")
+# CLR transformation of abundance data matrix
+clr_data <- as.matrix(transformAssay(tse, method = "clr", assay.type = "counts", pseudocount = TRUE))
 
-# Perform hierarchical clustering on the samples using Euclidean distance
-distance_matrix <- dist(clr_data, method = "euclidean")
-clustering <- hclust(distance_matrix, method = "average")
-
-# Cut the dendrogram to form clusters (k = 3 for this example)
+# Hierarchical clustering on samples
+clustering <- hclust(dist(clr_data, method = "euclidean"), method = "average")
 clusters <- cutree(clustering, k = 3)
+colData(tse)$cluster <- as.factor(clusters)
 
-# Add cluster information to colData
-colData(se)$cluster <- as.factor(clusters)
+# Create annotation for clusters
+annotation_df <- data.frame(Cluster = colData(tse)$cluster)
+annotation_colors <- list(Cluster = c("1" = "red", "2" = "blue", "3" = "green"))
 
-# Visualize the heatmap with clusters using ComplexHeatmap
-Heatmap(clr_data, 
-        name = "CLR Counts",
-        row_dend_reorder = TRUE,
-        column_dend_reorder = TRUE,
-        cluster_rows = clustering, 
-        cluster_columns = clustering,
-        show_row_names = FALSE,
-        show_column_names = FALSE,
-        top_annotation = HeatmapAnnotation(Cluster = colData(se)$cluster, 
-                                           col = list(Cluster = c("1" = "red", "2" = "blue", "3" = "green"))),
-        main = "Heatmap with Clustering")  
+# Visualize the heatmap with sechm
+sechm(
+  mat = clr_data,
+  row_labels = FALSE,
+  column_labels = FALSE,
+  row_cluster = clustering,
+  column_cluster = clustering,
+  row_annotation = annotation_df,
+  row_annotation_colors = annotation_colors,
+  main = "Heatmap with Clustering")
 ```
 
 
@@ -1265,8 +1252,7 @@ Heatmap(clr_data,
 # Load necessary libraries
 library(mia)
 library(SummarizedExperiment)
-library(ComplexHeatmap)
-library(circlize)
+library(sechm)
 
 # Generate a sample SummarizedExperiment object
 data(GlobalPatterns)
@@ -1275,24 +1261,21 @@ tse <- GlobalPatterns
 # Ensure cluster information is correctly added to colData
 # (Assuming the clusters have been calculated previously and added to colData)
 
-# Create a sample metadata annotation (e.g., SampleType)
-sample_metadata <- data.frame(SampleType = colData(se)$SampleType,
-                              Cluster = colData(se)$cluster)
-rownames(sample_metadata) <- colnames(assay(se, "counts"))
+# Create a sample metadata annotation (e.g., SampleType and Cluster)
+sample_metadata <- data.frame(SampleType = colData(tse)$SampleType,
+                              Cluster = colData(tse)$cluster)
+rownames(sample_metadata) <- colnames(assay(tse, "counts"))
 
-# Create a HeatmapAnnotation object
-annotation <- HeatmapAnnotation(df = sample_metadata,
-                                col = list(Cluster = c("1" = "red", "2" = "blue", "3" = "green")))
-
-# Visualize the heatmap with annotations using ComplexHeatmap
-Heatmap(assay(se, "counts"), 
-        name = "Counts",
-        row_dend_reorder = TRUE,
-        column_dend_reorder = TRUE,
-        show_row_names = FALSE,
-        show_column_names = FALSE,
-        top_annotation = annotation,
-        main = "Heatmap with Annotations")
+# Visualize the heatmap with annotations using sechm
+sechm_plot <- sechm(assay(tse, "counts"),
+                    annotation_col = sample_metadata,
+                    clustering_distance_rows = "euclidean",
+                    clustering_distance_cols = "euclidean",
+                    clustering_method = "complete",
+                    scale = "row",
+                    show_rownames = FALSE,
+                    show_colnames = FALSE,
+                    main = "Heatmap with Annotations")
 ```
 
 ## Multiomics
