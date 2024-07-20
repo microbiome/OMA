@@ -20,6 +20,45 @@ on how to represent different varieties of multi-table data within the
 
 The options and recommendations are summarized in [@tbl-options].
 
+## Rows and columns {#sec-rows-and-cols}
+
+Let us load example data and store it in variable `tse`.
+
+```{r}
+library(mia)
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+tse
+```
+
+The `TreeSE` object, similar to a standard `data.frame` or `matrix`, has rows
+and columns. Typically, samples are stored in columns, while features or taxa
+are stored in rows. You can extract subsets of the data, such as the first
+five rows and certain three columns. The object manages the linkages
+between data, ensuring, for example, that when you subset the data, for
+instance, both the assay and sample metadata are subsetted simultaneously,
+ensuring they remain matched with each other.
+
+```{r}
+#| label: subset_intro
+
+tse <- tse[1:5, c(1, 19, 16)]
+tse
+```
+
+Compared to the original data the dimensions are for rows and columns 5 and 3,
+respectively.
+
+::: {.callout-note}
+## Note
+
+`SummarizedExperiment` objects have rows and columns.
+Also `MultiAssayExperiment`, introduced in [@sec-mae] have rows and cols but
+the structure is more complicated. You can find more examples on subsetting
+from [@sec-treese_subsetting].
+
+:::
+
 ## Assay data {#sec-assay-slot}
 
 The microbiome is the collection of all microbes (such as bacteria, viruses,
@@ -32,17 +71,11 @@ a certain type are in your gut, you can use an assay to measure this. When
 storing assays, the original data is count-based. However, the original
 count-based taxonomic abundance tables may undergo different 
 transformations, such as logarithmic, Centered Log-Ratio (CLR), or relative 
-abundance. These are typically stored in _**assays**_.
+abundance. These are typically stored in _**assays**_. See
+[@sec-assay-transform] for more information on transformations.
 
-Let us load example data and rename it as tse.
-
-```{r}
-library(mia)
-data("GlobalPatterns", package = "mia")
-tse <- GlobalPatterns
-```
-
-The `assays` slot contains the experimental data as multiple count matrices. The result of `assays` is a list of matrices.
+The `assays` slot contains the experimental data as multiple count matrices.
+The result of `assays` is a list of matrices.
 
 ```{r}
 assays(tse)
@@ -51,7 +84,7 @@ assays(tse)
 Individual assays can be accessed via `assay`
 
 ```{r}
-assay(tse, "counts")[1:5,1:7]
+assay(tse, "counts") |> head()
 ```
 
 So, in summary, in the world of microbiome analysis, an assay is essentially
@@ -59,23 +92,24 @@ a way to quantify and understand the composition of microbes in a given sample,
 which is super important for all kinds of research, ranging from human health
 to environment studies. 
 
-Furthermore, to illustrate the use of multiple assays, the relative abundance data can be 
-calculated and stored along the original count data using `transformAssay`.
+Furthermore, to illustrate the use of multiple assays, we can create an empty
+matrix and add it to the object.
 
 ```{r}
-tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+mat <- matrix(nrow = nrow(tse), ncol = ncol(tse))
+assay(tse, "empty_table", withDimnames=FALSE) <- mat
 assays(tse)
 ```
 
 Now there are two assays available in the `tse` object, `counts` and 
-`relabundance`.
+`empty_table`.
 
 ```{r}
-assay(tse, "relabundance")[1:5,1:7]
+assay(tse, "empty_table") |> head()
 ```
 
-Here the dimension of the count data remains unchanged in
-transformation. This is in fact, a requirement for the assays.
+Here the dimension of the assay data remains unchanged. This is in fact
+a requirement for the assays.
 
 ## colData
 
@@ -94,13 +128,13 @@ indicates the sample type (e.g. soil, fecal matter, control) and
 
 ## rowData {#sec-rowData}
 
-`rowData` contains data on the features of the analyzed samples. This is particularly 
-important in the microbiome field for storing taxonomic information.
-This taxonomic information is extremely important for understanding the
-composition and diversity of the microbiome in each sample analyzed. 
-It enables identification of the different types of microorganisms present in
-samples. It also allows you to explore the relationships between microbiome composition
-and various environmental or health factors.
+`rowData` contains data on the features of the analyzed samples. This is
+particularly important in the microbiome field for storing taxonomic
+information. This taxonomic information is extremely important for
+understanding the composition and diversity of the microbiome in each sample
+analyzed. It enables identification of the different types of microorganisms
+present in samples. It also allows you to explore the relationships between
+microbiome composition and various environmental or health factors.
 
 ```{r rowdata}
 rowData(tse)
@@ -154,34 +188,38 @@ agglomerated at different taxonomic levels. However, the data could as
 well originate from entirely different measurement sources as long as
 the samples match.
 
-Let us first agglomerate the data to Phylum level. This yields a new
-`TreeSE` data object.
+Let us first subset the data so that it has only two rows.
 
 ```{r altexp_agglomerate}
-tse_phylum <- agglomerateByRank(tse, "Phylum", na.rm=TRUE)
+tse_sub <- tse[1:2, ]
 # Both have the same number of columns (samples)
 dim(tse)
-dim(tse_phylum)
+dim(tse_sub)
 ```
 
-Then we can add the new phylum-level data object as an alternative experiment in the original data.
+Then we can add the new data object as an alternative experiment in the
+original data.
 
 ```{r altexp_agglomerate2}
-# Add the new data object to the original data object as an alternative experiment with the name "Phylum"
-altExp(tse, "Phylum") <- tse_phylum
+# Add the new data object to the original data object as an alternative
+# experiment with the name "Phylum"
+altExp(tse, "subsetted") <- tse_sub
 
 # Check the alternative experiment names available in the data
 altExpNames(tse)
 ```
 
-We can now subset the data, for instance, and this acts on both altExp and assay data.
+We can now subset the data by taking certain samples, for instance, and this
+acts on both `altExp` and assay data.
 
 ```{r altexp_agglomerate3}
-tse[,1:10]
-dim(altExp(tse[,1:10],"Phylum"))
+tse_single_sample <- tse[, 1]
+dim(altExp(tse_single_sample,"subsetted"))
 ```
 
-For more details on _altExp_, you can check the [introduction](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html) to the `SingleCellExperiment` package [@R_SingleCellExperiment].
+For more details on _altExp_, you can check the
+[introduction](https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html)
+to the `SingleCellExperiment` package [@R_SingleCellExperiment].
 
 ## Multiple experiments {#sec-mae}
 
@@ -199,22 +237,68 @@ samples are defined through a `sampleMap`. Each element on the
 `matrix`-like objects, including `SE` objects, and 
 the number of samples can differ between the elements.
 
+The `MAE` object can handle more complex relationships between experiments.
+It manages the linkages between samples and experiments, ensuring that
+the data remains consistent and well-organized.
+
+```{r}
+#| label: show_mae
+
+data("HintikkaXOData")
+mae <- HintikkaXOData
+mae
+```
+
+The `sampleMap` is a crucial component of the `MAE` object as it acts as the
+important bookkeeper, maintaining the information about which samples are
+associated with which experiments. This ensures that data linkages are
+correctly managed and preserved across different types of experiments.
+
+In fact, we can have 
+
+```{r}
+#| label: show_mae2
+
+sampleMap(mae) |> head()
+```
+
+For illustration, let's subset the data by taking first five samples.
+
+```{r}
+#| label: show_mae3
+
+mae <- mae[ , 1:5, ]
+mae
+```
+
+::: {.callout-note}
+## Note
+
+If you have multiple experiments containing replicated samples from patients,
+you can utilize the `MultiAssayExperiment` object to keep track of which
+samples belong to which patient.
+
+:::
 <!--
 ```{r}
 #TODO: Find the right dataset to explain a non 1:1 sample relationship
 ```
 -->
 
-For information have a look at the [intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html) of the `MultiAssayExperiment` package.  
+For information have a look at the
+[intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html)
+of the `MultiAssayExperiment` package.  
 
- 
+::: {.callout-tip}
+## Recommended options for storing multiple data tables in microbiome studies
+
    Option   Rows (features)    Cols (samples)               Recommended  
 ---------   --------------    ---------------  ------------------------
    assays  	         match              match       Data transformations  
    altExp             free              match    Alternative experiments  
 MultiAssay            free      free (mapping)    Multi-omic experiments    
 
-: **Recommended options for storing multiple data tables in microbiome studies**
+:
 The _assays_ are best suited for data transformations (one-to-one match between
 samples and columns across the assays). The _alternative experiments_ are
 particularly suitable for alternative versions of the data that are of same
@@ -238,3 +322,5 @@ data incorporating different types of complementary data sources in a
 single, reproducible workflow. An alternative experiment can be stored in
 _altExp_ slot of the SE data container. Alternatively, both experiments can be
 stored side-by-side in an `MAE` data container.
+
+:::
