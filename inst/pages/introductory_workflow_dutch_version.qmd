@@ -1,0 +1,478 @@
+## Introductory (Dutch)
+
+```{r}
+#| label: setup
+#| echo: FALSE
+#| results: "asis"
+library(rebook)
+chapterPreamble()
+```
+
+<div id="workflow">
+
+<div id="translate">
+  <a href="introductory_workflow.html"><img src="figures/flags/GB_flag.png" alt="Great Britain flag" class="flag"/> **English** </a>
+  <a href="introductory_workflow_dutch_version.html"><img src="figures/flags/Netherland_flag.jpg" alt="Netherland flag" class="flag"/> **Dutch** </a>
+</div>
+
+<img src="figures/intro_workflow_logo.svg" alt="logo workflow" id="banner"/>
+
+## Introductie
+
+Hallo en welkom bij een complete workflow met de nieuwste R/Bioconductor-tools
+voor microbiome data science. In deze tutorial leiden we je door enkele
+basisstappen van een compositieanalyse-studie met behulp van OMA. Deze stappen
+zijn toepasbaar op vrijwel al je projecten en zullen je helpen de
+fundamentele concepten te begrijpen die je toekomstige microbiome-analyses
+naar een hoger niveau zullen tillen 🚀.
+
+## Data importeren
+
+Bij het gebruik van microbiome-pakketten zijn er veel verschillende manieren
+om je data te importeren. Laten we eerst alle paketten laden:
+
+```{r}
+#| label: install
+#| output: FALSE
+# List of packages that we need
+packages <- c(
+    "ggplot2", "knitr", "mia", "dplyr", "miaViz", "vegan", "DT",
+    "scater", "patchwork", "sechm", "plotly"
+    )
+
+# Get packages that are already installed installed
+packages_already_installed <- packages[ packages %in% installed.packages() ]
+
+# Get packages that need to be installed
+packages_need_to_install <- setdiff( packages, packages_already_installed )
+
+# Loads BiocManager into the session. Install it if it not already installed.
+if( !require("BiocManager") ){
+    install.packages("BiocManager")
+    library("BiocManager")
+}
+
+# If there are packages that need to be installed, installs them with BiocManager
+# Updates old packages.
+if( length(packages_need_to_install) > 0 ) {
+   install(packages_need_to_install, ask = FALSE)
+}
+
+# Load all packages into session. Stop if there are packages that were not
+# successfully loaded
+pkgs_not_loaded <- !sapply(packages, require, character.only = TRUE)
+pkgs_not_loaded <- names(pkgs_not_loaded)[ pkgs_not_loaded ]
+if( length(pkgs_not_loaded) > 0 ){
+    stop(
+        "Error in loading the following packages into the session: '",
+        paste0(pkgs_not_loaded, collapse = "', '"), "'")
+}
+```
+
+Je kunt er zowel voor kiezen om je eigen data te gebruiken als een van de
+ingebouwde datasets die door mia worden aangeboden, welke je kunt vinden in
+het OMA boek@sec-example-data :
+
+In deze tutorial gebruiken we de @Tengeler2020 dataset. Deze dataset is
+gemaakt door A.C. Tengeler om de impact van aangetaste microbiomen op de
+hersenstructuur aan te tonen. Hier is hoe we de data in onze R-omgeving
+kunnen laden:
+
+```{r}
+#| label: laad-dataset
+data("Tengeler2020", pakket="mia")
+tse <- Tengeler2020
+```
+
+Er zijn verschillende andere manieren om je data te importeren via het
+[**mia pakket**](https://microbiome.github.io/mia/). Deze omvatten het gebruik
+van zowel **je eigen data**([@sec-import-from-file]) of door een bestaand
+object om te zetten naar een TreeSummarizedExperiment object zoals vermeld
+in **dit gedeelte van het OMA boek**:
+[@sec-conversions-between-data-formats-in-r]
+
+<hr>
+
+## Microbiële data opslaan
+
+*TreeSummarizedExperiment* of TSE objecten zijn het type object dat wordt
+gebruikt binnen [**mia**](https://microbiome.github.io/mia/) om data op te
+slaan. Een *TreeSummarizedExperiment* is een veelzijdig en multifunctioneel
+datatype dat een efficiënte manier biedt om data op te slaan en te benaderen.
+
+### Assays
+
+Een **assay**([@sec-assay-slot]) is een methode om de aanwezigheid en
+hoeveelheid van verschillende soorten microben in een monster te detecteren
+en te meten. Als je bijvoorbeeld wilt weten hoeveel bacteriën van een
+bepaald type in je darmen aanwezig zijn, kun je een assay gebruiken om
+dit te bepalen. In het volgende voorbeeld selecteren we een subset van
+een assay door alleen de eerste 5 rijen en de eerste 10 kolommen te tonen.
+Dit maakt het eenvoudiger om te begrijpen en te lezen. Later in de worklow
+zal er meer uitleg worden gegeven over het maken van subsets.
+
+```{r}
+#| label: assay
+assay(tse)[1:5,1:10] 
+```
+
+### colData
+
+Een ander belangrijk aspect van microbiome-analyse is
+**monsterdata**([@sec-add-or-modify-data]).
+
+```{r}
+#| label: coldata
+
+# verandert de colData in een dataframe
+tse_df_colData <- as.data.frame(colData(tse))
+
+# laat een interactieve tabel zien
+datatable(tse_df_colData,options = list(pageLength = 5),rownames = FALSE)
+```
+
+n het bovenstaande voorbeeld retourneert colData(tse) een DataFrame
+met 26 rijen en 10 kolommen. Elke rij correspondeert met een specifiek
+monster en elke kolom bevat gegevens over dat monster.
+
+### rowData
+
+**rowData**([@sec-rowData]) bevat gegevens van een type microbe,
+voornamelijk taxonomische informatie.
+
+```{r}
+#| label: tse-naar-datatable
+#| warning: FALSE
+tse_df_rowData <- as.data.frame(rowData(tse))
+datatable(tse_df_rowData, options = list(pageLength = 5))
+```
+
+Hierboven retourneert `rowData(tse)` een DataFrame met 151 rijen en
+7 colommen. Iedere rij verwijst naar een organisme terwijl iedere kolom
+naar een taxonomische rang verwijst.
+
+In dit voorbeeld geeft de kolom genaamd **Kingdom** aan of het organisme
+behoort tot het rijk van bacteriën of archaea. **Phylum** geeft aan tot
+welke stam een micro-organisme behoort, en zo verder tot het niveau van
+de soort micro-organisme.
+
+Om de structuur van een TreeSummarizedExperiment te verduidelijken is hier
+een artikel van @Huang2021 dat gebruik maakt van dit soort type object.
+Bekijk ook figuur 1 hieronder.
+
+![1. microbiële data opslaan : de structuur van een TreeSummarizedExperiment](figures/TSE-structure.svg){.lightbox .contentimg}
+
+<hr>
+
+## Data verwerking
+
+In sommige gevallen is het nodig om je data te transformeren om een
+bepaald soort resultaat te behalen. In de volgende rubriek zullen we
+bespreken hoe je gegevens kunt samenvoegen, je gegevens kunt subsetten en
+meer. Een *TreeSummarizedExperiment* maakt het mogelijk om gegevens op een
+handige manier te manipuleren met [**dplyr**](https://dplyr.tidyverse.org/).
+
+### Subsetten
+
+In sommige gevallen hoeft u slechts een deel van uw originele
+*TreeSummarizedExperiment* te behouden.
+
+Met de Tengeler2020 dataset, kunnen we de focus leggen op een bepaald
+cohort bijvoorbeeld. Dit resultaat kan op de volgende manier behaald worden:
+
+```{r}
+#| label: subset-tse
+tse_subset_by_sample <- tse[ , tse$cohort =="Cohort_1"]
+```
+
+Dit creëert een *TreeSummarizedExperiment*-object dat alleen bestaat uit
+monsters van het eerste cohort. Om het resulterende object beter te
+visualiseren, kunnen we de `meltAssay`-methode gebruiken en specificeren welk
+type kolom behouden moet blijven:
+
+```{r}
+#| label: tse-naar-df
+molten_tse <- meltAssay(
+    tse_subset_by_sample,
+    add_row_data = TRUE,
+    add_col_data = TRUE,
+    assay.type = "counts")
+
+datatable(molten_tse,options = list(pageLength = 5),rownames = FALSE)
+```
+
+### Data samenvoegen
+
+Om de analyse verder te verdiepen en de focus te leggen op de verdeling
+van de microbiële data op een specifieke taxonomische rang, kan het nuttig
+zijn om de gegevens samen te voegen tot dat specifieke niveau. De functie
+`agglomerateByRank` vereenvoudigt dit proces en maakt meer geraffineerde en
+effectieve analyses mogelijk. Hier volgt een voorbeeld:
+
+```{r}
+#| label: data-samenvoegen
+tse.agglomerated <- agglomerateByRank(tse, rank='Phylum')
+
+# Check
+datatable(
+    data.frame(rowData(tse.agglomerated)),
+    options = list(pageLength = 5),rownames = FALSE)
+```
+
+Perfect! Nu bevatten onze gegevens alleen nog maar taxonomische informatie tot
+op het niveau van het phylum, waardoor het gemakkelijker is om de nadruk te
+leggen op deze specifieke rang bij het analyseren van de data.
+
+## Metingen
+
+### Microbiële diversititeit
+
+Microbiële diversititeit in microbiologie wordt gemeten op
+vershillende manieren:
+
+-   Soortenrijkdom: Het totale aantal soorten micro-organismen.
+-   Evenwichtigheid: De verdeling van soorten binnen een microbioom.
+-   Diversiteit: De combinatie van beide (soortenrijkdom en evenwichtigheid).
+
+[**@Hill's coefficiënt**](https://en.wikipedia.org/wiki/Hill_equation_(biochemistry))
+combineert deze soorten metingen tot een formule. De drie vorige maatstaven
+worden ook wel *Alfabetische diversiteit (alpha-diversiteit)* genoemd.
+
+```{r}
+#| label: rijkdom
+# Schatting (waargenomen) rijkdom
+tse_alpha <- addAlpha(
+    tse, 
+    assay.type = "counts", 
+    index = "observed", 
+    name="observed")
+
+# Controleer enkele van de eerste waarden in colData
+head(tse_alpha$observed)
+```
+
+Het resultaat toont de geschatte rijkdomwaarden voor verschillende monsters
+of locaties binnen de dataset. Het geeft een idee van hoe divers elk monster
+is in verhouding tot het aantal verschillende soorten dat aanwezig is. We
+kunnen dan vervolgens een figuur tekenen om dit te visualiseren.
+
+```{r}
+#| label: rijkdom-grafiek
+plotColData(
+    tse_alpha, 
+    "observed", 
+    "cohort", 
+    colour_by = "patient_status") +
+  
+    theme(axis.text.x = element_text(angle=45,hjust=1)) + 
+    labs(y=expression(Richness[Observed]))
+```
+
+Om nog een stap verder te gaan, kunnen we ook de geschatte Shannon-index
+vergelijken met de waargenomen soortenrijkdom. De Shannon-index kwantificeert
+de diversiteit in relatie tot zowel het aantal verschillende soorten (rijkdom)
+als de gelijkheid van hun verspreiding (evenwichtigheid) en wordt als volgt
+berekend:
+
+$$
+H' = -\sum_{i=1}^{R} p_i \ln(p_i)
+$$
+
+is het aandeel dat bestaat uit een bepaald micro-organisme binnen een
+microbioom.
+
+<hr/>
+
+Eerst kunnen we deze maatstaf eenvoudig berekenen en toevoegen aan onze TSE.
+
+```{r}
+#| label: diversiteit
+tse_alpha <- addAlpha(
+    tse_alpha, 
+    assay.type = "counts",
+    index = c("shannon"), 
+    name = c("shannon"))
+```
+
+En daarna kunnen we de twee maten van diversiteit vergelijken door de
+volgende grafieken te maken.
+
+```{r}
+#| label: shanon-grafiek
+
+# Initialisatie van het grafiek object
+plots <- lapply(
+    c("observed", "shannon"),
+    plotColData,
+    object = tse_alpha,
+    x = "patient_status",
+    colour_by = "patient_status")
+
+# Weergave verbeteren
+plots <- lapply(plots, "+", 
+    theme(
+        axis.text.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.ticks.x = element_blank()))
+
+# Grafieken vertonen
+(plots[[1]] | plots[[2]]) +
+    plot_layout(guides = "collect")
+```
+
+Het is erg belangrijk om al deze vergelijkingen te maken om diversiteit te
+kwantificeren en monsters in onze gegevens te vergelijken met behulp van
+verschillende maatstaven. - Je kunt andere soorten vergelijkingen
+[**direct in het boek vinden**](https://microbiome.github.io/OMA/docs/devel/pages/14_alpha_diversity.html).
+
+<hr>
+
+### Community similarity (Gemeenschapsovereenkomst)
+
+Community similarity of Gemeenschapsovereenkomst verwijst naar de mate
+waarin micro-organismen op elkaar lijken qua samenstelling en overvloed
+van verschillende microbiële taxa. Dit kan ons helpen begrijpen in hoeverre
+verschillende monsters op elkaar lijken en faciliteert het helpen van
+belangrijke informatie. In microbiële analyse is het echter gebruikelijker
+om de ongelijkheid (Beta diversiteit) tussen twee monsters A en B te meten
+met behulp van de Bray-Curtis-formule, die als volgt wordt gedefinieerd:
+
+$$
+BC_{ij} = \frac{\sum_{k} |A_{k} - B_{k}|}{\sum_{k} (A_{k} + B_{k})}
+$$
+
+Gelukkig biedt de [**mia pakket**](https://microbiome.github.io/mia/) ons een
+eenvoudige manier om ten eerste de relatieve overvloed te berekenen en daarna
+de Bray-Curtis ongelijkheid. de relatieve overvloed kan worden toegevoegd aan
+onze TSE met behulp van de `transformAssay` methode:
+
+```{r}
+#| label: bereken-relabundance
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+```
+
+Dit resulteert in een matrix waarbij de verschillende monsters als rijen
+worden weergegeven en de overvloed ten opzichte van de monsters als kolommen.
+Deze nieuwe maatstaaf is makkelijk toegankelijk via de assays van de tse:
+
+```{r}
+#| label: toon-relabundance
+assay(tse, "relabundance")[5:10,1:10]
+```
+
+In ons geval bevat de assay 151 rijen en 27 kolommen. Zoveel kolommen en
+dus dimensies kunnen datavisualisatie belemmeren.
+
+Om het verschil tussen de verschillende monsters te visualiseren, kunnen
+we een hoofdcomponentenanalyse uitvoeren op de nieuwe assay. Dit projecteert
+de Bray-curtis dimensies op een lagere ruimte met behoud van zoveel mogelijk
+variatie. De geprojecteerde waarden worden principale coördinaten genoemd.
+U kunt hier @Multidimensional-scaling meer lezen over dit type analyse.
+
+MIA biedt geen directe manier om de dimensionaliteit te reduceren, maar we
+kunnen wel gebruik maken van Bioconductor's scater pakket en het vegan pakket,
+dat @R_vegan hier kan worden gevonden om de ongelijkheid om te zetten in
+werkelijke afstanden die gevisualiseerd kunnen worden:
+
+```{r}
+#| label: Hoofdcomponentenanalyse
+#| output: false
+
+# Voer een Hoofdcomponentenanalyse uit  op de relabundance assay en behoudt de Bray-Curtis afstanden.
+tse <- runMDS(
+    tse,
+    FUN = vegdist,
+    method = "bray",
+    assay.type = "relabundance",
+    name = "MDS_bray")
+```
+
+Nu we de hoofdcoördinaten hebben berekend, kunnen we ze als volgt weergeven
+in een tweedimensionale ruimte:
+
+```{r}
+#| label: grafiek-hoofdcomponentenanalyse
+# Maak een ggplot object
+p <- plotReducedDim(tse, "MDS_bray",colour_by = "cohort")
+
+# Converteren naar een interactief plot met ggplotly
+ggplotly(p)
+```
+
+De assen zijn echter niet erg informatief en de hoeveelheid behouden variantie
+door het algoritme is nergens te vinden. We kunnen de grafiek op de volgende
+manier aanpassen om meer informatie weer te geven :
+
+```{r}
+#| label: Bereken-variantie
+# Berekent de behouden variantie
+e <- attr(reducedDim(tse, "MDS_bray"), "eig")
+rel_eig <- e / sum(e[e > 0])
+
+# voegt de variantie toe aan de assen van de grafiek
+p <- p + labs(
+    x = paste("Component 1 (", round(100 * rel_eig[[1]], 1), "%", ")", sep = ""),
+    y = paste("Component 2 (", round(100 * rel_eig[[2]], 1), "%", ")", sep = ""))
+
+# Reonvert to an interactive plot with ggplotly
+ggplotly(p)
+```
+
+Elke as toont nu de hoeveelheid variantie, in ons geval ongelijkheid, van elk
+hoofdcoördinaat. Je kunt meer opties toevoegen om bijvoorbeeld een bepaald
+kenmerk in te kleuren. Meer hierover vindt u in deze sectie
+[@sec-community-similarity] van het OMA boek.
+
+<hr>
+
+## Datavisualisatie met heatmaps
+
+Heatmaps zijn een van de meest veelzijdige manieren om je gegevens te
+visualiseren. In dit gedeelte behandelen we hoe je een eenvoudige heatmap
+maakt om de meest voorkomende taxa te visualiseren met behulp van het
+[**sechm pakket**](https://bioconductor.org/packages/release/bioc/html/sechm.html).
+Ga voor een meer gedetailleerde heatmap naar
+**dit gedeelte**[@sec-cross-correlation].
+
+Laten we de TreeSE subsetten naar de meest voorkomende taxa met behulp
+van een alternatief experiment:
+
+```{r}
+#| label: meest-voorkomende
+altExp(tse, "prevalence-subset") <- subsetByPrevalent(tse,prevalence=0.5)[1:5,]
+```
+
+Bij het subsetten met deze functie bevat het resulterende object niet
+langer de juiste relatieve abundanties, omdat deze abundanties oorspronkelijk
+werden berekend op basis van de volledige dataset en niet op basis van de
+subset. Daardoor moeten we de waarden opnieuw berekenen om de subset accuraat
+te kunnen weergeven door middel van een heatmap. Omwille van de leesbaarheid
+subsetten we ook de eerste vijf taxa na de eerste subset.
+
+```{r}
+#| label: herbereken-relabundance
+altExp(tse, "prevalence-subset") <- transformAssay(
+    altExp(tse, "prevalence-subset"),
+    assay.type = "counts",
+    method = "relabundance")
+```
+
+Nu we de gegevens hebben voorbereid, kunnen we de eerder geladen
+`sechm`-bibliotheek gebruiken om de heatmap weer te geven:
+
+```{r}
+#| label: heatmap
+# Definieert de kleuren.
+setSechmOption("hmcols", value=c("#F0F0FF","#007562"))
+
+# Geeft de daadwerkelijke heatmap weer.
+sechm(
+    altExp(tse, "prevalence-subset"), features =
+    rownames(rowData(altExp(tse, "prevalence-subset"))),
+    assayName="relabundance",show_colnames=TRUE)
+```
+
+In de heatmap hierboven valt op dat Parabacteroides relatief vaak voorkomen
+in sommige monsters terwijl Akkermansia zeer weinig wordt gedetecteerd.
+
+</div>
