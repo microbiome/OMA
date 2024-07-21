@@ -22,11 +22,24 @@ jobs:
       - name: ⏳ Collect Workflow Telemetry
         uses: runforesight/workflow-telemetry-action@v1
 
+      - name: 🧹 Clean up Docker environment
+        run: |
+          docker system prune --all --force --volumes
+
       - name: 🐳 Set up QEMU
         uses: docker/setup-qemu-action@v2
+
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
   
+      - name: 📦 Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
       - name: 📝 Get book info
         id: info
         env:
