@@ -211,21 +211,14 @@ technique for binary classification problems.
 ```{r}
 #| label: ROC
 
-library(plotROC)
+library(ROCR)
 
-# Add observation as binary
-res[["obs_binary"]] <- 0
-res[["obs_binary"]][ res[["obs"]] == "healthy" ] <- 1
-roc_plot <- ggplot(res, aes(m = .data[["healthy"]], d = .data[["obs_binary"]])) + 
-    geom_roc(labels = FALSE, n.cuts = 0) +
-    labs(x = "False Positive Rate", y = "True Positive Rate")
-# Add AUC
-p <- roc_plot +
-    geom_rocci(fill="pink", sig.level = 0.05) +
-    geom_text(aes(
-        0.5, 0.5, label = paste0("AUC = ", round(calc_auc(roc_plot)$AUC, 3))
-        )) +
-    theme(legend.position="none")
+# Get positive class
+pos_class <-levels(res[["obs"]])[[1]]
+# Create ROC plot
+pred <- prediction(res[[pos_class]], ifelse(res[["obs"]] == pos_class, 1, 0))
+perf <- performance(pred, measure = "tpr", x.measure = "fpr")
+p <- plot(perf)
 p
 ```
 
