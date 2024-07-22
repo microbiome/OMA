@@ -1152,10 +1152,10 @@ Useful functions: scater::runMDS, runNMDS, transformAssay, ggplot, scater::plotR
 
 See the OMA book for examples.
 
-**Extra** Cool Exercise : Identify Patterns and Clusters
+**Extra** Cool exercise : Identifying patterns and clusters.
 To make the exercise more engaging, let's do an exploratory data analysis task:
 
-### 1: k-means Clustering on Reduced Dimensions and Visualization
+#### 1: k-means clustering on reduced dimensions and visualization 
 
 - Performs k-means clustering on reduced dimensional data obtained from PCoA.
 - Visualizes the clusters in a scatter plot of the reduced dimensions.
@@ -1184,7 +1184,7 @@ tse <- runMDS(tse, FUN = vegan::vegdist, method = "bray", assay.type = "counts")
 # Perform k-means clustering (k = 3) using the bluster package
 set.seed(123)
 clustering_result <- clusterRows(reducedDim(tse, "MDS"), BLUSPARAM=KmeansParam(centers=3))
-colData(tse)$cluster <- as.factor(clustering_result)
+tse <- addCluster(tse, clustering_result, colLabel = "cluster")
 
 # Visualize MDS with clusters
 plotReducedDim(tse, dimred = "MDS", colour_by = "cluster") +
@@ -1193,7 +1193,7 @@ plotReducedDim(tse, dimred = "MDS", colour_by = "cluster") +
   scale_color_manual(values = c("red", "blue", "green"))
 ```
 
-### 2: Cluster Analysis with Heatmap Visualization
+#### 2: Cluster analysis with heatmap visualization
 
 - Hierarchical clustering of samples based on abundance data.
 - Visualizes the clustered data using a heatmap, with cluster information added to metadata.
@@ -1208,37 +1208,38 @@ plotReducedDim(tse, dimred = "MDS", colour_by = "cluster") +
 library(SummarizedExperiment)
 library(sechm)
 library(compositions)
+library(mia)
 
 # Generate a sample SummarizedExperiment object 
 data(GlobalPatterns)
 tse <- GlobalPatterns
 
-# CLR transformation of abundance data matrix
-clr_data <- as.matrix(transformAssay(tse, method = "clr", assay.type = "counts", pseudocount = TRUE))
+# CLR transformation of abundance data matrix and add it to the tse object
+clr_data <- transformAssay(tse, method = "clr", assay.type = "counts", pseudocount = TRUE)
+assay(tse, "clr") <- as.matrix(clr_data)
 
 # Hierarchical clustering on samples
-clustering <- hclust(dist(clr_data, method = "euclidean"), method = "average")
+clustering <- hclust(dist(assay(tse, "clr"), method = "euclidean"), method = "average")
 clusters <- cutree(clustering, k = 3)
-colData(tse)$cluster <- as.factor(clusters)
+tse <- addCluster(tse, clusters, colLabel = "cluster")
 
 # Create annotation for clusters
-annotation_df <- data.frame(Cluster = colData(tse)$cluster)
 annotation_colors <- list(Cluster = c("1" = "red", "2" = "blue", "3" = "green"))
 
 # Visualize the heatmap with sechm
 sechm(
-  mat = clr_data,
+  mat = assay(tse, "clr"),
   row_labels = FALSE,
   column_labels = FALSE,
-  row_cluster = clustering,
-  column_cluster = clustering,
-  row_annotation = annotation_df,
+  row_cluster = clustering,  # Use clustering object directly
+  column_cluster = clustering,  
+  row_annotation = as.data.frame(colData(tse)),
   row_annotation_colors = annotation_colors,
   main = "Heatmap with Clustering")
 ```
 
 
-### 3: Heatmap with Annotations
+#### 3: Heatmap with annotations
 
 - Uses heatmaps to visualize high-dimensional data, such as abundance data.
 - Annotations add context to the heatmap, linking clustering patterns to metadata like sample groups or experimental conditions.
@@ -1261,14 +1262,9 @@ tse <- GlobalPatterns
 # Ensure cluster information is correctly added to colData
 # (Assuming the clusters have been calculated previously and added to colData)
 
-# Create a sample metadata annotation (e.g., SampleType and Cluster)
-sample_metadata <- data.frame(SampleType = colData(tse)$SampleType,
-                              Cluster = colData(tse)$cluster)
-rownames(sample_metadata) <- colnames(assay(tse, "counts"))
-
 # Visualize the heatmap with annotations using sechm
 sechm_plot <- sechm(assay(tse, "counts"),
-                    annotation_col = sample_metadata,
+                    annotation_col = as.data.frame(colData(tse)),
                     clustering_distance_rows = "euclidean",
                     clustering_distance_cols = "euclidean",
                     clustering_method = "complete",
