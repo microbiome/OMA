@@ -1,0 +1,246 @@
+# miaverse {#sec-ecosystem}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+This chapter provides an overview of the miaverse ecosystem.
+[@sec-data-containers] aims to describe the relationship between data containers
+utilized in miaverse. [@sec-packages] details the packages involved, while
+[@sec-installation] provides guidance on installing these packages.
+
+miaverse (MIcrobiome Analysis uniVERSE) is an actively developed R/Bioconductor
+framework for microbiome downstream analysis. It becomes particularly relevant
+when working with abundance tables derived from sequencing data, whether from
+shotgun metagenomics or 16S rRNA sequencing. Before utilizing miaverse,
+sequencing data must undergo preprocessing to convert raw sequence reads into
+abundance tables.
+
+miaverse consists of multiple R/Bioc packages and this online book that you are
+reading. The idea is not only to offer tools for microbiome downstream analysis
+but also to serve as a resource for valuable insights, offering guidance on
+conducting microbiome data analysis and developing effective microbiome data
+science workflows.
+
+The key concept of miaverse lies in its utilization of
+`SummarizedExperiment`-based data containers. This design choice enhances
+interoperability and versatility within the broader Bioconductor framework,
+facilitating access to an expanding array of tools. In practice, this approach
+allows for the integration of promising methods from related fields, such as
+single-cell sequencing.
+
+![miaverse framework.](figures/FigureOverviewV2_mod.png){width="100%"}
+
+## Data containers {#sec-data-containers}
+
+As discussed, miaverse is built upon `TreeSummarizedExperiment (TreeSE)` data
+container. `TreeSummarizedExperiment` is expanded from
+`SingleCellExperiment (SCE)` by incorporating additional slots tailored for
+microbiome analysis.
+`SingleCellExperiment` class which is designed for single-cell sequencing
+[@R_SingleCellExperiment]. Bioconductor offers wide variety of tools for this
+field including online book Orchestrating Single-Cell Analysis in Bioconductor
+(OSCA) [@Amezquita2020]. `SingleCellExperiment`, on the other hand, is further
+derived from `SummarizedExperiment (SE)` class. This hierarchical relationship
+among data containers means that all methods applicable to `SingleCellExperiment` and
+`SummarizedExperiment` objects can also be applied to `TreeSummarizedExperiment`
+objects.
+
+- `SummarizedExperiment` (`SE`) [@R_SummarizedExperiment] is a generic and
+highly optimized container for complex data
+structures. It has become a common choice for analyzing various types
+of biomedical profiling data, such as RNAseq, ChIp-Seq, microarrays,
+flow cytometry, proteomics, and single-cell
+sequencing.
+
+- `SingeCellExperiment` (`SCE`) [@R_SingleCellExperiment] was developed as
+an extension to store copies of data to same data container.
+
+- `TreeSummarizedExperiment` (`TreeSE`) [@R_TreeSummarizedExperiment] was
+developed as an extension to incorporate hierarchical
+information (such as phylogenetic trees and sample hierarchies) and
+reference sequences.
+
+```{r}
+#| label: TreeSE-figure
+#| fig-cap: SummarizedExperiment is extended to SingleCellExperiment and it is further extended to TreeSummarizedExperiment.
+#| fig-width: 4
+#| echo: false
+
+library(ggplot2)
+
+p <- ggplot() +
+    theme_void() +  # Remove axis and background
+    annotate("text", x = c(1, 2, 3), y = 1, label = c("SE", "SCE", "TreeSE"), size = 6) +
+    annotate(
+        "segment", x = c(1+0.25, 2+0.25),
+        xend = c(2-0.25, 3-0.25), y = 1, yend = 1,
+        arrow = arrow(length = unit(0.2, "inches"), type = "closed"))
+p + expand_limits(x = c(0.75, 3.25))
+```
+
+`MultiAssayExperiment` (`MAE`) [@Ramos2017] provides an organized
+way to bind several different data containers together in a single
+object. For example, we can bind microbiome data (in `TreeSE`
+container) with metabolomic profiling data (in `SE`) container, with
+(partially) shared sample metadata. This is convenient and robust for
+instance, in subsetting and other data manipulation tasks. Microbiome
+data can be part of multiomics experiments and analysis strategies. We
+highlight how the methods used throughout in this book relate to this
+data framework by using the `TreeSE`,
+`MAE`, and classes beyond.
+
+## Package ecosystem {#sec-packages}
+
+Methods for the`(Tree)SummarizedExperiment` and `MultiAssayExperiment`
+data containers are provided by multiple independent developers
+through R/Bioconductor packages. Some of these are listed below (tips
+on new packages are [welcome](https://microbiome.github.io)).
+
+Especially, Bioconductor packages include comprehensive manuals as they are
+required. Follow the links below to find package vignettes and other materials
+showing the utilization of packages and their methods.
+
+### mia package family
+
+The mia package family provides general methods for microbiome data wrangling,
+analysis and visualization.
+
+- [mia](https://microbiome.github.io/mia/): Microbiome analysis tools [@R_mia]
+- [miaViz](https://microbiome.github.io/miaViz/): Microbiome analysis specific visualization [@Ernst2022]
+- [miaSim](https://microbiome.github.io/miaSim/): Microbiome data simulations [@Simsek2021]
+- [miaTime](https://microbiome.github.io/miaTime/): Microbiome time series analysis [@Lahti2021]
+
+### SE supporting packages {#sec-sub-diff-abund}
+
+The following DA methods support `(Tree)SummarizedExperiment`.
+
+- [ANCOMBC](https://bioconductor.org/packages/devel/bioc/html/ANCOMBC.html) for differential abundance analysis
+- [benchdamic](https://bioconductor.org/packages/release/bioc/vignettes/benchdamic/inst/doc/intro.html) for benchmarking differential abundance methods
+- [ALDEx2](https://www.bioconductor.org/packages/release/bioc/html/ALDEx2.html) for differential abundance analysis
+
+### Other relevant packages
+
+- [LinDA](https://github.com/zhouhj1994/LinDA)
+- [vegan](https://vegandevs.github.io/vegan/)
+- [philr](http://bioconductor.org/packages/devel/bioc/html/philr.html) (@Silverman2017) phylogeny-aware phILR transformation
+- [MicrobiotaProcess](https://bioconductor.org/packages/release/bioc/html/MicrobiotaProcess.html) for the "tidy" analysis of microbiome and other ecological data
+- [Tools for Microbiome Analysis](https://microsud.github.io/Tools-Microbiome-Analysis/)
+site listed over 130 R packages for microbiome data science in 2023. 
+Many of these are not in Bioconductor, or do not directly support the
+data containers  used in this book but can be often used with minor
+modifications. The phyloseq-based tools can be used by converting the
+TreeSE data into phyloseq with `convertToPhyloseq`.
+
+### Open microbiome data 
+
+Hundreds of published microbiome datasets are readily available in
+these data containers (see [@sec-example-data]).
+
+## Installation {#sec-installation}
+
+### Installing all packages
+
+You can install all packages that are required to run every example in this
+book via the following command:
+
+```{r}
+#| label: install_packages
+#| eval: FALSE
+remotes::install_github("microbiome/OMA", dependencies = TRUE, upgrade = TRUE)
+```
+
+Optionally, you can install all packages or just certain ones with the following
+script.
+
+```{r}
+#| label: all_packages
+#| eval: FALSE
+#| 
+
+# URL of the raw CSV file on GitHub. It includes all packages needed.
+url <- "https://raw.githubusercontent.com/microbiome/OMA/devel/oma_packages/oma_packages.csv"
+
+# Read the CSV file directly into R
+df <- read.csv(url)
+packages <- df[[1]]
+
+# Get packages that are already installed installed
+packages_already_installed <- packages[ packages %in% installed.packages() ]
+
+# Get packages that need to be installed
+packages_need_to_install <- setdiff( packages, packages_already_installed )
+
+# Loads BiocManager into the session. Install it if it not already installed.
+if( !require("BiocManager") ){
+    install.packages("BiocManager")
+    library("BiocManager")
+}
+
+# If there are packages that need to be installed, installs them with BiocManager
+# Updates old packages.
+if( length(packages_need_to_install) > 0 ) {
+   install(packages_need_to_install, ask = FALSE)
+}
+
+# Load all packages into session. Stop if there are packages that were not
+# successfully loaded
+pkgs_not_loaded <- !sapply(packages, require, character.only = TRUE)
+pkgs_not_loaded <- names(pkgs_not_loaded)[ pkgs_not_loaded ]
+if( length(pkgs_not_loaded) > 0 ){
+    stop("Error in loading the following packages into the session: '", paste0(pkgs_not_loaded, collapse = "', '"), "'")
+}
+```
+
+### Installing specific packages {#sec-packages_specific}
+
+You can install R packages of your choice with the following procedures.
+
+**Bioconductor release version** is the most stable and tested version but may
+miss some of the latest methods and updates.
+
+```{r}
+#| label: bioc_release
+#| eval: FALSE
+BiocManager::install("microbiome/mia")
+```
+
+
+**Bioconductor development version** requires the installation of the
+latest R beta version. This is primarily recommended for those who
+already have experience with R/Bioconductor and need access to the
+latest updates.
+
+```{r}
+#| label: bioc_devel
+#| eval: FALSE
+BiocManager::install("microbiome/mia", version = "devel")
+```
+
+**Github development version** provides access to the latest but
+potentially unstable features. This is useful when you want access to
+all available tools.
+
+```{r}
+#| label: github
+#| eval: FALSE
+devtools::install_github("microbiome/mia")
+```
+
+### Troubleshoot in installing
+
+If you encounter installation issue related to package dependencies please see
+the troubleshoot page
+[here](https://github.com/microbiome/OMA/blob/devel/PackageInstallations_Troubleshoots.qmd)
+and [@sec-support].
+
+::: {.callout-tip}
+## Summary
+
+- TreeSummarizedExperiment is derived from SummarizedExperiment class.
+- miaverse is based on TreeSummarizedExperiment data container.
+- We can borrow methods from packages utilizing SingleCellExperiment and
+SummarizedExperiment. 
+
+:::
