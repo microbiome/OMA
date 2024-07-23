@@ -148,8 +148,9 @@ Sample dissimilarity can be visualized on a lower-dimensional display (typically
 provides tools to incorporate additional information encoded by color, shape,
 size and other aesthetics. Can you find any difference between the groups?
 
-```{r "MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."}
-#| label: "MDS plot based on the Bray-Curtis distances"
+```{r}
+#| label: MDS plot based on the Bray-Curtis distances
+#| fig-cap:  MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset.
 
 # Create ggplot object
 p <- plotReducedDim(tse, "MDS_bray", colour_by = "Group")
@@ -288,11 +289,9 @@ distance calculations later on.
 ```{r}
 #| label: rarefaction2
 
-tse <- GlobalPatterns
-
 # Let us see what happens when we operate with ntop highest variance features
 ntop <- 5
-tse <- tse[head(rev(order(rowSds(assay(tse, "counts")))), ntop), ]
+tse_sub <- tse[head(rev(order(rowSds(assay(tse, "counts")))), ntop), ]
 ```
 
 Let us first convert the count assay to centered log ratio (clr) assay and 
@@ -303,21 +302,21 @@ calculate Aitchison distance without rarefaction:
 
 # Centered log-ratio transformation to properly apply Aitchison distance
 
-tse <- transformAssay(
-                      tse,
-                      assay.type = "counts",		      
-                      method = "clr",
-                      pseudocount = 1
-                      )
+tse_sub <- transformAssay(
+  tse_sub,
+  assay.type = "counts",		      
+  method = "clr",
+  pseudocount = 1
+  )
 
 # Run MDS on clr assay with Aitchison distance
-tse <- runMDS(
-              tse,
-              FUN = vegan::vegdist,
-              method = "euclidean",
-              assay.type = "clr",
-              name = "MDS_aitchison"
-              )
+tse_sub <- runMDS(
+  tse_sub,
+  FUN = vegan::vegdist,
+  method = "euclidean",
+  assay.type = "clr",
+  name = "MDS_aitchison"
+  )
 ```
 
 The function `vegan::avgdist` can use rarefaction to compute beta diversity:
@@ -332,26 +331,27 @@ clr <- function (x) {
 }
 
 # Run transformation after rarefactions before calculating the beta diversity..
-tse <- runMDS(tse, 
-              assay.type="counts",
-              ntop = nrow(tse), 
-              FUN = vegan::avgdist, # Custom beta diversity function that 
-                                    # includes rarefaction
-              sample = min(colSums(assay(tse, "counts"))), # rarefaction depth 
-              distfun = vegan::vegdist, # Use vegdist beta diversity function
-              dmethod = "euclidean", # euclidean beta diversity
-              iterations = 10,
-              transf=clr,
-	      replace=TRUE,
-              name = "MDS_aitchison_rarefied") 
+tse_sub <- runMDS(tse_sub, 
+  assay.type="counts",
+  ntop = nrow(tse_sub), 
+  FUN = vegan::avgdist, # Custom beta diversity function that includes rarefaction
+  sample = min(colSums(assay(tse_sub, "counts"))), # rarefaction depth 
+  distfun = vegan::vegdist, # Use vegdist beta diversity function
+  dmethod = "euclidean", # euclidean beta diversity
+  iterations = 10,
+  transf=clr,
+  replace=TRUE,
+  name = "MDS_aitchison_rarefied"
+  )
 
-plotReducedDim(tse, "MDS_aitchison_rarefied")
+plotReducedDim(tse_sub, "MDS_aitchison_rarefied")
 
 # Generate plots for non-rarefied and rarefied Bray-Curtis distances scaled by 
 # MDS
-plots <- lapply(c("MDS_aitchison", "MDS_aitchison_rarefied"),
-                plotReducedDim,
-                object = tse)
+plots <- lapply(
+  c("MDS_aitchison", "MDS_aitchison_rarefied"),
+  plotReducedDim,
+  object = tse_sub)
 
 # Generate multi-panel plot
 wrap_plots(plots) +
@@ -362,10 +362,13 @@ wrap_plots(plots) +
 #| label = rarefaction3
 
 # Check correlation between non-rarefied and rarefied Aichitson distances
-print(all.equal(current = cor(as.vector(reducedDim(tse, "MDS_aitchison")),
-                        as.vector(reducedDim(tse, "MDS_aitchison_rarefied"))),
-          target = 1,
-          tolerance = 0.05))
+print(all.equal(
+  current = cor(
+    as.vector(reducedDim(tse_sub, "MDS_aitchison")),
+    as.vector(reducedDim(tse_sub, "MDS_aitchison_rarefied"))
+    ),
+    target = 1,
+    tolerance = 0.05))
 ```
 
 `ntop` is a `runMDS` option. Here it is set to total number of features in 
@@ -393,8 +396,8 @@ for (k in 1:2) {
 
   # Principal axes are sign invariant;
   # align the signs; if the correlation is negative then swap the other axis
-  pcx <- reducedDim(tse, "MDS_aitchison")[,k]
-  pcy <- reducedDim(tse, "MDS_aitchison_rarefied")[,k]
+  pcx <- reducedDim(tse_sub, "MDS_aitchison")[,k]
+  pcy <- reducedDim(tse_sub, "MDS_aitchison_rarefied")[,k]
   pcy <- sign(cor(pcx, pcy)) * pcy
   r <- cor(pcx, pcy)
 
@@ -404,7 +407,7 @@ for (k in 1:2) {
 ```
 
 The mia package includes the rarefaction function `rarefyAssay` that randomly
-subsamples a given assay of a *TreeSummarizedExperiment* dataset. However, the 
+subsamples a given assay of a `TreeSummarizedExperiment` dataset. However, the 
 iterations and beta diversity calculations are not included.
 
 ### Other ordination methods {#sec-other-ord-methods}
