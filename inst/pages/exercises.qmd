@@ -1552,6 +1552,24 @@ sechm(
     show_colnames=TRUE)
 ```
 
+5. Create a basic heatmap of the data using the `pheatmap` package.
+
+```{r}
+#| label: heatmap-ex5
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+library(pheatmap)
+
+# Create example data
+set.seed(123)
+example_data <- matrix(rnorm(200), nrow = 20, ncol = 10)
+
+# Create basic heatmap using pheatmap
+pheatmap(example_data)
+```
+
 ### Advanced Heatmaps
 
 1. Import mia, miaviz, complexHeatmap, shadowtext as well as a dataset of your
@@ -1611,7 +1629,7 @@ correlations <- getCrossAssociation(
     show.warnings = FALSE)
 ```
 
-4. plot a heatmap using the correlations and mark significant correlations
+4. Plot a heatmap using the correlations and mark significant correlations
 (p<0.05) with a cross.
 
 ```{r}
@@ -1674,71 +1692,134 @@ p <- Heatmap(
 p
 ```
 
-**Extra** Cool Exercise : Identify Patterns and Clusters
-To make the exercise more engaging, let's do an exploratory data analysis task:
+**Extra** Cool exercises :
 
-#### 1. Cluster Analysis on PCoA/PCA Results:
+1. Interactive Heatmap:
+Create an interactive heatmap.
 
-i. Perform clustering on the ordination results (e.g., k-means clustering).
-ii. Visualize the clusters on the ordination plots.
+```{r}
+#| label: extra-interactiveheatmap-ex1
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
 
-```{r, eval = FALSE}
-library(scater)
+# Load necessary libraries
+library(heatmaply)
 
-# Setting seed for reproducibility
-set.seed(123)
+# Create example data
+example_data <- matrix(rnorm(200), nrow = 20, ncol = 10)
 
-# Perform k-means clustering on the reduced dimensions of pcoa_bray
-pcoa_bray_clusters <- kmeans(reducedDim(pcoa_bray), centers = 3)$cluster
-
-# Plot the reduced dimensions of pcoa_bray with clusters as colors
-plotReducedDim(pcoa_bray, colour_by = pcoa_bray_clusters)
-
-# Perform k-means clustering on the reduced dimensions of pca_aitchison
-pca_aitchison_clusters <- kmeans(reducedDim(pca_aitchison), centers = 3)$cluster
-
-# Plot the reduced dimensions of pca_aitchison with clusters as colors
-plotReducedDim(pca_aitchison, colour_by = pca_aitchison_clusters)
+# Create interactive heatmap
+heatmaply(example_data)
 ```
 
-Where: 
-- `reducedDim` is a function that extracts the reduced dimensionality
-representation of your data (e.g., from a PCA or PCoA object).
-- `plotReducedDim` is a function that can plot these reduced dimensions and
-has a 'colour_by argument' that accepts a vector of cluster assignments.
+2. k-means clustering on reduced dimensions and visualization 
 
-#### 2. Heatmap with Annotations:
+- Performs k-means clustering on reduced dimensional data obtained from PCoA.
+- Visualizes the clusters in a scatter plot of the reduced dimensions.
 
-- Annotate the heatmap with additional metadata (e.g., subject groups or
-sample types).
+```{r}
+#| label: extra-kmeansclustering-heatmap-ex2
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
 
-```{r, eval = FALSE}
-# Load necessary libraries
+library(mia)
 library(SummarizedExperiment)
+library(vegan)
+library(scater)
+
+# Load the dataset
+data(GlobalPatterns)
+tse <- GlobalPatterns
+
+# Perform MDS on the abundance data using scater::runMDS
+tse <- runMDS(tse, FUN = vegan::vegdist, method = "bray", assay.type = "counts")
+
+# Extract the reduced dimensions
+mds_data <- reducedDim(tse, "MDS")
+
+# Perform k-means clustering (k = 3) using the base R kmeans function
+set.seed(123)
+kmeans_result <- kmeans(mds_data, centers = 3)
+
+# Add cluster labels to the SummarizedExperiment object
+# Convert clustering result to a factor
+tse$cluster <- factor(kmeans_result$cluster)
+
+# Visualize MDS with clusters
+plotReducedDim(tse, dimred = "MDS", colour_by = "cluster") +
+  labs(title = "MDS with k-means Clustering") +
+  theme_minimal()
+```
+
+3. Hierarchial Clustering
+- Hierarchical clustering of samples based on abundance data.
+- Visualizes the clustered data using a heatmap, with cluster information added to metadata.
+
+```{r}
+#| label: extra-hierarchialclustering-heatmap-ex3
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
 library(ComplexHeatmap)
 
-# Example data creation
-# Assuming enterotype is a SummarizedExperiment object with sample metadata
-# and assay_data is a matrix containing assay data
+# Perform hierarchical clustering on the MDS data (extracted in last exercise)
+dist_matrix <- dist(mds_data)  # Compute distance matrix on MDS dimensions
+hclust_result <- hclust(dist_matrix, method = "complete")
 
-# Create example SummarizedExperiment object
-example_data <- matrix(runif(200), nrow = 20, ncol = 10) # Example assay data
-col_data <- DataFrame(
-    Sample = paste0("Sample", 1:10),
-    Group = rep(c("A", "B"), each = 5)) # Example sample metadata
-enterotype <- SummarizedExperiment(
-    assays = list(counts = example_data), colData = col_data)
+# Cut the dendrogram into 3 clusters
+cluster_labels <- cutree(hclust_result, k = 3)
 
-# Extract sample metadata
-sample_metadata <- colData(enterotype)
+# Add cluster labels to the SummarizedExperiment object
+colData(tse)$cluster <- factor(cluster_labels)
 
-# Extract assay data
-assay_data <- assay(enterotype, "counts")
+# Visualize MDS with clusters using scater::plotReducedDim
+plotReducedDim(tse, dimred = "MDS", colour_by = "cluster") +
+  labs(title = "MDS with Hierarchical Clustering") +
+  theme_minimal()
 
-# Plot heatmap with clustering and sample annotations
-pheatmap(
-    assay_data, cluster_rows = TRUE, cluster_cols = TRUE,
-    annotation_col = as.data.frame(sample_metadata))
+# Optional: Visualize the hierarchical clustering with a heatmap
+# Convert MDS data to a matrix for heatmap visualization
+mds_matrix <- t(as.matrix(mds_data))  # Transpose the matrix to match the columns
+
+# Create a heatmap with cluster annotations
+heatmap <- Heatmap(mds_matrix,
+                   name = "MDS",
+                   show_row_dend = TRUE,
+                   show_column_dend = TRUE,
+                   column_split = cluster_labels,
+                   column_title = "Clusters",
+                   top_annotation = HeatmapAnnotation(cluster = cluster_labels),
+                   clustering_distance_columns = dist_matrix,
+                   clustering_method_columns = "complete")
+
+# Draw the heatmap
+draw(heatmap, heatmap_legend_side = "right")
+```
+
+4. Heatmap with Custom Color Palette:
+Customize the heatmap with a specific color palette to enhance visualization using ComplexHeatmap.
+
+```{r}
+#| label: extra-customcolorheatmap-ex-4
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+# Load necessary libraries
+library(ComplexHeatmap)
+library(circlize)  # for color functions
+
+# Create example data
+example_data <- matrix(rnorm(200), nrow = 20, ncol = 10)
+
+# Define custom color palette
+custom_colors <- colorRamp2(c(min(example_data), 0, max(example_data)), c("blue", "white", "red"))
+
+# Create heatmap with custom color palette
+Heatmap(example_data, col = custom_colors)
 ```
 
 ## Multiomics
