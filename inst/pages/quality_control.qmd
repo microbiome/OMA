@@ -41,10 +41,10 @@ tse <- transformAssay(tse, MARGIN = "cols", method = "relabundance")
 # assay.type / assay.type / assay.type
 # depending on the mia package version
 plotAbundanceDensity(
-    tse, layout = "jitter", 
+    tse, layout = "jitter",
     assay.type = "relabundance",
-    n = 40, point_size=1, point.shape=19, 
-    point.alpha=0.1) + 
+    n = 40, point_size=1, point.shape=19,
+    point.alpha=0.1) +
     scale_x_log10(label=scales::percent)
 ```
 
@@ -54,9 +54,9 @@ visualized as a density plot over a log-scaled axis, with
 
 ```{r, warning=FALSE, message=FALSE}
 plotAbundanceDensity(
-    tse, layout = "density", 
+    tse, layout = "density",
     assay.type = "relabundance",
-    n = 5, colour.by="nationality", 
+    n = 5, colour.by="nationality",
     point.alpha=1/10) +
     scale_x_log10()
 ```
@@ -73,7 +73,7 @@ which may be _conditionally abundant_ in a small number of samples.
 
 The population prevalence (frequency) at a 1% relative abundance
 threshold (`detection = 1/100` and `as.relative = TRUE`) can look
-like this. 
+like this.
 
 ```{r exploration-prevalence}
 getPrevalence(tse, detection = 1/100, sort = TRUE, as.relative = TRUE) |>
@@ -98,7 +98,7 @@ If the output is to be used for subsetting or storing the data in the
 
 ### Prevalence analysis
 
-To investigate microbiome prevalence at a selected taxonomic level, two 
+To investigate microbiome prevalence at a selected taxonomic level, two
 approaches are available.
 
 First, the data can be agglomerated to the taxonomic level and then
@@ -108,7 +108,7 @@ First, the data can be agglomerated to the taxonomic level and then
 # Agglomerate taxa abundances to Phylum level
 #and add the new table to the altExp slot
 altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
-# Check prevalence for the Phylum abundance table 
+# Check prevalence for the Phylum abundance table
 #from the altExp slot
 getPrevalence(
     altExp(tse,"Phylum"), detection = 1/100, sort = TRUE,
@@ -149,7 +149,7 @@ prev
 ## Note
 
 The `detection` and `prevalence` thresholds are not the same, as
-`detection` can be applied to relative counts or absolute counts depending on 
+`detection` can be applied to relative counts or absolute counts depending on
 whether `as.relative` is set `TRUE` or `FALSE`
 :::
 
@@ -170,14 +170,14 @@ are stored in the `altExp` slot.
 
 ```{r}
 rowData(altExp(tse,"Phylum"))$prevalence <- getPrevalence(
-    altExp(tse,"Phylum"), detection = 1/100, 
+    altExp(tse,"Phylum"), detection = 1/100,
     sort = FALSE,
     assay.type = "counts", as.relative = TRUE)
 ```
 
 The prevalences can then be plotted using the plotting functions from
 the `scater` package.
- 
+
 ```{r, message=FALSE, warning=FALSE}
 library(scater)
 plotRowData(altExp(tse,"Phylum"), "prevalence", colour_by = "Phylum")
@@ -191,9 +191,9 @@ tse <- agglomerateByRanks(tse)
 altExps(tse) <- lapply(
     altExps(tse), function(y){
         rowData(y)$prevalence <- getPrevalence(
-            y, detection = 1/100, 
+            y, detection = 1/100,
             sort = FALSE,
-            assay.type = "counts", 
+            assay.type = "counts",
             as.relative = TRUE)
         return(y)
     })
@@ -211,7 +211,7 @@ top_phyla_mean <- getTop(
 x <- unsplitByRanks(tse, ranks = taxonomyRanks(tse)[1:6])
 x <- addHierarchyTree(x)
 ```
- 
+
 After some preparation, the data are assembled and can be plotted with
 `plotRowTree`.
 
@@ -241,22 +241,22 @@ microbiome data summaries.
 ```{r, message=FALSE}
 library(mia)
 data("GlobalPatterns", package="mia")
-tse <- GlobalPatterns 
+tse <- GlobalPatterns
 ```
 
-### Top taxa  
+### Top taxa
 
-The function `getTop` identifies top taxa in the data.   
+The function `getTop` identifies top taxa in the data.
 
 ```{r top-feature-taxo}
 # Pick the top taxa
 top_features <- getTop(tse, method="median", top=10)
 
-# Check the information for these 
+# Check the information for these
 rowData(tse)[top_features, taxonomyRanks(tse)][1:5, 1:3]
 ```
 
-### Library size / read count  
+### Library size / read count
 
 The total counts per sample can be calculated using
 `perCellQCMetrics`/`addPerCellQC` from the `scater` package. The former one
@@ -279,36 +279,36 @@ library(ggplot2)
 p1 <- ggplot(colData(tse)) +
         geom_histogram(
             aes(x = sum), color = "black", fill = "gray", bins = 30) +
-        labs(x = "Library size", y = "Frequency (n)") + 
+        labs(x = "Library size", y = "Frequency (n)") +
         # scale_x_log10(
-            # breaks = scales::trans_breaks("log10", function(x) 10^x), 
+            # breaks = scales::trans_breaks("log10", function(x) 10^x),
             # labels = scales::trans_format("log10", scales::math_format(10^.x))) +
         theme_bw() +
         # Removes the grid
-        theme(panel.grid.major = element_blank(), 
+        theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             panel.border = element_blank(),
             panel.background = element_blank(),
             # Adds y-axis
-            axis.line = element_line(colour = "black")) 
+            axis.line = element_line(colour = "black"))
 
 library(dplyr)
 df <- as.data.frame(colData(tse)) %>%
     arrange(sum) %>%
     mutate(index = 1:n())
 p2 <- ggplot(df, aes(y = index, x = sum/1e6)) +
-    geom_point() +	
+    geom_point() +
     labs(
-        x = "Library size (million reads)", 
-        y = "Sample index") +	
+        x = "Library size (million reads)",
+        y = "Sample index") +
     theme_bw() +
     # Removes the grid
-    theme(panel.grid.major = element_blank(), 
+    theme(panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     panel.border = element_blank(),
     panel.background = element_blank(),
     # Adds y-axis
-    axis.line = element_line(colour = "black")) 
+    axis.line = element_line(colour = "black"))
 
 library(patchwork)
 p1 + p2
@@ -318,28 +318,28 @@ Library sizes and other variables from `colData` can be visualized using a
 specified function called `plotColData`.
 
 ```{r plot-viz-lib-size-2, fig.width=8, fig.height=4, fig.cap="Library sizes per sample."}
-# Sort samples by read count, 
-# order the factor levels, 
+# Sort samples by read count,
+# order the factor levels,
 # and store back to tse as DataFrame
-# TODO: plotColData could include an option 
+# TODO: plotColData could include an option
 # for sorting samples based on colData variables
 colData(tse) <- as.data.frame(colData(tse)) %>%
     arrange(X.SampleID) %>%
     mutate(X.SampleID = factor(X.SampleID, levels=X.SampleID)) %>%
         DataFrame
-plotColData(tse,"sum","X.SampleID", colour_by = "SampleType") + 
+plotColData(tse,"sum","X.SampleID", colour_by = "SampleType") +
     theme(axis.text.x = element_text(angle = 45, hjust=1)) +
-    labs(y = "Library size (N)", x = "Sample ID") 	    
+    labs(y = "Library size (N)", x = "Sample ID")
 ```
 
 ```{r plot-viz-lib-size-3, fig.width=8, fig.height=4, fig.cap="Library sizes per sample type."}
-plotColData(tse,"sum","SampleType", colour_by = "SampleType") + 
+plotColData(tse,"sum","SampleType", colour_by = "SampleType") +
     theme(axis.text.x = element_text(angle = 45, hjust=1))
 ```
 
 In addition, data can be rarefied with
 [rarefyAssay](https://microbiome.github.io/mia/reference/rarefyAssay.html),
-which normalizes the samples to an equal number of reads. 
+which normalizes the samples to an equal number of reads.
 This remains controversial, however, and strategies to mitigate the information
 loss in rarefaction have been proposed [@Schloss2024rarefaction1]
 [@Schloss2024rarefaction2].
@@ -352,9 +352,9 @@ Samples might be contaminated with exogenous sequences. The impact of
 each contaminant can be estimated based on its frequencies and
 concentrations across the samples.
 
-The following 
+The following
 [decontam functions](https://microbiome.github.io/mia/reference/isContaminant.html)
 are based on [@davis2018simple] and support such functionality:
 
-* `isContaminant`, `isNotContaminant`  
-* `addContaminantQC`, `addNotContaminantQC`  
+* `isContaminant`, `isNotContaminant`
+* `addContaminantQC`, `addNotContaminantQC`

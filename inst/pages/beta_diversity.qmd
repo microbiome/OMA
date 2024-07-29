@@ -34,7 +34,7 @@ terms dissimilarity and beta diversity are preferred.
 
 | Method description          | Assay type          | Beta diversity metric |
 |:---------------------------:|:-------------------:|:---------------------:|
-| Quantitative profiling      | Absolute counts     | Bray-Curtis           | 
+| Quantitative profiling      | Absolute counts     | Bray-Curtis           |
 | Relative profiling          | Relative abundances | Bray-Curtis           |
 | Aitchison distance          | Absolute counts     | Aitchison             |
 | Aitchison distance          | clr                 | Euclidean             |
@@ -43,9 +43,9 @@ terms dissimilarity and beta diversity are preferred.
 | Presence/Absence similarity | Absolute counts     | Jaccard               |
 | Phylogenetic distance       | Rarefied counts     | Unifrac               |
 
-In practice, beta diversity is usually represented as a `dist` object. Such an 
+In practice, beta diversity is usually represented as a `dist` object. Such an
 object is a triangular matrix where the distance between each pair of samples
-is encoded by a specific cell. 
+is encoded by a specific cell.
 This distance matrix can then undergo ordination, which is an
 important ecological tool to reduce the dimensionality of data for a more
 efficient analysis and visualization. Ordination techniques aim to capture as
@@ -56,7 +56,7 @@ similarities in an optimal way, which is defined in different ways by different
 methods.
 
 Based on the type of algorithm, ordination methods in microbiome research can
-be generally divided in two categories: 
+be generally divided in two categories:
 
 - unsupervised ordination
 - supervised ordination
@@ -75,7 +75,7 @@ library(mia)
 data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 
-# Beta diversity metrics like Bray-Curtis are often 
+# Beta diversity metrics like Bray-Curtis are often
 # applied to relabundances
 tse <- transformAssay(
     tse, assay.type = "counts", method = "relabundance")
@@ -242,11 +242,11 @@ plotReducedDim(tse, "Unifrac", colour_by = "Group")
 ### Rarefaction to mitigate impacts of uneven sequencing effort
 
 The sequencing depth of a sample refers to the number of metagenomic reads
-obtained from the sequencing process. A variation in sequencing depth across the 
-samples of a study may impact the calculation of alpha and beta diversity 
-metrics [@Schloss2023]. 
+obtained from the sequencing process. A variation in sequencing depth across the
+samples of a study may impact the calculation of alpha and beta diversity
+metrics [@Schloss2023].
 It is common to find significant variation in sequencing depth between samples.
-For instance, the samples of the *TreeSummarizedExperiment* dataset 
+For instance, the samples of the *TreeSummarizedExperiment* dataset
 `GlobalPatterns` show up to a 40-fold difference in the number of metagenomic
 reads.
 
@@ -255,36 +255,36 @@ reads.
 
 # Calculate the list of sequencing depths across samples
 sequencing_depths <- colSums(assay(tse))
-# Calculate variation between highest and lowest sequencing depth 
+# Calculate variation between highest and lowest sequencing depth
 depth_variation <- max(sequencing_depths)/min(sequencing_depths)
 depth_variation
 ```
 
-To address uneven sequencing effort, rarefaction aims to normalize metagenomic 
-reads counts using subsampling. 
-First, the user chooses the rarefaction depth and a number of iterations N. All 
+To address uneven sequencing effort, rarefaction aims to normalize metagenomic
+reads counts using subsampling.
+First, the user chooses the rarefaction depth and a number of iterations N. All
 the samples with metagenomic reads count below the rarefaction depth are removed
 and metagenomic reads are randomly drawn from the samples left to get subsamples
-fitting the rarefaction depth. Then a beta diversity metric is calculated from 
+fitting the rarefaction depth. Then a beta diversity metric is calculated from
 those subsamples and the process is iterated N times. Finally, beta diversity is
-estimated with the mean of all beta diversity values calculated on subsampled 
+estimated with the mean of all beta diversity values calculated on subsampled
 data.
 
 There has been a long-lasting controversy surrounding the use of rarefaction in
 microbial ecology. The main concern is that rarefaction would omit data
 [@mcmurdie2014waste] [@Schloss2024rarefaction2].
-However, if the subsampling process is repeated a sufficient number of times, 
-and if the rarefaction depth is set to the lowest metagenomic reads count found 
-across all samples, no data will be omitted. 
-Moreover, Patrick Schloss has demonstrated that rarefaction is "the only method 
-that could control for variation in uneven sequencing effort when measuring 
+However, if the subsampling process is repeated a sufficient number of times,
+and if the rarefaction depth is set to the lowest metagenomic reads count found
+across all samples, no data will be omitted.
+Moreover, Patrick Schloss has demonstrated that rarefaction is "the only method
+that could control for variation in uneven sequencing effort when measuring
 commonly used alpha and beta diversity metrics" [@Schloss2023].
 
-Before applying rarefaction, selecting the most variable features can help 
+Before applying rarefaction, selecting the most variable features can help
 minimize variation caused by random subsampling. These features have the highest
-read counts, while rare features tend to increase sampling variation. This 
-approach facilitates comparison of results between non-rarefied and rarefied 
-distance calculations later on.  
+read counts, while rare features tend to increase sampling variation. This
+approach facilitates comparison of results between non-rarefied and rarefied
+distance calculations later on.
 
 ```{r}
 #| label: rarefaction2
@@ -294,7 +294,7 @@ ntop <- 5
 tse_sub <- tse[head(rev(order(rowSds(assay(tse, "counts")))), ntop), ]
 ```
 
-Let us first convert the count assay to centered log ratio (clr) assay and 
+Let us first convert the count assay to centered log ratio (clr) assay and
 calculate Aitchison distance without rarefaction:
 
 ```{r}
@@ -304,7 +304,7 @@ calculate Aitchison distance without rarefaction:
 
 tse_sub <- transformAssay(
   tse_sub,
-  assay.type = "counts",		      
+  assay.type = "counts",
   method = "clr",
   pseudocount = 1
   )
@@ -331,11 +331,11 @@ clr <- function (x) {
 }
 
 # Run transformation after rarefactions before calculating the beta diversity..
-tse_sub <- runMDS(tse_sub, 
+tse_sub <- runMDS(tse_sub,
   assay.type="counts",
-  ntop = nrow(tse_sub), 
+  ntop = nrow(tse_sub),
   FUN = vegan::avgdist, # Custom beta diversity function that includes rarefaction
-  sample = min(colSums(assay(tse_sub, "counts"))), # rarefaction depth 
+  sample = min(colSums(assay(tse_sub, "counts"))), # rarefaction depth
   distfun = vegan::vegdist, # Use vegdist beta diversity function
   dmethod = "euclidean", # euclidean beta diversity
   iterations = 10,
@@ -346,7 +346,7 @@ tse_sub <- runMDS(tse_sub,
 
 plotReducedDim(tse_sub, "MDS_aitchison_rarefied")
 
-# Generate plots for non-rarefied and rarefied Bray-Curtis distances scaled by 
+# Generate plots for non-rarefied and rarefied Bray-Curtis distances scaled by
 # MDS
 plots <- lapply(
   c("MDS_aitchison", "MDS_aitchison_rarefied"),
@@ -371,22 +371,22 @@ print(all.equal(
     tolerance = 0.05))
 ```
 
-`ntop` is a `runMDS` option. Here it is set to total number of features in 
-`GlobalPatterns` dataset so that they are not filtered. If ntop was not set to 
+`ntop` is a `runMDS` option. Here it is set to total number of features in
+`GlobalPatterns` dataset so that they are not filtered. If ntop was not set to
 the total number of features, only the ntop features with highest variance would
 be used for dimensionality reduction and the other features would be filtered.
 
-The argument `sample` is set to the smallest metagenomic reads count across 
-all samples. This ensures that no sample will be removed during the rarefaction 
-process. 
+The argument `sample` is set to the smallest metagenomic reads count across
+all samples. This ensures that no sample will be removed during the rarefaction
+process.
 
-The argument `iterations` is by default set to 100 but 10 iterations is often 
+The argument `iterations` is by default set to 100 but 10 iterations is often
 sufficient for beta diversity calculations.
 
-To use transformations after the rarefaction of the samples and before the beta 
+To use transformations after the rarefaction of the samples and before the beta
 diversity calculation, `vegan::avgdist` has the argument `transf`.
 
-We can also plot the correlation between principal coordinates PCx and PCy for 
+We can also plot the correlation between principal coordinates PCx and PCy for
 both the rarefied and non-rarefied distance calculations:
 
 ```{r}
@@ -407,7 +407,7 @@ for (k in 1:2) {
 ```
 
 The mia package includes the rarefaction function `rarefyAssay` that randomly
-subsamples a given assay of a `TreeSummarizedExperiment` dataset. However, the 
+subsamples a given assay of a `TreeSummarizedExperiment` dataset. However, the
 iterations and beta diversity calculations are not included.
 
 ### Other ordination methods {#sec-other-ord-methods}
@@ -469,7 +469,7 @@ better if smaller. This can be calculated as shown below.
 
 # Quantify dissimilarities in the original feature space
 # Pick relabunance assay separately
-x <- assay(tse, "relabundance") 
+x <- assay(tse, "relabundance")
 d0 <- as.matrix(vegan::vegdist(t(x), "bray"))
 
 # PCoA Ordination
@@ -479,7 +479,7 @@ names(pcoa) <- c("PCoA1", "PCoA2")
 # Quantify dissimilarities in the ordination space
 dp <- as.matrix(dist(pcoa))
 
-# Calculate stress i.e. relative difference 
+# Calculate stress i.e. relative difference
 # in the original and projected dissimilarities
 stress <- sum((dp - d0)^2) / sum(d0^2)
 ```
@@ -494,10 +494,10 @@ df <- data.frame(d0 = as.vector(d0)[ord],
 
 ggplot(df, aes(x = d0, y = dmds)) +
   geom_smooth() +
-  geom_point() +    
+  geom_point() +
   labs(title = "Shepard plot",
        x = "Original distance",
-       y = "MDS distance",   
+       y = "MDS distance",
        subtitle = paste("Stress:", round(stress, 2))) +
   theme_bw()
 ```
@@ -513,7 +513,7 @@ between the supervised and unsupervised ordination methods.
 |                          | supervised ordination  | unsupervised ordination  |
 |:------------------------:|:----------------------:|:------------------------:|
 | Euclidean distance       | RDA                    | PCA                      |
-| non-Euclidean distance   | dbRDA                  | PCoA/MDS, NMDS, UMAP     | 
+| non-Euclidean distance   | dbRDA                  | PCoA/MDS, NMDS, UMAP     |
 
 In summary, the dbRDA is the more general method that allows a wider
 variety dissimilarity, or beta diversity, indices. This method is
@@ -631,11 +631,11 @@ ggplot(df, aes(x = x, y = y)) +
 ```
 
 In the example above, the largest differences between the two groups
-can be attributed to _`r names(sort(abs(top_coef), decreasing = TRUE))[[1]]`_ 
+can be attributed to _`r names(sort(abs(top_coef), decreasing = TRUE))[[1]]`_
 and
 _`r names(sort(abs(top_coef), decreasing = TRUE))[[2]] `_.
 
-### Checking the homogeneity condition 
+### Checking the homogeneity condition
 
 It is important to note that the application of PERMANOVA assumes
 homogeneous group dispersions (variances). This can be tested with the
@@ -757,11 +757,11 @@ percent_FALSE <- round(freq_FALSE / sum(freq_FALSE) * 100, 1)
 plotReducedDim(
     tse_genus[ , colData(tse_genus)$Group == TRUE], "PCoA_BC",
     colour_by = "most_abundant") +
-    
+
     scale_colour_manual(
         values = my_colors,
         labels = paste0(names(percent_TRUE), "(", percent_TRUE, "%)")) +
-  
+
   labs(
       x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
       y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
@@ -770,11 +770,11 @@ plotReducedDim(
 plotReducedDim(
     tse_genus[ , colData(tse_genus)$Group == FALSE], "PCoA_BC",
     colour_by = "most_abundant") +
-    
+
     scale_colour_manual(
         values = my_colors,
         labels = paste0(names(percent_FALSE), "(", percent_FALSE, "%)")) +
-    
+
     labs(
         x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
         y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
@@ -808,6 +808,6 @@ and `runTSNE`
 
 For more information on sample clustering, you can refer to:
 
-* [How to extract information from clusters](http://bioconductor.org/books/release/OSCA/clustering.html)  
+* [How to extract information from clusters](http://bioconductor.org/books/release/OSCA/clustering.html)
 * Chapter [@sec-clustering] on community typing
 :::
