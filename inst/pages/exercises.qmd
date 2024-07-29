@@ -1728,6 +1728,7 @@ library(mia)
 library(SummarizedExperiment)
 library(vegan)
 library(scater)
+library(bluster)
 
 # Load the dataset
 data(GlobalPatterns)
@@ -1743,15 +1744,16 @@ mds_data <- reducedDim(tse, "MDS")
 set.seed(123)
 kmeans_result <- kmeans(mds_data, centers = 3)
 
-# Add cluster labels to the SummarizedExperiment object
-# Convert clustering result to a factor
-tse$cluster <- factor(kmeans_result$cluster)
+# Create KmeansParam object
+kmeans_param <- KmeansParam(centers = 3)
+
+# Add cluster labels to the SummarizedExperiment object using mia::addCluster()
+tse <- addCluster(tse, cluster = kmeans_result$cluster, BLUSPARAM = kmeans_param)
 
 # Visualize MDS with clusters
-plotReducedDim(tse, dimred = "MDS", colour_by = "cluster") +
+plotReducedDim(tse, dimred = "MDS") +
   labs(title = "MDS with k-means Clustering") +
   theme_minimal()
-```
 
 3. Hierarchial Clustering
 - Hierarchical clustering of samples based on abundance data.
