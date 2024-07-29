@@ -631,22 +631,23 @@ Argelaguet, Ricard et al. 2018. <span>“Multi-Omics Factor Analysis—a Framewo
 <span><span class="co"># reticulate package is needed</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/reticulate/">reticulate</a></span><span class="op">)</span></span>
 <span><span class="co"># Let us assume that these have been installed already.</span></span>
-<span><span class="co">#reticulate::install_miniconda(force = TRUE)</span></span>
-<span><span class="co">#reticulate::use_miniconda(condaenv = "env1", required = FALSE)</span></span>
-<span><span class="co">#reticulate::py_install(packages = c("mofapy2"), pip = TRUE, python_version=3.6)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/install_miniconda.html">install_miniconda</a></span><span class="op">(</span>force <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">##  [1] "/root/.local/share/r-miniconda"</span></span>
+<span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/use_python.html">use_miniconda</a></span><span class="op">(</span>condaenv <span class="op">=</span> <span class="st">"env1"</span>, required <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_install.html">py_install</a></span><span class="op">(</span>packages <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"mofapy2"</span><span class="op">)</span>, pip <span class="op">=</span> <span class="cn">TRUE</span>, python_version<span class="op">=</span><span class="fl">3.6</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The <code>mae</code> object could be used straight to create the MOFA model. Yet, we transform our assays since the model assumes normality per default, and Gaussian model is recommened (see <a href="https://biofam.github.io/MOFA2/faq.html">MOFA2 FAQ</a>). However, Poisson and Bernoulli distribution models are also offered.</p>
 <p>Note that duplicates, such as “uncultured”, might appear when aggregating the microbiome data by a taxonomic rank. To check for duplicates, run <code>any(duplicated(rownames(mae[[1]])))</code>. If it returns <code>TRUE</code>, then the duplicates are present. We can add <code>rownames(mae[[1]]) &lt;- getTaxonomyLabels(mae[[1]], make.unique=TRUE)</code> to remove them.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://biofam.github.io/MOFA2/index.html">MOFA2</a></span><span class="op">)</span></span>
-<span><span class="co"># For simplicity, classify all high-fat diets as high-fat, and all the low-fat </span></span>
+<span><span class="co"># For simplicity, classify all high-fat diets as high-fat, and all the low-fat</span></span>
 <span><span class="co"># diets as low-fat diets</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">mae</span><span class="op">)</span><span class="op">$</span><span class="va">Diet</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">mae</span><span class="op">)</span><span class="op">$</span><span class="va">Diet</span> <span class="op">==</span> <span class="st">"High-fat"</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">mae</span><span class="op">)</span><span class="op">$</span><span class="va">Diet</span> <span class="op">==</span> <span class="st">"High-fat + XOS"</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">mae</span><span class="op">)</span><span class="op">$</span><span class="va">Diet</span> <span class="op">==</span> <span class="st">"High-fat"</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">mae</span><span class="op">)</span><span class="op">$</span><span class="va">Diet</span> <span class="op">==</span> <span class="st">"High-fat + XOS"</span>,</span>
 <span>    <span class="st">"High-fat"</span>, <span class="st">"Low-fat"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Agglomerate microbiome data</span></span>
-<span><span class="va">mae</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">agglomerateByPrevalence</a></span><span class="op">(</span><span class="va">mae</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, rank <span class="op">=</span> <span class="st">"Genus"</span><span class="op">)</span></span>
+<span><span class="va">mae</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/agglomerateByPrevalence.html">agglomerateByPrevalence</a></span><span class="op">(</span><span class="va">mae</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, rank <span class="op">=</span> <span class="st">"Genus"</span><span class="op">)</span></span>
 <span><span class="co"># Transforming microbiome data with clr and by scaling</span></span>
 <span><span class="va">mae</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">mae</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, method <span class="op">=</span> <span class="st">"clr"</span>, pseudocount <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">mae</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span></span>
@@ -669,7 +670,7 @@ Argelaguet, Ricard et al. 2018. <span>“Multi-Omics Factor Analysis—a Framewo
 <span><span class="co"># Building our mofa model</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MOFA2/man/create_mofa_from_MultiAssayExperiment.html">create_mofa_from_MultiAssayExperiment</a></span><span class="op">(</span></span>
 <span>    <span class="va">mae</span>,</span>
-<span>    groups <span class="op">=</span> <span class="st">"Diet"</span>, </span>
+<span>    groups <span class="op">=</span> <span class="st">"Diet"</span>,</span>
 <span>    extract_metadata <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">model</span></span>
 <span><span class="co">##  Untrained MOFA model with the following characteristics: </span></span>
@@ -1031,7 +1032,7 @@ Argelaguet, Ricard et al. 2018. <span>“Multi-Omics Factor Analysis—a Framewo
 <span><span class="co">##  #######################</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">##  </span></span>
-<span><span class="co">##  Saving model in /tmp/Rtmp9BbURb/mofa_20240723-183012.hdf5...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">##  Saving model in /tmp/RtmpYm3glx/mofa_20240729-215232.hdf5...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The explained variance is visualized with the <code>plot_variance_explained</code> function.</p>
 <div class="cell" data-layout-align="center">
