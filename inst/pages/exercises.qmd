@@ -1765,41 +1765,34 @@ plotReducedDim(tse, dimred = "MDS") +
 #| code-fold: true
 #| code-summary: "Show solution"
 
-library(ComplexHeatmap)
+# Load necessary libraries
+library(SummarizedExperiment)
+library(sechm)
 
-# Perform hierarchical clustering on the MDS data (extracted in last exercise)
-dist_matrix <- dist(mds_data)  # Compute distance matrix on MDS dimensions
-hclust_result <- hclust(dist_matrix, method = "complete")
+# Generate sample abundance data
+set.seed(123)
+sample_data <- matrix(rnorm(100), nrow = 10)
+rownames(sample_data) <- paste0("Gene", 1:10)
+colnames(sample_data) <- paste0("Sample", 1:10)
 
-# Cut the dendrogram into 3 clusters
-cluster_labels <- cutree(hclust_result, k = 3)
+# Perform hierarchical clustering
+hclust_result <- hclust(dist(t(sample_data)), method = "complete")
 
-# Add cluster labels to the SummarizedExperiment object
-colData(tse)$cluster <- factor(cluster_labels)
+# Assign cluster information to metadata
+clusters <- cutree(hclust_result, k = 3)
+metadata <- data.frame(Cluster = as.factor(clusters))
+rownames(metadata) <- colnames(sample_data)
 
-# Visualize MDS with clusters using scater::plotReducedDim
-plotReducedDim(tse, dimred = "MDS", colour_by = "cluster") +
-  labs(title = "MDS with Hierarchical Clustering") +
-  theme_minimal()
+# Create a SummarizedExperiment object
+se <- SummarizedExperiment(assays = list(counts = sample_data),
+                           colData = metadata)
 
-# Optional: Visualize the hierarchical clustering with a heatmap
-# Convert MDS data to a matrix for heatmap visualization
-mds_matrix <- t(as.matrix(mds_data))  # Transpose the matrix to match the columns
-
-# Create a heatmap with cluster annotations
-heatmap <- Heatmap(mds_matrix,
-                   name = "MDS",
-                   show_row_dend = TRUE,
-                   show_column_dend = TRUE,
-                   column_split = cluster_labels,
-                   column_title = "Clusters",
-                   top_annotation = HeatmapAnnotation(cluster = cluster_labels),
-                   clustering_distance_columns = dist_matrix,
-                   clustering_method_columns = "complete")
-
-# Draw the heatmap
-draw(heatmap, heatmap_legend_side = "right")
-```
+# Visualization using sechm heatmap
+sechm(se,
+      features = rownames(sample_data),
+      cluster_rows = TRUE,
+      cluster_cols = TRUE,
+      )
 
 4. Heatmap with Custom Color Palette:
 Customize the heatmap with a specific color palette to enhance visualization using ComplexHeatmap.
