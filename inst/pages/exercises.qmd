@@ -1749,22 +1749,26 @@ regression charts help in visualizing how changes in microbial communities
 correlate with various environmental factors, health outcomes, or other
 biological variables.
 
-Let us do a regression analysis exercise using a dataset consisting of 
-20 samples with the following variables:
+Let us do a regression analysis exercise using the `GlobalPatterns` dataset
+with the following variables:
 
-1. Relative Abundance (%) of a bacterial genus (e.g., Bacteroides)
-2. Body Mass Index (BMI) of individuals
+1. ShannonIndex
+2. Body Mass Index (BMI) (bmi_group, variable in the GlobalPatterns dataset)
 
 Steps:
 
-1. Import the dataset into R.
-2. Create a scatter plot with "Relative Abundance (%)" on the y-axis and "BMI" 
+1. Import the dataset into R; here we are using a demo dataset.
+2. Create a scatter plot with "Shannon Index" on the y-axis and "BMI_group" 
 on the x-axis.
 3. Fit a linear regression model to the data.  In R, you can use `ggplot2` for 
 plotting and `lm()` function for linear modeling.
 4. Add the regression line to the scatter plot for visualization.
 5. Examine the slope, intercept, and R-squared value to 
 understand the relationship between the variables.
+6. Test the linear modeling assumptions.
+7. Treat other possible covariates.
+8. Perform visualizations and interpret the analysis outcomes. You can use
+visualization methods from packages like miaViz, scater, etc.
 
 ```{r}
 #| label: extra-regressionchart
@@ -1774,31 +1778,150 @@ understand the relationship between the variables.
 
 # Load the necessary libraries
 library(ggplot2)
+library(TreeSummarizedExperiment)
+library(mia)
+library(miaViz)
+library(scater)
+
+# Load the demo dataset 
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+
+# Calculate the Shannon diversity index
+diversity <- estimateDiversity(tse, assay.type = "counts", index = "shannon")
+
+# Extract the Shannon diversity index and bmi_group
+shannon_index <- diversity$shannon
+bmi_group <- colData(tse)$SampleType  # Using SampleType as a proxy for BMI_Group
 
 # Create the data frame
 data <- data.frame(
-  Sample_ID = 1:20,
-  Relative_Abundance = c(12.5, 10.3, 15.4, 9.6, 8.7, 11.2, 7.4, 14.0, 13.6, 6.8,
-16.1, 8.3, 10.5, 7.1, 14.8, 9.2, 11.0, 13.4, 12.0, 10.8),
-  BMI = c(22, 24, 26, 23, 27, 25, 28, 30, 29, 31, 21, 24, 26, 28, 27, 25, 
-29, 23, 22, 24)
+  Shannon_Index = shannon_index,
+  BMI_Group = bmi_group
 )
 
 # Perform the regression analysis
-model <- lm(Relative_Abundance ~ BMI, data = data)
+model <- lm(Shannon_Index ~ BMI_Group, data = data)
 
 # Create the plot with the regression line
-ggplot(data, aes(x = BMI, y = Relative_Abundance)) +
+p <- ggplot(data, aes(x = BMI_Group, y = Shannon_Index)) +
   geom_point(color = 'blue') +
   geom_smooth(method = 'lm', color = 'red') +
-  labs(title = 'Regression Analysis of Relative Abundance vs. BMI',
-       x = 'BMI', y = 'Relative Abundance (%)') +
+  labs(title = 'Regression Analysis of Shannon Index vs. BMI Group',
+       x = 'BMI Group', y = 'Shannon Index') +
   theme_minimal()
+
+# Print the plot
+print(p)
 
 # Print the model summary
 summary(model)
 ```
-Great! Are there any outliers or unusual data points that might affect the regression analysis?
+What do we interpret from the above regression analysis?
+
+1. The coefficients of the regression model indicate the relationship 
+between the BMI groups and the Shannon diversity index. If the coefficient
+for a particular BMI group is significantly different from zero, it
+suggests that this group has a different Shannon diversity index compared
+to the reference group.
+2. The p-value associated with each coefficient tells us whether the effect
+of that BMI group on the Shannon diversity index is statistically
+significant. A common threshold for significance is 0.05.
+3. R-squared: This value indicates the proportion of the variance in the
+Shannon diversity index that is explained by the BMI groups. A higher R-squared
+value indicates a better fit of the model.
+
+Now, let's check some linear modeling assumptions :
+
+```{r}
+#| label: sub-checking-modeling-assumptions
+
+# 1. Linearity
+plot(model, which = 1)
+
+# 2. Normality of residuals
+plot(model, which = 2)
+
+# 3. Homoscedasticity
+plot(model, which = 3)
+
+# 4. Independence of residuals (Durbin-Watson test)
+dwtest(model)
+```
+Here, 
+1. Linearity plot(Plot 1) shows the residuals vs. fitted values. The residuals
+should be randomly scattered around zero, indicating that the linearity
+assumption is met. 
+2. Normality/QQ plot(Plot 2) of the residuals should show that the residuals
+are approximately normally distributed. Deviations from the line suggest 
+deviations from normality.
+3. Homoscedasticity (Plot 3): The residuals vs. fitted values plot should
+show constant variance of the residuals (homoscedasticity). If there is a
+pattern (e.g., funnel shape), it indicates heteroscedasticity.
+4. Durbin-Watson Test checks for autocorrelation in the residuals. A value
+close to 2 indicates no autocorrelation. Values significantly different 
+from 2 suggest autocorrelation.
+
+Further, treat sex as another possible covariate :
+
+```{r}
+#| label: sub-trying-possible-covariates
+
+sex <- colData(tse)$SampleType
+
+# Add sex to the data frame
+data$Sex <- sex
+
+# Perform the regression analysis with covariates
+model_with_covariates <- lm(Shannon_Index ~ BMI_Group + Sex, data = data)
+
+# Print the summary of the model with covariates
+summary(model_with_covariates)
+```
+
+Additionally, do visualizations using `scater`.
+```{r}
+#| label: sub-scater-visualization
+
+# Plot PCA for Shannon index
+sce <- SingleCellExperiment(assays = list(counts = assay(tse, "counts")),
+colData = colData(tse))
+
+# Perform PCA and store the results
+sce <- runPCA(sce, ncomponents = 2, exprs_values = "counts")
+
+# Plot PCA with Shannon Index colored by BMI Group
+plotPCA(sce, shape_by = "SampleType") +
+  labs(title = 'PCA of Shannon Index colored by BMI Group')
+```
+The PCA plot shows the first two principal components. Each point represents a
+sample, colored by the Shannon index and shaped by the BMI group. Clusters or 
+separation of points may indicate that certain BMI groups have distinct microbial
+compositions. Overlapping points suggest similar compositions.
+
+Let's also visualize the relationship between Shannon Index and BMI Group
+using a violin plot. Violin plot combines features of a boxplot and a 
+density plot. It shows the distribution and density of the Shannon index for
+each BMI group. Wider sections indicate higher density of data points.
+
+```{r}
+#| label: sub-violin_plot-visualization
+
+violin_plot <- ggplot(data, aes(x = BMI_Group, y = Shannon_Index,
+fill = BMI_Group)) +
+  geom_violin() +
+  geom_jitter(width = 0.2) +
+  labs(title = 'Violin Plot of Shannon Index vs. BMI Group', x = 'BMI Group',
+  y = 'Shannon Index') +
+  theme_minimal()
+
+# Print the violin plot
+print(violin_plot)
+
+# Visualize the regression results with a summary plot
+par(mfrow=c(2,2))  # Setting up a 2x2 plot grid
+plot(model_with_covariates)
+```
 
 ## Multiomics
 
