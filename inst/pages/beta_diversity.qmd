@@ -466,20 +466,20 @@ would report relative stress, which varies within the unit interval and is
 better if smaller. This can be calculated as shown below.
 
 ```{r relstress}
-
 # Quantify dissimilarities in the original feature space
-# Pick relabunance assay separately
-x <- assay(tse, "relabundance")
-d0 <- as.matrix(vegan::vegdist(t(x), "bray"))
+d0 <- as.matrix(vegan::vegdist(t(assay(tse, "relabundance")), "bray"))
 
 # PCoA Ordination
-pcoa <- as.data.frame(cmdscale(d0, k = 2))
-names(pcoa) <- c("PCoA1", "PCoA2")
+tse <- runMDS(tse,
+                FUN = vegan::vegdist,
+                name = "PCoA",
+                method = "bray",
+                assay.type = "relabundance")
 
 # Quantify dissimilarities in the ordination space
-dp <- as.matrix(dist(pcoa))
+dp <- as.matrix(dist(reducedDim(tse, "PCoA")))
 
-# Calculate stress i.e. relative difference
+# Calculate stress i.e. relative difference 
 # in the original and projected dissimilarities
 stress <- sum((dp - d0)^2) / sum(d0^2)
 ```
