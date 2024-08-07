@@ -306,14 +306,14 @@ plots <- plotAbundance(
     order.col.by = "Clostridiales",
     features = "SampleType")
 
-# Modify the legend of the first plot to be smaller 
+# Modify the legend of the first plot to be smaller
 plots[[1]] <- plots[[1]] +
     theme(
         legend.key.size = unit(0.3, 'cm'),
         legend.text = element_text(size = 6),
         legend.title = element_text(size = 8))
 
-# Modify the legend of the second plot to be smaller 
+# Modify the legend of the second plot to be smaller
 plots[[2]] <- plots[[2]] +
     theme(
         legend.key.height = unit(0.3, 'cm'),
@@ -324,17 +324,17 @@ plots[[2]] <- plots[[2]] +
 
 # Load required packages
 library(ggpubr)
-library(patchwork) 
+library(patchwork)
 # Combine legends
 legend <- wrap_plots(
     as_ggplot(get_legend(plots[[1]])),
     as_ggplot(get_legend(plots[[2]])),
-    ncol = 1) 
+    ncol = 1)
 
 # Removes legends from the plots
 plots[[1]] <- plots[[1]] + theme(legend.position = "none")
 plots[[2]] <- plots[[2]] +
-    theme(legend.position = "none", axis.title.x=element_blank()) 
+    theme(legend.position = "none", axis.title.x=element_blank())
 
 # Combine plots
 plot <- wrap_plots(plots[[2]], plots[[1]], ncol = 1, heights = c(2, 10))
@@ -371,7 +371,7 @@ tse_phylum_subset <- transformAssay(
     assay.type = "counts", pseudocount = 1)
 # Does standardize-transformation
 tse_phylum_subset <- transformAssay(
-    tse_phylum_subset, assay.type = "clr", MARGIN = "rows", 
+    tse_phylum_subset, assay.type = "clr", MARGIN = "rows",
     method = "standardize", name = "clr_z")
 
 # Get n most abundant taxa, and subsets the data by them
@@ -397,7 +397,7 @@ taxa_hclust <- hclust(dist(mat), method = "complete")
 taxa_tree <- as.phylo(taxa_hclust)
 
 # Plot taxa tree
-taxa_tree <- ggtree(taxa_tree) + 
+taxa_tree <- ggtree(taxa_tree) +
   theme(plot.margin=margin(0,0,0,0)) # removes margins
 
 # Get order of taxa in plot
@@ -407,7 +407,7 @@ taxa_ordered <- get_taxa_name(taxa_tree)
 # taxa_tree
 ```
 
-Based on phylo tree, we decide to create three clusters. 
+Based on phylo tree, we decide to create three clusters.
 
 ```{r}
 #| label = "pheatmap3"
@@ -419,7 +419,7 @@ taxa_clusters <- data.frame(clusters = taxa_clusters)
 taxa_clusters$clusters <- factor(taxa_clusters$clusters)
 
 # Order data so that it's same as in phylo tree
-taxa_clusters <- taxa_clusters[taxa_ordered, , drop = FALSE] 
+taxa_clusters <- taxa_clusters[taxa_ordered, , drop = FALSE]
 
 # Prints taxa and their clusters
 taxa_clusters
@@ -449,7 +449,7 @@ sample_hclust <- hclust(dist(t(mat)), method = "complete")
 sample_tree <- as.phylo(sample_hclust)
 
 # Plot sample tree
-sample_tree <- ggtree(sample_tree) + layout_dendrogram() + 
+sample_tree <- ggtree(sample_tree) + layout_dendrogram() +
   theme(plot.margin=margin(0,0,0,0)) # removes margins
 
 # Get order of samples in plot
@@ -465,9 +465,9 @@ sample_clusters <- factor(cutree(tree = sample_hclust, k = 3))
 sample_data <- data.frame(clusters = sample_clusters)
 
 # Order data so that it's same as in phylo tree
-sample_data <- sample_data[samples_ordered, , drop = FALSE] 
+sample_data <- sample_data[samples_ordered, , drop = FALSE]
 
-# Order data based on 
+# Order data based on
 tse_phylum_subset <- tse_phylum_subset[ , rownames(sample_data)]
 
 # Add sample type data
@@ -482,12 +482,12 @@ Now we can create heatmap with additional annotations.
 #| label = "pheatmap6"
 # Determines the scaling of colors
 # Scale colors
-breaks <- seq(-ceiling(max(abs(mat))), ceiling(max(abs(mat))), 
+breaks <- seq(-ceiling(max(abs(mat))), ceiling(max(abs(mat))),
               length.out = ifelse( max(abs(mat))>5, 2*ceiling(max(abs(mat))), 10 ) )
 colors <- colorRampPalette(c("darkblue", "blue", "white", "red", "darkred"))(length(breaks)-1)
 
 pheatmap(
-    mat, annotation_row = taxa_clusters, 
+    mat, annotation_row = taxa_clusters,
     annotation_col = sample_data,
     breaks = breaks,
     color = colors)
@@ -505,11 +505,11 @@ metadata(tse_phylum_subset)$anno_colors$SampleType <- c(
 
 # Create a plot
 sechm(
-    tse_phylum_subset, 
-    features = rownames(tse_phylum_subset), 
-    assayName = "clr", 
-    do.scale = TRUE, 
-    top_annotation = c("SampleType"), 
+    tse_phylum_subset,
+    features = rownames(tse_phylum_subset),
+    assayName = "clr",
+    do.scale = TRUE,
+    top_annotation = c("SampleType"),
     gaps_at = "SampleType",
     cluster_cols = TRUE, cluster_rows = TRUE)
 ```
@@ -525,7 +525,7 @@ taxa_clusters$Feature <- rownames(taxa_clusters)
 taxa_clusters$Feature <- factor(taxa_clusters$Feature, levels = taxa_clusters$Feature)
 
 # Create annotation plot
-row_annotation <- ggplot(taxa_clusters) + 
+row_annotation <- ggplot(taxa_clusters) +
     geom_tile(aes(x = NA, y = Feature, fill = clusters)) +
     coord_equal(ratio = 1) +
     theme(
@@ -584,7 +584,7 @@ limits <- c(-maxval, maxval)
 breaks <- seq(from = min(limits), to = max(limits), by = 0.5)
 colours <- c("darkblue", "blue", "white", "red", "darkred")
 
-heatmap <- ggplot(melted_mat) + 
+heatmap <- ggplot(melted_mat) +
     geom_tile(aes(x = Sample, y = Taxa, fill = clr_z)) +
     theme(
         axis.title.y = element_blank(),
@@ -595,10 +595,10 @@ heatmap <- ggplot(melted_mat) +
         legend.key.height = unit(1, 'cm')
     ) +
     scale_fill_gradientn(
-        name = "CLR + Z transform", 
-        breaks = breaks, 
-        limits = limits, 
-        colours = colours) + 
+        name = "CLR + Z transform",
+        breaks = breaks,
+        limits = limits,
+        colours = colours) +
     scale_y_discrete(position = "right")
 
 heatmap
@@ -629,16 +629,16 @@ plot <- row_annotation +
     plot_layout(
         design = design, guides = "collect",
         # Specify layout, collect legends
-        
+
         # Adjust widths and heights to align plots.
         # When annotation plot is larger, it might not fit into
         # its column/row.
         # Then you need to make column/row larger.
-        
+
         # Relative widths and heights of each column and row:
         # Currently, the width of the first column is 15 % and the height of
         # first two rows are 30 % the size of others
-        
+
         # To get this work most of the times, you can adjust all sizes to be
         # 1, i.e. equal, but then the gaps between plots are larger.
         widths = c(0.15, 1, 1),
@@ -666,9 +666,9 @@ design <- c(
 # plot(design)
 
 # Combine plots
-plot <- taxa_tree + 
+plot <- taxa_tree +
     row_annotation +
-    sample_tree + 
+    sample_tree +
     sample_clusters_annotation +
     sample_types_annotation +
     heatmap +
@@ -723,7 +723,7 @@ tse_Genus <- runMDS(
     method = "bray",
     ncomponents = 3, # calculates three principal coordinates
     assay.type = "relative_abundance", # calculates Bray-Curtis from relative abundace
-    name = "MDS_bray") #name of the PCoA within the tse 
+    name = "MDS_bray") #name of the PCoA within the tse
 
 e <- attr(reducedDim(tse_Genus, "MDS_bray"), "eig")
 rel_eig <- e / sum(e[e > 0])

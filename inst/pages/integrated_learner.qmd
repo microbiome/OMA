@@ -29,9 +29,9 @@ from the multi-omics integrated framework (`IntegratedLearner`) proposed by
 
 ## Input data
 
-We use the publicly available Inflammatory Bowel Diseases (IBD) data from the 
-curatedMetagenomicData package [@Lloyd-Price2019], where we aim to 
-predict IBD disease status based on both taxonomic (species abundances) and 
+We use the publicly available Inflammatory Bowel Diseases (IBD) data from the
+curatedMetagenomicData package [@Lloyd-Price2019], where we aim to
+predict IBD disease status based on both taxonomic (species abundances) and
 functional (pathway abundances) profiles.
 
 ```{r load-pkg-data}
@@ -85,10 +85,10 @@ rownames(feature_species) <- sub('.*s__', '', rownames(feature_species))
 
 feature_pwys <- as.data.frame(assay(se_pathway))
 feature_pwys <- rownames_to_column(feature_pwys, "ID")
-feature_pwys <- feature_pwys %>% 
-  filter(!grepl("\\|", ID)) %>% 
-  filter(!ID %in% c('UNMAPPED', 'UNINTEGRATED')) %>% 
-  column_to_rownames('ID') %>% 
+feature_pwys <- feature_pwys %>%
+  filter(!grepl("\\|", ID)) %>%
+  filter(!ID %in% c('UNMAPPED', 'UNINTEGRATED')) %>%
+  column_to_rownames('ID') %>%
   as.data.frame()
 
 ################################
@@ -148,9 +148,9 @@ library(caret)
 feature_table_t <- as.data.frame(t(feature_table))
 abd_threshold = 0
 prev_threshold = 0.1
-nzv <- nearZeroVar(feature_table_t) 
-features_var_filtered <- feature_table_t[, -nzv] 
-features_var_filtered <- as.data.frame(features_var_filtered) 
+nzv <- nearZeroVar(feature_table_t)
+features_var_filtered <- feature_table_t[, -nzv]
+features_var_filtered <- as.data.frame(features_var_filtered)
 features_filtered <- features_var_filtered[
   , colSums(features_var_filtered > abd_threshold) >
     nrow(features_var_filtered) * prev_threshold
@@ -199,7 +199,7 @@ subjectCvFoldsIN <- createFolds(1:length(subjectID), k = 5, returnTrain=TRUE)
 # Curate subject-level samples per fold #
 #########################################
 
-obsIndexIn <- vector("list", 5) 
+obsIndexIn <- vector("list", 5)
 for(k in 1:length(obsIndexIn)){
   x <- which(!sample_metadata$subjectID %in% subjectID[subjectCvFoldsIN[[k]]])
   obsIndexIn[[k]] <- x
@@ -221,10 +221,10 @@ name_layers <- with(
     droplevels(feature_metadata),
     list(levels = levels(featureType)), nlevels = nlevels(featureType))$levels
 SL_fit_predictions <- vector("list", length(name_layers))
-SL_fit_layers <- vector("list", length(name_layers)) 
+SL_fit_layers <- vector("list", length(name_layers))
 names(SL_fit_layers) <- name_layers
 names(SL_fit_predictions) <- name_layers
-X_train_layers <- vector("list", length(name_layers)) 
+X_train_layers <- vector("list", length(name_layers))
 names(X_train_layers) <- name_layers
 layer_wise_predictions_train <- vector("list", length(name_layers))
 names(layer_wise_predictions_train) <- name_layers
@@ -244,39 +244,39 @@ utilizing the SuperLearner R package.
 ########################################################
 
 for (i in seq_along(name_layers)){
-  
+
     # Prepare single-omic input data
-    include_list <- feature_metadata %>% filter(featureType == name_layers[i]) 
+    include_list <- feature_metadata %>% filter(featureType == name_layers[i])
     t_dat_slice <- feature_table[
         rownames(feature_table) %in% include_list$featureID, ]
     dat_slice <- as.data.frame(t(t_dat_slice))
     Y = sample_metadata$Y
     X = dat_slice
     X_train_layers[[i]] <- X
-    
+
     # Run user-specified base learner
     library(SuperLearner)
-    
+
     SL_fit_layers[[i]] <- SuperLearner(
-        Y = Y, 
+        Y = Y,
         X = X,
-        cvControl = cvControl,  
+        cvControl = cvControl,
         SL.library = c('SL.randomForest'),
         family = binomial())
-    
+
     # Append the corresponding y and X to the results
     SL_fit_layers[[i]]$Y <- sample_metadata['Y']
     SL_fit_layers[[i]]$X <- X
-    
+
     # Remove redundant data frames and collect pre-stack predictions
     rm(t_dat_slice)
     rm(dat_slice)
     rm(X)
     SL_fit_predictions[[i]] <- SL_fit_layers[[i]]$Z
-    
+
     # Re-fit to entire dataset for final predictions
     layer_wise_predictions_train[[i]] <- SL_fit_layers[[i]]$SL.predict
-  
+
 }
 
 ```
@@ -308,9 +308,9 @@ names(combo_final) <- name_layers
 
 # Run user-specified meta learner
 SL_fit_stacked <- SuperLearner(
-    Y = Y, 
-    X = combo, 
-    cvControl = cvControl,    
+    Y = Y,
+    X = combo,
+    cvControl = cvControl,
     verbose = TRUE,
     SL.library = 'SL.glmnet',
     family = binomial())
@@ -326,8 +326,8 @@ SL_fit_stacked$X <- combo
 
 ```
 
-In contrast to late fusion, in early fusion, we will simply supply a combined 
-representation of the data and we will use the `random forest` method for 
+In contrast to late fusion, in early fusion, we will simply supply a combined
+representation of the data and we will use the `random forest` method for
 building an integrated prediction model.
 
 ```{r early-fusion}
@@ -340,9 +340,9 @@ fulldat<-as.data.frame(t(feature_table))
 
 # Early Fusion using Random Forest
 SL_fit_concat <- SuperLearner(
-    Y = Y, 
+    Y = Y,
     X = fulldat,
-    cvControl = cvControl,   
+    cvControl = cvControl,
     SL.library = 'SL.randomForest',
     family = binomial())
 
@@ -352,19 +352,18 @@ model_concat <- SL_fit_concat$fitLibrary[[1]]$object
 # Append the corresponding y and X to the results
 SL_fit_concat$Y <- sample_metadata['Y']
 SL_fit_concat$X <- fulldat
-
 ```
 
-Finally, we consider the intermediate fusion approach, which combines ideas 
-from both late fusion and early fusion by integrating the usual squared-error 
-loss of predictions with an "agreement" (fusion) penalty ($\rho$) so that the 
+Finally, we consider the intermediate fusion approach, which combines ideas
+from both late fusion and early fusion by integrating the usual squared-error
+loss of predictions with an "agreement" (fusion) penalty ($\rho$) so that the
 predictions from different data views agree.
 
 The intermediate fusion adjusts the degree of fusion in an adaptive manner,
 where the test set prediction error is estimated with a cross-validation method.
 By varying the weight of the fusion penalty - hyperparameter $\rho$, we obtain
 the early and late fusion approaches as special cases. If $\rho = 0$, we have a
-simple form of early fusion; if $\rho = 1$, we obtain a simple form of late 
+simple form of early fusion; if $\rho = 1$, we obtain a simple form of late
 fusion. For $0 < \rho < 1$, we obtain the intermediate fusion.
 
 Here, as examples, we will prepare the input data, fit the multiview model, and
@@ -388,8 +387,14 @@ name_layers <- with(
 dataList <- vector("list", length = length(name_layers))
 names(dataList) <- name_layers
 table(feature_metadata$featureType)
-dataList[[1]] <- t(feature_table[124:nrow(feature_table), ])
-dataList[[2]] <- t(feature_table[1:123, ])
+
+# Select indices of Pathways and Species rows
+pathways_ind <- which(feature_metadata$featureType == "Pathways")
+species_ind <- which(feature_metadata$featureType == "Species")
+
+# Create two data lists for pathways and species
+dataList[[1]] <- t(feature_table[pathways_ind, ])
+dataList[[2]] <- t(feature_table[species_ind, ])
 
 # Extract y and X's
 dataList <- lapply(dataList, as.matrix)
@@ -403,15 +408,15 @@ set.seed(1234)
 library(multiview)
 library(glmnet)
 
-cvfit <- cv.multiview(dataList, Y, family = binomial(), alpha = 0.5) 
+cvfit <- cv.multiview(dataList, Y, family = binomial(), alpha = 0.5)
 DD <- as.data.frame(as.matrix(coef_ordered(cvfit, s="lambda.min", alpha = 0.5)))
 DD$standardized_coef <- as.numeric(DD$standardized_coef)
 DD$coef <- as.numeric(DD$coef)
 
 ```
 
-In this section, we visualize the prediction performance by gathering all 
-predictions and extracting the data necessary for ROC plotting, corresponding 
+In this section, we visualize the prediction performance by gathering all
+predictions and extracting the data necessary for ROC plotting, corresponding
 to each integration paradigm.
 
 ```{r visualization1}
@@ -427,36 +432,36 @@ yhat.train <- cbind(
 colnames(yhat.train) <- c(
     colnames(combo), "Late Fusion", "Early Fusion", "Intermediate Fusion")
 
-# Extract ROC plot data 
+# Extract ROC plot data
 list.ROC <- vector("list", length = ncol(yhat.train))
 names(list.ROC) <- colnames(yhat.train)
-    
-# Loop over layers 
+
+# Loop over layers
 library(ROCR)
 
 for(k in 1:length(list.ROC)){
     preds <- yhat.train[ ,k]
     pred <- prediction(preds, Y)
     AUC <- round(performance(pred, "auc")@y.values[[1]], 2)
-    perf <- performance(pred, "sens", "spec") 
+    perf <- performance(pred, "sens", "spec")
     list.ROC[[k]] <- data.frame(
         sensitivity = slot(perf, "y.values")[[1]],
         specificity = 1 - slot(perf, "x.values")[[1]],
         AUC = AUC,
         layer = names(list.ROC)[k])
 }
-    
+
 # Combine
 ROC_table <- do.call('rbind', list.ROC)
 
 ```
 
-Based on the ROC plot described below, we observe that the AUC is 0.65 when 
+Based on the ROC plot described below, we observe that the AUC is 0.65 when
 considering only the pathway abundance data in the model, and 0.64 for the model
 including only the species abundance data. The AUC increases to 0.68 when using
-the early fusion model and reaches 1 with the late fusion model. In contrast, 
+the early fusion model and reaches 1 with the late fusion model. In contrast,
 the intermediate fusion model achieves an AUC of 0.99. Overall, most integrated
-classifiers outperform individual layers in distinguishing between IBD and 
+classifiers outperform individual layers in distinguishing between IBD and
 non-IBD controls.
 
 ```{r visualization2}
@@ -466,24 +471,24 @@ plot_data <- ROC_table
 plot_data$displayItem <- paste(plot_data$layer, " AUC = ", plot_data$AUC, sep="")
 plot_data$displayItem <- factor(
     plot_data$displayItem, levels = unique(plot_data$displayItem))
-    
+
 # ROC curves
 p <- ggplot(
     plot_data,
     aes(x = specificity,
     y = sensitivity,
-    group = displayItem)) + 
+    group = displayItem)) +
     geom_line(aes(x = specificity,y = sensitivity,color = displayItem)) +
     theme(
-        legend.position = "bottom", 
+        legend.position = "bottom",
         legend.background=element_blank(),
-        legend.box.background=element_rect(colour = "black")) + 
+        legend.box.background=element_rect(colour = "black")) +
     theme_bw() +
     xlab("False Positive Rate") +
     ylab("True Positive Rate") +
     theme(legend.position = "right", legend.direction = "vertical") +
-    labs(color = '') 
-    
+    labs(color = '')
+
 # Print
 print(p)
 
@@ -492,9 +497,8 @@ print(p)
 Finally, we visualize the results for the top 20 features for each layer based
 on the intermediate fusion.
 
-```{r visualization3, fig.width = 6, fig.height = 3}
-#### Change the pathway 
-# Only plot tp to 20 per layer
+```{r visualization3, fig.width = 6, fig.height = 7}
+# Only plot 20 features per layer
 DD <- DD %>%
   group_by(view) %>%
   top_n(n = 20, wt = abs(standardized_coef))
@@ -504,16 +508,18 @@ DD$view_col <- gsub(":.*", "", DD$view_col)
 # Visualization
 library(forcats)
 
-p <- DD %>% 
-    mutate(view_col = fct_reorder(view_col, standardized_coef)) %>% 
-    ggplot(aes(x = view_col, y = standardized_coef, fill = view, width = 0.75)) + 
+p <- DD %>%
+    mutate(view_col = fct_reorder(view_col, standardized_coef)) %>%
+    ggplot(aes(x = view_col, y = standardized_coef, fill = view, width = 0.75)) +
     geom_bar(stat = "identity", show.legend = FALSE, width = 1) +
     coord_flip() +
     facet_wrap(~ view, scales = 'free_y', nrow = 2) +
     ylab('Standardized LFC') +
     xlab('') +
-    ggtitle('IBD-associated multi-omics features') + 
+    #labs(title = "IBD-associated\nmulti-omics features") +
+    ggtitle('IBD-associated\nmulti-omics features') +
     theme_bw() + theme(
+        plot.title = element_text(hjust = 0.5, vjust = 0.5),
         strip.background  = element_blank(),
         panel.grid.major = element_line(colour = "grey80"),
         panel.border = element_blank(),
@@ -521,10 +527,9 @@ p <- DD %>%
         panel.grid.minor.y = element_blank(),
         panel.grid.major.y = element_blank())
 p
-
 ```
 
-Based on the bar plot, we observe that \emph{Proteobacteria_bacterium_CAG.139}
+Based on the barplot, we observe that \emph{Proteobacteria_bacterium_CAG.139}
 is the species most positively associated, while \emph{Gemmiger_formicilis} is
 the most negatively associated species. Additionally, L-lysine biosynthesis VI
 is the pathway most positively associated, and PYRIDNUSCYN-PWY: NAD biosynthesis

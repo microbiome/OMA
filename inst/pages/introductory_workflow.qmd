@@ -101,7 +101,7 @@ You can access **assays** [@sec-assay-slot] as such:
 
 ```{r}
 #| label: showAssay
-assay(tse)[1:5,1:10] 
+assay(tse)[1:5,1:10]
 ```
 
 Whereas **colData** [@sec-add-or-modify-data] is accessible through:
@@ -198,9 +198,9 @@ All these variations are referred to as alpha diversity.
 
 # Estimate (observed) richness
 tse_alpha <- addAlpha(
-    tse, 
-    assay.type = "counts", 
-    index = "observed", 
+    tse,
+    assay.type = "counts",
+    index = "observed",
     name="observed")
 
 # Check some of the first values in colData
@@ -215,12 +215,12 @@ graph to visualize this.
 ```{r}
 #| label: plotColdata
 plotColData(
-    tse_alpha, 
-    "observed", 
-    "cohort", 
+    tse_alpha,
+    "observed",
+    "cohort",
     colour_by = "patient_status") +
-    
-    theme(axis.text.x = element_text(angle=45,hjust=1)) + 
+    ggtitle("Richness plot of three patient cohorts") +
+    theme(axis.text.x = element_text(angle=45,hjust=1)) +
     labs(y=expression(Richness[Observed]))
 ```
 
@@ -240,9 +240,9 @@ First, we can easily calculate this measure and add them to our TreeSE.
 ```{r}
 #| label: calculateDiversity
 tse_alpha <- addAlpha(
-    tse_alpha, 
+    tse_alpha,
     assay.type = "counts",
-    index = c("shannon"), 
+    index = c("shannon"),
     name = c("shannon"))
 ```
 
@@ -261,16 +261,26 @@ plots <- lapply(
     colour_by = "patient_status")
 
 # Fine-tune visual appearance
-plots <- lapply(plots, "+", 
+plots <- lapply(plots, "+",
     theme(
         axis.text.x = element_blank(),
         axis.title.x = element_blank(),
         axis.ticks.x = element_blank()))
 
-# Plot the figures
-(plots[[1]] | plots[[2]]) +
-  plot_layout(guides = "collect")
+# Add titles to individual plots
+plots[[1]] <- plots[[1]] +
+  ggtitle("Observed richness")
+plots[[2]] <- plots[[2]] +
+  ggtitle("Shannon diversity")
 
+
+# Plot the figures
+patchwork <- (plots[[1]] | plots[[2]])
+patchwork +
+  plot_layout(guides = "collect") +
+  plot_annotation(
+  title = "Comparison of observed richness estimate and Shannon diversity",
+)
 ```
 
 It's very important to make all these comparisons in order to quantify
@@ -295,7 +305,7 @@ $$
 
 Luckily for us, the [**mia package**](https://microbiome.github.io/mia/)
 provides an easy way to calculate the relative abundance for our TreeSE
-using the `transformAssay` method.
+using the `transformAssay()` method.
 
 ```{r}
 #| label: calculateRelabundance
@@ -331,8 +341,8 @@ In our case, the assay contains 151 rows and 27 columns. Having so many
 columns and thus dimensions can be troublesome for visualizing dissimilarity.
 
 In order to visualize the dissimilarity between the different samples, we can
-conduct a Principal Coordinate analysis on the newly created assay. This
-essentially projects the Bray-curtis dimensions onto a lower space whilst
+conduct a Principal Coordinate Analysis on the newly created assay. This
+essentially projects the Bray-Curtis dimensions onto a lower space whilst
 maintaining as much of the variation as possible, the projected values are
 called principal coordinates. You can read more on @Multidimensional-scaling
 here.
@@ -343,8 +353,9 @@ we can use Bioconductor's scater package and the vegan package, made by
 
 ```{r}
 #| label: showPCoA
-# Create ggplot object
-p <- plotReducedDim(tse, "MDS_bray", colour_by = "cohort")
+# Create a ggplot object
+p <- plotReducedDim(tse, "MDS_bray", colour_by = "cohort") +
+  ggtitle("Bray-Curtis dissimilarity using multidimensional scaling")
 
 # Convert to an interactive plot with ggplotly
 ggplotly(p)
@@ -363,7 +374,8 @@ rel_eig <- e / sum(e[e > 0])
 # Add explained variance for each axis on the plot
 p <- p + labs(
     x = paste("PCoA 1 (", round(100 * rel_eig[[1]], 1), "%", ")", sep = ""),
-    y = paste("PCoA 2 (", round(100 * rel_eig[[2]], 1), "%", ")", sep = ""))
+    y = paste("PCoA 2 (", round(100 * rel_eig[[2]], 1), "%", ")", sep = "")) +
+    ggtitle("Bray-Curtis dissimilarity using multidimensional scaling")
 
 # Reonvert to an interactive plot with ggplotly
 ggplotly(p)

@@ -13,7 +13,7 @@ detect the modest but coordinated changes in pre-specified sets of related
 microbial features. Such a set might include all the microbes in a specific
 pathway or microbial genes that have been shown to be co-regulated based on
 previously published studies. Like GSEA, MSEA aggregates the per-feature
-statistics across microbes within a microbe set. This corresponds to the 
+statistics across microbes within a microbe set. This corresponds to the
 hypothesis that many relevant phenotype differences are manifested by small but
 consistent changes in a set of features.
 
@@ -54,9 +54,9 @@ se_relative <- sampleMetadata |>
 # Create sample metadata #
 ##########################
 
-sample_metadata <- 
-    colData(se_relative) %>% 
-    as.data.frame() %>% filter(visit_number == 1) %>% 
+sample_metadata <-
+    colData(se_relative) %>%
+    as.data.frame() %>% filter(visit_number == 1) %>%
     .[, c("age", "disease", "antibiotics_current_use")]
 
 #################
@@ -95,17 +95,17 @@ study.
 library(Maaslin2)
 
 fit_data = Maaslin2(
-    input_data = feature_species, 
-    input_metadata = sample_metadata, 
+    input_data = feature_species,
+    input_metadata = sample_metadata,
     normalization = "NONE",
-    output = "output_species", 
+    output = "output_species",
     fixed_effects = c("disease", "age", "antibiotics_current_use"))
 
 ```
 
 Unlike gene expression studies, we do not have well-defined signatures or
 modules for microbiome data. Here, we will construct data-driven modules using
-weighted gene co-expression network analysis (WGCNA) [@Langfelder2008], 
+weighted gene co-expression network analysis (WGCNA) [@Langfelder2008],
 [@Geistlinger2023]. We aim to ensure that the effect of disease and other
 covariates has been removed by working on the residuals. Following the WGCNA
 tutorial, our first step will be to check whether there are any outliers in our
@@ -151,7 +151,7 @@ connectivity graphic for the selection of this power parameter.
 powers = c(c(1:20), seq(from = 22, to=30, by=2))
 sft = pickSoftThreshold(
     datExpr, powerVector = powers, verbose = 5, dataIsExpr = TRUE,
-    RsquaredCut = 0.30) 
+    RsquaredCut = 0.30)
 
 ```
 
@@ -162,16 +162,16 @@ soft threshold parameter selected above.
 
 power = sft$powerEstimate
 net = blockwiseModules(
-    datExpr, 
+    datExpr,
     power = power,
-    corFnc="bicor", 
-    corOptions=list(maxPOutliers=0.1), 
-    networkType ="unsigned", 
+    corFnc="bicor",
+    corOptions=list(maxPOutliers=0.1),
+    networkType ="unsigned",
     maxBlockSize = ncol(datExpr),
     minModuleSize = 3,
-    TOMType = "unsigned", 
-    reassignThreshold = 0, 
-    mergeCutHeight = 0,                       
+    TOMType = "unsigned",
+    reassignThreshold = 0,
+    mergeCutHeight = 0,
     verbose = 3)
 
 ####################
@@ -241,26 +241,26 @@ library(gsEasy)
 run_MSEA <- function(
         microbeSet, # A list
         ranked_features, # Ranked list of featured
-        filter.count = 3, 
+        filter.count = 3,
         seed = 1234,
         fdr.correction = 'BH') {
-    
-  
+
+
     ###################
     # Filter out sets #
     ##################
-    
+
     microbeSet0 <- microbeSet
     cond <- sapply(microbeSet0, function(x) length(x) > filter.count)
     microbeSet <- microbeSet0[cond]
     lengthmicrobeSet <- as.data.frame(
         reshape2::melt(lapply(microbeSet, function(x) length(x))))
     colnames(lengthmicrobeSet) <- c('Freq','Set')
-    
+
     ################
     # Classic MSEA #
     ################
-    
+
     set.seed(seed)
     enrichment <- as.data.frame(
         sapply(microbeSet, function(set) gset(S = set, r = ranked_features)))
@@ -268,13 +268,13 @@ run_MSEA <- function(
     enrichment <- rownames_to_column(enrichment, 'Set')
     enrichment <- merge(enrichment, lengthmicrobeSet, 'Set')
     enrichment$qval <- p.adjust(enrichment$ES, fdr.correction)
-    
+
     ##########
     # Return #
     ##########
-    
+
     return(enrichment)
-  
+
 }
 
 ```
@@ -322,14 +322,14 @@ We can plot the enrichment scores to visualize the MSEA results.
 
 ```{r visualzation}
 
-p <- MSEA %>% 
-    arrange(-pval) %>% 
-    mutate(ID = factor(ID, levels = ID)) %>% 
+p <- MSEA %>%
+    arrange(-pval) %>%
+    mutate(ID = factor(ID, levels = ID)) %>%
     ggplot(aes(y = -log10(pval), x = ID)) +
-    geom_bar(stat = "identity", fill = 'cornflowerblue') + theme_bw() + 
-    coord_flip() + 
-    ggtitle('Statistically significant modules associated with disease') + 
-    xlab('') + 
+    geom_bar(stat = "identity", fill = 'cornflowerblue') + theme_bw() +
+    coord_flip() +
+    ggtitle('Statistically significant modules associated with disease') +
+    xlab('') +
     ylab('MSEA enrichment score')
 
 print(p)
@@ -356,7 +356,7 @@ project and follow the same steps as before.
 ```{r input-data}
 
 ##########################
-# Load HMP2 pathway data # 
+# Load HMP2 pathway data #
 ##########################
 
 se_pathway <- sampleMetadata |>
@@ -367,8 +367,8 @@ se_pathway <- sampleMetadata |>
 # Create sample metadata #
 ##########################
 
-sample_metadata <- colData(se_pathway) %>% 
-    as.data.frame() %>% filter(visit_number == 1) %>% 
+sample_metadata <- colData(se_pathway) %>%
+    as.data.frame() %>% filter(visit_number == 1) %>%
     dplyr::select("age", "disease", "antibiotics_current_use")
 
 # Set reference
@@ -381,10 +381,10 @@ sample_metadata$disease <- relevel(sample_metadata$disease, 'healthy')
 
 feature_pwys_t <- as.data.frame(assay(se_pathway))
 feature_pwys_t <- rownames_to_column(feature_pwys_t, "ID")
-feature_pwys_t <- feature_pwys_t %>% 
-    filter(!grepl("\\|", ID)) %>% 
-    filter(!ID %in% c('UNMAPPED', 'UNINTEGRATED')) %>% 
-    column_to_rownames('ID') %>% 
+feature_pwys_t <- feature_pwys_t %>%
+    filter(!grepl("\\|", ID)) %>%
+    filter(!ID %in% c('UNMAPPED', 'UNINTEGRATED')) %>%
+    column_to_rownames('ID') %>%
     as.data.frame()
 
 ##############################
@@ -404,10 +404,10 @@ construct the modules using residuals from the `MaAsLin2` models.
 ```{r MSEA-preparation}
 
 fit_data = Maaslin2(
-    input_data = feature_pwys, 
-    input_metadata = sample_metadata, 
+    input_data = feature_pwys,
+    input_metadata = sample_metadata,
     normalization = "NONE",
-    output = "output_pwys", 
+    output = "output_pwys",
     fixed_effects = c("disease", "age", "antibiotics_current_use"))
 
 ##########################
@@ -453,16 +453,16 @@ sft = pickSoftThreshold(
 
 power = sft$powerEstimate
 net = blockwiseModules(
-    datExpr, 
+    datExpr,
     power = power,
-    corFnc = "bicor", 
-    corOptions = list(maxPOutliers = 0.1), 
-    networkType ="unsigned", 
+    corFnc = "bicor",
+    corOptions = list(maxPOutliers = 0.1),
+    networkType ="unsigned",
     maxBlockSize = ncol(datExpr),
     minModuleSize = 3,
-    TOMType = "unsigned", 
-    reassignThreshold = 0, 
-    mergeCutHeight = 0,                       
+    TOMType = "unsigned",
+    reassignThreshold = 0,
+    mergeCutHeight = 0,
     verbose = 3)
 
 ####################
@@ -538,14 +538,14 @@ MSEA$ID <- paste(MSEA$ID, ' (', MSEA$Size, ')', sep = '')
 # Plot #
 ########
 
-p <- MSEA %>% 
-  arrange(-pval) %>% 
-  mutate(ID = factor(ID, levels = ID)) %>% 
+p <- MSEA %>%
+  arrange(-pval) %>%
+  mutate(ID = factor(ID, levels = ID)) %>%
   ggplot(aes(y = -log10(pval), x = ID)) +
-  geom_bar(stat = "identity", fill = 'cornflowerblue') + theme_bw() + 
-  coord_flip() + 
-  ggtitle('Statistically significant modules associated with disease') + 
-  xlab('') + 
+  geom_bar(stat = "identity", fill = 'cornflowerblue') + theme_bw() +
+  coord_flip() +
+  ggtitle('Statistically significant modules associated with disease') +
+  xlab('') +
   ylab('MSEA enrichment score')
 
 print(p)

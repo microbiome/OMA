@@ -74,7 +74,7 @@ The following list gives a selection of compositionality aware approaches:
     + **Proportionality measures (proportionality aware by definition):**
       - [propr](https://github.com/tpq/propr)
       - [Shrinkage proportionality estimator](https://github.com/MichelleBadri/NormCorr-manuscript/blob/master/code/helpers/norm_functions.R); applied in [@sec-shrinkage-prop]
-        
+
 4.  **Sparsification:** Transforming the estimated associations directly into
 adjacencies would lead to a dense network where all nodes are connected and
 only weighted network measures are meaningful. Therefore, the association
@@ -132,8 +132,8 @@ dim(tse)
 ```
 
 ```{r, echo=FALSE}
-# The networks shown in this chapter take several minutes to generate. 
-# Therefore, the network objects have been stored in a folder and are loaded 
+# The networks shown in this chapter take several minutes to generate.
+# Therefore, the network objects have been stored in a folder and are loaded
 # here to reduce the time needed to knit the book.
 spring_networks_file  <- system.file(
     "extdata", "spring_networks.RData", package = "OMA")
@@ -176,14 +176,14 @@ steps:
 
 ```{r}
 # Agglomerate to genus level
-tse <- agglomerateByRank(tse, rank = "genus") 
+tse <- agglomerateByRank(tse, rank = "genus")
 
 # Add relative abundances
 tse <- transformAssay(
-    tse, 
-    assay.type = "counts", 
+    tse,
+    assay.type = "counts",
     method = "relabundance",
-    MARGIN = "cols") 
+    MARGIN = "cols")
 
 # Filter by prevalence
 tse <- subsetByPrevalent(
@@ -206,7 +206,7 @@ dim(tse)
 As explained in [@sec-network-learning-workflow], we use
 [SPRING](https://github.com/GraceYoon/SPRING) ("Semi-Parametric Rank-based
 approach for INference in Graphical model") as association measure. We first
-use the `SPRING` function directly to construct a conditional dependency graph. 
+use the `SPRING` function directly to construct a conditional dependency graph.
 
 Neither zero replacement nor normalization (steps 1 and 2 in our workflow)
 are required because SPRING uses a modified clr (mclr) transformation that
@@ -236,8 +236,8 @@ library(SPRING)
 ```{r, eval=FALSE}
 set.seed(13075)
 spring_est <- SPRING(
-    t(assay(tse, "counts")), 
-    Rmethod = "approx", 
+    t(assay(tse, "counts")),
+    Rmethod = "approx",
     thresh = 0.05,
     lambdaseq = "data-specific")
 ```
@@ -283,24 +283,24 @@ transform_asso <- function(assoMat, thresh = NULL, dissTrans = "signed") {
   if (!is.null(thresh)) {
       assoMat[abs(assoMat) < thresh] <- 0
   }
-  
+
   # Compute dissimilarity matrix
   if (dissTrans == "signed") {
       dissMat <- sqrt(0.5 * (1 - assoMat))
   } else {
       dissMat <- sqrt(1 - assoMat^2)
   }
-  
+
   # Dissimilarity between nodes with zero correlation is set to 1
   # (these nodes are unconnected and thus should have maximum dissimilarity)
   dissMat[assoMat == 0] <- 1
-  
+
   # Compute similarity matrix
   simMat <- 1 - dissMat
-  
+
   # Turn into igraph object
   graphObj <- SpiecEasi::adj2igraph(simMat)
-  
+
   return(list(graph = graphObj, adja = simMat, asso = assoMat, diss = dissMat))
 }
 ```
@@ -324,7 +324,7 @@ preprocessing, association estimation, sparsification, and transformation.
 The returned `microNet` object can then be passed to `netAnalyze()`
 (the network analysis function) so that all necessary information is available
 for the network analysis workflow.
- 
+
 ```{r, message=FALSE, warning=FALSE}
 library(NetCoMi)
 ```
@@ -344,7 +344,7 @@ netcomi_net <- netConstruct(
     filtTaxPar = list(numbSamp = 0.2),
     measure = "spring",
     measurePar = list(thresh = 0.05, Rmethod = "approx"),
-    sparsMethod = "none", 
+    sparsMethod = "none",
     dissFunc = "signed",
     seed = 13075)
 ```
@@ -418,9 +418,9 @@ set.seed(13075)
 lay_fr <- layout_with_fr(spring_graph)
 
 par(mfrow = c(1,2))
-plot(spring_graph, layout = lay_fr, vertex.size = vsize, 
+plot(spring_graph, layout = lay_fr, vertex.size = vsize,
      vertex.label = NA, main = "SPRING network")
-plot(netcomi_graph, layout = lay_fr, vertex.size = vsize, 
+plot(netcomi_graph, layout = lay_fr, vertex.size = vsize,
      vertex.label = NA, main = "NetCoMi network\n(with SPRING associations)")
 ```
 
@@ -480,7 +480,7 @@ head(vsize_df)
 ```{r plots_centrality, fig.height=10, fig.width=10}
 par(mfrow = c(2,2))
 for (i in seq_along(centr_df)) {
-    plot(spring_graph, layout = lay_fr, vertex.size = vsize_df[, i], 
+    plot(spring_graph, layout = lay_fr, vertex.size = vsize_df[, i],
         vertex.label = NA, main = colnames(centr_df)[i])
 }
 ```
@@ -515,7 +515,7 @@ vsize_df <- get_vsizes(centr_df)
 ```{r plots_centrality_lcc, fig.height=10, fig.width=10}
 par(mfrow = c(2,2))
 for (i in seq_along(centr_df)) {
-    plot(spring_graph, layout = lay_fr, vertex.size = vsize_df[, i], 
+    plot(spring_graph, layout = lay_fr, vertex.size = vsize_df[, i],
         vertex.label = NA, main = colnames(centr_df)[i])
 }
 ```
@@ -550,6 +550,7 @@ df <- data.frame(
 ggplot(data = df, aes(x = Degree, y = Fraction, group = 1)) +
     geom_line() +
     geom_point() +
+    labs(title = "Degree distribution") +
     theme_bw()
 ```
 
@@ -579,14 +580,14 @@ adja_sel <- spring_cor[sel, sel]
 ```{r clustered_heatmap, fig.width=5.8, fig.height=5}
 # Color vector
 col <- colorRamp2(
-    c(-1, -0.5, 0, 0.5, 1), 
+    c(-1, -0.5, 0, 0.5, 1),
     c("royalblue4", "lightblue", "white", "orange", "firebrick3"))
 
 Heatmap(
-    adja_sel, 
-    col = col, 
+    adja_sel,
+    col = col,
     rect_gp = gpar(col = "gray", lwd = 1),
-    show_row_names = FALSE, 
+    show_row_names = FALSE,
     show_column_names = FALSE,
     name = "Association")
 ```
@@ -644,7 +645,7 @@ resulting from Student's t-test in the lower triangle). See `?calcGCM` and
 
 ```{r netAnalyze_single, fig.width=7, fig.height=7, out.width='75%'}
 netcomi_netprops <- netAnalyze(
-    netcomi_net, 
+    netcomi_net,
     clustMethod = "cluster_fast_greedy",
     hubPar = "eigenvector",
     normDeg = FALSE)
@@ -707,17 +708,17 @@ plot(netcomi_netprops,
      labelScale = FALSE,
      nodeSize = "eigenvector",
      nodeSizeSpread = 3,
-     nodeColor = "cluster", 
+     nodeColor = "cluster",
      hubBorderCol = "gray40",
      cexNodes = 1.8,
      edgeTranspHigh = 20,
-     title1 = "Network properties highlighted", 
+     title1 = "Network properties highlighted",
      showTitle = TRUE,
      cexTitle = 2.3,
      mar = c(1, 3, 4, 8))
 
 legend(0.7, 1.1, cex = 1.7, title = "estimated correlation:",
-       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"), 
+       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"),
        bty = "n", horiz = TRUE)
 ```
 
@@ -747,28 +748,28 @@ plot(netcomi_netprops,
      shortenLabels = "intelligent",
      labelScale = FALSE,
      nodeSize = "mclr",
-     nodeColor = "feature", 
-     featVecCol = phyla, 
+     nodeColor = "feature",
+     featVecCol = phyla,
      colorVec =  colvec,
      nodeTransp = 20,
      highlightHubs = FALSE,
      cexNodes = 1.8,
      edgeTranspHigh = 20,
-     title1 = "Data features highlighted", 
+     title1 = "Data features highlighted",
      showTitle = TRUE,
      cexTitle = 2.3,
      mar = c(1, 10, 4, 6))
 
 # Add legends
 legend(0.7, 1.1, cex = 1.7, title = "estimated correlation:",
-       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"), 
+       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"),
        bty = "n", horiz = TRUE)
 
 # Colors used in the legend should be equally transparent as in the plot
 col_transp <- colToTransp(colvec, 20)
 
-legend(-1.8, 1.1, cex = 1.7, pt.cex = 2.5, title = "Phylum:", 
-       legend=levels(phyla), col = col_transp, bty = "n", pch = 16) 
+legend(-1.8, 1.1, cex = 1.7, pt.cex = 2.5, title = "Phylum:",
+       legend=levels(phyla), col = col_transp, bty = "n", pch = 16)
 ```
 
 **A few things to observe:**
@@ -849,7 +850,7 @@ conditional dependence measures address the high dimensionality of microbiome da
 as an alternative measure of pairwise association for compositional data.
 The idea is that if the relative abundances between two taxa $i$ and $j$ are
 proportional, then their corresponding absolute abundances are also
-proportional: 
+proportional:
 $\frac{\omega_i}{m} \propto \frac{\omega_j}{m} \Rightarrow \omega_i \propto \omega_j$,
 where $m$ is the sum of counts in the sample. It follows that proportionality
 is identical for the observed (relative) read counts and the true unobserved
@@ -866,15 +867,15 @@ even with small sample sizes.
 ## Comparison of association measures
 
 In this section, we provide three additional examples for constructing a
-network using each of the three types of association: 
+network using each of the three types of association:
 
 * Correlation using `SparCC`
 * Partial correlation using `SpiecEasi`
 * Proportionality using the shrinkage proportionality measure
 
 ```{r, echo=FALSE}
-# The networks shown in this chapter take several minutes to generate. 
-# Therefore, the network objects have been stored in a folder and are loaded 
+# The networks shown in this chapter take several minutes to generate.
+# Therefore, the network objects have been stored in a folder and are loaded
 # here to reduce the time needed to knit the book.
 networks_file  <- system.file("extdata", "networks.RData", package = "OMA")
 load(networks_file)
@@ -961,7 +962,7 @@ for Ecological Association and Statistical Inference") approach proposed by
 @Kurtz2015 to estimate a sparse conditional dependency graph. The neighborhood
 selection method ("MB") introduced by @meinshausen2006high is used for network
 learning. The approach is implemented in the R package
-[SpiecEasi](https://github.com/zdk123/SpiecEasi). 
+[SpiecEasi](https://github.com/zdk123/SpiecEasi).
 
 ```{r, message=FALSE, warning=FALSE}
 library(SpiecEasi)
@@ -970,8 +971,8 @@ library(SpiecEasi)
 ```{r, eval=FALSE}
 set.seed(13075)
 se_mb_est <- spiec.easi(
-    t(assay(tse, "counts")), 
-    method = 'mb', nlambda = 20, 
+    t(assay(tse, "counts")),
+    method = 'mb', nlambda = 20,
     pulsar.params = list(rep.num = 20))
 ```
 
@@ -1015,17 +1016,17 @@ set.seed(13075)
 lay_fr <- layout_with_fr(se_mb_graph)
 
 par(mfrow = c(2,2))
-plot(sparcc_graph03, layout = lay_fr, vertex.size = vsize, 
+plot(sparcc_graph03, layout = lay_fr, vertex.size = vsize,
      vertex.label = NA, main = "SparCC (thresh 0.3)")
-plot(sparcc_graph04, layout = lay_fr, vertex.size = vsize, 
+plot(sparcc_graph04, layout = lay_fr, vertex.size = vsize,
      vertex.label = NA, main = "SparCC (thresh 0.4)")
-plot(prop_graph, layout = lay_fr, vertex.size = vsize, 
+plot(prop_graph, layout = lay_fr, vertex.size = vsize,
      vertex.label = NA, main = "Shrinkage proportionality\n(thresh 0.4)")
-plot(se_mb_graph, layout = lay_fr, vertex.size = vsize, 
+plot(se_mb_graph, layout = lay_fr, vertex.size = vsize,
      vertex.label = NA, main = "SpiecEasi (MB)")
 ```
 
-**A few observations:**  
+**A few observations:**
 The density of SparCC (threshold 0.4), proportionality and SpiecEasi is
 comparable, while the SparCC correlation network with threshold 0.3 is much
 denser. However, there are edges in the proportionality and SpiecEasi networks
@@ -1046,7 +1047,7 @@ graph objects we need for the analyses.
 
 ```{r graphlist}
 graphlist <- list(
-    SparCC = sparcc_graph04, 
+    SparCC = sparcc_graph04,
     Proportionality = prop_graph,
     SpiecEasi = se_mb_graph,
     SPRING = spring_graph)
@@ -1075,8 +1076,8 @@ for(i in seq_along(graphlist)) {
 
 # Data frame needed for ggplot2
 df <- data.frame(
-    Degree = rep(seq_len(maxdeg), length(graphlist)), 
-    Fraction = unlist(ddlist), 
+    Degree = rep(seq_len(maxdeg), length(graphlist)),
+    Fraction = unlist(ddlist),
     Method = rep(names(graphlist), each = maxdeg))
 
 ggplot(df, aes(x = Degree, y = Fraction, group = Method)) +
@@ -1136,18 +1137,18 @@ for(i in seq_along(assolist)) {
     } else {
         showlegend <- FALSE
     }
-    
+
     hm_list[[i]] <- Heatmap(
-        assolist[[i]], 
-        col = col, 
+        assolist[[i]],
+        col = col,
         rect_gp = gpar(col = "gray", lwd = 1),
-        show_row_names = FALSE, 
+        show_row_names = FALSE,
         show_column_names = FALSE,
-        column_title = names(assolist)[i], 
+        column_title = names(assolist)[i],
         name = "Association",
         show_heatmap_legend = showlegend) %>%
-      
-        draw() %>% 
+
+        draw() %>%
         grid.grabExpr()
 }
 
