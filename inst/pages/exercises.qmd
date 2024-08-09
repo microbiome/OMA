@@ -1560,11 +1560,14 @@ sechm(
 #| code-summary: "Show solution"
 #| eval: false
 
+library(mia)
 library(pheatmap)
 
-# Create example data
-set.seed(123)
-example_data <- matrix(rnorm(200), nrow = 20, ncol = 10)
+# Load example dataset from mia package
+data(enterotype)
+
+# Extract the data matrix for heatmap
+example_data <- assay(enterotype, "counts")
 
 # Create basic heatmap using pheatmap
 pheatmap(example_data)
@@ -1703,17 +1706,27 @@ Create an interactive heatmap.
 #| code-summary: "Show solution"
 #| eval: false
 
-# Load necessary libraries
+# Load required libraries
+library(mia)
 library(heatmaply)
 
-# Create example data
-example_data <- matrix(rnorm(200), nrow = 20, ncol = 10)
+# Load the GlobalPatterns dataset from the mia package
+data("GlobalPatterns", package = "mia")
 
-# Create interactive heatmap
-heatmaply(example_data)
+# Here we extract the first 20 taxa and the first 10 samples as an example
+taxa_data <- assay(GlobalPatterns)[1:20, 1:10]
+taxa_names <- rownames(taxa_data)
+sample_names <- colnames(taxa_data)
+
+# Create the interactive heatmap using heatmaply
+heatmaply(taxa_data,
+          xlab = "Samples",
+          ylab = "Taxa",
+          main = "Interactive Heatmap of
+                  GlobalPatterns Dataset")
 ```
 
-2. k-means clustering on reduced dimensions and visualization 
+2. k-means clustering on reduced dimensions and visualization
 
 - Performs k-means clustering on reduced dimensional data obtained from PCoA.
 - Visualizes the clusters in a scatter plot of the reduced dimensions.
@@ -1737,20 +1750,15 @@ tse <- GlobalPatterns
 # Perform MDS on the abundance data using scater::runMDS
 tse <- runMDS(tse, FUN = vegan::vegdist, method = "bray", assay.type = "counts")
 
-# Extract the reduced dimensions
-mds_data <- reducedDim(tse, "MDS")
-
-# Perform k-means clustering (k = 3) using the base R kmeans function
-set.seed(123)
-kmeans_result <- kmeans(mds_data, centers = 3)
-
-# Create KmeansParam object
+# Perform k-means clustering using mia's addCluster function
 kmeans_param <- KmeansParam(centers = 3)
+tse <- addCluster(tse, colDataName = "kmeans_clusters", BLUSPARAM = kmeans_param)
 
 # Visualize MDS with clusters
 plotReducedDim(tse, dimred = "MDS") +
   labs(title = "MDS with k-means Clustering") +
   theme_minimal()
+```
 
 3. Hierarchial Clustering
 - Hierarchical clustering of samples based on abundance data.
@@ -1763,36 +1771,35 @@ plotReducedDim(tse, dimred = "MDS") +
 #| code-summary: "Show solution"
 
 # Load necessary libraries
-library(SummarizedExperiment)
+library(mia)
 library(sechm)
+library(bluster)
 
-# Generate sample abundance data
-set.seed(123)
-sample_data <- matrix(rnorm(100), nrow = 10)
-rownames(sample_data) <- paste0("Gene", 1:10)
-colnames(sample_data) <- paste0("Sample", 1:10)
+# Load abundance data
+data("GlobalPatterns", package = "mia")
 
-# Perform hierarchical clustering
-hclust_result <- hclust(dist(t(sample_data)), method = "complete")
-
-# Assign cluster information to metadata
-clusters <- cutree(hclust_result, k = 3)
-metadata <- data.frame(Cluster = as.factor(clusters))
-rownames(metadata) <- colnames(sample_data)
+# Here we extract the first 20 taxa and the first 20 samples as an example
+sample_data <- assay(GlobalPatterns)[1:20, 1:20]
 
 # Create a SummarizedExperiment object
-se <- SummarizedExperiment(assays = list(counts = sample_data),
-                           colData = metadata)
+se <- SummarizedExperiment(assays = list(counts = sample_data))
+
+# Perform hierarchical clustering using bluster package & addCluster from mia package
+hclust_param <- HclustParam(method = "complete", cut.params = list(k = 3))
+se <- addCluster(se, 
+                 colDataName = "Cluster", 
+                 BLUSPARAM = hclust_param)
 
 # Visualization using sechm heatmap
 sechm(se,
       features = rownames(sample_data),
       cluster_rows = TRUE,
-      cluster_cols = TRUE,
-      )
+      cluster_cols = TRUE)
+
 
 4. Heatmap with Custom Color Palette:
-Customize the heatmap with a specific color palette to enhance visualization using ComplexHeatmap.
+Customize the heatmap with a specific color palette to enhance visualization 
+using ComplexHeatmap.
 
 ```{r}
 #| label: extra-customcolorheatmap-ex-4
@@ -1801,14 +1808,18 @@ Customize the heatmap with a specific color palette to enhance visualization usi
 #| eval: false
 
 # Load necessary libraries
+library(mia)
 library(ComplexHeatmap)
 library(circlize)  # for color functions
 
-# Create example data
-example_data <- matrix(rnorm(200), nrow = 20, ncol = 10)
+# Load the GlobalPatterns dataset from the mia package
+data("GlobalPatterns", package = "mia")
+
+# Here we extract the first 30 taxa and the first 20 samples as an example
+example_data <- assay(GlobalPatterns)[1:30, 1:20]
 
 # Define custom color palette
-custom_colors <- colorRamp2(c(min(example_data), 0, max(example_data)), c("blue", "white", "red"))
+custom_colors <- colorRamp2(c(min(example_data), 0, max(example_data)), c("yellow", "green", "red"))
 
 # Create heatmap with custom color palette
 Heatmap(example_data, col = custom_colors)
