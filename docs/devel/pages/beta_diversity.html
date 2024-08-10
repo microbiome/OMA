@@ -1004,20 +1004,20 @@ Schloss, Patrick D. 2023. <span>“Rarefaction Is Currently the Best Approach to
 <p>In typical use cases, we would like to know how well the ordination reflects the original similarity structures; then the quantity of interest is the so-called “stress” function, which measures the difference in pairwise similarities between the data points in the original (high-dimensional) vs.&nbsp;projected (low-dimensional) space.</p>
 <p>Hence, we propose that for PCoA and other ordination methods, users would report relative stress, which varies within the unit interval and is better if smaller. This can be calculated as shown below.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span></span>
-<span><span class="co"># Quantify dissimilarities in the original feature space</span></span>
-<span><span class="co"># Pick relabunance assay separately</span></span>
-<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"relabundance"</span><span class="op">)</span></span>
-<span><span class="va">d0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu">vegan</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/vegan/man/vegdist.html">vegdist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="st">"bray"</span><span class="op">)</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Quantify dissimilarities in the original feature space</span></span>
+<span><span class="va">d0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu">vegan</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/vegan/man/vegdist.html">vegdist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"relabundance"</span><span class="op">)</span><span class="op">)</span>, <span class="st">"bray"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># PCoA Ordination</span></span>
-<span><span class="va">pcoa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cmdscale.html">cmdscale</a></span><span class="op">(</span><span class="va">d0</span>, k <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">pcoa</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"PCoA1"</span>, <span class="st">"PCoA2"</span><span class="op">)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scater/man/runMDS.html">runMDS</a></span><span class="op">(</span><span class="va">tse</span>,</span>
+<span>                FUN <span class="op">=</span> <span class="fu">vegan</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/vegan/man/vegdist.html">vegdist</a></span>,</span>
+<span>                name <span class="op">=</span> <span class="st">"PCoA"</span>,</span>
+<span>                method <span class="op">=</span> <span class="st">"bray"</span>,</span>
+<span>                assay.type <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Quantify dissimilarities in the ordination space</span></span>
-<span><span class="va">dp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/dist.html">dist</a></span><span class="op">(</span><span class="va">pcoa</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">dp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/dist.html">dist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDim</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"PCoA"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Calculate stress i.e. relative difference</span></span>
+<span><span class="co"># Calculate stress i.e. relative difference </span></span>
 <span><span class="co"># in the original and projected dissimilarities</span></span>
 <span><span class="va">stress</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">dp</span> <span class="op">-</span> <span class="va">d0</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">d0</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -1129,7 +1129,7 @@ Anderson, Marti J. 2001. <span>“A New Method for Non-Parametric Multivariate A
 <td style="text-align: right;">6</td>
 <td style="text-align: right;">1.1157</td>
 <td style="text-align: right;">1.940</td>
-<td style="text-align: right;">0.029</td>
+<td style="text-align: right;">0.037</td>
 <td style="text-align: right;">3.991</td>
 <td style="text-align: right;">0.2795</td>
 </tr>
@@ -1138,7 +1138,7 @@ Anderson, Marti J. 2001. <span>“A New Method for Non-Parametric Multivariate A
 <td style="text-align: right;">4</td>
 <td style="text-align: right;">0.5837</td>
 <td style="text-align: right;">1.522</td>
-<td style="text-align: right;">0.127</td>
+<td style="text-align: right;">0.135</td>
 <td style="text-align: right;">3.991</td>
 <td style="text-align: right;">0.1463</td>
 </tr>
@@ -1147,7 +1147,7 @@ Anderson, Marti J. 2001. <span>“A New Method for Non-Parametric Multivariate A
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">0.1679</td>
 <td style="text-align: right;">1.751</td>
-<td style="text-align: right;">0.124</td>
+<td style="text-align: right;">0.108</td>
 <td style="text-align: right;">3.991</td>
 <td style="text-align: right;">0.0421</td>
 </tr>
@@ -1276,7 +1276,7 @@ Note
 <td style="text-align: right;">0.0628</td>
 <td style="text-align: right;">2.7440</td>
 <td style="text-align: right;">999</td>
-<td style="text-align: right;">0.130</td>
+<td style="text-align: right;">0.108</td>
 <td style="text-align: right;">1.0288</td>
 <td style="text-align: right;">0.2440</td>
 </tr>
@@ -1287,7 +1287,7 @@ Note
 <td style="text-align: right;">0.0103</td>
 <td style="text-align: right;">0.4158</td>
 <td style="text-align: right;">999</td>
-<td style="text-align: right;">0.524</td>
+<td style="text-align: right;">0.557</td>
 <td style="text-align: right;">0.9283</td>
 <td style="text-align: right;">0.0111</td>
 </tr>
@@ -1298,7 +1298,7 @@ Note
 <td style="text-align: right;">0.0113</td>
 <td style="text-align: right;">17.0255</td>
 <td style="text-align: right;">999</td>
-<td style="text-align: right;">0.427</td>
+<td style="text-align: right;">0.393</td>
 <td style="text-align: right;">0.3319</td>
 <td style="text-align: right;">0.9860</td>
 </tr>
