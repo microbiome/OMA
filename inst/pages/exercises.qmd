@@ -1546,13 +1546,14 @@ tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 #| code-fold: true
 #| code-summary: "Show solution"
 #| eval: false
+
 setSechmOption("hmcols", value=c("#F0F0FF","#007562"))
 sechm(
     tse, features = rownames(tse), assayName="relabundance",
     show_colnames=TRUE)
 ```
 
-5. Create a basic heatmap of the data using the `pheatmap` package.
+5. Create a basic heatmap using the `pheatmap` package.
 
 ```{r}
 #| label: heatmap-ex5
@@ -1563,14 +1564,8 @@ sechm(
 library(mia)
 library(pheatmap)
 
-# Load example dataset from mia package
-data(enterotype)
-
-# Extract the data matrix for heatmap
-example_data <- assay(enterotype, "counts")
-
-# Create basic heatmap using pheatmap
-pheatmap(example_data)
+data(enterotype, package = "mia")
+pheatmap(assay(enterotype, "counts"))
 ```
 
 ### Advanced Heatmaps
@@ -1697,8 +1692,7 @@ p
 
 **Extra** Cool exercises :
 
-1. Interactive Heatmap:
-Create an interactive heatmap.
+1. Create an interactive heatmap. 
 
 ```{r}
 #| label: extra-interactiveheatmap-ex1
@@ -1706,25 +1700,17 @@ Create an interactive heatmap.
 #| code-summary: "Show solution"
 #| eval: false
 
-# Load required libraries
 library(mia)
 library(heatmaply)
 
-# Load the GlobalPatterns dataset from the mia package
 data("GlobalPatterns", package = "mia")
 
-# Here we extract the first 20 taxa and the first 10 samples as an example
-taxa_data <- assay(GlobalPatterns)[1:20, 1:10]
-taxa_names <- rownames(taxa_data)
-sample_names <- colnames(taxa_data)
-
-# Create the interactive heatmap using heatmaply
-heatmaply(taxa_data,
-          xlab = "Samples",
-          ylab = "Taxa",
-          main = "Interactive Heatmap of
-                  GlobalPatterns Dataset")
+# Create the interactive heatmap using aggregated data
+heatmaply(assay(agglomerateByRank(GlobalPatterns, rank = "Phylum")),
+          xlab = "Samples", ylab = "Phyla")
 ```
+Notice we aggregate the "GlobalPatterns" dataset
+to a higher taxonomic level to make the data more manageable.
 
 2. k-means clustering on reduced dimensions and visualization
 
@@ -1743,14 +1729,13 @@ library(vegan)
 library(scater)
 library(bluster)
 
-# Load the dataset
 data(GlobalPatterns)
 tse <- GlobalPatterns
 
 # Perform MDS on the abundance data using scater::runMDS
 tse <- runMDS(tse, FUN = vegan::vegdist, method = "bray", assay.type = "counts")
 
-# Perform k-means clustering using mia's addCluster function
+# Perform k-means clustering using mia's addCluster()
 kmeans_param <- KmeansParam(centers = 3)
 tse <- addCluster(tse, colDataName = "kmeans_clusters", BLUSPARAM = kmeans_param)
 
@@ -1770,36 +1755,23 @@ plotReducedDim(tse, dimred = "MDS") +
 #| code-fold: true
 #| code-summary: "Show solution"
 
-# Load necessary libraries
 library(mia)
 library(sechm)
 library(bluster)
 
-# Load abundance data
-data("GlobalPatterns", package = "mia")
+data("enterotype", package = "mia")
 
-# Here we extract the first 20 taxa and the first 20 samples as an example
-sample_data <- assay(GlobalPatterns)[1:20, 1:20]
-
-# Create a SummarizedExperiment object
-se <- SummarizedExperiment(assays = list(counts = sample_data))
-
-# Perform hierarchical clustering using bluster package & addCluster from mia package
+# Perform hierarchical clustering
 hclust_param <- HclustParam(method = "complete", cut.params = list(k = 3))
-se <- addCluster(se, 
-                 colDataName = "Cluster", 
-                 BLUSPARAM = hclust_param)
+tse <- addCluster(enterotype, colDataName = "Cluster", BLUSPARAM = hclust_param)
 
 # Visualization using sechm heatmap
-sechm(se,
-      features = rownames(sample_data),
-      cluster_rows = TRUE,
-      cluster_cols = TRUE)
+sechm(tse, 
+      features = rownames(tse), 
+      cluster_rows = TRUE, cluster_cols = TRUE)
+```
 
-
-4. Heatmap with Custom Color Palette:
-Customize the heatmap with a specific color palette to enhance visualization 
-using ComplexHeatmap.
+4. Customize the heatmap with a specific color palette to enhance visualization.
 
 ```{r}
 #| label: extra-customcolorheatmap-ex-4
@@ -1807,23 +1779,24 @@ using ComplexHeatmap.
 #| code-summary: "Show solution"
 #| eval: false
 
-# Load necessary libraries
 library(mia)
 library(ComplexHeatmap)
-library(circlize)  # for color functions
+library(circlize)
 
-# Load the GlobalPatterns dataset from the mia package
-data("GlobalPatterns", package = "mia")
+data("esophagus", package = "mia")
 
-# Here we extract the first 30 taxa and the first 20 samples as an example
-example_data <- assay(GlobalPatterns)[1:30, 1:20]
+# Define a custom color palette
+custom_colors <- colorRamp2(c(min(assay(esophagus)), mean(assay(esophagus)), 
+                            max(assay(esophagus))), c("blue", "white", "red"))
 
-# Define custom color palette
-custom_colors <- colorRamp2(c(min(example_data), 0, max(example_data)), c("yellow", "green", "red"))
-
-# Create heatmap with custom color palette
-Heatmap(example_data, col = custom_colors)
+Heatmap(assay(esophagus),  
+        col = custom_colors,
+        cluster_rows = TRUE, 
+        cluster_columns = TRUE)
 ```
+Sometimes, e.g. with `sechm`, you might have to do log transformation to reduce the skewness and 
+bring the higher values closer to the rest of the data. This will help in highlighting
+differences across the entire range of data.
 
 ## Multiomics
 
