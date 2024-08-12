@@ -1,4 +1,4 @@
-extract_packages <- function(description_file_path = "~/OMA/DESCRIPTION", output_file_path = "~/OMA/oma_packages/oma_packages.csv") {
+extract_packages <- function(description_file_path = "DESCRIPTION", output_file_path = "oma_packages/oma_packages.csv") {
   # Check if the DESCRIPTION file exists
   if (!file.exists(description_file_path)) {
     stop(paste("DESCRIPTION file not found at path:", description_file_path))
