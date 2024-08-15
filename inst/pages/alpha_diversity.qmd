@@ -26,7 +26,7 @@ is often used to collectively refer to all these variants.
   together with increasing richness and evenness. **Phylogenetic
   diversity** (PD), [@Faith1992], is a variant that incorporates
   information from phylogenetic relationships between species, unlike
-  most other commonly used diversity indices. The `addAlpha`
+  most other commonly used diversity indices. The `addAlpha()`
   function uses a faster reimplementation of the widely used function
   in _`picante`_ [@R_picante, @Kembel2010]. The method uses the
   default rowTree from the `TreeSummarizedExperiment` object (`tse`).
@@ -39,6 +39,20 @@ is often used to collectively refer to all these variants.
   including for instance ACE [@Chao1992] and Chao1 [@Chao1984]
   indices. Richness estimates do not aim to characterize variations in
   species abundances.
+  
+Nonparametric richness estimators such as Chao1 and ACE, however, must not be 
+used with amplicon sequence variant (ASV) data. Algorithms that generate ASVs, 
+like DADA2 and Deblur, typically remove singletons, which are essential for 
+these richness calculations. This removal leads to meaningless results. 
+Although ASVs offer higher resolution than operational taxonomic units (OTUs) 
+and are increasingly used, the removal of singletons invalidates the application 
+of Chao1 and ACE. Therefore, alternative alpha diversity metrics that do not 
+depend on singletons or doubletons should be considered, or OTUs could be 
+used specifically for alpha diversity analysis to retain low-abundance taxa.
+Additionally, the inability of denoising algorithms to distinguish true 
+singleton sequences from artifacts further complicates the issue, making 
+traditional richness estimators unsuitable for ASV datasets, which are often 
+standardized for sequencing depth.[@Deng2024]
 
 **Evenness** focuses on the distribution of species abundances, and it
   can thus complement the number of species. Pielou's evenness is a
@@ -63,8 +77,8 @@ indices of dominance or rarity:
 
 ### Calculate diversity measures {#sec-estimate-diversity}
 
-Alpha diversity can be estimated with `addAlpha` wrapper function that interact
-with other packages implementing the calculation, such as _`vegan`_
+Alpha diversity can be estimated with `addAlpha()` wrapper function that interact
+with other packages implementing the calculation, such as `vegan`
 [@R_vegan].
 
 These functions calculate the given indices, and add them to the
@@ -72,8 +86,8 @@ These functions calculate the given indices, and add them to the
 `name`.
 
 The estimated values can then be retrieved and analyzed directly from
-the `colData`, for example, by plotting them using `plotColData` from
-the _`scater`_ package [@R_scater]. Here, we use the `observed`
+the `colData`, for example, by plotting them using `plotColData()` from
+the `scater` package [@R_scater]. Here, we use the `observed`
 species as a measure of richness.
 
 Certain indices have additional options, here observed has `detection` parameter
@@ -120,9 +134,9 @@ plotColData(
     labs(expression(Richness[Observed]))
 ```
 
-We can then analyze the statistical significance. We use non-parametrics
-Wilcoxon or Mann-Whitney test since it is more flexibly than commonly used
-Student's t-Test since it does not have normality assumption.
+We can then analyze the statistical significance. We use the non-parametric
+Wilcoxon or Mann-Whitney test, as it is more flexible than the commonly used
+Student's t-Test, since it does not assume normality.
 
 ```{r}
 #| label: test_alpha1
@@ -133,7 +147,7 @@ pairwise.wilcox.test(
 
 ### Faith phylogenetic diversity {#sec-faith-diversity}
 
-The Faith index is returned by the function `addAlpha`. It utilizes the widely
+The Faith index is returned by the function `addAlpha()`. It utilizes the widely
 used function in _`picante`_ [@R_picante, @Kembel2010].
 
 ```{r phylo-div-1}
