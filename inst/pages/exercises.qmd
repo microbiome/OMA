@@ -1754,46 +1754,19 @@ against the Shannon index ("ShannonIndex"), a common measure of alpha diversity,
 which quantifies the diversity within each sample. This index will serve as the
 dependent variable in our regression model examples.
 
-We extract SampleType as a categorical(discrete) variable and coverage as a
+We extract "SampleType" as a categorical(discrete) variable and "coverage" as a
 continuous variable from the dataset’s metadata. These variables will be used
 as predictors/independent variables in our linear regression models.
 
-Steps:
-1. Import the dataset into R; here we are using a microbiome dataset.
-2. Calculate Alpha Diversity (Shannon Index), i.e. the dependent variable and 
-define the covariates, the independent variable.
-3. Fit linear model using discrete variable "SampleType", where Shannon diversity
-is the response variable, and SampleType is the predictor. 
-4. Visualize the results using a boxplot. This plot helps in understanding the
-distribution of diversity across discrete sample types.
-5. Fit linear model using continuous variable "coverage", where Shannon diversity 
-is the response variable, and coverage is the predictor.  
-6. Visualize the model with a scatterplot. In R, you can also use 
-[`ggplot2`](https://ggplot2.tidyverse.org/) for
-plotting and `lm()` function for linear modeling.
-7. Examine the slope, intercept, and R-squared value to understand the 
-relationship between the variables.
-8. Summarize results with `gtsummary`. The [`gtsummary`]
-(https://www.danieldsjoberg.com/gtsummary/) package is used to generate a summary 
-table of the regression model, which is easy to interpret and present in reports
-or publications.
-9. Visualize coefficients with `jtools`. The [`jtools`]
-(https://cran.r-project.org/web/packages/jtools/index.html) package provides a visual
-representation of the model’s coefficients, including their confidence intervals, allowing
-for a clear understanding of the effect sizes.
-10. Finally, interpret the analysis outcomes. 
-
-Visualization methods from packages like 
-[`miaViz`](https://bioconductor.org/packages/release/bioc/html/miaViz.html)
-and [`scater`](https://bioconductor.org/packages/release/bioc/html/scater.html) can be used.
+1. Load the necessary libraries and import the dataset into R; here we are
+using a microbiome dataset.
 
 ```{r}
-#| label: extra-regressionchart
+#| label: extra-regressionchart-step1
 #| code-fold: true
 #| code-summary: "Show solution"
 #| eval: false
 
-# Load the necessary libraries
 library(mia)             
 library(TreeSummarizedExperiment) 
 library(scater) 
@@ -1801,41 +1774,76 @@ library(lmtest)
 library(gtsummary)   
 library(jtools)   
       
-# Load the example dataset
 data("GlobalPatterns")
 tse <- GlobalPatterns
+```
 
-# Calculate alpha diversity (ShannonIndex)
+2. Calculate Alpha Diversity (Shannon Index), i.e. the dependent variable.
+
+```{r}
+#| label: extra-regressionchart-step2
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
 tse <- addAlpha(tse)
 shannon <- colData(tse)$shannon
+```
 
-# Fit Linear Model Using discrete predictor 'SampleType'
+Now let's define the covariates i.e. the independent variables.
+
+3. First, fit linear model using a discrete variable, say "SampleType", where 
+Shannon diversity is the response variable, and SampleType is the predictor. 
+
+"SampleType" represents the type or source of the microbiome sample. It 
+categorizes each sample based on the environment or biological material from
+which it was collected.
+
+```{r}
+#| label: extra-regressionchart-step3
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
 model <- lm(shannon ~ SampleType, data = colData(tse))
+```
 
-# Visualize using a boxplot
+4. Visualize the results using a boxplot. This plot helps in understanding the
+distribution of diversity across discrete sample types.
+
+```{r}
+#| label: extra-regressionchart-step4
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
 plotColData(tse, x = "SampleType", y = "shannon", color_by = "SampleType") +
   geom_boxplot() +
   theme_minimal()
 ```
+
 What do we interpret from the above regression analysis?
 
-1.The boxplot generated shows the distribution of Shannon diversity across
-different sample types. If the boxes are well-separated and there are significant 
-differences in medians, it indicates that SampleType has a strong effect on 
-diversity. This would be supported by significant p-values in the regression summary.
-2. The p-value associated with each coefficient tells us whether the effect
+i. The boxplot generated shows the distribution of Shannon diversity across
+different sample types. If the boxes are well-separated and there are 
+significant differences in medians, it indicates that SampleType has a strong
+effect on diversity. This would be supported by significant p-values in the
+regression summary.
+ii. The p-value associated with each coefficient tells us whether the effect
 of that sample type on the Shannon diversity index is statistically
 significant. A common threshold for significance is 0.05.
-3. R-squared: This value indicates the proportion of the variance in the
+iii. R-squared: This value indicates the proportion of the variance in the
 Shannon diversity index that is explained by the sample type. A higher R-squared
 value indicates a better fit of the model.
 
 Now, let's check some linear modeling assumptions :
-
+  
 ```{r}
 #| label: sub-checking-modeling-assumptions
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
 
-# Check Linear Modeling Assumptions
 # - Residual diagnostics to visually check for normality and homoscedasticity.
 # - Durbin-Watson Test for independence of residuals
 
@@ -1846,24 +1854,28 @@ print(dw_result)
 ```
 
 Here, 
-1. Residual diagnostics (normality and homoscedasticity):
-a. The Residuals vs Fitted plot provides insight into the relationship between residuals
-and fitted values. Ideally, the residuals should be randomly scattered around the horizontal
-line (residuals = 0) without any discernible pattern. This indicates that the model’s
-assumption of linearity and homoscedasticity (constant variance of residuals) is likely 
-met. If you observe any systematic patterns (such as a funnel shape), it may suggest
-heteroscedasticity, meaning the variance of residuals is not constant.
-b. The Normal Q-Q plot assesses whether the residuals are normally distributed. In this plot,
-residuals should align closely with the diagonal line. Deviations from this line, especially at
-the tails, indicate that the residuals are not normally distributed, which could violate the
-assumption of normality.
-c. The Scale-Location (or Spread-Location) plot also helps check the homoscedasticity assumption.
-It plots the square root of standardized residuals against the fitted values.
-d. The Residuals vs Leverage plot helps identify influential data points (outliers) that 
-might disproportionately affect the model. Points outside the dashed lines (Cook’s distance)
-are potential outliers that may have a strong influence on the model's coefficients.
 
-2. Durbin-Watson test checks for autocorrelation in the residuals. A value
+i. Residual diagnostics (normality and homoscedasticity):
+
+a. The Residuals vs Fitted plot provides insight into the relationship 
+between residuals and fitted values. Ideally, the residuals should be randomly
+scattered around the horizontal line (residuals = 0) without any discernible 
+pattern. This indicates that the model’s assumption of linearity and homoscedasticity
+(constant variance of residuals) is likely met. If you observe any systematic patterns
+(such as a funnel shape), it may suggest heteroscedasticity, meaning the variance of
+residuals is not constant.
+b. The Normal Q-Q plot assesses whether the residuals are normally distributed. In this
+plot, residuals should align closely with the diagonal line. Deviations from this line,
+especially at the tails, indicate that the residuals are not normally distributed, 
+which could violate the assumption of normality.
+c. The Scale-Location (or Spread-Location) plot also helps check the homoscedasticity 
+assumption. It plots the square root of standardized residuals against the fitted values.
+d. The Residuals vs Leverage plot helps identify influential data points (outliers) that 
+might disproportionately affect the model. Points outside the dashed lines (Cook’s 
+distance) are potential outliers that may have a strong influence on the model's 
+coefficients.
+
+ii. Durbin-Watson test checks for autocorrelation in the residuals. A value
 close to 2 indicates no autocorrelation. Values significantly different 
 from 2 suggest autocorrelation.
 
@@ -1871,22 +1883,37 @@ In a nutshell, if all the assumptions hold (as indicated by the diagnostic plots
 and the statistical tests), you can be confident that the linear regression model
 is appropriate for the data, and the results can be interpreted reliably.
 
-Further, let's explore a continuous covariate, "coverage". 'Coverage' is a measure
-of how comprehensively the microbial diversity was sampled in each sample. This
-could refer to the sequencing depth (number of reads) or an index like Good’s 
-Coverage that quantifies the completeness of sampling.
+5. Further, fit linear model using a continuous variable, say "coverage", where
+Shannon diversity is the response variable, and coverage is the predictor. 
 
+"Coverage" is a measure of how comprehensively the microbial diversity
+was sampled in each sample. This could refer to the sequencing depth (number of reads)
+or an index like Good’s Coverage that quantifies the completeness of sampling.
 ```{r}
-#| label: sub-lm-continuous-variable
+#| label: extra-regressionchart-step5
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
 
-# Fit Linear Model Using 'Coverage'
 model_continuous <- lm(shannon ~ coverage, data = colData(tse))
+```
 
-# Visualization for Continuous Predictor
+6. Visualize this model with a scatterplot. In R, you can also use 
+[`ggplot2`](https://ggplot2.tidyverse.org/) for
+plotting and `lm()` function for linear modeling.
+```{r}
+#| label: extra-regressionchart-step6
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
 plotColData(tse, x = "coverage", y = "shannon") +
   geom_point() +
   theme_minimal()
 ```
+
+7. Examine the slope, intercept, and R-squared value to understand the 
+relationship between the variables.
 
 Here, when you perform a linear regression with Shannon diversity as the outcome
 variable and coverage as the predictor variable, both are treated as continuous.
@@ -1894,26 +1921,47 @@ The regression model will estimate how changes in the continuous variable covera
 associated with changes in the continuous variable shannon.
 
 Thus, this example illustrates a linear relationship between two continuous variables,
-where the slope of the regression line indicates the rate of change in Shannon diversity
-per unit change in coverage unlike our previous example in which the predictor is categorical
-(like SampleType) and coefficients represent differences between group means.
+where the slope of the regression line indicates the rate of change in Shannon 
+diversity per unit change in coverage unlike our previous example in which the predictor
+is categorical (like SampleType) and coefficients represent differences
+between group means.
 
-Additionally, let's summarise results with [`gtsummary`]
-(https://www.danieldsjoberg.com/gtsummary/) and visualize the coefficients with [`jtools`]
-(https://cran.r-project.org/web/packages/jtools/index.html).
-
+8. Summarize results with `gtsummary`. The 
+[`gtsummary`](https://www.danieldsjoberg.com/gtsummary/) package is used to generate
+a summary table of the regression model, which is easy to interpret and
+present in reports or publications.
 ```{r}
-#| label: sub-gtsummary-jtools
+#| label: extra-regressionchart-step8
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
 
-# Summarize Results with gtsummary
 gt_model <- tbl_regression(model)
 print(gt_model)
+```
 
-# Visualize Coefficients with jtools
+9. Visualize coefficients with `jtools`. The 
+[`jtools`](https://cran.r-project.org/web/packages/jtools/index.html) package
+provides a visual representation of the model’s coefficients, including their 
+confidence intervals, allowing for a clear understanding of the effect sizes.
+```{r}
+#| label: extra-regressionchart-step9
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
 summ(model, confint = TRUE, ci.level = 0.95)
 ```
+
 Similarly, you can do it for the continuous variable example and compare their
 coefficients and statistical values.
+
+10. Finally, interpret the analysis outcomes.
+
+Visualization methods from packages like 
+[`miaViz`](https://bioconductor.org/packages/release/bioc/html/miaViz.html)
+and [`scater`](https://bioconductor.org/packages/release/bioc/html/scater.html)
+can be used.
 
 ## Multiomics
 
