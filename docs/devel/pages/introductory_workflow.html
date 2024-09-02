@@ -632,8 +632,6 @@ document.addEventListener("click", function (event) {
 }
 </style>
 </div>
-<div id="workflow" class="page-columns page-full">
-
 <div id="translate">
 <p><a href="../pages/introductory_workflow_french_version.html"><img src="figures/flags/France_flag.png" alt="French flag" class="flag"><strong>French</strong> </a> <a href="../pages/introductory_workflow_dutch_version.html"><img src="figures/flags/Netherland_flag.jpg" alt="Netherland flag" class="flag"><strong>Dutch</strong> </a></p>
 </div>
@@ -641,11 +639,10 @@ document.addEventListener("click", function (event) {
 <section id="introduction" class="level2" data-number="26.1"><h2 data-number="26.1" class="anchored" data-anchor-id="introduction">
 <span class="header-section-number">26.1</span> Introduction</h2>
 <p>Hello and welcome to a comprehensive workflow using the latest R/Bioconductor tools for microbiome data science. In this tutorial, we’ll guide you through the foundational steps of microbiome analysis using <em>miaverse</em>. These steps are applicable to almost any of your projects and will help you understand the fundamental concepts that will skyrocket 🚀 your future microbiome analyses.</p>
-<p>In this workflow, we cover:</p>
+<p>In this workflow, we cover basics of:</p>
 <pre><code>- Data wrangling and transformations
-- Basic exploration
-- Alpha diversity analysis
-- Beta diversity analysis</code></pre>
+- Exploration
+- Alpha and beta diversity</code></pre>
 </section><section id="load-packages" class="level2" data-number="26.2"><h2 data-number="26.2" class="anchored" data-anchor-id="load-packages">
 <span class="header-section-number">26.2</span> Load packages</h2>
 <p>To begin, we need to load the necessary packages. The following script ensures that all required packages are loaded and installed if they aren’t already.</p>
@@ -685,14 +682,14 @@ document.addEventListener("click", function (event) {
 <span class="header-section-number">26.3</span> Importing data</h2>
 <p>The next step involves importing your data into the R environment. Depending on the bioinformatics tools used in the upstream section of the workflow, importing the data may vary slightly. We cover the most widely used formats, with importers available for convenience. You can also build a <code>TreeSummarizedExperiment</code> (<code>TreeSE</code>) from scratch from basic text files. For more information, see <a href="import.html#sec-loading-experimental-microbiome-data" class="quarto-xref"><span>Section 4.1</span></a>.</p>
 <p>For this demonstration, you can either use your own data or one of the built-in datasets provided by mia, which you can find here: <a href="import.html#sec-example-data" class="quarto-xref"><span>Section 4.2</span></a>.</p>
-<p>In this tutorial, we’ll be using the <span class="citation" data-cites="Tengeler2020">C Tengeler et al. (<a href="#ref-Tengeler2020" role="doc-biblioref">2020</a>)</span> dataset. In the study, they explored the impact of altered microbiomes on brain structure, specifically comparing patients with ADHD (Attention Deficit Hyperactivity Disorder) to controls. See more information on this dataset from <a href="https://microbiome.github.io/outreach/tengeler2020_presentation.html#/title-slide">here</a>. Let’s load this dataset into our R environment:</p>
+<p>In this tutorial, we’ll be using the <span class="citation" data-cites="Tengeler2020">C Tengeler et al. (<a href="#ref-Tengeler2020" role="doc-biblioref">2020</a>)</span> dataset. In the study, they explored the impact of altered microbiomes on brain structure, specifically comparing patients with ADHD (Attention Deficit Hyperactivity Disorder) to controls (see more information on this dataset from <a href="https://microbiome.github.io/outreach/tengeler2020_presentation.html#/title-slide">here</a>). Let’s load this dataset into our R environment:</p>
 <div class="no-row-height column-margin column-container"><div id="ref-Tengeler2020" class="csl-entry" role="listitem">
 C Tengeler, Anouk, Sarita A Dam, Maximilian Wiesmann, Jilly Naaijen, Miranda van Bodegom, Clara Belzer, Pieter J Dederen, et al. 2020. <span>“Gut Microbiota from Persons with Attention-Deficit/Hyperactivity Disorder Affects the Brain in Mice.”</span> <em>Microbiome</em> 8: 1–14. <a href="https://doi.org/10.1186/s40168-020-00816-x">https://doi.org/10.1186/s40168-020-00816-x</a>.
 </div></div><div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"Tengeler2020"</span>, package <span class="op">=</span> <span class="st">"mia"</span><span class="op">)</span></span>
 <span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">Tengeler2020</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<hr></section><section id="subsetting-and-accessing-the-data" class="level2" data-number="26.4"><h2 data-number="26.4" class="anchored" data-anchor-id="subsetting-and-accessing-the-data">
+</section><section id="subsetting-and-accessing-the-data" class="level2" data-number="26.4"><h2 data-number="26.4" class="anchored" data-anchor-id="subsetting-and-accessing-the-data">
 <span class="header-section-number">26.4</span> Subsetting and accessing the data</h2>
 <p>Once loaded, we often need to wrangle and preprocess the data. The <code>TreeSE</code> object, a primary data container in the <em>miaverse</em> framework, is designed to handle complex microbiome data effectively. For more details about the <code>TreeSE</code> and other data containers, see <a href="containers.html" class="quarto-xref"><span>Chapter 3</span></a>.</p>
 <section id="subsetting" class="level3" data-number="26.4.1"><h3 data-number="26.4.1" class="anchored" data-anchor-id="subsetting">
@@ -784,7 +781,7 @@ C Tengeler, Anouk, Sarita A Dam, Maximilian Wiesmann, Jilly Naaijen, Miranda van
 <span><span class="co">##  Unidentified_Lachnospiraceae_14      Lachnospiraceae        uncultured</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here <code>rowData(tse)</code> returns a DataFrame with 151 rows and 7 columns. Each row represents an organism and each column a taxonomic level.</p>
-<hr></section></section><section id="data-wrangling" class="level2" data-number="26.5"><h2 data-number="26.5" class="anchored" data-anchor-id="data-wrangling">
+</section></section><section id="data-wrangling" class="level2" data-number="26.5"><h2 data-number="26.5" class="anchored" data-anchor-id="data-wrangling">
 <span class="header-section-number">26.5</span> Data wrangling</h2>
 <section id="agglomerating-data" class="level3" data-number="26.5.1"><h3 data-number="26.5.1" class="anchored" data-anchor-id="agglomerating-data">
 <span class="header-section-number">26.5.1</span> Agglomerating data</h3>
@@ -867,7 +864,6 @@ C Tengeler, Anouk, Sarita A Dam, Maximilian Wiesmann, Jilly Naaijen, Miranda van
 <p>The results are stored to <code>colData</code>. The calculated index shows how diverse each sample is in terms of the number of different microbes present. We can then create a graph to visualize this.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">plotColData</span><span class="op">(</span><span class="va">tse</span>, x <span class="op">=</span> <span class="st">"patient_status"</span>, y <span class="op">=</span> <span class="st">"faith"</span><span class="op">)</span></span>
-<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="va">p</span> <span class="op">+</span> <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Faith plot"</span><span class="op">)</span></span>
 <span><span class="va">p</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -877,7 +873,7 @@ C Tengeler, Anouk, Sarita A Dam, Maximilian Wiesmann, Jilly Naaijen, Miranda van
 </div>
 </div>
 <p>The graph shows that there is no significant difference in microbial diversity between the ADHD and control groups. However, alpha diversity metrics like Faith’s index only tell us about the diversity within individual samples and do not account for the differences between samples or groups. To understand how microbial communities vary between different samples — for instance, between ADHD patients and controls — we need to examine beta diversity.</p>
-<hr></section><section id="community-dissimilarity" class="level2" data-number="26.8"><h2 data-number="26.8" class="anchored" data-anchor-id="community-dissimilarity">
+</section><section id="community-dissimilarity" class="level2" data-number="26.8"><h2 data-number="26.8" class="anchored" data-anchor-id="community-dissimilarity">
 <span class="header-section-number">26.8</span> Community dissimilarity</h2>
 <p>To gain a more comprehensive understanding of microbial variation across different samples, we assess beta diversity by measuring the dissimilarities in microbial compositions between samples. Beta diversity helps us determine how distinct or similar the microbiomes are among groups, allowing us to identify patterns or differences in microbial communities that may not be apparent from alpha diversity alone.</p>
 <p>To explore these dissimilarities, we use Principal Coordinate Analysis (PCoA), a technique that reduces the complexity of high-dimensional data by projecting it into a lower-dimensional space while preserving the dissimilarities (or distances) between samples. This enables us to visualize the relationships and differences between samples in a simplified manner.</p>
@@ -893,7 +889,7 @@ C Tengeler, Anouk, Sarita A Dam, Maximilian Wiesmann, Jilly Naaijen, Miranda van
 <span>    niter <span class="op">=</span> <span class="fl">100</span></span>
 <span>    <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>In order to visualize this newly generated projection, we can apply <code><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">scater::plotReducedDim()</a></code>.</p>
+<p>The results are stored in <code>reducedDim</code> slot. In order to visualize this newly generated projection, we can apply <code><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">scater::plotReducedDim()</a></code>.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create a ggplot object</span></span>
 <span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">plotReducedDim</span><span class="op">(</span></span>
@@ -901,6 +897,7 @@ C Tengeler, Anouk, Sarita A Dam, Maximilian Wiesmann, Jilly Naaijen, Miranda van
 <span>    colour_by <span class="op">=</span> <span class="st">"patient_status"</span>,</span>
 <span>    point_size <span class="op">=</span> <span class="fl">3</span></span>
 <span>    <span class="op">)</span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="va">p</span> <span class="op">+</span> <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Principal Coordinate Analysis"</span><span class="op">)</span></span>
 <span><span class="va">p</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -911,14 +908,10 @@ C Tengeler, Anouk, Sarita A Dam, Maximilian Wiesmann, Jilly Naaijen, Miranda van
 </div>
 <p>The plot shows that the data clusters into three groups, with two of them consisting solely of one diagnosis or another. This suggests that the microbial profiles differ between ADHD patients and controls.</p>
 <p>To further explore the factors driving these differences in microbial profiles, we can perform a differential abundance analysis, for instance (see <a href="differential_abundance.html" class="quarto-xref"><span>Chapter 15</span></a>).</p>
-<hr></section>
-</div>
 
 
 
-
-
-<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section><a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
