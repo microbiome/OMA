@@ -5,8 +5,6 @@ library(rebook)
 chapterPreamble()
 ```
 
-## Multi-omics Integration
-
 In multiview data analysis, there are two main types of approaches: early fusion
 and late fusion. \underline{Early fusion} combines all datasets into a single
 representation, which then serves as input for a supervised learning model. In
@@ -19,9 +17,168 @@ advanced method, called cooperative learning [@Ding2022], which is also known as
 predictions from different data views to align through an agreement parameter
 ($\rho$).
 
-## Multi-omics Prediction and Classification of Binary IBD Disease Status
+## Prediction of fat and prebiotics in diet of rats
 
-In this chapter, we showcase examples of various integration paradigms (early,
+As an example we would build a random forest classifier based on theHintikkaxOData 
+multi-omics profiles to classify fat and prebiotics in diet of rats. 
+
+### With validation set
+
+```{r valid-set}
+
+###########################
+# load required libraries #
+###########################
+library(mia)
+library(SuperLearner)
+library(IntegratedLearner)
+library(tidyverse)
+library(cowplot)
+
+########################
+# load multi-omic data #
+########################
+data("HintikkaXOData")
+mae <- HintikkaXOData
+
+######################################
+# Add validation set info to colData #
+######################################
+
+colData(mae)[["valid"]] <- sample(c(TRUE, FALSE), nrow(colData(mae)), 
+                                  replace = TRUE)
+
+###########################
+# Run with validation set #
+###########################
+
+fit1 <- IntegratedLearnerFromMAE(
+    mae,
+    experiment = c(1, 2, 3),
+    assay.type = c("counts", "nmr", "signals"),
+    outcome.col = "Fat",
+    valid.col = "valid",
+    folds = 10,
+    na.rm = TRUE,
+    base_learner = 'SL.randomForest',
+    meta_learner = 'SL.nnls.auc',
+    verbose = TRUE,
+    family=binomial()
+)
+
+```
+
+IntegratedLearner offers easily accessible and interpretable summary outputs 
+including 1) computation time, 2) per-layer AUC/ R2 scores on training , 3) AUC/ R2
+metrics for stacked and concatenated model if run_stacked=TRUE and r
+un_concat=TRUE and 4) estimated per-layer weights from meta learner in stacked 
+model.
+
+We can visualize the classification performance by constructing layer-wise ROC 
+curves for both train and test set using plot.learner() function that takes 
+IntegratedLearner object as input.
+
+```{r plot fit1}
+###################
+# Summary outputs #
+###################
+
+plot <- IntegratedLearner:::plot.learner(fit1)
+
+```
+
+The stacked model achieves superior accuracy to individual layers and concatenation 
+model in independent validation, indicating that the stacked multi-omics classifier 
+leads to a competitive or superior cross-validated and independent validation 
+classification accuracy than its single-omics counterparts.
+
+### Without validataion set
+
+The default base model recommendation for IntegratedLearner is Bayesian additive 
+regression trees or BART (base_learner='SL.BART'). Using BART as base-model yields 
+uncertainty estimates (i.e. credible intervals) of the prediction and model 
+parameters in addition to reporting a small set of interpretable features for 
+follow-up experiments (i.e. feature importance scores).
+
+```{r no_valid set}
+
+##############################
+# Run without validation set #
+##############################
+
+fit2 <- IntegratedLearnerFromMAE(
+    mae,
+    experiment = c(1, 2, 3),
+    assay.type = c("counts", "nmr", "signals"),
+    outcome.col = "Diet",
+    folds = 10,
+    na.rm = TRUE # The data has missing values that are removed
+)
+
+```
+
+```{r plot fit2}
+
+###################
+# Summary outputs #
+###################
+
+plot <- IntegratedLearner:::plot.learner(fit2)
+
+```
+
+As before, the multi-omics stacked prediction model leads to a better 
+cross-validated accuracy than its single-omics counterparts and concatenation 
+model.
+
+When base_learner='SL.BART', in addition to point predictions, we can also 
+generate 1) credible intervals for all observations, 2) estimated layer weights 
+in the meta model and 3) feature importance scores.
+
+```{r weights fit2}
+weights <- fit2$weights
+
+dataX <- fit2$X_train_layers
+dataY <- fit2$Y_train
+
+
+post.samples <- vector("list", length(weights))
+names(post.samples) <- names(dataX)
+
+for(i in seq_along(post.samples)){
+post.samples[[i]] <- bartMachine::bart_machine_get_posterior(fit2$model_fits$model_layers[[i]],dataX[[i]])$y_hat_posterior_samples
+}
+
+weighted.post.samples <-Reduce('+', Map('*', post.samples, weights))
+rownames(weighted.post.samples) <- rownames(dataX[[1]])
+names(dataY) <- rownames(dataX[[1]])
+```
+
+```{r capture output}
+
+library(mcmcplots)
+capture.output(temp <- caterplot(t(weighted.post.samples), add = FALSE))
+
+```
+
+We show below the 68% and 95% credible intervals obtained from stacked model for 
+all 40 observations. The filled circle indicates the posterior median and empty 
+circle indicates the true value of the observation.
+
+```{r plot capture}
+
+temp<-caterplot(t(weighted.post.samples),
+          horizontal = FALSE, add = FALSE)
+points(dataY[temp])
+title(main ="", xlab = "Observations", ylab = "Fat and prebiotics in rats",
+       line = NA, outer = FALSE)
+
+```
+
+
+## Prediction of Binary IBD Disease Status
+
+In this example, we showcase various integration paradigms (early,
 late, and intermediate fusion) using the R packages `multiview` [@Ding2022]
 and `SuperLearner` [@Van2007]. We make use of the publicly available source code
 from the multi-omics integrated framework (`IntegratedLearner`) proposed by
