@@ -191,146 +191,29 @@ We use the publicly available Inflammatory Bowel Diseases (IBD) data from the
 predict IBD disease status based on both taxonomic (species abundances) and 
 functional (pathway abundances) profiles.
 
-```{r load-pkg-data}
-
-##################
-# Load iHMP data #
-##################
-
-library(curatedMetagenomicData)
-library(dplyr)
-library(tidyverse)
-
-se_relative <- sampleMetadata |>
-  filter(study_name == "HMP_2019_ibdmdb") |>
-  returnSamples("relative_abundance", rownames = "short")
-
-se_pathway <- sampleMetadata |>
-  filter(study_name == "HMP_2019_ibdmdb") |>
-  returnSamples("pathway_abundance", rownames = "short")
-
-```
-
-We will first prepare the input sample metadata and feature table for both
-relative abundance and pathway abundance data.
-
-```{r prepare-metadata-feature}
-
-##########################
-# Create sample metadata #
-##########################
-
-sample_metadata <- select(
-    as.data.frame(colData(se_relative)),
-    c("study_name", "disease", "subject_id"))
-
-# Define response variable & sample id
-sample_metadata$Y <- ifelse(sample_metadata$disease == "IBD", 1, 0)
-sample_metadata <- sample_metadata %>%
-    select(subject_id, Y) %>% rename(subjectID = subject_id)
-
-###########################
-# Create Species Features #
-###########################
-
-feature_species <- as.data.frame(assay(se_relative))
-rownames(feature_species) <- sub('.*s__', '', rownames(feature_species))
-
-###########################
-# Create Pathway Features #
-###########################
-
-feature_pwys <- as.data.frame(assay(se_pathway))
-feature_pwys <- rownames_to_column(feature_pwys, "ID")
-feature_pwys <- feature_pwys %>%
-  filter(!grepl("\\|", ID)) %>%
-  filter(!ID %in% c('UNMAPPED', 'UNINTEGRATED')) %>%
-  column_to_rownames('ID') %>%
-  as.data.frame()
-
-################################
-# Combine Species and Pathways #
-################################
-
-feature_table <- bind_rows(feature_species, feature_pwys)
-
-########################################################
-# Check row names of feature_table and sample_metadata #
-########################################################
-
-all(colnames(feature_table) == rownames(sample_metadata))
-
-```
-
-We will then create a metadata table for the features. This table captures
-high-level information related to the features (e.g., which layer they belong
-to).
-
-```{r create-metadata-table}
-
-######################################
-# Create metadata table for features #
-######################################
-
-rowID <- rep(
-    c('Species', 'Pathways'),
-    c(nrow(feature_species), nrow(feature_pwys)))
-feature_metadata <- cbind.data.frame(
-    featureID = rownames(feature_table), featureType = rowID)
-rownames(feature_metadata) <- feature_metadata$featureID
-
-################
-# Sanity check #
-################
-
-all(rownames(feature_table) == rownames(feature_metadata)) # TRUE
-all(colnames(feature_table) == rownames(sample_metadata)) # TRUE
-
-```
-
-Further data pre-processing is necessary to handle near-zero-variance features
-in this dataset. Ultimately, 483 features are retained, consisting of 360
-pathways and 123 species. A combination of variance and prevalence filtering
-is applied to the feature table, while related metadata is cleaned to ensure the
-retention of matching samples.
-
-```{r create-feature-table}
+```{r load_data_prism}
 
 #################
-# feature_table #
+# load IBD data #
 #################
 
-library(caret)
+pcl <- system.file(
+    "extdata", "PRISM.RData", package = "OMA")
 
-feature_table_t <- as.data.frame(t(feature_table))
-abd_threshold = 0
-prev_threshold = 0.1
-nzv <- nearZeroVar(feature_table_t)
-features_var_filtered <- feature_table_t[, -nzv]
-features_var_filtered <- as.data.frame(features_var_filtered)
-features_filtered <- features_var_filtered[
-  , colSums(features_var_filtered > abd_threshold) >
-    nrow(features_var_filtered) * prev_threshold
-  ]
-feature_table <- as.data.frame(t(features_filtered))
+load(pcl)
 
-####################
-# feature_metadata #
-####################
+########################################################################
+# Get feature table,  sample metadata  and feature metadata respectively #
+########################################################################
 
-feature_metadata <- feature_metadata[rownames(feature_table), ]
-table(feature_metadata$featureType)
-
-######################
-# Sanity check again #
-######################
-
-all(rownames(feature_table) == rownames(feature_metadata)) # TRUE
-all(colnames(feature_table) == rownames(sample_metadata)) # TRUE
+feature_table <- pcl$feature_table
+sample_metadata <- pcl$sample_metadata
+feature_metadata <- pcl$sample_metadata
 
 ```
 
-Following the preprocessing, we conduct additional input data preparation,
+
+Following the data loading, we conduct additional input data preparation,
 which includes configuring parameters for sample splitting and 5-fold
 cross-validation. It's important to note that this dataset contains repeated
 measures (i.e., multiple samples per subject). To address this, we will conduct
