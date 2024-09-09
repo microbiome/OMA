@@ -101,7 +101,7 @@ tse <- addDivergence(
     tse,
     assay.type = "counts",
     reference = "median",
-    FUN = vegan::vegdist)
+    FUN = getDissimilarity)
 ```
 
 ## Unsupervised ordination {#sec-unsupervised-ordination}
@@ -137,7 +137,7 @@ library(scater)
 # Run PCoA on relabundance assay with Bray-Curtis distances
 tse <- runMDS(
     tse,
-    FUN = vegan::vegdist,
+    FUN = getDissimilarity,
     method = "bray",
     assay.type = "relabundance",
     name = "MDS_bray")
@@ -202,7 +202,7 @@ tse <- runNMDS(
 ```
 
 Multiple ordination plots are combined into a multi-panel plot with the
-patchwork package, so that different methods can be compared to find
+`patchwork` package, so that different methods can be compared to find
 similarities between them or select the most suitable one to visualize
 beta diversity in the light of the research question.
 
@@ -313,7 +313,7 @@ tse_sub <- transformAssay(
 # Run MDS on clr assay with Aitchison distance
 tse_sub <- runMDS(
   tse_sub,
-  FUN = vegan::vegdist,
+  FUN = getDissimilarity,
   method = "euclidean",
   assay.type = "clr",
   name = "MDS_aitchison"
@@ -337,7 +337,7 @@ tse_sub <- runMDS(tse_sub,
   ntop = nrow(tse_sub),
   FUN = vegan::avgdist, # Custom beta diversity function that includes rarefaction
   sample = min(colSums(assay(tse_sub, "counts"))), # rarefaction depth
-  distfun = vegan::vegdist, # Use vegdist beta diversity function
+  distfun = getDissimilarity, # Use vegdist beta diversity function
   dmethod = "euclidean", # euclidean beta diversity
   iterations = 10,
   transf=clr,
@@ -357,19 +357,6 @@ plots <- lapply(
 # Generate multi-panel plot
 wrap_plots(plots) +
   plot_layout(guides = "collect")
-```
-
-```{r}
-#| label = rarefaction3
-
-# Check correlation between non-rarefied and rarefied Aichitson distances
-print(all.equal(
-  current = cor(
-    as.vector(reducedDim(tse_sub, "MDS_aitchison")),
-    as.vector(reducedDim(tse_sub, "MDS_aitchison_rarefied"))
-    ),
-    target = 1,
-    tolerance = 0.05))
 ```
 
 `ntop` is a `runMDS()` option. Here it is set to total number of features in 
@@ -393,6 +380,7 @@ both the rarefied and non-rarefied distance calculations:
 ```{r}
 #| label: PC_correlation
 par(mfrow=c(1, 2))
+p <- list()
 for (k in 1:2) {
 
   # Principal axes are sign invariant;
@@ -402,12 +390,16 @@ for (k in 1:2) {
   pcy <- sign(cor(pcx, pcy)) * pcy
   r <- cor(pcx, pcy)
 
-  plot(pcx, pcy, main=paste0("PC", k, "; r=",round(r, 3)));
-  abline(0, 1)
+  p[[k]]  <- ggplot(data = data.frame(pcx, pcy), aes(x = pcx, y = pcy)) +
+        geom_point() +
+        geom_abline(intercept = 0, slope = 1, color = "red") +  # Adding the line y = x
+        ggtitle(paste0("PC", k, "; r=", round(r, 3))) +  # Adding the title
+        theme_minimal()
 }
+wrap_plots(p)
 ```
 
-The mia package includes the rarefaction function `rarefyAssay()` that randomly
+The `mia` package includes the rarefaction function `rarefyAssay()` that randomly
 subsamples a given assay of a `TreeSummarizedExperiment` dataset. However, the 
 iterations and beta diversity calculations are not included.
 
@@ -468,11 +460,11 @@ better if smaller. This can be calculated as shown below.
 
 ```{r relstress}
 # Quantify dissimilarities in the original feature space
-d0 <- as.matrix(vegan::vegdist(t(assay(tse, "relabundance")), "bray"))
+d0 <- as.matrix(getDissimilarity(t(assay(tse, "relabundance")), "bray"))
 
 # PCoA Ordination
 tse <- runMDS(tse,
-                FUN = vegan::vegdist,
+                FUN = getDissimilarity,
                 name = "PCoA",
                 method = "bray",
                 assay.type = "relabundance")
@@ -573,7 +565,7 @@ the community are equivalent between the compared groups. A p-value
 smaller than the significance threshold indicates that the groups have
 a different community composition. This method is implemented with the
 [`adonis2`](https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis)
-function from the vegan package. You can find more on PERMANOVA from
+function from the `vegan` package. You can find more on PERMANOVA from
 [here](https://microbiome.github.io/OMA/docs/devel/pages/97_extra_materials.html#compare-permanova).
 
 We see that both clinical status and age explain more than 10% of the
@@ -696,7 +688,7 @@ Next, we perform PCoA with Bray-Curtis dissimilarity.
 ```{r}
 tse_genus <- runMDS(
     tse_genus,
-    FUN = vegan::vegdist,
+    FUN = getDissimilarity,
     name = "PCoA_BC",
     assay.type = "relabundance")
 ```

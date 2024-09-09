@@ -293,8 +293,13 @@ histogram (left) or by sorting the samples by library size (right).
 
 ```{r plot-viz-lib-size-1, fig.width=8, fig.height=4, fig.cap="Library size distribution."}
 library(ggplot2)
+library(dplyr)
+df <- as.data.frame(colData(tse)) |>
+    arrange(sum)
 
-p1 <- ggplot(colData(tse)) +
+df$cum_freq <- cumsum(df$sum)
+
+p1 <- ggplot(df) +
         geom_histogram(
             aes(x = sum), color = "black", fill = "gray", bins = 30) +
         labs(x = "Library size", y = "Frequency (n)") +
@@ -310,15 +315,12 @@ p1 <- ggplot(colData(tse)) +
             # Adds y-axis
             axis.line = element_line(colour = "black"))
 
-library(dplyr)
-df <- as.data.frame(colData(tse)) |>
-    arrange(sum) |>
-    mutate(index = 1:n())
-p2 <- ggplot(df, aes(y = index, x = sum/1e6)) +
-    geom_point() +
+p2 <- ggplot(df) +
+    geom_histogram(
+            aes(x = cum_freq), color = "black", fill = "gray", bins = 30) +
     labs(
-        x = "Library size (million reads)",
-        y = "Sample index") +
+        x = "Cummulative samples (million reads)",
+        y = "Frequency") +
     theme_bw() +
     # Removes the grid
     theme(panel.grid.major = element_blank(),
@@ -339,11 +341,9 @@ specified function called `plotColData()`.
 # Sort samples by read count,
 # order the factor levels,
 # and store back to tse as DataFrame
-# TODO: plotColData could include an option
-# for sorting samples based on colData variables
 colData(tse) <- as.data.frame(colData(tse)) |>
     arrange(X.SampleID) |>
-    mutate(X.SampleID = factor(X.SampleID, levels=X.SampleID)) |>
+    mutate(X.SampleID = factor(X.SampleID, levels=X.SampleID)) %>%
         DataFrame
 plotColData(tse,"sum","X.SampleID", colour_by = "SampleType") +
     theme(axis.text.x = element_text(angle = 45, hjust=1)) +
