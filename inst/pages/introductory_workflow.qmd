@@ -1,5 +1,7 @@
 ## Introductory
 
+**Version:** 2.1
+
 ```{r}
 #| label: setup
 #| echo: FALSE
@@ -7,8 +9,6 @@
 library(rebook)
 chapterPreamble()
 ```
-
-<div id="workflow">
 
 ::: {#translate}
 <a href="introductory_workflow_french_version.qmd"><img src="figures/flags/France_flag.png" alt="French flag" class="flag"/> **French** </a> <a href="introductory_workflow_dutch_version.qmd"><img src="figures/flags/Netherland_flag.jpg" alt="Netherland flag" class="flag"/> **Dutch** </a>
@@ -18,33 +18,36 @@ chapterPreamble()
 
 ## Introduction
 
-Hello and welcome to a complete workflow using the latest R/Bioconductor
-tools for microbiome data science. In this tutorial we’ll walk you through
-some basic steps of a composition analysis study using OMA. These will be
+Hello and welcome to a comprehensive workflow using the latest R/Bioconductor tools
+for microbiome data science. In this tutorial, we’ll guide you through the
+foundational steps of microbiome analysis using _miaverse_. These steps are
 applicable to almost any of your projects and will help you understand the
-fundamental concepts that will sky-rocket 🚀 your future microbiome analyses.
+fundamental concepts that will skyrocket 🚀 your future microbiome analyses.
 
-## Importing data
+In this workflow, we cover basics of:
 
-When using microbiome packages, there are many different ways to import your
-data. Let's first load the required packages:
+    - Data wrangling and transformations
+    - Exploration
+    - Alpha and beta diversity
+
+## Load packages
+
+To begin, we need to load the necessary packages. The following script ensures
+that all required packages are loaded and installed if they aren’t already.
 
 ```{r}
 #| label: install
 #| output: FALSE
 # List of packages that we need
-packages <- c(
-    "ggplot2", "knitr", "mia", "dplyr", "miaViz", "vegan", "DT",
-    "scater", "patchwork", "sechm", "plotly"
-    )
+packages <- c("mia",  "miaViz", "scater")
 
-# Get packages that are already installed installed
+# Get packages that are already installed
 packages_already_installed <- packages[ packages %in% installed.packages() ]
 
 # Get packages that need to be installed
 packages_need_to_install <- setdiff( packages, packages_already_installed )
 
-# Loads BiocManager into the session. Install it if it not already installed.
+# Loads BiocManager into the session. Install it if it is not already installed.
 if( !require("BiocManager") ){
     install.packages("BiocManager")
     library("BiocManager")
@@ -67,375 +70,257 @@ if( length(pkgs_not_loaded) > 0 ){
 }
 ```
 
-You can either choose to use your own data or one of the built-in datasets
-provided by mia which you may find here @sec-example-data:
+## Importing data
 
-In this tutorial, we'll be using the @Tengeler2020 dataset. This dataset was
-made by A.C. Tengeler to try to demonstrate the impact of altered microbiomes
-on the brain structure. Here's how we can load the data into our R environment:
+The next step involves importing your data into the R environment.
+Depending on the bioinformatics tools used in the upstream section of the
+workflow, importing the data may vary slightly. We cover the most widely used
+formats, with importers available for convenience. You can also build a
+`TreeSummarizedExperiment` (`TreeSE`) from scratch from basic text files. For more
+information, see @sec-loading-experimental-microbiome-data.
+
+For this demonstration, you can either use your own data or one of the
+built-in datasets provided by mia, which you can find here: @sec-example-data.
+
+In this tutorial, we'll be using the @Tengeler2020 dataset. In the study,
+they explored the impact of altered microbiomes on brain
+structure, specifically comparing patients with ADHD
+(Attention Deficit Hyperactivity Disorder) to controls (see more information
+on this dataset from
+[here](https://microbiome.github.io/outreach/tengeler2020_presentation.html#/title-slide)).
+Let's load this dataset into our R environment:
 
 ```{r}
 #| label: loadDataset
-data("Tengeler2020", package="mia")
+data("Tengeler2020", package = "mia")
 tse <- Tengeler2020
 ```
 
-There are of course other ways to import your data using the
-[**mia package**](https://microbiome.github.io/mia/). These include: using
-either **your own data** [@sec-import-from-file] or by converting an existing
-object to a *TreeSummarizedExperiment* object as stated in
-**this section** [@sec-conversions-between-data-formats-in-r].
+## Subsetting and accessing the data
 
-<hr>
+Once loaded, we often need to wrangle and preprocess the data. The `TreeSE`
+object, a primary data container in the _miaverse_ framework, is designed to
+handle complex microbiome data effectively. For more details about the `TreeSE`
+and other data containers, see [@sec-containers].
 
-## Storing microbiome data
+### Subsetting
 
-*TreeSummarizedExperiment* or `TreeSE` object is the type of object used within
-the [**mia package**](https://microbiome.github.io/mia/) to store your data.
-It's a versatile and multi-purpose data type that allows for an efficient way
-to store and access data.
+In many cases, you may need to work with only a portion of your original
+`TreeSE` for various reasons. Subsetting the `TreeSE` object is as
+straightforward as manipulating a basic matrix in R, utilizing rows and columns.
+For example, using the Tengeler2020 dataset, we can focus on a specific cohort.
+Here's how:
 
+```{r}
+#| label: subsetBySample
+dim(tse)
+# Subset based on sample metadata
+tse <- tse[ , tse$cohort == "Cohort_2" ]
+dim(tse)
+```
+
+This will create a `TreeSE` object only containing
+samples of the second cohort. You can find more information on subsetting from
+here [@sec-rows-and-cols].
+
+### Accessing data
+
+You can also access different types of data stored within the `TreeSE` object.
 Here's a quick reminder on how to access certain types of data:
 
-You can access **assays** [@sec-assay-slot] as such:
+You can access the abundance table, or assays, as follows. In this example,
+we specify that we want to fetch an abundance table named "counts". For more
+details, see [@sec-assay-slot].
 
 ```{r}
 #| label: showAssay
-assay(tse)[1:5,1:10]
+assay(tse, "counts") |> head()
 ```
 
-Whereas `**colData**` [@sec-add-or-modify-data] is accessible through:
+Sample (or column) metadata is stored in `colData`. In this example, it includes
+the diagnoses of the patients from whom the samples were drawn. See for more
+info on `colData` from [@sec-add-or-modify-data].
 
 ```{r}
 #| label: showColdata
-# Transform the colData to a dataframe
-tse_df_colData <- as.data.frame(colData(tse))
 
-# Show as an interactive table
-datatable(tse_df_colData,options = list(pageLength = 5),rownames = FALSE)
+colData(tse)
 ```
 
-\*rowData\*\* [@sec-rowData] contains data on sample characteristics,
-particularly taxonomic information.
+`rowData` contains data on feature characteristics,
+particularly taxonomic information (see [@sec-rowData]).
 
 ```{r}
 #| warning: FALSE
 #| label: showRowdata
-tse_df_rowData <- as.data.frame(rowData(tse))
-datatable(tse_df_rowData, options = list(pageLength = 5))
+rd <- rowData(tse)
+rd
 ```
 
 Here `rowData(tse)` returns a DataFrame with 151 rows and 7 columns. Each
 row represents an organism and each column a taxonomic level.
 
-To illustrate the structure of a *TreeSummarizedExperiment*, here's an article
-of @Huang2021 that uses this type of object. Also, please take a look at
-figure 1 below.
-
-![1. Storing microbial data: the structure of a TreeSummarizedExperiment](figures/TSE-structure.svg){.lightbox .contentimg}
-
-<hr>
-
-## Wrangling the data
-
-In some cases, you may need to change your data in order to get your wanted
-results. In this section we'll go over how to agglomerate data, subset your
-data and more. A *TreeSummarizedExperiment* allows for some neat data
-manipulation using [**the dplyr package**](https://dplyr.tidyverse.org/).
-
-### Subsetting
-
-In some cases, you may only need to use part of your original
-`*TreeSummarizedExperiment*`.
-
-Using the Tengeler2020 dataset, we can focus on a certain cohort for example.
-Doing this is pretty straightforward:
-
-```{r}
-#| label: subsetBySample
-tse_subset_by_sample <- tse[ , tse$cohort =="Cohort_1"]
-```
-
-This will create a `*TreeSummarizedExperiment*` object only containing
-samples of the first cohort.
+## Data wrangling
 
 ### Agglomerating data
 
-To further push your data analysis and focus on its distribution at a
-specific taxonomic rank, it can be beneficial to agglomerate your data to
-that particular level. The `agglomerateByRank()` function simplifies this process,
-enabling more streamlined and effective analyses. Here’s an example:
+Agglomerating your data to a specific taxonomic rank helps simplify the
+analysis and reveal broader patterns. By grouping taxa at a chosen level,
+such as Phylum, you can better understand general trends and distributions.
+The `agglomerateByRank()` function streamlines this process, making it easier
+to analyze and visualize data at a higher level of aggregation.
 
 ```{r}
 #| label: agglomerating-data
-tse.agglomerated <- agglomerateByRank(tse, rank='Phylum')
+tse_phylum <- agglomerateByRank(tse, rank = "Phylum")
 
 # Check
-datatable(data.frame(
-    rowData(tse.agglomerated)),options = list(pageLength = 5),rownames = FALSE)
+tse_phylum
 ```
 
-Great! Now, our data is confined to the taxonomic information up to the Phylum
-level, allowing the analysis to be focused on this specific rank. In the rest
-of the workflow, we won't be using the agglomerated data but all of the code
-beneath can be used on this.
+Great! Now, our data is aggregated to the taxonomic information up to the Phylum
+level, allowing the analysis to be focused on this specific rank.
 
-## Metrics
+### Transformation
 
-### Community Diversity
-
-Community diversity in microbiology is measured by several indices:
-
--   species richness (total number of species)
--   equitability (distribution of species within a microbiome)
--   diversity (combination of the two)
-
-The **coefficient of @Hill** combines these measures into a single equation.
-All these variations are referred to as alpha diversity.
-
-```{r}
-#| label: calculateRichness
-
-# Estimate (observed) richness
-tse_alpha <- addAlpha(
-    tse,
-    assay.type = "counts",
-    index = "observed",
-    name="observed")
-
-# Check some of the first values in colData
-head(tse_alpha$observed)
-```
-
-The result is showing the estimated richness values for different samples or
-locations within the dataset. It gives an idea of how diverse each sample is
-in terms of the number of different species present. We can then create a
-graph to visualize this.
-
-```{r}
-#| label: plotColdata
-plotColData(
-    tse_alpha,
-    "observed",
-    "cohort",
-    colour_by = "patient_status") +
-    ggtitle("Richness plot of three patient cohorts") +
-    theme(axis.text.x = element_text(angle=45,hjust=1)) +
-    labs(y=expression(Richness[Observed]))
-```
-
-To go even further, we can also compare the estimated Shannon index to the
-observed richness. Shannon quantifies the diversity in terms of both the
-number of different species (richness) and the evenness of their distribution
-(abundance) and is calculated as such:
-
-$$
-H' = -\sum_{i=1}^{R} p_i \ln(p_i)
-$$ p~i~ being the proportion of a certain microorganism.
-
-<hr/>
-
-First, we can easily calculate this measure and add them to our `TreeSE`.
-
-```{r}
-#| label: calculateDiversity
-tse_alpha <- addAlpha(
-    tse_alpha,
-    assay.type = "counts",
-    index = c("shannon"),
-    name = c("shannon"))
-```
-
-We can also compare the two measures of diversity by producing the following
-graphs.
-
-```{r}
-#| label: violinPlots
-
-# Create the plots
-plots <- lapply(
-    c("observed", "shannon"),
-    plotColData,
-    object = tse_alpha,
-    x = "patient_status",
-    colour_by = "patient_status")
-
-# Fine-tune visual appearance
-plots <- lapply(plots, "+",
-    theme(
-        axis.text.x = element_blank(),
-        axis.title.x = element_blank(),
-        axis.ticks.x = element_blank()))
-
-# Add titles to individual plots
-plots[[1]] <- plots[[1]] +
-  ggtitle("Observed richness")
-plots[[2]] <- plots[[2]] +
-  ggtitle("Shannon diversity")
-
-
-# Plot the figures
-patchwork <- (plots[[1]] | plots[[2]])
-patchwork +
-  plot_layout(guides = "collect") +
-  plot_annotation(
-  title = "Comparison of observed richness estimate and Shannon diversity",
-)
-```
-
-It's very important to make all these comparisons in order to quantify
-diversity and compare samples in our data using different measures. - You
-can find other types of comparisons directly in the book
-[@sec-community-diversity].
-
-<hr>
-
-### Community similarity
-
-Community similarity refers to the way microorganisms resemble each other
-in terms of their composition and abundance of different microbial taxa. This
-can help us understand to what degree different samples resemble each other
-and finding key information. In microbiome analysis however, it's more common
-to measure the dissimilarity/Beta diversity between two samples A and B using
-the Bray-Curtis measure which is defined as follows:
-
-$$
-BC_{ij} = \frac{\sum_{k} |A_{k} - B_{k}|}{\sum_{k} (A_{k} + B_{k})}
-$$
-
-Luckily for us, the [**mia package**](https://microbiome.github.io/mia/)
-provides an easy way to calculate the relative abundance for our TreeSE
+The [`mia` package](https://microbiome.github.io/mia/)
+provides an easy way to calculate the relative abundances for our `TreeSE`
 using the `transformAssay()` method.
 
 ```{r}
 #| label: calculateRelabundance
-tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+tse <- transformAssay(tse, method = "relabundance")
+tse_phylum <- transformAssay(tse_phylum, method = "relabundance")
 ```
 
-This will take the original counts assay and calculate the relative abundances.
-The result is a matrix with the sample identifiers as rows and the relative
-abundances for each taxon within those samples as columns. It can be accessed
-in the assays of the tse:
+This function takes the original counts assay and calculates the relative
+abundances, storing the newly computed matrix back into the `TreeSE`. You can
+access it in the assays of the `TreeSE` by specifying the name of the relative
+abundance assay (e.g., "relabundance"):
 
 ```{r}
 #| label: showRelabundance
-assay(tse, "relabundance")[5:10,1:10]
+assay(tse, "relabundance") |> head()
 ```
 
-Then we can add the Bray-Curtis dissimilarity :
+For more information on the capabilities and transformation options of 
+`mia::transformAssay()`, see [@sec-assay-transform].
+
+## Community composition
+
+A common way to summarize composition is to use a bar plot to display relative
+abundances. See [@sec-microbiome-community] for more details on composition
+summaries. This approach visualizes the relative abundances of selected taxa
+in each sample, providing a quick overview of common compositions and major
+changes across samples. Here, we choose to plot all the phyla found in the
+samples.
+
+```{r}
+#| label: composition_plot
+
+p <- plotAbundance(tse_phylum, assay.type = "relabundance")
+p
+```
+
+As we can see, _Bacteroidetes_ is a common phylum in all samples. When its
+abundance drops below 50%, _Firmicutes_ notably increases to fill the space.
+
+## Community diversity
+
+Community diversity measures in microbiology can be categorized into three groups:
+
+    - Richness: The total number of taxa.
+    - Equitability: How evenly the abundances of taxa are distributed.
+    - Diversity: A combination of taxa richness and equitability.
+
+Diversity can vary in association with different phenotypes.
+Next, we will calculate Faith's phylogenetic diversity index. What sets this index
+apart is its incorporation of phylogeny into the diversity calculation. This
+index considers both the number and the relatedness of different taxa, using
+branch lengths on a phylogenetic tree. For
+more information on diversity, see [@sec-community-diversity].
+
+```{r}
+#| label: calculateRichness
+
+# Estimate Faith's index
+tse <- addAlpha(tse, index = "faith")
+```
+
+The results are stored to `colData`. The calculated index shows how diverse
+each sample is in terms of the number of different microbes present. We can
+then create a graph to visualize this.
+
+```{r}
+#| label: plotColdata
+p <- plotColData(tse, x = "patient_status", y = "faith")
+p
+```
+
+The graph shows that there is no significant difference in microbial diversity
+between the ADHD and control groups. However, alpha diversity metrics like
+Faith's index only tell us about the diversity within individual samples
+and do not account for the differences between samples or groups. To
+understand how microbial communities vary between different samples — for
+instance, between ADHD patients and controls — we need to examine beta diversity.
+
+## Community dissimilarity
+
+To gain a more comprehensive understanding of microbial variation across
+different samples, we assess beta diversity by measuring the dissimilarities
+in microbial compositions between samples. Beta diversity helps us determine
+how distinct or similar the microbiomes are among groups, allowing us to
+identify patterns or differences in microbial communities that may not be
+apparent from alpha diversity alone.
+
+To explore these dissimilarities, we use Principal Coordinate Analysis (PCoA),
+a technique that reduces the complexity of high-dimensional data by projecting
+it into a lower-dimensional space while preserving the dissimilarities
+(or distances) between samples. This enables us to visualize the relationships
+and differences between samples in a simplified manner. For more information,
+refer to [@sec-community-similarity].
+
+In this analysis, we use UniFrac dissimilarity, which takes into account
+the phylogenetic relationships among taxa. UniFrac measures the phylogenetic
+distance between microbial communities by comparing the branch lengths shared
+by the communities on a phylogenetic tree. This provides a more nuanced
+understanding of community differences by incorporating evolutionary
+relationships.
 
 ```{r}
 #| label: calculateBrayCurtis
 #| output: false
 
-# Run PCoA on relabundance assay with Bray-Curtis distances
+# Run PCoA
 tse <- runMDS(
     tse,
-    FUN = vegdist,
-    method = "bray",
-    assay.type = "relabundance",
-    name = "MDS_bray")
+    FUN = getDissimilarity,
+    tree = rowTree(tse),
+    method = "unifrac",
+    assay.type = "counts",
+    niter = 100
+    )
 ```
 
-In our case, the assay contains 151 rows and 27 columns. Having so many
-columns and thus dimensions can be troublesome for visualizing dissimilarity.
-
-In order to visualize the dissimilarity between the different samples, we can
-conduct a Principal Coordinate Analysis on the newly created assay. This
-essentially projects the Bray-Curtis dimensions onto a lower space whilst
-maintaining as much of the variation as possible, the projected values are
-called principal coordinates. You can read more on @Multidimensional-scaling
-here.
-
-`mia` provides some dimension reduction techniques, such as dbRDA. Additionally,
-we can use Bioconductor's `scater` package and the `vegan` package, made by
-@R_vegan to turn the dissimilarity into actual distances that can be visualized:
+The results are stored in `reducedDim` slot. In order to visualize this newly
+generated projection, we can apply `scater::plotReducedDim()`.
 
 ```{r}
 #| label: showPCoA
 # Create a ggplot object
-p <- plotReducedDim(tse, "MDS_bray", colour_by = "cohort") +
-  ggtitle("Bray-Curtis dissimilarity using multidimensional scaling")
-
-# Convert to an interactive plot with ggplotly
-ggplotly(p)
+p <- plotReducedDim(
+    tse, "MDS",
+    colour_by = "patient_status",
+    point_size = 3
+    )
+p <- p + labs(title = "Principal Coordinate Analysis")
+p
 ```
 
-However, the axes are not very informative and the amount of captured
-variance by the algorithm is nowhere to be found. We can tweak the plot to
-show some more information as such:
+The plot shows that the data clusters into three groups, with two of them
+consisting solely of one diagnosis or another. This suggests that the microbial
+profiles differ between ADHD patients and controls.
 
-```{r}
-#| label: addVariancePCoA
-# Calculate explained variance
-e <- attr(reducedDim(tse, "MDS_bray"), "eig")
-rel_eig <- e / sum(e[e > 0])
-
-# Add explained variance for each axis on the plot
-p <- p + labs(
-    x = paste("PCoA 1 (", round(100 * rel_eig[[1]], 1), "%", ")", sep = ""),
-    y = paste("PCoA 2 (", round(100 * rel_eig[[2]], 1), "%", ")", sep = "")) +
-    ggtitle("Bray-Curtis dissimilarity using multidimensional scaling")
-
-# Reonvert to an interactive plot with ggplotly
-ggplotly(p)
-```
-
-There we have it! Each axis shows the amount of variance or in our case
-dissimilarity retained by each principal coordinate. You can additionally
-add more options to color by a certain characteristic for example. More on
-this can be found in @sec-community-similarity.
-
-<hr>
-
-## Data visualisation using heatmaps
-
-Heatmaps are one of the most versatile ways to visualise your data. In
-this section we'll cover how to create a basic heatmap to visualise the most
-prevalent features using the
-[**sechm library**](https://bioconductor.org/packages/release/bioc/html/sechm.html).
-For a more detailed heatmap, please revert to
-**this section** [@sec-cross-correlation] of the OMA book.
-
-Then, let's subset the TreeSE to the most prevalent taxa using an
-alternative experiment:
-
-```{r}
-#| label: most-prevalent
-altExp(tse, "prevalence-subset") <- subsetByPrevalent(tse,prevalence=0.5)[1:5,]
-```
-
-When subsetting with this function, the resulting object no longer contains
-the correct relative abundances because these abundances were originally
-calculated based on the full dataset, not the subsetted one. Therefore, we
-need to recalculate the values to reflect the subset accurately. For the
-sake of readability, we'll also subset to the first five taxa after the
-initial subset.
-
-```{r}
-#| label: recalculate-relabundance
-altExp(tse, "prevalence-subset") <- transformAssay(
-    altExp(tse, "prevalence-subset"),
-    assay.type = "counts",
-    method = "relabundance")
-```
-
-Now that we have prepared the data, we can use the previously loaded `sechm`
-library to plot the heatmap:
-
-```{r}
-#| label: heatmap
-# Sets the colors
-setSechmOption("hmcols", value=c("#F0F0FF","#007562"))
-
-# Plots the actual heatmap.
-sechm(
-    altExp(tse, "prevalence-subset"), features =
-    rownames(rowData(altExp(tse, "prevalence-subset"))),
-    assayName="relabundance",show_colnames=TRUE)
-```
-
-In the heatmap above, it is apparent that Parabacteroides are relatively
-common in some samples while Akkermansia is detected very seldom.
-
-</div>
+To further explore the factors driving these differences in microbial profiles,
+we can perform a differential abundance analysis, for instance
+(see [@sec-differential-abundance]).
