@@ -1,0 +1,279 @@
+# Community Diversity {#sec-community-diversity}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+Community diversity is a central concept in microbiome research. Several
+diversity indices are available in the ecological literature.
+
+The main categories of diversity indices include species richness,
+evenness, and diversity: each of these emphasizes different aspects of
+the community heterogeneity [@Whittaker1960], [@Willis2019]. The _Hill
+coefficient_ combines many standard indices into a single equation
+that provides observed richness, inverse Simpson, Shannon diversity,
+and generalized diversity as special cases, with varying levels of
+emphasis on species abundance values. Thus, the term _alpha diversity_
+is often used to collectively refer to all these variants.
+
+**Diversity** summarizes the distribution of
+  species abundances in a given sample into a single number that
+  depends on both species richness and evenness (see below). Diversity
+  indices measure the overall community heterogeneity that considers
+  both of these aspects simultaneously. A number of ecological
+  diversity measures are available. In general, diversity increases
+  together with increasing richness and evenness. **Phylogenetic
+  diversity** (PD), [@Faith1992], is a variant that incorporates
+  information from phylogenetic relationships between species, unlike
+  most other commonly used diversity indices. The `addAlpha()`
+  function uses a faster reimplementation of the widely used function
+  in _`picante`_ [@R_picante, @Kembel2010]. The method uses the
+  default rowTree from the `TreeSummarizedExperiment` object (`tse`).
+
+**Richness** refers to the total number of species in a community
+  (sample). The simplest richness index is the number of species
+  observed in a sample (observed richness). Assuming limited sampling
+  from the community, however, this may underestimate the true species
+  richness. Several estimators have been developed to address this,
+  including for instance ACE [@Chao1992] and Chao1 [@Chao1984]
+  indices. Richness estimates do not aim to characterize variations in
+  species abundances.
+  
+Nonparametric richness estimators such as Chao1 and ACE, however, must not be 
+used with amplicon sequence variant (ASV) data. Algorithms that generate ASVs, 
+like DADA2 and Deblur, typically remove singletons, which are essential for 
+these richness calculations. This removal leads to meaningless results. 
+Although ASVs offer higher resolution than operational taxonomic units (OTUs) 
+and are increasingly used, the removal of singletons invalidates the application 
+of Chao1 and ACE. Therefore, alternative alpha diversity metrics that do not 
+depend on singletons or doubletons should be considered, or OTUs could be 
+used specifically for alpha diversity analysis to retain low-abundance taxa.
+Additionally, the inability of denoising algorithms to distinguish true 
+singleton sequences from artifacts further complicates the issue, making 
+traditional richness estimators unsuitable for ASV datasets, which are often 
+standardized for sequencing depth.[@Deng2024]
+
+**Evenness** focuses on the distribution of species abundances, and it
+  can thus complement the number of species. Pielou's evenness is a
+  commonly used index, obtained by normalizing Shannon diversity by
+  (the natural logarithm of) observed richness.
+
+These main classes of alpha diversity are sometimes complemented with
+indices of dominance or rarity:
+
+**Dominance** indices are in general negatively correlated with alpha
+  diversity. A high dominance is obtained when one or a few species have
+  a high share of the total species abundance in the community. Note
+  that dominance indices are generally inversely correlated with other
+  alpha diversity indices.
+
+**Rarity** indices characterize the concentration of species at low
+  abundance.  Prevalence and detection thresholds determine rare
+  species whose total concentration will determine the value of a
+  rarity index.
+
+## Alpha diversity estimation in practice
+
+### Calculate diversity measures {#sec-estimate-diversity}
+
+Alpha diversity can be estimated with `addAlpha()` wrapper function that interact
+with other packages implementing the calculation, such as `vegan`
+[@R_vegan].
+
+These functions calculate the given indices, and add them to the
+`colData` slot of the `SummarizedExperiment` object with the given
+`name`.
+
+The estimated values can then be retrieved and analyzed directly from
+the `colData`, for example, by plotting them using `plotColData()` from
+the `scater` package [@R_scater]. Here, we use the `observed`
+species as a measure of richness.
+
+Certain indices have additional options, here observed has `detection` parameter
+that control the detection threshold. Species over this threshold is considered
+as detected. See full list of options from from `help(addAlpha)`.
+
+```{r plot-richness, message=FALSE, cache=TRUE}
+#| context: setup
+
+# First, let's load some example data.
+library(mia)
+data("GlobalPatterns", package="mia")
+tse <- GlobalPatterns
+
+# Estimate (observed) richness
+tse <- addAlpha(
+    tse, assay.type = "counts", index = "observed", name = "observed",
+    detection = 10)
+
+# Check some of the first values in colData
+head(tse$observed)
+```
+
+::: {.callout-tip}
+## Tip
+
+You can calculate multiple indices simultaneously by specifying multiple indices
+in the `index` parameter.
+
+For example:  `index = c("observed", "shannon")`
+:::
+
+Let's visualize the results against selected `colData` variables (sample
+type and final barcode).
+
+```{r plot-div-obs, message=FALSE, fig.cap="Shannon diversity estimates plotted grouped by sample type with colour-labeled barcode.", cache=TRUE}
+library(scater)
+plotColData(
+    tse,
+    "observed",
+    "SampleType",
+    colour_by = "Final_Barcode") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(expression(Richness[Observed]))
+```
+
+We can then analyze the statistical significance. We use the non-parametric
+Wilcoxon or Mann-Whitney test, as it is more flexible than the commonly used
+Student's t-Test, since it does not assume normality.
+
+```{r}
+#| label: test_alpha1
+
+pairwise.wilcox.test(
+    tse[["observed"]], tse[["SampleType"]], p.adjust.method = "fdr")
+```
+
+### Faith phylogenetic diversity {#sec-faith-diversity}
+
+The Faith index is returned by the function `addAlpha()`. It utilizes the widely
+used function in _`picante`_ [@R_picante, @Kembel2010].
+
+```{r phylo-div-1}
+tse <- addAlpha(tse, assay.type = "counts", index = "faith")
+head(tse$faith)
+```
+
+::: {.callout-note}
+## Note
+
+Because `tse` is a `TreeSummarizedExperiment` object, its phylogenetic tree is
+used by default. However, the optional argument `tree` must be provided if
+`tse` does not contain one.
+:::
+
+## Alpha diversity measure comparisons {#sec-compare-alpha}
+
+We can compare alpha diversities for example by calculating correlation between
+them. Below, a visual comparison between shannon and faith indices is shown
+with a scatter plot.
+
+```{r compare-diversities, fig.width = 6.5}
+tse <- addAlpha(tse, assay.type = "counts", index = "shannon")
+
+plotColData(tse, x = "shannon", y = "faith") +
+    labs(x="Shannon index", y="Faith (phylogenetic) index") +
+    geom_smooth(method = "lm")
+```
+
+```{r}
+#| label: compare_indices
+
+cor.test(tse[["shannon"]], tse[["faith"]])
+```
+
+Let us visualize results from multiple alpha diversity measures
+against a given sample grouping available in `colData` (here,
+sample type). These have been readily stored in the `colData` slot,
+and they are thus directly available for plotting.
+
+```{r plot-all-diversities, fig.width = 6.5}
+library(patchwork)
+
+# Create the plots
+plots <- lapply(
+    c("observed", "shannon", "faith"),
+    plotColData,
+    object = tse,
+    x = "SampleType",
+    colour_by = "SampleType")
+
+# Fine-tune visual appearance
+plots <- lapply(
+    plots, "+",
+    theme(axis.text.x = element_blank(),
+          axis.title.x = element_blank(),
+          axis.ticks.x = element_blank()))
+
+# Plot the figures
+wrap_plots(plots, ncol = 1) +
+  plot_layout(guides = "collect")
+```
+
+## Visualizing significance in group-wise comparisons
+
+Next, let's compare the Shannon index between sample groups and visualize the
+statistical significance. Using the `stat_compare_means` function from the
+`ggpubr` package, we can add visually appealing p-values to our plots.
+
+To add adjusted p-values, we have to first calculate them.
+
+```{r visualize-shannon}
+library(ggpubr)
+library(tidyverse)
+
+
+index <- "shannon"
+group_var <- "SampleType"
+
+# Subsets the data. Takes only those samples that are from feces, skin, or
+# tongue.
+tse_sub <- tse[ , tse[[group_var]] %in% c("Feces", "Skin", "Tongue") ]
+
+# Changes old levels with new levels
+tse_sub$SampleType <- factor(tse_sub$SampleType)
+
+# Calculate p values
+pvals <- pairwise.wilcox.test(
+    tse_sub[[index]], tse_sub[[group_var]], p.adjust.method = "fdr")
+# Put them to data.frame format
+pvals <- pvals[["p.value"]] |>
+    as.data.frame()
+varname <- "group1"
+pvals[[varname]] <- rownames(pvals)
+# To long format
+pvals <- reshape(
+    pvals,
+    direction = "long",
+    varying = colnames(pvals)[ !colnames(pvals) %in% varname ],
+    times = colnames(pvals)[ !colnames(pvals) %in% varname ],
+    v.names = "p",
+    timevar = "group2",
+    idvar = "group1"
+    ) |>
+    na.omit()
+# Add y-axis position
+pvals[["y.position"]] <- apply(pvals, 1, function(x){
+    temp1 <- tse[[index]][ tse[[group_var]] == x[["group1"]] ]
+    temp2 <- tse[[index]][ tse[[group_var]] == x[["group2"]] ]
+    temp <- max( c(temp1, temp2) )
+    return(temp)
+})
+pvals[["y.position"]] <- max(pvals[["y.position"]]) +
+    order(pvals[["y.position"]]) * 0.2
+# Round values
+pvals[["p"]] <- round(pvals[["p"]], 3)
+
+# Create a boxplot
+p <- plotColData(
+    tse_sub, x = group_var, y = index,
+    show_boxplot = TRUE, show_violin = FALSE) +
+    theme(text = element_text(size = 10)) +
+    stat_pvalue_manual(pvals)
+p
+```
+
+Article on
+[`ggpubr` package](http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/76-add-p-values-and-significance-levels-to-ggplots/)
+provides further examples for estimating and highlighting significances.

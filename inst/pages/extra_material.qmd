@@ -1,0 +1,998 @@
+# Extra material {#sec-extras}
+
+```{r}
+knitr::opts_chunk$set(eval=TRUE, warning=FALSE, message=FALSE)
+```
+
+## `phyloseq` vs TreeSE cheatsheet
+
+This section has a cheatsheet for translating common functions in phyloseq
+to TreeSE/mia with example code.
+
+```{r}
+#| label: "download_libs"
+
+# Download libraries
+library(mia)
+library(phyloseq)
+library(dplyr)
+library(ggplot2)
+```
+
+Start by loading data as a `phyloseq` object "phy" and as `TreeSE` object "tse".
+
+```{r}
+#| label: "load_data"
+
+# Loading example data
+# Using GlobalPatterns dataset
+
+data(package = "phyloseq", "GlobalPatterns") # phyloseq object
+phy <- GlobalPatterns # Rename
+phy # Check the phyloseq object
+
+data(package = "mia", "GlobalPatterns") # TreeSE object
+tse <- GlobalPatterns # Rename
+tse # Check the tse object
+```
+
+### Accessing different types of data in `phyloseq` versus `TreeSE`
+
+Often microbiome datasets contain three different types of tables, one which
+defines the microbes' taxonomy from domain to species level, one that
+describes sample level information like whether the sample is from a
+healthy or a diseased person, and one that has the abundances of taxa from
+mapping, like an OTU table.
+
+There are slightly different names for these tables in phyloseq and tse,
+but they can be retrieved from the phyloseq and tse containers in analogous
+ways.
+
+**Accessing the table of taxonomic names: tax_table = rowData**
+
+phyloseq and TreeSE objects' taxonomy tables can be accessed with tax_table and
+rowData commands.
+
+```{r}
+phy_taxtable <-
+    tax_table(phy)  %>% # Access the phyloseq taxonomic name table
+    data.frame # Make into a data frame
+
+tse_taxtable <- rowData(tse) %>% # Same for tse
+    data.frame
+
+```
+
+**Accessing sample data: sample_data = colData**
+
+Sample data can be accessed with `sample_data` and `colData` commands.
+
+```{r}
+#| label: "access_sampledata"
+
+phy_sampledata <-
+    sample_data(phy) %>% data.frame
+
+tse_sampledata <-
+    colData(tse) %>% data.frame
+
+```
+
+**Accessing operational taxonomic unit (OTU) abundance objects: otu_table = assay**
+
+OTU tables can be accessed with otu_table and assay commands. The assay can
+also hold other types of information like taxa abundances from shotgun
+metagenomic annotation, or functional gene abundances.
+
+```{r}
+#| label: "access_otutable"
+
+phy_otutable <-
+    otu_table(phy) %>% data.frame
+
+tse_otutable <-
+    assay(tse) %>% data.frame
+
+```
+
+### Building phyloseq objects vs TreeSE objects: phyloseq = TreeSummarizedExperiment
+
+After learning how to access various data types from TreeSE, let's see how
+creating TreeSE objects compares to creating phyloseq objects. We will use
+the vanilla dataframes we created from the phyloseq object to demonstrate
+making both types of data objects. These are identical to the equivalent tse
+dataframes but for demonstration we will use ones created from phy.
+
+Let's start by checking what we have.
+
+```{r}
+phy_otutable %>% head
+phy_sampledata %>% head
+phy_taxtable %>% head
+```
+
+Ok, these are all normal data frames which could come from upstream
+bioinformatics, like OTU tables that come from 16S analysis, and taxonomy
+tables.
+
+Let's demo how to create the TreeSE object, how it compares to creating
+phyloseq and how assay in TreeSE compares to otu_table in phyloseq.
+
+```{r}
+#| label: "build_dataobjects"
+
+
+# Create phyloseq object
+OTU_phy <- otu_table(phy_otutable %>% as.matrix, taxa_are_rows = TRUE) # Make OTU table
+TAX_phy <- tax_table(phy_taxtable %>% as.matrix) # Make TAX table
+SAMPLE_phy <- sample_data(phy_sampledata) # Make sample data table
+
+phy <- phyloseq(OTU_phy, TAX_phy, SAMPLE_phy) # Combine into phyloseq object
+phy # Inspect
+
+```
+
+Let's start by checking our otu table, and see if it is counts or already
+normalized. We will use the same data frame extracted from the phy object
+as before.
+
+```{r}
+#| label: "check_otutable"
+
+# Check if we have counts or normalized data
+
+phy_otutable %>% head
+
+```
+
+We have counts!
+
+Since TreeSEs can hold many different versions of the OTU table, most commonly
+either relative abundances or counts, we will need to give our assay
+(which corresponds to otu_table in Phyloseq) a name and
+list the different types of assays or transformations we have. In this
+example we only have one item 'counts' in the list.
+
+Let's convert the data frame to a matrix and make the list of assays.
+
+```{r}
+# Create TreeSE
+counts <- as.matrix(phy_otutable) # Convert to a matrix
+assays <- SimpleList(counts = counts)
+tse <- TreeSummarizedExperiment(
+    assays = assays,
+    colData = phy_sampledata,
+    rowData = phy_taxtable
+)
+
+```
+
+Let's check the different assay names we have.
+
+```{r}
+assayNames(tse)
+```
+
+
+### Handling different OTU table normalizations in phyloseq vs TreeSE
+
+Adding the assays as a list might seem inconvenient if you only have one type of
+OTU table (`counts` in our example), but let's see why it is actually very
+convenient to be able to hold multiple assays in one data object. 
+
+
+Here we'll show an example of how to add relative abundances and CLR normalized
+OTU tables to your tse assays.
+
+With phyloseq you would need three different phyloseq objects, each taking up
+7.7 MB of memory, whilst the tse with the three assays takes up only 18.3 MB.
+
+```{r}
+# Add another assay that holds the relative abundance normalized OTU table
+tse <-
+  transformAssay(tse, assay.type = "counts", method = "relabundance")
+assays(tse) # Let's check
+
+# With phyloseq you would need to have two different phyloseq objects
+phy_relab  = transform_sample_counts(phy, function(x)
+  x / sum(x))
+
+# Let's add clr transformed data just for the fun of it :)
+tse <- transformAssay(
+    tse,
+    assay.type = "counts",
+    method = "clr",
+    pseudocount = 1)
+
+assays(tse) # Let's check
+
+# With phyloseq you would need to have a third phyloseq object.
+# phy_CLR <- microbiome::transform(phy, 'clr') # Example, don't run
+```
+
+### Subsetting samples and taxa
+
+**Subsetting samples: subset_samples = indexing columns**
+
+Next let's learn how to subset samples. In phyloseq we use subset_samples
+command, but since the sample data is stored in columns in the TreeSe, we
+can access it by indexing columns.
+
+In this section we will remove the "Mock" samples and make new data objects.
+
+```{r}
+phy_nomock <- subset_samples(
+    phy, !SampleType == "Mock") # Removing mock samples in phyloseq
+
+tse_nomock <- tse[,!tse$SampleType == "Mock"] # tse uses indexing columns
+```
+
+Let's see what we have now.
+
+```{r}
+#| label: "check_removed_samples"
+
+phy %>% sample_names() %>% length()
+phy_nomock %>% sample_names() %>% length()
+colnames(tse) %>% length()
+colnames(tse_nomock) %>% length()
+```
+
+We have removed three samples that where SampleType "Mock".
+
+**Subsetting taxa: subset_taxa = indexing rows**
+
+Taxa are stored in rows in TreeSE and the TreeSE equivalent to subset_taxa is
+indexing rows.
+
+```{r}
+#| label: "take_only_bact"
+
+phy_nomock_bacteria <-
+  subset_taxa(phy_nomock, Kingdom == "Bacteria")
+tse_nomock_bacteria <-
+  tse[tse$Kingdom == "Bacteria", ]
+
+phy_nomock_bacteria # We have 19008 taxa (only bacteria) and before 19216
+tse_nomock_bacteria
+```
+
+### Calculating alpha diversity: estimate_richness = estimateDiversity
+
+Now we know how data stored in `TreeSE` can be accessed and the `TreeSE` data
+objects created. Let's look at how we can calculate alpha diversity using
+ `mia` compared to  `phyloseq` package.
+
+The `mia` command  `estimateDiversity()` will return a TreeSE and the results are
+stored in `colData`, unlike the `phyloseq` command that outputs a data frame with
+just the diversity estimates.
+
+In `phyloseq` you would need to add the alpha diversity separately to your
+sample data to keep it safe with the other sample level data.
+
+```{r}
+#| label: "alpha_div"
+
+# Alpha diversity with phyloseq
+df <- estimate_richness(phy, measures = "Shannon")
+head(df) # Inspect
+
+# Add Shannon to the sample_data to keep results safe with other sample data
+phy_sampledata <- sample_data(phy) %>% data.frame
+phy_sampledata$shannon <- df$Shannon
+sample_data(phy) <- phy_sampledata
+sample_data(phy) %>% head  # Inspect
+```
+
+For the tse we will need to specify which assay (which normalization of the
+OTU table) we want to use, since we have three options now with the counts,
+relative abundance and CLR. We can check the assay names first.
+
+```{r}
+#| label: "mia_alpha_div"
+
+assayNames(tse) # Check the assay names
+
+tse <- estimateDiversity(tse, assay.type = "counts", index = "shannon") # Let's use counts
+# Inspect the new colData with added alpha diversity estimate
+colData(tse) %>% names # shannon has been added to the colData
+```
+
+If we want to extract a data frame that only has the alpha diversity it can be
+done easily.
+
+```{r}
+#| label: "extract_alpha"
+# Extract
+df <- colData(tse) %>% data.frame %>% dplyr::select(matches("shannon"))
+
+```
+
+### Calculating beta diversity: ordinate = runMDS
+
+We can calculate PCoA with Bray-Curtis distances in `phyloseq` using the
+`ordinate()` command. The beta diversity calculation in `mia` outputs a TreeSE
+with a new type of data, reduced dimensions or `reducedDim`. 
+
+Here we will use the `scater` package that runs the PCoA with `runMDS()`. (PCoA and
+MDS mean the same thing)
+
+In `phyloseq` you would again need to add the dimensions to the sample data if you
+want to keep them safe with other metadata.
+
+```{r}
+#| label: "beta_div"
+
+# Run PCoA on the relative abundance data and store in phy_ord list
+phy_ord <- ordinate(phy_relab, method = "PCoA", distance = "bray")
+
+library(scater)
+
+# Ordinate with runMDS and implement the vegan's Bray-Curtis dissimilarity
+# distance calculation
+tse <- runMDS(
+    tse,
+    FUN = vegan::vegdist,
+    method = "bray",
+    assay.type = "relabundance",
+    name = "MDS_bray",
+    ncomponents = 10) # Let's also define how many dimensions
+tse # Inspect, now we have new reducedDim "MDS_bray"
+
+```
+
+### Plotting ordinations: `plot_ordination()` = `plotReducedDim()`
+`phyloseq` has it's own plotting fuction for ordinations.
+
+```{r}
+#| label: "plot_ord"
+
+plot_ordination(physeq = phy, ordination = phy_ord, color = "SampleType")
+```
+
+It is also easy to plot the ordination stored in `reducedDim` in the tse using
+the `plotReducedDim()` function. We can first check what the name of the
+Bray-Curtis MDS/PCoA was incase we forgot.
+
+```{r}
+#| label: "check_reducedDimNames"
+
+# Check reduced dim names
+reducedDimNames(tse)
+```
+Ok, let's plot.
+
+```{r}
+#| label: "plot_red_dim"
+
+# Plot
+plotReducedDim(tse, "MDS_bray", color_by = "SampleType")
+# The sign is given arbitrarily. We can change it to match the plot_ordination
+reducedDim(tse)[, 1] <- -reducedDim(tse)[, 1]
+reducedDim(tse)[, 2] <- -reducedDim(tse)[, 2]
+plotReducedDim(tse, "MDS_bray", color_by = "SampleType")
+```
+
+### Agglomerating taxa: `tax_glom()` = `agglomerateByRank()`
+
+Often you might want to study your data using different taxonomic ranks,
+for example check if you see differences in the abundances of higher
+taxonomic levels.
+
+```{r}
+#| label: "tax_glom"
+
+phy_fam <- tax_glom(phy, taxrank = "Family")
+```
+
+This family level data object can again be conveniently stored in a tse object
+under `altExp`.
+
+`tax_glom()` removes the taxa which have not been assigned to the level given in
+taxrank by default (NArm = TRUE).
+So we will add the na.rm = TRUE to `agglomerateByRank()` function which is
+equivalent to the default behaviour of `tax_glom()`.
+
+```{r}
+#| label: "agglomerateByRank"
+
+altExp(tse, "Family") <-
+  agglomerateByRank(tse,
+                      rank = "Family")
+altExp(tse, "Family")
+```
+
+### Cheatsheet
+
+```{r}
+#| label: "cheatsheet"
+#| echo: false
+
+library(knitr)
+df <-
+  data.frame(
+    Functionality = c(
+      "Access sample data", # Row 1
+      "Access tax table", # Row 2
+      "Access OTU table",
+      "Build data object",
+      "Calculate alpha diversity",
+      "Calculate beta diversity",
+      "Plot ordination",
+      "Subset taxa",
+      "Subset samples",
+      "Aggromerate taxa"
+    ),
+    phyloseq = c(
+      "sample_data()",
+      "tax_table()",
+      "otu_table()",
+      "phyloseq()",
+      "estimate_richness()",
+      "ordinate()",
+      "plot_ordination()",
+      "subset_taxa()",
+      "subset_samples()",
+      "tax_glom()"
+    ),
+    "mia/TreeSE" = c(
+      "Index columns",
+      "Index rows",
+      "assays()",
+      "TreeSummarizedExperiment()",
+      "estimateDiversity()",
+      "runMDS()",
+      "plotReducedDim()",
+      "Index rows",
+      "Index columns",
+      "agglomerateByRank()"
+    )
+  )
+
+df2 <- data.frame(
+    Data_type = c(
+        "OTU table", # Row 1
+        "Taxonomy table", # Row2
+        "Sample data table"), # Row 3
+    phyloseq = c(
+        "otu_table", # Row 1
+        "tax_table", # Row2
+        "sample_data"),# Row 3
+    TreeSE = c(
+        "assay", # Row 1
+        "rowData", # Row2
+        "colData") # Row 3
+  )
+
+kable(df)
+kable(df2)
+```
+
+## 16S workflow {#sec-16s-workflow}
+
+Result of amplicon sequencing is a large number of files that include all the
+sequences that were read from samples. Those sequences need to be matched with
+taxa. Additionally, we need to know how many times each taxa were found from
+each sample.
+
+There are several algorithms to do that, and DADA2 is one of the most common.
+You can find DADA2 pipeline tutorial, for example,
+[here](https://benjjneb.github.io/dada2/tutorial.html).
+After the DADA2 portion of the tutorial is completed, the data is stored into
+`phyloseq` object  (Bonus: Handoff to phyloseq). To store the data to `TreeSE`,
+follow the example below. 
+
+You can find full workflow script without further explanations and comments from
+[Rmd file](extra_material/dada2_workflow.Rmd)
+
+```{r dada2_1, include=FALSE}
+# Load objects
+seqtab.nochim <- readRDS(
+    system.file("extdata", "dada2_seqtab.nochim", package = "OMA"))
+taxa <- readRDS(system.file("extdata", "dada2_taxa", package = "OMA"))
+```
+
+Load required packages.
+
+```{r dada2_2}
+library(mia)
+library(BiocManager)
+library(Biostrings)
+```
+
+Create arbitrary example sample metadata like it was done in the tutorial.
+Usually,  sample metadata is imported as a file.
+
+```{r dada2_3}
+samples.out <- rownames(seqtab.nochim)
+subject <- sapply(strsplit(samples.out, "D"), `[`, 1)
+gender <- substr(subject,1,1)
+subject <- substr(subject,2,999)
+day <- as.integer(sapply(strsplit(samples.out, "D"), `[`, 2))
+samdf <- data.frame(Subject=subject, Gender=gender, Day=day)
+samdf$When <- "Early"
+samdf$When[samdf$Day>100] <- "Late"
+rownames(samdf) <- samples.out
+```
+
+Convert data into right format and create a `_TreeSE_` object.
+
+```{r dada2_4}
+# Create a list that contains assays
+counts <- t(seqtab.nochim)
+counts <- as.matrix(counts)
+assays <- SimpleList(counts = counts)
+
+# Convert `colData` and `rowData` into `DataFrame`
+samdf <- DataFrame(samdf)
+taxa <- DataFrame(taxa)
+
+# Create TreeSE
+tse <- TreeSummarizedExperiment(
+    assays = assays,
+    colData = samdf,
+    rowData = taxa
+    )
+
+# Remove mock sample like it is also done in DADA2 pipeline tutorial
+tse <- tse[ , colnames(tse) != "mock"]
+```
+
+Add sequences into `referenceSeq` slot and convert rownames into simpler format.
+
+```{r dada2_5}
+# Convert sequences into right format
+dna <- Biostrings::DNAStringSet( rownames(tse) )
+# Add sequences into referenceSeq slot
+referenceSeq(tse) <- dna
+# Convert rownames into ASV_number format
+rownames(tse) <- paste0("ASV", seq( nrow(tse) ))
+tse
+```
+
+## Bayesian Multinomial Logistic-Normal Models {sec-fido}
+
+Analysis using such model could be performed with the function
+`pibble()` from the `fido` package, wihch is in form of a Multinomial
+Logistic-Normal Linear Regression model; see
+[vignette](https://jsilve24.github.io/fido/articles/introduction-to-fido.html)
+of package.
+
+The following presents such an exemplary analysis based on the
+data of @Sprockett2020 available
+through `microbiomeDataSets` package.
+
+
+```{r}
+library(fido)
+```
+
+Loading the libraries and importing data:
+
+```{r}
+library(fido)
+```
+
+```{r, eval=FALSE}
+library(microbiomeDataSets)
+tse <- SprockettTHData()
+```
+
+```{r, echo=FALSE}
+# saveRDS(tse, file="data/SprockettTHData.Rds")
+# Hidden reading of the saved data
+tse <- readRDS("../extdata/SprockettTHData.Rds")
+```
+
+
+We pick three covariates ("Sex","Age_Years","Delivery_Mode") during this
+analysis as an example, and beforehand we check for missing data:
+
+
+```{r}
+library(mia)
+cov_names <- c("Sex","Age_Years","Delivery_Mode")
+na_counts <- apply(is.na(colData(tse)[,cov_names]), 2, sum)
+na_summary<-as.data.frame(na_counts,row.names=cov_names)
+```
+
+We drop missing values of the covariates:
+
+```{r}
+tse <- tse[ , !is.na(colData(tse)$Delivery_Mode) ]
+tse <- tse[ , !is.na(colData(tse)$Age_Years) ]
+```
+
+We agglomerate microbiome data to Phylum:
+
+```{r}
+tse_phylum <- agglomerateByRank(tse, "Phylum")
+```
+
+We extract the counts assay and covariate data to build the model
+matrix:
+
+```{r}
+Y <- assays(tse_phylum)$counts
+# design matrix
+# taking 3 covariates
+sample_data<-as.data.frame(colData(tse_phylum)[,cov_names])
+X <- t(model.matrix(~Sex+Age_Years+Delivery_Mode,data=sample_data))
+```
+
+Building the parameters for the `pibble()` call to build the model; see more at
+[vignette](https://jsilve24.github.io/fido/articles/introduction-to-fido.html):
+
+```{r}
+n_taxa<-nrow(Y)
+upsilon <- n_taxa+3
+Omega <- diag(n_taxa)
+G <- cbind(diag(n_taxa-1), -1)
+Xi <- (upsilon-n_taxa)*G%*%Omega%*%t(G)
+Theta <- matrix(0, n_taxa-1, nrow(X))
+Gamma <- diag(nrow(X))
+```
+
+Automatically initializing the priors and visualizing their distributions:
+
+```{r}
+priors <- pibble(NULL, X, upsilon, Theta, Gamma, Xi)
+names_covariates(priors) <- rownames(X)
+plot(priors, pars="Lambda") + ggplot2::xlim(c(-5, 5))
+```
+
+Estimating the posterior by including our response data `Y`.
+Note: Some computational failures could occur (see
+[discussion](https://github-wiki-see.page/m/jsilve24/fido/wiki/Frequently-Asked-Questions))
+the arguments `multDirichletBoot` `calcGradHess` could be passed in such case.
+
+```{r}
+priors$Y <- Y
+posterior <- refit(priors, optim_method="adam", multDirichletBoot=0.5) #calcGradHess=FALSE
+```
+
+Printing a summary about the posterior:
+
+```{r}
+ppc_summary(posterior)
+```
+Plotting the summary of the posterior distributions of the regression parameters:
+
+```{r}
+names_categories(posterior) <- rownames(Y)
+plot(posterior,par="Lambda",focus.cov=rownames(X)[2:4])
+```
+
+Taking a closer look at "Sex" and "Delivery_Mode":
+
+```{r}
+plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
+```
+
+## Biclustering
+
+Biclustering methods cluster rows and columns simultaneously in order
+to find subsets of correlated features/samples.
+
+Here, we use following packages:
+
+-   [biclust](https://cran.r-project.org/web/packages/biclust/index.html)
+-   [cobiclust](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13582)
+
+`cobiclust` is especially developed for microbiome data whereas `biclust` is
+more general method. In this section, we show two different cases and example 
+solutions to apply biclustering to them. 
+
+1.   Taxa vs samples
+2.   Taxa vs biomolecule/biomarker
+
+Biclusters can be visualized using heatmap or boxplot, for
+instance. For checking purposes, also scatter plot might be valid
+choice.
+
+Check out more ideas for heatmaps from chapters [@sec-viz-chapter] and
+[@sec-microbiome-community].
+
+### Taxa vs samples
+
+When you have microbial abundance matrices, we suggest to use
+`cobiclust` which is designed for microbial data.
+
+Load example data
+
+```{r load-pkg-data2}
+library(cobiclust)
+data("HintikkaXOData")
+mae <- HintikkaXOData
+```
+
+Only the most prevalent taxa are included in analysis.
+
+```{r cobiclust_1}
+# Subset data in the first experiment
+mae[[1]] <- subsetByPrevalent(
+    mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
+
+# rclr-transform in the first experiment
+mae[[1]] <- transformAssay(mae[[1]], method = "rclr")
+```
+
+`cobiclust()` takes counts table as an input and gives `cobiclust` object as an
+output. It includes clusters for taxa and samples. 
+
+
+```{r cobiclust_2}
+# Do clustering using counts table
+clusters <- cobiclust(assay(mae[[1]], "counts"))
+
+# Get clusters
+row_clusters <- clusters$classification$rowclass
+col_clusters <- clusters$classification$colclass
+
+# Add clusters to rowdata and coldata
+rowData(mae[[1]])$clusters <- factor(row_clusters)
+colData(mae[[1]])$clusters <- factor(col_clusters)
+
+# Order data based on clusters
+mae[[1]] <- mae[[1]][
+    order(rowData(mae[[1]])$clusters), order(colData(mae[[1]])$clusters)]
+
+# Print clusters
+clusters$classification
+```
+
+Next we can plot clusters. Annotated heatmap is a common choice.
+
+```{r cobiclust_3a, fig.width=14, fig.height=12}
+library(ComplexHeatmap)
+# z-transform for heatmap
+mae[[1]] <- transformAssay(
+    mae[[1]], assay.type = "rclr", MARGIN = "features", method = "z",
+    name = "rclr_z")
+
+# Create annotations. When column names are equal, they should share levels.
+# Here samples include 3 clusters, and taxa 2. That is why we have to make
+# column names unique.
+annotation_col <- data.frame(colData(mae[[1]])[, "clusters", drop = FALSE])
+colnames(annotation_col) <- "col_clusters"
+
+annotation_row <- data.frame(rowData(mae[[1]])[, "clusters", drop = FALSE])
+colnames(annotation_row) <- "row_clusters"
+```
+
+Plot the heatmap.
+
+```{r cobiclust_3b, fig.width=14, fig.height=12}
+pheatmap(
+    assay(mae[[1]], "rclr_z"), cluster_rows = F, cluster_cols = F,
+    annotation_col = annotation_col, annotation_row = annotation_row)
+```
+
+Boxplot is commonly used to summarize the results:
+
+```{r cobiclust_4}
+library(ggplot2)
+library(patchwork)
+
+# ggplot requires data in melted format
+melt_assay <- meltSE(
+    mae[[1]], assay.type = "rclr",
+    add_col_data = TRUE, add_row_data = TRUE)
+
+# patchwork two plots side-by-side
+p1 <- ggplot(melt_assay) +
+    geom_boxplot(aes(x = clusters.x, y = rclr)) +
+    labs(x = "Taxa clusters")
+
+p2 <- ggplot(melt_assay) +
+    geom_boxplot(aes(x = clusters.y, y = rclr)) +
+    labs(x = "Sample clusters")
+
+p1 + p2
+```
+
+### Taxa vs biomolecules
+
+Here, we analyze cross-correlation between taxa and metabolites. This
+is a case, where we use `biclust` method which is suitable for numeric
+matrices in general. First we pre-process the data.
+
+```{r biclust_1}
+# Samples must be in equal order
+# (Only 1st experiment was ordered in cobiclust step leading to unequal order)
+mae[[1]] <- mae[[1]][, colnames(mae[[2]])]
+
+# Make rownames unique, since it is required by other steps
+rownames(mae[[1]]) <- make.unique(rownames(mae[[1]]))
+
+# Transform the metabolites to be in log basis
+mae[[2]] <- transformAssay(mae[[2]], assay.type = "nmr", method = "log10")
+
+# Add missing data to the metabolites
+replace_na <- function(row) {
+    na_indices <- which(is.na(row))
+    non_na_values <- row[!is.na(row)]
+    row[na_indices] <- sample(non_na_values, length(na_indices), replace = TRUE)
+    row
+}
+assay(mae[[2]], "log10") <- t(apply(assay(mae[[2]], "log10"), 1, replace_na))
+```
+
+Next, we compute the Spearman correlation matrix.
+
+```{r biclust_2}
+# Calculate correlations
+corr <- getExperimentCrossCorrelation(
+    mae, 1, 2, assay.type1 = "rclr", assay.type2 = "log10",
+    mode = "matrix", correlation = "spearman")
+```
+
+`biclust()` takes a matrix as an input and returns a `biclust` object. 
+
+```{r biclust_3}
+library(biclust)
+# Set seed for reproducibility
+set.seed(3973)
+
+# Find biclusters
+bc <- biclust(corr, method = BCPlaid(), verbose = FALSE)
+
+bc
+```
+
+The object includes cluster information. However compared to
+`cobiclust`, `biclust` object includes only information about clusters
+that were found, not general cluster.
+
+Meaning that if one cluster size of 5 features was found out of 20 features,
+those 15 features do not belong to any cluster. That is why we have to create an
+additional cluster for features/samples that are not assigned into any cluster.
+
+```{r biclust_4}
+# Functions for obtaining biclust information
+
+# Get clusters for rows and columns
+.get_biclusters_from_biclust <- function(bc, assay) {
+    # Get cluster information for columns and rows
+    bc_columns <- t(bc@NumberxCol)
+    bc_columns <- data.frame(bc_columns)
+    bc_rows <- bc@RowxNumber
+    bc_rows <- data.frame(bc_rows)
+
+    # Get data into right format
+    bc_columns <- .manipulate_bc_data(bc_columns, assay, "col")
+    bc_rows <- .manipulate_bc_data(bc_rows, assay, "row")
+
+    return(list(bc_columns = bc_columns, bc_rows = bc_rows))
+}
+
+# Input clusters, and how many observations there should be, i.e.,
+# the number of samples or features
+.manipulate_bc_data <- function(bc_clusters, assay, row_col) {
+    # Get right dimension
+    dim <- ifelse(row_col == "col", ncol(assay), nrow(assay))
+    # Get column/row names
+    if (row_col == "col") {
+        names <- colnames(assay)
+    } else {
+        names <- rownames(assay)
+    }
+
+    # If no clusters were found, create one. Otherwise create additional
+    # cluster which
+    # contain those samples that are not included in clusters that were found.
+    if (nrow(bc_clusters) != dim) {
+        bc_clusters <- data.frame(cluster = rep(TRUE, dim))
+    } else {
+        # Create additional cluster that includes those samples/features that
+        # are not included in other clusters.
+        vec <- ifelse(rowSums(bc_clusters) > 0, FALSE, TRUE)
+
+        # If additional cluster contains samples, then add it
+        if (any(vec)) {
+            bc_clusters <- cbind(bc_clusters, vec)
+        }
+    }
+
+    # Adjust row and column names
+    rownames(bc_clusters) <- names
+    colnames(bc_clusters) <- paste0("cluster_", 1:ncol(bc_clusters))
+    return(bc_clusters)
+}
+```
+
+```{r biclust_5}
+# Get biclusters
+bcs <- .get_biclusters_from_biclust(bc, corr)
+
+bicluster_rows <- bcs$bc_rows
+bicluster_columns <- bcs$bc_columns
+
+# Print biclusters for rows
+head(bicluster_rows)
+```
+
+Let's collect information for the scatter plot.
+
+```{r biclust_6}
+# Function for obtaining sample-wise sum, mean, median, and mean variance
+# for each cluster
+
+.sum_mean_median_var <- function(tse1, tse2, assay.type1, assay.type2, clusters1, clusters2) {
+    list <- list()
+    # Create a data frame that includes all the information
+    for (i in 1:ncol(clusters1)) {
+        # Subset data based on cluster
+        tse_subset1 <- tse1[clusters1[, i], ]
+        tse_subset2 <- tse2[clusters2[, i], ]
+        # Get assay
+        assay1 <- assay(tse_subset1, assay.type1)
+        assay2 <- assay(tse_subset2, assay.type2)
+        # Calculate sum, mean, median, and mean variance
+        sum1 <- colSums2(assay1, na.rm = T)
+        mean1 <- colMeans2(assay1, na.rm = T)
+        median1 <- colMedians(assay1, na.rm = T)
+        var1 <- colVars(assay1, na.rm = T)
+
+        sum2 <- colSums2(assay2, na.rm = T)
+        mean2 <- colMeans2(assay2, na.rm = T)
+        median2 <- colMedians(assay2, na.rm = T)
+        var2 <- colVars(assay2, na.rm = T)
+
+        list[[i]] <- data.frame(sample = colnames(tse1), sum1, sum2, mean1,
+                                 mean2, median1, median2, var1, var2)
+    }
+    return(list)
+}
+
+# Calculate info
+df <- .sum_mean_median_var(mae[[1]], mae[[2]], "rclr", "log10", bicluster_rows, bicluster_columns)
+```
+
+Now we can create a scatter plot. X-axis includes median clr abundance
+of microbiome and y-axis median absolute concentration of each
+metabolite. Each data point represents a single sample.
+
+From the plots, we can see that there is low negative correlation in
+both cluster 1 and 3.  This means that when abundance of bacteria
+belonging to cluster 1 or 3 is higher, the concentration of
+metabolites of cluster 1 or 3 is lower, and vice versa.
+
+```{r biclust_7, fig.width=14, fig.height=6, fig.show="keep", out.width="33%"}
+pics <- list()
+for (i in seq_along(df)) {
+    pics[[i]] <- ggplot(df[[i]]) +
+        geom_point(aes(x = median1, y = median2)) +
+        labs(title = paste0("Cluster ", i), x = "Taxa (rclr median)",
+             y = "Metabolites (abs. median)")
+    print(pics[[i]])
+}
+pics[[1]] + pics[[2]] + pics[[3]]
+```
+
+`pheatmap` does not allow boolean values, so they must be converted into factors.
+
+```{r biclust_8}
+bicluster_columns <- data.frame(apply(bicluster_columns, 2, as.factor))
+bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
+```
+
+Again, we can plot clusters with heatmap.
+
+```{r biclust_9, fig.width=10, fig.height=10}
+# Adjust colors for all clusters
+if (ncol(bicluster_rows) > ncol(bicluster_columns)) {
+    cluster_names <- colnames(bicluster_rows)
+} else {
+    cluster_names <- colnames(bicluster_columns)
+}
+annotation_colors <- list()
+for (name in cluster_names) {
+    annotation_colors[[name]] <- c("TRUE" = "red", "FALSE" = "white")
+}
+
+# Create a heatmap
+pheatmap(corr, cluster_cols = F, cluster_rows = F,
+         annotation_col = bicluster_columns, annotation_row = bicluster_rows,
+         annotation_colors = annotation_colors)
+```

@@ -1,0 +1,121 @@
+# Convert & Export {#sec-convert}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+library(DT)
+chapterPreamble()
+```
+
+## Conversions between data formats in R {#sec-conversions-between-data-formats-in-r}
+
+If the data has already been imported in R in another format, it
+can be readily converted into `TreeSE`, as shown in our next
+example. Note that similar conversion functions to
+`TreeSE` are available for multiple data formats via
+the `mia` package (see convertFrom* for phyloseq,
+Biom, and DADA2).
+
+```{r, message=FALSE}
+library(mia)
+
+# phyloseq example data
+data(GlobalPatterns, package = "phyloseq")
+GlobalPatterns_phyloseq <- GlobalPatterns
+GlobalPatterns_phyloseq
+```
+
+```{r, message=FALSE}
+# convert phyloseq to TSE
+GlobalPatterns_TSE <- convertFromPhyloseq(GlobalPatterns_phyloseq)
+GlobalPatterns_TSE
+```
+
+We can also convert `TreeSE` objects into `phyloseq`
+with respect to the shared components that are supported by both
+formats (i.e. taxonomic abundance table, sample metadata, taxonomic
+table, phylogenetic tree, sequence information). This is useful for
+instance when additional methods are available for `phyloseq`.
+
+```{r, message=FALSE}
+# convert TSE to phyloseq
+GlobalPatterns_phyloseq2 <- convertToPhyloseq(GlobalPatterns_TSE)
+GlobalPatterns_phyloseq2
+```
+
+Conversion is possible between other data formats. Interested readers can
+refer to the following functions:
+
+* [convertFromDADA2](https://microbiome.github.io/mia/reference/convertFromDADA2.html)
+* [convertFromBIOM](https://microbiome.github.io/mia/reference/convertFromBIOM.html)
+* [convertToBIOM](https://microbiome.github.io/mia/reference/convertFromBIOM.html)
+
+## Exporting data container {#sec-exporting-data-container}
+
+### Export TreeSummarizedExperiment
+
+Transforming a TreeSE object into a dataframe is straightforward with the mia
+package. The `meltSE` function is particularly handy for this purpose. It allows
+you to melt various parts of a TreeSE object into a dataframe based on the
+parameters you specify.
+
+Exporting a `TreeSE` data container can be done using `feather` package. TreeSE
+object has to be converted into a dataframe (`data.frame` and not `DataFrame`).
+The output file is a .feather file, which can be imported in other languages
+such as Julia or Python. For information, have a look at the
+[FeatherFile](https://juliapackages.com/p/featherfiles) Julia package and
+[feather-format](https://pypi.org/project/feather-format/) Python library.
+
+```{r}
+#| label: write_feather
+#| eval: false
+
+data(GlobalPatterns, package = "mia")
+tse <- GlobalPatterns
+
+molten_tse <- meltSE(
+    tse,
+    add_row_data = TRUE,
+    add_col_data = TRUE,
+    assay.type = "counts")
+
+# Export as a feather file
+library(feather)
+path <- "path/to/tse.feather"
+write_feather(molten_tse, path)
+```
+
+Another way could be using a CSV file. This works  the same as for a feather
+file, make sure you have converted your `TreeSE` data container as a dataframe
+Here note that you can decide whether you want to write the row names or not.
+
+```{r}
+#| label: write_csv
+#| eval: false
+
+write.csv(molten_tse, "path/to/tse.csv", row.names=FALSE)
+```
+
+### Export MultiAssayExperiment
+
+Exporting a `MultiAssayExperiment` data container can also be done using
+`feather` package.
+
+```{r}
+#| label: write_feater_mae
+#| eval: false
+
+# Convert into a data.frame
+molten_mae <- longFormat(mae)
+molten_mae <- data.frame(molten_mae)
+path <- "path/to/mae.feather"
+write_feather(molten_mae,path)
+```
+
+And as a CSV file.
+
+```{r}
+#| label: write_csv_mae
+#| eval: false
+
+write.csv(molten_mae, "path/to/mae.csv", row.names=FALSE)
+```

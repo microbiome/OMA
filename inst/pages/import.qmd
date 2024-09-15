@@ -1,0 +1,461 @@
+# Import {#sec-import}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+library(DT)
+chapterPreamble()
+```
+
+This chapter demonstrates how data can be imported into data containers from
+files. Additionally, multiple databases offer curated microbiome data, which
+are introduced in [@sec-example-data].
+
+In prior to importing the data to container, the raw sequences must be
+mapped to abundances. The specific method depends on sequencing type and other
+data-specific factors. There are several resources available to guide this
+process [Metagenomics wiki](https://www.metagenomics.wiki/) being one of them.
+In [@sec-16s-workflow] we provide an example workflow for processing 16S rRNA
+sequences into a data container using DADA2.
+
+## Import microbiome data from files {#sec-loading-experimental-microbiome-data}
+
+The data containers can be constructed from scratch. For most common microbiome
+data formats, there is dedicated importers available which streamlines the
+importing.
+
+### Standard data formats
+
+Specific import functions are provided for:
+
+- BIOM files (see `help(mia::importBIOM)`)
+- QIIME2 files (see `help(mia::importQIIME2)`)
+- Mothur files (see `help(mia::importMothur)`)
+- MetaPhlAn files (see `help(mia::importMetaPhlAn)`)
+- HUMAnN files (see `help(mia::importHUMAnN)`)
+- taxpasta files (see `help(mia::importTaxpasta)`)
+
+Here we show how [Biom files](https://biom-format.org/) are imported into
+a `TreeSE` object using as an example Tengeler2020, which is further described
+[here](https://microbiome.github.io/mia/reference/Tengeler2020.html).
+This dataset consists of 3 files, which can be
+fetched or downloaded from
+[this repository](https://github.com/microbiome/data/tree/main/Tengeler2020):
+
+-   biom file: abundance table and taxonomy information
+-   csv file: sample metadata
+-   tree file: phylogenetic tree
+
+To begin with, we store the data in a local directory within the working
+directory, such as _data/_, and define the source file paths.
+
+```{r}
+biom_file_path <- system.file(
+    "extdata", "Aggregated_humanization2.biom", package = "OMA")
+sample_meta_file_path <- system.file(
+    "extdata", "Mapping_file_ADHD_aggregated.csv", package = "OMA")
+tree_file_path <- system.file(
+    "extdata", "Data_humanization_phylo_aggregation.tre", package = "OMA")
+```
+
+Now we can read in the biom file and convert it into a `TreeSE` object. In
+addition, we retrieve the rank names from the prefixes of the feature names
+and then remove them with the `rank.from.prefix` and `prefix.rm` optional
+arguments.
+
+```{r}
+library(mia)
+
+# read biom and convert it to TreeSE
+tse <- importBIOM(
+    biom_file_path,
+    rank.from.prefix = TRUE,
+    prefix.rm = TRUE)
+
+# Check
+tse
+```
+
+The `assays` slot includes a list of abundance tables. The imported
+abundance table is named as "counts".  Let us inspect only the first
+cols and rows.
+
+```{r}
+assay(tse, "counts")[1:3, 1:3]
+```
+
+The `rowdata` includes taxonomic information from the biom file. The `head()`
+command shows just the beginning of the data table for an overview.
+
+`knitr::kable()` helps print the information more nicely.
+
+```{r}
+head(rowData(tse))
+```
+
+We further polish the feature names by removing unnecessary characters and
+then replace the original `rowData` with its updated version.
+
+```{r}
+# Genus level has additional '\"', so let's delete that also
+rowdata_modified <- BiocParallel::bplapply(
+    rowData(tse),
+    FUN = stringr::str_remove,
+    pattern = '\"')
+
+# rowdata_modified is a list, so convert this back to DataFrame format.
+# and assign the cleaned data back to the TSE rowData
+rowData(tse) <- DataFrame(rowdata_modified)
+
+# Now we have a nicer table
+head(rowData(tse))
+```
+
+We notice that the imported biom file did not contain any `colData` yet,
+so only an empty dataframe appears in this slot.
+
+```{r}
+head(colData(tse))
+```
+
+Let us add `colData` from the sample metadata, which is stored in a CSV file.
+
+```{r}
+# CSV file with colnames in the first row and rownames in the first column
+sample_meta <- read.csv(
+    sample_meta_file_path, sep = ",", row.names = 1)
+
+# Add this sample data to colData of the taxonomic data object
+# Note that the data must be given in a DataFrame format
+colData(tse) <- DataFrame(sample_meta)
+```
+
+Now the `colData` includes the sample metadata.
+
+```{r}
+head(colData(tse))
+```
+
+Finally, we add a phylogenetic tree to the `rowData` slot. Such feature is
+available only in `TreeSE` objects. Similarly, Trees specifying the sample
+hierarchy can be stored in the `colTree` slot.
+
+Here, we read in the file containing the phylogenetic tree and insert it
+in corresponding slot of the `TreeSE` object.
+
+```{r}
+# Reads the tree file
+tree <- ape::read.tree(tree_file_path)
+
+# Add tree to rowTree
+rowTree(tse) <- tree
+
+# Check
+tse
+```
+
+Now the `rowTree` slot contains the phylogenetic tree:
+
+```{r, eval=FALSE}
+head(rowTree(tse))
+```
+
+### Non-standard formats {#sec-import-from-file}
+
+Microbiome (taxonomic) profiling data is commonly distributed in
+various file formats. You can import such external data files as a
+`TreeSE` object, but the details depend on the file
+format. Here, we provide examples for common formats. Some datasets and raw
+files to learn how to import raw data and construct `TreeSE/MAE` containers are
+available in the
+[microbiome data repository](https://github.com/microbiome/data).
+
+#### CSV import
+
+**CSV data tables** can be imported with the standard R functions,
+then converted to the desired format. For detailed examples, you can
+check the
+[Bioconductor course material](https://bioconductor.org/help/course-materials/2019/BSS2019/04_Practical_CoreApproachesInBioconductor.html)
+by Martin Morgan. You can also check the [example
+files](https://github.com/microbiome/OMA/tree/master/data) and
+construct your own CSV files accordingly.
+
+Recommendations for the CSV files are the following. File names are
+arbitrary; we refer here to the same names as in the examples:
+
+- Abundance table (`assay_taxa.csv`): data matrix (features x
+samples); first column provides feature IDs, the first row provides
+sample IDs; other values should be numeric (abundances).
+
+- Row data (`rowdata_taxa.csv`): data table (features x info); first
+column provides feature IDs, the first row provides column headers;
+this file usually contains the taxonomic mapping between different
+taxonomic levels. Ideally, the feature IDs (row names) match one-to-one with
+the abundance table row names.
+
+- Column data (`coldata.csv`): data table (samples x info); first
+column provides sample IDs, the first row provides column headers;
+this file usually contains the sample metadata/phenodata (such as
+subject age, health etc). Ideally, the sample IDs match one-to-one with
+the abundance table column names.
+
+After you have set up the CSV files, you can read them in R:
+
+```{r importingcsv1, message=FALSE}
+count_file  <- system.file("extdata", "assay_taxa.csv", package = "OMA")
+tax_file    <- system.file("extdata", "rowdata_taxa.csv", package = "OMA")
+sample_file <- system.file("extdata", "coldata.csv", package = "OMA")
+
+# Load files
+counts  <- read.csv(count_file, row.names=1)   # Abundance table (e.g. ASV data; to assay data)
+tax     <- read.csv(tax_file, row.names=1)     # Taxonomy table (to rowData)
+samples <- read.csv(sample_file, row.names=1)  # Sample data (to colData)
+```
+
+After reading the data in R, ensure the following:
+
+- abundance table (`counts`): numeric `matrix`, with feature IDs as
+  rownames and sample IDs as column names.
+
+- `rowdata` (`tax`): `DataFrame`, with feature IDs as rownames. If this
+  is a `data.frame` you can use the function `DataFrame()` to change
+  the format. Column names are free but in microbiome analysis they
+  usually they refer to taxonomic ranks. The rownames in rowdata
+  should match with rownames in abundance table.
+
+- `coldata` (`samples`): `DataFrame`, with sample IDs as rownames. If
+  this is a `data.frame` you can use the function `DataFrame()` to
+  change the format.  Column names are free. The rownames in `coldata`
+  should match with colnames in abundance table.
+
+**Always ensure that the tables have rownames!** The _TreeSE_ constructor
+compares  rownames and ensures that, for example, right samples are linked
+with right patient.
+
+Also, ensure that the row and column names match one-to-one between
+abundance table, `rowdata`, and `coldata`:
+
+```{r importingcsv2}
+# Match rows and columns
+counts <- counts[rownames(tax), rownames(samples)]
+
+# Let's ensure that the data is in correct (numeric matrix) format:
+counts <- as.matrix(counts)
+```
+
+If you hesitate about the format of the data, you can compare to one
+of the available demonstration datasets, and make sure that your data
+components have the same format.
+
+There are many different source files and many different ways to read
+data in R. One can do data manipulation in R as well. Investigate the
+entries as follows.
+
+```{r demodata, message=FALSE}
+# coldata rownames match assay colnames
+all(rownames(samples) == colnames(counts)) # our dataset
+class(samples) # should be data.frame or DataFrame
+
+# rowdata rownames match assay rownames
+all(rownames(tax) == rownames(counts)) # our dataset
+class(tax) # should be data.frame or DataFrame
+
+# Counts
+class(counts) # should be a numeric matrix
+```
+
+::: {.callout-important}
+## Important!
+
+Ensure that colnames of assay match with rownames of `colData`, and rownames of
+assay match with rownames of `rowData`.
+
+If your data do not have names, you have to be especially careful, since this
+can lead to errors!
+:::
+
+#### Constructing TreeSE
+
+Now, let's create the `TreeSE` object from the input data tables. Here
+we also convert the data objects in their preferred formats:
+
+   - counts --> numeric matrix
+   - rowData --> DataFrame
+   - colData --> DataFrame
+
+The `SimpleList` could be used to include multiple alternative assays, if
+necessary.
+
+```{r importingcsv3}
+# Create a TreeSE
+tse_taxa <- TreeSummarizedExperiment(
+    assays =  SimpleList(counts = counts),
+    colData = DataFrame(samples),
+    rowData = DataFrame(tax))
+
+tse_taxa
+```
+
+Now you should have a ready-made `TreeSE` data object that can be used in
+downstream analyses.
+
+#### Constructing MAE
+
+To construct a `MAE` object, just combine multiple `TreeSE` data containers. 
+
+Here we import metabolite data from the same study.
+
+```{r importingcsv4, message=FALSE}
+count_file <- system.file("extdata", "assay_metabolites.csv", package = "OMA")
+sample_file <- system.file("extdata", "coldata.csv", package = "OMA")
+
+# Load files
+counts  <- read.csv(count_file, row.names=1)
+samples <- read.csv(sample_file, row.names=1)
+
+# Create a TreeSE for the metabolite data
+tse_metabolite <- TreeSummarizedExperiment(
+    assays = SimpleList(concs = as.matrix(counts)),
+    colData = DataFrame(samples))
+
+tse_metabolite
+```
+
+::: {.callout-important}
+## Important!
+
+When creating TreeSE, `assay` must be a matrix, and both `colData` and `rowData` must
+be DataFrame objects.
+:::
+
+Now we can combine these two experiments into _MAE_.
+
+```{r importingcsv5}
+# Create an ExperimentList that includes experiments
+experiments <- ExperimentList(
+    microbiome = tse_taxa, metabolite = tse_metabolite)
+
+# Create a MAE
+mae <- MultiAssayExperiment(experiments = experiments)
+
+mae
+```
+
+## Data resources {#sec-example-data}
+
+Open demonstration data for testing and benchmarking purposes is
+available from multiple locations. This chapter introduces some
+options. The other chapters of this book provide ample examples about
+the use of the data.
+
+### Package data {#sec-package-data}
+
+The `mia` R package contains example datasets that are direct
+conversions from the alternative `phyloseq` container to the
+`TreeSE` container.
+
+List the [available
+datasets](https://microbiome.github.io/mia/reference/mia-datasets.html) in
+the `mia` package:
+
+```{r, message=FALSE}
+library(mia)
+data(package="mia")
+```
+
+Load the `GlobalPatterns` data from the `mia` package:
+
+```{r, message=FALSE}
+data("GlobalPatterns", package="mia")
+GlobalPatterns
+```
+
+R packages contain additional demonstration data sets (see the Datasets
+section of the reference page):
+
+* [mia reference](https://microbiome.github.io/mia/reference/index.html)
+* [miaViz reference](https://microbiome.github.io/miaViz/reference/index.html)
+* [miaTime reference](https://microbiome.github.io/miaTime/reference/index.html)
+
+### ExperimentHub data
+
+[ExperimentHub](https://bioconductor.org/packages/release/bioc/vignettes/ExperimentHub/inst/doc/ExperimentHub.html)
+provides a variety of data resources, including the
+[microbiomeDataSets](https://bioconductor.org/packages/release/data/experiment/html/microbiomeDataSets.html)
+package [@Morgan2021; @microlahti2021].
+
+A table of the available datasets is available through the
+`availableDataSets()` function.
+
+```{r, message=FALSE}
+library(microbiomeDataSets)
+availableDataSets()
+```
+
+All data are downloaded from ExperimentHub and cached for local
+re-use. Check the [man pages of each
+function](https://microbiome.github.io/microbiomeDataSets/reference/index.html)
+for a detailed documentation of the data contents and references. Let
+us retrieve a `r Biocpkg("MAE")` dataset:
+
+```{r eval=FALSE, message=FALSE}
+# mae <- HintikkaXOData()
+# Since HintikkaXOData is now added to mia, we can load it directly from there
+# We suggest to check other datasets from microbiomeDataSets
+data(HintikkaXOData, package = "mia")
+mae <- HintikkaXOData
+```
+
+Data is available in `r Biocpkg("SE")`, `r Biocpkg("TreeSE")` and
+`r Biocpkg("MAE")` data containers; see the for example [@sec-cross-correlation]
+for more details.
+
+### Curated metagenomic data
+
+[curatedMetagenomicData](https://bioconductor.org/packages/release/data/experiment/html/curatedMetagenomicData.html)
+is a large collection of curated human microbiome datasets, provided as
+`TreeSE` objects [@Pasolli2017]. The resource
+provides curated human microbiome data including gene families, marker
+abundance, marker presence, pathway abundance, pathway coverage, and
+relative abundance for samples from different body sites. See the
+package homepage for more details on data availability and access.
+
+As one example, let us retrieve the Vatanen (2016) [@Vatanen2016] data
+set. This is a larger collection with a bit longer download time.
+
+```{r, message=FALSE, eval=FALSE}
+library(curatedMetagenomicData)
+tse <- curatedMetagenomicData("Vatanen*", dryrun = FALSE, counts = TRUE)
+```
+
+###  Human microbiome compendium
+
+[MicroBioMap](https://seandavi.github.io/MicroBioMap/) dataset includes
+over 170k samples of publicly available 16S rRNA amplicon sequencing data,
+all processed using the same pipeline and reference database [@microbiomap].
+After installing the MicroBioMap package (see the
+[original website](https://github.com/seandavi/MicroBioMap#microbiome-compendium)
+for instructions), you can load the compendium with
+
+```{r, message=FALSE, eval=FALSE}
+library(MicroBioMap)
+cpd <- getCompendium()
+```
+
+This returns a `TreeSE` object. Currently,
+the `rowTree` slot of the `TreeSE` is not populated.
+
+After loading the compendium, you will have immediate access to
+nearly 170,000 microbiome samples of publicly available 16S rRNA amplicon
+sequencing data, all processed using the same pipeline and reference database.
+For more use examples in R/Bioconductor, see the
+[MicroBioMap vignette](https://seandavi.github.io/MicroBioMap/articles/overview.html).
+
+### Other data sources
+
+The current collections provide access to vast microbiome data
+resources. The output has to be converted into `TreeSE/MAE` separately.
+
+- [MGnifyR](https://bioconductor.org/packages/release/bioc/html/MGnifyR.html) provides access to [EBI/MGnify](https://www.ebi.ac.uk/metagenomics/)
+- [HoloFoodR](https://bioconductor.org/packages/release/bioc/html/HoloFoodR.html) provides access to [EBI/HoloFood](https://www.holofooddata.org/)
+- [qiitr](https://github.com/cran/qiitr) provides access to [QIITA](https://qiita.com/about)
+- [qiime2R](https://github.com/microbiome/qiime2R) provides access to [QIIME2](https://docs.qiime2.org/2024.2/)

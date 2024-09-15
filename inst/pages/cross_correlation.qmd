@@ -1,0 +1,137 @@
+# Cross-association {#sec-cross-correlation}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+```{r load-pkg-data}
+library(mia)
+```
+
+Multi-omics approaches integrate data from multiple sources. For
+example, we can integrate taxonomic abundance profiles with
+metabolomic or other biomolecular profiling data to observe
+associations, make predictions, or aim at causal
+inferences. Integrating evidence across multiple sources can lead to
+enhanced predictions, more holistic understanding, or facilitate the
+discovery of novel biomarkers. In the following chapters we demonstrate common
+multi-assay data integration tasks.
+
+As an example dataset, we use a data from the following publication:
+[-@Hintikka2021] Xylo-Oligosaccharides in prevention of hepatic
+steatosis and adipose tissue inflammation: associating taxonomic and
+metabolomic patterns in fecal microbiota with biclustering.
+In this study, mice were fed either with a high-fat or a low-fat diet,
+and with or without prebiotics, for the purpose of studying whether prebiotics
+attenuate the negative impact of a high-fat diet on health.
+
+This example data can be loaded from the `mia` package. The data is
+already in `MAE` format which is tailored for multi-assay analyses
+(see [@sec-containers]). The dataset includes three different experiments:
+microbial abundance data, metabolite concentrations, and data about
+different biomarkers. If you like to construct the same data object from the
+original files instead, [here]([@sec-loading-experimental-microbiome-data]) 
+you can find help for importing data into an `SE`object.
+
+## Cross-association Analysis {#sec-cross-correlation}
+
+Cross-association analysis is a straightforward approach that can
+reveal strength and type of associations between data sets. For instance,
+we can analyze if higher presence of a specific taxon relates to higher
+levels of a biomolecule. Correlation analyses within dataset were already
+discussed in [@sec-correlation].
+
+```{r cross-association1}
+# Load the data
+data(HintikkaXOData, package = "mia")
+mae <- HintikkaXOData
+```
+
+```{r cross-association2}
+library(stringr)
+# Drop those bacteria that do not include information in Phylum or lower levels
+mae[[1]] <- mae[[1]][!is.na(rowData(mae[[1]])$Phylum), ]
+# Clean taxonomy data, so that names do not include additional characters
+rowData(mae[[1]]) <- DataFrame(
+    apply(rowData(mae[[1]]), 2, str_remove, pattern = "._[0-9]__"))
+```
+
+```{r}
+# Available alternative experiments
+experiments(mae)
+```
+
+```{r}
+# Microbiome data
+getWithColData(mae, "microbiota")
+```
+
+```{r cross-association3}
+# Metabolite data
+getWithColData(mae, "metabolites")
+```
+
+```{r cross-association4}
+# Biomarker data
+getWithColData(mae, "biomarkers")
+```
+
+Next we can perform a cross-association analysis. Let us analyze if
+individual bacteria genera are correlated with concentrations of
+individual metabolites. This helps to answer the following question: "If
+bacterium X is present, is the concentration of metabolite Y lower or higher"?
+
+```{r cross-correlation5}
+# Agglomerate microbiome data at family level
+mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family")
+# Does log10 transform for microbiome data
+mae[[1]] <- transformAssay(mae[[1]], method = "log10", pseudocount = TRUE)
+
+# Give unique names, so that we do not have problems when we are creating a plot
+rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]])
+
+# Cross correlates data sets
+res <- getCrossAssociation(
+    mae,
+    experiment1 = 1,
+    experiment2 = 2,
+    assay.type1 = "log10",
+    assay.type2 = "nmr",
+    method = "spearman",
+    test.signif = TRUE,
+    p_adj_threshold = NULL,
+    cor_threshold = NULL,
+    # Remove when mia is fixed
+    mode = "matrix",
+    sort = TRUE,
+    show.warnings = FALSE)
+```
+
+Next, we create a heatmap depicting all cross-correlations between bacterial
+genera and metabolite concentrations.
+
+```{r cross-correlation6, fig.width=10, fig.height=8}
+library(ComplexHeatmap)
+library(shadowtext)
+
+# Function for marking significant correlations with "X"
+add_signif <- function(j, i, x, y, width, height, fill) {
+    # If the p-value is under threshold
+    if( !is.na(res$p_adj[i, j]) & res$p_adj[i, j] < 0.05 ){
+        # Print "X"
+        grid.shadowtext(
+            sprintf("%s", "X"), x, y, gp = gpar(fontsize = 8, col = "#f5f5f5"))
+    }
+}
+
+# Create a heatmap
+p <- Heatmap(res$cor,
+    # Print values to cells
+    cell_fun = add_signif,
+    heatmap_legend_param = list(
+        title = "correlation", legend_height = unit(5, "cm")),
+    column_names_rot = 45
+    )
+p
+```

@@ -1,0 +1,188 @@
+# Ordination-based Multiassay Analysis {#sec-multiassay_ordination}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+In this chapter, we continue from where we left off in the previous section
+(referenced as [@sec-cross-correlation]). Specifically, we introduce an
+analytical method called Multi-Omics Factor Analysis. This method is described
+as "ordination-based," meaning it involves techniques that reduce the
+dimensionality of the data while preserving as much variability as possible.
+Ordination methods are often used in multivariate analysis to visualize
+patterns, trends, and relationships in complex data sets, making them
+particularly useful for multi-omics data where multiple types of biological
+data are integrated and analyzed together.
+
+See [@sec-community-similarity] for more information on ordination methods.
+
+## Multi-Omics Factor Analysis {#sec-mofa}
+
+Multi-Omics Factor Analysis (MOFA) is an unsupervised method for integrating
+multi-omic data sets in a downstream analysis [@Argelaguet2018]. It could be
+seen as a generalization of principal component analysis. Yet, with the ability
+to infer a latent (low-dimensional) representation, shared among the multiple
+(-omics) data sets in hand.
+
+We use the R [MOFA2](https://biofam.github.io/MOFA2/index.html)
+package for the analysis, and
+[install](https://biofam.github.io/MOFA2/installation.html) the
+corresponding dependencies.
+
+```{r mofa_data1}
+library(mia)
+# Load the data
+data(HintikkaXOData, package = "mia")
+mae <- HintikkaXOData
+```
+
+```{r MOFA2, message=FALSE, warning=FALSE}
+library(MOFA2)
+
+# For inter-operability between Python and R, and setting Python dependencies,
+# reticulate package is needed
+library(reticulate)
+# Let us assume that these have been installed already.
+reticulate::install_miniconda(force = TRUE)
+reticulate::use_miniconda(condaenv = "env1", required = FALSE)
+reticulate::py_install(packages = c("mofapy2"), pip = TRUE, python_version=3.6)
+```
+
+The `mae` object could be used straight to create the MOFA model. Yet,
+we transform our assays since the model assumes normality per
+default, and Gaussian model is recommended
+(see [MOFA2 FAQ](https://biofam.github.io/MOFA2/faq.html)). However, Poisson and
+Bernoulli distribution models are also offered.
+
+Note that duplicates, such as "uncultured", might appear when aggregating the
+microbiome data by a taxonomic rank. To check for duplicates, run
+`any(duplicated(rownames(mae[[1]])))`. If it returns `TRUE`, then the
+duplicates are present. We can add
+`rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]], make.unique=TRUE)` to
+remove them.
+
+```{r, message=FALSE, warning=FALSE}
+#| label: mofa3
+
+library(MOFA2)
+# For simplicity, classify all high-fat diets as high-fat, and all the low-fat
+# diets as low-fat diets
+colData(mae)$Diet <- ifelse(
+    colData(mae)$Diet == "High-fat" | colData(mae)$Diet == "High-fat + XOS",
+    "High-fat", "Low-fat")
+
+# Agglomerate microbiome data
+mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Genus")
+# Transforming microbiome data with clr and by scaling
+mae[[1]] <- transformAssay(mae[[1]], method = "clr", pseudocount = TRUE)
+mae[[1]] <- transformAssay(
+    mae[[1]], assay.type = "clr", method = "standardize", MARGIN = "rows")
+
+# Transforming metabolomic data with log10 and by scaling
+mae[[2]] <- transformAssay(mae[[2]], assay.type = "nmr", method = "log10")
+mae[[2]] <- transformAssay(
+    mae[[2]], assay.type = "log10", method = "standardize")
+
+# Transforming biomarker data by scaling
+mae[[3]] <- transformAssay(
+    mae[[3]], assay.type = "signals", method = "standardize", MARGIN = "rows")
+
+# Removing the assays no longer needed
+assays(mae[[1]]) <- assays(mae[[1]])["standardize"]
+assays(mae[[2]]) <- assays(mae[[2]])["standardize"]
+assays(mae[[3]]) <- assays(mae[[3]])["standardize"]
+
+# Building our mofa model
+model <- create_mofa_from_MultiAssayExperiment(
+    mae,
+    groups = "Diet",
+    extract_metadata = TRUE)
+model
+```
+
+Model options can be defined as follows:
+
+```{r, message=FALSE, warning=FALSE}
+#| label: mofa4
+
+model_opts <- get_default_model_options(model)
+model_opts$num_factors <- 5
+head(model_opts)
+```
+
+Training options for the model are defined in the following way:
+
+```{r, message=FALSE, warning=FALSE}
+#| label: mofa5
+
+train_opts <- get_default_training_options(model)
+head(train_opts)
+```
+
+The model is then prepared  with `prepare_mofa()` and trained with `run_mofa()`:
+
+```{r, message=FALSE, warning=FALSE}
+#| label: mofa6
+
+model <- prepare_mofa(
+  object = model,
+  model_options = model_opts
+)
+
+# Some systems may require the specification `use_basilisk = TRUE`
+# so it has been added to the following code
+model <- run_mofa(model, use_basilisk = TRUE)
+```
+
+The explained variance is visualized with the `plot_variance_explained()` function.
+
+```{r, message=FALSE, warning=FALSE, fig.height=8, fig.width=10}
+#| label: mofa7
+
+library(patchwork)
+library(ggplot2)
+
+plot_list <- plot_variance_explained(
+    model,
+    x = "view", y = "factor",
+    plot_total = TRUE)
+
+wrap_plots(plot_list, nrow = 2) +
+    plot_annotation(
+        title = "Variance Explained per factor and assay",
+        theme = theme(plot.title = element_text(hjust = 0.5)))
+```
+
+From the plot, we can observe that the microbiota accounts for most of the
+variability in the data. Biomarkers do not significantly explain the
+variability. The variability in the microbiota is primarily captured in factors
+1 and 2, while metabolites are primarily represented in factor 2.
+
+We can then visualize the top weights for microbiota and metabolites for
+the first two factors to analyze co-varying features.
+
+```{r, warning=FALSE, message=FALSE, fig.height=10, fig.width=10}
+#| label: mofa8
+
+plot_list <- lapply(
+    c("microbiota", "metabolites"),
+    plot_top_weights,
+    object = model,
+    factors = c(1, 2),
+    nfeatures = 10
+    )
+
+wrap_plots(plot_list, ncol = 1) & theme(text = element_text(size = 8))
+```
+
+From the visualization, we can see that glycerol, lactate, and choline are
+positively associated with factor 2, while acetate is negatively associated
+among the metabolites. In terms of microbiota, Ruminococcaceae and
+Ruminodostridium, for instance, are positively associated with the same factor.
+This indicates that these features co-vary in the data, suggesting a positive
+association with glycerol, lactate, and choline, and a negative association
+with acetate and these microbes.
+
+More tutorials and examples of using the package are found at
+[MOFA2 tutorials](https://biofam.github.io/MOFA2/tutorials.html).

@@ -1,0 +1,201 @@
+# Taxonomic Information {#sec-taxonomic-information}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+```{r, message=FALSE}
+library(mia)
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+```
+
+Taxonomic information is a key part of analyzing microbiome data, and without
+it, any type of data analysis probably will not make much sense. However,
+the degree of detail of taxonomic information differs depending on the dataset
+and annotation data used.
+
+Therefore, the `mia` package expects a loose assembly of taxonomic information
+and assumes certain key aspects:
+
+* Taxonomic information is given as character vectors or factors in the
+`rowData` of a `SummarizedExperiment` object.
+* The columns containing the taxonomic information must be named `domain`,
+`kingdom`, `phylum`, `class`, `order`, `family`, `genus`, `species` or with
+a capital first letter.
+* The columns must be given in the order shown above.
+* column can be omitted, but the order must remain
+
+In this chapter, we will refer to the co-abundant groups as CAGs, which are
+clusters of taxa that co-vary across samples.
+
+## Assigning taxonomic information
+
+There are a number of methods to assign taxonomic information. We like to give
+a short introduction about the methods available without ranking one over the
+other. This has to be your choice based on the result for the individual
+dataset.
+
+### DADA2
+
+The `dada2` package [@Callahan2016dada2] implements the `assignTaxonomy()`
+function, which takes as input the ASV sequences associated with each
+row of data and a training dataset. For more information visit the
+[dada2 homepage](https://benjjneb.github.io/dada2/assign.html).
+
+### DECIPHER
+
+The `DECIPHER` package [@R_DECIPHER] implements the `IDTAXA` algorithm to assign
+either taxonomic information or function information. For `mia`,
+only the first option is of interest for now and more information can be
+found on the [DECIPHER website](http://www2.decipher.codes/Classification.html).
+
+## Functions to access taxonomic information
+
+### Check taxonomy ranks in data
+
+`checkTaxonomy()` checks whether the taxonomic information is usable for `mia`
+
+```{r}
+checkTaxonomy(tse)
+```
+
+Since the `rowData` can contain other data, `taxonomyRanks()` will return the 
+columns that `mia` assumes to contain the taxonomic information.
+
+```{r}
+taxonomyRanks(tse)
+```
+
+This can then be used to subset the `rowData` to columns needed.
+
+```{r}
+rowData(tse)[, taxonomyRanks(tse)]
+```
+
+`taxonomyRankEmpty()` checks for empty values in the given `rank` and returns a 
+logical vector of `length(x)`.
+
+```{r}
+all(!taxonomyRankEmpty(tse, rank = "Kingdom"))
+table(taxonomyRankEmpty(tse, rank = "Genus"))
+table(taxonomyRankEmpty(tse, rank = "Species"))
+```
+
+### Get taxonomy labels
+
+`getTaxonomyLabels()` is a multi-purpose function, which turns taxonomic
+information into a character vector of `length(x)`
+
+```{r}
+head(getTaxonomyLabels(tse))
+```
+
+By default, this will use the lowest non-empty information to construct a
+string with the following scheme `level:value`. If all levels are the same,
+this part is omitted, but can be added by setting `with.rank = TRUE`.
+
+```{r}
+phylum <- !is.na(rowData(tse)$Phylum) &
+    vapply(data.frame(apply(
+       rowData(tse)[, taxonomyRanks(tse)[3:7]], 1L, is.na)), all, logical(1))
+head(getTaxonomyLabels(tse[phylum,]))
+head(getTaxonomyLabels(tse[phylum,], with.rank = TRUE))
+```
+
+By default the return value of `getTaxonomyLabels()` contains only
+unique elements by passing it through `make.unique`. This step can be
+omitted by setting `make.unique = FALSE`.
+
+```{r}
+head(getTaxonomyLabels(tse[phylum,], with.rank = TRUE, make.unique = FALSE))
+```
+
+To apply the loop resolving function `resolveLoop()` from the
+`TreeSummarizedExperiment` package [@R_TreeSummarizedExperiment] within
+`getTaxonomyLabels()`, set `resolve.loops = TRUE`.
+
+### Get information on certain taxa
+
+The function `getUnique()` gives a list of unique taxa for the
+specified taxonomic rank.
+
+```{r}
+head(getUnique(tse, rank = "Phylum"))
+```
+
+With `mapTaxonomy()`, you can search information on certain taxa from the taxonomy
+table. For instance, we can check all the taxa that matches with "Escherichia".
+
+```{r}
+#| label: mapTaxonomy
+mapTaxonomy(GlobalPatterns, taxa = "Escherichia")
+```
+
+
+### Generate a hierarchy tree on the fly {#sec-fly-tree}
+
+A hierarchy tree shows mapping between the taxonomic levels in taxonomic rank
+table (included in `rowData`), rather than the detailed phylogenetic relations.
+Usually, a phylogenetic tree refers to latter which is why we call here the
+generated tree as "hierarchy tree".
+
+To create a hierarchy tree, `getHierarchyTree()` used the information and
+returns a `phylo` object. Duplicate information from the `rowData` is removed.
+
+```{r}
+getHierarchyTree(tse)
+```
+
+```{r}
+tse <- addHierarchyTree(tse)
+tse
+```
+
+The implementation is based on the `toTree()` function from the
+`TreeSummarizedExperiment` package [@R_TreeSummarizedExperiment].
+
+## Set taxonomy ranks
+
+If your data includes taxonomy ranks that are not included by default in `mia`,
+you can set the ranks manually. By doing so, `mia` will be able to detect and
+utilize these taxonomy ranks from your data as expected.
+
+Get default ranks of `mia`.
+
+```{r}
+#| label: get_default_ranks
+
+getTaxonomyRanks()
+```
+
+Set ranks to your own ranks. Remember that the order is meaningful.
+
+```{r}
+#| label: get_ranks
+#| echo: false
+#| message: false
+
+ranks <- getTaxonomyRanks()
+```
+
+
+```{r}
+#| label: set_ranks
+
+# Set ranks
+setTaxonomyRanks(c("test", "test2", "apple"))
+
+# Get ranks
+getTaxonomyRanks()
+```
+
+```{r}
+#| label: set_default_ranks
+#| echo: false
+#| message: false
+
+# Set default ranks back
+setTaxonomyRanks(ranks)
+```

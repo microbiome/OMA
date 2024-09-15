@@ -1,0 +1,523 @@
+# Differential Abundance {#sec-differential-abundance}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+Differential Abundance Analysis (DAA) is a method used to identify
+differences in the abundances of individual taxa (at any taxonomic level)
+between two or more groups, such as treatment versus control groups.
+Here, we demonstrate its implementation on
+[Tengeler2020](https://microbiome.github.io/mia/reference/Tengeler2020.html)
+data set.
+
+The goal of DAA is to identify biomarkers of a certain phenotype or condition,
+and gain understanding of a complex system by looking at its isolated
+components. For example, the identification of a bacterial taxon that is
+more or less abundant between healthy patients and diseased patients can
+lead to important
+insights into the underlying mechanisms of the disease. In other words,
+differentially abundant taxa can be involved in the dynamics of the
+disease, which in turn helps understand the system as a whole. Despite its
+relevance in current research, the DAA approach has also been subject to
+debate [@Quinn2021].
+
+## Statistical challenges of microbiome data
+
+As discussed in [@sec-stat-challenges], data display unique properties that are
+exclusively addressed by DAA tools developed for microbiome analysis.
+
+We recommend to have a look at @Nearing2022. In this study,
+multiple DAA methods
+were applied to 38 different datasets and their results were compared to one
+another. The study highlighted that different methods might
+yield varying results
+due to differing assumptions and normalization techniques. Interestingly,
+@pelto2024 concluded that elementary DAA methods achieve the highest
+consistency.
+
+Recently, @Yang2022 comprehensively evaluated DAA methods via a
+semi-parametric framework and 106 real
+datasets, concluding that different methods can produce contradictory results,
+creating the risk of cherry-picking the most favorable options for one’s
+own hypothesis. Therefore, it is highly recommended to perform DAA with
+multiple methods to verify if the findings are consistent across
+different approaches.
+
+Built on the findings of @Calgaro2020,
+the benchdamic [@Calgaro2022] package could offer a valuable
+support in this regard
+through a comprehensive evaluation process. It serves both
+practitioners by comparing
+DA methods from existing literature, and method developers by
+providing an impartial
+tool to evaluate their new approaches in comparison to what is
+already available. For
+more details, refer to its extensive
+[vignette](https://www.bioconductor.org/packages/release/bioc/vignettes/benchdamic/inst/doc/intro.html).
+
+#### Approaches to Handle Zero-Inflated Data :
+
+The first approach to target zero-inflated data consists of specialized models,
+such as **over-dispersed count models** and **zero-inflated mixture models**.
+DESeq2, edgeR and corncorb are based on over-dispersed count models, whereas
+metagenomeSeq, RAIDA, ZIBB and Omnibus implement zero-inflated mixture models to
+address zero-inflation. Typically, these models assume a negative binomial,
+beta-binomial or normal/log-normal distribution.
+
+Another approach to deal with zero-inflated data is **zero imputation**
+where zeross are replaced with estimated values. ALDEx2 and
+eBay apply a Bayesian model to impute the zeros when working with proportion
+data, accounting for sampling variability and sequencing depth variation. Other
+methods, such as MaAsLin2 and ANCOMBC impute the zeros with a
+pseudo-count strategy.
+
+#### Approaches to handle Compositional Data :
+
+To address the compositionality of microbiome data, several approaches have been
+developed to perform **robust normalization** with methods specifically designed
+to reduce the bias found in compositional data. Some examples include :
+
+- *Trimmed mean of M-values (TMM)* normalization used by edgeR.
+
+- *Relative log expression (RLE)* normalization used by DESeq2.
+
+- *Cumulative sum scaling (CSS)* normalization used by metagenomeSeq.
+
+- *Centered log-ratio transformation (CLR)* normalization used by ALDEx2.
+
+- *Geometric mean of pairwise ratios (GMPR)* normalization used by Omnibus
+and Wrench normalization [@Kumar2018], which corrects the compositional bias
+by an empirical Bayes approach.
+
+Other methods to deal with compositional data entail reference taxa approach
+used by DACOMP and RAIDA, analyzing the pattern of pairwise log ratios as done
+by ANCOM and bias-correction applied by ANCOMBC.
+
+## Using the tools
+
+In this section we demonstrate the use of four methods that can be
+recommended based on recent literature (ANCOM-BC [@ancombc2020],
+_ALDEx2_ [@Gloor2016], _Maaslin2_ [@Mallick2020], _LinDA_ [@Zhou2022]
+and _ZicoSeq_ [@Yang2022]).
+
+The purpose of this section is to show how to perform DAA in R, not
+how to correctly do causal inference. Depending on your experimental
+setup and your theory, you must determine how to specify any model
+exactly.  E.g., there might be confounding factors that might drive
+(the absence of) differences between the shown groups that we ignore
+here for simplicity. Or your dataset is repeated sampling design,
+matched-pair design or the general longitudinal design.  We will
+demonstrate how to include covariates in those models. We picked a
+dataset that merely has microbial abundances in a TSE object as well
+as a grouping variable in the sample data. We simplify the examples by
+only including two of the three groups.
+
+```{r import-daa-data}
+library(mia)
+library(tidyverse)
+
+# Import dataset
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# Show patient status by cohort
+table(tse$patient_status, tse$cohort) %>%
+  knitr::kable()
+```
+
+### Preparing the data for DAA
+
+Before starting the analysis, it is recommended to reduce the size and
+complexity of the data to make the results more reproducible. For this
+purpose, we agglomerate the features by genus and filter them by a prevalence
+threshold of 10%.
+
+```{r prep-daa-data}
+# Agglomerate by genus and subset by prevalence
+tse <- subsetByPrevalent(tse, rank = "Genus", prevalence = 10/100)
+
+# Transform count assay to relative abundances
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+```
+
+While some DAA tools provide optional arguments for prevalence filtering, here
+we filtered the tse object directly. This way, we ensure that the input data
+remains the same when multiple tools are used.
+
+### ALDEx2
+
+In this section, we will show how to perform DAA with ALDEx2, which can be
+regarded as the method of choice for its consistency, as it normally
+identifies features that are also found by complementary methods
+[@Nearing2022]. A more
+extensive introduction to its functionality is available in the
+[ALDEx2 vignette](https://bioconductor.org/packages/release/bioc/vignettes/ALDEx2/inst/doc/ALDEx2_vignette.html).
+
+ALDEx2 estimates technical variation within each sample per taxon by utilizing
+the Dirichlet distribution. It furthermore applies the CLR transformation (or
+closely related log-ratio transforms). Depending on the experimental setup, it
+will perform a two sample Welch's t-test and Wilcoxon test or a one-way ANOVA
+and Kruskal-Wallis test. For more complex study designs, there is a possibility
+to utilize the `glm` functionality within ALDEx2. The Benjamini-Hochberg
+procedure is applied by default to correct for multiple testing.
+
+```{r run-aldex2}
+# Load package
+library(ALDEx2)
+
+# Generate Monte Carlo samples of the Dirichlet distribution for each sample.
+# Convert each instance using the centered log-ratio transform.
+# This is the input for all further analyses.
+set.seed(123)
+x <- aldex.clr(assay(tse), tse$patient_status)
+```
+
+The t-test:
+
+```{r aldex2-ttest}
+# calculates expected values of the Welch's t-test and Wilcoxon rank
+# test on the data returned by aldex.clr
+x_tt <- aldex.ttest(x, paired.test = FALSE, verbose = FALSE)
+```
+
+Effect sizes:
+
+```{r aldex2-effect}
+# Determines the median clr abundance of the feature in all samples and in
+# groups, the median difference between the two groups, the median variation
+# within each group and the effect size, which is the median of the ratio
+# of the between group difference and the larger of the variance within groups
+x_effect <- aldex.effect(x, CI = TRUE, verbose = FALSE)
+
+# combine all outputs
+aldex_out <- data.frame(x_tt, x_effect)
+```
+
+Now, we can create a so called Bland-Altman or MA plot (left). It shows the
+association between the relative abundance and the magnitude of the difference
+per sample. Next to that, we can also create a plot that shows the dispersion
+on the x-axis instead of log-ratio abundance. Red dots represent genera that are
+differentially abundant ($q \leq 0.1$) between the 2 groups. Black points are
+rare taxa and grey ones are abundant taxa. The dashed line represent an effect
+size of 1. @Gloor2016 provides more information on these plots.
+
+```{r plot-aldex2}
+par(mfrow = c(1, 2))
+
+aldex.plot(
+    aldex_out,
+    type = "MA",
+    test = "welch",
+    xlab = "Log-ratio abundance",
+    ylab = "Difference",
+    cutoff = 0.05)
+
+aldex.plot(
+    aldex_out,
+    type = "MW",
+    test = "welch",
+    xlab = "Dispersion",
+    ylab = "Difference",
+    cutoff = 0.05)
+```
+
+The evaluation as differential abundant in above plots is based on the
+corrected p-value. According to the ALDEx2 developers, the safest
+approach is to identify those features where the 95% CI of the effect
+size does not cross 0. As we can see in below table, this is not the
+case for any of the identified genera (see overlap column, which
+indicates the proportion of overlap). Also, the authors recommend to
+focus on effect sizes and CIs rather than interpreting the p-value. To
+keep the comparison simple, we will here use the p-value as decision
+criterion. But please be aware that the effect size together with the
+CI is a better answer to the question we are typically interested in.
+
+```{r aldex2-res}
+aldex_out %>%
+  rownames_to_column(var = "Genus") %>%
+  # here we choose the wilcoxon output rather than t-test output
+  filter(wi.eBH <= 0.05)  %>%
+  dplyr::select(Genus, we.eBH, wi.eBH, effect, overlap) %>%
+  knitr::kable()
+```
+
+### ANCOM-BC
+
+The analysis of composition of microbiomes with bias correction
+(ANCOM-BC) [@ancombc2020] is a recently developed method for differential
+abundance testing. It is based on an earlier published approach
+[@Mandal2015].  The previous version of ANCOM was among the methods
+that produced the most consistent results and is probably a
+conservative approach [@Nearing2022].  However, the new ANCOM-BC
+method operates quite differently compared to the former ANCOM method.
+
+As the only method, ANCOM-BC incorporates the so called *sampling
+fraction* into the model. The latter term could be empirically
+estimated by the ratio of the library size to the microbial
+load. According to the authors, ignoring variations
+in this sampling fraction would bias DAA results. Furthermore,
+this method provides p-values and confidence intervals for each
+taxon. It also controls the FDR and it is computationally simple to
+implement.
+
+Note that the original method was implemented in the `ancombc()` function (see
+[extended tutorial](https://www.bioconductor.org/packages/release/bioc/vignettes/ANCOMBC/inst/doc/ANCOMBC.html)).
+The method has since then been updated and new features have been added to enable
+multi-group comparisons and repeated measurements among other improvements.
+We do not cover the more advanced features of ANCOMBC in this tutorial
+as these features are documented in detail in this
+[tutorial](https://www.bioconductor.org/packages/release/bioc/vignettes/ANCOMBC/inst/doc/ANCOMBC2.html).
+
+We now proceed with a simple example.  First, we specify a formula. In this
+formula, other covariates could potentially be included to adjust for
+confounding. We show this further below. Again, please make sure to check the
+[function documentation](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html)
+as well as the linked tutorials to learn about the additional arguments
+that we specify.
+
+```{r run-ancombc, warning=FALSE}
+# Load package
+library(ANCOMBC)
+
+# Run ANCOM-BC at the genus level and only including the prevalent genera
+ancombc2_out <- ancombc2(
+    data = tse,
+    assay.type = "counts",
+    fix_formula = "patient_status",
+    p_adj_method = "fdr",
+    prv_cut = 0,
+    group = "patient_status",
+    struc_zero = TRUE,
+    neg_lb = TRUE,
+    # multi group comparison is deactivated automatically
+    global = TRUE)
+```
+
+The object `out` contains all model output. Again, see the
+[documentation of the
+function](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html)
+under **Value** for details. Our question whether taxa are
+differentially abundant can be answered by looking at the `res`
+object, which contains dataframes with the coefficients, standard
+errors, p-values and q-values. Below we show the first entries of this
+dataframe.
+
+```{r ancombc-res}
+# store the FDR adjusted results
+ancombc2_out$res %>%
+  dplyr::select(taxon, lfc_patient_statusControl, q_patient_statusControl) %>%
+  filter(q_patient_statusControl < 0.05) %>%
+  arrange(q_patient_statusControl) %>%
+  head() %>%
+  knitr::kable()
+```
+
+### MaAsLin2
+
+Let us next illustrate MaAsLin2 [@Mallick2020]. This method is based on
+generalized linear models and flexible for different study designs
+and covariate structures. For details, check their
+[Biobakery tutorial](https://github.com/biobakery/biobakery/wiki/maaslin2).
+
+```{r run-maaslin2, warning=FALSE, results="hide"}
+# Load package
+library(Maaslin2)
+
+# maaslin expects features as columns and samples as rows
+# for both the abundance table as well as metadata
+
+# We can specify different GLMs/normalizations/transforms.
+# specifying a ref is especially important if you have more than 2 levels
+maaslin2_out <- Maaslin2(
+    input_data = as.data.frame(t(assay(tse))),
+    input_metadata = as.data.frame(colData(tse)),
+    output = "DAA example",
+    transform = "AST",
+    fixed_effects = "patient_status",
+    # you can also fit MLM by specifying random effects
+    # random_effects = c(...),
+    reference = "patient_status,Control",
+    normalization = "TSS",
+    standardize = FALSE,
+    # filtering was previously performed
+    min_prevalence = 0)
+```
+
+Which genera are identified as differentially abundant?
+(leave out "head" to see all).
+
+```{r, maaslin2-res}
+maaslin2_out$results %>%
+  filter(qval < 0.05) %>%
+  knitr::kable()
+```
+
+This will create a folder that is called like in the output specified
+above. It contains also figures to visualize difference between
+significant taxa.
+
+### PhILR
+
+PhILR is a tree-based method that tests group-wise associations based on
+balances. A detailed introduction to this method is available in
+[this Bioconductor tutorial](https://www.bioconductor.org/packages/devel/bioc/vignettes/philr/inst/doc/philr-intro.html).
+
+### Comparison of methods
+
+Although the methods described above yield unidentical results, they are
+expected to agree on a few differentially abundant taxa. To draw more informed
+conclusions, it is good practice to compare the outcomes of different methods
+in terms of found features, their effect sizes and significances, as well as
+other method-specific aspects. Such comparative approach is outlined in
+[this exercise](#compare-daa-methods).
+
+## DAA with confounding
+
+Confounders can be defined as variables that are related to and affect the
+apparent dynamics between the response and the main independent variable.
+They are common in experimental studies. Generally, they can be classified
+into three groups:
+
+- Biological confounders, such as age and sex
+
+- Technical confounders produced during sample collection, processing and
+analysis
+
+- Confounders resulting from experimental models, such as batch effects and
+sample history
+
+Controlling for confounders is an important practice to reach an unbiased
+conclusion. To perform causal inference, it is crucial that the method
+is able to include confounders in the model. This is not possible with
+statistical tests of general use, such as the Wilcoxon test. In contrast,
+methods that target DAA, such as those described in this chapter, allow
+controlling for confounders. In the following examples, we will perform DAA
+with a main independent variable and a few confounders.
+
+### Selecting confounders
+
+In addition to patient status, we will now control for two confounders: cohort
+and library size. The former is a categorical variable with three factors,
+whereas the latter is a discrete numerical variable. Remarkably, most DAA
+methods accept these two and several other data types.
+
+For demonstration, library size is treated as a confounder and included
+in the formulas of the DAA methods. Although this is a satisfactory approach to
+control for uneven sequencing efforts across samples, rarefaction generally
+represents a better solution [@Schloss2023]. With that said, library size can
+be readily computed and added to the colData.
+
+
+```{r daa-data-libsize}
+# Compute and store library size in colData
+colData(tse)$library_size <- colSums(assay(tse, "counts"))
+```
+
+### ANCOM-BC
+
+Here, confounders can be added to the formula along with patient status, the
+main outcome variable. This way, the model evaluates whether differentially
+abundant taxa are associated with one of the variables when the other two
+are kept constant.
+
+```{r run-adj-ancombc, warning=FALSE}
+# perform the analysis
+ancombc2_out <- ancombc2(
+    tse,
+    assay.type = "counts",
+    fix_formula = "patient_status + cohort + library_size",
+    p_adj_method = "fdr",
+    lib_cut = 0,
+    group = "patient_status",
+    struc_zero = TRUE,
+    neg_lb = TRUE,
+    alpha = 0.05,
+    # multi-group comparison is deactivated automatically
+    global = TRUE)
+```
+
+In the output, each taxon is assigned with several effect sizes (lfc, which
+stands for log-fold change) and adjusted p-values (q). For categorica
+variables such as patient status and cohort, the statistics indicate whether
+the abundance
+of a given taxon is significantly different between the specified group (column
+name) and the reference group (the group that does not appear in the column
+names), whereas for numerical variables such as library size, they indicate
+whether the abundance of a given taxon varies with that variable.
+
+```{r adj-ancombc-res}
+ancombc2_out$res %>%
+  dplyr::select(starts_with(c("taxon", "lfc", "q"))) %>%
+  arrange(q_patient_statusControl) %>%
+  head() %>%
+  knitr::kable()
+```
+
+## Further information on tools for DAA :
+
+#### LinDA
+
+LinDA covers linear models for differential abundance analysis of microbiome
+compositional data (@Zhou2022). This is very similar to ANCOMBC with few differences:
+
+  1. LinDA corrects for the compositional bias differently using the mode of
+  all regression coefficients.
+
+  2. It is faster (100x-1000x than ANCOMBC and according to the authors);
+
+  3. It supports hierarchical models. The latest ANCOMBC versions are also
+  supporting hierarchical models.
+
+Nevertheless, LinDA seems a promising tool that achieves a very good power/fdr
+trade-off together with ANCOMBC according to the review. The speed improvements
+might make it critical especially for datasets that have higher sample or
+feature set sizes.
+
+#### ZicoSeq
+
+Subsequently, we demonstrate DAA with ZicoSeq, a method based on linear models
+and permutation. Further details can be found in this tutorial. This approach
+has been assessed to exhibit high power and a low false discovery rate, which
+has the following components:
+
+  1. Winsorization to decrease the influence of outliers;
+
+  2. Posterior sampling based on a beta mixture prior to address sampling
+  variability and zero inflation;
+
+  3. Reference-based multiple-stage normalization to address compositional
+  effects;Additional resources
+
+
+::: {.callout-tip}
+## Additional resources
+
+DAA can be performed by several means. Although most of them provide similar
+functionality, some may be more suitable than others given a certain study
+design or data type. Commonly used DAA tools include:
+
+- ALDEx2 [@Gloor2016]
+- ANCOM [@Mandal2015]
+- ANCOMBC [@ancombc2020]
+- corncob [@Martin2021]
+- DACOMP [@Brill2019]
+- DESeq2 [@Love2014]
+- eBay [@Liu2020]
+- edgeR [@Chen2016]
+- fastANCOM [@fastANCOM2022]
+- LDM [@Hu2020]
+- lefser [@Khlebrodova2021]
+- limma [@Ritchie2015]
+- LinDA [@Zhou2022]
+- MaAsLin2 [@Mallick2020]
+- metagenomeSeq [@Paulson2017]
+- Omnibus [@Omnibus2018]
+- RAIDA [@Sohn2015]
+- t-test
+- Wilcoxon test
+- ZicoSeq [@Yang2022]
+- ZINQ [@Ling2021]
+- BIRDMAn [@Rahman2023]
+:::

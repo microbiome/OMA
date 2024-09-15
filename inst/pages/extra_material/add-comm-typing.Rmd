@@ -1,0 +1,555 @@
+# Additional Community Typing
+
+## K-means clustering
+
+Let's now try k-means clustering. Here observations are divided into clusters so
+that the distances between observations and cluster centers are
+minimized; an observation belongs to cluster whose center is the
+nearest.
+
+The algorithm starts by dividing observation to random clusters whose
+number is defined by user. The centroids of the clusters are then
+calculated. After that, observations' allocation to clusters are
+updated so that the means are minimized. Again, the centroids are
+calculated, and the algorithm continues iteratively until the assignments
+do not change.
+
+As an alternative to `NbClust` get the optimal number of clusters, we can 
+visualize the silhouette analysis thanks to the library `factoextra`.
+
+```{r kmeans1}
+library(factoextra)
+
+# Convert dist object into matrix
+diss <- as.matrix(diss)
+
+# Perform silhouette analysis and plot the result
+fviz_nbclust(diss, kmeans, method = "silhouette")
+```
+
+Based on the result of silhouette analysis, we confirm that 2 is the optimal
+number of clusters in k-means clustering.
+
+```{r kmeans2}
+# The first step is random, add seed for reproducibility
+set.seed(15463)
+
+# Perform k-means clustering with 2 clusters
+km <- kmeans(diss, 2, nstart = 25)
+
+# Add the result to colData
+colData(tse)$clusters <- as.factor(km$cluster)
+
+# Perform PCoA so that we can visualize clusters
+tse <- runMDS(tse, assay.type = "relabundance", 
+              FUN = vegan::vegdist, method = "bray")
+
+# Plot PCoA and color clusters
+plotReducedDim(tse, "MDS", colour.by = "clusters")
+```
+
+```{r data, message=FALSE, warning=FALSE}
+# Load data
+library(mia)
+library(microbiomeDataSets)
+tse <- SprockettTHData()
+```
+
+
+## Graph-based clustering
+
+Another approach for discovering communities within the samples of the
+data, is to run community detection algorithms after building a
+graph. The following demonstration builds a graph based on the k
+nearest-neighbors and performs the community detection on the fly.
+
+Here, we will be using the `addCluster` function with a graph-based clustering 
+function, enabling the community detection task.
+
+The algorithm used is "short random walks" [@Pons2006]. The graph is
+constructed using different k values (the number of nearest neighbors
+to consider during graph construction) using the robust centered log
+ratio (rclr) assay data. Then plotting the communities using UMAP
+[@McInnes2018] ordination as a visual exploration aid. Let us cluster the 
+`enterotype` dataset.
+
+```{r NNGraph1, message=FALSE, warning=FALSE}
+library(patchwork) # For arranging several plots as a grid
+
+# Get enterotype dataset and transform data with rclr
+tse <- enterotype
+tse <- transformAssay(tse, method = "rclr")
+
+# Perform and store UMAP
+tse <- runUMAP(tse, name = "UMAP", assay.type = "rclr")
+
+# Set different k values to test
+k <- c(2, 3, 5, 10)
+
+ClustAndPlot <- function(x) {
+    # Add the clustering data from the short random walks algorithm to the TSE
+    tse <- addCluster(tse, assay.type = "rclr", 
+                   by = "cols", NNGraphParam(k = x))
+    
+    # Plot the results of the clustering as a color for each sample
+    plotUMAP(tse, colour.by = I(colData(tse)$clusters)) +
+    labs(title = paste0("k = ", x))
+}
+
+# Apply the function for different k values
+plots <- lapply(k, ClustAndPlot)
+
+# Display plots in a grid
+plots[[1]] + plots[[2]] + plots[[3]] + plots[[4]] + plot_layout(ncol = 4)
+```
+
+In this graph, we can clearly see the impact of the k choice on the quality
+of the clustering
+
+Similarly, the _`bluster`_ [@R_bluster] package offers clustering
+diagnostics that can be used for judging the clustering quality (see
+[Assorted clustering
+diagnostics](http://bioconductor.org/packages/release/bioc/vignettes/bluster/inst/doc/diagnostics.html)).
+In the following, Silhouette width as a diagnostic tool is computed
+and results are visualized for each case presented earlier. For more
+about Silhouettes read [@Rousseeuw1987].
+
+```{r NNGraph2, message=FALSE, warning=FALSE}
+ClustDiagPlot <- function(x) {
+  # Get the clustering results
+    tse <- addCluster(tse, assay.type = "rclr", 
+                   by = "cols", NNGraphParam(k = x))
+
+    # Compute the diagnostic info
+    sil <- approxSilhouette(t(assays(tse)$rclr), colData(tse)$clusters)
+
+    # Plot as a boxplot to observe cluster separation
+    boxplot(split(sil$width, colData(tse)$clusters), main = paste0("k = ", x))
+}
+# Apply the function for different k values
+res <- lapply(k, ClustDiagPlot)
+```
+
+## Community composition
+
+### Composition barplot
+
+A typical way to visualise microbiome composition is by using a composition barplot.
+In the following, we agglomerate to the phylum level and subset by the country "Finland" to avoid long computation times. The samples in the barplot are ordered by "Firmicutes":
+
+```{r, message=FALSE, warning=FALSE}
+library(miaViz)
+
+# Only consider Forest samples
+tse <- tse[, colData(tse)$Country == "Finland"]
+# Agglomerate to phylum level
+tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+# Get top taxa
+rel_taxa <- getTop(tse, top = 8, assay.type = "counts")
+# Take only the top taxa
+tse <- tse[is.element(rownames(tse), rel_taxa), ]
+
+# Visualise composition barplot, with samples order by "Firmicutes"
+plotAbundance(tse, rank = "Phylum", order.row.by = "abund", order.col.by = "Firmicutes")
+```
+
+### Composition heatmap
+
+The community composition can be visualised with a heatmap where one axis represents the samples and the other taxa. The colour of each line represents the abundance of a taxon in a specific sample.
+
+Here, the CLR + Z-transformed abundances are shown.
+
+```{r, message=FALSE, warning=FALSE}
+library(ComplexHeatmap)
+library(grid)
+library(RColorBrewer)
+# Agglomerate to phylum level
+tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+# Take only the top taxa
+tse <- tse[is.element(rownames(tse), rel_taxa),]
+
+# CLR and standardize transforms
+tse <- transformAssay(tse, MARGIN = "cols", assay.type = "counts",
+                       method = "clr", pseudocount=1)
+tse <- transformAssay(tse, MARGIN = "rows", assay.type = "clr", method = "standardize")
+
+Countries <- data.frame("Country" = colData(tse)$Country)
+rownames(Countries) <- colData(tse)$Sample_ID
+# count matrix for pheatmap
+mat <- assay(tse, "standardize")
+
+# Order community types
+mat <- mat[, order(Countries$Country)]
+colnames(mat) <- colnames(mat)[order(Countries$Country)]
+rownames(mat) <- stringr::str_remove(rownames(mat), "Phylum:")
+# Make grid for heatmap
+breaks <- seq(-3, 3, length.out = 10)
+setHook("grid.newpage", function() pushViewport(viewport(x = 1, y = 1, width = 0.9, 
+                                                         height = 0.9, name = "vp", 
+                                                         just = c("right","top"))), 
+        action = "prepend")
+pheatmap(mat, color = rev(brewer.pal(9, "RdBu")), breaks = breaks, main = "Countries", treeheight_row = 0, treeheight_col = 0, show_colnames = 0, annotation_col = Countries, cluster_cols = F)
+setHook("grid.newpage", NULL, "replace")
+grid.text("Sample", x = 0.39, y = -0.04, gp = gpar(fontsize = 16))
+grid.text("Phylum", x = -0.04, y = 0.47, rot = 90, gp = gpar(fontsize = 16))
+```
+
+## Cluster into CSTs
+
+The burden of specifying the number of clusters falls on the researcher. To help make an informed decision, we turn to previously established methods for doing so. In this section we introduce three such methods (aside from DMM analysis) to cluster similar samples. They include the [Elbow Method, Silhouette Method, and Gap Statistic Method](https://uc-r.github.io/kmeans_clustering). All of them will utilise the [`kmeans'](https://uc-r.github.io/kmeans_clustering) algorithm which essentially assigns clusters and minimises the distance within clusters (a sum of squares calculation). The default distance metric used is the Euclidean metric.
+
+The scree plot allows us to see how much of the variance is captured by each dimension in the MDS ordination.
+
+```{r scree}
+library(ggplot2); th <- theme_bw()
+
+# Only consider Finland samples
+tse <- tse[, colData(tse)$Country == "Finland"]
+
+# MDS analysis with the first 20 dimensions
+tse  <- scater::runMDS(tse, FUN = vegan::vegdist, method = "bray", 
+                       name = "MDS_BC", assay.type = "counts", ncomponents = 20)
+ord  <- reducedDim(tse, "MDS_BC", withDimnames = TRUE)
+# retrieve eigenvalues
+eigs <- attr(ord, "eig")
+
+# variance in each of the axes
+var <- eigs / sum(eigs)
+# first 12 values
+df <- data.frame(x = c(1:12), y = var[1:12])
+# create scree plot
+p <- ggplot(df, aes(x, y)) +
+     geom_bar(stat="identity") +
+     xlab("Principal Component") +
+     ylab("Variance") +
+     ggtitle("Scree Plot")
+p
+```
+
+From the scree plot (above), we can see that the first two dimensions can account for 15.5% of the total variation, but dimensions beyond 2 may be useful so let's try to remove the less relevant dimensions.
+
+```{r}
+# histogram of MDS eigenvalues from the fifth dimension onward
+h <- hist(eigs[3:length(eigs)], 100)
+```
+
+```{r message = FALSE, warning = FALSE}
+plot(h$mids, h$count, log = "y", type = "h", lwd = 10, lend = 2)
+```
+
+As you can see, dimensions 3, 4, and 5 still stand out so we will include 5 MDS dimensions.
+
+### Elbow Method
+
+This method graphs the sum of the sum of squares for each $k$ (number of clusters), where $k$ ranges between 1 and 10. Where the bend or `elbow' occurs is the optimal value of $k$.
+
+```{r elbow, message = FALSE}
+library(factoextra)
+
+# take only first 5 dimensions
+NDIM <- 5
+x    <- ord[, 1:NDIM]
+
+# Elbow Method
+factoextra::fviz_nbclust(x, kmeans, method = "wss") +
+                         geom_vline(xintercept = 3, linetype = 2) +
+                         labs(subtitle = "Elbow Method") + th
+```
+
+The function says that the bend occurs at $k=3$, however it is hard to tell that the bend couldn't equally occur at $k=4$, $5$, or $6$.
+
+### Silhouette Method
+
+This method on the otherhand returns a width for each $k$. In this case, we want the $k$ that maximises the width.
+
+```{r silhouette}
+# Silhouette method
+factoextra::fviz_nbclust(x, kmeans, method = "silhouette") +
+                         labs(subtitle = "Silhouette method") + th
+```
+
+The graph shows the maximum occurring at $k=6$. At the very least, there is strong evidence for $\geq k=2$ clusters because of the jump in the plot; this result is consistent with what we obtained from the elbow method.
+
+### Gap-Statistic Method
+
+The Gap-Statistic Method is the most complicated among the methods discussed here. With the gap statistic method, we typically want the $k$ value that maximises the output (local and global maxima), but we also want to pay attention to where the plot jumps if the maximum value doesn't turn out to be helpful. 
+
+```{r gap-statistic}
+# Gap Statistic Method
+factoextra::fviz_nbclust(x, kmeans, method = "gap_stat", nboot = 50)+
+                         labs(subtitle = "Gap Statistic Method") + th
+```
+
+The peak suggests $k=6$ clusters. If we also look to the points where the graph jumps, we can see there is evidence for $k=2$, $k=6$, and $k=8$. The output indicates that there should be at least three clusters present. Since we have previous evidence for the existence of six clusters from the silhouette and elbow methods, we will go with $k=6$. 
+
+At this point it helps to visualise the clustering in an MDS or NMDS plot. 
+
+Now, let's divide the subjects into their respective clusters.
+
+```{r create clusters}
+library(cluster)
+tse2 <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+
+# assume 6 clusters
+K <- 6
+x <- ord[, 1:NDIM]
+
+clust <- as.factor(pam(x, k = K, cluster.only = TRUE))
+# assign CSTs
+colData(tse2)$CST <- clust
+CSTs <- as.character(seq(K))
+```
+
+Let's take a look at the MDS ordination with the Bray-Curtis dissimilarity in the first four dimensions.
+
+```{r message = FALSE, warning = FALSE}
+library(scater)
+library(RColorBrewer)
+library(patchwork)
+
+# set up colours
+CSTColors <- brewer.pal(6, "Paired")[c(2, 5, 3, 4, 1, 6)]
+names(CSTColors) <- CSTs
+
+CSTColorScale <- scale_colour_manual(name = "CST", values = CSTColors)
+CSTFillScale <- scale_fill_manual(name = "CST", values = CSTColors)
+
+# plot MDS with Bray-Curtis dimensions 1 and 2
+p1 <- scater::plotReducedDim(tse2, "MDS_BC", colour_by = "CST", point_alpha = 1, 
+                             percentVar = var[c(1, 2)]*100) + th + labs(title = "Ordination by Cluster") +
+                             theme(plot.title = element_text(hjust = 0.5))
+# plot MDS with Bray-Curtis dimensions 3 and 4
+p2 <- scater::plotReducedDim(tse2, "MDS_BC", colour_by = "CST", point_alpha = 1, 
+                             ncomponents = c(3, 4), percentVar = var[c(1, 2, 3, 4)]*100) + th
+# show results
+(p1 + CSTColorScale) / (p2 + CSTColorScale)
+```
+
+And now nMDS.
+
+```{r message = FALSE, warning = FALSE}
+tse2  <- runNMDS(tse2, FUN = vegan::vegdist, method = "bray", 
+                name = "NMDS_BC", assay.type = "counts", ncomponents = 20)
+scater::plotReducedDim(tse2, "NMDS_BC", colour_by = "CST", point_alpha = 1) + th + 
+        labs(title = "NMDS Bray-Curtis by Cluster") +
+        theme(plot.title = element_text(hjust = 0.5)) + CSTColorScale
+```
+
+## CST Analysis
+
+Looking at heatmaps of the CSTs can reveal structure on a different level. Using all of the data again (for the top 8 taxa) and taking the `standardize` transformation of the clr transformed counts, we have
+
+```{r message = FALSE, warning = FALSE, results = FALSE}
+
+# Z transform of CLR counts
+tse2 <- transformAssay(tse2, MARGIN = "cols", assay.type = "counts",
+                        method = "clr", pseudocount=1)
+tse2 <- transformAssay(tse2, MARGIN = "rows", assay.type = "clr", method = "standardize")
+# get top taxa
+tse2 <- tse2[is.element(rownames(tse2), rel_taxa), ]
+
+mat <- assay(tse2, "standardize")
+
+# Order CSTs
+mat <- mat[, order(clust)]
+colnames(mat) <- names(sort(clust))
+rownames(mat) <- stringr::str_remove(rownames(mat), "Phylum:")
+```
+
+```{r messages = FALSE, warning = FALSE}
+# Plot
+CSTs        <- as.data.frame(sort(clust))
+names(CSTs) <- "CST"
+breaks <- seq(-2, 2, length.out = 10)
+# Make grid for heatmap
+setHook("grid.newpage", function() pushViewport(viewport(x = 1, y = 1, width = 0.9, 
+                                                         height = 0.9, name = "vp", 
+                                                         just = c("right","top"))), 
+        action = "prepend")
+pheatmap(mat, color = rev(brewer.pal(9, "RdBu")), breaks = breaks, main = "All CSTs", treeheight_row = 0, treeheight_col = 0, show_colnames = 0, annotation_col = CSTs, cluster_cols = F)
+setHook("grid.newpage", NULL, "replace")
+grid.text("Sample", x = 0.39, y = -0.04, gp = gpar(fontsize = 16))
+grid.text("Phylum", x = -0.04, y = 0.47, rot = 90, gp = gpar(fontsize = 16))
+```
+
+## Dirichlet Multinomial Mixtures (DMM)
+
+This section focus on DMM analysis. 
+
+A different technique that allows us to search for groups of samples that are
+similar to one another is the [Dirichlet-Multinomial Mixture
+Model](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030126). In
+DMM, we first determine the number of clusters (k) that best fit the
+data (model evidence) using the Laplace approximation. After fitting the
+model with k clusters, we obtain, for each sample, k probabilities that
+reflect the probability that a sample belongs to a given cluster.
+
+Let's cluster the data with DMM clustering. 
+
+```{r dmm}
+# Runs model and calculates the most likely number of clusters from 1 to 7.
+# Since this is a large dataset it takes a long time to run
+# For this reason we use only a subset of the data agglomerated to the phylum level
+tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
+```
+
+```{r}
+# It is stored in metadata
+tse_dmn
+```
+
+Return information on metadata that the object contains.
+
+```{r}
+names(metadata(tse_dmn))
+```
+
+This returns a list of DMN objects for closer investigation.
+
+```{r}
+getDMN(tse_dmn)
+```
+
+
+Show Laplace approximation (model evidence) for each model of every value of $k$.
+
+```{r}
+library(miaViz)
+plotDMNFit(tse_dmn, type = "laplace")
+```
+
+Return the model that has the best fit.
+
+```{r}
+getBestDMNFit(tse_dmn, type = "laplace")
+```
+### PCoA for ASV-level data with Bray-Curtis
+
+Group samples and return DMNGroup object that contains a summary.
+Sample country is used for grouping.
+
+```{r}
+dmn_group <- calculateDMNgroup(tse_dmn, variable = "Country",  assay.type = "counts",
+                               k = 3, seed=.Machine$integer.max)
+
+dmn_group
+```
+
+Mixture weights (rough measure of the cluster size).
+
+
+```{r}
+DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
+```
+
+
+Samples-cluster assignment probabilities / how probable it is that a sample belongs
+to each cluster
+
+```{r}
+head(DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)))
+```
+
+Contribution of each taxa to each component
+
+```{r}
+head(DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)))
+```
+Get the assignment probabilities
+
+```{r}
+prob <- DirichletMultinomial::mixture(getBestDMNFit(tse_dmn))
+# Add column names
+colnames(prob) <- paste0("comp", seq_len(ncol(prob)))
+
+# For each row, finds column that has the highest value. Then extract the column 
+# names of highest values.
+vec <- colnames(prob)[max.col(prob,ties.method = "first")]
+```
+
+Computing the bray PCoA and storing it as a dataframe
+
+```{r}
+# Calculate relative abundances
+tse_dmn <- transformAssay(tse_dmn, method = "relabundance")
+# Does principal coordinate analysis
+bray_pcoa_df <- calculateMDS(tse_dmn, FUN = vegan::vegdist, method = "bray", 
+                             assay.type = "relabundance")
+
+# Convert to data.frame
+bray_pcoa_df <- as.data.frame(bray_pcoa_df)
+colnames(bray_pcoa_df) <- c("pcoa1", "pcoa2")
+head(bray_pcoa_df)
+```
+
+```{r}
+# Creates a data frame that contains principal coordinates and DMM information
+bray_dmm_pcoa_df <- bray_pcoa_df 
+bray_dmm_pcoa_df$dmm_component <- vec
+# Creates a plot
+bray_dmm_plot <- ggplot(data = bray_dmm_pcoa_df, 
+                        aes(x = pcoa1, y = pcoa2, color = dmm_component)) +
+  geom_point() +
+  labs(x = "Coordinate 1",
+       y = "Coordinate 2",
+       title = "PCoA with Bray-Curtis Dissimilarity") +  
+  theme(title = element_text(size = 12)) + theme_bw() # makes titles smaller
+
+bray_dmm_plot
+```
+
+Visualise dmm clusters in a heatmap.
+
+```{r}
+# CLR and standardize transforms
+tse_dmn <- transformAssay(tse_dmn, MARGIN = "cols",
+                           assay.type = "counts", method = "clr",
+			   pseudocount = 1)
+tse_dmn <- transformAssay(tse_dmn, MARGIN = "rows",
+                           assay.type = "clr", method = "standardize")
+# objects containing dmm component information
+clust <- factor(vec)
+names(clust) <- colnames(tse_dmn)
+# get top taxa
+tse_dmn <- tse_dmn[is.element(rownames(tse_dmn), rel_taxa), ]
+# get just counts
+mat <- assay(tse_dmn, "standardize")
+# order according to dmm component
+mat <- mat[, order(clust)]
+colnames(mat) <- names(sort(clust))
+rownames(mat) <- stringr::str_remove(rownames(mat), "Phylum:")
+# Plot
+CSTs        <- as.data.frame(sort(clust))
+names(CSTs) <- "CST"
+breaks <- seq(-2, 2, length.out = 10)
+# Make grid for heatmap
+setHook("grid.newpage", function() pushViewport(viewport(x = 1, y = 1, width = 0.9, 
+                                                         height = 0.9, name = "vp", 
+                                                         just = c("right","top"))), 
+        action = "prepend")
+pheatmap(mat, color = rev(brewer.pal(9, "RdBu")), breaks = breaks, main = "All CSTs", treeheight_row = 0, treeheight_col = 0, show_colnames = 0, annotation_col = CSTs, cluster_cols = F)
+setHook("grid.newpage", NULL, "replace")
+grid.text("Sample", x = 0.39, y = -0.04, gp = gpar(fontsize = 16))
+grid.text("Phylum", x = -0.04, y = 0.47, rot = 90, gp = gpar(fontsize = 16))
+```
+
+## Session Info
+
+```{r}
+sessionInfo()
+```
+
+## Bibliography
+
+Robert L. Thorndike. 1953. "Who Belongs in the Family?". Psychometrika. 18 (4): 267–276. doi:10.1007/BF02289263
+
+Peter J. Rousseeuw. 1987. "Silhouettes: a Graphical Aid to the Interpretation and Validation of Cluster Analysis". Computational and Applied Mathematics. 20: 53–65. doi:10.1016/0377-0427(87)90125-7.
+
+Robert Tibshirani, Guenther Walther, and Trevor Hastie. 2002. Estimating the number of clusters in a data set via the gap statistic method. (63): 411-423. doi:10.1111/1467-9868.00293.
+
+Daniel B. DiGiulio et al. 2015. Temporal and spatial variation of the human microbiota during pregnancy. (112): 11060--11065. doi:10.1073/pnas.1502875112
+
+Holmes I, Harris K, Quince C, 2012 Dirichlet Multinomial Mixtures: Generative Models for Microbial Metagenomics. PLoS ONE 7(2): e30126. doi:10.1371/journal.pone.0030126.
+
+Sprockett, D.D., Martin, M., Costello, E.K. et al. (2020) Microbiota assembly, structure, and dynamics among Tsimane horticulturalists of the Bolivian Amazon. Nat Commun 11, 3772 https://doi.org/10.1038/s41467-020-17541-6

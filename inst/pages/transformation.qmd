@@ -1,0 +1,178 @@
+# Transformation {#sec-assay-transform}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+Data transformations are common in (microbial) ecology [@Legendre2001]
+and used to improve compatibility with assumptions related to specific
+statistical methods, mitigate biases, enhance the comparability of
+samples, or features, or to obtain more interpretable values.
+
+Examples include the logarithmic transformation, the calculation of
+relative abundances (percentages), and compositionality-aware
+transformations such as the centered log-ratio transformation (clr).
+
+## Characteristics of microbiome data {#sec-stat-challenges}
+
+Microbiome sequencing data has unique characteristics that must be addressed;
+otherwise, incorrect decisions might be made based on the results.
+Specifically, microbiome sequencing data is
+characterized by high variability, zero-inflation and compositionality.
+**High variability** expresses that abundance of taxa often varies by several
+orders of magnitude from sample to sample. **Zero-inflation** means that
+typically more than 70% of the values are zeros, which could be due to either
+physical absence (structural zeros) or insufficient sampling effort (sampling
+zeros). **Compositionality** means that a change in the absolute abundance of
+one taxon will lead to apparent variations in the relative abundances of other
+taxa in the same sample. If neglected, such properties may cause significant
+bias in the results of DAA or other statistical tests. Therefore, several
+approaches have been developed to address the unique properties of microbiome
+data and provide statistically reliable results.
+
+## Common transformation methods
+
+Let us now summarize some commonly used transformations in microbiome data
+science; further details and benchmarkings available in the
+references.
+
+ * 'relabundance' Relative transformation, also known as total sum
+   scaling (TSS) and compositional transformation. This converts
+   counts into percentages (at the scale [0, 1]) that sum up to
+   1. Much of the currently available taxonomic abundance data from
+   high-throughput assays (16S, metagenomic sequencing) is
+   compositional by nature, even if the data is provided as counts
+   [@Gloor2017].
+
+ * 'clr' Centered log ratio transformation [@Aitchison1986] is used to
+   reduce data skewness and compositionality bias in relative
+   abundances, while bringing the data to the logarithmic scale. This
+   transformation is frequently applied in microbial ecology
+   [@Gloor2017]. However, this transformation only applies to positive
+   values. Usual solution is to add `pseudocount`, which adds another
+   type of bias in the data. The robust `clr` transformation ('rclr')
+   aims to circumvent the need to add a `pseudocount`. While the
+   resulting values from these transformations are difficult to interpret
+   directly, this transformation may enhance comparability of relative
+   differences between samples. It is part of a broader Aitchison
+   family of transformations; the additive log ratio transformation
+   (`alr') is also available. The robust `clr` ("rclr") is similar to
+   regular clr (see above) but allows data with zeroes and avoids the
+   need to add pseudocount [@Keshavan2010, @Martino2019].
+
+  * 'pa' Presence/Absence transformation ignores abundances and only
+   indicates whether the given feature is detected above the given
+   threshold (default: 0). This simple transformation is relatively
+   widely used in ecological research. It has shown good performance
+   in microbiome-based classification performance [@Giliberti2022,
+   Karwowska2024].
+
+ * 'standardize' Standardize(or 'z-score') transformation scales data to zero
+   mean and unit variance. This is used to bring features (or samples) to more
+   comparable levels in terms of mean and scale of the values. This can enhance
+   visualization and interpretation of the data
+
+* 'log', 'log2', 'log10' Logarithmic transformations, used e.g. to
+   reduce data skewness. With compositional data, the `clr` (or `rclr`)
+   transformation is often preferred.
+
+ * 'hellinger' Hellinger transformation is equal to the square root of
+   relative abundances. This ecological transformation can be useful
+   if we are interested in changes in relative abundances.
+
+ * 'rank' Rank transformation replaces each value by its rank. Also
+   see 'rrank' (relative rank transformation). This has use, for
+   instance, in non-parametric statistics.
+
+ * Other available transformations include Chi square ('chi.square'),
+   Frequency transformation ('frequency'), and Make margin sum of
+   squares equal to one ('normalize')
+
+Transformations on abundance assays can be performed with
+`mia::transformAssay()`, keeping both the original and the transformed
+assay(s). The transformed abundance assay is then stored back to the
+'assays' slot in the data object. The function applies sample-wise or
+column-wise transformation when MARGIN = 'cols', feature-wise or
+row-wise transformation when MARGIN = 'rows'.
+A complete list of available transformations and parameters, is
+available in the function
+[help](https://microbiome.github.io/mia/reference/transformAssay.html).
+
+::: {.callout-important}
+
+`Pseudocount` is a small non-negative value added to the normalized data to avoid 
+taking the logarithm of zero. It's value can have a significant impact on the results when applying 
+a logarithm transformation to normalized data, as the logarithm transformation 
+is a nonlinear operation that can fundamentally change the data distribution [@Costea2014].
+
+
+`Pseudocount` should be chosen consistently across all normalization methods being 
+compared, for example, by setting it to a value smaller than the minimum abundance 
+value before transformation. Some tools, like ancombc2, take into account the effect 
+of the `pseudocount` by performing sensitivity tests using multiple pseudocount 
+values. See [@sec-differential-abundance].
+
+:::
+
+## Transformations in practice
+
+```{r}
+# Load example data
+library(mia)
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+
+# Transform "counts" assay to relative abundances ("relabundance"), with
+# pseudocount 1
+tse <- transformAssay(
+     tse, assay.type = "counts", method = "relabundance", pseudocount = 1)
+
+# Transform relative abundance assay ("relabundance") to "clr", using
+# pseudocount if necessary; name the resulting assay to "clr"
+tse <- transformAssay(
+    x = tse, assay.type = "relabundance", method = "clr", pseudocount = TRUE,
+    name = "clr")
+
+```
+
+Get the values in the resulting assay, and view some of the first
+entries of it with the `head` command.
+
+```{r}
+head(assay(tse, "clr"))
+```
+
+In 'pa' transformation, abundance table is converted to
+presence/absence table that ignores abundances and only indicates
+whether the given feature is detected. This simple transformation is
+relatively widely used in ecological research. It has shown good
+performance in microbiome-based classification performance
+[@Giliberti2022, Karwowska2024].
+
+```{r}
+# Here, `assay.type` is not explicitly specified.
+# Then The function uses the "counts" assay for the transformation.
+tse <- transformAssay(tse, method = "pa")
+head(assay(tse, "pa"))
+```
+
+You can now view the entire list of abundance assays in your data object with:
+
+```{r}
+assays(tse)
+```
+
+::: {.callout-tip}
+## Summary
+
+Microbiome data is characterized by the following features:
+
+- Compositional
+- High variability
+- Zero-inflated
+
+You can find more information on normalization from
+[OSCA book](https://bioconductor.org/books/3.18/OSCA.basic/normalization.html#normalization-transformation).
+
+:::

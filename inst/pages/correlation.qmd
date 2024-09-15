@@ -1,0 +1,140 @@
+# Correlation {#sec-correlation}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+In correlation — or association analysis more generally — we can evaluate the
+relationships between numeric variables. These variables can be taxa or
+patient metadata. For instance, we might be interested in which taxa are
+present simultaneously with others, or whether body weight is associated with
+the abundance of certain taxa. In this chapter, we will demonstrate how to
+perform correlation analysis with `getCrossAssociation()` method.
+
+## Association between taxa
+
+Here we demonstrate, how to analyse which bacteria co-exists in the dataset.
+
+```{r}
+#| label: association1
+
+library(mia)
+
+data("peerj13075")
+tse <- peerj13075
+
+# Agglomerate to certain taxonomy level
+tse <- agglomerateByPrevalence(tse, rank = "class")
+
+# Apply clr-transform and scale
+tse <- transformAssay(tse, method = "clr", pseudocount = TRUE)
+tse <- transformAssay(
+    tse, assay.type = "clr", method = "standardize", MARGIN = "rows")
+
+# Get correlation results
+res <- getCrossAssociation(
+    tse, tse, assay.type1 = "clr", assay.type2 = "clr",
+    test.signif = TRUE, mode = "matrix")
+```
+
+We can visualize the result with heatmap as we do later in this chapter, or
+we can visualize the results with correlation network plot as done below.
+
+```{r}
+#| label: association3
+
+library(qgraph)
+
+# Create correlation network plot
+qgraph(
+    res$cor, layout = "spring", labels = colnames(res$cor),
+    label.cex = 1.2, theme = "colorblind",
+    node.width = 1.5, node.height = 2)
+```
+
+You can find more on networks from [@sec-network-learning].
+
+## Association between taxa and sample metadata
+
+Now, we can calculate alpha diversity indices, and evaluate if they have
+significant association with taxa.
+
+```{r}
+#| label: association4
+
+# Calculate diversity measures
+index <- c(
+    "shannon", "log_modulo_skewness", "coverage", "inverse_simpson", "gini")
+tse <- addAlpha(tse, index = index)
+
+# Get correlation results
+res <- getCrossAssociation(
+    tse, tse, assay.type1 = "clr", col.var2 = index,
+    test.signif = TRUE, mode = "matrix")
+```
+
+Below, we present the results using a heatmap visualization.
+
+```{r}
+#| label: association5
+#| fig-width: 8
+#| fig-height: 8
+
+library(ComplexHeatmap)
+library(shadowtext)
+
+# Function for marking significant correlations with "X"
+add_signif <- function(j, i, x, y, width, height, fill) {
+    # If the p-value is under threshold
+    if( !is.na(res$p_adj[i, j]) & res$p_adj[i, j] < 0.05 ){
+        # Print "X"
+        grid.shadowtext(
+            sprintf("%s", "X"), x, y, gp = gpar(fontsize = 8, col = "#f5f5f5"))
+    }
+}
+
+# Create a heatmap
+p <- Heatmap(res$cor,
+    # Print values to cells
+    cell_fun = add_signif,
+    heatmap_legend_param = list(
+        title = "correlation", legend_height = unit(5, "cm")),
+    column_names_rot = 45
+    )
+p
+```
+
+## Association between sample metadata variables {#sec-alpha-correlation}
+
+Finally, we demonstrate how to calculate correlation between sample metadata
+variables. Here we estimate correlation between alpha diversity measures.
+
+Compared to the solution in [@sec-compare-alpha], `getCrossAssociation()`
+allows us to calculate correlations in bulk easily, without the need for
+looping.
+
+```{r}
+#| label: association6
+
+# Get correlation results
+res <- getCrossAssociation(
+    tse, tse, col.var1 = index, col.var2 = index,
+    test.signif = TRUE, mode = "matrix")
+
+# Create a heatmap and store it
+p <- Heatmap(res$cor,
+    # Print values to cells
+    cell_fun = add_signif,
+    heatmap_legend_param = list(
+        title = "correlation", legend_height = unit(5, "cm")),
+    column_names_rot = 45
+    )
+p
+```
+
+::: {.callout-tip}
+## Cross-association
+
+See [@sec-cross-correlation] for further information on correlation and association analyses.
+:::

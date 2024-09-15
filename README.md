@@ -6,7 +6,7 @@
 
 **README from [microbiome/OMA](https://github.com/microbiome/OMA)**
 
-# Orchestrating Microbiome Analysis Book <img src="inst/pages/images/mia_logo.png" align="right" width="120" />
+# Orchestrating Microbiome Analysis Book <img src="inst/assets/mia_logo.png" align="right" width="120" />
 
 ## Overview
 
@@ -47,7 +47,7 @@ to [getting started with Github](https://docs.github.com/en/get-started)):
 
 1. Fork the project
 2. Clone your fork
-3. Modify the material
+3. Modify the material. **Check that the code runs successfully.**
 4. Check locally that the changes render successfully (see above)
 5. Add and commit the changes to your fork
 6. Create a pull request (PR) from your fork back to the original repo
@@ -71,11 +71,9 @@ The upstream you can set on command line as follows, for instance (and
 you can educate yourself more through various online resources on
 using Git/hub):
 
-
 ```
 git remote add upstream git@github.com:microbiome/OMA.git
 ```
-
 
 Pull changes from the _origin_ and _upstream_ to your local version:
 
@@ -85,7 +83,6 @@ git merge origin/devel
 git merge upstream/devel
 ```
 
-
 Sync your local version with the _origin_ and _upstream_:
 
 ```
@@ -93,18 +90,13 @@ git add .
 git commit -am "my changes"
 ```
 
-
 Push your changes to origin:
 
 ```
 git push origin devel
 ```
 
-
 After this you can open a PR from origin to the [official devel branch](https://github.com/microbiome/OMA/) in Github.
-
-
-
 
 ### Adding new sections
 
@@ -114,11 +106,50 @@ Please note that chapters should be independent of each other.
 - Add it also to the list in file [inst/assets/_book.yml](inst/assets/_book.yml). 
 - **Add any new dependency you use to the [DESCRIPTION](DESCRIPTION) file**.
 
+### Styling
+
+1. Use a coding style consistent with the rest of the book. It makes the book
+look coherent.
+
+2. Use quarto-styling instead or Rmarkdown style in code options. See
+[quarto execution options](https://quarto.org/docs/computations/execution-options.html).
+
+3. All chunks should have labels. It is easier to see for instance which chunk
+is causing problems.
+
+4. Focus on interpreting the results, as this is often what readers find most
+helpful and clarifying.
+
+5. Use callout blocks where possible. They enhance the book's appearance and
+help structure the text effectively. See
+[quarto callout blocks](https://quarto.org/docs/authoring/callouts.html).
+
+6. Use the following style: \`package\` and \`function()\`.
+
+7. The text lines should not exceed 80 characters.
+
+8. The code lines should not exceed 80 characters. Code exceeding this limit
+does not fit to html pages correctly.
+
+Instead of this
+
+```
+long_variable_name <- long_function_name(parameter = "parameter".
+                                         parameter2 = "parameter2")
+```
+
+use the following styling
+
+```
+long_variable_name <- long_function_name(
+    parameter = "parameter".
+    parameter2 = "parameter2"
+	)
+```
+
+	
+
 # Code of conduct
 
 Please note that the OMA project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).
 By contributing to this project, you agree to abide by its terms.
-
-
-
-

@@ -1,0 +1,1182 @@
+# Network Learning & Analysis {#sec-network-learning}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+Learning and analyzing microbial association networks is another common
+exploratory data analysis approach aimed at understanding the complex
+interplay of microbial communities in their natural habitat. Microbial
+networks consist of nodes, representing microbial species or taxa, and edges
+expressing their associations. The mathematical representation of a network is
+the adjacency matrix, which has a non-zero entry for each edge in the network.
+
+A typical workflow for estimating a microbial network involves several steps,
+including data preprocessing, estimating microbial associations, and
+transforming them into edge weights. The resulting network can be analyzed
+using local network properties, such as centrality measures, or global measures
+that describe the overall structure of the network. Network plots provide
+further insight into the microbial community structure and allow for
+exploratory analysis of microbial relationships.
+
+In this chapter, we go through the complete workflow of constructing and
+analyzing a single microbial network, step by step. A potential next analysis
+task is to compare networks between groups, such as patients and controls,
+different environmental conditions, or different time points. How to compare
+networks between two groups is explained in [@sec-network-comparison].
+
+## Network learning
+
+### Typical workflow {#sec-network-learning-workflow}
+
+[@fig-network-workflow] shows the workflow for learning/constructing a
+microbial association network as proposed by @peschel2021netcomi. The
+respective steps are explained below.
+
+```{r network-workflow, echo=FALSE, out.width='100%', fig.cap='The typical input is a $p$ x $n$ dimensional count matrix coming from a sequencing process, where $n$ is the number of samples and $p$ the number of features / ASVs / OTUs. Steps 1 through 6 are explained below. Each matrix resulting from steps 4, 5, and 6 plays a specific role in the final network: The adjacency matrix is used for edge colors, dissimilarity for layout, and similarity for edge weights. In weighted networks, the similarity matrix equals the adjacency matrix.'}
+#| label: fig-network-workflow
+knitr::include_graphics("figures/FigureNetworkLearning.png")
+```
+
+1.  **Zero replacement:** Since the following steps usually require non-zero
+entries in the read count matrix, zero counts must be replaced. A simple
+solution is to add a pseudo count to the data. Other possible approaches are
+implemented in the R package
+[zCompositions](https://cran.r-project.org/web/packages/zCompositions/index.html)
+
+2.  **Normalization:** To avoid compositional effects, the data are normalized
+using a compositionality aware transformation. A common approach is the
+centered log-ratio (clr) transformation, which moves the data from a
+$p$-dimensional simplex to Euclidean space so that standard statistical
+analysis methods are valid. A variance stabilizing transformation (vst) is
+also a suitable approach for normalizing microbial count data
+[@badri2020shrinkage].
+
+3.  **Association estimation:** This is the crucial step in network learning
+to obtain statistical relations between the taxa. Common association measures
+include correlation, conditional dependence (which we will equate to partial
+correlation), and proportionality. Further information on these three types of
+association and their application can be found in [@sec-more-about-association].
+The following list gives a selection of compositionality aware approaches:
+    + **Compositionality aware correlation estimation methods:**
+      -   Pearson's correlation coefficient (+ normalization)
+      -   Spearman's rank correlation coefficient (+ normalization)
+      -   Covariance shrinkage ([corpcor](https://strimmerlab.github.io/software/corpcor/) package) (+ normalization)
+      -   SparCC (implemented in [SpiecEasi](https://rdrr.io/github/zdk123/SpiecEasi/man/sparcc.html)); applied in [@sec-sparcc-correlation]
+      -   CCREPE ([ccrepe](https://bioconductor.org/packages/release/bioc/html/ccrepe.html) package)
+      -   CCLasso ([R code on GitHub](https://github.com/huayingfang/CCLasso))
+    + **Compositionality aware measures of conditional dependence / partial correlation:**
+      -   [SpiecEasi](https://github.com/zdk123/SpiecEasi) with Meinshausen and Bühlmann (MB) neighborhood selection; applied in [@sec-spieceasi-mb]
+      -   [SpiecEasi](https://github.com/zdk123/SpiecEasi) with the graphical lasso (glasso)
+      -   gCoda ([R code on GitHub](https://github.com/huayingfang/gCoda))
+      -   [SPRING](https://github.com/GraceYoon/SPRING); applied in [@sec-spring-network]
+    + **Proportionality measures (proportionality aware by definition):**
+      - [propr](https://github.com/tpq/propr)
+      - [Shrinkage proportionality estimator](https://github.com/MichelleBadri/NormCorr-manuscript/blob/master/code/helpers/norm_functions.R); applied in [@sec-shrinkage-prop]
+
+4.  **Sparsification:** Transforming the estimated associations directly into
+adjacencies would lead to a dense network where all nodes are connected and
+only weighted network measures are meaningful. Therefore, the association
+matrix is usually sparsified to select edges of interest. A common
+sparsification approach for correlations is thresholding, where correlations
+with a magnitude below the threshold are set to zero. Another possibility is
+a statistical test (Student's t-test or permutation test) with the null
+hypothesis that the correlation is equal to zero. SpiecEasi uses the StARS
+stability selection approach [@liu2010stability] to decide on an appropriate
+sparsification level of the inferred conditional dependence graph.
+
+5.  **Transformation into dissimilarity:** A common next step is to simply use
+the absolute values of the sparsified associations as the edge weights. In
+this way, correlations of high magnitude (both positive and negative) will
+have a high edge weight. From a biological point of view, it would also make
+sense to assign a low edge weight to taxa that are strongly negatively
+associated, which would correspond to a high dissimilarity value. Here we
+follow @vanDongen2012metric to directly transform the sparse
+associations $r_{ij}^*$ into dissimilarities, which can later be used for
+shortest path network measures. Depending on the desired handling of negative
+associations, one of the two proposed transformations should be chosen:
+
+    5a: **"signed":** $d_{ij} = \sqrt{0.5(1-r^*_{ij})}$, where strongly negatively associated taxa have the largest distance and are placed further apart in the network.
+
+    5b: **"unsigned":** $d_{ij} = \sqrt{1-{r_{ij}^*}^2}$, resulting in a small distance between strongly associated taxa (regardless of the sign).
+
+6.  **Transformation into similarity / edge weight:** Finally, the
+dissimilarities are transformed into similarities by $s_{ij} = 1 - d_{ij}$,
+which are used as edge weights. Thus, the similarity matrix is equal to the
+adjacency matrix in a weighted network.
+
+The main association measure used in this chapter is the
+[SPRING](https://github.com/GraceYoon/SPRING) ("Semi-Parametric Rank-based
+approach for INference in Graphical model") method proposed by
+@yoon2019microbial. `SPRING` learns conditional dependency graphs for
+compositional data and follows the neighborhood selection method introduced
+by @meinshausen2006high ("MB"). We will show how to apply the method directly,
+as well as how to use it in conjunction with the R package
+[NetCoMi](https://github.com/stefpeschel/NetCoMi), which is specifically
+designed for the construction and analysis of networks for microbiome data.
+
+See [@sec-more-about-association] for a comparison of all three association
+types (correlation, partial correlation, and proportionality) with more
+information on each measure and applications.
+
+We demonstrate the workflow using the the **PeerJ data set**
+[@potbhare2022skin]. It contains skin microbial profiles of 58 subjects.
+
+```{r, message=FALSE, warning=FALSE}
+library(mia)
+
+data("peerj13075", package = "mia")
+tse <- peerj13075
+dim(tse)
+```
+
+```{r, echo=FALSE}
+# The networks shown in this chapter take several minutes to generate.
+# Therefore, the network objects have been stored in a folder and are loaded
+# here to reduce the time needed to knit the book.
+spring_networks_file  <- system.file(
+    "extdata", "spring_networks.RData", package = "OMA")
+load(spring_networks_file)
+```
+
+### Install packages
+
+Three packages used in this chapter are available on GitHub only:
+`SpiecEasi`, `SPRING`, and `NetCoMi`. We recommend that you install these
+packages before proceeding.
+
+```{r install_packages, message=FALSE, warning=FALSE}
+if(!require(SpiecEasi)){
+  devtools::install_github("zdk123/SpiecEasi")
+}
+
+if(!require(SPRING)){
+  devtools::install_github("GraceYoon/SPRING")
+}
+
+if(!require(NetCoMi)){
+  devtools::install_github(
+      "stefpeschel/NetCoMi", force = TRUE, ref = "TSE",
+       dependencies = c("Depends", "Imports", "LinkingTo"),
+       repos = c("https://cloud.r-project.org/", BiocManager::repositories()))
+}
+```
+
+### Data preparation
+
+Before applying the network learning methods, we perform some data preparation
+steps:
+
+-   Aggregation to genus level
+-   Add relative abundance assay
+-   Prevalence filtering (keep genera with prevalence \> 20%)
+-   Add assay with log10 transformed abundances
+-   Add assay with clr transformed abundances
+
+```{r}
+# Agglomerate to genus level
+tse <- agglomerateByRank(tse, rank = "genus")
+
+# Add relative abundances
+tse <- transformAssay(
+    tse,
+    assay.type = "counts",
+    method = "relabundance",
+    MARGIN = "cols")
+
+# Filter by prevalence
+tse <- subsetByPrevalent(
+    tse,
+    prevalence = 0.2,
+    detection = 0,
+    assay.type = "relabundance")
+
+# Add log10-transformed abundances
+tse <- transformAssay(tse, method = "log10", pseudocount = 1)
+
+# Add clr-transformed abundances
+tse <- transformAssay(tse, method = "clr", pseudocount = 1)
+
+dim(tse)
+```
+
+### SPRING network {#sec-spring-network}
+
+As explained in [@sec-network-learning-workflow], we use
+[SPRING](https://github.com/GraceYoon/SPRING) ("Semi-Parametric Rank-based
+approach for INference in Graphical model") as association measure. We first
+use the `SPRING` function directly to construct a conditional dependency graph.
+
+Neither zero replacement nor normalization (steps 1 and 2 in our workflow)
+are required because `SPRING` uses a modified clr (mclr) transformation that
+can handle zero counts, and the correlation estimation method itself can
+also deal with zeros in the data. mclr is similar to the clr transformation
+except that mclr considers only the non-zero values. More precisely, the
+geometric mean is derived from positive values only, and zero counts remain
+zero after the transformation. This approach is similar to the "robust clr"
+(rclr) transformation included in the `vegan` package, except that mclr
+applies a positive shift to all non-zero values to make them strictly positive.
+See [@yoon2019microbial] for details.
+
+The `Rmethod` argument is set to "approx" to estimate the correlations using a
+hybrid multi-linear interpolation approach proposed by @yoon2021fast. This
+method considerably reduces the runtime while controlling the approximation
+error.
+
+`SPRING` uses the StARS ("Stability Approach to Regularization Selection")
+method [@liu2010stability] to obtain a sparse association matrix. Thus, also
+step 4 of our workflow is already included. We set the StARS threshold to 0.05
+to get a sparser graph.
+
+```{r, message=FALSE, warning=FALSE}
+library(SPRING)
+```
+
+```{r, eval=FALSE}
+set.seed(13075)
+spring_est <- SPRING(
+    t(assay(tse, "counts")),
+    Rmethod = "approx",
+    thresh = 0.05,
+    lambdaseq = "data-specific")
+```
+
+
+```{r}
+# Get index of the optimal lambda selected by StARS
+opt.K <- spring_est$output$stars$opt.index
+
+# Store partial correlation matrix belonging to the optimal lambda as matrix
+spring_cor <- SpiecEasi::symBeta(as.matrix(spring_est$output$est$beta[[opt.K]]))
+spring_cor <- as.matrix(spring_cor)
+rownames(spring_cor) <- colnames(spring_cor) <- rownames(tse)
+diag(spring_cor) <- 1
+```
+
+As explained in [@sec-network-learning-workflow], the estimated associations
+are sparsified and transformed into dissimilarities, and finally transformed
+into similarities, which are the adjacency values. We write a function for
+these steps, which will be reused later.
+
+Since `SPRING` already includes a sparsification approach, the `thresh`
+argument is not needed here, but will be needed in [@sec-more-about-association]
+for other association measures.
+
+To be consistent with the workflow, we provide two dissimilarity
+transformations: "signed" and "unsigned" (see [@sec-network-learning-workflow]
+for an explanation). These transformations were introduced by
+@vanDongen2012metric. We use the "signed" transformation in our examples
+so that strongly negatively associated genera have low edge weights.
+
+The output of the function is an `igraph` object, which can be plotted and
+analyzed using functions from the `igraph` package.
+
+```{r transform_function}
+# Arguments:
+# - assoMat: association matrix
+# - threshold: associations below the threshold are set to zero
+# - dissTrans: dissimilarity transformation ("signed" or "unsigned")
+
+transform_asso <- function(assoMat, thresh = NULL, dissTrans = "signed") {
+  # Sparsification
+  if (!is.null(thresh)) {
+      assoMat[abs(assoMat) < thresh] <- 0
+  }
+
+  # Compute dissimilarity matrix
+  if (dissTrans == "signed") {
+      dissMat <- sqrt(0.5 * (1 - assoMat))
+  } else {
+      dissMat <- sqrt(1 - assoMat^2)
+  }
+
+  # Dissimilarity between nodes with zero correlation is set to 1
+  # (these nodes are unconnected and thus should have maximum dissimilarity)
+  dissMat[assoMat == 0] <- 1
+
+  # Compute similarity matrix
+  simMat <- 1 - dissMat
+
+  # Turn into igraph object
+  graphObj <- SpiecEasi::adj2igraph(simMat)
+
+  return(list(graph = graphObj, adja = simMat, asso = assoMat, diss = dissMat))
+}
+```
+
+
+```{r}
+# Create graph object
+spring_graph <- transform_asso(spring_cor)$graph
+```
+
+### NetCoMi network {#sec-netcomi-spring}
+
+The [NetCoMi](https://github.com/stefpeschel/NetCoMi) [@peschel2021netcomi]
+package is specifically designed to construct, analyze, and compare networks
+for microbiome data and implements the complete workflow described in
+[@sec-network-learning-workflow]. Instead of using several functions for
+each of the steps, `NetCoMi` provides a single function for network
+construction (`netConstruct()`), so the package streamlines the workflow
+considerably. The user can choose from a variety of methods for data
+preprocessing, association estimation, sparsification, and transformation.
+The returned `microNet` object can then be passed to `netAnalyze()`
+(the network analysis function) so that all necessary information is available
+for the network analysis workflow.
+
+```{r, message=FALSE, warning=FALSE}
+library(NetCoMi)
+```
+
+We again use `SPRING` as one of the association measures available in `NetCoMi`
+to construct a conditional dependency graph.
+
+To demonstrate how taxa are filtered with `netConstruct()`, we will use the
+unfiltered `tse` object this time. The filtering is the same as before: Taxa
+occurring in less than 20% of the samples are removed.
+
+```{r netcomi_net_single, eval=FALSE}
+netcomi_net <- netConstruct(
+    tse,
+    taxRank = "genus",
+    filtTax = "numbSamp",
+    filtTaxPar = list(numbSamp = 0.2),
+    measure = "spring",
+    measurePar = list(thresh = 0.05, Rmethod = "approx"),
+    sparsMethod = "none",
+    dissFunc = "signed",
+    seed = 13075)
+```
+
+`netConstruct()` returns an object of the class `microNet`, which contains all
+matrices generated during network construction.
+
+The object also contains an edge list, giving each edge's estimated
+association, dissimilarity, and adjacency. Let's take a quick look at the edges
+with the highest and lowest edge weights:
+
+```{r edge_list}
+edgelist <- netcomi_net$edgelist1[
+    order(netcomi_net$edgelist1$adja, decreasing = TRUE), ]
+head(edgelist)
+tail(edgelist)
+```
+
+As before, the adjacency matrix is converted into an `igraph` object. Further
+steps like sparsification and transformation are not necessary because they
+are done internally by `netConstruct()`.
+
+```{r transform_spring, fig.height=4, fig.width=10}
+netcomi_graph <- SpiecEasi::adj2igraph(abs(netcomi_net$adjaMat1))
+```
+
+```{r, eval=FALSE, echo=FALSE}
+save(
+    spring_est, netcomi_net,
+    file = "general/network_data/spring_networks.RData")
+```
+
+## Network analysis with igraph {#sec-network-analysis}
+
+The computed network is now analyzed using appropriate methods. We will first
+use the `igraph` package to analyze the `SPRING` network. NetCoMi's
+`netAnalyze()` function will be used later to analyze the constructed
+`microNet` object.
+
+### Network plot
+
+To get an overview of the network structure, a first common analysis method is
+to plot the network. We here use the [igraph](https://r.igraph.org/) package,
+which is a state-of-the-art package for network analysis and visualization.
+Other packages that could be used for network plotting are the
+[qgraph](https://rdrr.io/cran/qgraph/) package or the
+[ggnet2](https://briatte.github.io/ggnet/) package. Since we will use `igraph`
+for network analysis later on, we are using its plotting function here as well.
+
+We use the Fruchterman-Reingold layout (a force-directed layout) for node
+placement. By placing strongly connected nodes close together and those with
+low edge weight far apart, this layout results in an easy-to-read network plot.
+
+The node sizes are proportional to a taxon's log10-transformed abundance,
+which we previously added to the `tse` object, averaged across all samples.
+The values are rescaled to be visually distinguishable.
+
+Since we created two graph objects, one with `SPRING` and one with `NetCoMi`, we
+plot them side by side. The two plots should be identical.
+
+```{r, message=FALSE, warning=FALSE}
+library(igraph)
+```
+
+```{r plots_spring_netcomi, fig.height=4, fig.width=8}
+# Node sizes
+vsize <- (colMeans(t(assay(tse, "log10"))) + 1) * 3
+
+# Fruchterman-Reingold layout from igraph package
+set.seed(13075)
+lay_fr <- layout_with_fr(spring_graph)
+
+par(mfrow = c(1,2))
+plot(spring_graph, layout = lay_fr, vertex.size = vsize,
+     vertex.label = NA, main = "SPRING network")
+plot(netcomi_graph, layout = lay_fr, vertex.size = vsize,
+     vertex.label = NA, main = "NetCoMi network\n(with SPRING associations)")
+```
+
+### Centrality measures
+
+Centrality measures express the importance of nodes within the network. Common
+measures are the degree, betweenness, closeness, and eigenvector centrality.
+The `igraph` package provides functions to compute these measures. We wrap a
+function around the code to reuse it later.
+
+```{r}
+get_centr <- function(graph_obj) {
+  # We access igraph directly with "::" because there are more packages loaded
+  # in this chapter that contain a degree() function.
+  df <- data.frame(Degree = igraph::degree(graph_obj))
+  df$Betweenness <- betweenness(graph_obj)
+  df$Closeness <- closeness(graph_obj, normalized = TRUE)
+  df$Eigenvector <- eigen_centrality(graph_obj)$vector
+  return(df)
+}
+
+centr_df <- get_centr(spring_graph)
+rownames(centr_df) <- rownames(spring_cor)
+head(centr_df, 15)
+```
+
+The closeness centrality is "NaN" for some genera. These are unconnected nodes,
+as can be seen by the zero degree and betweenness centrality.
+
+### Scale node sizes by degree
+
+Centrality measures can be visualized in the network plot by scaling the node
+sizes according to one of these measures. We plot the `Spring` graph using the
+same layout as before and with the node sizes scaled according to all four
+centrality measures.
+
+Of the four centrality measures, only the degree has a range suitable to be
+used as node size. The other centrality measures must be rescaled because
+their range is either too small or too large. The following scaling is a
+suggestion that works for this example. The values might be adapted for other
+data sets.
+
+```{r netplot_degree}
+get_vsizes <- function(centr_df) {
+    df <- as.matrix(centr_df)
+    df[, "Betweenness"] <- log(df[, "Betweenness"])
+    df[, "Closeness"] <- df[, "Closeness"] * 10
+    df[, "Eigenvector"] <- df[, "Eigenvector"] * 10
+    df[is.infinite(df) | is.na(df)] <- 0
+    return(df)
+}
+
+vsize_df <- get_vsizes(centr_df )
+head(vsize_df)
+```
+
+```{r plots_centrality, fig.height=10, fig.width=10}
+par(mfrow = c(2,2))
+for (i in seq_along(centr_df)) {
+    plot(spring_graph, layout = lay_fr, vertex.size = vsize_df[, i],
+        vertex.label = NA, main = colnames(centr_df)[i])
+}
+```
+
+We observe that the two-node component at the bottom has a much higher
+closeness centrality than the nodes belonging to the main component of the
+network. Obviously, closeness centrality as commonly defined is misleading
+when the network consists of disconnected components. Nodes belonging to
+smaller components are seen as closer to others than in larger components.
+To overcome this problem, centrality values, and especially closeness
+centrality, are often calculated only for the largest connected component
+(LCC), which we will do below.
+
+```{r}
+# Extract the LCC
+dg_net <- igraph::decompose.graph(spring_graph)
+idx_lcc <- which.max(unlist(lapply(dg_net, function(x) length(igraph::V(x)))))
+lcc <- dg_net[[idx_lcc]]
+
+# Compute centrality values for the LCC
+centr_df_lcc <- get_centr(lcc)
+
+# Replace centrality values by those for LCC and set all others to zero
+lcc_nodes <- as.numeric(rownames(centr_df_lcc))
+centr_df[lcc_nodes, ] <- centr_df_lcc
+centr_df[-lcc_nodes, ] <- 0
+
+# Node/vertex sizes
+vsize_df <- get_vsizes(centr_df)
+```
+
+```{r plots_centrality_lcc, fig.height=10, fig.width=10}
+par(mfrow = c(2,2))
+for (i in seq_along(centr_df)) {
+    plot(spring_graph, layout = lay_fr, vertex.size = vsize_df[, i],
+        vertex.label = NA, main = colnames(centr_df)[i])
+}
+```
+
+Note that `NetCoMi` follows a different approach to overcome this problem.
+`NetCoMi` uses the definition of closeness centrality proposed by
+[Tore Opsahl](https://toreopsahl.com/2010/03/20/closeness-centrality-in-networks-with-disconnected-components/),
+which is well defined even for disconnected networks and assigns higher
+closeness centrality values to nodes in larger components. This is more
+intuitive because nodes in a larger component are connected to a larger number
+of other nodes than in small components.
+
+### Degree distribution
+
+The degree distribution is another popular measure that expresses the
+probability distribution of degrees over the entire network. It thus provides
+insight into the overall network structure. We plot the degree distribution for
+all four association estimation methods to compare the network structure.
+
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+```
+
+```{r degree_dist_spring, fig.height=4, fig.width=7}
+# Compute degree distribution
+ddist<- igraph::degree.distribution(spring_graph)
+
+# Data frame needed for ggplot2
+df <- data.frame(
+    Degree = as.factor((seq_along(ddist)) - 1), Fraction = ddist)
+
+ggplot(data = df, aes(x = Degree, y = Fraction, group = 1)) +
+    geom_line() +
+    geom_point() +
+    labs(title = "Degree distribution") +
+    theme_bw()
+```
+
+The network has a large number of singletons and sparsely connected nodes,
+and only a small number of nodes with a higher degree of 7 or more.
+
+### Clustered heatmaps
+
+Using the `ComplexHeatmap` package, we plot a heatmap of the association matrix
+estimated with `SPRING`. Rows and columns are sorted according to the clusters
+identified via hierarchical clustering.
+
+```{r, message=FALSE, warning=FALSE}
+library(ComplexHeatmap)
+library(circlize)
+```
+
+We select the 50 nodes with the highest sum of edge weights to get a smaller
+heatmap.
+
+```{r select_nodes}
+sel <- names(sort(rowSums(spring_cor), decreasing = TRUE))[seq_len(50)]
+adja_sel <- spring_cor[sel, sel]
+```
+
+
+```{r clustered_heatmap, fig.width=5.8, fig.height=5}
+# Color vector
+col <- colorRamp2(
+    c(-1, -0.5, 0, 0.5, 1),
+    c("royalblue4", "lightblue", "white", "orange", "firebrick3"))
+
+Heatmap(
+    adja_sel,
+    col = col,
+    rect_gp = gpar(col = "gray", lwd = 1),
+    show_row_names = FALSE,
+    show_column_names = FALSE,
+    name = "Association")
+```
+
+The associations are generally quite low, and there are no prominent clusters
+detected by hierarchical clustering.
+
+### Global network measures
+
+Global measures describe the overall network structure. We take a look at
+three common measures: density, transitivity, and average path length. The values are again computed with `igraph` functions.
+
+#### Density
+
+Definition: Proportion of present edges from all possible edges.
+
+```{r density}
+edge_density(spring_graph)
+```
+
+#### Transitivity (clustering coefficient)
+
+Here, we consider only the global clustering coefficient, which is defined as
+the ratio of triangles to connected triples.
+
+```{r transitivity}
+transitivity(spring_graph)
+```
+
+#### Average path length
+
+Definition: Mean of the shortest distance between each pair of nodes.
+
+```{r avpath}
+average.path.length(spring_graph)
+```
+
+## Network analysis with NetCoMi
+
+The `netcomi_net` object of class `microNet` created before is now passed to
+`netAnalyze()` to perform network analysis with `NetCoMi`.
+
+The function computes several common network characteristics such as centrality
+measures, cluster assignment, the graphlet correlation matrix, as well as
+global network measures.
+
+The user has several options to choose from, such as a clustering method, how
+to define hubs, and whether or not to normalize centrality values. See the
+help page `?netAnalyze` for a description of the arguments.
+
+By default, a heatmap of the Graphlet Correlation Matrix (GCM) is returned
+(with graphlet correlations in the upper triangle and significance codes
+resulting from Student's t-test in the lower triangle). See `?calcGCM` and
+`?testGCM` for details.
+
+```{r netAnalyze_single, fig.width=7, fig.height=7, out.width='75%'}
+netcomi_netprops <- netAnalyze(
+    netcomi_net,
+    clustMethod = "cluster_fast_greedy",
+    hubPar = "eigenvector",
+    normDeg = FALSE)
+```
+
+```{r summary_single}
+summary(netcomi_netprops, numbNodes = 5)
+```
+
+**Interpretation of some findings:**
+
+-   The largest connected component (LCC) has
+`r netcomi_netprops$compSize1[1, 1]` nodes and the network contains
+`r netcomi_netprops$compSize1[2, netcomi_netprops$compSize1[1, ] == 1]`
+singletons.
+-   `r max(netcomi_netprops$clustering$clust1)` clusters have been
+identified, containing `r min(table(netcomi_netprops$clustering$clust1)[-1])`
+to `r max(table(netcomi_netprops$clustering$clust1)[-1])` nodes.
+-   There are `r length(netcomi_netprops$hubs$hubs1)` hub nodes detected
+which by definition are the nodes with the highest eigenvector centrality.
+  -   The average path length in the LCC is
+  `r netcomi_netprops$globalPropsLCC$avPath1`. This means that on average
+  it takes `r netcomi_netprops$globalPropsLCC$avPath1` steps (step length is
+  the average dissimilarity) to get from one node to another. Note that the
+  average path length in `NetCoMi` is defined differently than in the `igraph`
+  package, which is why the values differ.
+-   Low values of edge density and the connectivity measures indicate that the
+network is rather sparse and not robust to perturbations (i.e., removal of
+nodes or edges).
+
+## Network visualization
+
+Further insight into the network structure can be gained by visualizing the
+network. We have already seen examples of how to plot a network using the
+`igraph` package. Here we will use NetCoMi's plot function. It takes as input
+the `microNetProps` object returned by `netAnalyze()`, which contains all
+computed network properties. This has the advantage that the user can choose
+which properties to plot by simply changing some arguments. The plot function
+is based on [qgraph](https://rdrr.io/cran/qgraph/), which is another
+state-of-the-art R package for network visualization. The help page can be
+accessed via `?plot.microNetProps`.
+
+### Highlight node properties
+
+In the first plot, node colors represent the detected clusters and node
+sizes are scaled by eigenvector centrality. Hub nodes are highlighted by
+default. Singletons are not included in the plot. To improve the readability
+NetCoMi's "intelligent" label shortening approach is used.
+
+Note that nodes are sometimes placed too close together so that the labels
+overlap. You may need to play around with the repulsion argument until you
+find a value where the labels are legible, but also the clusters are still
+well recognizable.
+
+```{r network_plot_single_cluster, fig.width=13, fig.height=10}
+plot(netcomi_netprops,
+     repulsion = 0.98,
+     rmSingles = TRUE,
+     shortenLabels = "intelligent",
+     labelScale = FALSE,
+     nodeSize = "eigenvector",
+     nodeSizeSpread = 3,
+     nodeColor = "cluster",
+     hubBorderCol = "gray40",
+     cexNodes = 1.8,
+     edgeTranspHigh = 20,
+     title1 = "Network properties highlighted",
+     showTitle = TRUE,
+     cexTitle = 2.3,
+     mar = c(1, 3, 4, 8))
+
+legend(0.7, 1.1, cex = 1.7, title = "estimated correlation:",
+       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"),
+       bty = "n", horiz = TRUE)
+```
+
+### Highlight data features
+
+We now color nodes according to their phylum. The node sizes are proportional
+to a taxon's sum of mclr-transformed abundances. As already mentioned in
+[@sec-spring-network], this is the normalization method used by `SPRING`. A
+color palette from `RColorBrewer` is used here.
+
+```{r, message=FALSE, warning=FALSE}
+library(RColorBrewer)
+```
+
+
+```{r network_plot_single_phylum, fig.width=15, fig.height=10}
+# Generate vector with phylum names for node coloring
+phyla <- as.factor(rowData(tse)$phylum)
+names(phyla) <- rowData(tse)$genus
+
+# Create color vector
+colvec <- RColorBrewer::brewer.pal(length(levels(phyla)), "Set3")
+
+plot(netcomi_netprops,
+     repulsion = 0.98,
+     rmSingles = TRUE,
+     shortenLabels = "intelligent",
+     labelScale = FALSE,
+     nodeSize = "mclr",
+     nodeColor = "feature",
+     featVecCol = phyla,
+     colorVec =  colvec,
+     nodeTransp = 20,
+     highlightHubs = FALSE,
+     cexNodes = 1.8,
+     edgeTranspHigh = 20,
+     title1 = "Data features highlighted",
+     showTitle = TRUE,
+     cexTitle = 2.3,
+     mar = c(1, 10, 4, 6))
+
+# Add legends
+legend(0.7, 1.1, cex = 1.7, title = "estimated correlation:",
+       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"),
+       bty = "n", horiz = TRUE)
+
+# Colors used in the legend should be equally transparent as in the plot
+col_transp <- colToTransp(colvec, 20)
+
+legend(-1.8, 1.1, cex = 1.7, pt.cex = 2.5, title = "Phylum:",
+       legend=levels(phyla), col = col_transp, bty = "n", pch = 16)
+```
+
+**A few things to observe:**
+
+-   Genera belonging to the same phylum tend to cluster together, though not perfectly.
+-   Genera with a low total count play a rather unimportant role in the network, i.e., they have a low centrality.
+-   There is only one negative edge in the network. This edge is between two clusters, as expected when using the "signed" transformation.
+
+## Which method(s) to choose?
+
+Throughout all the steps from primary data to potentially significant network
+features, there is a variety of methods and parameters to choose from.
+However, there is no general consensus in the community on the "right" way
+to estimate and analyze microbial networks. In the absence of a "best method"
+for inferring and analyzing microbial networks, researchers may be tempted to
+try different methods and report only the optimal results or those that fit
+some prior knowledge. This carries the risk of "overfitting" the analysis to
+the existing data so that the results are not replicable for new data
+[@ullmann2023over].
+
+Therefore, the selection of the workflow building blocks should be set up
+once and independently of any hypothesis about the data, thus avoiding the
+fallacy of starting to "fish" for results that best fit a previously formulated
+hypothesis. For example, one should ask prior to the analysis whether
+correlation or conditional dependence as a measure of association better
+fits the research question and choose the method accordingly. Another example
+is the choice of transformation from estimated association to dissimilarity
+(i.e., "signed" or "unsigned"), which completely changes the interpretation
+and characteristics of the network. This choice should be made based on the
+research question before starting the analysis.
+
+## More about association measures {#sec-more-about-association}
+
+As mentioned in the introduction of this chapter, there are three types of
+association measures that are commonly used to express relationships between
+taxa: correlation, conditional dependence, and proportionality. Below, we
+provide a brief explanation of each of these measures, along with lists of
+available compositionality-aware approaches.
+
+- **Correlation:** Two popular measures of ecological association are
+Pearson's correlation coefficient and Spearman's rank correlation coefficient,
+both of which can be inferred from empirical (sample) covariances. However,
+in the $p\gg n$ setting, which most microbiome datasets are in, sample
+covariances and correlations are unreliable because the parameters being estimated are typically underdetermined. One way to improve sample covariance estimates is to assume that the underlying covariance matrix is
+sparse and use a regularized covariance estimator to implement this structural
+assumption. The Schäfer-Strimmer shrinkage estimator [@schafer2005shrinkage]
+is one possible method for estimating a sparse correlation matrix. Other
+popular methods, especially designed to estimate correlations for compositional
+data, are SparCC ("Sparse Correlations for Compositional data") by
+@Friedman2012, CCREPE ("Compositionality Corrected by REnormalization and
+PErmutation") by @faust2012microbial, and CCLasso ("Correlation inference for
+Compositional data through Lasso") by @fang2015cclasso. The latter three
+methods already include a compositionality aware normalization, and SparCC
+also includes a zero replacement approach.
+-  **Conditional dependence:** Since standard correlations include both direct
+and indirect dependencies, conditional dependence or partial correlation is
+often preferred for measuring association. Unlike (marginal) correlation, it
+expresses the relationship between two features conditioned on all other
+features in the data set. The approach and R package
+[SpiecEasi](https://github.com/zdk123/SpiecEasi) ("Sparse InversE Covariance
+estimation for Ecological Association and Statistical Inference") by
+@Kurtz2015 is specifically designed for inferring ecological networks from
+microbiome data and includes two approaches for estimating conditional
+dependence structures between taxa: Neighborhood Selection; short "MB"
+[@meinshausen2006high] and (inverse) covariance selection
+[@friedman2008sparse], which is based on a penalized maximum likelihood
+approach and is also known as "graphical lasso". Another approach and R
+package for inferring partial correlations from microbiome data is
+[SPRING](https://github.com/GraceYoon/SPRING) ("Semi-Parametric Rank-based
+approach for INference in Graphical model") by @yoon2019microbial. They also
+use the MB neighborhood selection method, but introduce a novel
+semi-parametric rank-based approach for sparse partial correlation estimation
+that can naturally handle the excess of zeros in the data. gCoda
+[@fang2017gcoda] is another conditional dependence measure based on
+penalized maximum likelihood estimation. All of the aforementioned
+conditional dependence measures address the high dimensionality of microbiome data.
+-  **Proportionality:** @lovell2015proportionality introduce proportionality
+as an alternative measure of pairwise association for compositional data.
+The idea is that if the relative abundances between two taxa $i$ and $j$ are
+proportional, then their corresponding absolute abundances are also
+proportional:
+$\frac{\omega_i}{m} \propto \frac{\omega_j}{m} \Rightarrow \omega_i \propto \omega_j$,
+where $m$ is the sum of counts in the sample. It follows that proportionality
+is identical for the observed (relative) read counts and the true unobserved
+counts. The proportionality measure proposed by @lovell2015proportionality is
+based on log-ratio variance $var(log \frac{x_i}{x_j})$, which is zero when
+$\omega_i$ and $\omega_j$ are perfectly proportional. Proportionality is
+implemented in the R package [propr](https://github.com/tpq/propr).
+@badri2020shrinkage extend the proportionality measure to a so-called
+"shrinkage proportionality estimator". It combines proportionality with
+the covariance shrinkage approach to obtain consistent association estimates
+even with small sample sizes.
+
+
+## Comparison of association measures
+
+In this section, we provide three additional examples for constructing a
+network using each of the three types of association:
+
+* Correlation using `SparCC`
+* Partial correlation using `SpiecEasi`
+* Proportionality using the shrinkage proportionality measure
+
+```{r, echo=FALSE}
+# The networks shown in this chapter take several minutes to generate.
+# Therefore, the network objects have been stored in a folder and are loaded
+# here to reduce the time needed to knit the book.
+networks_file  <- system.file("extdata", "networks.RData", package = "OMA")
+load(networks_file)
+```
+
+
+### SparCC {#sec-sparcc-correlation}
+
+The first association measure we look at is SparCC ("Sparse Correlations fo
+Compositional data"), introduced by @Friedman2012. It estimates Pearson
+correlations while taking into account the compositional structure of the
+data. The [SpiecEasi](https://rdrr.io/github/zdk123/SpiecEasi/man/sparcc.html)
+package provides an implementation of this method.
+
+```{r, eval=FALSE}
+# Set seed for reproducibility
+set.seed(13075)
+# Compute correlation matrix
+sparcc_cor <- SpiecEasi::sparcc(t(assay(tse, "counts")))$Cor
+rownames(sparcc_cor) <- colnames(sparcc_cor) <- rownames(tse)
+```
+
+We reuse the `transform_asso()` function created in [@sec-spring-network],
+which sparsifies the association matrix, transforms it into a similarity matrix,
+and finally returns an `igraph` object.
+
+Two threshold values are used to see the effect of sparsification later in
+the network plot.
+
+```{r transform_sparcc}
+sparcc_trans03 <- transform_asso(sparcc_cor, thresh = 0.3)
+sparcc_trans04 <- transform_asso(sparcc_cor, thresh = 0.4)
+
+sparcc_graph03 <- sparcc_trans03$graph
+sparcc_graph04 <- sparcc_trans04$graph
+```
+
+
+### Shrinkage proportionality {#sec-shrinkage-prop}
+
+In the second example, microbial associations are measured by proportionality,
+originally introduced by @lovell2015proportionality. We use the shrinkage
+proportionality estimator proposed by @badri2020shrinkage, which gives
+consistent results even for small sample sizes. Since there is no R package
+implementing this estimator, we use the `rho_shrink_est()` function provided
+in the
+[GitHub repository](https://github.com/MichelleBadri/NormCorr-manuscript/blob/master/code/helpers/norm_functions.R)
+associated with the paper. The function is slightly modified to take normalized
+counts as input.
+
+```{r, message=FALSE, warning=FALSE}
+library(corpcor)
+```
+
+```{r}
+# norm_counts: clr-transformed count matrix with samples in rows
+rho_shrink_est <- function(norm_counts, ...) {
+    shrunk_cov <- cov.shrink(norm_counts, ...)
+    p <- ncol(norm_counts)
+    J <- matrix(rep(diag(shrunk_cov), p), p)
+    rho <- 2 * shrunk_cov / (J + t(J))
+    (rho + t(rho)) / 2
+}
+```
+
+```{r compute_shrink_prop}
+# Apply the shrinkage proportionality estimator to the clr-transformed counts
+prop_est <- as(rho_shrink_est(t(assay(tse, "clr"))), "matrix")
+```
+
+Again, we use our transformation function to convert the association matrix
+into a graph object.
+
+```{r transform_shrink_prop}
+prop_trans <- transform_asso(prop_est, thresh = 0.4)
+prop_graph <- prop_trans$graph
+```
+
+
+### SpiecEasi - MB {#sec-spieceasi-mb}
+
+As third example, we use the SpiecEasi ("Sparse InversE Covariance estimation
+for Ecological Association and Statistical Inference") approach proposed by
+@Kurtz2015 to estimate a sparse conditional dependency graph. The neighborhood
+selection method ("MB") introduced by @meinshausen2006high is used for network
+learning. The approach is implemented in the R package
+[SpiecEasi](https://github.com/zdk123/SpiecEasi).
+
+```{r, message=FALSE, warning=FALSE}
+library(SpiecEasi)
+```
+
+```{r, eval=FALSE}
+set.seed(13075)
+se_mb_est <- spiec.easi(
+    t(assay(tse, "counts")),
+    method = 'mb', nlambda = 20,
+    pulsar.params = list(rep.num = 20))
+```
+
+Since `SpiecEasi` uses the StARS ("Stability Approach to Regularization
+Selection") method [@liu2010stability] to obtain a sparse association matrix,
+we don't need to set a threshold here. We store the partial correlations
+corresponding to the StARS-optimal lambda and convert them into an `igraph`
+object.
+
+```{r transform_se_mb}
+# Get optimal matrix with partial correlations
+se_mb_cor <- as.matrix(getOptBeta(se_mb_est))
+se_mb_cor <- as.matrix(symBeta(se_mb_cor))
+rownames(se_mb_cor) <- colnames(se_mb_cor) <- rownames(tse)
+diag(se_mb_cor) <- 1
+
+# Create graph object
+se_mb_graph <- transform_asso(se_mb_cor)$graph
+```
+
+```{r, eval=FALSE, echo=FALSE}
+save(sparcc_cor, se_mb_est, file = "general/network_data/networks.RData")
+```
+
+### Network plots
+
+The graph objects can now be plotted using the [igraph](https://r.igraph.org/)
+package. The same layout is used in all four plots so that the networks are
+comparable.
+
+```{r, message=FALSE, warning=FALSE}
+library(igraph)
+```
+
+```{r netplots, fig.height=10, fig.width=10}
+# Node sizes
+vsize <- (colMeans(t(assay(tse, "log10"))) + 1) * 3
+
+# Use Fruchterman-Reingold (force-directed) layout
+set.seed(13075)
+lay_fr <- layout_with_fr(se_mb_graph)
+
+par(mfrow = c(2,2))
+plot(sparcc_graph03, layout = lay_fr, vertex.size = vsize,
+     vertex.label = NA, main = "SparCC (thresh 0.3)")
+plot(sparcc_graph04, layout = lay_fr, vertex.size = vsize,
+     vertex.label = NA, main = "SparCC (thresh 0.4)")
+plot(prop_graph, layout = lay_fr, vertex.size = vsize,
+     vertex.label = NA, main = "Shrinkage proportionality\n(thresh 0.4)")
+plot(se_mb_graph, layout = lay_fr, vertex.size = vsize,
+     vertex.label = NA, main = "SpiecEasi (MB)")
+```
+
+**A few observations:**
+The density of SparCC (threshold 0.4), proportionality and SpiecEasi is
+comparable, while the SparCC correlation network with threshold 0.3 is much
+denser. However, there are edges in the proportionality and SpiecEasi networks
+that are not present in the two SparCC networks. The `SpiecEasi` network has
+less highly connected nodes than the other three networks, but more nodes
+with one or two connections.
+
+We will look at the degree distribution in the next section to quantify
+these observations.
+
+### Network analysis
+
+Here we repeat some of the network analysis approaches explained in
+[@sec-network-analysis]. The analyses are performed simultaneously for
+the three association measures as well as the `SPRING` network constructed
+in [@sec-spring-network]. Therefore, we start by creating a list of all the
+graph objects we need for the analyses.
+
+```{r graphlist}
+graphlist <- list(
+    SparCC = sparcc_graph04,
+    Proportionality = prop_graph,
+    SpiecEasi = se_mb_graph,
+    SPRING = spring_graph)
+```
+
+#### Degree distribution
+
+The degree distribution is plotted for all four measures to compare the
+overall network structure.
+
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+```
+
+```{r degree_dist}
+# Compute degree distributions
+ddlist <- lapply(graphlist, igraph::degree.distribution)
+
+# Maximum degree
+maxdeg <- max(lengths(ddlist))
+
+# Make list elements the same length
+for(i in seq_along(graphlist)) {
+    length(ddlist[[i]]) <- maxdeg
+}
+
+# Data frame needed for ggplot2
+df <- data.frame(
+    Degree = rep(seq_len(maxdeg), length(graphlist)),
+    Fraction = unlist(ddlist),
+    Method = rep(names(graphlist), each = maxdeg))
+
+ggplot(df, aes(x = Degree, y = Fraction, group = Method)) +
+    geom_line(aes(color = Method)) +
+    geom_point(aes(color = Method)) +
+    theme_bw()
+```
+
+The SparCC and shrinkage proportionality networks have a considerably higher
+proportion of singletons (zero-degree nodes) than the two conditional
+dependency graphs, but a lower proportion of nodes with degrees between one
+and five. The SpiecEasi and SPRING graphs, on the other hand, have a higher
+proportion of low degree nodes, but no highly connected nodes with a degree
+greater than eleven.
+
+#### Clustered heatmaps
+
+Using the `ComplexHeatmap` package, we plot heatmaps of the association
+matrices for the four considered association measures. Rows and columns are
+sorted according to the clusters identified via hierarchical clustering.
+
+```{r, message=FALSE, warning=FALSE}
+library(ComplexHeatmap)
+library(circlize)
+library(patchwork)
+```
+
+For each association measure, we select the 50 nodes with the highest sum of
+edge weights.
+
+```{r select_nodes_all}
+# Function for selecting taxa with highest sum of edge weights
+select_taxa <- function(adja, ntaxa = 50) {
+    sel <- names(sort(rowSums(adja), decreasing = TRUE))[seq_len(ntaxa)]
+    adja[sel, sel]
+}
+
+assolist <- list()
+assolist$SparCC <- select_taxa(sparcc_trans04$adja)
+assolist$Proportionality <- select_taxa(prop_trans$adja)
+assolist$SpiecEasi <- select_taxa(se_mb_cor)
+assolist$SPRING <- select_taxa(spring_cor)
+```
+
+
+```{r clustered_heatmap_all, fig.width=10, fig.height=10}
+# Color vector for the legend
+col <- colorRamp2(
+    c(-1, -0.5, 0, 0.5, 1),
+    c("royalblue4", "lightblue", "white", "orange", "firebrick3"))
+
+hm_list <- list()
+
+for(i in seq_along(assolist)) {
+    if (i %in% c(2, 4)) {
+        showlegend <- TRUE
+    } else {
+        showlegend <- FALSE
+    }
+
+    hm_list[[i]] <- Heatmap(
+        assolist[[i]],
+        col = col,
+        rect_gp = gpar(col = "gray", lwd = 1),
+        show_row_names = FALSE,
+        show_column_names = FALSE,
+        column_title = names(assolist)[i],
+        name = "Association",
+        show_heatmap_legend = showlegend) %>%
+
+        draw() %>%
+        grid.grabExpr()
+}
+
+# Plot with wrap_plots() function from patchwork package
+wrap_plots(hm_list, ncol = 2, widths = c(8, 10, 8, 10))
+```
+
+
+The SparCC and the proportionality network show a block structure, where each
+block corresponds to a cluster. The clusters are less pronounced in the
+conditional dependence networks. The latter also generally have lower edge
+weights.
+
+#### Global network measures
+
+For each association measure, the three global network measures density,
+transitivity, and average path length are computed and stored in a data frame
+for comparison.
+
+```{r glob_props}
+# Compute density and store in a data frame
+glob <- data.frame(Density = unlist(lapply(graphlist, edge_density)))
+
+# Transitivity
+glob$Transitivity <- unlist(lapply(graphlist, transitivity))
+
+# Average path length
+glob$Av.path <- unlist(lapply(graphlist, average.path.length))
+
+glob
+```
