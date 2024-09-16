@@ -262,30 +262,39 @@ The plot above suggests that two clusters describe the data the best. Now
 we can plot which taxa define the key cluster features.
 
 ```{r dmm3, fig.width=6, fig.height=2}
+library(patchwork)
+
 # Get the estimates on how much each phyla contributes on each cluster
 best_model <- metadata(altExp(tse, "prevalent"))$DMM$dmm[2]
 drivers <- as.data.frame(best_model[[1]]@fit$Estimate)
 
-# Clean names
+# Clean class names
 drivers$class <- rownames(drivers)
 
-for (i in 1:2) {
-  # Transfer to relative to optimize plotting
-  drivers[i] <- drivers[i]/sum(drivers[i])
+# Function to create plots for the top 5 phyla
+plot_top_phyla <- function(i) {
+  # Convert to relative contributions for plotting
+  drivers[[i]] <- drivers[[i]] / sum(drivers[[i]])
+  
+  # Sort by the relative contribution
+  drivers_sorted <- drivers[order(drivers[[i]], decreasing = TRUE),]
+  
+  # Plot top 5 phyla
+  ggplot(head(drivers, 5), aes(
+  x = reorder(head(class, 5), + head(drivers[[i]], 5)),
+  y = head(drivers[[i]], 5))) +
 
-  drivers <- drivers[order(drivers[[i]], decreasing = TRUE),]
-  p <- ggplot(head(drivers, 5), aes(
-      x = reorder(head(class, 5), + head(drivers[[i]], 5)),
-      y = head(drivers[[i]], 5))) +
-
-      geom_bar(stat = "identity", fill = scales::hue_pal()(1), alpha = 0.6) +
-      coord_flip() +
-      labs(title = paste("Top phyla in group", i)) +
-      theme_minimal(base_size = 11) +
-      labs(x="", y="") +
-      scale_y_continuous(limits=c(0,1))
-  print(p)
+  geom_bar(stat = "identity", fill = scales::hue_pal()(1), alpha = 0.6) +
+  coord_flip() +
+  labs(title = paste("Top phyla in group", i)) +
+  theme_minimal(base_size = 11) +
+  labs(x="", y="") +
+  scale_y_continuous(limits=c(0,1))
 }
+
+# Generate both plots using lapply and combine them with wrap_plots
+plots <- lapply(1:2, plot_top_phyla)
+wrap_plots(plots)
 ```
 
 As well as in hierarchical clustering, we can also visualize the clusters by

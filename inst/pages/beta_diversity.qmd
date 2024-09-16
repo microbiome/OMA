@@ -292,7 +292,15 @@ distance calculations later on.
 
 # Let us see what happens when we operate with ntop highest variance features
 ntop <- 5
-tse_sub <- tse[head(rev(order(rowSds(assay(tse, "counts")))), ntop), ]
+
+# Calculate the standard deviations for each row
+row_sds <- rowSds(assay(tse, "counts"))
+
+# Get the indices of the top 5 rows with the highest standard deviations
+top_indices <- order(row_sds, decreasing = TRUE)[1:ntop]
+
+# Subset the `tse` object based on the top indices
+tse_sub <- tse[top_indices, ]
 ```
 
 Let us first convert the count assay to centered log ratio (clr) assay and
@@ -690,6 +698,7 @@ tse_genus <- runMDS(
     tse_genus,
     FUN = getDissimilarity,
     name = "PCoA_BC",
+    method = "bray",
     assay.type = "relabundance")
 ```
 
