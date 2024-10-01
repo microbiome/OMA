@@ -332,27 +332,22 @@ continuous sample memberships across all community types. NMF algorithm
 calculates the minimum distance between the original data and it's approximation
 using Kullback-Leibler divergence.
 
-Here, we use functions in `NMF` package. To reduce calculation time,
-we set the number of components to four instead of optimizing the number of
+Here, we use `mia` wrapper `getNMF`. To reduce calculation time,
+we set the number of components `k` to four instead of optimizing the number of
 components that describe the original data the best.
+The matrix returned by `getNMF` contains the sample scores, while the NMF output
+and NMF feature loadings are stored in the attributes `NMF_output` and 
+`loadings`, respectively.
 
 ```{r nmf1}
 library(NMF)
 
-# Optimize the number of communities required to describe the data
+# Calculate NMF
 set.seed(3221)
-res <- nmf(t(assay(altExp(tse, "prevalent"), "counts")), 4)
-```
-```{r}
-# Pick low-rank representations
-H <- res@fit@H
-W <- res@fit@W
-
-# Add NMF loadings in the metadata
-metadata(altExp(tse, "prevalent"))$NMF_loadings <- H
+res <- getNMF(altExp(tse, "prevalent"), k = 4)
 
 # Obtain the relative abundance of ES in each sample
-wrel <- t(apply(W, 1, function (x) {x/sum(x)}))
+wrel <- t(apply(res, 1, function (x) {x/sum(x)}))
 
 # Define the community type of a sample with the highest relative abundance
 altExp(tse, "prevalent")$NMFcomponent <- as.factor(apply(wrel, 1, which.max))
