@@ -299,12 +299,12 @@ row_sds <- rowSds(assay(tse, "counts"))
 # Get the indices of the top 5 rows with the highest standard deviations
 top_indices <- order(row_sds, decreasing = TRUE)[1:ntop]
 
-# Subset the `tse` object based on the top indices
+# Subset the tse object based on the top indices
 tse_sub <- tse[top_indices, ]
 ```
 
 Let us first convert the count assay to centered log ratio (clr) assay and
-calculate Aitchison distance without rarefaction:
+calculate MDS with Aitchison distance without rarefaction:
 
 ```{r}
 #| label: Aitchison distance without rarefaction
@@ -328,7 +328,7 @@ tse_sub <- runMDS(
   )
 ```
 
-The function `vegan::avgdist()` can use rarefaction to compute beta diversity:
+Then let's do the same with rarefaction:
 
 
 ```{r}
@@ -341,19 +341,16 @@ clr <- function (x) {
 
 # Run transformation after rarefactions before calculating the beta diversity..
 tse_sub <- runMDS(tse_sub,
-  assay.type="counts",
+  assay.type = "counts",
   ntop = nrow(tse_sub),
-  FUN = vegan::avgdist, # Custom beta diversity function that includes rarefaction
-  sample = min(colSums(assay(tse_sub, "counts"))), # rarefaction depth
-  distfun = getDissimilarity, # Use vegdist beta diversity function
-  dmethod = "euclidean", # euclidean beta diversity
-  iterations = 10,
-  transf=clr,
-  replace=TRUE,
+  FUN = getDissimilarity,
+  method = "euclidean",
+  niter = 10, # Number of iterations
+  sample = min(colSums(assay(tse_sub, "counts"))), # Rarefaction depth
+  transf = clr, # Applied transformation
+  replace = TRUE,
   name = "MDS_aitchison_rarefied"
   )
-
-plotReducedDim(tse_sub, "MDS_aitchison_rarefied")
 
 # Generate plots for non-rarefied and rarefied Bray-Curtis distances scaled by
 # MDS
@@ -372,44 +369,45 @@ wrap_plots(plots) +
 the total number of features, only the `ntop` features with highest variance would
 be used for dimensionality reduction and the other features would be filtered.
 
+When rarefaction is not done, the `getDissimilarity()` utilizes
+`vegan::vegdist()` function while in rafection `vegan::avgdist()` is applied.
 The argument `sample` is set to the smallest metagenomic reads count across
 all samples. This ensures that no sample will be removed during the rarefaction
 process.
 
-The argument `iterations` is by default set to 100 but 10 iterations is often
+The argument `niter` is by default set to 100 but 10 iterations is often
 sufficient for beta diversity calculations.
 
 To use transformations after the rarefaction of the samples and before the beta 
-diversity calculation, `vegan::avgdist()` has the argument `transf`.
+diversity calculation,  we can use the argument `transf`.
 
 We can also plot the correlation between principal coordinates PCx and PCy for
 both the rarefied and non-rarefied distance calculations:
 
 ```{r}
 #| label: PC_correlation
-par(mfrow=c(1, 2))
-p <- list()
-for (k in 1:2) {
 
+library(ggpubr)
+
+p <- lapply(1:2, function(i){
   # Principal axes are sign invariant;
   # align the signs; if the correlation is negative then swap the other axis
-  pcx <- reducedDim(tse_sub, "MDS_aitchison")[,k]
-  pcy <- reducedDim(tse_sub, "MDS_aitchison_rarefied")[,k]
-  pcy <- sign(cor(pcx, pcy)) * pcy
-  r <- cor(pcx, pcy)
+  original <- reducedDim(tse_sub, "MDS_aitchison")[, i]
+  rarefied <- reducedDim(tse_sub, "MDS_aitchison_rarefied")[, i]
 
-  p[[k]]  <- ggplot(data = data.frame(pcx, pcy), aes(x = pcx, y = pcy)) +
-        geom_point() +
-        geom_abline(intercept = 0, slope = 1, color = "red") +  # Adding the line y = x
-        ggtitle(paste0("PC", k, "; r=", round(r, 3))) +  # Adding the title
-        theme_minimal()
-}
+  temp  <- ggplot(data = data.frame(original, rarefied), aes(x = original, y = rarefied)) +
+    geom_point() + geom_smooth(method = "lm") +
+    stat_cor(method = "pearson") +
+    labs(title = paste0("Principal coordinate ", i))
+  return(temp)
+})
 wrap_plots(p)
 ```
 
-The `mia` package includes the rarefaction function `rarefyAssay()` that randomly
-subsamples a given assay of a `TreeSummarizedExperiment` dataset. However, the 
-iterations and beta diversity calculations are not included.
+The `mia` package's `addAlpha()` and `getDissimilarity()` functions support
+rarefaction in alpha and beta diversity calculations. Additionally, the
+`rarefyAssay()` function allows random subsampling of a given assay within a
+`TreeSummarizedExperiment` dataset.
 
 ### Other ordination methods {#sec-other-ord-methods}
 
@@ -471,11 +469,12 @@ better if smaller. This can be calculated as shown below.
 d0 <- as.matrix(getDissimilarity(t(assay(tse, "relabundance")), "bray"))
 
 # PCoA Ordination
-tse <- runMDS(tse,
-                FUN = getDissimilarity,
-                name = "PCoA",
-                method = "bray",
-                assay.type = "relabundance")
+tse <- runMDS(
+  tse,
+  FUN = getDissimilarity,
+  name = "PCoA",
+  method = "bray",
+  assay.type = "relabundance")
 
 # Quantify dissimilarities in the ordination space
 dp <- as.matrix(dist(reducedDim(tse, "PCoA")))

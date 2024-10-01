@@ -39,7 +39,6 @@ as hierarchical clustering, DBSCAN, and K-means.
 ```{r load_bluster}
 # Load dependencies
 library(bluster)
-library(kableExtra)
 ```
 
 In the examples of this chapter we use *peerj13075* data for
@@ -128,8 +127,9 @@ altExp(tse, "prevalent") <- addDominant(altExp(tse, "prevalent"))
 labels(dend) <- altExp(tse, "prevalent")$dominant_taxa
 dend <- color_labels(dend, k = k, col = unlist(cols))
 
-# Plot dendrogram
+# Adjust frame for the figure
 par(mar=c(9, 3, 0.5, 0.5))
+# Plot dendrogram
 dend |> set("labels_cex", 0.8) |> plot()
 ```
 
@@ -139,7 +139,7 @@ surface that captures the most variability in the data. In this example, we use
 multi-dimensional scaling (MDS) (see [@sec-unsupervised-ordinantion]).
 
 ```{r hclust3}
-library (scater)
+library(scater)
 
 # Add the MDS dimensions for plotting
 altExp(tse, "prevalent") <- runMDS(
@@ -262,39 +262,12 @@ The plot above suggests that two clusters describe the data the best. Now
 we can plot which taxa define the key cluster features.
 
 ```{r dmm3, fig.width=6, fig.height=2}
-library(patchwork)
-
 # Get the estimates on how much each phyla contributes on each cluster
 best_model <- metadata(altExp(tse, "prevalent"))$DMM$dmm[2]
 drivers <- as.data.frame(best_model[[1]]@fit$Estimate)
 
-# Clean class names
-drivers$class <- rownames(drivers)
-
-# Function to create plots for the top 5 phyla
-plot_top_phyla <- function(i) {
-  # Convert to relative contributions for plotting
-  drivers[[i]] <- drivers[[i]] / sum(drivers[[i]])
-  
-  # Sort by the relative contribution
-  drivers_sorted <- drivers[order(drivers[[i]], decreasing = TRUE),]
-  
-  # Plot top 5 phyla
-  ggplot(head(drivers, 5), aes(
-  x = reorder(head(class, 5), + head(drivers[[i]], 5)),
-  y = head(drivers[[i]], 5))) +
-
-  geom_bar(stat = "identity", fill = scales::hue_pal()(1), alpha = 0.6) +
-  coord_flip() +
-  labs(title = paste("Top phyla in group", i)) +
-  theme_minimal(base_size = 11) +
-  labs(x="", y="") +
-  scale_y_continuous(limits=c(0,1))
-}
-
-# Generate both plots using lapply and combine them with wrap_plots
-plots <- lapply(1:2, plot_top_phyla)
-wrap_plots(plots)
+# Plot by utilizng miaViz::plotLoadings
+plotLoadings(as.matrix(drivers), ncomponents = 2)
 ```
 
 As well as in hierarchical clustering, we can also visualize the clusters by
