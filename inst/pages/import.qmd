@@ -69,7 +69,8 @@ library(mia)
 tse <- importBIOM(
     biom_file_path,
     rank.from.prefix = TRUE,
-    prefix.rm = TRUE)
+    prefix.rm = TRUE,
+    artifact.rm = TRUE)
 
 # Check
 tse
@@ -89,32 +90,14 @@ command shows just the beginning of the data table for an overview.
 `knitr::kable()` helps print the information more nicely.
 
 ```{r}
-head(rowData(tse))
-```
-
-We further polish the feature names by removing unnecessary characters and
-then replace the original `rowData` with its updated version.
-
-```{r}
-# Genus level has additional '\"', so let's delete that also
-rowdata_modified <- BiocParallel::bplapply(
-    rowData(tse),
-    FUN = stringr::str_remove,
-    pattern = '\"')
-
-# rowdata_modified is a list, so convert this back to DataFrame format.
-# and assign the cleaned data back to the TSE rowData
-rowData(tse) <- DataFrame(rowdata_modified)
-
-# Now we have a nicer table
-head(rowData(tse))
+rowData(tse) |> head()
 ```
 
 We notice that the imported biom file did not contain any `colData` yet,
 so only an empty dataframe appears in this slot.
 
 ```{r}
-head(colData(tse))
+colData(tse) |> head()
 ```
 
 Let us add `colData` from the sample metadata, which is stored in a CSV file.
@@ -132,7 +115,7 @@ colData(tse) <- DataFrame(sample_meta)
 Now the `colData` includes the sample metadata.
 
 ```{r}
-head(colData(tse))
+colData(tse) |> head()
 ```
 
 Finally, we add a phylogenetic tree to the `rowData` slot. Such feature is
@@ -156,7 +139,7 @@ tse
 Now the `rowTree` slot contains the phylogenetic tree:
 
 ```{r, eval=FALSE}
-head(rowTree(tse))
+rowTree(tse) |> head()
 ```
 
 ### Non-standard formats {#sec-import-from-file}

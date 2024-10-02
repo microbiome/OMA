@@ -159,7 +159,7 @@ relative abundance of the prevalent taxa (between 0 and 1).
 ### Rare taxa
 
 Related functions are available for the analysis of rare taxa
-(`rareMembers`, `rareAbundance`, `lowAbundance`, `getRare()`,
+(`rare_members()`, `rare_abundance()`, `low_abundance()`, `getRare()`,
 `subsetByRare()`).
 
 ### Plotting prevalence
@@ -217,8 +217,12 @@ After some preparation, the data are assembled and can be plotted with
 
 ```{r plot-prev-prev, message=FALSE, fig.cap="Prevalence of top phyla as judged by prevalence"}
 library(miaViz)
+# Filter rows where Phylum is in top_phyla
+selected <- rowData(x)$Phylum %in% top_phyla
+
+# Plot the data
 plotRowTree(
-    x[rowData(x)$Phylum %in% top_phyla,],
+    x[selected, ],
     edge.colour.by = "Phylum",
     tip.colour.by = "prevalence",
     node.colour.by = "prevalence")
@@ -226,8 +230,12 @@ plotRowTree(
 
 
 ```{r plot-prev-mean, message=FALSE, fig.cap="Prevalence of top phyla as judged by mean abundance"}
+# Filter for Phylum in top_phyla_mean
+selected <- rowData(x)$Phylum %in% top_phyla_mean
+
+# Plot the data
 plotRowTree(
-    x[rowData(x)$Phylum %in% top_phyla_mean,],
+    x[selected, ],
     edge.colour.by = "Phylum",
     tip.colour.by = "prevalence",
     node.colour.by = "prevalence")
@@ -293,42 +301,26 @@ histogram (left) or by sorting the samples by library size (right).
 
 ```{r plot-viz-lib-size-1, fig.width=8, fig.height=4, fig.cap="Library size distribution."}
 library(ggplot2)
-
-p1 <- ggplot(colData(tse)) +
-        geom_histogram(
-            aes(x = sum), color = "black", fill = "gray", bins = 30) +
-        labs(x = "Library size", y = "Frequency (n)") +
-        # scale_x_log10(
-            # breaks = scales::trans_breaks("log10", function(x) 10^x),
-            # labels = scales::trans_format("log10", scales::math_format(10^.x))) +
-        theme_bw() +
-        # Removes the grid
-        theme(panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            panel.border = element_blank(),
-            panel.background = element_blank(),
-            # Adds y-axis
-            axis.line = element_line(colour = "black"))
-
 library(dplyr)
-df <- as.data.frame(colData(tse)) %>%
-    arrange(sum) %>%
-    mutate(index = 1:n())
-p2 <- ggplot(df, aes(y = index, x = sum/1e6)) +
-    geom_point() +
-    labs(
-        x = "Library size (million reads)",
-        y = "Sample index") +
-    theme_bw() +
-    # Removes the grid
-    theme(panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    panel.border = element_blank(),
-    panel.background = element_blank(),
-    # Adds y-axis
-    axis.line = element_line(colour = "black"))
-
 library(patchwork)
+
+# Create a histrogram showing distribution of library sizes
+p1 <- ggplot(colData(tse)) +
+        geom_histogram(aes(x = sum/1e6), color = "black", fill = "gray") +
+        labs(x = "Library size (million reads)", y = "Frequency (n)") +
+        theme_classic()
+
+# Order data in increasing order
+df <- as.data.frame(colData(tse)) |>
+    arrange(sum) |>
+    mutate(proportion = (1:n())/n())
+
+# Create a scatter plot showing how library sizes are distributed
+p2 <- ggplot(df, aes(y = proportion, x = sum/1e6)) +
+    geom_point() +
+    labs(x = "Library size (million reads)", y = "Proportion of samples") +
+    theme_classic()
+
 p1 + p2
 ```
 
@@ -339,10 +331,8 @@ specified function called `plotColData()`.
 # Sort samples by read count,
 # order the factor levels,
 # and store back to tse as DataFrame
-# TODO: plotColData could include an option
-# for sorting samples based on colData variables
-colData(tse) <- as.data.frame(colData(tse)) %>%
-    arrange(X.SampleID) %>%
+colData(tse) <- as.data.frame(colData(tse)) |>
+    arrange(X.SampleID) |>
     mutate(X.SampleID = factor(X.SampleID, levels=X.SampleID)) %>%
         DataFrame
 plotColData(tse,"sum","X.SampleID", colour_by = "SampleType") +
