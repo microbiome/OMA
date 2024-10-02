@@ -5,10 +5,11 @@ library(rebook)
 chapterPreamble()
 ```
 
-This chapter covers various basic techniques for preparing data for subsequent
-analysis. These include subsetting, splitting, and modifying data, as well as
-converting data to a `data.frame` through melting and merging multiple
-`SummarizedExperiment` objects. See [@sec-containers] for basics of `TreeSE`.
+This chapter introduces several essential techniques for preparing data for
+analysis. These techniques include  subsetting and splitting data, modifying data, 
+and converting data to a `data.frame.` Additionally, it explains how to merge 
+multiple `SummarizedExperiment` objects when needed. For a basic understanding of 
+`TreeSE` please refer to [@sec-containers]
 
 ## Subsetting {#sec-treese_subsetting}
 
@@ -18,13 +19,6 @@ the subset of interest can be extracted and investigated
 separately. This might improve performance and reduce the
 computational load.
 
-Load:
-
-* mia
-* dplyr
-* knitr
-* data `GlobalPatterns`
-
 ```{r include = FALSE}
 # Load libraries and data
 library(mia)
@@ -33,9 +27,7 @@ library(knitr)
 ```
 
 Let us store `GlobalPatterns` into `tse` and check its original number of
-features (rows) and samples (columns). **Note**: When subsetting by sample,
-expect the number of columns to decrease. When subsetting by feature, expect
-the number of rows to decrease.
+features (rows) and samples (columns).
 
 ```{r}
 # Store data into se and check dimensions
@@ -45,7 +37,22 @@ tse <- GlobalPatterns
 dim(tse)
 ```
 
+::: {.callout-note}
+## Note
+
+When subsetting by sample, expect the number of columns to decrease. When 
+subsetting by feature, expect the number of rows to decrease.
+:::
+
 ### Subset by sample (column-wise)
+
+Several criteria can be used to subset by sample:
+
+- origin
+- sampling time
+- sequencing method
+- DNA / RNA barcode
+- cohort
 
 For the sake of demonstration, here we will extract a subset containing only the
 samples of human origin (feces, skin or tongue), stored as `SampleType` within
@@ -61,24 +68,13 @@ unique(tse$SampleType)
 
 ```{r eval = FALSE}
 # Show the frequency of each value
-tse$SampleType %>% table()
+tse$SampleType |> table()
 ```
 
 ```{r echo = FALSE}
 # Show the frequency of each value
-tse$SampleType %>% table() %>% kable() %>%
-    kableExtra::kable_styling("striped", latex_options="scale_down") %>%
-    kableExtra::scroll_box(width = "100%")
+tse$SampleType |> table() |> kable()
 ```
-
-::: {.callout-note}
-## Note
-
-After subsetting, expect the number of columns to equal the
-sum of the frequencies of the samples that you are interested
-in. For instance, `ncols = Feces + Skin + Tongue = 4 + 3 + 2 = 9`.
-:::
-
 
 Next, we _logical index_ across the columns of `tse` (make sure to
 leave the first index empty to select all rows) and filter for the
@@ -93,18 +89,13 @@ tse_sub <- tse[ , tse$SampleType %in% c("Feces", "Skin", "Tongue")]
 dim(tse_sub)
 ```
 
-As a sanity check, the new object `tse_subset_by_sample` should have
-the original number of features (rows) and a number of samples
-(columns) equal to the sum of the samples of interest (in this case
-9).
+::: {.callout-note}
+## Note
 
-Several criteria can be used to subset by sample:
-
-* origin
-* sampling time
-* sequencing method
-* DNA / RNA barcode
-* cohort
+After subsetting, expect the number of columns to equal the
+sum of the frequencies of the samples that you are interested
+in. For instance, `ncols = Feces + Skin + Tongue = 4 + 3 + 2 = 9`.
+:::
 
 ### Subset by feature (row-wise)
 
@@ -126,11 +117,7 @@ cat(paste(unique(rowData(tse)$Phylum)[1:5], collapse = "\n"))
 
 ```{r}
 # Show the frequency of each value
-rowData(tse)$Phylum %>% table() %>% head() %>%
-  kable() %>%
-  kableExtra::kable_styling("striped", latex_options="scale_down") %>%
-  kableExtra::scroll_box(width = "100%")
-
+rowData(tse)$Phylum |> table() |> head() |> kable()
 ```
 
 ::: {.callout-note}
@@ -149,9 +136,7 @@ abundance of all features that belong to Actinobacteria or
 Chlamydiae, agglomeration is recommended (see
 [@sec-agglomeration] for details).
 
-### Select features based on taxonomy rank
-
-Next, we _logical index_ across the rows of `tse` (make sure to leave
+Next, we _logically index_ across the rows of `tse` (make sure to leave
 the second index empty to select all columns) and filter for the
 features that fall in either Actinobacteria or Chlamydiae group. For this,
 we use the information on the samples from the metadata
@@ -163,16 +148,13 @@ filters out all features that have an `NA` in place of the phylum variable.
 
 ```{r}
 # Subset by feature
-tse_sub <- tse[
-    rowData(tse)$Phylum %in% c("Actinobacteria","Chlamydiae"), ]
+selected <- rowData(tse)$Phylum %in% c("Actinobacteria","Chlamydiae") &
+  !is.na(rowData(tse)$Phylum)
+tse_sub <- tse[selected, ]
 
 # Show dimensions
 dim(tse_sub)
 ```
-
-As a sanity check, the new object, `tse_subset_by_feature`, should have the
-original number of samples (columns) and a number of features (rows) equal to
-the sum of the features of interest (in this case, 1652).
 
 ### Subset by sample and feature
 
@@ -182,10 +164,10 @@ features of phyla Actinobacteria or Chlamydiae.
 
 ```{r}
 # Subset by sample and feature and remove NAs
-tse_sub <- tse[
-  rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") &
-      !is.na(rowData(tse)$Phylum),
-  tse$SampleType %in% c("Feces", "Skin", "Tongue")]
+selected_rows <- rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") &
+      !is.na(rowData(tse)$Phylum)
+selected_cols <- tse$SampleType %in% c("Feces", "Skin", "Tongue")
+tse_sub <- tse[selected_rows, selected_cols]
 
 # Show dimensions
 dim(tse_sub)
@@ -201,8 +183,7 @@ rows filtered by feature).
 
 If a study was to consider and quantify the presence of Actinobacteria
 as well as Chlamydiae in different sites of the human body,
-`tse_sub` might be a suitable subset to start
-with.
+`tse_sub` might be a suitable subset to start with.
 
 ### Remove empty columns and rows
 
@@ -272,14 +253,16 @@ You can split the data based on variables by using the functions
 
 `agglomerateByRanks()` splits the data based on taxonomic ranks. Since the 
 elements of the output list share columns, they can be stored into `altExp` by
-setting `as.list = FALSE`.
+setting `as.list = FALSE`. See [@sec-agglomeration] for more tips on agglomeration.
 
 ```{r agglomerateByRanks}
 agglomerateByRanks(tse, as.list = TRUE)
 ```
 
-If you want to split the data based on another variable than taxonomic rank, use 
-`splitOn()`. It works for row-wise and column-wise splitting.
+If you want to split the data based on a variable other than taxonomic rank, use 
+`splitOn()`. It works for row-wise and column-wise splitting. We might want to 
+split the data, Splitting the data may be useful, for example, if you want to 
+analyze data from different cohorts separately.
 
 ```{r splitOn}
 splitOn(tse, "SampleType")
@@ -287,8 +270,10 @@ splitOn(tse, "SampleType")
 
 ## Add or modify data {#sec-add-or-modify-data}
 
-The information contained by the `colData` of a `TreeSE` can be modified by
-accessing the desired variables.
+The information contained by the `colData` of a `TreeSE` can be added and/or 
+modified by accessing the desired variables. You might want to add or modify 
+this data to include new variables or update existing ones, which can be essential 
+for ensuring that all relevant metadata is available for subsequent analyses.
 
 ```{r modify-coldata}
 # modify the Description entries
@@ -296,10 +281,10 @@ colData(tse)$Description <- paste(
     colData(tse)$Description, "modified description")
 
 # view modified variable
-head(tse$Description)
+tse$Description |> head()
 ```
 
-New information can also be added to the experiment by creating a new variable.
+New information can be added to the experiment by creating a new variable.
 
 ```{r add-coldata}
 # simulate new data
@@ -309,7 +294,18 @@ new_data <- runif(ncol(tse))
 colData(tse)$NewVariable <- new_data
 
 # view new variable
-head(tse$NewVariable)
+tse$NewVariable |> head()
+```
+
+Alternatively, you can add whole table by merging it with exising `colData`.
+
+```{r add-coldata2}
+# simulate new data
+new_data <- data.frame(var1 = runif(ncol(tse)), var2 = runif(ncol(tse)))
+rownames(new_data) <- colnames(tse)
+
+# Combine existing data with new data
+colData(tse) <- cbind(colData(tse), new_data)
 ```
 
 ## Melting data
@@ -324,7 +320,7 @@ data(GlobalPatterns, package="mia")
 tse <- GlobalPatterns
 tse <- transformAssay(tse, MARGIN = "cols", method="relabundance")
 # Melt SE object
-molten_tse <- mia::meltSE(
+molten_tse <- meltSE(
     tse,
     add.row = TRUE,
     add.col = TRUE,
