@@ -1457,7 +1457,6 @@ zicoseq_res |>
     kable()
 ```
 
-
 ### Workflow 1
 
 1. Get the abundances for an individual feature (taxonomic group / row).
@@ -1490,7 +1489,6 @@ ComplexHeatmap::pheatmap, ComplexHeatMap::Heatmap, ANCOMBC::ancombc2,
 ALDEx2::aldex, Maaslin2::Maaslin2, agglomerateByRank, transformAssay,
 subsetByPrevalent
 
-
 ## Visualization
 
 ### Multivariate ordination
@@ -1503,7 +1501,6 @@ subsetByPrevalent
 
 Useful functions: scater::runMDS, runNMDS, transformAssay, ggplot,
 scater::plotReducedDim
-
 
 ### Heatmap visualization
 
@@ -1545,7 +1542,7 @@ tse <- agglomerateByPrevalence(tse, rank = "Phylum", prevalence = 0.9)
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 ```
 
-4. Visualize the relative abundances with a heatmap using the sechm library
+4. Visualize the relative abundances with a heatmap using the `sechm` package.
 
 ```{r}
 #| label: heatmap-ex4
@@ -1559,7 +1556,7 @@ sechm(
     show_colnames=TRUE)
 ```
 
-5. Create a basic heatmap using the `pheatmap` package.
+5. Create a similar heatmap but now using the `ComplexHeatmap` package directly.
 
 ```{r}
 #| label: heatmap-ex5
@@ -1568,10 +1565,9 @@ sechm(
 #| eval: false
 
 library(mia)
-library(pheatmap)
+library(ComplexHeatmap)
 
-# Create heatmap using pheatmap on mia's enterotype dataset
-pheatmap(assay(enterotype, "counts"))
+Heatmap(assay(tse, "relabundance"))
 ```
 
 ### Advanced Heatmaps
@@ -1696,9 +1692,10 @@ p <- Heatmap(
 p
 ```
 
-**Extra** Cool exercises :
+**Extra** Cool exercises:
 
-1. Create an interactive heatmap. 
+1. Create an interactive heatmap in Phylum level. Visualize standardized
+(Z-scored) relative abundances.
 
 ```{r}
 #| label: extra-interactiveheatmap-ex1
@@ -1710,13 +1707,18 @@ library(mia)
 library(heatmaply)
 
 data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+# Agglomerate
+tse_phylum <- agglomerateByRank(GlobalPatterns, rank = "Phylum")
+# Transform
+tse_phylum <- transformAssay(tse_phylum, method = "relabundance")
+tse_phylum <- transformAssay(
+   tse_phylum, assay.type = "relabundance", method = "standardize",
+   MARGIN = "rows")
 
 # Create the interactive heatmap using aggregated data
-heatmaply(assay(agglomerateByRank(GlobalPatterns, rank = "Phylum")),
-          xlab = "Samples", ylab = "Phyla")
+heatmaply(assay(tse_phylum, "standardize"), xlab = "Samples", ylab = "Phyla")
 ```
-Notice we aggregate the "GlobalPatterns" dataset
-to a higher taxonomic level to make the data more manageable.
 
 2. k-means clustering on reduced dimensions and visualization
 
@@ -1731,7 +1733,6 @@ to a higher taxonomic level to make the data more manageable.
 
 library(mia)
 library(SummarizedExperiment)
-library(vegan)
 library(scater)
 library(bluster)
 
@@ -1739,19 +1740,21 @@ data(GlobalPatterns)
 tse <- GlobalPatterns
 
 # Perform MDS on the abundance data using scater::runMDS
-tse <- runMDS(tse, FUN = vegan::vegdist, method = "bray", assay.type = "counts")
+tse <- runMDS(tse, FUN = getDissimilarity, method = "bray", assay.type = "counts")
 
 # Perform k-means clustering using mia's addCluster()
 kmeans_param <- KmeansParam(centers = 3)
-tse <- addCluster(tse, colDataName = "kmeans_clusters", BLUSPARAM = kmeans_param)
+tse <- addCluster(
+   tse, clust.col = "kmeans_clusters", by = "columns", BLUSPARAM = kmeans_param)
 
 # Visualize MDS with clusters
-plotReducedDim(tse, dimred = "MDS") +
+plotReducedDim(tse, dimred = "MDS", colour_by = "kmeans_clusters") +
   labs(title = "MDS with k-means Clustering") +
   theme_minimal()
 ```
 
-3. Hierarchial Clustering
+3. Hierarchical Clustering
+- Agglomerate to Family level
 - Hierarchical clustering of samples based on abundance data.
 - Visualizes the clustered data using a heatmap, with cluster information added to metadata.
 
@@ -1762,22 +1765,30 @@ plotReducedDim(tse, dimred = "MDS") +
 #| code-summary: "Show solution"
 
 library(mia)
-library(sechm)
 library(bluster)
+library(ComplexHeatmap)
 
-data("enterotype", package = "mia")
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
 
+# Agglomerate data
+tse <- agglomerateByRank(tse, rank = "Phylum")
+# Transform adata
+tse <- transformAssay(tse, method = "clr", pseudocount = TRUE)
+tse <- transformAssay(tse, assay.type = "clr", method = "standardize", MARGIN = "rows")
 # Perform hierarchical clustering
 hclust_param <- HclustParam(method = "complete", cut.params = list(k = 3))
-tse <- addCluster(enterotype, colDataName = "Cluster", BLUSPARAM = hclust_param)
+tse <- addCluster(
+   tse, clust.col = "Cluster", MARGIN = "columns", BLUSPARAM = hclust_param)
 
+# Create column annotation
+column_ha = HeatmapAnnotation(cluster = colData(tse)$Cluster)
 # Visualization using sechm heatmap
-sechm(tse, 
-      features = rownames(tse), 
-      cluster_rows = TRUE, cluster_cols = TRUE)
+mat <- assay(tse, "standardize")
+Heatmap(mat, name = "mat", top_annotation = column_ha)
 ```
 
-4. Customize the heatmap with a specific color palette to enhance visualization.
+4. In the previous heatmap, order the columns based on clusters.
 
 ```{r}
 #| label: extra-customcolorheatmap-ex-4
@@ -1785,24 +1796,14 @@ sechm(tse,
 #| code-summary: "Show solution"
 #| eval: true
 
-library(mia)
-library(ComplexHeatmap)
-library(circlize)
-
-data("esophagus", package = "mia")
-
-# Define a custom color palette
-custom_colors <- colorRamp2(c(min(assay(esophagus)), mean(assay(esophagus)), 
-                            max(assay(esophagus))), c("blue", "white", "red"))
-
-Heatmap(assay(esophagus),  
-        col = custom_colors,
-        cluster_rows = TRUE, 
-        cluster_columns = TRUE)
+# Order
+tse <- tse[, order(colData(tse)$Cluster)]
+# Create column annotation
+column_ha = HeatmapAnnotation(cluster = colData(tse)$Cluster)
+# Visualization using sechm heatmap
+mat <- assay(tse, "standardize")
+Heatmap(mat, name = "mat", top_annotation = column_ha, cluster_columns = FALSE)
 ```
-Sometimes, e.g. with `sechm`, you might have to do log transformation to reduce the skewness and 
-bring the higher values closer to the rest of the data. This will help in highlighting
-differences across the entire range of data.
 
 ## Multiomics
 
