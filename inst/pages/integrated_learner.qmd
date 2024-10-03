@@ -23,11 +23,10 @@ predictions from different data views to align through an agreement parameter
 
 ## Import and preprocess data
 
-We use the publicly available type 2 diabetes (T2D) data from the 
+We use the publicly available Inflammatory Bowel Diseases (IBD) data from the 
 `curatedMetagenomicData` package [@Lloyd-Price2019], where we aim to 
-predict T2D disease status based on both taxonomic (species abundances) and 
-functional (pathway abundances) profiles. Note that the dataset is the same as
-used in [@sec-machine_learning] for single omic ML model.
+predict IBD disease status based on both taxonomic (species abundances) and 
+functional (pathway abundances) profiles.
 
 ```{r}
 #| label: load-pkg-data
@@ -37,11 +36,11 @@ library(dplyr)
 library(mia)
 
 tse1 <- sampleMetadata |>
-  filter(study_name == "QinJ_2012") |>
+  filter(study_name == "HMP_2019_ibdmdb") |>
   returnSamples("relative_abundance", rownames = "short")
 
 tse2 <- sampleMetadata |>
-  filter(study_name == "QinJ_2012") |>
+  filter(study_name == "HMP_2019_ibdmdb") |>
   returnSamples("pathway_abundance", rownames = "short")
 
 # Create a MAE object
@@ -50,6 +49,17 @@ mae <- MultiAssayExperiment(
     )
 mae
 ```
+
+Let's first check how many patients are in each group.
+
+```{r}
+#| label: check_diagnoses
+table(mae[[1]]$disease) / ncol(mae[[1]])
+```
+
+The dataset appears to be imbalanced, with nearly three-quarters of the
+patients having IBD. This imbalance may impact the training process and how
+the model learns to predict outcomes for underrepresented group members.
 
 Further data pre-processing is necessary to handle near-zero-variance features
 in this dataset. A combination of variance and prevalence filtering
@@ -84,6 +94,8 @@ mae[[2]] <- transformAssay(
 Ultimately, `r nrow(mae[[1]])+nrow(mae[[1]])` features are retained, consisting
 of `r nrow(mae[[1]])` pathways and `r nrow(mae[[2]])` species.
 
+## Fit model
+
 We randomly select 20% of the samples for the validation set, ensuring they are
 not used in training. This approach provides a more robust estimate of how well
 the model generalizes to unseen data.
@@ -91,7 +103,7 @@ the model generalizes to unseen data.
 ```{r}
 #| label: select_validation
 
-set.seed(3747)
+set.seed(377)
 colData(mae)[["validation_set"]] <- sample(
     c(TRUE, FALSE), size = ncol(mae[[1]]), replace = TRUE, prob = c(0.2, 0.8))
 ```
@@ -101,41 +113,42 @@ supports early, late, and intermediate fusion methods [@Mallick2024]. Under the
 hood, it leverages the `SuperLearner` package. The process begins by fitting
 "base learners" for each layer, with separate models trained for each omic
 dataset. Then, a "meta learner" integrates the outputs from these individual
-models to make the final predictions.
+models to make the final predictions. For "base learners" and "meta learner",
+we use _random forest_ and _rank loss minimization_ models, respectively.
 
 ```{r}
 #| label: fit_model
-
-# For some reason Java Virtual Machine is often incorrectly configured. This
-# makes sure that enough memory is assigned to JVM (5GB).
-options(java.parameters = "-Xmx5g")
 
 library(IntegratedLearner)
 library(SuperLearner)
 
 # Fit the model
 fit <- IntegratedLearnerFromMAE(
-    mae,
-    # Select experiments and assays
-    experiment = names(experiments(mae)),
-    assay.type = c("clr", "clr"),
-    # Select columns from sample metadata
-    outcome.col = "disease",
-    valid.col = "validation_set",
-    # Options for base and meta models
-    base_learner = "SL.bartMachine",
-    meta_learner = "SL.nnls.auc",
-    # The outcome is binary
-    family = binomial()
+  mae,
+  # Select experiments and assays
+  experiment = names(experiments(mae)),
+  assay.type = c("clr", "clr"),
+  # Select columns from sample metadata
+  outcome.col = "disease",
+  valid.col = "validation_set",
+  # Options for base and meta models
+  base_learner = "SL.randomForest",
+  meta_learner = "SL.nnls.auc",
+  # The outcome is binary
+  family = binomial()
 )
 ```
-The outputs include the following models:
+
+The output include the following models:
 
     - Individual models: Trained separately for each omic dataset.
     - Stacked model (late fusion): Combines the predictions from each individual model into a single meta-model.
     - Concatenated model (early fusion): Trains a model where all features are merged before training.
 
-We can summarize the model performance using a Receiver Operating Characteristic (ROC) plot.
+## Visualize results
+
+We can summarize the model performance using a Receiver Operating
+Characteristic (ROC) plot.
 
 ```{r}
 #| label: visualize_result
@@ -146,191 +159,83 @@ library(cowplot)
 p <- IntegratedLearner:::plot.learner(fit)
 ```
 
-Based on the ROC plot described below, we observe that the AUC is `r fit$AUC.test[[2]]` when
-considering only the pathway abundance data in the model, and `r fit$AUC.test[[1]]` for the model
-including only the species abundance data. The AUC increases to `r fit$AUC.test[[4]]` when using
-the early fusion model and reaches `r fit$AUC.test[[3]]` with the late fusion model.
-Overall, most integrated
-classifiers outperform individual layers in distinguishing between T2D and
-healthy controls.
+Based on the ROC plot described below, we observe that the AUC is
+`r fit$AUC.test[[2]]` when considering only the pathway abundance data in the
+model, and `r fit$AUC.test[[1]]` for the model including only the species
+abundance data. The AUC increases to `r fit$AUC.test[[4]]` when using
+the early fusion model and reaches `r fit$AUC.test[[3]]` with the late fusion
+model. Overall, most integrated classifiers outperform individual layers in
+distinguishing between T2D and healthy controls.
 
-When using the BART machine, in addition to point predictions, we can also generate:
+The model's performance can also be evaluated and summarized using a confusion
+matrix.
 
-    1. Credible intervals for all observations,
-    2. Estimated layer weights in the meta-model, and
-    3. Feature importance scores.
+```{r}
+#| label: conf_matrix
 
-For visualization tips on how to plot these and more, refer to the
+library(caret)
+
+obs <- factor(fit$Y_test)
+pred <- ifelse(fit$yhat.test$stacked > 0.5, levels(obs)[[2]], levels(obs)[[1]])
+pred <- factor(pred, levels = levels(obs))
+conf <- confusionMatrix(data = pred, reference = obs)
+conf
+```
+
+The model appears to be performing well the the accuracy being
+`r paste0(round(conf$overall[[1]]*100, 2), "%")`. The model seems to precict
+correctly almost all IBD patients. It is also worth noting that over
+three-quarters of the controls are classified correctly
+
+Lastly, we may be interested in identifying the features that contribute most
+to predicting the outcome. To do this, we first extract feature importance
+scores from the individual models. Next, we scale these importance scores based
+on the weights assigned to each layer in the stacked model. This process
+provides us with the overall importance of each feature in the final model.
+
+```{r}
+#| label: feat_importance
+
+library(ggplot2)
+
+# Get individual models
+models <- fit$model_fits$model_layers
+# Get importances
+importances <- lapply(seq_len(length(models)), function(i){
+  # Get importances
+  temp <- models[[i]]$importance
+  # Scale based on weight in stacked model
+  temp <- temp * fit$weights[[i]]
+  return(temp)
+  })
+# Combine and order to most important features
+importances <- do.call(rbind, importances)
+importances <- importances[
+  order(importances, decreasing = TRUE), , drop = FALSE]
+# Add features to column
+importances <- importances |> as.data.frame()
+importances[["Feature"]] <- factor(
+  rownames(importances), levels = rownames(importances))
+# Convert to 0-1 scale
+importances[[1]] <- importances[[1]] / sum(importances[[1]])
+# Get top 20 importances
+top_n <- 20
+importances <- importances[ seq_len(top_n), ]
+
+# Plot as a bar plot
+p <- ggplot(importances, aes(x = MeanDecreaseGini, y = Feature)) +
+  geom_bar(stat = "identity")
+p
+```
+
+From the plot, we can observe that `r importances[1, "Feature"]` and
+`r importances[1, "Feature"]` appear to have the greatest predictive power
+among all the features in determining the outcome. However, the predictive
+power appears to be fairly evenly distributed across all features.
+
+::: {.callout-note}
+
+For more details on modeling with `IntegratedLearner`, refer to
 [IntegratedLearner vignette](http://htmlpreview.github.io/?https://github.com/himelmallick/IntegratedLearner/blob/master/vignettes/IntegratedLearner.html).
 
-
-
-
-
-```{r}
-#| label: capture output
-
-library(mcmcplots)
-
-capture.output(temp <- caterplot(t(weighted_post_samples), add = FALSE))
-
-```
-
-
-
-Finally, we visualize the results for the top 20 features for each layer based
-on the intermediate fusion.
-
-```{r}
-
-```
-
-
-## Prediction of fat and prebiotics in diet of rats
-
-As an example we would build a random forest classifier based on the 
-HintikkaxOData multi-omics profiles to classify fat and prebiotics in diet of rats. 
-
-### With validation set
-
-```{r valid-set}
-# load required libraries 
-
-library(mia)
-library(SuperLearner)
-library(IntegratedLearner)
-library(tidyverse)
-library(cowplot)
-
-# load multi-omic data 
-
-data("HintikkaXOData")
-mae <- HintikkaXOData
-
-# Add validation set info to colData 
-
-
-colData(mae)[["valid"]] <- sample(c(TRUE, FALSE), nrow(colData(mae)), 
-                                  replace = TRUE)
-
-# Run with validation set 
-
-
-fit1 <- IntegratedLearnerFromMAE(
-    mae,
-    experiment = c(1, 2, 3),
-    assay.type = c("counts", "nmr", "signals"),
-    outcome.col = "Fat",
-    valid.col = "valid",
-    folds = 10,
-    na.rm = TRUE,
-    base_learner = 'SL.randomForest',
-    meta_learner = 'SL.nnls.auc',
-    verbose = TRUE,
-    family = binomial()
-)
-
-```
-
-IntegratedLearner offers easily accessible and interpretable summary outputs 
-including 1) computation time, 2) per-layer AUC/ R2 scores on training , 3) AUC/ R2
-metrics for stacked and concatenated model if run_stacked=TRUE and r
-un_concat=TRUE and 4) estimated per-layer weights from meta learner in stacked 
-model.
-
-We can visualize the classification performance by constructing layer-wise ROC 
-curves for both train and test set using plot.learner() function that takes 
-IntegratedLearner object as input.
-
-```{r plot fit1}
-
-# Summary outputs 
-
-plot <- IntegratedLearner:::plot.learner(fit1)
-
-```
-
-The stacked model achieves superior accuracy to individual layers and concatenation 
-model in independent validation, indicating that the stacked multi-omics classifier 
-leads to a competitive or superior cross-validated and independent validation 
-classification accuracy than its single-omics counterparts.
-
-### Without validataion set
-
-The default base model recommendation for IntegratedLearner is Bayesian additive 
-regression trees or BART (base_learner='SL.BART'). Using BART as base-model yields 
-uncertainty estimates (i.e. credible intervals) of the prediction and model 
-parameters in addition to reporting a small set of interpretable features for 
-follow-up experiments (i.e. feature importance scores).
-
-```{r no_valid set}
-
-# Run without validation set 
-
-fit2 <- IntegratedLearnerFromMAE(
-    mae,
-    experiment = c(1, 2, 3),
-    assay.type = c("counts", "nmr", "signals"),
-    outcome.col = "Diet",
-    folds = 10,
-    na.rm = TRUE # The data has missing values that are removed
-)
-
-```
-
-```{r plot fit2}
-
-# Summary outputs 
-
-plot <- IntegratedLearner:::plot.learner(fit2)
-
-```
-
-As before, the multi-omics stacked prediction model leads to a better 
-cross-validated accuracy than its single-omics counterparts and concatenation 
-model.
-
-When base_learner='SL.BART', in addition to point predictions, we can also 
-generate 1) credible intervals for all observations, 2) estimated layer weights 
-in the meta model and 3) feature importance scores.
-
-```{r weights fit2}
-weights <- fit2$weights
-
-dataX <- fit2$X_train_layers
-dataY <- fit2$Y_train
-
-
-post_samples <- vector("list", length(weights))
-names(post_samples) <- names(dataX)
-
-for(i in seq_along(post_samples)){
-post_samples[[i]] <- bartMachine::bart_machine_get_posterior(
-    fit2$model_fits$model_layers[[i]], dataX[[i]])$y_hat_posterior_samples
-}
-
-weighted_post_samples <-Reduce('+', Map('*', post_samples, weights))
-rownames(weighted_post_samples) <- rownames(dataX[[1]])
-names(dataY) <- rownames(dataX[[1]])
-```
-
-```{r capture output}
-
-library(mcmcplots)
-capture.output(temp <- caterplot(t(weighted_post_samples), add = FALSE))
-
-```
-
-We show below the 68% and 95% credible intervals obtained from stacked model for 
-all 40 observations. The filled circle indicates the posterior median and empty 
-circle indicates the true value of the observation.
-
-```{r plot capture}
-
-temp <- caterplot(t(weighted_post_samples),
-          horizontal = FALSE, add = FALSE)
-points(dataY[temp])
-title(main ="", xlab = "Observations", ylab = "Fat and prebiotics in rats",
-       line = NA, outer = FALSE)
-
-```
+:::
