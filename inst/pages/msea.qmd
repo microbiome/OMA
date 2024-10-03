@@ -55,9 +55,9 @@ se_relative <- sampleMetadata |>
 ##########################
 
 sample_metadata <-
-    colData(se_relative) %>%
-    as.data.frame() %>% filter(visit_number == 1) %>%
-    .[, c("age", "disease", "antibiotics_current_use")]
+    colData(se_relative) |>
+    as.data.frame() |> filter(visit_number == 1) |>
+    select(c("age", "disease", "antibiotics_current_use"))
 
 #################
 # Set reference #
@@ -91,7 +91,6 @@ setting. We also adjust for age and antibiotic usage, following the original
 study.
 
 ```{r fit-model-Maaslin2}
-
 library(Maaslin2)
 
 fit_data = Maaslin2(
@@ -289,7 +288,7 @@ from the mapping file created above.
 # Rank DA results #
 ###################
 
-results <- fit_data$results %>% filter(metadata == 'disease')
+results <- fit_data$results |> filter(metadata == 'disease')
 results$qval <- p.adjust(results$pval, 'BH')
 results <- results[order(results$qval, decreasing = FALSE), ]
 
@@ -322,9 +321,9 @@ We can plot the enrichment scores to visualize the MSEA results.
 
 ```{r visualzation}
 
-p <- MSEA %>%
-    arrange(-pval) %>%
-    mutate(ID = factor(ID, levels = ID)) %>%
+p <- MSEA |>
+    arrange(-pval) |>
+    mutate(ID = factor(ID, levels = ID)) |>
     ggplot(aes(y = -log10(pval), x = ID)) +
     geom_bar(stat = "identity", fill = 'cornflowerblue') + theme_bw() +
     coord_flip() +
@@ -367,8 +366,8 @@ se_pathway <- sampleMetadata |>
 # Create sample metadata #
 ##########################
 
-sample_metadata <- colData(se_pathway) %>%
-    as.data.frame() %>% filter(visit_number == 1) %>%
+sample_metadata <- colData(se_pathway) |>
+    as.data.frame() |> filter(visit_number == 1) |>
     dplyr::select("age", "disease", "antibiotics_current_use")
 
 # Set reference
@@ -381,10 +380,10 @@ sample_metadata$disease <- relevel(sample_metadata$disease, 'healthy')
 
 feature_pwys_t <- as.data.frame(assay(se_pathway))
 feature_pwys_t <- rownames_to_column(feature_pwys_t, "ID")
-feature_pwys_t <- feature_pwys_t %>%
-    filter(!grepl("\\|", ID)) %>%
-    filter(!ID %in% c('UNMAPPED', 'UNINTEGRATED')) %>%
-    column_to_rownames('ID') %>%
+feature_pwys_t <- feature_pwys_t |>
+    filter(!grepl("\\|", ID)) |>
+    filter(!ID %in% c('UNMAPPED', 'UNINTEGRATED')) |>
+    column_to_rownames('ID') |>
     as.data.frame()
 
 ##############################
@@ -510,7 +509,7 @@ pathways.
 # Rank DA results #
 ###################
 
-results <- fit_data$results %>% filter(metadata=='disease')
+results <- fit_data$results |> filter(metadata=='disease')
 results$qval <- p.adjust(results$pval, 'BH')
 sum(results$qval < 0.05)
 results <- results[order(results$qval, decreasing = FALSE),]
@@ -538,9 +537,9 @@ MSEA$ID <- paste(MSEA$ID, ' (', MSEA$Size, ')', sep = '')
 # Plot #
 ########
 
-p <- MSEA %>%
-  arrange(-pval) %>%
-  mutate(ID = factor(ID, levels = ID)) %>%
+p <- MSEA |>
+  arrange(-pval) |>
+  mutate(ID = factor(ID, levels = ID)) |>
   ggplot(aes(y = -log10(pval), x = ID)) +
   geom_bar(stat = "identity", fill = 'cornflowerblue') + theme_bw() +
   coord_flip() +
@@ -548,8 +547,7 @@ p <- MSEA %>%
   xlab('') +
   ylab('MSEA enrichment score')
 
-print(p)
-
+p
 ```
 
 Based on the MSEA results, we obtain 4 enriched modules of microbial pathways.

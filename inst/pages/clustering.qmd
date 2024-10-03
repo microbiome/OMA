@@ -39,7 +39,6 @@ as hierarchical clustering, DBSCAN, and K-means.
 ```{r load_bluster}
 # Load dependencies
 library(bluster)
-library(kableExtra)
 ```
 
 In the examples of this chapter we use *peerj13075* data for
@@ -91,7 +90,7 @@ altExp(tse, "prevalent") <- addCluster(
     altExp(tse, "prevalent"),
     assay.type = "counts",
     by = "cols",
-    HclustParam(method = "ward.D2", dist.fun = vegdist, metric = "bray"),
+    HclustParam(method = "ward.D2", dist.fun = getDissimilarity, metric = "bray"),
     full = TRUE,
     clust.col = "hclust")
 
@@ -128,18 +127,19 @@ altExp(tse, "prevalent") <- addDominant(altExp(tse, "prevalent"))
 labels(dend) <- altExp(tse, "prevalent")$dominant_taxa
 dend <- color_labels(dend, k = k, col = unlist(cols))
 
-# Plot dendrogram
+# Adjust frame for the figure
 par(mar=c(9, 3, 0.5, 0.5))
-dend %>% set("labels_cex", 0.8) %>% plot()
+# Plot dendrogram
+dend |> set("labels_cex", 0.8) |> plot()
 ```
 
 We can also visualize the clusters by projecting the data onto
 two-dimensional
 surface that captures the most variability in the data. In this example, we use
-multi-dimensional scaling (MDS).
+multi-dimensional scaling (MDS) (see [@sec-unsupervised-ordinantion]).
 
 ```{r hclust3}
-library (scater)
+library(scater)
 
 # Add the MDS dimensions for plotting
 altExp(tse, "prevalent") <- runMDS(
@@ -266,26 +266,8 @@ we can plot which taxa define the key cluster features.
 best_model <- metadata(altExp(tse, "prevalent"))$DMM$dmm[2]
 drivers <- as.data.frame(best_model[[1]]@fit$Estimate)
 
-# Clean names
-drivers$class <- rownames(drivers)
-
-for (i in 1:2) {
-  # Transfer to relative to optimize plotting
-  drivers[i] <- drivers[i]/sum(drivers[i])
-
-  drivers <- drivers[order(drivers[[i]], decreasing = TRUE),]
-  p <- ggplot(head(drivers, 5), aes(
-      x = reorder(head(class, 5), + head(drivers[[i]], 5)),
-      y = head(drivers[[i]], 5))) +
-
-      geom_bar(stat = "identity", fill = scales::hue_pal()(1), alpha = 0.6) +
-      coord_flip() +
-      labs(title = paste("Top phyla in group", i)) +
-      theme_minimal(base_size = 11) +
-      labs(x="", y="") +
-      scale_y_continuous(limits=c(0,1))
-  print(p)
-}
+# Plot by utilizng miaViz::plotLoadings
+plotLoadings(as.matrix(drivers), ncomponents = 2)
 ```
 
 As well as in hierarchical clustering, we can also visualize the clusters by
@@ -323,27 +305,22 @@ continuous sample memberships across all community types. NMF algorithm
 calculates the minimum distance between the original data and it's approximation
 using Kullback-Leibler divergence.
 
-Here, we use functions in `NMF` package. To reduce calculation time,
-we set the number of components to four instead of optimizing the number of
+Here, we use `mia` wrapper `getNMF`. To reduce calculation time,
+we set the number of components `k` to four instead of optimizing the number of
 components that describe the original data the best.
+The matrix returned by `getNMF` contains the sample scores, while the NMF output
+and NMF feature loadings are stored in the attributes `NMF_output` and 
+`loadings`, respectively.
 
 ```{r nmf1}
 library(NMF)
 
-# Optimize the number of communities required to describe the data
+# Calculate NMF
 set.seed(3221)
-res <- nmf(t(assay(altExp(tse, "prevalent"), "counts")), 4)
-```
-```{r}
-# Pick low-rank representations
-H <- res@fit@H
-W <- res@fit@W
-
-# Add NMF loadings in the metadata
-metadata(altExp(tse, "prevalent"))$NMF_loadings <- H
+res <- getNMF(altExp(tse, "prevalent"), k = 4)
 
 # Obtain the relative abundance of ES in each sample
-wrel <- t(apply(W, 1, function (x) {x/sum(x)}))
+wrel <- t(apply(res, 1, function (x) {x/sum(x)}))
 
 # Define the community type of a sample with the highest relative abundance
 altExp(tse, "prevalent")$NMFcomponent <- as.factor(apply(wrel, 1, which.max))

@@ -55,11 +55,11 @@ rowData commands.
 
 ```{r}
 phy_taxtable <-
-    tax_table(phy)  %>% # Access the phyloseq taxonomic name table
-    data.frame # Make into a data frame
+    tax_table(phy)  |> # Access the phyloseq taxonomic name table
+    data.frame() # Make into a data frame
 
-tse_taxtable <- rowData(tse) %>% # Same for tse
-    data.frame
+tse_taxtable <- rowData(tse) |> # Same for tse
+    data.frame()
 
 ```
 
@@ -71,11 +71,10 @@ Sample data can be accessed with `sample_data` and `colData` commands.
 #| label: "access_sampledata"
 
 phy_sampledata <-
-    sample_data(phy) %>% data.frame
+    sample_data(phy) |> data.frame()
 
 tse_sampledata <-
-    colData(tse) %>% data.frame
-
+    colData(tse) |> data.frame()
 ```
 
 **Accessing operational taxonomic unit (OTU) abundance objects: otu_table = assay**
@@ -88,11 +87,10 @@ metagenomic annotation, or functional gene abundances.
 #| label: "access_otutable"
 
 phy_otutable <-
-    otu_table(phy) %>% data.frame
+    otu_table(phy) |> data.frame()
 
 tse_otutable <-
-    assay(tse) %>% data.frame
-
+    assay(tse) |> data.frame()
 ```
 
 ### Building phyloseq objects vs TreeSE objects: phyloseq = TreeSummarizedExperiment
@@ -106,9 +104,9 @@ dataframes but for demonstration we will use ones created from phy.
 Let's start by checking what we have.
 
 ```{r}
-phy_otutable %>% head
-phy_sampledata %>% head
-phy_taxtable %>% head
+phy_otutable |> head()
+phy_sampledata |> head()
+phy_taxtable |> head()
 ```
 
 Ok, these are all normal data frames which could come from upstream
@@ -123,8 +121,8 @@ phyloseq and how assay in TreeSE compares to otu_table in phyloseq.
 
 
 # Create phyloseq object
-OTU_phy <- otu_table(phy_otutable %>% as.matrix, taxa_are_rows = TRUE) # Make OTU table
-TAX_phy <- tax_table(phy_taxtable %>% as.matrix) # Make TAX table
+OTU_phy <- otu_table(as.matrix(phy_otutable), taxa_are_rows = TRUE) # Make OTU table
+TAX_phy <- tax_table(as.matrix(phy_taxtable)) # Make TAX table
 SAMPLE_phy <- sample_data(phy_sampledata) # Make sample data table
 
 phy <- phyloseq(OTU_phy, TAX_phy, SAMPLE_phy) # Combine into phyloseq object
@@ -141,8 +139,7 @@ as before.
 
 # Check if we have counts or normalized data
 
-phy_otutable %>% head
-
+phy_otutable |> head()
 ```
 
 We have counts!
@@ -164,7 +161,6 @@ tse <- TreeSummarizedExperiment(
     colData = phy_sampledata,
     rowData = phy_taxtable
 )
-
 ```
 
 Let's check the different assay names we have.
@@ -189,8 +185,7 @@ With phyloseq you would need three different phyloseq objects, each taking up
 
 ```{r}
 # Add another assay that holds the relative abundance normalized OTU table
-tse <-
-  transformAssay(tse, assay.type = "counts", method = "relabundance")
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 assays(tse) # Let's check
 
 # With phyloseq you would need to have two different phyloseq objects
@@ -232,10 +227,10 @@ Let's see what we have now.
 ```{r}
 #| label: "check_removed_samples"
 
-phy %>% sample_names() %>% length()
-phy_nomock %>% sample_names() %>% length()
-colnames(tse) %>% length()
-colnames(tse_nomock) %>% length()
+phy |> sample_names() |> length()
+phy_nomock |> sample_names() |> length()
+colnames(tse) |> length()
+colnames(tse_nomock) |> length()
 ```
 
 We have removed three samples that where SampleType "Mock".
@@ -275,13 +270,13 @@ sample data to keep it safe with the other sample level data.
 
 # Alpha diversity with phyloseq
 df <- estimate_richness(phy, measures = "Shannon")
-head(df) # Inspect
+df |> head() # Inspect
 
 # Add Shannon to the sample_data to keep results safe with other sample data
-phy_sampledata <- sample_data(phy) %>% data.frame
+phy_sampledata <- sample_data(phy) |> data.frame()
 phy_sampledata$shannon <- df$Shannon
 sample_data(phy) <- phy_sampledata
-sample_data(phy) %>% head  # Inspect
+sample_data(phy) |> head()  # Inspect
 ```
 
 For the tse we will need to specify which assay (which normalization of the
@@ -295,7 +290,7 @@ assayNames(tse) # Check the assay names
 
 tse <- estimateDiversity(tse, assay.type = "counts", index = "shannon") # Let's use counts
 # Inspect the new colData with added alpha diversity estimate
-colData(tse) %>% names # shannon has been added to the colData
+colData(tse) |> names() # shannon has been added to the colData
 ```
 
 If we want to extract a data frame that only has the alpha diversity it can be
@@ -304,8 +299,7 @@ done easily.
 ```{r}
 #| label: "extract_alpha"
 # Extract
-df <- colData(tse) %>% data.frame %>% dplyr::select(matches("shannon"))
-
+df <- colData(tse) |> data.frame() |> dplyr::select(matches("shannon"))
 ```
 
 ### Calculating beta diversity: ordinate = runMDS
@@ -332,7 +326,7 @@ library(scater)
 # distance calculation
 tse <- runMDS(
     tse,
-    FUN = vegan::vegdist,
+    FUN = getDissimilarity,
     method = "bray",
     assay.type = "relabundance",
     name = "MDS_bray",
@@ -396,9 +390,7 @@ equivalent to the default behaviour of `tax_glom()`.
 ```{r}
 #| label: "agglomerateByRank"
 
-altExp(tse, "Family") <-
-  agglomerateByRank(tse,
-                      rank = "Family")
+altExp(tse, "Family") <- agglomerateByRank(tse, rank = "Family")
 altExp(tse, "Family")
 ```
 
@@ -909,7 +901,7 @@ bicluster_rows <- bcs$bc_rows
 bicluster_columns <- bcs$bc_columns
 
 # Print biclusters for rows
-head(bicluster_rows)
+bicluster_rows |> head()
 ```
 
 Let's collect information for the scatter plot.
