@@ -1,9 +1,13 @@
-# Multi-omics Integration {#sec-multi-omics-integration}
+# Multi-omics prediction and classification {#sec-multi-omics-integration}
 
 ```{r setup, echo=FALSE, results="asis"}
 library(rebook)
 chapterPreamble()
 ```
+
+This chapter illustrates how we can create a classification model that utilizes
+multiomics data. In contrast [@sec-machine_learning] shows classification models
+that utilizes single omic data.
 
 In multiview data analysis, there are two main types of approaches: early fusion
 and late fusion. \underline{Early fusion} combines all datasets into a single
@@ -16,6 +20,171 @@ advanced method, called cooperative learning [@Ding2022], which is also known as
 \underline{intermediate fusion}, combines the best of both worlds by encouraging
 predictions from different data views to align through an agreement parameter
 ($\rho$).
+
+## Import and preprocess data
+
+We use the publicly available type 2 diabetes (T2D) data from the 
+`curatedMetagenomicData` package [@Lloyd-Price2019], where we aim to 
+predict T2D disease status based on both taxonomic (species abundances) and 
+functional (pathway abundances) profiles. Note that the dataset is the same as
+used in [@sec-machine_learning] for single omic ML model.
+
+```{r}
+#| label: load-pkg-data
+
+library(curatedMetagenomicData)
+library(dplyr)
+library(mia)
+
+tse1 <- sampleMetadata |>
+  filter(study_name == "QinJ_2012") |>
+  returnSamples("relative_abundance", rownames = "short")
+
+tse2 <- sampleMetadata |>
+  filter(study_name == "QinJ_2012") |>
+  returnSamples("pathway_abundance", rownames = "short")
+
+# Create a MAE object
+mae <- MultiAssayExperiment(
+    ExperimentList(microbiota = tse1, pathway = tse2)
+    )
+mae
+```
+
+Further data pre-processing is necessary to handle near-zero-variance features
+in this dataset. A combination of variance and prevalence filtering
+is applied to the dataset to include only meaningful features.
+
+```{r}
+#| label: preprocess
+
+# Subset by prevalence
+mae[[1]] <- subsetByPrevalent(
+    mae[[1]], assay.type = "relative_abundance", prevalence = 0.1,
+    include.lowest = TRUE)
+mae[[2]] <- subsetByPrevalent(
+    mae[[2]], assay.type = "pathway_abundance", prevalence = 0.1,
+    include.lowest = TRUE)
+
+# Subset those features that have near zero variance
+rowData(mae[[1]])[["sd"]] <- rowSds(assay(mae[[1]], "relative_abundance"))
+rowData(mae[[2]])[["sd"]] <- rowSds(assay(mae[[2]], "pathway_abundance"))
+mae[[1]] <- mae[[1]][ rowData(mae[[1]])[["sd"]] > 0.001, ]
+mae[[2]] <- mae[[2]][ rowData(mae[[2]])[["sd"]] > 0.001, ]
+
+# Transform the data with CLR
+mae[[1]] <- transformAssay(
+  mae[[1]], assay.type = "relative_abundance", method = "clr",
+  pseudocount = TRUE)
+mae[[2]] <- transformAssay(
+  mae[[2]], assay.type = "pathway_abundance", method = "clr",
+  pseudocount = TRUE)
+```
+
+Ultimately, `r nrow(mae[[1]])+nrow(mae[[1]])` features are retained, consisting
+of `r nrow(mae[[1]])` pathways and `r nrow(mae[[2]])` species.
+
+We randomly select 20% of the samples for the validation set, ensuring they are
+not used in training. This approach provides a more robust estimate of how well
+the model generalizes to unseen data.
+
+```{r}
+#| label: select_validation
+
+set.seed(3747)
+colData(mae)[["validation_set"]] <- sample(
+    c(TRUE, FALSE), size = ncol(mae[[1]]), replace = TRUE, prob = c(0.2, 0.8))
+```
+
+Now, we are ready to fit the model using the `IntegratedLearner` package, which
+supports early, late, and intermediate fusion methods [@Mallick2024]. Under the
+hood, it leverages the `SuperLearner` package. The process begins by fitting
+"base learners" for each layer, with separate models trained for each omic
+dataset. Then, a "meta learner" integrates the outputs from these individual
+models to make the final predictions.
+
+```{r}
+#| label: fit_model
+
+# For some reason Java Virtual Machine is often incorrectly configured. This
+# makes sure that enough memory is assigned to JVM (5GB).
+options(java.parameters = "-Xmx5g")
+
+library(IntegratedLearner)
+library(SuperLearner)
+
+# Fit the model
+fit <- IntegratedLearnerFromMAE(
+    mae,
+    # Select experiments and assays
+    experiment = names(experiments(mae)),
+    assay.type = c("clr", "clr"),
+    # Select columns from sample metadata
+    outcome.col = "disease",
+    valid.col = "validation_set",
+    # Options for base and meta models
+    base_learner = "SL.bartMachine",
+    meta_learner = "SL.nnls.auc",
+    # The outcome is binary
+    family = binomial()
+)
+```
+The outputs include the following models:
+
+    - Individual models: Trained separately for each omic dataset.
+    - Stacked model (late fusion): Combines the predictions from each individual model into a single meta-model.
+    - Concatenated model (early fusion): Trains a model where all features are merged before training.
+
+We can summarize the model performance using a Receiver Operating Characteristic (ROC) plot.
+
+```{r}
+#| label: visualize_result
+
+library(tidyverse)
+library(cowplot)
+
+p <- IntegratedLearner:::plot.learner(fit)
+```
+
+Based on the ROC plot described below, we observe that the AUC is `r fit$AUC.test[[2]]` when
+considering only the pathway abundance data in the model, and `r fit$AUC.test[[1]]` for the model
+including only the species abundance data. The AUC increases to `r fit$AUC.test[[4]]` when using
+the early fusion model and reaches `r fit$AUC.test[[3]]` with the late fusion model.
+Overall, most integrated
+classifiers outperform individual layers in distinguishing between T2D and
+healthy controls.
+
+When using the BART machine, in addition to point predictions, we can also generate:
+
+    1. Credible intervals for all observations,
+    2. Estimated layer weights in the meta-model, and
+    3. Feature importance scores.
+
+For visualization tips on how to plot these and more, refer to the
+[IntegratedLearner vignette](http://htmlpreview.github.io/?https://github.com/himelmallick/IntegratedLearner/blob/master/vignettes/IntegratedLearner.html).
+
+
+
+
+
+```{r}
+#| label: capture output
+
+library(mcmcplots)
+
+capture.output(temp <- caterplot(t(weighted_post_samples), add = FALSE))
+
+```
+
+
+
+Finally, we visualize the results for the top 20 features for each layer based
+on the intermediate fusion.
+
+```{r}
+
+```
+
 
 ## Prediction of fat and prebiotics in diet of rats
 
