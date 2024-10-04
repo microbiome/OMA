@@ -1,26 +1,11 @@
-# Subsetting and agglomeration {#sec-agglomeration}
+# Agglomeration {#sec-agglomeration}
 
 ```{r setup, echo=FALSE, results="asis"}
 library(rebook)
 chapterPreamble()
 ```
 
-```{r, message=FALSE}
-library(mia)
-data("GlobalPatterns", package = "mia")
-tse <- GlobalPatterns
-```
-
-In this chapter, we explore the concepts of subsetting and agglomeration.
-
-Subsetting is the process of selecting specific rows or columns from a
-dataset based on certain criteria. When you subset your data, you retain the
-original values of the selected data points. For example, if you have a
-dataset of microbial taxa and you choose to keep only certain species, you
-still have the individual counts for those species. This allows you to analyze
-the data in detail, but you may lose information about other species that are
-not included.
-
+In [@sec-treese_subsetting], we covered how to select features from the dataset.
 Agglomeration, on the other hand, involves combining data points into broader
 categories by summing their values. For instance, if you have counts for
 individual species, you might agglomerate them into groups based on their
@@ -29,351 +14,138 @@ a particular family to get a single value that represents that family. While
 this method simplifies your dataset and highlights overall trends, it means
 you lose the specific information about individual species.
 
-The choice between these two methods depends on your research goals and the
-type of insights you want to gain from your data. Agglomeration is often used
-to reduce the number of features, especially in sequencing data, where there
+The choice between these subsetting and agglomeration depends on your research
+goals and the type of insights you want to gain from your data.
+Agglomeration is often used to reduce the number of features, especially in
+sequencing data, where there
 may not be enough resolution to reliably differentiate between closely related
 species. By combining data at higher taxonomic levels, you can focus on broader
 patterns and trends in the community while managing the complexity of the
 dataset.
 
-If the data is filtered or agglomerated by features, the ideal location to
-store the resulting dataset is as an alternative experiment
-(see [@sec-alt-exp]).
+Moreover, whenthe total abundances of certain taxonomy rank are important, the
+data should first be agglomerated to the specified taxonomy level. Afterward,
+we can select the desired taxa from the dataset.
 
-## Subsetting {#sec-treese_subsetting}
+```{r}
+#| label: load_data
 
-Subsetting data helps to draw the focus of an analysis on particular
-sets of samples and / or features. When dealing with large datasets,
-the subset of interest can be extracted and investigated
-separately. This might improve performance and reduce the
-computational load.
-
-```{r include = FALSE}
-# Load libraries and data
 library(mia)
-library(dplyr)
-library(knitr)
-```
-
-Let us store `GlobalPatterns` into `tse` and check its original number of
-features (rows) and samples (columns).
-
-```{r}
-# Store data into se and check dimensions
-data("GlobalPatterns", package="mia")
+data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
-# Show dimensions (features x samples)
-dim(tse)
 ```
 
-::: {.callout-note}
-## Note
-
-When subsetting by sample, expect the number of columns to decrease. When 
-subsetting by feature, expect the number of rows to decrease.
-:::
-
-### Subset by sample (column-wise)
-
-Several criteria can be used to subset by sample:
-
-- origin
-- sampling time
-- sequencing method
-- DNA / RNA barcode
-- cohort
-
-For the sake of demonstration, here we will extract a subset containing only the
-samples of human origin (feces, skin or tongue), stored as `SampleType` within
-`colData(tse)` as well as in `tse`.
-
-First, we would like to see all the possible values that `SampleType` can have
-and how frequent those are:
-
-```{r}
-# Inspect possible values for SampleType
-unique(tse$SampleType)
-```
-
-```{r eval = FALSE}
-# Show the frequency of each value
-tse$SampleType |> table()
-```
-
-```{r echo = FALSE}
-# Show the frequency of each value
-tse$SampleType |> table() |> kable()
-```
-
-Next, we _logical index_ across the columns of `tse` (make sure to
-leave the first index empty to select all rows) and filter for the
-samples of human origin. For this, we use the information on the
-samples from the meta data `colData(tse)`.
-
-```{r}
-# Subset by sample
-tse_sub <- tse[ , tse$SampleType %in% c("Feces", "Skin", "Tongue")]
-
-# Show dimensions
-dim(tse_sub)
-```
-
-::: {.callout-note}
-## Note
-
-After subsetting, expect the number of columns to equal the
-sum of the frequencies of the samples that you are interested
-in. For instance, `ncols = Feces + Skin + Tongue = 4 + 3 + 2 = 9`.
-:::
-
-### Subset by feature (row-wise)
-
-Similarly, here we will extract a subset containing only the features
-that belong to the phyla Actinobacteria and Chlamydiae, stored as
-`Phylum` within `rowData(tse)`. However, subsetting by feature implies
-a few more obstacles, such as the presence of `NA` elements and the
-possible need for agglomeration.
-
-As previously, we would first like to see all the possible values that `Phylum`
-can have and how frequent those are:
-
-```{r}
-# Inspect possible values for phylum
-# and show the first five values
-cat(paste(unique(rowData(tse)$Phylum)[1:5], collapse = "\n"))
-
-```
-
-```{r}
-# Show the frequency of each value
-rowData(tse)$Phylum |> table() |> head() |> kable()
-```
-
-::: {.callout-note}
-## Note
-
-After subsetting, expect the number of columns to equal the
-sum of the frequencies of the feature(s) that you are interested
-in. For instance, `nrows = Actinobacteria + Chlamydiae = 1631 + 21 = 1652`.
-:::
-
-Depending on your research question, you might or might not need to
-agglomerate the data in the first place: if you want to find the
-abundance of each and every feature that belongs to Actinobacteria and
-Chlamydiae, agglomeration is not needed. However, if you want to find the total
-abundance of all features that belong to Actinobacteria or
-Chlamydiae, agglomeration is recommended (see
-[@sec-data-agglomeration] for details).
-
-Next, we _logically index_ across the rows of `tse` (make sure to leave
-the second index empty to select all columns) and filter for the
-features that fall in either Actinobacteria or Chlamydiae group. For this,
-we use the information on the samples from the metadata
-`rowData(tse)`.
-
-The first term with the `%in%` operator includes all the features
-of interest, whereas the second term after the AND operator `&`
-filters out all features that have an `NA` in place of the phylum variable.
-
-```{r}
-# Subset by feature
-selected <- rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") &
-  !is.na(rowData(tse)$Phylum)
-tse_sub <- tse[selected, ]
-
-# Show dimensions
-dim(tse_sub)
-```
-
-### Subset by samples and features
-
-Finally, we can subset data by sample and feature at once. The
-resulting subset contains all the samples of human origin and all the
-features of phyla Actinobacteria or Chlamydiae.
-
-```{r}
-# Subset by sample and feature and remove NAs
-selected_rows <- rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") &
-      !is.na(rowData(tse)$Phylum)
-selected_cols <- tse$SampleType %in% c("Feces", "Skin", "Tongue")
-tse_sub <- tse[selected_rows, selected_cols]
-
-# Show dimensions
-dim(tse_sub)
-```
-
-::: {.callout-note}
-## Note
-
-The dimensions of `tse_sub` are on par with
-those of the previous subsets (9 columns filtered by sample and 1652
-rows filtered by feature).
-:::
-
-If a study was to consider and quantify the presence of Actinobacteria
-as well as Chlamydiae in different sites of the human body,
-`tse_sub` might be a suitable subset to start with.
-
-### Filtering out empty samples
-
-Sometimes data might contain, e.g., features that are not present in any of
-the samples. This can occur, for example, after data subsetting. In certain
-analyses, we might want to remove those instances. In this example, we are
-interested only those features that belong to Species _Achromatiumoxaliferum_.
-
-```{r}
-#| label: select_archaea
-
-ind <- rowData(tse)$Species == "Achromatiumoxaliferum"
-ind[is.na(ind)] <- FALSE
-tse_sub <- tse[ind, ]
-```
-
-Then we can calculate, how many times each feature was detected in each
-samples.
-
-```{r}
-library(scuttle)
-
-tse_sub <- addPerCellQCMetrics(tse_sub)
-# List total counts of each sample
-tse_sub$total |> head()
-```
-
-Now we can see that certain samples do not include any bacteria. We can remove
-those.
-
-```{r}
-# Remove samples that do not contain any bacteria
-tse_sub <- tse_sub[ , tse_sub$total != 0]
-tse_sub
-```
-
-We have now subsetted the dataset so that it only includes samples containing
-the selected features. A similar approach can also be applied to filter features
-based on the samples they appear in, ensuring both dimensions of the data are
-relevant to your analysis.
-
-### Filtering out zero-variance features
-
-In some datasets, certain features remain constant across all samples—they show
-no variance. If our goal is to study or model microbial differences between
-groups, these zero-variance features hold no value. For a feature to reflect
-differences between groups, it must exhibit variability.
-
-By removing these invariant features, we can sharpen our focus on the more
-informative features. This not only reduces the number of comparisons but also
-helps our machine learning models learn from meaningful data without additional
-noise.
-
-To filter these features, we begin by calculating their standard deviation.
-Then we visualize the variances with histogram.
-
-```{r}
-#| label: standard_deviation
-
-tse <- GlobalPatterns
-
-# Calculate
-tse <- addPerFeatureQCMetrics(tse)
-# Plot
-hist(log(rowData(tse)[["sd"]]))
-```
-
-From the histogram of feature variances, we can establish a sensible threshold
-for filtering. For example, using a threshold of 0 would effectively remove a
-large set of features that show no variance.
-
-It's important to note that the data is on a log scale, meaning that a
-log-transformed value of 1 corresponds to 0 (i.e., log(1) = 0). This ensures
-that features with zero variance are correctly identified and filtered out.
-
-```{r}
-#| label: filter_sd
-
-th <- 1
-
-selected <- rowData(tse)[["sd"]] > 1
-tse_sub <- tse[selected, ]
-tse_sub
-```
-
-Now the dataset includes the `r nrow(tse_sub)` features comapred to previous
-`r nrow(tse)`. The dataset now includes the features that vary. Note that
-this threshold choice depends on your research question, and this was a rather
-conservative choice retaining most of the features.
-
-After filtering, the dataset now contains `r nrow(tse_sub)` features, compared
-to the original `r nrow(tse)` features. This means we are left with features
-that exhibit variance. Keep in mind that the choice of threshold depends on the
-specific research question, and in this case, we opted for a rather conservative
-threshold that retains most features.
-
-### Subset based on prevalence
-
-In addition to agglomeration, we can subset the data based on prevalence.
-Using `subsetByPrevalent()`, we can filter for taxa that exceed a specified
-prevalence threshold. Alternatively, `subsetByRare()` allows us to filter for taxa
-that do not exceed the threshold.
-
-```{r}
-#| label: subset_by_rare
-
-tse_sub <- subsetByRare(tse, rank = "Genus", detection = 0.01, prevalence = 0.1)
-tse_sub
-```
-
-## Agglomeration {#sec-data-agglomeration}
-
-### Agglomerate by rank
+## Agglomerate based on taxonomy rank
 
 One of the main applications of taxonomic information in regards to count data
 is to agglomerate count data on taxonomic levels and track the influence of
 changing conditions through these levels. For this `mia` contains the
 `agglomerateByRank()` function.
 
-We first transform the data to demonstrate how the function aggregates all the
-assays. For more information on transformations, see [@sec-assay-transform].
+At its simplest, the function takes a `TreeSE` object as input and outputs a
+`TreeSE` object agglomerated to a specified taxonomy level using the `rank`
+parameter. Additionally, we can choose to prune the phylogenetic tree to
+correspond to the agglomerated data.
 
 ```{r}
 #| label: agg_family
 
-# Transform data
-tse <- transformAssay(tse, method = "relabundance")
-# Aglomerate
-tse_family <- agglomerateByRank(tse, rank = "Family", agglomerate.tree = TRUE)
-tse_family
+# Agglomerate
+tse_phylum <- agglomerateByRank(tse, rank = "Phylum", update.tree = TRUE)
+tse_phylum
 ```
 
-If multiple assays (counts and relabundance) exist, both will be agglomerated.
+The output now contains `r nrow(tse_phylum)` features, a reduction from the
+original `r nrow(tse)` rows. It's important to note that the samples remain
+unchanged from the original dataset. Let's take a look at the `rowData` to
+see how it looks.
 
 ```{r}
-assayNames(tse)
+#| label: agg_family_rowdata
+
+rowData(tse_phylum)
+```
+
+As we observe from the taxonomy table, all lower ranks below Phylum now contain
+`NA` values. This is expected, as we have agglomerated the data to the Phylum
+level, meaning that the lowest rank that rows can be uniquely mapped to is the
+Family rank.
+
+Since we specified `update.tree = TRUE`, the phylogenetic tree has also been
+agglomerated. This is evident from the tree, which now has only
+`r length(rowTree(tse_phylum)$tip.label)` tips, each corresponding to a single
+row in the dataset.
+
+```{r}
+#| label: agg_family_rowtree
+
+rowTree(tse_phylum)
+```
+
+Additionally, we can examine the counts assay to assess how the agglomeration
+has affected the counts.
+
+```{r}
+#| label: agg_family_assay
+
+assay(tse_phylum, "counts") |> head()
+```
+
+The values in the counts assay are significantly larger than in the original
+data, indicating that the values have been summed during agglomeration.
+
+Now when the data is agglomerated, we can check the abundances of certain phyla.
+
+```{r}
+#| label: select_phyla
+
+# Store features of interest into phyla
+phyla <- c("Actinobacteria", "Chlamydiae")
+# subset by feature
+tse_sub <- tse_phylum[phyla, ]
+# Show dimensions
+assay(tse_sub)
+```
+
+::: {.callout-note}
+## Note
+
+As data was agglomerated, the number of rows should equal the
+number of phyla used to index (in this case, just 2).
+:::
+
+Furthermore, we can observe that the agglomeration will be applied to every
+assay in the dataset. Let's add another assay to the dataset and then perform
+agglomeration again, this time at the Family level.
+
+```{r}
+#| label: agg_family
+
+# Add another assay
+assay(tse, "another_assay", withDimnames = FALSE) <- matrix(
+  runif(ncol(tse)*nrow(tse), 0, 1), ncol = ncol(tse), nrow = nrow(tse))
+
+# Agglomerate
+tse_family <- agglomerateByRank(tse, rank = "Family")
+
 assayNames(tse_family)
 ```
 
-```{r}
-assay(tse_family, "relabundance")[1:5, 1:7]
-```
+We can now confirm that the agglomerated dataset contains two assays:
+"counts" and "another_assay," consistent with the original data structure.
 
-```{r taxinfo_altexp_example}
-assay(tse_family, "counts")[1:5, 1:7]
-```
-
-### Agglomerate by ranks
-
-As mentioned earlier, `altExp` slot is idea place to store agglomerated data.
-Let's add it there.
+If the data is agglomerated by features, the ideal location to
+store the resulting dataset is as an alternative experiment, `altExp` slot
+(see [@sec-alt-exp]). Let's add the Phylum data there.
 
 ```{r}
 #| label: add_agg
 
-altExp(tse, "family") <- tse_family
+altExp(tse, "phylum") <- tse_phylum
 altExpNames(tse)
 ```
 
-`altExpNames` now consists of `Family` level data. This can be extended to use
+`altExpNames` now consists of `Phylum` level data. This can be extended to use
 any taxonomic level listed in `taxonomyRanks(tse)`. While it is certainly
 possible to agglomerate data one taxonomic level at a time, you can also
 aggregate data across all available ranks in a single step using the
@@ -390,70 +162,84 @@ tse <- agglomerateByRanks(tse)
 altExpNames(tse)
 ```
 
-### Total abundance of certain taxa
+## Aggregate data based on variable
 
-When total abundances of certain phyla are of relevance, the data is initially
-agglomerated by Phylum. Then, similar steps as in the case of non-agglomerated
-data are followed.
+The `agglomerateByRank()` function aggregates data while considering taxonomy
+information. For more flexible aggregations, the `agglomerateByVariable()`
+method is also available. In some cases, both functions may yield the same
+results; however, agglomerateByRank() ensures that the entire taxonomy of a
+feature is unique for successful agglomeration.
 
-```{r}
-#| label: select_phyla
+For example, a dataset might contain taxa with the same lower-level rank, even
+if their higher-level ranks differ. Thus, `agglomerateByVariable()` should not
+be used for aggregating taxonomy ranks.
 
-# Store features of interest into phyla
-phyla <- c("Actinobacteria", "Chlamydiae")
-# subset by feature
-tse_sub <- tse_phylum[phyla, ]
-# Show dimensions
-dim(tse_sub)
-```
-
-::: {.callout-note}
-## Note
-As data was agglomerated, the number of rows should equal the
-number of phyla used to index (in this case, just 2).
-:::
-
-### Agglomerate based on prevalence
-
-Rare taxa can also be aggregated into a single group "Other" instead of 
-filtering them out. A suitable function for this is `agglomerateByPrevalence()`.
-The number of rare taxa is higher on the species level, which causes the need 
-for data agglomeration by prevalence.
-
-```{r}
-altExp(tse, "Species_byPrevalence") <- agglomerateByPrevalence(
-    tse,
-    rank = "Species",
-    other.label = "Other",
-    prevalence = 5 / 100,
-    detection = 1 / 100,
-    as.relative = TRUE)
-altExp(tse, "Species_byPrevalence")
-
-assay(altExp(tse, "Species_byPrevalence"), "relabundance")[1:5, 1:3]
-```
-
-### Aggregate data based on variable
-
-`agglomerateByRank()` aggregates the data taking into account the taxonomy
-information. For more flexible aggregations, there is available method
-`agglomerateByVariable()`. For instance, we can aggregate the data by sample
-types.
+Instead, `agglomerateByVariable()` is designed to aggregate data based on other
+criteria, such as sample groups or clusters. For instance, we can aggregate the
+data by sample types. The function operates similarly to feature aggregation,
+but the `by` parameter must be set to "rows."
 
 ```{r}
 #| label: aggregate_samples
 
 # Agglomerate samples based on type
-tse_sub <- agglomerateByVariable(tse, by = "cols", f = "SampleType")
+tse_sub <- agglomerateByVariable(tse, by = "cols", group = "SampleType")
 tse_sub
 ```
 
-[@sec-taxa-clustering] introduces how cluster information can be utilized to
-agglomerate data.
+Now, the data includes as many columns as there are sample types.
 
-::: {.callout-tip}
-## Summary
+In [@sec-taxa-clustering], we will explore how cluster information can be used
+to agglomerate data effectively.
 
-Use subsetting, when you are interested on certain features. Agglomerate the
-data if you want to focus on features at a higher taxonomic level.
-:::
+## Agglomerate based on prevalence {#sec-agglomerate_prev}
+
+[@sec-subset_prev] demonstrated how to select only prevalent or rare features.
+In some cases, it might be beneficial to combine these features that would
+otherwise be removed. The function `agglomerateByPrevalence()` accomplishes
+this by merging filtered features into a single feature called "Other" by
+default, preventing unnecessary loss of information. This is particularly
+useful for retaining features that may still represent a significant proportion
+when combined.
+
+Here, we demonstrate how to agglomerate the data using prevalence thresholds
+of 20% and 0.1%, respectively. This means that for a feature to be considered
+detected in a sample, its abundance must exceed 0.1%. Furthermore, the feature
+must be present in at least 20% of samples to be retained in the dataset rather
+than placed in the "Other" group.
+
+To use relative abundances for the detection threshold, we must first transform
+the data to relative abundances. We will let the [@sec-assay-transform] to
+introduce transformations in more detail.
+
+```{r}
+#| label: agg_prevalence
+
+# Transform
+tse <- transformAssay(tse, method = "relabundance")
+# Agglomerate
+tse_prev <- agglomerateByPrevalence(
+  tse,
+  assay.type = "relabundance",
+  prevalence = 20 / 100,
+  detection = 0.1 / 100
+  )
+tse_prev
+```
+
+We have now successfully agglomerated the data based on prevalence. If we are
+interested in prevalent Phyla, we can certainly first agglomerate the data by
+Phylum rank and then by prevalence. The function `agglomerateByPrevalence()`
+allows us to accomplish both tasks simultaneously.
+
+```{r}
+#| label: agg_prev_phylum
+
+tse_prev_phylum <- agglomerateByPrevalence(
+  tse,
+  rank = "Phylum",
+  prevalence = 20 / 100,
+  detection =  1
+  )
+tse_prev_phylum
+```
