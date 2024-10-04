@@ -22,7 +22,13 @@ If you want to split the data based on a variable other than taxonomic rank, use
 split the data, Splitting the data may be useful, for example, if you want to 
 analyze data from different cohorts separately.
 
-```{r splitOn}
+```{r}
+#| label: splitOn
+
+library(mia)
+data("GlobalPatterns")
+tse <- GlobalPatterns
+
 splitOn(tse, "SampleType")
 ```
 
@@ -33,7 +39,9 @@ modified by accessing the desired variables. You might want to add or modify
 this data to include new variables or update existing ones, which can be essential 
 for ensuring that all relevant metadata is available for subsequent analyses.
 
-```{r modify-coldata}
+```{r}
+#| label: modify_coldata
+
 # modify the Description entries
 colData(tse)$Description <- paste(
     colData(tse)$Description, "modified description")
@@ -44,7 +52,9 @@ tse$Description |> head()
 
 New information can be added to the experiment by creating a new variable.
 
-```{r add-coldata}
+```{r}
+#| label: add-coldata
+
 # simulate new data
 new_data <- runif(ncol(tse))
 
@@ -57,7 +67,9 @@ tse$NewVariable |> head()
 
 Alternatively, you can add whole table by merging it with existing `colData`.
 
-```{r add-coldata2}
+```{r}
+#| label: add-coldata2
+
 # simulate new data
 new_data <- data.frame(var1 = runif(ncol(tse)), var2 = runif(ncol(tse)))
 rownames(new_data) <- colnames(tse)
@@ -66,11 +78,34 @@ rownames(new_data) <- colnames(tse)
 colData(tse) <- cbind(colData(tse), new_data)
 ```
 
-Similar steps can also be applied to `rowData`. When adding new samples or
+Similar steps can also be applied to `rowData`. If you have an assay whose
+rows and columns aling with the existing ones, you can add the assay easily
+to the `TreeSE` object.
+
+Here we add an assay that has random numbers but in real life these steps
+might come handy after you have transformed the data with custom transformation
+that cannot be found from `mia`.
+
+```{r}
+#| label: add_assay
+
+# Create a matrix with random values
+mat <- rnorm(ncol(tse)*nrow(tse), 0, 1)
+mat <- matrix(mat, ncol = ncol(tse), nrow = nrow(tse))
+# Add matrix to tse
+assay(tse, "random", withDimnames = FALSE) <- mat
+
+assayNames(tse)
+```
+
+Now we can see that the `TreeSE` object has now an additional assay called
+"random". When adding new samples or
 features to your existing dataset, you can use `cbind()` to combine columns for
 new features or `rbind()` to add rows for new samples.
 
 ```{r}
+#| label: combine-cols
+
 tse2 <- cbind(tse, tse)
 tse2
 ```
@@ -89,7 +124,9 @@ multiple `TreeSE` objects which each includes one sample.
 `mergeSEs()` works much like standard joining operations. It combines rows and 
 columns and allows you to specify the merging method.
 
-```{r merge1}
+```{r}
+#| label: merge1
+
 # Take subsets for demonstration purposes
 tse1 <- tse[, 1]
 tse2 <- tse[, 2]
@@ -97,14 +134,18 @@ tse3 <- tse[, 3]
 tse4 <- tse[1:100, 4]
 ```
 
-```{r merge2}
+```{r}
+#| label: merge2
+
 # With inner join, we want to include all shared rows. When using mergeSEs
 # function all samples are always preserved.
 tse <- mergeSEs(list(tse1, tse2, tse3, tse4), join = "inner")
 tse
 ```
 
-```{r merge3}
+```{r}
+#| label: merge3
+
 # Left join preserves all rows of the 1st object
 tse <- mergeSEs(tse1, tse4, missing.values = 0, join = "left")
 tse
@@ -117,7 +158,7 @@ For several custom analysis and visualization packages, such as those from
 `meltSE()`.    
 
 ```{r}
-tse <- GlobalPatterns
+#| label: melt-data
 
 # Melt SE object
 molten_tse <- meltSE(
