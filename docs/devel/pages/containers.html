@@ -563,13 +563,14 @@ div.csl-indent {
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
    
   <ul>
-<li><a href="#sec-rows-and-cols" id="toc-sec-rows-and-cols" class="nav-link active" data-scroll-target="#sec-rows-and-cols"><span class="header-section-number">3.1</span> Rows and columns</a></li>
-  <li><a href="#sec-assay-slot" id="toc-sec-assay-slot" class="nav-link" data-scroll-target="#sec-assay-slot"><span class="header-section-number">3.2</span> Assay data</a></li>
-  <li><a href="#coldata" id="toc-coldata" class="nav-link" data-scroll-target="#coldata"><span class="header-section-number">3.3</span> colData</a></li>
-  <li><a href="#sec-rowData" id="toc-sec-rowData" class="nav-link" data-scroll-target="#sec-rowData"><span class="header-section-number">3.4</span> rowData</a></li>
-  <li><a href="#rowtree" id="toc-rowtree" class="nav-link" data-scroll-target="#rowtree"><span class="header-section-number">3.5</span> rowTree</a></li>
-  <li><a href="#sec-alt-exp" id="toc-sec-alt-exp" class="nav-link" data-scroll-target="#sec-alt-exp"><span class="header-section-number">3.6</span> Alternative Experiments</a></li>
-  <li><a href="#sec-mae" id="toc-sec-mae" class="nav-link" data-scroll-target="#sec-mae"><span class="header-section-number">3.7</span> Multiple experiments</a></li>
+<li><a href="#structure-of-treese" id="toc-structure-of-treese" class="nav-link active" data-scroll-target="#structure-of-treese"><span class="header-section-number">3.1</span> Structure of <code>TreeSE</code></a></li>
+  <li><a href="#sec-rows-and-cols" id="toc-sec-rows-and-cols" class="nav-link" data-scroll-target="#sec-rows-and-cols"><span class="header-section-number">3.2</span> Rows and columns</a></li>
+  <li><a href="#sec-assay-slot" id="toc-sec-assay-slot" class="nav-link" data-scroll-target="#sec-assay-slot"><span class="header-section-number">3.3</span> Assay data</a></li>
+  <li><a href="#coldata" id="toc-coldata" class="nav-link" data-scroll-target="#coldata"><span class="header-section-number">3.4</span> colData</a></li>
+  <li><a href="#sec-rowData" id="toc-sec-rowData" class="nav-link" data-scroll-target="#sec-rowData"><span class="header-section-number">3.5</span> rowData</a></li>
+  <li><a href="#rowtree" id="toc-rowtree" class="nav-link" data-scroll-target="#rowtree"><span class="header-section-number">3.6</span> rowTree</a></li>
+  <li><a href="#sec-alt-exp" id="toc-sec-alt-exp" class="nav-link" data-scroll-target="#sec-alt-exp"><span class="header-section-number">3.7</span> Alternative Experiments</a></li>
+  <li><a href="#sec-mae" id="toc-sec-mae" class="nav-link" data-scroll-target="#sec-mae"><span class="header-section-number">3.8</span> Multiple experiments</a></li>
   </ul></nav>
     </div>
 <!-- main -->
@@ -624,8 +625,49 @@ document.addEventListener("click", function (event) {
 </div>
 <p>This section provides an introduction to <code>TreeSummarizedExperiment (TreeSE)</code> and <code>MultiAssayExperiment (MAE)</code> data containers introduced in <a href="intro.html#sec-microbiome-bioc" class="quarto-xref"><span>Section 1.2</span></a>. In microbiome data science, these containers link taxonomic abundance tables with rich side information on the features and samples. Taxonomic abundance data can be obtained by 16S rRNA amplicon or metagenomic sequencing, phylogenetic microarrays, or by other means. Many microbiome experiments include multiple versions and types of data generated independently or derived from each other through transformation or agglomeration. We start by providing recommendations on how to represent different varieties of multi-table data within the <code>TreeSE</code> class.</p>
 <p>The options and recommendations are summarized in <a href="#tbl-options" class="quarto-xref">Table&nbsp;<span>3.1</span></a>.</p>
-<section id="sec-rows-and-cols" class="level2" data-number="3.1"><h2 data-number="3.1" class="anchored" data-anchor-id="sec-rows-and-cols">
-<span class="header-section-number">3.1</span> Rows and columns</h2>
+<section id="structure-of-treese" class="level2 page-columns page-full" data-number="3.1"><h2 data-number="3.1" class="anchored" data-anchor-id="structure-of-treese">
+<span class="header-section-number">3.1</span> Structure of <code>TreeSE</code>
+</h2>
+<p><code>TreeSE</code> contains several distinct slots, each holding a specific type of data. The <code>assays</code> slot is the core of <code>TreeSE</code>, storing abundance tables that contain the counts or concentrations of features in each sample. Features can be taxa, metabolites, antimicrobial resistance genes, or other measured entities, and are represented as rows. The columns correspond to unique samples.</p>
+<p>Building upon the <code>assays</code>, <code>TreeSE</code> accommodates various data types for both features and samples. In <code>rowData</code>, the rows correspond to the same features (rows) as in the abundance tables, while the columns represent variables such as taxonomy ranks. Similarly, in <code>colData</code>, each row matches the samples (columns) from the abundance tables, with the columns of <code>colData</code> containing metadata like disease status or patient ID and time point if the dataset includes time series.</p>
+<p>The slots in <code>TreeSE</code> are outlined below:</p>
+<ul>
+<li>
+<code>assays</code>: Stores a list of abundance tables. Each table has consistent rows and columns, where rows represent taxa and columns represent samples.</li>
+<li>
+<code>rowData</code>: Contains metadata about the rows (taxa). For example, this slot can include a taxonomy table.</li>
+<li>
+<code>colData</code>: Holds metadata about the columns (samples), such as patient information or the time points when samples were collected.</li>
+<li>
+<code>rowTree</code>: Stores a hierarchical tree for the rows, such as a phylogenetic tree representing the relationships between taxa.</li>
+<li>
+<code>colTree</code>: Includes a hierarchical tree for the columns, which can represent relationships between samples, for example, indicating whether patients are relatives and the structure of those relationships.</li>
+<li>
+<code>rowLinks</code>: Contains information about the linkages between rows and the nodes in the <code>rowTree</code>.</li>
+<li>
+<code>colLinks</code>: Contains information about the linkages between columns and the nodes in the <code>colTree</code>.</li>
+<li>
+<code>referenceSeq</code>: Holds reference sequences, i.e., the sequences that correspond to each taxon identified in the rows.</li>
+<li>
+<code>metadata</code>: Contains metadata about the experiment, such as the date it was conducted and the researchers involved.</li>
+</ul>
+<p>These slots are illustrated in the figure below:</p>
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full"><p><img src="figures/treese.png" class="img-fluid figure-img" style="width:80.0%"></p>
+<figcaption>The structure of TreeSummarizedExperiment (TreeSE) object <span class="citation" data-cites="Huang2021">(<a href="#ref-Huang2021" role="doc-biblioref">Huang et al. 2021</a>)</span>.</figcaption><div class="no-row-height column-margin column-container"><div id="ref-Huang2021" class="csl-entry" role="listitem">
+Huang, Ruizhu, Charlotte Soneson, Felix G. M. Ernst, et al. 2021. <span>“TreeSummarizedExperiment: A S4 Class for Data with Hierarchical Structure [Version 2; Peer Review: 3 Approved].”</span> <em>F1000Research</em> 9: 1246. <a href="https://doi.org/10.12688/f1000research.26669.2">https://doi.org/10.12688/f1000research.26669.2</a>.
+</div></div></figure>
+</div>
+<p>Additionally, TreeSE includes:</p>
+<ul>
+<li>
+<code>reducedDim</code>: Contains reduced dimensionality representations of the samples, such as Principal Component Analysis (PCA) results (see <a href="beta_diversity.html" class="quarto-xref"><span>Chapter 14</span></a>.</li>
+<li>
+<code>altExp</code>: Stores alternative experiments, which are <code>TreeSE</code> objects sharing the same samples but with different feature sets.</li>
+</ul>
+<p>Among these, <code>assays</code>, <code>rowData</code>, <code>colData</code>, and <code>metadata</code> are shared with the <code>SummarizedExperiment</code> (<code>SE</code>) data container. <code>reducedDim</code> and <code>altExp</code> come from inheriting the <code>SingleCellExperiment</code> (<code>SCE</code>) class. The <code>rowTree</code>, <code>colTree</code>, <code>rowLinks</code>, <code>colLinks</code>, and <code>referenceSeq</code> slots are unique to <code>TreeSE</code>.</p>
+</section><section id="sec-rows-and-cols" class="level2" data-number="3.2"><h2 data-number="3.2" class="anchored" data-anchor-id="sec-rows-and-cols">
+<span class="header-section-number">3.2</span> Rows and columns</h2>
 <p>Let us load example data and store it in variable <code>tse</code>.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
@@ -679,11 +721,11 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><code>SummarizedExperiment</code> objects have rows and columns. Also <code>MultiAssayExperiment</code>, introduced in <a href="#sec-mae" class="quarto-xref"><span>Section 3.7</span></a> have rows and cols but the structure is more complicated. You can find more examples on subsetting from <a href="subsetting.html" class="quarto-xref"><span>Chapter 8</span></a>.</p>
+<p><code>SummarizedExperiment</code> objects have rows and columns. Also <code>MultiAssayExperiment</code>, introduced in <a href="#sec-mae" class="quarto-xref"><span>Section 3.8</span></a> have rows and cols but the structure is more complicated. You can find more examples on subsetting from <a href="subsetting.html" class="quarto-xref"><span>Chapter 8</span></a>.</p>
 </div>
 </div>
-</section><section id="sec-assay-slot" class="level2" data-number="3.2"><h2 data-number="3.2" class="anchored" data-anchor-id="sec-assay-slot">
-<span class="header-section-number">3.2</span> Assay data</h2>
+</section><section id="sec-assay-slot" class="level2" data-number="3.3"><h2 data-number="3.3" class="anchored" data-anchor-id="sec-assay-slot">
+<span class="header-section-number">3.3</span> Assay data</h2>
 <p>The microbiome is the collection of all microbes (such as bacteria, viruses, fungi, etc.) in the body. When studying these microbes, abundance data is needed, and that’s where assays come in.</p>
 <p>An assay is a way of measuring the presence and abundance of different types of microbes in a sample. For example, if you want to know how many bacteria of a certain type are in your gut, you can use an assay to measure this. When storing assays, the original data is count-based. However, the original count-based taxonomic abundance tables may undergo different transformations, such as logarithmic, Centered Log-Ratio (CLR), or relative abundance. These are typically stored in <em><strong>assays</strong></em>. See <a href="transformation.html" class="quarto-xref"><span>Chapter 10</span></a> for more information on transformations.</p>
 <p>The <code>assays</code> slot contains the experimental data as multiple count matrices. The result of <code>assays</code> is a list of matrices.</p>
@@ -722,8 +764,8 @@ Note
 <span><span class="co">##  586076  NA      NA  NA</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here the dimension of the assay data remains unchanged. This is in fact a requirement for the assays.</p>
-</section><section id="coldata" class="level2" data-number="3.3"><h2 data-number="3.3" class="anchored" data-anchor-id="coldata">
-<span class="header-section-number">3.3</span> colData</h2>
+</section><section id="coldata" class="level2" data-number="3.4"><h2 data-number="3.4" class="anchored" data-anchor-id="coldata">
+<span class="header-section-number">3.4</span> colData</h2>
 <p><code>colData</code> contains information about the samples used in the study. This information can include details such as the sample ID, the primers used in the analysis, the barcodes associated with the sample (truncated or complete), the type of sample (e.g.&nbsp;soil, fecal, mock) and a description of the sample.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span>
@@ -745,8 +787,8 @@ Note
 <span><span class="co">##  NP2     Newport Pier, CA surface water, Time 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>To illustrate, <strong><em>X.SampleID</em></strong> gives the sample identifier, <strong><em>SampleType</em></strong> indicates the sample type (e.g.&nbsp;soil, fecal matter, control) and <strong><em>Description</em></strong> provides an additional description of the sample.</p>
-</section><section id="sec-rowData" class="level2" data-number="3.4"><h2 data-number="3.4" class="anchored" data-anchor-id="sec-rowData">
-<span class="header-section-number">3.4</span> rowData</h2>
+</section><section id="sec-rowData" class="level2" data-number="3.5"><h2 data-number="3.5" class="anchored" data-anchor-id="sec-rowData">
+<span class="header-section-number">3.5</span> rowData</h2>
 <p><code>rowData</code> contains data on the features of the analyzed samples. This is particularly important in the microbiome field for storing taxonomic information. This taxonomic information is extremely important for understanding the composition and diversity of the microbiome in each sample analyzed. It enables identification of the different types of microorganisms present in samples. It also allows you to explore the relationships between microbiome composition and various environmental or health factors.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span>
@@ -766,8 +808,8 @@ Note
 <span><span class="co">##  244423          NA                     NA</span></span>
 <span><span class="co">##  586076          NA                     NA</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="rowtree" class="level2" data-number="3.5"><h2 data-number="3.5" class="anchored" data-anchor-id="rowtree">
-<span class="header-section-number">3.5</span> rowTree</h2>
+</section><section id="rowtree" class="level2" data-number="3.6"><h2 data-number="3.6" class="anchored" data-anchor-id="rowtree">
+<span class="header-section-number">3.6</span> rowTree</h2>
 <p>Phylogenetic trees also play an important role in the microbiome field. The <code>TreeSE</code> class can keep track of features and node relations via two functions, <code>rowTree</code> and <code>rowLinks</code>.</p>
 <p>A tree can be accessed via <code>rowTree</code> as <code>phylo</code> object.</p>
 <div class="cell" data-layout-align="center">
@@ -782,7 +824,7 @@ Note
 <span><span class="co">##  </span></span>
 <span><span class="co">##  Rooted; includes branch lengths.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>The links to the individual features are available through <code>rowLinks</code>.</p>
+<p>Each row in <code>TreeSE</code> is linked to a specific node in a tree. This relationship is stored in the <code>rowLinks</code> slot, which has the same rows as <code>TreeSE</code>. The <code>rowLinks</code> slot contains information about which tree node corresponds to each row and whether the node is a leaf (tip) or an internal node, among other details.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-accessor.html">rowLinks</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span>
 <span><span class="co">##  LinkDataFrame with 5 rows and 5 columns</span></span>
@@ -795,8 +837,8 @@ Note
 <span><span class="co">##  5      586076         5       alias_5      TRUE       phylo</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Please note that there can be a 1:1 relationship between tree nodes and features, but this is not a must-have. This means there can be features that are not linked to nodes, and nodes that are not linked to features. To change the links in an existing object, the <code><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/changeTree.html">changeTree()</a></code> function is available.</p>
-</section><section id="sec-alt-exp" class="level2 page-columns page-full" data-number="3.6"><h2 data-number="3.6" class="anchored" data-anchor-id="sec-alt-exp">
-<span class="header-section-number">3.6</span> Alternative Experiments</h2>
+</section><section id="sec-alt-exp" class="level2 page-columns page-full" data-number="3.7"><h2 data-number="3.7" class="anchored" data-anchor-id="sec-alt-exp">
+<span class="header-section-number">3.7</span> Alternative Experiments</h2>
 <p><em><strong>Alternative experiments</strong></em> complement <em>assays</em>. They can contain complementary data, which is no longer tied to the same dimensions as the assay data. However, the number of samples (columns) must be the same.</p>
 <p>This can come into play, for instance, when one has taxonomic abundance profiles quantified using different measurement technologies, such as phylogenetic microarrays, amplicon sequencing, or metagenomic sequencing. Another common use case is including abundance tables for different taxonomic ranks. Such alternative experiments concerning the same set of samples can be stored as</p>
 <ol type="1">
@@ -816,10 +858,10 @@ Note
 <p>Then we can add the new data object as an alternative experiment in the original data.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add the new data object to the original data object as an alternative</span></span>
-<span><span class="co"># experiment with the name "Phylum"</span></span>
+<span><span class="co"># experiment with the specified name</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html">altExp</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"subsetted"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">tse_sub</span></span>
 <span></span>
-<span><span class="co"># Check the alternative experiment names available in the data</span></span>
+<span><span class="co"># Retrieve and display the names of alternative experiments available</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html">altExpNames</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span>
 <span><span class="co">##  [1] "subsetted"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -832,16 +874,31 @@ Note
 <p>For more details on <em>altExp</em>, you can check the <a href="https://bioconductor.org/packages/release/bioc/vignettes/SingleCellExperiment/inst/doc/intro.html">introduction</a> to the <code>SingleCellExperiment</code> package <span class="citation" data-cites="R_SingleCellExperiment">(<a href="#ref-R_SingleCellExperiment" role="doc-biblioref">Lun and Risso 2020</a>)</span>.</p>
 <div class="no-row-height column-margin column-container"><div id="ref-R_SingleCellExperiment" class="csl-entry" role="listitem">
 Lun, Aaron, and Davide Risso. 2020. <em>SingleCellExperiment: S4 Classes for Single Cell Data</em>.
-</div></div></section><section id="sec-mae" class="level2 page-columns page-full" data-number="3.7"><h2 data-number="3.7" class="anchored" data-anchor-id="sec-mae">
-<span class="header-section-number">3.7</span> Multiple experiments</h2>
+</div></div></section><section id="sec-mae" class="level2 page-columns page-full" data-number="3.8"><h2 data-number="3.8" class="anchored" data-anchor-id="sec-mae">
+<span class="header-section-number">3.8</span> Multiple experiments</h2>
 <p><em><strong>Multiple experiments</strong></em> relate to complementary measurement types, such as transcriptomic or metabolomic profiling of the microbiome or the host. Multiple experiments can be represented using the same options as alternative experiments, or by using the <code>MAE</code> class <span class="citation" data-cites="Ramos2017">(<a href="#ref-Ramos2017" role="doc-biblioref">Ramos et al. 2017</a>)</span>. Depending on how the datasets relate to each other the data can be stored as:</p>
-<div class="no-row-height column-margin column-container"><div id="ref-Ramos2017" class="csl-entry" role="listitem">
-Ramos, Marcel, Lucas Schiffer, Angela Re, Rimsha Azhar, Azfar Basunia, Carmen Rodriguez Cabrera, Tiffany Chan, et al. 2017. <span>“Software for the Integration of Multiomics Experiments in Bioconductor.”</span> <em>Cancer Research</em>. <a href="https://doi.org/10.1158/0008-5472.CAN-17-0344">https://doi.org/10.1158/0008-5472.CAN-17-0344</a>.
-</div></div><ol type="1">
+<div class="no-row-height column-margin column-container"></div><ol type="1">
 <li>
 <code>altExp</code> if the samples can be matched directly 1:1; or</li>
 <li>As <code>MAE</code> objects, in which the connections between samples are defined through a <code>sampleMap</code>. Each element on the <code>ExperimentList</code> of an <code>MAE</code> is <code>matrix</code> or <code>matrix</code>-like objects, including <code>SE</code> objects, and the number of samples can differ between the elements.</li>
 </ol>
+<p>In a <code>MAE</code>, the “subjects” represent patients. The <code>MAE</code> has four main slots, with <code>experiments</code> being the core. This slot holds a list of experiments, each in (<code>Tree</code>)<code>SE</code> format. To handle complex mappings between samples (observations) across different experiments, the <code>sampleMap</code> slot stores information about how each sample in the experiments is linked to a patient. Metadata for each patient is stored in the <code>colData</code> slot. Unlike the <code>colData</code> in <code>TreeSE</code>, this <code>colData</code> is meant to store only metadata that remains constant throughout the trial.</p>
+<ul>
+<li>
+<code>experiments</code>: Contains experiments, such as different omics data, in TreeSE format.</li>
+<li>
+<code>sampleMap</code>: Holds linkages between patients (subjects) and samples in the experiments (observations).</li>
+<li>
+<code>colData</code>: Includes patient metadata that remains unchanged throughout the trial.</li>
+</ul>
+<p>These slots are illustrated in the figure below:</p>
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full"><p><img src="figures/mae.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<figcaption>The structure of MultiAssayExperiment (MAE) object <span class="citation" data-cites="Ramos2017">(<a href="#ref-Ramos2017" role="doc-biblioref">Ramos et al. 2017</a>)</span>.</figcaption><div class="no-row-height column-margin column-container"><div id="ref-Ramos2017" class="csl-entry" role="listitem">
+Ramos, Marcel, Lucas Schiffer, Angela Re, Rimsha Azhar, Azfar Basunia, Carmen Rodriguez Cabrera, Tiffany Chan, et al. 2017. <span>“Software for the Integration of Multiomics Experiments in Bioconductor.”</span> <em>Cancer Research</em>. <a href="https://doi.org/10.1158/0008-5472.CAN-17-0344">https://doi.org/10.1158/0008-5472.CAN-17-0344</a>.
+</div></div></figure>
+</div>
+<p>Additionally, the object includes a <code>metadata</code> slot that contains information about the dataset, such as the trial period and the creator of the <code>MAE</code> object.</p>
 <p>The <code>MAE</code> object can handle more complex relationships between experiments. It manages the linkages between samples and experiments, ensuring that the data remains consistent and well-organized.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"HintikkaXOData"</span><span class="op">)</span></span>
@@ -863,7 +920,6 @@ Ramos, Marcel, Lucas Schiffer, Angela Re, Rimsha Azhar, Azfar Basunia, Carmen Ro
 <span><span class="co">##   exportClass() - save data to flat files</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The <code>sampleMap</code> is a crucial component of the <code>MAE</code> object as it acts as the important bookkeeper, maintaining the information about which samples are associated with which experiments. This ensures that data linkages are correctly managed and preserved across different types of experiments.</p>
-<p>In fact, we can have</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://github.com/waldronlab/MultiAssayExperiment/reference/MultiAssayExperiment-methods.html">sampleMap</a></span><span class="op">(</span><span class="va">mae</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">##  DataFrame with 6 rows and 3 columns</span></span>
@@ -905,7 +961,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>If you have multiple experiments containing multiple measures from same patients, you can utilize the <code>MultiAssayExperiment</code> object to keep track of which samples belong to which patient.</p>
+<p>If you have multiple experiments (e.g., different omics data types like metagenomics, transcriptomics, proteomics, or metabolomics), the <code>MultiAssayExperiment</code> object allows you to organize and integrate these datasets, even if the samples across experiments don’t have a perfect 1:1 match.</p>
 </div>
 </div>
 <p>The following dataset illustrates how to utilize the sample mapping system in <code>MAE</code>. It includes two omics: biogenic amines and fatty acids, collected from 10 chickens.</p>
