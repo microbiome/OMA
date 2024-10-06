@@ -20,6 +20,50 @@ on how to represent different varieties of multi-table data within the
 
 The options and recommendations are summarized in [@tbl-options].
 
+## Structure of `TreeSE`
+
+`TreeSE` contains several distinct slots, each holding a specific type of data.
+The `assays` slot is the core of `TreeSE`, storing abundance tables that
+contain the counts or concentrations of features in each sample.
+Features can be taxa, metabolites, antimicrobial resistance genes, or other
+measured entities, and are represented as rows. The columns correspond to
+unique samples.
+
+Building upon the `assays`, `TreeSE` accommodates various data types for both
+features and samples. In `rowData`, the rows correspond to the same features
+(rows) as in the abundance tables, while the columns represent variables such as
+taxonomy ranks. Similarly, in `colData`, each row matches the samples (columns)
+from the abundance tables, with the columns of `colData` containing metadata
+like disease status or patient ID and time point if the dataset includes time
+series.
+
+The slots in `TreeSE` are outlined below:
+
+- `assays`: Stores a list of abundance tables. Each table has consistent rows and columns, where rows represent taxa and columns represent samples.
+- `rowData`: Contains metadata about the rows (taxa). For example, this slot can include a taxonomy table.
+- `colData`: Holds metadata about the columns (samples), such as patient information or the time points when samples were collected.
+- `rowTree`: Stores a hierarchical tree for the rows, such as a phylogenetic tree representing the relationships between taxa.
+- `colTree`: Includes a hierarchical tree for the columns, which can represent relationships between samples, for example, indicating whether patients are relatives and the structure of those relationships.
+- `rowLinks`: Contains information about the linkages between rows and the nodes in the `rowTree`.
+- `colLinks`: Contains information about the linkages between columns and the nodes in the `colTree`.
+- `referenceSeq`: Holds reference sequences, i.e., the sequences that correspond to each taxon identified in the rows.
+- `metadata`: Contains metadata about the experiment, such as the date it was conducted and the researchers involved.
+
+These slots are illustrated in the figure below:
+
+![The structure of TreeSummarizedExperiment (TreeSE) object [@Huang2021].](figures/treese.png){width="80%"}
+
+Additionally, TreeSE includes:
+
+- `reducedDim`: Contains reduced dimensionality representations of the samples, such as Principal Component Analysis (PCA) results (see [@sec-community-similarity].
+- `altExp`: Stores alternative experiments, which are `TreeSE` objects sharing the same samples but with different feature sets.
+
+Among these, `assays`, `rowData`, `colData`, and `metadata` are shared with the
+`SummarizedExperiment` (`SE`) data container. `reducedDim` and `altExp` come
+from inheriting the `SingleCellExperiment` (`SCE`) class. The `rowTree`,
+`colTree`, `rowLinks`, `colLinks`, and `referenceSeq` slots are unique to
+`TreeSE`.
+
 ## Rows and columns {#sec-rows-and-cols}
 
 Let us load example data and store it in variable `tse`.
@@ -152,7 +196,11 @@ A tree can be accessed via `rowTree` as `phylo` object.
 rowTree(tse)
 ```
 
-The links to the individual features are available through `rowLinks`.
+Each row in `TreeSE` is linked to a specific node in a tree. This relationship
+is stored in the `rowLinks` slot, which has the same  rows as `TreeSE`.
+The `rowLinks` slot contains information about which tree node corresponds to
+each row and whether the node is a leaf (tip) or an internal node, among other
+details.
 
 ```{r rowlinks}
 rowLinks(tse)
@@ -202,10 +250,10 @@ original data.
 
 ```{r altexp_agglomerate2}
 # Add the new data object to the original data object as an alternative
-# experiment with the name "Phylum"
+# experiment with the specified name
 altExp(tse, "subsetted") <- tse_sub
 
-# Check the alternative experiment names available in the data
+# Retrieve and display the names of alternative experiments available
 altExpNames(tse)
 ```
 
@@ -237,6 +285,26 @@ samples are defined through a `sampleMap`. Each element on the
 `matrix`-like objects, including `SE` objects, and
 the number of samples can differ between the elements.
 
+In a `MAE`, the "subjects" represent patients. The `MAE` has four main slots,
+with `experiments` being the core. This slot holds a list of experiments, each
+in (`Tree`)`SE` format. To handle complex mappings between samples
+(observations) across different experiments, the `sampleMap` slot stores
+information about how each
+sample in the experiments is linked to a patient. Metadata for each patient is
+stored in the `colData` slot. Unlike the `colData` in `TreeSE`, this `colData`
+is meant to store only metadata that remains constant throughout the trial.
+
+- `experiments`: Contains experiments, such as different omics data, in TreeSE format.
+- `sampleMap`: Holds linkages between patients (subjects) and samples in the experiments (observations).
+- `colData`: Includes patient metadata that remains unchanged throughout the trial.
+
+These slots are illustrated in the figure below:
+
+![The structure of MultiAssayExperiment (MAE) object [@Ramos2017].](figures/mae.png){width="60%"}
+
+Additionally, the object includes a `metadata` slot that contains information
+about the dataset, such as the trial period and the creator of the `MAE` object.
+
 The `MAE` object can handle more complex relationships between experiments.
 It manages the linkages between samples and experiments, ensuring that
 the data remains consistent and well-organized.
@@ -253,8 +321,6 @@ The `sampleMap` is a crucial component of the `MAE` object as it acts as the
 important bookkeeper, maintaining the information about which samples are
 associated with which experiments. This ensures that data linkages are
 correctly managed and preserved across different types of experiments.
-
-In fact, we can have
 
 ```{r}
 #| label: show_mae2
@@ -274,9 +340,10 @@ mae
 ::: {.callout-note}
 ## Note
 
-If you have multiple experiments containing multiple measures from same patients,
-you can utilize the `MultiAssayExperiment` object to keep track of which
-samples belong to which patient.
+If you have multiple experiments (e.g., different omics data types like
+metagenomics, transcriptomics, proteomics, or metabolomics), the
+`MultiAssayExperiment` object allows you to organize and integrate these
+datasets, even if the samples across experiments don’t have a perfect 1:1 match.
 
 :::
 
