@@ -1457,7 +1457,6 @@ zicoseq_res |>
     kable()
 ```
 
-
 ### Workflow 1
 
 1. Get the abundances for an individual feature (taxonomic group / row).
@@ -1490,7 +1489,6 @@ ComplexHeatmap::pheatmap, ComplexHeatMap::Heatmap, ANCOMBC::ancombc2,
 ALDEx2::aldex, Maaslin2::Maaslin2, agglomerateByRank, transformAssay,
 subsetByPrevalent
 
-
 ## Visualization
 
 ### Multivariate ordination
@@ -1503,7 +1501,6 @@ subsetByPrevalent
 
 Useful functions: scater::runMDS, runNMDS, transformAssay, ggplot,
 scater::plotReducedDim
-
 
 ### Heatmap visualization
 
@@ -1545,17 +1542,32 @@ tse <- agglomerateByPrevalence(tse, rank = "Phylum", prevalence = 0.9)
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 ```
 
-4. Visualize the relative abundances with a heatmap using the sechm library
+4. Visualize the relative abundances with a heatmap using the `sechm` package.
 
 ```{r}
 #| label: heatmap-ex4
 #| code-fold: true
 #| code-summary: "Show solution"
 #| eval: false
+
 setSechmOption("hmcols", value=c("#F0F0FF","#007562"))
 sechm(
     tse, features = rownames(tse), assayName="relabundance",
     show_colnames=TRUE)
+```
+
+5. Create a similar heatmap but now using the `ComplexHeatmap` package directly.
+
+```{r}
+#| label: heatmap-ex5
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+library(mia)
+library(ComplexHeatmap)
+
+Heatmap(assay(tse, "relabundance"))
 ```
 
 ### Advanced Heatmaps
@@ -1617,7 +1629,7 @@ correlations <- getCrossAssociation(
     show.warnings = FALSE)
 ```
 
-4. plot a heatmap using the correlations and mark significant correlations
+4. Plot a heatmap using the correlations and mark significant correlations
 (p<0.05) with a cross.
 
 ```{r}
@@ -1680,71 +1692,117 @@ p <- Heatmap(
 p
 ```
 
-**Extra** Cool Exercise : Identify Patterns and Clusters
-To make the exercise more engaging, let's do an exploratory data analysis task:
+**Extra** Cool exercises:
 
-#### 1. Cluster Analysis on PCoA/PCA Results:
+1. Create an interactive heatmap in Phylum level. Visualize standardized
+(Z-scored) relative abundances.
 
-i. Perform clustering on the ordination results (e.g., k-means clustering).
-ii. Visualize the clusters on the ordination plots.
+```{r}
+#| label: extra-interactiveheatmap-ex1
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
 
-```{r, eval = FALSE}
-library(scater)
+library(mia)
+library(heatmaply)
 
-# Setting seed for reproducibility
-set.seed(123)
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+# Agglomerate
+tse_phylum <- agglomerateByRank(GlobalPatterns, rank = "Phylum")
+# Transform
+tse_phylum <- transformAssay(tse_phylum, method = "relabundance")
+tse_phylum <- transformAssay(
+   tse_phylum, assay.type = "relabundance", method = "standardize",
+   MARGIN = "rows")
 
-# Perform k-means clustering on the reduced dimensions of pcoa_bray
-pcoa_bray_clusters <- kmeans(reducedDim(pcoa_bray), centers = 3)$cluster
-
-# Plot the reduced dimensions of pcoa_bray with clusters as colors
-plotReducedDim(pcoa_bray, colour_by = pcoa_bray_clusters)
-
-# Perform k-means clustering on the reduced dimensions of pca_aitchison
-pca_aitchison_clusters <- kmeans(reducedDim(pca_aitchison), centers = 3)$cluster
-
-# Plot the reduced dimensions of pca_aitchison with clusters as colors
-plotReducedDim(pca_aitchison, colour_by = pca_aitchison_clusters)
+# Create the interactive heatmap using aggregated data
+heatmaply(assay(tse_phylum, "standardize"), xlab = "Samples", ylab = "Phyla")
 ```
 
-Where:
-- `reducedDim` is a function that extracts the reduced dimensionality
-representation of your data (e.g., from a PCA or PCoA object).
-- `plotReducedDim` is a function that can plot these reduced dimensions and
-has a 'colour_by argument' that accepts a vector of cluster assignments.
+2. k-means clustering on reduced dimensions and visualization
 
-#### 2. Heatmap with Annotations:
+- Performs k-means clustering on reduced dimensional data obtained from PCoA.
+- Visualizes the clusters in a scatter plot of the reduced dimensions.
 
-- Annotate the heatmap with additional metadata (e.g., subject groups or
-sample types).
+```{r}
+#| label: extra-kmeansclustering-heatmap-ex2
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
 
-```{r, eval = FALSE}
-# Load necessary libraries
+library(mia)
 library(SummarizedExperiment)
+library(scater)
+library(bluster)
+
+data(GlobalPatterns)
+tse <- GlobalPatterns
+
+# Perform MDS on the abundance data using scater::runMDS
+tse <- runMDS(tse, FUN = getDissimilarity, method = "bray", assay.type = "counts")
+
+# Perform k-means clustering using mia's addCluster()
+kmeans_param <- KmeansParam(centers = 3)
+tse <- addCluster(
+   tse, clust.col = "kmeans_clusters", by = "columns", BLUSPARAM = kmeans_param)
+
+# Visualize MDS with clusters
+plotReducedDim(tse, dimred = "MDS", colour_by = "kmeans_clusters") +
+  labs(title = "MDS with k-means Clustering") +
+  theme_minimal()
+```
+
+3. Hierarchical Clustering
+- Agglomerate to Family level
+- Hierarchical clustering of samples based on abundance data.
+- Visualizes the clustered data using a heatmap, with cluster information added to metadata.
+
+```{r}
+#| label: extra-hierarchialclustering-heatmap-ex3
+#| eval: FALSE
+#| code-fold: true
+#| code-summary: "Show solution"
+
+library(mia)
+library(bluster)
 library(ComplexHeatmap)
 
-# Example data creation
-# Assuming enterotype is a SummarizedExperiment object with sample metadata
-# and assay_data is a matrix containing assay data
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
 
-# Create example SummarizedExperiment object
-example_data <- matrix(runif(200), nrow = 20, ncol = 10) # Example assay data
-col_data <- DataFrame(
-    Sample = paste0("Sample", 1:10),
-    Group = rep(c("A", "B"), each = 5)) # Example sample metadata
-enterotype <- SummarizedExperiment(
-    assays = list(counts = example_data), colData = col_data)
+# Agglomerate data
+tse <- agglomerateByRank(tse, rank = "Phylum")
+# Transform adata
+tse <- transformAssay(tse, method = "clr", pseudocount = TRUE)
+tse <- transformAssay(tse, assay.type = "clr", method = "standardize", MARGIN = "rows")
+# Perform hierarchical clustering
+hclust_param <- HclustParam(method = "complete", cut.params = list(k = 3))
+tse <- addCluster(
+   tse, clust.col = "Cluster", MARGIN = "columns", BLUSPARAM = hclust_param)
 
-# Extract sample metadata
-sample_metadata <- colData(enterotype)
+# Create column annotation
+column_ha = HeatmapAnnotation(cluster = colData(tse)$Cluster)
+# Visualization using sechm heatmap
+mat <- assay(tse, "standardize")
+Heatmap(mat, name = "mat", top_annotation = column_ha)
+```
 
-# Extract assay data
-assay_data <- assay(enterotype, "counts")
+4. In the previous heatmap, order the columns based on clusters.
 
-# Plot heatmap with clustering and sample annotations
-pheatmap(
-    assay_data, cluster_rows = TRUE, cluster_cols = TRUE,
-    annotation_col = as.data.frame(sample_metadata))
+```{r}
+#| label: extra-customcolorheatmap-ex-4
+#| code-fold: true
+#| code-summary: "Show solution"
+#| eval: false
+
+# Order
+tse <- tse[, order(colData(tse)$Cluster)]
+# Create column annotation
+column_ha = HeatmapAnnotation(cluster = colData(tse)$Cluster)
+# Visualization using sechm heatmap
+mat <- assay(tse, "standardize")
+Heatmap(mat, name = "mat", top_annotation = column_ha, cluster_columns = FALSE)
 ```
 
 ### *bonus* Regression charts to visualize microbiome data

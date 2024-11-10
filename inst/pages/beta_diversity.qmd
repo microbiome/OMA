@@ -1,4 +1,4 @@
-# Community Similarity {#sec-community-similarity}
+# Community similarity {#sec-community-similarity}
 
 ```{r setup, echo = FALSE, results = "asis"}
 library(rebook)
@@ -607,33 +607,19 @@ how the groups tend to differ from each other in terms of community
 composition.
 
 ```{r plot-top-coef-anova, fig.cap = ""}
-# Extract loadings for first eigenvector
-rda <- reducedDim(tse2, "RDA")
-rda <- attr(rda, "rda")
-coef <- rda$CCA$v
-coef <- coef[, 1, drop = FALSE]
+plotLoadings(tse2, "RDA", ncomponents = 2, n = 20)
+```
 
-# Get the taxa with biggest weights
-top_coef <- head(coef[rev(order(abs(coef))), , drop = FALSE], 20)
-# Sort weights in increasing order
-top_coef <- top_coef[order(top_coef), ]
+```{r}
+#| label: get_top_taxa
+#| echo: false
 
-# Create data.frame
-df <- data.frame(
-    x = top_coef,
-    y = factor(names(top_coef), unique(names(top_coef))))
-
-# Create a plot
-ggplot(df, aes(x = x, y = y)) +
-    geom_bar(stat = "identity") +
-    labs(x = "", y= "", title = "Top Taxa") +
-    theme_bw()
+loadings <- attr(reducedDim(tse2, "RDA"), "species")
+top_coef <- sort(abs(loadings[, 1]), decreasing = TRUE)
 ```
 
 In the example above, the largest differences between the two groups
-can be attributed to _`r names(sort(abs(top_coef), decreasing = TRUE))[[1]]`_
-and
-_`r names(sort(abs(top_coef), decreasing = TRUE))[[2]] `_.
+can be attributed to _`r names(top_coef)[[1]]`_ and _`r names(top_coef)[[2]] `_.
 
 ### Checking the homogeneity condition
 
@@ -805,7 +791,6 @@ methods store the reducedDim object into the specified TreeSE.
 * t-distributed Stochastic Neighbor Embedding (t-SNE): `calculateTSNE()`
 and `runTSNE()`
 * UMAP: `calculateUMAP()` and `runUMAP()`
-
 
 For more information on sample clustering, you can refer to:
 

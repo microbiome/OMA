@@ -5,57 +5,155 @@ library(rebook)
 chapterPreamble()
 ```
 
-```{r, message=FALSE}
+In [@sec-treese_subsetting], we covered how to select features from the dataset.
+Agglomeration, on the other hand, involves combining data points into broader
+categories by summing their values. For instance, if you have counts for
+individual species, you might agglomerate them into groups based on their
+family or genus. This means you would add up the counts of all species within
+a particular family to get a single value that represents that family. While
+this method simplifies your dataset and highlights overall trends, it means
+you lose the specific information about individual species.
+
+The choice between these subsetting and agglomeration depends on your research
+goals and the type of insights you want to gain from your data.
+Agglomeration is often used to reduce the number of features, especially in
+sequencing data, where there
+may not be enough resolution to reliably differentiate between closely related
+species. By combining data at higher taxonomic levels, you can focus on broader
+patterns and trends in the community while managing the complexity of the
+dataset.
+
+Moreover, whenthe total abundances of certain taxonomy rank are important, the
+data should first be agglomerated to the specified taxonomy level. Afterward,
+we can select the desired taxa from the dataset.
+
+```{r}
+#| label: load_data
+
 library(mia)
 data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 ```
 
-In this chapter, we discuss agglomeration, which involves summing data within
-specific groups. For example, we can agglomerate data to the phylum taxonomy
-level. This process begins by identifying which phyla are present in the data.
-Subsequently, we group the data according to these phyla and aggregate the
-counts. The resulting dataset will have features corresponding to each phylum,
-with counts aggregated from the lower-level taxa associated with them.
-
-## Agglomerate data to certain rank {#sec-data-agglomeration}
+## Agglomerate based on taxonomy rank
 
 One of the main applications of taxonomic information in regards to count data
 is to agglomerate count data on taxonomic levels and track the influence of
 changing conditions through these levels. For this `mia` contains the
-`agglomerateByRank()` function. The ideal location to store the agglomerated data
-is as an alternative experiment(see [@sec-alt-exp]).
+`agglomerateByRank()` function.
+
+At its simplest, the function takes a `TreeSE` object as input and outputs a
+`TreeSE` object agglomerated to a specified taxonomy level using the `rank`
+parameter. Additionally, we can choose to prune the phylogenetic tree to
+correspond to the agglomerated data.
 
 ```{r}
-# Transform data
-tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+#| label: agg_phylum
+
 # Agglomerate
-altExp(tse, "Family") <- agglomerateByRank(
-    tse, rank = "Family", agglomerate.tree = TRUE)
-altExp(tse, "Family")
+tse_phylum <- agglomerateByRank(tse, rank = "Phylum", update.tree = TRUE)
+tse_phylum
 ```
 
-If multiple assays (counts and relabundance) exist, both will be agglomerated.
+The output now contains `r nrow(tse_phylum)` features, a reduction from the
+original `r nrow(tse)` rows. It's important to note that the samples remain
+unchanged from the original dataset. Let's take a look at the `rowData` to
+see how it looks.
 
 ```{r}
-assayNames(tse)
-assayNames(altExp(tse, "Family"))
+#| label: agg_phylum_rowdata
+
+rowData(tse_phylum)
 ```
+
+As we observe from the taxonomy table, all lower ranks below Phylum now contain
+`NA` values. This is expected, as we have agglomerated the data to the Phylum
+level, meaning that the lowest rank that rows can be uniquely mapped to is the
+Family rank.
+
+Since we specified `update.tree = TRUE`, the phylogenetic tree has also been
+agglomerated. This is evident from the tree, which now has only
+`r length(rowTree(tse_phylum)$tip.label)` tips, each corresponding to a single
+row in the dataset.
 
 ```{r}
-assay(altExp(tse, "Family"), "relabundance")[1:5, 1:7]
+#| label: agg_phylum_rowtree
+
+rowTree(tse_phylum)
 ```
 
-```{r taxinfo_altexp_example}
-assay(altExp(tse, "Family"), "counts")[1:5, 1:7]
+Additionally, we can examine the counts assay to assess how the agglomeration
+has affected the counts.
+
+```{r}
+#| label: agg_phylum_assay
+
+assay(tse_phylum, "counts") |> head()
 ```
 
-`altExpNames` now consists of `Family` level data. This can be extended to use
-any taxonomic level listed in `taxonomyRanks(tse)`.
+The values in the counts assay are significantly larger than in the original
+data, indicating that the values have been summed during agglomeration.
 
-We can also aggregate the data across all available ranks in one step using
-`agglomerateByRanks()`. The function returns `TreeSE` including agglomerated
-objects in `altExp` slot.
+Now when the data is agglomerated, we can check the abundances of certain phyla.
+
+```{r}
+#| label: select_phyla
+
+# Store features of interest into phyla
+phyla <- c("Actinobacteria", "Chlamydiae")
+# subset by feature
+tse_sub <- tse_phylum[phyla, ]
+# Show dimensions
+assay(tse_sub)
+```
+
+::: {.callout-note}
+## Note
+
+As data was agglomerated, the number of rows should equal the
+number of phyla used to index (in this case, just 2).
+:::
+
+Furthermore, we can observe that the agglomeration will be applied to every
+assay in the dataset. Let's add another assay to the dataset and then perform
+agglomeration again, this time at the Family level.
+
+```{r}
+#| label: agg_family
+
+# Add another assay
+assay(tse, "another_assay", withDimnames = FALSE) <- matrix(
+  runif(ncol(tse)*nrow(tse), 0, 1), ncol = ncol(tse), nrow = nrow(tse))
+
+# Agglomerate
+tse_family <- agglomerateByRank(tse, rank = "Family")
+
+assayNames(tse_family)
+```
+
+We can now confirm that the agglomerated dataset contains two assays:
+"counts" and "another_assay," consistent with the original data structure.
+
+If the data is agglomerated by features, the ideal location to
+store the resulting dataset is as an alternative experiment, `altExp` slot
+(see [@sec-alt-exp]). Let's add the Phylum data there.
+
+```{r}
+#| label: add_agg
+
+altExp(tse, "phylum") <- tse_phylum
+altExpNames(tse)
+```
+
+`altExpNames` now consists of `Phylum` level data. This can be extended to use
+any taxonomic level listed in `taxonomyRanks(tse)`. While it is certainly
+possible to agglomerate data one taxonomic level at a time, you can also
+aggregate data across all available ranks in a single step using the
+`agglomerateByRanks()` function. This function returns a `TreeSE` object that
+includes the agglomerated data in the `altExp` slot.
+
+If you want the data as a `list` as discussed in [@sec-splitting], you can
+achieve this by specifying `as.list = TRUE`
 
 ```{r}
 #| label: agglomerateranks
@@ -64,91 +162,84 @@ tse <- agglomerateByRanks(tse)
 altExpNames(tse)
 ```
 
-### Total abundance of certain taxa
-
-When total abundances of certain phyla are of relevance, the data is initially
-agglomerated by Phylum. Then, similar steps as in the case of non-agglomerated
-data are followed.
-
-```{r}
-# Get the agglomerated data from altExp
-tse_phylum <- altExp(tse, "Phylum")
-
-# Subset by feature and remove NAs
-tse_sub <- tse_phylum[
-    rowData(tse_phylum)$Phylum %in% c("Actinobacteria", "Chlamydiae")
-        &!is.na(rowData(tse_phylum)$Phylum), ]
-
-# Show dimensions
-dim(tse_sub)
-```
-
-::: {.callout-note}
-## Note
-As data was agglomerated, the number of rows should equal the
-number of phyla used to index (in this case, just 2).
-:::
-
-Alternatively:
-
-```{r}
-# Store features of interest into phyla
-phyla <- c("Actinobacteria", "Chlamydiae")
-# subset by feature
-tse_sub <- tse_phylum[phyla, ]
-# Show dimensions
-dim(tse_sub)
-```
-
-## Agglomerate based on prevalence
-
-Rare taxa can also be aggregated into a single group "Other" instead of 
-filtering them out. A suitable function for this is `agglomerateByPrevalence()`.
-The number of rare taxa is higher on the species level, which causes the need 
-for data agglomeration by prevalence.
-
-```{r}
-altExp(tse, "Species_byPrevalence") <- agglomerateByPrevalence(
-    tse,
-    rank = "Species",
-    other.label = "Other",
-    prevalence = 5 / 100,
-    detection = 1 / 100,
-    as.relative = TRUE)
-altExp(tse, "Species_byPrevalence")
-
-assay(altExp(tse, "Species_byPrevalence"), "relabundance")[1:5, 1:3]
-```
-
 ## Aggregate data based on variable
 
-`agglomerateByRank()` aggregates the data taking into account the taxonomy
-information. For more flexible aggregations, there is available method
-`agglomerateByVariable()`. For instance, we can aggregate the data by sample
-types.
+The `agglomerateByRank()` function aggregates data while considering taxonomy
+information. For more flexible aggregations, the `agglomerateByVariable()`
+method is also available. In some cases, both functions may yield the same
+results; however, agglomerateByRank() ensures that the entire taxonomy of a
+feature is unique for successful agglomeration.
+
+For example, a dataset might contain taxa with the same lower-level rank, even
+if their higher-level ranks differ. Thus, `agglomerateByVariable()` should not
+be used for aggregating taxonomy ranks.
+
+Instead, `agglomerateByVariable()` is designed to aggregate data based on other
+criteria, such as sample groups or clusters. For instance, we can aggregate the
+data by sample types. The function operates similarly to feature aggregation,
+but the `by` parameter must be set to "rows."
 
 ```{r}
 #| label: aggregate_samples
 
 # Agglomerate samples based on type
-tse_sub <- agglomerateByVariable(tse, by = "cols", f = "SampleType")
+tse_sub <- agglomerateByVariable(tse, by = "cols", group = "SampleType")
 tse_sub
 ```
 
-[@sec-taxa-clustering] introduces how cluster information can be utilized to
-agglomerate data.
+Now, the data includes as many columns as there are sample types.
 
-## Subset based on prevalence
+In [@sec-taxa-clustering], we will explore how cluster information can be used
+to agglomerate data effectively.
 
-In addition to agglomeration, we can subset the data based on prevalence.
-Using `subsetByPrevalent()`, we can filter for taxa that exceed a specified
-prevalence threshold. Alternatively, `subsetByRare()` allows us to filter for taxa
-that do not exceed the threshold.
+## Agglomerate based on prevalence {#sec-agglomerate_prev}
+
+[@sec-subset_prev] demonstrated how to select only prevalent or rare features.
+In some cases, it might be beneficial to combine these features that would
+otherwise be removed. The function `agglomerateByPrevalence()` accomplishes
+this by merging filtered features into a single feature called "Other" by
+default, preventing unnecessary loss of information. This is particularly
+useful for retaining features that may still represent a significant proportion
+when combined.
+
+Here, we demonstrate how to agglomerate the data using prevalence thresholds
+of 20% and 0.1%, respectively. This means that for a feature to be considered
+detected in a sample, its abundance must exceed 0.1%. Furthermore, the feature
+must be present in at least 20% of samples to be retained in the dataset rather
+than placed in the "Other" group.
+
+To use relative abundances for the detection threshold, we must first transform
+the data to relative abundances. We will let the [@sec-assay-transform] to
+introduce transformations in more detail.
 
 ```{r}
-#| label: subset_by_rare
+#| label: agg_prevalence
 
-tse_sub <- subsetByRare(tse, rank = "Genus", detection = 0.01, prevalence = 0.1)
-tse_sub
+# Transform
+tse <- transformAssay(tse, method = "relabundance")
+# Agglomerate
+tse_prev <- agglomerateByPrevalence(
+  tse,
+  assay.type = "relabundance",
+  prevalence = 20 / 100,
+  detection = 0.1 / 100
+  )
+tse_prev
 ```
 
+We have now successfully agglomerated the data based on prevalence. If we are
+interested in prevalent Phyla, we can certainly first agglomerate the data by
+Phylum rank and then by prevalence. The function `agglomerateByPrevalence()`
+allows us to accomplish both tasks simultaneously.
+
+```{r}
+#| label: agg_prev_phylum
+
+tse_prev_phylum <- agglomerateByPrevalence(
+  tse,
+  rank = "Phylum",
+  prevalence = 20 / 100,
+  detection =  1
+  )
+tse_prev_phylum
+```
