@@ -130,9 +130,47 @@ table. For instance, we can check all the taxa that matches with "Escherichia".
 
 ```{r}
 #| label: mapTaxonomy
-mapTaxonomy(GlobalPatterns, taxa = "Escherichia")
+mapTaxonomy(tse, taxa = "Escherichia")
 ```
 
+## Prune taxonomy tree {#sec-update-tree}
+
+Subsetting is explained in detail in [@sec-treese_subsetting]. However, if
+you've already subsetted your data, you may have noticed that the taxonomy tree
+does not automatically update when using the `[]` operators. Although the
+linakges between rows and tree nodes remain correct, the tree retains its
+original, complex structure. You may be wondering how to update the tree to
+reflect the newly simplified data.
+
+`mia` package functions `subsetBy*` and `agglomerateBy*` (see
+[@sec-agglomeration]) include an `update.tree` parameter to handle this
+adjustment. However, when using `[]`, tree pruning must be done as an additional
+step.
+
+Let's start by selecting 5 arbitrary rows.
+
+```{r}
+#| label: subset_tse
+
+tse_sub <- tse[1:5, ]
+tse_sub
+```
+
+ven though we have only 5 rows, the tree still retains its original number of
+tips. To align the tree with the subsetted data, we can use the
+`TreeSummarizedExperiment::subsetByLeaf()` function, which allows us to select
+specific tips from the tree, effectively pruning it to match the current subset
+of data.
+
+```{r}
+#| label: subset_tree
+
+tse_sub <- subsetByLeaf(tse_sub, rowLeaf = rownames(tse_sub))
+tse_sub
+```
+
+Now, we can see that the taxonomy tree has a simpler structure, including only
+the selected leaves.
 
 ## Generate a hierarchy tree on the fly {#sec-fly-tree}
 
