@@ -196,7 +196,7 @@ provides us with the overall importance of each feature in the final model.
 ```{r}
 #| label: feat_importance
 
-library(ggplot2)
+library(miaViz)
 
 # Get individual models
 models <- fit$model_fits$model_layers
@@ -208,28 +208,18 @@ importances <- lapply(seq_len(length(models)), function(i){
   temp <- temp * fit$weights[[i]]
   return(temp)
   })
-# Combine and order to most important features
+# Combine the feature importances
 importances <- do.call(rbind, importances)
-importances <- importances[
-  order(importances, decreasing = TRUE), , drop = FALSE]
-# Add features to column
-importances <- importances |> as.data.frame()
-importances[["Feature"]] <- factor(
-  rownames(importances), levels = rownames(importances))
-# Convert to 0-1 scale
-importances[[1]] <- importances[[1]] / sum(importances[[1]])
-# Get top 20 importances
-top_n <- 20
-importances <- importances[ seq_len(top_n), ]
 
-# Plot as a bar plot
-p <- ggplot(importances, aes(x = MeanDecreaseGini, y = Feature)) +
-  geom_bar(stat = "identity")
+# Plot feature importances
+p <- plotLoadings(importances, ncomponents = 1, n = 20, show.color = FALSE)
 p
 ```
 
-From the plot, we can observe that _`r importances[1, "Feature"]`_ and
-_`r importances[1, "Feature"]`_ appear to have the greatest predictive power
+From the plot, we can observe that
+_`r rownames(importances)[order(importances, decreasing = TRUE)][[1]]`_ and
+_`r rownames(importances)[order(importances, decreasing = TRUE)][[2]]`_ appear
+to have the greatest predictive power
 among all the features in determining the outcome. However, the predictive
 power appears to be fairly evenly distributed across all features.
 
