@@ -578,8 +578,9 @@ div.csl-indent {
   <li><a href="#get-information-on-certain-taxa" id="toc-get-information-on-certain-taxa" class="nav-link" data-scroll-target="#get-information-on-certain-taxa"><span class="header-section-number">6.2.3</span> Get information on certain taxa</a></li>
   </ul>
 </li>
-  <li><a href="#sec-fly-tree" id="toc-sec-fly-tree" class="nav-link" data-scroll-target="#sec-fly-tree"><span class="header-section-number">6.3</span> Generate a hierarchy tree on the fly</a></li>
-  <li><a href="#set-taxonomy-ranks" id="toc-set-taxonomy-ranks" class="nav-link" data-scroll-target="#set-taxonomy-ranks"><span class="header-section-number">6.4</span> Set taxonomy ranks</a></li>
+  <li><a href="#sec-update-tree" id="toc-sec-update-tree" class="nav-link" data-scroll-target="#sec-update-tree"><span class="header-section-number">6.3</span> Prune taxonomy tree</a></li>
+  <li><a href="#sec-fly-tree" id="toc-sec-fly-tree" class="nav-link" data-scroll-target="#sec-fly-tree"><span class="header-section-number">6.4</span> Generate a hierarchy tree on the fly</a></li>
+  <li><a href="#set-taxonomy-ranks" id="toc-set-taxonomy-ranks" class="nav-link" data-scroll-target="#set-taxonomy-ranks"><span class="header-section-number">6.5</span> Set taxonomy ranks</a></li>
   </ul></nav>
     </div>
 <!-- main -->
@@ -756,7 +757,7 @@ Wright, Erik. 2020. <em>DECIPHER: Tools for Curating, Analyzing, and Manipulatin
 </div>
 <p>With <code><a href="https://rdrr.io/pkg/mia/man/taxonomy-methods.html">mapTaxonomy()</a></code>, you can search information on certain taxa from the taxonomy table. For instance, we can check all the taxa that matches with “Escherichia”.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/mia/man/taxonomy-methods.html">mapTaxonomy</a></span><span class="op">(</span><span class="va">GlobalPatterns</span>, taxa <span class="op">=</span> <span class="st">"Escherichia"</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/mia/man/taxonomy-methods.html">mapTaxonomy</a></span><span class="op">(</span><span class="va">tse</span>, taxa <span class="op">=</span> <span class="st">"Escherichia"</span><span class="op">)</span></span>
 <span><span class="co">##  $Escherichia</span></span>
 <span><span class="co">##  DataFrame with 1 row and 7 columns</span></span>
 <span><span class="co">##             Kingdom         Phylum               Class             Order</span></span>
@@ -766,12 +767,57 @@ Wright, Erik. 2020. <em>DECIPHER: Tools for Curating, Analyzing, and Manipulatin
 <span><span class="co">##                &lt;character&gt; &lt;character&gt; &lt;character&gt;</span></span>
 <span><span class="co">##  249227 Enterobacteriaceae Escherichia          NA</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section></section><section id="sec-fly-tree" class="level2 page-columns page-full" data-number="6.3"><h2 data-number="6.3" class="anchored" data-anchor-id="sec-fly-tree">
-<span class="header-section-number">6.3</span> Generate a hierarchy tree on the fly</h2>
+</section></section><section id="sec-update-tree" class="level2" data-number="6.3"><h2 data-number="6.3" class="anchored" data-anchor-id="sec-update-tree">
+<span class="header-section-number">6.3</span> Prune taxonomy tree</h2>
+<p>Subsetting is explained in detail in <a href="subsetting.html" class="quarto-xref"><span>Chapter 8</span></a>. However, if you’ve already subsetted your data, you may have noticed that the taxonomy tree does not automatically update when using the <code>[]</code> operators. Although the linakges between rows and tree nodes remain correct, the tree retains its original, complex structure. You may be wondering how to update the tree to reflect the newly simplified data.</p>
+<p><code>mia</code> package functions <code>subsetBy*</code> and <code>agglomerateBy*</code> (see <a href="agglomeration.html" class="quarto-xref"><span>Chapter 9</span></a>) include an <code>update.tree</code> parameter to handle this adjustment. However, when using <code>[]</code>, tree pruning must be done as an additional step.</p>
+<p>Let’s start by selecting 5 arbitrary rows.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse_sub</span> <span class="op">&lt;-</span> <span class="va">tse</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">]</span></span>
+<span><span class="va">tse_sub</span></span>
+<span><span class="co">##  class: TreeSummarizedExperiment </span></span>
+<span><span class="co">##  dim: 5 26 </span></span>
+<span><span class="co">##  metadata(0):</span></span>
+<span><span class="co">##  assays(1): counts</span></span>
+<span><span class="co">##  rownames(5): 549322 522457 951 244423 586076</span></span>
+<span><span class="co">##  rowData names(7): Kingdom Phylum ... Genus Species</span></span>
+<span><span class="co">##  colnames(26): CL3 CC1 ... Even2 Even3</span></span>
+<span><span class="co">##  colData names(7): X.SampleID Primer ... SampleType Description</span></span>
+<span><span class="co">##  reducedDimNames(0):</span></span>
+<span><span class="co">##  mainExpName: NULL</span></span>
+<span><span class="co">##  altExpNames(0):</span></span>
+<span><span class="co">##  rowLinks: a LinkDataFrame (5 rows)</span></span>
+<span><span class="co">##  rowTree: 1 phylo tree(s) (19216 leaves)</span></span>
+<span><span class="co">##  colLinks: NULL</span></span>
+<span><span class="co">##  colTree: NULL</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>ven though we have only 5 rows, the tree still retains its original number of tips. To align the tree with the subsetted data, we can use the <code><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-accessor.html">TreeSummarizedExperiment::subsetByLeaf()</a></code> function, which allows us to select specific tips from the tree, effectively pruning it to match the current subset of data.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse_sub</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-accessor.html">subsetByLeaf</a></span><span class="op">(</span><span class="va">tse_sub</span>, rowLeaf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">tse_sub</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">tse_sub</span></span>
+<span><span class="co">##  class: TreeSummarizedExperiment </span></span>
+<span><span class="co">##  dim: 5 26 </span></span>
+<span><span class="co">##  metadata(0):</span></span>
+<span><span class="co">##  assays(1): counts</span></span>
+<span><span class="co">##  rownames(5): 549322 522457 951 244423 586076</span></span>
+<span><span class="co">##  rowData names(7): Kingdom Phylum ... Genus Species</span></span>
+<span><span class="co">##  colnames(26): CL3 CC1 ... Even2 Even3</span></span>
+<span><span class="co">##  colData names(7): X.SampleID Primer ... SampleType Description</span></span>
+<span><span class="co">##  reducedDimNames(0):</span></span>
+<span><span class="co">##  mainExpName: NULL</span></span>
+<span><span class="co">##  altExpNames(0):</span></span>
+<span><span class="co">##  rowLinks: a LinkDataFrame (5 rows)</span></span>
+<span><span class="co">##  rowTree: 1 phylo tree(s) (5 leaves)</span></span>
+<span><span class="co">##  colLinks: NULL</span></span>
+<span><span class="co">##  colTree: NULL</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, we can see that the taxonomy tree has a simpler structure, including only the selected leaves.</p>
+</section><section id="sec-fly-tree" class="level2 page-columns page-full" data-number="6.4"><h2 data-number="6.4" class="anchored" data-anchor-id="sec-fly-tree">
+<span class="header-section-number">6.4</span> Generate a hierarchy tree on the fly</h2>
 <p>A hierarchy tree shows mapping between the taxonomic levels in taxonomic rank table (included in <code>rowData</code>), rather than the detailed phylogenetic relations. Usually, a phylogenetic tree refers to latter which is why we call here the generated tree as “hierarchy tree”.</p>
 <p>To create a hierarchy tree, <code><a href="https://rdrr.io/pkg/mia/man/hierarchy-tree.html">getHierarchyTree()</a></code> used the information and returns a <code>phylo</code> object. Duplicate information from the <code>rowData</code> is removed.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/mia/man/hierarchy-tree.html">getHierarchyTree</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/mia/man/hierarchy-tree.html">getHierarchyTree</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span>
 <span><span class="co">##  </span></span>
 <span><span class="co">##  Phylogenetic tree with 1645 tips and 1089 internal nodes.</span></span>
 <span><span class="co">##  </span></span>
@@ -783,7 +829,7 @@ Wright, Erik. 2020. <em>DECIPHER: Tools for Curating, Analyzing, and Manipulatin
 <span><span class="co">##  Rooted; includes branch lengths.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/hierarchy-tree.html">addHierarchyTree</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/hierarchy-tree.html">addHierarchyTree</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span>
 <span><span class="va">tse</span></span>
 <span><span class="co">##  class: TreeSummarizedExperiment </span></span>
 <span><span class="co">##  dim: 19216 26 </span></span>
@@ -804,19 +850,19 @@ Wright, Erik. 2020. <em>DECIPHER: Tools for Curating, Analyzing, and Manipulatin
 <p>The implementation is based on the <code><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/toTree.html">toTree()</a></code> function from the <code>TreeSummarizedExperiment</code> package <span class="citation" data-cites="R_TreeSummarizedExperiment">(<a href="#ref-R_TreeSummarizedExperiment" role="doc-biblioref">Huang 2020</a>)</span>.</p>
 <div class="no-row-height column-margin column-container"><div id="ref-R_TreeSummarizedExperiment" class="csl-entry" role="listitem">
 Huang, Ruizhu. 2020. <em>TreeSummarizedExperiment: A S4 Class for Data with Tree Structures</em>.
-</div></div></section><section id="set-taxonomy-ranks" class="level2" data-number="6.4"><h2 data-number="6.4" class="anchored" data-anchor-id="set-taxonomy-ranks">
-<span class="header-section-number">6.4</span> Set taxonomy ranks</h2>
+</div></div></section><section id="set-taxonomy-ranks" class="level2" data-number="6.5"><h2 data-number="6.5" class="anchored" data-anchor-id="set-taxonomy-ranks">
+<span class="header-section-number">6.5</span> Set taxonomy ranks</h2>
 <p>If your data includes taxonomy ranks that are not included by default in <code>mia</code>, you can set the ranks manually. By doing so, <code>mia</code> will be able to detect and utilize these taxonomy ranks from your data as expected.</p>
 <p>Get default ranks of <code>mia</code>.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/mia/man/taxonomy-methods.html">getTaxonomyRanks</a></span><span class="op">(</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/mia/man/taxonomy-methods.html">getTaxonomyRanks</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">##   [1] "domain"       "superkingdom" "kingdom"      "phylum"      </span></span>
 <span><span class="co">##   [5] "class"        "order"        "family"       "genus"       </span></span>
 <span><span class="co">##   [9] "species"      "strain"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Set ranks to your own ranks. Remember that the order is meaningful.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set ranks</span></span>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Set ranks</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/mia/man/taxonomy-methods.html">setTaxonomyRanks</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"test"</span>, <span class="st">"test2"</span>, <span class="st">"apple"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Get ranks</span></span>
