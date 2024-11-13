@@ -751,7 +751,7 @@ Mallick, Himel, Anupreet Porwal, Satabdi Saha, Piyali Basak, Vladimir Svetnik, a
 <span><span class="co">##  Running base model for layer  2 ... </span></span>
 <span><span class="co">##  Running stacked model...</span></span>
 <span><span class="co">##  Running concatenated model...</span></span>
-<span><span class="co">##  Time for model fit : 1.6 minutes </span></span>
+<span><span class="co">##  Time for model fit : 1.623 minutes </span></span>
 <span><span class="co">##  ========================================</span></span>
 <span><span class="co">##  Model fit for individual layers: SL.randomForest </span></span>
 <span><span class="co">##  Model fit for stacked layer: SL.nnls.auc </span></span>
@@ -842,7 +842,7 @@ Mallick, Himel, Anupreet Porwal, Satabdi Saha, Piyali Basak, Vladimir Svetnik, a
 <p>The model appears to be performing well the the accuracy being 93.16%. The model seems to precict correctly almost all IBD patients. It is also worth noting that over three-quarters of the controls are classified correctly</p>
 <p>Lastly, we may be interested in identifying the features that contribute most to predicting the outcome. To do this, we first extract feature importance scores from the individual models. Next, we scale these importance scores based on the weights assigned to each layer in the stacked model. This process provides us with the overall importance of each feature in the final model.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">miaViz</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Get individual models</span></span>
 <span><span class="va">models</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">$</span><span class="va">model_fits</span><span class="op">$</span><span class="va">model_layers</span></span>
@@ -854,23 +854,11 @@ Mallick, Himel, Anupreet Porwal, Satabdi Saha, Piyali Basak, Vladimir Svetnik, a
 <span>  <span class="va">temp</span> <span class="op">&lt;-</span> <span class="va">temp</span> <span class="op">*</span> <span class="va">fit</span><span class="op">$</span><span class="va">weights</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">temp</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
-<span><span class="co"># Combine and order to most important features</span></span>
+<span><span class="co"># Combine the feature importances</span></span>
 <span><span class="va">importances</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">importances</span><span class="op">)</span></span>
-<span><span class="va">importances</span> <span class="op">&lt;-</span> <span class="va">importances</span><span class="op">[</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/order.html">order</a></span><span class="op">(</span><span class="va">importances</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
-<span><span class="co"># Add features to column</span></span>
-<span><span class="va">importances</span> <span class="op">&lt;-</span> <span class="va">importances</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">importances</span><span class="op">[[</span><span class="st">"Feature"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">importances</span><span class="op">)</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">importances</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># Convert to 0-1 scale</span></span>
-<span><span class="va">importances</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">importances</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">importances</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co"># Get top 20 importances</span></span>
-<span><span class="va">top_n</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
-<span><span class="va">importances</span> <span class="op">&lt;-</span> <span class="va">importances</span><span class="op">[</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_len</a></span><span class="op">(</span><span class="va">top_n</span><span class="op">)</span>, <span class="op">]</span></span>
 <span></span>
-<span><span class="co"># Plot as a bar plot</span></span>
-<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">importances</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">MeanDecreaseGini</span>, y <span class="op">=</span> <span class="va">Feature</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html">geom_bar</a></span><span class="op">(</span>stat <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span></span>
+<span><span class="co"># Plot feature importances</span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/miaViz/man/plotLoadings.html">plotLoadings</a></span><span class="op">(</span><span class="va">importances</span>, ncomponents <span class="op">=</span> <span class="fl">1</span>, n <span class="op">=</span> <span class="fl">20</span>, show.color <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">p</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -879,7 +867,7 @@ Mallick, Himel, Anupreet Porwal, Satabdi Saha, Piyali Basak, Vladimir Svetnik, a
 </div>
 </div>
 </div>
-<p>From the plot, we can observe that <em>Alistipes putredinis</em> and <em>Alistipes putredinis</em> appear to have the greatest predictive power among all the features in determining the outcome. However, the predictive power appears to be fairly evenly distributed across all features.</p>
+<p>From the plot, we can observe that <em>Alistipes putredinis</em> and <em>Firmicutes bacterium CAG:83</em> appear to have the greatest predictive power among all the features in determining the outcome. However, the predictive power appears to be fairly evenly distributed across all features.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
