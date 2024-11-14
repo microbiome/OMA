@@ -196,7 +196,8 @@ model <- train(
     tuneGrid = tune_grid,
     trControl = train_control,
     weights = class_weights,
-    max_delta_step = 1
+    max_delta_step = 1,
+    verbosity = 0
 )
 
 # Get predictions
@@ -211,41 +212,37 @@ technique for binary classification problems.
 ```{r}
 #| label: ROC
 
-library(ROCR)
+library(plotROC)
 
-# Get positive class
-pos_class <-levels(res[["obs"]])[[1]]
-# Create ROC plot
-pred <- prediction(res[[pos_class]], ifelse(res[["obs"]] == pos_class, 1, 0))
-perf <- performance(pred, measure = "tpr", x.measure = "fpr")
-p <- plot(perf)
+# Prepare data for ROC
+roc_data <- data.frame(
+    observed_class = as.numeric(res[["obs"]] == "healthy"),
+    predicted_probability = res[["healthy"]]
+    )
+
+# Plot ROC curve
+p <- ggplot(roc_data, aes(m = predicted_probability, d = observed_class)) +
+  geom_roc() +
+  style_roc(theme = theme_minimal())
 p
 ```
 
-XGBoost model returns also feature importances that can be visualized with bar
+XGBoost model also returns feature significance that can be visualized with bar
 plot.
 
 ```{r}
 #| label: xgboost_feat
 
 library(xgboost)
+library(miaViz)
 
-# Get feature importance
-df <- xgb.importance(model = model$finalModel)
-# Take top 20 features
-df <- df[seq_len(20), ]
-# Factorize to preserve order
-df[["Feature"]] <- factor(df[["Feature"]], levels = df[["Feature"]])
-# Round values, add percentage symbol
-df[["Percentage"]] <- paste0(round(df[["Gain"]], 3)*100, "%")
+# Get feature importance and convert to matrix
+df <- xgb.importance(model = model$finalModel) |> as.data.frame()
+rownames(df) <- df[["Feature"]]
+df <- as.matrix(df[, "Gain", drop = FALSE])
 
-# Create a plot
-p <- ggplot(df, aes(x = Feature, y = Gain)) +
-    geom_bar(stat = "identity") +
-    geom_text(aes(label = Percentage), hjust = -0.1, size = 2.5) +
-    expand_limits(y = max(df[["Gain"]]) + 0.01) +
-    scale_y_continuous(labels = scales::percent) +
-    coord_flip()
+# Create plot for top 20 features
+p <- plotLoadings(df, ncomponents = 1, n = 20, show.color = FALSE)
 p
 ```
 
