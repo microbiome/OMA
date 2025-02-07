@@ -1,10 +1,37 @@
 # Mediation {#sec-mediation}
 
-what is the goal of mediation analysis?
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+Mediation analysis is used to study the effect of an independent variable (X) on
+the outcome variable (Y) through a third variable, known as mediator (M). Mathematically, this relationship is described as follows:
+
+Y ~ X * M
+
+The significance of a mediator is typically quantified in terms of the mediated
+effect, that is, the portion of the association between X and Y that can be
+explained through M. This corresponds to the difference between the total effect
+and the direct effect and is called Average Causal Mediated Effect (ACME):
+
+ACME = Total Effect - Average Direct Effect
+
+Put nice illustration of mediation, use a DAG.
+
+The microbiome has the potential to mediate the effects of multiple environmental
+stimuli on human health. For example, the impact of antibiotics on humour largely
+depends on microbiome depletion. In this case, we talk about complete mediation.
+On the other hand, diet affects the organism directly via nutrition and
+metabolism, but in part also delivered through the microbiome. In this case, we
+talk about partial mediation.
+
+We demonstrate a basic mediation analysis and visualisation with the hitchip1006
+dataset from miaTime package.
 
 ```{r}
 library(mia)
-library(scater)
+library(miaViz)
 
 # Load dataset
 data(hitchip1006, package = "miaTime")
@@ -12,10 +39,16 @@ tse <- hitchip1006
 ```
 
 ```{r}
-# Agglomerate features by family (merely to speed up execution)
-tse <- agglomerateByRank(tse, rank = "Phylum")
 # Convert BMI variable to numeric
 tse$bmi_group <- as.numeric(tse$bmi_group)
+
+# Agglomerate features by family (merely to speed up execution)
+tse <- agglomerateByRank(tse, rank = "Phylum")
+
+# Apply clr transformation to counts assay
+tse <- transformAssay(tse,
+                      method = "clr",
+                      pseudocount = 1)
 ```
 
 ## Feature mediation
@@ -30,11 +63,10 @@ med_df <- getMediation(tse,
                        covariates = c("sex", "age"),
                        treat.value = "Scandinavia",
                        control.value = "CentralEurope",
-                       boot = TRUE, sims = 100,
-                       add.metadata = TRUE)
+                       boot = TRUE, sims = 100)
  
 # Visualise model statistics for 1st mediator
-plot(attr(med_df, "metadata")[[1]])
+plotMediation(med_df, layout = "forest")
 ```
 
 what is the meaning of ACME, ADE and total effect?
@@ -42,11 +74,6 @@ what is the meaning of ACME, ADE and total effect?
 ## Assay mediation
 
 ```{r}
-# Apply clr transformation to counts assay
-tse <- transformAssay(tse,
-                      method = "clr",
-                      pseudocount = 1)
-
 # Analyse mediated effect of nationality on BMI via clr-transformed features
 # 100 permutations were done to speed up execution, but ~1000 are recommended     
 tse <- addMediation(tse, name = "assay_mediation",
@@ -64,32 +91,7 @@ head(metadata(tse)$assay_mediation, 5)
 ```
 
 ```{r}
-my_df <- metadata(tse)$assay_mediation
-
-coef_mat <-  as.matrix(my_df[ , c("ACME_estimate", "ADE_estimate")])
-p_mat <-  as.matrix(my_df[ , c("ACME_pval", "ADE_pval")])
-
-rownames(coef_mat) <- my_df[["Mediator"]]
-colnames(coef_mat) <- gsub("_estimate", "", colnames(coef_mat))
-
-p_mat <- t(p_mat)
-
-Heatmap(t(coef_mat),
-        name = "Effect",
-        cluster_rows = FALSE,
-        cluster_columns = FALSE,
-        row_names_side = "left",
-        column_names_rot = 45,
-        rect_gp = gpar(col = "white", lwd = 2),
-        cell_fun = function(j, i, x, y, w, h, fill) {
-          if(p_mat[i, j] < 0.001) {
-            grid.text("***", x, y)
-          } else if(p_mat[i, j] < 0.01) {
-            grid.text("**", x, y)
-          } else if(p_mat[i, j] < 0.05) {
-            grid.text("*", x, y)
-          }
-        })
+plotMediation(tse, "assay_mediation", layout = "heatmap")
 ```
 
 
@@ -97,17 +99,16 @@ Heatmap(t(coef_mat),
 
 ```{r}
 # Perform ordination
-tse <- runMDS(tse, name = "MDS",
-              method = "euclidean",
+tse <- runPCA(tse, name = "PCA",
               assay.type = "clr",
-              ncomponents = 5)
+              ncomponents = 3)
 
 # Analyse mediated effect of nationality on BMI via MDS components 
 # 100 permutations were done to speed up execution, but ~1000 are recommended       
 tse <- addMediation(tse, name = "reddim_mediation",
                     outcome = "bmi_group",
                     treatment = "nationality",
-                    dimred = "MDS",
+                    dimred = "PCA",
                     covariates = c("sex", "age"),
                     treat.value = "Scandinavia",
                     control.value = "CentralEurope",
@@ -117,46 +118,13 @@ tse <- addMediation(tse, name = "reddim_mediation",
 # Show results for first 5 mediators
 head(metadata(tse)$reddim_mediation, 5)
 ```
-```{r}
-my_df <- metadata(tse)$reddim_mediation
-
-coef_mat <-  as.matrix(my_df[ , c("ACME_estimate", "ADE_estimate")])
-p_mat <-  as.matrix(my_df[ , c("ACME_pval", "ADE_pval")])
-
-rownames(coef_mat) <- my_df[["Mediator"]]
-colnames(coef_mat) <- gsub("_estimate", "", colnames(coef_mat))
-
-p_mat <- t(p_mat)
-
-Heatmap(t(coef_mat),
-        name = "Effect",
-        cluster_rows = FALSE,
-        cluster_columns = FALSE,
-        row_names_side = "left",
-        column_names_rot = 45,
-        rect_gp = gpar(col = "white", lwd = 2),
-        cell_fun = function(j, i, x, y, w, h, fill) {
-          if(p_mat[i, j] < 0.001) {
-            grid.text("***", x, y)
-          } else if(p_mat[i, j] < 0.01) {
-            grid.text("**", x, y)
-          } else if(p_mat[i, j] < 0.05) {
-            grid.text("*", x, y)
-          }
-        })
-```
 
 ```{r}
-reddim_mediation <- attr(metadata(tse)$reddim_mediation, "metadata")
+p1 <- plotMediation(tse, "reddim_mediation", layout = "forest")
+p2 <- plotLoadings(tse, "PCA", ncomponents = 3, n = 8, layout = "heatmap")
 
-plots <- lapply(reddim_mediation, plot)
+library(patchwork)
 
-#entries <- c("d.avg", "d.avg.p", "z.avg", "z.avg.p", "tau.coef", "tau.p")
-
-#my_ls <- lapply(reddim_mediation, function(x) x[names(x) %in% entries])
-
-#my_df <- data.frame(do.call(rbind, my_ls))
-
-
+p1 / p2
 ```
 
