@@ -24,7 +24,8 @@ $$
 
 The microbiome can mediate the effects of multiple environmental stimuli on
 human health. However, the importance of its role as a mediator depends on the
-nature of the stimulus. For example, the effect of dietary fiber intake on host behaviour is largely mediated by the gut microbiome [@Logan2014nutritional]. On
+nature of the stimulus. For example, the effect of dietary fiber intake on host
+behaviour is largely mediated by the gut microbiome [@Logan2014nutritional]. On
 the other hand, the indirect impact of antibiotic use on mental health through
 an altered microbiome represents a more subtle phenomenon [@Dinan2022antibiotics].
 
@@ -101,7 +102,7 @@ med_df <- getMediation(tse,
                        control.value = "CentralEurope",
                        boot = TRUE, sims = 100)
  
-# Visualise model statistics for 1st mediator
+# Plot results as a forest plot
 plotMediation(med_df, layout = "forest")
 ```
 
@@ -123,8 +124,8 @@ practice to correct the significance of the findings with a method of choice.
 # Analyse mediated effect of nationality on BMI via clr-transformed features
 # 100 permutations were done to speed up execution, but ~1000 are recommended     
 tse <- addMediation(tse, name = "assay_mediation",
-                    outcome = "bmi_group",
                     treatment = "nationality",
+                    outcome = "bmi_group",
                     assay.type = "clr",
                     covariates = c("sex", "age"),
                     treat.value = "Scandinavia",
@@ -132,7 +133,7 @@ tse <- addMediation(tse, name = "assay_mediation",
                     boot = TRUE, sims = 100,
                     p.adj.method = "fdr")
 
-# Show results for first 5 mediators
+# View results
 knitr::kable(metadata(tse)$assay_mediation)
 ```
 
@@ -142,6 +143,7 @@ Significant findings can be marked with p-values or stars.
 
 ```{r}
 #| label: mediation5
+# Plot results as a heatmap
 plotMediation(tse, "assay_mediation", layout = "heatmap",
               add.significance = "symbol")
 ```
@@ -159,23 +161,24 @@ comparisons. A solution to this issue is proposed in the following section.
 ## Reduced dimensions as mediators
 
 Performing mediation analysis for each feature provides insight into individual
-contributions. However, this approach greatly increases the number of drawn comparisons and thus it reduces statistical power. To overcome this issue, it is
-possible to assess the combined contributions of subset of features by means of
+contributions. However, this approach greatly increases the number of drawn
+comparisons and thus it reduces statistical power. To overcome this issue, it is
+possible to assess the combined contributions of groups of features by means of
 dimensionality reduction.
 
 ```{r}
 #| label: mediation6
 #| message: false
-# Perform ordination
+# Reduce dimensions with PCA
 tse <- runPCA(tse, name = "PCA",
               assay.type = "clr",
               ncomponents = 3)
 
-# Analyse mediated effect of nationality on BMI via MDS components 
+# Analyse mediated effect of nationality on BMI via principal components 
 # 100 permutations were done to speed up execution, but ~1000 are recommended       
 tse <- addMediation(tse, name = "reddim_mediation",
-                    outcome = "bmi_group",
                     treatment = "nationality",
+                    outcome = "bmi_group",
                     dimred = "PCA",
                     covariates = c("sex", "age"),
                     treat.value = "Scandinavia",
@@ -183,19 +186,22 @@ tse <- addMediation(tse, name = "reddim_mediation",
                     boot = TRUE, sims = 100,
                     p.adj.method = "fdr")
 
-# Show results for first 5 mediators
+# View results
 knitr::kable(metadata(tse)$reddim_mediation)
 ```
 
 Results can be displayed as one forest plot for each reduced dimension. When
-combined with a heatmap of the feature loadings for each dimension, we can
-deduce whether certain groups of features act as mediators.
+combined with a heatmap of the feature loadings by dimension, we can deduce
+whether certain groups of features act as mediators.
 
 ```{r}
 #| label: mediation7
+# Plot results as multiple forest plots
 p1 <- plotMediation(tse, "reddim_mediation", layout = "forest")
+# Plot loadings by principal component
 p2 <- plotLoadings(tse, "PCA", ncomponents = 3, n = 8, layout = "heatmap")
 
+# Combine plots
 p1 / p2
 ```
 
@@ -206,17 +212,17 @@ the largest contributors.
 ## Final remarks
 
 This chapter introduced the concept of mediation and demonstrated a standard
-analysis of the microbiome as mediator at 3 different levels (global, individual
-and combined contributions). Importantly, the provided method is based on the `mediation` package and is limited to univariate comparisons and binary
-treatment conditions [@Tingley2014mediation]. Therefore, it is recommended to
-reduce the number of mediators under study by means of a knowledge-based
-strategy to preserve statistical power.
+analysis of the microbiome as mediator at three different levels (global,
+individual and combined contributions). Importantly, the provided method is
+based on the `mediation` package and is limited to univariate comparisons and
+binary conditions for the independent variable [@Tingley2014mediation].
+Therefore, it is recommended to reduce the number of mediators under study by
+means of a knowledge-based strategy to preserve statistical power.
 
 A few methods for multivariate mediation analysis of high-dimensional omic
-data also exist [@Xia2021mediation]. However, no one solution has emerged to
+data also exist [@Xia2021mediation]. However, no one solution has emerged yet to
 become the golden standard in microbiome data analysis, mainly because the
 available approaches can only partially accommodate for the specific properties
 of microbiome data, such as compositionality, sparsity and its hierarchical
 structure. While this chapter proposed a standard approach to mediation analysis,
 in the future fine-tuned solutions for the microbiome may also become common.
-
