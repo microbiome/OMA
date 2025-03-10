@@ -1,0 +1,295 @@
+# Mediation {#sec-mediation}
+
+```{r setup, echo=FALSE, results="asis"}
+library(rebook)
+chapterPreamble()
+```
+
+Mediation analysis is used to study the effect of an exposure variable (X) on
+the outcome (Y) through a third factor, known as mediator (M). Mathematically,
+this relationship can be described as follows:
+
+$$
+Y \thicksim X * M
+$$
+
+The contribution of a mediator is typically quantified in terms of Average
+Causal Mediated Effect (ACME), that is, the portion of the association between X
+and Y that is explained by M. In practice, this corresponds to the difference
+between the Total Effect (TE) and the Average Direct Effect (ADE):
+
+$$
+ACME = TE - ADE
+$$
+
+The microbiome can mediate the effects of multiple environmental stimuli on
+human health. However, the importance of its role as a mediator depends on the
+nature of the stimulus. For example, the effect of dietary fiber intake on host
+behaviour is largely mediated by the gut microbiome [@Logan2014nutritional]. In
+contrast, the indirect impact of antibiotic use on mental health through an
+altered microbiome represents a more subtle process [@Dinan2022antibiotics].
+
+In general, the wide range of mediation effects can be divided into two classes:
+
+- partial mediation, where the mediator assists the exposure variable in
+  conveying only part of the effect on the outcome
+- complete mediation, where the mediator conveys the full effect of the the
+  exposure variable on the outcome
+
+```{r}
+#| label: fig-mediation
+#| fig-cap: Directed acyclic graphs for two possible relationships involving
+#|   mediation. A. The effect of x on y is mostly direct, and only a portion
+#|   thereof is mediated by m. B. The effect of x on y is completely mediated by m.
+#| message: false
+#| echo: false
+
+# Import libraries
+library(ggdag)
+library(ggplot2)
+library(patchwork)
+
+# Plot triangle for complete mediation
+p1 <- ggdag_mediation_triangle(x_y_associated = TRUE, stylized = TRUE) +
+    ggtitle("A: Partial mediation") +
+    theme_dag()
+  
+# Plot triangle for partial mediation
+p2 <- ggdag_mediation_triangle(stylized = TRUE) +
+    ggtitle("B: Complete mediation") +
+    theme_dag()
+
+# Combine plots
+p1 | p2
+```
+
+Mediation analysis is based on the assumption that the exposure variable, the
+mediator and the outcome follow one another in this temporal sequence. Therefore,
+investigating mediation is a suitable analytical choice in longitudinal studies,
+whereas it is discouraged in cross-sectional ones [@Fairchild2017best].
+
+We demonstrate a standard mediation analysis with the `hitchip1006` dataset
+from the `miaTime` package, which contains a genus-level assay for 1006 Western
+adults of 6 different nationalities.
+
+```{r}
+#| label: mediation1
+#| message: false
+
+# Import libraries
+library(mia)
+library(miaViz)
+library(scater)
+library(patchwork)
+library(knitr)
+
+# Load dataset
+data(hitchip1006, package = "miaTime")
+tse <- hitchip1006
+```
+
+In our analyses, nationality and BMI group will represent the exposure (X)
+and outcome (Y) variables, respectively. We make the broad assumption that
+nationality reflects differences in the living environment between subjects.
+
+```{r}
+#| label: mediation2
+
+# Convert BMI variable to numeric
+tse$bmi_group <- as.numeric(tse$bmi_group)
+
+# Agglomerate features by phylum
+tse <- agglomerateByRank(tse, rank = "Phylum")
+
+# Apply clr transformation to counts assay
+tse <- transformAssay(
+    tse,
+    method = "clr",
+    pseudocount = 1
+)
+```
+
+In the following examples, the effect of living environment on BMI mediated
+by the microbiome is investigated in three different steps:
+
+1. global contribution by alpha diversity
+2. individual contributions by assay features
+3. joint contributions by reduced dimensions
+
+## Alpha diversity as mediator
+
+First, we ask whether alpha diversity mediates the effect of living environment
+on BMI. Using the `getMediation` function, the variables X, Y and M are specified
+with the arguments `treatment`, `outcome` and `mediator`, respectively. We
+control for sex and age and limit comparisons to two nationality groups, Central
+Europeans (control) vs. Scandinavians (treatment).
+
+```{r}
+#| label: mediation3
+#| message: false
+
+# Analyse mediated effect of nationality on BMI via alpha diversity
+# 100 permutations were done to speed up execution, but ~1000 are recommended 
+med_df <- getMediation(
+    tse,
+    treatment = "nationality",
+    outcome = "bmi_group",
+    mediator = "diversity",
+    covariates = c("sex", "age"),
+    treat.value = "Scandinavia",
+    control.value = "CentralEurope",
+    boot = TRUE, sims = 100
+)
+ 
+# Plot results as a forest plot
+plotMediation(med_df, layout = "forest")
+```
+
+The forest plot above shows significance for both ACME and ADE, which suggests
+that alpha diversity is a partial mediator of living environment on BMI. In
+contrast, if ACME but not ADE were significant, complete mediation would be
+inferred. The negative sign of the effect means that a lower BMI and alpha
+diversity are associated with the control group (Scandinavians).
+
+## Assay features as mediators
+
+If we suspect that only certain features of the microbiome act as mediators,
+we can estimate their individual contributions by fitting one model for each
+feature in a selected assay. As multiple tests are performed, it is good
+practice to correct the significance of the findings with a method of choice to
+adjust p-values.
+
+```{r}
+#| label: mediation4
+#| message: false
+
+# Analyse mediated effect of nationality on BMI via clr-transformed features
+# 100 permutations were done to speed up execution, but ~1000 are recommended     
+tse <- addMediation(
+    tse, name = "assay_mediation",
+    treatment = "nationality",
+    outcome = "bmi_group",
+    assay.type = "clr",
+    covariates = c("sex", "age"),
+    treat.value = "Scandinavia",
+    control.value = "CentralEurope",
+    boot = TRUE, sims = 100,
+    p.adj.method = "fdr"
+)
+
+# View results
+kable(metadata(tse)$assay_mediation)
+```
+
+For convenience, results can be visualized with a heatmap, where rows represent
+features and columns correspond to the coefficients for TE, ADE and ACME.
+Significant findings can be marked with p-values or stars.
+
+```{r}
+#| label: mediation5
+
+# Plot results as a heatmap
+plotMediation(
+    tse, "assay_mediation",
+    layout = "heatmap",
+    add.significance = "symbol"
+)
+```
+
+Results suggest that only four out of eight features (Bacteroidetes, Firmicutes,
+Proteobacteria and Verrucomicrobia) partially mediate the effect of living
+environment on BMI. As the sign is negative, a smaller abundance of these
+mediators is found in Scandinavians compared to Central Europeans, which matches
+the negative trend of alpha diversity.
+
+While analyses were conducted at the phylum level to simplify results, using
+original assays without agglomeration also represents a valid option. However,
+the increase in phylogenetic resolution also implies a higher probability of
+spurious findings, which in turn necessitates a stronger correction for multiple
+comparisons. A solution to this issue is proposed in the following section.
+
+## Reduced dimensions as mediators
+
+Performing mediation analysis for each feature provides insight into individual
+contributions. However, this approach greatly increases the number of multiple
+tests to correct for and thus it reduces statistical power. To overcome this
+issue, it is possible to assess the joint contributions of groups of features
+by means of dimensionality reduction.
+
+```{r}
+#| label: mediation6
+#| message: false
+
+# Reduce dimensions with PCA
+tse <- runPCA(
+    tse, name = "PCA",
+    assay.type = "clr",
+    ncomponents = 3
+)
+
+# Analyse mediated effect of nationality on BMI via principal components 
+# 100 permutations were done to speed up execution, but ~1000 are recommended       
+tse <- addMediation(
+    tse, name = "reddim_mediation",
+    treatment = "nationality",
+    outcome = "bmi_group",
+    dimred = "PCA",
+    covariates = c("sex", "age"),
+    treat.value = "Scandinavia",
+    control.value = "CentralEurope",
+    boot = TRUE, sims = 100,
+    p.adj.method = "fdr"
+)
+
+# View results
+kable(metadata(tse)$reddim_mediation)
+```
+
+Results can be displayed as one forest plot for each reduced dimension. When
+combined with a heatmap of the feature loadings by dimension, it helps deduce
+whether certain groups of features act as mediators.
+
+```{r}
+#| label: mediation7
+
+# Plot results as multiple forest plots
+p1 <- plotMediation(
+    tse, "reddim_mediation",
+    layout = "forest"
+)
+
+# Plot loadings by principal component
+p2 <- plotLoadings(
+    tse, "PCA",
+    ncomponents = 3, n = 8,
+    layout = "heatmap"
+)
+
+# Combine plots
+p1 / p2
+```
+
+The plot above suggests that only PC1 partially mediates the effect of living
+environment on BMI. Within this dimension, Bacteroidetes and Actinobacteria are
+the largest contributors in opposite directions. Interestingly, in the previous
+section the former but not the latter appeared significant individually, which
+implies that mediation might emerge from their joint contribution.
+
+## Final remarks
+
+This chapter introduced the concept of mediation and demonstrated a standard
+analysis of the microbiome as mediator at three different levels (global,
+individual and joint contributions). Importantly, the provided method is
+based on the `mediation` package and is limited to univariate comparisons and
+binary conditions for the exposure variable [@Tingley2014mediation]. Therefore,
+it is recommended to reduce the number of mediators under study by means of a
+knowledge-based strategy to preserve statistical power.
+
+A few methods for multivariate mediation analysis of high-dimensional omic
+data also exist [@Xia2021mediation]. However, no one solution has emerged yet to
+become the golden standard in microbiome data analysis, mainly because the
+available approaches can only partially accommodate for the specific properties
+of microbiome data, such as compositionality, sparsity and its hierarchical
+structure. While this chapter proposed a standard approach to mediation
+analysis, in the future fine-tuned solutions for the microbiome may also become
+common.
