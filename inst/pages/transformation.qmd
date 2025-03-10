@@ -44,20 +44,20 @@ references.
    high-throughput assays (16S, metagenomic sequencing) is
    compositional by nature, even if the data is provided as counts
    [@Gloor2017].
- 
+
  * 'clr' Centered log ratio transformation [@Aitchison1986] is used to
    reduce data skewness and compositionality bias in relative
    abundances, while bringing the data to the logarithmic scale. This
    transformation is frequently applied in microbial ecology
    [@Gloor2017]. However, this transformation only applies to positive
-   values. Usual solution is to add pseudocount, which adds another
-   type of bias in the data. The robust clr transformation ('rclr')
-   aims to circumvent the need to add a pseudocount. While the
-   resulting values from these transformations are difficult interpret
+   values. Usual solution is to add `pseudocount`, which adds another
+   type of bias in the data. The robust `clr` transformation ('rclr')
+   aims to circumvent the need to add a `pseudocount`. While the
+   resulting values from these transformations are difficult to interpret
    directly, this transformation may enhance comparability of relative
    differences between samples. It is part of a broader Aitchison
    family of transformations; the additive log ratio transformation
-   (`alr') is also available. The robust clr ("rclr") is similar to
+   (`alr') is also available. The robust `clr` ("rclr") is similar to
    regular clr (see above) but allows data with zeroes and avoids the
    need to add pseudocount [@Keshavan2010, @Martino2019].
 
@@ -69,14 +69,14 @@ references.
    Karwowska2024].
 
  * 'standardize' Standardize(or 'z-score') transformation scales data to zero
-   mean and unit variance. This is used to bring features (or samples) to more 
+   mean and unit variance. This is used to bring features (or samples) to more
    comparable levels in terms of mean and scale of the values. This can enhance
    visualization and interpretation of the data
 
 * 'log', 'log2', 'log10' Logarithmic transformations, used e.g. to
    reduce data skewness. With compositional data, the `clr` (or `rclr`)
    transformation is often preferred.
-   
+
  * 'hellinger' Hellinger transformation is equal to the square root of
    relative abundances. This ecological transformation can be useful
    if we are interested in changes in relative abundances.
@@ -95,24 +95,25 @@ assay(s). The transformed abundance assay is then stored back to the
 'assays' slot in the data object. The function applies sample-wise or
 column-wise transformation when MARGIN = 'cols', feature-wise or
 row-wise transformation when MARGIN = 'rows'.
-
 A complete list of available transformations and parameters, is
 available in the function
 [help](https://microbiome.github.io/mia/reference/transformAssay.html).
 
 ::: {.callout-important}
 
-Pseudocount is a small non-negative value added to the normalized data to avoid 
-taking the logarithm of zero. It's value can have a significant impact on the results when applying 
-a logarithm transformation to normalized data, as the logarithm transformation 
-is a nonlinear operation that can fundamentally change the data distribution [@Costea2014].
+`Pseudocount` is a small non-negative value added to the normalized data to
+avoid taking the logarithm of zero. It's value can have a significant impact
+on the results when applying 
+a logarithm transformation to normalized data, as the logarithm transformation
+is a nonlinear operation that can fundamentally change the data distribution
+[@Costea2014].
 
 
-Pseudocount should be chosen consistently across all normalization methods being 
-compared, for example, by setting it to a value smaller than the minimum abundance 
-value before transformation. Some tools, like ancombc2, take into account the effect 
-of the pseudocount by performing sensitivity tests using multiple pseudocount 
-values. See [@sec-differential-abundance].
+`Pseudocount` should be chosen consistently across all normalization methods
+being compared, for example, by setting it to a value smaller than the minimum
+abundance value before transformation. Some tools, like ancombc2, take into
+account the effect of the `pseudocount` by performing sensitivity tests using
+multiple pseudocount values. See [@sec-differential-abundance].
 
 :::
 
@@ -124,15 +125,13 @@ library(mia)
 data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 
-# Transform "counts" assay to relative abundances ("relabundance"), with
-# pseudocount 1 
-tse <- transformAssay(
-     tse, assay.type = "counts", method = "relabundance", pseudocount = 1)
+# Transform "counts" assay to relative abundances ("relabundance")
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 
-# Transform relative abundance assay ("relabundance") to "clr", using
-# pseudocount if necessary; name the resulting assay to "clr" 
+# Transform "counts" to "clr", using pseudocount if necessary; name
+# the resulting assay to "clr".
 tse <- transformAssay(
-    x = tse, assay.type = "relabundance", method = "clr", pseudocount = TRUE,
+    x = tse, assay.type = "counts", method = "clr", pseudocount = TRUE,
     name = "clr")
 
 ```
@@ -141,7 +140,7 @@ Get the values in the resulting assay, and view some of the first
 entries of it with the `head` command.
 
 ```{r}
-head(assay(tse, "clr"))
+assay(tse, "clr") |> head()
 ```
 
 In 'pa' transformation, abundance table is converted to
@@ -155,7 +154,7 @@ performance in microbiome-based classification performance
 # Here, `assay.type` is not explicitly specified.
 # Then The function uses the "counts" assay for the transformation.
 tse <- transformAssay(tse, method = "pa")
-head(assay(tse, "pa"))
+assay(tse, "pa") |> head()
 ```
 
 You can now view the entire list of abundance assays in your data object with:
@@ -173,8 +172,6 @@ Microbiome data is characterized by the following features:
 - High variability
 - Zero-inflated
 
-You can find more information on normalization from
-[OSCA book](https://bioconductor.org/books/3.18/OSCA.basic/normalization.html#normalization-transformation).
+[OSCA book](https://bioconductor.org/books/3.18/OSCA.basic/normalization.html#normalization-transformation) provides additional information on normalization from the perspective of single-cell analysis.
 
 :::
-

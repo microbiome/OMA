@@ -1,5 +1,7 @@
 ## Introductory (French)
 
+**Version:** 1.0
+
 ```{r}
 #| label: setup
 #| echo: FALSE
@@ -87,14 +89,14 @@ tse <- Tengeler2020
 Bien sûr, il existe d'autres moyens d'importer vos données en utilisant le
 [**package mia**](https://microbiome.github.io/mia/). Ceux-ci incluent :
 utiliser **vos propres données** ([@sec-import-from-file]) ou convertir un
-objet existant en un objet *TreeSummarizedExperiment* comme indiqué
+objet existant en un objet `TreeSummarizedExperiment` comme indiqué
 dans **cette section** : [@sec-conversions-between-data-formats-in-r].
 
 <hr>
 
 ## Stockage des données du microbiome
 
-*TreeSummarizedExperiment* ou objet TreeSE est le type d'objet utilisé dans
+`TreeSummarizedExperiment` ou objet TreeSE est le type d'objet utilisé dans
 le [**package mia**](https://microbiome.github.io/mia/) pour stocker vos
 données. C'est un type de données polyvalent et multi-usages qui permet de
 stocker et d'accéder aux données de manière efficace.
@@ -106,10 +108,10 @@ manière :
 
 ```{r}
 #| label: showAssay
-assay(tse)[1:5,1:10] 
+assay(tse)[1:5,1:10]
 ```
 
-Alors que **colData** ([@sec-add-or-modify-data]) est accessible via :
+Alors que `colData` ([@sec-add-or-modify-data]) est accessible via :
 
 ```{r}
 #| label: showColdata
@@ -127,13 +129,13 @@ des échantillons, notamment des informations taxonomiques.
 #| warning: FALSE
 #| label: showRowdata
 tse_df_rowData <- as.data.frame(rowData(tse))
-datatable(tse_df_rowData, options = list(pageLength = 5))
+datatable(tse_df_rowData, options = list(pageLength = 5))  
 ```
 
 Ici `rowData(tse)` renvoie un DataFrame avec 151 lignes et 7 colonnes. Chaque
 ligne représente un organisme et chaque colonne un niveau taxonomique.
 
-Pour illustrer la structure d'un *TreeSummarizedExperiment*, voici un
+Pour illustrer la structure d'un `TreeSummarizedExperiment`, voici un
 article de @Huang2021 qui utilise ce type d'objet. De plus, veuillez consulter
 la figure 1 ci-dessous.
 
@@ -145,14 +147,14 @@ la figure 1 ci-dessous.
 
 Dans certains cas, vous devrez peut-être modifier vos données pour obtenir
 les résultats souhaités. Dans cette section, nous verrons comment agglomérer
-les données, les sous-ensembles et plus encore. Un TreeSummarizedExperiment
+les données, les sous-ensembles et plus encore. Un `TreeSummarizedExperiment`
 permet une manipulation astucieuse des données en utilisant
 le [**package dplyr**](https://dplyr.tidyverse.org/).
 
 ### Sous-ensembles
 
 Dans certains cas, vous n'aurez peut-être besoin d'utiliser qu'une partie de
-votre *TreeSummarizedExperiment* d'origine.
+votre `TreeSummarizedExperiment` d'origine.
 
 En utilisant l'ensemble de données Tengeler2020, nous pouvons nous concentrer
 sur une certaine cohorte par exemple. Cela est assez simple :
@@ -162,7 +164,7 @@ sur une certaine cohorte par exemple. Cela est assez simple :
 tse_subset_by_sample <- tse[ , tse$cohort =="Cohort_1"]
 ```
 
-Cela créera un objet *TreeSummarizedExperiment* ne contenant que les
+Cela créera un objet `TreeSummarizedExperiment` ne contenant que les
 échantillons de la première cohorte.
 
 ### Agglomération des données
@@ -170,7 +172,7 @@ Cela créera un objet *TreeSummarizedExperiment* ne contenant que les
 Pour pousser davantage votre analyse de données et vous concentrer sur sa
 distribution à un rang taxonomique spécifique, il peut être bénéfique
 d'agglomérer vos données à ce niveau particulier. La fonction
-`agglomerateByRank` simplifie ce processus, permettant des analyses plus
+`agglomerateByRank()` simplifie ce processus, permettant des analyses plus
 fluides et efficaces. Voici un exemple :
 
 ```{r}
@@ -207,13 +209,13 @@ Toutes ces variations sont appelées diversité alpha.
 
 # Estimate (observed) richness
 tse_alpha <- addAlpha(
-    tse, 
-    assay.type = "counts", 
-    index = "observed", 
+    tse,
+    assay.type = "counts",
+    index = "observed",
     name="observed")
 
 # Check some of the first values in colData
-head(tse_alpha$observed)
+tse_alpha$observed |> head()
 ```
 
 Le résultat montre les valeurs de richesse estimées pour différents
@@ -225,12 +227,12 @@ visualiser cela.
 ```{r}
 #| label: plotColdata
 plotColData(
-    tse_alpha, 
-    "observed", 
-    "cohort", 
+    tse_alpha,
+    "observed",
+    "cohort",
     colour_by = "patient_status") +
-    
-    theme(axis.text.x = element_text(angle=45,hjust=1)) + 
+
+    theme(axis.text.x = element_text(angle=45,hjust=1)) +
     labs(y=expression(Richness[Observed]))
 ```
 
@@ -251,9 +253,9 @@ notre TreeSE.
 ```{r}
 #| label: calculateDiversity
 tse_alpha <- addAlpha(
-    tse_alpha, 
+    tse_alpha,
     assay.type = "counts",
-    index = c("shannon"), 
+    index = c("shannon"),
     name = c("shannon"))
 ```
 
@@ -272,7 +274,7 @@ plots <- lapply(
     colour_by = "patient_status")
 
 # Fine-tune visual appearance
-plots <- lapply(plots, "+", 
+plots <- lapply(plots, "+",
     theme(
         axis.text.x = element_blank(),
         axis.title.x = element_blank(),
@@ -287,7 +289,7 @@ plots <- lapply(plots, "+",
 Il est très important de faire toutes ces comparaisons afin de quantifier
 la diversité et de comparer les échantillons dans nos données en utilisant
 différentes mesures. - Vous pouvez trouver d'autres types de comparaisons
-directement dans le livre @sec-community-diversity.
+directement dans le livre @sec-alpha-diversity.
 
 <hr>
 
@@ -353,9 +355,9 @@ sur un espace inférieur tout en conservant autant de variation que possible,
 les valeurs projetées étant appelées coordonnées principales. Vous pouvez en
 lire plus sur @Multidimensional-scaling ici.
 
-mia fournit certaines techniques de réduction de dimension, telles que dbRDA.
-De plus, nous pouvons utiliser le package scater de Bioconductor et le
-package vegan, créé par @R_vegan pour transformer la dissimilarité en distances
+`mia` fournit certaines techniques de réduction de dimension, telles que dbRDA.
+De plus, nous pouvons utiliser le package `scater` de Bioconductor et le
+package `vegan`, créé par @R_vegan pour transformer la dissimilarité en distances
 réelles pouvant être visualisées :
 
 ```{r}
@@ -427,7 +429,7 @@ altExp(tse, "prevalence-subset") <- transformAssay(
 ```
 
 Maintenant que nous avons préparé les données, nous pouvons utiliser la
-bibliothèque sechm précédemment chargée pour visualiser la carte de chaleur :
+bibliothèque `sechm` précédemment chargée pour visualiser la carte de chaleur :
 
 ```{r}
 #| label: heatmap

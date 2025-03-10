@@ -1,4 +1,4 @@
-# Data Containers {#sec-containers}
+# Data containers {#sec-containers}
 
 ```{r setup, echo=FALSE, results="asis"}
 library(rebook)
@@ -9,7 +9,7 @@ chapterPreamble()
 This section provides an introduction to `TreeSummarizedExperiment (TreeSE)`
 and `MultiAssayExperiment (MAE)` data containers introduced in
 [@sec-microbiome-bioc]. In microbiome data science, these containers
-link taxonomic abundance tables with rich side information on the features and
+link taxonomic abundance tables with rich side information on the taxa and
 samples. Taxonomic abundance data can be obtained by 16S rRNA amplicon
 or metagenomic sequencing, phylogenetic microarrays, or by other
 means. Many microbiome experiments include multiple versions and types
@@ -19,6 +19,50 @@ on how to represent different varieties of multi-table data within the
 `TreeSE` class.
 
 The options and recommendations are summarized in [@tbl-options].
+
+## Structure of `TreeSE`
+
+`TreeSE` contains several distinct slots, each holding a specific type of data.
+The `assays` slot is the core of `TreeSE`, storing abundance tables that
+contain the counts or concentrations of features in each sample.
+Features can be taxa, metabolites, antimicrobial resistance genes, or other
+measured entities, and are represented as rows. The columns correspond to
+unique samples.
+
+Building upon the `assays`, `TreeSE` accommodates various data types for both
+features and samples. In `rowData`, the rows correspond to the same features
+(rows) as in the abundance tables, while the columns represent variables such as
+taxonomy ranks. Similarly, in `colData`, each row matches the samples (columns)
+from the abundance tables, with the columns of `colData` containing metadata
+like disease status or patient ID and time point if the dataset includes time
+series.
+
+The slots in `TreeSE` are outlined below:
+
+- `assays`: Stores a list of abundance tables. Each table has consistent rows and columns, where rows represent taxa and columns represent samples.
+- `rowData`: Contains metadata about the rows (taxa). For example, this slot can include a taxonomy table.
+- `colData`: Holds metadata about the columns (samples), such as patient information or the time points when samples were collected.
+- `rowTree`: Stores a hierarchical tree for the rows, such as a phylogenetic tree representing the relationships between taxa.
+- `colTree`: Includes a hierarchical tree for the columns, which can represent relationships between samples, for example, indicating whether patients are relatives and the structure of those relationships.
+- `rowLinks`: Contains information about the linkages between rows and the nodes in the `rowTree`.
+- `colLinks`: Contains information about the linkages between columns and the nodes in the `colTree`.
+- `referenceSeq`: Holds reference sequences, i.e., the sequences that correspond to each taxon identified in the rows.
+- `metadata`: Contains metadata about the experiment, such as the date it was conducted and the researchers involved.
+
+These slots are illustrated in the figure below:
+
+![The structure of TreeSummarizedExperiment (TreeSE) object [@Huang2021].](figures/treese.png){width="80%"}
+
+Additionally, TreeSE includes:
+
+- `reducedDim`: Contains reduced dimensionality representations of the samples, such as Principal Component Analysis (PCA) results (see [@sec-community-similarity].
+- `altExp`: Stores alternative experiments, which are `TreeSE` objects sharing the same samples but with different feature sets.
+
+Among these, `assays`, `rowData`, `colData`, and `metadata` are shared with the
+`SummarizedExperiment` (`SE`) data container. `reducedDim` and `altExp` come
+from inheriting the `SingleCellExperiment` (`SCE`) class. The `rowTree`,
+`colTree`, `rowLinks`, `colLinks`, and `referenceSeq` slots are unique to
+`TreeSE`.
 
 ## Rows and columns {#sec-rows-and-cols}
 
@@ -32,12 +76,12 @@ tse
 ```
 
 The `TreeSE` object, similar to a standard `data.frame` or `matrix`, has rows
-and columns. Typically, samples are stored in columns, while features or taxa
+and columns. Typically, samples are stored in columns, while taxa (or features)
 are stored in rows. You can extract subsets of the data, such as the first
-five rows and certain three columns. The object manages the linkages
-between data, ensuring, for example, that when you subset the data, for
-instance, both the assay and sample metadata are subsetted simultaneously,
-ensuring they remain matched with each other.
+five rows (first five taxa) and certain three columns (certain three samples). 
+The object manages the linkages between data (e.g., the assay data and the sample
+metadata), ensuring that when you subset the data object, all its parts 
+are subsetted simultaneously, such that they remain matched with each other.
 
 ```{r}
 #| label: subset_intro
@@ -61,36 +105,38 @@ from [@sec-treese_subsetting].
 
 ## Assay data {#sec-assay-slot}
 
-The microbiome is the collection of all microbes (such as bacteria, viruses,
-fungi, etc.) in the body. When studying these microbes, abundance data is
-needed, and that’s where assays come in.
+When studying microbiomes, the primary type of data is in the form of abundance
+of given microbes in given samples. This sample per taxa table forms the 
+core of the TreeSE object, called the  ‘The assay data’ .
 
-An assay is a way of measuring the presence and abundance of different types
-of microbes in a sample. For example, if you want to know how many bacteria of
-a certain type are in your gut, you can use an assay to measure this. When
-storing assays, the original data is count-based. However, the original
-count-based taxonomic abundance tables may undergo different 
-transformations, such as logarithmic, Centered Log-Ratio (CLR), or relative 
-abundance. These are typically stored in _**assays**_. See
-[@sec-assay-transform] for more information on transformations.
+An assay is a measurement of the presence and abundance of different microbial
+taxa in a sample. The assay data records this in a table where rows are unique
+taxa and columns are unique samples and each entry contains a number 
+describing how many of a given taxon is present in a given sample. Note that 
+when storing assays, the original data is count-based. However, due to the 
+nature of how microbiome data is produced, these count-based abundances rarely 
+reflect the true counts of microbial taxa in the sample, and thus the abundance 
+tables often undergo different transformations, such as logarithmic, Centered 
+Log-Ratio (CLR), or relative abundance to make these abundance values comparable 
+with each other. See[@sec-assay-transform] for more information on transformations.
 
-The `assays` slot contains the experimental data as multiple count matrices.
-The result of `assays` is a list of matrices.
+The microbial abundance tables are stored in _**assays**_. The assays slot 
+contains the abundance data as multiple count matrices. The result of assays
+is a list of matrices.
 
 ```{r}
 assays(tse)
 ```
 
-Individual assays can be accessed via `assay`
+Individual assays can be accessed via `assay`.
 
 ```{r}
 assay(tse, "counts") |> head()
 ```
 
 So, in summary, in the world of microbiome analysis, an assay is essentially
-a way to quantify and understand the composition of microbes in a given sample,
-which is super important for all kinds of research, ranging from human health
-to environment studies. 
+a way to describe the composition of microbes in a given sample. This way we
+can summarise the microbiome profile of a human gut or a sample of soil. 
 
 Furthermore, to illustrate the use of multiple assays, we can create an empty
 matrix and add it to the object.
@@ -101,7 +147,7 @@ assay(tse, "empty_table", withDimnames=FALSE) <- mat
 assays(tse)
 ```
 
-Now there are two assays available in the `tse` object, `counts` and 
+Now there are two assays available in the `tse` object, `counts` and
 `empty_table`.
 
 ```{r}
@@ -114,7 +160,7 @@ a requirement for the assays.
 ## colData
 
 `colData` contains information about the samples used in the study. This
-information can include details such as the sample ID, the primers used in
+sample metadata can include details such as the sample ID, the primers used in
 the analysis, the barcodes associated with the sample (truncated or complete),
 the type of sample (e.g. soil, fecal, mock) and a description of the sample.
 
@@ -128,44 +174,52 @@ indicates the sample type (e.g. soil, fecal matter, control) and
 
 ## rowData {#sec-rowData}
 
-`rowData` contains data on the features of the analyzed samples. This is
-particularly important in the microbiome field for storing taxonomic
-information. This taxonomic information is extremely important for
-understanding the composition and diversity of the microbiome in each sample
-analyzed. It enables identification of the different types of microorganisms
-present in samples. It also allows you to explore the relationships between
-microbiome composition and various environmental or health factors.
+`rowData` contains data on the features, such as microbial taxa of the analyzed 
+samples. This is particularly important in the microbiome field for storing 
+taxonomic information, such as the Species, Genus or Family of the different 
+microorganisms present in samples. This taxonomic information is extremely important 
+for understanding the composition and diversity of the microbiome in each sample.
+
 
 ```{r rowdata}
 rowData(tse)
 ```
 
-## rowTree  
+## rowTree
 
-Phylogenetic trees also play an important role in the microbiome field. The 
-`TreeSE` class can keep track of features and node
-relations via two functions, `rowTree` and `rowLinks`.
+Phylogenetic trees play an important role in the microbiome field. Many times it 
+is useful to know how closely related the microbial taxa present in the data are. 
+For example, to calculate widely-used phylogenetically weighted microbiome 
+dissimilarity metrics such as UniFrac and wUniFrac, we need information
+on not only the presence and abundance of microbial taxa in each sample but 
+also the evolutionary relatedness among these taxa. The `TreeSE` class can 
+keep track of relations among features (taxa) via two functions, 
+`rowTree` and `rowLinks`.
 
-A tree can be accessed via `rowTree` as `phylo` object.      
+A tree can be accessed via `rowTree` as `phylo` object.
 
 ```{r rowtree}
 rowTree(tse)
 ```
 
-The links to the individual features are available through `rowLinks`.
+Each row in `TreeSE` is linked to a specific node in a tree. This relationship
+is stored in the `rowLinks` slot, which has the same  rows as `TreeSE`.
+The `rowLinks` slot contains information about which tree node corresponds to
+each row and whether the node is a leaf (tip) or an internal node, among other
+details.
 
 ```{r rowlinks}
 rowLinks(tse)
 ```
 
-Please note that there can be a 1:1 relationship between tree nodes and 
+Please note that there can be a 1:1 relationship between tree nodes and
 features, but this is not a must-have. This means there can be features that
 are not linked to nodes, and nodes that are not linked to features. To change
-the links in an existing object, the `changeTree` function is available.
+the links in an existing object, the `changeTree()` function is available.
 
 ## Alternative Experiments {#sec-alt-exp}
 
-_**Alternative experiments**_ complement _assays_. They can contain
+_**Alternative experiments**_  (`altExp`) complement _assays_. They can contain
 complementary data, which is no longer tied to the same dimensions as
 the assay data. However, the number of samples (columns) must be the
 same.
@@ -179,14 +233,14 @@ same set of samples can be stored as
 
 1. Separate _assays_ assuming that the taxonomic information can be mapped 
 between features directly 1:1; or 
-2. Data in the _altExp_ slot of the `TreeSE`, if the feature 
-dimensions differ. Each element of the _altExp_ slot is a `SE`
+2. Data in the `altExp` slot of the `TreeSE`, if the feature 
+dimensions differ. Each element of the `altExp` slot is a `SE`
 or an object from a derived class with independent feature data.
 
 The following shows how to store taxonomic abundance tables
 agglomerated at different taxonomic levels. However, the data could as
-well originate from entirely different measurement sources as long as
-the samples match.
+well originate from entirely different measurement sources (e.g., 16S 
+amplicon and metagenomic sequence data) as long as the samples match.
 
 Let us first subset the data so that it has only two rows.
 
@@ -202,15 +256,14 @@ original data.
 
 ```{r altexp_agglomerate2}
 # Add the new data object to the original data object as an alternative
-# experiment with the name "Phylum"
+# experiment with the specified name
 altExp(tse, "subsetted") <- tse_sub
 
-# Check the alternative experiment names available in the data
+# Retrieve and display the names of alternative experiments available
 altExpNames(tse)
 ```
 
-We can now subset the data by taking certain samples, for instance, and this
-acts on both `altExp` and assay data.
+Now, if we subset the data, this acts on both the `altExp` and the assay data.
 
 ```{r altexp_agglomerate3}
 tse_single_sample <- tse[, 1]
@@ -223,19 +276,39 @@ to the `SingleCellExperiment` package [@R_SingleCellExperiment].
 
 ## Multiple experiments {#sec-mae}
 
-_**Multiple experiments**_ relate to complementary measurement types,
-such as transcriptomic or metabolomic profiling of the microbiome or
-the host. Multiple experiments can be represented using the same
+_**Multiple experiments**_ relate to complementary measurement types from
+the same samples, such as transcriptomic or metabolomic profiling of the 
+microbiome. Multiple experiments can be represented using the same
 options as alternative experiments, or by using the
-`MAE` class [@Ramos2017]. Depending on how the 
+`MAE` class [@Ramos2017]. Depending on how the
 datasets relate to each other the data can be stored as:
 
-1.  _altExp_ if the samples can be matched directly 1:1; or
+1. `altExp` if the samples can be matched directly 1:1; or
 2. As `MAE` objects, in which the connections between
 samples are defined through a `sampleMap`. Each element on the
 `ExperimentList` of an `MAE` is `matrix` or
-`matrix`-like objects, including `SE` objects, and 
+`matrix`-like objects, including `SE` objects, and
 the number of samples can differ between the elements.
+
+In a `MAE`, the "subjects" represent patients. The `MAE` has four main slots,
+with `experiments` being the core. This slot holds a list of experiments, each
+in (`Tree`)`SE` format. To handle complex mappings between samples
+(observations) across different experiments, the `sampleMap` slot stores
+information about how each
+sample in the experiments is linked to a patient. Metadata for each patient is
+stored in the `colData` slot. Unlike the `colData` in `TreeSE`, this `colData`
+is meant to store only metadata that remains constant throughout the trial.
+
+- `experiments`: Contains experiments, such as different omics data, in TreeSE format.
+- `sampleMap`: Holds linkages between patients (subjects) and samples in the experiments (observations).
+- `colData`: Includes patient metadata that remains unchanged throughout the trial.
+
+These slots are illustrated in the figure below:
+
+![The structure of MultiAssayExperiment (MAE) object [@Ramos2017].](figures/mae.png){width="60%"}
+
+Additionally, the object includes a `metadata` slot that contains information
+about the dataset, such as the trial period and the creator of the `MAE` object.
 
 The `MAE` object can handle more complex relationships between experiments.
 It manages the linkages between samples and experiments, ensuring that
@@ -249,12 +322,10 @@ mae <- HintikkaXOData
 mae
 ```
 
-The `sampleMap` is a crucial component of the `MAE` object as it acts as the
+The `sampleMap` is a crucial component of the `MAE` object as it acts as an
 important bookkeeper, maintaining the information about which samples are
 associated with which experiments. This ensures that data linkages are
-correctly managed and preserved across different types of experiments.
-
-In fact, we can have 
+correctly managed and preserved across different types of measurements.
 
 ```{r}
 #| label: show_mae2
@@ -274,29 +345,59 @@ mae
 ::: {.callout-note}
 ## Note
 
-If you have multiple experiments containing replicated samples from patients,
-you can utilize the `MultiAssayExperiment` object to keep track of which
-samples belong to which patient.
+If you have multiple experiments containing multiple measures from same sources 
+(e.g., patients/host, individuals/sites), you can utilize the `MultiAssayExperiment` 
+object to keep track of which samples belong to which patient.
 
 :::
-<!--
+
+The following dataset illustrates how to utilize the sample mapping system in
+`MAE`. It includes two omics data: biogenic amines and fatty acids,
+collected from 10 chickens.
+
 ```{r}
-#TODO: Find the right dataset to explain a non 1:1 sample relationship
+#| label: show_holofood_mae
+
+mae <- readRDS(system.file("extdata", "mae_holofood.Rds", package = "OMA"))
+mae
 ```
--->
+
+We can see that there are more than ten samples per omic dataset due to
+multiple samples from different time points collected for some animals. 
+From the `colData` of `MAE`, we can observe the individual animal metadata,
+including information that remains constant throughout the trial.
+
+```{r}
+#| label: show_coldata_mae
+colData(mae)
+```
+
+The `sampleMap` slot now contains mappings between each unique sample and the
+corresponding individual animal. There are as many rows as there are total samples.
+
+The "colname" column refers to the samples in the omic dataset identified in
+the "assay" column, while the "primary" column provides information about the
+animals. You will notice that some animals are listed multiple times,
+reflecting the multiple omics and time points collected for those individuals.
+
+```{r}
+#| label: show_samplemap_mae
+
+sampleMap(mae)
+```
 
 For information have a look at the
 [intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html)
-of the `MultiAssayExperiment` package.  
+of the `MultiAssayExperiment` package.
 
 ::: {.callout-tip}
 ## Recommended options for storing multiple data tables in microbiome studies
 
-   Option   Rows (features)    Cols (samples)               Recommended  
+   Option   Rows (features)    Cols (samples)               Recommended
 ---------   --------------    ---------------  ------------------------
-   assays  	         match              match       Data transformations  
-   altExp             free              match    Alternative experiments  
-MultiAssay            free      free (mapping)    Multi-omic experiments    
+   assays  	         match              match       Data transformations
+   altExp             free              match    Alternative experiments
+MultiAssay            free      free (mapping)    Multi-omic experiments
 
 :
 The _assays_ are best suited for data transformations (one-to-one match between
