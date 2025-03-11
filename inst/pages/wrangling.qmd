@@ -18,18 +18,35 @@ You can split the data based on variables by using the functions
 [@sec-agglomeration].
 
 If you want to split the data based on a variable other than taxonomic rank, use 
-`splitOn()`. It works for row-wise and column-wise splitting. We might want to 
-split the data, Splitting the data may be useful, for example, if you want to 
-analyze data from different cohorts separately.
+`splitOn()`. It works for row-wise and column-wise splitting. Splitting the data
+may be useful, for example, if you want to analyze data from different cohorts
+separately.
+
+The following example demonstrates how to identify the most abundant taxa for
+each sample type. Given that some samples originate from different origin, we
+expect differences between sample types. While `getTop()` can be used to
+determine the most abundant taxa across the entire dataset, this approach would
+obscure taxa that are specific to individual sample types.
 
 ```{r}
 #| label: splitOn
 
 library(mia)
+library(knitr)
+
 data("GlobalPatterns")
 tse <- GlobalPatterns
 
-splitOn(tse, "SampleType")
+# Agglomerate to phyla
+tse <- agglomerateByRank(tse, rank = "Phylum")
+
+# Split data based on sample type
+tse_list <- splitOn(tse, by = "samples", group = "SampleType")
+
+# Loop over the list of TreeSEs, and get top features for each
+top_taxa <- sapply(tse_list, getTop)
+
+top_taxa |> kable()
 ```
 
 ## Add or modify variables {#sec-add-or-modify-data}
