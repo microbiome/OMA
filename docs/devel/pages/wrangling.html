@@ -609,21 +609,117 @@ document.addEventListener("click", function (event) {
 <section id="sec-splitting" class="level2" data-number="7.1"><h2 data-number="7.1" class="anchored" data-anchor-id="sec-splitting">
 <span class="header-section-number">7.1</span> Splitting</h2>
 <p>You can split the data based on variables by using the functions <code><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">agglomerateByRanks()</a></code> and <code><a href="https://rdrr.io/pkg/mia/man/splitOn.html">splitOn()</a></code>. The former is detailed in <a href="agglomeration.html" class="quarto-xref"><span>Chapter 9</span></a>.</p>
-<p>If you want to split the data based on a variable other than taxonomic rank, use <code><a href="https://rdrr.io/pkg/mia/man/splitOn.html">splitOn()</a></code>. It works for row-wise and column-wise splitting. We might want to split the data, Splitting the data may be useful, for example, if you want to analyze data from different cohorts separately.</p>
+<p>If you want to split the data based on a variable other than taxonomic rank, use <code><a href="https://rdrr.io/pkg/mia/man/splitOn.html">splitOn()</a></code>. It works for row-wise and column-wise splitting. Splitting the data may be useful, for example, if you want to analyze data from different cohorts separately.</p>
+<p>The following example demonstrates how to identify the most abundant taxa for each sample type. Given that some samples originate from different origin, we expect differences between sample types. While <code><a href="https://rdrr.io/pkg/mia/man/summary.html">getTop()</a></code> can be used to determine the most abundant taxa across the entire dataset, this approach would obscure taxa that are specific to individual sample types.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://yihui.org/knitr/">knitr</a></span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"GlobalPatterns"</span><span class="op">)</span></span>
 <span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">GlobalPatterns</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/mia/man/splitOn.html">splitOn</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"SampleType"</span><span class="op">)</span></span>
-<span><span class="co">##  List of length 9</span></span>
-<span><span class="co">##  names(9): Soil Feces Skin Tongue ... Ocean Sediment (estuary) Mock</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co"># Agglomerate to phyla</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">agglomerateByRank</a></span><span class="op">(</span><span class="va">tse</span>, rank <span class="op">=</span> <span class="st">"Phylum"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Split data based on sample type</span></span>
+<span><span class="va">tse_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/splitOn.html">splitOn</a></span><span class="op">(</span><span class="va">tse</span>, by <span class="op">=</span> <span class="st">"samples"</span>, group <span class="op">=</span> <span class="st">"SampleType"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Loop over the list of TreeSEs, and get top features for each</span></span>
+<span><span class="va">top_taxa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">tse_list</span>, <span class="va">getTop</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">top_taxa</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 11%">
+<col style="width: 13%">
+<col style="width: 10%">
+<col style="width: 13%">
+<col style="width: 10%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">Soil</th>
+<th style="text-align: left;">Feces</th>
+<th style="text-align: left;">Skin</th>
+<th style="text-align: left;">Tongue</th>
+<th style="text-align: left;">Freshwater</th>
+<th style="text-align: left;">Freshwater (creek)</th>
+<th style="text-align: left;">Ocean</th>
+<th style="text-align: left;">Sediment (estuary)</th>
+<th style="text-align: left;">Mock</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Proteobacteria</td>
+<td style="text-align: left;">Firmicutes</td>
+<td style="text-align: left;">Firmicutes</td>
+<td style="text-align: left;">Proteobacteria</td>
+<td style="text-align: left;">Cyanobacteria</td>
+<td style="text-align: left;">Cyanobacteria</td>
+<td style="text-align: left;">Proteobacteria</td>
+<td style="text-align: left;">Proteobacteria</td>
+<td style="text-align: left;">Firmicutes</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Acidobacteria</td>
+<td style="text-align: left;">Bacteroidetes</td>
+<td style="text-align: left;">Proteobacteria</td>
+<td style="text-align: left;">Firmicutes</td>
+<td style="text-align: left;">Actinobacteria</td>
+<td style="text-align: left;">Proteobacteria</td>
+<td style="text-align: left;">Bacteroidetes</td>
+<td style="text-align: left;">Bacteroidetes</td>
+<td style="text-align: left;">Bacteroidetes</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Verrucomicrobia</td>
+<td style="text-align: left;">Cyanobacteria</td>
+<td style="text-align: left;">Actinobacteria</td>
+<td style="text-align: left;">Bacteroidetes</td>
+<td style="text-align: left;">Proteobacteria</td>
+<td style="text-align: left;">Bacteroidetes</td>
+<td style="text-align: left;">Cyanobacteria</td>
+<td style="text-align: left;">Cyanobacteria</td>
+<td style="text-align: left;">Proteobacteria</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bacteroidetes</td>
+<td style="text-align: left;">Actinobacteria</td>
+<td style="text-align: left;">Bacteroidetes</td>
+<td style="text-align: left;">Actinobacteria</td>
+<td style="text-align: left;">Bacteroidetes</td>
+<td style="text-align: left;">Verrucomicrobia</td>
+<td style="text-align: left;">Actinobacteria</td>
+<td style="text-align: left;">Crenarchaeota</td>
+<td style="text-align: left;">Actinobacteria</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Actinobacteria</td>
+<td style="text-align: left;">Proteobacteria</td>
+<td style="text-align: left;">Fusobacteria</td>
+<td style="text-align: left;">Fusobacteria</td>
+<td style="text-align: left;">Verrucomicrobia</td>
+<td style="text-align: left;">Chloroflexi</td>
+<td style="text-align: left;">Euryarchaeota</td>
+<td style="text-align: left;">Planctomycetes</td>
+<td style="text-align: left;">Tenericutes</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </section><section id="sec-add-or-modify-data" class="level2" data-number="7.2"><h2 data-number="7.2" class="anchored" data-anchor-id="sec-add-or-modify-data">
 <span class="header-section-number">7.2</span> Add or modify variables</h2>
 <p>The information contained by the <code>colData</code> of a <code>TreeSE</code> can be added and/or modified by accessing the desired variables. You might want to add or modify this data to include new variables or update existing ones, which can be essential for ensuring that all relevant metadata is available for subsequent analyses.</p>
 <div class="cell" data-layout-align="center">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># modify the Description entries</span></span>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"GlobalPatterns"</span><span class="op">)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">GlobalPatterns</span></span>
+<span></span>
+<span><span class="co"># modify the Description entries</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">$</span><span class="va">Description</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">$</span><span class="va">Description</span>, <span class="st">"modified description"</span><span class="op">)</span></span>
 <span></span>
@@ -646,7 +742,7 @@ document.addEventListener("click", function (event) {
 <span></span>
 <span><span class="co"># view new variable</span></span>
 <span><span class="va">tse</span><span class="op">$</span><span class="va">NewVariable</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">##  [1] 0.5975 0.4867 0.1355 0.9912 0.9997 0.6592</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="co">##  [1] 0.4250 0.3073 0.8151 0.9520 0.8627 0.2960</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Alternatively, you can add whole table by merging it with existing <code>colData</code>.</p>
 <div class="cell" data-layout-align="center">
@@ -822,9 +918,9 @@ document.addEventListener("click", function (event) {
 <td style="text-align: left;">CTAGCGTGCGT</td>
 <td style="text-align: left;">Soil</td>
 <td style="text-align: left;">Calhoun South Carolina Pine soil, pH 4.9 modified description</td>
-<td style="text-align: right;">0.5975</td>
-<td style="text-align: right;">0.2741</td>
-<td style="text-align: right;">0.9233</td>
+<td style="text-align: right;">0.425</td>
+<td style="text-align: right;">0.1938</td>
+<td style="text-align: right;">0.4909</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">239672</td>
@@ -844,9 +940,9 @@ document.addEventListener("click", function (event) {
 <td style="text-align: left;">TCGACATCTCT</td>
 <td style="text-align: left;">Feces</td>
 <td style="text-align: left;">M3, Day 1, fecal swab, whole body study modified description</td>
-<td style="text-align: right;">0.9912</td>
-<td style="text-align: right;">0.5994</td>
-<td style="text-align: right;">0.2339</td>
+<td style="text-align: right;">0.952</td>
+<td style="text-align: right;">0.5844</td>
+<td style="text-align: right;">0.8255</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">243675</td>
@@ -866,9 +962,9 @@ document.addEventListener("click", function (event) {
 <td style="text-align: left;">CTAGCGTGCGT</td>
 <td style="text-align: left;">Soil</td>
 <td style="text-align: left;">Calhoun South Carolina Pine soil, pH 4.9 modified description</td>
-<td style="text-align: right;">0.5975</td>
-<td style="text-align: right;">0.2741</td>
-<td style="text-align: right;">0.9233</td>
+<td style="text-align: right;">0.425</td>
+<td style="text-align: right;">0.1938</td>
+<td style="text-align: right;">0.4909</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">243675</td>
@@ -888,9 +984,9 @@ document.addEventListener("click", function (event) {
 <td style="text-align: left;">TCGACATCTCT</td>
 <td style="text-align: left;">Feces</td>
 <td style="text-align: left;">M3, Day 1, fecal swab, whole body study modified description</td>
-<td style="text-align: right;">0.9912</td>
-<td style="text-align: right;">0.5994</td>
-<td style="text-align: right;">0.2339</td>
+<td style="text-align: right;">0.952</td>
+<td style="text-align: right;">0.5844</td>
+<td style="text-align: right;">0.8255</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">444679</td>
@@ -910,9 +1006,9 @@ document.addEventListener("click", function (event) {
 <td style="text-align: left;">CTAGCGTGCGT</td>
 <td style="text-align: left;">Soil</td>
 <td style="text-align: left;">Calhoun South Carolina Pine soil, pH 4.9 modified description</td>
-<td style="text-align: right;">0.5975</td>
-<td style="text-align: right;">0.2741</td>
-<td style="text-align: right;">0.9233</td>
+<td style="text-align: right;">0.425</td>
+<td style="text-align: right;">0.1938</td>
+<td style="text-align: right;">0.4909</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">444679</td>
@@ -932,9 +1028,9 @@ document.addEventListener("click", function (event) {
 <td style="text-align: left;">TCGACATCTCT</td>
 <td style="text-align: left;">Feces</td>
 <td style="text-align: left;">M3, Day 1, fecal swab, whole body study modified description</td>
-<td style="text-align: right;">0.9912</td>
-<td style="text-align: right;">0.5994</td>
-<td style="text-align: right;">0.2339</td>
+<td style="text-align: right;">0.952</td>
+<td style="text-align: right;">0.5844</td>
+<td style="text-align: right;">0.8255</td>
 </tr>
 </tbody>
 </table>
