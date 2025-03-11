@@ -48,18 +48,25 @@ are available for an easy deployment.
 1. Install Docker for your platform: [Linux](https://docs.docker.com/engine/install/),
 [Mac](https://docs.docker.com/desktop/setup/install/mac-install/),
 [Windows](https://docs.docker.com/desktop/setup/install/windows-install/).
-2. Pull the image from our repository:
+2. Pull the image from our repository by running the following command in the terminal:
 
 ```sh
 docker pull ghcr.io/microbiome/oma:latest
 ```
 
 You can also specify any of the available tags to pull a particular version of
-the image.
+the image, for example `docker pull ghcr.io/microbiome/oma:0.98.35` will pull
+the version `0.98.35`.
 
-3. Switch to the directory of the book, for example, with `cd` command.
+3. Use the terminal command `git clone git@github.com:microbiome/OMA.git`
+to clone the repository to your local machine. This command will create
+the `OMA` directory in the current working directory. For more details, see
+[here](https://git-scm.com/docs/git-clone).
 
-4. Run the image:
+4. Switch to the directory of the book with the `cd` command.
+If you followed point 3, the command is `cd OMA`.
+
+5. Run the image:
 
 ```sh
 docker run --volume ./:/project -p 8787:8787 -e PASSWORD=1234 ghcr.io/microbiome/oma
@@ -76,12 +83,14 @@ specify this option, the book Quarto files are still available in the `/opt/pkg`
 directory inside the container, but any changes you make to the files, will be
 _discarded_ when you stop the container.
 
-5. Access RStudio. When the image is running, the RStudio server is available on
+6. Access RStudio. When the image is running, the RStudio server is available on
 the `localhost:8787` address via any browser.
-6. After accessing RStudio, the username is either `rstudio` or `root`, and the
+
+7. After accessing RStudio, the username is either `rstudio` or `root`, and the
 password is `1234` (specified in with the `-e PASSWORD=1234` option in the
-command above)
-7. Now, you have two options:
+command above).
+
+8. Now, you have two options:
 
 - If you specified the `--volume ./:/project` option in the book's repository,
 you have the access to the bleeding-edge repo. Access it with `setwd("/project")`
