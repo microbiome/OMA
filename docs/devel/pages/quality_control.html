@@ -1066,12 +1066,495 @@ McMurdie, Paul J, and Susan Holmes. 2014. <span>“Waste Not, Want Not: Why Rare
 Davis, Nicole M, Diana M Proctor, Susan P Holmes, David A Relman, and Benjamin J Callahan. 2018. <span>“Simple Statistical Identification and Removal of Contaminant Sequences in Marker-Gene and Metagenomics Data.”</span> <em>Microbiome</em> 6 (1): 1–14.
 </div></div><ul>
 <li>
-<code><a href="https://rdrr.io/pkg/decontam/man/isContaminant.html">isContaminant()</a></code>, <code>isNotContaminant()</code><br>
+<code><a href="https://rdrr.io/pkg/decontam/man/isContaminant.html">isContaminant()</a></code>, <code>isNotContaminant()</code>
 </li>
 <li>
 <code><a href="https://rdrr.io/pkg/mia/man/isContaminant.html">addContaminantQC()</a></code>, <code><a href="https://rdrr.io/pkg/mia/man/isContaminant.html">addNotContaminantQC()</a></code>
 </li>
 </ul>
+<p>Contaminations can be detected using two main approaches: frequency-based and prevalence-based testing. In frequency-based testing, the user must provide the DNA concentration of samples. The abundance of features is then compared to the DNA concentration, as contaminants are expected to show an inverse relationship — they make up a larger fraction in low-DNA samples and smaller fraction in high-DNA samples.</p>
+<p>In the prevalence-based approach, sequence prevalence is compared between true biological samples and control samples. This method assumes that contaminants are more prevalent in negative controls, as these lack true biological DNA and primarily contain background noise from contamination sources.</p>
+<p>Below we download a dataset from <code>microbiomeDataSets</code>.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">microbiomeDataSets</span><span class="op">)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/microbiomeDataSets/man/GrieneisenTSData.html">baboongut</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The dataset contains 16S data from the gut microbiome of baboons, with DNA concentration recorded in the “post_pcr_dna_ng” column in the sample metadata. This information can be used for frequency-based contamination identification.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://yihui.org/knitr/">knitr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 2%">
+<col style="width: 4%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 3%">
+<col style="width: 2%">
+<col style="width: 3%">
+<col style="width: 1%">
+<col style="width: 2%">
+<col style="width: 1%">
+<col style="width: 2%">
+<col style="width: 1%">
+<col style="width: 4%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 2%">
+<col style="width: 1%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 2%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">sample</th>
+<th style="text-align: left;">baboon_id</th>
+<th style="text-align: left;">collection_date</th>
+<th style="text-align: left;">sex</th>
+<th style="text-align: right;">age</th>
+<th style="text-align: left;">social_group</th>
+<th style="text-align: right;">group_size</th>
+<th style="text-align: right;">rain_month_mm</th>
+<th style="text-align: left;">season</th>
+<th style="text-align: right;">hydro_year</th>
+<th style="text-align: right;">month</th>
+<th style="text-align: right;">readcount</th>
+<th style="text-align: left;">plate</th>
+<th style="text-align: right;">post_pcr_dna_ng</th>
+<th style="text-align: right;">diet_PC1</th>
+<th style="text-align: right;">diet_PC2</th>
+<th style="text-align: right;">diet_PC3</th>
+<th style="text-align: right;">diet_PC4</th>
+<th style="text-align: right;">diet_PC5</th>
+<th style="text-align: right;">diet_PC6</th>
+<th style="text-align: right;">diet_PC7</th>
+<th style="text-align: right;">diet_PC8</th>
+<th style="text-align: right;">diet_PC9</th>
+<th style="text-align: right;">diet_PC10</th>
+<th style="text-align: right;">diet_PC11</th>
+<th style="text-align: right;">diet_PC12</th>
+<th style="text-align: right;">diet_PC13</th>
+<th style="text-align: right;">diet_shannon_h</th>
+<th style="text-align: right;">asv_richness</th>
+<th style="text-align: right;">asv_shannon_h</th>
+<th style="text-align: right;">pc1_bc</th>
+<th style="text-align: right;">pc2_bc</th>
+<th style="text-align: right;">pc3_bc</th>
+<th style="text-align: right;">pc4_bc</th>
+<th style="text-align: right;">pc5_bc</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">sample_11410-AACTCCTGTGGA-396</td>
+<td style="text-align: left;">sample_11410-AACTCCTGTGGA-396</td>
+<td style="text-align: left;">Baboon_1</td>
+<td style="text-align: left;">2010-08-14</td>
+<td style="text-align: left;">M</td>
+<td style="text-align: right;">8.375</td>
+<td style="text-align: left;">g_2.1</td>
+<td style="text-align: right;">74</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: left;">dry</td>
+<td style="text-align: right;">2010</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">26140</td>
+<td style="text-align: left;">129</td>
+<td style="text-align: right;">78.98</td>
+<td style="text-align: right;">44.245</td>
+<td style="text-align: right;">13.304</td>
+<td style="text-align: right;">-3.182</td>
+<td style="text-align: right;">1.639</td>
+<td style="text-align: right;">-1.5291</td>
+<td style="text-align: right;">1.2958</td>
+<td style="text-align: right;">1.957</td>
+<td style="text-align: right;">0.840</td>
+<td style="text-align: right;">0.8753</td>
+<td style="text-align: right;">0.2847</td>
+<td style="text-align: right;">-0.4202</td>
+<td style="text-align: right;">0.4844</td>
+<td style="text-align: right;">-0.0784</td>
+<td style="text-align: right;">0.7761</td>
+<td style="text-align: right;">179</td>
+<td style="text-align: right;">2.972</td>
+<td style="text-align: right;">-0.0649</td>
+<td style="text-align: right;">0.2813</td>
+<td style="text-align: right;">-0.0912</td>
+<td style="text-align: right;">-0.0204</td>
+<td style="text-align: right;">0.0731</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sample_11413-CGGCCTAAGTTC-397</td>
+<td style="text-align: left;">sample_11413-CGGCCTAAGTTC-397</td>
+<td style="text-align: left;">Baboon_1</td>
+<td style="text-align: left;">2010-05-14</td>
+<td style="text-align: left;">M</td>
+<td style="text-align: right;">8.123</td>
+<td style="text-align: left;">g_2.1</td>
+<td style="text-align: right;">72</td>
+<td style="text-align: right;">44.6</td>
+<td style="text-align: left;">wet</td>
+<td style="text-align: right;">2010</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">11186</td>
+<td style="text-align: left;">9</td>
+<td style="text-align: right;">49.70</td>
+<td style="text-align: right;">-1.621</td>
+<td style="text-align: right;">-3.402</td>
+<td style="text-align: right;">-16.786</td>
+<td style="text-align: right;">8.296</td>
+<td style="text-align: right;">-0.4551</td>
+<td style="text-align: right;">-0.4667</td>
+<td style="text-align: right;">1.290</td>
+<td style="text-align: right;">-5.776</td>
+<td style="text-align: right;">0.9291</td>
+<td style="text-align: right;">-1.7560</td>
+<td style="text-align: right;">0.1513</td>
+<td style="text-align: right;">-1.9706</td>
+<td style="text-align: right;">-5.9968</td>
+<td style="text-align: right;">1.6158</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">1.574</td>
+<td style="text-align: right;">0.3312</td>
+<td style="text-align: right;">0.2543</td>
+<td style="text-align: right;">-0.1423</td>
+<td style="text-align: right;">0.2182</td>
+<td style="text-align: right;">-0.2007</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sample_11409-CAGAAGGTGTGG-395</td>
+<td style="text-align: left;">sample_11409-CAGAAGGTGTGG-395</td>
+<td style="text-align: left;">Baboon_1</td>
+<td style="text-align: left;">2011-01-08</td>
+<td style="text-align: left;">M</td>
+<td style="text-align: right;">8.778</td>
+<td style="text-align: left;">g_2.1</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: right;">12.2</td>
+<td style="text-align: left;">wet</td>
+<td style="text-align: right;">2011</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">30532</td>
+<td style="text-align: left;">196</td>
+<td style="text-align: right;">59.16</td>
+<td style="text-align: right;">-34.954</td>
+<td style="text-align: right;">-8.627</td>
+<td style="text-align: right;">-5.499</td>
+<td style="text-align: right;">-9.029</td>
+<td style="text-align: right;">-1.9215</td>
+<td style="text-align: right;">9.7852</td>
+<td style="text-align: right;">13.418</td>
+<td style="text-align: right;">10.094</td>
+<td style="text-align: right;">-10.1494</td>
+<td style="text-align: right;">-3.0103</td>
+<td style="text-align: right;">3.0000</td>
+<td style="text-align: right;">0.2265</td>
+<td style="text-align: right;">0.1694</td>
+<td style="text-align: right;">1.8709</td>
+<td style="text-align: right;">164</td>
+<td style="text-align: right;">3.045</td>
+<td style="text-align: right;">0.1434</td>
+<td style="text-align: right;">0.2225</td>
+<td style="text-align: right;">0.0493</td>
+<td style="text-align: right;">0.0680</td>
+<td style="text-align: right;">-0.0521</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sample_11412-AAGGCCTTTACG-397</td>
+<td style="text-align: left;">sample_11412-AAGGCCTTTACG-397</td>
+<td style="text-align: left;">Baboon_1</td>
+<td style="text-align: left;">2010-11-18</td>
+<td style="text-align: left;">M</td>
+<td style="text-align: right;">8.638</td>
+<td style="text-align: left;">g_2.1</td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">70.6</td>
+<td style="text-align: left;">wet</td>
+<td style="text-align: right;">2011</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">35855</td>
+<td style="text-align: left;">198</td>
+<td style="text-align: right;">46.91</td>
+<td style="text-align: right;">-14.331</td>
+<td style="text-align: right;">5.290</td>
+<td style="text-align: right;">9.872</td>
+<td style="text-align: right;">12.223</td>
+<td style="text-align: right;">-1.3256</td>
+<td style="text-align: right;">1.4292</td>
+<td style="text-align: right;">1.043</td>
+<td style="text-align: right;">-1.948</td>
+<td style="text-align: right;">-1.7495</td>
+<td style="text-align: right;">-0.4891</td>
+<td style="text-align: right;">-3.5910</td>
+<td style="text-align: right;">0.2045</td>
+<td style="text-align: right;">0.0381</td>
+<td style="text-align: right;">1.4014</td>
+<td style="text-align: right;">113</td>
+<td style="text-align: right;">2.485</td>
+<td style="text-align: right;">0.1796</td>
+<td style="text-align: right;">0.2159</td>
+<td style="text-align: right;">0.0269</td>
+<td style="text-align: right;">-0.1299</td>
+<td style="text-align: right;">-0.0282</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sample_11409-GTTGCTGAGTCC-395</td>
+<td style="text-align: left;">sample_11409-GTTGCTGAGTCC-395</td>
+<td style="text-align: left;">Baboon_1</td>
+<td style="text-align: left;">2011-01-22</td>
+<td style="text-align: left;">M</td>
+<td style="text-align: right;">8.816</td>
+<td style="text-align: left;">g_2.1</td>
+<td style="text-align: right;">81</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: left;">wet</td>
+<td style="text-align: right;">2011</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">49800</td>
+<td style="text-align: left;">146</td>
+<td style="text-align: right;">50.14</td>
+<td style="text-align: right;">-6.118</td>
+<td style="text-align: right;">-8.050</td>
+<td style="text-align: right;">-7.833</td>
+<td style="text-align: right;">-8.504</td>
+<td style="text-align: right;">-8.9970</td>
+<td style="text-align: right;">4.1727</td>
+<td style="text-align: right;">4.685</td>
+<td style="text-align: right;">12.025</td>
+<td style="text-align: right;">-9.4630</td>
+<td style="text-align: right;">0.8942</td>
+<td style="text-align: right;">2.1969</td>
+<td style="text-align: right;">0.4153</td>
+<td style="text-align: right;">0.1357</td>
+<td style="text-align: right;">1.9947</td>
+<td style="text-align: right;">201</td>
+<td style="text-align: right;">3.317</td>
+<td style="text-align: right;">0.0630</td>
+<td style="text-align: right;">0.2135</td>
+<td style="text-align: right;">0.0708</td>
+<td style="text-align: right;">0.0638</td>
+<td style="text-align: right;">-0.0419</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sample_11408-GGTCTTAGCACC-395</td>
+<td style="text-align: left;">sample_11408-GGTCTTAGCACC-395</td>
+<td style="text-align: left;">Baboon_1</td>
+<td style="text-align: left;">2010-10-14</td>
+<td style="text-align: left;">M</td>
+<td style="text-align: right;">8.542</td>
+<td style="text-align: left;">g_2.1</td>
+<td style="text-align: right;">76</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: left;">dry</td>
+<td style="text-align: right;">2010</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">45778</td>
+<td style="text-align: left;">194</td>
+<td style="text-align: right;">46.91</td>
+<td style="text-align: right;">15.927</td>
+<td style="text-align: right;">2.057</td>
+<td style="text-align: right;">5.217</td>
+<td style="text-align: right;">4.699</td>
+<td style="text-align: right;">-5.0800</td>
+<td style="text-align: right;">0.4955</td>
+<td style="text-align: right;">2.755</td>
+<td style="text-align: right;">-3.277</td>
+<td style="text-align: right;">-2.1587</td>
+<td style="text-align: right;">-0.2728</td>
+<td style="text-align: right;">1.5095</td>
+<td style="text-align: right;">-1.5876</td>
+<td style="text-align: right;">0.3703</td>
+<td style="text-align: right;">1.4930</td>
+<td style="text-align: right;">244</td>
+<td style="text-align: right;">3.783</td>
+<td style="text-align: right;">0.0027</td>
+<td style="text-align: right;">0.1412</td>
+<td style="text-align: right;">0.1576</td>
+<td style="text-align: right;">0.0705</td>
+<td style="text-align: right;">0.0437</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Now we can detect contaminant sequences. We run <code><a href="https://rdrr.io/pkg/mia/man/isContaminant.html">addContaminantQC()</a></code> which adds results to <code>rowData</code>.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/isContaminant.html">addContaminantQC</a></span><span class="op">(</span><span class="va">tse</span>, concentration <span class="op">=</span> <span class="st">"post_pcr_dna_ng"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 8%">
+<col style="width: 7%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 13%">
+<col style="width: 6%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 4%">
+<col style="width: 4%">
+<col style="width: 4%">
+<col style="width: 8%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Domain</th>
+<th style="text-align: left;">Phylum</th>
+<th style="text-align: left;">Class</th>
+<th style="text-align: left;">Order</th>
+<th style="text-align: left;">Family</th>
+<th style="text-align: left;">Genus</th>
+<th style="text-align: left;">ASV</th>
+<th style="text-align: right;">freq</th>
+<th style="text-align: right;">prev</th>
+<th style="text-align: right;">p.freq</th>
+<th style="text-align: left;">p.prev</th>
+<th style="text-align: right;">p</th>
+<th style="text-align: left;">contaminant</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">asv_10002</td>
+<td style="text-align: left;">Bacteria</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">asv_10002</td>
+<td style="text-align: right;">0.0003</td>
+<td style="text-align: right;">3355</td>
+<td style="text-align: right;">0.6914</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0.6914</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">asv_10020</td>
+<td style="text-align: left;">Bacteria</td>
+<td style="text-align: left;">Tenericutes</td>
+<td style="text-align: left;">Mollicutes</td>
+<td style="text-align: left;">Mollicutes RF39</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">asv_10020</td>
+<td style="text-align: right;">0.0001</td>
+<td style="text-align: right;">2511</td>
+<td style="text-align: right;">0.7099</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0.7099</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">asv_10027</td>
+<td style="text-align: left;">Bacteria</td>
+<td style="text-align: left;">Tenericutes</td>
+<td style="text-align: left;">Mollicutes</td>
+<td style="text-align: left;">Mollicutes RF39</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">asv_10027</td>
+<td style="text-align: right;">0.0001</td>
+<td style="text-align: right;">2835</td>
+<td style="text-align: right;">0.7766</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0.7766</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">asv_10036</td>
+<td style="text-align: left;">Bacteria</td>
+<td style="text-align: left;">Tenericutes</td>
+<td style="text-align: left;">Mollicutes</td>
+<td style="text-align: left;">Mollicutes RF39</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">asv_10036</td>
+<td style="text-align: right;">0.0016</td>
+<td style="text-align: right;">8633</td>
+<td style="text-align: right;">0.7051</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0.7051</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">asv_10052</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">asv_10052</td>
+<td style="text-align: right;">0.0001</td>
+<td style="text-align: right;">2833</td>
+<td style="text-align: right;">0.7341</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0.7341</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">asv_10072</td>
+<td style="text-align: left;">Bacteria</td>
+<td style="text-align: left;">Firmicutes</td>
+<td style="text-align: left;">Clostridia</td>
+<td style="text-align: left;">Clostridiales</td>
+<td style="text-align: left;">Ruminococcaceae</td>
+<td style="text-align: left;">Ruminiclostridium 6</td>
+<td style="text-align: left;">asv_10072</td>
+<td style="text-align: right;">0.0001</td>
+<td style="text-align: right;">2138</td>
+<td style="text-align: right;">0.6394</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: right;">0.6394</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The method performs statistical tests to identify contaminants. By default, it uses a 0.1 probability threshold for identifying contaminants, which can be adjusted as needed. In this case, 0% of sequences were detected to be contaminants. We can then filter out these features from the data.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">tse</span><span class="op">[</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">[[</span><span class="st">"contaminant"</span><span class="op">]</span><span class="op">]</span>, <span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>As an example, we also demonstrate how to apply the prevalence-based approach. Note that the data used here is arbitrary, and in practice, you should use real control sample information.</p>
+<p>First, we add arbitrary control samples:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">control</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">control</span><span class="op">[</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
+<span><span class="va">tse</span><span class="op">[[</span><span class="st">"control"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">control</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, we perform the analysis. Note that we could have applied both frequency-based and prevalence-based methods simultaneously by specifying the <code>method</code> parameter in the previous step.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">not_contaminant</span> <span class="op">&lt;-</span> <span class="fu">isNotContaminant</span><span class="op">(</span><span class="va">tse</span>, control <span class="op">=</span> <span class="st">"control"</span>, detailed <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">not_contaminant</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">##  [1]  TRUE  TRUE  TRUE FALSE  TRUE  TRUE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To identify non-contaminant sequences with prevalence approach, a threshold of 0.5 is used, by default. As noted in the previous step, the <code>add*()</code> functions add results to <code>rowData</code>. Here, we used function that return only the results. By specifying <code>detailed = FALSE</code>, we obtain the results as a vector, which can then be used for subsetting the data.</p>
 
 
 
