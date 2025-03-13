@@ -366,5 +366,108 @@ The following
 [decontam functions](https://microbiome.github.io/mia/reference/isContaminant.html)
 are based on [@davis2018simple] and support such functionality:
 
-* `isContaminant()`, `isNotContaminant()`  
-* `addContaminantQC()`, `addNotContaminantQC()`  
+* `isContaminant()`, `isNotContaminant()`
+* `addContaminantQC()`, `addNotContaminantQC()`
+
+Contaminations can be detected using two main approaches: frequency-based and
+prevalence-based testing. In frequency-based testing, the user must provide the
+DNA concentration of samples. The abundance of features is then compared to the
+DNA concentration, as contaminants are expected to show an inverse
+relationship &mdash; they make up a larger fraction in low-DNA samples and 
+smaller fraction in high-DNA samples.
+
+In the prevalence-based approach, sequence prevalence is compared between true
+biological samples and control samples. This method assumes that contaminants
+are more prevalent in negative controls, as these lack true biological DNA and
+primarily contain background noise from contamination sources.
+
+Below we download a dataset from `microbiomeDataSets`.
+
+```{r}
+#| label: load_contaminant
+
+library(microbiomeDataSets)
+tse <- baboongut()
+```
+
+```{r}
+#| label: replace_missing_values
+#| echo: false
+
+# These is a bug in decontam. If there are missing values, it leads to an error
+# in input check. This is why we replace missing values with imputed values.
+# This chunk can be removed when this PR is merged:
+# https://github.com/benjjneb/decontam/pull/162
+avg_conc <- mean(tse[["post_pcr_dna_ng"]], na.rm = TRUE)
+colData(tse)[ is.na(tse[["post_pcr_dna_ng"]]), "post_pcr_dna_ng"] <- avg_conc
+```
+
+The dataset contains 16S data from the gut microbiome of baboons, with DNA
+concentration recorded in the "post_pcr_dna_ng" column in the sample metadata.
+This information can be used for frequency-based contamination identification.
+
+```{r}
+#| label: show_metadata
+
+library(knitr)
+
+colData(tse) |> head() |> kable()
+```
+
+Now we can detect contaminant sequences. We run `addContaminantQC()` which
+adds results to `rowData`. 
+
+```{r}
+#| label: detect_contaminant
+
+library(mia)
+
+tse <- addContaminantQC(tse, concentration = "post_pcr_dna_ng")
+
+rowData(tse) |> head() |> kable()
+```
+
+
+The method performs statistical tests to identify contaminants. By default, it
+uses a 0.1 probability threshold for identifying contaminants, which can be
+adjusted as needed. In this case,
+`r (sum(rowData(tse)[["contaminant_contaminant"]])/nrow(tse))*100`% of
+sequences were detected to be contaminants. We can then filter out these
+features from the data.
+
+```{r}
+#| label: filter_contaminants
+
+tse <- tse[ !rowData(tse)[["contaminant"]], ]
+```
+
+As an example, we also demonstrate how to apply the prevalence-based approach.
+Note that the data used here is arbitrary, and in practice, you should use real
+control sample information.
+
+First, we add arbitrary control samples:
+
+```{r}
+#| label: add_control_info
+
+control <- rep(FALSE, ncol(tse))
+control[ sample(seq_len(ncol(tse)), 1) ] <- TRUE
+tse[["control"]] <- control
+```
+
+Next, we perform the analysis. Note that we could have applied both
+frequency-based and prevalence-based methods simultaneously by specifying the
+`method` parameter in the previous step.
+
+```{r}
+#| label: contaminant_prevalence
+
+not_contaminant <- isNotContaminant(tse, control = "control", detailed = FALSE)
+not_contaminant |> head()
+```
+
+To identify non-contaminant sequences with prevalence approach, a threshold of
+0.5 is used, by default. As noted in the previous step, the `add*()` functions
+add results to `rowData`. Here, we used function that return only the results.
+By specifying `detailed = FALSE`, we obtain the results as a vector, which can
+then be used for subsetting the data.
