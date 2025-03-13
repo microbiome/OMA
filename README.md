@@ -48,7 +48,9 @@ are available for an easy deployment.
 1. Install Docker for your platform: [Linux](https://docs.docker.com/engine/install/),
 [Mac](https://docs.docker.com/desktop/setup/install/mac-install/),
 [Windows](https://docs.docker.com/desktop/setup/install/windows-install/).
-2. Pull the image from our repository by running the following command in the terminal:
+
+2. Pull the image from our repository by running the following command in the
+terminal:
 
 ```sh
 docker pull ghcr.io/microbiome/oma:latest
@@ -61,10 +63,11 @@ the version `0.98.35`.
 3. Use the terminal command `git clone git@github.com:microbiome/OMA.git`
 to clone the repository to your local machine. This command will create
 the `OMA` directory in the current working directory. For more details, see
-[here](https://git-scm.com/docs/git-clone).
+[here](https://git-scm.com/docs/git-clone). Alternatively, you can download the
+repository, and extract the files.
 
-4. Switch to the directory of the book with the `cd` command.
-If you followed point 3, the command is `cd OMA`.
+4. Open terminal in OMA directory. If you followed cloned the repository in the
+point 3, you can switch to the directory by running the command `cd OMA`.
 
 5. Run the image:
 
@@ -203,10 +206,11 @@ use the following styling
 long_variable_name <- long_function_name(
     parameter = "parameter".
     parameter2 = "parameter2"
- )
+)
 ```
 
 # Code of conduct
 
-Please note that the OMA project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).
+Please note that the OMA project is released with a
+[Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).
 By contributing to this project, you agree to abide by its terms.
