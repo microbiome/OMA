@@ -53,21 +53,33 @@ remove them.
 To run MOFA2, it needs to connect `mofapy2` Python packages via the `reticulate`
 package, as clarified in the [MOFA2 vignette](https://bioconductor.org/packages/release/bioc/vignettes/MOFA2/inst/doc/getting_started_R.html#6_Build_and_train_the_MOFA_object).
 
-The following chunk does not install and does not update `miniconda` if already
-installed. Furthermore, it does not install the latest version of `mofapy2`.
-If this setup causes issues, update `miniconda` and `mofapy2`.
+The following chunk checks if Python dependencies are already installed,
+and installs them if they are not available. If this setup causes issues,
+update `miniconda` and `mofapy2`.
 
 ```{r}
 #| label: mofapy2
 #| message: false
 #| warning: false
 
-reticulate::install_miniconda(force = FALSE, update = FALSE)
-reticulate::use_miniconda(condaenv = reticulate::miniconda_path(), required = FALSE)
-reticulate::py_install(
-    packages = c("mofapy2"), pip = TRUE,
-    pip_ignore_installed = TRUE, python_version=3.12
-)
+library(reticulate)
+
+# Set miniconda environment
+if( !reticulate:::miniconda_exists() ){
+    install_miniconda()
+}
+if( !condaenv_exists(miniconda_path()) ){
+    use_miniconda(condaenv = miniconda_path(), required = FALSE)
+}
+
+# Check if mofapy2 is installed, and install it if not
+if( !py_module_available("mofapy2") ){
+    py_install(
+        packages = "mofapy2",
+        pip = TRUE,
+        pip_ignore_installed = TRUE,
+    )
+}
 ```
 
 ```{r}
