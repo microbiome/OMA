@@ -41,17 +41,40 @@ study.
 library(microbiomeDataSets)
 
 mae <- microbiomeDataSets::peerj32()
-tse <- mae[[1]]
+tse <- getWithColData(mae, 1L)
+tse[["time_point"]] <- tse[["time"]] |> as.factor()
 ```
 
 ## Alpha diversity
 
 [@sec-alpha-diversity] introduced methods and main idea of alpha diversity.
+Here we calculate
 
 MIten alfa-diversiteetti eroaa? Viiva potilainen näytteidenn välillä.
 Väritä, onko punaine tai sininen, muutoksen suunta.
 
 Tee nopea testi, jolla testataan, onko paired samples wilcoxon test, merkitsevä ero
+
+```{r}
+#| label: alpha1
+
+library(mia)
+
+tse <- addAlpha(tse, index = "shannon")
+```
+
+```{r}
+library(dplyr)
+df <- colData(tse)
+df <- df |> as.data.frame() |> arrange(time) |> group_by(subject) |> mutate(diff = diff(shannon)) |> ungroup() |> DataFrame()
+
+
+library(ggplot2)
+p <- ggplot(df, aes(x = time_point, y = shannon, group = interaction(time_point, group))) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_point()
+p
+```
 
 
 ## Time divergence
