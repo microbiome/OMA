@@ -40,9 +40,13 @@ Training is usually enhanced with cross-validation to improve the
 model's robustness. However, when the dataset is small, splitting it 
 into training and test sets might not be feasible. In such cases, 
 cross-validation alone can be used to provide a rough estimate of the
-model's performance. While this approach is not as reliable as having
-a separate test set, it can still give valuable insights into how well
-the model might perform on new data. 
+model's performance. This strategy involves dividing the data into
+K folds (or subsets) of similar size. The model is then trained on 
+K-1 folds, and tested on the remaining fold. This process is repeated 
+K times, allowing each fold to serve as the test set once. While this 
+approach is not as reliable as having a separate test set, it can 
+still give valuable insights into how well the model might perform 
+on new data. 
 
 Common tasks for supervised machine learning includes classification (e.g.,
 predict categorical variables) and regression (e.g., predicting continuous
@@ -85,10 +89,7 @@ used throught this chapter. This package was developed to offer a
 user-friendly interface to supervised ML algorithms implemented in the
 `caret` package. 
 [Here](https://www.schlosslab.org/mikropml/articles/introduction.html#the-methods-we-support)
-is a list of models well supported by mikropml and
-[here](https://topepo.github.io/caret/available-models.html)
-a complete list of other models available in caret that *might* work when
-called through mikropml.
+is a list of models well supported by mikropml.
 
 The code below will retrieve the data and show the number of
 participants on each category.
@@ -331,11 +332,12 @@ BMI) based on the values of the features (e.g., microbial taxa). Each
 tree split the data to minimize the difference between predicted and 
 real (observed) values, often using metrics like mean squared 
 error (MSE). One strength of RF is that it can learn non-linear patterns 
-in the data that other regression algorithms might not capture.
+in the data that simpler regression algorithms might not capture.
 
 Regarding its implementation, notice that just by changing the outcome 
 from a categorical to a continuous variable, RF models can now be used
 in regression tasks:
+
 ```{r}
 #| label: 4.2 - RF for regression
 
@@ -358,13 +360,11 @@ Extreme Gradient Boosting (XGBoost) is another ensemble algorithm
 where decision trees are sequentially built. In this strategy, each
 new tree improves the performance of the previous.
 
-Although XGBoost can be used for classification and regression
-tasks, only the first is covered in this chapter. When applied to 
-classification, each tree predicts the class of an observation (e.g., 
-healthy or T2D) based on feature values (e.g., microbial taxa). However,
-instead of 'voting' like in Random Forest, XGBoost improves the 
-performance by assigning higher weights (or penalties) to missclassified 
-observations.
+When applied to classification, each tree predicts the class of an 
+observation (e.g., healthy or T2D) based on feature values (e.g., 
+microbial taxa). However, instead of 'voting' like in Random Forest, 
+XGBoost improves the performance by assigning higher weights (or 
+penalties) to missclassified observations.
 
 It must be noted that XGBoost is a more complex model usually 
 described as one of the best performing models for tabular data
@@ -395,30 +395,34 @@ See the RF example for reference.
 
 ## Model performance metrics
 
-Under the hood, the function `run_ml` generates a 80/20 split of 
-the data to train and test a model of interest. That means 
+Under the hood, the function `run_ml` generates a default 80/20 
+split of the data to train and test a model of interest. That means 
 that after the model is trained (i.e., learns patterns) in 80% of
 the data, the remaining 20% of data (not seen by our model in the 
 training) is used to assess how well our model can generalize 
 the patterns it learned to new data. 
 
-Thus, in this section we will discuss different metrics used to 
-assess the performance of the model. However, notice that we only 
-use the function `run_ml` one time per model (i.e., we performed only
-one 80/20 split). Thus, the metrics we will discuss represent the 
-performance of the model in one of multiple splitting scenarios. Often, 
-researchers are interested in generating multiple splits, calculate 
-the performance for each model, and then look at the variability across 
-iterations. This gives a more accurate assessment of the model's 
-performance. 
+Therefore, the goals of this section is to discuss different metrics
+used to assess the performance of the model, to compare metrics from
+two models used in the classification of the same observations, 
+and to contrasts the results of these models with previous analyses
+in the published literature.
 
-That approach is discussed in the 
+::: {.callout-tip}
+## Tip: Assess model performance with multiple data splits
+
+Notice that the function `run_ml` performs only one 80/20 split. 
+Thus, the output metrics represent the performance of the model 
+in one of multiple splitting scenarios. However, researchers
+are often interested in generating multiple splits, calculate 
+the performance for the models trained on each split, and then 
+look at the variability across iterations. This gives a more 
+accurate assessment of the model's performance. That approach is 
+discussed in the 
 [documentation](https://www.schlosslab.org/mikropml/articles/parallel.html) 
-of `mikropml`. Therefore, we will focus in interpreting the results
-of one split. The goals below are to discuss the different performance 
-metrics, to compare metrics from two models used in the classification 
-of the same observations, and to contrasts the results of these models
-with previous analyses in the published literature.
+of `mikropml`.
+:::
+
 
 ### Classification metrics
 
@@ -427,6 +431,7 @@ in the same microbiome dataset. Since both were used in classification,
 the type of performance metrics are the same:
 
 Metrics of the RF model:
+
 ``` {r}
 #| label: 5.1 - RF classification performance
 
@@ -435,6 +440,7 @@ rf_classification[["performance"]] |> knitr::kable()
 ```
 
 Metrics of the XGBoost model:
+
 ``` {r}
 #| label: 5.2 - XGBoost classification performance
 
@@ -442,17 +448,18 @@ Metrics of the XGBoost model:
 xgb[["performance"]] |> knitr::kable()
 ```
 
-A common metric to quickly assess model performance is the area under 
-the receiver operator characteristic curve 'AUC'. Notice that
-the result tables include two types of AUC metrics: `cv_metric_AUC`,
-which represents AUC for the 80% of data used in training, and `AUC`, 
-which is the AUC for the 20% used in testing. 
+A common metric to quickly assess model performance in binary 
+classification tasks is the area under the receiver operator 
+characteristic curve 'AUC'. Notice that the result tables 
+include two types of AUC metrics: `cv_metric_AUC`,
+which represents AUC for the 80% of data used in training, 
+and `AUC`, which is the AUC for the 20% used in testing. 
 
-Researchers are often interested in scenarios where `AUC` is as good as 
-or better than `cv_metric_AUC`. The opposite suggests that the model may 
-be overfitted, meaning that the model fails to generalize to new data.
+Thus, results where the performance of the model in the train set
+highly exceeds its performance in the test set suggest overfiting, 
+meaning that the model fails to generalize to new data.
 Notice, however, that small drops of model's performance in the test 
-compared to the train data are acceptable and shouldn't be a concern.
+compared to the train data are expected and thus shouldn't be a concern.
 
 Now let's take a look at the results. First, notice that AUC values 
 suggest a relatively good performance considering that predicting 
@@ -536,14 +543,15 @@ between the observed and predicted values of the outcome variable
 Similarly to AUC in classification, the results table include two 
 types of RMSE metrics: `cv_metric_RMSE`, which represents RMSE for 
 the 80% of data used in training, and `RMSE`, which is the metric
-for the 20% used in testing. Again, researchers are often interested 
-in scenarios where `RMSE` is as good as or better than 
-`cv_metric_RMSE`. Notice, however, the small drop of model's performance
-in the test (`{r} round(rf_regression[["performance"]][["RMSE"]], 3)`)
+for the 20% used in testing. Notice, the small drop of model's 
+performance in the test 
+(`{r} round(rf_regression[["performance"]][["RMSE"]], 3)`)
 compared to the train 
 (`{r} round(rf_regression[["performance"]][["cv_metric_RMSE"]], 3)`)
-data. As discussed above, this shouldn't be a concern given that the 
-drop is small.
+tests. As discussed in the classification results, big drops of
+model's performance in the test compared to the train data are 
+indicative of overfitting. However, in this case the drop in performance
+is small and thus it shouldn't be a concern. 
 
 
 ## Visualizing model's performance
@@ -558,7 +566,7 @@ visualizations, as well as providing insights in their interpretations.
 
 The area under the receiver-operator characteristic (ROC) curve,
 also called 'AUC' was introduced before as common metric to assess 
-model's performance in classification tasks. As it name suggests,
+model's performance in binary classification tasks. As it name suggests,
 AUC is just the area under a curve. Since different ROC curves can have 
 similar AUC, visualizing the curve can give complementary information.
 
@@ -676,6 +684,16 @@ RF AUC =
 `{r} round(rf_classification[["performance"]][["AUC"]], 4)`
 and XGBoost AUC = `{r} round(xgb[["performance"]][["AUC"]], 4)`).
 
+:::{.callout-note}
+## Note: Visualization of multiclass ROC curves
+It was discussed above that ROC curves (and AUCs) can be extender to 
+multiclass classification tasks. One example of such approach is
+this article [@su2022_multiclassML] where authors used gut microbiome
+data to train different classification supervised ML algorithms to 
+discriminate between patients of 9 different diseases. Notice that
+the R package `pROC` supports the visualization of multiclass ROC curves
+:::
+
 
 ### Regression
 
@@ -736,8 +754,16 @@ making it impossible for the model to use microbiome patterns to predict
 BMI, or that our model is overfitted. Since the RMSE for training 
 (`{r} rf_regression[["performance"]][["cv_metric_RMSE"]]`) and test 
 (`{r} rf_regression[["performance"]][["RMSE"]]`) data are similar, 
-we may conclude that gut microbiome composition is not very 
-informative of BMI.
+we may conclude that gut microbiome composition is not informative 
+of BMI. 
+
+This illustrate another important aspect of supervised ML.
+Regardless of the complexity of the models deployed, their 
+predictive performance depends in their ability to learn patterns 
+from the data. However, if such patterns don't exist it would be 
+impossible for the model to correclty predict an outcome. This is
+most likely what happened in this regression tasks but it can 
+certainly happen in classification tasks too.
 
 
 ## Model interpretation
@@ -786,7 +812,7 @@ feat_imp$feat <- factor(feat_imp$feat, levels = rev(feat_imp$feat))
 # Plot mean feature importance with 95% CI
 ggplot(feat_imp) +
     geom_col(aes(x = perf_metric_diff, y = feat)) +
-    labs(x = "Performance reduction", y = "Feature") +
+    labs(x = "Decrease in performance", y = "Feature") +
     theme_classic()
 ```
 
