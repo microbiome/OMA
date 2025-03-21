@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-Microbial communities are dynamicm, constantly evolving over time. Despite
+Microbial communities are dynamic, constantly evolving over time. Despite
 temporal fluctuations driven by environmental and other factors, the
 microbiome retains its core characteristics [@Schmidt2018].
 
@@ -48,12 +48,7 @@ tse[["time_point"]] <- tse[["time"]] |> as.factor()
 ## Alpha diversity
 
 [@sec-alpha-diversity] introduced methods and main idea of alpha diversity.
-Here we calculate
-
-MIten alfa-diversiteetti eroaa? Viiva potilainen näytteidenn välillä.
-Väritä, onko punaine tai sininen, muutoksen suunta.
-
-Tee nopea testi, jolla testataan, onko paired samples wilcoxon test, merkitsevä ero
+Here we calculate Shannon diversity index.
 
 ```{r}
 #| label: alpha1
@@ -63,18 +58,108 @@ library(mia)
 tse <- addAlpha(tse, index = "shannon")
 ```
 
-```{r}
-library(dplyr)
-df <- colData(tse)
-df <- df |> as.data.frame() |> arrange(time) |> group_by(subject) |> mutate(diff = diff(shannon)) |> ungroup() |> DataFrame()
+In addition to visualizing the diversity in respect to sample groups, we want
+to visualize how much the diversity changes between time points. That is why
+we calculate the difference for each subject.
 
+```{r}
+#| label: alpha2
+
+library(dplyr)
+
+df <- colData(tse) |>
+    as.data.frame() |>
+    # Sort based on time
+    arrange(time) |>
+    # Group based on subject so that we calculate the difference between each
+    # subject's samples
+    group_by(subject) |>
+    # Calculate difference
+    mutate(diff = diff(shannon)) |>
+    ungroup() |>
+    DataFrame()
+
+# Sort to original order and add difference info to colData
+df <- df[match(tse[["sample"]], df[["sample"]]), , drop = FALSE]
+rownames(df) <- colnames(tse)
+colData(tse) <- df
+
+colData(tse) |> head()
+```
+
+Now we can continue to visualize the alpha diversities. First we create a simple
+boxplot showing Shannon index in respect to groups and time.
+
+```{r}
+#| label: alpha3
 
 library(ggplot2)
-p <- ggplot(df, aes(x = time_point, y = shannon, group = interaction(time_point, group))) +
-  geom_boxplot(outlier.shape = NA) +
-  geom_point()
+
+# Get colData
+df <- colData(tse) |>
+    as.data.frame()
+
+# Create a second df which is sorted
+df2 <- df |>
+    arrange(subject, time_point, group)
+
+# Create a jitter
+jitter_position <- position_jitterdodge(
+    dodge.width = 0.75,
+    jitter.width = 0,
+    jitter.height = 0
+    )
+
+# Create a plot
+p <- ggplot(mapping = aes(x = time_point, y = shannon, fill = group)) +
+    # We disable outlier plotting as we plot points with jitter. Otherwise
+    # outliers would be duplicated
+    geom_boxplot(data = df, outlier.shape = NA) +
+    # Add jitter plot
+    geom_point(data = df2, aes(
+        group = interaction(subject, group)),
+        position = jitter_position)
+
 p
 ```
+
+Additionally, we might be interested on linking the sample-pairs to visualize
+their difference.
+
+```{r}
+#| label: alpha4
+
+# Add line linking subjects
+p_path <- p +
+    geom_line(
+      data = df2,
+      aes(group = interaction(subject, group)),
+      position = jitter_position
+      )
+p_path
+```
+
+```{r}
+# Add line linking subjects
+p_path <- p +
+    geom_line(
+      data = df2,
+      arrow = arrow(length = unit(2, "mm")),
+      aes(group = interaction(subject, group), color = diff),
+      position = jitter_position
+      ) +
+  scale_color_gradient2(
+      low="blue", mid="white", high="red", 
+      limits = c(-max(abs(df[["diff"]])), max(abs(df[["diff"]]))))
+
+p_path
+```
+
+
+MIten alfa-diversiteetti eroaa? Viiva potilainen näytteidenn välillä.
+Väritä, onko punaine tai sininen, muutoksen suunta.
+
+Tee nopea testi, jolla testataan, onko paired samples wilcoxon test, merkitsevä ero
 
 
 ## Time divergence
