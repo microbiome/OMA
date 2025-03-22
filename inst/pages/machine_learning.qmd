@@ -4,256 +4,832 @@
 library(rebook)
 chapterPreamble()
 ```
+## Background
 
 Machine learning (ML) is a branch of artificial intelligence. While there are
-several definitions of machine learning, it generally involves using
-computational methods ("machines") to improve performance by identifying
-patterns in data ("learning"). ML encompasses a wide range of techniques,
-from simple statistical methods to complex algorithms like neural networks
-in deep learning.
+several definitions of machine learning, they generally involve using
+computational methods (i.e., machines) to identify patterns in data 
+(i.e., learning).
 
 Machine learning can be divided into supervised and unsupervised learning.
 Supervised ML is used to predict outcomes based on labeled data, whereas
 unsupervised ML is used to discover unknown patterns and structures within
 the data.
 
-## Unsupervised machine learning
+### Unsupervised machine learning
 
-"Unsupervised" means that the labels (e.g., patient status) are not known,
-and patterns are learned based solely on the data, such as an abundance table.
-Unsupervised ML is also known as data mining, where patterns are extracted from
-large datasets.
+"Unsupervised" means that the outcomes (e.g., patient status) are not known
+by the model during its training, and patterns are learned based solely on
+the data, such as an abundance table.
 
-Common tasks in unsupervised machine learning include dimension reduction and
-clustering that we already discussed in [@sec-community-similarity] and
+Common tasks in unsupervised machine learning include dimension reduction 
+and clustering, tasks discussed in [@sec-community-similarity] and
 [@sec-clustering], respectively.
 
-## Supervised machine learning
+### Supervised machine learning
 
-"Supervised" means that the training data is introduced beforehand. The
-training data contains labels (e.g., patient status), and the model is fitted
-based on the training data. After fitting, the model is utilized to predict
-labels of data whose labels are not known. Common tasks for supervised machine
-learning includes classification (predict classes) and regression (predict
-numeric values).
+"Supervised" means that a model is trained on observations paired with 
+a known output (e.g., patient status: healthy or diseased). During 
+training, the model learns patterns from a portion of the data and it 
+is then evaluated on its ability to generalize to new data. This process
+involves splitting the collected data into a training and testing sets, 
+commonly in 80/20 ratio, although other proportions can be used depending 
+on the size and applications of the dataset.
+
+Training is usually enhanced with cross-validation to improve the 
+model's robustness. However, when the dataset is small, splitting it 
+into training and test sets might not be feasible. In such cases, 
+cross-validation alone can be used to provide a rough estimate of the
+model's performance. This strategy involves dividing the data into
+K folds (or subsets) of similar size. The model is then trained on 
+K-1 folds, and tested on the remaining fold. This process is repeated 
+K times, allowing each fold to serve as the test set once. While this 
+approach is not as reliable as having a separate test set, it can 
+still give valuable insights into how well the model might perform 
+on new data. 
+
+Common tasks for supervised machine learning includes classification (e.g.,
+predict categorical variables) and regression (e.g., predicting continuous
+variables). This chapter discusses two supervised ML algorithms that can
+be applied to classification and regression tasks.
 
 ::: {.callout-note}
-## Data leakage is a common pitfall.
-
-Data leakage occurs when information from the test set influences the model
-training process, leading to overly optimistic performance estimates. This
-can happen, for example, if preprocessing steps like scaling are applied to
-both the training and test data together, allowing the model to indirectly
-"see" the test data during training.
-
-In supervised machine learning, the goal is to train a model that can predict
-outcomes for unseen data. To evaluate a model's generalization ability, the
-data is typically split into training and test sets, often with a ratio of
-70% training to 30% testing (or 80% vs 20%). The test set is kept
-separate and untouched during training. Training is usually enhanced with
-cross-validation to improve the model's robustness. After training, the
-model's performance is assessed using the test set, providing an estimate of
-its ability to predict new samples accurately.
-
-However, when the dataset is small, splitting it into training and test sets
-might not be feasible. In such cases, cross-validation alone can be used to
-provide a rough estimate of the model's performance. While this approach is
-not as reliable as having a separate test set, it can still give valuable
-insights into how well the model might perform on new data.
-
+## Note: ML in multi-omics data analysis
+ML applications for the integration of multi-omic datasets are covered
+in [@sec-multiassay_ordination] and [@sec-multi-omics-integration]
 :::
 
-```{r}
-#| label: superML1
 
-library(mia)
+## Setup
+
+Published fecal microbiome data [@qin2012_t2d] will be used to 
+illustrate how to deploy supervised machine learning algorithms to
+address classification and regression problems. For classification,
+two ML models will be used to classify subjects in two groups: Type II 
+diabetes patients or Healthy individuals (encoded as T2D and healthy
+in the metadata). For regression, models will be use to predict the 
+body mass index (BMI) of each subject. In both tasks the models will
+be trained with participants gut microbiome data. 
+
+Mounting evidence show associations between gut microbiome and 
+the onset of type II diabetes. Thus, it has been suggested that
+microbiome data could be used to discriminate between patients 
+and healthy individuals. Indeed, that hypothesis was explored in the
+research article where the dataset we will work with was first 
+described [@qin2012_t2d].
+On the other hand, experiments conducted with twins have shown that 
+while the transplantation of gut microbiome from the obese twin
+induces obesity in mice, the gut microbiome of the lean twin doesn't
+[@ridaura2013_obesityFMT]. Thus, predicting the health status of a 
+person or their BMI from their gut microbiome seems a plausible task,
+and an interesting opportunity to learn about supervised ML
+algorithms using real-world data. 
+
+To do so, the R package `mikropml`[@topcuoglu2020;@topcuoglu2021] will be
+used throught this chapter. This package was developed to offer a 
+user-friendly interface to supervised ML algorithms implemented in the
+`caret` package. 
+[Here](https://www.schlosslab.org/mikropml/articles/introduction.html#the-methods-we-support)
+is a list of models well supported by mikropml.
+
+The code below will retrieve the data and show the number of
+participants on each category.
+
+```{r}
+#| label: 2 - Setup
+
 library(curatedMetagenomicData)
-library(dplyr)
 
 samples <- sampleMetadata[ sampleMetadata[["study_name"]] == "QinJ_2012", ]
 
 tse <- returnSamples(
-    samples, dataType = "relative_abundance",
-    counts = TRUE, rownames = "short")
+    samples, 
+    dataType = "relative_abundance",
+    counts = TRUE, # use counts instead of rel abundances
+    rownames = "short"
+)
 
-table(tse[["disease"]])
+# Change assay's name to reflect its content
+assayNames(tse) <- "counts"
+
+table(tse[["disease"]]) |> t() |> knitr::kable()
 ```
 
-We have binary classification problem. We are aiming to predict type 2 diabetes
-from control samples. Let's first preprocess the data.
+## Data preprocessing
+
+Before applying any ML algorithm, the data must be preprocessed. 
+This speeds up the training of the models by reducing the amount of 
+features analysed, a desirable outcome when working with 
+high-dimensional microbiome data. In addition to faster performance, 
+common pre-processing steps have biological justifications. 
+For instance:
+
+* **Collapse highly correlated features:** In a microbial community,
+it's common for the abundance of two or more taxa to be highly correlated.
+Thus, removing or collapsing correlated taxa allows the
+model to analyse them as one group.
+* **Remove features with near-zero variance:** Features that don't vary
+enough across groups can hardly help in discerning between them, as they
+don't hold any biologically relevant information. Additionally, 
+under certain data splits, these variables can show zero variance.
+* **Remove features with low prevalence:** Microbiome data is sparse,
+and taxa present in just a few samples of each group hardly provide 
+useful biological information for their classification. 
+
+::: {.callout-important}
+## Important: Data leakage is a common pitfall.
+
+Data leakage occurs when information from the test set influences the
+model training process, leading to overly optimistic performance 
+estimates. This can happen, for example, if preprocessing steps like 
+scaling are applied to both the training and test data together, allowing
+the model to indirectly "see" the test data during training. 
+Fortunately, there are questions we can ask ourselves to void data
+leakage [@bernett2024_dataLeakage] 
+:::
+
+The code below shows how to join the abundance of each microbial taxa
+with different alpha diversity indices that provide ecosystem-level 
+information. See [@sec-alpha-diversity] for a discussion on alpha 
+diversity.
 
 ```{r}
-#| label: superML2
+#| label: 3 - general preprocessing
 
-# We calculate all available alpha diversity measures
-variables_before <- colnames(colData(tse))
-tse <- addAlpha(tse, assay.type = "relative_abundance")
-# By comparing variables, we get which indices were calculated
-index <- colnames(colData(tse))[ !colnames(colData(tse)) %in% variables_before ]
-
-# Agglomerate based on prevalence
-# tse <- agglomerateByPrevalence(tse, prevalence = 0.5, detection = 0.01)
-# Apply CLR transform
-tse <- transformAssay(
-    tse, assay.type = "relative_abundance", method = "clr", MARGIN = "cols",
-    pseudocount = TRUE)
-
-# Get assay
-assay <- assay(tse, "clr")
-# Transpose assay
-assay <- t(assay)
-# Add alpha diversity measures
-assay <- cbind(assay, colData(tse)[, index, drop = FALSE])
-# Drop variables that have zero variance
-ind <- sapply(assay, sd, na.rm = TRUE)
-ind <- is.na(ind) | ind == 0
-assay <- assay[, !ind, drop = FALSE]
-# Convert into data.frame
-assay <- as.data.frame(assay)
-# Get labels, i.e., known outcome
-labels <- tse[["disease"]]
-```
-
-In the example below, we use
-[mikropml](https://journals.asm.org/doi/10.1128/mBio.00434-20) package. We aim
-to predict diagnosis (adenoma, colorectal cancer, or control) based on the
-microbial data.
-
-```{r}
-#| label: superML3
-
+library(mia)
 library(mikropml)
 
-#  Combine data into single data.frame
-df <- assay
-df[["diagnosis"]] <- labels
-
-# Run random forest
-results <- run_ml(
-    df, "rf", outcome_colname = "diagnosis",
-    kfold = 2, cv_times = 5, training_frac = 0.8)
-
-# Get the final model
-res <- results[["trained_model"]][["finalModel"]]
-# Print result
-confusionMatrix(data = res[["predicted"]], reference = res[["y"]])
-```
-
-The model performs relatively well considering the data type as predicting
-outcomes based on complex microbiome data is typically challenging.
-
-In this second model, we try to improve the prediction accuracy. We address the
-imbalanced data by applying class weights. Moreover, we utilize a more
-complex model, XGBoost, which is another commonly used algorithm in
-bioinformatics, usually one of the best performing models
-for tabular data [@SHWARTZZIV202284]. We use
-[`caret`](https://cran.r-project.org/web/packages/caret/index.html) package
-which offers a R framework for machine learning.
-
-```{r}
-#| label: superML4
-
-library(caret)
-library(xgboost)
-
-# Set seed for reproducibility
-set.seed(6358)
-
-# Calculate class weights
-weights <- 1 / (table(tse[["disease"]]) / ncol(tse))
-class_weights <- weights[ match(labels, names(weights)) ]
-
-# Specify train control
-train_control <- trainControl(
-    method = "cv", number = 5,
-    classProbs = TRUE,
-    savePredictions = "final",
-    allowParallel = TRUE,
-    summaryFunction = twoClassSummary
-    )
-
-# Specify hyperparameter tuning grid. Adjust the values for your own purpose.
-# We have here less values to make the computation faster for this example.
-tune_grid <- expand.grid(
-    nrounds = c(100, 250),
-    max_depth = c(10),
-    colsample_bytree = c(0.4, 0.6),
-    eta = c(0.1, 0.3),
-    gamma = c(0),
-    min_child_weight = c(3, 4),
-    subsample = c(0.6, 0.8)
+# Keep taxa present in more than 10% of samples
+tse_prev <- subsetByPrevalent(
+    x = tse,
+    assay.type = "counts",
+    prevalence = 10/100
 )
 
-# Train the model
-model <- train(
-    x = assay,
-    y = labels,
-    preProcess = c("center", "scale"),
-    method = "xgbTree",
-    objective = "binary:logistic",
-    eval_metric = "auc",
-    metric = "ROC",
-    tuneGrid = tune_grid,
-    trControl = train_control,
-    weights = class_weights,
-    max_delta_step = 1,
-    verbosity = 0
+# Get alpha diversity metrics to add them as inputs
+alpha_divs <- getAlpha(
+    tse_prev, 
+    assay.type = "counts"
 )
 
-# Get predictions
-res <- model[["pred"]]
-# Print result
-confusionMatrix(data = res[["pred"]], reference = res[["obs"]])
+# Apply CLR transformation 
+tse_prev <- transformAssay(
+    x = tse_prev,
+    assay.type = "counts",
+    method = "clr",
+    MARGIN = "cols",
+    pseudocount = TRUE
+)
+
+# Get CLR assay
+assay <- assay(tse_prev, "clr")
+# Transpose assay
+assay <- t(assay)
+# Join CLR abundances and alpha diversity metrics
+assay_alpha <- cbind(assay, alpha_divs)
+raw_df <- as.data.frame(assay_alpha)
+
+# Make new names of groups of correlated features 
+# by concatenating the names of the group members
+names_grp_feats <- group_correlated_features(
+    features = raw_df, 
+    group_neg_corr = FALSE
+)
 ```
 
-A receiver operating characteristic curve (ROC) is a common visualization
-technique for binary classification problems.
+The next step is to join the microbial abundances and alpha diversities 
+with the outcome of interest (either diagnosis status or BMI) for each
+observation. 
+
+### Preprocess for classification task
+
+The code below joins the diagnosis status of each participant (either 
+'T2D' or 'healthy') and then preprocess the microbiome data using the 
+three strategies discussed above. The resulting preprocessed dataset will
+be used to train and test our model in the following section.
 
 ```{r}
-#| label: ROC
+#| label: 3.1 - preprocessing for classification
 
-library(plotROC)
+# Add labels, i.e., known outcome
+labels <- tse_prev[["disease"]]
+raw_df[["diagnosis"]] <- labels
 
-# Prepare data for ROC
-roc_data <- data.frame(
-    observed_class = as.numeric(res[["obs"]] == "healthy"),
-    predicted_probability = res[["healthy"]]
-    )
+# Preprocess data for classification
+prep_classification <- preprocess_data(
+    dataset = raw_df,
+    outcome_colname = "diagnosis",
+    method = NULL, # Skip normalization as CLR was performed 
+    remove_var = "zv",
+    collapse_corr_feats = TRUE,
+    group_neg_corr = FALSE
+)
 
-# Plot ROC curve
-p <- ggplot(roc_data, aes(m = predicted_probability, d = observed_class)) +
-  geom_roc() +
-  style_roc(theme = theme_minimal())
-p
+# rename grouped features with names generated in previous chunk
+new_names <- c("diagnosis", names_grp_feats)
+colnames(prep_classification[["dat_transformed"]]) <- new_names
+
+# get preprocessed data
+df_classification <- prep_classification[["dat_transformed"]]
 ```
 
-XGBoost model also returns feature significance that can be visualized with bar
-plot.
+### Preprocess for regression task 
+
+In the code below we join the BMI of each participant before preprocessing
+it. Again, the resulting preprocessed dataset will be then used to train
+and test our model. 
 
 ```{r}
-#| label: xgboost_feat
+#| label: 3.2 - preprocessing for regression
 
-library(xgboost)
-library(miaViz)
+# Remove 'diagnosis' used before for classification
+raw_df <- within(raw_df, rm("diagnosis"))
 
-# Get feature importance and convert to matrix
-df <- xgb.importance(model = model$finalModel) |> as.data.frame()
-rownames(df) <- df[["Feature"]]
-df <- as.matrix(df[, "Gain", drop = FALSE])
+# Add BMI for regression task
+BMI <- tse_prev[["BMI"]]
+raw_df[["BMI"]] <- BMI
 
-# Create plot for top 20 features
-p <- plotLoadings(df, ncomponents = 1, n = 20, show.color = FALSE)
-p
+# Preprocess data for regression task
+prep_regression <- preprocess_data(
+    dataset = raw_df,
+    outcome_colname = "BMI",
+    method = NULL, # Skip normalization as CLR was performed 
+    remove_var = "zv",
+    collapse_corr_feats = TRUE,
+    group_neg_corr = FALSE
+)
+
+# rename grouped features with names generated above
+new_names <- c("BMI", names_grp_feats)
+colnames(prep_regression[["dat_transformed"]]) <- new_names
+
+# get preprocessed data
+df_regression <- prep_regression[["dat_transformed"]]
 ```
 
-These importances show which features have most of the information for
-predicting the outcome.
 
-Our model shows a slight improvement over previous versions, but its
-performance remains average. The key to better performance lies in the
-quality of the data; even the most advanced models cannot compensate for
-data that lacks essential information. The dataset do not have sufficient
-amount of data on carcinoma to build an accurate predictive model.
+::: {.callout-note}
+## Note: Preprocessing strategies must follow research goals
+
+The code above should be deemed as a reference. Preprocessing 
+strategies impact the performance of ML models, and thus the steps
+used should always be tailored to satisfy specific research goals. 
+Other preprocessing steps can be implemented using it the
+`preprocess_data` function, as described
+[here](https://www.schlosslab.org/mikropml/reference/preprocess_data.html).
+:::
+
+
+## Model training
+
+Now we can deploy supervised ML models on the preprocessed data. In this
+section, two algorithms will be covered: 
+
+* Random Forest
+* XGBoost
+
+These are within the most used supervised ML in the microbiome field. 
+Possible reasons are that they can be used for classification 
+and regression tasks, and that they show a good balance between
+performance and interpretability. Although the focus of this book is the
+implementation and interpretation of these models, other resources are 
+suggested for an introduction to the mathematical underpinnings of 
+these &mdash;and other&mdash; models [@james2013_ISLR].
+
+### Random forest 
+
+Random Forests (RF) is an ensemble algorithm. That means that RF deploys
+and combines the outputs of multiple decision trees through majority 
+voting or averaging the predicted numerical outcome. Since each tree is 
+trained on a random subset of the data and features, RF reduces 
+overfitting and enhance generalization to new data.
+
+When applied to classification problems, each tree predicts 
+the class of an observation (e.g., healthy or T2D) based on the values
+of the features (e.g., microbial taxa). Each tree finds the best
+split of the data by reducing how mixed the classes are, often using 
+metrics like entropy or Gini impurity.
+
+Below, the RF algorithm is used for a classification task:
+```{r}
+#| label: 4.1 - RF for classification
+
+# Train random forest for classification
+rf_classification <- run_ml(
+    dataset = df_classification, 
+    method = "rf", 
+    outcome_colname = "diagnosis", 
+    seed = 1,
+    kfold = 2, 
+    cv_times = 2, 
+    training_frac = .8, 
+    find_feature_importance = FALSE
+)
+```
+
+For regression tasks, each tree predicts a numerical outcome (e.g.,
+BMI) based on the values of the features (e.g., microbial taxa). Each 
+tree split the data to minimize the difference between predicted and 
+real (observed) values, often using metrics like mean squared 
+error (MSE). One strength of RF is that it can learn non-linear patterns 
+in the data that simpler regression algorithms might not capture.
+
+Regarding its implementation, notice that just by changing the outcome 
+from a categorical to a continuous variable, RF models can now be used
+in regression tasks:
+
+```{r}
+#| label: 4.2 - RF for regression
+
+# Train random forest for regression
+rf_regression <- run_ml(
+    dataset = df_regression, 
+    method = "rf", 
+    outcome_colname = "BMI", 
+    seed = 1,
+    kfold = 2, 
+    cv_times = 2, 
+    training_frac = .8, 
+    find_feature_importance = FALSE
+)
+```
+
+### XGBoost
+
+Extreme Gradient Boosting (XGBoost) is another ensemble algorithm 
+where decision trees are sequentially built. In this strategy, each
+new tree improves the performance of the previous.
+
+When applied to classification, each tree predicts the class of an 
+observation (e.g., healthy or T2D) based on feature values (e.g., 
+microbial taxa). However, instead of 'voting' like in Random Forest, 
+XGBoost improves the performance by assigning higher weights (or 
+penalties) to missclassified observations.
+
+It must be noted that XGBoost is a more complex model usually 
+described as one of the best performing models for tabular data
+[@SHWARTZZIV202284], such as the count tables used in microbiome 
+data analysis.
+
+```{r}
+#| label: 4.3 - XGBoost
+
+# Train XGBoost for classification
+xgb <- run_ml(
+    dataset = df_classification, 
+    method = "xgbTree", 
+    outcome_colname = "diagnosis", 
+    seed = 1,
+    kfold = 2, 
+    cv_times = 2, 
+    training_frac = .8,
+    find_feature_importance = FALSE
+)
+```
+
+Although not demonstrated in the chapter, XGBoost can be used
+in regressions tasks using similar code to the one shown above.
+The only difference will be the outcome variable selected.
+See the RF example for reference.
+
+
+## Model performance metrics
+
+Under the hood, the function `run_ml` generates a default 80/20 
+split of the data to train and test a model of interest. That means 
+that after the model is trained (i.e., learns patterns) in 80% of
+the data, the remaining 20% of data (not seen by our model in the 
+training) is used to assess how well our model can generalize 
+the patterns it learned to new data. 
+
+Therefore, the goals of this section are: to discuss different metrics
+used to assess the performance of the model, to compare metrics from
+two models used in the classification of the same observations, 
+and to contrasts the results of these models with previous analyses
+in the published literature.
+
+::: {.callout-tip}
+## Tip: Assess model performance with multiple data splits
+
+Notice that the function `run_ml` performs only one 80/20 split. 
+Thus, the output metrics represent the performance of the model 
+in one of multiple splitting scenarios. However, researchers
+are often interested in generating multiple splits, calculate 
+the performance of the models trained on each split, and then 
+look at the variability across iterations. This gives a more 
+accurate assessment of the model's performance. That approach is 
+discussed in the 
+[documentation](https://www.schlosslab.org/mikropml/articles/parallel.html) 
+of `mikropml`.
+:::
+
+
+### Classification metrics
+
+Two models (RF and XGBoost) were used to perform a classification task 
+in the same microbiome dataset. Since both were used in classification,
+the type of performance metrics are the same:
+
+Metrics of the RF model:
+
+``` {r}
+#| label: 5.1 - RF classification performance
+
+# RF performance in classification tasks
+rf_classification[["performance"]] |> knitr::kable()
+```
+
+Metrics of the XGBoost model:
+
+``` {r}
+#| label: 5.2 - XGBoost classification performance
+
+# XGBoost performance in classification tasks
+xgb[["performance"]] |> knitr::kable()
+```
+
+A common metric to quickly assess model performance in binary 
+classification tasks is the area under the receiver operator 
+characteristic curve 'AUC'. Notice that the result tables 
+include two types of AUC metrics: `cv_metric_AUC`,
+which represents AUC for the 80% of data used in training, 
+and `AUC`, which is the AUC for the 20% used in testing. 
+Thus, results where the performance of the model in the train set
+highly exceeds its performance in the test set suggest overfiting, 
+meaning that the model fails to generalize to new data.
+Notice, however, that small drops of model's performance in the test 
+compared to the train data are expected and thus shouldn't be a concern.
+
+Now let's take a look at the results. First, notice that AUC values 
+suggest a relatively good performance considering that predicting 
+outcomes based on complex microbiome data is typically a challenging 
+task. In addition, notice that the performance of RF and XGBoost are
+similar (RF AUC = 
+`{r} round(rf_classification[["performance"]][["AUC"]], 4)` and
+XGBoost AUC = `{r} round(xgb[["performance"]][["AUC"]], 4)`). This 
+illustrates an important point in ML: sometimes simpler models can
+perform as good as more complex ones. Thus, it is often a good idea 
+to deploy different models and compare their performance on the same 
+task.
+
+Now let's interpret our results at the light of previous research.
+In the largest multi-cohort analysis of gut microbiome associations 
+with T2D published to date [@mei2024_t2d], authors report similar AUC values 
+to ours when training RF models to discriminate healthy participants 
+and T2D patients using microbiome and anthropometric variables like
+age, sex and BMI. Interestingly, they included the study we are 
+working with in their analysis. Notice their reported an AUC of 0.74, 
+which is very close to ours. This further validates the potential 
+of the gut microbiome to discriminate between healthy individuals 
+and T2D patients.
+
+Although the tasks we addressed required binomial classification (i.e., 
+classify sampples either as patients or controls), some research questions
+will require the classification of observations in more than just two 
+groups, a task known as multiclass classification. For instance, we may 
+have been interested in classifying patients as (1) healthy individuals, 
+(2) T2D patients with obesity, and (3) T2D patients without obesity by 
+integrating BMI information. In such cases, metrics like AUC (developed 
+for binary classification) can be generalized, like in the case of 
+multiclass AUC, also referred to as One-vs-Rest AUC. This approach 
+evaluates how well each class is distinguished from the others, 
+enebling the assessment of model performance in multiclass problems.
+Multiclass classification can be implemented with `run_ml` too, as 
+described 
+[here](https://www.schlosslab.org/mikropml/articles/introduction.html?q=multiclass#multiclass-data).
+
+::: {.callout-tip}
+## Tip: Always use multiple performance metrics
+
+Regardless of the type of classification task performed, it is often
+desirable to look at different metrics to accurately assess the
+model's performance. This is particularly relevant in cases where 
+classes are imbalanced. Suppose a dataset consists of 95% healthy 
+individuals, and only 5% T2D patients. In such a case, a model can 
+easily achieve 95% accuracy by just predicting (labelling) all samples
+as healthy, despite being useless for the classification of T2D patients. 
+
+This is an extreme case and hopefully we won't encounter datasets
+like that. However, it highlights that class imbalance can 
+lead to misleading interpretations of performance metrics like 
+accuracy and AUC. Thus, when dealing with imbalanced classes, other 
+metrics like F1-score and the area under the precision recall curve
+(prAUC), might be more appropriate.
+
+In addition to relying in other performance metrics, different
+strategies for handling class imbalance datasets have been discussed 
+[@Papoutsoglou2023] and applied [@Diez2022] in microbiome
+data analysis before.
+:::
+
+### Regression metrics
+
+When RF are used in regression tasks, the performance metrics are
+different to what was discussed for classifications.
+
+``` {r}
+#| label: 5.3 - RF regression performance
+
+# RF performance in regression tasks
+rf_regression[["performance"]] |> knitr::kable()
+```
+
+A commonly used metric to quickly assess model performance in 
+regression tasks is the root mean square error (RMSE). As it name
+suggests, this metric is just the root of the mean squared difference
+between the observed and predicted values of the outcome variable
+(patient's BMI in this example).
+
+Similarly to AUC in classification, the results table include two 
+types of RMSE metrics: `cv_metric_RMSE`, which represents RMSE for 
+the 80% of data used in training, and `RMSE`, which is the metric
+for the 20% used in testing. Notice, the small drop of model's 
+performance in the test 
+(`{r} round(rf_regression[["performance"]][["RMSE"]], 3)`)
+compared to the train 
+(`{r} round(rf_regression[["performance"]][["cv_metric_RMSE"]], 3)`)
+tests. As discussed in the classification results, big drops of
+model's performance in the test compared to the train data are 
+indicative of overfitting. However, in this case the drop in performance
+is small and thus it shouldn't be a concern. 
+
+
+## Visualizing model's performance
+
+We explored the different performance metrics used in classification
+and regression tasks. However, researchers are often interested in
+generating visual representations of the performance of their models.
+Thus, the goal of this section is to show code to create those
+visualizations, as well as providing insights in their interpretations. 
+
+### Classification
+
+The area under the receiver-operator characteristic (ROC) curve,
+also called 'AUC' was introduced before as common metric to assess 
+model's performance in binary classification tasks. As it name suggests,
+AUC is just the area under a curve. Since different ROC curves can have 
+similar AUC, visualizing the curve can give complementary information.
+
+Complementary to ROC curves, the the precision-recall curves (PRC) 
+are preferred in datasets with class imbalance, where AUC can be 
+misleading, as discussed above.
+
+The code below is used to calculate the metrics required to generate
+both curves for the two models generated (RF and XGBoost):
+
+```{r}
+#| label: 6.1 - calculate metrics for ROC and PRC
+
+# Calculate RF model metrics required for plotting
+rf_senspec <- calc_model_sensspec(
+        rf_classification[["trained_model"]],
+        rf_classification[["test_data"]]
+)
+# Add model label to data
+rf_senspec$model <- "rf"
+
+# Calculate XGBoost model metrics required for plotting
+xgb_senspec <- calc_model_sensspec(
+        xgb[["trained_model"]],
+        xgb[["test_data"]]
+)
+# Add model label to data
+xgb_senspec$model <- "XGBoost"
+
+# Combine model metrics
+senspec <- rbind(rf_senspec, xgb_senspec)
+
+# Inspect part of the output
+senspec |> head() |> knitr::kable()
+```
+
+The metrics 'Sensitivity' and 'Specificity' are used in ROC curves, and
+'Sensitivity' and 'Precision' are used in PRC curves. Note that
+'Precision' and 'Recall' are the same metric. While the term 'Precision'
+is preferred in the biomedical literature, 'Recall' is more prevalent 
+in other fields.
+
+The code below generates the ROC and PRC curves of both models and shows
+them side by side:
+
+``` {r}
+#| label: 6.2 - plot ROC and PRC
+
+library(patchwork)
+
+# 1. Plot the ROC curve of each model
+roc_p <- ggplot(data = senspec) +
+    geom_path(aes(x = fpr, y = sensitivity, color = model))
+# 1.1 Add line representing 'random guess' performance
+roc_p <- roc_p + 
+    geom_abline(color = "grey30", linetype = "dashed")
+# 1.2 Add axis titles and custom theme
+roc_p <- roc_p + 
+    labs(x = "FPR or (1 - Specificity)", y = "Sensitivity", title = "ROC") +
+    theme_bw()
+
+
+# 2. Plot the PRC curve of each model
+prc_p <- ggplot(data = senspec) +
+    geom_path(aes(x = sensitivity, y = precision, color = model)) 
+# 2.1 Add line representing 'random guess' performance
+prc_p <- prc_p +
+    geom_hline(color = "grey30", linetype = "dashed", yintercept = 0.5)
+# 2.2 Add axis titles and custom theme
+prc_p <- prc_p +
+    labs(x = "Recall or Sensitivity", y = "Precision", title = "PRC") +
+    theme_bw()
+
+
+# 3. Plot ROC and PRC side by side
+roc_p + prc_p + plot_layout(guides = "collect")
+```
+
+Before describing the plots and their meaning, it is worth noting
+that the ROC curves of both models resembles the curve presented in 
+the article where this dataset was first analysed [@qin2012_t2d] 
+(see Figure 4B). Interestingly, authors used other supervised ML 
+algorithm, and it was trained in a set of 50 microbiome genes (instead
+of taxa and alpha diversity metrics, as we did). However, it is 
+interesting that concordant AUCs and ROC curves shapes were obtained 
+using different microbiome-derived information. 
+
+Regarding our figures, note the dashed grey lines in both plots
+representing the expected performance of a model that is classifying
+samples randomly. Therefore, the greater the distance between that 
+reference and the line representing our model's performance, the better.
+Thus, perfect performance will be achieve when the line is the
+farthest from that reference. 
+
+In our example, a model with perfect performance is such that, by 
+learning patterns from the microbiome data, it can correctly identify 
+T2D patients with perfect sensitivity (i.e., all T2D patients are 
+classified as such) while maintaining a false positive rate (FPR) 
+of 0 (i.e., no healthy individual is misclassified as T2D). 
+In the ROC plot, this means the model consistently achieves a
+Sensitivity of 1 and a FPR of 0, pushing the curve towards the top
+left corner.
+
+In terms of the PRC plot, the perfect model would consistently 
+achieve a Recall and Precision of 1, pushing the curve towards the top 
+right corner. That, in turn, would mean that the model has perfect
+Sensitivity (i.e., all T2D patients are classified as such), while 
+maintaining a perfect Precision (i.e., every individual classified as
+T2D is actually a T2D patient).
+
+Finally, note that the ROC curves of RF and XGBoost have a similar 
+shape. This suggests a similar performance in classifying T2D patients.
+This isn't surprising as the AUC of both models were very similar too 
+(RF AUC = 
+`{r} round(rf_classification[["performance"]][["AUC"]], 4)`
+and XGBoost AUC = `{r} round(xgb[["performance"]][["AUC"]], 4)`).
+
+:::{.callout-note}
+## Note: Visualization of multiclass ROC curves
+It was discussed above that ROC curves (and AUCs) can be extended to 
+multiclass classification tasks. One example of such approach is
+this article [@su2022_multiclassML] where authors used gut microbiome
+data to train different classification supervised ML algorithms to 
+discriminate between patients of 9 different diseases. Notice that 
+the visualization of multiclass ROC curves can be achieved in a similar
+way to what was described in this chapter. In addition, the R package
+`pROC` provides handy functions to build multiclass visualizations.
+:::
+
+
+### Regression
+
+In this chapter RF was used to learn patterns in the gut microbiome to
+predict the BMI of the participants. The most used diagnostic 
+visualization of model's performance is to compare observed against 
+predicted BMI values.
+
+The code below is used to generate that plot using the observations
+in the test data.
+
+``` {r}
+#| label: 6.2 - plot predicted vs observed
+
+# Get the test set: data not used in training the model
+test_data <- rf_regression[["test_data"]]
+
+# Get the trained model
+model <- rf_regression[["trained_model"]][["finalModel"]]
+
+# Use the model to predict BMI values in the test set
+pred <- predict(model, test_data)
+
+# Add predicted BMI values to the test dataset
+test_data$pred <- pred
+# Add diagnosis status to test data.
+# This variable was created when preprocessing for classification
+ids <- rownames(test_data) |> as.numeric()
+test_data$diagnosis <- labels[ids]
+
+table(test_data$diagnosis)
+
+# Plot actual (y-axis) vs predicted (x-axis) BMI values
+obs_vs_pred <- ggplot(data = test_data) +
+    geom_point(aes(x = pred, y = BMI, color = diagnosis), size = 2)
+# Add line showing perfect prediction
+obs_vs_pred <- obs_vs_pred + geom_abline(color = "grey30", linetype = "dashed")
+# Make axes of same scale
+obs_vs_pred<- obs_vs_pred + coord_equal(xlim = c(17,30), ylim = c(17,30))
+# Custom axes titles
+obs_vs_pred <- obs_vs_pred + labs(x = "Predicted BMI", y = "Observed BMI")
+# Add custom theme and visualize the plot
+obs_vs_pred + theme_bw()
+```
+
+The dashed grey line in the plot above represents a perfect correlation
+between the observed and the model-predicted BMI values of each 
+participant. Thus, the line indicates perfect performance of the model. 
+We can see that while the predictions are around the mean BMI (close
+to 24), the observed values range approximately between 
+`{r} round(min(test_data$BMI))` and `{r} round(max(test_data$BMI))`,
+showing poor correlation between observed and predicted BMI values. 
+Note that both groups show a similar spread in BMI.
+
+This plot clearly indicates a poor performance of our model. This
+usually means that either the gut microbiome is not related to BMI, 
+making it impossible for the model to use microbiome patterns to predict
+BMI, or that our model is overfitted. Since the RMSE for training 
+(`{r} rf_regression[["performance"]][["cv_metric_RMSE"]]`) and test 
+(`{r} rf_regression[["performance"]][["RMSE"]]`) data are similar, 
+we may conclude that gut microbiome composition is not informative 
+of BMI. 
+
+This illustrate another important aspect of supervised ML.
+Regardless of the complexity of the models deployed, their 
+predictive performance depends in their ability to learn patterns 
+from the data. If such patterns don't exist it would be impossible 
+for the model to make accurate predictions. This is most likely 
+what happened in this regression task. Notice that this can certainly 
+happen in classification tasks too.
+
+
+## Model interpretation
+
+Besides the performance of the model, often researchers are interested in
+understanding what are the features that are affecting the model 
+performance, a property of ML models called interpretability.
+
+ML models have different degrees of interpretability. One way to 
+understand how different features (e.g., microbial taxa) affect model's 
+performance is by randomly permuting the values of that feature across 
+samples and then evaluating the amount of change in a performance metric.
+
+For simplicity, the code below shows how to determine feature importance 
+only with the RF model trained for classification. However, minimal
+changes are required to determine feature importance for other models
+built in this chapter, like the XGBoost model used in classification or 
+the RF model used in regression.
+
+```{r}
+#| label: 7 - Interpret the model
+
+# estimate features importance
+feat_imp <- get_feature_importance(
+    trained_model = rf_classification[["trained_model"]],
+    test_data = rf_classification[["test_data"]],
+    outcome_colname = "diagnosis",
+    perf_metric_function = multiClassSummary,
+    perf_metric_name = "AUC",
+    class_probs = TRUE,
+    method = "rf",
+    seed = 1,
+    nperms = 5 # 1/20 of default to speed calculations up
+)
+
+# Identify the 10 most important features
+ordered_features <- order(feat_imp$perf_metric_diff, decreasing = TRUE)
+ordered_features <- ordered_features[1:10]
+
+# Retain only those features
+feat_imp <- feat_imp[ordered_features, ]
+
+# Conver column 'feat' into a factor to fix its order in the plot
+feat_imp$feat <- factor(feat_imp$feat, levels = rev(feat_imp$feat))
+
+# Plot mean feature importance with 95% CI
+ggplot(feat_imp) +
+    geom_col(aes(x = perf_metric_diff, y = feat)) +
+    labs(x = "Decrease in performance", y = "Feature") +
+    theme_classic()
+```
+
+::: {.callout-important}
+## Important: A call to avoid oversimplifications
+
+Feature importance plots are often interpreted in the literature with a 
+reductionist mindset. Thus, researchers often conclude that a single 
+feature (i.e., bacterial taxa) is responsible of a complex clinical output 
+of interest. However, more often than not, microbes interact with one 
+another, and thus the effect of a single taxa doesn't always inform about
+ecosystem-level properties of the microbiome. It is important to 
+bear that in mind when interpreting the results of our models.
+:::
+
 
 ::: {.callout-tip icon=false}
 ## Exercises
@@ -261,7 +837,7 @@ amount of data on carcinoma to build an accurate predictive model.
 **Goal:** After completing these exercises, you should be able to fit supervised
 machine learning model utilizing multi-assay data.
 
-**Exercise 1: IntegratedLearner**
+**Exercise 1: Supervised ML**
 
 1. Load any of the example datasets mentioned in [@sec-example-data].
 
@@ -291,3 +867,4 @@ Useful functions:
 `mikropml::run_ml()`, `mikropml::plot_model_performance()`
 
 :::
+
