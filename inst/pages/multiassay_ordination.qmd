@@ -50,8 +50,42 @@ duplicates are present. We can add
 `rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]], make.unique=TRUE)` to
 remove them.
 
-```{r, message=FALSE, warning=FALSE}
+To run MOFA2, it needs to connect `mofapy2` Python packages via the `reticulate`
+package, as clarified in the [MOFA2 vignette](https://bioconductor.org/packages/release/bioc/vignettes/MOFA2/inst/doc/getting_started_R.html#6_Build_and_train_the_MOFA_object).
+
+The following chunk checks if Python dependencies are already installed,
+and installs them if they are not available. If this setup causes issues,
+update `miniconda` and `mofapy2`.
+
+```{r}
+#| label: mofapy2
+#| message: false
+#| warning: false
+
+library(reticulate)
+
+# Set miniconda environment
+if( !reticulate:::miniconda_exists() ){
+    install_miniconda()
+}
+if( !condaenv_exists(miniconda_path()) ){
+    use_miniconda(condaenv = miniconda_path(), required = FALSE)
+}
+
+# Check if mofapy2 is installed, and install it if not
+if( !py_module_available("mofapy2") ){
+    py_install(
+        packages = "mofapy2",
+        pip = TRUE,
+        pip_ignore_installed = TRUE,
+    )
+}
+```
+
+```{r}
 #| label: mofa3
+#| message: false
+#| warning: false
 
 library(MOFA2)
 # For simplicity, classify all high-fat diets as high-fat, and all the low-fat
