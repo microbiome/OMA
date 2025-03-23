@@ -16,8 +16,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-Microbial communities are dynamic, constantly evolving over time. Despite
-temporal fluctuations driven by environmental and other factors, the
+Microbial communities are dynamic, constantly evolving over time. However,
+despite temporal fluctuations driven by environmental and other factors, the
 microbiome retains its core characteristics [@Schmidt2018].
 
 Compared to cross-sectional studies, a longitudinal study design allows
@@ -33,14 +33,15 @@ Most of the methods introduced earlier in this book can be applied to temporal
 studies with appropriate modifications and considerations.
 
 In this chapter, we use an example dataset from probiotic/placebo intervention
-study.
+study. The dataset includes gut microbiota samples from 22 subjects and 2 time
+points. The first time point was sampled before introducing a treatment.
 
 ```{r}
 #| label: load_data
 
 library(microbiomeDataSets)
 
-mae <- microbiomeDataSets::peerj32()
+mae <- peerj32()
 tse <- getWithColData(mae, 1L)
 tse[["time_point"]] <- tse[["time"]] |> as.factor()
 ```
@@ -59,8 +60,8 @@ tse <- addAlpha(tse, index = "shannon")
 ```
 
 In addition to visualizing the diversity in respect to sample groups, we want
-to visualize how much the diversity changes between time points. That is why
-we calculate the difference for each subject.
+to analyse how much the diversity changes between time points. That is why
+we calculate the difference between time points for each subject.
 
 ```{r}
 #| label: alpha2
@@ -123,28 +124,35 @@ p <- ggplot(mapping = aes(x = time_point, y = shannon, fill = group)) +
 p
 ```
 
-Additionally, we might be interested on linking the sample-pairs to visualize
-their difference.
+The boxplot above shows alpha diversity in each group and time point. In the
+dataset, each subject was sampled in each time point, however, from the plot
+we cannot see which samples correspond to which subject. That is why we 
+might be interested on linking the sample-pairs to highlight
+the subject-specific deviation between time points.
 
 ```{r}
 #| label: alpha4
 
-# Add line linking subjects
+# Add line to link subjects
 p_path <- p +
     geom_line(
       data = df2,
       aes(group = interaction(subject, group)),
-      position = jitter_position
+      position = jitter_position,
+      alpha = 0.3
       )
 p_path
 ```
 
+We can further refine the plot by adding the magnitude of change with a color.
+
 ```{r}
+#| label: alpha5
+
 # Add line linking subjects
 p_path <- p +
     geom_line(
       data = df2,
-      arrow = arrow(length = unit(2, "mm")),
       aes(group = interaction(subject, group), color = diff),
       position = jitter_position
       ) +
@@ -155,39 +163,180 @@ p_path <- p +
 p_path
 ```
 
+The visualization does not show clear effect of treatment. We can still test
+if we can get support on these null findings with statistical tests. The
+simplest test might be the Wilcoxon test that we have to apply for each
+treatment group separately. Moreover, we have to apply the paired version of
+test as the samples are from same subjects.
 
-MIten alfa-diversiteetti eroaa? Viiva potilainen näytteidenn välillä.
-Väritä, onko punaine tai sininen, muutoksen suunta.
+We first test if placebo treatment had effect on alpha diversity.
 
-Tee nopea testi, jolla testataan, onko paired samples wilcoxon test, merkitsevä ero
+```{r}
+#| label: alpha6
 
+# Get data on placebo samples
+df <- tse[, tse[["group"]] == "Placebo"] |> colData()
+# Get first and second time points separately
+before <- df[df[["time_point"]] == 1, "shannon"]
+after <- df[df[["time_point"]] == 2, "shannon"]
+
+# Apply paired Wilcoxon test
+wilcox.test(before, after, paired = TRUE)
+```
+
+Based on results, alpha diversity in second time point equals to first time
+point for the placebo group, which is expected result. We can then do the same
+test for group that got probiotics.
+
+```{r}
+#| label: alpha7
+
+# Get data on placebo samples
+df <- tse[, tse[["group"]] == "LGG"] |> colData()
+# Get first and second time points separately
+before <- df[df[["time_point"]] == 1, "shannon"]
+after <- df[df[["time_point"]] == 2, "shannon"]
+
+# Apply paired Wilcoxon test
+wilcox.test(before, after, paired = TRUE)
+```
+
+Wilcoxon test confirms the results also for probiotics group: probiotic
+treatment do not increase or decrease diversity of microbioal community.
+
+More elegant test would be model-based approach. Below, we fit a simple linear
+mixed effects model to examine the impact of time and treatment group on
+Shannon diversity. In this model, both time and group are treated as fixed
+effects, meaning that we assume their influence on Shannon diversity is
+consistent across all subjects. Additionally, we include subject as a random
+effect to account for the repeated measurements from the same individuals.
+
+If you are not familiar with R formulas, here’s an explanation of how to
+interpret the components:
+
+- The left-hand side of the formula represents the predicted variable
+(in this case, shannon diversity).
+
+- The `+` sign in the formula means that we are adding the terms on the
+right-hand side of the formula together (i.e., combining them as separate
+effects).
+
+- The `*` sign indicates an interaction between the terms on either side. This
+means that we are not only testing the individual effects of time and group, but
+also how these two factors interact with each other to influence Shannon
+diversity. Specifically, it allows us to assess how the effect of treatment
+group differs between time point 1 and time point 2.
+
+```{r}
+#| label: alpha8
+
+library(lme4)
+library(lmerTest)
+
+# Get sample metadata
+df <- colData(tse) |>
+    as.data.frame()
+
+# Fit the model
+model <- lmer(shannon ~ time * group + (1 | subject), data = df)
+
+# Display summary with p-values
+summary(model)
+```
+
+The results indicate that none of the variables in the model show statistically
+significant effects. Specifically, "time" represents the overall effect of time
+on Shannon diversity, while "groupPlacebo" represents the overall difference in
+Shannon diversity between the Placebo group and the LGG group, averaged across
+both time points.
+
+The most interesting variable in the results is the "time:groupPlacebo"
+interaction term. This term investigates whether the effect of time on Shannon
+diversity differs between the Placebo group and the LGG group when comparing the
+second time point to the first one.
+
+A significant interaction would indicate that the change in diversity over time
+is different between the two groups. However, in this case, the interaction is
+not statistically significant, suggesting that the treatment effect did not
+differ significantly between the Placebo group and the LGG group between the two
+time points.
 
 ## Time divergence
 
-Analysoi näytteiden välinen ero, miten visualisoida?
+[@sec-divergence] introduced divergence which means that we calculate
+dissimilarity between samples. We can do the same and calculate dissimilarity
+between time points for each subject. Below we calculate Bray-Curtis
+dissimilarity between consecutive time points.
 
-Box plot, divergence y-askelilla, x -askelilla ryhmä
+```{r}
+#| label: divergence1
+
+library(miaTime)
+
+tse <- transformAssay(tse, method = "relabundance")
+tse <- addStepwiseDivergence(
+    tse,
+    time.col = "time",
+    group = "subject",
+    assay.type = "relabundance",
+    method = "bray"
+)
+```
+
+Then we can visualize the results with a box plot.
+
+```{r}
+#| label: divergence2
+
+library(scater)
+
+plotColData(tse, x = "group", y = "divergence", show_boxplot = TRUE)
+```
+
+Figure above summarizes the divergence. Each point represent a subject:
+dissimilarity between samples from the two time points. Divergence between
+consecutive time points seems to be equal between treatment groups.
 
 ## Ordination
 
-Viiva pootlaiden välillä, nuoli
+Ordination plots, e.g., Principal Coordinate Analysis (PCoA) plot, is a common
+visualization technique to find patterns from the data. Below, we perform PCoA
+and visualize the results as showed in [@#sec-community-similarity].
 
-In datasets including time points, researcher might be interested on how similar
-samples are within a subject or patient and how the microbial communities
-evolve. This can be done for instance by connecting points of each subject.
+Note that it is important to sort the data based on time so that the arrows that
+we add in the next step have correct direction.
 
 ```{r}
-library(miaTime)
-library(scater)
-data("temporalMicrobiome20")
-tse <- temporalMicrobiome20
+#| label: pcoa
 
-tse <- transformAssay(tse, method = "clr", pseudocount = 1)
+# Sort data based on time
+tse <- tse[, order(tse[["time"]])]
 
-tse <- runPCA(tse, assay.type = "clr")
-
-p <- plotReducedDim(tse, "PCA")
+# Perform PCoA
+tse <- addMDS(tse, assay.type = "relabundance", method = "bray")
+# Create ordination plot
+p <- plotReducedDim(
+    tse, dimred = "MDS", colour_by = "group",
+    # Add other fields that are used later to add paths
+    other_fields = c("subject", "time")
+)
+p
 ```
 
-Lisää tehtäviä. Lisää esimerkkivastauksiin chunk
+After initializing a scatter plot, we can add arrows that show how the microbial
+communities evolved over time.
 
+```{r}
+#| label: pcoa2
+
+# Add arrows to connect samples from subjects
+p <- p + geom_path(
+    mapping = aes(group = subject, ),
+    arrow = arrow(length = unit(0.2, "cm")),
+    alpha = 0.5
+)
+p
+```
+
+From the PCoA plot, we cannot observe clear patterns. As a final conclusion, it
+seems that probiotics did not have effect on microbiome compared to placebo.
