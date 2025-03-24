@@ -102,6 +102,13 @@ in the R console.
 with `setwd("/opt/pkg")`, but any modifications
 you make to the files _will not be saved_ if you restart the container.
 
+### Troubleshooting
+
+Consult the package installation troubleshooting guide if you experience issues
+with package installation.
+The latest version is available
+[here](https://github.com/microbiome/OMA/blob/devel/PackageInstallations_Troubleshoots.qmd).
+
 ## Development and Contributions
 
 To contribute reports, follow the Git flow procedure (you can see instructions
