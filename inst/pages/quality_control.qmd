@@ -5,356 +5,200 @@ library(rebook)
 chapterPreamble()
 ```
 
-This chapter focuses on the quality control and exploration of
+This chapter focuses on the quality control (QC) and exploration of
 microbiome data and establishes commonly used descriptive
 summaries. Familiarizing yourself with the peculiarities of a given dataset is
-essential for data analysis and model building.
+essential for data analysis and model building to make justified conclusions.
 
 The dataset should not suffer from severe technical biases, and you
 should at least be aware of potential challenges, such as outliers,
 biases, unexpected patterns, and so forth. Standard summaries and
 visualizations can help, and the rest comes with experience. Moreover,
-exploration and quality control often entail iterative processes.
+exploration and QC often entail iterative processes.
 
-## Abundance
+There are available guidelines for QC, for instance, [@Zuur2010].
+However, it should be noted that one should not follow any protocols strictly
+but rather use them as a template and customize them to one's dataset. The goal
+of QC is not only to improve quality of data, but also to understand it and its limitations. Poor data quality leads to poor results which is illustrated by a
+common expression in computer science:
 
-Abundance visualization is an important data exploration
-approach. `miaViz` integrated the `plotAbundanceDensity()` function to plot
-the most abundant taxa along with several options.
+> _"Garbage in, garbage out"_
 
-Next, a few demonstrations are shown using the [@Lahti2014]
-dataset. A jitter plot based on relative abundance data, similar to
-the one presented at [@Salosensaari2021] (Supplementary Fig.1), can
-be visualized as follows:
-
-```{r, warning=FALSE, message=FALSE}
-# Load example data
-library(miaTime)
-library(miaViz)
-data(hitchip1006)
-tse <- hitchip1006
-
-# Add relative abundances
-tse <- transformAssay(tse, MARGIN = "cols", method = "relabundance")
-
-# Use argument names
-# assay.type / assay.type / assay.type
-# depending on the mia package version
-plotAbundanceDensity(
-    tse, layout = "jitter",
-    assay.type = "relabundance",
-    n = 40, point_size=1, point.shape=19,
-    point.alpha=0.1) +
-    scale_x_log10(label=scales::percent)
-```
-
-The relative abundance values for the top-5 taxonomic features can be
-visualized as a density plot over a log-scaled axis, with
-"nationality" indicated by colors:
-
-```{r, warning=FALSE, message=FALSE}
-plotAbundanceDensity(
-    tse, layout = "density",
-    assay.type = "relabundance",
-    n = 5, colour.by="nationality",
-    point.alpha=1/10) +
-    scale_x_log10()
-```
-
-## Prevalence
-
-Prevalence quantifies the frequency of samples where certain microbes
-were detected (above a given detection threshold). Prevalence can
-be given as sample size (N) or percentage (unit interval).
-
-Investigating prevalence allows you either to focus on changes which
-pertain to the majority of the samples, or identify rare microbes,
-which may be _conditionally abundant_ in a small number of samples.
-
-The population prevalence (frequency) at a 1% relative abundance
-threshold (`detection = 1/100` and `as.relative = TRUE`) can look
-like this.
-
-```{r exploration-prevalence}
-getPrevalence(tse, detection = 1/100, sort = TRUE, as.relative = TRUE) |>
-    head()
-```
-
-The function arguments `detection` and `as.relative` can also be used
-to access how many samples pass a threshold for raw counts. Here,
-the population prevalence (frequency) at the absolute abundance
-threshold (`as.relative = FALSE`) with a read count of 1 (`detection = 1`) is
-accessed.
-
-```{r concepts_prevalence2}
-getPrevalence(
-    tse, detection = 1, sort = TRUE, assay.type = "counts",
-    as.relative = FALSE) |>
-    head()
-```
-
-If the output is to be used for subsetting or storing the data in the
-`rowData`, set `sort = FALSE`.
-
-### Prevalence analysis
-
-To investigate microbiome prevalence at a selected taxonomic level, two
-approaches are available.
-
-First, the data can be agglomerated to the taxonomic level and then
-`getPrevalence()`  can be applied to the resulting object.
+Below we download a dataset from `microbiomeDataSets`.
+The dataset contains 16S data from the gut microbiome of baboons.
 
 ```{r}
-# Agglomerate taxa abundances to Phylum level
-#and add the new table to the altExp slot
-altExp(tse,"Phylum") <- agglomerateByRank(tse, "Phylum")
-# Check prevalence for the Phylum abundance table
-#from the altExp slot
-getPrevalence(
-    altExp(tse,"Phylum"), detection = 1/100, sort = TRUE,
-    assay.type = "counts", as.relative = TRUE) |>
-    head()
+#| label: load_data
+
+library(microbiomeDataSets)
+tse <- baboongut()
 ```
 
-Alternatively, the `rank` argument can be set to perform the
-agglomeration on the fly.
+## Summarize data {#sec-qc-summarize}
+
+When you first get your hands dirty with the data, the first step is to
+summarize it and get a sense of what kind of data you're dealing with. Printing
+`TreeSE` already provides useful information about the dataset's dimensions,
+such as the number of samples and taxa.
 
 ```{r}
-getPrevalence(
-    tse, rank = "Phylum", detection = 1/100, sort = TRUE,
-    assay.type = "counts", as.relative = TRUE) |>
-    head()
+#| label: explore1
+
+tse
 ```
 
-::: {.callout-note}
-## Note
-
-By default, `na.rm = TRUE` is used for agglomeration in
-`getPrevalence()`, whereas the default for `agglomerateByRank()` is
-`FALSE` to prevent accidental data loss.
-:::
-
-If you only need the names of the prevalent taxa, `getPrevalent()`
-is available. This returns the taxa that exceed the given prevalence
-and detection thresholds.
-
-```{r core-members, message=FALSE, warning=FALSE, eval = FALSE}
-getPrevalent(tse, detection = 0, prevalence = 50/100)
-prev <- getPrevalent(
-    tse, detection = 0, prevalence = 50/100, rank = "Phylum", sort = TRUE)
-prev
-```
-
-::: {.callout-note}
-## Note
-
-The `detection` and `prevalence` thresholds are not the same, as
-`detection` can be applied to relative counts or absolute counts depending on
-whether `as.relative` is set `TRUE` or `FALSE`
-:::
-
-The function `getPrevalentAbundance()` can be used to check the total
-relative abundance of the prevalent taxa (between 0 and 1).
-
-### Rare taxa
-
-Related functions are available for the analysis of rare taxa
-(`rare_members()`, `rare_abundance()`, `low_abundance()`, `getRare()`,
-`subsetByRare()`).
-
-### Plotting prevalence
-
-To plot the prevalence, add the prevalence of each taxon to
-`rowData`. Here, we are analyzing the Phylum-level abundances, which
-are stored in the `altExp` slot.
-
-```{r}
-rowData(altExp(tse,"Phylum"))$prevalence <- getPrevalence(
-    altExp(tse,"Phylum"), detection = 1/100,
-    sort = FALSE,
-    assay.type = "counts", as.relative = TRUE)
-```
-
-The prevalences can then be plotted using the plotting functions from
-the `scater` package.
-
-```{r, message=FALSE, warning=FALSE}
-library(scater)
-plotRowData(altExp(tse,"Phylum"), "prevalence", colour_by = "Phylum")
-```
-
-The prevalence can also be visualized on the taxonomic tree with the
-`miaViz` package.
-
-```{r}
-tse <- agglomerateByRanks(tse)
-altExps(tse) <- lapply(
-    altExps(tse), function(y){
-        rowData(y)$prevalence <- getPrevalence(
-            y, detection = 1/100,
-            sort = FALSE,
-            assay.type = "counts",
-            as.relative = TRUE)
-        return(y)
-    })
-top_phyla <- getTop(
-    altExp(tse,"Phylum"),
-    method="prevalence",
-    top=5L,
-    assay.type="counts")
-top_phyla_mean <- getTop(
-    altExp(tse,"Phylum"),
-    method="mean",
-    top=5L,
-    assay.type="counts")
-
-x <- unsplitByRanks(tse, ranks = taxonomyRanks(tse)[1:6])
-x <- addHierarchyTree(x)
-```
-
-After some preparation, the data are assembled and can be plotted with
-`plotRowTree()`.
-
-```{r plot-prev-prev, message=FALSE, fig.cap="Prevalence of top phyla as judged by prevalence"}
-library(miaViz)
-# Filter rows where Phylum is in top_phyla
-selected <- rowData(x)$Phylum %in% top_phyla
-
-# Plot the data
-plotRowTree(
-    x[selected, ],
-    edge.colour.by = "Phylum",
-    tip.colour.by = "prevalence",
-    node.colour.by = "prevalence")
-```
-
-
-```{r plot-prev-mean, message=FALSE, fig.cap="Prevalence of top phyla as judged by mean abundance"}
-# Filter for Phylum in top_phyla_mean
-selected <- rowData(x)$Phylum %in% top_phyla_mean
-
-# Plot the data
-plotRowTree(
-    x[selected, ],
-    edge.colour.by = "Phylum",
-    tip.colour.by = "prevalence",
-    node.colour.by = "prevalence")
-```
-
-## Quality control {#sec-qc}
-
-Next, let's load the `GlobalPatterns` dataset to illustrate standard
-microbiome data summaries.
-
-```{r, message=FALSE}
-library(mia)
-data("GlobalPatterns", package="mia")
-tse <- GlobalPatterns
-```
-
-### Top taxa
-
-The function `getTop()` identifies top taxa in the data.   
-
-```{r top-feature-taxo}
-# Pick the top taxa
-top_features <- getTop(tse, method="median", top=10)
-
-# Check the information for these
-rowData(tse)[top_features, taxonomyRanks(tse)][1:5, 1:3]
-```
-
-### Unique taxa
-
-The function `getUnique` returns unique taxa in the data.
-
-```{r}
-# Get unique taxa at rank Class
-getUnique(tse, "Class", sort = TRUE)
-```
-
-
-### Library size / read count
-
-The total counts per sample can be calculated using
-`perCellQCMetrics()`/`addPerCellQC()` from the `scater` package. The former one
-just calculates the values, whereas the latter directly adds them to
-`colData`. mia provides the function `summary` for SE objects which returns 
+The dataset includes `r nrow(tse)` taxa identified from `r ncol(tse)` samples.
+`mia` provides the `summary()` function for `TreeSE` objects which returns 
 the summary of counts for all samples and features including measures of 
 central tendency.
 
-```{r lib-size}
-library(scater)
-# Get an overview of sample and taxa counts
-summary(tse, assay.type= "counts")
+```{r}
+#| label: explore2
 
-# Calculate total counts per sample
-perCellQCMetrics(tse)[1:5,]
+library(mia)
+
+# Calculate summary tables
+summary(tse, assay.type = "counts")
+```
+
+The returned tables show that samples exhibit lots of variance in library sizes.
+Moreover, we can observe that there are no singletons in the dataset
+(library size and singletons are discussed in more detail in
+[@sec-qc-outliers]).
+
+Another type of summary can be generated using the `summarizeDominance()`
+function. This function returns a table displaying both the absolute and
+relative abundance of each taxon &mdash; that is, how many times a taxon was
+detected in the dataset and the proportion of samples in which it was
+identified. Below, we create a summary table for genera.
+
+```{r}
+#| label: explore3
+
+df <- summarizeDominance(tse, rank = "Genus")
+df
+```
+
+Based on the summary table, `r df[["dominant_taxa"]][[1L]]` seems to be
+highly presented in the baboon gut.
+
+`mia` also provides other functions to summarize the dataset. For example, you
+can retrieve unique, top, prevalent, or rare taxa using `getUnique()`,
+`getTop()`, `getPrevalent()`, and `getRare()`, respectively.
+
+Let’s first check which phyla are included in the dataset.
+
+```{r}
+#| label: explore4
+
+uniq <- getUnique(tse, rank = "Phylum")
+uniq
+```
+
+There are `r length(uniq)` phyla present in the dataset.
+
+Next, we might be interested on assessing which features are the most abundance.
+This can be done by utilizing `getTop()` function. Below, we pick top 10 taxa
+which is determined based on median abundance.
+
+```{r}
+#| label: explore5
+
+# Pick the top taxa
+top_features <- getTop(tse, method = "median", top = 10)
+top_features
+```
+
+These ten features, have the highest median abundance across all samples.
+`getPrevalent()` differs from `getTop()` so that it retrieves which taxa
+exceeds the specified prevalence and detection thresholds. Here we determine
+prevalent genera.
+
+```{r}
+#| label: explore6
+
+prev <- getPrevalent(tse, rank = "Genus", prevalence = 0.2, detection = 0)
+prev |> head()
+```
+
+Out of `r library(mia); nrow(agglomerateByRank(tse, "Genus"))` genera,
+`r length(prev)` of them are detected to be prevalent, meaning they are found
+in a sufficient number of samples with sufficiently high abundance.
+
+`getRare()` function is counterpart of `getPrevalent()`. It returns those taxa
+that do not exceed the thresholds. 
+
+```{r}
+#| label: explore7
+
+rare <- getRare(tse, rank = "Genus", prevalence = 0.2, detection = 0)
+rare |> head()
+```
+
+It returns `r length(rare)` taxa which is expected as it should match with
+number of genera after subtracting the prevalent ones.
+
+## Outliers, singletons and contaminants {#sec-qc-outliers}
+
+Outliers are observations that deviate significantly from the rest of the data.
+Researchers should be cautious when handling outliers, as what appears to be an
+outlier may actually result from a valid biological mechanism. This is
+especially relevant in the microbiome field, where sequenced counts often
+exhibit seemingly irregular variation. In such cases, transformations (see
+[@sec-assay-transform]) are typically the preferred approach for handling these
+observations. However, if an observation or sample is significantly affected by
+measurement error, removing it may be a reasonable option. The approach to
+dealing with outliers in each dataset requires careful consideration by the
+researcher.
+
+Singletons are sequences that appears only once in a dataset, meaning it is
+observed in just a single sequencing read. Often rare features are removed from
+the data as they usually represent sequencing artifacts. See [@sec-subset_prev]
+and [@sec-agglomerate_prev] for more details on prevalence filtering and
+agglomeration.
+
+### Library size
+
+Library size refers to the total number of counts found in a single sample.
+The returned tables in [@sec-qc-summarize] showed that samples exhibit lots of
+variance in library sizes. We can then visualize the library sizes. The total
+counts per sample can be calculated using `addPerCellQC()` from the `scater`
+package.
+
+```{r}
+#| label: outlier2
+
+library(scater)
+library(knitr)
 
 # Calculate and add total counts to `colData`
 tse <- addPerCellQC(tse)
-colData(tse)[1:5,1:3]
 ```
 
-The distribution of calculated library sizes can be visualized as a
-histogram (left) or by sorting the samples by library size (right).
+The results are stored in `colData`. We can then visualize these results with a
+violin plot and histogram.
 
-```{r plot-viz-lib-size-1, fig.width=8, fig.height=4, fig.cap="Library size distribution."}
-library(ggplot2)
-library(dplyr)
+```{r}
+#| label: outlier3
+
 library(patchwork)
 
-# Create a histrogram showing distribution of library sizes
-p1 <- ggplot(colData(tse)) +
-        geom_histogram(aes(x = sum/1e6), color = "black", fill = "gray") +
-        labs(x = "Library size (million reads)", y = "Frequency (n)") +
-        theme_classic()
-
-# Order data in increasing order
-df <- as.data.frame(colData(tse)) |>
-    arrange(sum) |>
-    mutate(proportion = (1:n())/n())
-
-# Create a scatter plot showing how library sizes are distributed
-p2 <- ggplot(df, aes(y = proportion, x = sum/1e6)) +
-    geom_point() +
-    labs(x = "Library size (million reads)", y = "Proportion of samples") +
-    theme_classic()
+p1 <- plotColData(tse, x = "sex", y = "total", colour_by = "age")
+p2 <- plotHistogram(tse, col.var = "total")
 
 p1 + p2
 ```
 
-Library sizes and other variables from `colData` can be visualized using a
-specified function called `plotColData()`.
+The distribution of library size is right-skewed. Most of the samples follow
+normal distribution while some of the samples deviates from this. This might be
+caused by technical variations or biological factors. 
 
-```{r plot-viz-lib-size-2, fig.width=8, fig.height=4, fig.cap="Library sizes per sample."}
-# Sort samples by read count,
-# order the factor levels,
-# and store back to tse as DataFrame
-colData(tse) <- as.data.frame(colData(tse)) |>
-    arrange(X.SampleID) |>
-    mutate(X.SampleID = factor(X.SampleID, levels=X.SampleID)) %>%
-        DataFrame
-plotColData(tse,"sum","X.SampleID", colour_by = "SampleType") +
-    theme(axis.text.x = element_text(angle = 45, hjust=1)) +
-    labs(y = "Library size (N)", x = "Sample ID")
-```
+Nevertheless, the most important check is to ensure that the sampling depth is
+sufficient. In case of insufficient sampling depth, one might consider filtering
+the data based on library size ([@sec-subset-library-size]).
 
-```{r plot-viz-lib-size-3, fig.width=8, fig.height=4, fig.cap="Library sizes per sample type."}
-plotColData(tse,"sum","SampleType", colour_by = "SampleType") +
-    theme(axis.text.x = element_text(angle = 45, hjust=1))
-```
-
-If you want to subset data based on library size, see [@sec-subset-library-size].
-
-In addition, data can be rarefied with
-[rarefyAssay](https://microbiome.github.io/mia/reference/rarefyAssay.html),
-which normalizes the samples to an equal number of reads.
-This remains controversial, however, and strategies to mitigate the information
-loss in rarefaction have been proposed [@Schloss2024rarefaction1]
-[@Schloss2024rarefaction2].
-Moreover, this practice has been discouraged for the analysis of differentially
-abundant microorganisms (see [@mcmurdie2014waste]).
+To control uneven sampling depths, one should apply data transformation or apply
+rarefaction. These both approaches are discussed in [@sec-assay-transform].
 
 ### Contaminant sequences
 
@@ -381,15 +225,6 @@ biological samples and control samples. This method assumes that contaminants
 are more prevalent in negative controls, as these lack true biological DNA and
 primarily contain background noise from contamination sources.
 
-Below we download a dataset from `microbiomeDataSets`.
-
-```{r}
-#| label: load_contaminant
-
-library(microbiomeDataSets)
-tse <- baboongut()
-```
-
 ```{r}
 #| label: replace_missing_values
 #| echo: false
@@ -402,8 +237,8 @@ avg_conc <- mean(tse[["post_pcr_dna_ng"]], na.rm = TRUE)
 colData(tse)[ is.na(tse[["post_pcr_dna_ng"]]), "post_pcr_dna_ng"] <- avg_conc
 ```
 
-The dataset contains 16S data from the gut microbiome of baboons, with DNA
-concentration recorded in the "post_pcr_dna_ng" column in the sample metadata.
+The dataset contains DNA concentration recorded in the "post_pcr_dna_ng" column
+in the sample metadata.
 This information can be used for frequency-based contamination identification.
 
 ```{r}
@@ -471,6 +306,189 @@ To identify non-contaminant sequences with prevalence approach, a threshold of
 add results to `rowData`. Here, we used function that return only the results.
 By specifying `detailed = FALSE`, we obtain the results as a vector, which can
 then be used for subsetting the data.  
+
+## Data distribution
+
+Microbiome counts data is rarely normally distributed
+(see [@sec-stat-challenges]). However, many common statistical tests assume
+normality and using them while violating the assumptions might lead to
+incorrect conclusions. While several tests for normality exist &mdash; such as
+Shapiro-Wilk test &mdash; they do not replace visual observation.
+
+`plotHistogram()` function provides easy way to visualize the counts
+distribution with a histogram.
+
+```{r}
+#| label: distribution
+
+plotHistogram(tse, assay.type = "counts")
+```
+
+The microbiome data is typically zero-inflated, meaning that there are lots of
+zeroes. Same method can also be used to visualize continuous variables from
+`colData`. For categorical values, one can utilize `plotBarplot()`.
+
+```{r}
+#| label: distribution2
+
+p1 <- plotHistogram(tse, col.var = "age") +
+    labs(x = "Age")
+p2 <- plotBarplot(tse, col.var = "sex") +
+    labs(x = "Sex")
+
+p1 + p2
+```
+
+### Abundance
+
+Abundance visualization is an important data exploration
+approach. `plotAbundanceDensity()` function generates a plot to visualize
+the most abundant taxa along with several options.
+
+Next, a few demonstrations are shown using the [@Lahti2014]
+dataset. A jitter plot based on relative abundance data, similar to
+the one presented at [@Salosensaari2021] (Supplementary Fig.1), can
+be visualized as follows:
+
+```{r}
+#| label: plot_abundance
+
+library(miaViz)
+
+# Add relative abundances
+tse <- transformAssay(tse, method = "relabundance")
+
+plotAbundanceDensity(
+    tse, layout = "jitter",
+    assay.type = "relabundance",
+    n = 40, point.size=1, point.shape=19,
+    point.alpha = 0.1) +
+    scale_x_log10(label=scales::percent)
+```
+
+The relative abundance values for the top-5 taxonomic features can be
+visualized as a density plot over a log-scaled axis, with
+"sex" indicated by colors:
+
+```{r}
+#| label: plot_abundance2
+
+plotAbundanceDensity(
+    tse, layout = "density",
+    assay.type = "relabundance",
+    n = 5, colour.by = "sex",
+    point.alpha = 0.1) +
+    scale_x_log10()
+```
+
+Alternatively, `scater::plotExpression()` can be used to visualize taxa with
+a violin plot. Below, we visualize top-10 features, selected based on their
+mean abundance.
+
+```{r}
+#| label: plot_abundance3
+
+# Select top features
+top <- getTop(tse, top = 10L, method = "mean")
+
+plotExpression(
+    tse,
+    features = top,
+    x = "sex",
+    assay.type = "relabundance",
+    point_alpha = 0.01
+    ) +
+    scale_y_log10()
+```
+
+### Prevalence
+
+Prevalence quantifies the frequency of samples where certain microbes
+were detected (above a given detection threshold). Prevalence can
+be given as sample size (N) or percentage (unit interval).
+
+Investigating prevalence allows you either to focus on changes which
+pertain to the majority of the samples, or identify rare microbes,
+which may be _conditionally abundant_ in a small number of samples.
+
+We can plot histogram of prevalence of taxa. This would tell us whether there
+are many taxa present in most of the samples or are there mostly rare
+taxa. The population prevalence (frequency) at a 0.01% relative abundance
+threshold (`detection = 0.1/100` and `as.relative = TRUE`) can look
+like this.
+
+```{r}
+#| label: plot_prevalence
+
+# Add prevalence of features
+tse <- addPrevalence(tse, detection = 0.1/100, as.relative = TRUE)
+# Plot them with a histogram
+plotHistogram(tse, row.var = "prevalence")
+```
+
+Most of the taxa are present only in minority of samples with specified
+abundance threshold. Similar conclusion can be made with visualization
+generated with `plotPrevalentAbundance()` or `plotRowPrevalence()` functions.
+
+```{r}
+#| label: plot_prevalence2
+
+p1 <- plotPrevalentAbundance(tse, as.relative = TRUE)
+# Remove y axis text as there are so many features that one cannot read them
+p2 <- plotRowPrevalence(tse, as.relative = TRUE) +
+    theme(
+       axis.text.y=element_blank(), 
+       axis.ticks.y=element_blank()
+    )
+
+p1 + p2
+```
+
+The plots above shows that most of the taxa are present with low abundance.
+However, there are couple taxa that are both high abundant and prevalent in the
+dataset.
+
+The figures also show the overall trend that most microbes are low in abundance
+and occur in a limited number of samples. This is a typical pattern in
+microbiome datasets, and can further visualized as follows.
+
+```{r}
+#| label: plot_prevalence3
+
+plotPrevalence(tse, as.relative = TRUE)
+```
+
+The plot shows the relationship between microbial relative abundance and
+prevalence across samples. Taxa with higher prevalence (yellow) tend to have
+lower relative abundance, while less prevalent taxa (purple) can still reach
+higher abundances in some cases.
+
+To analyze how present the core taxa are in samples, we can calculate how large
+proportions the core taxa present in each sample. We can then visualize this
+distribution again with a histogram.
+
+```{r}
+#| label: plot_prevalence4
+
+# Calculate the proportion of core taxa
+tse <- addPrevalentAbundance(tse, prevalence = 50/100, detection = 0.1/100)
+# Visualize
+plotHistogram(tse, col.var = "prevalent_abundance")
+```
+
+In most of the samples, the core taxa represent over 3/4 of species. However,
+there are some samples where this proportion is much lower.
+
+## Colinearity and independence
+
+Microbial species are rarely independent; rather, they influence each other's
+abundance through complex networks of competition and symbiosis. Colinearity
+occurs when information from one variable is already included in some other
+variable. Modeling variables that exhibit collinearity can lead to issues such
+as reduced interpretability, overfitting and incorrect estimations.
+
+Collinearity of variables can be assessed, for instance, with correlation
+heatmaps (see [@sec-correlation]) or with scatter plots. 
 
 ::: {.callout-tip icon=false}
 ## Exercises
