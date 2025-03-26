@@ -237,6 +237,53 @@ getTaxonomyRanks()
 setTaxonomyRanks(ranks)
 ```
 
+## Visualizing phylogeny
+
+`plotRowTree()` function provides a convenient way to visualize the phylogeny.
+
+```{r}
+#| label: plot_phylogeny
+
+plotRowTree(tse)
+```
+
+By default, the visualized phylogeny has only limited amount of information.
+To enrich the visualization, we can prune the tree to genus level and visualize
+to which phyla these genera belong to.
+
+```{r}
+#| label: plot_phylogeny2
+
+# Agglomerate data and prune tree
+tse <- agglomerateByRank(tse, rank = "Genus")
+# Get top features
+top <- getTop(tse, top = 50L)
+# Plot
+plotRowTree(
+    tse[top, ],
+    tip.colour.by = "Phylum"
+    )
+```
+
+In addition to nodes and tips, we can also color edges based on feature metadata
+data. Below, we color edges based on phyla and illustrate the mean abundance of
+genera by coloring tips. Moreover, we switch to dendrogram layout.
+
+```{r}
+#| label: plot_phylogeny3
+
+# Calculate mean abundance
+tse <- addPerFeatureQC(tse)
+rowData(tse)[["log_mean"]] <- log(rowData(tse)[["mean"]])
+# Plot
+plotRowTree(
+    tse[top, ],
+    layout = "dendrogram",
+    edge.colour.by = "Phylum",
+    tip.colour.by = "log_mean"
+)
+```
+
 ::: {.callout-tip icon=false}
 ## Exercises
 
