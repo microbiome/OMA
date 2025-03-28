@@ -748,6 +748,54 @@ From above, we can see that only age significantly describes
 differences between the microbial profiles of different samples. Such visual
 approach complements the previous results obtained with PERMANOVA.
 
+::: {.callout-tip }
+## Speed-up calculations
+
+Calculating dissimilarities between samples is computationally demanding task,
+which can make methods like dbRDA or PCoA time-consuming with large datasets. 
+To speed-up calculations, consider using functions that support parallel
+processing instead of the default `vegan` package options. Packages like
+`parallelDist` can significantly improve performance on systems
+with multiple available cores.
+
+In `*Dissimilarity()` functions, you can specify the utilized dissimilarity
+function with `dis.fun` argument.
+
+```
+tse <- addDissimilarity(
+    tse,
+    assay.type = "relabundance",
+    method = "bray",
+    dis.fun = parallelDist::parallelDist
+)
+```
+
+This same approach can also be used in PCoA.
+
+```
+tse <- addMDS(
+    tse,
+    assay.type = "relabundance",
+    method = "bray",
+    dis.fun = parallelDist::parallelDist
+)
+```
+
+With dbRDA, you can use precomputed dissimilarity matrices, allowing the method
+to bypass the dissimilarity estimation step. This enhances efficiency and speeds
+up the analysis.
+
+```
+tse <- addRDA(
+    tse,
+    dis.name = "bray",
+    formula = assay ~ ClinicalStatus + Gender + Age,
+    na.action = na.exclude
+)
+```
+
+:::
+
 ### Visualize dbRDA loadings {#sec-dbrda-workflow}
 
 Let us visualize the model coefficients or loadings for species that exhibit the
