@@ -90,7 +90,7 @@ used throught this chapter. This package was developed to offer a
 user-friendly interface to supervised ML algorithms implemented in the
 `caret` package. 
 [Here](https://www.schlosslab.org/mikropml/articles/introduction.html#the-methods-we-support)
-is a list of models well supported by mikropml.
+is a list of models supported by mikropml.
 
 The code below will retrieve the data and show the number of
 participants on each category.
@@ -172,20 +172,20 @@ alpha_divs <- getAlpha(
     assay.type = "counts"
 )
 
-# Apply CLR transformation 
+# Transform to relative abundances
 tse_prev <- transformAssay(
     x = tse_prev,
     assay.type = "counts",
-    method = "clr",
+    method = "relabundance",
     MARGIN = "cols",
     pseudocount = TRUE
 )
 
-# Get CLR assay
-assay <- assay(tse_prev, "clr")
+# Get relative abundances assay
+assay <- assay(tse_prev, "relabundance")
 # Transpose assay
 assay <- t(assay)
-# Join CLR abundances and alpha diversity metrics
+# Join relative abundances and alpha diversity metrics
 assay_alpha <- cbind(assay, alpha_divs)
 raw_df <- as.data.frame(assay_alpha)
 
@@ -219,7 +219,7 @@ raw_df[["diagnosis"]] <- labels
 prep_classification <- preprocess_data(
     dataset = raw_df,
     outcome_colname = "diagnosis",
-    method = NULL, # Skip normalization as CLR was performed 
+    method = NULL, # Skip normalization
     remove_var = "zv",
     collapse_corr_feats = TRUE,
     group_neg_corr = FALSE
@@ -253,7 +253,7 @@ raw_df[["BMI"]] <- BMI
 prep_regression <- preprocess_data(
     dataset = raw_df,
     outcome_colname = "BMI",
-    method = NULL, # Skip normalization as CLR was performed 
+    method = NULL, # Skip normalization 
     remove_var = "zv",
     collapse_corr_feats = TRUE,
     group_neg_corr = FALSE
@@ -269,14 +269,25 @@ df_regression <- prep_regression[["dat_transformed"]]
 
 
 ::: {.callout-note}
-## Note: Preprocessing strategies must follow research goals
+## Note: Preprocessing strategies impact the performance of ML models.
 
-The code above should be deemed as a reference. Preprocessing 
-strategies impact the performance of ML models, and thus the steps
-used should always be tailored to satisfy specific research goals. 
-Other preprocessing steps can be implemented using it the
-`preprocess_data` function, as described
+Although microbiome data **is** compositional, proportion-based 
+transformations &mdash;such as relative abundance or Hellinger&mdash;
+often outperform compositional transformations like CLR when building
+Random Forests [@yerke2024_transformationsML], one of the algorithms 
+discussed in the next section. The authors note that the impact of the 
+chosen transformations decreases as the signal-to-noise ratio 
+increases. In other words, the more distinct the conditions we aim to
+classify, the less influence preprocessing transformations will have on
+model performance. A similar relationship has been observed in 
+regression tasks. Moreover, in addition to improving model performance, 
+proportion-based transformations are more intuitive and therefore easier
+to interpret.
+
+Given this, it is worth exploring different preprocessing approaches.
+The `preprocess_data` function supports a a variety of strategies described
 [here](https://www.schlosslab.org/mikropml/reference/preprocess_data.html).
+For a discussion in transformations methods, see [@sec-assay-transform].
 :::
 
 
