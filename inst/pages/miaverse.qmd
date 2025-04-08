@@ -151,59 +151,6 @@ these data containers (see [@sec-example-data]).
 
 ## Installation {#sec-installation}
 
-### Installing all packages
-
-You can install all packages that are required to run every example in this
-book via the following command:
-
-```{r}
-#| label: install_packages
-#| eval: FALSE
-remotes::install_github("microbiome/OMA", dependencies = TRUE, upgrade = TRUE)
-```
-
-Optionally, you can install all packages or just certain ones with the following
-script.
-
-```{r}
-#| label: all_packages
-#| eval: FALSE
-#|
-
-# URL of the raw CSV file on GitHub. It includes all packages needed.
-url <- "https://raw.githubusercontent.com/microbiome/OMA/devel/oma_packages/oma_packages.csv"
-
-# Read the CSV file directly into R
-df <- read.csv(url)
-packages <- df[[1]]
-
-# Get packages that are already installed installed
-packages_already_installed <- packages[ packages %in% installed.packages() ]
-
-# Get packages that need to be installed
-packages_need_to_install <- setdiff( packages, packages_already_installed )
-
-# Loads BiocManager into the session. Install it if it not already installed.
-if( !require("BiocManager") ){
-    install.packages("BiocManager")
-    library("BiocManager")
-}
-
-# If there are packages that need to be installed, installs them with BiocManager
-# Updates old packages.
-if( length(packages_need_to_install) > 0 ) {
-   install(packages_need_to_install, ask = FALSE)
-}
-
-# Load all packages into session. Stop if there are packages that were not
-# successfully loaded
-pkgs_not_loaded <- !sapply(packages, require, character.only = TRUE)
-pkgs_not_loaded <- names(pkgs_not_loaded)[ pkgs_not_loaded ]
-if( length(pkgs_not_loaded) > 0 ){
-    stop("Error in loading the following packages into the session: '", paste0(pkgs_not_loaded, collapse = "', '"), "'")
-}
-```
-
 ### Installing specific packages {#sec-packages_specific}
 
 You can install R packages of your choice with the following procedures.
@@ -225,7 +172,9 @@ latest updates.
 ```{r}
 #| label: bioc_devel
 #| eval: FALSE
-BiocManager::install("microbiome/mia", version = "devel")
+
+library(BiocManager)
+install("microbiome/mia", version = "devel")
 ```
 
 **Github development version** provides access to the latest but
@@ -235,8 +184,101 @@ all available tools.
 ```{r}
 #| label: github
 #| eval: FALSE
-devtools::install_github("microbiome/mia")
+
+library(remotes)
+install_github("microbiome/mia")
 ```
+
+### Install key packages {#sec-key-packages}
+
+Installing the core packages listed below is sufficient for training sessions
+and courses, as they provide the essential functionality required to run common
+tasks and most example workflows. You can then install additional packages as
+needed, depending on the specific requirements of your analysis.
+
+Let us fist define a script to install packages.
+
+```{r}
+#| label: install_function
+
+install_packages <- function(pkg){
+    # Get packages that are already installed installed
+    pkg_installed <- pkg[ pkg %in% installed.packages() ]
+
+    # Get packages that need to be installed
+    pkg_to_install <- setdiff( pkg, pkg_installed )
+    
+    # Loads BiocManager into the session. Install it if it not already
+    # installed.
+    if( !require("BiocManager") ){
+        install.packages("BiocManager")
+        library("BiocManager")
+    }
+    
+    # If there are packages that need to be installed, installs them with
+    # BiocManager.
+    if( length(pkg_to_install) > 0 ) {
+       install(pkg_to_install, ask = FALSE)
+    }
+    
+    # Load all packages into session. Stop if there are packages that were not
+    # successfully loaded.
+    pkgs_not_loaded <- !sapply(pkg, require, character.only = TRUE)
+    pkgs_not_loaded <- names(pkgs_not_loaded)[ pkgs_not_loaded ]
+    if( length(pkgs_not_loaded) > 0 ){
+        stop("Error in loading the following packages into the session: '",
+            paste0(pkgs_not_loaded, collapse = "', '"), "'")
+    }
+    return(TRUE)
+}
+```
+
+The core packages include `mia`, `miaViz`, `maaslin3` (for differential
+abundance), and `mikropml` (for supervised ML).
+
+```{r}
+#| label: install_key_packages
+
+pkgs <- c("mia", "miaViz", "maaslin3", "mikropml")
+install_packages(pkgs)
+```
+
+### Installing all packages
+
+You can install all packages that are required to run every example in this
+book via the following command:
+
+```{r}
+#| label: install_packages
+#| eval: FALSE
+
+library(remotes)
+install_github("microbiome/OMA", dependencies = TRUE, upgrade = TRUE)
+```
+
+Optionally, you can install all packages or just certain ones with the following
+script.
+
+```{r}
+#| label: all_packages
+#| eval: FALSE
+
+# URL of the raw CSV file on GitHub. It includes all packages needed.
+url <- "https://raw.githubusercontent.com/microbiome/OMA/devel/oma_packages/oma_packages.csv"
+
+# Read the CSV file directly into R
+df <- read.csv(url)
+packages <- df[[1]]
+# Install packages
+install_packages(packages)
+```
+
+### Docker container
+
+Installing all the packages might take some time, and sometimes there can be
+some troubles. To get quickly access to all packages, you might want to consider
+loading the Docker image. You can find more information from
+[@sec-docker-image].
 
 ### Troubleshoot in installing
 
