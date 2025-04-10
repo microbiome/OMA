@@ -1,7 +1,7 @@
 <!-- badges: start -->
-📦 [Repo](https://github.com/js2264/OMA) [![rworkflows](https://img.shields.io/github/actions/workflow/status/js2264/OMA/rworkflows.yml?label=Package%20check)](https://github.com/js2264/OMA/actions/workflows/rworkflows.yml)
-📖 [Book](https://js2264.github.io/OMA/) [![deployment](https://img.shields.io/github/actions/workflow/status/js2264/OMA/pages/pages-build-deployment?label=Book%20deployment)](https://github.com/js2264/OMA/actions/workflows/pages/pages-build-deployment)
-🐳 [Docker](https://github.com/js2264/OMA/pkgs/container/OMA) [![biocbook](https://img.shields.io/github/actions/workflow/status/js2264/OMA/biocbook.yml?label=Docker%20image)](https://github.com/js2264/OMA/actions/workflows/biocbook.yml)
+📦 [Repo](https://github.com/microbiome/OMA) [![rworkflows](https://img.shields.io/github/actions/workflow/status/microbiome/OMA/rworkflows.yml?label=Package%20check)](https://github.com/microbiome/OMA/actions/workflows/rworkflows.yml)
+📖 [Book](https://microbiome.github.io/OMA/) [![deployment](https://img.shields.io/github/actions/workflow/status/microbiome/OMA/pages/pages-build-deployment?label=Book%20deployment)](https://github.com/microbiome/OMA/actions/workflows/pages/pages-build-deployment)
+🐳 [Docker](https://github.com/microbiome/OMA/pkgs/container/OMA) [![biocbook](https://img.shields.io/github/actions/workflow/status/microbiome/OMA/biocbook.yml?label=Docker%20image)](https://github.com/microbiome/OMA/actions/workflows/biocbook.yml)
 <!-- badges: end -->
 
 **README from [microbiome/OMA](https://github.com/microbiome/OMA)**
