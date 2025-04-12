@@ -210,6 +210,71 @@ molten_mae <- longFormat(
 molten_mae |> head() |> kable()
 ```
 
+## Tidy R programming
+
+The tidy paradigm, first introduced in the tidyverse, promotes an intuitive and
+easy-to-learn coding style, which has made it popular among users. _tidyomics_
+bridges the gap between Bioconductor’s `SummarizedExperiment` ecosystem and the
+_tidyverse_ [@Hutchison2024].
+
+The package `TidySingleCellExperiment` can be used to manage data in `TreeSE`.
+For instance, we can easily view the object as `tibble` abstraction, familiar
+from _tidyverse_.
+
+```{r}
+#| label: tidy1
+
+data("GlobalPatterns")
+tse <- GlobalPatterns
+
+library(tidySingleCellExperiment)
+
+tse
+```
+
+By utilizing tidy programming, we could then effortlessly manipulate the data.
+For instance, we can calculate the mean library size in each
+sample type. This is done by first calculating library size for each sample and
+then summarizing total counts in each sample type; all done by using tidy
+paradigm. For more information on library size, see [@sec-quality-control].
+
+```{r}
+#| label: tidy2
+
+tse %>%
+    join_features(features = rownames(tse)) %>%
+    group_by(.cell) %>%
+    mutate(total_counts = sum(.abundance_counts)) %>%
+    group_by(SampleType) %>%
+    summarise(total_counts = mean(total_counts))
+```
+
+We can then filter samples and leverage `ggplot2` for plotting. In the
+example below, we select soil samples and visualize their abundances with a
+boxplot. Of course, these tidy commands can be combined with `mia` tools. Before
+plotting, we apply CLR transformation by using `trasformAssay()`
+(see more on transformation from [@sec-assay-transform]).
+
+```{r}
+#| label: tidy3
+
+library(ggplot2)
+
+tse %>%
+    filter(SampleType == "Soil") %>%
+    transformAssay(method = "clr", pseudocount = TRUE) %>%
+    join_features(features = rownames(tse)) %>%
+    ggplot(aes(x = .cell, y = .abundance_clr, fill = .cell)) +
+    geom_boxplot()
+```
+
+As demonstrated, tidy R programming can be effectively used to manage `TreeSE`
+objects. Please refer to
+[tidySummarizedExperiment](https://www.bioconductor.org/packages/release/bioc/vignettes/tidySummarizedExperiment/inst/doc/introduction.html)
+and
+[tidySingleCellExperiment](https://www.bioconductor.org/packages/release/bioc/vignettes/tidySingleCellExperiment/inst/doc/introduction.html)
+vignettes for more examples.
+
 ::: {.callout-tip icon=false}
 ## Exercises
 
