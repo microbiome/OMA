@@ -264,14 +264,14 @@ custom functions created by the user also work, as long as they return a `dist`
 object. In either case, this function is then applied to calculate reduced
 dimensions via an ordination method, the results of which can be stored in the
 `reducedDim` slot of the TreeSE. This entire process is contained by the
-`runMDS()` and `runNMDS()` functions.
+`addMDS()` and `addNMDS()` functions.
 
-```{r runMDS}
+```{r addMDS}
 # Load package to plot reducedDim
 library(scater)
 
 # Run PCoA on relabundance assay with Bray-Curtis distances
-tse <- runMDS(
+tse <- addMDS(
     tse,
     FUN = getDissimilarity,
     method = "bray",
@@ -326,7 +326,7 @@ factors can affect the resulting lower-dimensional data.
 
 ```{r mds-nmds-comparison, results='hide'}
 # Run NMDS on relabundance assay with Bray-Curtis distances
-tse <- runNMDS(
+tse <- addNMDS(
     tse,
     FUN = getDissimilarity,
     method = "bray",
@@ -334,7 +334,7 @@ tse <- runNMDS(
     name = "NMDS_bray")
 
 # Run MDS on clr assay with Aitchison distances
-tse <- runMDS(
+tse <- addMDS(
     tse,
     FUN = getDissimilarity,
     method = "euclidean",
@@ -342,7 +342,7 @@ tse <- runMDS(
     name = "MDS_aitchison")
 
 # Run NMDS on clr assay with Euclidean distances
-tse <- runNMDS(
+tse <- addNMDS(
     tse,
     FUN = getDissimilarity,
     method = "euclidean",
@@ -374,10 +374,10 @@ wrap_plots(plots) +
 The _Unifrac_ method is a special case, as it requires data on the
 relationship of features in the form of a `phylo` tree. `getDissimilarity()`
 performs the calculation to return a `dist` object, which can again be
-used within `runMDS()`.
+used within `addMDS()`.
 
 ```{r plot-unifrac, fig.cap = "Unifrac distances scaled by MDS of the GlobalPattern dataset."}
-tse <- runMDS(
+tse <- addMDS(
     tse,
     FUN = getDissimilarity,
     method = "unifrac",
@@ -430,28 +430,6 @@ Moreover, Patrick Schloss has demonstrated that rarefaction is "the only method
 that could control for variation in uneven sequencing effort when measuring
 commonly used alpha and beta diversity metrics" [@Schloss2023].
 
-Before applying rarefaction, selecting the most variable features can help
-minimize variation caused by random subsampling. These features have the highest
-read counts, while rare features tend to increase sampling variation. This
-approach facilitates comparison of results between non-rarefied and rarefied
-distance calculations later on.
-
-```{r}
-#| label: rarefaction2
-
-# Let us see what happens when we operate with ntop highest variance features
-ntop <- 5
-
-# Calculate the standard deviations for each row
-row_sds <- rowSds(assay(tse, "counts"))
-
-# Get the indices of the top 5 rows with the highest standard deviations
-top_indices <- order(row_sds, decreasing = TRUE)[1:ntop]
-
-# Subset the tse object based on the top indices
-tse_sub <- tse[top_indices, ]
-```
-
 Let us first convert the count assay to centered log ratio (clr) assay and
 calculate MDS with Aitchison distance without rarefaction:
 
@@ -460,63 +438,72 @@ calculate MDS with Aitchison distance without rarefaction:
 
 # Centered log-ratio transformation to properly apply Aitchison distance
 
-tse_sub <- transformAssay(
-  tse_sub,
-  assay.type = "counts",
-  method = "clr",
-  pseudocount = 1
-  )
+tse <- transformAssay(
+    tse,
+    assay.type = "counts",
+    method = "clr",
+    pseudocount = 1
+    )
 
 # Run MDS on clr assay with Aitchison distance
-tse_sub <- runMDS(
-  tse_sub,
-  FUN = getDissimilarity,
-  method = "euclidean",
-  assay.type = "clr",
-  name = "MDS_aitchison"
-  )
+tse <- addMDS(
+    tse,
+    FUN = getDissimilarity,
+    method = "euclidean",
+    assay.type = "clr",
+    name = "MDS_aitchison"
+    )
 ```
 
 Then let's do the same with rarefaction:
 
-
 ```{r}
-#| label = "MDS plot based on the Bray-Curtis distances using rarefaction."
-
+#| label: rarefied_mds
+#
 # Define custom transformation function..
 clr <- function (x) {
-  vegan::decostand(x, method="clr", pseudocount=1)
+    vegan::decostand(x, method = "clr", pseudocount = 1)
 }
 
-# Run transformation after rarefactions before calculating the beta diversity..
-tse_sub <- runMDS(tse_sub,
-  assay.type = "counts",
-  ntop = nrow(tse_sub),
-  FUN = getDissimilarity,
-  method = "euclidean",
-  niter = 10, # Number of iterations
-  sample = min(colSums(assay(tse_sub, "counts"))), # Rarefaction depth
-  transf = clr, # Applied transformation
-  replace = TRUE,
-  name = "MDS_aitchison_rarefied"
-  )
+# Run transformation after rarefactions before calculating the beta diversity
+tse <- addMDS(
+    tse,
+    assay.type = "counts",
+    FUN = getDissimilarity,
+    method = "euclidean",
+    niter = 10, # Number of iterations
+    sample = min(colSums(assay(tse, "counts"))), # Rarefaction depth
+    transf = clr, # Applied transformation
+    replace = TRUE,
+    name = "MDS_aitchison_rarefied"
+    )
+```
+
+Now we are ready for plot non-rarefied and rarefied MDS plots side-by-side.
+
+```{r}
+#| label: MDS plot based on the Bray-Curtis distances using rarefaction.
+#| fig-width: 12
 
 # Generate plots for non-rarefied and rarefied Bray-Curtis distances scaled by
 # MDS
 plots <- lapply(
-  c("MDS_aitchison", "MDS_aitchison_rarefied"),
-  plotReducedDim,
-  object = tse_sub)
+    c("MDS_aitchison", "MDS_aitchison_rarefied"),
+    plotReducedDim,
+    object = tse,
+    colour_by = "SampleType"
+    )
 
 # Generate multi-panel plot
 wrap_plots(plots) +
-  plot_layout(guides = "collect")
+    plot_layout(guides = "collect")
 ```
 
-`ntop` is a `runMDS()` option. Here it is set to total number of features in 
+`ntop` is a `addMDS()` option. Here it is set to total number of features in 
 `GlobalPatterns` dataset so that they are not filtered. If `ntop` was not set to 
-the total number of features, only the `ntop` features with highest variance would
-be used for dimensionality reduction and the other features would be filtered.
+the total number of features, only the `ntop` features with highest variance
+would be used for dimensionality reduction and the other features would be
+filtered.
 
 When rarefaction is not done, the `getDissimilarity()` utilizes
 `vegan::vegdist()` function while in rafection `vegan::avgdist()` is applied.
@@ -539,16 +526,19 @@ both the rarefied and non-rarefied distance calculations:
 library(ggpubr)
 
 p <- lapply(1:2, function(i){
-  # Principal axes are sign invariant;
-  # align the signs; if the correlation is negative then swap the other axis
-  original <- reducedDim(tse_sub, "MDS_aitchison")[, i]
-  rarefied <- reducedDim(tse_sub, "MDS_aitchison_rarefied")[, i]
-
-  temp  <- ggplot(data = data.frame(original, rarefied), aes(x = original, y = rarefied)) +
-    geom_point() + geom_smooth(method = "lm") +
-    stat_cor(method = "pearson") +
-    labs(title = paste0("Principal coordinate ", i))
-  return(temp)
+    # Principal axes are sign invariant;
+    # align the signs; if the correlation is negative then swap the other axis
+    original <- reducedDim(tse, "MDS_aitchison")[, i]
+    rarefied <- reducedDim(tse, "MDS_aitchison_rarefied")[, i]
+  
+    temp  <- ggplot(
+        data = data.frame(original, rarefied),
+        aes(x = original, y = rarefied)
+        ) +
+        geom_point() + geom_smooth(method = "lm") +
+        stat_cor(method = "pearson") +
+        labs(title = paste0("Principal coordinate ", i))
+    return(temp)
 })
 wrap_plots(p)
 ```
@@ -618,7 +608,7 @@ better if smaller. This can be calculated as shown below.
 d0 <- as.matrix(getDissimilarity(t(assay(tse, "relabundance")), "bray"))
 
 # PCoA Ordination
-tse <- runMDS(
+tse <- addMDS(
   tse,
   FUN = getDissimilarity,
   name = "PCoA",
@@ -876,7 +866,7 @@ summarizeDominance(
 Next, we perform PCoA with Bray-Curtis dissimilarity.
 
 ```{r}
-tse_genus <- runMDS(
+tse_genus <- addMDS(
     tse_genus,
     FUN = getDissimilarity,
     name = "PCoA_BC",
@@ -978,8 +968,8 @@ methods store the reducedDim object into the specified TreeSE.
   to assess differences in community composition (beta diversity)
 * Double Principal Coordinate Analysis (DPCoA): `getDPCoA()` and `runDPCoA()`
 * Jensen-Shannon Divergence (JSD): `calculateJSD()` and `runJSD()`
-* MDS: `calculateMDS()` and `runMDS()`
-* NMDS: `getNMDS()` and `runNMDS()`
+* MDS: `getMDS()` and `addMDS()`
+* NMDS: `getNMDS()` and `addNMDS()`
 * Overlap: `calculateOverlap()` and `runOverlap()`
 * PERMANOVA: (e.g. from `vegan::adonis2()`) can be used to assess
   significance when comparing community composition between
