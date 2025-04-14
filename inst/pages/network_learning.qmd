@@ -8,7 +8,7 @@ chapterPreamble()
 Learning and analyzing microbial association networks is another common
 exploratory data analysis approach aimed at understanding the complex
 interplay of microbial communities in their natural habitat. Microbial
-networks consist of nodes, representing microbial species or taxa, and edges
+networks consist of nodes, representing microbial species or features, and edges
 expressing their associations. The mathematical representation of a network is
 the adjacency matrix, which has a non-zero entry for each edge in the network.
 
@@ -54,7 +54,8 @@ also a suitable approach for normalizing microbial count data
 [@badri2020shrinkage].
 
 3.  **Association estimation:** This is the crucial step in network learning
-to obtain statistical relations between the taxa. Common association measures
+to obtain statistical relations between the taxnomic features. Common
+association measures
 include correlation, conditional dependence (which we will equate to partial
 correlation), and proportionality. Further information on these three types of
 association and their application can be found in [@sec-more-about-association].
@@ -90,16 +91,17 @@ sparsification level of the inferred conditional dependence graph.
 the absolute values of the sparsified associations as the edge weights. In
 this way, correlations of high magnitude (both positive and negative) will
 have a high edge weight. From a biological point of view, it would also make
-sense to assign a low edge weight to taxa that are strongly negatively
+sense to assign a low edge weight to taxonomic features that are strongly
+negatively
 associated, which would correspond to a high dissimilarity value. Here we
 follow @vanDongen2012metric to directly transform the sparse
 associations $r_{ij}^*$ into dissimilarities, which can later be used for
 shortest path network measures. Depending on the desired handling of negative
 associations, one of the two proposed transformations should be chosen:
 
-    5a: **"signed":** $d_{ij} = \sqrt{0.5(1-r^*_{ij})}$, where strongly negatively associated taxa have the largest distance and are placed further apart in the network.
+    5a: **"signed":** $d_{ij} = \sqrt{0.5(1-r^*_{ij})}$, where strongly negatively associated taxonomic features have the largest distance and are placed further apart in the network.
 
-    5b: **"unsigned":** $d_{ij} = \sqrt{1-{r_{ij}^*}^2}$, resulting in a small distance between strongly associated taxa (regardless of the sign).
+    5b: **"unsigned":** $d_{ij} = \sqrt{1-{r_{ij}^*}^2}$, resulting in a small distance between strongly associated taxonomic features (regardless of the sign).
 
 6.  **Transformation into similarity / edge weight:** Finally, the
 dissimilarities are transformed into similarities by $s_{ij} = 1 - d_{ij}$,
@@ -332,9 +334,9 @@ library(NetCoMi)
 We again use `SPRING` as one of the association measures available in `NetCoMi`
 to construct a conditional dependency graph.
 
-To demonstrate how taxa are filtered with `netConstruct()`, we will use the
-unfiltered `tse` object this time. The filtering is the same as before: Taxa
-occurring in less than 20% of the samples are removed.
+To demonstrate how taxonomic features are filtered with `netConstruct()`,
+we will use the unfiltered `tse` object this time. The filtering is the same as
+before: Features occurring in less than 20% of the samples are removed.
 
 ```{r netcomi_net_single, eval=FALSE}
 netcomi_net <- netConstruct(
@@ -805,7 +807,7 @@ research question before starting the analysis.
 
 As mentioned in the introduction of this chapter, there are three types of
 association measures that are commonly used to express relationships between
-taxa: correlation, conditional dependence, and proportionality. Below, we
+features: correlation, conditional dependence, and proportionality. Below, we
 provide a brief explanation of each of these measures, along with lists of
 available compositionality-aware approaches.
 
@@ -813,7 +815,9 @@ available compositionality-aware approaches.
 Pearson's correlation coefficient and Spearman's rank correlation coefficient,
 both of which can be inferred from empirical (sample) covariances. However,
 in the $p\gg n$ setting, which most microbiome datasets are in, sample
-covariances and correlations are unreliable because the parameters being estimated are typically underdetermined. One way to improve sample covariance estimates is to assume that the underlying covariance matrix is
+covariances and correlations are unreliable because the parameters being
+estimated are typically underdetermined. One way to improve sample covariance
+estimates is to assume that the underlying covariance matrix is
 sparse and use a regularized covariance estimator to implement this structural
 assumption. The Schäfer-Strimmer shrinkage estimator [@schafer2005shrinkage]
 is one possible method for estimating a sparse correlation matrix. Other
@@ -833,8 +837,8 @@ features in the data set. The approach and R package
 estimation for Ecological Association and Statistical Inference") by
 @Kurtz2015 is specifically designed for inferring ecological networks from
 microbiome data and includes two approaches for estimating conditional
-dependence structures between taxa: Neighborhood Selection; short "MB"
-[@meinshausen2006high] and (inverse) covariance selection
+dependence structures between taxonomic features: Neighborhood Selection; short
+"MB" [@meinshausen2006high] and (inverse) covariance selection
 [@friedman2008sparse], which is based on a penalized maximum likelihood
 approach and is also known as "graphical lasso". Another approach and R
 package for inferring partial correlations from microbiome data is
@@ -848,7 +852,7 @@ penalized maximum likelihood estimation. All of the aforementioned
 conditional dependence measures address the high dimensionality of microbiome data.
 -  **Proportionality:** @lovell2015proportionality introduce proportionality
 as an alternative measure of pairwise association for compositional data.
-The idea is that if the relative abundances between two taxa $i$ and $j$ are
+The idea is that if the relative abundances between two features $i$ and $j$ are
 proportional, then their corresponding absolute abundances are also
 proportional:
 $\frac{\omega_i}{m} \propto \frac{\omega_j}{m} \Rightarrow \omega_i \propto \omega_j$,
