@@ -7,8 +7,8 @@ library(rebook)
 chapterPreamble()
 ```
 
-An important component of many microbiome studies is Differential Abundance
-Analysis (DAA). It is used to identify differences in the abundances of
+An important component of many microbiome studies is differential abundance
+analysis (DAA). It is used to identify differences in the abundances of
 individual taxa (at any taxonomic level) between two or more groups, such as
 treatment versus control groups.
 
@@ -119,7 +119,6 @@ people are from three different cohorts.
 library(tidyverse)
 library(mia)
 library(knitr)
-library(miaViz)
 
 # Import dataset
 data("Tengeler2020", package = "mia")
@@ -131,15 +130,15 @@ table(tse$patient_status, tse$cohort) |>
 ```
 
 
-#### Preparing the data
+### Preparing the data
 
 Before starting the analysis, it is recommended to reduce the size and
 complexity of the data to make the results more reproducible. For this
 purpose, we agglomerate the features by genus and filter them by a prevalence
-threshold of 10%. Furthermore, we create assays for relative abundances and presence/absence of
-taxa. Lastly, we transfrom variable `patient_status` to a factor with `Control`
-as the reference level. (It is a standard practice to use the control group as
-the reference group in many statistical analyses.)
+threshold of 10%. Furthermore, we create assays for relative abundances and
+presence/absence of taxa. Lastly, we transfrom variable `patient_status` to a
+factor with `Control` as the reference level. (It is a standard practice to use
+the control group as the reference group in many statistical analyses.)
 
 ```{r}
 #| label: prepare_data 
@@ -161,7 +160,828 @@ tse$cohort <- factor(tse$cohort, levels = c('Cohort_1', 'Cohort_2', 'Cohort_3'))
 ```
 
 
-### Analyzing relative abundances with ordinal regression model {#sec-daa}
+### Performing differential abundance analysis {#sec-daa}
+
+We show here how to perform DAA by analyzing relative abundances with linear
+regression models. (Note that e.g. t-test, ANOVA and ANCOVA are special cases of
+linear regression models.)
+
+The advantages of linear regression models are, for instance,
+their robustness to assumptions, simplicity and interpretability. However,
+as linear regression models assume normality of the response variable the
+relative abundances (having usually very skewed distributions) need to be
+transformed before the analysis. The choice of transformation adds
+arbitrariness to the analysis, however. Furthermore, when using the log
+transformation the zero abundances must be treated somehow, for instance, by
+adding an arbitrary pseudo-count to the counts (before transforming to relative
+abundances). The arbitrariness related to the transformation can be considered
+as one of the main disadvantages of employing linear regression models in DAA.
+Nevertheless, linear regression models have been observed to perform well in
+practice in DAA (@Wirbel2024, @Pelto2025), so we will employ them here.
+
+We employ the `Maaslin2` function from the MaAsLin2 package [@Mallick2020]. The
+function takes the untransformed count matrix as input. It first replaces
+the zero counts by half of the smallest non-zero count separately for each
+taxon. Next, it transforms the counts to relative abundances and then
+applies $log_{2}$ transformation to them. Lastly, it runs
+a linear regression model for each taxon using the transformed relative
+abundances as the response variable.
+
+
+#### The basic two-group comparison {#sec-daa-basic}
+
+We first perform the basic two-group comparison without any other covariates
+(i.e. t-test). We compare the relative abundance of taxa between the people
+with and without ADHD.
+
+The `Maaslin2` function takes the count matrix and metadata as inputs.
+We also need to provide it with the variable indicating the groups,
+i.e. `patient_status` in our case. Furthermorem we need to specify the folder
+for some ouput files, even though we do not need the files here. Lastly, we
+prevent Maaslin2 to create certain plots. (`Maaslin2` prints a lot of some
+rather unnecessary output which is supresseed here for conveniency.)
+
+```{r}
+#| label: run_daa_basic
+#| results: hide
+
+library(Maaslin2)
+
+obj_daa_basic <- Maaslin2(
+  input_data = assay(tse),                          # The count matrix
+  input_metadata = colData(tse) |> as.data.frame(), # The metadata
+  fixed_effects = "patient_status",                 # The predictor variable
+  
+  output = 'output', # The name of the folder for ouput files.
+  plot_heatmap = FALSE,
+  plot_scatter = FALSE)
+```
+
+Next, we extract the data.frame of results from the list object returned by
+`Maaslin2`. We also calculate the 95% confidence intervals and transform the
+results to a slightly more convenient format. (The `N - 2` in the calculation
+of the confidence intervals indicates the residual degrees of freedom. Usually
+you can use the sample size `N` there as a good approximation.)
+
+```{r}
+#| label: results_daa_basic
+
+# Extract the results from the list object and calculate the 95% CIs
+res_daa_basic <- obj_daa_basic$results |> 
+  mutate(ci_lwr = coef - qt(.975, df = N - 2) * stderr,
+         ci_upr = coef + qt(.975, df = N - 2) * stderr) |>
+  select(feature, name, coef, pval, qval, ci_lwr, ci_upr)
+
+# Print the results for taxa with the smallest p-values
+res_daa_basic |> arrange(pval) |> head() |> kable()
+```
+
+The columns of `res_daa_basic` are as follows:
+
+- `feature` indicates the taxon (here genus) name.
+- `name` indicates the predictor variable. As `patient_status` is a
+categorical variable, it also tells the group used as the _non_-reference level
+(here `ADHD` as `Control` was set as the reference level).
+- `coef` is the log~2~-fold change estimate, a standard way to express effect
+size in DAA.
+Most importantly, positive values indicate abundance being higher in the
+non-reference group (here `ADHD`). More precisely, `2 ^ coef` would be
+interpreted here as the ratio of geometric means of the relative abundances
+between the ADHD and Control groups.
+- `pval` is the unadjusted p-value.
+- `qval` (q-value) is the FDR adusted p-value. This is generally used to define
+statisitcal significance. Typically, q-values < .05 are considered as
+(statistically) significant.
+- `ci_lwr` and `ci_upr` are the lower and upper bounds of the 95% confidence 
+intervals for the log~2~-fold change.
+
+Thus, if we use the standard criterion for statistical significance, namely,
+q-value < 0.05, we can see that the difference is statistically significant for
+the genera named as _Ruminococcus gauvreauii group_, _Faecalibacterium_,
+_Catabacter_, _Clostridium innocuum group_ and _Erysipelatoclostridium_.
+Furthermore, as the log~2~-fold change estimate is positive, for instance, for
+_Faecalibacterium_ it means that the average relative abundance of
+_Faecalibacterium_ is higher in the ADHD group.
+
+
+#### DAA with additional covariates {#sec-daa-cov}
+
+Here we show how to perform DAA with an additional covariate included in the
+analysis. One usually wants to include a variable as a covariate if they suspect
+that it may act as a _confounding_ variable, namely, a variable that causes a
+spurious association between the variable of main interest and the abundances.
+
+We use here `cohort` as a covariate. We proceed as above except that we now set
+`fixed_effects = c("patient_status", "cohort")`. Furthermore, we now calculate
+the q-values manually so that they are calculated separately for each variable
+in the model. This is because `Maaslin2` calculates the q-values over all
+variables in the model which is usually _not_ what we want as we are usually
+mainly interested only in one variable (here `patient_status`).
+
+
+```{r}
+#| label: daa_cov
+#| results: hide
+
+# Run Maaslin2 with patient_status and cohort as predictor variables
+obj_daa_cov <- Maaslin2(
+  input_data = assay(tse),                          
+  input_metadata = colData(tse) |> as.data.frame(),
+  fixed_effects = c("patient_status", "cohort"),
+  output = 'output',
+  plot_heatmap = FALSE,
+  plot_scatter = FALSE)
+
+# Extract the results and calculate the 95% CIs and q-values
+res_daa_cov <- obj_daa_cov$results |> 
+  mutate(ci_lwr = coef - qt(.975, df = N - 4) * stderr,
+         ci_upr = coef + qt(.975, df = N - 4) * stderr) |>
+  group_by(name) |> 
+  mutate(qval = p.adjust(pval, method = "fdr")) |>
+  ungroup() |>
+  select(feature, name, coef, pval, qval, ci_lwr, ci_upr)
+```
+
+```{r}
+#| label: print_daa_cov_1
+
+# Print a sample of the results
+res_daa_cov |> arrange(feature, name) |> head() |> kable()
+```
+
+Note that there now appear results also for the variable `cohort`. As `cohort`
+consists of three groups, namely, `Cohort_1` (the reference group), `Cohort_2`
+and `Cohort_3`, there are results separately for the comparison between
+`Cohort_2` vs. `Cohort_1` (`cohortCohort_2`) and for the comparison between
+`Cohort_3` vs. `Cohort_1` (`cohortCohort_3`).
+
+We can now examine how the inclusion of `cohort` as a covariate affects the
+results for `patient_status`.
+
+```{r}
+#| label: print_daa_cov_2
+
+# Print the results for taxa with the smallest p-values for patient_status
+res_daa_cov |> 
+  filter(name == "patient_statusADHD") |> 
+  arrange(pval) |> 
+  head() |> 
+  kable()
+```
+
+When comparing these results to the results without the covariate included, we
+can see that, for instance, the q-value of _Faecalibacterium_ and
+_Catabacter_ are now somewhat smaller. Nevertheless, the results overally look
+rather similar to the results without the covariate included. Therefore, cohort
+does not not seem to be a confounder causing spurious associations between 
+patient status and the abundances of any taxa.
+
+
+#### DAA with an interaction {#sec-daa-ia}
+
+Here we show a more complex version of DAA, namely, a case where the interaction
+effect of two variables is analyzed. We give this example here for illustration
+purposes but note that such complex analysis may not be advisable with a small
+dataset such as our example dataset.
+
+We analyze interaction between `patient_status` and `cohort`. We proceed as in
+@sec-daa-cov above except that we now add also the interaction term into the
+formula. As `Maaslin2` does not directly support the analysis with interactions
+we must first create the interaction dummy variables in to the
+metadata. The main effects `patient_status` and `cohort` as well as the
+interaction dummy variables are then included in the `Maaslin2` function.
+
+```{r}
+#| label: run_daa_ia
+#| results: hide
+
+# Create dummy variables for the interaction term
+tse$patient_statusADHD_cohortCohort_2 <- 
+  ifelse(tse$patient_status == "ADHD" & tse$cohort == "Cohort_2", 1, 0)
+tse$patient_statusADHD_cohortCohort_3 <- 
+  ifelse(tse$patient_status == "ADHD" & tse$cohort == "Cohort_3", 1, 0)
+
+# Run Maaslin2 with patient_status, cohort and their interaction terms
+obj_daa_ia <- Maaslin2(
+  input_data = assay(tse),                          
+  input_metadata = colData(tse) |> as.data.frame(),
+  fixed_effects = c("patient_status",
+                    "cohort",
+                    "patient_statusADHD_cohortCohort_2",
+                    "patient_statusADHD_cohortCohort_3"),
+  output = 'output',
+  plot_heatmap = FALSE,
+  plot_scatter = FALSE)
+
+# Extract the results and calculate the 95% CIs and q-values
+res_daa_ia <- obj_daa_ia$results |> 
+  mutate(ci_lwr = coef - qt(.975, df = N - 6) * stderr,
+         ci_upr = coef + qt(.975, df = N - 6) * stderr) |>
+  group_by(name) |> 
+  mutate(qval = p.adjust(pval, method = "fdr")) |>
+  ungroup() |>
+  select(feature, name, coef, pval, qval, ci_lwr, ci_upr)
+```
+
+```{r}
+#| label: run_daa_ia_1
+#| 
+# Print a sample of the results
+res_daa_ia |> arrange(feature, name) |> head() |> kable()
+```
+
+The results object `res_daa_ia` now also includes the interaction
+terms `patient_statusADHD_cohortCohort_2` and
+`patient_statusADHD_cohortCohort_3`. 
+
+We examine the term `patient_status_cohortCohort_3`. It indicates how the
+differences between the ADHD and Control groups vary between cohorts 1 and 3.
+
+```{r}
+#| label: print_daa_ia_2
+
+# Print the results for the interaction term patient_statusADHD_cohortCohort_3
+res_daa_ia |> 
+  filter(name == "patient_statusADHD_cohortCohort_3") |> 
+  arrange(pval) |> 
+  head() |> 
+  kable()
+```
+
+The smallest p-value is observed for _Coprobacter_. As the log~2~-fold change
+estimate is negative it means that the difference in the relative abundance of
+_Coprobacter_ between the ADHD and Control groups is higher in Cohort 1 than
+in Cohort 3.
+
+
+#### Ordinal regression model as an alternative to linear regression model
+
+If on wants to avoid the use of transformations needed with linear regression
+models, we suggest performing DAA using non/semi-parametric ordinal regression
+models (ORM). As there does not currently exist a good implementation of ORM for
+DAA one has to use a custom function. Such custom function with application
+examples is given in the [@sec-extras].
+
+
+### Performing differential presence/absence (prevalence) analysis {#sec-dpaa}
+
+We show here how to perform differential presence/absence analysis (DPAA) with
+logistic regression. Due to a convenient implementation of logistic regression
+for DPAA, we employ here the maaslin3 package [@Nickols2024].
+
+We note, however, that the version of logistic regression used maaslin3 provides
+rather conservative results, that is, it rarely provides false positive results
+but, importantly,
+_it may **not** detect some clear differences in presence/absence_. For a better
+performance, we recommend using a version of logistic regression introduced by
+@Firth1993. As there currently exist no convenient implenetation of Firth
+logistic regression for DPAA, one needs to use a custom function. Such custom
+function with application examples is given in the [@sec-extras]. 
+
+It is also important to note that we will analyze the _observed_
+presence/absence of taxa (i.e. observed non-zero/zero count) and not the
+presence/absence of taxa in their ecosystem. Those concepts are not the same
+because a taxon that is present in an ecosystem may be left undetected if, for
+instance, its abundance is below the detection limit of the experimantal
+workflow used in processing/analyzing the microbial samples [@Silverman2020].
+
+
+#### The basic two-group comparison for presence/absence {#sec-dpaa-basic}
+
+We first perform the basic two-group comparison without any other covariates.
+We compare the presence/absence of taxa between the people with and without
+ADHD.
+
+The `maaslin3` function takes the `tse` object as input. We also need to provide
+it with the model formula, in this case `~ patient_status`. Furthermore, we need
+to specify the folder for some ouput files, even though we do not need the files
+here. Lastly, we prevent `maaslin3` to create certain plots and print some
+unnecessary output.
+
+```{r}
+#| label: run_dpaa_basic
+
+library(maaslin3)
+
+# Run maaslin3 with patient_status as the predictor variable
+obj_dpaa_basic <- maaslin3(
+  tse,                          
+  formula = ~ patient_status, # Model formula
+  output = 'output',          # The name of the folder for some ouput files.
+  plot_associations = FALSE,  # Prevent some unnecessary plots
+  plot_summary_plot = FALSE,
+  verbosity = 'ERROR')        # Prevent some unnecessary output
+```
+
+Next, we extract the data.frame of results from the list object returned by
+`maaslin3`. We also calculate the 95% confidence intervals and transform the
+results to a slightly more convenient format.
+
+```{r}
+#| label: results_dpaa_basic
+
+# Extract and transform the results to the same form as before 
+res_dpaa_basic <- obj_dpaa_basic$fit_data_prevalence$results |> 
+  mutate(ci_lwr = coef - qnorm(.975) * stderr,
+         ci_upr = coef + qnorm(.975) * stderr) |>
+  select(feature, name, coef, pval = pval_individual, qval = qval_individual,
+         ci_lwr, ci_upr)
+
+# The results for taxa with the smallest p-values
+res_dpaa_basic |> arrange(pval) |> head() |> kable()
+```
+
+The results are now in the same format as the DAA results in @sec-daa-basic. The
+only difference is `coef` now indicates the log-odds ratio for the difference
+in prevalences. The odds ratios (OR) are thus calculated as `or = exp(coef)`.
+Note also that the results are not provided for taxa that were present in all
+samples (as it is not sensible to analyze presence/absence differences for
+such taxa).
+
+By examining the results we see that the smallest p-value was observed for
+genus _Erysipelatoclostridium_. As the sign of the estimate is _negative_ is
+means that the genus is more prevalent in the control group.
+
+
+#### DPAA with additional covariates {#sec-dpaa-cov}
+
+Here we show how to perform DPAA with `cohort` included as an additional
+covariate in the analysis. We proceed as above but we now set the formula to
+`~ patient_status + cohort`. We also calculate the q-values manually as in 
+@sec-daa-cov.
+
+```{r}
+#| label: dpaa_cov
+
+# Run maaslin3 with patient_status and cohort as predictor variables
+obj_dpaa_cov <- maaslin3(
+  tse,                          
+  formula = ~ patient_status + cohort,
+  output = 'output',          
+  plot_associations = FALSE,
+  plot_summary_plot = FALSE,
+  verbosity = 'ERROR')
+
+# Extract the results and calculate the 95% CIs and q-values
+res_dpaa_cov <- obj_dpaa_cov$fit_data_prevalence$results |> 
+  mutate(ci_lwr = coef - qnorm(.975) * stderr,
+         ci_upr = coef + qnorm(.975) * stderr) |>
+  group_by(name) |> 
+  mutate(qval = p.adjust(pval_individual, method = "fdr")) |>
+  ungroup() |>
+  select(feature, name, coef, pval = pval_individual, qval, ci_lwr, ci_upr)
+```
+
+The `res_dpaa_cov` corresponds to the `res_daa_cov` in @sec-daa-cov.
+
+```{r}
+#| label: print_dpaa_cov
+
+# Print the results for taxa with the smallest p-values for patient_status
+res_dpaa_cov |> 
+  filter(name == "patient_statusADHD") |> 
+  arrange(pval) |> 
+  head() |> 
+  kable()
+```
+
+By examining the results of taxa with the smallest p-values we see that,
+overall, the results are rather similar to the results without the covariate.
+
+
+#### DPAA with an interaction {#sec-logr-ia}
+
+Next, we show how to perform DPAA with interaction terms. Contrary to
+`Maaslin2`, the `maaslin3` function supports also the analysis with interaction
+terms. Therefore, we can just add an intercation term in the model formula by
+using the stndard R syntax
+`formula = ~ patient_status + cohort + patient_status:cohort` or
+alternatively `formula = ~ patient_status * cohort`. The latter is usually more
+convenient.
+
+```{r}
+#| label: dpaa_ia
+
+# Run maaslin3 with patient_status, cohort and their interaction
+obj_dpaa_ia <- maaslin3(
+  tse,                          
+  formula = ~ patient_status * cohort,
+  output = 'output',          
+  plot_associations = FALSE,
+  plot_summary_plot = FALSE,
+  verbosity = 'ERROR')
+
+# Extract the results and calculate the 95% CIs and q-values
+res_dpaa_ia <- obj_dpaa_ia$fit_data_prevalence$results |> 
+  mutate(ci_lwr = coef - qnorm(.975) * stderr,
+         ci_upr = coef + qnorm(.975) * stderr) |>
+  group_by(name) |> 
+  mutate(qval = p.adjust(pval_individual, method = "fdr")) |>
+  ungroup() |>
+  select(feature, name, coef, pval = pval_individual, qval, ci_lwr, ci_upr)
+```
+
+As in @sec-daa-ia we examine the term `patient_status:cohortCohort_3`. It
+indicates how the differences in presence/absences between the ADHD and Control
+groups vary between cohorts 1 and 3.
+
+```{r}
+#| label: print_dpaa_ia
+
+# Print the results for the interaction term patient_statusADHD:cohortCohort_3
+res_dpaa_ia |> 
+  filter(name == "patient_statusADHD:cohortCohort_3") |> 
+  arrange(pval) |> 
+  head() |> 
+  kable()
+```
+
+As, for instance, the log odd ratio estimate (`coef`) is negative for
+_Barnesiella_ it indicates that the difference in the prvelance of
+_Barnesiella_ between the ADHD and Control groups is higher in Cohort 1 than
+in Cohort 3. (None of the results are close to significant after the FDR
+adjustnment, however.)
+
+
+### Analyzing positive (non-zero) abundances {#sec-daa-pos}
+
+It may sometimes be biologically relevant to analyze only the positive
+relative abundances of taxa. We show here how to perform such analysis.
+
+It should be noted, however, that especially in small datasets (like the
+example dataset used here), the number of positive/non-zero abundances may be
+very small for some taxa. Therefore, this type of analysis may not always be
+reasonable. Furthermore, we note again that one should keep in mind that the
+observed absence of a taxon does not necessarily mean that the taxon
+is truly absent in a microbial sample.
+
+The analysis of positive relative abundances can be easily performed by using
+maaslin3 package [@Nickols2024]. It first applies $log_{2}$ transformation to
+the positive relative abundances and performs linear regression analysis for
+each taxon. It should be especially noted that log transformation is very
+convenient here as there are no zeros that would require some special treatment.
+
+
+#### The basic two-group comparison {#sec-daa-pos-basic}
+
+We proceed as in sections @sec-daa-basic and @sec-dpaa-basic. The difference
+copmpared to DPAA is that we now have to extract `fit_data_abundance` (and not
+`fit_data_prevalence`) from the list object returned by `maaslin3`. We also
+need to set `median_comparison_abundance = FALSE` in the function call as we
+want to estimate the differences of (positive) relative abundances and not make
+any compositinal adjustments.
+
+```{r}
+#| label: daa_pos_basic
+
+# Run maaslin3 with patient_status as the predictor variable
+obj_daa_pos_basic <- maaslin3(
+  tse,
+  output = 'output',
+  formula = ~ patient_status,
+  median_comparison_abundance = FALSE,
+  verbosity = 'ERROR',
+  plot_associations = FALSE,
+  plot_summary_plot = FALSE)
+
+# Extract the results and calculate also the 95% confidence intervals
+res_daa_pos_basic <- obj_daa_pos_basic$fit_data_abundance$results |> 
+  mutate(ci_lwr = coef - qt(.975, df = N_not_zero - 2) * stderr,
+         ci_upr = coef + qt(.975, df = N_not_zero - 2) * stderr) |>
+  select(feature, name, coef, pval = pval_individual, qval = qval_individual,
+         ci_lwr, ci_upr, N_not_zero)
+
+# Print the results for taxa with the smallest p-values
+res_daa_pos_basic |> arrange(pval) |> head() |> kable()
+```
+
+The results are interpreted in a similar manner as in DAA (section
+@sec-daa-basic). `N_not_zero` indicates the number of samples with
+positive (non-zero) relative abundances. Note that the results are not provided
+for taxa with too few positive abundances.
+
+
+#### Analysis with covariates {#sec-daa-pos-cov}
+
+To include cohort as a covariate in the analysis, we proceed as above but we
+just set `formula = ~ patient_status + cohort`. Moreover, we again calculate the q-values manually as explained in section @sec-daa-cov. (The results for taxa
+with too few positive abundances are also filtered out.)
+
+```{r}
+#| label: daa_pos_cov
+
+# Run maaslin3 with patient_status and cohort as the predictor variables
+obj_daa_pos_cov <- maaslin3(
+  tse,
+  output = 'output',
+  formula = ~ patient_status + cohort,
+  median_comparison_abundance = FALSE,
+  verbosity = 'ERROR',
+  plot_associations = FALSE,
+  plot_summary_plot = FALSE)
+
+# Extract the results and alculate the 95% confidence intervals and q-values 
+res_daa_pos_cov <- obj_daa_pos_cov$fit_data_abundance$results |> 
+  filter(!is.na(pval_individual) & N_not_zero > 4) |>
+  mutate(ci_lwr = coef - qt(.975, df = N_not_zero - 4) * stderr,
+         ci_upr = coef + qt(.975, df = N_not_zero - 4) * stderr) |>
+  group_by(name) |> 
+  mutate(qval = p.adjust(pval_individual, method = "fdr")) |>
+  ungroup() |>
+  select(feature, name, coef, pval = pval_individual, qval, ci_lwr, ci_upr,
+         N_not_zero)
+
+# The results for patient_status for the taxa with the smallest p-values
+res_daa_pos_cov |> 
+  filter(name == "patient_statusADHD") |> 
+  arrange(pval) |> 
+  head() |> 
+  kable()
+```
+
+The results are interpreted in a similar manner as in DAA (section
+@sec-daa-cov).
+
+
+#### Analysis with interaction {#sec-daa-pos-ia}
+
+The analysis of positive relative abundances with interaction effect can be
+performed as follows.
+
+```{r}
+#| label: daa_pos_ia
+
+# Run maaslin3 function.
+obj_daa_pos_ia <- maaslin3(
+  tse,
+  output = 'output',
+  formula = ~ patient_status * cohort,
+  median_comparison_abundance = FALSE,
+  verbosity = 'ERROR',
+  plot_associations = FALSE,
+  plot_summary_plot = FALSE)
+
+# Extract the results and calculate the 95% confidence intervals and q-values 
+res_daa_pos_ia <- obj_daa_pos_ia$fit_data_abundance$results |> 
+  filter(!is.na(pval_individual) & N_not_zero > 6) |>
+  mutate(ci_lwr = coef - qt(.975, df = N_not_zero - 6) * stderr,
+         ci_upr = coef + qt(.975, df = N_not_zero - 6) * stderr) |>
+  group_by(name) |> 
+  mutate(qval = p.adjust(pval_individual, method = "fdr")) |>
+  ungroup() |>
+  select(feature, name, coef, pval = pval_individual, qval, ci_lwr, ci_upr,
+         N_not_zero)
+
+# The results for the interacion between patient_status and cohort (when
+# comparing Cohort_3 to Cohort_1) for the taxa with the smallest p-values
+res_daa_pos_ia |> 
+  filter(name == "patient_statusADHD:cohortCohort_3") |> 
+  arrange(pval) |> 
+  head() |> 
+  kable()
+```
+
+Again, the results are interpreted in a similar manner as in DAA (section
+@sec-daa-ia).
+
+
+## Visualizing results {#sec-daa-viz}
+
+In this section we briefly show how to visualize the results of the above
+analyses.
+
+### Visualizing abundances and prevalences
+
+While DAA and DPAA provide information on which taxa how much their abundances
+differ between the examined groups, some relevant infromation on _how_ the
+abundances differ may not be seen from the result tables. It is therefore also
+important to visualize the distributions of abundances of the (significant)
+taxa. Moreover, for instance, the effect of covariates or the interaction terms
+may be easier to comprehend by visualizing the abundances than by just trying
+to interpret the estimates and p-values.
+
+We thus show here how visualize the distributions of abundances by employing
+the `plotBoxplot` function from the miaViz package.
+
+#### The basic two group comparisons {#sec-daa-viz-1}
+
+We first visualize the relative abundances of the taxa that had the q-values 
+$< 0.05$ in the basic two group comparisons in DAA (section @sec-daa-basic).
+
+```{r}
+#| label: daa-viz-print-1
+
+# The taxa with q-values < .05 in DAA
+res_daa_basic |> arrange(pval) |> filter(qval < .05) |>  kable()
+```
+
+We illustrate the distribution of the relative abundances and presence/absences
+of these genera by strip plots with boxplots and bars indicating prevalence.
+To specifically illustrate the differences between the ADHD and Control groups
+we group and color the abundances by `patient_status`.
+
+```{r}
+#| label: daa-viz-1
+
+library(miaViz)
+
+# Create strip plots with boxplots and bars indicating prevalence
+plotBoxplot(
+  tse,
+  features = c("[Ruminococcus]_gauvreauii_group",
+               "Faecalibacterium",
+               "Catabacter",
+               "Erysipelatoclostridium",
+               "[Clostridium]_innocuum_group"),
+  
+  assay.type = "relabundance",   # To plot relative abundances
+  x = "patient_status",          # The variable on the x (horizontal) axis
+  color.by = "patient_status",   # The variable for the color of the points
+  fill.by = "patient_status",    # The boxplots
+  facet.by = "rownames",         # To create a separate plot for each feature
+  scales = 'free_y',             # To allow different y-axis scales
+  add.proportion = TRUE,         # Add bars indicating prevalence
+  point.offset = "quasirandom",  # To plot points nicely
+  point.size = 2,                # The size of the points
+  point.alpha = .50,             # The transparency of the points
+  box.alpha = .20) +             # The transparency of the boxplots
+  theme(strip.text = element_text(size = 6)) # The size of the facet labels
+```
+
+In the boxplots,
+
+- the thicker horizontal line indicates the median,
+- the box indicates the interquartile range (IQR), namely, the range between
+the 25th (Q1) and 75th percentile (Q3),
+- the lower whisker indicates the smallest value above $Q1 - 1.5 \times IQR$,
+and
+- the lower whisker indicates the largest value below $Q3 + 1.5 \times IQR$.
+
+The strip plots and boxplots show clearly how, for instance, the relative
+abundance of the
+genus named as _[Ruminococcus] gauvreauii group_ is higher in the Control group
+as indicated by the negative sign of the log~2~-fold estimate (`coef`). The
+bars indicating the prevalence (below the boxplots) also show how the prevalence
+of _[Ruminococcus] gauvreauii group_ is higher in the Control group.
+Correspondingly, for instance, the relative abundances of _Faecalibacterium_
+are higher in the ADHD group as indicated by the positive sign of their
+log~2~-fold estimates.
+
+The result for _Erysipelatoclostridium_ in DPAA, namely, the small q-value with
+negative log(OR) estimate, is clearly illustrated by the prevelence bars. They
+show a high prevelence of _Erysipelatoclostridium_ in the Control group and low
+prevelance in the ADHD group.
+
+
+#### More complex analyses {#sec-daa-viz-2}
+
+By plotting the abundances of a taxon by two predictor variables, we can
+illustrate the confounding and interaction effects. We show here how to
+illustrate the significant interaction of `patient_status` and `cohort` for
+_Coprobacter_ (see section @sec-daa-ia).
+
+```{r}
+#| label: daa-viz-print-2
+
+# The significant results for the interaction in DAA
+res_daa_ia |> 
+  filter(name %in% c("patient_statusADHD_cohortCohort_3",
+                     "patient_statusADHD_cohortCohort_2")) |>
+  arrange(pval) |> 
+  filter(qval < .05) |> 
+  kable()
+```
+
+```{r}
+#| label: daa-viz-2
+
+# Plot the abundances of Odoribacter by patient_status and cohort
+plotBoxplot(
+  tse,
+  features = c("Coprobacter"),
+  assay.type = "relabundance",   # To plot relative abundances
+  x = "patient_status",          # The variable on the x (horizontal) axis
+  color.by = "patient_status",   # The variable for the color of the points
+  fill.by = "patient_status",    # The boxplots
+  facet.by = "cohort",           # To create a separate plot for each cohort
+  scales = 'fixed',              # To have the same y-axis scale in each facet
+  add.proportion = TRUE,         # Add bars indicating prevalence
+  point.offset = "quasirandom",  # To plot points nicely
+  point.size = 2,                # The size of the points
+  point.alpha = .50,             # The transparency of the points
+  box.alpha = .20)               # The transparency of the boxplots
+```
+
+Here we can clearly see how the relative abundances of _Coprobacter_ are higher
+in the ADHD group in Cohort 1 but they are higher in the Control group in 
+Cohort 3. As the association is positive in Cohort 1 (the baseline cohort) and
+negative in Cohort 3, sign of interaction estimate is negative (the association
+becomes more negative when we move from the baseline cohort to a non-baseline
+cohort).
+
+### Summarizing results by plotting estimates and confidence intervals
+
+The results of an analysis can be conveniently visualized by plotting the
+log~2~-fold changes (or log ORs in DPAA) and the 95% confidence intervals.
+
+```{r}
+#| label: plot_daa_est_ci
+
+# Correct the names of certain taxa and reorder the taxa by the log2-fold
+# change estimates
+res_viz_daa_basic <- res_daa_basic |> 
+  mutate(taxon = str_replace(feature, "X\\.", "\\["),
+         taxon = str_replace(taxon, "\\._", "\\]_"),
+         taxon = fct_reorder(taxon, coef))
+
+# Plot the log2-fold changes and the 95% confidence intervals
+ggplot(res_viz_daa_basic, aes(x = coef, y = taxon)) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_point() +
+  geom_errorbarh(aes(xmin = ci_lwr, xmax = ci_upr), height = 0.2) +
+  labs(x = "Log2-fold change (95% CI)") +
+  theme_light() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 7),
+        plot.title = element_text(hjust = 0.5))
+```
+
+
+
+::: {.callout-tip}
+## Additional resources
+While we generally recommend the use of the above simple methods in DAA there
+exist dozens of alternative methods. A (non-comprehensive) list of these methods
+is given below.
+
+- ALDEx2 [@Gloor2016]
+- ANCOM [@Mandal2015]
+- ANCOMBC [@ancombc2020]
+- BIRDMAn [@Rahman2023]
+- corncob [@Martin2021]
+- DACOMP [@Brill2019]
+- DESeq2 [@Love2014]
+- eBay [@Liu2020]
+- edgeR [@Chen2016]
+- fastANCOM [@fastANCOM2022]
+- fido [@Silverman2019]
+- LDM [@Hu2020]
+- lefser [@Khlebrodova2021]
+- limma [@Ritchie2015]
+- LinDA [@Zhou2022]
+- MaAsLin2 [@Mallick2020]
+- MaAsLin3 [@Nickols2024]
+- metagenomeSeq [@Paulson2017]
+- Omnibus [@Omnibus2018]
+- RAIDA [@Sohn2015]
+- sccomp [@mangiola2023]
+- ZicoSeq [@Yang2022]
+- ZINQ [@Ling2021]
+:::
+
+::: {.callout-tip icon=false}
+
+## Exercises
+
+**Goal:** The goal of these exercises it to learn how to perform differential
+abundance and presence/absence analysis and to visualize the results.
+
+**Exercise 1: Differential abundance analysis (DAA)**
+
+1. Load any of the example datasets mentioned in [@sec-example-data].
+
+2. Observe `colData`. Ensure that the data includes meaningful sample grouping.
+If it does not, choose another dataset.
+
+3. Agglomerate the data by genus and filter by a prevalence of 10%.
+
+4. Run the basic two-group DAA and DPAA. You can also run DAA for positive
+abundances.
+
+5. Explore the results tables. Are there any taxa with significant
+abundance/prevalence differences?
+
+6. Run the same analyses now with an additional covariate. Do the results
+differ? Why?
+
+7. You can try also more complex analysis, e.g. with several covariates and/or
+with interactions.
+
+8. Visualize the results.
+
+9. Bonus: Try to run DAA and DPAA with ordinal regression model and Firth 
+logistic regression with the custom functions provided in the extra materials.
+See how the results differ from the results obtained with Maaslin2 and maaslin3.
+
+Useful functions:
+
+`data()`, `colData`, `subsetByPrevalent()`
+
+:::
+
+## These will come to Chapter C - Extra material
+
+### Analyzing relative abundances with ordinal regression model {#sec-orm}
 
 We show here how to perform DAA by analyzing relative abundances with ordinal
 regression model (ORM). We have chosen ORM as it makes few assumptions on the
@@ -220,11 +1040,34 @@ run_orm <- function(abundance, metadata, formula){
 }
 ```
 
+We use the same Tengler2020 dataset as in @sec-differential-abundance.
 
+```{r}
+#| label: orm_prepare
+
+library(tidyverse)
+library(mia)
+library(knitr)
+
+# Import dataset
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# Agglomerate by genus and subset by prevalence
+tse <- subsetByPrevalent(tse, rank = "Genus", prevalence = 0.10)
+
+# Transform count data and create assay of relative abundances
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+
+# Transform patient_status to a factor and set "Control" as the refrence level
+tse$patient_status <- factor(tse$patient_status, levels = c('Control', 'ADHD'))
+
+# We also transform cohort as a factor
+tse$cohort <- factor(tse$cohort, levels = c('Cohort_1', 'Cohort_2', 'Cohort_3'))
+```
 
 #### The basic two-group comparison {#sec-orm-basic}
 
-We first perform the basic two-group comparison without any other covariates.
 We compare the relative abundance of taxa between the people with and without
 ADHD (indicated by the variable `patient_status`).
 
@@ -244,7 +1087,7 @@ The code below works as follows.
 
 
 ```{r}
-#| label: run_daa_basic
+#| label: run_orm_basic
 
 res_daa_basic <- assay(tse, "relabundance") |>  # Extract relative abundances
   t() |>                                        # Transpose the assay
@@ -259,12 +1102,6 @@ res_daa_basic <- assay(tse, "relabundance") |>  # Extract relative abundances
   mutate(
     q_value = p.adjust(p_value, method = "BH")) # Calculate q-values
                                                 # (FDR adjusted p-values)
-```
-
-Next, we examine the results ordered by p-value.
-
-```{r}
-#| label: print_daa_basic
 
 # The results for taxa with the smallest p-values
 res_daa_basic |> arrange(p_value) |> head() |> kable()
@@ -277,210 +1114,34 @@ categorical variable, it also tells the group used as the non-reference level
 (here `ADHD` as `Control` was set as the reference level).
 - `estimate` is log(odds ratio). Most importantly, positive values indicate
 abundance being higher in the non-reference group (here `ADHD`). Otherwise,
-estimates can be a bit difficult to interpret for ORMs. 
+estimates can be a bit difficult to interpret for ORMs.
 
-If we use the standard criterion for statistical significance, namely q-value <
-0.05, we can see that the difference is statistically significant only for the
-genus named as [Ruminococcus]_gauvreauii_group. As the sign of the estimate is
-_negative_ it means that the relative abundance is _higher in the control
-group_.
+#### More complex analyses {#sec-orm-complex}
 
-This difference can be illustrated by a strip plot with boxplots. From those we
-can clearly see how the relative abundances are higher in the control group.
- 
-```{r}
-#| label: plot_daa_basic
-
-# We use the function plotBoxpplot to illustrate the result for
-# [Ruminococcus]_gauvreauii_group
-plotBoxplot(tse,
-            assay.type = "relabundance",
-            features = "[Ruminococcus]_gauvreauii_group",
-            x = "patient_status",
-            colour.by = "patient_status",
-            fill.by = "patient_status",
-            apply.beeswarm = T)
-```
+Analysis with covariates and analysis of interaction terms can be performed in
+by just using different `formula` in the `run_orm` function, e.g.
+`formula = patient_status + cohort` or `formula = patient_status * cohort`.
 
 
-#### DAA with additional covariates {#sec-orm-cov}
+### DPAA with Firth logistic regression {#sec-firth}
 
-Here we show how to perform DAA with an additional covariate included in the
-analysis. One usually wants to include a variable as a covariate if they suspect
-that it may act as a _confounding_ variable, namely, a variable that causes a
-spurious association between the variable of main interest and the abundances.
-
-We use `cohort` as a covariate. We proceed as above except that we now have
-`formula = ~ patient_status + cohort`. Furthermore, as there are now many
-variables in the model we modify the code so that the multiplicity correction
-for the p-values is made separately for each variable.  
-
-
-```{r}
-#| label: run_daa_cov
-
-# Run orm for each taxon with cohort as an additional covariate
-res_daa_cov <- assay(tse, "relabundance") |> 
-  t() |> 
-  as.data.frame() |> 
-  map(~ run_orm(
-    .,
-    metadata = colData(tse) |> as.data.frame(),
-    formula = ~ patient_status + cohort)
-  ) |> 
-  bind_rows(.id = "taxon") |> 
-  group_by(variable) |>    # p-values FDR adjusted separately for each variable.    
-  mutate(q_value = p.adjust(p_value, method = "BH")) |> 
-  ungroup()
-
-res_daa_cov |> head() |> kable()
-```
-
-Note that there now appear results also for the variable `cohort`. As `cohort`
-consists of three groups, namely, `Cohort_1` (the reference group), `Cohort_2`
-and `Cohort_3`, there are results separately for the comparison between
-`Cohort_2` vs. `Cohort_1` (`cohortCohort_2`) and for the comparison between
-`Cohort_3` vs. `Cohort_1` (`cohortCohort_3`).
-
-We can now examine how the inclusion of `cohort` as a covariate affects the
-results for `patient_status`.
-
-```{r}
-#| label: print_daa_cov
-
-# The results for patient_status for the taxa with the smallest p-values
-res_daa_cov |> 
-  filter(variable == "patient_statusADHD") |> 
-  arrange(p_value) |> 
-  head() |> 
-  kable()
-```
-
-We can see that the results for [Ruminococcus]_gauvreauii_group and
-_Erysipelatoclostridium_ are in fact clearer (e.g. smaller p-values) when
-cohort is controlled for.
-
-By examining strip plots by `patient_status` and `cohort`, we can see that
-the abundances are overall higher in cohort 3, and therefore the difference
-between the patients with and without ADHD seems clearer in cohorts 1 and 2.
-This seems to explain the difference in the results compared to the basic case
-(@sec-orm-basic).
-
-```{r}
-#| label: plot_daa_cov
-
-# Plot abundance of [Ruminococcus]_gauvreauii_group by patient_status and cohort
-plotBoxplot(tse,
-            assay.type = "relabundance",
-            features = "[Ruminococcus]_gauvreauii_group",
-            x = "patient_status",
-            colour.by = "patient_status",
-            fill.by = "patient_status",
-            facet.by = "cohort",
-            apply.beeswarm = T)
-```
-
-
-#### DAA with an interaction {#sec-orm-ia}
-
-Here we show a more complex version of DAA, namely, a case where the interaction
-effect of two variables is analyzed. We give this example here for illustration
-purposes but note that such complex analysis may not be advisable with a small
-dataset such as our example dataset.
-
-We analyze interaction between `patient_status` and `cohort`. We proceed as in
-@sec-orm-cov above except that we now add also the interaction term into the
-formula. We could thus write
-`formula = ~ patient_status + cohort + patient_status:cohort` but we recommend
-using the write the shorter version `formula = ~ patient_status * cohort`.
-Using the `*` between the terms automatically adds the interaction term as well
-as the main effect terms in the analysis. 
-
-```{r}
-#| label: run_daa_ia
-
-# Run orm with interaction term for each taxon
-res_daa_ia <- assay(tse, "relabundance") |> 
-  t() |> 
-  as.data.frame() |> 
-  map(~ run_orm(
-    .,
-    metadata = colData(tse) |> as.data.frame(),
-    formula = ~ patient_status * cohort)
-  ) |> 
-  bind_rows(.id = "taxon") |> 
-  group_by(variable) |>                                  
-  mutate(q_value = p.adjust(p_value, method = "BH")) |> 
-  ungroup()
-
-res_daa_ia |> head() |> kable()
-```
-
-Note that the results object `res_daa_ia` now also includes the interaction
-terms `patient_statusADHD:cohortCohort_2` and
-`patient_statusADHD:cohortCohort_3`. 
-
-We examine the term `patient_status:cohortCohort_3`. It indicates how the
-differences between the ADHD and Control groups vary between cohorts 1 and 3.
-
-```{r}
-#| label: print_daa_ia
-
-res_daa_ia |> 
-  filter(variable == "patient_statusADHD:cohortCohort_3") |> 
-  arrange(p_value) |> 
-  head() |> 
-  kable()
-```
-
-The smallest p-value is observed for _Coprobacter_. By examining the boxplots
-of the relative abundances of _Coprobacter_ by `patient_status` and `cohort`, we
-can see the interaction effect by observing that in cohort 1 the relative
-abundance is higher in the ADHD group while in cohort 3 the abundance is higher
-in the control group.
-
-```{r}
-#| label: plot_daa_ia
-
-# Strip plots with boxplots for Coprobacter by patient_status and cohort
-plotBoxplot(tse,
-            assay.type = "relabundance",
-            features = "Coprobacter",
-            x = "patient_status",
-            colour.by = "patient_status",
-            fill.by = "patient_status",
-            facet.by = "cohort",
-            apply.beeswarm = T)
-```
-
-
-### Analyzing presence/absence of taxa with logistic regression
-
-We show here how to perform differential presence/absence analysis (DPAA) with
-logistic regression. As some versions of logistic regression perform badly in
+As some versions of logistic regression perform badly in
 the cases where, for instance, the prevelance of a taxon is zero in one
-group we employ a robust version of logistic regression introduced by
-@Firth1993. This version has been observed to perform well in DPAA in practice
-[@Pelto2025].
+group we show here how to perform DPAA with a robust version of logistic
+regression introduced by @Firth1993. This version has been observed to perform
+well in DPAA in practice [@Pelto2025].
 
-It is also important to note that we will analyze the _observed_
-presence/absence of taxa (i.e. observed non-zero/zero count) and not the
-presence/absence of taxa in their ecosystem. Those concepts are not the same
-because a taxon that is present in an ecosystem may be left undetected if, for
-instance, its abundance is below the detection limit of the experimantal
-workflow used in processing/analyzing the microbial samples [@Silverman2020].
-
-We proceed as in the previous section @sec-daa. We first create a function that
-runs logistic regression for presence/absence and returns the
-effect size estimate and p-value for each variable in the model.
+We first create a function that runs Firth logistic regression for
+presence/absence and returns the effect size estimate and p-value for each
+variable in the model.
 
 ```{r}
-#| label: function_logr
+#| label: function_firth
 
 # The function uses the logistf() function from the logistf package 
 library(logistf)
 
-run_logr <- function(abundance, metadata, formula){
+run_firth <- function(abundance, metadata, formula){
   
   # Create the design matrix of the model
   mm <- model.matrix(formula, metadata) |> 
@@ -498,21 +1159,45 @@ run_logr <- function(abundance, metadata, formula){
 }
 ```
 
+We use the same Tengler2020 dataset as in @sec-differential-abundance.
 
-#### The basic two-group comparison for presence/absence {#sec-logr-basic}
+```{r}
+#| label: firth_prepare
 
-We first perform the basic two-group comparison without any other covariates.
+library(tidyverse)
+library(mia)
+library(knitr)
+
+# Import dataset
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# Agglomerate by genus and subset by prevalence
+tse <- subsetByPrevalent(tse, rank = "Genus", prevalence = 0.10)
+
+# Transform count data and create assay of presence/absences
+tse <- transformAssay(tse, assay.type = "counts", method = "pa")
+
+# Transform patient_status to a factor and set "Control" as the refrence level
+tse$patient_status <- factor(tse$patient_status, levels = c('Control', 'ADHD'))
+
+# We also transform cohort as a factor
+tse$cohort <- factor(tse$cohort, levels = c('Cohort_1', 'Cohort_2', 'Cohort_3'))
+```
+
+#### The basic two-group comparison {#sec-firth-basic}
+
+We perform here the basic two-group comparison without any other covariates.
 We compare the presence/absence of taxa between the people with and without
 ADHD.
 
-
 ```{r}
-#| label: run_dpaa_basic
+#| label: run_firth_basic
 
-res_dpaa_basic <- assay(tse, "pa") |>           # Extract presence/absences
+res_firth_basic <- assay(tse, "pa") |>           # Extract presence/absences
   t() |>                                        # Transpose the assay
   as.data.frame() |>                            # Transform to a data.frame
-  map(~ run_logr(                               # Run ORM for each taxon
+  map(~ run_firth(                               # Run ORM for each taxon
     .,                                            
     metadata = colData(tse) |> as.data.frame(), # Extract the metadata
     formula = ~ patient_status)                 # Model formula.
@@ -521,381 +1206,22 @@ res_dpaa_basic <- assay(tse, "pa") |>           # Extract presence/absences
   mutate(
     q_value = p.adjust(p_value, method = "BH")) # Calculate q-values
                                                 # (FDR adjusted p-values)
-```
-
-Next, we again examine the results sorted by p-value.
-
-```{r}
-#| label: print_dpaa_basic
 
 # The results for taxa with the smallest p-values
-res_dpaa_basic |> arrange(p_value) |> head() |> kable()
+res_firth_basic |> arrange(p_value) |> head() |> kable()
 ```
 
-Now the `estimate` in the output is the familiar log(odds ratio) of logistic
-regression. A positive value indicates the taxon being more prevalent in the
-non-refrence group (here `ADHD`).
-
-The smallest p-value and q-value is observed for genus _Erysipelatoclostridium_.
-As the sign of the estimate is _negative_ is means that the genus is more
-prevalent in the control group. This difference can be illustrated using
-`plotBoxplot` function with the proportion bars added to specifically illustrate
-the prevalence. From there we can clearly see that _Erysipelatoclostridium_ is
-more prevalent in the control group.
- 
-```{r}
-#| label: plot_dpaa_basic
-
-# Illustrate the prevalence of Erysipelatoclostridium using plotBoxplot with
-# proportion bar
-plotBoxplot(tse,
-            assay.type = "relabundance",
-            features = "Erysipelatoclostridium",
-            x = "patient_status",
-            colour.by = "patient_status",
-            fill.by = "patient_status",
-            apply.beeswarm = T,
-            add.proportion = T)
-```
-
-
-#### DPAA with additional covariates {#sec-logr-cov}
-
-Here we show how to perform DPAA with an additional `cohort` included in the
-analysis. We proceed as in the section @sec-orm-cov.
-
-```{r}
-#| label: dpaa_cov
-
-# Run logistic regression for each taxon with cohort as an additional covariate
-res_dpaa_cov <- assay(tse, "pa") |> 
-  t() |> 
-  as.data.frame() |> 
-  map(~ run_logr(
-    .,
-    metadata = colData(tse) |> as.data.frame(),
-    formula = ~ patient_status + cohort)
-  ) |> 
-  bind_rows(.id = "taxon") |> 
-  group_by(variable) |>                        # FDR adjust p-values separately          
-  mutate(                                      # for each variable.
-    q_value = p.adjust(p_value, method = "BH")
-    ) |> 
-  ungroup()
-
-# The results for patient_status for the taxa with the smallest p-values
-res_dpaa_cov |> 
-  filter(variable == "patient_statusADHD") |> 
-  arrange(p_value) |> 
-  head() |> 
-  kable()
-
-# Strip plots with proportion bars to illustrate the revelence of
-# Erysipelatoclostridium by patient_status and cohort
-plotBoxplot(tse,
-            assay.type = "relabundance",
-            features = "Erysipelatoclostridium",
-            x = "patient_status",
-            colour.by = "patient_status",
-            fill.by = "patient_status",
-            facet.by = "cohort",
-            apply.beeswarm = T,
-            add.proportion = T)
-```
-
-
-#### DPAA with an interaction {#sec-logr-ia}
-
-Again, we proceed similarly as in the section @sec-orm-ia.
-
-```{r}
-#| label: dpaa_ia
-
-# Run logistic regression with an interaction term for each taxon
-res_dpaa_ia <- assay(tse, "pa") |> 
-  t() |> 
-  as.data.frame() |> 
-  map(~ run_logr(
-    .,
-    metadata = colData(tse) |> as.data.frame(),
-    formula = ~ patient_status * cohort)
-  ) |> 
-  bind_rows(.id = "taxon") |> 
-  group_by(variable) |>                                  
-  mutate(                                      
-    q_value = p.adjust(p_value, method = "BH")
-    ) |> 
-  ungroup()
-
-# Interaction results for patient_statusADHD:cohortCohort_3
-res_daa_ia |> 
-  filter(variable == "patient_statusADHD:cohortCohort_3") |> 
-  arrange(p_value) |> 
-  head() |> 
-  kable()
-
-# Cerate strip plots with proportion bars to illustrate the prevalence of
-# Erysipelatoclostridium by patient_status and cohort
-plotBoxplot(tse,
-            assay.type = "relabundance",
-            features = "Coprobacter",
-            x = "patient_status",
-            colour.by = "patient_status",
-            fill.by = "patient_status",
-            facet.by = "cohort",
-            apply.beeswarm = T,
-            add.proportion = T)
-```
-
-The figure illustrates how _Coprobacter_ is more prevalent in the ADHD group in
-cohort 1 but more prevalent in the control group in cohort 3.
-
-
-### Analyzing positive relative abundances with linear regression {#sec-daa_lm}
-
-Relative abundances can also be analyzed using the standard linear regression
-methods (e.g. the t-test) instead of ORM. This, however, requires in practice
-some transformation to be applied for the abundances. A typical transformation
-is log transformation. It is, however, problematic because zeros cannot be log
-transformed. Instead, zeros must be treated somehow before the transformation
-(e.g. by using pseudo-count).
-
-Analyzing log transformed relative abundances can be advantageous, however, for
-instance in the case where one wants to analyze only _positive_ (non-zero)
-relative abundances. Such analysis can sometimes be biologically relevant,
-especially when performed along with DPAA.
-
-It should be noted, however, that especially in small datasets (like the
-example dataset used here), the number of positive/non-zero abundances may be
-very small for some taxa. Therefore, this type of analysis may not always be
-reasonable. Furthermore, we note again that one should keep in mind that the
-observed absence of a taxon does not necessarily mean that the taxon
-is truly absent in a microbial sample.
-
-
-#### The basic two-group comparison {#sec-daa-pos-basic}
-
-Analysis of positive relative abundances can be easily performed by using e.g.
-maaslin3 package [@Nickols2024].
-
-```{r}
-#| label: run_daa_pos_basic
-
-library(maaslin3)
-
-# We first perform DAA with maaslin3 function
-obj_maaslin3_basic <- maaslin3(tse,
-                               output = 'output',
-                               formula = ~ patient_status,
-                               median_comparison_abundance = FALSE,
-                               verbosity = 'ERROR',
-                               plot_associations = FALSE,
-                               plot_summary_plot = FALSE)
-
-# We then extract and transform the results to the same form as before 
-res_daa_pos_basic <- obj_maaslin3_basic$fit_data_abundance$results |> 
-  select(taxon = feature,
-         variable = name,
-         estimate = coef,
-         p_value = pval_individual,
-         q_value = qval_individual)
-```
-
-Then, we again examine the results ordered by p-value.
-
-```{r}
-#| label: print_daa_pos_basic
-
-# The results for taxa with the smallest p-values
-res_daa_pos_basic |> arrange(p_value) |> head() |> kable()
-```
-
-
-Plotting the abundance of _Coprobacter_ illustrates how the positive (non-zero)
-relative abundances are clearly higher in the ADHD group. (We omit the boxplots
-this time as they are affected by the zero values.)
-
-```{r}
-#| label: plot_daa_pos_basic
-
-# Plot the result for Coprobacter
-plotBoxplot(tse,
-            assay.type = "relabundance",
-            features = "Coprobacter",
-            x = "patient_status",
-            colour.by = "patient_status",
-            fill.by = "patient_status",
-            add.box = FALSE,
-            apply.beeswarm = T)
-```
-
-
-#### Analysis with covariates {#sec-daa-pos-cov}
-
-To include cohort as a covariate in the analysis, we proceed as above but we
-just set `formula = ~ patient_status + cohort`. We also calculate the q-values
-manually as `maaslin3` calculates them over all variables, and not separately
-for each variable. The latter method is more sensible in most cases as one is
-usually mainly interested in their "main variable", i.e., `patient_status`
-here.
-
-```{r}
-#| label: daa_pos_cov
-
-# Run maaslin3 function.
-obj_maaslin3_cov <- maaslin3(tse,
-                             output = 'output',
-                             formula = ~ patient_status + cohort,
-                             median_comparison_abundance = FALSE,
-                             verbosity = 'ERROR',
-                             plot_associations = FALSE,
-                             plot_summary_plot = FALSE)
-
-# Extract the results and calculate q-values 
-res_daa_pos_cov <- obj_maaslin3_cov$fit_data_abundance$results |> 
-  select(taxon = feature,
-         variable = name,
-         estimate = coef,
-         p_value = pval_individual) |> 
-  group_by(variable) |> 
-  mutate(q_value = p.adjust(p_value, method = 'BH')) |> 
-  ungroup()
-
-# The results for patient_status for the taxa with the smallest p-values
-res_daa_pos_cov |> 
-  filter(variable == "patient_statusADHD") |> 
-  arrange(p_value) |> 
-  head() |> 
-  kable()
-```
-
-```{r}
-#| label: plot_daa_pos_cov
-
-# Plot the result for Coprobacter
-plotBoxplot(tse,
-            assay.type = "relabundance",
-            features = "Coprobacter",
-            x = "patient_status",
-            colour.by = "patient_status",
-            fill.by = "patient_status",
-            facet.by = "cohort",
-            add.box = FALSE,
-            apply.beeswarm = T,
-            add.proportion = T)
-
-```
-
-
-
-#### Analysis with interaction {#sec-daa-pos-ia}
-
-The analysis of positive relative abundances with interaction effect can be
-performed as follows. (The interaction analysis is performed here only for
-illustration purposes, but we note that it may not be advisable to conduct
-such a complex analysis when the number of non-zero abundances is very low for
-many taxa.) 
-
-```{r}
-#| label: daa_pos_ia
-
-# Run maaslin3 function.
-obj_maaslin3_ia <- maaslin3(tse,
-                             output = 'output',
-                             formula = ~ patient_status * cohort,
-                             median_comparison_abundance = FALSE,
-                             verbosity = 'ERROR',
-                             plot_associations = FALSE,
-                             plot_summary_plot = FALSE)
-
-# Extract the results and calculate q-values 
-res_daa_pos_ia <- obj_maaslin3_ia$fit_data_abundance$results |> 
-  select(taxon = feature,
-         variable = name,
-         estimate = coef,
-         p_value = pval_individual) |> 
-  group_by(variable) |> 
-  mutate(q_value = p.adjust(p_value, method = 'BH')) |> 
-  ungroup()
-
-# The results for the interacion between patient_status and cohort (when
-# comparing Cohort_3 to Cohort_1) for the taxa with the smallest p-values
-res_daa_pos_ia |> 
-  filter(variable == "patient_statusADHD:cohortCohort_3") |> 
-  arrange(p_value) |> 
-  head() |> 
-  kable()
-```
-
-The result was not even close to significant for any taxa. This is likely due to
-the comlex nature of interaction anlaysis and the very small number of non-zero
-abundances for many taxa. 
-
-
-::: {.callout-tip}
-## Additional resources
-While we generally recommend the use of the above simple methods in DAA there
-exist dozens of alternative methods. A (non-comprehensive) list of these methods
-is given below.
-
-- ALDEx2 [@Gloor2016]
-- ANCOM [@Mandal2015]
-- ANCOMBC [@ancombc2020]
-- BIRDMAn [@Rahman2023]
-- corncob [@Martin2021]
-- DACOMP [@Brill2019]
-- DESeq2 [@Love2014]
-- eBay [@Liu2020]
-- edgeR [@Chen2016]
-- fastANCOM [@fastANCOM2022]
-- fido [@Silverman2019]
-- LDM [@Hu2020]
-- lefser [@Khlebrodova2021]
-- limma [@Ritchie2015]
-- LinDA [@Zhou2022]
-- MaAsLin2 [@Mallick2020]
-- MaAsLin3 [@Nickols2024]
-- metagenomeSeq [@Paulson2017]
-- Omnibus [@Omnibus2018]
-- RAIDA [@Sohn2015]
-- sccomp [@mangiola2023]
-- ZicoSeq [@Yang2022]
-- ZINQ [@Ling2021]
-:::
-
-::: {.callout-tip icon=false}
-
-## Exercises
-
-**Goal:** The goal of these exercises it to learn how to perform differential
-abundance and presence/absence analysis and to visualize the results.
-
-**Exercise 1: Differential abundance analysis (DAA)**
-
-1. Load any of the example datasets mentioned in [@sec-example-data].
-
-2. Observe `colData`. Ensure that the data includes meaningful sample grouping.
-If it does not, choose another dataset.
-
-3. Agglomerate the data by genus and filter by a prevalence of 10%.
-
-4. Run the basic two-group DAA and DPAA using ORM and logistic regression,
-respectively. (You can also try DAA of positive abundances with maaslin3.)
-
-5. Explore the results tables. Are there any taxa with significant
-abundance/prevalence differences?
-
-6. Run the same analyses now with an additional covariate. Do the results
-differ? Why?
-
-7. You can try also more complex analysis, e.g. with several covariates and/or
-with interactions.
-
-8. Visualize the results.
-
-Useful functions:
-
-`data()`, `colData`, `subsetByPrevalent()`
-
-:::
+In the output
+
+- `variable` indicates the predictor variable. As `patient_status` is a
+categorical variable, it also tells the group used as the non-reference level
+(here `ADHD` as `Control` was set as the reference level).
+- `estimate` is the familiar log(odds ratio). A positive value indicates the
+taxon being more prevalent in the non-refrence group (here `ADHD`).
+
+#### More complex analyses {#sec-firth-complex}
+
+Analysis with covariates and analysis of interaction terms can be performed in
+by just using different `formula` in the `run_firth` function, e.g.
+`formula = patient_status + cohort` or `formula = patient_status * cohort`.
 
