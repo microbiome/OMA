@@ -1,4 +1,4 @@
-# Alpha Diversity {#sec-alpha-diversity}
+# Alpha diversity {#sec-alpha-diversity}
 
 ```{r setup, echo=FALSE, results="asis"}
 library(rebook)
@@ -9,7 +9,8 @@ chapterPreamble()
 
 Alpha diversity, or within-sample diversity, is a central concept in microbiome 
 research. In ecological literature, several distinct but related alpha diversity
-indices, often referring to **richness** and **evenness** - the number of taxa 
+indices, often referring to **richness** and **evenness** - the number of
+taxonomic features
 and how they are distributed, respectively - are commonly used 
 [@Willis2019;@Whittaker1960]. The term **diversity** can be used to collectively 
 refer to all these indices.
@@ -30,9 +31,10 @@ evident from their names. Bastiaanssen et al. [-@bastiaanssen2023bugs1] lay out
 this relationship across two factors (See table below); First, alpha diversity 
 metrics can be defined as special cases of a unifying equation of **diversity**, 
 where the **Hill number** determines the specific index captured. Lower Hill 
-numbers favour **richness**, the number of distinct taxa, whereas higher numbers 
-favour **evenness**, how the taxa are distributed over the sample [@Hill1973]. 
-Second, some alpha diversity metrics are weighed based on phylogeny, like 
+numbers favour **richness**, the number of distinct taxonomic features,
+whereas higher numbers favour **evenness**, how the taxonomic features are
+distributed over the sample [@Hill1973].  Second, some alpha diversity metrics
+are weighed based on phylogeny, like 
 Faith's PD [-@Faith1992] and PhILR [@Silverman2017]. 
 
 ```{r}
@@ -51,9 +53,9 @@ phyl_div <- "**Phylogenetic Diversity**
 ---  
 *Indices are scaled based on taxonomic closeness with a phylogenetic tree*"
 
-hill_0 <- 'Dependent on presence and absence of taxa, not abundance'
-hill_1 <- 'Dependent on how evenly taxa are distributed in a sample'
-hill_2 <- 'The probability of two randomly picked taxa not being the same'
+hill_0 <- 'Dependent on presence and absence of taxonomic features, not abundance'
+hill_1 <- 'Dependent on how evenly taxonomic features are distributed in a sample'
+hill_2 <- 'The probability of two randomly picked taxonomic feature not being the same'
 
 table_colnames <- c("phyl_desc", hill_0, hill_1, hill_2)
 
@@ -92,6 +94,18 @@ cbind.data.frame(
   tab_footnote(footnote = footnote_md, placement = "left") 
 ```
 
+Cassol et al. [-@Cassol2025] offer practical guidelines for selecting alpha
+diversity indices. They classify alpha diversity into four main categories and
+recommend calculating at least one metric from each category, if possible, to
+sufficiently capture within-sample diversity. Since indices within the same
+category tend to be correlated, they suggest using the simplest available
+metric. Below are the default choices for each category.
+
+- **Richness**: The number of observed unique features
+- **Dominance**: Berger-Parker
+- **Information**: Shannon
+- **Phylogenetics**: Faith
+
 ::: {.callout-note}
 ## Note: Richness estimators and denoising
 
@@ -106,10 +120,10 @@ modern 16S data, which commonly features denoising and removal of singletons
 
 ### Calculate alpha diversity measures {#sec-estimate-diversity}
 
-Alpha diversity can be estimated with the `addAlpha()` function, which interacts
-with other packages implementing the calculation, such as `vegan` [@R_vegan] and
-_`picante`_ [@R_picante; @Kembel2010]. 
-These functions calculate the given indices, and add them to the `colData` slot 
+Alpha diversity can be estimated with the `addAlpha()` function, which includes
+built-in methods for calculating some indices, while others are computed via
+integration with the `vegan` [@R_vegan] package.
+The method calculates the given indices, and add them to the `colData` slot 
 of the `SummarizedExperiment` object with the given `name`. 
 
 ```{r}
@@ -118,13 +132,16 @@ of the `SummarizedExperiment` object with the given `name`.
 
 # First, let's load some example data.
 library(mia)
-data("GlobalPatterns", package="mia")
+data("GlobalPatterns")
 tse <- GlobalPatterns
 
 # Compute one or multiple indices simultaneously through the index 'parameter'. 
 tse <- addAlpha(
-    tse, assay.type = "counts", index = c("observed", "shannon", "faith"),
-    detection = 10)
+    tse,
+    assay.type = "counts", 
+    index = c("observed", "dbp", "shannon", "faith"),
+    detection = 10
+)
 
 # Check some of the first values in colData
 tse$observed |> head()
@@ -198,12 +215,13 @@ and they are thus directly available for plotting.
 ```{r}
 #| label: plot-all-diversities
 #| fig-width: 6.5
+#| fig-height: 8
 
 library(patchwork)
 
 # Create the plots
 plots <- lapply(
-    c("observed", "shannon", "faith"),
+    c("observed", "dbp", "shannon", "faith"),
     plotColData,
     object = tse,
     x = "SampleType",
@@ -220,6 +238,35 @@ plots <- lapply(
 wrap_plots(plots, ncol = 1) +
   plot_layout(guides = "collect")
 ```
+
+All these different metrics provide information from different aspects of
+alpha diversity, notably on richness, dominance, information, and phylogenetic
+diversity described in [@Cassol2025]. It is recommended to interpret these
+aspects separately and together.
+
+From our example, we can observe that soil and freshwater (creek) have the
+highest number of different taxonomic features present while tongue microbiome
+has the lowest richness, suggesting greater biodiversity in soil and freshwater
+samples.
+
+Based on the dominance values, species abundances in the soil samples appeared
+to be relatively evenly distributed. In contrast, the freshwater microbiome
+&mdash; particularly in the freshwater creek samples &mdash; was dominated by a
+single species, despite showing high observed richness.
+
+These observations are supported by the Shannon index, which accounts for both
+richness and dominance. Soil samples showed the highest Shannon diversity,
+reflecting their high number of observed species and relatively even species
+distribution.
+
+Soil and freshwater creek environments host a wide range of phylogenetically
+diverse organisms, indicating that the observed taxonomic features are not
+closely related but rather distinct from one another in terms of their
+evolutionary history.
+
+In summary, soil samples exhibit the highest biodiversity, while human-derived
+samples show less variation in terms of species composition and evolutionary
+diversity.
 
 ### Statistical analysis of alpha diversity measures {#sec-stats-diversity}
 

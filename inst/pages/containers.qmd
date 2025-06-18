@@ -9,23 +9,49 @@ chapterPreamble()
 This section provides an introduction to `TreeSummarizedExperiment (TreeSE)`
 and `MultiAssayExperiment (MAE)` data containers introduced in
 [@sec-microbiome-bioc]. In microbiome data science, these containers
-link taxonomic abundance tables with rich side information on the taxa and
-samples. Taxonomic abundance data can be obtained by 16S rRNA amplicon
-or metagenomic sequencing, phylogenetic microarrays, or by other
-means. Many microbiome experiments include multiple versions and types
-of data generated independently or derived from each other through
-transformation or agglomeration. We start by providing recommendations
-on how to represent different varieties of multi-table data within the
-`TreeSE` class.
+link taxonomic abundance tables with rich side information on the features and
+samples.
 
-The options and recommendations are summarized in [@tbl-options].
+One key advantage of `SummarizedExperiment` ecosystem  is its flexibility and
+generality. While taxonomic features remain central in microbiome studies, there
+is growing interest in analyzing and integrating diverse types of features.
+These may include:
+
+- **Taxonomic features** (also referred to as taxa, microbes, or
+taxonomic profile), typically obtained through 16S rRNA amplicon sequencing,
+shotgun metagenomic sequencing, or phylogenetic microarrays. These represent the
+composition and abundance of microbial taxa within a sample.
+
+- **Functional features** (also known as gene abundance, pathway abundance, or
+functional profile), usually derived from shotgun metagenomic sequencing. These
+describe the functional potential of microbial communities within a sample.
+
+- **Transcriptomic features** (or metatranscriptomic profile),
+typically obtained using metatranscriptomic sequencing (RNA-seq). These capture
+the actively expressed genes in microbial communities and reflect functional
+activity within a sample.
+
+- **Metabolomic features**, typically obtained
+using mass spectrometry (MS) or nuclear magnetic resonance (NMR). These
+represent small molecules produced or consumed by the microbiome within a
+sample.
+
+- **Proteomic features**, typically obtained using mass spectrometry (MS). These
+capture the expressed proteins in a sample and reflect microbial activity within
+a sample.
+
+In addition, these data tables often exist in multiple versions, derived through
+transformations or agglomerations. We start by providing recommendations
+on how to represent different varieties of multi-table data within the
+`TreeSE` class. The options and recommendations are summarized in
+[@tbl-options].
 
 ## Structure of `TreeSE`
 
 `TreeSE` contains several distinct slots, each holding a specific type of data.
 The `assays` slot is the core of `TreeSE`, storing abundance tables that
 contain the counts or concentrations of features in each sample.
-Features can be taxa, metabolites, antimicrobial resistance genes, or other
+Features can be taxonomic, metabolomic, antimicrobial resistance genes, or other
 measured entities, and are represented as rows. The columns correspond to
 unique samples.
 
@@ -39,10 +65,10 @@ series.
 
 The slots in `TreeSE` are outlined below:
 
-- `assays`: Stores a list of abundance tables. Each table has consistent rows and columns, where rows represent taxa and columns represent samples.
-- `rowData`: Contains metadata about the rows (taxa). For example, this slot can include a taxonomy table.
+- `assays`: Stores a list of abundance tables. Each table has consistent rows and columns, where rows represent features and columns represent samples.
+- `rowData`: Contains metadata about the rows (features). For example, this slot can include a taxonomy table.
 - `colData`: Holds metadata about the columns (samples), such as patient information or the time points when samples were collected.
-- `rowTree`: Stores a hierarchical tree for the rows, such as a phylogenetic tree representing the relationships between taxa.
+- `rowTree`: Stores a hierarchical tree for the rows, such as a phylogenetic tree representing the relationships between features.
 - `colTree`: Includes a hierarchical tree for the columns, which can represent relationships between samples, for example, indicating whether patients are relatives and the structure of those relationships.
 - `rowLinks`: Contains information about the linkages between rows and the nodes in the `rowTree`.
 - `colLinks`: Contains information about the linkages between columns and the nodes in the `colTree`.
@@ -76,11 +102,12 @@ tse
 ```
 
 The `TreeSE` object, similar to a standard `data.frame` or `matrix`, has rows
-and columns. Typically, samples are stored in columns, while taxa (or features)
+and columns. Typically, samples are stored in columns, while features
 are stored in rows. You can extract subsets of the data, such as the first
-five rows (first five taxa) and certain three columns (certain three samples). 
-The object manages the linkages between data (e.g., the assay data and the sample
-metadata), ensuring that when you subset the data object, all its parts 
+five rows (first five features) and certain three columns
+(certain three samples). 
+The object manages the linkages between data (e.g., the assay data and the
+sample metadata), ensuring that when you subset the data object, all its parts 
 are subsetted simultaneously, such that they remain matched with each other.
 
 ```{r}
@@ -106,19 +133,20 @@ from [@sec-treese_subsetting].
 ## Assay data {#sec-assay-slot}
 
 When studying microbiomes, the primary type of data is in the form of abundance
-of given microbes in given samples. This sample per taxa table forms the 
-core of the TreeSE object, called the  ‘The assay data’ .
+of given microbes in given samples. This sample per feature table
+forms the core of the TreeSE object, called the  ‘the assay data’ .
 
-An assay is a measurement of the presence and abundance of different microbial
-taxa in a sample. The assay data records this in a table where rows are unique
-taxa and columns are unique samples and each entry contains a number 
-describing how many of a given taxon is present in a given sample. Note that 
-when storing assays, the original data is count-based. However, due to the 
-nature of how microbiome data is produced, these count-based abundances rarely 
-reflect the true counts of microbial taxa in the sample, and thus the abundance 
-tables often undergo different transformations, such as logarithmic, Centered 
-Log-Ratio (CLR), or relative abundance to make these abundance values comparable 
-with each other. See[@sec-assay-transform] for more information on transformations.
+An assay is a measurement of the presence and abundance of different taxxonomic
+features in a sample. The assay data records this in a table where rows are
+unique features and columns are unique samples and each entry contain
+a number  describing how many of a given feature is present in a given sample.
+Note that  when storing assays, the original data is count-based. However, due
+to the  nature of how microbiome data is produced, these count-based abundances
+rarely  reflect the true counts of features in the sample, and thus
+the abundance  tables often undergo different transformations, such as
+logarithmic, Centered  Log-Ratio (CLR), or relative abundance to make these
+abundance values comparable  with each other. See[@sec-assay-transform] for more
+information on transformations.
 
 The microbial abundance tables are stored in _**assays**_. The assays slot 
 contains the abundance data as multiple count matrices. The result of assays
@@ -174,11 +202,12 @@ indicates the sample type (e.g. soil, fecal matter, control) and
 
 ## rowData {#sec-rowData}
 
-`rowData` contains data on the features, such as microbial taxa of the analyzed 
-samples. This is particularly important in the microbiome field for storing 
-taxonomic information, such as the Species, Genus or Family of the different 
-microorganisms present in samples. This taxonomic information is extremely important 
-for understanding the composition and diversity of the microbiome in each sample.
+`rowData` contains data on the features, such as taxonomic features of the
+analyzed samples. This is particularly important in the microbiome field for
+storing taxonomic information, such as the Species, Genus or Family of the
+different  microorganisms present in samples. This taxonomic information is
+extremely important for understanding the composition and diversity of the
+microbiome in each sample.
 
 
 ```{r rowdata}
@@ -188,12 +217,12 @@ rowData(tse)
 ## rowTree
 
 Phylogenetic trees play an important role in the microbiome field. Many times it 
-is useful to know how closely related the microbial taxa present in the data are. 
-For example, to calculate widely-used phylogenetically weighted microbiome 
-dissimilarity metrics such as UniFrac and wUniFrac, we need information
-on not only the presence and abundance of microbial taxa in each sample but 
-also the evolutionary relatedness among these taxa. The `TreeSE` class can 
-keep track of relations among features (taxa) via two functions, 
+is useful to know how closely related the taxonomic features present in the data
+are. For example, to calculate widely-used phylogenetically weighted microbiome 
+dissimilarity metrics such as UniFrac, we need information
+on not only the presence and abundance of taxonomic features in each sample but 
+also the evolutionary relatedness among these taxonomic features. The `TreeSE`
+class can  keep track of relations among features via two functions, 
 `rowTree` and `rowLinks`.
 
 A tree can be accessed via `rowTree` as `phylo` object.

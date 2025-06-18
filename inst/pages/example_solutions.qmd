@@ -69,7 +69,7 @@ tse_read <- readRDS("tse.rds")
 
 # Converting TreeSE to long format and writing it in a CSV file
 lf <- meltSE(tse_read)
-write.csv(lf, "LongFormat_tse.csv")
+write.csv(lf, "long_format_tse.csv")
 ```
 
 ## Taxonomic information
@@ -81,7 +81,39 @@ These example solutions are related to exercises in
 #| label: taxonomy
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
+
+# load example dataset
+library(mia)
+library(miaViz)
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# Available taxonomic ranks
+taxonomyRanks(tse)
+
+# Unique taxonomic features from class
+getUnique(tse, rank = "Order")
+
+# Subsets the data and aligns the tree
+tse_sub <- tse[1:15, ]
+rowTree(tse_sub)$Nnode
+
+tse_sub <- subsetByLeaf(tse_sub, rowLeaf = rownames(tse_sub))
+rowTree(tse_sub)$Nnode
+
+# Creates plot for the phylogeny
+p1 <- plotRowTree(tse_sub)
+
+# Creates taxonomic tree
+tse_sub_hierarchy <- tse_sub
+tse_sub_hierarchy <- addHierarchyTree(tse_sub_hierarchy)
+
+# Creates plot for the taxonomic tree
+p2 <- plotRowTree(tse_sub_hierarchy)
+
+# Plots trees
+library(patchwork)
+p1 + p2
 ```
 
 ## Data wrangling
@@ -136,6 +168,83 @@ tse <- mergeSEs(tse, GlobalPatterns)
 colData(tse)
 ```
 
+## Exploration & quality control
+
+These example solutions are related to exercises in [@sec-quality-control].
+
+```{r}
+#| label: qc
+#| code-fold: true
+#| code-summary: "Show the solution"
+
+# Load example dataset
+library(mia)
+library(miaViz)
+library(scuttle)
+data("GlobalPatterns")
+tse <- GlobalPatterns
+
+# Plot counts with a histogram
+plotHistogram(tse, assay.type = "counts")
+
+# Add prevalence to rowData
+tse <- addPrevalence(tse)
+
+# Plot the distribution of prevalence values
+plotHistogram(tse, row.var = "prevalence")
+
+# Add library size to colData
+tse <- addPerCellQCMetrics(tse)
+# And visualize them
+plotHistogram(tse, col.var = "total")
+
+# Plot categorical values with a barplot
+plotBarplot(tse, col.var = "SampleType")
+
+# Available taxonomic ranks
+taxonomyRanks(tse)
+
+# Checks the dominance of genera
+summarizeDominance(tse, rank = "Genus")
+
+# Get the most prevalent taxa
+getPrevalent(tse, rank = "Genus", prevalence = 0.2, detection = 1)
+
+# Get the most abundant taxa based on their median abundance
+getTop(tse, method = "median")
+
+# Visualzie the most prevalent features
+plotAbundanceDensity(tse)
+```
+
+## Subsetting
+
+These example solutions are related to exercises in [@sec-subsetting].
+
+```{r}
+#| label: subsetting
+#| code-fold: true
+#| code-summary: "Show the solution"
+
+# Loading one of the available example datasets
+library(mia)
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+
+# Adds total size of all libraries to colData
+library(scuttle)
+tse <- addPerCellQCMetrics(tse)
+
+# Visualizes colData and plots distribution of library sizes
+colData(tse) |> head()
+library(miaViz)
+plotHistogram(x = tse, col.var = "total")
+
+# Subsets based on library size and then subsets again based on feature prevalence
+tse_library <- tse[, tse$total > 500000]
+tse_subset <- subsetByPrevalent(tse_library, detection = 1, prevalence = 2/10)
+```
+
 ## Agglomeration
 
 These example solutions are related to exercises in [@sec-agglomeration].
@@ -144,7 +253,37 @@ These example solutions are related to exercises in [@sec-agglomeration].
 #| label: agglomeration
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
+
+# Load packages and dataset
+library(mia)
+data("GlobalPatterns")
+tse <- GlobalPatterns
+
+# Show taxonomic ranks
+taxonomyRanks(tse)
+
+# Show the unique values for a rank
+getUnique(tse, rank = "Phylum")
+
+# Agglomerate by rank and shows # of rows
+tse_agglomerated <- agglomerateByRank(tse, rank = "Phylum")
+nrow(tse_agglomerated)
+
+# Show rowData
+rowData(tse_agglomerated)
+
+# Agglomerate by all ranks and shows one
+tse_all_ranks <- agglomerateByRanks(tse)
+altExpNames(tse_all_ranks)
+altExp(tse_all_ranks, "Phylum")
+
+# Agglomerate by prevalence
+tse_prevalence <- agglomerateByPrevalence(tse)
+altExp(tse, "prevalent") <- agglomerateByPrevalence(tse)
+
+# Show column variables and merges the data based on one
+colData(tse) |> colnames()
+tse_variable <- agglomerateByVariable(tse, group = "SampleType", by = "cols")
 ```
 
 ## Transformation
@@ -155,18 +294,48 @@ These example solutions are related to exercises in [@sec-assay-transform].
 #| label: transformation
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
-```
 
-## Exploration & quality control
+# Load the example dataset
+library(mia)
+library(miaViz)
+data("GlobalPatterns")
+tse <- GlobalPatterns
 
-These example solutions are related to exercises in [@sec-quality-control].
+# Visualize counts
+plotHistogram(tse, assay.type = "counts")
 
-```{r}
-#| label: qc
-#| code-fold: true
-#| code-summary: "Show the solution"
-    
+# Transformations on the counts assay
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+tse <- transformAssay(tse, assay.type = "counts", method = "clr", pseudocount = 1)
+
+assayNames(tse)
+
+# Plots the two different assays
+library(patchwork)
+p1 <- plotHistogram(tse, assay.type = "counts")
+p2 <- plotHistogram(tse, assay.type = "clr")
+
+p1 + p2
+
+# Subset the abundance table
+clr_matrix <- assay(tse, "clr")
+clr_matrix[1:10, 1:5]
+
+# Agglomerate data by Phylum rank
+tse_phylum <- agglomerateByRank(tse, rank = "Phylym")
+
+# Apply transformation to Phylum data
+tse_phylum <- altExp(tse, "Phylum")
+tse_phylum <- transformAssay(
+    tse_phylum, assay.type = "counts", method = "relabundance")
+tse_phylum <- transformAssay(
+    tse_phylum, assay.type = "counts", method = "clr", pseudocount = 1)
+
+# phiLR transformation
+tse <- transformAssay(
+    tse, assay.type = "counts", method = "philr", MARGIN = 1L, pseudocount = TRUE)
+
+assay(altExp(tse, "philr"))
 ```
 
 ## Community composition

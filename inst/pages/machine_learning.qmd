@@ -59,7 +59,6 @@ ML applications for the integration of multi-omic datasets are covered
 in [@sec-multiassay_ordination] and [@sec-multi-omics-integration]
 :::
 
-
 ## Setup
 
 Published fecal microbiome data [@qin2012_t2d] will be used to 
@@ -125,16 +124,16 @@ common pre-processing steps have biological justifications.
 For instance:
 
 * **Collapse highly correlated features:** In a microbial community,
-it's common for the abundance of two or more taxa to be highly correlated.
-Thus, removing or collapsing correlated taxa allows the
+it's common for the abundance of two or more taxonomic features to be highly
+correlated. Thus, removing or collapsing correlated features allows the
 model to analyse them as one group.
 * **Remove features with near-zero variance:** Features that don't vary
 enough across groups can hardly help in discerning between them, as they
 don't hold any biologically relevant information. Additionally, 
 under certain data splits, these variables can show zero variance.
 * **Remove features with low prevalence:** Microbiome data is sparse,
-and taxa present in just a few samples of each group hardly provide 
-useful biological information for their classification. 
+and taxonomic features present in just a few samples of each group hardly
+provide useful biological information for their classification. 
 
 ::: {.callout-important}
 ## Important: Data leakage is a common pitfall.
@@ -148,7 +147,7 @@ Fortunately, there are questions we can ask ourselves to void data
 leakage [@bernett2024_dataLeakage] 
 :::
 
-The code below shows how to join the abundance of each microbial taxa
+The code below shows how to join the abundance of each taxonomic features
 with different alpha diversity indices that provide ecosystem-level 
 information. See [@sec-alpha-diversity] for a discussion on alpha 
 diversity.
@@ -272,17 +271,28 @@ df_regression <- prep_regression[["dat_transformed"]]
 ## Note: Preprocessing strategies impact the performance of ML models.
 
 Although microbiome data **is** compositional, proportion-based 
-transformations &mdash;such as relative abundance or Hellinger&mdash;
-often outperform compositional transformations like CLR when building
-Random Forests [@yerke2024], one of the algorithms 
-discussed in the next section. The authors note that the impact of the 
-chosen transformations decreases as the signal-to-noise ratio 
+transformations &mdash;such as relative abundance or Hellinger&mdash; or even
+simpler approaches often outperform compositional transformations like CLR when
+building supervised ML models [@yerke2024]. The authors note that the impact of
+the  chosen transformations decreases as the signal-to-noise ratio 
 increases. In other words, the more distinct the conditions we aim to
 classify, the less influence preprocessing transformations will have on
-model performance. A similar relationship has been observed in 
-regression tasks. Moreover, in addition to improving model performance, 
-proportion-based transformations are more intuitive and therefore easier
-to interpret.
+model performance.
+
+The aforementioned paper described the effect in both regression and
+classification tasks. A similar observations have also been done
+in other papers where they extensively compared different transformations
+in microbiome classification data [@Karwowska2025; @Giliberti2022]. These papers
+suggest presence/absence being the preferred approach in supervised ML
+applications. Even though the papers benchmarked transformations only in
+classification, their findings are likely applicable to regression as well.
+
+These studies were conducted with stool samples which contain many sources of
+biases as they serve as proxy for our main interest: the gut flora. This can
+explain why the simpler approaches are more robust and reproducible.
+Moreover, in addition to improving model performance, 
+proportion or presence/absence-based transformations are more intuitive and
+therefore easier to interpret.
 
 Given this, it is worth exploring different preprocessing approaches.
 The `preprocess_data` function supports a a variety of strategies described
@@ -317,7 +327,7 @@ overfitting and enhance generalization to new data.
 
 When applied to classification problems, each tree predicts 
 the class of an observation (e.g., healthy or T2D) based on the values
-of the features (e.g., microbial taxa). Each tree finds the best
+of the features (e.g., taxonomic). Each tree finds the best
 split of the data by reducing how mixed the classes are, often using 
 metrics like entropy or Gini impurity.
 
@@ -339,7 +349,7 @@ rf_classification <- run_ml(
 ```
 
 For regression tasks, each tree predicts a numerical outcome (e.g.,
-BMI) based on the values of the features (e.g., microbial taxa). Each 
+BMI) based on the values of the features (e.g., taxonomic). Each 
 tree split the data to minimize the difference between predicted and 
 real (observed) values, often using metrics like mean squared 
 error (MSE). One strength of RF is that it can learn non-linear patterns 
@@ -373,7 +383,7 @@ new tree improves the performance of the previous.
 
 When applied to classification, each tree predicts the class of an 
 observation (e.g., healthy or T2D) based on feature values (e.g., 
-microbial taxa). However, instead of 'voting' like in Random Forest, 
+taxonomic). However, instead of 'voting' like in Random Forest, 
 XGBoost improves the performance by assigning higher weights (or 
 penalties) to missclassified observations.
 
@@ -661,7 +671,7 @@ that the ROC curves of both models resembles the curve presented in
 the article where this dataset was first analysed [@qin2012_t2d] 
 (see Figure 4B). Interestingly, authors used other supervised ML 
 algorithm, and it was trained in a set of 50 microbiome genes (instead
-of taxa and alpha diversity metrics, as we did). However, it is 
+of taxonomic features and alpha diversity metrics, as we did). However, it is 
 interesting that concordant AUCs and ROC curves shapes were obtained 
 using different microbiome-derived information. 
 
@@ -786,7 +796,7 @@ understanding what are the features that are affecting the model
 performance, a property of ML models called interpretability.
 
 ML models have different degrees of interpretability. One way to 
-understand how different features (e.g., microbial taxa) affect model's 
+understand how different features (e.g., taxonomic) affect model's 
 performance is by randomly permuting the values of that feature across 
 samples and then evaluating the amount of change in a performance metric.
 
@@ -833,8 +843,8 @@ This plot shows the features with the highest effect on model's
 performance. In other words, which features have most of the information 
 required to differentiate between healthy participant and T2D patients. 
 However, note that the differences in model performance are very close to
-zero, which indicates a small contribution of each taxa in allowing the
-model to distinguish between groups.
+zero, which indicates a small contribution of each taxonomic feature in allowing
+the model to distinguish between groups.
 
 Interestingly, our results are coherent with what authors of the 
 original analysis reported [@qin2012_t2d]. For instance, they 
@@ -842,7 +852,7 @@ mention that *F. prausnitzii* and *R. intestinalis* (also within our
 most relevant features) are important nodes in the co-occurrence
 network enriched in healthy participants. On the other hand, they 
 report several *Clostridium* representatives enriched in the T2D
-patients (see Figure 2A). This taxa was also reported as having 
+patients (see Figure 2A). This taxonomic feature was also reported as having 
 the largest differences in the mean abundances between 
 groups [@mei2024_t2d] (see Figures 2A and 2B). 
 
@@ -851,10 +861,10 @@ groups [@mei2024_t2d] (see Figures 2A and 2B).
 
 Feature importance plots are often interpreted in the literature with a 
 reductionist mindset. Thus, researchers often conclude that a single 
-feature (i.e., bacterial taxa) is responsible of a complex clinical output 
+feature is responsible of a complex clinical output 
 of interest. However, more often than not, microbes interact with one 
-another, and thus the effect of a single taxa doesn't always inform about
-ecosystem-level properties of the microbiome. It is important to 
+another, and thus the effect of a single taxonomic feature doesn't always inform
+about ecosystem-level properties of the microbiome. It is important to 
 bear that in mind when interpreting the results of our models.
 :::
 
