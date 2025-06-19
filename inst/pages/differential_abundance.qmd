@@ -44,8 +44,9 @@ trying out several different DAA methods.
 ## Recommendations based on recent literature
 
 Usually, when a new DAA method is introduced, the authors demonstrate it to
-perform better to some of the existing alternatives. That is often achieved by
-employing simulated data and possibly one or more real datasets. The authors may
+perform better compared to some of the existing alternatives. That is often
+achieved by employing simulated data and possibly one or more real datasets.
+The authors may
 have, however, selected their simulation models, example datasets, evaluation
 metrics, compared methods, etc. specifically to show the introduced method in a
 favorable light. Assessing the performance of different methods based solely on
@@ -54,51 +55,64 @@ advisable.
 
 A more neutral evaluation of the performance of different DAA methods can be
 found from several independent benchmarking studies (e.g. @Weiss2017,
-@Hawinkel2019, @Calgaro2020, @Wallen2021, @Nearing2022, @Cappellato2022,
-@Roche2022, @Swift2023). Unfortunately, these studies have ended up with very
-discordant conclusions on the methods. However, three very recent benchmark
-studies employing mostly real datasets, have ended up with somewhat concordant
-conclusions.
+@Hawinkel2019, @Calgaro2020, @Wallen2021, @Nearing2022, @Yang2022,
+@Cappellato2022, @Roche2022, @Swift2023, @Wirbel2024, @Pelto2025,
+@Gamboa-Tuz2025). Unfortunately, these studies have ended up with very
+discordant conclusions on the methods. However, if we look specifically at some
+benchmarking studies that have used more real datasets (instead of simulated
+data), we can see that analyzing relative abundances (i.e. using TSS
+normalization) with a simple non-parametric method or linear regression have
+performed well.
 
--	@Wirbel2024 produced realistic test datasets by first creating random
-case-control groups on real datasets (from healthy patients) and then implanting
-differential abundance signals to such data. They found that only t-test/linear
-regression, the Wilcoxon test, limma [@Ritchie2015], and fastANCOM
-[@fastANCOM2022] properly controlled false discoveries at relatively high
-sensitivity.
+- @Nearing2022 studied the performance of DAA methods using 38 datasets. They
+evaluated the number of detected taxa (ASVs), consistency of the detected taxa
+between methods, replication of results between studies and error rate on
+datasets with randomly generated groups.
+They emphasized conservatism (low error rate)
+in their recommendations and ended up recommending ALDEx2 [@Fernandes2014] and
+ANCOM-II [@Mandal2015]. Additionally, they recommended MaAsLin2 [@Mallick2020]
+(i.e. analyzing arcsine square root transformed relative abundances with linear
+regression) as a more powerful option.
+
+- In addition to simulations, @Yang2022 evaluated the FDR of different DAA
+methods on 106 real datasets with randomly created groups. They found that,
+the observed FDR was at the nominal level when, for instance, analyzing
+relative abundances either the Wilcoxon test or with linear regression
+(MaAsLin2).
 
 -	@Pelto2025 studied how the results from different DAA methods replicate
 between random partitions of datasets and between datasets from independent
 studies. They found that when considering consistency along with sensitivity,
-the best performance was obtained by analyzing relative (TSS normalized)
-abundances with a non-parametric method or (after log transformation) with
-linear regression/t-test or analyzing presence/absence of taxa with logistic
+the best performance was obtained by analyzing relative abundances with a
+non-parametric method or (after log transformation) with linear
+regression/t-test (MaAsLin2) or analyzing presence/absence of taxa with logistic
 regression.
 
 -	@Gamboa-Tuz2025 employed three real datasets to benchmark different DAA
 methods against biological ground truth. They found that methods employing the
-TSS normalization and RNA-seq-derived methods performed best.
+TSS normalization (with e.g. the Wilcoxon test) and RNA-seq-derived methods
+performed best.
 
-In conclusion, it seems that simple methods perform better (or similarly) than
-more elaborate methods. An additional benefit of using simple methods is that
-they are intuitive and easy to understand. We therefore recommend performing DAA
-by analyzing **relative (TSS normalized) abundances by a non-parametric method**
-(e.g. ordinal regression model) or, after a log transformation,
-by **t-test/linear regression**.
+We therefore recommend performing DAA by analyzing
+**relative (TSS normalized) abundances by a non-parametric method**
+(e.g. the Wilcoxon test or ordinal regression model) or, after a log
+transformation, with **t-test/linear regression**. In addition to their
+good performance on real data they have the benefit of being **intuitive and
+easy to understand**.
 
-Furthermore, based on recent studies on classification accuracy of healthy vs.
+We note, however, that the performance of DAA methods likely depends
+on the characteristics of the analyzed data (@Weiss2017, @Calgaro2020). 
+Consequently, while the methods recommended above seem to be good general
+default methods, they may not necessarily be the optimal methods in many cases.
+If one wants to evaluate which method may perform best specifically on their
+data, one option to use the benchdamic package by @Calgaro2022 (see vignette
+[here](https://www.bioconductor.org/packages/release/bioc/vignettes/benchdamic/inst/doc/intro.html)).
+
+Lastly, based on recent studies on classification accuracy of healthy vs.
 non-healthy patients, it seems that a high proportion of information in
 microbiome data is included in the mere **presence/absence** of taxa
 (@Giliberti2022 @Karwowska2025). A viable, and even simpler, alternative to DAA
 is thus **differential presence/absence analysis** (DPAA, see also @Pelto2025).
-
-Lastly, we note that the performance of a DAA method may depend
-on the characteristics of the analyzed data (@Weiss2017). Consequently,
-there surely exist cases where some other methods perform better than the
-recommended simple methods. If one wants to evaluate which method may perform
-best specifically on their data, one option to use the benchdamic package by
-@Calgaro2022 (see vignette
-[here](https://www.bioconductor.org/packages/release/bioc/vignettes/benchdamic/inst/doc/intro.html)).
 
 
 ## Performing differential abundance and presence/absence analysis
@@ -150,10 +164,10 @@ tse <- subsetByPrevalent(tse, rank = "Genus", prevalence = 0.10)
 # Transform count data and create assay of relative abundances
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 
-# Transform count data and create assay of presence/abundance of taxa
+# Transform count data and create assay of presence/absence of taxa
 tse <- transformAssay(tse, assay.type = "counts", method = "pa")
 
-# Transform patient_status to a factor and set "Control" as the refrence level
+# Transform patient_status to a factor and set "Control" as the reference level
 tse$patient_status <- factor(tse$patient_status, levels = c('Control', 'ADHD'))
 
 # We also transform cohort as a factor
@@ -197,10 +211,10 @@ with and without ADHD.
 
 The `Maaslin2` function takes the count matrix and metadata as inputs.
 We also need to provide it with the variable indicating the groups,
-i.e. `patient_status` in our case. Furthermorem we need to specify the folder
-for some ouput files, even though we do not need the files here. Lastly, we
+i.e. `patient_status` in our case. Furthermore, we need to specify the folder
+for some output files, even though we do not need the files here. Lastly, we
 prevent Maaslin2 to create certain plots. (`Maaslin2` prints a lot of some
-rather unnecessary output which is supresseed here for conveniency.)
+rather unnecessary output which is supressed here for convenience.)
 
 ```{r}
 #| label: run_daa_basic
@@ -213,7 +227,7 @@ obj_daa_basic <- Maaslin2(
   input_metadata = colData(tse) |> as.data.frame(), # The metadata
   fixed_effects = "patient_status",                 # The predictor variable
   
-  output = 'output', # The name of the folder for ouput files.
+  output = 'output', # The name of the folder for output files.
   plot_heatmap = FALSE,
   plot_scatter = FALSE)
 ```
@@ -258,8 +272,9 @@ intervals for the log~2~-fold change.
 
 Thus, if we use the standard criterion for statistical significance, namely,
 q-value < 0.05, we can see that the difference is statistically significant for
-the genera named as _Ruminococcus gauvreauii group_, _Faecalibacterium_,
-_Catabacter_, _Clostridium innocuum group_ and _Erysipelatoclostridium_.
+the genera named as _[Ruminococcus] gauvreauii group_, _Faecalibacterium_,
+_Catabacter_, _[Clostridium] innocuum group_ and _Erysipelatoclostridium_.
+(`Maaslin2` has some problems with special characters such as `[` or `]`.)
 Furthermore, as the log~2~-fold change estimate is positive, for instance, for
 _Faecalibacterium_ it means that the average relative abundance of
 _Faecalibacterium_ is higher in the ADHD group.
@@ -332,9 +347,9 @@ res_daa_cov |>
 
 When comparing these results to the results without the covariate included, we
 can see that, for instance, the q-value of _Faecalibacterium_ and
-_Catabacter_ are now somewhat smaller. Nevertheless, the results overally look
+_Catabacter_ are now somewhat smaller. Nevertheless, the results look overall
 rather similar to the results without the covariate included. Therefore, cohort
-does not not seem to be a confounder causing spurious associations between 
+does not seem to be a confounder causing spurious associations between 
 patient status and the abundances of any taxa.
 
 
@@ -433,9 +448,9 @@ for DPAA, we employ here the maaslin3 package [@Nickols2024].
 We note, however, that the version of logistic regression used maaslin3 provides
 rather conservative results, that is, it rarely provides false positive results
 but, importantly,
-_it may **not** detect some clear differences in presence/absence_. For a better
+_it may fail to detect some clear differences in presence/absence_. For a better
 performance, we recommend using a version of logistic regression introduced by
-@Firth1993. As there currently exist no convenient implenetation of Firth
+@Firth1993. As there currently exist no convenient implementation of Firth
 logistic regression for DPAA, one needs to use a custom function. Such custom
 function with application examples is given in the [@sec-extras]. 
 
@@ -449,42 +464,54 @@ workflow used in processing/analyzing the microbial samples [@Silverman2020].
 
 #### The basic two-group comparison for presence/absence {#sec-dpaa-basic}
 
-We first perform the basic two-group comparison without any other covariates.
-We compare the presence/absence of taxa between the people with and without
-ADHD.
+We first perform the basic two-group comparison, that is, we compare the
+presence/absence of taxa between the people with and without ADHD. As suggested
+by the authors of `maaslin3`, we control for the sequencing depth (`reads`)
+also in the analysis. This is because the detection (observed presence) of taxa
+may depend on the sequencing depth.
 
 The `maaslin3` function takes the `tse` object as input. We also need to provide
-it with the model formula, in this case `~ patient_status`. Furthermore, we need
-to specify the folder for some ouput files, even though we do not need the files
-here. Lastly, we prevent `maaslin3` to create certain plots and print some
-unnecessary output.
+it with the model formula, in this case `~ patient_status + reads`. Furthermore,
+we need to specify the folder for some output files, even though we do not need
+the files here. Lastly, we prevent `maaslin3` to create certain plots and print
+some unnecessary output.
 
 ```{r}
 #| label: run_dpaa_basic
 
 library(maaslin3)
 
-# Run maaslin3 with patient_status as the predictor variable
+# Calculate the sequencing depth (the total number of reads/counts) for each
+# sample
+tse$reads <- colSums(assay(tse, "counts")) |> as.numeric()
+
+# Run maaslin3 with patient_status and reads as the predictor variables
 obj_dpaa_basic <- maaslin3(
   tse,                          
-  formula = ~ patient_status, # Model formula
-  output = 'output',          # The name of the folder for some ouput files.
-  plot_associations = FALSE,  # Prevent some unnecessary plots
+  formula = ~ patient_status + reads, # Model formula
+  output = 'output',              # The name of the folder for some output files
+  plot_associations = FALSE,      # Prevent some unnecessary plots
   plot_summary_plot = FALSE,
-  verbosity = 'ERROR')        # Prevent some unnecessary output
+  verbosity = 'ERROR')            # Prevent some unnecessary output
 ```
 
-Next, we extract the data.frame of results from the list object returned by
-`maaslin3`. We also calculate the 95% confidence intervals and transform the
-results to a slightly more convenient format.
+Next, we extract the `data.frame` of results from the list object returned by
+`maaslin3`. We remove the variable `reads` from the output as it is merely a 
+technical covariate that we are not interested in. We also calculate the 95%
+confidence intervals. Furthermore, we calculate the q-values manually as
+`maaslin3` calculates them by including `reads` also in the calculation, which
+is not what we want. Lastly, we transform the results to a slightly more
+convenient format.
 
 ```{r}
 #| label: results_dpaa_basic
 
 # Extract and transform the results to the same form as before 
 res_dpaa_basic <- obj_dpaa_basic$fit_data_prevalence$results |> 
+  filter(name != 'reads') |> 
   mutate(ci_lwr = coef - qnorm(.975) * stderr,
-         ci_upr = coef + qnorm(.975) * stderr) |>
+         ci_upr = coef + qnorm(.975) * stderr,
+         qval = p.adjust(pval_individual, method = "fdr")) |>
   select(feature, name, coef, pval = pval_individual, qval = qval_individual,
          ci_lwr, ci_upr)
 
@@ -508,16 +535,16 @@ means that the genus is more prevalent in the control group.
 
 Here we show how to perform DPAA with `cohort` included as an additional
 covariate in the analysis. We proceed as above but we now set the formula to
-`~ patient_status + cohort`. We also calculate the q-values manually as in 
-@sec-daa-cov.
+`~ patient_status + cohor + reads`. We also calculate the q-values manually as
+in @sec-daa-cov.
 
 ```{r}
 #| label: dpaa_cov
 
-# Run maaslin3 with patient_status and cohort as predictor variables
+# Run maaslin3 with patient_status and cohort (and reads) as predictor variables
 obj_dpaa_cov <- maaslin3(
   tse,                          
-  formula = ~ patient_status + cohort,
+  formula = ~ patient_status + cohort + reads,
   output = 'output',          
   plot_associations = FALSE,
   plot_summary_plot = FALSE,
@@ -525,6 +552,7 @@ obj_dpaa_cov <- maaslin3(
 
 # Extract the results and calculate the 95% CIs and q-values
 res_dpaa_cov <- obj_dpaa_cov$fit_data_prevalence$results |> 
+  filter(name != 'reads') |> 
   mutate(ci_lwr = coef - qnorm(.975) * stderr,
          ci_upr = coef + qnorm(.975) * stderr) |>
   group_by(name) |> 
@@ -556,17 +584,17 @@ Next, we show how to perform DPAA with interaction terms. Contrary to
 `Maaslin2`, the `maaslin3` function supports also the analysis with interaction
 terms. Therefore, we can just add an intercation term in the model formula by
 using the stndard R syntax
-`formula = ~ patient_status + cohort + patient_status:cohort` or
-alternatively `formula = ~ patient_status * cohort`. The latter is usually more
-convenient.
+`formula = ~ patient_status + cohort + patient_status:cohort + reads` or
+alternatively `formula = ~ patient_status * cohort + reads`. The latter is
+usually more convenient.
 
 ```{r}
 #| label: dpaa_ia
 
-# Run maaslin3 with patient_status, cohort and their interaction
+# Run maaslin3 with patient_status, cohort and their interaction (and reads)
 obj_dpaa_ia <- maaslin3(
   tse,                          
-  formula = ~ patient_status * cohort,
+  formula = ~ patient_status * cohort + reads,
   output = 'output',          
   plot_associations = FALSE,
   plot_summary_plot = FALSE,
@@ -574,6 +602,7 @@ obj_dpaa_ia <- maaslin3(
 
 # Extract the results and calculate the 95% CIs and q-values
 res_dpaa_ia <- obj_dpaa_ia$fit_data_prevalence$results |> 
+  filter(name != 'reads') |> 
   mutate(ci_lwr = coef - qnorm(.975) * stderr,
          ci_upr = coef + qnorm(.975) * stderr) |>
   group_by(name) |> 
@@ -612,7 +641,7 @@ relative abundances of taxa. We show here how to perform such analysis.
 It should be noted, however, that especially in small datasets (like the
 example dataset used here), the number of positive/non-zero abundances may be
 very small for some taxa. Therefore, this type of analysis may not always be
-reasonable. Furthermore, we note again that one should keep in mind that the
+reasonable. Furthermore, we note again that the
 observed absence of a taxon does not necessarily mean that the taxon
 is truly absent in a microbial sample.
 
@@ -829,9 +858,9 @@ are higher in the ADHD group as indicated by the positive sign of their
 log~2~-fold estimates.
 
 The result for _Erysipelatoclostridium_ in DPAA, namely, the small q-value with
-negative log(OR) estimate, is clearly illustrated by the prevelence bars. They
-show a high prevelence of _Erysipelatoclostridium_ in the Control group and low
-prevelance in the ADHD group.
+negative log(OR) estimate, is clearly illustrated by the prevalence bars. They
+show a high prevalence of _Erysipelatoclostridium_ in the Control group and low
+prevalence in the ADHD group.
 
 
 #### More complex analyses {#sec-daa-viz-2}
@@ -915,7 +944,7 @@ While we generally recommend the use of the above simple methods in DAA there
 exist dozens of alternative methods. A (non-comprehensive) list of these methods
 is given below.
 
-- ALDEx2 [@Gloor2016]
+- ALDEx2 [@Fernandes2014]
 - ANCOM [@Mandal2015]
 - ANCOMBC [@ancombc2020]
 - BIRDMAn [@Rahman2023]
@@ -936,7 +965,7 @@ is given below.
 - metagenomeSeq [@Paulson2017]
 - Omnibus [@Omnibus2018]
 - RAIDA [@Sohn2015]
-- sccomp [@mangiola2023]
+- sccomp [@Mangiola2023sccomp]
 - ZicoSeq [@Yang2022]
 - ZINQ [@Ling2021]
 :::
@@ -980,250 +1009,3 @@ Useful functions:
 `data()`, `colData`, `subsetByPrevalent()`
 
 :::
-
-## These will come to Chapter C - Extra material
-
-### Analyzing relative abundances with ordinal regression model {#sec-orm}
-
-We show here how to perform DAA by analyzing relative abundances with ordinal
-regression model (ORM). We have chosen ORM as it makes few assumptions on the
-distributions of abundances while it can incorporate covariates (including
-interaction terms) in the analysis. As ORM performs very similarly to the
-familiar non-parametric Wilcoxon test in the basic two group comparison it can
-also be seen as an extension of the Wilcoxon test (@Harrell2001, @Liu2017).
-
-By using ORM to model the skewed and/or zero inflated distributions of microbial
-abundances, we can avoid the strong parametric assumptions (e.g. negative
-binomial distribution) made by some methods. Furthermore, we do not need to
-transform abundances. This good because the choice of the transformation may be
-somewhat arbitrary while it may affect the DAA results. Moreover, ORM has been
-shown to perform well in practice in DAA when considering its sensitivity and
-the consistency of its results (@Pelto2025).
-
-We first create a function that (for each taxon) runs ORM and returns the effect
-size estimate and p-value (based on score test) for each variable in the model.
-
-```{r}
-#| label: function_orm
-
-# The function uses the orm() function from the rms package 
-library(rms)
-
-run_orm <- function(abundance, metadata, formula){
-  
-  # Create the design matrix of the model
-  mm <- model.matrix(formula, metadata) |> 
-    cbind(abundance) |> 
-    tibble::as_tibble() |> 
-    dplyr::select(-"(Intercept)")
-  
-  inds <- 1:(ncol(mm) - 1)
-  vars <- colnames(mm)[inds]
-  
-  # Fit ordinal regression model with all variables
-  # (Intercepts are automatically added)
-  fit_1 <- rms::orm(abundance ~ ., data = mm)
-  score_1 <- fit_1$stats["Score"]
-  
-  res <- data.frame(estimate = fit_1$coefficients[vars], p_value = NA)
-  
-  # Calculate p-value based on score test for each variable
-  if(length(inds) == 1){
-    res$p_value <- fit_1$stats["Score P"]
-  }else{
-    for(i in inds){
-      fit_0 <- rms::orm(abundance ~ ., data = mm[, -i])
-      score_0 <- fit_0$stats["Score"]
-      res$p_value[i] <- as.numeric(1 - pchisq(score_1 - score_0, df = 1)) 
-    }
-  }
-  
-  return(res |> tibble::rownames_to_column("variable"))
-}
-```
-
-We use the same Tengler2020 dataset as in @sec-differential-abundance.
-
-```{r}
-#| label: orm_prepare
-
-library(tidyverse)
-library(mia)
-library(knitr)
-
-# Import dataset
-data("Tengeler2020", package = "mia")
-tse <- Tengeler2020
-
-# Agglomerate by genus and subset by prevalence
-tse <- subsetByPrevalent(tse, rank = "Genus", prevalence = 0.10)
-
-# Transform count data and create assay of relative abundances
-tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
-
-# Transform patient_status to a factor and set "Control" as the refrence level
-tse$patient_status <- factor(tse$patient_status, levels = c('Control', 'ADHD'))
-
-# We also transform cohort as a factor
-tse$cohort <- factor(tse$cohort, levels = c('Cohort_1', 'Cohort_2', 'Cohort_3'))
-```
-
-#### The basic two-group comparison {#sec-orm-basic}
-
-We compare the relative abundance of taxa between the people with and without
-ADHD (indicated by the variable `patient_status`).
-
-The code below works as follows.
-
- 1. We extract the assay with relative abundances from the `tse` object
- 2. The assay is transposed and transformed to a `data.frame`
- 3. The function `run_orm` is run for each taxon
-    i) The `.` indicates here the relative abundance of each taxon
-    ii) The metadata including the variable `patient_status` is extracted from
-    the `tse` object
-    iii) The model formula indicates that we included only `patient_status` in
-    our analysis
- 4. The results for all taxa are binded to as one `data.frame`
- 5. Lastly, we calculate p-values adjusted from multiple testing (`q-value`) by
- using the standard FDR correction by @Benjamini1995 (`method = "BH"`).
-
-
-```{r}
-#| label: run_orm_basic
-
-res_daa_basic <- assay(tse, "relabundance") |>  # Extract relative abundances
-  t() |>                                        # Transpose the assay
-  as.data.frame() |>                            # Transform to a data.frame
-  map(~ run_orm(                                # Run ORM for each taxon
-    .,                                            
-    metadata = colData(tse) |> as.data.frame(), # Extract the metadata
-    formula = ~ patient_status)                 # Model formula. Now only 
-                                                # patient_status
-    ) |> 
-  bind_rows(.id = "taxon") |>                   # Bind the results of all taxa
-  mutate(
-    q_value = p.adjust(p_value, method = "BH")) # Calculate q-values
-                                                # (FDR adjusted p-values)
-
-# The results for taxa with the smallest p-values
-res_daa_basic |> arrange(p_value) |> head() |> kable()
-```
-
-In the output
-
-- `variable` indicates the predictor variable. As `patient_status` is a
-categorical variable, it also tells the group used as the non-reference level
-(here `ADHD` as `Control` was set as the reference level).
-- `estimate` is log(odds ratio). Most importantly, positive values indicate
-abundance being higher in the non-reference group (here `ADHD`). Otherwise,
-estimates can be a bit difficult to interpret for ORMs.
-
-#### More complex analyses {#sec-orm-complex}
-
-Analysis with covariates and analysis of interaction terms can be performed in
-by just using different `formula` in the `run_orm` function, e.g.
-`formula = patient_status + cohort` or `formula = patient_status * cohort`.
-
-
-### DPAA with Firth logistic regression {#sec-firth}
-
-As some versions of logistic regression perform badly in
-the cases where, for instance, the prevelance of a taxon is zero in one
-group we show here how to perform DPAA with a robust version of logistic
-regression introduced by @Firth1993. This version has been observed to perform
-well in DPAA in practice [@Pelto2025].
-
-We first create a function that runs Firth logistic regression for
-presence/absence and returns the effect size estimate and p-value for each
-variable in the model.
-
-```{r}
-#| label: function_firth
-
-# The function uses the logistf() function from the logistf package 
-library(logistf)
-
-run_firth <- function(abundance, metadata, formula){
-  
-  # Create the design matrix of the model
-  mm <- model.matrix(formula, metadata) |> 
-    cbind(abundance) |> 
-    tibble::as_tibble() |> 
-    dplyr::select(-"(Intercept)")
-  
-  # Fit Firth logistic regression model
-  fit <- logistf::logistf(abundance ~ ., data = mm)
-  
-  res <- data.frame(estimate = fit$coefficients,
-                    p_value = fit$prob)
-  
-  return(res[-1, ] |> tibble::rownames_to_column("variable"))
-}
-```
-
-We use the same Tengler2020 dataset as in @sec-differential-abundance.
-
-```{r}
-#| label: firth_prepare
-
-library(tidyverse)
-library(mia)
-library(knitr)
-
-# Import dataset
-data("Tengeler2020", package = "mia")
-tse <- Tengeler2020
-
-# Agglomerate by genus and subset by prevalence
-tse <- subsetByPrevalent(tse, rank = "Genus", prevalence = 0.10)
-
-# Transform count data and create assay of presence/absences
-tse <- transformAssay(tse, assay.type = "counts", method = "pa")
-
-# Transform patient_status to a factor and set "Control" as the refrence level
-tse$patient_status <- factor(tse$patient_status, levels = c('Control', 'ADHD'))
-
-# We also transform cohort as a factor
-tse$cohort <- factor(tse$cohort, levels = c('Cohort_1', 'Cohort_2', 'Cohort_3'))
-```
-
-#### The basic two-group comparison {#sec-firth-basic}
-
-We perform here the basic two-group comparison without any other covariates.
-We compare the presence/absence of taxa between the people with and without
-ADHD.
-
-```{r}
-#| label: run_firth_basic
-
-res_firth_basic <- assay(tse, "pa") |>           # Extract presence/absences
-  t() |>                                        # Transpose the assay
-  as.data.frame() |>                            # Transform to a data.frame
-  map(~ run_firth(                               # Run ORM for each taxon
-    .,                                            
-    metadata = colData(tse) |> as.data.frame(), # Extract the metadata
-    formula = ~ patient_status)                 # Model formula.
-    ) |> 
-  bind_rows(.id = "taxon") |>                   # Bind the results of all taxa
-  mutate(
-    q_value = p.adjust(p_value, method = "BH")) # Calculate q-values
-                                                # (FDR adjusted p-values)
-
-# The results for taxa with the smallest p-values
-res_firth_basic |> arrange(p_value) |> head() |> kable()
-```
-
-In the output
-
-- `variable` indicates the predictor variable. As `patient_status` is a
-categorical variable, it also tells the group used as the non-reference level
-(here `ADHD` as `Control` was set as the reference level).
-- `estimate` is the familiar log(odds ratio). A positive value indicates the
-taxon being more prevalent in the non-refrence group (here `ADHD`).
-
-#### More complex analyses {#sec-firth-complex}
-
-Analysis with covariates and analysis of interaction terms can be performed in
-by just using different `formula` in the `run_firth` function, e.g.
-`formula = patient_status + cohort` or `formula = patient_status * cohort`.
-
