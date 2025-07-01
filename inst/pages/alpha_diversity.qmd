@@ -135,17 +135,18 @@ library(mia)
 data("GlobalPatterns")
 tse <- GlobalPatterns
 
-# Compute one or multiple indices simultaneously through the index 'parameter'. 
+# The 'index' parameter allows computing multiple diversity indices simultaneously.
+# Without specification, four standard indices are calculated: 
+# dbp_dominance, faith_diversity, observed_richness, and shannon_diversity.
 tse <- addAlpha(
     tse,
-    assay.type = "counts", 
-    index = c("observed", "dbp", "shannon", "faith"),
+    assay.type = "counts",
     detection = 10
 )
 
 # Check some of the first values in colData
-tse$observed |> head()
-tse$shannon  |> head()
+tse$observed_richness |> head()
+tse$shannon_diversity |> head()
 ```
 
 Certain indices have additional options, here observed has `detection` parameter
@@ -177,11 +178,11 @@ results against selected `colData` variables (sample type and final barcode).
 library(scater)
 plotColData(
     tse,
-    "observed",
+    "observed_richness",
     "SampleType",
     colour_by = "Final_Barcode") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Sample types", y = expression(Richness[Observed]))
+    labs(x = "Sample types", y = expression(Richness[observed_richness]))
 ```
 
 #### Alpha diversity measure comparisons {#sec-compare-alpha}
@@ -194,9 +195,9 @@ with a scatter plot.
 #| label: compare-diversities
 #| fig-width: 6.5
 
-tse <- addAlpha(tse, assay.type = "counts", index = "shannon")
 
-plotColData(tse, x = "shannon", y = "faith") +
+
+plotColData(tse, x = "shannon_diversity", y = "faith_diversity") +
     labs(x="Shannon index", y="Faith (phylogenetic) index") +
     geom_smooth(method = "lm")
 ```
@@ -204,7 +205,7 @@ plotColData(tse, x = "shannon", y = "faith") +
 ```{r}
 #| label: compare_indices
 
-cor.test(tse[["shannon"]], tse[["faith"]])
+cor.test(tse[["shannon_diversity"]], tse[["faith_diversity"]])
 ```
 
 Let us visualize results from multiple alpha diversity measures
@@ -221,7 +222,7 @@ library(patchwork)
 
 # Create the plots
 plots <- lapply(
-    c("observed", "dbp", "shannon", "faith"),
+    c("observed_richness", "dbp_dominance", "shannon_diversity", "faith_diversity"),
     plotColData,
     object = tse,
     x = "SampleType",
@@ -278,7 +279,7 @@ Student's t-Test, since it does not assume normality.
 #| label: test_alpha1
 
 pairwise.wilcox.test(
-    tse[["observed"]], tse[["SampleType"]], p.adjust.method = "fdr")
+    tse[["observed_richness"]], tse[["SampleType"]], p.adjust.method = "fdr")
 ```
 
 #### Visualizing significance in group-wise comparisons
@@ -296,7 +297,7 @@ library(ggpubr)
 library(tidyverse)
 
 
-index <- "shannon"
+index <- "shannon_diversity"
 group_var <- "SampleType"
 
 # Subsets the data. Takes only those samples that are from feces, skin, or
