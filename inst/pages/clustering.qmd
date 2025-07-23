@@ -16,19 +16,19 @@ clustering and dimensionality reduction techniques, where clustering is more
 commonly in use.
 
 In this chapter, we first walk you through some common clustering schemes in use
-for microbial community ecology, and then focus in more detailed community
+for microbial community ecology, and then focus on more detailed community
 typing techniques based on data dimensionality reduction.
 
 ## Clustering
 
 Clustering techniques aim to find groups, called clusters, that share a pattern
 in the data. In the microbiome context, clustering techniques are included in
-microbiome community typing methods. For example, clustering allow samples to be
+microbiome community typing methods. For example, clustering allows samples to be
 distinguished from each other based on their microbiome community composition.
 Clustering scheme consists of two steps, the first is to compute the sample
-dissimilarities with a given distance metrics, and the second is to form the
+dissimilarities with a given distance metric, and the second is to form the
 clusters based on the dissimilarity matrix. The data can be clustered either
-based on features or samples. The examples below
+based on features or on samples. The examples below
 are focused on sample clustering.
 
 There are multiple clustering algorithms available. `bluster` is a 
@@ -41,7 +41,7 @@ as hierarchical clustering, DBSCAN, and K-means.
 library(bluster)
 ```
 
-In the examples of this chapter we use *peerj13075* data for
+In the examples of this chapter we use `peerj13075` data for
 microbiota community
 typing. This chapter illustrates how different results can be obtained depending
 on the choice of the algorithm. To reduce calculation time we decided to
@@ -62,31 +62,31 @@ altExp(tse, "prevalent") <- agglomerateByPrevalence(
 
 ### Hierarchical clustering
 
-The hierarchical clustering aims to find hierarchy between
-samples/features. There are two approaches: agglomerative ("bottom-up")
-and divisive ("top-down"). In agglomerative approach, each observation is first
+Hierarchical clustering aims to find hierarchy between
+samples or features. There are two approaches: agglomerative ("bottom-up")
+and divisive ("top-down"). In the agglomerative approach, each observation is first
 in a unique cluster, after which the algorithm continues to agglomerate similar
 data points into clusters. The divisive approach, instead, starts with one
 cluster that contains all observations. Clusters are split recursively into
 clusters that differ the most. The clustering can be continued until each
 cluster contains only one observation.
 
-In this example we use `addCluster()` function from `mia` to  cluster the data. 
-`addCluster()` function allows to choose a clustering algorithm and offers multiple 
-parameters to shape the result. `HclustParam()` parameter is chosen for hierarchical 
-clustering. `HclustParam()` parameter itself has parameters on its own 
+In this example we use the `addCluster()` function from `mia` to cluster the data. 
+The `addCluster()` function allows to choose a clustering algorithm and offers multiple 
+parameters to shape the result. The `HclustParam()` parameter is used for hierarchical 
+clustering, and it accepts several sub-parameters, as further detailed in 
 [HclustParam documentation](https://rdrr.io/github/LTLA/bluster/man/HclustParam-class.html).
-A parameter, `by` defines whether to cluster features or samples. Here we 
-cluster counts data, for which we compute the dissimilarities with the 
-Bray-Curtis distance. Here, again, we use `ward.d2` method.  Returning 
-statistical information can be chosen by using 
-`full` parameter. Finally, the `clust.col` parameter allows us to choose the 
-name of the column in the colData (default name is `clusters`).
+Notably, the `by` argument specifies whether clustering is performed based on features or samples. Here, we cluster counts data, for which we compute the dissimilarities with the 
+Bray-Curtis distance using the `ward.d2` method. Statistical information can be 
+optionally returned with the `full` parameter. Finally, the `clust.col` parameter allows us to choose the name of the column in the colData (default name is `clusters`).
 
 ```{r hclust1}
 library(vegan)
 
+# Set seed for reproducibility
 set.seed(174923)
+
+# Add cluster
 altExp(tse, "prevalent") <- addCluster(
     altExp(tse, "prevalent"),
     assay.type = "counts",
@@ -95,10 +95,12 @@ altExp(tse, "prevalent") <- addCluster(
     full = TRUE,
     clust.col = "hclust")
 
+# Print the result table
 table(altExp(tse, "prevalent")$hclust)
 ```
 
-Hierarchical clustering suggests six clusters to describe the data.
+From the table we can see that the hierarchical clustering suggests six clusters 
+to describe the data.
 
 Now, we visualize the hierarchical structure of the clusters with a dendrogram
 tree. In dendrograms, the tree is split where the branch length is the largest.
@@ -130,12 +132,12 @@ dend <- color_labels(dend, k = k, col = unlist(cols))
 
 # Adjust frame for the figure
 par(mar=c(9, 3, 0.5, 0.5))
+
 # Plot dendrogram
 dend |> set("labels_cex", 0.8) |> plot()
 ```
 
-We can also visualize the clusters by projecting the data onto
-two-dimensional
+We can also visualize the clusters by projecting the data onto a two-dimensional
 surface that captures the most variability in the data. In this example, we use
 multi-dimensional scaling (MDS) (see [@sec-unsupervised-ordination]).
 
@@ -151,6 +153,7 @@ altExp(tse, "prevalent") <- addMDS(
 ```
 
 ```{r hclust4, fig.width=6, fig.height=4}
+# Visualize the clusters
 plotReducedDim(
     altExp(tse, "prevalent"), "MDS", colour_by = "hclust",
     theme_size = 13, point_size = 4) +
@@ -164,7 +167,7 @@ taxonomic features. To do so, we usually start by doing a compositionality aware
 transformation such as CLR, followed by the application of a standard
 clustering method.
 
-Here is an example that does a CLR transformation followed by the hierarchical
+Below is an example of a CLR transformation followed by the hierarchical
 clustering algorithm. We will use the kendall dissimilarity.
 
 ```{r taxa_clustering}
@@ -179,8 +182,7 @@ kendall_dissimilarity <- function(x) {
     as.dist(1 - cor(t(x), method = "kendall"))
 }
 
-# Cluster (with Kendall dissimilarity) on the features of the `standardize`
-# assay
+# Cluster (with Kendall dissimilarity) on the features of the `standardize` assay
 tse <- addCluster(
     tse,
     assay.type = "standardize",
@@ -189,10 +191,8 @@ tse <- addCluster(
     HclustParam(dist.fun = kendall_dissimilarity, method = "ward.D2"))
 ```
 
-Results are stored in the `rowData` column specified
-with the `clust.col` parameter.
-
-To better visualize the results and the distribution of the clusters, we can
+The results are stored in the `rowData` column specified
+with the `clust.col` parameter. To better visualize the results and the distribution of the clusters, we can
 plot the histogram of the clusters.
 
 ```{r taxa_clustering_histogram}
@@ -210,9 +210,7 @@ tse_merged
 ```
 
 We can note that it worked as planned since there are now as many rows as there
-were clusters.
-
-You can find more information on agglomeration from [@sec-agglomeration].
+were clusters. You can find more information on agglomeration from [@sec-agglomeration].
 
 ### Dirichlet Multinomial Mixtures (DMM)
 
