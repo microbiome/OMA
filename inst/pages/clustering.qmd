@@ -16,7 +16,7 @@ clustering and dimensionality reduction techniques, where clustering is more
 commonly in use.
 
 In this chapter, we first walk you through some common clustering schemes in use
-for microbial community ecology, and then focus on more detailed community
+for microbial community ecology, then focus on more detailed community
 typing techniques based on data dimensionality reduction.
 
 ## Clustering
@@ -37,11 +37,10 @@ Bioconductor package providing tools for clustering data in the
 as hierarchical clustering, DBSCAN, and K-means. 
 
 ```{r load_bluster}
-# Load dependencies
 library(bluster)
 ```
 
-In the examples of this chapter we use `peerj13075` data for
+In the examples of this chapter we use the `peerj13075` data for
 microbiota community
 typing. This chapter illustrates how different results can be obtained depending
 on the choice of the algorithm. To reduce calculation time we decided to
@@ -215,13 +214,13 @@ were clusters. You can find more information on agglomeration from [@sec-agglome
 ### Dirichlet Multinomial Mixtures (DMM)
 
 This section focuses on
-[Dirichlet-Multinomial MixturenModel](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030126)
-analysis. It is a Bayesian clustering technique that allows to search for sample
+[Dirichlet Multinomial Mixture   Model](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030126)
+(DMM) analysis. It is a Bayesian clustering technique that allows to search for sample
 patterns that reflect sample similarity in the data using both prior information
 and the data.
 
 In this example, we cluster the data with DMM clustering. In the example below,
-we calculate model fit using Laplace approximation ro reduce the
+we calculate model fit using Laplace approximation to reduce the
 calculation time.
 The cluster information is added in the metadata with an
 optional `name`. In this
@@ -229,8 +228,9 @@ example, we use a prior assumption that the optimal number of clusters to
 describe the data would be in the range from 1 to 6.
 
 ```{r dmm1}
-# Run the model and calculates the most likely number of clusters from 1 to 6
+# Run the model and calculate the most likely number of clusters from 1 to 6
 set.seed(1495723)
+
 altExp(tse, "prevalent") <- addCluster(
     altExp(tse, "prevalent"),
     assay.type = "counts",
@@ -243,9 +243,7 @@ altExp(tse, "prevalent") <- addCluster(
 
 The plot below represents the Laplace approximation to the model evidence for
 each of the six models. We can see that the best number of clusters is two, as
-the minimum value of Laplace approximation to the negative log model
-evidence for
-DMM models as a function of k, determines the optimal k. The optimal k suggests
+the minimum value of Laplace approximation determines the optimal k. The optimal k suggests
 to fit a model with k mixtures of Dirichlet distributions as a prior.
 
 ```{r dmm2, fig.width=5, fig.height=3}
@@ -254,20 +252,20 @@ p <- plotDMNFit(altExp(tse, "prevalent"), type = "laplace", name = "DMM")
 p + theme_minimal(base_size = 11)
 ```
 
-The plot above suggests that two clusters describe the data the best. Now 
-we can plot which taxonomic features define the key cluster features.
+The plot above confirms our previous suggestion that two clusters describe the data the best. 
+Now we can plot which taxonomic features define the key cluster features.
 
 ```{r dmm3, fig.width=6, fig.height=2}
 # Get the estimates on how much each phyla contributes on each cluster
 best_model <- metadata(altExp(tse, "prevalent"))$DMM$dmm[2]
 drivers <- as.data.frame(best_model[[1]]@fit$Estimate)
 
-# Plot by utilizng miaViz::plotLoadings
+# Plot by utilizng miaViz's function plotLoadings
 plotLoadings(as.matrix(drivers), ncomponents = 2)
 ```
 
 As well as in hierarchical clustering, we can also visualize the clusters by
-projecting the data onto two-dimensional surface calculated using MDS. The plot
+projecting the data onto a two-dimensional surface calculated using MDS. The plot
 rather clearly demonstrates the cluster division.
 
 ```{r dmm4}
