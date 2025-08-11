@@ -1,6 +1,10 @@
 # Differential abundance {#sec-differential-abundance}
 
-```{r setup, echo=FALSE, results="asis"}
+```{r}
+#| label: setup
+#| echo: false
+#| results: asis
+
 library(rebook)
 chapterPreamble()
 ```
@@ -113,7 +117,9 @@ abundances in a TSE object as well as a grouping variable in the sample
 data. We simplify the examples by only including two of the three
 groups.
 
-```{r import-daa-data}
+```{r}
+#| label: import_daa_data
+
 library(mia)
 library(knitr)
 
@@ -133,7 +139,9 @@ complexity of the data to make the results more reproducible. For this
 purpose, we agglomerate the features by genus and filter them by a
 prevalence threshold of 10%.
 
-```{r prep-daa-data}
+```{r}
+#| label: prep_daa_data
+
 # Agglomerate by genus and subset by prevalence
 tse <- subsetByPrevalent(tse, rank = "Genus", prevalence = 10/100)
 
@@ -163,7 +171,9 @@ complex study designs, there is a possibility to utilize the `glm`
 functionality within ALDEx2. The Benjamini-Hochberg procedure is applied
 by default to correct for multiple testing.
 
-```{r run-aldex2}
+```{r}
+#| label: run_aldex2
+
 # Load package
 library(ALDEx2)
 
@@ -176,7 +186,9 @@ x <- aldex.clr(assay(tse), tse$patient_status)
 
 The t-test:
 
-```{r aldex2-ttest}
+```{r}
+#| label: aldex2_ttest
+
 # Calculates expected values of the Welch's t-test and Wilcoxon rank
 # test on the data returned by aldex.clr
 x_tt <- aldex.ttest(x, paired.test = FALSE, verbose = FALSE)
@@ -184,7 +196,9 @@ x_tt <- aldex.ttest(x, paired.test = FALSE, verbose = FALSE)
 
 Effect sizes:
 
-```{r aldex2-effect}
+```{r}
+#| label: aldex2_effect
+
 # Determines the median clr abundance of the feature in all samples and in
 # groups, the median difference between the two groups, the median variation
 # within each group and the effect size, which is the median of the ratio
@@ -204,7 +218,9 @@ between the 2 groups. Black points are rare taxonomic features and grey
 ones are abundant features. The dashed line represent an effect size
 of 1. @Gloor2016 provides more information on these plots.
 
-```{r plot-aldex2}
+```{r}
+#| label: plot_aldex2
+
 par(mfrow = c(1, 2))
 
 aldex.plot(
@@ -235,7 +251,9 @@ keep the comparison simple, we will here use the p-value as decision
 criterion. But please be aware that the effect size together with the CI
 is a better answer to the question we are typically interested in.
 
-```{r aldex2-res}
+```{r}
+#| label: aldex2_results
+
 library(tidyverse)
 
 aldex_out |>
@@ -281,7 +299,10 @@ documentation](https://rdrr.io/github/FrederickHuangLin/ANCOMBC/man/ancombc.html
 as well as the linked tutorials to learn about the additional arguments
 that we specify.
 
-```{r run-ancombc, warning=FALSE}
+```{r}
+#| label: run_ancombc
+#| warning: false
+
 # Load package
 library(ANCOMBC)
 
@@ -308,7 +329,9 @@ which contains dataframes with the coefficients, standard errors,
 p-values and q-values. Below we show the first entries of this
 dataframe.
 
-```{r ancombc-res}
+```{r}
+#| label: ancombc_results
+
 # Store the FDR adjusted results
 ancombc2_out$res |>
   dplyr::select(taxon, lfc_patient_statusControl, q_patient_statusControl) |>
@@ -370,6 +393,7 @@ are differential abundant between the study groups.
 
 ```{r}
 #| label: maaslin3_summary
+
 include_graphics(file.path("DAA_example", "figures", "summary_plot.png"))
 ```
 
@@ -429,7 +453,9 @@ rarefaction generally represents a better solution [@Schloss2023]. With
 that said, library size can be readily computed and added to the
 `colData`.
 
-```{r daa-data-libsize}
+```{r}
+#| label: daa_data_libsize
+
 # Compute and store library size in colData
 colData(tse)$library_size <- colSums(assay(tse, "counts"))
 ```
@@ -441,7 +467,10 @@ the main outcome variable. This way, the model evaluates whether
 differentially abundant taxonomic features are associated with one of
 the variables when the other two are kept constant.
 
-```{r run-adj-ancombc, warning=FALSE}
+```{r}
+#| label: run_adj_ancombc
+#| warning: false
+
 # Perform the analysis
 ancombc2_out <- ancombc2(
     tse,
@@ -466,7 +495,9 @@ group (the group that does not appear in the column names), whereas for
 numerical variables such as library size, they indicate whether the
 abundance of a given taxon varies with that variable.
 
-```{r adj-ancombc-res}
+```{r}
+#| label: adj_ancombc_results
+
 ancombc2_out$res |>
   dplyr::select(starts_with(c("taxon", "lfc", "q"))) |>
   arrange(q_patient_statusControl) |>
