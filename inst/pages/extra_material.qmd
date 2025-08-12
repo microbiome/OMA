@@ -1,6 +1,8 @@
 # Extra material {#sec-extras}
 
 ```{r}
+#| label: setup
+
 knitr::opts_chunk$set(eval=TRUE, warning=FALSE, message=FALSE)
 ```
 
@@ -10,7 +12,7 @@ This section has a cheatsheet for translating common functions in phyloseq
 to TreeSE/mia with example code.
 
 ```{r}
-#| label: "download_libs"
+#| label: download_libs
 
 # Download libraries
 library(mia)
@@ -22,7 +24,7 @@ library(ggplot2)
 Start by loading data as a `phyloseq` object "phy" and as `TreeSE` object "tse".
 
 ```{r}
-#| label: "load_data"
+#| label: load_data
 
 # Loading example data
 # Using GlobalPatterns dataset
@@ -54,6 +56,8 @@ phyloseq and TreeSE objects' taxonomy tables can be accessed with tax_table and
 rowData commands.
 
 ```{r}
+#| label: access_data
+
 phy_taxtable <-
     tax_table(phy)  |> # Access the phyloseq taxonomic name table
     data.frame() # Make into a data frame
@@ -68,7 +72,7 @@ tse_taxtable <- rowData(tse) |> # Same for tse
 Sample data can be accessed with `sample_data` and `colData` commands.
 
 ```{r}
-#| label: "access_sampledata"
+#| label: access_sampledata
 
 phy_sampledata <-
     sample_data(phy) |> data.frame()
@@ -84,7 +88,7 @@ also hold other types of information like taxa abundances from shotgun
 metagenomic annotation, or functional gene abundances.
 
 ```{r}
-#| label: "access_otutable"
+#| label: access_otutable
 
 phy_otutable <-
     otu_table(phy) |> data.frame()
@@ -104,6 +108,8 @@ dataframes but for demonstration we will use ones created from phy.
 Let's start by checking what we have.
 
 ```{r}
+#| label: inspect_data
+
 phy_otutable |> head()
 phy_sampledata |> head()
 phy_taxtable |> head()
@@ -117,7 +123,7 @@ Let's demo how to create the TreeSE object, how it compares to creating
 phyloseq and how assay in TreeSE compares to otu_table in phyloseq.
 
 ```{r}
-#| label: "build_dataobjects"
+#| label: build_dataobjects
 
 
 # Create phyloseq object
@@ -135,7 +141,7 @@ normalized. We will use the same data frame extracted from the phy object
 as before.
 
 ```{r}
-#| label: "check_otutable"
+#| label: check_otutable
 
 # Check if we have counts or normalized data
 
@@ -153,6 +159,8 @@ example we only have one item 'counts' in the list.
 Let's convert the data frame to a matrix and make the list of assays.
 
 ```{r}
+#| label: create_tse
+
 # Create TreeSE
 counts <- as.matrix(phy_otutable) # Convert to a matrix
 assays <- SimpleList(counts = counts)
@@ -166,6 +174,8 @@ tse <- TreeSummarizedExperiment(
 Let's check the different assay names we have.
 
 ```{r}
+#| label: check_assays
+ 
 assayNames(tse)
 ```
 
@@ -184,6 +194,8 @@ With phyloseq you would need three different phyloseq objects, each taking up
 7.7 MB of memory, whilst the tse with the three assays takes up only 18.3 MB.
 
 ```{r}
+#| label: transform_assay
+
 # Add another assay that holds the relative abundance normalized OTU table
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 assays(tse) # Let's check
@@ -216,6 +228,8 @@ can access it by indexing columns.
 In this section we will remove the "Mock" samples and make new data objects.
 
 ```{r}
+#| label: subset_samples
+
 phy_nomock <- subset_samples(
     phy, !SampleType == "Mock") # Removing mock samples in phyloseq
 
@@ -225,7 +239,7 @@ tse_nomock <- tse[,!tse$SampleType == "Mock"] # tse uses indexing columns
 Let's see what we have now.
 
 ```{r}
-#| label: "check_removed_samples"
+#| label: check_removed_samples
 
 phy |> sample_names() |> length()
 phy_nomock |> sample_names() |> length()
@@ -241,7 +255,7 @@ Taxa are stored in rows in TreeSE and the TreeSE equivalent to subset_taxa is
 indexing rows.
 
 ```{r}
-#| label: "take_only_bact"
+#| label: take_only_bact
 
 phy_nomock_bacteria <-
   subset_taxa(phy_nomock, Kingdom == "Bacteria")
@@ -266,7 +280,7 @@ In `phyloseq` you would need to add the alpha diversity separately to your
 sample data to keep it safe with the other sample level data.
 
 ```{r}
-#| label: "alpha_div"
+#| label: alpha_div
 
 # Alpha diversity with phyloseq
 df <- estimate_richness(phy, measures = "Shannon")
@@ -284,7 +298,7 @@ OTU table) we want to use, since we have three options now with the counts,
 relative abundance and CLR. We can check the assay names first.
 
 ```{r}
-#| label: "mia_alpha_div"
+#| label: mia_alpha_div
 
 assayNames(tse) # Check the assay names
 
@@ -297,7 +311,8 @@ If we want to extract a data frame that only has the alpha diversity it can be
 done easily.
 
 ```{r}
-#| label: "extract_alpha"
+#| label: extract_alpha
+
 # Extract
 df <- colData(tse) |> data.frame() |> dplyr::select(matches("shannon"))
 ```
@@ -315,7 +330,7 @@ In `phyloseq` you would again need to add the dimensions to the sample data if y
 want to keep them safe with other metadata.
 
 ```{r}
-#| label: "beta_div"
+#| label: beta_div
 
 # Run PCoA on the relative abundance data and store in phy_ord list
 phy_ord <- ordinate(phy_relab, method = "PCoA", distance = "bray")
@@ -339,7 +354,7 @@ tse # Inspect, now we have new reducedDim "MDS_bray"
 `phyloseq` has it's own plotting fuction for ordinations.
 
 ```{r}
-#| label: "plot_ord"
+#| label: plot_ord
 
 plot_ordination(physeq = phy, ordination = phy_ord, color = "SampleType")
 ```
@@ -349,7 +364,7 @@ the `plotReducedDim()` function. We can first check what the name of the
 Bray-Curtis MDS/PCoA was incase we forgot.
 
 ```{r}
-#| label: "check_reducedDimNames"
+#| label: check_reducedDimNames
 
 # Check reduced dim names
 reducedDimNames(tse)
@@ -357,7 +372,7 @@ reducedDimNames(tse)
 Ok, let's plot.
 
 ```{r}
-#| label: "plot_red_dim"
+#| label: plot_red_dim
 
 # Plot
 plotReducedDim(tse, "MDS_bray", color_by = "SampleType")
@@ -374,7 +389,7 @@ for example check if you see differences in the abundances of higher
 taxonomic levels.
 
 ```{r}
-#| label: "tax_glom"
+#| label: tax_glom
 
 phy_fam <- tax_glom(phy, taxrank = "Family")
 ```
@@ -388,7 +403,7 @@ So we will add the na.rm = TRUE to `agglomerateByRank()` function which is
 equivalent to the default behaviour of `tax_glom()`.
 
 ```{r}
-#| label: "agglomerateByRank"
+#| label: agglomerateByRank
 
 altExp(tse, "Family") <- agglomerateByRank(tse, rank = "Family")
 altExp(tse, "Family")
@@ -397,7 +412,7 @@ altExp(tse, "Family")
 ### Cheatsheet
 
 ```{r}
-#| label: "cheatsheet"
+#| label: cheatsheet
 #| echo: false
 
 library(knitr)
@@ -477,7 +492,10 @@ follow the example below.
 You can find full workflow script without further explanations and comments from
 [Rmd file](extra_material/dada2_workflow.Rmd)
 
-```{r dada2_1, include=FALSE}
+```{r}
+#| label: dada2_1
+#| include: false
+
 # Load objects
 seqtab.nochim <- readRDS(
     system.file("extdata", "dada2_seqtab.nochim", package = "OMA"))
@@ -486,7 +504,9 @@ taxa <- readRDS(system.file("extdata", "dada2_taxa", package = "OMA"))
 
 Load required packages.
 
-```{r dada2_2}
+```{r}
+#| label: dada2_2
+
 library(mia)
 library(BiocManager)
 library(Biostrings)
@@ -495,7 +515,9 @@ library(Biostrings)
 Create arbitrary example sample metadata like it was done in the tutorial.
 Usually,  sample metadata is imported as a file.
 
-```{r dada2_3}
+```{r}
+#| label: dada2_3
+
 samples.out <- rownames(seqtab.nochim)
 subject <- sapply(strsplit(samples.out, "D"), `[`, 1)
 gender <- substr(subject,1,1)
@@ -509,7 +531,9 @@ rownames(samdf) <- samples.out
 
 Convert data into right format and create a `_TreeSE_` object.
 
-```{r dada2_4}
+```{r}
+#| label: dada2_4
+
 # Create a list that contains assays
 counts <- t(seqtab.nochim)
 counts <- as.matrix(counts)
@@ -532,7 +556,9 @@ tse <- tse[ , colnames(tse) != "mock"]
 
 Add sequences into `referenceSeq` slot and convert rownames into simpler format.
 
-```{r dada2_5}
+```{r}
+#| label: dada2_5
+
 # Convert sequences into right format
 dna <- Biostrings::DNAStringSet( rownames(tse) )
 # Add sequences into referenceSeq slot
@@ -554,23 +580,26 @@ The following presents such an exemplary analysis based on the
 data of @Sprockett2020 available
 through `microbiomeDataSets` package.
 
-
-```{r}
-library(fido)
-```
-
 Loading the libraries and importing data:
 
 ```{r}
+#| label: load_library
+
 library(fido)
 ```
 
-```{r, eval=FALSE}
+```{r}
+#| label: load_dataset
+#| eval: false
+
 library(microbiomeDataSets)
 tse <- SprockettTHData()
 ```
 
-```{r, echo=FALSE}
+```{r}
+#| label: read_dataset
+#| echo: false
+
 # saveRDS(tse, file="data/SprockettTHData.Rds")
 # Hidden reading of the saved data
 tse <- readRDS("../extdata/SprockettTHData.Rds")
@@ -582,6 +611,8 @@ analysis as an example, and beforehand we check for missing data:
 
 
 ```{r}
+#| label: pick_covariates
+
 library(mia)
 cov_names <- c("Sex","Age_Years","Delivery_Mode")
 na_counts <- apply(is.na(colData(tse)[,cov_names]), 2, sum)
@@ -591,6 +622,8 @@ na_summary<-as.data.frame(na_counts,row.names=cov_names)
 We drop missing values of the covariates:
 
 ```{r}
+#| label: subset_tse
+
 tse <- tse[ , !is.na(colData(tse)$Delivery_Mode) ]
 tse <- tse[ , !is.na(colData(tse)$Age_Years) ]
 ```
@@ -598,6 +631,8 @@ tse <- tse[ , !is.na(colData(tse)$Age_Years) ]
 We agglomerate microbiome data to Phylum:
 
 ```{r}
+#| label: agglomerate_tse
+
 tse_phylum <- agglomerateByRank(tse, "Phylum")
 ```
 
@@ -605,6 +640,8 @@ We extract the counts assay and covariate data to build the model
 matrix:
 
 ```{r}
+#| label: extract_data
+
 Y <- assays(tse_phylum)$counts
 # design matrix
 # taking 3 covariates
@@ -616,6 +653,8 @@ Building the parameters for the `pibble()` call to build the model; see more at
 [vignette](https://jsilve24.github.io/fido/articles/introduction-to-fido.html):
 
 ```{r}
+#| label: set_parameters
+
 n_taxa<-nrow(Y)
 upsilon <- n_taxa+3
 Omega <- diag(n_taxa)
@@ -628,6 +667,8 @@ Gamma <- diag(nrow(X))
 Automatically initializing the priors and visualizing their distributions:
 
 ```{r}
+#| label: init_priors
+
 priors <- pibble(NULL, X, upsilon, Theta, Gamma, Xi)
 names_covariates(priors) <- rownames(X)
 plot(priors, pars="Lambda") + ggplot2::xlim(c(-5, 5))
@@ -639,6 +680,8 @@ Note: Some computational failures could occur (see
 the arguments `multDirichletBoot` `calcGradHess` could be passed in such case.
 
 ```{r}
+#| label: estimate_posterior
+
 priors$Y <- Y
 posterior <- refit(priors, optim_method="adam", multDirichletBoot=0.5) #calcGradHess=FALSE
 ```
@@ -646,11 +689,15 @@ posterior <- refit(priors, optim_method="adam", multDirichletBoot=0.5) #calcGrad
 Printing a summary about the posterior:
 
 ```{r}
+#| label: results1
+
 ppc_summary(posterior)
 ```
 Plotting the summary of the posterior distributions of the regression parameters:
 
 ```{r}
+#| label: results2
+
 names_categories(posterior) <- rownames(Y)
 plot(posterior,par="Lambda",focus.cov=rownames(X)[2:4])
 ```
@@ -658,6 +705,8 @@ plot(posterior,par="Lambda",focus.cov=rownames(X)[2:4])
 Taking a closer look at "Sex" and "Delivery_Mode":
 
 ```{r}
+#| label: results3
+
 plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
 ```
 
@@ -692,7 +741,9 @@ When you have microbial abundance matrices, we suggest to use
 
 Load example data
 
-```{r load-pkg-data2}
+```{r}
+#| label: load_pkg_data2
+
 library(cobiclust)
 data("HintikkaXOData")
 mae <- HintikkaXOData
@@ -700,7 +751,9 @@ mae <- HintikkaXOData
 
 Only the most prevalent taxa are included in analysis.
 
-```{r cobiclust_1}
+```{r}
+#| label: cobiclust1
+
 # Subset data in the first experiment
 mae[[1]] <- subsetByPrevalent(
     mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
@@ -713,7 +766,9 @@ mae[[1]] <- transformAssay(mae[[1]], method = "rclr")
 output. It includes clusters for taxa and samples. 
 
 
-```{r cobiclust_2}
+```{r}
+#| label: cobiclust2
+ 
 # Do clustering using counts table
 clusters <- cobiclust(assay(mae[[1]], "counts"))
 
@@ -735,7 +790,11 @@ clusters$classification
 
 Next we can plot clusters. Annotated heatmap is a common choice.
 
-```{r cobiclust_3a, fig.width=14, fig.height=12}
+```{r}
+#| label: cobiclust3
+#| fig-width: 14
+#| fig-height: 12
+
 library(ComplexHeatmap)
 # z-transform for heatmap
 mae[[1]] <- transformAssay(
@@ -754,7 +813,11 @@ colnames(annotation_row) <- "row_clusters"
 
 Plot the heatmap.
 
-```{r cobiclust_3b, fig.width=14, fig.height=12}
+```{r}
+#| label: cobiclust4
+#| fig-width: 14
+#| fig-height: 12
+
 pheatmap(
     assay(mae[[1]], "rclr_z"), cluster_rows = F, cluster_cols = F,
     annotation_col = annotation_col, annotation_row = annotation_row)
@@ -762,7 +825,9 @@ pheatmap(
 
 Boxplot is commonly used to summarize the results:
 
-```{r cobiclust_4}
+```{r}
+#| label: cobiclust5
+
 library(ggplot2)
 library(patchwork)
 
@@ -789,7 +854,9 @@ Here, we analyze cross-correlation between taxa and metabolites. This
 is a case, where we use `biclust` method which is suitable for numeric
 matrices in general. First we pre-process the data.
 
-```{r biclust_1}
+```{r}
+#| label: biclust1
+
 # Samples must be in equal order
 # (Only 1st experiment was ordered in cobiclust step leading to unequal order)
 mae[[1]] <- mae[[1]][, colnames(mae[[2]])]
@@ -812,7 +879,9 @@ assay(mae[[2]], "log10") <- t(apply(assay(mae[[2]], "log10"), 1, replace_na))
 
 Next, we compute the Spearman correlation matrix.
 
-```{r biclust_2}
+```{r}
+#| label: biclust2
+
 # Calculate correlations
 corr <- getExperimentCrossCorrelation(
     mae, 1, 2, assay.type1 = "rclr", assay.type2 = "log10",
@@ -821,7 +890,9 @@ corr <- getExperimentCrossCorrelation(
 
 `biclust()` takes a matrix as an input and returns a `biclust` object. 
 
-```{r biclust_3}
+```{r}
+#| label: biclust3
+
 library(biclust)
 # Set seed for reproducibility
 set.seed(3973)
@@ -840,7 +911,9 @@ Meaning that if one cluster size of 5 features was found out of 20 features,
 those 15 features do not belong to any cluster. That is why we have to create an
 additional cluster for features/samples that are not assigned into any cluster.
 
-```{r biclust_4}
+```{r}
+#| label: biclust4
+
 # Functions for obtaining biclust information
 
 # Get clusters for rows and columns
@@ -893,7 +966,9 @@ additional cluster for features/samples that are not assigned into any cluster.
 }
 ```
 
-```{r biclust_5}
+```{r}
+#| label: biclust5
+
 # Get biclusters
 bcs <- .get_biclusters_from_biclust(bc, corr)
 
@@ -906,7 +981,17 @@ bicluster_rows |> head()
 
 Let's collect information for the scatter plot.
 
-```{r biclust_6}
+
+```{r}
+#| label: biclust_eval_toggle
+#| echo: false
+
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+```{r}
+#| label: biclust6
+
 # Function for obtaining sample-wise sum, mean, median, and mean variance
 # for each cluster
 
@@ -950,7 +1035,12 @@ both cluster 1 and 3.  This means that when abundance of bacteria
 belonging to cluster 1 or 3 is higher, the concentration of
 metabolites of cluster 1 or 3 is lower, and vice versa.
 
-```{r biclust_7, fig.width=14, fig.height=6, fig.show="keep", out.width="33%"}
+```{r}
+#| label: biclust7
+#| fig-width: 14
+#| fig-height: 6
+#| fig-show: asis
+
 pics <- list()
 for (i in seq_along(df)) {
     pics[[i]] <- ggplot(df[[i]]) +
@@ -964,14 +1054,20 @@ pics[[1]] + pics[[2]] + pics[[3]]
 
 `pheatmap` does not allow boolean values, so they must be converted into factors.
 
-```{r biclust_8}
+```{r}
+#| label: biclust8
+
 bicluster_columns <- data.frame(apply(bicluster_columns, 2, as.factor))
 bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
 ```
 
 Again, we can plot clusters with heatmap.
 
-```{r biclust_9, fig.width=10, fig.height=10}
+```{r}
+#| label: biclust9
+#| fig-width: 10
+#| fig-height: 10
+
 # Adjust colors for all clusters
 if (ncol(bicluster_rows) > ncol(bicluster_columns)) {
     cluster_names <- colnames(bicluster_rows)

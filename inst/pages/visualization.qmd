@@ -1,9 +1,10 @@
 # Visualization {#sec-viz-chapter}
 
 ```{r}
-#| label: "setup"
+#| label: setup1
 #| echo: false
-#| results: "asis"
+#| results: asis
+
 library(rebook)
 chapterPreamble()
 ```
@@ -35,7 +36,9 @@ includes the following packages:
 * _plotly_: animated and 3D plotting
 
 ```{r}
+#| label: load_libraries
 #| include: false
+
 library(ggplot2)
 theme_set(theme_classic())
 library(mia)
@@ -62,6 +65,8 @@ accessing, modifying and graphing the meta data related to features as
 well as samples.
 
 ```{r}
+#| label: list_names
+
 # list row meta data
 names(rowData(tse))
 # list column meta data
@@ -72,7 +77,9 @@ Such meta data can be directly plotted with the functions
 `plotRowData()` and `plotColData()`.
 
 ```{r}
+#| label: add_qc_metadata
 #| warning: false
+
 # obtain QC data
 tse <- addPerCellQC(tse)
 tse <- addPerFeatureQC(tse)
@@ -90,6 +97,8 @@ Alternatively, they can be converted to a `data.frame` object and
 passed to `ggplot`.
 
 ```{r}
+#| label: plot_colData
+
 # store colData into a data frame
 # plot Number of Samples against Sampling Site
 ggplot(colData(tse), aes(x = SampleType)) +
@@ -147,6 +156,8 @@ different samples in a `TSE` object includes the following, where each
 data point represents one sample:
 
 ```{r}
+#| label: est_shannon
+
 # estimate shannon diversity index
 tse <- addAlpha(tse, assay.type = "counts", index = c("shannon", "faith"))
 # plot shannon diversity index, colour-labeled by Sample Type
@@ -162,6 +173,8 @@ recursively applied to a number of diversity indices with the function
 package is then exploited.
 
 ```{r}
+#| label: plot_alpha_div
+
 # generate plots for shannon and faith indices
 # and store them into a list
 plots <- lapply(
@@ -201,6 +214,8 @@ components, **coordination plots** can also span multiple dimensions,
 which is explained in chapter [@sec-extras].
 
 ```{r}
+#| label: runNMDS
+
 # perform NMDS coordination method
 tse <- runNMDS(tse, FUN = vegan::vegdist, name = "NMDS")
 # plot results of a 2-component NMDS on tse,
@@ -211,6 +226,8 @@ plotReducedDim(tse, "NMDS", colour_by = "shannon")
 Multiple combinations of coordinates or dimensions can also be integrated into a multi-panel arrangement.
 
 ```{r}
+#| label: runMDS
+
 # perform MDS coordination method
 tse <- addMDS(
     tse,
@@ -230,6 +247,8 @@ apply `plotReducedDim()` and visually compare results among various
 coordination methods.
 
 ```{r}
+#| label: plot_ordination
+
 # generate plots for MDS and NMDS methods
 # and store them into a list
 plots <- lapply(
@@ -261,7 +280,8 @@ at the Order rank.  Bar plots and heatmaps with analogous information
 at the Phylum level are available in the aforementioned chapter.
 
 ```{r}
-#| label: "plotAbundance1"
+#| label: plotAbundance1
+
 # agglomerate tse by Order
 tse_order <- agglomerateByRank(tse, rank = "Order")
 # transform counts into relative abundance
@@ -287,7 +307,8 @@ To add a sample annotation, you can combine plots that you get from the output
 of `plotAbundance()`.
 
 ```{r}
-#| label: "plotAbundance2"
+#| label: plotAbundance2
+
 # Create plots
 plots <- plotAbundance(
     tse_order,
@@ -338,7 +359,8 @@ and `ggplot2`, the packages `pheatmap` and `sechm` provide methods to include
 feature and sample clusters in a heatmap, along with further functionality.
 
 ```{r}
-#| label: "pheatmap1"
+#| label: pheatmap1
+
 # Agglomerate tse by phylum
 tse_phylum <- agglomerateByRank(tse, rank = "Phylum")
 
@@ -381,7 +403,8 @@ We can cluster both samples and features hierarchically and add them to the
 x and y axes of the heatmap, respectively.
 
 ```{r}
-#| label: "pheatmap2"
+#| label: pheatmap2
+
 # Hierarchical clustering
 taxa_hclust <- hclust(dist(mat), method = "complete")
 
@@ -402,7 +425,8 @@ taxa_ordered <- get_taxa_name(taxa_tree)
 Based on phylo tree, we decide to create three clusters.
 
 ```{r}
-#| label: "pheatmap3"
+#| label: pheatmap3
+
 # Creates clusters
 taxa_clusters <- cutree(tree = taxa_hclust, k = 3)
 
@@ -420,7 +444,8 @@ taxa_clusters
 The information on the clusters is then added to the feature meta data.
 
 ```{r}
-#| label: "pheatmap4"
+#| label: pheatmap4
+
 # Adds information to rowData
 rowData(tse_phylum_subset)$clusters <- taxa_clusters[order(match(rownames(taxa_clusters), rownames(tse_phylum_subset))), ]
 
@@ -433,7 +458,8 @@ number of clusters for the plot is selected and the new information is stored
 into the sample meta data.
 
 ```{r}
-#| label: "pheatmap5"
+#| label: pheatmap5
+
 # Hierarchical clustering
 sample_hclust <- hclust(dist(t(mat)), method = "complete")
 
@@ -471,7 +497,8 @@ sample_data
 Now we can create heatmap with additional annotations.
 
 ```{r}
-#| label: "pheatmap6"
+#| label: pheatmap6
+
 # Determines the scaling of colors
 # Scale colors
 breaks <- seq(-ceiling(max(abs(mat))), ceiling(max(abs(mat))),
@@ -490,7 +517,8 @@ In this case, the clustering step is automatically performed by the plotting
 function and does not need to be executed in advance.
 
 ```{r}
-#| label: "sechm"
+#| label: sechm
+
 # Stores annotation colros to metadata
 metadata(tse_phylum_subset)$anno_colors$SampleType <- c(
     Feces = "blue", Skin = "red", Tongue = "gray")
@@ -511,7 +539,8 @@ It is also possible to create an analogous heatmap by just using the
 generate an identical output.
 
 ```{r}
-#| label: "more_complex_heatmap"
+#| label: more_complex_heatmap
+
 # Add feature names to column as a factor
 taxa_clusters$Feature <- rownames(taxa_clusters)
 taxa_clusters$Feature <- factor(taxa_clusters$Feature, levels = taxa_clusters$Feature)
@@ -597,10 +626,11 @@ heatmap
 ```
 
 ```{r}
-#| label: "more_complex_heatmap2"
+#| label: more_complex_heatmap2
 #| fig.width: 10
 #| fig.height: 8
 #| eval: true 
+
 library(patchwork)
 
 # Create layout
@@ -640,10 +670,11 @@ plot
 ```
 
 ```{r}
-#| label: "more_complex_heatmap3"
+#| label: more_complex_heatmap3
 #| fig.width: 10
 #| fig.height: 8
-#| eval: true 
+#| eval: true
+
 # Create layout
 design <- c(
       patchwork::area(4, 1, 5, 1),
@@ -679,12 +710,16 @@ multi-assay analyses. These are discussed further in chapters
 ## Interactive 3D Plots
 
 ```{r}
+#| label: load_plot_libraries
+
 # Load libraries
 library(rgl)
 library(plotly)
 ```
 
-```{r setup2}
+```{r}
+#| label: setup2
+
 library(knitr)
 knitr::knit_hooks$set(webgl = hook_webgl)
 ```
@@ -693,6 +728,8 @@ In this section we make a 3D version of the earlier PCoA plot
 (see \@ref(quality-control)), with the help of the plotly [@Sievert2020].
 
 ```{r}
+#| label: plot_3d_PCoA
+
 # Importing necessary libraries
 library(curatedMetagenomicData)
 library(dplyr)
