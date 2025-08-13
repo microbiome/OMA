@@ -1,4 +1,3 @@
-
 # Extra material {#sec-extras}
 
 ```{r}
@@ -217,3 +216,262 @@ assays(tse) # Let's check
 # With phyloseq you would need to have a third phyloseq object.
 # phy_CLR <- microbiome::transform(phy, 'clr') # Example, don't run
 ```
+
+### Subsetting samples and taxa
+
+**Subsetting samples: subset_samples = indexing columns**
+
+Next let's learn how to subset samples. In phyloseq we use subset_samples
+command, but since the sample data is stored in columns in the TreeSe, we
+can access it by indexing columns.
+
+In this section we will remove the "Mock" samples and make new data objects.
+
+```{r}
+#| label: subset_samples
+
+phy_nomock <- subset_samples(
+    phy, !SampleType == "Mock") # Removing mock samples in phyloseq
+
+tse_nomock <- tse[,!tse$SampleType == "Mock"] # tse uses indexing columns
+```
+
+Let's see what we have now.
+
+```{r}
+#| label: check_removed_samples
+
+phy |> sample_names() |> length()
+phy_nomock |> sample_names() |> length()
+colnames(tse) |> length()
+colnames(tse_nomock) |> length()
+```
+
+We have removed three samples that where SampleType "Mock".
+
+**Subsetting taxa: subset_taxa = indexing rows**
+
+Taxa are stored in rows in TreeSE and the TreeSE equivalent to subset_taxa is
+indexing rows.
+
+```{r}
+#| label: take_only_bact
+
+phy_nomock_bacteria <-
+  subset_taxa(phy_nomock, Kingdom == "Bacteria")
+tse_nomock_bacteria <-
+  tse[tse$Kingdom == "Bacteria", ]
+
+phy_nomock_bacteria # We have 19008 taxa (only bacteria) and before 19216
+tse_nomock_bacteria
+```
+
+### Calculating alpha diversity: estimate_richness = estimateDiversity
+
+Now we know how data stored in `TreeSE` can be accessed and the `TreeSE` data
+objects created. Let's look at how we can calculate alpha diversity using
+ `mia` compared to  `phyloseq` package.
+
+The `mia` command  `estimateDiversity()` will return a TreeSE and the results are
+stored in `colData`, unlike the `phyloseq` command that outputs a data frame with
+just the diversity estimates.
+
+In `phyloseq` you would need to add the alpha diversity separately to your
+sample data to keep it safe with the other sample level data.
+
+```{r}
+#| label: alpha_div
+
+# Alpha diversity with phyloseq
+df <- estimate_richness(phy, measures = "Shannon")
+df |> head() # Inspect
+
+# Add Shannon to the sample_data to keep results safe with other sample data
+phy_sampledata <- sample_data(phy) |> data.frame()
+phy_sampledata$shannon <- df$Shannon
+sample_data(phy) <- phy_sampledata
+sample_data(phy) |> head()  # Inspect
+```
+
+For the tse we will need to specify which assay (which normalization of the
+OTU table) we want to use, since we have three options now with the counts,
+relative abundance and CLR. We can check the assay names first.
+
+```{r}
+#| label: mia_alpha_div
+
+assayNames(tse) # Check the assay names
+
+tse <- estimateDiversity(tse, assay.type = "counts", index = "shannon") # Let's use counts
+# Inspect the new colData with added alpha diversity estimate
+colData(tse) |> names() # shannon has been added to the colData
+```
+
+If we want to extract a data frame that only has the alpha diversity it can be
+done easily.
+
+```{r}
+#| label: extract_alpha
+
+# Extract
+df <- colData(tse) |> data.frame() |> dplyr::select(matches("shannon"))
+```
+
+### Calculating beta diversity: ordinate = addMDS
+
+We can calculate PCoA with Bray-Curtis distances in `phyloseq` using the
+`ordinate()` command. The beta diversity calculation in `mia` outputs a TreeSE
+with a new type of data, reduced dimensions or `reducedDim`. 
+
+Here we will use the `scater` package that runs the PCoA with `addMDS()`. (PCoA and
+MDS mean the same thing)
+
+In `phyloseq` you would again need to add the dimensions to the sample data if you
+want to keep them safe with other metadata.
+
+```{r}
+#| label: beta_div
+
+# Run PCoA on the relative abundance data and store in phy_ord list
+phy_ord <- ordinate(phy_relab, method = "PCoA", distance = "bray")
+
+library(scater)
+
+# Ordinate with addMDS and implement the vegan's Bray-Curtis dissimilarity
+# distance calculation
+tse <- addMDS(
+    tse,
+    FUN = getDissimilarity,
+    method = "bray",
+    assay.type = "relabundance",
+    name = "MDS_bray",
+    ncomponents = 10) # Let's also define how many dimensions
+tse # Inspect, now we have new reducedDim "MDS_bray"
+
+```
+
+### Plotting ordinations: `plot_ordination()` = `plotReducedDim()`
+`phyloseq` has it's own plotting fuction for ordinations.
+
+```{r}
+#| label: plot_ord
+
+plot_ordination(physeq = phy, ordination = phy_ord, color = "SampleType")
+```
+
+It is also easy to plot the ordination stored in `reducedDim` in the tse using
+the `plotReducedDim()` function. We can first check what the name of the
+Bray-Curtis MDS/PCoA was incase we forgot.
+
+```{r}
+#| label: check_reducedDimNames
+
+# Check reduced dim names
+reducedDimNames(tse)
+```
+Ok, let's plot.
+
+```{r}
+#| label: plot_red_dim
+
+# Plot
+plotReducedDim(tse, "MDS_bray", color_by = "SampleType")
+# The sign is given arbitrarily. We can change it to match the plot_ordination
+reducedDim(tse)[, 1] <- -reducedDim(tse)[, 1]
+reducedDim(tse)[, 2] <- -reducedDim(tse)[, 2]
+plotReducedDim(tse, "MDS_bray", color_by = "SampleType")
+```
+
+### Agglomerating taxa: `tax_glom()` = `agglomerateByRank()`
+
+Often you might want to study your data using different taxonomic ranks,
+for example check if you see differences in the abundances of higher
+taxonomic levels.
+
+```{r}
+#| label: tax_glom
+
+phy_fam <- tax_glom(phy, taxrank = "Family")
+```
+
+This family level data object can again be conveniently stored in a tse object
+under `altExp`.
+
+`tax_glom()` removes the taxa which have not been assigned to the level given in
+taxrank by default (NArm = TRUE).
+So we will add the na.rm = TRUE to `agglomerateByRank()` function which is
+equivalent to the default behaviour of `tax_glom()`.
+
+```{r}
+#| label: agglomerateByRank
+
+altExp(tse, "Family") <- agglomerateByRank(tse, rank = "Family")
+altExp(tse, "Family")
+```
+
+### Cheatsheet
+
+```{r}
+#| label: cheatsheet
+#| echo: false
+
+library(knitr)
+df <-
+  data.frame(
+    Functionality = c(
+      "Access sample data", # Row 1
+      "Access tax table", # Row 2
+      "Access OTU table",
+      "Build data object",
+      "Calculate alpha diversity",
+      "Calculate beta diversity",
+      "Plot ordination",
+      "Subset taxa",
+      "Subset samples",
+      "Aggromerate taxa"
+    ),
+    phyloseq = c(
+      "sample_data()",
+      "tax_table()",
+      "otu_table()",
+      "phyloseq()",
+      "estimate_richness()",
+      "ordinate()",
+      "plot_ordination()",
+      "subset_taxa()",
+      "subset_samples()",
+      "tax_glom()"
+    ),
+    "mia/TreeSE" = c(
+      "Index columns",
+      "Index rows",
+      "assays()",
+      "TreeSummarizedExperiment()",
+      "estimateDiversity()",
+      "addMDS()",
+      "plotReducedDim()",
+      "Index rows",
+      "Index columns",
+      "agglomerateByRank()"
+    )
+  )
+
+df2 <- data.frame(
+    Data_type = c(
+        "OTU table", # Row 1
+        "Taxonomy table", # Row2
+        "Sample data table"), # Row 3
+    phyloseq = c(
+        "otu_table", # Row 1
+        "tax_table", # Row2
+        "sample_data"),# Row 3
+    TreeSE = c(
+        "assay", # Row 1
+        "rowData", # Row2
+        "colData") # Row 3
+  )
+
+kable(df)
+kable(df2)
+```
+
