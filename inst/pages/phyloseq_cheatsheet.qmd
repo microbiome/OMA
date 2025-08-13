@@ -1,0 +1,219 @@
+
+# Extra material {#sec-extras}
+
+```{r}
+#| label: setup
+
+knitr::opts_chunk$set(eval=TRUE, warning=FALSE, message=FALSE)
+```
+
+## `phyloseq` vs TreeSE cheatsheet
+
+This section has a cheatsheet for translating common functions in phyloseq
+to TreeSE/mia with example code.
+
+```{r}
+#| label: download_libs
+
+# Download libraries
+library(mia)
+library(phyloseq)
+library(dplyr)
+library(ggplot2)
+```
+
+Start by loading data as a `phyloseq` object "phy" and as `TreeSE` object "tse".
+
+```{r}
+#| label: load_data
+
+# Loading example data
+# Using GlobalPatterns dataset
+
+data(package = "phyloseq", "GlobalPatterns") # phyloseq object
+phy <- GlobalPatterns # Rename
+phy # Check the phyloseq object
+
+data(package = "mia", "GlobalPatterns") # TreeSE object
+tse <- GlobalPatterns # Rename
+tse # Check the tse object
+```
+
+### Accessing different types of data in `phyloseq` versus `TreeSE`
+
+Often microbiome datasets contain three different types of tables, one which
+defines the microbes' taxonomy from domain to species level, one that
+describes sample level information like whether the sample is from a
+healthy or a diseased person, and one that has the abundances of taxa from
+mapping, like an OTU table.
+
+There are slightly different names for these tables in phyloseq and tse,
+but they can be retrieved from the phyloseq and tse containers in analogous
+ways.
+
+**Accessing the table of taxonomic names: tax_table = rowData**
+
+phyloseq and TreeSE objects' taxonomy tables can be accessed with tax_table and
+rowData commands.
+
+```{r}
+#| label: access_data
+
+phy_taxtable <-
+    tax_table(phy)  |> # Access the phyloseq taxonomic name table
+    data.frame() # Make into a data frame
+
+tse_taxtable <- rowData(tse) |> # Same for tse
+    data.frame()
+
+```
+
+**Accessing sample data: sample_data = colData**
+
+Sample data can be accessed with `sample_data` and `colData` commands.
+
+```{r}
+#| label: access_sampledata
+
+phy_sampledata <-
+    sample_data(phy) |> data.frame()
+
+tse_sampledata <-
+    colData(tse) |> data.frame()
+```
+
+**Accessing operational taxonomic unit (OTU) abundance objects: otu_table = assay**
+
+OTU tables can be accessed with otu_table and assay commands. The assay can
+also hold other types of information like taxa abundances from shotgun
+metagenomic annotation, or functional gene abundances.
+
+```{r}
+#| label: access_otutable
+
+phy_otutable <-
+    otu_table(phy) |> data.frame()
+
+tse_otutable <-
+    assay(tse) |> data.frame()
+```
+
+### Building phyloseq objects vs TreeSE objects: phyloseq = TreeSummarizedExperiment
+
+After learning how to access various data types from TreeSE, let's see how
+creating TreeSE objects compares to creating phyloseq objects. We will use
+the vanilla dataframes we created from the phyloseq object to demonstrate
+making both types of data objects. These are identical to the equivalent tse
+dataframes but for demonstration we will use ones created from phy.
+
+Let's start by checking what we have.
+
+```{r}
+#| label: inspect_data
+
+phy_otutable |> head()
+phy_sampledata |> head()
+phy_taxtable |> head()
+```
+
+Ok, these are all normal data frames which could come from upstream
+bioinformatics, like OTU tables that come from 16S analysis, and taxonomy
+tables.
+
+Let's demo how to create the TreeSE object, how it compares to creating
+phyloseq and how assay in TreeSE compares to otu_table in phyloseq.
+
+```{r}
+#| label: build_dataobjects
+
+
+# Create phyloseq object
+OTU_phy <- otu_table(as.matrix(phy_otutable), taxa_are_rows = TRUE) # Make OTU table
+TAX_phy <- tax_table(as.matrix(phy_taxtable)) # Make TAX table
+SAMPLE_phy <- sample_data(phy_sampledata) # Make sample data table
+
+phy <- phyloseq(OTU_phy, TAX_phy, SAMPLE_phy) # Combine into phyloseq object
+phy # Inspect
+
+```
+
+Let's start by checking our otu table, and see if it is counts or already
+normalized. We will use the same data frame extracted from the phy object
+as before.
+
+```{r}
+#| label: check_otutable
+
+# Check if we have counts or normalized data
+
+phy_otutable |> head()
+```
+
+We have counts!
+
+Since TreeSEs can hold many different versions of the OTU table, most commonly
+either relative abundances or counts, we will need to give our assay
+(which corresponds to otu_table in Phyloseq) a name and
+list the different types of assays or transformations we have. In this
+example we only have one item 'counts' in the list.
+
+Let's convert the data frame to a matrix and make the list of assays.
+
+```{r}
+#| label: create_tse
+
+# Create TreeSE
+counts <- as.matrix(phy_otutable) # Convert to a matrix
+assays <- SimpleList(counts = counts)
+tse <- TreeSummarizedExperiment(
+    assays = assays,
+    colData = phy_sampledata,
+    rowData = phy_taxtable
+)
+```
+
+Let's check the different assay names we have.
+
+```{r}
+#| label: check_assays
+ 
+assayNames(tse)
+```
+
+
+### Handling different OTU table normalizations in phyloseq vs TreeSE
+
+Adding the assays as a list might seem inconvenient if you only have one type of
+OTU table (`counts` in our example), but let's see why it is actually very
+convenient to be able to hold multiple assays in one data object. 
+
+
+Here we'll show an example of how to add relative abundances and CLR normalized
+OTU tables to your tse assays.
+
+With phyloseq you would need three different phyloseq objects, each taking up
+7.7 MB of memory, whilst the tse with the three assays takes up only 18.3 MB.
+
+```{r}
+#| label: transform_assay
+
+# Add another assay that holds the relative abundance normalized OTU table
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+assays(tse) # Let's check
+
+# With phyloseq you would need to have two different phyloseq objects
+phy_relab  = transform_sample_counts(phy, function(x)
+  x / sum(x))
+
+# Let's add clr transformed data just for the fun of it :)
+tse <- transformAssay(
+    tse,
+    assay.type = "counts",
+    method = "clr",
+    pseudocount = 1)
+
+assays(tse) # Let's check
+
+# With phyloseq you would need to have a third phyloseq object.
+# phy_CLR <- microbiome::transform(phy, 'clr') # Example, don't run
+```
