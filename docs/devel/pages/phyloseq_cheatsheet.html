@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Appendix C — phyloseq vs TreeSE cheatsheet – Orchestrating Microbiome Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../pages/example_solutions.html" rel="next">
+<link href="../pages/mmuphin_meta_analysis.html" rel="prev">
+<link href="../assets/favicon.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-2fa0555fe88427c29efa1b60aaf9e62d.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-6d7e7b9b3dbd114c66b233ded7072392.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-d973621a3e613e1e42b80e1aa2850238.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-9baeb33c27a4557a4870343b8a08bbbd.min.css" rel="prefetch" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+</head>
+<body class="nav-sidebar docked nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg " data-bs-theme="dark"><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../assets/mia_logo.png" alt="" class="navbar-logo"></a>
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Orchestrating Microbiome Analysis</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+<li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-bi-github">
+<li>
+    <a class="dropdown-item" href="https://github.com/microbiome/OMA/">
+ <span class="dropdown-text">Source Code</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://microbiome.github.io/OMA/docs/devel/">
+ <span class="dropdown-text">Browse version <code>devel</code></span></a>
+  </li>  
+    </ul>
+</li>
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+</div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../pages/msea.html">Appendices</a></li><li class="breadcrumb-item"><a href="../pages/phyloseq_cheatsheet.html"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">phyloseq vs TreeSE cheatsheet</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto"><div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Introduction</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Microbiome data science in Bioconductor</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/miaverse.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">miaverse</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Data containers &amp; importing</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/containers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Data containers</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/import.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Import</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/convert.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Convert &amp; export</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Data wrangling</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/taxonomy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Taxonomic information</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/wrangling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Data wrangling</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">QC &amp; preprocessing</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/preprocess.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">QC &amp; preprocessing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/quality_control.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Exploration &amp; quality control</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/subsetting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Subsetting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/agglomeration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Agglomeration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/transformation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Transformation</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Diversity &amp; similarity</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Community composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/alpha_diversity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Alpha diversity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/beta_diversity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Community similarity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Community typing</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Association</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/differential_abundance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Differential abundance</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/mediation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Mediation</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Networks</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/network_learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Network learning &amp; analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/network_comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Network comparison</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Multiomics</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/multiomics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Multi-omics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/cross_correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Cross-association</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/multiassay_ordination.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Ordination-based multiassay analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/integrated_learner.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Multi-omics prediction and classification</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Machine learning &amp; statistical modeling</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/machine_learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Machine learning</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false">
+ <span class="menu-text">Training</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/training.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">Support &amp; resources</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 ">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/support.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Support</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Resources</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/contributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Contributions</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/msea.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Microbe Set Enrichment Analysis (MSEA)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/mmuphin_meta_analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Meta-analyses</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/phyloseq_cheatsheet.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">phyloseq vs TreeSE cheatsheet</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/example_solutions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">Example solutions for exercises</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../pages/session_info.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">Technical info</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li><a href="#accessing-different-types-of-data-in-phyloseq-versus-treese" id="toc-accessing-different-types-of-data-in-phyloseq-versus-treese" class="nav-link active" data-scroll-target="#accessing-different-types-of-data-in-phyloseq-versus-treese"><span class="header-section-number">C.1</span> Accessing different types of data in <code>phyloseq</code> versus <code>TreeSE</code></a></li>
+  <li><a href="#building-phyloseq-objects-vs-treese-objects-phyloseq-treesummarizedexperiment" id="toc-building-phyloseq-objects-vs-treese-objects-phyloseq-treesummarizedexperiment" class="nav-link" data-scroll-target="#building-phyloseq-objects-vs-treese-objects-phyloseq-treesummarizedexperiment"><span class="header-section-number">C.2</span> Building phyloseq objects vs TreeSE objects: phyloseq = TreeSummarizedExperiment</a></li>
+  <li><a href="#handling-different-otu-table-normalizations-in-phyloseq-vs-treese" id="toc-handling-different-otu-table-normalizations-in-phyloseq-vs-treese" class="nav-link" data-scroll-target="#handling-different-otu-table-normalizations-in-phyloseq-vs-treese"><span class="header-section-number">C.3</span> Handling different OTU table normalizations in phyloseq vs TreeSE</a></li>
+  <li><a href="#subsetting-samples-and-taxa" id="toc-subsetting-samples-and-taxa" class="nav-link" data-scroll-target="#subsetting-samples-and-taxa"><span class="header-section-number">C.4</span> Subsetting samples and taxa</a></li>
+  <li><a href="#calculating-alpha-diversity-estimate_richness-estimatediversity" id="toc-calculating-alpha-diversity-estimate_richness-estimatediversity" class="nav-link" data-scroll-target="#calculating-alpha-diversity-estimate_richness-estimatediversity"><span class="header-section-number">C.5</span> Calculating alpha diversity: estimate_richness = estimateDiversity</a></li>
+  <li><a href="#calculating-beta-diversity-ordinate-addmds" id="toc-calculating-beta-diversity-ordinate-addmds" class="nav-link" data-scroll-target="#calculating-beta-diversity-ordinate-addmds"><span class="header-section-number">C.6</span> Calculating beta diversity: ordinate = addMDS</a></li>
+  <li><a href="#plotting-ordinations-plot_ordination-plotreduceddim" id="toc-plotting-ordinations-plot_ordination-plotreduceddim" class="nav-link" data-scroll-target="#plotting-ordinations-plot_ordination-plotreduceddim"><span class="header-section-number">C.7</span> Plotting ordinations: <code>plot_ordination()</code> = <code>plotReducedDim()</code></a></li>
+  <li><a href="#agglomerating-taxa-tax_glom-agglomeratebyrank" id="toc-agglomerating-taxa-tax_glom-agglomeratebyrank" class="nav-link" data-scroll-target="#agglomerating-taxa-tax_glom-agglomeratebyrank"><span class="header-section-number">C.8</span> Agglomerating taxa: <code>tax_glom()</code> = <code>agglomerateByRank()</code></a></li>
+  <li><a href="#cheatsheet" id="toc-cheatsheet" class="nav-link" data-scroll-target="#cheatsheet"><span class="header-section-number">C.9</span> Cheatsheet</a></li>
+  </ul></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../pages/msea.html">Appendices</a></li><li class="breadcrumb-item"><a href="../pages/phyloseq_cheatsheet.html"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">phyloseq vs TreeSE cheatsheet</span></a></li></ol></nav><div class="quarto-title">
+<h1 class="title"><span id="sec-extras" class="quarto-section-identifier">Appendix C — phyloseq vs TreeSE cheatsheet</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><p>This section has a cheatsheet for translating common functions in phyloseq to TreeSE/mia with example code.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Download libraries</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/microbiome/mia">mia</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://dx.plos.org/10.1371/journal.pone.0061217">phyloseq</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Start by loading data as a <code>phyloseq</code> object “phy” and as <code>TreeSE</code> object “tse”.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Loading example data</span></span>
+<span><span class="co"># Using GlobalPatterns dataset</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"phyloseq"</span>, <span class="st">"GlobalPatterns"</span><span class="op">)</span> <span class="co"># phyloseq object</span></span>
+<span><span class="va">phy</span> <span class="op">&lt;-</span> <span class="va">GlobalPatterns</span> <span class="co"># Rename</span></span>
+<span><span class="va">phy</span> <span class="co"># Check the phyloseq object</span></span>
+<span><span class="co">##  phyloseq-class experiment-level object</span></span>
+<span><span class="co">##  otu_table()   OTU Table:         [ 19216 taxa and 26 samples ]</span></span>
+<span><span class="co">##  sample_data() Sample Data:       [ 26 samples by 7 sample variables ]</span></span>
+<span><span class="co">##  tax_table()   Taxonomy Table:    [ 19216 taxa by 7 taxonomic ranks ]</span></span>
+<span><span class="co">##  phy_tree()    Phylogenetic Tree: [ 19216 tips and 19215 internal nodes ]</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"mia"</span>, <span class="st">"GlobalPatterns"</span><span class="op">)</span> <span class="co"># TreeSE object</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="va">GlobalPatterns</span> <span class="co"># Rename</span></span>
+<span><span class="va">tse</span> <span class="co"># Check the tse object</span></span>
+<span><span class="co">##  class: TreeSummarizedExperiment </span></span>
+<span><span class="co">##  dim: 19216 26 </span></span>
+<span><span class="co">##  metadata(0):</span></span>
+<span><span class="co">##  assays(1): counts</span></span>
+<span><span class="co">##  rownames(19216): 549322 522457 ... 200359 271582</span></span>
+<span><span class="co">##  rowData names(7): Kingdom Phylum ... Genus Species</span></span>
+<span><span class="co">##  colnames(26): CL3 CC1 ... Even2 Even3</span></span>
+<span><span class="co">##  colData names(7): X.SampleID Primer ... SampleType Description</span></span>
+<span><span class="co">##  reducedDimNames(0):</span></span>
+<span><span class="co">##  mainExpName: NULL</span></span>
+<span><span class="co">##  altExpNames(0):</span></span>
+<span><span class="co">##  rowLinks: a LinkDataFrame (19216 rows)</span></span>
+<span><span class="co">##  rowTree: 1 phylo tree(s) (19216 leaves)</span></span>
+<span><span class="co">##  colLinks: NULL</span></span>
+<span><span class="co">##  colTree: NULL</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="accessing-different-types-of-data-in-phyloseq-versus-treese" class="level2" data-number="C.1"><h2 data-number="C.1" class="anchored" data-anchor-id="accessing-different-types-of-data-in-phyloseq-versus-treese">
+<span class="header-section-number">C.1</span> Accessing different types of data in <code>phyloseq</code> versus <code>TreeSE</code>
+</h2>
+<p>Often microbiome datasets contain three different types of tables, one which defines the microbes’ taxonomy from domain to species level, one that describes sample level information like whether the sample is from a healthy or a diseased person, and one that has the abundances of taxa from mapping, like an OTU table.</p>
+<p>There are slightly different names for these tables in phyloseq and tse, but they can be retrieved from the phyloseq and tse containers in analogous ways.</p>
+<p><strong>Accessing the table of taxonomic names: tax_table = rowData</strong></p>
+<p>phyloseq and TreeSE objects’ taxonomy tables can be accessed with tax_table and rowData commands.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">phy_taxtable</span> <span class="op">&lt;-</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/tax_table-methods.html">tax_table</a></span><span class="op">(</span><span class="va">phy</span><span class="op">)</span>  <span class="op">|&gt;</span> <span class="co"># Access the phyloseq taxonomic name table</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># Make into a data frame</span></span>
+<span></span>
+<span><span class="va">tse_taxtable</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">rowData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># Same for tse</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Accessing sample data: sample_data = colData</strong></p>
+<p>Sample data can be accessed with <code>sample_data</code> and <code>colData</code> commands.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">phy_sampledata</span> <span class="op">&lt;-</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/sample_data-methods.html">sample_data</a></span><span class="op">(</span><span class="va">phy</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tse_sampledata</span> <span class="op">&lt;-</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Accessing operational taxonomic unit (OTU) abundance objects: otu_table = assay</strong></p>
+<p>OTU tables can be accessed with otu_table and assay commands. The assay can also hold other types of information like taxa abundances from shotgun metagenomic annotation, or functional gene abundances.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">phy_otutable</span> <span class="op">&lt;-</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/otu_table-methods.html">otu_table</a></span><span class="op">(</span><span class="va">phy</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tse_otutable</span> <span class="op">&lt;-</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assay</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="building-phyloseq-objects-vs-treese-objects-phyloseq-treesummarizedexperiment" class="level2" data-number="C.2"><h2 data-number="C.2" class="anchored" data-anchor-id="building-phyloseq-objects-vs-treese-objects-phyloseq-treesummarizedexperiment">
+<span class="header-section-number">C.2</span> Building phyloseq objects vs TreeSE objects: phyloseq = TreeSummarizedExperiment</h2>
+<p>After learning how to access various data types from TreeSE, let’s see how creating TreeSE objects compares to creating phyloseq objects. We will use the vanilla dataframes we created from the phyloseq object to demonstrate making both types of data objects. These are identical to the equivalent tse dataframes but for demonstration we will use ones created from phy.</p>
+<p>Let’s start by checking what we have.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">phy_otutable</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">##         CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr F21Plmr M31Tong M11Tong</span></span>
+<span><span class="co">##  549322   0   0   0       0       0       0       0       0       0       0</span></span>
+<span><span class="co">##  522457   0   0   0       0       0       0       0       0       0       0</span></span>
+<span><span class="co">##  951      0   0   0       0       0       0       1       0       0       0</span></span>
+<span><span class="co">##  244423   0   0   0       0       0       0       0       0       0       0</span></span>
+<span><span class="co">##  586076   0   0   0       0       0       0       0       0       0       0</span></span>
+<span><span class="co">##  246140   0   0   0       0       0       0       0       0       0       0</span></span>
+<span><span class="co">##         LMEpi24M SLEpi20M AQC1cm AQC4cm AQC7cm NP2 NP3 NP5 TRRsed1 TRRsed2</span></span>
+<span><span class="co">##  549322        0        1     27    100    130   1   0   0       0       0</span></span>
+<span><span class="co">##  522457        0        0      0      2      6   0   0   0       0       0</span></span>
+<span><span class="co">##  951           0        0      0      0      0   0   0   0       0       0</span></span>
+<span><span class="co">##  244423        0        0      0     22     29   0   0   0       0       0</span></span>
+<span><span class="co">##  586076        0        0      0      2      1   0   0   0       0       0</span></span>
+<span><span class="co">##  246140        0        0      0      1      3   0   0   0       0       0</span></span>
+<span><span class="co">##         TRRsed3 TS28 TS29 Even1 Even2 Even3</span></span>
+<span><span class="co">##  549322       0    0    0     0     0     0</span></span>
+<span><span class="co">##  522457       0    0    0     0     0     0</span></span>
+<span><span class="co">##  951          0    0    0     0     0     0</span></span>
+<span><span class="co">##  244423       0    0    0     0     0     0</span></span>
+<span><span class="co">##  586076       0    0    0     0     0     0</span></span>
+<span><span class="co">##  246140       0    0    0     0     0     0</span></span>
+<span><span class="va">phy_sampledata</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">##          X.SampleID  Primer Final_Barcode Barcode_truncated_plus_T</span></span>
+<span><span class="co">##  CL3            CL3 ILBC_01        AACGCA                   TGCGTT</span></span>
+<span><span class="co">##  CC1            CC1 ILBC_02        AACTCG                   CGAGTT</span></span>
+<span><span class="co">##  SV1            SV1 ILBC_03        AACTGT                   ACAGTT</span></span>
+<span><span class="co">##  M31Fcsw    M31Fcsw ILBC_04        AAGAGA                   TCTCTT</span></span>
+<span><span class="co">##  M11Fcsw    M11Fcsw ILBC_05        AAGCTG                   CAGCTT</span></span>
+<span><span class="co">##  M31Plmr    M31Plmr ILBC_07        AATCGT                   ACGATT</span></span>
+<span><span class="co">##          Barcode_full_length SampleType</span></span>
+<span><span class="co">##  CL3             CTAGCGTGCGT       Soil</span></span>
+<span><span class="co">##  CC1             CATCGACGAGT       Soil</span></span>
+<span><span class="co">##  SV1             GTACGCACAGT       Soil</span></span>
+<span><span class="co">##  M31Fcsw         TCGACATCTCT      Feces</span></span>
+<span><span class="co">##  M11Fcsw         CGACTGCAGCT      Feces</span></span>
+<span><span class="co">##  M31Plmr         CGAGTCACGAT       Skin</span></span>
+<span><span class="co">##                                         Description</span></span>
+<span><span class="co">##  CL3       Calhoun South Carolina Pine soil, pH 4.9</span></span>
+<span><span class="co">##  CC1       Cedar Creek Minnesota, grassland, pH 6.1</span></span>
+<span><span class="co">##  SV1     Sevilleta new Mexico, desert scrub, pH 8.3</span></span>
+<span><span class="co">##  M31Fcsw    M3, Day 1, fecal swab, whole body study</span></span>
+<span><span class="co">##  M11Fcsw   M1, Day 1, fecal swab, whole body study </span></span>
+<span><span class="co">##  M31Plmr    M3, Day 1, right palm, whole body study</span></span>
+<span><span class="va">phy_taxtable</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">##         Kingdom        Phylum        Class        Order        Family</span></span>
+<span><span class="co">##  549322 Archaea Crenarchaeota Thermoprotei         &lt;NA&gt;          &lt;NA&gt;</span></span>
+<span><span class="co">##  522457 Archaea Crenarchaeota Thermoprotei         &lt;NA&gt;          &lt;NA&gt;</span></span>
+<span><span class="co">##  951    Archaea Crenarchaeota Thermoprotei Sulfolobales Sulfolobaceae</span></span>
+<span><span class="co">##  244423 Archaea Crenarchaeota        Sd-NA         &lt;NA&gt;          &lt;NA&gt;</span></span>
+<span><span class="co">##  586076 Archaea Crenarchaeota        Sd-NA         &lt;NA&gt;          &lt;NA&gt;</span></span>
+<span><span class="co">##  246140 Archaea Crenarchaeota        Sd-NA         &lt;NA&gt;          &lt;NA&gt;</span></span>
+<span><span class="co">##              Genus                  Species</span></span>
+<span><span class="co">##  549322       &lt;NA&gt;                     &lt;NA&gt;</span></span>
+<span><span class="co">##  522457       &lt;NA&gt;                     &lt;NA&gt;</span></span>
+<span><span class="co">##  951    Sulfolobus Sulfolobusacidocaldarius</span></span>
+<span><span class="co">##  244423       &lt;NA&gt;                     &lt;NA&gt;</span></span>
+<span><span class="co">##  586076       &lt;NA&gt;                     &lt;NA&gt;</span></span>
+<span><span class="co">##  246140       &lt;NA&gt;                     &lt;NA&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ok, these are all normal data frames which could come from upstream bioinformatics, like OTU tables that come from 16S analysis, and taxonomy tables.</p>
+<p>Let’s demo how to create the TreeSE object, how it compares to creating phyloseq and how assay in TreeSE compares to otu_table in phyloseq.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span></span>
+<span><span class="co"># Create phyloseq object</span></span>
+<span><span class="va">OTU_phy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/otu_table-methods.html">otu_table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">phy_otutable</span><span class="op">)</span>, taxa_are_rows <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="co"># Make OTU table</span></span>
+<span><span class="va">TAX_phy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/tax_table-methods.html">tax_table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">phy_taxtable</span><span class="op">)</span><span class="op">)</span> <span class="co"># Make TAX table</span></span>
+<span><span class="va">SAMPLE_phy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/sample_data-methods.html">sample_data</a></span><span class="op">(</span><span class="va">phy_sampledata</span><span class="op">)</span> <span class="co"># Make sample data table</span></span>
+<span></span>
+<span><span class="va">phy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/phyloseq.html">phyloseq</a></span><span class="op">(</span><span class="va">OTU_phy</span>, <span class="va">TAX_phy</span>, <span class="va">SAMPLE_phy</span><span class="op">)</span> <span class="co"># Combine into phyloseq object</span></span>
+<span><span class="va">phy</span> <span class="co"># Inspect</span></span>
+<span><span class="co">##  phyloseq-class experiment-level object</span></span>
+<span><span class="co">##  otu_table()   OTU Table:         [ 19216 taxa and 26 samples ]</span></span>
+<span><span class="co">##  sample_data() Sample Data:       [ 26 samples by 7 sample variables ]</span></span>
+<span><span class="co">##  tax_table()   Taxonomy Table:    [ 19216 taxa by 7 taxonomic ranks ]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s start by checking our otu table, and see if it is counts or already normalized. We will use the same data frame extracted from the phy object as before.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Check if we have counts or normalized data</span></span>
+<span></span>
+<span><span class="va">phy_otutable</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">##         CL3 CC1 SV1 M31Fcsw M11Fcsw M31Plmr M11Plmr F21Plmr M31Tong M11Tong</span></span>
+<span><span class="co">##  549322   0   0   0       0       0       0       0       0       0       0</span></span>
+<span><span class="co">##  522457   0   0   0       0       0       0       0       0       0       0</span></span>
+<span><span class="co">##  951      0   0   0       0       0       0       1       0       0       0</span></span>
+<span><span class="co">##  244423   0   0   0       0       0       0       0       0       0       0</span></span>
+<span><span class="co">##  586076   0   0   0       0       0       0       0       0       0       0</span></span>
+<span><span class="co">##  246140   0   0   0       0       0       0       0       0       0       0</span></span>
+<span><span class="co">##         LMEpi24M SLEpi20M AQC1cm AQC4cm AQC7cm NP2 NP3 NP5 TRRsed1 TRRsed2</span></span>
+<span><span class="co">##  549322        0        1     27    100    130   1   0   0       0       0</span></span>
+<span><span class="co">##  522457        0        0      0      2      6   0   0   0       0       0</span></span>
+<span><span class="co">##  951           0        0      0      0      0   0   0   0       0       0</span></span>
+<span><span class="co">##  244423        0        0      0     22     29   0   0   0       0       0</span></span>
+<span><span class="co">##  586076        0        0      0      2      1   0   0   0       0       0</span></span>
+<span><span class="co">##  246140        0        0      0      1      3   0   0   0       0       0</span></span>
+<span><span class="co">##         TRRsed3 TS28 TS29 Even1 Even2 Even3</span></span>
+<span><span class="co">##  549322       0    0    0     0     0     0</span></span>
+<span><span class="co">##  522457       0    0    0     0     0     0</span></span>
+<span><span class="co">##  951          0    0    0     0     0     0</span></span>
+<span><span class="co">##  244423       0    0    0     0     0     0</span></span>
+<span><span class="co">##  586076       0    0    0     0     0     0</span></span>
+<span><span class="co">##  246140       0    0    0     0     0     0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We have counts!</p>
+<p>Since TreeSEs can hold many different versions of the OTU table, most commonly either relative abundances or counts, we will need to give our assay (which corresponds to otu_table in Phyloseq) a name and list the different types of assays or transformations we have. In this example we only have one item ‘counts’ in the list.</p>
+<p>Let’s convert the data frame to a matrix and make the list of assays.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Create TreeSE</span></span>
+<span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">phy_otutable</span><span class="op">)</span> <span class="co"># Convert to a matrix</span></span>
+<span><span class="va">assays</span> <span class="op">&lt;-</span> <span class="fu">SimpleList</span><span class="op">(</span>counts <span class="op">=</span> <span class="va">counts</span><span class="op">)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-constructor.html">TreeSummarizedExperiment</a></span><span class="op">(</span></span>
+<span>    assays <span class="op">=</span> <span class="va">assays</span>,</span>
+<span>    colData <span class="op">=</span> <span class="va">phy_sampledata</span>,</span>
+<span>    rowData <span class="op">=</span> <span class="va">phy_taxtable</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s check the different assay names we have.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assayNames</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span>
+<span><span class="co">##  [1] "counts"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="handling-different-otu-table-normalizations-in-phyloseq-vs-treese" class="level2" data-number="C.3"><h2 data-number="C.3" class="anchored" data-anchor-id="handling-different-otu-table-normalizations-in-phyloseq-vs-treese">
+<span class="header-section-number">C.3</span> Handling different OTU table normalizations in phyloseq vs TreeSE</h2>
+<p>Adding the assays as a list might seem inconvenient if you only have one type of OTU table (<code>counts</code> in our example), but let’s see why it is actually very convenient to be able to hold multiple assays in one data object.</p>
+<p>Here we’ll show an example of how to add relative abundances and CLR normalized OTU tables to your tse assays.</p>
+<p>With phyloseq you would need three different phyloseq objects, each taking up 7.7 MB of memory, whilst the tse with the three assays takes up only 18.3 MB.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Add another assay that holds the relative abundance normalized OTU table</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span><span class="va">tse</span>, assay.type <span class="op">=</span> <span class="st">"counts"</span>, method <span class="op">=</span> <span class="st">"relabundance"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span> <span class="co"># Let's check</span></span>
+<span><span class="co">##  List of length 2</span></span>
+<span><span class="co">##  names(2): counts relabundance</span></span>
+<span></span>
+<span><span class="co"># With phyloseq you would need to have two different phyloseq objects</span></span>
+<span><span class="va">phy_relab</span>  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/transformcounts.html">transform_sample_counts</a></span><span class="op">(</span><span class="va">phy</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span>  <span class="va">x</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Let's add clr transformed data just for the fun of it :)</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/transformAssay.html">transformAssay</a></span><span class="op">(</span></span>
+<span>    <span class="va">tse</span>,</span>
+<span>    assay.type <span class="op">=</span> <span class="st">"counts"</span>,</span>
+<span>    method <span class="op">=</span> <span class="st">"clr"</span>,</span>
+<span>    pseudocount <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assays</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span> <span class="co"># Let's check</span></span>
+<span><span class="co">##  List of length 3</span></span>
+<span><span class="co">##  names(3): counts relabundance clr</span></span>
+<span></span>
+<span><span class="co"># With phyloseq you would need to have a third phyloseq object.</span></span>
+<span><span class="co"># phy_CLR &lt;- microbiome::transform(phy, 'clr') # Example, don't run</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="subsetting-samples-and-taxa" class="level2" data-number="C.4"><h2 data-number="C.4" class="anchored" data-anchor-id="subsetting-samples-and-taxa">
+<span class="header-section-number">C.4</span> Subsetting samples and taxa</h2>
+<p><strong>Subsetting samples: subset_samples = indexing columns</strong></p>
+<p>Next let’s learn how to subset samples. In phyloseq we use subset_samples command, but since the sample data is stored in columns in the TreeSe, we can access it by indexing columns.</p>
+<p>In this section we will remove the “Mock” samples and make new data objects.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">phy_nomock</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/subset_samples-methods.html">subset_samples</a></span><span class="op">(</span></span>
+<span>    <span class="va">phy</span>, <span class="op">!</span><span class="va">SampleType</span> <span class="op">==</span> <span class="st">"Mock"</span><span class="op">)</span> <span class="co"># Removing mock samples in phyloseq</span></span>
+<span></span>
+<span><span class="va">tse_nomock</span> <span class="op">&lt;-</span> <span class="va">tse</span><span class="op">[</span>,<span class="op">!</span><span class="va">tse</span><span class="op">$</span><span class="va">SampleType</span> <span class="op">==</span> <span class="st">"Mock"</span><span class="op">]</span> <span class="co"># tse uses indexing columns</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s see what we have now.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">phy</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/sample_names-methods.html">sample_names</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">##  [1] 26</span></span>
+<span><span class="va">phy_nomock</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/sample_names-methods.html">sample_names</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">##  [1] 23</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">##  [1] 26</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">tse_nomock</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">##  [1] 23</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We have removed three samples that where SampleType “Mock”.</p>
+<p><strong>Subsetting taxa: subset_taxa = indexing rows</strong></p>
+<p>Taxa are stored in rows in TreeSE and the TreeSE equivalent to subset_taxa is indexing rows.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">phy_nomock_bacteria</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/subset_taxa-methods.html">subset_taxa</a></span><span class="op">(</span><span class="va">phy_nomock</span>, <span class="va">Kingdom</span> <span class="op">==</span> <span class="st">"Bacteria"</span><span class="op">)</span></span>
+<span><span class="va">tse_nomock_bacteria</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">tse</span><span class="op">[</span><span class="va">tse</span><span class="op">$</span><span class="va">Kingdom</span> <span class="op">==</span> <span class="st">"Bacteria"</span>, <span class="op">]</span></span>
+<span></span>
+<span><span class="va">phy_nomock_bacteria</span> <span class="co"># We have 19008 taxa (only bacteria) and before 19216</span></span>
+<span><span class="co">##  phyloseq-class experiment-level object</span></span>
+<span><span class="co">##  otu_table()   OTU Table:         [ 19008 taxa and 23 samples ]</span></span>
+<span><span class="co">##  sample_data() Sample Data:       [ 23 samples by 7 sample variables ]</span></span>
+<span><span class="co">##  tax_table()   Taxonomy Table:    [ 19008 taxa by 7 taxonomic ranks ]</span></span>
+<span><span class="va">tse_nomock_bacteria</span></span>
+<span><span class="co">##  class: TreeSummarizedExperiment </span></span>
+<span><span class="co">##  dim: 0 26 </span></span>
+<span><span class="co">##  metadata(0):</span></span>
+<span><span class="co">##  assays(3): counts relabundance clr</span></span>
+<span><span class="co">##  rownames(0):</span></span>
+<span><span class="co">##  rowData names(7): Kingdom Phylum ... Genus Species</span></span>
+<span><span class="co">##  colnames(26): CL3 CC1 ... Even2 Even3</span></span>
+<span><span class="co">##  colData names(7): X.SampleID Primer ... SampleType Description</span></span>
+<span><span class="co">##  reducedDimNames(0):</span></span>
+<span><span class="co">##  mainExpName: NULL</span></span>
+<span><span class="co">##  altExpNames(0):</span></span>
+<span><span class="co">##  rowLinks: NULL</span></span>
+<span><span class="co">##  rowTree: NULL</span></span>
+<span><span class="co">##  colLinks: NULL</span></span>
+<span><span class="co">##  colTree: NULL</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="calculating-alpha-diversity-estimate_richness-estimatediversity" class="level2" data-number="C.5"><h2 data-number="C.5" class="anchored" data-anchor-id="calculating-alpha-diversity-estimate_richness-estimatediversity">
+<span class="header-section-number">C.5</span> Calculating alpha diversity: estimate_richness = estimateDiversity</h2>
+<p>Now we know how data stored in <code>TreeSE</code> can be accessed and the <code>TreeSE</code> data objects created. Let’s look at how we can calculate alpha diversity using <code>mia</code> compared to <code>phyloseq</code> package.</p>
+<p>The <code>mia</code> command <code><a href="https://rdrr.io/pkg/mia/man/deprecate.html">estimateDiversity()</a></code> will return a TreeSE and the results are stored in <code>colData</code>, unlike the <code>phyloseq</code> command that outputs a data frame with just the diversity estimates.</p>
+<p>In <code>phyloseq</code> you would need to add the alpha diversity separately to your sample data to keep it safe with the other sample level data.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Alpha diversity with phyloseq</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/estimate_richness.html">estimate_richness</a></span><span class="op">(</span><span class="va">phy</span>, measures <span class="op">=</span> <span class="st">"Shannon"</span><span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># Inspect</span></span>
+<span><span class="co">##           Shannon</span></span>
+<span><span class="co">##  CL3     6.576517</span></span>
+<span><span class="co">##  CC1     6.776603</span></span>
+<span><span class="co">##  SV1     6.498494</span></span>
+<span><span class="co">##  M31Fcsw 3.828368</span></span>
+<span><span class="co">##  M11Fcsw 3.287666</span></span>
+<span><span class="co">##  M31Plmr 4.289269</span></span>
+<span></span>
+<span><span class="co"># Add Shannon to the sample_data to keep results safe with other sample data</span></span>
+<span><span class="va">phy_sampledata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/sample_data-methods.html">sample_data</a></span><span class="op">(</span><span class="va">phy</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">phy_sampledata</span><span class="op">$</span><span class="va">shannon</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">$</span><span class="va">Shannon</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/sample_data-methods.html">sample_data</a></span><span class="op">(</span><span class="va">phy</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">phy_sampledata</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/sample_data-methods.html">sample_data</a></span><span class="op">(</span><span class="va">phy</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># Inspect</span></span>
+<span><span class="co">##          X.SampleID  Primer Final_Barcode Barcode_truncated_plus_T</span></span>
+<span><span class="co">##  CL3            CL3 ILBC_01        AACGCA                   TGCGTT</span></span>
+<span><span class="co">##  CC1            CC1 ILBC_02        AACTCG                   CGAGTT</span></span>
+<span><span class="co">##  SV1            SV1 ILBC_03        AACTGT                   ACAGTT</span></span>
+<span><span class="co">##  M31Fcsw    M31Fcsw ILBC_04        AAGAGA                   TCTCTT</span></span>
+<span><span class="co">##  M11Fcsw    M11Fcsw ILBC_05        AAGCTG                   CAGCTT</span></span>
+<span><span class="co">##  M31Plmr    M31Plmr ILBC_07        AATCGT                   ACGATT</span></span>
+<span><span class="co">##          Barcode_full_length SampleType</span></span>
+<span><span class="co">##  CL3             CTAGCGTGCGT       Soil</span></span>
+<span><span class="co">##  CC1             CATCGACGAGT       Soil</span></span>
+<span><span class="co">##  SV1             GTACGCACAGT       Soil</span></span>
+<span><span class="co">##  M31Fcsw         TCGACATCTCT      Feces</span></span>
+<span><span class="co">##  M11Fcsw         CGACTGCAGCT      Feces</span></span>
+<span><span class="co">##  M31Plmr         CGAGTCACGAT       Skin</span></span>
+<span><span class="co">##                                         Description  shannon</span></span>
+<span><span class="co">##  CL3       Calhoun South Carolina Pine soil, pH 4.9 6.576517</span></span>
+<span><span class="co">##  CC1       Cedar Creek Minnesota, grassland, pH 6.1 6.776603</span></span>
+<span><span class="co">##  SV1     Sevilleta new Mexico, desert scrub, pH 8.3 6.498494</span></span>
+<span><span class="co">##  M31Fcsw    M3, Day 1, fecal swab, whole body study 3.828368</span></span>
+<span><span class="co">##  M11Fcsw   M1, Day 1, fecal swab, whole body study  3.287666</span></span>
+<span><span class="co">##  M31Plmr    M3, Day 1, right palm, whole body study 4.289269</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For the tse we will need to specify which assay (which normalization of the OTU table) we want to use, since we have three options now with the counts, relative abundance and CLR. We can check the assay names first.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">assayNames</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span> <span class="co"># Check the assay names</span></span>
+<span><span class="co">##  [1] "counts"       "relabundance" "clr"</span></span>
+<span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/deprecate.html">estimateDiversity</a></span><span class="op">(</span><span class="va">tse</span>, assay.type <span class="op">=</span> <span class="st">"counts"</span>, index <span class="op">=</span> <span class="st">"shannon"</span><span class="op">)</span> <span class="co"># Let's use counts</span></span>
+<span><span class="co"># Inspect the new colData with added alpha diversity estimate</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># shannon has been added to the colData</span></span>
+<span><span class="co">##  [1] "X.SampleID"               "Primer"                  </span></span>
+<span><span class="co">##  [3] "Final_Barcode"            "Barcode_truncated_plus_T"</span></span>
+<span><span class="co">##  [5] "Barcode_full_length"      "SampleType"              </span></span>
+<span><span class="co">##  [7] "Description"              "shannon"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>If we want to extract a data frame that only has the alpha diversity it can be done easily.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html">colData</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">matches</a></span><span class="op">(</span><span class="st">"shannon"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="calculating-beta-diversity-ordinate-addmds" class="level2" data-number="C.6"><h2 data-number="C.6" class="anchored" data-anchor-id="calculating-beta-diversity-ordinate-addmds">
+<span class="header-section-number">C.6</span> Calculating beta diversity: ordinate = addMDS</h2>
+<p>We can calculate PCoA with Bray-Curtis distances in <code>phyloseq</code> using the <code><a href="https://rdrr.io/pkg/phyloseq/man/ordinate.html">ordinate()</a></code> command. The beta diversity calculation in <code>mia</code> outputs a TreeSE with a new type of data, reduced dimensions or <code>reducedDim</code>.</p>
+<p>Here we will use the <code>scater</code> package that runs the PCoA with <code><a href="https://rdrr.io/pkg/mia/man/addMDS.html">addMDS()</a></code>. (PCoA and MDS mean the same thing)</p>
+<p>In <code>phyloseq</code> you would again need to add the dimensions to the sample data if you want to keep them safe with other metadata.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Run PCoA on the relative abundance data and store in phy_ord list</span></span>
+<span><span class="va">phy_ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/ordinate.html">ordinate</a></span><span class="op">(</span><span class="va">phy_relab</span>, method <span class="op">=</span> <span class="st">"PCoA"</span>, distance <span class="op">=</span> <span class="st">"bray"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/">scater</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Ordinate with addMDS and implement the vegan's Bray-Curtis dissimilarity</span></span>
+<span><span class="co"># distance calculation</span></span>
+<span><span class="va">tse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/addMDS.html">addMDS</a></span><span class="op">(</span></span>
+<span>    <span class="va">tse</span>,</span>
+<span>    FUN <span class="op">=</span> <span class="va">getDissimilarity</span>,</span>
+<span>    method <span class="op">=</span> <span class="st">"bray"</span>,</span>
+<span>    assay.type <span class="op">=</span> <span class="st">"relabundance"</span>,</span>
+<span>    name <span class="op">=</span> <span class="st">"MDS_bray"</span>,</span>
+<span>    ncomponents <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="co"># Let's also define how many dimensions</span></span>
+<span><span class="va">tse</span> <span class="co"># Inspect, now we have new reducedDim "MDS_bray"</span></span>
+<span><span class="co">##  class: TreeSummarizedExperiment </span></span>
+<span><span class="co">##  dim: 19216 26 </span></span>
+<span><span class="co">##  metadata(0):</span></span>
+<span><span class="co">##  assays(3): counts relabundance clr</span></span>
+<span><span class="co">##  rownames(19216): 549322 522457 ... 200359 271582</span></span>
+<span><span class="co">##  rowData names(7): Kingdom Phylum ... Genus Species</span></span>
+<span><span class="co">##  colnames(26): CL3 CC1 ... Even2 Even3</span></span>
+<span><span class="co">##  colData names(8): X.SampleID Primer ... Description shannon</span></span>
+<span><span class="co">##  reducedDimNames(1): MDS_bray</span></span>
+<span><span class="co">##  mainExpName: NULL</span></span>
+<span><span class="co">##  altExpNames(0):</span></span>
+<span><span class="co">##  rowLinks: NULL</span></span>
+<span><span class="co">##  rowTree: NULL</span></span>
+<span><span class="co">##  colLinks: NULL</span></span>
+<span><span class="co">##  colTree: NULL</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="plotting-ordinations-plot_ordination-plotreduceddim" class="level2" data-number="C.7"><h2 data-number="C.7" class="anchored" data-anchor-id="plotting-ordinations-plot_ordination-plotreduceddim">
+<span class="header-section-number">C.7</span> Plotting ordinations: <code>plot_ordination()</code> = <code>plotReducedDim()</code>
+</h2>
+<p><code>phyloseq</code> has it’s own plotting fuction for ordinations.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/plot_ordination.html">plot_ordination</a></span><span class="op">(</span>physeq <span class="op">=</span> <span class="va">phy</span>, ordination <span class="op">=</span> <span class="va">phy_ord</span>, color <span class="op">=</span> <span class="st">"SampleType"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="phyloseq_cheatsheet_files/figure-html/plot_ord-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>It is also easy to plot the ordination stored in <code>reducedDim</code> in the tse using the <code><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim()</a></code> function. We can first check what the name of the Bray-Curtis MDS/PCoA was incase we forgot.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Check reduced dim names</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDimNames</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span></span>
+<span><span class="co">##  [1] "MDS_bray"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ok, let’s plot.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Plot</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"MDS_bray"</span>, color_by <span class="op">=</span> <span class="st">"SampleType"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="phyloseq_cheatsheet_files/figure-html/plot_red_dim-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># The sign is given arbitrarily. We can change it to match the plot_ordination</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDim</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDim</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDim</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html">reducedDim</a></span><span class="op">(</span><span class="va">tse</span><span class="op">)</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html">plotReducedDim</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"MDS_bray"</span>, color_by <span class="op">=</span> <span class="st">"SampleType"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="phyloseq_cheatsheet_files/figure-html/plot_red_dim-2.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="agglomerating-taxa-tax_glom-agglomeratebyrank" class="level2" data-number="C.8"><h2 data-number="C.8" class="anchored" data-anchor-id="agglomerating-taxa-tax_glom-agglomeratebyrank">
+<span class="header-section-number">C.8</span> Agglomerating taxa: <code>tax_glom()</code> = <code>agglomerateByRank()</code>
+</h2>
+<p>Often you might want to study your data using different taxonomic ranks, for example check if you see differences in the abundances of higher taxonomic levels.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">phy_fam</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/phyloseq/man/tax_glom.html">tax_glom</a></span><span class="op">(</span><span class="va">phy</span>, taxrank <span class="op">=</span> <span class="st">"Family"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This family level data object can again be conveniently stored in a tse object under <code>altExp</code>.</p>
+<p><code><a href="https://rdrr.io/pkg/phyloseq/man/tax_glom.html">tax_glom()</a></code> removes the taxa which have not been assigned to the level given in taxrank by default (NArm = TRUE). So we will add the na.rm = TRUE to <code><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">agglomerateByRank()</a></code> function which is equivalent to the default behaviour of <code><a href="https://rdrr.io/pkg/phyloseq/man/tax_glom.html">tax_glom()</a></code>.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html">altExp</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"Family"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mia/man/agglomerate-methods.html">agglomerateByRank</a></span><span class="op">(</span><span class="va">tse</span>, rank <span class="op">=</span> <span class="st">"Family"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html">altExp</a></span><span class="op">(</span><span class="va">tse</span>, <span class="st">"Family"</span><span class="op">)</span></span>
+<span><span class="co">##  class: TreeSummarizedExperiment </span></span>
+<span><span class="co">##  dim: 341 26 </span></span>
+<span><span class="co">##  metadata(1): agglomerated_by_rank</span></span>
+<span><span class="co">##  assays(3): counts relabundance clr</span></span>
+<span><span class="co">##  rownames(341): 125ds10 211ds20 ... vadinHA31 wb1_P06</span></span>
+<span><span class="co">##  rowData names(7): Kingdom Phylum ... Genus Species</span></span>
+<span><span class="co">##  colnames(26): CL3 CC1 ... Even2 Even3</span></span>
+<span><span class="co">##  colData names(8): X.SampleID Primer ... Description shannon</span></span>
+<span><span class="co">##  reducedDimNames(1): MDS_bray</span></span>
+<span><span class="co">##  mainExpName: NULL</span></span>
+<span><span class="co">##  altExpNames(0):</span></span>
+<span><span class="co">##  rowLinks: NULL</span></span>
+<span><span class="co">##  rowTree: NULL</span></span>
+<span><span class="co">##  colLinks: NULL</span></span>
+<span><span class="co">##  colTree: NULL</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="cheatsheet" class="level2" data-number="C.9"><h2 data-number="C.9" class="anchored" data-anchor-id="cheatsheet">
+<span class="header-section-number">C.9</span> Cheatsheet</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 35%">
+<col style="width: 27%">
+<col style="width: 36%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">Functionality</th>
+<th style="text-align: left;">phyloseq</th>
+<th style="text-align: left;">mia.TreeSE</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Access sample data</td>
+<td style="text-align: left;">sample_data()</td>
+<td style="text-align: left;">Index columns</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Access tax table</td>
+<td style="text-align: left;">tax_table()</td>
+<td style="text-align: left;">Index rows</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Access OTU table</td>
+<td style="text-align: left;">otu_table()</td>
+<td style="text-align: left;">assays()</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Build data object</td>
+<td style="text-align: left;">phyloseq()</td>
+<td style="text-align: left;">TreeSummarizedExperiment()</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Calculate alpha diversity</td>
+<td style="text-align: left;">estimate_richness()</td>
+<td style="text-align: left;">estimateDiversity()</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Calculate beta diversity</td>
+<td style="text-align: left;">ordinate()</td>
+<td style="text-align: left;">addMDS()</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Plot ordination</td>
+<td style="text-align: left;">plot_ordination()</td>
+<td style="text-align: left;">plotReducedDim()</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Subset taxa</td>
+<td style="text-align: left;">subset_taxa()</td>
+<td style="text-align: left;">Index rows</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Subset samples</td>
+<td style="text-align: left;">subset_samples()</td>
+<td style="text-align: left;">Index columns</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Aggromerate taxa</td>
+<td style="text-align: left;">tax_glom()</td>
+<td style="text-align: left;">agglomerateByRank()</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead><tr class="header">
+<th style="text-align: left;">Data_type</th>
+<th style="text-align: left;">phyloseq</th>
+<th style="text-align: left;">TreeSE</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">OTU table</td>
+<td style="text-align: left;">otu_table</td>
+<td style="text-align: left;">assay</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Taxonomy table</td>
+<td style="text-align: left;">tax_table</td>
+<td style="text-align: left;">rowData</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Sample data table</td>
+<td style="text-align: left;">sample_data</td>
+<td style="text-align: left;">colData</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+</section><a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="../pages/mmuphin_meta_analysis.html" class="pagination-link" aria-label="Meta-analyses">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Meta-analyses</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../pages/example_solutions.html" class="pagination-link" aria-label="Example solutions for exercises">
+        <span class="nav-page-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">Example solutions for exercises</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+<p><a href="./">Orchestrating Microbiome Analysis with Bioconductor</a></p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>This book was built with <a href="https://github.com/js2264/BiocBook/">BiocBook</a> with <span class="emoji" data-emoji="heart">❤️</span></p>
+</div>
+  </div>
+</footer>
+
+
+</body></html>
