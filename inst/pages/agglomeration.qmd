@@ -10,33 +10,35 @@ chapterPreamble()
 ```
 
 In [@sec-treese_subsetting], we covered how to select features from the dataset.
-Agglomeration, on the other hand, involves combining data points into broader feature
-categories by summing their values. For instance, if you have counts for
-individual species, you might agglomerate them into groups based on the
-family of each species. This means you would add up the counts of all species within
-a particular family to get a single value that represents that family. While
-this method simplifies your dataset and you lose the specific information 
-about individual species, it can, however, be useful in highlighting overall trends.
+Agglomeration, on the other hand, involves combining data points into broader 
+feature categories by summing their values. For instance, if you have counts 
+for individual species, you might agglomerate them into groups based on the
+family of each species. This means you would add up the counts of all species 
+within a particular family to get a single value that represents that family. 
+While this method simplifies your dataset and you lose the specific information 
+about individual species, it can, however, be useful in highlighting overall 
+trends.
 
-The choice between subsetting and agglomeration
-depends on your research goals and the type of insights you want to gain from your data.
-For example, if you are interested in comparing compositions of two types of microbiomes
-(e.g., gut microbiome and soil microbiome), you might want to first examine their taxonomic 
-profiles at the level of phyla or families, rather than species, to get an idea of their 
-broad similarities or differences. Agglomeration is most often used to reduce the number of features, 
-especially in sequencing data, where there may not be enough resolution to reliably differentiate 
-between closely related species. Combining data at higher taxonomic levels allows you to 
-focus on broader patterns in the community while managing the complexity of the
-dataset. Similarly, in addition to aggregating features to higher categories, you might want 
-to aggregate samples within the given sample type, to examine these broad differences across sample 
-types rather than samples.
+The choice between subsetting and agglomeration depends on your research goals 
+and the type of insights you want to gain from your data. For example, if you 
+are interested in comparing compositions of two types of microbiomes (e.g., gut 
+microbiome and soil microbiome), you might want to first examine their 
+taxonomic profiles at the level of phyla or families, rather than species, to 
+get an idea of their broad similarities or differences. Agglomeration is most 
+often used to reduce the number of features, especially in sequencing data, 
+where there may not be enough resolution to reliably differentiate between 
+closely related species. Combining data at higher taxonomic levels allows you 
+to focus on broader patterns in the community while managing the complexity of 
+the dataset. Similarly, in addition to agglomerating features to higher 
+categories, you might want to agglomerate samples within the given sample type, 
+to examine these broad differences across sample types rather than samples.
 
 ::: {.callout-note}
 ## Note
 
-When you are interested in the total feature abundances of certain taxonomy ranks, 
-the data should first be agglomerated to the specified taxonomy level. Afterward,
-we can then select the desired taxa from the dataset.
+When you are interested in the total feature abundances of certain taxonomy 
+ranks, the data should first be agglomerated to the specified taxonomy level. 
+Afterward, we can then select the desired taxa from the dataset.
 :::
 
 ```{r}
@@ -52,7 +54,7 @@ tse <- GlobalPatterns
 One of the main applications of taxonomic information in sequencing data
 is to agglomerate counts (such as ASV counts) to specific taxonomic levels
 and to model how different sample-specific variables may influence the feature
-composition at different taxonomic levels. For this mia contains the
+composition at different taxonomic levels. For this, `mia` contains the
 `agglomerateByRank()` function.
 
 At its simplest, the function takes a `TreeSE` object as input and outputs a
@@ -69,9 +71,9 @@ tse_phylum
 ```
 
 The output now contains `r nrow(tse_phylum)` features, a reduction from the
-original `r nrow(tse)` rows. Agglomeration has combined features together to higher 
-feature categories, but the samples remain unchanged from the original dataset. 
-Let's take a look at the `rowData` to see how it looks.
+original `r nrow(tse)` rows. Agglomeration has combined features together to 
+higher feature categories, but the samples remain unchanged from the original 
+dataset. Let's take a look at the `rowData` to see how it looks.
 
 ```{r}
 #| label: agg_phylum_rowdata
@@ -84,10 +86,10 @@ As we observe from the taxonomy table, all lower ranks below Phylum now contain
 level, meaning that the lowest rank that rows can be uniquely mapped to is the
 Phylum rank.
 
-Since we specified `update.tree = TRUE`, the phylogenetic tree has also
-been agglomerated. This is evident from the tree, which now has only
-`r length(rowTree(tse_phylum)$tip.label)` tips, each corresponding to a
-single row in the dataset.
+Since we specified `update.tree = TRUE`, the phylogenetic tree has also been 
+agglomerated. This is evident from the tree, which now has only
+`r length(rowTree(tse_phylum)$tip.label)` tips, each corresponding to a single 
+row in the dataset.
 
 ```{r}
 #| label: agg_phylum_rowtree
@@ -95,8 +97,8 @@ single row in the dataset.
 rowTree(tse_phylum)
 ```
 
-Additionally, we can examine the counts assay table to assess how the agglomeration
-has affected the counts of unique features per sample.
+Additionally, we can examine the counts assay table to assess how the 
+agglomeration has affected the counts of unique features per sample.
 
 ```{r}
 #| label: agg_phylum_assay
@@ -104,9 +106,8 @@ has affected the counts of unique features per sample.
 assay(tse_phylum, "counts") |> head()
 ```
 
-The values in the counts assay are significantly larger than in the
-original data, indicating that the values have been summed during
-agglomeration.
+The values in the counts assay are significantly larger than in the original 
+data, indicating that the values have been summed during agglomeration.
 
 Now when the data is agglomerated, we can check the abundances of certain phyla 
 across the samples.
@@ -127,13 +128,13 @@ assay(tse_sub)
 ::: callout-note
 ## Note
 
-As data was agglomerated and then further subsetted, the number of rows should equal the
-number of phyla used in subsetting (in this case, just 2).
+As data was agglomerated and then further subsetted, the number of rows should 
+equal the number of phyla used in subsetting (in this case, just 2).
 :::
 
-Furthermore, we can observe that the agglomeration will be applied to every
-assay in the dataset. Let's add another assay to the original dataset and then perform
-agglomeration again, this time at the Family level.
+Furthermore, we can observe that the agglomeration will be applied to every 
+assay in the dataset. Let's add another assay to the original dataset and then 
+perform agglomeration again, this time at the Family level.
 
 ```{r}
 #| label: agg_family
@@ -148,13 +149,12 @@ tse_family <- agglomerateByRank(tse, rank = "Family")
 assayNames(tse_family)
 ```
 
-We can now confirm that the agglomerated dataset contains two assays:
-"counts" and "another_assay," consistent with the original data
-structure.
+We can now confirm that the agglomerated dataset contains two assays: "counts" 
+and "another_assay," consistent with the original data structure.
 
-If the data is agglomerated by features, the ideal location to
-store the resulting dataset is the alternative experiment, `altExp`, slot
-(see [@sec-alt-exp]). Let's add the Phylum data there.
+If the data is agglomerated by features, the ideal location to store the 
+resulting dataset is the alternative experiment, `altExp`, slot (see 
+[@sec-alt-exp]). Let's add the Phylum data there.
 
 ```{r}
 #| label: add_agg
@@ -170,8 +170,8 @@ aggregate data across all available ranks in a single step using the
 `agglomerateByRanks()` function. This function returns a `TreeSE` object that
 includes the agglomerated datasets in the `altExp` slot.
 
-If you want the data as a `list` as discussed in [@sec-splitting], you
-can achieve this by specifying `as.list = TRUE`
+If you want the data as a `list` as discussed in [@sec-splitting], you can 
+achieve this by specifying `as.list = TRUE`
 
 ```{r}
 #| label: agglomerateranks
@@ -182,21 +182,20 @@ altExpNames(tse)
 
 ## Aggregate data based on variable
 
-The `agglomerateByRank()` function aggregates data based on `rowData`, 
-that is, the agglomerates are made based on features, such as taxonomy
-information. Alternatively, you can use `agglomerateByVariable()`
-to aggregate the data. 
+The `agglomerateByRank()` function aggregates data based on `rowData`, that is,
+the agglomerates are made based on features, such as taxonomy information. 
+Alternatively, you can use `agglomerateByVariable()` to aggregate the data. 
 
-`agglomerateByVariable()` is designed to aggregate data based on other
-criteria than taxa, such as sample groups or clusters. The function operates 
-similarly to feature aggregation, but the `by` parameter must be set to "rows." 
+`agglomerateByVariable()` is designed to aggregate data based on other criteria 
+than taxa, such as sample groups or clusters. The function operates similarly 
+to feature aggregation, but the `by` parameter must be set to "rows." 
 
 ::: {.callout-note}
 ## Note
 
-Note that a feature dataset might contain taxa with the same lower-level rank, even
-if their higher-level ranks differ. For this reason, `agglomerateByVariable()` should not
-be used for aggregating taxonomy ranks.
+Note that a feature dataset might contain taxa with the same lower-level rank, 
+even if their higher-level ranks differ. For this reason, 
+`agglomerateByVariable()` should not be used for aggregating taxonomy ranks.
 :::
 
 ```{r}
@@ -209,30 +208,30 @@ tse_sub
 
 Now, the data includes as many columns as there are sample types.
 
-In [@sec-taxa-clustering], we will explore how cluster information can
-be used to agglomerate data effectively.
+In [@sec-taxa-clustering], we will explore how cluster information can be used
+to agglomerate data effectively.
 
 ## Agglomerate based on prevalence {#sec-agglomerate_prev}
 
-[@sec-subset_prev] demonstrated how to select data with only prevalent or rare features.
-In some cases, it might be beneficial to combine the features that would
-otherwise be removed. For example, instead of filtering out rare taxa, we can
-combine the reads from all these rare taxa under a new feature which we can call "Rare taxa".
-The function `agglomerateByPrevalence()` accomplishes this by merging filtered 
-features into a single feature called "Other" by default, preventing unnecessary 
-loss of information. This is particularly useful when working with left-skewed feature data, 
-such as soil microbiome data sets where rare taxa may represent a significant 
-proportion of the reads when combined.
+[@sec-subset_prev] demonstrated how to select data with only prevalent or rare 
+features. In some cases, it might be beneficial to combine the features that 
+would otherwise be removed. For example, instead of filtering out rare taxa, we
+can combine the reads from all these rare taxa under a new feature which we can
+call "Rare taxa". The function `agglomerateByPrevalence()` accomplishes this by
+merging filtered features into a single feature called "Other" by default, 
+preventing unnecessary loss of information. This is particularly useful when 
+working with left-skewed feature data, such as soil microbiome data sets where 
+rare taxa may represent a significant proportion of the reads when combined.
 
-Here, we demonstrate how to agglomerate the data using prevalence and abundance thresholds
-of 20% and 0.1%, respectively. This means that for a feature to be considered
-detected in a sample, its relative abundance must exceed 0.1% and after this, the feature
-must be detected in at least 20% of samples. Taxa that do not meet these criteria 
-are combined in the "Other" group.
+Here, we demonstrate how to agglomerate the data using prevalence and abundance
+thresholds of 20% and 0.1%, respectively. This means that for a feature to be 
+considered detected in a sample, its relative abundance must exceed 0.1% and 
+after this, the feature must be detected in at least 20% of samples. Taxa that 
+do not meet these criteria are combined in the "Other" group.
 
 To use relative abundances for the detection threshold, we must first transform
-the data to relative abundances (aka normalize as proportions).
-These kind of transformations are introduced in more detail in [@sec-assay-transform].
+the data to relative abundances (aka normalize as proportions). These kinds of 
+transformations are introduced in more detail in [@sec-assay-transform].
 
 ```{r}
 #| label: agg_prevalence
@@ -250,10 +249,11 @@ tse_prev <- agglomerateByPrevalence(
 tse_prev
 ```
 
-We have now successfully agglomerated the data based on prevalence. Similarly, if we 
-were interested in only the most prevalent Phyla, we can certainly first agglomerate the data by
-Phylum rank and then by prevalence, combining the rarer Phyla into one category. 
-In fact, the function `agglomerateByPrevalence()` allows us to accomplish both tasks simultaneously.
+We have now successfully agglomerated the data based on prevalence. Similarly,
+if we were interested in only the most prevalent phyla, we can certainly first
+agglomerate the data by Phylum rank and then by prevalence, combining the rarer
+Phyla into one category. In fact, the function `agglomerateByPrevalence()` 
+allows us to accomplish both tasks simultaneously.
 
 ```{r}
 #| label: agg_prev_phylum
@@ -286,8 +286,8 @@ tse_prev_phylum
     variable.
 
 5.  How many rows are there in the agglomerated data? Does this
-    correspond to the number of unique values in step 2? If not, why
-    they do not match?
+    correspond to the number of unique values in step 2? If not, why do
+    they not match?
 
 6.  Observe `rowData` of agglomerated data. What has happened? Why are
     there so many `NA`s?
@@ -316,9 +316,12 @@ tse_prev_phylum
 
 Useful functions:
 
-`utils::data()`, `mia::taxonomyRanks()`, `mia::getUnique()`, `mia::agglomerateByRank()`, `SummarizedExperiment::rowData()`,
-`mia::agglomerateByRanks()`, `SingleCellExperiment::altExpNames()`, `SingleCellExperiment::altExp()`, `base::dim()`,
-`mia::agglomerateByPrevalence()`, `mia::subsetByPrevalent()`, `SingleCellExperiment::altExp()<-`, `SummarizedExperiment::colData()`,
+`utils::data()`, `mia::taxonomyRanks()`, `mia::getUnique()`, 
+`mia::agglomerateByRank()`, `SummarizedExperiment::rowData()`,
+`mia::agglomerateByRanks()`, `SingleCellExperiment::altExpNames()`, 
+`SingleCellExperiment::altExp()`, `base::dim()`, 
+`mia::agglomerateByPrevalence()`, `mia::subsetByPrevalent()`, 
+`SingleCellExperiment::altExp()<-`, `SummarizedExperiment::colData()`,
 `mia::agglomerateByVariable()`
 
 :::
