@@ -1,6 +1,10 @@
 # Community typing {#sec-clustering}
 
-```{r setup, echo=FALSE, results="asis"}
+```{r}
+#| label: setup
+#| echo: false
+#| results: asis
+
 library(rebook)
 chapterPreamble()
 ```
@@ -36,7 +40,9 @@ Bioconductor package providing tools for clustering data in the
 `SummarizedExperiment` container. It offers multiple algorithms such 
 as hierarchical clustering, DBSCAN, and K-means. 
 
-```{r load_bluster}
+```{r}
+#| label: load_bluster
+
 # Load dependencies
 library(bluster)
 ```
@@ -50,7 +56,9 @@ prevalent taxonomic features as
 well as less commonly detected within a sample resulting in 25 features in the
 data.
 
-```{r load-pkg-data1}
+```{r}
+#| label: load_pkg_data
+
 library(mia)
 data("peerj13075", package = "mia")
 tse <- peerj13075
@@ -83,7 +91,9 @@ statistical information can be chosen by using
 `full` parameter. Finally, the `clust.col` parameter allows us to choose the 
 name of the column in the colData (default name is `clusters`).
 
-```{r hclust1}
+```{r}
+#| label: hclust1
+
 library(vegan)
 
 set.seed(174923)
@@ -106,7 +116,9 @@ In each splitting point, the tree is divided into two clusters leading to the
 hierarchy. In this example, each sample is labelled by their dominant taxon
 to visualize ecological differences between the clusters.
 
-```{r hclust2}
+```{r}
+#| label: hclust2
+
 library(dendextend)
 
 # Get hclust data from metadata
@@ -139,7 +151,9 @@ two-dimensional
 surface that captures the most variability in the data. In this example, we use
 multi-dimensional scaling (MDS) (see [@sec-unsupervised-ordination]).
 
-```{r hclust3}
+```{r}
+#| label: hclust3
+
 library(scater)
 
 # Add the MDS dimensions for plotting
@@ -150,7 +164,11 @@ altExp(tse, "prevalent") <- addMDS(
     method = "bray")
 ```
 
-```{r hclust4, fig.width=6, fig.height=4}
+```{r}
+#| label: hclust4
+#| fig-width: 6
+#| fig-height: 4
+ 
 plotReducedDim(
     altExp(tse, "prevalent"), "MDS", colour_by = "hclust",
     theme_size = 13, point_size = 4) +
@@ -167,7 +185,9 @@ clustering method.
 Here is an example that does a CLR transformation followed by the hierarchical
 clustering algorithm. We will use the kendall dissimilarity.
 
-```{r taxa_clustering}
+```{r}
+#| label: taxa_clustering
+
 # The result of the CLR transform is stored in the assay clr
 tse <- transformAssay(tse, method = "clr", pseudocount = 1)
 
@@ -195,7 +215,9 @@ with the `clust.col` parameter.
 To better visualize the results and the distribution of the clusters, we can
 plot the histogram of the clusters.
 
-```{r taxa_clustering_histogram}
+```{r}
+#| label: taxa_clustering_histrogram
+
 library(miaViz)
 
 plotBarplot(tse, row.var = "hclustKendall")
@@ -203,7 +225,9 @@ plotBarplot(tse, row.var = "hclustKendall")
 
 Then we can merge data to clusters.
 
-```{r taxa_clustering_row_merge}
+```{r}
+#| label: taxa_clustering_row_merge
+
 # Aggregate clusters as a sum of each cluster values
 tse_merged <- agglomerateByVariable(tse, by = "rows", f = "hclustKendall")
 tse_merged
@@ -230,7 +254,9 @@ optional `name`. In this
 example, we use a prior assumption that the optimal number of clusters to
 describe the data would be in the range from 1 to 6.
 
-```{r dmm1}
+```{r}
+#| label: dmm1
+
 # Run the model and calculates the most likely number of clusters from 1 to 6
 set.seed(1495723)
 altExp(tse, "prevalent") <- addCluster(
@@ -250,8 +276,13 @@ evidence for
 DMM models as a function of k, determines the optimal k. The optimal k suggests
 to fit a model with k mixtures of Dirichlet distributions as a prior.
 
-```{r dmm2, fig.width=5, fig.height=3}
+```{r}
+#| label: dmm2
+#| fig-width: 5
+#| fig-height: 3
+ 
 library(miaViz)
+
 p <- plotDMNFit(altExp(tse, "prevalent"), type = "laplace", name = "DMM")
 p + theme_minimal(base_size = 11)
 ```
@@ -259,7 +290,11 @@ p + theme_minimal(base_size = 11)
 The plot above suggests that two clusters describe the data the best. Now 
 we can plot which taxonomic features define the key cluster features.
 
-```{r dmm3, fig.width=6, fig.height=2}
+```{r}
+#| label: dmm3
+#| fig-width: 6
+#| fig-height: 2
+
 # Get the estimates on how much each phyla contributes on each cluster
 best_model <- metadata(altExp(tse, "prevalent"))$DMM$dmm[2]
 drivers <- as.data.frame(best_model[[1]]@fit$Estimate)
@@ -272,7 +307,9 @@ As well as in hierarchical clustering, we can also visualize the clusters by
 projecting the data onto two-dimensional surface calculated using MDS. The plot
 rather clearly demonstrates the cluster division.
 
-```{r dmm4}
+```{r}
+#| label: dmm4
+
 # DMM clusters
 plotReducedDim(altExp(tse, "prevalent"), "MDS", theme_size = 13) +
               geom_point(size = 3, alpha = 0.6,
@@ -310,7 +347,9 @@ The matrix returned by `getNMF` contains the sample scores, while the NMF output
 and NMF feature loadings are stored in the attributes `NMF_output` and 
 `loadings`, respectively.
 
-```{r nmf1}
+```{r}
+#| label: nmf1
+
 library(NMF)
 
 # Calculate NMF
@@ -328,7 +367,9 @@ table(altExp(tse, "prevalent")$NMFcomponent)
 Now, we can plot the NMF community types calculated based on maximum membership
 for each sample onto a two-dimensional surface.
 
-```{r nmf2}
+```{r}
+#| label: nmf2
+
 # NMF community types
 plotReducedDim(
     altExp(tse, "prevalent"), "MDS", colour_by = "NMFcomponent",
@@ -343,7 +384,9 @@ In [@sec-composition-heatmap], we visualized community composition with
 heatmaps. We can visualize the data similarly but add addition information on
 clusters.
 
-```{r pheatmap1}
+```{r}
+#| label: pheatmap1
+
 library(ComplexHeatmap)
 
 # Agglomerate to Genus level
@@ -359,7 +402,9 @@ mat <- assay(tse, "standardize")
 
 Now we can cluster rows.
 
-```{r pheatmap2}
+```{r}
+#| label: pheatmap2
+
 library(ape)
 library(ggtree)
 
@@ -375,7 +420,9 @@ ggtree(taxa_tree)
 
 Based on the phylo tree, we decide to create eight clusters.
 
-```{r pheatmap4}
+```{r}
+#| label: pheatmap3
+
 # Hierarchical clustering with k = 3
 tse <- addCluster(
     tse, assay.type = "standardize",
@@ -385,7 +432,9 @@ tse <- addCluster(
 For columns, we can utilize k-means clustering. First we have to specify the
 number of clusters.
 
-```{r pheatmap6}
+```{r}
+#| label: pheatmap4
+
 library(factoextra)
 library(NbClust)
 library(patchwork)
@@ -400,7 +449,9 @@ p1 + p2
 
 Based on the results, we split the columns into six clusters.
 
-```{r pheatmap7}
+```{r}
+#| label: pheatmap5
+
 # Hierarchical clustering with k = 4
 tse <- addCluster(
     tse, assay.type = "standardize", by = "cols",
@@ -412,7 +463,11 @@ colData(tse)[["clusters"]]
 
 Now we can create a heatmap with additional annotations.
 
-```{r pheatmap8, fig.width=13, fig.height=7}
+```{r}
+#| label: pheatmap6
+#| fig-width: 13
+#| fig-height: 7
+
 # Order the data based on clusters
 tse <- tse[
     order(rowData(tse)[["clusters"]]),
@@ -477,8 +532,8 @@ sample metadata? You can, for instance, visualize the variables with a box plot.
 
 Useful functions:
 
-`data()`, `transformAssay()`, `addMDS()`, `reducedDimNames()`, `reducedDim()`
-`addCluster()`, `plotBarplot()`, `scater::plotReducedDim()`, `colData()`,
-`scater::plotColData()`
+`utils::data()`, `mia::transformAssay()`, `mia::addMDS()`, `SingleCellExperiment::reducedDimNames()`,
+`SingleCellExperiment::reducedDim()`, `mia::addCluster()`, `miaViz::plotBarplot()`,
+`scater::plotReducedDim()`, `SummarizedExperiment::colData()`, `scater::plotColData()`
 
 :::

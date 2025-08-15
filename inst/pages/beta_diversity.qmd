@@ -1,11 +1,18 @@
 # Community similarity {#sec-community-similarity}
 
-```{r setup, echo = FALSE, results = "asis"}
+```{r}
+#| label: setup1
+#| echo: false
+#| results: asis
+
 library(rebook)
 chapterPreamble()
 ```
 
-```{r include = FALSE}
+```{r}
+#| label: setup2
+#| include: false
+
 # global knitr options
 knitr::opts_chunk$set(
   message = FALSE,
@@ -70,7 +77,7 @@ methods and then proceed to supervised ones.
 Let us now prepare some demonstration data for the practical examples.
 
 ```{r}
-#| label: prep-tse
+#| label: prep_tse
 
 # Load mia and import sample dataset
 library(mia)
@@ -186,6 +193,8 @@ calculation of divergence can be specified as `reference` and `FUN`,
 respectively.
 
 ```{r}
+#| label: add_divergence
+
 tse <- addDivergence(
     tse,
     assay.type = "counts",
@@ -270,7 +279,9 @@ dimensions via an ordination method, the results of which can be stored in the
 `reducedDim` slot of the TreeSE. This entire process is contained by the
 `addMDS()` and `addNMDS()` functions.
 
-```{r addMDS}
+```{r}
+#| label: addMDS
+
 # Load package to plot reducedDim
 library(scater)
 
@@ -289,8 +300,8 @@ provides tools to incorporate additional information encoded by color, shape,
 size and other aesthetics. Can you find any difference between the groups?
 
 ```{r}
-#| label: MDS plot based on the Bray-Curtis distances
-#| fig-cap:  MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset.
+#| label: MDS_plot_based_on_the_Bray-Curtis_distances
+#| fig-cap: "MDS plot based on the Bray-Curtis distances on the GlobalPattern dataset."
 
 # Create ggplot object
 p <- plotReducedDim(tse, "MDS_bray", colour_by = "Group")
@@ -328,7 +339,10 @@ applied to the relative abundance and the clr assays, respectively. Besides
 variable that should be considered. Below, we show how the choice of these three
 factors can affect the resulting lower-dimensional data.
 
-```{r mds-nmds-comparison, results='hide'}
+```{r}
+#| label: mds-nmds_comparison1
+#| results: hide
+
 # Run NMDS on relabundance assay with Bray-Curtis distances
 tse <- addNMDS(
     tse,
@@ -359,7 +373,10 @@ Multiple ordination plots are combined into a multi-panel plot with the
 similarities between them or select the most suitable one to visualize
 beta diversity in the light of the research question.
 
-```{r, fig.cap = "Comparison of MDS and NMDS plots based on the Bray-Curtis or Aitchison distances on the GlobalPattern dataset."}
+```{r}
+#| label: mds-nmds_comparison2
+#| fig-cap: "Comparison of MDS and NMDS plots based on the Bray-Curtis or Aitchison distances on the GlobalPattern dataset."
+ 
 # Load package for multi-panel plotting
 library(patchwork)
 
@@ -380,7 +397,10 @@ relationship of features in the form of a `phylo` tree. `getDissimilarity()`
 performs the calculation to return a `dist` object, which can again be
 used within `addMDS()`.
 
-```{r plot-unifrac, fig.cap = "Unifrac distances scaled by MDS of the GlobalPattern dataset."}
+```{r}
+#| label: plot_unifrac
+#| fig-cap: "Unifrac distances scaled by MDS of the GlobalPattern dataset."
+ 
 tse <- addMDS(
     tse,
     FUN = getDissimilarity,
@@ -405,7 +425,7 @@ For instance, the samples of the *TreeSummarizedExperiment* dataset
 reads.
 
 ```{r}
-#| label: rarefaction1
+#| label: rarefaction
 
 # Calculate the list of sequencing depths across samples
 sequencing_depths <- colSums(assay(tse))
@@ -438,7 +458,7 @@ Let us first convert the count assay to centered log ratio (clr) assay and
 calculate MDS with Aitchison distance without rarefaction:
 
 ```{r}
-#| label: Aitchison distance without rarefaction
+#| label: Aitchison_distance_without_rarefaction
 
 # Centered log-ratio transformation to properly apply Aitchison distance
 
@@ -463,7 +483,7 @@ Then let's do the same with rarefaction:
 
 ```{r}
 #| label: rarefied_mds
-#
+
 # Define custom transformation function..
 clr <- function (x) {
     vegan::decostand(x, method = "clr", pseudocount = 1)
@@ -486,7 +506,7 @@ tse <- addMDS(
 Now we are ready for plot non-rarefied and rarefied MDS plots side-by-side.
 
 ```{r}
-#| label: MDS plot based on the Bray-Curtis distances using rarefaction.
+#| label: MDS_plot_based_on_the_Bray-Curtis_distances_using_rarefaction
 #| fig-width: 12
 
 # Generate plots for non-rarefied and rarefied Bray-Curtis distances scaled by
@@ -557,7 +577,10 @@ rarefaction in alpha and beta diversity calculations. Additionally, the
 Other dimension reduction methods, such as PCA and UMAP, are inherited from the
 `scater` package.
 
-```{r plot-pca, fig.cap = "PCA plot on the GlobalPatterns data set containing sample from different sources."}
+```{r}
+#| label: plot_pca
+#| fig-cap: "PCA plot on the GlobalPatterns data set containing sample from different sources."
+
 tse <- runPCA(
     tse,
     name = "PCA",
@@ -570,7 +593,10 @@ plotReducedDim(tse, "PCA", colour_by = "Group")
 As mentioned before, applicability of the different methods depends on your
 sample set and research question.
 
-```{r plot-umap, fig.cap = "UMAP plot on the GlobalPatterns data set containing sample from different sources."}
+```{r}
+#| label: plot_umap
+#| fig-cap: "UMAP plot on the GlobalPatterns data set containing sample from different sources."
+ 
 tse <- runUMAP(
     tse,
     name = "UMAP",
@@ -607,7 +633,9 @@ Hence, we propose that for PCoA and other ordination methods, users
 would report relative stress, which varies within the unit interval and is
 better if smaller. This can be calculated as shown below.
 
-```{r relstress}
+```{r}
+#| label: relstress
+
 # Quantify dissimilarities in the original feature space
 d0 <- as.matrix(getDissimilarity(t(assay(tse, "relabundance")), "bray"))
 
@@ -630,7 +658,9 @@ stress <- sum((dp - d0)^2) / sum(d0^2)
 A Shepard plot visualizes the original versus the ordinated dissimilarity
 between the observations.
 
-```{r shepard}
+```{r}
+#| label: plot_shepard
+ 
 ord <- order(as.vector(d0))
 df <- data.frame(d0 = as.vector(d0)[ord],
                  dmds = as.vector(dp)[ord])
@@ -670,7 +700,9 @@ samples correspond to patients. The `colData` lists the clinical
 status of each patient and a few covariates such as gender and
 age.
 
-```{r import-rda-dataset}
+```{r}
+#| label: import_rda_dataset
+
 # Load data
 data("enterotype", package = "mia")
 tse2 <- enterotype
@@ -687,7 +719,9 @@ function takes a formula to control for variables and an action to treat missing
 values. Along with clinical status, which is the main outcome, we control for
 gender and age, and exclude observations where one of these variables is missing.
 
-```{r run-rda}
+```{r}
+#| label: run_rda
+
 # Perform RDA
 tse2 <- addRDA(
     tse2,
@@ -721,7 +755,9 @@ function from the `vegan` package. You can find more on PERMANOVA from
 We see that both clinical status and age explain more than 10% of the
 variance, but only age has statistical significance.
 
-```{r rda-permanova-res}
+```{r}
+#| label: rda_permanova_results
+
 rda_info$permanova |>
    knitr::kable()
 ```
@@ -730,7 +766,9 @@ Next, we proceed to visualize the weight and significance of each variable on
 the similarity between samples with an RDA plot, which can be generated with
 the `plotRDA()` function from the `miaViz` package.
 
-```{r plot-rda}
+```{r}
+#| label: plot_rda
+
 # Load packages for plotting function
 library(miaViz)
 
@@ -797,7 +835,9 @@ largest differences between the groups. This gives some insights into
 how the groups tend to differ from each other in terms of community
 composition.
 
-```{r plot-top-coef-anova, fig.cap = ""}
+```{r}
+#| label: plot_top_coef_anova
+
 plotLoadings(tse2, "RDA", ncomponents = 2, n = 20)
 ```
 
@@ -834,7 +874,9 @@ the results can be misleading.
 `addRDA()` performs homogeneity test automatically.
 :::
 
-```{r rda-homogeneity-res}
+```{r}
+#| label: rda_homogeneity_results
+
 rda_info$homogeneity |>
     knitr::kable()
 ```
@@ -852,6 +894,8 @@ agglomerate the data at the Genus level and identify the dominant taxonomic
 features for each sample.
 
 ```{r}
+#| label: case_study1
+ 
 # Agglomerate to genus level
 tse_genus <- agglomerateByRank(tse, rank = "Genus")
 
@@ -870,6 +914,8 @@ summarizeDominance(
 Next, we perform PCoA with Bray-Curtis dissimilarity.
 
 ```{r}
+#| label: case_study2
+
 tse_genus <- addMDS(
     tse_genus,
     FUN = getDissimilarity,
@@ -879,10 +925,11 @@ tse_genus <- addMDS(
 ```
 
 Finally, we get the top taxonomic features and and visualize their abundances on
-PCoA. Note that a 3D interactive version of the plot below can be found in
-[@sec-extras].
+PCoA.
 
 ```{r}
+#| label: case_study3
+
 # Getting the top taxa
 top_taxa <- getTop(tse_genus, top = 6, assay.type = "relabundance")
 
@@ -926,6 +973,8 @@ p
 Similarly, we visualize and compare the sub-population.
 
 ```{r}
+#| label: case_study4
+
 # Calculating the frequencies and percentages for both categories
 freq_TRUE  <- table(as.character(most_abundant[tse_genus$Group]))
 freq_FALSE <- table(as.character(most_abundant[!tse_genus$Group]))
@@ -993,29 +1042,29 @@ For more information on sample clustering, you can refer to:
 ::: {.callout-tip icon=false}
 ## Exercises
 
-**Goal:** The goal is to get insights on the community and its relation to
-sample groups.
+**Goal:** To get insight into differences in the microbial community between groups of samples.
 
 **Exercise 1: Principal Component Analysis (PCA)**
 
 1. Load any of the example datasets mentioned in [@sec-example-data].
 
-2. Apply CLR transformation.
+2. Apply a CLR transformation.
 
-3. Apply Principal Component analysis (PCA).
+3. Reduce dimensionality with Principal Component analysis (PCA).
 
-4. List all available reduced dimensionalities in `reducedDim` slot.
+4. List all available reduced dimensionalities stored in a `tse` -object using
+the `reducedDimNames()` -function. Is the PCA reduced dimension available?
 
-5. Retrieve PCA results from `reducedDim` slot, and explore them. Where
-principal components are located? How about feature loadings and eigenvalues?
+5. Retrieve PCA results (using the `reducedDim()` -function), and explore them. Where are the
+principal components located? How about the feature loadings and eigenvalues?
 
-6. Visualize first two principal components.
+6. Visualize the first two principal components.
 
-7. Explore `colData` and visualize first two principal components again, now
-with samples coloured based on sample metadata variable. Can you observe
+7. Explore `colData` and visualize the first two principal components again, now
+with samples coloured based on a variable from the sample metadata. Can you observe any
 patterns?
 
-8. Visualize PCA loadings for two first components. Which features have the
+8. Visualize the PCA loadings for the two first components. Which features have the
 strongest associations? Interpret these results in reflect to sample grouping.
 Is there association between abundance of certain features and sample variable?
 
@@ -1023,37 +1072,38 @@ Is there association between abundance of certain features and sample variable?
 
 1. Load any of the example datasets mentioned in [@sec-example-data].
 
-2. Apply relative transformation.
+2. Transform counts to relative abundance.
 
 3. Apply Principal Coordinate Analysis (PCoA) to relative abundances with
-Bray-Curtis dissimilarity.
+Bray-Curtis dissimilarity. 
 
-4. List all available reduced dimensionalities in `reducedDim` slot.
+4. List all available reduced dimensionalities stored in a `tse` -object using
+the `reducedDimNames()` -function. Is the PCoA reduced dimension available?
 
 5. Visualize PCoA results with sample grouping.
 
 6. Run PCoA with rarefaction. Visualize the results and compare them to PCoA
-without rarefaction. Do the plots look similar? What rarefaction does, and
-for what it can be used?
+without rarefaction. Do the plots look similar? What does rarefaction do, and
+what is it used for?
 
 **Exercise 3: Distance-based Redundancy Analsis (db-RDA)**
 
 1. Load any of the example datasets mentioned in [@sec-example-data].
 
 2. Explore `colData`. Select sample metadata variables and run distance-based
-redundancy analysis (db-RDA) to relative abundances with Bray-Curtis
+redundancy analysis (db-RDA) on relative abundances with Bray-Curtis
 dissimilarity.
 
 3. Explore the statistical significance of the results. Do the sample groups
-have homogenic variance? Is there significant association between variables
-and microbial profile?
+have homogenic variance? Is there a significant association between any variables
+and the microbial profile?
 
 4. Visualize the db-RDA results.
 
 Useful functions:
 
-`data()`, `transformAssay()`, `scater::runPCA()`, `reducedDimNames()`,
-`reducedDim()` `scater::plotReducedDim()`, `plotLoadings()`, `addMDS()`,
-`addRDA()`, `getReducedDimAttribute()`, `plotRDA()`
+`utils::data()`, `mia::transformAssay()`, `scater::runPCA()`, `SingleCellExperiment::reducedDimNames()`,
+`SingleCellExperiment::reducedDim()` `scater::plotReducedDim()`, `miaViz::plotLoadings()`, `mia::addMDS()`,
+`mia::addRDA()`, `mia::getReducedDimAttribute()`, `miaViz::plotRDA()`
 
 :::

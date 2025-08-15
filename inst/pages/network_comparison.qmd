@@ -1,11 +1,18 @@
 # Network comparison {#sec-network-comparison}
 
-```{r setup, echo=FALSE, results="asis"}
+```{r}
+#| label: setup
+#| echo: false
+#| results: asis
+
 library(rebook)
 chapterPreamble()
 ```
 
-```{r, echo=FALSE}
+```{r}
+#| label: load_network_obj
+#| echo: false
+
 # The networks shown in this chapter take several minutes to generate.
 # Therefore, the network objects have been stored in a folder and are loaded
 # here to reduce the time needed to knit the book.
@@ -52,17 +59,25 @@ interesting question that will be explored in this chapter.
 
 We perform the same data preprocessing steps as in [@sec-network-learning].
 
-```{r load_packages, message=FALSE, warning=FALSE}
+```{r}
+#| label: load_pkgs
+#| message: false
+#| warning: false
+ 
 library(NetCoMi)
 library(mia)
 ```
 
-```{r load_data}
+```{r}
+#| label: load_data
+
 data("peerj13075", package = "mia")
 tse <- peerj13075
 ```
 
-```{r preprocessing}
+```{r}
+#| label: preprocessing
+ 
 # Agglomerate to genus level
 tse <- agglomerateByRank(tse, rank = "genus")
 
@@ -91,7 +106,9 @@ Based on "Diet", the `tse` object is then split into two groups: One
 with mixed diet subjects, and one with vegetarian subjects. Both subsets
 have nearly the same sample size and are therefore comparable.
 
-```{r split_data}
+```{r}
+#| label: split_data 
+
 table(tse$Diet)
 tse_list <- splitOn(tse, group = "Diet", use.names = TRUE, by = "cols")
 ```
@@ -106,7 +123,10 @@ The `rep.num` argument is set to 10 to perform only 10 repetitions in the
 model selection approach. This speeds up the permutation tests performed
 later, and has a negligible effect for this data set.
 
-```{r netConstruct_diet, eval=FALSE}
+```{r}
+#| label: netConstruct_diet
+#| eval: false
+
 spring_net_diet <- netConstruct(
     data = tse_list$Mixed,
     data2 = tse_list$Veg,
@@ -130,7 +150,11 @@ plotted together with a third matrix containing the differences between the
 GCMs and significance codes that express if the differences are significantly
 different from zero.
 
-```{r netAnalyze_diet, fig.width=10, fig.height=10}
+```{r}
+#| label: netAnalyze_diet
+#| fig-width: 10
+#| fig-height: 10
+ 
 spring_netprops_diet <- netAnalyze(
     spring_net_diet,
     clustMethod = "cluster_fast_greedy",
@@ -142,7 +166,9 @@ In both of the networks, some graphlet correlations are significantly different
 from zero. However, none of the correlations are significantly different
 between the groups.
 
-```{r summary_diet}
+```{r}
+#| label: summary_diet
+ 
 summary(spring_netprops_diet, groupNames = c("Mixed diet", "Vegetarian"))
 ```
 
@@ -160,7 +186,12 @@ are significant.
 We start with a visual comparison of the two networks using NetCoMi's plot
 function. The same configuration as in [@sec-network-learning] is used.
 
-```{r network_plot_diet_difflay, fig.width=17, fig.height=8}
+```{r}
+#| label: network_plot_diet_difflay
+#| fig-width: 17
+#| fig-height: 8
+ 
+
 plot(spring_netprops_diet,
      repulsion = 0.97,
      rmSingles = TRUE,
@@ -193,7 +224,11 @@ same layout for both groups (argument `sameLayout`). Instead of simply copying
 one layout to the other network, we set `layoutGroup` to "union". This ensures
 that the nodes are placed as optimally as possible for both networks.
 
-```{r network_plot_diet_samelay, fig.width=17, fig.height=8}
+```{r}
+#| label: network_plot_diet_samelay
+#| fig-width: 17
+#| fig-heigth: 8
+ 
 plot(spring_netprops_diet,
      sameLayout = TRUE,
      repulsion = 0.95,
@@ -235,11 +270,19 @@ between the two groups.
 As in [@sec-network-learning], we also generate a network plot using phylum
 names to color the nodes and mclr-transformed abundances to scale node sizes.
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
+#| label: load_RColorBrewer 
+#| message: false
+#| warning: false
+
 library(RColorBrewer)
 ```
 
-```{r network_plot_diet_phyla, fig.width=17, fig.height=8}
+```{r}
+#| label: network_plot_diet_phyla
+#| fig-width: 17
+#| fig-heigth: 8
+ 
 # Generate vector with phylum names for node coloring
 phyla <- as.factor(rowData(tse)$phylum)
 names(phyla) <- rowData(tse)$genus
@@ -298,7 +341,10 @@ network comparison with permutation tests may take several hours. You should
 test the code below with a small number of permutations to make sure it works
 before applying it to your data.
 
-```{r netcomp_diet_permute, eval=FALSE}
+```{r}
+#| label: netcomp_diet_permute
+#| eval: false
+ 
 spring_netcomp_diet <- netCompare(
     spring_netprops_diet,
     permTest = TRUE,
@@ -310,7 +356,9 @@ spring_netcomp_diet <- netCompare(
     verbose = TRUE)
 ```
 
-```{r summary_netcomp_diet}
+```{r}
+#| label: summary_netcomp_diet
+ 
 summary(spring_netcomp_diet,
         groupNames = c("Mix", "Veg"),
         numbNodes = 5)
@@ -351,7 +399,12 @@ we can reuse them here (argument `fileLoadAssoPerm`).
 The local false discovery rate is controlled at level 0.2 to account for
 multiplicity.
 
-```{r diffnet_diet, eval=FALSE, message=FALSE, results='hide'}
+```{r}
+#| label: diffnet_diet
+#| eval: false
+#| message: false
+#| results: false
+ 
 spring_diffnet <- diffnet(
     spring_net_diet,
     diffMethod = "perm",
@@ -359,7 +412,10 @@ spring_diffnet <- diffnet(
     adjust = "lfdr")
 ```
 
-```{r hist_pvals, out.width='80%'}
+```{r}
+#| label: hist_pvals
+#| out-width: 80%
+ 
 sum(spring_diffnet$pAdjustVec < 0.05)
 sum(spring_diffnet$pvalsVec < 0.05)
 ```
@@ -371,7 +427,11 @@ multiple testing so that the differential network would be empty.
 To demonstrate the interpretation of a differential network, we set `adjust`
 to "none", which is actually statistically incorrect.
 
-```{r diffnet_diet_unadjusted, message=FALSE, results='hide'}
+```{r}
+#| label: diffnet_diet_unadjusted
+#| message: false 
+#| results: false
+
 spring_diffnet_unadj <- diffnet(
     spring_net_diet,
     pvalsVec = spring_diffnet$pvalsVec,
@@ -382,7 +442,11 @@ spring_diffnet_unadj <- diffnet(
 
 The `diffnet` object is now plotted using NetCoMi's `plot()` function. 
 
-```{r diffnet_plot, fig.width=20, fig.height=14}
+```{r}
+#| label: diffnet_plot
+#| fig-width: 20
+#| fig-heigth: 14
+ 
 plot(spring_diffnet_unadj,
      cexLabels = 1,
      cexNodes = 1.3,
@@ -400,7 +464,11 @@ For example, if two OTUs are positively correlated in the mixed diet group and
 uncorrelated in the vegetarian group (such as Serratia and Citrobacter), the
 edge color is dark green.
 
-```{r, eval=FALSE, echo=FALSE}
+```{r}
+#| label: save_file
+#| eval: false
+#| echo: false
+
 save(spring_diffnet, spring_net_diet, spring_netcomp_diet,
      file = "general/network_data/networks_diet.RData")
 ```
