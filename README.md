@@ -16,8 +16,8 @@ Bioconductor in R. This book is based on Quarto and **`BiocBook`**
 
 ## Deployment
 
-The book is automatically built and deployed from the `devel` branch to
-the `gh-pages` branch using GitHub Actions.
+The book release version is automatically built and deployed from the 
+`devel` branch to the `gh-pages` branch using GitHub Actions.
 
 You can also preview it locally after _cloning_ this Github
 repository. This is useful if you want to suggest
