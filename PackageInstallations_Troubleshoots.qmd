@@ -115,7 +115,153 @@ loaded via a namespace (and not attached):
  [9] rmarkdown_2.25    knitr_1.44        xfun_0.40         digest_0.6.33
 [13] rlang_1.1.1       evaluate_0.22
 ```
+## Windows user
 
+Windows users commonly encounter RTools-related issues when installing miaverse packages that contain C++ code. RTools is a collection of software tools required for building R packages from source on Windows.
+
+### Common RTools Error Messages
+
+You may see warnings like:
+
+```
+WARNING: Rtools is required to build R packages but is not currently installed. 
+Please download and install the appropriate version of Rtools before proceeding:
+https://cran.rstudio.com/bin/windows/Rtools/
+```
+
+Or during compilation:
+
+```
+Error: Failed to compile C++ code
+fatal error: R.h: No such file or directory
+compilation terminated.
+```
+
+### RTools Installation Steps
+
+1. **Determine your R version** by running in R console:
+   ```r
+   R.version.string
+   ```
+
+2. **Download the correct RTools version** from [https://cran.r-project.org/bin/windows/Rtools/](https://cran.r-project.org/bin/windows/Rtools/):
+   - For R 4.4 and later: Use RTools 4.4 or newer
+   - For R 4.2-4.3: Use RTools 4.2
+   - For R 4.0-4.1: Use RTools 4.0
+   - For R 3.5-3.6: Use RTools 3.5
+
+3. **Install RTools**:
+   - Run the downloaded installer (e.g., `rtools44-6104-6039.exe`)
+   - **Important**: Use the default installation path (e.g., `C:\rtools44`)
+   - Accept all default settings during installation
+   - Allow the installer to modify your system PATH when prompted
+
+4. **Verify RTools installation** in R console:
+   ```r
+   # Check if RTools is found
+   Sys.which("make")
+   
+   # For more detailed verification
+   pkgbuild::find_rtools()
+   ```
+
+### Troubleshooting RTools Issues
+
+If RTools is not detected after installation:
+
+1. **Check PATH environment variable**:
+   ```r
+   Sys.getenv("PATH")
+   ```
+   Should include paths like `C:\rtools44\usr\bin` and `C:\rtools44\x86_64-w64-mingw32.static.posix\bin`
+
+2. **Manual PATH setup using .Renviron file** (recommended approach):
+   ```r
+   # Create or edit .Renviron file
+   writeLines(
+     'PATH="${RTOOLS44_HOME}\\usr\\bin;${PATH}"',
+     con = "~/.Renviron"
+   )
+   ```
+
+3. **Alternative manual PATH setup for current session**:
+   ```r
+   # Add RTools to PATH for current session
+   Sys.setenv(PATH = paste(Sys.getenv("PATH"), 
+                           "C:\\rtools44\\usr\\bin", 
+                           "C:\\rtools44\\x86_64-w64-mingw32.static.posix\\bin", 
+                           sep = ";"))
+   ```
+
+4. **Restart R/RStudio** after installation and PATH configuration for changes to take effect.
+
+### Alternative Solutions
+
+1. **Use pre-compiled binaries**: If possible, install binary versions of packages instead of compiling from source:
+   ```r
+   install.packages("package_name", type = "binary")
+   ```
+
+2. **Docker approach**: Use the Docker installation as described in the Linux section below, which avoids compilation issues entirely.
+
+### Common Issues and Solutions
+
+- **Anti-virus interference**: Some anti-virus software may block RTools installation. Temporarily disable it during installation.
+- **Permissions**: Ensure you have administrator rights when installing RTools.
+- **Network restrictions**: In corporate environments, download restrictions may prevent automatic RTools installation.
+- **Mixed architectures**: Ensure RTools architecture (64-bit) matches your R installation.
+- **Username with spaces**: Windows usernames with spaces can cause issues. Consider editing TMP and TEMP environment variables to a location without spaces, like `C:\TEMP`.
+
+### Testing RTools Installation
+
+After successful installation, test with a simple package compilation:
+
+```r
+# Test with Rcpp compilation
+install.packages("Rcpp")
+library(Rcpp)
+
+# Test compilation
+Rcpp::evalCpp("1 + 1")
+```
+
+If this returns `2`, your RTools installation is working correctly.
+
+After successful RTools setup, install miaverse packages:
+
+```r
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("mia")
+```
+
+Session info at the time of writing
+
+```
+> sessionInfo()
+R version 4.4.1 (2024-06-14)
+Platform: x86_64-w64-mingw32/x64
+Running under: Windows 11 x64 (build 22631)
+
+Matrix products: default
+BLAS:   C:/Program Files/R/R-4.4.1/bin/x64/Rblas.dll
+LAPACK: C:/Program Files/R/R-4.4.1/bin/x64/Rlapack.dll;  LAPACK version 3.12.0
+
+locale:
+[1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8   
+[3] LC_MONETARY=English_United States.utf8 LC_NUMERIC=C                          
+[5] LC_TIME=English_United States.utf8    
+
+time zone: America/New_York
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base
+
+loaded via a namespace (and not attached):
+[1] compiler_4.4.1
+```
 ## Linux user
 
 ::: {.callout-note}
