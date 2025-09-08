@@ -14,10 +14,17 @@ This is a reference cookbook for performing **Microbiome Analysis** with
 Bioconductor in R. This book is based on Quarto and **`BiocBook`**
 (<https://www.bioconductor.org/packages/release/bioc/html/BiocBook.html>).
 
+## Funding
+
+<img src="inst/assets/findingpheno_logo.png" align="right" width="160" />
+
+This project received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 952914 ([FindingPheno](https://findingpheno.eu/)).
+
+
 ## Deployment
 
-The book is automatically built and deployed from the `devel` branch to
-the `gh-pages` branch using GitHub Actions.
+The book release version is automatically built and deployed from the 
+`devel` branch to the `gh-pages` branch using GitHub Actions.
 
 You can also preview it locally after _cloning_ this Github
 repository. This is useful if you want to suggest
