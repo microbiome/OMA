@@ -237,7 +237,7 @@ primarily contain background noise from contamination sources.
 # This chunk can be removed when this PR is merged:
 # https://github.com/benjjneb/decontam/pull/162
 avg_conc <- mean(tse[["post_pcr_dna_ng"]], na.rm = TRUE)
-colData(tse)[ is.na(tse[["post_pcr_dna_ng"]]), "post_pcr_dna_ng"] <- avg_conc
+colData(tse)[is.na(tse[["post_pcr_dna_ng"]]), "post_pcr_dna_ng"] <- avg_conc
 ```
 
 The dataset contains DNA concentration recorded in the `post_pcr_dna_ng` column
@@ -249,7 +249,9 @@ contamination identification.
 
 library(knitr)
 
-colData(tse) |> head() |> kable()
+colData(tse) |>
+    head() |>
+    kable()
 ```
 
 Now we can detect contaminant sequences. We run `addContaminantQC()` which adds
@@ -260,7 +262,9 @@ results to `rowData`.
 
 tse <- addContaminantQC(tse, concentration = "post_pcr_dna_ng")
 
-rowData(tse) |> head() |> kable()
+rowData(tse) |>
+    head() |>
+    kable()
 ```
 
 The method performs statistical tests to identify contaminants. By default, it
@@ -273,7 +277,7 @@ features from the data.
 ```{r}
 #| label: filter_contaminants
 
-tse <- tse[ !rowData(tse)[["contaminant"]], ]
+tse <- tse[!rowData(tse)[["contaminant"]], ]
 ```
 
 As an example, we also demonstrate how to apply the prevalence-based approach.
@@ -286,7 +290,7 @@ First, we add arbitrary control samples:
 #| label: add_control_info
 
 control <- rep(FALSE, ncol(tse))
-control[ sample(seq_len(ncol(tse)), 1) ] <- TRUE
+control[sample(seq_len(ncol(tse)), 1)] <- TRUE
 tse[["control"]] <- control
 ```
 
@@ -356,11 +360,13 @@ plot based on relative abundance data, similar to the one presented by
 tse <- transformAssay(tse, method = "relabundance")
 
 plotAbundanceDensity(
-    tse, layout = "jitter",
+    tse,
+    layout = "jitter",
     assay.type = "relabundance",
-    n = 40, point.size=1, point.shape=19,
-    point.alpha = 0.1) +
-    scale_x_log10(label=scales::percent)
+    n = 40, point.size = 1, point.shape = 19,
+    point.alpha = 0.1
+) +
+    scale_x_log10(label = scales::percent)
 ```
 
 The relative abundance values for the top-5 taxonomic features can be
@@ -371,10 +377,12 @@ colors:
 #| label: plot_abundance2
 
 plotAbundanceDensity(
-    tse, layout = "density",
+    tse,
+    layout = "density",
     assay.type = "relabundance",
     n = 5, colour.by = "sex",
-    point.alpha = 0.1) +
+    point.alpha = 0.1
+) +
     scale_x_log10()
 ```
 
@@ -394,7 +402,7 @@ plotExpression(
     x = "sex",
     assay.type = "relabundance",
     point_alpha = 0.01
-    ) +
+) +
     scale_y_log10()
 ```
 
@@ -418,7 +426,7 @@ mostly rare taxonomic features. The population prevalence (frequency) at a
 #| label: plot_prevalence1
 
 # Add prevalence of features
-tse <- addPrevalence(tse, detection = 0.1/100, as.relative = TRUE)
+tse <- addPrevalence(tse, detection = 0.1 / 100, as.relative = TRUE)
 
 # Plot them with a histogram
 plotHistogram(tse, row.var = "prevalence")
@@ -437,8 +445,8 @@ p1 <- plotPrevalentAbundance(tse, as.relative = TRUE)
 # Remove y axis text as there are so many features that one cannot read them
 p2 <- plotRowPrevalence(tse, as.relative = TRUE) +
     theme(
-       axis.text.y=element_blank(), 
-       axis.ticks.y=element_blank()
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()
     )
 
 p1 + p2
@@ -471,7 +479,7 @@ can then visualize this distribution again with a histogram.
 #| label: plot_prevalence4
 
 # Calculate the proportion of core taxa
-tse <- addPrevalentAbundance(tse, prevalence = 50/100, detection = 0.1/100)
+tse <- addPrevalentAbundance(tse, prevalence = 50 / 100, detection = 0.1 / 100)
 
 # Visualize
 plotHistogram(tse, col.var = "prevalent_abundance")

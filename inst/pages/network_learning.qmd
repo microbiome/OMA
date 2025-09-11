@@ -4,7 +4,7 @@
 #| label: setup
 #| echo: false
 #| results: asis
- 
+
 library(rebook)
 chapterPreamble()
 ```
@@ -43,8 +43,8 @@ respective steps are explained below.
 #| echo: false
 #| out-width: 100%
 #| fig-cap: >
-#|  The typical input is a $p$ x $n$ dimensional count matrix coming from a sequencing process, 
-#|  where $n$ is the number of samples and $p$ the number of features / ASVs / OTUs. 
+#|  The typical input is a $p$ x $n$ dimensional count matrix coming from a sequencing process,
+#|  where $n$ is the number of samples and $p$ the number of features / ASVs / OTUs.
 #|  Steps 1 through 6 are explained below. Each matrix resulting from steps 4, 5, and 6
 #|  plays a specific role in the final network: The adjacency matrix is used for edge colors,
 #|  dissimilarity for layout, and similarity for edge weights. In weighted networks,
@@ -143,7 +143,7 @@ We demonstrate the workflow using the the **PeerJ data set**
 #| label: load_pkg_data
 #| message: false
 #| warning: false
- 
+
 library(mia)
 
 data("peerj13075", package = "mia")
@@ -154,11 +154,11 @@ dim(tse)
 ```{r}
 #| label: read_network_obj
 #| echo: false
- 
+
 # The networks shown in this chapter take several minutes to generate.
 # Therefore, the network objects have been stored in a folder and are loaded
 # here to reduce the time needed to knit the book.
-spring_networks_file  <- system.file("extdata", "spring_networks.RData", package = "OMA")
+spring_networks_file <- system.file("extdata", "spring_networks.RData", package = "OMA")
 load(spring_networks_file)
 ```
 
@@ -173,15 +173,15 @@ packages before proceeding.
 #| message: false
 #| warning: false
 
-if(!require(SpiecEasi)){
-  devtools::install_github("zdk123/SpiecEasi")
+if (!require(SpiecEasi)) {
+    devtools::install_github("zdk123/SpiecEasi")
 }
 
-if(!require(SPRING)){
-  devtools::install_github("GraceYoon/SPRING")
+if (!require(SPRING)) {
+    devtools::install_github("GraceYoon/SPRING")
 }
 
-if(!require(NetCoMi)){
+if (!require(NetCoMi)) {
     devtools::install_github(
         "stefpeschel/NetCoMi",
         repos = c("https://cloud.r-project.org/", BiocManager::repositories())
@@ -202,7 +202,7 @@ steps:
 
 ```{r}
 #| label: prepare_data
- 
+
 # Agglomerate to genus level
 tse <- agglomerateByRank(tse, rank = "genus")
 
@@ -211,14 +211,16 @@ tse <- transformAssay(
     tse,
     assay.type = "counts",
     method = "relabundance",
-    MARGIN = "cols")
+    MARGIN = "cols"
+)
 
 # Filter by prevalence
 tse <- subsetByPrevalent(
     tse,
     prevalence = 0.2,
     detection = 0,
-    assay.type = "relabundance")
+    assay.type = "relabundance"
+)
 
 # Add log10-transformed abundances
 tse <- transformAssay(tse, method = "log10", pseudocount = 1)
@@ -258,7 +260,7 @@ step 4 of our workflow is already included. We set the StARS threshold to 0.05
 to get a sparser graph.
 
 ```{r}
-#| label: load_SPRING 
+#| label: load_SPRING
 #| message: false
 #| warning: false
 
@@ -274,7 +276,8 @@ spring_est <- SPRING(
     t(assay(tse, "counts")),
     Rmethod = "approx",
     thresh = 0.05,
-    lambdaseq = "data-specific")
+    lambdaseq = "data-specific"
+)
 ```
 
 
@@ -310,7 +313,7 @@ The output of the function is an `igraph` object, which can be plotted and
 analyzed using functions from the `igraph` package.
 
 ```{r}
-#| label: transform_function 
+#| label: transform_function
 
 # Arguments:
 # - assoMat: association matrix
@@ -318,29 +321,29 @@ analyzed using functions from the `igraph` package.
 # - dissTrans: dissimilarity transformation ("signed" or "unsigned")
 
 transform_asso <- function(assoMat, thresh = NULL, dissTrans = "signed") {
-  # Sparsification
-  if (!is.null(thresh)) {
-      assoMat[abs(assoMat) < thresh] <- 0
-  }
+    # Sparsification
+    if (!is.null(thresh)) {
+        assoMat[abs(assoMat) < thresh] <- 0
+    }
 
-  # Compute dissimilarity matrix
-  if (dissTrans == "signed") {
-      dissMat <- sqrt(0.5 * (1 - assoMat))
-  } else {
-      dissMat <- sqrt(1 - assoMat^2)
-  }
+    # Compute dissimilarity matrix
+    if (dissTrans == "signed") {
+        dissMat <- sqrt(0.5 * (1 - assoMat))
+    } else {
+        dissMat <- sqrt(1 - assoMat^2)
+    }
 
-  # Dissimilarity between nodes with zero correlation is set to 1
-  # (these nodes are unconnected and thus should have maximum dissimilarity)
-  dissMat[assoMat == 0] <- 1
+    # Dissimilarity between nodes with zero correlation is set to 1
+    # (these nodes are unconnected and thus should have maximum dissimilarity)
+    dissMat[assoMat == 0] <- 1
 
-  # Compute similarity matrix
-  simMat <- 1 - dissMat
+    # Compute similarity matrix
+    simMat <- 1 - dissMat
 
-  # Turn into igraph object
-  graphObj <- SpiecEasi::adj2igraph(simMat)
+    # Turn into igraph object
+    graphObj <- SpiecEasi::adj2igraph(simMat)
 
-  return(list(graph = graphObj, adja = simMat, asso = assoMat, diss = dissMat))
+    return(list(graph = graphObj, adja = simMat, asso = assoMat, diss = dissMat))
 }
 ```
 
@@ -367,7 +370,7 @@ The returned `microNet` object can then be passed to `netAnalyze()`
 for the network analysis workflow.
 
 ```{r}
-#| label: load_NetCoMi 
+#| label: load_NetCoMi
 #| message: false
 #| warning: false
 
@@ -394,7 +397,8 @@ netcomi_net <- netConstruct(
     measurePar = list(thresh = 0.05, Rmethod = "approx"),
     sparsMethod = "none",
     dissFunc = "signed",
-    seed = 13075)
+    seed = 13075
+)
 ```
 
 `netConstruct()` returns an object of the class `microNet`, which contains all
@@ -408,7 +412,8 @@ with the highest and lowest edge weights:
 #| label: edge_list
 
 edgelist <- netcomi_net$edgelist1[
-    order(netcomi_net$edgelist1$adja, decreasing = TRUE), ]
+    order(netcomi_net$edgelist1$adja, decreasing = TRUE),
+]
 edgelist |> head()
 edgelist |> tail()
 ```
@@ -429,10 +434,11 @@ netcomi_graph <- SpiecEasi::adj2igraph(abs(netcomi_net$adjaMat1))
 #| label: save_RData1
 #| eval: false
 #| echo: false
-  
+
 save(
     spring_est, netcomi_net,
-    file = "general/network_data/spring_networks.RData")
+    file = "general/network_data/spring_networks.RData"
+)
 ```
 
 ## Network analysis with igraph {#sec-network-analysis}
@@ -467,7 +473,7 @@ plot them side by side. The two plots should be identical.
 #| label: load_igraph2
 #| message: false
 #| warning: false
- 
+
 library(igraph)
 ```
 
@@ -475,7 +481,7 @@ library(igraph)
 #| label: plots_spring_netcomi
 #| fig-height: 4
 #| fig-width: 8
- 
+
 # Node sizes
 vsize <- (colMeans(t(assay(tse, "log10"))) + 1) * 3
 
@@ -483,11 +489,15 @@ vsize <- (colMeans(t(assay(tse, "log10"))) + 1) * 3
 set.seed(13075)
 lay_fr <- layout_with_fr(spring_graph)
 
-par(mfrow = c(1,2))
-plot(spring_graph, layout = lay_fr, vertex.size = vsize,
-     vertex.label = NA, main = "SPRING network")
-plot(netcomi_graph, layout = lay_fr, vertex.size = vsize,
-     vertex.label = NA, main = "NetCoMi network\n(with SPRING associations)")
+par(mfrow = c(1, 2))
+plot(spring_graph,
+    layout = lay_fr, vertex.size = vsize,
+    vertex.label = NA, main = "SPRING network"
+)
+plot(netcomi_graph,
+    layout = lay_fr, vertex.size = vsize,
+    vertex.label = NA, main = "NetCoMi network\n(with SPRING associations)"
+)
 ```
 
 ### Centrality measures
@@ -499,15 +509,15 @@ function around the code to reuse it later.
 
 ```{r}
 #| label: centrality
- 
+
 get_centr <- function(graph_obj) {
-  # We access igraph directly with "::" because there are more packages loaded
-  # in this chapter that contain a degree() function.
-  df <- data.frame(Degree = igraph::degree(graph_obj))
-  df$Betweenness <- betweenness(graph_obj)
-  df$Closeness <- closeness(graph_obj, normalized = TRUE)
-  df$Eigenvector <- eigen_centrality(graph_obj)$vector
-  return(df)
+    # We access igraph directly with "::" because there are more packages loaded
+    # in this chapter that contain a degree() function.
+    df <- data.frame(Degree = igraph::degree(graph_obj))
+    df$Betweenness <- betweenness(graph_obj)
+    df$Closeness <- closeness(graph_obj, normalized = TRUE)
+    df$Eigenvector <- eigen_centrality(graph_obj)$vector
+    return(df)
 }
 
 centr_df <- get_centr(spring_graph)
@@ -533,7 +543,7 @@ data sets.
 
 ```{r}
 #| label: netplot_degree
- 
+
 get_vsizes <- function(centr_df) {
     df <- as.matrix(centr_df)
     df[, "Betweenness"] <- log(df[, "Betweenness"])
@@ -543,7 +553,7 @@ get_vsizes <- function(centr_df) {
     return(df)
 }
 
-vsize_df <- get_vsizes(centr_df )
+vsize_df <- get_vsizes(centr_df)
 vsize_df |> head()
 ```
 
@@ -551,11 +561,13 @@ vsize_df |> head()
 #| label: plots_centrality
 #| fig-height: 10
 #| fig-width: 10
- 
-par(mfrow = c(2,2))
+
+par(mfrow = c(2, 2))
 for (i in seq_along(centr_df)) {
-    plot(spring_graph, layout = lay_fr, vertex.size = vsize_df[, i],
-        vertex.label = NA, main = colnames(centr_df)[i])
+    plot(spring_graph,
+        layout = lay_fr, vertex.size = vsize_df[, i],
+        vertex.label = NA, main = colnames(centr_df)[i]
+    )
 }
 ```
 
@@ -570,7 +582,7 @@ centrality, are often calculated only for the largest connected component
 
 ```{r}
 #| label: largest_connected_component
- 
+
 # Extract the LCC
 dg_net <- igraph::decompose.graph(spring_graph)
 idx_lcc <- which.max(unlist(lapply(dg_net, function(x) length(igraph::V(x)))))
@@ -592,11 +604,13 @@ vsize_df <- get_vsizes(centr_df)
 #| label: plots_centrality_lcc
 #| fig-heigth: 10
 #| fig-width: 10
- 
-par(mfrow = c(2,2))
+
+par(mfrow = c(2, 2))
 for (i in seq_along(centr_df)) {
-    plot(spring_graph, layout = lay_fr, vertex.size = vsize_df[, i],
-        vertex.label = NA, main = colnames(centr_df)[i])
+    plot(spring_graph,
+        layout = lay_fr, vertex.size = vsize_df[, i],
+        vertex.label = NA, main = colnames(centr_df)[i]
+    )
 }
 ```
 
@@ -619,7 +633,7 @@ all four association estimation methods to compare the network structure.
 #| label: load_libraries
 #| message: false
 #| warning: false
- 
+
 library(ggplot2)
 ```
 
@@ -627,13 +641,14 @@ library(ggplot2)
 #| label: degree_dist_spring
 #| fig-height: 4
 #| fig-width: 7
- 
+
 # Compute degree distribution
-ddist<- igraph::degree.distribution(spring_graph)
+ddist <- igraph::degree.distribution(spring_graph)
 
 # Data frame needed for ggplot2
 df <- data.frame(
-    Degree = as.factor((seq_along(ddist)) - 1), Fraction = ddist)
+    Degree = as.factor((seq_along(ddist)) - 1), Fraction = ddist
+)
 
 ggplot(data = df, aes(x = Degree, y = Fraction, group = 1)) +
     geom_line() +
@@ -675,11 +690,12 @@ adja_sel <- spring_cor[sel, sel]
 #| label: clustered_heatmap
 #| fig-width: 5.8
 #| fig-heigth: 5
- 
+
 # Color vector
 col <- colorRamp2(
     c(-1, -0.5, 0, 0.5, 1),
-    c("royalblue4", "lightblue", "white", "orange", "firebrick3"))
+    c("royalblue4", "lightblue", "white", "orange", "firebrick3")
+)
 
 Heatmap(
     adja_sel,
@@ -687,7 +703,8 @@ Heatmap(
     rect_gp = gpar(col = "gray", lwd = 1),
     show_row_names = FALSE,
     show_column_names = FALSE,
-    name = "Association")
+    name = "Association"
+)
 ```
 
 The associations are generally quite low, and there are no prominent clusters
@@ -715,7 +732,7 @@ the ratio of triangles to connected triples.
 
 ```{r}
 #| label: transitvity
- 
+
 transitivity(spring_graph)
 ```
 
@@ -725,7 +742,7 @@ Definition: Mean of the shortest distance between each pair of nodes.
 
 ```{r}
 #| label: avpath
- 
+
 average.path.length(spring_graph)
 ```
 
@@ -752,17 +769,18 @@ resulting from Student's t-test in the lower triangle). See `?calcGCM` and
 #| fig-width: 7
 #| fig-heigth: 7
 #| out-width: 75%
- 
+
 netcomi_netprops <- netAnalyze(
     netcomi_net,
     clustMethod = "cluster_fast_greedy",
     hubPar = "eigenvector",
-    normDeg = FALSE)
+    normDeg = FALSE
+)
 ```
 
 ```{r}
 #| label: summary_single
- 
+
 summary(netcomi_netprops, numbNodes = 5)
 ```
 
@@ -815,26 +833,29 @@ well recognizable.
 #| label: network_plot_single_cluster
 #| fig-width: 13
 #| fig-height: 10
- 
-plot(netcomi_netprops,
-     repulsion = 0.98,
-     rmSingles = TRUE,
-     shortenLabels = "intelligent",
-     labelScale = FALSE,
-     nodeSize = "eigenvector",
-     nodeSizeSpread = 3,
-     nodeColor = "cluster",
-     hubBorderCol = "gray40",
-     cexNodes = 1.8,
-     edgeTranspHigh = 20,
-     title1 = "Network properties highlighted",
-     showTitle = TRUE,
-     cexTitle = 2.3,
-     mar = c(1, 3, 4, 8))
 
-legend(0.7, 1.1, cex = 1.7, title = "estimated correlation:",
-       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"),
-       bty = "n", horiz = TRUE)
+plot(netcomi_netprops,
+    repulsion = 0.98,
+    rmSingles = TRUE,
+    shortenLabels = "intelligent",
+    labelScale = FALSE,
+    nodeSize = "eigenvector",
+    nodeSizeSpread = 3,
+    nodeColor = "cluster",
+    hubBorderCol = "gray40",
+    cexNodes = 1.8,
+    edgeTranspHigh = 20,
+    title1 = "Network properties highlighted",
+    showTitle = TRUE,
+    cexTitle = 2.3,
+    mar = c(1, 3, 4, 8)
+)
+
+legend(0.7, 1.1,
+    cex = 1.7, title = "estimated correlation:",
+    legend = c("+", "-"), lty = 1, lwd = 3, col = c("#009900", "red"),
+    bty = "n", horiz = TRUE
+)
 ```
 
 ### Highlight data features
@@ -848,7 +869,7 @@ color palette from `RColorBrewer` is used here.
 #| label: loading_RColorBrewer
 #| message: false
 #| warning: false
- 
+
 library(RColorBrewer)
 ```
 
@@ -857,7 +878,7 @@ library(RColorBrewer)
 #| label: network_plot_single_phylum
 #| fig-width: 15
 #| fig-heigth: 10
- 
+
 # Generate vector with phylum names for node coloring
 phyla <- as.factor(rowData(tse)$phylum)
 names(phyla) <- rowData(tse)$genus
@@ -866,33 +887,38 @@ names(phyla) <- rowData(tse)$genus
 colvec <- RColorBrewer::brewer.pal(length(levels(phyla)), "Set3")
 
 plot(netcomi_netprops,
-     repulsion = 0.98,
-     rmSingles = TRUE,
-     shortenLabels = "intelligent",
-     labelScale = FALSE,
-     nodeSize = "mclr",
-     nodeColor = "feature",
-     featVecCol = phyla,
-     colorVec =  colvec,
-     nodeTransp = 20,
-     highlightHubs = FALSE,
-     cexNodes = 1.8,
-     edgeTranspHigh = 20,
-     title1 = "Data features highlighted",
-     showTitle = TRUE,
-     cexTitle = 2.3,
-     mar = c(1, 10, 4, 6))
+    repulsion = 0.98,
+    rmSingles = TRUE,
+    shortenLabels = "intelligent",
+    labelScale = FALSE,
+    nodeSize = "mclr",
+    nodeColor = "feature",
+    featVecCol = phyla,
+    colorVec = colvec,
+    nodeTransp = 20,
+    highlightHubs = FALSE,
+    cexNodes = 1.8,
+    edgeTranspHigh = 20,
+    title1 = "Data features highlighted",
+    showTitle = TRUE,
+    cexTitle = 2.3,
+    mar = c(1, 10, 4, 6)
+)
 
 # Add legends
-legend(0.7, 1.1, cex = 1.7, title = "estimated correlation:",
-       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"),
-       bty = "n", horiz = TRUE)
+legend(0.7, 1.1,
+    cex = 1.7, title = "estimated correlation:",
+    legend = c("+", "-"), lty = 1, lwd = 3, col = c("#009900", "red"),
+    bty = "n", horiz = TRUE
+)
 
 # Colors used in the legend should be equally transparent as in the plot
 col_transp <- colToTransp(colvec, 20)
 
-legend(-1.8, 1.1, cex = 1.7, pt.cex = 2.5, title = "Phylum:",
-       legend=levels(phyla), col = col_transp, bty = "n", pch = 16)
+legend(-1.8, 1.1,
+    cex = 1.7, pt.cex = 2.5, title = "Phylum:",
+    legend = levels(phyla), col = col_transp, bty = "n", pch = 16
+)
 ```
 
 **A few things to observe:**
@@ -1001,11 +1027,11 @@ network using each of the three types of association:
 ```{r}
 #| label: load_network_obj
 #| echo: false
- 
+
 # The networks shown in this chapter take several minutes to generate.
 # Therefore, the network objects have been stored in a folder and are loaded
 # here to reduce the time needed to knit the book.
-networks_file  <- system.file("extdata", "networks.RData", package = "OMA")
+networks_file <- system.file("extdata", "networks.RData", package = "OMA")
 load(networks_file)
 ```
 
@@ -1021,7 +1047,7 @@ package provides an implementation of this method.
 ```{r}
 #| label: SparCC
 #| eval: false
- 
+
 # Set seed for reproducibility
 set.seed(13075)
 # Compute correlation matrix
@@ -1063,7 +1089,7 @@ counts as input.
 #| label: load_corpcor
 #| message: false
 #| warning: false
- 
+
 library(corpcor)
 ```
 
@@ -1111,19 +1137,20 @@ learning. The approach is implemented in the R package
 #| label: load_SpiecEasi
 #| message: false
 #| warning: false
- 
+
 library(SpiecEasi)
 ```
 
 ```{r}
 #| label: estimate_network
 #| eval: false
- 
+
 set.seed(13075)
 se_mb_est <- spiec.easi(
     t(assay(tse, "counts")),
-    method = 'mb', nlambda = 20,
-    pulsar.params = list(rep.num = 20))
+    method = "mb", nlambda = 20,
+    pulsar.params = list(rep.num = 20)
+)
 ```
 
 Since `SpiecEasi` uses the StARS ("Stability Approach to Regularization
@@ -1149,7 +1176,7 @@ se_mb_graph <- transform_asso(se_mb_cor)$graph
 #| label: save_RData2
 #| eval: false
 #| echo: false
- 
+
 save(sparcc_cor, se_mb_est, file = "general/network_data/networks.RData")
 ```
 
@@ -1163,7 +1190,7 @@ comparable.
 #| label: load_igraph1
 #| message: false
 #| warning: false
- 
+
 library(igraph)
 ```
 
@@ -1179,15 +1206,23 @@ vsize <- (colMeans(t(assay(tse, "log10"))) + 1) * 3
 set.seed(13075)
 lay_fr <- layout_with_fr(se_mb_graph)
 
-par(mfrow = c(2,2))
-plot(sparcc_graph03, layout = lay_fr, vertex.size = vsize,
-     vertex.label = NA, main = "SparCC (thresh 0.3)")
-plot(sparcc_graph04, layout = lay_fr, vertex.size = vsize,
-     vertex.label = NA, main = "SparCC (thresh 0.4)")
-plot(prop_graph, layout = lay_fr, vertex.size = vsize,
-     vertex.label = NA, main = "Shrinkage proportionality\n(thresh 0.4)")
-plot(se_mb_graph, layout = lay_fr, vertex.size = vsize,
-     vertex.label = NA, main = "SpiecEasi (MB)")
+par(mfrow = c(2, 2))
+plot(sparcc_graph03,
+    layout = lay_fr, vertex.size = vsize,
+    vertex.label = NA, main = "SparCC (thresh 0.3)"
+)
+plot(sparcc_graph04,
+    layout = lay_fr, vertex.size = vsize,
+    vertex.label = NA, main = "SparCC (thresh 0.4)"
+)
+plot(prop_graph,
+    layout = lay_fr, vertex.size = vsize,
+    vertex.label = NA, main = "Shrinkage proportionality\n(thresh 0.4)"
+)
+plot(se_mb_graph,
+    layout = lay_fr, vertex.size = vsize,
+    vertex.label = NA, main = "SpiecEasi (MB)"
+)
 ```
 
 **A few observations:**
@@ -1216,7 +1251,8 @@ graphlist <- list(
     SparCC = sparcc_graph04,
     Proportionality = prop_graph,
     SpiecEasi = se_mb_graph,
-    SPRING = spring_graph)
+    SPRING = spring_graph
+)
 ```
 
 #### Degree distribution
@@ -1228,7 +1264,7 @@ overall network structure.
 #| label: load_ggplot2
 #| message: false
 #| warning: false
- 
+
 library(ggplot2)
 ```
 
@@ -1242,7 +1278,7 @@ ddlist <- lapply(graphlist, igraph::degree.distribution)
 maxdeg <- max(lengths(ddlist))
 
 # Make list elements the same length
-for(i in seq_along(graphlist)) {
+for (i in seq_along(graphlist)) {
     length(ddlist[[i]]) <- maxdeg
 }
 
@@ -1250,7 +1286,8 @@ for(i in seq_along(graphlist)) {
 df <- data.frame(
     Degree = rep(seq_len(maxdeg), length(graphlist)),
     Fraction = unlist(ddlist),
-    Method = rep(names(graphlist), each = maxdeg))
+    Method = rep(names(graphlist), each = maxdeg)
+)
 
 ggplot(df, aes(x = Degree, y = Fraction, group = Method)) +
     geom_line(aes(color = Method)) +
@@ -1275,7 +1312,7 @@ sorted according to the clusters identified via hierarchical clustering.
 #| label: load_heatmap1
 #| message: false
 #| warning: false
- 
+
 library(ComplexHeatmap)
 library(circlize)
 library(patchwork)
@@ -1309,11 +1346,12 @@ assolist$SPRING <- select_taxa(spring_cor)
 # Color vector for the legend
 col <- colorRamp2(
     c(-1, -0.5, 0, 0.5, 1),
-    c("royalblue4", "lightblue", "white", "orange", "firebrick3"))
+    c("royalblue4", "lightblue", "white", "orange", "firebrick3")
+)
 
 hm_list <- list()
 
-for(i in seq_along(assolist)) {
+for (i in seq_along(assolist)) {
     if (i %in% c(2, 4)) {
         showlegend <- TRUE
     } else {
@@ -1328,8 +1366,8 @@ for(i in seq_along(assolist)) {
         show_column_names = FALSE,
         column_title = names(assolist)[i],
         name = "Association",
-        show_heatmap_legend = showlegend) |>
-
+        show_heatmap_legend = showlegend
+    ) |>
         draw() |>
         grid.grabExpr()
 }
