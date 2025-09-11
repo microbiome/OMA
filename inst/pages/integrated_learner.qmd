@@ -40,17 +40,17 @@ library(dplyr)
 library(mia)
 
 tse1 <- sampleMetadata |>
-  filter(study_name == "HMP_2019_ibdmdb") |>
-  returnSamples("relative_abundance", rownames = "short")
+    filter(study_name == "HMP_2019_ibdmdb") |>
+    returnSamples("relative_abundance", rownames = "short")
 
 tse2 <- sampleMetadata |>
-  filter(study_name == "HMP_2019_ibdmdb") |>
-  returnSamples("pathway_abundance", rownames = "short")
+    filter(study_name == "HMP_2019_ibdmdb") |>
+    returnSamples("pathway_abundance", rownames = "short")
 
 # Create a MAE object
 mae <- MultiAssayExperiment(
     ExperimentList(microbiota = tse1, pathway = tse2)
-    )
+)
 mae
 ```
 
@@ -75,25 +75,33 @@ is applied to the dataset to include only meaningful features.
 
 # Subset by prevalence
 mae[[1]] <- subsetByPrevalent(
-    mae[[1]], assay.type = "relative_abundance", prevalence = 0.1,
-    include.lowest = TRUE)
+    mae[[1]],
+    assay.type = "relative_abundance", prevalence = 0.1,
+    include.lowest = TRUE
+)
 mae[[2]] <- subsetByPrevalent(
-    mae[[2]], assay.type = "pathway_abundance", prevalence = 0.1,
-    include.lowest = TRUE)
+    mae[[2]],
+    assay.type = "pathway_abundance", prevalence = 0.1,
+    include.lowest = TRUE
+)
 
 # Subset those features that have near zero variance
 rowData(mae[[1]])[["sd"]] <- rowSds(assay(mae[[1]], "relative_abundance"))
 rowData(mae[[2]])[["sd"]] <- rowSds(assay(mae[[2]], "pathway_abundance"))
-mae[[1]] <- mae[[1]][ rowData(mae[[1]])[["sd"]] > 0.001, ]
-mae[[2]] <- mae[[2]][ rowData(mae[[2]])[["sd"]] > 0.001, ]
+mae[[1]] <- mae[[1]][rowData(mae[[1]])[["sd"]] > 0.001, ]
+mae[[2]] <- mae[[2]][rowData(mae[[2]])[["sd"]] > 0.001, ]
 
 # Transform the data with CLR
 mae[[1]] <- transformAssay(
-  mae[[1]], assay.type = "relative_abundance", method = "clr",
-  pseudocount = TRUE)
+    mae[[1]],
+    assay.type = "relative_abundance", method = "clr",
+    pseudocount = TRUE
+)
 mae[[2]] <- transformAssay(
-  mae[[2]], assay.type = "pathway_abundance", method = "clr",
-  pseudocount = TRUE)
+    mae[[2]],
+    assay.type = "pathway_abundance", method = "clr",
+    pseudocount = TRUE
+)
 ```
 
 Ultimately, `r nrow(mae[[1]])+nrow(mae[[1]])` features are retained, consisting
@@ -110,7 +118,9 @@ the model generalizes to unseen data.
 
 set.seed(377)
 colData(mae)[["validation_set"]] <- sample(
-    c(TRUE, FALSE), size = ncol(mae[[1]]), replace = TRUE, prob = c(0.2, 0.8))
+    c(TRUE, FALSE),
+    size = ncol(mae[[1]]), replace = TRUE, prob = c(0.2, 0.8)
+)
 ```
 
 Now, we are ready to fit the model using the `IntegratedLearner` package, which
@@ -143,18 +153,18 @@ library(SuperLearner)
 
 # Fit the model
 fit <- IntegratedLearnerFromMAE(
-  mae,
-  # Select experiments and assays
-  experiment = names(experiments(mae)),
-  assay.type = c("clr", "clr"),
-  # Select columns from sample metadata
-  outcome.col = "disease",
-  valid.col = "validation_set",
-  # Options for base and meta models
-  base_learner = "SL.randomForest",
-  meta_learner = "SL.nnls.auc",
-  # The outcome is binary
-  family = binomial()
+    mae,
+    # Select experiments and assays
+    experiment = names(experiments(mae)),
+    assay.type = c("clr", "clr"),
+    # Select columns from sample metadata
+    outcome.col = "disease",
+    valid.col = "validation_set",
+    # Options for base and meta models
+    base_learner = "SL.randomForest",
+    meta_learner = "SL.nnls.auc",
+    # The outcome is binary
+    family = binomial()
 )
 ```
 
@@ -220,13 +230,13 @@ library(miaViz)
 # Get individual models
 models <- fit$model_fits$model_layers
 # Get importances
-importances <- lapply(seq_len(length(models)), function(i){
-  # Get importances
-  temp <- models[[i]]$importance
-  # Scale based on weight in stacked model
-  temp <- temp * fit$weights[[i]]
-  return(temp)
-  })
+importances <- lapply(seq_len(length(models)), function(i) {
+    # Get importances
+    temp <- models[[i]]$importance
+    # Scale based on weight in stacked model
+    temp <- temp * fit$weights[[i]]
+    return(temp)
+})
 # Combine the feature importances
 importances <- do.call(rbind, importances)
 

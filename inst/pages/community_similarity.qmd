@@ -15,11 +15,11 @@ chapterPreamble()
 
 # global knitr options
 knitr::opts_chunk$set(
-  message = FALSE,
-  fig.width = 10,
-  dpi = 300,
-  dev = "png",
-  dev.args = list(type = "cairo-png")
+    message = FALSE,
+    fig.width = 10,
+    dpi = 300,
+    dev = "png",
+    dev.args = list(type = "cairo-png")
 )
 ```
 
@@ -87,11 +87,15 @@ tse <- GlobalPatterns
 # Beta diversity metrics like Bray-Curtis are often
 # applied to relabundances
 tse <- transformAssay(
-    tse, assay.type = "counts", method = "relabundance")
+    tse,
+    assay.type = "counts", method = "relabundance"
+)
 
 # Other metrics like Aitchison to clr-transformed data
 tse <- transformAssay(
-    tse, assay.type = "counts", method = "clr", pseudocount = TRUE)
+    tse,
+    assay.type = "counts", method = "clr", pseudocount = TRUE
+)
 
 # Add group information Feces yes/no
 tse$Group <- tse$SampleType == "Feces"
@@ -138,7 +142,7 @@ distances.
 ```{r}
 #| label: diss_matrix
 
-tse <- addDissimilarity(tse, assay.type = "counts" , method = "unifrac")
+tse <- addDissimilarity(tse, assay.type = "counts", method = "unifrac")
 ```
 
 The dissimilarities can then be visualized with a heatmap. Here we also add
@@ -154,9 +158,9 @@ annotation <- HeatmapAnnotation(sample_type = tse[["SampleType"]])
 
 # Create a heatmap
 Heatmap(
-  metadata(tse)[["unifrac"]],
-  heatmap_legend_param = list(title = "Unifrac"),
-  bottom_annotation = annotation
+    metadata(tse)[["unifrac"]],
+    heatmap_legend_param = list(title = "Unifrac"),
+    bottom_annotation = annotation
 )
 ```
 
@@ -199,7 +203,8 @@ tse <- addDivergence(
     tse,
     assay.type = "counts",
     reference = "median",
-    FUN = getDissimilarity)
+    FUN = getDissimilarity
+)
 ```
 
 ## Permutational Multivariate Analysis of Variance
@@ -229,7 +234,7 @@ res <- getPERMANOVA(
     tse,
     assay.type = "relabundance",
     formula = x ~ SampleType
-    )
+)
 res
 ```
 
@@ -291,7 +296,8 @@ tse <- addMDS(
     FUN = getDissimilarity,
     method = "bray",
     assay.type = "relabundance",
-    name = "MDS_bray")
+    name = "MDS_bray"
+)
 ```
 
 Sample dissimilarity can be visualized on a lower-dimensional display (typically
@@ -314,7 +320,7 @@ rel_eig <- e / sum(e[e > 0])
 p <- p + labs(
     x = paste("PCoA 1 (", round(100 * rel_eig[[1]], 1), "%", ")", sep = ""),
     y = paste("PCoA 2 (", round(100 * rel_eig[[2]], 1), "%", ")", sep = "")
-    )
+)
 
 p
 ```
@@ -349,7 +355,8 @@ tse <- addNMDS(
     FUN = getDissimilarity,
     method = "bray",
     assay.type = "relabundance",
-    name = "NMDS_bray")
+    name = "NMDS_bray"
+)
 
 # Run MDS on clr assay with Aitchison distances
 tse <- addMDS(
@@ -357,7 +364,8 @@ tse <- addMDS(
     FUN = getDissimilarity,
     method = "euclidean",
     assay.type = "clr",
-    name = "MDS_aitchison")
+    name = "MDS_aitchison"
+)
 
 # Run NMDS on clr assay with Euclidean distances
 tse <- addNMDS(
@@ -365,7 +373,8 @@ tse <- addNMDS(
     FUN = getDissimilarity,
     method = "euclidean",
     assay.type = "clr",
-    name = "NMDS_aitchison")
+    name = "NMDS_aitchison"
+)
 ```
 
 Multiple ordination plots are combined into a multi-panel plot with the
@@ -376,7 +385,7 @@ beta diversity in the light of the research question.
 ```{r}
 #| label: mds-nmds_comparison2
 #| fig-cap: "Comparison of MDS and NMDS plots based on the Bray-Curtis or Aitchison distances on the GlobalPattern dataset."
- 
+
 # Load package for multi-panel plotting
 library(patchwork)
 
@@ -385,7 +394,8 @@ plots <- lapply(
     c("MDS_bray", "MDS_aitchison", "NMDS_bray", "NMDS_aitchison"),
     plotReducedDim,
     object = tse,
-    colour_by = "Group")
+    colour_by = "Group"
+)
 
 # Generate multi-panel plot
 wrap_plots(plots) +
@@ -400,7 +410,7 @@ used within `addMDS()`.
 ```{r}
 #| label: plot_unifrac
 #| fig-cap: "Unifrac distances scaled by MDS of the GlobalPattern dataset."
- 
+
 tse <- addMDS(
     tse,
     FUN = getDissimilarity,
@@ -408,7 +418,8 @@ tse <- addMDS(
     name = "unifrac",
     tree = rowTree(tse),
     ntop = nrow(tse),
-    assay.type = "counts")
+    assay.type = "counts"
+)
 
 plotReducedDim(tse, "unifrac", colour_by = "Group")
 ```
@@ -430,7 +441,7 @@ reads.
 # Calculate the list of sequencing depths across samples
 sequencing_depths <- colSums(assay(tse))
 # Calculate variation between highest and lowest sequencing depth
-depth_variation <- max(sequencing_depths)/min(sequencing_depths)
+depth_variation <- max(sequencing_depths) / min(sequencing_depths)
 depth_variation
 ```
 
@@ -467,7 +478,7 @@ tse <- transformAssay(
     assay.type = "counts",
     method = "clr",
     pseudocount = 1
-    )
+)
 
 # Run MDS on clr assay with Aitchison distance
 tse <- addMDS(
@@ -476,7 +487,7 @@ tse <- addMDS(
     method = "euclidean",
     assay.type = "clr",
     name = "MDS_aitchison"
-    )
+)
 ```
 
 Then let's do the same with rarefaction:
@@ -485,7 +496,7 @@ Then let's do the same with rarefaction:
 #| label: rarefied_mds
 
 # Define custom transformation function..
-clr <- function (x) {
+clr <- function(x) {
     vegan::decostand(x, method = "clr", pseudocount = 1)
 }
 
@@ -500,7 +511,7 @@ tse <- addMDS(
     transf = clr, # Applied transformation
     replace = TRUE,
     name = "MDS_aitchison_rarefied"
-    )
+)
 ```
 
 Now we are ready for plot non-rarefied and rarefied MDS plots side-by-side.
@@ -516,7 +527,7 @@ plots <- lapply(
     plotReducedDim,
     object = tse,
     colour_by = "SampleType"
-    )
+)
 
 # Generate multi-panel plot
 wrap_plots(plots) +
@@ -549,17 +560,18 @@ both the rarefied and non-rarefied distance calculations:
 
 library(ggpubr)
 
-p <- lapply(1:2, function(i){
+p <- lapply(1:2, function(i) {
     # Principal axes are sign invariant;
     # align the signs; if the correlation is negative then swap the other axis
     original <- reducedDim(tse, "MDS_aitchison")[, i]
     rarefied <- reducedDim(tse, "MDS_aitchison_rarefied")[, i]
-  
-    temp  <- ggplot(
+
+    temp <- ggplot(
         data = data.frame(original, rarefied),
         aes(x = original, y = rarefied)
-        ) +
-        geom_point() + geom_smooth(method = "lm") +
+    ) +
+        geom_point() +
+        geom_smooth(method = "lm") +
         stat_cor(method = "pearson") +
         labs(title = paste0("Principal coordinate ", i))
     return(temp)
@@ -585,7 +597,8 @@ tse <- runPCA(
     tse,
     name = "PCA",
     assay.type = "counts",
-    ncomponents = 10)
+    ncomponents = 10
+)
 
 plotReducedDim(tse, "PCA", colour_by = "Group")
 ```
@@ -596,12 +609,13 @@ sample set and research question.
 ```{r}
 #| label: plot_umap
 #| fig-cap: "UMAP plot on the GlobalPatterns data set containing sample from different sources."
- 
+
 tse <- runUMAP(
     tse,
     name = "UMAP",
     assay.type = "counts",
-    ncomponents = 3)
+    ncomponents = 3
+)
 
 plotReducedDim(tse, "UMAP", colour_by = "Group", ncomponents = c(1:3))
 ```
@@ -641,16 +655,17 @@ d0 <- as.matrix(getDissimilarity(t(assay(tse, "relabundance")), "bray"))
 
 # PCoA Ordination
 tse <- addMDS(
-  tse,
-  FUN = getDissimilarity,
-  name = "PCoA",
-  method = "bray",
-  assay.type = "relabundance")
+    tse,
+    FUN = getDissimilarity,
+    name = "PCoA",
+    method = "bray",
+    assay.type = "relabundance"
+)
 
 # Quantify dissimilarities in the ordination space
 dp <- as.matrix(dist(reducedDim(tse, "PCoA")))
 
-# Calculate stress i.e. relative difference 
+# Calculate stress i.e. relative difference
 # in the original and projected dissimilarities
 stress <- sum((dp - d0)^2) / sum(d0^2)
 ```
@@ -660,19 +675,23 @@ between the observations.
 
 ```{r}
 #| label: plot_shepard
- 
+
 ord <- order(as.vector(d0))
-df <- data.frame(d0 = as.vector(d0)[ord],
-                 dmds = as.vector(dp)[ord])
+df <- data.frame(
+    d0 = as.vector(d0)[ord],
+    dmds = as.vector(dp)[ord]
+)
 
 ggplot(df, aes(x = d0, y = dmds)) +
-  geom_smooth() +
-  geom_point() +
-  labs(title = "Shepard plot",
-       x = "Original distance",
-       y = "MDS distance",
-       subtitle = paste("Stress:", round(stress, 2))) +
-  theme_bw()
+    geom_smooth() +
+    geom_point() +
+    labs(
+        title = "Shepard plot",
+        x = "Original distance",
+        y = "MDS distance",
+        subtitle = paste("Stress:", round(stress, 2))
+    ) +
+    theme_bw()
 ```
 
 ## Supervised / constrained ordination
@@ -728,7 +747,8 @@ tse2 <- addRDA(
     assay.type = "relabundance",
     formula = assay ~ ClinicalStatus + Gender + Age,
     distance = "bray",
-    na.action = na.exclude)
+    na.action = na.exclude
+)
 
 # Store results of PERMANOVA test
 rda_info <- attr(reducedDim(tse2, "RDA"), "significance")
@@ -759,7 +779,7 @@ variance, but only age has statistical significance.
 #| label: rda_permanova_results
 
 rda_info$permanova |>
-   knitr::kable()
+    knitr::kable()
 ```
 
 Next, we proceed to visualize the weight and significance of each variable on
@@ -895,20 +915,26 @@ features for each sample.
 
 ```{r}
 #| label: case_study1
- 
+
 # Agglomerate to genus level
 tse_genus <- agglomerateByRank(tse, rank = "Genus")
 
 # Convert to relative abundances
 tse_genus <- transformAssay(
-    tse, method = "relabundance", assay.type = "counts")
+    tse,
+    method = "relabundance", assay.type = "counts"
+)
 
 # Add info on dominant genus per sample
 tse_genus <- addDominant(
-    tse_genus, assay.type = "relabundance", name = "dominant_taxa")
+    tse_genus,
+    assay.type = "relabundance", name = "dominant_taxa"
+)
 # Overview
 summarizeDominance(
-    tse_genus, rank = "Genus", digits = 3, name = "dominant_taxa")
+    tse_genus,
+    rank = "Genus", digits = 3, name = "dominant_taxa"
+)
 ```
 
 Next, we perform PCoA with Bray-Curtis dissimilarity.
@@ -921,7 +947,8 @@ tse_genus <- addMDS(
     FUN = getDissimilarity,
     name = "PCoA_BC",
     method = "bray",
-    assay.type = "relabundance")
+    assay.type = "relabundance"
+)
 ```
 
 Finally, we get the top taxonomic features and and visualize their abundances on
@@ -935,9 +962,14 @@ top_taxa <- getTop(tse_genus, top = 6, assay.type = "relabundance")
 
 # Naming all the rest of non top-taxa as "Other"
 most_abundant <- lapply(
-    colData(tse_genus)$dominant_taxa, function(x){
-        if (x %in% top_taxa) {x} else {"Other"}
-    })
+    colData(tse_genus)$dominant_taxa, function(x) {
+        if (x %in% top_taxa) {
+            x
+        } else {
+            "Other"
+        }
+    }
+)
 
 # Storing the previous results as a new column within colData
 colData(tse_genus)$most_abundant <- as.character(most_abundant)
@@ -946,7 +978,8 @@ colData(tse_genus)$most_abundant <- as.character(most_abundant)
 most_abundant_freq <- table(as.character(most_abundant))
 most_abundant_percent <- round(
     most_abundant_freq / sum(most_abundant_freq) * 100,
-    1)
+    1
+)
 
 # Retrieving the explained variance
 e <- attr(reducedDim(tse_genus, "PCoA_BC"), "eig")
@@ -954,18 +987,22 @@ var_explained <- e / sum(e[e > 0]) * 100
 
 # Define colors for visualization
 my_colors <- c(
-    "black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red")
+    "black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"
+)
 
 # Visualization
 p <- plotReducedDim(tse_genus, "PCoA_BC", colour_by = "most_abundant") +
     scale_colour_manual(
         values = my_colors,
         labels = paste0(
-            names(most_abundant_percent), "(", most_abundant_percent, "%)")) +
+            names(most_abundant_percent), "(", most_abundant_percent, "%)"
+        )
+    ) +
     labs(
         x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
         y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
-        color = "")
+        color = ""
+    )
 
 p
 ```
@@ -976,37 +1013,43 @@ Similarly, we visualize and compare the sub-population.
 #| label: case_study4
 
 # Calculating the frequencies and percentages for both categories
-freq_TRUE  <- table(as.character(most_abundant[tse_genus$Group]))
+freq_TRUE <- table(as.character(most_abundant[tse_genus$Group]))
 freq_FALSE <- table(as.character(most_abundant[!tse_genus$Group]))
-percent_TRUE  <- round(freq_TRUE  / sum(freq_TRUE)  * 100, 1)
+percent_TRUE <- round(freq_TRUE / sum(freq_TRUE) * 100, 1)
 percent_FALSE <- round(freq_FALSE / sum(freq_FALSE) * 100, 1)
 
 # Visualization
 plotReducedDim(
-    tse_genus[ , colData(tse_genus)$Group == TRUE], "PCoA_BC",
-    colour_by = "most_abundant") +
+    tse_genus[, colData(tse_genus)$Group == TRUE], "PCoA_BC",
+    colour_by = "most_abundant"
+) +
 
     scale_colour_manual(
         values = my_colors,
-        labels = paste0(names(percent_TRUE), "(", percent_TRUE, "%)")) +
-
-  labs(
-      x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
-      y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
-      title = "Group = TRUE", color = "")
-
-plotReducedDim(
-    tse_genus[ , colData(tse_genus)$Group == FALSE], "PCoA_BC",
-    colour_by = "most_abundant") +
-
-    scale_colour_manual(
-        values = my_colors,
-        labels = paste0(names(percent_FALSE), "(", percent_FALSE, "%)")) +
+        labels = paste0(names(percent_TRUE), "(", percent_TRUE, "%)")
+    ) +
 
     labs(
         x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
         y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
-        title = "Group = FALSE", color = "")
+        title = "Group = TRUE", color = ""
+    )
+
+plotReducedDim(
+    tse_genus[, colData(tse_genus)$Group == FALSE], "PCoA_BC",
+    colour_by = "most_abundant"
+) +
+
+    scale_colour_manual(
+        values = my_colors,
+        labels = paste0(names(percent_FALSE), "(", percent_FALSE, "%)")
+    ) +
+
+    labs(
+        x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
+        y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
+        title = "Group = FALSE", color = ""
+    )
 ```
 
 ::: {.callout-tip}
