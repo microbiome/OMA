@@ -33,7 +33,7 @@ We use the [MOFA2](https://www.bioconductor.org/packages/release/bioc/html/MOFA2
 package for analysis.
 
 ```{r}
-#| label: mofa_data1 
+#| label: mofa_data1
 
 library(mia)
 # Load the data
@@ -65,23 +65,30 @@ library(MOFA2)
 # diets as low-fat diets
 colData(mae)$Diet <- ifelse(
     colData(mae)$Diet == "High-fat" | colData(mae)$Diet == "High-fat + XOS",
-    "High-fat", "Low-fat")
+    "High-fat", "Low-fat"
+)
 
 # Agglomerate microbiome data
 mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Genus")
 # Transforming microbiome data with clr and by scaling
 mae[[1]] <- transformAssay(mae[[1]], method = "clr", pseudocount = TRUE)
 mae[[1]] <- transformAssay(
-    mae[[1]], assay.type = "clr", method = "standardize", MARGIN = "rows")
+    mae[[1]],
+    assay.type = "clr", method = "standardize", MARGIN = "rows"
+)
 
 # Transforming metabolomic data with log10 and by scaling
 mae[[2]] <- transformAssay(mae[[2]], assay.type = "nmr", method = "log10")
 mae[[2]] <- transformAssay(
-    mae[[2]], assay.type = "log10", method = "standardize")
+    mae[[2]],
+    assay.type = "log10", method = "standardize"
+)
 
 # Transforming biomarker data by scaling
 mae[[3]] <- transformAssay(
-    mae[[3]], assay.type = "signals", method = "standardize", MARGIN = "rows")
+    mae[[3]],
+    assay.type = "signals", method = "standardize", MARGIN = "rows"
+)
 
 # Removing the assays no longer needed
 assays(mae[[1]]) <- assays(mae[[1]])["standardize"]
@@ -92,7 +99,8 @@ assays(mae[[3]]) <- assays(mae[[3]])["standardize"]
 model <- create_mofa_from_MultiAssayExperiment(
     mae,
     groups = "Diet",
-    extract_metadata = TRUE)
+    extract_metadata = TRUE
+)
 model
 ```
 
@@ -126,8 +134,8 @@ The model is then prepared  with `prepare_mofa()` and trained with `run_mofa()`:
 #| results: false
 
 model <- prepare_mofa(
-  object = model,
-  model_options = model_opts
+    object = model,
+    model_options = model_opts
 )
 
 # Some systems may require the specification `use_basilisk = TRUE`
@@ -151,12 +159,14 @@ library(ggplot2)
 plot_list <- plot_variance_explained(
     model,
     x = "view", y = "factor",
-    plot_total = TRUE)
+    plot_total = TRUE
+)
 
 wrap_plots(plot_list, nrow = 2) +
     plot_annotation(
         title = "Variance Explained per factor and assay",
-        theme = theme(plot.title = element_text(hjust = 0.5)))
+        theme = theme(plot.title = element_text(hjust = 0.5))
+    )
 ```
 
 From the plot, we can observe that the microbiota accounts for most of the
@@ -180,7 +190,7 @@ plot_list <- lapply(
     object = model,
     factors = c(1, 2),
     nfeatures = 10
-    )
+)
 
 wrap_plots(plot_list, ncol = 1) & theme(text = element_text(size = 8))
 ```

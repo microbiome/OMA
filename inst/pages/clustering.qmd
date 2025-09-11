@@ -61,7 +61,9 @@ tse <- peerj13075
 
 # Filter out most taxa to ease the calculation
 altExp(tse, "prevalent") <- agglomerateByPrevalence(
-    tse, rank = "class", prevalence = 20/100, detection = 1/100)
+    tse,
+    rank = "class", prevalence = 20 / 100, detection = 1 / 100
+)
 ```
 
 ### Hierarchical clustering
@@ -102,7 +104,8 @@ altExp(tse, "prevalent") <- addCluster(
     by = "cols",
     HclustParam(method = "ward.D2", dist.fun = getDissimilarity, metric = "bray"),
     full = TRUE,
-    clust.col = "hclust")
+    clust.col = "hclust"
+)
 
 # Print the result table
 table(altExp(tse, "prevalent")$hclust)
@@ -133,7 +136,7 @@ k <- length(unique(altExp(tse, "prevalent")$hclust))
 cols <- scales::hue_pal()(k)
 
 # Order the colors to be equivalent to the factor levels
-cols <- cols[c(1,4,5,3,2,6)]
+cols <- cols[c(1, 4, 5, 3, 2, 6)]
 dend <- color_branches(dendro, k = k, col = unlist(cols))
 
 # Label the samples by their dominant taxon
@@ -142,10 +145,12 @@ labels(dend) <- altExp(tse, "prevalent")$dominant_taxa
 dend <- color_labels(dend, k = k, col = unlist(cols))
 
 # Adjust frame for the figure
-par(mar=c(9, 3, 0.5, 0.5))
+par(mar = c(9, 3, 0.5, 0.5))
 
 # Plot dendrogram
-dend |> set("labels_cex", 0.8) |> plot()
+dend |>
+    set("labels_cex", 0.8) |>
+    plot()
 ```
 
 We can also visualize the clusters by projecting the data onto a
@@ -162,17 +167,20 @@ altExp(tse, "prevalent") <- addMDS(
     altExp(tse, "prevalent"),
     assay.type = "counts",
     FUN = vegan::vegdist,
-    method = "bray")
+    method = "bray"
+)
 ```
 
 ```{r}
 #| label: hclust4
 #| fig-width: 6
 #| fig-height: 4
- 
+
 plotReducedDim(
-    altExp(tse, "prevalent"), "MDS", colour_by = "hclust",
-    theme_size = 13, point_size = 4) +
+    altExp(tse, "prevalent"), "MDS",
+    colour_by = "hclust",
+    theme_size = 13, point_size = 4
+) +
     labs(color = "HClust", title = "Hclust") + theme_minimal()
 ```
 
@@ -193,7 +201,9 @@ clustering algorithm. We will use the kendall dissimilarity.
 tse <- transformAssay(tse, method = "clr", pseudocount = 1)
 
 tse <- transformAssay(
-    tse, assay.type = "clr", method = "standardize", MARGIN = "rows")
+    tse,
+    assay.type = "clr", method = "standardize", MARGIN = "rows"
+)
 
 # Declare the Kendall dissimilarity computation function
 kendall_dissimilarity <- function(x) {
@@ -206,7 +216,8 @@ tse <- addCluster(
     assay.type = "standardize",
     clust.col = "hclustKendall",
     MARGIN = "rows",
-    HclustParam(dist.fun = kendall_dissimilarity, method = "ward.D2"))
+    HclustParam(dist.fun = kendall_dissimilarity, method = "ward.D2")
+)
 ```
 
 The results are stored in the `rowData` column specified with the `clust.col`
@@ -261,7 +272,8 @@ altExp(tse, "prevalent") <- addCluster(
     DmmParam(k = 1:6, type = "laplace"),
     MARGIN = "samples",
     full = TRUE,
-    clust.col = "dmmclust")
+    clust.col = "dmmclust"
+)
 ```
 
 The plot below represents the Laplace approximation to the model evidence for
@@ -274,7 +286,7 @@ a prior.
 #| label: dmm2
 #| fig-width: 5
 #| fig-height: 3
- 
+
 library(miaViz)
 
 p <- plotDMNFit(altExp(tse, "prevalent"), type = "laplace", name = "DMM")
@@ -307,9 +319,11 @@ plot rather clearly demonstrates the cluster division.
 
 # DMM clusters
 plotReducedDim(altExp(tse, "prevalent"), "MDS", theme_size = 13) +
-              geom_point(size = 3, alpha = 0.6,
-                      aes(color = altExp(tse, "prevalent")$dmmclust)) +
-              labs(color = "DMMclust", title = "DMM") + theme_minimal()
+    geom_point(
+        size = 3, alpha = 0.6,
+        aes(color = altExp(tse, "prevalent")$dmmclust)
+    ) +
+    labs(color = "DMMclust", title = "DMM") + theme_minimal()
 ```
 
 ## Dimensionality reduction
@@ -350,7 +364,9 @@ set.seed(3221)
 res <- getNMF(altExp(tse, "prevalent"), k = 4)
 
 # Obtain the relative abundance of ES in each sample
-wrel <- t(apply(res, 1, function (x) {x/sum(x)}))
+wrel <- t(apply(res, 1, function(x) {
+    x / sum(x)
+}))
 
 # Define the community type of a sample with the highest relative abundance
 altExp(tse, "prevalent")$NMFcomponent <- as.factor(apply(wrel, 1, which.max))
@@ -365,8 +381,10 @@ for each sample onto a two-dimensional surface.
 
 # NMF community types
 plotReducedDim(
-    altExp(tse, "prevalent"), "MDS", colour_by = "NMFcomponent",
-    point_size = 3, theme_size = 13) +
+    altExp(tse, "prevalent"), "MDS",
+    colour_by = "NMFcomponent",
+    point_size = 3, theme_size = 13
+) +
 
     labs(color = "NMFcomponent", title = "NMF") + theme_minimal()
 ```
@@ -387,8 +405,10 @@ tse <- agglomerateByPrevalence(tse, rank = "genus")
 
 # Apply clr and scale data
 tse <- transformAssay(tse, method = "clr", pseudocount = TRUE)
-tse <-  transformAssay(
-    tse, assay.type = "clr", method = "standardize", MARGIN = "rows")
+tse <- transformAssay(
+    tse,
+    assay.type = "clr", method = "standardize", MARGIN = "rows"
+)
 
 # Gets the assay table
 mat <- assay(tse, "standardize")
@@ -404,8 +424,10 @@ library(ggtree)
 
 # Hierarchical clustering
 tse <- addCluster(
-    tse, assay.type = "standardize", HclustParam(method = "complete"),
-    full = TRUE)
+    tse,
+    assay.type = "standardize", HclustParam(method = "complete"),
+    full = TRUE
+)
 taxa_hclust <- metadata(tse)[["clusters"]][["hclust"]]
 
 # Creates a tree
@@ -420,8 +442,10 @@ Based on the phylo tree, we decide to create eight clusters.
 
 # Hierarchical clustering with k = 8
 tse <- addCluster(
-    tse, assay.type = "standardize",
-    HclustParam(method = "complete", cut.fun = cutree, k = 8))
+    tse,
+    assay.type = "standardize",
+    HclustParam(method = "complete", cut.fun = cutree, k = 8)
+)
 ```
 
 For the columns, we can utilize k-means clustering. First we have to specify
@@ -449,8 +473,10 @@ Based on the results, we split the columns into six clusters.
 
 # Hierarchical clustering with k = 4
 tse <- addCluster(
-    tse, assay.type = "standardize", by = "cols",
-    KmeansParam(centers = 6))
+    tse,
+    assay.type = "standardize", by = "cols",
+    KmeansParam(centers = 6)
+)
 
 # Prints samples and their clusters
 colData(tse)[["clusters"]]
@@ -466,29 +492,33 @@ Now we can create a heatmap with additional annotations.
 # Order the data based on clusters
 tse <- tse[
     order(rowData(tse)[["clusters"]]),
-    order(colData(tse)[["clusters"]])]
+    order(colData(tse)[["clusters"]])
+]
 
 # Get data for plotting
 mat <- assay(tse, "standardize")
 taxa_clusters <- rowData(tse)[, "clusters", drop = FALSE] |>
-  as.data.frame()
+    as.data.frame()
 sample_data <- colData(tse)[, c("clusters", "Gender"), drop = FALSE] |>
-  as.data.frame()
+    as.data.frame()
 colnames(sample_data) <- c("clusters_col", "gender")
 
 # Determine the scaling of colors
 # Scale colors
 breaks <- seq(
     -ceiling(max(abs(mat))), ceiling(max(abs(mat))),
-    length.out = ifelse( max(abs(mat))>5, 2*ceiling(max(abs(mat))), 10 ) )
-colors <- colorRampPalette(c("darkblue", "blue", "white", "red", "darkred"))(length(breaks)-1)
+    length.out = ifelse(max(abs(mat)) > 5, 2 * ceiling(max(abs(mat))), 10)
+)
+colors <- colorRampPalette(c("darkblue", "blue", "white", "red", "darkred"))(length(breaks) - 1)
 
 pheatmap(
-    mat, annotation_row = taxa_clusters,
+    mat,
+    annotation_row = taxa_clusters,
     annotation_col = sample_data,
     cluster_cols = FALSE, cluster_rows = FALSE,
     breaks = breaks,
-    color = colors)
+    color = colors
+)
 ```
 
 ::: {.callout-tip}

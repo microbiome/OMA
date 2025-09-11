@@ -4,7 +4,7 @@
 #| label: setup
 #| echo: false
 #| results: asis
- 
+
 library(rebook)
 chapterPreamble()
 ```
@@ -32,9 +32,13 @@ tse <- agglomerateByRank(tse, rank = "Phylum")
 top_taxa <- getTop(tse, top = 10, assay.type = "relabundance")
 
 # Renaming the "Phylum" rank to keep only top taxa and assign the rest to "Other"
-phylum_renamed <- lapply(rowData(tse)$Phylum, function(x){
-    if (x %in% top_taxa) {x} else {"Other"}
-    })
+phylum_renamed <- lapply(rowData(tse)$Phylum, function(x) {
+    if (x %in% top_taxa) {
+        x
+    } else {
+        "Other"
+    }
+})
 rowData(tse)$Phylum_sub <- as.character(phylum_renamed)
 
 # Agglomerate the data based on specified taxa
@@ -42,8 +46,10 @@ tse_sub <- agglomerateByVariable(tse, by = "rows", f = "Phylum_sub")
 
 # Visualizing the composition barplot, with samples ordered by "Bacteroidetes"
 plotAbundance(
-    tse_sub, assay.type = "relabundance",
-    order.row.by = "abund", order.col.by = "Bacteroidetes")
+    tse_sub,
+    assay.type = "relabundance",
+    order.row.by = "abund", order.col.by = "Bacteroidetes"
+)
 ```
 
 ## Composition heatmap {#sec-composition-heatmap}
@@ -70,13 +76,17 @@ tse <- agglomerateByPrevalence(tse, rank = "Phylum")
 
 # Add clr-transformation on samples
 tse <- transformAssay(
-    tse, assay.type = "counts", method = "relabundance", pseudocount = 1)
+    tse,
+    assay.type = "counts", method = "relabundance", pseudocount = 1
+)
 tse <- transformAssay(tse, assay.type = "relabundance", method = "clr")
 
 # Add scale features (taxa)
 tse <- transformAssay(
-    tse, assay.type = "clr", MARGIN = "rows", method = "standardize",
-    name = "clr_z")
+    tse,
+    assay.type = "clr", MARGIN = "rows", method = "standardize",
+    name = "clr_z"
+)
 ```
 
 We can visualize the heatmap with the
@@ -90,11 +100,12 @@ library(sechm)
 
 # Plot heatMap with sechm
 heatmap <- sechm(
-    tse, assayName = "clr_z", features = rownames(tse),
+    tse,
+    assayName = "clr_z", features = rownames(tse),
     show_rownames = TRUE, show_colnames = TRUE,
     row_names_gp = gpar(fontsize = 6), column_names_gp = gpar(fontsize = 8),
     breaks = 1, hmcols = c("blue", "white", "red")
-    )
+)
 
 heatmap
 ```
@@ -125,17 +136,20 @@ tse <- runPCA(tse, ncomponents = 10, assay.type = "clr_z")
 
 # Sort by radial theta using the first two principal components
 sorted_order <- getNeatOrder(
-    reducedDim(tse, "PCA")[, c(1, 2)], centering = "mean")
+    reducedDim(tse, "PCA")[, c(1, 2)],
+    centering = "mean"
+)
 tse <- tse[, sorted_order]
 
 # Plot NeatMap with sechm
 neatmap <- sechm(
-    tse, assayName = "clr_z", features = rownames(tse),
+    tse,
+    assayName = "clr_z", features = rownames(tse),
     show_rownames = TRUE, show_colnames = TRUE,
     do.scale = FALSE, cluster_rows = FALSE, sortRowsOn = NULL,
     row_names_gp = gpar(fontsize = 6), column_names_gp = gpar(fontsize = 8),
     breaks = 1, hmcols = c("blue", "white", "red")
-    )
+)
 
 neatmap
 ```

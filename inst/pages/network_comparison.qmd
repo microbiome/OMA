@@ -16,8 +16,10 @@ chapterPreamble()
 # The networks shown in this chapter take several minutes to generate.
 # Therefore, the network objects have been stored in a folder and are loaded
 # here to reduce the time needed to knit the book.
-networks_diet_file  <- system.file(
-    "extdata", "networks_diet.RData", package = "OMA")
+networks_diet_file <- system.file(
+    "extdata", "networks_diet.RData",
+    package = "OMA"
+)
 load(networks_diet_file)
 ```
 
@@ -63,7 +65,7 @@ We perform the same data preprocessing steps as in [@sec-network-learning].
 #| label: load_pkgs
 #| message: false
 #| warning: false
- 
+
 library(NetCoMi)
 library(mia)
 ```
@@ -77,7 +79,7 @@ tse <- peerj13075
 
 ```{r}
 #| label: preprocessing
- 
+
 # Agglomerate to genus level
 tse <- agglomerateByRank(tse, rank = "genus")
 
@@ -86,14 +88,16 @@ tse <- transformAssay(
     tse,
     assay.type = "counts",
     method = "relabundance",
-    MARGIN = "cols")
+    MARGIN = "cols"
+)
 
 # Filter by prevalence
 tse <- subsetByPrevalent(
     tse,
     prevalence = 0.2,
     detection = 0,
-    assay.type = "relabundance")
+    assay.type = "relabundance"
+)
 
 # Add log10-transformed abundances
 tse <- transformAssay(tse, method = "log10", pseudocount = 1)
@@ -107,7 +111,7 @@ with mixed diet subjects, and one with vegetarian subjects. Both subsets
 have nearly the same sample size and are therefore comparable.
 
 ```{r}
-#| label: split_data 
+#| label: split_data
 
 table(tse$Diet)
 tse_list <- splitOn(tse, group = "Diet", use.names = TRUE, by = "cols")
@@ -132,17 +136,19 @@ spring_net_diet <- netConstruct(
     data2 = tse_list$Veg,
     taxRank = "genus",
     filtTax = "highestFreq",
-    filtTaxPar = list(highestFreq  = 100),
+    filtTaxPar = list(highestFreq = 100),
     measure = "spring",
     measurePar = list(
         nlambda = 20,
         rep.num = 10,
         thresh = 0.05,
-        Rmethod = "approx"),
+        Rmethod = "approx"
+    ),
     sparsMethod = "none",
     dissFunc = "signed",
     verbose = 3,
-    seed = 13075)
+    seed = 13075
+)
 ```
 
 All network measures are now computed for both networks. Also, both GCMs are
@@ -154,12 +160,13 @@ different from zero.
 #| label: netAnalyze_diet
 #| fig-width: 10
 #| fig-height: 10
- 
+
 spring_netprops_diet <- netAnalyze(
     spring_net_diet,
     clustMethod = "cluster_fast_greedy",
     hubPar = "eigenvector",
-    normDeg = FALSE)
+    normDeg = FALSE
+)
 ```
 
 In both of the networks, some graphlet correlations are significantly different
@@ -168,7 +175,7 @@ between the groups.
 
 ```{r}
 #| label: summary_diet
- 
+
 summary(spring_netprops_diet, groupNames = c("Mixed diet", "Vegetarian"))
 ```
 
@@ -190,32 +197,35 @@ function. The same configuration as in [@sec-network-learning] is used.
 #| label: network_plot_diet_difflay
 #| fig-width: 17
 #| fig-height: 8
- 
+
 
 plot(spring_netprops_diet,
-     repulsion = 0.97,
-     rmSingles = TRUE,
-     labelScale = FALSE,
-     nodeSize = "eigenvector",
-     nodeSizeSpread = 2,
-     nodeColor = "cluster",
-     sameColThresh = 2,
-     hubBorderCol = "darkgray",
-     cexNodes = 2,
-     edgeTranspHigh = 20,
-     title1 = "Mixed diet",
-     title2 = "Vegetarian",
-     showTitle = TRUE,
-     cexTitle = 2,
-     mar = c(1, 4, 4, 4))
+    repulsion = 0.97,
+    rmSingles = TRUE,
+    labelScale = FALSE,
+    nodeSize = "eigenvector",
+    nodeSizeSpread = 2,
+    nodeColor = "cluster",
+    sameColThresh = 2,
+    hubBorderCol = "darkgray",
+    cexNodes = 2,
+    edgeTranspHigh = 20,
+    title1 = "Mixed diet",
+    title2 = "Vegetarian",
+    showTitle = TRUE,
+    cexTitle = 2,
+    mar = c(1, 4, 4, 4)
+)
 
 # Overlay a transparent plot on which the legend is plotted
-par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), mar=c(0, 0, 0, 0), new=TRUE)
-plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
+par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
+plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
 
-legend(-0.2, -0.9, cex = 1.5, title = "estimated correlation:",
-       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"),
-       bty = "n", horiz = TRUE)
+legend(-0.2, -0.9,
+    cex = 1.5, title = "estimated correlation:",
+    legend = c("+", "-"), lty = 1, lwd = 3, col = c("#009900", "red"),
+    bty = "n", horiz = TRUE
+)
 ```
 
 The layout is computed separately for each network, making it difficult to
@@ -228,31 +238,34 @@ that the nodes are placed as optimally as possible for both networks.
 #| label: network_plot_diet_samelay
 #| fig-width: 17
 #| fig-heigth: 8
- 
+
 plot(spring_netprops_diet,
-     sameLayout = TRUE,
-     repulsion = 0.95,
-     rmSingles = "inboth",
-     labelScale = FALSE,
-     nodeSize = "eigenvector",
-     nodeSizeSpread = 2,
-     nodeColor = "cluster",
-     sameColThresh = 2,
-     hubBorderCol = "darkgray",
-     cexNodes = 2,
-     edgeTranspHigh = 20,
-     title1 = "Mixed diet",
-     title2 = "Vegetarian",
-     showTitle = TRUE,
-     cexTitle = 2,
-     mar = c(1, 4, 4, 4))
+    sameLayout = TRUE,
+    repulsion = 0.95,
+    rmSingles = "inboth",
+    labelScale = FALSE,
+    nodeSize = "eigenvector",
+    nodeSizeSpread = 2,
+    nodeColor = "cluster",
+    sameColThresh = 2,
+    hubBorderCol = "darkgray",
+    cexNodes = 2,
+    edgeTranspHigh = 20,
+    title1 = "Mixed diet",
+    title2 = "Vegetarian",
+    showTitle = TRUE,
+    cexTitle = 2,
+    mar = c(1, 4, 4, 4)
+)
 
 # Add legend
-par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), mar=c(0, 0, 0, 0), new=TRUE)
-plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
-legend(-0.2, -0.8, cex = 1.7, title = "estimated correlation:",
-       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"),
-       bty = "n", horiz = TRUE)
+par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
+plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
+legend(-0.2, -0.8,
+    cex = 1.7, title = "estimated correlation:",
+    legend = c("+", "-"), lty = 1, lwd = 3, col = c("#009900", "red"),
+    bty = "n", horiz = TRUE
+)
 ```
 
 **A few notes:**
@@ -271,7 +284,7 @@ As in [@sec-network-learning], we also generate a network plot using phylum
 names to color the nodes and mclr-transformed abundances to scale node sizes.
 
 ```{r}
-#| label: load_RColorBrewer 
+#| label: load_RColorBrewer
 #| message: false
 #| warning: false
 
@@ -282,7 +295,7 @@ library(RColorBrewer)
 #| label: network_plot_diet_phyla
 #| fig-width: 17
 #| fig-heigth: 8
- 
+
 # Generate vector with phylum names for node coloring
 phyla <- as.factor(rowData(tse)$phylum)
 names(phyla) <- rowData(tse)$genus
@@ -299,29 +312,34 @@ p_diet <- plot(
     nodeSize = "clr",
     nodeColor = "feature",
     featVecCol = phyla,
-    colorVec =  colvec,
+    colorVec = colvec,
     nodeTransp = 20,
     sameColThresh = 2,
     highlightHubs = FALSE,
     cexNodes = 2,
     edgeTranspHigh = 20,
-   title1 = "Mixed diet",
-   title2 = "Vegetarian",
-   showTitle = TRUE,
-   cexTitle = 2,
-   mar = c(1, 4, 4, 4))
+    title1 = "Mixed diet",
+    title2 = "Vegetarian",
+    showTitle = TRUE,
+    cexTitle = 2,
+    mar = c(1, 4, 4, 4)
+)
 
 # Add legends
 # Colors used in the legend should be equally transparent as in the plot
 col_transp <- colToTransp(colvec, 20)
 
-par(fig=c(0, 1, 0, 1), oma=c(0, 0, 0, 0), mar=c(0, 0, 0, 0), new=TRUE)
-plot(0, 0, type='n', bty='n', xaxt='n', yaxt='n')
-legend(-0.15, -0.8, cex = 1.7, title = "estimated correlation:",
-       legend = c("+","-"), lty = 1, lwd = 3, col = c("#009900","red"),
-       bty = "n", horiz = TRUE)
-legend(-0.15, 1.3, cex = 1.7, pt.cex = 2.5, title = "Phylum:",
-       legend=levels(phyla), col = col_transp, bty = "n", pch = 16)
+par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
+plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
+legend(-0.15, -0.8,
+    cex = 1.7, title = "estimated correlation:",
+    legend = c("+", "-"), lty = 1, lwd = 3, col = c("#009900", "red"),
+    bty = "n", horiz = TRUE
+)
+legend(-0.15, 1.3,
+    cex = 1.7, pt.cex = 2.5, title = "Phylum:",
+    legend = levels(phyla), col = col_transp, bty = "n", pch = 16
+)
 ```
 
 ### Quantitative comparison
@@ -344,7 +362,7 @@ before applying it to your data.
 ```{r}
 #| label: netcomp_diet_permute
 #| eval: false
- 
+
 spring_netcomp_diet <- netCompare(
     spring_netprops_diet,
     permTest = TRUE,
@@ -353,15 +371,17 @@ spring_netcomp_diet <- netCompare(
     seed = 13075,
     storeAssoPerm = TRUE,
     fileStoreAssoPerm = "general/network_data/spring_assoPerm",
-    verbose = TRUE)
+    verbose = TRUE
+)
 ```
 
 ```{r}
 #| label: summary_netcomp_diet
- 
+
 summary(spring_netcomp_diet,
-        groupNames = c("Mix", "Veg"),
-        numbNodes = 5)
+    groupNames = c("Mix", "Veg"),
+    numbNodes = 5
+)
 ```
 
 **Interpreting some results:**
@@ -404,18 +424,19 @@ multiplicity.
 #| eval: false
 #| message: false
 #| results: false
- 
+
 spring_diffnet <- diffnet(
     spring_net_diet,
     diffMethod = "perm",
     fileLoadAssoPerm = "general/network_data/spring_assoPerm",
-    adjust = "lfdr")
+    adjust = "lfdr"
+)
 ```
 
 ```{r}
 #| label: hist_pvals
 #| out-width: 80%
- 
+
 sum(spring_diffnet$pAdjustVec < 0.05)
 sum(spring_diffnet$pvalsVec < 0.05)
 ```
@@ -429,7 +450,7 @@ to "none", which is actually statistically incorrect.
 
 ```{r}
 #| label: diffnet_diet_unadjusted
-#| message: false 
+#| message: false
 #| results: false
 
 spring_diffnet_unadj <- diffnet(
@@ -437,7 +458,8 @@ spring_diffnet_unadj <- diffnet(
     pvalsVec = spring_diffnet$pvalsVec,
     diffMethod = "perm",
     alpha = 0.05,
-    adjust = "none")
+    adjust = "none"
+)
 ```
 
 The `diffnet` object is now plotted using NetCoMi's `plot()` function. 
@@ -446,17 +468,18 @@ The `diffnet` object is now plotted using NetCoMi's `plot()` function.
 #| label: diffnet_plot
 #| fig-width: 20
 #| fig-heigth: 14
- 
+
 plot(spring_diffnet_unadj,
-     cexLabels = 1,
-     cexNodes = 1.3,
-     cexLegend = 2.5,
-     cexTitle = 3,
-     mar = c(3,2,5,15),
-     legendGroupnames = c("Mixed diet", "Vegetarian"),
-     legendPos = c(1.2,1.5),
-     legendArgs = list(lwd = 4),
-     fade = FALSE)
+    cexLabels = 1,
+    cexNodes = 1.3,
+    cexLegend = 2.5,
+    cexTitle = 3,
+    mar = c(3, 2, 5, 15),
+    legendGroupnames = c("Mixed diet", "Vegetarian"),
+    legendPos = c(1.2, 1.5),
+    legendArgs = list(lwd = 4),
+    fade = FALSE
+)
 ```
 
 Edge colors represent the direction of the associations in the two groups.
@@ -470,7 +493,8 @@ edge color is dark green.
 #| echo: false
 
 save(spring_diffnet, spring_net_diet, spring_netcomp_diet,
-     file = "general/network_data/networks_diet.RData")
+    file = "general/network_data/networks_diet.RData"
+)
 ```
 
 
