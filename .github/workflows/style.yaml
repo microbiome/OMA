@@ -52,18 +52,25 @@ jobs:
             ${{ runner.os }}-styler-
             ${{ runner.os }}-
       - name: Style
-        run: styler::style_pkg(transformers = styler::tidyverse_style(indent_by = 4L))
+        run: |
+          # Style only R files
+          files <- system(
+            "git diff --name-only origin/${{ github.base_ref }}...${{ github.sha }} | egrep -i '\\.(R|Rmd|qmd|Rmarkdown|Rnw|Rprofile)$'",
+            intern = TRUE
+          )
+          if (length(files)) {
+            styler::style_file(path = files, transformers = styler::tidyverse_style(indent_by = 4L))
+          }
         shell: Rscript {0}
+
       - name: Commit and push changes
         run: |
-          if FILES_TO_COMMIT=($(git diff-index --name-only ${{ github.sha }} \
-              | egrep --ignore-case '\.(R|[qR]md|Rmarkdown|Rnw|Rprofile)$'))
-          then
-            git config --local user.name "$GITHUB_ACTOR"
-            git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
-            git commit ${FILES_TO_COMMIT[*]} -m "Style code (GHA)"
-            git pull --ff-only
-            git push origin
-          else
+          git config --local user.name "$GITHUB_ACTOR"
+          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git add -u
+          if git diff --cached --quiet; then
             echo "No changes to commit."
+          else
+            git commit -m "Style code (GHA)"
+            git push origin HEAD:${{ github.head_ref }}
           fi
