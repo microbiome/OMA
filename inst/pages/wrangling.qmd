@@ -9,28 +9,29 @@ library(rebook)
 chapterPreamble()
 ```
 
-This chapter introduces several essential techniques for preparing data for
-analysis. These techniques include splitting data, modifying data, 
-and converting data to a `data.frame.` Additionally, it explains how to merge 
-multiple `SummarizedExperiment` objects when needed. For a basic understanding
-of  `TreeSE` please refer to [@sec-containers]
+This chapter introduces several essential techniques for preparing data
+for analysis. These techniques include splitting data, modifying data,
+and converting data to a `data.frame`. Additionally, it explains how to
+merge multiple `SummarizedExperiment` objects when needed. For a basic
+understanding of `TreeSE` please refer to [@sec-containers].
 
 ## Splitting {#sec-splitting}
 
-You can split the data based on variables by using the functions 
+You can split the data based on variables by using the functions
 `agglomerateByRanks()` and `splitOn()`. The former is detailed in
 [@sec-agglomeration].
 
-If you want to split the data based on a variable other than taxonomic rank, use 
-`splitOn()`. It works for row-wise and column-wise splitting. Splitting the data
-may be useful, for example, if you want to analyze data from different cohorts
-separately.
+If you want to split the data based on a variable other than taxonomic
+rank, use `splitOn()`. It works for row-wise and column-wise splitting.
+Splitting the data may be useful, for example, if you want to analyze
+data from different cohorts separately.
 
-The following example demonstrates how to identify the most abundant taxonomic
-features for each sample type. Given that some samples originate from different
-origin, we expect differences between sample types. While `getTop()` can be used
-to determine the most abundant features across the entire dataset, this
-approach would obscure features that are specific to individual sample types.
+The following example demonstrates how to identify the most abundant
+taxonomic features for each sample type. Given that some samples
+originate from different origin, we expect differences between sample
+types. While `getTop()` can be used to determine the most abundant
+features across the entire dataset, this approach would obscure features
+that are specific to individual sample types.
 
 ```{r}
 #| label: splitOn
@@ -55,10 +56,11 @@ top_taxa |> kable()
 
 ## Add or modify variables {#sec-add-or-modify-data}
 
-The information contained by the `colData` of a `TreeSE` can be added and/or 
-modified by accessing the desired variables. You might want to add or modify 
-this data to include new variables or update existing ones, which can be essential 
-for ensuring that all relevant metadata is available for subsequent analyses.
+The information contained by the `colData` of a `TreeSE` can be added
+and/or modified by accessing the desired variables. You might want to
+add or modify this data to include new variables or update existing
+ones, which can be essential for ensuring that all relevant metadata is
+available for subsequent analyses.
 
 ```{r}
 #| label: modify_coldata
@@ -66,35 +68,37 @@ for ensuring that all relevant metadata is available for subsequent analyses.
 data("GlobalPatterns")
 tse <- GlobalPatterns
 
-# modify the Description entries
+# Modify the Description entries
 colData(tse)$Description <- paste(
     colData(tse)$Description, "modified description")
 
-# view modified variable
+# View modified variable
 tse$Description |> head()
 ```
 
-New information can be added to the experiment by creating a new variable.
+New information can be added to the experiment by creating a new
+variable.
 
 ```{r}
 #| label: add-coldata1
 
-# simulate new data
+# Simulate new data
 new_data <- runif(ncol(tse))
 
-# store new data as new variable in colData
+# Store new data as a new variable in colData
 colData(tse)$NewVariable <- new_data
 
-# view new variable
+# View the new variable
 tse$NewVariable |> head()
 ```
 
-Alternatively, you can add whole table by merging it with existing `colData`.
+Alternatively, you can add a whole table by merging it with existing
+`colData`.
 
 ```{r}
 #| label: add-coldata2
 
-# simulate new data
+# Simulate new data
 new_data <- data.frame(var1 = runif(ncol(tse)), var2 = runif(ncol(tse)))
 rownames(new_data) <- colnames(tse)
 
@@ -102,13 +106,13 @@ rownames(new_data) <- colnames(tse)
 colData(tse) <- cbind(colData(tse), new_data)
 ```
 
-Similar steps can also be applied to `rowData`. If you have an assay whose
-rows and columns aling with the existing ones, you can add the assay easily
-to the `TreeSE` object.
+Similar steps can also be applied to `rowData`. If you have an assay
+whose rows and columns align with the existing ones, you can add the
+assay easily to the `TreeSE` object.
 
-Here we add an assay that has random numbers but in real life these steps
-might come handy after you have transformed the data with custom transformation
-that cannot be found from `mia`.
+Here we add an assay that has random numbers but in real life these
+steps might come in handy after you have transformed the data with
+custom transformation that cannot be found from `mia`.
 
 ```{r}
 #| label: add_assay
@@ -116,16 +120,17 @@ that cannot be found from `mia`.
 # Create a matrix with random values
 mat <- rnorm(ncol(tse)*nrow(tse), 0, 1)
 mat <- matrix(mat, ncol = ncol(tse), nrow = nrow(tse))
+
 # Add matrix to tse
 assay(tse, "random", withDimnames = FALSE) <- mat
 
 assayNames(tse)
 ```
 
-Now we can see that the `TreeSE` object has now an additional assay called
-"random". When adding new samples or
-features to your existing dataset, you can use `cbind()` to combine columns for
-new features or `rbind()` to add rows for new samples.
+Now we can see that the `TreeSE` object has an additional assay called
+"random". When adding new samples or features to your existing dataset,
+you can use `cbind()` to combine columns for new features or `rbind()`
+to add rows for new samples.
 
 ```{r}
 #| label: combine-cols
@@ -134,10 +139,11 @@ tse2 <- cbind(tse, tse)
 tse2
 ```
 
-However, the aforementioned functions assume that the rows align correctly when
-combining columns, and vice versa. In practice, this is often not the case;
-for example, samples may have different feature sets. In such situations, using
-a merging approach is the appropriate method.
+However, the aforementioned functions assume that the rows align
+correctly when combining columns, and vice versa. In practice, this is
+often not the case; for example, samples may have different feature
+sets. In such situations, using a merging approach is the appropriate
+method.
 
 ## Merge data
 
@@ -145,8 +151,8 @@ a merging approach is the appropriate method.
 `SummarizedExperiment` objects. For example, it is possible to combine
 multiple `TreeSE` objects which each includes one sample.
 
-`mergeSEs()` works much like standard joining operations. It combines rows and 
-columns and allows you to specify the merging method.
+`mergeSEs()` works much like standard joining operations. It combines
+rows and columns and allows you to specify the merging method.
 
 ```{r}
 #| label: merge1
@@ -177,9 +183,9 @@ tse
 
 ## Melting data
 
-For several custom analysis and visualization packages, such as those from
-`tidyverse`, the `SE` data can be converted to a long `data.frame` format with 
-`meltSE()`.    
+For several custom analysis and visualization packages, such as those
+from `tidyverse`, the `SE` data can be converted to a long `data.frame`
+format with `meltSE()`.
 
 ```{r}
 #| label: melt-data
@@ -197,7 +203,7 @@ molten_tse <- meltSE(
 molten_tse |> head() |> kable()
 ```
 
-For `MultiAssayExperiment` data, you can utilize instead `longForm()`.
+For `MultiAssayExperiment` data, you can instead utilize `longForm()`.
 
 ```{r}
 #| label: melt-mae-data
@@ -216,14 +222,14 @@ molten_mae |> head() |> kable()
 
 ## Tidy R programming
 
-The tidy paradigm, first introduced in the tidyverse, promotes an intuitive and
-easy-to-learn coding style, which has made it popular among users. _tidyomics_
-bridges the gap between Bioconductor’s `SummarizedExperiment` ecosystem and the
-_tidyverse_ [@Hutchison2024].
+The tidy paradigm, first introduced in the tidyverse, promotes an
+intuitive and easy-to-learn coding style, which has made it popular
+among users. *tidyomics* bridges the gap between Bioconductor’s
+`SummarizedExperiment` ecosystem and the *tidyverse* [@Hutchison2024].
 
-The package `TidySingleCellExperiment` can be used to manage data in `TreeSE`.
-For instance, we can easily view the object as `tibble` abstraction, familiar
-from _tidyverse_.
+The package `TidySingleCellExperiment` can be used to manage data in
+`TreeSE`. For instance, we can easily view the object as a `tibble`
+abstraction, familiar from *tidyverse*.
 
 ```{r}
 #| label: tidy1
@@ -236,11 +242,12 @@ library(tidySingleCellExperiment)
 tse
 ```
 
-By utilizing tidy programming, we could then effortlessly manipulate the data.
-For instance, we can calculate the mean library size in each
-sample type. This is done by first calculating library size for each sample and
-then summarizing total counts in each sample type; all done by using tidy
-paradigm. For more information on library size, see [@sec-quality-control].
+By utilizing tidy programming, we could then effortlessly manipulate the
+data. For instance, we can calculate the mean library size in each
+sample type. This is done by first calculating library size for each
+sample and then summarizing total counts in each sample type; all done
+by using tidy paradigm. For more information on library size, see
+[@sec-quality-control].
 
 ```{r}
 #| label: tidy2
@@ -254,10 +261,11 @@ tse %>%
 ```
 
 We can then filter samples and leverage `ggplot2` for plotting. In the
-example below, we select soil samples and visualize their abundances with a
-boxplot. Of course, these tidy commands can be combined with `mia` tools. Before
-plotting, we apply CLR transformation by using `trasformAssay()`
-(see more on transformation from [@sec-assay-transform]).
+example below, we select soil samples and visualize their abundances
+with a boxplot. Of course, these tidy commands can be combined with
+`mia` tools. Before plotting, we apply CLR transformation by using
+`trasformAssay()` (see more on transformation from
+[@sec-assay-transform]).
 
 ```{r}
 #| label: tidy3
@@ -272,53 +280,56 @@ tse %>%
     geom_boxplot()
 ```
 
-As demonstrated, tidy R programming can be effectively used to manage `TreeSE`
-objects. Please refer to
+As demonstrated, tidy R programming can be effectively used to manage
+`TreeSE` objects. Please refer to
 [tidySummarizedExperiment](https://www.bioconductor.org/packages/release/bioc/vignettes/tidySummarizedExperiment/inst/doc/introduction.html)
 and
 [tidySingleCellExperiment](https://www.bioconductor.org/packages/release/bioc/vignettes/tidySingleCellExperiment/inst/doc/introduction.html)
 vignettes for more examples.
 
-::: {.callout-tip icon=false}
+::: {.callout-tip icon="false"}
 ## Exercises
 
-**Goal:** The goal is to learn how to work with multiple datasets by merging
-them and splitting dataset into list of `TreeSE`s.
+**Goal:** The goal is to learn how to work with multiple datasets by
+merging them and splitting datasets into lists of `TreeSE`s.
 
 **Exercise 1: Working with multiple datasets**
 
 1. Load any of the example datasets mentioned in [@sec-example-data].
 
-2. Explore sample metadata.
+2. Explore the sample metadata.
 
-3. Add arbitrary groups to `colData`. For instance, you create groups like this:
+3. Add arbitrary groups to `colData`. For instance, you can create
+groups like this:
 `sample(c("group1", "group2"), size = ncol(tse), replace = TRUE)`.
 
 4. Explore the group distribution with a bar plot.
 
-5. Split the data based on groups. The result should be a list containing
-each group in separate `TreeSE`.
+5. Split the data based on groups. The result should be a list
+containing each group in separate `TreeSE`.
 
-6. For each `TreeSE`, explore the grouping variable in `colData`. Does each
-`TreeSE` include only one unique value?
+6. For each `TreeSE`, explore the grouping variable in `colData`. Does
+each `TreeSE` include only one unique value?
 
 7. Calculate the total number of counts in each group.
+
     - Loop through elements of the list.
-    - For single `TreeSE`, retrieve `assay`, sum all the values, and add
-    the calculated sum to `colData` (all the samples in certain group should
-    have same value).
-    - The result should be a list of `TreeSE`s with additional sample metadata
-    column.
+    - For single `TreeSE`, retrieve `assay`, sum all the values, and
+    add the calculated sum to `colData` (all the samples in a
+    certain group should have the same value).
+    - The result should be a list of `TreeSE`s with an additional
+    sample metadata column.
 
-8. Combine the list back to single `TreeSE`.
+8. Combine the list back to a single `TreeSE` object.
 
-9. Load another dataset from [@sec-example-data] and merge it with the one
-You've been using. Explore the data.
+9. Load another dataset from [@sec-example-data] and merge it with the
+one You've been using. Explore the data.
 
 Useful functions:
 
-`utils::data()`, `SummarizedExperiment::colData()`, `base::sample()`, `miaViz::plotBarplot()`,
-`mia::splitOn()`, `BiocGenerics::lapply()`, `SummarizedExperiment::assay()`,
-`base::sum()`, `mia::unsplitOn()` `mia::mergeSEs()`
+`utils::data()`, `SummarizedExperiment::colData()`, `base::sample()`,
+`miaViz::plotBarplot()`, `mia::splitOn()`, `BiocGenerics::lapply()`,
+`SummarizedExperiment::assay()`, `base::sum()`, `mia::unsplitOn()`,
+`mia::mergeSEs()`
 
 :::

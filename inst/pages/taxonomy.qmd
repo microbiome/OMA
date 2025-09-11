@@ -18,51 +18,54 @@ data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 ```
 
-Taxonomic information is a key part of analyzing microbiome data, and without
-it, any type of data analysis probably will not make much sense. However,
-the degree of detail of taxonomic information differs depending on the dataset
-and annotation data used.
+Taxonomic information is a key part of analyzing microbiome data, and
+without it, any type of data analysis probably would not make much
+sense. However, the degree of detail of taxonomic information differs
+depending on the dataset and annotation data used.
 
-Therefore, the `mia` package expects a loose assembly of taxonomic information
-and assumes certain key aspects:
+Therefore, the `mia` package expects a loose assembly of taxonomic
+information and assumes certain key aspects:
 
-* Taxonomic information is given as character vectors or factors in the
-`rowData` of a `SummarizedExperiment` object.
-* The columns containing the taxonomic information must be named `domain`,
-`kingdom`, `phylum`, `class`, `order`, `family`, `genus`, `species` or with
-a capital first letter.
-* The columns must be given in the order shown above.
-* column can be omitted, but the order must remain
+- Taxonomic information is given as character vectors or factors in
+the `rowData` of a `SummarizedExperiment` object.
+- The columns containing the taxonomic information must be named
+`domain`, `kingdom`, `phylum`, `class`, `order`, `family`, `genus`,
+`species` or with a capital first letter.
+- The columns must be given in the order shown above.
+- A column can be omitted, but the order must remain.
 
-In this chapter, we will refer to the co-abundant groups as CAGs, which are
-clusters of taxonomic features that co-vary across samples.
+In this chapter, we will refer to the co-abundant groups as CAGs, which
+are clusters of taxonomic features that co-vary across samples.
 
 ## Assigning taxonomic information
 
-There are a number of methods to assign taxonomic information. We like to give
-a short introduction about the methods available without ranking one over the
-other. This has to be your choice based on the result for the individual
-dataset.
+There are a number of methods to assign taxonomic information. We like
+to give a short introduction about the methods available without ranking
+one over the other. This has to be your choice based on the result for
+the individual dataset.
 
 ### DADA2
 
-The `dada2` package [@Callahan2016dada2] implements the `assignTaxonomy()`
-function, which takes as input the ASV sequences associated with each
-row of data and a training dataset. For more information visit the
+The `dada2` package [@Callahan2016dada2] implements the
+`assignTaxonomy()` function, which takes as input the ASV sequences
+associated with each row of data and a training dataset. For more
+information visit the
 [dada2 homepage](https://benjjneb.github.io/dada2/assign.html).
 
 ### DECIPHER
 
-The `DECIPHER` package [@R_DECIPHER] implements the `IDTAXA` algorithm to assign
-either taxonomic information or function information. For `mia`,
-only the first option is of interest for now and more information can be
-found on the [DECIPHER website](http://www2.decipher.codes/Classification.html).
+The `DECIPHER` package [@R_DECIPHER] implements the `IDTAXA` algorithm
+to assign either taxonomic information or function information. For
+`mia`, only the first option is of interest for now and more information
+can be found on the
+[DECIPHER website](http://www2.decipher.codes/Classification.html).
 
 ## Functions to access taxonomic information
 
 ### Check taxonomy ranks in data
 
-`checkTaxonomy()` checks whether the taxonomic information is usable for `mia`
+`checkTaxonomy()` checks whether the taxonomic information is usable for
+`mia`
 
 ```{r}
 #| label: check_tax
@@ -70,8 +73,9 @@ found on the [DECIPHER website](http://www2.decipher.codes/Classification.html).
 checkTaxonomy(tse)
 ```
 
-Since the `rowData` can contain other data, `taxonomyRanks()` will return the 
-columns that `mia` assumes to contain the taxonomic information.
+Since the `rowData` can contain other data, `taxonomyRanks()` will
+return the columns that `mia` assumes to contain the taxonomic
+information.
 
 ```{r}
 #| label: tax_ranks
@@ -79,7 +83,7 @@ columns that `mia` assumes to contain the taxonomic information.
 taxonomyRanks(tse)
 ```
 
-This can then be used to subset the `rowData` to columns needed.
+This can then be used to subset the `rowData` to columns as needed.
 
 ```{r}
 #| label: subset_rowData
@@ -87,8 +91,8 @@ This can then be used to subset the `rowData` to columns needed.
 rowData(tse)[, taxonomyRanks(tse)]
 ```
 
-`taxonomyRankEmpty()` checks for empty values in the given `rank` and returns a 
-logical vector of `length(x)`.
+`taxonomyRankEmpty()` checks for empty values in the given `rank` and
+returns a logical vector of `length(x)`.
 
 ```{r}
 #| label: check_empty
@@ -109,9 +113,10 @@ information into a character vector of `length(x)`
 getTaxonomyLabels(tse) |> head()
 ```
 
-By default, this will use the lowest non-empty information to construct a
-string with the following scheme `level:value`. If all levels are the same,
-this part is omitted, but can be added by setting `with.rank = TRUE`.
+By default, this will use the lowest non-empty information to construct
+a string with the following scheme `level:value`. If all levels are the
+same, this part is omitted, but can be added by setting
+`with.rank = TRUE`.
 
 ```{r}
 #| label: get_taxa_labels2
@@ -149,8 +154,8 @@ getUnique(tse, rank = "Phylum") |> head()
 ```
 
 With `mapTaxonomy()`, you can search information on certain taxonomic
-features from the taxonomy table. For instance, we can check all the features
-that matches with "Escherichia".
+features from the taxonomy table. For instance, we can check all the
+features that matches with "Escherichia".
 
 ```{r}
 #| label: mapTaxonomy
@@ -160,17 +165,17 @@ mapTaxonomy(tse, taxa = "Escherichia")
 
 ## Prune taxonomy tree {#sec-update-tree}
 
-Subsetting is explained in detail in [@sec-treese_subsetting]. However, if
-you've already subsetted your data, you may have noticed that the taxonomy tree
-does not automatically update when using the `[]` operators. Although the
-linakges between rows and tree nodes remain correct, the tree retains its
-original, complex structure. You may be wondering how to update the tree to
-reflect the newly simplified data.
+Subsetting is explained in detail in [@sec-treese_subsetting]. However,
+if you've already subsetted your data, you may have noticed that the
+taxonomy tree does not automatically update when using the `[]`
+operators. Although the linkages between rows and tree nodes remain
+correct, the tree retains its original, complex structure. You may be
+wondering how to update the tree to reflect the newly simplified data.
 
 `mia` package functions `subsetBy*` and `agglomerateBy*` (see
 [@sec-agglomeration]) include an `update.tree` parameter to handle this
-adjustment. However, when using `[]`, tree pruning must be done as an additional
-step.
+adjustment. However, when using `[]`, tree pruning must be done as an
+additional step.
 
 Let's start by selecting 5 arbitrary rows.
 
@@ -181,11 +186,11 @@ tse_sub <- tse[1:5, ]
 tse_sub
 ```
 
-ven though we have only 5 rows, the tree still retains its original number of
-tips. To align the tree with the subsetted data, we can use the
-`TreeSummarizedExperiment::subsetByLeaf()` function, which allows us to select
-specific tips from the tree, effectively pruning it to match the current subset
-of data.
+Even though we have only 5 rows, the tree still retains its original
+number of tips. To align the tree with the subsetted data, we can use
+the `TreeSummarizedExperiment::subsetByLeaf()` function, which allows us
+to select specific tips from the tree, effectively pruning it to match
+the current subset of data.
 
 ```{r}
 #| label: subset_tree
@@ -194,18 +199,19 @@ tse_sub <- subsetByLeaf(tse_sub, rowLeaf = rownames(tse_sub))
 tse_sub
 ```
 
-Now, we can see that the taxonomy tree has a simpler structure, including only
-the selected leaves.
+Now, we can see that the taxonomy tree has a simpler structure,
+including only the selected leaves.
 
 ## Generate a hierarchy tree on the fly {#sec-fly-tree}
 
-A hierarchy tree shows mapping between the taxonomic levels in taxonomic rank
-table (included in `rowData`), rather than the detailed phylogenetic relations.
-Usually, a phylogenetic tree refers to latter which is why we call here the
-generated tree as "hierarchy tree".
+A hierarchy tree shows mapping between the taxonomic levels in taxonomic
+rank table (included in `rowData`), rather than the detailed
+phylogenetic relations. Usually, a phylogenetic tree refers to the
+latter which is why we here call the generated tree a "hierarchy tree".
 
-To create a hierarchy tree, `getHierarchyTree()` used the information and
-returns a `phylo` object. Duplicate information from the `rowData` is removed.
+To create a hierarchy tree, `getHierarchyTree()` uses the information
+and returns a `phylo` object. Duplicate information from the `rowData`
+is removed.
 
 ```{r}
 #| label: getHierarchyTree
@@ -225,9 +231,9 @@ The implementation is based on the `toTree()` function from the
 
 ## Set taxonomy ranks
 
-If your data includes taxonomy ranks that are not included by default in `mia`,
-you can set the ranks manually. By doing so, `mia` will be able to detect and
-utilize these taxonomy ranks from your data as expected.
+If your data includes taxonomy ranks that are not included by default in
+`mia`, you can set the ranks manually. By doing so, `mia` will be able
+to detect and utilize these taxonomy ranks from your data as expected.
 
 Get default ranks of `mia`.
 
@@ -268,7 +274,8 @@ setTaxonomyRanks(ranks)
 
 ## Visualizing phylogeny
 
-`plotRowTree()` function provides a convenient way to visualize the phylogeny.
+The `plotRowTree()` function provides a convenient way to visualize the
+phylogeny.
 
 ```{r}
 #| label: plot_phylogeny1
@@ -278,17 +285,19 @@ library(miaViz)
 plotRowTree(tse)
 ```
 
-By default, the visualized phylogeny has only limited amount of information.
-To enrich the visualization, we can prune the tree to genus level and visualize
-to which phyla these genera belong to.
+By default, the visualized phylogeny has only a limited amount of
+information. To enrich the visualization, we can prune the tree to genus
+level and visualize to which phyla these genera belong to.
 
 ```{r}
 #| label: plot_phylogeny2
 
 # Agglomerate data and prune tree
 tse <- agglomerateByRank(tse, rank = "Genus")
+
 # Get top features
 top <- getTop(tse, top = 50L)
+
 # Plot
 plotRowTree(
     tse[top, ],
@@ -296,9 +305,10 @@ plotRowTree(
     )
 ```
 
-In addition to nodes and tips, we can also color edges based on feature metadata
-data. Below, we color edges based on phyla and illustrate the mean abundance of
-genera by coloring tips. Moreover, we switch to dendrogram layout.
+In addition to nodes and tips, we can also color edges based on feature
+metadata. Below, we color edges based on phyla and illustrate the mean
+abundance of genera by coloring tips. Moreover, we switch to a
+dendrogram layout.
 
 ```{r}
 #| label: plot_phylogeny3
@@ -308,6 +318,7 @@ library(scater)
 # Calculate mean abundance
 tse <- addPerFeatureQC(tse)
 rowData(tse)[["log_mean"]] <- log(rowData(tse)[["mean"]])
+
 # Plot
 plotRowTree(
     tse[top, ],
@@ -317,7 +328,7 @@ plotRowTree(
 )
 ```
 
-::: {.callout-tip icon=false}
+::: {.callout-tip icon="false"}
 ## Exercises
 
 **Goal:** Learn how to handle taxonomy information.
@@ -326,29 +337,31 @@ plotRowTree(
 
 1. Load any of the example datasets mentioned in [@sec-example-data].
 
-2. Ensure that the data includes `rowData` and `rowTree`. If not, select some
-other dataset.
+2. Ensure that the data includes `rowData` and `rowTree`. If not,
+select some other dataset.
 
 3. List the available taxonomic ranks in the data.
 
 4. List the unique taxonomic features from specific taxonomy rank.
 
-5. Subset data by taking, e.g., first 10 rows.
+5. Subset data by taking, e.g., the first 10 rows.
 
-6. How many nodes the phylogeny includes?
+6. How many nodes does the phylogeny include?
 
-7. Prune the tree to correspond the subsetted data. How many nodes there are
-after pruning?
+7. Prune the tree to correspond the subsetted data. How many nodes are
+left after pruning?
 
 8. Visualize the phylogeny.
 
-9. Save the data to another variable. Calculate hierarchy tree, and visualize
-it. How the tree differs from phylogeny?
+9. Save the data to another variable. Calculate the hierarchy tree, and
+visualize it. How does the tree differ from phylogeny?
 
 Useful functions:
 
-`utils::data()`, `SummarizedExperiment::rowData()`, `TreeSummarizedExperiment::rowTree()`,
-`mia::taxonomyRanks()`, `mia::getUnique()`, `TreeSummarizedExperiment::rowTree(tse)$Nnode`,
-`TreeSummarizedExperiment::subsetByLeaf()`, `miaViz::plotRowTree()`, `mia::addHierarchyTree()`
+`utils::data()`, `SummarizedExperiment::rowData()`,
+`TreeSummarizedExperiment::rowTree()`, `mia::taxonomyRanks()`,
+`mia::getUnique()`, `TreeSummarizedExperiment::rowTree(tse)$Nnode`,
+`TreeSummarizedExperiment::subsetByLeaf()`, `miaViz::plotRowTree()`,
+`mia::addHierarchyTree()`
 
 :::
