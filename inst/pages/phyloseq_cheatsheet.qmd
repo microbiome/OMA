@@ -1,10 +1,10 @@
-# phyloseq vs TreeSE cheatsheet {#sec-extras}
+# phyloseq vs TreeSE cheatsheet {#sec-phyloseq_cheatsheet}
 
 ```{r}
 #| label: setup
 #| echo: false
 
-knitr::opts_chunk$set(eval=TRUE, warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(eval = TRUE, warning = FALSE, message = FALSE)
 ```
 
 This section has a cheatsheet for translating common functions in phyloseq
@@ -58,12 +58,11 @@ rowData commands.
 #| label: access_data
 
 phy_taxtable <-
-    tax_table(phy)  |> # Access the phyloseq taxonomic name table
+    tax_table(phy) |> # Access the phyloseq taxonomic name table
     data.frame() # Make into a data frame
 
 tse_taxtable <- rowData(tse) |> # Same for tse
     data.frame()
-
 ```
 
 **Accessing sample data: sample_data = colData**
@@ -132,7 +131,6 @@ SAMPLE_phy <- sample_data(phy_sampledata) # Make sample data table
 
 phy <- phyloseq(OTU_phy, TAX_phy, SAMPLE_phy) # Combine into phyloseq object
 phy # Inspect
-
 ```
 
 Let's start by checking our otu table, and see if it is counts or already
@@ -174,7 +172,7 @@ Let's check the different assay names we have.
 
 ```{r}
 #| label: check_assays
- 
+
 assayNames(tse)
 ```
 
@@ -200,15 +198,17 @@ tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 assays(tse) # Let's check
 
 # With phyloseq you would need to have two different phyloseq objects
-phy_relab  = transform_sample_counts(phy, function(x)
-  x / sum(x))
+phy_relab <- transform_sample_counts(phy, function(x) {
+    x / sum(x)
+})
 
 # Let's add clr transformed data just for the fun of it :)
 tse <- transformAssay(
     tse,
     assay.type = "counts",
     method = "clr",
-    pseudocount = 1)
+    pseudocount = 1
+)
 
 assays(tse) # Let's check
 
@@ -230,9 +230,10 @@ In this section we will remove the "Mock" samples and make new data objects.
 #| label: subset_samples
 
 phy_nomock <- subset_samples(
-    phy, !SampleType == "Mock") # Removing mock samples in phyloseq
+    phy, !SampleType == "Mock"
+) # Removing mock samples in phyloseq
 
-tse_nomock <- tse[,!tse$SampleType == "Mock"] # tse uses indexing columns
+tse_nomock <- tse[, !tse$SampleType == "Mock"] # tse uses indexing columns
 ```
 
 Let's see what we have now.
@@ -240,8 +241,12 @@ Let's see what we have now.
 ```{r}
 #| label: check_removed_samples
 
-phy |> sample_names() |> length()
-phy_nomock |> sample_names() |> length()
+phy |>
+    sample_names() |>
+    length()
+phy_nomock |>
+    sample_names() |>
+    length()
 colnames(tse) |> length()
 colnames(tse_nomock) |> length()
 ```
@@ -257,9 +262,9 @@ indexing rows.
 #| label: take_only_bact
 
 phy_nomock_bacteria <-
-  subset_taxa(phy_nomock, Kingdom == "Bacteria")
+    subset_taxa(phy_nomock, Kingdom == "Bacteria")
 tse_nomock_bacteria <-
-  tse[tse$Kingdom == "Bacteria", ]
+    tse[tse$Kingdom == "Bacteria", ]
 
 phy_nomock_bacteria # We have 19008 taxa (only bacteria) and before 19216
 tse_nomock_bacteria
@@ -289,7 +294,7 @@ df |> head() # Inspect
 phy_sampledata <- sample_data(phy) |> data.frame()
 phy_sampledata$shannon <- df$Shannon
 sample_data(phy) <- phy_sampledata
-sample_data(phy) |> head()  # Inspect
+sample_data(phy) |> head() # Inspect
 ```
 
 For the tse we will need to specify which assay (which normalization of the
@@ -313,7 +318,9 @@ done easily.
 #| label: extract_alpha
 
 # Extract
-df <- colData(tse) |> data.frame() |> dplyr::select(matches("shannon"))
+df <- colData(tse) |>
+    data.frame() |>
+    dplyr::select(matches("shannon"))
 ```
 
 ## Calculating beta diversity: ordinate = addMDS
@@ -344,9 +351,9 @@ tse <- addMDS(
     method = "bray",
     assay.type = "relabundance",
     name = "MDS_bray",
-    ncomponents = 10) # Let's also define how many dimensions
+    ncomponents = 10
+) # Let's also define how many dimensions
 tse # Inspect, now we have new reducedDim "MDS_bray"
-
 ```
 
 ## Plotting ordinations: `plot_ordination()` = `plotReducedDim()`
@@ -416,59 +423,62 @@ altExp(tse, "Family")
 
 library(knitr)
 df <-
-  data.frame(
-    Functionality = c(
-      "Access sample data", # Row 1
-      "Access tax table", # Row 2
-      "Access OTU table",
-      "Build data object",
-      "Calculate alpha diversity",
-      "Calculate beta diversity",
-      "Plot ordination",
-      "Subset taxa",
-      "Subset samples",
-      "Aggromerate taxa"
-    ),
-    phyloseq = c(
-      "sample_data()",
-      "tax_table()",
-      "otu_table()",
-      "phyloseq()",
-      "estimate_richness()",
-      "ordinate()",
-      "plot_ordination()",
-      "subset_taxa()",
-      "subset_samples()",
-      "tax_glom()"
-    ),
-    "mia/TreeSE" = c(
-      "Index columns",
-      "Index rows",
-      "assays()",
-      "TreeSummarizedExperiment()",
-      "estimateDiversity()",
-      "addMDS()",
-      "plotReducedDim()",
-      "Index rows",
-      "Index columns",
-      "agglomerateByRank()"
+    data.frame(
+        Functionality = c(
+            "Access sample data", # Row 1
+            "Access tax table", # Row 2
+            "Access OTU table",
+            "Build data object",
+            "Calculate alpha diversity",
+            "Calculate beta diversity",
+            "Plot ordination",
+            "Subset taxa",
+            "Subset samples",
+            "Aggromerate taxa"
+        ),
+        phyloseq = c(
+            "sample_data()",
+            "tax_table()",
+            "otu_table()",
+            "phyloseq()",
+            "estimate_richness()",
+            "ordinate()",
+            "plot_ordination()",
+            "subset_taxa()",
+            "subset_samples()",
+            "tax_glom()"
+        ),
+        "mia/TreeSE" = c(
+            "Index columns",
+            "Index rows",
+            "assays()",
+            "TreeSummarizedExperiment()",
+            "estimateDiversity()",
+            "addMDS()",
+            "plotReducedDim()",
+            "Index rows",
+            "Index columns",
+            "agglomerateByRank()"
+        )
     )
-  )
 
 df2 <- data.frame(
     Data_type = c(
         "OTU table", # Row 1
         "Taxonomy table", # Row2
-        "Sample data table"), # Row 3
+        "Sample data table"
+    ), # Row 3
     phyloseq = c(
         "otu_table", # Row 1
         "tax_table", # Row2
-        "sample_data"),# Row 3
+        "sample_data"
+    ), # Row 3
     TreeSE = c(
         "assay", # Row 1
         "rowData", # Row2
-        "colData") # Row 3
-  )
+        "colData"
+    ) # Row 3
+)
 
 kable(df)
 kable(df2)

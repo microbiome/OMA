@@ -3,7 +3,7 @@
 ```{r}
 #| label: setup
 
-knitr::opts_chunk$set(eval=TRUE, warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(eval = TRUE, warning = FALSE, message = FALSE)
 ```
 
 ## `phyloseq` vs TreeSE cheatsheet
@@ -59,12 +59,11 @@ rowData commands.
 #| label: access_data
 
 phy_taxtable <-
-    tax_table(phy)  |> # Access the phyloseq taxonomic name table
+    tax_table(phy) |> # Access the phyloseq taxonomic name table
     data.frame() # Make into a data frame
 
 tse_taxtable <- rowData(tse) |> # Same for tse
     data.frame()
-
 ```
 
 **Accessing sample data: sample_data = colData**
@@ -133,7 +132,6 @@ SAMPLE_phy <- sample_data(phy_sampledata) # Make sample data table
 
 phy <- phyloseq(OTU_phy, TAX_phy, SAMPLE_phy) # Combine into phyloseq object
 phy # Inspect
-
 ```
 
 Let's start by checking our otu table, and see if it is counts or already
@@ -175,7 +173,7 @@ Let's check the different assay names we have.
 
 ```{r}
 #| label: check_assays
- 
+
 assayNames(tse)
 ```
 
@@ -201,15 +199,17 @@ tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 assays(tse) # Let's check
 
 # With phyloseq you would need to have two different phyloseq objects
-phy_relab  = transform_sample_counts(phy, function(x)
-  x / sum(x))
+phy_relab <- transform_sample_counts(phy, function(x) {
+    x / sum(x)
+})
 
 # Let's add clr transformed data just for the fun of it :)
 tse <- transformAssay(
     tse,
     assay.type = "counts",
     method = "clr",
-    pseudocount = 1)
+    pseudocount = 1
+)
 
 assays(tse) # Let's check
 
@@ -231,9 +231,10 @@ In this section we will remove the "Mock" samples and make new data objects.
 #| label: subset_samples
 
 phy_nomock <- subset_samples(
-    phy, !SampleType == "Mock") # Removing mock samples in phyloseq
+    phy, !SampleType == "Mock"
+) # Removing mock samples in phyloseq
 
-tse_nomock <- tse[,!tse$SampleType == "Mock"] # tse uses indexing columns
+tse_nomock <- tse[, !tse$SampleType == "Mock"] # tse uses indexing columns
 ```
 
 Let's see what we have now.
@@ -241,8 +242,12 @@ Let's see what we have now.
 ```{r}
 #| label: check_removed_samples
 
-phy |> sample_names() |> length()
-phy_nomock |> sample_names() |> length()
+phy |>
+    sample_names() |>
+    length()
+phy_nomock |>
+    sample_names() |>
+    length()
 colnames(tse) |> length()
 colnames(tse_nomock) |> length()
 ```
@@ -258,9 +263,9 @@ indexing rows.
 #| label: take_only_bact
 
 phy_nomock_bacteria <-
-  subset_taxa(phy_nomock, Kingdom == "Bacteria")
+    subset_taxa(phy_nomock, Kingdom == "Bacteria")
 tse_nomock_bacteria <-
-  tse[tse$Kingdom == "Bacteria", ]
+    tse[tse$Kingdom == "Bacteria", ]
 
 phy_nomock_bacteria # We have 19008 taxa (only bacteria) and before 19216
 tse_nomock_bacteria
@@ -290,7 +295,7 @@ df |> head() # Inspect
 phy_sampledata <- sample_data(phy) |> data.frame()
 phy_sampledata$shannon <- df$Shannon
 sample_data(phy) <- phy_sampledata
-sample_data(phy) |> head()  # Inspect
+sample_data(phy) |> head() # Inspect
 ```
 
 For the tse we will need to specify which assay (which normalization of the
@@ -314,7 +319,9 @@ done easily.
 #| label: extract_alpha
 
 # Extract
-df <- colData(tse) |> data.frame() |> dplyr::select(matches("shannon"))
+df <- colData(tse) |>
+    data.frame() |>
+    dplyr::select(matches("shannon"))
 ```
 
 ### Calculating beta diversity: ordinate = addMDS
@@ -345,9 +352,9 @@ tse <- addMDS(
     method = "bray",
     assay.type = "relabundance",
     name = "MDS_bray",
-    ncomponents = 10) # Let's also define how many dimensions
+    ncomponents = 10
+) # Let's also define how many dimensions
 tse # Inspect, now we have new reducedDim "MDS_bray"
-
 ```
 
 ### Plotting ordinations: `plot_ordination()` = `plotReducedDim()`
@@ -417,59 +424,62 @@ altExp(tse, "Family")
 
 library(knitr)
 df <-
-  data.frame(
-    Functionality = c(
-      "Access sample data", # Row 1
-      "Access tax table", # Row 2
-      "Access OTU table",
-      "Build data object",
-      "Calculate alpha diversity",
-      "Calculate beta diversity",
-      "Plot ordination",
-      "Subset taxa",
-      "Subset samples",
-      "Aggromerate taxa"
-    ),
-    phyloseq = c(
-      "sample_data()",
-      "tax_table()",
-      "otu_table()",
-      "phyloseq()",
-      "estimate_richness()",
-      "ordinate()",
-      "plot_ordination()",
-      "subset_taxa()",
-      "subset_samples()",
-      "tax_glom()"
-    ),
-    "mia/TreeSE" = c(
-      "Index columns",
-      "Index rows",
-      "assays()",
-      "TreeSummarizedExperiment()",
-      "estimateDiversity()",
-      "addMDS()",
-      "plotReducedDim()",
-      "Index rows",
-      "Index columns",
-      "agglomerateByRank()"
+    data.frame(
+        Functionality = c(
+            "Access sample data", # Row 1
+            "Access tax table", # Row 2
+            "Access OTU table",
+            "Build data object",
+            "Calculate alpha diversity",
+            "Calculate beta diversity",
+            "Plot ordination",
+            "Subset taxa",
+            "Subset samples",
+            "Aggromerate taxa"
+        ),
+        phyloseq = c(
+            "sample_data()",
+            "tax_table()",
+            "otu_table()",
+            "phyloseq()",
+            "estimate_richness()",
+            "ordinate()",
+            "plot_ordination()",
+            "subset_taxa()",
+            "subset_samples()",
+            "tax_glom()"
+        ),
+        "mia/TreeSE" = c(
+            "Index columns",
+            "Index rows",
+            "assays()",
+            "TreeSummarizedExperiment()",
+            "estimateDiversity()",
+            "addMDS()",
+            "plotReducedDim()",
+            "Index rows",
+            "Index columns",
+            "agglomerateByRank()"
+        )
     )
-  )
 
 df2 <- data.frame(
     Data_type = c(
         "OTU table", # Row 1
         "Taxonomy table", # Row2
-        "Sample data table"), # Row 3
+        "Sample data table"
+    ), # Row 3
     phyloseq = c(
         "otu_table", # Row 1
         "tax_table", # Row2
-        "sample_data"),# Row 3
+        "sample_data"
+    ), # Row 3
     TreeSE = c(
         "assay", # Row 1
         "rowData", # Row2
-        "colData") # Row 3
-  )
+        "colData"
+    ) # Row 3
+)
 
 kable(df)
 kable(df2)
@@ -498,7 +508,8 @@ You can find full workflow script without further explanations and comments from
 
 # Load objects
 seqtab.nochim <- readRDS(
-    system.file("extdata", "dada2_seqtab.nochim", package = "OMA"))
+    system.file("extdata", "dada2_seqtab.nochim", package = "OMA")
+)
 taxa <- readRDS(system.file("extdata", "dada2_taxa", package = "OMA"))
 ```
 
@@ -520,12 +531,12 @@ Usually,  sample metadata is imported as a file.
 
 samples.out <- rownames(seqtab.nochim)
 subject <- sapply(strsplit(samples.out, "D"), `[`, 1)
-gender <- substr(subject,1,1)
-subject <- substr(subject,2,999)
+gender <- substr(subject, 1, 1)
+subject <- substr(subject, 2, 999)
 day <- as.integer(sapply(strsplit(samples.out, "D"), `[`, 2))
-samdf <- data.frame(Subject=subject, Gender=gender, Day=day)
+samdf <- data.frame(Subject = subject, Gender = gender, Day = day)
 samdf$When <- "Early"
-samdf$When[samdf$Day>100] <- "Late"
+samdf$When[samdf$Day > 100] <- "Late"
 rownames(samdf) <- samples.out
 ```
 
@@ -548,10 +559,10 @@ tse <- TreeSummarizedExperiment(
     assays = assays,
     colData = samdf,
     rowData = taxa
-    )
+)
 
 # Remove mock sample like it is also done in DADA2 pipeline tutorial
-tse <- tse[ , colnames(tse) != "mock"]
+tse <- tse[, colnames(tse) != "mock"]
 ```
 
 Add sequences into `referenceSeq` slot and convert rownames into simpler format.
@@ -560,11 +571,11 @@ Add sequences into `referenceSeq` slot and convert rownames into simpler format.
 #| label: dada2_5
 
 # Convert sequences into right format
-dna <- Biostrings::DNAStringSet( rownames(tse) )
+dna <- Biostrings::DNAStringSet(rownames(tse))
 # Add sequences into referenceSeq slot
 referenceSeq(tse) <- dna
 # Convert rownames into ASV_number format
-rownames(tse) <- paste0("ASV", seq( nrow(tse) ))
+rownames(tse) <- paste0("ASV", seq(nrow(tse)))
 tse
 ```
 
@@ -614,9 +625,9 @@ analysis as an example, and beforehand we check for missing data:
 #| label: pick_covariates
 
 library(mia)
-cov_names <- c("Sex","Age_Years","Delivery_Mode")
-na_counts <- apply(is.na(colData(tse)[,cov_names]), 2, sum)
-na_summary<-as.data.frame(na_counts,row.names=cov_names)
+cov_names <- c("Sex", "Age_Years", "Delivery_Mode")
+na_counts <- apply(is.na(colData(tse)[, cov_names]), 2, sum)
+na_summary <- as.data.frame(na_counts, row.names = cov_names)
 ```
 
 We drop missing values of the covariates:
@@ -624,8 +635,8 @@ We drop missing values of the covariates:
 ```{r}
 #| label: subset_tse
 
-tse <- tse[ , !is.na(colData(tse)$Delivery_Mode) ]
-tse <- tse[ , !is.na(colData(tse)$Age_Years) ]
+tse <- tse[, !is.na(colData(tse)$Delivery_Mode)]
+tse <- tse[, !is.na(colData(tse)$Age_Years)]
 ```
 
 We agglomerate microbiome data to Phylum:
@@ -645,8 +656,8 @@ matrix:
 Y <- assays(tse_phylum)$counts
 # design matrix
 # taking 3 covariates
-sample_data<-as.data.frame(colData(tse_phylum)[,cov_names])
-X <- t(model.matrix(~Sex+Age_Years+Delivery_Mode,data=sample_data))
+sample_data <- as.data.frame(colData(tse_phylum)[, cov_names])
+X <- t(model.matrix(~ Sex + Age_Years + Delivery_Mode, data = sample_data))
 ```
 
 Building the parameters for the `pibble()` call to build the model; see more at
@@ -655,12 +666,12 @@ Building the parameters for the `pibble()` call to build the model; see more at
 ```{r}
 #| label: set_parameters
 
-n_taxa<-nrow(Y)
-upsilon <- n_taxa+3
+n_taxa <- nrow(Y)
+upsilon <- n_taxa + 3
 Omega <- diag(n_taxa)
-G <- cbind(diag(n_taxa-1), -1)
-Xi <- (upsilon-n_taxa)*G%*%Omega%*%t(G)
-Theta <- matrix(0, n_taxa-1, nrow(X))
+G <- cbind(diag(n_taxa - 1), -1)
+Xi <- (upsilon - n_taxa) * G %*% Omega %*% t(G)
+Theta <- matrix(0, n_taxa - 1, nrow(X))
 Gamma <- diag(nrow(X))
 ```
 
@@ -671,7 +682,7 @@ Automatically initializing the priors and visualizing their distributions:
 
 priors <- pibble(NULL, X, upsilon, Theta, Gamma, Xi)
 names_covariates(priors) <- rownames(X)
-plot(priors, pars="Lambda") + ggplot2::xlim(c(-5, 5))
+plot(priors, pars = "Lambda") + ggplot2::xlim(c(-5, 5))
 ```
 
 Estimating the posterior by including our response data `Y`.
@@ -683,7 +694,7 @@ the arguments `multDirichletBoot` `calcGradHess` could be passed in such case.
 #| label: estimate_posterior
 
 priors$Y <- Y
-posterior <- refit(priors, optim_method="adam", multDirichletBoot=0.5) #calcGradHess=FALSE
+posterior <- refit(priors, optim_method = "adam", multDirichletBoot = 0.5) # calcGradHess=FALSE
 ```
 
 Printing a summary about the posterior:
@@ -699,7 +710,7 @@ Plotting the summary of the posterior distributions of the regression parameters
 #| label: results2
 
 names_categories(posterior) <- rownames(Y)
-plot(posterior,par="Lambda",focus.cov=rownames(X)[2:4])
+plot(posterior, par = "Lambda", focus.cov = rownames(X)[2:4])
 ```
 
 Taking a closer look at "Sex" and "Delivery_Mode":
@@ -707,7 +718,7 @@ Taking a closer look at "Sex" and "Delivery_Mode":
 ```{r}
 #| label: results3
 
-plot(posterior, par="Lambda", focus.cov = rownames(X)[c(2,4)])
+plot(posterior, par = "Lambda", focus.cov = rownames(X)[c(2, 4)])
 ```
 
 ## Biclustering
@@ -756,7 +767,9 @@ Only the most prevalent taxa are included in analysis.
 
 # Subset data in the first experiment
 mae[[1]] <- subsetByPrevalent(
-    mae[[1]], rank = "Genus", prevalence = 0.2, detection = 0.001)
+    mae[[1]],
+    rank = "Genus", prevalence = 0.2, detection = 0.001
+)
 
 # rclr-transform in the first experiment
 mae[[1]] <- transformAssay(mae[[1]], method = "rclr")
@@ -768,7 +781,7 @@ output. It includes clusters for taxa and samples.
 
 ```{r}
 #| label: cobiclust2
- 
+
 # Do clustering using counts table
 clusters <- cobiclust(assay(mae[[1]], "counts"))
 
@@ -782,7 +795,8 @@ colData(mae[[1]])$clusters <- factor(col_clusters)
 
 # Order data based on clusters
 mae[[1]] <- mae[[1]][
-    order(rowData(mae[[1]])$clusters), order(colData(mae[[1]])$clusters)]
+    order(rowData(mae[[1]])$clusters), order(colData(mae[[1]])$clusters)
+]
 
 # Print clusters
 clusters$classification
@@ -798,8 +812,10 @@ Next we can plot clusters. Annotated heatmap is a common choice.
 library(ComplexHeatmap)
 # z-transform for heatmap
 mae[[1]] <- transformAssay(
-    mae[[1]], assay.type = "rclr", MARGIN = "features", method = "z",
-    name = "rclr_z")
+    mae[[1]],
+    assay.type = "rclr", MARGIN = "features", method = "z",
+    name = "rclr_z"
+)
 
 # Create annotations. When column names are equal, they should share levels.
 # Here samples include 3 clusters, and taxa 2. That is why we have to make
@@ -819,8 +835,10 @@ Plot the heatmap.
 #| fig-height: 12
 
 pheatmap(
-    assay(mae[[1]], "rclr_z"), cluster_rows = F, cluster_cols = F,
-    annotation_col = annotation_col, annotation_row = annotation_row)
+    assay(mae[[1]], "rclr_z"),
+    cluster_rows = F, cluster_cols = F,
+    annotation_col = annotation_col, annotation_row = annotation_row
+)
 ```
 
 Boxplot is commonly used to summarize the results:
@@ -833,8 +851,10 @@ library(patchwork)
 
 # ggplot requires data in melted format
 melt_assay <- meltSE(
-    mae[[1]], assay.type = "rclr",
-    add_col_data = TRUE, add_row_data = TRUE)
+    mae[[1]],
+    assay.type = "rclr",
+    add_col_data = TRUE, add_row_data = TRUE
+)
 
 # patchwork two plots side-by-side
 p1 <- ggplot(melt_assay) +
@@ -884,8 +904,10 @@ Next, we compute the Spearman correlation matrix.
 
 # Calculate correlations
 corr <- getExperimentCrossCorrelation(
-    mae, 1, 2, assay.type1 = "rclr", assay.type2 = "log10",
-    mode = "matrix", correlation = "spearman")
+    mae, 1, 2,
+    assay.type1 = "rclr", assay.type2 = "log10",
+    mode = "matrix", correlation = "spearman"
+)
 ```
 
 `biclust()` takes a matrix as an input and returns a `biclust` object. 
@@ -1016,8 +1038,10 @@ knitr::opts_chunk$set(eval = FALSE)
         median2 <- colMedians(assay2, na.rm = T)
         var2 <- colVars(assay2, na.rm = T)
 
-        list[[i]] <- data.frame(sample = colnames(tse1), sum1, sum2, mean1,
-                                 mean2, median1, median2, var1, var2)
+        list[[i]] <- data.frame(
+            sample = colnames(tse1), sum1, sum2, mean1,
+            mean2, median1, median2, var1, var2
+        )
     }
     return(list)
 }
@@ -1045,8 +1069,10 @@ pics <- list()
 for (i in seq_along(df)) {
     pics[[i]] <- ggplot(df[[i]]) +
         geom_point(aes(x = median1, y = median2)) +
-        labs(title = paste0("Cluster ", i), x = "Taxa (rclr median)",
-             y = "Metabolites (abs. median)")
+        labs(
+            title = paste0("Cluster ", i), x = "Taxa (rclr median)",
+            y = "Metabolites (abs. median)"
+        )
     print(pics[[i]])
 }
 pics[[1]] + pics[[2]] + pics[[3]]
@@ -1080,7 +1106,9 @@ for (name in cluster_names) {
 }
 
 # Create a heatmap
-pheatmap(corr, cluster_cols = F, cluster_rows = F,
-         annotation_col = bicluster_columns, annotation_row = bicluster_rows,
-         annotation_colors = annotation_colors)
+pheatmap(corr,
+    cluster_cols = F, cluster_rows = F,
+    annotation_col = bicluster_columns, annotation_row = bicluster_rows,
+    annotation_colors = annotation_colors
+)
 ```

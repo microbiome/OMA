@@ -103,10 +103,10 @@ participants on each category.
 
 library(curatedMetagenomicData)
 
-samples <- sampleMetadata[ sampleMetadata[["study_name"]] == "QinJ_2012", ]
+samples <- sampleMetadata[sampleMetadata[["study_name"]] == "QinJ_2012", ]
 
 tse <- returnSamples(
-    samples, 
+    samples,
     dataType = "relative_abundance",
     counts = TRUE, # use counts instead of rel abundances
     rownames = "short"
@@ -115,7 +115,9 @@ tse <- returnSamples(
 # Change assay's name to reflect its content
 assayNames(tse) <- "counts"
 
-table(tse[["disease"]]) |> t() |> knitr::kable()
+table(tse[["disease"]]) |>
+    t() |>
+    knitr::kable()
 ```
 
 ## Data preprocessing
@@ -166,12 +168,12 @@ library(mikropml)
 tse_prev <- subsetByPrevalent(
     x = tse,
     assay.type = "counts",
-    prevalence = 10/100
+    prevalence = 10 / 100
 )
 
 # Get alpha diversity metrics to add them as inputs
 alpha_divs <- getAlpha(
-    tse_prev, 
+    tse_prev,
     assay.type = "counts"
 )
 
@@ -192,10 +194,10 @@ assay <- t(assay)
 assay_alpha <- cbind(assay, alpha_divs)
 raw_df <- as.data.frame(assay_alpha)
 
-# Make new names of groups of correlated features 
+# Make new names of groups of correlated features
 # by concatenating the names of the group members
 names_grp_feats <- group_correlated_features(
-    features = raw_df, 
+    features = raw_df,
     group_neg_corr = FALSE
 )
 ```
@@ -256,7 +258,7 @@ raw_df[["BMI"]] <- BMI
 prep_regression <- preprocess_data(
     dataset = raw_df,
     outcome_colname = "BMI",
-    method = NULL, # Skip normalization 
+    method = NULL, # Skip normalization
     remove_var = "zv",
     collapse_corr_feats = TRUE,
     group_neg_corr = FALSE
@@ -341,13 +343,13 @@ Below, the RF algorithm is used for a classification task:
 
 # Train random forest for classification
 rf_classification <- run_ml(
-    dataset = df_classification, 
-    method = "rf", 
-    outcome_colname = "diagnosis", 
+    dataset = df_classification,
+    method = "rf",
+    outcome_colname = "diagnosis",
     seed = 1,
-    kfold = 2, 
-    cv_times = 2, 
-    training_frac = .8, 
+    kfold = 2,
+    cv_times = 2,
+    training_frac = .8,
     find_feature_importance = FALSE
 )
 ```
@@ -368,13 +370,13 @@ in regression tasks:
 
 # Train random forest for regression
 rf_regression <- run_ml(
-    dataset = df_regression, 
-    method = "rf", 
-    outcome_colname = "BMI", 
+    dataset = df_regression,
+    method = "rf",
+    outcome_colname = "BMI",
     seed = 1,
-    kfold = 2, 
-    cv_times = 2, 
-    training_frac = .8, 
+    kfold = 2,
+    cv_times = 2,
+    training_frac = .8,
     find_feature_importance = FALSE
 )
 ```
@@ -401,12 +403,12 @@ data analysis.
 
 # Train XGBoost for classification
 xgb <- run_ml(
-    dataset = df_classification, 
-    method = "xgbTree", 
-    outcome_colname = "diagnosis", 
+    dataset = df_classification,
+    method = "xgbTree",
+    outcome_colname = "diagnosis",
     seed = 1,
-    kfold = 2, 
-    cv_times = 2, 
+    kfold = 2,
+    cv_times = 2,
     training_frac = .8,
     find_feature_importance = FALSE
 )
@@ -607,16 +609,16 @@ both curves for the two models generated (RF and XGBoost):
 
 # Calculate RF model metrics required for plotting
 rf_senspec <- calc_model_sensspec(
-        rf_classification[["trained_model"]],
-        rf_classification[["test_data"]]
+    rf_classification[["trained_model"]],
+    rf_classification[["test_data"]]
 )
 # Add model label to data
 rf_senspec$model <- "rf"
 
 # Calculate XGBoost model metrics required for plotting
 xgb_senspec <- calc_model_sensspec(
-        xgb[["trained_model"]],
-        xgb[["test_data"]]
+    xgb[["trained_model"]],
+    xgb[["test_data"]]
 )
 # Add model label to data
 xgb_senspec$model <- "XGBoost"
@@ -625,7 +627,9 @@ xgb_senspec$model <- "XGBoost"
 senspec <- rbind(rf_senspec, xgb_senspec)
 
 # Inspect part of the output
-senspec |> head() |> knitr::kable()
+senspec |>
+    head() |>
+    knitr::kable()
 ```
 
 The metrics 'Sensitivity' and 'Specificity' are used in ROC curves, and
@@ -646,17 +650,17 @@ library(patchwork)
 roc_p <- ggplot(data = senspec) +
     geom_path(aes(x = fpr, y = sensitivity, color = model))
 # 1.1 Add line representing 'random guess' performance
-roc_p <- roc_p + 
+roc_p <- roc_p +
     geom_abline(color = "grey30", linetype = "dashed")
 # 1.2 Add axis titles and custom theme
-roc_p <- roc_p + 
+roc_p <- roc_p +
     labs(x = "FPR or (1 - Specificity)", y = "Sensitivity", title = "ROC") +
     theme_bw()
 
 
 # 2. Plot the PRC curve of each model
 prc_p <- ggplot(data = senspec) +
-    geom_path(aes(x = sensitivity, y = precision, color = model)) 
+    geom_path(aes(x = sensitivity, y = precision, color = model))
 # 2.1 Add line representing 'random guess' performance
 prc_p <- prc_p +
     geom_hline(color = "grey30", linetype = "dashed", yintercept = 0.5)
@@ -759,7 +763,7 @@ obs_vs_pred <- ggplot(data = test_data) +
 # Add line showing perfect prediction
 obs_vs_pred <- obs_vs_pred + geom_abline(color = "grey30", linetype = "dashed")
 # Make axes of same scale
-obs_vs_pred<- obs_vs_pred + coord_equal(xlim = c(17,30), ylim = c(17,30))
+obs_vs_pred <- obs_vs_pred + coord_equal(xlim = c(17, 30), ylim = c(17, 30))
 # Custom axes titles
 obs_vs_pred <- obs_vs_pred + labs(x = "Predicted BMI", y = "Observed BMI")
 # Add custom theme and visualize the plot

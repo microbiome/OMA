@@ -1,0 +1,76 @@
+on:
+  pull_request:
+    branches:
+      - devel
+      - RELEASE_**
+    paths: ["**.[rR]", "**.[qrR]md", "**.[rR]markdown", "**.[rR]nw", "**.[rR]profile"]
+  workflow_dispatch:
+name: Style code
+permissions: read-all
+jobs:
+  style:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - name: Install styler and roxygen2
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: any::styler, any::roxygen2
+          needs: styler
+      - name: Enable styler cache
+        run: styler::cache_activate()
+        shell: Rscript {0}
+      - name: Determine cache location
+        id: styler-location
+        run: |
+          cat(
+            "location=",
+            styler::cache_info(format = "tabular")$location,
+            "\n",
+            file = Sys.getenv("GITHUB_OUTPUT"),
+            append = TRUE,
+            sep = ""
+          )
+        shell: Rscript {0}
+      - name: Cache styler
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.styler-location.outputs.location }}
+          key: ${{ runner.os }}-styler-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-styler-
+            ${{ runner.os }}-
+      - name: Style
+        run: |
+          # Style only R files
+          files <- system(
+            "git diff --name-only origin/${{ github.base_ref }}...${{ github.sha }} | egrep -i '\\.(R|Rmd|qmd|Rmarkdown|Rnw|Rprofile)$'",
+            intern = TRUE
+          )
+          if (length(files)) {
+            styler::style_file(path = files, transformers = styler::tidyverse_style(indent_by = 4L))
+          }
+        shell: Rscript {0}
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.name "$GITHUB_ACTOR"
+          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git add -u
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Style code (GHA)"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
