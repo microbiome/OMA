@@ -67,24 +67,26 @@ performed well.
 evaluated the number of detected taxa (ASVs), consistency of the detected taxa
 between methods, replication of results between studies and error rate on
 datasets with randomly assigned groups. They emphasized conservatism
-(low error rate) in their recommendations and ended up recommending ALDEx2
-[@Fernandes2014] and ANCOM-II [@Mandal2015]. Additionally, they recommended
-MaAsLin2 [@Mallick2020] (i.e. analyzing arcsine square root transformed
-relative abundances with linear regression) as a more powerful option.
+(low error rate) in their recommendations and ended up recommending
+`r BiocStyle::Biocpkg("ALDEx2")` [@Fernandes2014] and
+`r BiocStyle::Biocpkg("ANCOMBC")` [@Mandal2015]. Additionally, they recommended
+`r BiocStyle::Biocpkg("Maaslin2")` [@Mallick2020] (i.e. analyzing arcsine
+square root transformed relative abundances with linear regression) as a more
+powerful option.
 
 - In addition to simulations, @Yang2022 estimated the FDR of different DAA
 methods on 106 real datasets with randomly created groups. They found that,
 the observed FDR was at the nominal level when, for instance, analyzing
 relative abundances either with the Wilcoxon test or with linear regression
-(MaAsLin2).
+(`r BiocStyle::Biocpkg("Maaslin2")`).
 
 -	@Pelto2025 studied how the results from different DAA methods replicate
 between random partitions of datasets and between datasets from independent
 studies. They found that when considering consistency along with sensitivity,
 the best performance was obtained by analyzing relative abundances with a
 non-parametric method or (after log transformation) with linear
-regression/t-test (MaAsLin2) or analyzing presence/absence of taxa with logistic
-regression.
+regression/t-test (`r BiocStyle::Biocpkg("Maaslin2")`) or analyzing
+presence/absence of taxa with logistic regression.
 
 -	@Gamboa-Tuz2025 employed three real datasets to benchmark different DAA
 methods against biological ground truth. They found that methods employing the
@@ -103,7 +105,8 @@ on the characteristics of the analyzed data (@Weiss2017, @Calgaro2020).
 Consequently, while the methods recommended above seem to be good general
 default methods, they may not necessarily be the optimal methods in many cases.
 If one wants to evaluate which method may perform best specifically on their
-data, one option to use the `benchdamic` package by @Calgaro2022 (see vignette
+data, one option to use the `r BiocStyle::Biocpkg("benchdamic")` package
+by @Calgaro2022 (see vignette
 [here](https://www.bioconductor.org/packages/release/bioc/vignettes/benchdamic/inst/doc/intro.html)).
 
 Lastly, based on recent studies on classification accuracy of healthy vs.
@@ -125,9 +128,9 @@ analysis and the differential analysis of positive (non-zero) abundances.
 
 ### Preparing the data {#sec-prepare-data}
 
-We use the Tengeler2020 dataset from `mia` package. The dataset includes
-samples from people with ADHD (N = 13) and without ADHD (Control group, N = 14).
-The people are from three different cohorts.
+We use the Tengeler2020 dataset from `r BiocStyle::Biocpkg("mia")` package.
+The dataset includes samples from people with ADHD (N = 13) and without ADHD
+(Control group, N = 14). The people are from three different cohorts.
 
 ```{r}
 #| label: load_packages_and_data
@@ -179,8 +182,8 @@ groups without any other covariates included in the analysis.
 In our case this means comparing the relative abundances of genera between the
 people with and without ADHD.
 
-We employ the `Maaslin2` function from the `MaAsLin2` package [@Mallick2020].
-The function
+We employ the `Maaslin2` function from the `r BiocStyle::Biocpkg("Maaslin2")`
+package [@Mallick2020]. The function
 
 - transforms counts to relative abundances,
 - replaces zeros by half of the smallest non-zero relative abundance,
@@ -260,7 +263,8 @@ Now, if we use the standard criterion for statistical significance, namely,
 q-value < 0.05, we can see that the DAA result is statistically significant for
 the genera named as _[Ruminococcus] gauvreauii group_, _Faecalibacterium_,
 _Catabacter_, _[Clostridium] innocuum group_ and _Erysipelatoclostridium_.
-(`Maaslin2` has some problems with special characters such as `[` or `]`.)
+(`r BiocStyle::Biocpkg("Maaslin2")` has some problems with special characters
+such as `[` or `]`.)
 Moreover, for instance, the positive log~2~-fold change estimate of
 _Faecalibacterium_ tells that the average relative abundance of
 _Faecalibacterium_ is higher in the ADHD group.
@@ -268,11 +272,11 @@ _Faecalibacterium_ is higher in the ADHD group.
 #### Visualizing the results {#sec-daa-viz}
 
 While the numbers above provide summarized information about the group
-differences
-for each taxon, it is often useful to further examine these associations in
-more detail. That can be done, for instance, using strip plots with boxplots.
-We show here how such plots can be created for the significant taxa by using
-`plotBoxplot` function from miaViz package.
+differences for each taxon, it is often useful to further examine these
+associations in more detail. That can be done, for instance, using strip
+plots with boxplots. We show here how such plots can be created for the
+significant taxa by using `plotBoxplot` function from
+the `r BiocStyle::Biocpkg("miaViz")` package.
 
 ```{r}
 #| label: daa-viz-1
@@ -554,13 +558,14 @@ effect.
 We show here how to perform DPA with logistic regression. We show the case
 where we compare subjects with and without ADHD while controlling for `cohort`. 
 Due to the convenient implementation of logistic regression for DPA,
-we employ here `maaslin3()` function from `maaslin3` package [@Nickols2024].
+we employ here the `maaslin3()` function from the
+`r BiocStyle::Biocpkg("maaslin3")` package [@Nickols2024].
 
-To run `maaslin3()` function, we need to provide it with
+To run the `maaslin3()` function, we need to provide it with
 
-- `tse` object,
-- model formula, in this case `~ patient_status + cohort + total`, and
-- folder for some output files
+- a `tse` object,
+- a model formula, in this case `~ patient_status + cohort + total`, and
+- a folder for output files
 
 Note that we also control for the sequencing depth/library size/total read
 count (`total`) in the analysis. This is because the detection
@@ -590,9 +595,9 @@ obj_DPA_cov <- maaslin3(
 Next, we extract the `data.frame` of results from the list object returned by
 `maaslin3()`. We remove the variable `total` from the output as it is merely a 
 technical covariate that we are not interested in. We also calculate the 95%
-confidence intervals. Furthermore, as with MaAsLin2, we calculate the q-values
-separately for `patient_status` and `cohort`. Lastly, we transform the results
-to a slightly more convenient format.
+confidence intervals. Furthermore, as with `r BiocStyle::Biocpkg("Maaslin2")`,
+we calculate the q-values separately for `patient_status` and `cohort`.
+Lastly, we transform the results to a slightly more convenient format.
 
 ```{r}
 #| label: results_DPA_cov
@@ -647,7 +652,7 @@ perform such analysis using the `maaslin3()` function. Purely for
 illustration purposes, we show here the analysis with an interaction term.
 
 We proceed as in the previous sections. The difference
-compared to DPA (@sec-dpa-cov) is that we now have to
+compared to DPA (@sec-DPA) is that we now have to
 extract `fit_data_abundance` (and not
 `fit_data_prevalence`) from the list object returned by `maaslin3()`. We also
 need to set `median_comparison_abundance = FALSE` in the function call as we
@@ -719,22 +724,22 @@ _simulated_ data with strong compositional effects (e.g. @Roche2022, @Yang2022).
 We therefore give below some options for incorporating more advanced
 compositionality adjustments in DAA.
 
-- In MaAsLin2, the default normalization method (TSS) can be replaced by TMM
-normalization [@Robinson2010] by including `NORM = "TMM"` in the `Maaslin2()`
-function.
-- In the analysis of positive abundances with MaAsLin3, the adjustment for 
-compositional bias can be enabled by setting
+- In `r BiocStyle::Biocpkg("Maaslin2")`, the default normalization method (TSS)
+can be replaced by TMM normalization [@Robinson2010] by including
+`NORM = "TMM"` in the `Maaslin2()` function.
+- In the analysis of positive abundances with `r BiocStyle::Biocpkg("maaslin3")`,
+the adjustment for compositional bias can be enabled by setting
 `median_comparison_abundance = TRUE` in `maaslin3()` function.
 - One can use DAA methods that are specifically designed to account for
 the compositionality of microbiome data. Such methods include, for instance,
-  - ANCOM-BC [@ancombc2020],
+  - `r BiocStyle::Biocpkg("ANCOMBC")` [@ancombc2020],
   [vignette](https://www.bioconductor.org/packages/devel/bioc/vignettes/ANCOMBC/inst/doc/ANCOMBC.html).
 Note that we refer here to the older version of ANCOM-BC. There is also a
 newer version (ANCOM-BC2) available, but some problems have been observed in its
-performance [e.g. @Pelto2025].
-  - LinDA [@Zhou2022],
+performance (e.g., @Pelto2025).
+  - `LinDA` [@Zhou2022] from the `r BiocStyle::CRANpkg("MicrobiomeStat")` package,
   [reference manual](https://cran.r-project.org/web/packages/MicrobiomeStat/MicrobiomeStat.pdf).
-  - ZicoSeq [@Yang2022],
+  - `ZicoSeq` [@Yang2022] from the `r BiocStyle::CRANpkg("GUniFrac")` package,
   [vignette](https://cran.r-project.org/web/packages/GUniFrac/vignettes/ZicoSeq.html).
 
 #### A non-parametic alternative to MaAsLin2
@@ -757,8 +762,8 @@ q-values (calculated for the variable of interest) automatically in its output.
 
 #### A more powerful alternative to MaAsLin3 in DPA
   
-While `maaslin3` package provides a convenient implementation of logistic
-regression for microbial DPA, we note, that it may
+While the `r BiocStyle::Biocpkg("maaslin3")` package provides a convenient
+implementation of logistic regression for microbial DPA, we note, that it may
 provide somewhat conservative results, that is, it rarely provides false
 positive results but it may fail to detect some true effects. To obtain higher
 statistical power, we recommend using a version of logistic regression
