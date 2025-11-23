@@ -141,6 +141,69 @@ than the minimum abundance value before transformation. Some tools, like
 values. See [@sec-differential-abundance].
 :::
 
+## Rarefaction {#sec-rarefaction}
+
+Another approach to control uneven sampling depths is to apply rarefaction with `rarefyAssay()`, which resamples the samples to an equal number of reads. This remains controversial, however, and strategies to mitigate the information loss in rarefaction have been proposed [@Schloss_2024a; @Schloss_2024b]. Moreover, this practice has been discouraged for the analysis of differentially abundant microorganisms [@McMurdie_and_Holmes_2014].
+
+Rarefaction can be performed iteratively by using the `niter` parameter in `rarefyAssay()`. This creates multiple rarefied versions of the data, which can help account for the stochasticity introduced by random subsampling. The resulting rarefied assays can then be used for downstream analyses such as alpha and beta diversity calculations.
+
+### Using rarefaction with alpha diversity
+
+When calculating alpha diversity indices, you can apply rarefaction iteratively and then compute diversity metrics across the rarefied replicates. The `addAlpha()` function can work with rarefied data:
+
+```{r}
+#| label: rarefaction-alpha
+#| eval: false
+
+# Load example data
+library(mia)
+data("Tengeler2020")
+tse <- Tengeler2020
+
+# Get minimum read depth for rarefaction
+min_reads <- min(colSums(assay(tse, "counts")))
+
+# Perform iterative rarefaction
+tse <- rarefyAssay(
+  tse,
+  method = "subsample",
+  sample = min_reads,
+  niter = 100
+)
+
+# Calculate alpha diversity on rarefied data
+tse <- addAlpha(
+  tse,
+  assay_name = "counts_rarefied",
+  sample = min_reads,
+  niter = 100
+)
+```
+
+### Using rarefaction with beta diversity
+
+Similarly, rarefaction can be applied before calculating beta diversity and performing ordination. The `addMDS()` function can utilize rarefied data for more robust distance calculations:
+
+```{r}
+#| label: rarefaction-beta
+#| eval: false
+
+# Perform MDS ordination on rarefied data
+tse <- addMDS(
+  tse,
+  assay_name = "counts_rarefied",
+  method = "bray",
+  niter = 100
+)
+```
+
+### Function comparison
+
+**`addAlpha()` vs `getAlpha()`**: Both functions calculate alpha diversity indices, but `addAlpha()` stores the results directly into the `colData` of the TreeSummarizedExperiment object, while `getAlpha()` returns the diversity values as a separate vector or matrix. Use `addAlpha()` when you want to keep all data together in one object, and `getAlpha()` when you need the diversity values for immediate use in other calculations.
+
+**`runMDS()` vs `addMDS()`**: The `runMDS()` function calculates multidimensional scaling coordinates and returns them as a separate matrix, whereas `addMDS()` calculates the MDS coordinates and stores them directly into the `reducedDim` slot of the TreeSummarizedExperiment object. Using `addMDS()` is generally preferred as it maintains all results within the same data object, making downstream analyses and visualization more straightforward.
+
+
 ## Transformations in practice
 
 Below, we apply relative transformation to counts table.
