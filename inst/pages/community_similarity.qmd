@@ -124,12 +124,13 @@ tse$Group <- tse$SampleType == "Feces"
 
 The standard Jaccard index is calculated based on a presence/absence table.
 However, a common mistake is using the quantitative version instead. By
-default, `vegan::vegdist()` computes the abundance-weighted Jaccard
+default, the function `vegdist()` from the `r BiocStyle::CRANpkg("vegan")` 
+package computes the abundance-weighted Jaccard
 dissimilarity, which is similar to Bray-Curtis. This can be controlled using
 the `binary` parameter.
 
-When calculating the Jaccard index with `mia`'s functions, it defaults to
-standard presence/absence version:
+When calculating the Jaccard index with `r BiocStyle::Biocpkg("mia")`'s
+functions, it defaults to standard presence/absence version:
 
 ```
 tse <- addDissimilarity(tse, assay.type = "counts", method = "jaccard")
@@ -273,7 +274,8 @@ and visualize the results.
 
 In the following examples dissimilarity is calculated with the function
 supplied to the `FUN` argument. Several metrics of beta diversity are defined
-by the `vegdist()` function of the `vegan` package, which is often used in
+by the `vegdist()` function of the `r BiocStyle::CRANpkg("vegan")`
+package, which is often used in
 this context. However, custom functions created by the user also work, as long
 as they return a `dist` object. In either case, this function is then applied
 to calculate reduced dimensions via an ordination method, the results of which
@@ -297,7 +299,8 @@ tse <- addMDS(
 ```
 
 Sample dissimilarity can be visualized on a lower-dimensional display
-(typically 2D) using the `plotReducedDim()` function from the `scater` package.
+(typically 2D) using the `plotReducedDim()` function from the
+`r BiocStyle::Biocpkg("scater")` package.
 This also provides tools to incorporate additional information encoded by
 color, shape, size and other aesthetics. Can you find any difference between
 the groups?
@@ -375,9 +378,9 @@ tse <- addNMDS(
 ```
 
 Multiple ordination plots are combined into a multi-panel plot with the
-`patchwork` package, so that different methods can be compared to find
-similarities between them or select the most suitable one to visualize
-beta diversity in the light of the research question.
+`r BiocStyle::CRANpkg("patchwork")` package, so that different methods 
+can be compared to find similarities between them or select the most
+suitable one to visualize beta diversity in the light of the research question.
 
 ```{r}
 #| label: mds-nmds_comparison2
@@ -421,15 +424,15 @@ tse <- addMDS(
 plotReducedDim(tse, "unifrac", colour_by = "Group")
 ```
 
-### Rarefaction to mitigate impacts of uneven sequencing effort
+### Rarefaction to mitigate impacts of uneven sequencing effort {#sec-rarefaction_ordination}
 
 The sequencing depth of a sample refers to the number of metagenomic reads
-obtained from the sequencing process. A variation in sequencing depth across
-the samples of a study may impact the calculation of alpha and beta diversity
-metrics [@Schloss2023]. It is common to find significant variation in
-sequencing depth between samples. For instance, the samples of the
+obtained from the sequencing process. It is common to find significant variation
+in sequencing depth between samples. For instance, the samples of the
 *TreeSummarizedExperiment* dataset `GlobalPatterns` show up to a 40-fold
-difference in the number of metagenomic reads.
+difference in the number of metagenomic reads. Variation in sequencing depth
+across samples in a study can bias the calculation of alpha and beta diversity
+metrics [@Schloss2023]. 
 
 ```{r}
 #| label: rarefaction
@@ -443,16 +446,16 @@ depth_variation
 ```
 
 To address uneven sequencing effort, rarefaction aims to normalize metagenomic
-reads counts using subsampling. First, the user chooses the rarefaction depth
-and a number of iterations N. All the samples with metagenomic reads count
-below the rarefaction depth are removed and metagenomic reads are randomly
-drawn from the samples left to get subsamples fitting the rarefaction depth.
-Then a beta diversity metric is calculated from those subsamples and the
-process is iterated N times. Finally, beta diversity is estimated with the mean
+reads counts using repeated subsampling. The user first chooses the rarefaction
+depth and a number of iterations N. All the samples with metagenomic read counts
+below the specified depth are removed and then metagenomic reads are randomly
+drawn for the samples left to get subsampled reads at equal read depth.
+Then a beta diversity metric is calculated with the subsampled data and the
+process is iterated N times. Finally, beta diversity is estimated taking the mean
 of all beta diversity values calculated on subsampled data.
 
 There has been a long-lasting controversy surrounding the use of rarefaction in
-microbial ecology. The main concern is that rarefaction would omit data
+microbial ecology. The main concern is that subsampling would omit data
 [@mcmurdie2014waste; @Schloss2024rarefaction2]. However, if the subsampling
 process is repeated a sufficient number of times, and if the rarefaction depth
 is set to the lowest metagenomic reads count found across all samples, no data
@@ -570,15 +573,15 @@ p <- lapply(1:2, function(i) {
 wrap_plots(p)
 ```
 
-The `mia` package's `addAlpha()` and `getDissimilarity()` functions support
-rarefaction in alpha and beta diversity calculations. Additionally, the
-`rarefyAssay()` function allows random subsampling of a given assay within a
-`TreeSummarizedExperiment` dataset.
+The `r BiocStyle::Biocpkg("mia")` package's `addAlpha()` and
+`getDissimilarity()` functions support rarefaction in alpha and beta diversity
+calculations. Additionally, the `rarefyAssay()` function allows random
+subsampling of a given assay within a `TreeSummarizedExperiment` dataset.
 
 ### Other ordination methods {#sec-other-ord-methods}
 
 Other dimension reduction methods, such as PCA and UMAP, are inherited from the
-`scater` package.
+`r BiocStyle::Biocpkg("scater")` package.
 
 ```{r}
 #| label: plot_pca
@@ -760,9 +763,8 @@ groups. A p-value smaller than the significance threshold indicates that the
 groups have a different community composition.
 
 This method is implemented with the
-[`adonis2`](https://www.rdocumentation.org/packages/vegan/versions/2.4-2/topics/adonis)
-function from the `vegan` package. You can find more on PERMANOVA from
-[here](https://microbiome.github.io/OMA/docs/devel/pages/97_extra_materials.html/#compare-permanova).
+[`adonis2`](https://www.rdocumentation.org/packages/vegan/versions/2.7-1/topics/adonis)
+function from the `r BiocStyle::CRANpkg("vegan")` package. 
 
 From the results table below, we see that both clinical status and age explain
 more than 10% of the variance, however, only age has statistical significance.
@@ -776,7 +778,7 @@ rda_info$permanova |>
 
 Next, we proceed to visualize the weight and significance of each variable on
 the similarity between samples with an RDA plot, which can be generated with
-the `plotRDA()` function from the `miaViz` package.
+the `plotRDA()` function from the `r BiocStyle::Biocpkg("miaViz")` package.
 
 ```{r}
 #| label: plot_rda
@@ -798,9 +800,9 @@ complements the previous results obtained with PERMANOVA.
 Calculating dissimilarities between samples is a computationally demanding
 task, which can make methods like dbRDA or PCoA time-consuming with large
 datasets. To speed up calculations, consider using functions that support
-parallel processing instead of the default `vegan` package options. Packages
-like `parallelDist` can significantly improve performance on systems with
-multiple available cores.
+parallel processing instead of the default `r BiocStyle::CRANpkg("vegan")`
+package options. Packages like `r BiocStyle::CRANpkg("parallelDist")`
+can significantly improve performance on systems with multiple available cores.
 
 In `*Dissimilarity()` functions, you can specify the utilized dissimilarity
 function with `dis.fun` argument.
@@ -1048,10 +1050,11 @@ plotReducedDim(
 ## Summary
 
 As a final note, we provide a comprehensive list of functions for the
-evaluation of dissimilarity indices available in the `mia` and `scater`
-packages. The `calculate` methods return a reducedDim object as an output,
-whereas the `run` methods store the reducedDim object into the specified
-TreeSE.
+evaluation of dissimilarity indices available in the
+`r BiocStyle::Biocpkg("mia")` and `r BiocStyle::Biocpkg("scater")`
+packages. The `calculate` methods return a `reducedDim` object as an output,
+whereas the `run` methods store the `reducedDim` object into the specified
+`TreeSE`.
 
 * Canonical Correspondence Analysis (CCA): `getCCA()` and `runCCA()`
 * dbRDA: `getRDA()` and `runRDA(0)`; our recommended default method to assess
