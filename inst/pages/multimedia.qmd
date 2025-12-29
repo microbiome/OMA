@@ -137,7 +137,7 @@ tse <- curatedMetagenomicData(
   )[[1]]
 
 # Assign SampleID for matching
-tse[["SampleID"]] <- colnames(tse)
+tse$SampleID <- colnames(tse)
 
 # Convert relative_abundance assay to relabundance (which is in [0,1] interval)
 tse <- transformAssay(tse, assay.type="relative_abundance", method="relabundance")
@@ -161,17 +161,15 @@ diss <- as.matrix(getDissimilarity(tse, method = "bray", na.rm=TRUE, assay.type 
 #################################
 
 # Calculate dysbiosis score for each sample
-# For each sample i, we compute the median distance between sample i and all reference samples in `ref_set`
-sample_ids <- tse[["SampleID"]]
+# For each sample i, we compute the median distance between sample i and all reference samples
+sample_ids <- tse$SampleID
 
-tse[["dysbiosis"]] <- sapply(seq_along(tse$disease_binary), function(i) {
-
+tse$dysbiosis <- sapply(seq_along(tse$disease_binary), function(i) {
   # Logical vector indicating all other reference samples (excluding i)
   ref_others <- tse$disease_binary & (sample_ids != sample_ids[i])
   
   # Compute median distance between sample i and these reference samples
   median(diss[i, ref_others], na.rm = TRUE)
-
 })
 
 #############################################################
@@ -179,22 +177,20 @@ tse[["dysbiosis"]] <- sapply(seq_along(tse$disease_binary), function(i) {
 #############################################################
 
 # Keep IBD only
-tse <- tse[, tse[["disease"]] != "healthy"]
+tse <- tse[, tse$disease != "healthy"]
 
-# Visit 1 (baseline) or 25 (post)
-tse <- tse[, tse[["visit_number"]] %in% c(1, 21)]
+# Visit 1 (baseline) or 21 (post)
+tse <- tse[, tse$visit_number %in% c(1, 21)]
 
 # Keep subjects with both visits
-keep_subjects <- names(which(table(tse[["subject_id"]]) == 2))
-tse <- tse[, tse[["subject_id"]] %in% keep_subjects]
+keep_subjects <- names(which(table(tse$subject_id) == 2))
+tse <- tse[, tse$subject_id %in% keep_subjects]
 
 # Define time point label
-tse[["Time_point"]] <- ifelse(
-  tse[["visit_number"]] == 1, "T0", "T1"
-)
+tse$Time_point <- ifelse(tse$visit_number == 1, "T0", "T1")
 
 # Define treatment: Pre and Post (Baseline vs. Post-baseline)
-tse[["treatment"]] <- factor(tse[["Time_point"]], levels = c("T0", "T1"))
+tse$treatment <- factor(tse$Time_point, levels = c("T0", "T1"))
 
 ```
 
@@ -235,17 +231,12 @@ treatment's effect on dysbiosis.
 # Run mediation (non-delta) #
 #############################
 
-# Convert the TreeSummarizedExperiment to be SummarizedExperiment
-se_relative <- as(tse, "SummarizedExperiment")
-rownames(se_relative) <- rownames(tse)
-rownames(rowData(se_relative)) <- rownames(tse)  # keep rowData aligned too
-
 # Use indices for mediators
-medi_idx <- seq_len(nrow(se_relative))
+medi_idx <- seq_len(nrow(tse))
 
 # Create the Mediation Data object
 exper <- mediation_data(
-  se_relative,
+  tse,
   outcomes   = "dysbiosis",
   treatments = "treatment",
   mediators  = medi_idx
@@ -270,29 +261,13 @@ print(direct_effect(res, exper))
 # Mediator-specific effects
 #############################
 
-# Helper function to extract the effects 
-extract_effects <- function(res, treat_term = "treatmentT1", outcome = "dysbiosis") {
-  # α: treatment -> each mediator (one model per mediator)
-  alpha <- sapply(res@mediation@estimates, function(m) unname(coef(m)[treat_term]))
-
-  # β: mediator -> outcome (single model with all mediators)
-  beta <- unname(coef(res@outcome@estimates[[outcome]])[names(alpha)])
-
-  tibble(
-    mediator = names(alpha),
-    alpha    = as.numeric(alpha),
-    beta     = as.numeric(beta),
-    indirect_effect = alpha * beta
-  )
-}
-
 # Extract the treatment-to-mediator path coefficients
-effects_by_mediator <- extract_effects(res, treat_term = "treatmentT1", outcome = "dysbiosis")
+effects_by_mediator <- indirect_pathwise(res, exper)
 
 # Rank
 top_mediators <- effects_by_mediator %>%
   arrange(desc(abs(indirect_effect))) %>%
-  head(10)
+  head(20)
 
 print(top_mediators)
 
@@ -404,6 +379,33 @@ same setup as before, using the time point as the treatment, dysbiosis score as
 the outcome, but pathways abundances as the mediation variables instead of the 
 relative species abundance.
 
+```{r}
+#| label: default_visualization_plot_mediators_pathway
+#| message: false
+
+# pick top mediators from the already-computed bootstrap summary (fast)
+top_meds <- summary_df %>%
+  dplyr::arrange(dplyr::desc(abs(estimate))) %>%
+  dplyr::slice_head(n = 12) %>%
+  dplyr::pull(mediator)
+
+# construct a minimal effect table that plot_mediators() can use
+ie_pw_fast <- tibble::tibble(
+  outcome = "dysbiosis",
+  mediator = top_meds,
+  direct_setting = levels(tse$treatment)[1],
+  contrast = paste(levels(tse$treatment)[1], "-", levels(tse$treatment)[2]),
+  indirect_effect = summary_df$estimate[match(top_meds, summary_df$mediator)]
+)
+
+plot_mediators(ie_pw_fast, exper, n_panels = 12)
+
+
+```
+Mediators are standardized (z-scored) for comparability across features; hence values may be negative. Besides, many microbial features are sparse; several mediators exhibit near-zero values for most samples, producing vertical bands.
+
+
+
 ### Performing multimodal mediation analysis for pathways abundances {#sec-pathways-abundances}
 
 Let's extract the pathway abundance data from the iHMP data first, as well as 
@@ -419,32 +421,30 @@ tse <- curatedMetagenomicData(
   dryrun = FALSE
   )[[1]]
 
-tse[["SampleID"]] <- colnames(tse)
+tse$SampleID <- colnames(tse)
 tse <- tse[, colSums(is.na(assay(tse))) == 0]
 
 rows_to_keep <- !grepl("\\|", rownames(tse))
 rows_to_keep[which(rows_to_keep)[1:2]] <- FALSE
 tse <- tse[rows_to_keep, ]
 assay(tse) <- assay(tse) / 100
-tse$disease_binary <- tse[["disease"]] == "healthy"
+tse$disease_binary <- tse$disease == "healthy"
 
 diss <- as.matrix(vegdist(t(assay(tse)), method = "bray", na.rm = TRUE))
-tse[["dysbiosis"]] <- sapply(seq_along(tse$disease_binary), function(i) {
+tse$dysbiosis <- sapply(seq_along(tse$disease_binary), function(i) {
   median(diss[i, tse$disease_binary & 
-              (tse[["SampleID"]] != tse[["SampleID"]][i])], 
+              (tse$SampleID != tse$SampleID[i])], 
          na.rm = TRUE)
 })
 
-tse <- tse[, tse[["disease"]] != "healthy"]
-tse <- tse[, tse[["visit_number"]] %in% c(1, 27)]
-keep_subjects <- names(which(table(tse[["subject_id"]]) == 2))
-tse <- tse[, tse[["subject_id"]] %in% keep_subjects]
+tse <- tse[, tse$disease != "healthy"]
+tse <- tse[, tse$visit_number %in% c(1, 27)]
+keep_subjects <- names(which(table(tse$subject_id) == 2))
+tse <- tse[, tse$subject_id %in% keep_subjects]
 
-tse[["Time_point"]] <- ifelse(
-  tse[["visit_number"]] == 1, "T0", "T1"
-)
+tse$Time_point <- ifelse(tse$visit_number == 1, "T0", "T1")
 
-tse[["treatment"]] <- factor(tse[["Time_point"]], levels = c("T0", "T1"))
+tse$treatment <- factor(tse$Time_point, levels = c("T0", "T1"))
 
 ```
 
@@ -465,21 +465,16 @@ and mediation-specific indirect effects.
 #| label: mediation_analysis
 #| message: false
 
-se_pathway <- as(tse, "SummarizedExperiment")
-rownames(se_pathway) <- rownames(tse)
-rownames(rowData(se_pathway)) <- rownames(tse)  # keep rowData aligned too
-
-
-raw <- rownames(se_pathway)
+raw <- rownames(tse)
 clean1 <- str_remove_all(raw, "\\[|\\]")
 clean2 <- str_replace_all(clean1, "[: \\.,]", "_")
 safe_names <- make.names(clean2, unique = TRUE)
-rownames(se_pathway) <- safe_names
+rownames(tse) <- safe_names
 
-medi_idx <- seq_len(nrow(se_pathway))
+medi_idx <- seq_len(nrow(tse))
 
 exper <- mediation_data(
-  se_pathway,
+  tse,
   outcomes   = "dysbiosis",
   treatments = "treatment",
   mediators  = medi_idx
@@ -491,11 +486,12 @@ summary(res)
 print(indirect_overall(res, exper))
 print(direct_effect(res, exper))
 
-effects_by_mediator <- extract_effects(res, treat_term = "treatmentT1", outcome = "dysbiosis")
+effects_by_mediator <- indirect_pathwise(res, exper)
 
 top_mediators <- effects_by_mediator %>%
   arrange(desc(abs(indirect_effect))) %>%
-  head(10)
+  head(20)
+
 print(top_mediators)
 
 ```
