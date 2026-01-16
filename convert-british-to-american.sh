@@ -3,7 +3,7 @@
 set -e
 
 find . -type f -iname "*.r" -or -iname "*.[qr]md" -or -iname "*.[r]markdown" |
-    xargs -0 sed -i \
+    xargs sed -i \
         -e 's/visualize/visualize/' \
         -e 's/summarize/summarize/' \
         -e 's/analyzed/analyzed/' \
