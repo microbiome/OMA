@@ -165,7 +165,7 @@ diversity.
 library(mia)
 
 # Keep taxa present in more than 10% of samples
-tse_prev <- subsetByPrevalent(
+tse <- subsetByPrevalent(
     x = tse,
     assay.type = "counts",
     prevalence = 10 / 100
@@ -173,13 +173,13 @@ tse_prev <- subsetByPrevalent(
 
 # Get alpha diversity metrics to add them as inputs
 alpha_divs <- getAlpha(
-    tse_prev,
+    tse,
     assay.type = "counts"
 )
 
 # Transform to relative abundances
-tse_prev <- transformAssay(
-    x = tse_prev,
+tse <- transformAssay(
+    x = tse,
     assay.type = "counts",
     method = "relabundance",
     MARGIN = "cols",
@@ -205,8 +205,8 @@ be used to train and test our model in the following section.
 library(mikropml)
 
 # Preprocess data for classification
-prep_classification <- preprocess_data(
-    dataset = tse_prev,
+tse <- preprocess_data(
+    dataset = tse,
     outcome_colname = "disease",
     assay.type = "relabundance", 
     name = "prep_classification",
@@ -228,9 +228,8 @@ and test our model.
 #| label: 3.2 - preprocessing for regression
 
 # Preprocess data for regression task
-prep_regression <- preprocess_data(
-    #dataset = raw_df,
-    dataset = tse_prev,
+tse <- preprocess_data(
+    dataset = tse,
     outcome_colname = "BMI",
     assay.type = "relabundance", 
     name = "prep_regression",
@@ -314,7 +313,7 @@ Below, the RF algorithm is used for a classification task:
 
 # Train random forest for classification
 rf_classification <- run_ml(
-    dataset = prep_classification,
+    dataset = tse,
     method = "rf",
     outcome_colname = "disease",
     assay.type = "prep_classification",
@@ -343,7 +342,7 @@ in regression tasks:
 
 # Train random forest for regression
 rf_regression <- run_ml(
-    dataset = prep_regression,
+    dataset = tse,
     method = "rf",
     outcome_colname = "BMI",
     assay.type = "prep_regression",
@@ -378,7 +377,7 @@ data analysis.
 
 # Train XGBoost for classification
 xgb <- run_ml(
-    dataset = prep_classification,
+    dataset = tse,
     method = "xgbTree",
     outcome_colname = "disease",
     assay.type = "prep_classification",
