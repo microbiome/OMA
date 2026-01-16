@@ -186,20 +186,6 @@ tse_prev <- transformAssay(
     pseudocount = TRUE
 )
 
-# # Get relative abundances assay
-# assay <- assay(tse_prev, "relabundance")
-# # Transpose assay
-# assay <- t(assay)
-# # Join relative abundances and alpha diversity metrics
-# assay_alpha <- cbind(assay, alpha_divs)
-# raw_df <- as.data.frame(assay_alpha)
-# 
-# # Make new names of groups of correlated features
-# # by concatenating the names of the group members
-# names_grp_feats <- group_correlated_features(
-#     features = raw_df,
-#     group_neg_corr = FALSE
-# )
 ```
 
 The next step is to join the microbial abundances and alpha diversities 
@@ -218,28 +204,18 @@ be used to train and test our model in the following section.
 
 library(mikropml)
 
-# # Add labels, i.e., known outcome
-# labels <- tse_prev[["disease"]]
-# raw_df[["diagnosis"]] <- labels
-
 # Preprocess data for classification
 prep_classification <- preprocess_data(
-    #dataset = raw_df,
     dataset = tse_prev,
-    #outcome_colname = "diagnosis",
     outcome_colname = "disease",
+    assay.type = "relabundance", 
+    name = "prep_classification",
     method = NULL, # Skip normalization
     remove_var = "zv",
     collapse_corr_feats = TRUE,
     group_neg_corr = FALSE
 )
 
-# # rename grouped features with names generated in previous chunk
-# new_names <- c("diagnosis", names_grp_feats)
-# colnames(prep_classification[["dat_transformed"]]) <- new_names
-# 
-# # get preprocessed data
-# df_classification <- prep_classification[["dat_transformed"]]
 ```
 
 ### Preprocess for regression task 
@@ -251,30 +227,19 @@ and test our model.
 ```{r}
 #| label: 3.2 - preprocessing for regression
 
-# # Remove 'diagnosis' used before for classification
-# raw_df <- within(raw_df, rm("diagnosis"))
-# 
-# # Add BMI for regression task
-# BMI <- tse_prev[["BMI"]]
-# raw_df[["BMI"]] <- BMI
-
 # Preprocess data for regression task
 prep_regression <- preprocess_data(
     #dataset = raw_df,
     dataset = tse_prev,
     outcome_colname = "BMI",
+    assay.type = "relabundance", 
+    name = "prep_regression",
     method = NULL, # Skip normalization
     remove_var = "zv",
     collapse_corr_feats = TRUE,
     group_neg_corr = FALSE
 )
 
-# # rename grouped features with names generated above
-# new_names <- c("BMI", names_grp_feats)
-# colnames(prep_regression[["dat_transformed"]]) <- new_names
-# 
-# # get preprocessed data
-# df_regression <- prep_regression[["dat_transformed"]]
 ```
 
 
@@ -349,11 +314,11 @@ Below, the RF algorithm is used for a classification task:
 
 # Train random forest for classification
 rf_classification <- run_ml(
-    #dataset = df_classification,
     dataset = prep_classification,
     method = "rf",
-    #outcome_colname = "diagnosis",
     outcome_colname = "disease",
+    assay.type = "prep_classification",
+    altexp = "prep_classification",
     seed = 1,
     kfold = 2,
     cv_times = 2,
@@ -378,10 +343,11 @@ in regression tasks:
 
 # Train random forest for regression
 rf_regression <- run_ml(
-    #dataset = df_regression,
     dataset = prep_regression,
     method = "rf",
     outcome_colname = "BMI",
+    assay.type = "prep_regression",
+    altexp = "prep_regression",
     seed = 1,
     kfold = 2,
     cv_times = 2,
@@ -412,11 +378,11 @@ data analysis.
 
 # Train XGBoost for classification
 xgb <- run_ml(
-    #dataset = df_classification,
     dataset = prep_classification,
     method = "xgbTree",
-    #outcome_colname = "diagnosis",
     outcome_colname = "disease",
+    assay.type = "prep_classification",
+    altexp = "prep_classification",
     seed = 1,
     kfold = 2,
     cv_times = 2,
@@ -765,8 +731,7 @@ pred <- predict(model, test_data)
 test_data$pred <- pred
 # Add diagnosis status to test data.
 # This variable was created when preprocessing for classification
-ids <- rownames(test_data) #|> as.numeric()
-#test_data$diagnosis <- labels[ids]
+ids <- rownames(test_data)
 test_data$disease <- colData(tse_prev)[ids, "disease"]
 
 #table(test_data$diagnosis)
