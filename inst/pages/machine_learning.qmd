@@ -171,12 +171,6 @@ tse <- subsetByPrevalent(
     prevalence = 10 / 100
 )
 
-# Get alpha diversity metrics to add them as inputs
-alpha_divs <- getAlpha(
-    tse,
-    assay.type = "counts"
-)
-
 # Transform to relative abundances
 tse <- transformAssay(
     x = tse,
@@ -185,6 +179,19 @@ tse <- transformAssay(
     MARGIN = "cols",
     pseudocount = TRUE
 )
+
+# Retrieve the names of the variables in the metadata
+metadata_vars <- colData(tse) |> colnames()
+
+# Add alpha diversity indices to the metadata for latter use in our ML tasks
+tse <- addAlpha(
+    tse,
+    assay.type = "counts"
+)
+
+# Get the names of the alpha diversity indices added above
+new_metadata_vars <- colData(tse) |> colnames()
+alpha_div_indices <- setdiff(new_metadata_vars, metadata_vars)
 
 ```
 
@@ -210,7 +217,7 @@ tse <- preprocess_data(
     outcome_colname = "disease",
     assay.type = "relabundance", 
     name = "prep_classification",
-    method = NULL, # Skip normalization
+    col.var = alpha_div_indices, # metadata variables to use as predictors
     remove_var = "zv",
     collapse_corr_feats = TRUE,
     group_neg_corr = FALSE
@@ -233,7 +240,7 @@ tse <- preprocess_data(
     outcome_colname = "BMI",
     assay.type = "relabundance", 
     name = "prep_regression",
-    method = NULL, # Skip normalization
+    col.var = alpha_div_indices, # metadata variables to use as predictors
     remove_var = "zv",
     collapse_corr_feats = TRUE,
     group_neg_corr = FALSE
@@ -731,7 +738,7 @@ test_data$pred <- pred
 # Add diagnosis status to test data.
 # This variable was created when preprocessing for classification
 ids <- rownames(test_data)
-test_data$disease <- colData(tse_prev)[ids, "disease"]
+test_data$disease <- colData(tse)[ids, "disease"]
 
 #table(test_data$diagnosis)
 table(test_data$disease)
