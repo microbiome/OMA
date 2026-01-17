@@ -191,7 +191,7 @@ tse <- addAlpha(
 
 # Get the names of the alpha diversity indices added above
 new_metadata_vars <- colData(tse) |> colnames()
-alpha_div_indices <- setdiff(new_metadata_vars, metadata_vars)
+alpha_divs <- setdiff(new_metadata_vars, metadata_vars)
 
 ```
 
@@ -217,11 +217,19 @@ tse <- preprocess_data(
     outcome_colname = "disease",
     assay.type = "relabundance", 
     name = "prep_classification",
-    col.var = alpha_div_indices, # metadata variables to use as predictors
+    col.var = alpha_divs, # preprocess these metadata variables too
     remove_var = "zv",
     collapse_corr_feats = TRUE,
     group_neg_corr = FALSE
 )
+
+# Identify the features that won't be used as predictors
+prep_classification <- altExp(tse, "prep_classification")
+removed_feats <- metadata(prep_classification)[["removed_feats"]]
+
+# If any alpha diversity index was removed, it will be discarded 
+# from the predictors
+alpha_divs_classification <- setdiff(alpha_divs, removed_feats)
 
 ```
 
@@ -240,11 +248,19 @@ tse <- preprocess_data(
     outcome_colname = "BMI",
     assay.type = "relabundance", 
     name = "prep_regression",
-    col.var = alpha_div_indices, # metadata variables to use as predictors
+    col.var = alpha_divs, # preprocess these metadata variables too
     remove_var = "zv",
     collapse_corr_feats = TRUE,
     group_neg_corr = FALSE
 )
+
+# Identify the features that won't be used as predictors
+prep_regression <- altExp(tse, "prep_regression")
+removed_feats <- metadata(prep_regression)[["removed_feats"]]
+
+# If any alpha diversity index was removed, it will be discarded 
+# from the predictors
+alpha_divs_regression <- setdiff(alpha_divs, removed_feats)
 
 ```
 
@@ -324,6 +340,7 @@ rf_classification <- run_ml(
     method = "rf",
     outcome_colname = "disease",
     assay.type = "prep_classification",
+    col.var = alpha_divs_classification, # use these variables as predictors too
     altexp = "prep_classification",
     seed = 1,
     kfold = 2,
@@ -353,6 +370,7 @@ rf_regression <- run_ml(
     method = "rf",
     outcome_colname = "BMI",
     assay.type = "prep_regression",
+    col.var = alpha_divs_regression, # use these variables as predictors too
     altexp = "prep_regression",
     seed = 1,
     kfold = 2,
@@ -388,6 +406,7 @@ xgb <- run_ml(
     method = "xgbTree",
     outcome_colname = "disease",
     assay.type = "prep_classification",
+    col.var = alpha_divs_classification, # use these variables as predictors too
     altexp = "prep_classification",
     seed = 1,
     kfold = 2,
