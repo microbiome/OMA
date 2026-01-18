@@ -78,8 +78,8 @@ Mounting evidence show associations between gut microbiome and
 the onset of type II diabetes. Thus, it has been suggested that
 microbiome data could be used to discriminate between patients 
 and healthy individuals. Indeed, that hypothesis was explored in the
-research article where the dataset we will work with was first 
-described [@qin2012_t2d].
+research article where the dataset we will work with 
+was released[@qin2012_t2d].
 On the other hand, experiments conducted with twins have shown that 
 while the transplantation of gut microbiome from the obese twin
 induces obesity in mice, the gut microbiome of the lean twin doesn't
@@ -132,8 +132,8 @@ For instance:
 
 * **Collapse highly correlated features:** In a microbial community,
 it's common for the abundance of two or more taxonomic features to be highly
-correlated. Thus, removing or collapsing correlated features allows the
-model to analyse them as one group.
+correlated due to ecological interactions. Thus, removing or collapsing
+correlated features allows the model to analyse them as one group.
 * **Remove features with near-zero variance:** Features that don't vary
 enough across groups can hardly help in discerning between them, as they
 don't hold any biologically relevant information. Additionally, 
@@ -154,10 +154,10 @@ Fortunately, there are questions we can ask ourselves to void data
 leakage [@bernett2024_dataLeakage] 
 :::
 
-The code below shows how to join the abundance of each taxonomic features
-with different alpha diversity indices that provide ecosystem-level 
-information. See [@sec-alpha-diversity] for a discussion on alpha 
-diversity.
+The code below shows how to obtain the relative abundances of each
+taxonomic feature with different alpha diversity indices that provide 
+ecosystem-level information. See [@sec-alpha-diversity] for a discussion
+on alpha diversity.
 
 ```{r}
 #| label: 3 - general preprocessing
@@ -195,16 +195,14 @@ alpha_divs <- setdiff(new_metadata_vars, metadata_vars)
 
 ```
 
-The next step is to join the microbial abundances and alpha diversities 
-with the outcome of interest (either diagnosis status or BMI) for each
-observation. 
-
 ### Preprocess for classification task
 
-The code below joins the diagnosis status of each participant (either 
-'T2D' or 'healthy') and then preprocess the microbiome data using the 
-three strategies discussed above. The resulting preprocessed dataset will
-be used to train and test our model in the following section.
+Next, we join the outcome of interest (i.e, diagnosis status or BMI) 
+of each participant with the microbiome abundances and alpha diversities.
+The resulting dataset will be preprocessed for its later use to train and
+test our model in the following section.
+
+The code below shows how to preprocess our data for a classification task.
 
 ```{r}
 #| label: 3.1 - preprocessing for classification
@@ -223,7 +221,7 @@ tse <- preprocess_data(
     group_neg_corr = FALSE
 )
 
-# Identify the features that won't be used as predictors
+# Identify the discarded features (that won't be used as predictors)
 prep_classification <- altExp(tse, "prep_classification")
 removed_feats <- metadata(prep_classification)[["removed_feats"]]
 
@@ -235,9 +233,8 @@ alpha_divs_classification <- setdiff(alpha_divs, removed_feats)
 
 ### Preprocess for regression task 
 
-In the code below we join the BMI of each participant before preprocessing
-it. Again, the resulting preprocessed dataset will be then used to train
-and test our model. 
+Similar to the code shown above, the following code shows how to preprocess
+our dataset. This time, however, we are interested in a regression task.
 
 ```{r}
 #| label: 3.2 - preprocessing for regression
@@ -254,7 +251,7 @@ tse <- preprocess_data(
     group_neg_corr = FALSE
 )
 
-# Identify the features that won't be used as predictors
+# Identify the discarded features (that won't be used as predictors)
 prep_regression <- altExp(tse, "prep_regression")
 removed_feats <- metadata(prep_regression)[["removed_feats"]]
 
@@ -263,7 +260,9 @@ removed_feats <- metadata(prep_regression)[["removed_feats"]]
 alpha_divs_regression <- setdiff(alpha_divs, removed_feats)
 
 ```
-
+Note that the preprocessed dataset for the classification and regression
+tasks are stored within the 'tse' object, under the 'altExp' called 
+'prep_classification' and 'prep_regression', respectively.
 
 ::: {.callout-note}
 ## Note: Preprocessing strategies impact the performance of ML models.
@@ -286,8 +285,8 @@ applications. Even though the papers benchmarked transformations only in
 classification, their findings are likely applicable to regression as well.
 
 These studies were conducted with stool samples which contain many sources of
-biases as they serve as proxy for our main interest: the gut flora. This can
-explain why the simpler approaches are more robust and reproducible.
+biases as they serve as proxy for our main interest: the gut microbiome. 
+This can explain why the simpler approaches are more robust and reproducible.
 Moreover, in addition to improving model performance, 
 proportion or presence/absence-based transformations are more intuitive and
 therefore easier to interpret.
@@ -308,10 +307,10 @@ section, two algorithms will be covered:
 * Random Forest
 * XGBoost
 
-These are within the most used supervised ML in the microbiome field. 
+These are within the most used supervised ML methods in the microbiome field. 
 Possible reasons are that they can be used for classification 
 and regression tasks, and that they show a good balance between
-performance and interpretability. Although the focus of this book is the
+performance and interpretability. Since the focus of this book is the
 implementation and interpretation of these models, other resources are 
 suggested for an introduction to the mathematical underpinnings of 
 these &mdash;and other&mdash; models [@james2013_ISLR].
@@ -339,9 +338,9 @@ rf_classification <- run_ml(
     dataset = tse,
     method = "rf",
     outcome_colname = "disease",
+    altexp = "prep_classification",
     assay.type = "prep_classification",
     col.var = alpha_divs_classification, # use these variables as predictors too
-    altexp = "prep_classification",
     seed = 1,
     kfold = 2,
     cv_times = 2,
@@ -357,7 +356,7 @@ real (observed) values, often using metrics like mean squared
 error (MSE). One strength of RF is that it can learn non-linear patterns 
 in the data that simpler regression algorithms might not capture.
 
-Regarding its implementation, notice that just by changing the outcome 
+Regarding its implementation, note that just by changing the outcome 
 from a categorical to a continuous variable, RF models can now be used
 in regression tasks:
 
@@ -369,9 +368,9 @@ rf_regression <- run_ml(
     dataset = tse,
     method = "rf",
     outcome_colname = "BMI",
+    altexp = "prep_regression",
     assay.type = "prep_regression",
     col.var = alpha_divs_regression, # use these variables as predictors too
-    altexp = "prep_regression",
     seed = 1,
     kfold = 2,
     cv_times = 2,
@@ -405,9 +404,9 @@ xgb <- run_ml(
     dataset = tse,
     method = "xgbTree",
     outcome_colname = "disease",
+    altexp = "prep_classification",
     assay.type = "prep_classification",
     col.var = alpha_divs_classification, # use these variables as predictors too
-    altexp = "prep_classification",
     seed = 1,
     kfold = 2,
     cv_times = 2,
@@ -416,10 +415,10 @@ xgb <- run_ml(
 )
 ```
 
-Although not demonstrated in the chapter, XGBoost can be used
+Although not demonstrated in this chapter, XGBoost can be used
 in regressions tasks using similar code to the one shown above.
 The only difference will be the outcome variable selected.
-See the RF example for reference.
+See the RF example as a reference.
 
 
 ## Model performance metrics
@@ -508,7 +507,7 @@ with T2D published to date [@mei2024_t2d], authors report similar AUC values
 to ours when training RF models to discriminate healthy participants 
 and T2D patients using microbiome and anthropometric variables like
 age, sex and BMI. Interestingly, they included the study we are 
-working with in their analysis. Notice their reported an AUC of 0.74, 
+working with in their analysis. Notice their reported AUC of 0.74, 
 which is very close to ours. This further validates the potential 
 of the gut microbiome to discriminate between healthy individuals 
 and T2D patients.
@@ -520,10 +519,10 @@ groups, a task known as multiclass classification. For instance, we may
 have been interested in classifying patients as (1) healthy individuals, 
 (2) T2D patients with obesity, and (3) T2D patients without obesity by 
 integrating BMI information. In such cases, metrics like AUC (developed 
-for binary classification) can be generalized, like in the case of 
-multiclass AUC, also referred to as One-vs-Rest AUC. This approach 
+for binary classification) can be generalized. This metric is known as 
+multiclass AUC, or One-vs-Rest AUC. This approach 
 evaluates how well each class is distinguished from the others, 
-enebling the assessment of model performance in multiclass problems.
+enabling the assessment of model performance in multiclass problems.
 Multiclass classification can be implemented with `run_ml` too, as 
 described 
 [here](https://www.schlosslab.org/mikropml/articles/introduction.html?q=multiclass#multiclass-data).
@@ -539,8 +538,8 @@ individuals, and only 5% T2D patients. In such a case, a model can
 easily achieve 95% accuracy by just predicting (labelling) all samples
 as healthy, despite being useless for the classification of T2D patients. 
 
-This is an extreme case and hopefully we won't encounter datasets
-like that. However, it highlights that class imbalance can 
+This is an extreme case and hopefully we won't encounter such situations.
+However, it highlights that class imbalance can 
 lead to misleading interpretations of performance metrics like 
 accuracy and AUC. Thus, when dealing with imbalanced classes, other 
 metrics like F1-score and the area under the precision recall curve
@@ -565,7 +564,7 @@ rf_regression[["performance"]] |> knitr::kable()
 ```
 
 A commonly used metric to quickly assess model performance in 
-regression tasks is the root mean square error (RMSE). As it name
+regression tasks is the root mean square error (RMSE). As its name
 suggests, this metric is just the root of the mean squared difference
 between the observed and predicted values of the outcome variable
 (patient's BMI in this example).
@@ -600,7 +599,7 @@ model's performance in binary classification tasks. As it name suggests,
 AUC is just the area under a curve. Since different ROC curves can have 
 similar AUC, visualizing the curve can give complementary information.
 
-Complementary to ROC curves, the the precision-recall curves (PRC) 
+Complementary to ROC curves, the precision-recall curves (PRC) 
 are preferred in datasets with class imbalance, where AUC can be 
 misleading, as discussed above.
 
@@ -787,7 +786,7 @@ Note that both groups show a similar spread in BMI.
 This plot clearly indicates a poor performance of our model. This
 usually means that either the gut microbiome is not related to BMI, 
 making it impossible for the model to use microbiome patterns to predict
-BMI, or that our model is overfitted. Since the RMSE for training 
+it, or that our model is overfitted. Since the RMSE for training 
 (`{r} rf_regression[["performance"]][["cv_metric_RMSE"]]`) and test 
 (`{r} rf_regression[["performance"]][["RMSE"]]`) data are similar, 
 we may conclude that gut microbiome composition is not informative 
@@ -795,7 +794,7 @@ of BMI.
 
 This illustrate another important aspect of supervised ML.
 Regardless of the complexity of the models deployed, their 
-predictive performance depends in their ability to learn patterns 
+predictive performance depends in their ability to learn meaningful patterns 
 from the data. If such patterns don't exist it would be impossible 
 for the model to make accurate predictions. This is most likely 
 what happened in this regression task. Notice that this can certainly 
@@ -804,12 +803,12 @@ happen in classification tasks too.
 
 ## Model interpretation
 
-Besides the performance of the model, often researchers are interested in
-understanding what are the features that are affecting the model 
+Besides the performance of the model, researchers are often interested in
+understanding what are the features that are affecting the model's 
 performance, a property of ML models called interpretability.
 
 ML models have different degrees of interpretability. One way to 
-understand how different features (e.g., taxonomic) affect model's 
+understand how different features (e.g., taxonomic identity) affect model's 
 performance is by randomly permuting the values of that feature across 
 samples and then evaluating the amount of change in a performance metric.
 
