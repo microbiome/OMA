@@ -79,7 +79,7 @@ the onset of type II diabetes. Thus, it has been suggested that
 microbiome data could be used to discriminate between patients 
 and healthy individuals. Indeed, that hypothesis was explored in the
 research article where the dataset we will work with 
-was released[@qin2012_t2d].
+was released [@qin2012_t2d].
 On the other hand, experiments conducted with twins have shown that 
 while the transplantation of gut microbiome from the obese twin
 induces obesity in mice, the gut microbiome of the lean twin doesn't
@@ -180,19 +180,20 @@ tse <- transformAssay(
     pseudocount = TRUE
 )
 
-# Retrieve the names of the variables in the metadata
-metadata_vars <- colData(tse) |> colnames()
+# Alpha diversity indices to be calculated
+alpha_divs <- c(
+    "dbp_dominance",
+    "faith_diversity",
+    "observed_richness",
+    "shannon_diversity"
+)
 
 # Add alpha diversity indices to the metadata for latter use in our ML tasks
 tse <- addAlpha(
     tse,
-    assay.type = "counts"
+    assay.type = "counts",
+    index = alpha_divs
 )
-
-# Get the names of the alpha diversity indices added above
-new_metadata_vars <- colData(tse) |> colnames()
-alpha_divs <- setdiff(new_metadata_vars, metadata_vars)
-
 ```
 
 ### Preprocess for classification task
@@ -213,7 +214,7 @@ library(mikropml)
 tse <- preprocess_data(
     dataset = tse,
     outcome_colname = "disease",
-    assay.type = "relabundance", 
+    assay.type = "relabundance",
     name = "prep_classification",
     col.var = alpha_divs, # preprocess these metadata variables too
     remove_var = "zv",
@@ -225,10 +226,9 @@ tse <- preprocess_data(
 prep_classification <- altExp(tse, "prep_classification")
 removed_feats <- metadata(prep_classification)[["removed_feats"]]
 
-# If any alpha diversity index was removed, it will be discarded 
+# If any alpha diversity index was removed, it will be discarded
 # from the predictors
 alpha_divs_classification <- setdiff(alpha_divs, removed_feats)
-
 ```
 
 ### Preprocess for regression task 
@@ -243,7 +243,7 @@ our dataset. This time, however, we are interested in a regression task.
 tse <- preprocess_data(
     dataset = tse,
     outcome_colname = "BMI",
-    assay.type = "relabundance", 
+    assay.type = "relabundance",
     name = "prep_regression",
     col.var = alpha_divs, # preprocess these metadata variables too
     remove_var = "zv",
@@ -255,10 +255,9 @@ tse <- preprocess_data(
 prep_regression <- altExp(tse, "prep_regression")
 removed_feats <- metadata(prep_regression)[["removed_feats"]]
 
-# If any alpha diversity index was removed, it will be discarded 
+# If any alpha diversity index was removed, it will be discarded
 # from the predictors
 alpha_divs_regression <- setdiff(alpha_divs, removed_feats)
-
 ```
 Note that the preprocessed dataset for the classification and regression
 tasks are stored within the 'tse' object, under the 'altExp' called 
@@ -758,7 +757,6 @@ test_data$pred <- pred
 ids <- rownames(test_data)
 test_data$disease <- colData(tse)[ids, "disease"]
 
-#table(test_data$diagnosis)
 table(test_data$disease)
 
 # Plot actual (y-axis) vs predicted (x-axis) BMI values
@@ -825,7 +823,6 @@ the RF model used in regression.
 feat_imp <- get_feature_importance(
     trained_model = rf_classification[["trained_model"]],
     test_data = rf_classification[["test_data"]],
-    #outcome_colname = "diagnosis",
     outcome_colname = "disease",
     perf_metric_function = multiClassSummary,
     perf_metric_name = "AUC",
@@ -918,4 +915,3 @@ Useful functions:
 `mikropml::preprocess_data()`, `mikropml::run_ml()`, `mikropml::plot_model_performance()`
 
 :::
-
