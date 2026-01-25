@@ -165,11 +165,13 @@ diss <- as.matrix(getDissimilarity(tse, method = "bray", na.rm=TRUE, assay.type 
 sample_ids <- tse$SampleID
 
 tse$dysbiosis <- sapply(seq_along(tse$disease_binary), function(i) {
+  
   # Logical vector indicating all other reference samples (excluding i)
   ref_others <- tse$disease_binary & (sample_ids != sample_ids[i])
   
   # Compute median distance between sample i and these reference samples
   median(diss[i, ref_others], na.rm = TRUE)
+  
 })
 
 #############################################################
@@ -231,12 +233,16 @@ treatment's effect on dysbiosis.
 # Run mediation (non-delta) #
 #############################
 
+# Convert the TreeSummarizedExperiment to be SummarizedExperiment
+se_relative <- as(tse, "SummarizedExperiment")
+if (is.null(rownames(se_relative))) rownames(se_relative) <- rownames(rowData(se_relative)) <- make.names(rownames(tse), unique = TRUE)
+
 # Use indices for mediators
-medi_idx <- seq_len(nrow(tse))
+medi_idx <- seq_len(nrow(se_relative))
 
 # Create the Mediation Data object
 exper <- mediation_data(
-  tse,
+  se_relative,
   outcomes   = "dysbiosis",
   treatments = "treatment",
   mediators  = medi_idx
@@ -286,7 +292,7 @@ overall and mediator-specific indirect effects.
 #####################################
 
 set.seed(12345)
-boot_overall <- bootstrap(mdl, exper, c(indirect = indirect_overall), B = 100)
+boot_overall <- bootstrap(mdl, exper, c(indirect = indirect_overall), B = 10)
 summary(boot_overall$indirect)
 quantile(boot_overall$indirect$indirect_effect, probs = c(0.025, 0.975))
 
