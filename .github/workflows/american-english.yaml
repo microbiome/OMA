@@ -1,0 +1,52 @@
+on:
+  pull_request:
+    branches:
+      - devel
+      - RELEASE_**
+    paths: ["**.[rR]", "**.[qrR]md", "**.[rR]markdown"]
+  workflow_dispatch:
+name: Convert British English spelling into American English spelling
+permissions: read-all
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Convert from American English to British English
+        run: |
+          find . -type f -iname "*.r" -or -iname "*.[qr]md" \
+                 -or -iname "*.rmarkdown" |
+            xargs sed -E -i \
+            -e 's/visualise/visualize/' \
+            -e 's/visualisation/visualization/' \
+            -e 's/\<summarise\>([^(])/summarize\1/' \
+            -e 's/\<summarised\>([^(])/summarized\1/' \
+            -e 's/summarises /summarizes /' \
+            -e 's/analysed/analyzed/' \
+            -e 's/\<analyze\>/analyze/' \
+            -e 's/favour/favor/' \
+            -e 's/coloured/colored/' \
+            -e 's/colour /color /' \
+            -e 's/utilise/utilize/' \
+            -e 's/maximis/maximiz/' \
+            -e 's/minimis/minimiz/' \
+            -e 's/normalis/normaliz/' \
+            -e 's/artefact/artifact/' \
+            -e 's/labelled/labeled/' \
+            -e 's/behaviour/behavior/' \
+            -e 's/whilst/while/' \
+            -e 's/programme /program /' \
+            -e 's/grey /gray /'
+
+      - name: Commit and push changes
+        # Commit all changed files back to the repository
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: Convert American English to British Enlish
