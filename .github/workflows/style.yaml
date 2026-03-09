@@ -3,7 +3,14 @@ on:
     branches:
       - devel
       - RELEASE_**
-    paths: ["**.[rR]", "**.[qrR]md", "**.[rR]markdown", "**.[rR]nw", "**.[rR]profile"]
+    paths:
+      [
+        "**.[rR]",
+        "**.[qrR]md",
+        "**.[rR]markdown",
+        "**.[rR]nw",
+        "**.[rR]profile",
+      ]
   workflow_dispatch:
 name: Style code
 permissions: read-all
@@ -16,7 +23,7 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Setup R
@@ -62,15 +69,8 @@ jobs:
             styler::style_file(path = files, transformers = styler::tidyverse_style(indent_by = 4L))
           }
         shell: Rscript {0}
-
       - name: Commit and push changes
-        run: |
-          git config --local user.name "$GITHUB_ACTOR"
-          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git add -u
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "Style code (GHA)"
-            git push origin HEAD:${{ github.head_ref }}
-          fi
+        # Commit all changed files back to the repository
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: Style R code with styler
