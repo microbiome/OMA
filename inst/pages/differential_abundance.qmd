@@ -17,7 +17,7 @@ treatment versus control groups.
 The goal of DAA is thus to identify biomarkers of a certain phenotype or
 condition, and gain understanding of a complex system by looking at its isolated
 components. For example, the identification of a bacterial taxon that is more
-abundant in healthy patients compared to diseased patients can lead to important
+abundant in healthy versus diseased individuals can lead to important
 insights into the underlying mechanisms of the disease. In other words,
 differentially abundant taxa can be involved in the dynamics of the disease,
 which in turn helps to understand the system as a whole.
@@ -129,8 +129,9 @@ analysis and the differential analysis of positive (non-zero) abundances.
 ### Preparing the data {#sec-prepare-data}
 
 We use the Tengeler2020 dataset from `r BiocStyle::Biocpkg("mia")` package.
-The dataset includes samples from people with ADHD (N = 13) and without ADHD
-(Control group, N = 14). The people are from three different cohorts.
+The dataset includes stool samples from mice humanized with either ADHD
+individuals' gut microbiome (N = 13) or healthy controls' (N = 14). The samples
+belong to three different cohorts.
 
 ```{r}
 #| label: load_packages_and_data
@@ -177,10 +178,10 @@ tse$cohort <- factor(tse$cohort, levels = c("Cohort_1", "Cohort_2", "Cohort_3"))
 
 ### Simple two-group comparison {#sec-daa-basic}
 
-Here we perform the simplest version of DAA, namely, the comparison of two
+Here, we perform the simplest version of DAA, namely, the comparison of two
 groups without any other covariates included in the analysis.
-In our case this means comparing the relative abundances of genera between the
-people with and without ADHD.
+In our case, this means comparing the relative abundances of genera between the
+microbiome of ADHD individuals versus control.
 
 We employ the `Maaslin2` function from the `r BiocStyle::Biocpkg("Maaslin2")`
 package [@Mallick2020]. The function
@@ -330,23 +331,15 @@ intervals.
 
 ```{r}
 #| label: plot_daa_est_ci
-
-# First arrange the genera by log2-fold estimate
-top_features <- res_daa_basic[order(res_daa_basic[["coef"]], decreasing = TRUE), "feature"]
-res_daa_basic[["genus_ord"]] <- factor(res_daa_basic[["feature"]], levels = top_features)
-
 # Plot the log2-fold changes and the 95% confidence intervals
-ggplot(res_daa_basic, aes(x = coef, y = genus_ord)) +
-    geom_vline(xintercept = 0, linetype = "dashed") +
-    geom_point() +
-    geom_errorbarh(aes(xmin = ci_lwr, xmax = ci_upr), height = 0.2) +
-    labs(x = "Log2-fold change (95% CI)") +
-    theme_light() +
-    theme(
-        axis.title.y = element_blank(),
-        axis.text.y = element_text(size = 7),
-        plot.title = element_text(hjust = 0.5)
-    )
+plotForest(
+    res_daa_basic,
+    effect.var = "coef",
+    ci.lower.var = "ci_lwr",
+    ci.upper.var = "ci_upr",
+    id.var = "feature",
+    order.by = "coef"
+)
 ```
 
 ### DAA with additional covariates {#sec-daa-cov}
