@@ -412,26 +412,6 @@ These example solutions are related to exercises in [@sec-mediation].
 #| code-summary: "Show the solution"
 ```
 
-## Network learning & analysis
-
-These example solutions are related to exercises in [@sec-network-learning].
-
-```{r}
-#| label: network1
-#| code-fold: true
-#| code-summary: "Show the solution"
-```
-
-## Network comparison
-
-These example solutions are related to exercises in [@sec-network-comparison].
-
-```{r}
-#| label: network2
-#| code-fold: true
-#| code-summary: "Show the solution"
-```
-
 ## Cross-association
 
 These example solutions are related to exercises in [@sec-cross-correlation].
@@ -440,6 +420,37 @@ These example solutions are related to exercises in [@sec-cross-correlation].
 #| label: cross-corr
 #| code-fold: true
 #| code-summary: "Show the solution"
+
+# Load the example dataset
+library(mia)
+data(HintikkaXOData)
+mae <- HintikkaXOData
+
+# Agglomerate microbiome data
+mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Phylum")
+
+# Apply CLR
+mae[[1]] <- transformAssay(mae[[1]], assay.type = "counts", method = "rclr")
+
+# Apply relative and log10
+mae[[2]] <- transformAssay(mae[[2]], assay.type = "nmr", method = "relabundance")
+mae[[2]] <- transformAssay(mae[[2]], assay.type = "relabundance", method = "log10", pseudocount = TRUE)
+
+# Cross correlates data sets
+res <- getCrossAssociation(
+    mae,
+    experiment1 = 1,
+    experiment2 = 2,
+    assay.type1 = "rclr",
+    assay.type2 = "log10",
+    method = "spearman",
+    mode = "matrix"
+)
+
+# Create a heatmap
+library(ComplexHeatmap)
+p <- Heatmap(res)
+p
 ```
 
 ## Ordination-based multiassay analysis
@@ -451,17 +462,44 @@ These example solutions are related to exercises in
 #| label: mofa
 #| code-fold: true
 #| code-summary: "Show the solution"
-```
 
-## Multi-omics prediction and classification
+# Load the example dataset
+library(mia)
+data(HintikkaXOData)
+mae <- HintikkaXOData
 
-These example solutions are related to exercises in
-[@sec-multi-omics-integration].
+# Select only microbiome and metabolites
+mae <- mae[, , c(1, 2)]
 
-```{r}
-#| label: integratedlearner
-#| code-fold: true
-#| code-summary: "Show the solution"
+# Agglomerate microbiome data
+mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Phylum")
+
+# Apply CLR
+mae[[1]] <- transformAssay(mae[[1]], assay.type = "counts", method = "rclr")
+
+# Apply relative and log10 transformations
+mae[[2]] <- transformAssay(mae[[2]], assay.type = "nmr", method = "relabundance")
+mae[[2]] <- transformAssay(mae[[2]], assay.type = "relabundance", method = "log10", pseudocount = TRUE)
+
+# Scale features
+mae[[1]] <- transformAssay(mae[[1]], assay.type = "rclr", method = "standardize", MARGIN = "rows")
+mae[[2]] <- transformAssay(mae[[2]], assay.type = "log10", method = "standardize", MARGIN = "rows")
+
+# Removing the assays no longer needed
+assays(mae[[1]]) <- assays(mae[[1]])["standardize"]
+assays(mae[[2]]) <- assays(mae[[2]])["standardize"]
+
+# Create a MOFA object
+library(MOFA2)
+model <- create_mofa_from_MultiAssayExperiment(mae)
+
+# Run MOFA
+model <- prepare_mofa(object = model)
+model <- run_mofa(model, use_basilisk = TRUE)
+
+# Visualize variance explained
+p <- plot_variance_explained(model, x = "view", y = "factor")
+p
 ```
 
 ## Machine learning
