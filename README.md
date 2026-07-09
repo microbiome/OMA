@@ -1,6 +1,6 @@
 <!-- badges: start -->
 📦 [Repo](https://github.com/microbiome/OMA) [![rworkflows](https://img.shields.io/github/actions/workflow/status/microbiome/OMA/rworkflows.yml?label=Package%20check)](https://github.com/microbiome/OMA/actions/workflows/rworkflows.yml)
-📖 [Book](https://microbiome.github.io/OMA/) [![deployment](https://img.shields.io/github/actions/workflow/status/microbiome/OMA/pages/pages-build-deployment?label=Book%20deployment)](https://github.com/microbiome/OMA/actions/workflows/pages/pages-build-deployment)
+📖 [Book](https://bioconductor.org/books/release/OMA/) [![book build](https://img.shields.io/github/actions/workflow/status/microbiome/OMA/biocbook.yml?label=Book%20build)](https://github.com/microbiome/OMA/actions/workflows/biocbook.yml)
 🐳 [Docker](https://github.com/microbiome/OMA/pkgs/container/OMA) [![biocbook](https://img.shields.io/github/actions/workflow/status/microbiome/OMA/biocbook.yml?label=Docker%20image)](https://github.com/microbiome/OMA/actions/workflows/biocbook.yml)
 <!-- badges: end -->
 
@@ -23,14 +23,13 @@ This project received funding from the European Union’s Horizon 2020 research 
 
 ## Deployment
 
-The book release version is automatically built and deployed from the 
-`devel` branch to the `gh-pages` branch using GitHub Actions.
+The canonical release book is published on Bioconductor. This repository still
+builds the book from the `devel` branch, but the GitHub Pages copy now
+redirects to the Bioconductor release.
 
-You can also preview it locally after _cloning_ this Github
-repository. This is useful if you want to suggest
-improvements to the material. You can also use this to test the build
-before making a pull request to add your new changes to the official
-release.
+You can also preview it locally after _cloning_ this Github repository. This
+is useful if you want to suggest improvements to the material or test the
+build before making a pull request.
 
 Building and viewing the book locally involves the following steps:
 
