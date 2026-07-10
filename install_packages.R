@@ -68,18 +68,9 @@ if(!requireNamespace("magrittr", quietly = TRUE)) {
 ## list of packages required for each chapters
 pkgs_all <- read.table(packages)[,1]
 
-# This will be installed manually later in this script
-# since it requires the latest devel update
-pkgs_all <- setdiff(pkgs_all, "Maaslin2") 
-
 # Customization
 # Github packages must be installed separately
-pkgs_github <- c("miaTime", "ggord")
-pkgs_nongithub <- setdiff(pkgs_all, pkgs_github)
-
-# Maaslin2 needs an update, see
-# https://forum.biobakery.org/t/xtfrm-error-with-maaslin2-default-example-in-r/5216/3
-remotes::install_github("biobakery/Maaslin2")
+pkgs_github <- c("ggord")
 
 # ---------------------------
 
@@ -100,7 +91,6 @@ for(i in seq_along(chapter_pkgs)) {
 }
 
 # Github packages
-devtools::install_github("microbiome/miaTime")
 devtools::install_github("fawda123/ggord")
 
 ## report packages no installed
