@@ -82,7 +82,7 @@ pkgs_all <- read.table(packages)[, 1]
 
 # This will be installed manually later in this script
 # since it requires the latest devel update
-pkgs_all <- setdiff(pkgs_all, "Maaslin2") 
+pkgs_all <- setdiff(pkgs_all, "Maaslin2")
 
 # Customization
 # Github packages must be installed separately
