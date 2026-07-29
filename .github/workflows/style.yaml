@@ -51,7 +51,7 @@ jobs:
           )
         shell: Rscript {0}
       - name: Cache styler
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ steps.styler-location.outputs.location }}
           key: ${{ runner.os }}-styler-${{ github.sha }}
@@ -69,8 +69,13 @@ jobs:
             styler::style_file(path = files, transformers = styler::tidyverse_style(indent_by = 4L))
           }
         shell: Rscript {0}
+      - name: Strip trailing whitespace
+        run: |
+          git ls-files -z \
+            | grep -zE '\.(R|Rmd|qmd|Rmarkdown|Rnw|Rprofile)$' \
+            | xargs -0 -r sed -i 's/[[:blank:]]*$//'
       - name: Commit and push changes
         # Commit all changed files back to the repository
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: Style R code with styler
+          commit_message: Style R code with styler and remove whitespaces
