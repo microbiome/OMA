@@ -26,7 +26,7 @@ insights into **how exposures impact outcomes via microbial features and**
 
 ```{r}
 #| label: fig_multivariate_mediation
-#| fig-cap: Directed acyclic graph illustrating multivariate mediation, where an exposure affects many parallel mediators (here, illustrated as microbial features) within a single omic layer, which in turn affect the outcome. A direct path from exposure to outcome is also included (dashed). For tractability in high-dimensional mediation analysis, mediators are assumed to be conditionally independent given the exposure; this is a simplification, since real microbial features are often correlated.
+#| fig-cap: Directed acyclic graph illustrating multivariate mediation where an exposure affects multiple mediators across modalities (microbial species and metabolites), which in turn affect the outcome. A direct path from exposure to outcome is also included (dashed). While gut microbial species biologically influence metabolite levels, for tractability in high-dimensional mediation analysis we assume species and metabolites act as conditionally independent parallel mediators given exposure, acknowledging this as an approximation
 #| echo: false
 
 library(ggdag)
@@ -35,24 +35,24 @@ library(ggplot2)
 
 # Define DAG: exposure -> 4 parallel mediators -> outcome, plus a direct path
 dag <- dagify(
-    outcome ~ m1 + m2 + m3 + m4 + exposure,
-    m1 ~ exposure,
-    m2 ~ exposure,
-    m3 ~ exposure,
-    m4 ~ exposure,
+    outcome ~ sp1 + sp2 + met1 + met2 + exposure,
+    sp1 ~ exposure,
+    sp2 ~ exposure,
+    met1 ~ exposure,
+    met2 ~ exposure,
     exposure = "exposure",
     outcome = "outcome",
     labels = c(
         exposure = "Exposure",
         outcome = "Outcome",
-        m1 = "Feature 1",
-        m2 = "Feature 2",
-        m3 = "Feature 3",
-        m4 = "Feature 4"
+        sp1 = "Species 1",
+        sp2 = "Species 2",
+        met1 = "Metabolite 1",
+        met2 = "Metabolite 2"
     ),
     coords = list(
-        x = c(exposure = 0, m1 = 1, m2 = 1, m3 = 1, m4 = 1, outcome = 2),
-        y = c(exposure = 0, m1 = 1.5, m2 = 0.5, m3 = -0.5, m4 = -1.5, outcome = 0)
+        x = c(exposure = 0, sp1 = 1, sp2 = 1, met1 = 1, met2 = 1, outcome = 2),
+        y = c(exposure = 0, sp1 = 1.5, sp2 = 0.5, met1 = -0.5, met2 = -1.5, outcome = 0)
     )
 )
 
@@ -215,15 +215,12 @@ treatment's effect on dysbiosis.
 #| label: overall_mediation_analysis
 #| message: false
 
-# Use indices for mediators
-medi_idx <- seq_len(nrow(tse))
-
 # Create the mediation data object
 exper <- mediation_data(
     tse,
     outcomes = "dysbiosis",
     treatments = "treatment",
-    mediators = medi_idx
+    mediators = rownames(tse)
 )
 
 # Fit the multivariate mediation model and estimate effects
@@ -467,15 +464,12 @@ and mediation-specific indirect effects.
 #| label: mediation_analysis
 #| message: false
 
-# Use indices for mediators
-medi_idx <- seq_len(nrow(se))
-
 # Create the mediation data object
 exper <- mediation_data(
     se,
     outcomes = "dysbiosis",
     treatments = "treatment",
-    mediators = medi_idx
+    mediators = rownames(se)
 )
 
 # Fit the multivariate mediation model and estimate effects
