@@ -253,9 +253,13 @@ top_mediators <- effects_by_mediator |>
 print(top_mediators)
 ```
 
-To quantify uncertainty around the indirect effects, we use non-parametric 
-bootstrap resampling to compute **95% confidence intervals** for both the 
-overall and mediator-specific indirect effects.
+To quantify uncertainty around the indirect effects, we use non-parametric
+bootstrap resampling to compute **95% confidence intervals** for both the
+overall and mediator-specific indirect effects. To keep the book build time
+short, we use only `B = 10` bootstrap iterations below; for real applications
+we recommend `B >= 500` (ideally 1000 or more) to obtain stable percentile
+confidence intervals, so the CI widths shown here should be interpreted as
+illustrative rather than definitive.
 
 ```{r}
 #| label: visualization_for_species_overall_indirect_effects
@@ -273,12 +277,12 @@ quantile(boot_overall$indirect$indirect_effect, probs = c(0.025, 0.975))
 # Plot the bootstrap distribution
 ggplot(boot_overall$indirect, aes(indirect_effect)) +
     geom_histogram(bins = 20, fill = "#69b3a2", color = "black") +
-    ggtitle("Bootstrap Distribution of Overall Indirect Effect (B = 100)") +
+    ggtitle("Bootstrap Distribution of Overall Indirect Effect (B = 10)") +
     labs(x = "Overall Indirect Effect", y = "Frequency") +
     theme_classic()
 ```
 
-Finally, we visualize the **mediator-specific indirect effects** using a forest 
+Finally, we visualize the **mediator-specific indirect effects** using a forest
 plot, displaying point estimates and 95% CIs to highlight the most influential 
 mediators.
 
@@ -301,7 +305,7 @@ indirect_each <- function(mdl, exper) {
 set.seed(12345)
 
 # Bootstrap mediator-specific indirect effects
-boot_each <- bootstrap(mdl, exper, c(indirect = indirect_each), B = 100)
+boot_each <- bootstrap(mdl, exper, c(indirect = indirect_each), B = 10)
 
 # Remove bootstrap index
 boot_each <- boot_each$indirect[, -1]
