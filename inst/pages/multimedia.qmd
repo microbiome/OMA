@@ -1,4 +1,4 @@
-# Multimodal Mediation Analysis {#sec-MSEA}
+# Multivariate Mediation Analysis {#sec-MSEA}
 
 ```{r}
 #| label: setup
@@ -10,21 +10,23 @@ library(rebook)
 chapterPreamble()
 ```
 
-Building upon the concepts and workflows presented in the previous chapter on 
-mediation analysis, here we demonstrate how to perform **multimodal mediation** 
-**analysis** to identify potential mediators across multiple omics layers. 
-**Multimodal mediation analysis** examines whether and how an exposure (e.g., 
-treatment, diet) affects an outcome (e.g., disease, phenotype) **through** 
-**intermediate variables (mediators) across multiple omics layers** 
-**simultaneously** (e.g., microbiome, metabolomics). It identifies which 
-features across modalities act as mediators, quantifies indirect (mediated) 
-effects while adjusting for covariates, and compares mediation strength across 
-layers, providing mechanistic insights into **how exposures impact outcomes** 
-**via molecular pathways**.
+Building upon the concepts and workflows presented in the previous chapter on
+mediation analysis, here we demonstrate how to perform **multivariate**
+**mediation analysis** to identify potential mediators when many candidate
+features are measured simultaneously within a single omic layer.
+**Multivariate mediation analysis** examines whether and how an exposure
+(e.g., treatment, diet) affects an outcome (e.g., disease, phenotype)
+**through a high-dimensional set of intermediate variables (mediators)**,
+such as the hundreds of species-level abundances or pathway abundances
+in a microbiome study. It identifies which features act as mediators,
+quantifies indirect (mediated) effects while adjusting for covariates,
+and ranks mediation strength across features, providing mechanistic
+insights into **how exposures impact outcomes via microbial features and**
+**functional pathways**.
 
 ```{r}
-#| label: fig_multimodal_mediation
-#| fig-cap: Directed acyclic graph illustrating multimodal mediation where an exposure affects multiple mediators across modalities (microbial species and metabolites), which in turn affect the outcome. A direct path from exposure to outcome is also included (dashed). While gut microbial species biologically influence metabolite levels, for tractability in high-dimensional mediation analysis we assume species and metabolites act as conditionally independent parallel mediators given exposure, acknowledging this as an approximation
+#| label: fig_multivariate_mediation
+#| fig-cap: Directed acyclic graph illustrating multivariate mediation, where an exposure affects many parallel mediators (here, illustrated as microbial features) within a single omic layer, which in turn affect the outcome. A direct path from exposure to outcome is also included (dashed). For tractability in high-dimensional mediation analysis, mediators are assumed to be conditionally independent given the exposure; this is a simplification, since real microbial features are often correlated.
 #| echo: false
 
 library(ggdag)
@@ -33,24 +35,24 @@ library(ggplot2)
 
 # Define DAG: exposure -> 4 parallel mediators -> outcome, plus a direct path
 dag <- dagify(
-    outcome ~ sp1 + sp2 + met1 + met2 + exposure,
-    sp1 ~ exposure,
-    sp2 ~ exposure,
-    met1 ~ exposure,
-    met2 ~ exposure,
+    outcome ~ m1 + m2 + m3 + m4 + exposure,
+    m1 ~ exposure,
+    m2 ~ exposure,
+    m3 ~ exposure,
+    m4 ~ exposure,
     exposure = "exposure",
     outcome = "outcome",
     labels = c(
         exposure = "Exposure",
         outcome = "Outcome",
-        sp1 = "Species 1",
-        sp2 = "Species 2",
-        met1 = "Metabolite 1",
-        met2 = "Metabolite 2"
+        m1 = "Feature 1",
+        m2 = "Feature 2",
+        m3 = "Feature 3",
+        m4 = "Feature 4"
     ),
     coords = list(
-        x = c(exposure = 0, sp1 = 1, sp2 = 1, met1 = 1, met2 = 1, outcome = 2),
-        y = c(exposure = 0, sp1 = 1.5, sp2 = 0.5, met1 = -0.5, met2 = -1.5, outcome = 0)
+        x = c(exposure = 0, m1 = 1, m2 = 1, m3 = 1, m4 = 1, outcome = 2),
+        y = c(exposure = 0, m1 = 1.5, m2 = 0.5, m3 = -0.5, m4 = -1.5, outcome = 0)
     )
 )
 
@@ -68,17 +70,16 @@ ggplot(tidy_dag, aes(x = x, y = y, xend = xend, yend = yend)) +
     theme_dag()
 ```
 
-In this chapter, we demonstrate multimodal mediation analysis using microbiome 
-data from the iHMP IBDMDB study from the R/Bioconductor package 
-curatedMetagenomicData. [@Lloyd-Price2019]. Unlike conventional mediation 
-analysis, which typically focuses on a single mediator or a small set of 
-mediators, we performed multimodal mediation analysis with R/Bioconductor 
-package \[multimedia\] [@Jiang2025] here, which can handle many potential 
-mediators across multiple data modalities. For example, species-level taxonomic 
-abundances, pathways abundances, and metabolomic profiles can all serve as 
-potential mediators. This method allows us to estimate and rank each mediator’s 
-contribution while accounting for correlations between mediators in a high- 
-dimensional setting.
+In this chapter, we demonstrate multivariate mediation analysis using microbiome
+data from the iHMP IBDMDB study from the R/Bioconductor package
+curatedMetagenomicData. [@Lloyd-Price2019]. Unlike conventional mediation
+analysis, which typically focuses on a single mediator or a small set of
+mediators, we performed multivariate mediation analysis with the R/Bioconductor
+package \[multimedia\] [@Jiang2025] here, which can handle many potential
+mediators within a single omic layer. For example, species-level taxonomic
+abundances or pathway abundances can each serve as a set of parallel mediators.
+This method allows us to estimate and rank each mediator’s contribution while
+accounting for correlations between mediators in a high-dimensional setting.
 
 In this example, time point (baseline vs. post-treatment) is used as the 
 treatment, and microbiome-based dysbiosis scores are used as the outcome. We 
@@ -93,7 +94,7 @@ Generally, we will proceed through the following key steps:
 
 3.  Define the mediation analysis data structure.
 
-4.  Fit the multimodal mediation model using the R package multimedia.
+4.  Fit the multivariate mediation model using the R package multimedia.
 
 5.  Interpret both the overall indirect effects and the mediator-specific 
 indirect effects.
@@ -103,7 +104,7 @@ prioritize findings.
 
 7.  Repeat the process for the iHMP microbial pathways.
 
-## Performing multimodal mediation analysis for iHMP species relative abundance {#sec-relative-abundance}
+## Performing multivariate mediation analysis for iHMP species relative abundance {#sec-relative-abundance}
 
 We begin by loading the relative abundance data and calculating dysbiosis scores 
 for each sample based on Bray–Curtis dissimilarity from a healthy reference set. 
@@ -206,7 +207,7 @@ multimedia function to estimate path models for the treatment-to-mediator (α
 path), mediator-to-outcome (β path), and the combined indirect effect (α×β 
 path).
 
-We now fit the multimodal mediation model and inspect the overall indirect and 
+We now fit the multivariate mediation model and inspect the overall indirect and 
 direct effects to understand whether microbiome composition mediates the 
 treatment's effect on dysbiosis.
 
@@ -225,7 +226,7 @@ exper <- mediation_data(
     mediators = medi_idx
 )
 
-# Fit the multimodal mediation model and estimate effects
+# Fit the multivariate mediation model and estimate effects
 mdl <- multimedia(exper)
 res <- estimate(mdl, exper)
 
@@ -369,7 +370,7 @@ ie_pw_fast <- tibble(
     mediator = top_meds,
     direct_setting = levels(tse$treatment)[1],
     contrast = paste(levels(tse$treatment)[1], "-", levels(tse$treatment)[2]),
-    indirect_effect = summary_df$estimate[match(top_meds, summary_df$mediator)]
+    indirect_effect = summary_df$effect[match(top_meds, summary_df$mediator)]
 )
 
 # Visualize the selected mediators across samples
@@ -383,7 +384,7 @@ same setup as before, using the time point as the treatment, dysbiosis score as
 the outcome, but pathways abundances as the mediation variables instead of the 
 relative species abundance.
 
-## Performing multimodal mediation analysis for pathways abundances {#sec-pathways-abundances}
+## Performing multivariate mediation analysis for pathways abundances {#sec-pathways-abundances}
 
 We then repeat the same minimal preprocessing on the iHMP pathway abundance
 table (paired visits 1 and 27 for pathways).
@@ -455,7 +456,7 @@ rownames(se) <- rownames(se) |>
     make.names(unique = TRUE)
 ```
 
-Next, we continue to fit the multimodal mediation model, and extract the overall 
+Next, we continue to fit the multivariate mediation model, and extract the overall 
 and mediation-specific indirect effects.
 
 ```{r}
@@ -473,7 +474,7 @@ exper <- mediation_data(
     mediators = medi_idx
 )
 
-# Fit the multimodal mediation model and estimate effects
+# Fit the multivariate mediation model and estimate effects
 mdl <- multimedia(exper)
 res <- estimate(mdl, exper)
 
@@ -505,7 +506,7 @@ both the overall and mediator-specific pathway indirect effects.
 set.seed(12345)
 
 # Bootstrap the overall indirect effect
-boot_overall <- bootstrap(mdl, exper, c(indirect = indirect_overall), B = 100)
+boot_overall <- bootstrap(mdl, exper, c(indirect = indirect_overall), B = 10)
 
 # Summarize the bootstrap distribution and percentile interval
 summary(boot_overall$indirect)
@@ -514,7 +515,7 @@ quantile(boot_overall$indirect$indirect_effect, probs = c(0.025, 0.975))
 # Plot the bootstrap distribution
 ggplot(boot_overall$indirect, aes(indirect_effect)) +
     geom_histogram(bins = 20, fill = "#69b3a2", color = "black") +
-    ggtitle("Bootstrap Distribution of Overall Indirect Effect (B = 100)") +
+    ggtitle("Bootstrap Distribution of Overall Indirect Effect (B = 10)") +
     labs(x = "Overall Indirect Effect", y = "Frequency") +
     theme_classic()
 ```
@@ -529,7 +530,7 @@ pathway abundance as well, with the point estimates and 95% CIs.
 set.seed(12345)
 
 # Bootstrap mediator-specific indirect effects
-boot_each <- bootstrap(mdl, exper, c(indirect = indirect_each), B = 100)
+boot_each <- bootstrap(mdl, exper, c(indirect = indirect_each), B = 10)
 
 # Remove bootstrap index
 boot_each <- boot_each$indirect[, -1]
