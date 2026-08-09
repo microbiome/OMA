@@ -28,6 +28,7 @@ layers, providing mechanistic insights into **how exposures impact outcomes**
 #| echo: false
 
 library(ggdag)
+library(ggraph)
 library(ggplot2)
 
 # Define DAG: exposure -> 4 parallel mediators -> outcome, plus a direct path
@@ -116,16 +117,14 @@ We first load the packages and define small plotting helpers used below.
 #| label: load_libraries_and_helpers
 #| message: false
 
-library(curatedMetagenomicData)
-library(SummarizedExperiment)
-library(dplyr)
-library(vegan)
-library(tidyverse)
-library(multimedia)
-library(stringr)
-library(ggplot2)
 library(mia)
 library(miaViz)
+library(multimedia)
+library(curatedMetagenomicData)
+library(dplyr)
+library(tidyverse)
+library(stringr)
+library(ggplot2)
 ```
 
 We pull the iHMP IBDMDB species relative-abundance table directly from
@@ -139,30 +138,39 @@ define the treatment factor, and standardize the assay for mediation.
 #| label: load_iHMP_relative_demo_data
 #| message: false
 
-# Import iHMP species relative abundance data
-tse <- curatedMetagenomicData(
+# Import iHMP dataset
+hmpibd <- curatedMetagenomicData(
     "HMP_2019_ibdmdb.relative_abundance",
-    rownames = "short", dryrun = FALSE
-)[[1]]
+    rownames = "short",
+    dryrun = FALSE
+)
+
+# Extract microbiome experiment
+tse <- hmpibd[[1]]
 
 # Convert the assay to relative abundances in [0, 1]
 tse <- transformAssay(
     tse,
-    assay.type = "relative_abundance", method = "relabundance"
+    assay.type = "relative_abundance",
+    method = "relabundance"
 )
 
 # Dysbiosis: median Bray-Curtis distance to healthy references (excluding self)
 diss <- as.matrix(getDissimilarity(
     tse,
-    method = "bray", assay.type = "relabundance", na.rm = TRUE
+    method = "bray",
+    assay.type = "relabundance",
+    na.rm = TRUE
 ))
-healthy <- tse$disease == "healthy"
+
+is_healthy <- tse$disease == "healthy"
+
 tse$dysbiosis <- sapply(seq_len(ncol(tse)), function(i) {
-    median(diss[i, healthy & seq_len(ncol(tse)) != i], na.rm = TRUE)
+    median(diss[i, is_healthy & seq_len(ncol(tse)) != i], na.rm = TRUE)
 })
 
 # Keep IBD subjects with paired baseline (visit 1) and post-treatment (visit 21)
-tse <- tse[, tse$disease != "healthy" & tse$visit_number %in% c(1, 21)]
+tse <- tse[, !is_healthy & tse$visit_number %in% c(1, 21)]
 paired <- names(which(table(tse$subject_id) == 2))
 tse <- tse[, tse$subject_id %in% paired]
 
@@ -171,9 +179,12 @@ tse$treatment <- factor(
     ifelse(tse$visit_number == 1, "T0", "T1"),
     levels = c("T0", "T1")
 )
+
 tse <- transformAssay(
     tse,
-    assay.type = "relabundance", method = "standardize", name = "scaled"
+    assay.type = "relabundance",
+    method = "standardize",
+    name = "scaled"
 )
 
 # Use syntactically valid mediator names in model formulas
@@ -234,8 +245,8 @@ effect size.
 effects_by_mediator <- indirect_pathwise(res, exper)
 
 # Rank mediators by absolute indirect effect size
-top_mediators <- effects_by_mediator %>%
-    arrange(desc(abs(indirect_effect))) %>%
+top_mediators <- effects_by_mediator |>
+    arrange(desc(abs(indirect_effect))) |>
     head(20)
 
 print(top_mediators)
@@ -249,8 +260,9 @@ overall and mediator-specific indirect effects.
 #| label: visualization_for_species_overall_indirect_effects
 #| message: false
 
-# Bootstrap the overall indirect effect
 set.seed(12345)
+
+# Bootstrap the overall indirect effect
 boot_overall <- bootstrap(mdl, exper, c(indirect = indirect_overall), B = 10)
 
 # Summarize the bootstrap distribution and percentile interval
@@ -260,12 +272,9 @@ quantile(boot_overall$indirect$indirect_effect, probs = c(0.025, 0.975))
 # Plot the bootstrap distribution
 ggplot(boot_overall$indirect, aes(indirect_effect)) +
     geom_histogram(bins = 20, fill = "#69b3a2", color = "black") +
-    theme_classic() +
-    labs(
-        x = "Overall Indirect Effect",
-        y = "Frequency",
-        title = "Bootstrap Distribution of Overall Indirect Effect (B = 100)"
-    )
+    ggtitle("Bootstrap Distribution of Overall Indirect Effect (B = 100)") +
+    labs(x = "Overall Indirect Effect", y = "Frequency") +
+    theme_classic()
 ```
 
 Finally, we visualize the **mediator-specific indirect effects** using a forest 
@@ -288,59 +297,53 @@ indirect_each <- function(mdl, exper) {
     return(indirect)
 }
 
-# Bootstrap mediator-specific indirect effects
 set.seed(12345)
+
+# Bootstrap mediator-specific indirect effects
 boot_each <- bootstrap(mdl, exper, c(indirect = indirect_each), B = 100)
-summary(boot_each$indirect)
+
+# Remove bootstrap index
+boot_each <- boot_each$indirect[, -1]
+
+summary(boot_each)
 
 # Calculate percentile intervals and bootstrap means
 lower_upper <- apply(
-    boot_each$indirect,
-    2,
-    function(x) quantile(x, c(0.025, 0.975), na.rm = TRUE)
+    boot_each,
+    MARGIN = 2,
+    quantile,
+    probs = c(0.025, 0.975),
+    na.rm = TRUE
 )
-means <- apply(boot_each$indirect, 2, mean, na.rm = TRUE)
 
 # Collect estimates and interval limits in one data frame
 summary_df <- data.frame(
-    mediator = colnames(boot_each$indirect),
-    estimate = means,
+    mediator = colnames(boot_each),
     lower = lower_upper[1, ],
     upper = lower_upper[2, ]
 )
-summary_df <- summary_df[-1, ]
 
-# Flag intervals that do not cross zero
-summary_df$significant <- with(summary_df, lower > 0 | upper < 0)
+summary_df$effect <- apply(boot_each, 2, mean, na.rm = TRUE)
 
-# Remove mediators with degenerate bootstrap intervals
-summary_df <- summary_df %>%
-    filter((upper - lower) != 0)
-
-# Prioritize significant mediators, then sort by effect size
-summary_df$rank <- ifelse(summary_df$significant, 1, 2)
-summary_df <- summary_df[order(summary_df$rank, -abs(summary_df$estimate)), ]
-
-# Add absolute effects for forest plot ordering
-summary_df <- summary_df %>%
-    mutate(abs_estimate = abs(estimate))
+summary_df <- summary_df |>
+    mutate(
+        # Flag intervals that do not cross zero
+        significant = lower > 0 | upper < 0,
+        # Add absolute effects for forest plot ordering
+        abs_effect = abs(effect)
+    ) |>
+    # Remove mediators with degenerate bootstrap intervals
+    filter(upper - lower > 0)
 
 # Plot mediator-specific effects with confidence intervals
 plotForest(
     summary_df,
-    effect.var = "estimate",
-    ci.lower.var = "lower",
-    ci.upper.var = "upper",
-    pval.var = NULL,
     id.var = "mediator",
-    order.by = "abs_estimate",
-    colour.by = "significant"
+    label.by = "CI",
+    order.by = "abs_effect"
 ) +
-    labs(
-        x = "Observed Indirect Effect with Bootstrap CI",
-        y = "Mediator",
-        title = "Forest Plot of Mediation-specific Indirect Effects for Species"
-    )
+    ggtitle("Forest Plot of Mediation-specific Indirect Effects for Species") +
+    labs(x = "Observed Indirect Effect with Bootstrap CI", y = "Mediator")
 ```
 
 Based on the forest plot results, we can see that the Agathobaculum 
@@ -355,9 +358,9 @@ visualization.
 #| message: false
 
 # Select the top mediators for the default mediator-level plot
-top_meds <- summary_df %>%
-    arrange(desc(abs(estimate))) %>%
-    slice_head(n = 12) %>%
+top_meds <- summary_df |>
+    arrange(desc(abs_effect)) |>
+    slice_head(n = 12) |>
     pull(mediator)
 
 # Create the effect table expected by plot_mediators
@@ -372,6 +375,7 @@ ie_pw_fast <- tibble(
 # Visualize the selected mediators across samples
 plot_mediators(ie_pw_fast, exper, n_panels = 12)
 ```
+
 Mediators are standardized (z-scored) for comparability across features; hence values may be negative. Besides, many microbial features are sparse; several mediators exhibit near-zero values for most samples, producing vertical bands.
 
 Next we repeat the mediation analysis with the iHMP pathway abundances using the 
@@ -389,43 +393,63 @@ table (paired visits 1 and 27 for pathways).
 #| message: false
 
 # Import iHMP pathway abundance data
-tse <- curatedMetagenomicData(
+hmpibd <- curatedMetagenomicData(
     "HMP_2019_ibdmdb.pathway_abundance",
-    rownames = "short", dryrun = FALSE
-)[[1]]
+    rownames = "short",
+    dryrun = FALSE
+)
 
-# Drop samples with any NAs; keep only top-level pathways (rows without "|"
-# strata) and remove the UNMAPPED / UNINTEGRATED rows; scale counts to [0, 1]
-tse <- tse[, colSums(is.na(assay(tse))) == 0]
-rows_to_keep <- !grepl("\\|", rownames(tse))
-rows_to_keep[which(rows_to_keep)[1:2]] <- FALSE
-tse <- tse[rows_to_keep, ]
-assay(tse) <- assay(tse) / 100
+# Extract pathway experiment from list
+se <- hmpibd[[1]]
+
+# Drop samples with any NAs
+se <- se[, colSums(is.na(assay(se))) == 0]
+
+# Keep only top-level pathways (rows without "|" strata)
+se <- se[str_detect(rownames(se), fixed("|"), negate = TRUE), ]
+
+# Remove the UNMAPPED / UNINTEGRATED rows
+se <- se[str_detect(rownames(se), "UNMAPPED|UNINTEGRATED", negate = TRUE), ]
+
+# Scale counts to [0, 1]
+assay(se) <- assay(se) / 100
 
 # Dysbiosis: median Bray-Curtis distance to healthy references (excluding self)
-diss <- as.matrix(vegdist(t(assay(tse)), method = "bray", na.rm = TRUE))
-healthy <- tse$disease == "healthy"
-tse$dysbiosis <- sapply(seq_len(ncol(tse)), function(i) {
-    median(diss[i, healthy & seq_len(ncol(tse)) != i], na.rm = TRUE)
+diss <- as.matrix(getDissimilarity(
+    se,
+    method = "bray",
+    assay.type = "pathway_abundance",
+    na.rm = TRUE
+))
+
+is_healthy <- se$disease == "healthy"
+
+se$dysbiosis <- sapply(seq_len(ncol(se)), function(i) {
+    median(diss[i, is_healthy & seq_len(ncol(se)) != i], na.rm = TRUE)
 })
 
 # Keep IBD subjects with paired baseline (visit 1) and post-treatment (visit 27)
-tse <- tse[, tse$disease != "healthy" & tse$visit_number %in% c(1, 27)]
-paired <- names(which(table(tse$subject_id) == 2))
-tse <- tse[, tse$subject_id %in% paired]
+se <- se[, !is_healthy & se$visit_number %in% c(1, 27)]
+
+paired <- names(which(table(se$subject_id) == 2))
+
+se <- se[, se$subject_id %in% paired]
 
 # Treatment factor and standardized mediator assay
-tse$treatment <- factor(
-    ifelse(tse$visit_number == 1, "T0", "T1"),
+se$treatment <- factor(
+    ifelse(se$visit_number == 1, "T0", "T1"),
     levels = c("T0", "T1")
 )
-tse <- transformAssay(
-    tse,
-    assay.type = "pathway_abundance", method = "standardize", name = "scaled"
+
+se <- transformAssay(
+    se,
+    assay.type = "pathway_abundance",
+    method = "standardize",
+    name = "scaled"
 )
 
 # Syntactically valid mediator names for model formulas
-rownames(tse) <- rownames(tse) |>
+rownames(se) <- rownames(se) |>
     str_remove_all("\\[|\\]") |>
     str_replace_all("[: \\.,]", "_") |>
     make.names(unique = TRUE)
@@ -439,11 +463,11 @@ and mediation-specific indirect effects.
 #| message: false
 
 # Use indices for mediators
-medi_idx <- seq_len(nrow(tse))
+medi_idx <- seq_len(nrow(se))
 
 # Create the mediation data object
 exper <- mediation_data(
-    tse,
+    se,
     outcomes = "dysbiosis",
     treatments = "treatment",
     mediators = medi_idx
@@ -457,12 +481,15 @@ res <- estimate(mdl, exper)
 summary(res)
 print(indirect_overall(res, exper))
 print(direct_effect(res, exper))
+```
 
+
+```{r}
 effects_by_mediator <- indirect_pathwise(res, exper)
 
 # Rank mediators by absolute indirect effect size
-top_mediators <- effects_by_mediator %>%
-    arrange(desc(abs(indirect_effect))) %>%
+top_mediators <- effects_by_mediator |>
+    arrange(desc(abs(indirect_effect))) |>
     head(20)
 
 print(top_mediators)
@@ -475,8 +502,9 @@ both the overall and mediator-specific pathway indirect effects.
 #| label: visualization_for_pathway_overall_indirect_effects
 #| message: false
 
+set.seed(12345)
+
 # Bootstrap the overall indirect effect
-set.seed(1234)
 boot_overall <- bootstrap(mdl, exper, c(indirect = indirect_overall), B = 100)
 
 # Summarize the bootstrap distribution and percentile interval
@@ -486,12 +514,9 @@ quantile(boot_overall$indirect$indirect_effect, probs = c(0.025, 0.975))
 # Plot the bootstrap distribution
 ggplot(boot_overall$indirect, aes(indirect_effect)) +
     geom_histogram(bins = 20, fill = "#69b3a2", color = "black") +
-    theme_classic() +
-    labs(
-        x = "Overall Indirect Effect",
-        y = "Frequency",
-        title = "Bootstrap Distribution of Overall Indirect Effect (B = 100)"
-    )
+    ggtitle("Bootstrap Distribution of Overall Indirect Effect (B = 100)") +
+    labs(x = "Overall Indirect Effect", y = "Frequency") +
+    theme_classic()
 ```
 
 We visualize the **mediator-specific indirect effects** using a forest plot for 
@@ -501,72 +526,59 @@ pathway abundance as well, with the point estimates and 95% CIs.
 #| label: visualization_for_pathway_specific_indirect_effects
 #| message: false
 
-# Define mediator-specific indirect effects for bootstrap resampling
-indirect_each <- function(mdl, exper) {
-    res <- estimate(mdl, exper)
-    alpha <- sapply(res@mediation@estimates, function(m) coef(m)["treatmentT1"])
-    names(alpha) <- sub("\\.treatmentT1$", "", names(alpha))
-    beta <- coef(res@outcome@estimates$dysbiosis)[names(alpha)]
-    indirect <- alpha * beta
-    names(indirect) <- names(alpha)
-    indirect <- indirect[!is.na(indirect)]
-    return(indirect)
-}
+set.seed(12345)
 
 # Bootstrap mediator-specific indirect effects
-set.seed(1234)
 boot_each <- bootstrap(mdl, exper, c(indirect = indirect_each), B = 100)
+
+# Remove bootstrap index
+boot_each <- boot_each$indirect[, -1]
+
+summary(boot_each)
 
 # Calculate percentile intervals and bootstrap means
 lower_upper <- apply(
-    boot_each$indirect,
-    2,
-    function(x) quantile(x, c(0.025, 0.975), na.rm = TRUE)
+    boot_each,
+    MARGIN = 2,
+    quantile,
+    probs = c(0.025, 0.975),
+    na.rm = TRUE
 )
-means <- apply(boot_each$indirect, 2, mean, na.rm = TRUE)
 
 # Collect estimates and interval limits in one data frame
-# (plotForest reads rownames by default, so no mediator column needed)
 summary_df <- data.frame(
-    estimate = means,
+    mediator = colnames(boot_each),
     lower = lower_upper[1, ],
-    upper = lower_upper[2, ],
-    row.names = colnames(boot_each$indirect)
+    upper = lower_upper[2, ]
 )
 
-summary_df <- summary_df[-1, ]
+summary_df$effect <- apply(boot_each, 2, mean, na.rm = TRUE)
 
-# Flag intervals that do not cross zero
-summary_df$significant <- with(summary_df, lower > 0 | upper < 0)
-
-# Remove mediators with degenerate bootstrap intervals
-summary_df <- summary_df[summary_df$upper != summary_df$lower, ]
+summary_df <- summary_df |>
+    mutate(
+        # Flag intervals that do not cross zero
+        significant = lower > 0 | upper < 0,
+        # Add absolute effects for forest plot ordering
+        abs_effect = abs(effect)
+    ) |>
+    # Remove mediators with degenerate bootstrap intervals
+    filter(upper - lower > 0)
 
 # Restore readable pathway labels for plotting
-rownames(summary_df) <- rownames(summary_df) |>
+summary_df$mediator <- summary_df$mediator |>
     str_replace_all("PWY0\\.|PWY\\.", "PWY-") |>
     str_replace_all("[_\\.]+", " ") |>
     str_squish()
 
-# Add absolute effects for forest plot ordering
-summary_df <- summary_df %>%
-    mutate(abs_estimate = abs(estimate))
-
 # Plot mediator-specific effects with confidence intervals
 plotForest(
     summary_df,
-    effect.var = "estimate",
-    ci.lower.var = "lower",
-    ci.upper.var = "upper",
-    pval.var = NULL,
-    order.by = "abs_estimate",
-    colour.by = "significant"
+    id.var = "mediator",
+    label.by = "CI",
+    order.by = "abs_effect"
 ) +
-    labs(
-        x = "Observed Indirect Effect with Bootstrap CI",
-        y = "Mediator",
-        title = "Forest Plot of Mediation-specific Indirect Effects for Pathway"
-    )
+    ggtitle("Forest Plot of Mediation-specific Indirect Effects for Pathway") +
+    labs(x = "Observed Indirect Effect with Bootstrap CI", y = "Mediator")
 ```
 
 Based on the forest plot results, we can see that the tRNA charging pathway has 
