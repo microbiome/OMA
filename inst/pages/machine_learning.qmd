@@ -223,9 +223,22 @@ tse <- preprocess_data(
     group_neg_corr = FALSE
 )
 
-# Identify the discarded features (that won't be used as predictors)
-prep_classification <- altExp(tse, "prep_classification")
-removed_feats <- metadata(prep_classification)[["removed_feats"]]
+# The result is stored in an altExp if features were removed, and otherwise
+# in an assay of the original TreeSE.
+prep_classification_altexp <- if (
+    "prep_classification" %in% altExpNames(tse)
+) {
+    "prep_classification"
+} else {
+    NULL
+}
+
+# Identify discarded features (that won't be used as predictors)
+removed_feats <- if (is.null(prep_classification_altexp)) {
+    metadata(tse)[["removed_feats"]]
+} else {
+    metadata(altExp(tse, prep_classification_altexp))[["removed_feats"]]
+}
 
 # If any alpha diversity index was removed, it will be discarded
 # from the predictors
@@ -252,17 +265,31 @@ tse <- preprocess_data(
     group_neg_corr = FALSE
 )
 
-# Identify the discarded features (that won't be used as predictors)
-prep_regression <- altExp(tse, "prep_regression")
-removed_feats <- metadata(prep_regression)[["removed_feats"]]
+# The result is stored in an altExp if features were removed, and otherwise
+# in an assay of the original TreeSE.
+prep_regression_altexp <- if (
+    "prep_regression" %in% altExpNames(tse)
+) {
+    "prep_regression"
+} else {
+    NULL
+}
+
+# Identify discarded features (that won't be used as predictors)
+removed_feats <- if (is.null(prep_regression_altexp)) {
+    metadata(tse)[["removed_feats"]]
+} else {
+    metadata(altExp(tse, prep_regression_altexp))[["removed_feats"]]
+}
 
 # If any alpha diversity index was removed, it will be discarded
 # from the predictors
 alpha_divs_regression <- setdiff(alpha_divs, removed_feats)
 ```
-Note that the preprocessed dataset for the classification and regression
-tasks are stored within the 'tse' object, under the 'altExp' called 
-'prep_classification' and 'prep_regression', respectively.
+Note that `mikropml::preprocess_data()` stores each result under the requested
+name. If preprocessing removes or groups features, the result is stored in an
+`altExp`; if the feature set is unchanged, it is stored as an assay on `tse`.
+The examples above detect the location and pass it to `run_ml()` accordingly.
 
 ::: {.callout-note}
 ## Note: Preprocessing strategies impact the performance of ML models.
@@ -338,7 +365,7 @@ rf_classification <- run_ml(
     dataset = tse,
     method = "rf",
     outcome_colname = "disease",
-    altexp = "prep_classification",
+    altexp = prep_classification_altexp,
     assay.type = "prep_classification",
     col.var = alpha_divs_classification, # use these variables as predictors too
     seed = 1,
@@ -368,7 +395,7 @@ rf_regression <- run_ml(
     dataset = tse,
     method = "rf",
     outcome_colname = "BMI",
-    altexp = "prep_regression",
+    altexp = prep_regression_altexp,
     assay.type = "prep_regression",
     col.var = alpha_divs_regression, # use these variables as predictors too
     seed = 1,
@@ -628,7 +655,7 @@ rf_senspec$model <- "rf"
 # xgb_senspec$model <- "XGBoost"
 
 # Combine model metrics
-senspec <- rbind(rf_senspec)#, xgb_senspec)
+senspec <- rbind(rf_senspec) # , xgb_senspec)
 
 # Inspect part of the output
 senspec |>
