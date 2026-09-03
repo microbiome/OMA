@@ -78,12 +78,12 @@ mediators, we performed multivariate mediation analysis with the R/Bioconductor
 package \[multimedia\] [@Jiang2025] here, which can handle many potential
 mediators within a single omic layer. For example, species-level taxonomic
 abundances or pathway abundances can each serve as a set of parallel mediators.
-This method allows us to estimate and rank each mediator’s contribution while
+This method allows us to estimate and rank each mediator's contribution while
 accounting for correlations between mediators in a high-dimensional setting.
 
-In this example, time point (baseline vs. post-treatment) is used as the 
-treatment, and microbiome-based dysbiosis scores are used as the outcome. We 
-will first focus on the relative abundances of gut microbial species as 
+In this example, time point (baseline vs. post-treatment) is used as the
+treatment, and microbiome-based dysbiosis scores are used as the outcome. We
+will first focus on the relative abundances of gut microbial species as
 mediators, followed by pathways abundances.
 
 Generally, we will proceed through the following key steps:
@@ -96,23 +96,26 @@ Generally, we will proceed through the following key steps:
 
 4.  Fit the multivariate mediation model using the R package multimedia.
 
-5.  Interpret both the overall indirect effects and the mediator-specific 
+5.  Interpret both the overall indirect effects and the mediator-specific
 indirect effects.
 
-6.  Visualize the results using forest plots, histograms, and rankings to 
+6.  Visualize the results using forest plots, histograms, and rankings to
 prioritize findings.
 
 7.  Repeat the process for the iHMP microbial pathways.
 
 ## Performing multivariate mediation analysis for iHMP species relative abundance {#sec-relative-abundance}
 
-We begin by loading the relative abundance data and calculating dysbiosis scores 
-for each sample based on Bray–Curtis dissimilarity from a healthy reference set. 
-This represents deviation from a healthy microbiome, where higher dysbiosis 
-scores indicate greater microbial imbalance. We then subset to IBD subjects with 
-samples collected at both baseline (visit 1) and post-treatment (visit 21).
+We use a pre-processed subset of the iHMP IBDMDB study, shipped with `miaViz`
+as example data (`tse_relative`). This subset already contains the
+`relabundance` and `scaled` assays, per-sample dysbiosis scores computed from
+Bray–Curtis distance to healthy references, only IBD subjects with paired
+baseline (visit 1) and post-treatment (visit 21) samples, and a `treatment`
+factor with levels `T0` and `T1`. See `?miaViz::multimedia-datasets` for
+details, and `inst/scripts/multimedia_relative_data_prep.R` in the miaViz
+source for the full preparation code.
 
-We first load the packages and define small plotting helpers used below.
+We first load the packages used below.
 
 ```{r}
 #| label: load_libraries_and_helpers
@@ -121,94 +124,32 @@ We first load the packages and define small plotting helpers used below.
 library(mia)
 library(miaViz)
 library(multimedia)
-library(curatedMetagenomicData)
 library(dplyr)
 library(tidyverse)
-library(stringr)
 library(ggplot2)
 ```
-
-We pull the iHMP IBDMDB species relative-abundance table directly from
-`curatedMetagenomicData` and apply a minimal preprocessing pipeline: convert
-to relative abundances, compute per-sample dysbiosis scores (median
-Bray–Curtis distance from the healthy reference), subset to IBD subjects
-with paired baseline (visit 1) and post-treatment (visit 21) samples,
-define the treatment factor, and standardize the assay for mediation.
 
 ```{r}
 #| label: load_iHMP_relative_demo_data
 #| message: false
 
-# Import iHMP dataset
-hmpibd <- curatedMetagenomicData(
-    "HMP_2019_ibdmdb.relative_abundance",
-    rownames = "short",
-    dryrun = FALSE
-)
-
-# Extract microbiome experiment
-tse <- hmpibd[[1]]
-
-# Convert the assay to relative abundances in [0, 1]
-tse <- transformAssay(
-    tse,
-    assay.type = "relative_abundance",
-    method = "relabundance"
-)
-
-# Dysbiosis: median Bray-Curtis distance to healthy references (excluding self)
-diss <- as.matrix(getDissimilarity(
-    tse,
-    method = "bray",
-    assay.type = "relabundance",
-    na.rm = TRUE
-))
-
-is_healthy <- tse$disease == "healthy"
-
-tse$dysbiosis <- sapply(seq_len(ncol(tse)), function(i) {
-    median(diss[i, is_healthy & seq_len(ncol(tse)) != i], na.rm = TRUE)
-})
-
-# Keep IBD subjects with paired baseline (visit 1) and post-treatment (visit 21)
-tse <- tse[, !is_healthy & tse$visit_number %in% c(1, 21)]
-paired <- names(which(table(tse$subject_id) == 2))
-tse <- tse[, tse$subject_id %in% paired]
-
-# Treatment factor and standardized mediator assay
-tse$treatment <- factor(
-    ifelse(tse$visit_number == 1, "T0", "T1"),
-    levels = c("T0", "T1")
-)
-
-tse <- transformAssay(
-    tse,
-    assay.type = "relabundance",
-    method = "standardize",
-    name = "scaled"
-)
-
-# Use syntactically valid mediator names in model formulas
-rownames(tse) <- rownames(tse) |>
-    str_remove(".*s__") |>
-    str_remove_all("\\[|\\]") |>
-    str_replace_all("[: \\.,]", "_") |>
-    make.names(unique = TRUE)
+data(tse_relative)
+tse <- tse_relative
 ```
 
-The mediation analysis components are defined as following: 
+The mediation analysis components are defined as following:
 
 Treatment: time point (baseline vs. post-baseline)
 Outcome: dysbiosis score
 Mediators: scaled species abundances
 
-These are bundled into a mediation data object (exper), which is passed into the 
-multimedia function to estimate path models for the treatment-to-mediator (α 
-path), mediator-to-outcome (β path), and the combined indirect effect (α×β 
+These are bundled into a mediation data object (exper), which is passed into the
+multimedia function to estimate path models for the treatment-to-mediator (α
+path), mediator-to-outcome (β path), and the combined indirect effect (α×β
 path).
 
-We now fit the multivariate mediation model and inspect the overall indirect and 
-direct effects to understand whether microbiome composition mediates the 
+We now fit the multivariate mediation model and inspect the overall indirect and
+direct effects to understand whether microbiome composition mediates the
 treatment's effect on dysbiosis.
 
 ```{r}
@@ -233,7 +174,7 @@ print(indirect_overall(res, exper))
 print(direct_effect(res, exper))
 ```
 
-Mediator-specific indirect effects are then extracted and ranked by absolute 
+Mediator-specific indirect effects are then extracted and ranked by absolute
 effect size.
 
 ```{r}
@@ -280,7 +221,7 @@ ggplot(boot_overall$indirect, aes(indirect_effect)) +
 ```
 
 Finally, we visualize the **mediator-specific indirect effects** using a forest
-plot, displaying point estimates and 95% CIs to highlight the most influential 
+plot, displaying point estimates and 95% CIs to highlight the most influential
 mediators.
 
 ```{r}
@@ -348,11 +289,11 @@ plotForest(
     labs(x = "Observed Indirect Effect with Bootstrap CI", y = "Mediator")
 ```
 
-Based on the forest plot results, we can see that the Agathobaculum 
-butyriciproducens and Escherichia coli pathways has significant indirect 
+Based on the forest plot results, we can see that the Agathobaculum
+butyriciproducens and Escherichia coli pathways has significant indirect
 mediation effects.
 
-We also inspect the top species mediators with the default mediator-level 
+We also inspect the top species mediators with the default mediator-level
 visualization.
 
 ```{r}
@@ -380,205 +321,7 @@ plot_mediators(ie_pw_fast, exper, n_panels = 12)
 
 Mediators are standardized (z-scored) for comparability across features; hence values may be negative. Besides, many microbial features are sparse; several mediators exhibit near-zero values for most samples, producing vertical bands.
 
-Next we repeat the mediation analysis with the iHMP pathway abundances using the 
-same setup as before, using the time point as the treatment, dysbiosis score as 
-the outcome, but pathways abundances as the mediation variables instead of the 
+Next we repeat the mediation analysis with the iHMP pathway abundances using the
+same setup as before, using the time point as the treatment, dysbiosis score as
+the outcome, but pathways abundances as the mediation variables instead of the
 relative species abundance.
-
-## Performing multivariate mediation analysis for pathways abundances {#sec-pathways-abundances}
-
-We then repeat the same minimal preprocessing on the iHMP pathway abundance
-table (paired visits 1 and 27 for pathways).
-
-```{r}
-#| label: load_iHMP_pathway_demo_data
-#| message: false
-
-# Import iHMP pathway abundance data
-hmpibd <- curatedMetagenomicData(
-    "HMP_2019_ibdmdb.pathway_abundance",
-    rownames = "short",
-    dryrun = FALSE
-)
-
-# Extract pathway experiment from list
-se <- hmpibd[[1]]
-
-# Drop samples with any NAs
-se <- se[, colSums(is.na(assay(se))) == 0]
-
-# Keep only top-level pathways (rows without "|" strata)
-se <- se[str_detect(rownames(se), fixed("|"), negate = TRUE), ]
-
-# Remove the UNMAPPED / UNINTEGRATED rows
-se <- se[str_detect(rownames(se), "UNMAPPED|UNINTEGRATED", negate = TRUE), ]
-
-# Scale counts to [0, 1]
-assay(se) <- assay(se) / 100
-
-# Dysbiosis: median Bray-Curtis distance to healthy references (excluding self)
-diss <- as.matrix(getDissimilarity(
-    se,
-    method = "bray",
-    assay.type = "pathway_abundance",
-    na.rm = TRUE
-))
-
-is_healthy <- se$disease == "healthy"
-
-se$dysbiosis <- sapply(seq_len(ncol(se)), function(i) {
-    median(diss[i, is_healthy & seq_len(ncol(se)) != i], na.rm = TRUE)
-})
-
-# Keep IBD subjects with paired baseline (visit 1) and post-treatment (visit 27)
-se <- se[, !is_healthy & se$visit_number %in% c(1, 27)]
-
-paired <- names(which(table(se$subject_id) == 2))
-
-se <- se[, se$subject_id %in% paired]
-
-# Treatment factor and standardized mediator assay
-se$treatment <- factor(
-    ifelse(se$visit_number == 1, "T0", "T1"),
-    levels = c("T0", "T1")
-)
-
-se <- transformAssay(
-    se,
-    assay.type = "pathway_abundance",
-    method = "standardize",
-    name = "scaled"
-)
-
-# Syntactically valid mediator names for model formulas
-rownames(se) <- rownames(se) |>
-    str_remove_all("\\[|\\]") |>
-    str_replace_all("[: \\.,]", "_") |>
-    make.names(unique = TRUE)
-```
-
-Next, we continue to fit the multivariate mediation model, and extract the overall 
-and mediation-specific indirect effects.
-
-```{r}
-#| label: mediation_analysis
-#| message: false
-
-# Create the mediation data object
-exper <- mediation_data(
-    se,
-    outcomes = "dysbiosis",
-    treatments = "treatment",
-    mediators = rownames(se)
-)
-
-# Fit the multivariate mediation model and estimate effects
-mdl <- multimedia(exper)
-res <- estimate(mdl, exper)
-
-# Summarize overall indirect and direct effects
-summary(res)
-print(indirect_overall(res, exper))
-print(direct_effect(res, exper))
-```
-
-
-```{r}
-effects_by_mediator <- indirect_pathwise(res, exper)
-
-# Rank mediators by absolute indirect effect size
-top_mediators <- effects_by_mediator |>
-    arrange(desc(abs(indirect_effect))) |>
-    head(20)
-
-print(top_mediators)
-```
-
-The non-parametric bootstrap resampling is also used to compute **95% CIs** for 
-both the overall and mediator-specific pathway indirect effects.
-
-```{r}
-#| label: visualization_for_pathway_overall_indirect_effects
-#| message: false
-
-set.seed(12345)
-
-# Bootstrap the overall indirect effect
-boot_overall <- bootstrap(mdl, exper, c(indirect = indirect_overall), B = 10)
-
-# Summarize the bootstrap distribution and percentile interval
-summary(boot_overall$indirect)
-quantile(boot_overall$indirect$indirect_effect, probs = c(0.025, 0.975))
-
-# Plot the bootstrap distribution
-ggplot(boot_overall$indirect, aes(indirect_effect)) +
-    geom_histogram(bins = 20, fill = "#69b3a2", color = "black") +
-    ggtitle("Bootstrap Distribution of Overall Indirect Effect (B = 10)") +
-    labs(x = "Overall Indirect Effect", y = "Frequency") +
-    theme_classic()
-```
-
-We visualize the **mediator-specific indirect effects** using a forest plot for 
-pathway abundance as well, with the point estimates and 95% CIs.
-
-```{r}
-#| label: visualization_for_pathway_specific_indirect_effects
-#| message: false
-
-set.seed(12345)
-
-# Bootstrap mediator-specific indirect effects
-boot_each <- bootstrap(mdl, exper, c(indirect = indirect_each), B = 10)
-
-# Remove bootstrap index
-boot_each <- boot_each$indirect[, -1]
-
-summary(boot_each)
-
-# Calculate percentile intervals and bootstrap means
-lower_upper <- apply(
-    boot_each,
-    MARGIN = 2,
-    quantile,
-    probs = c(0.025, 0.975),
-    na.rm = TRUE
-)
-
-# Collect estimates and interval limits in one data frame
-summary_df <- data.frame(
-    mediator = colnames(boot_each),
-    lower = lower_upper[1, ],
-    upper = lower_upper[2, ]
-)
-
-summary_df$effect <- apply(boot_each, 2, mean, na.rm = TRUE)
-
-summary_df <- summary_df |>
-    mutate(
-        # Flag intervals that do not cross zero
-        significant = lower > 0 | upper < 0,
-        # Add absolute effects for forest plot ordering
-        abs_effect = abs(effect)
-    ) |>
-    # Remove mediators with degenerate bootstrap intervals
-    filter(upper - lower > 0)
-
-# Restore readable pathway labels for plotting
-summary_df$mediator <- summary_df$mediator |>
-    str_replace_all("PWY0\\.|PWY\\.", "PWY-") |>
-    str_replace_all("[_\\.]+", " ") |>
-    str_squish()
-
-# Plot mediator-specific effects with confidence intervals
-plotForest(
-    summary_df,
-    id.var = "mediator",
-    label.by = "CI",
-    order.by = "abs_effect"
-) +
-    ggtitle("Forest Plot of Mediation-specific Indirect Effects for Pathway") +
-    labs(x = "Observed Indirect Effect with Bootstrap CI", y = "Mediator")
-```
-
-Based on the forest plot results, we can see that the tRNA charging pathway has 
-significant indirect mediation effects on the dysbiosis scores.
