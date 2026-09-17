@@ -54,6 +54,30 @@ mae <- MultiAssayExperiment(
 mae
 ```
 
+`IntegratedLearnerFromMAE()` requires complete cases across the selected
+experiments. Every experiment must contain the same samples, and the sample
+names must match character-for-character. A `sampleMap` records relationships
+between samples and subjects in a `MultiAssayExperiment`, but it does not
+impute missing measurements or harmonize names for IntegratedLearner.
+
+Check this requirement before fitting the model:
+
+```{r}
+#| label: check_sample_names
+
+sample_ids <- lapply(experiments(mae), colnames)
+stopifnot(all(vapply(
+    sample_ids,
+    identical,
+    logical(1),
+    y = sample_ids[[1]]
+)))
+```
+
+For other datasets, rename columns to a shared sample or patient identifier
+and subset every experiment to the complete-case intersection before creating
+the `MultiAssayExperiment`.
+
 Let's first check how many patients are in each group.
 
 ```{r}
