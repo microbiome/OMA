@@ -254,6 +254,108 @@ this new dataset is stored into `altExp`.
 altExp(tse, "philr")
 ```
 
+## Rarefaction {#sec-rarefaction}
+
+The number of taxa we observe in a sample depends strongly on how deeply the
+sample was sequenced. Sequencing depth (or library size, see
+[@sec-library-size]) refers to the number of reads obtained for a sample.
+In practice, sequencing depth often varies substantially between samples, even
+within the same study.
+
+A common way to visualize this relationship is with a rarefaction curve, which
+shows how the number of observed features increases as a function of the number
+of reads sampled.
+
+```{r}
+#| label: rarefaction_curve
+library(mia)
+library(vegan)
+
+data(GlobalPatterns)
+tse <- GlobalPatterns
+
+mat <- tse |> assay("counts") |> t()
+rarecurve(mat, step = 1000)
+```
+
+If a sample has not been sequenced deeply enough for its curve to approach
+saturation, its observed richness will be artificially low. This is not a
+biological signal: it is a measurement artifact caused by limited sampling.
+
+This becomes problematic when samples are sequenced at different depths. Samples
+with larger library sizes tend to show more observed taxa simply because more
+reads were collected, not because their microbial communities are truly more
+diverse. Consequently, variation in sequencing depth can bias commonly used
+alpha and beta diversity metrics [@Schloss2023].
+
+To inspect the depth variation in the data, we can compute and visualize total
+counts per sample:
+
+```{r}
+#| label: library_size_variation
+library(scater)
+library(miaViz)
+
+tse <- addPerCellQCMetrics(tse, assay.type = "counts")
+
+plotBoxplot(tse, col.var = "total", x = "SampleType")
+```
+
+We can also quantify the spread in sequencing depth:
+
+```{r}
+#| label: depth_variation
+
+# Calculate variation between highest and lowest sequencing depth
+depth_variation <- max(tse[["total"]]) / min(tse[["total"]])
+depth_variation
+```
+
+This dataset shows up to a `r depth_variation |> round()`-fold difference in
+sequencing depth across samples.
+
+To mitigate bias from uneven sequencing depths, *rarefaction* has been proposed
+[@Schloss_2024a; @Schloss_2024b]. Rarefaction standardizes sequencing depth by
+randomly subsampling reads so that all retained samples have the same total
+number of reads.
+
+Conceptually, the workflow is:
+
+1. Choose a rarefaction depth (often the minimum library size across samples, here `r tse[["total"]] |> min()`).
+2. Discard samples with fewer reads than this depth.
+3. For each remaining sample, randomly subsample exactly that many reads.
+
+In `mia`, rarefaction can be applied directly to an assay:
+
+```{r}
+#| label: simple_rarefaction
+tse_rarefy <- rarefyAssay(
+    tse,
+    assay.type = "counts"
+)
+tse_rarefy
+```
+
+There has been a long-lasting controversy surrounding the use of rarefaction in
+microbial ecology. The main concern is that subsampling would omit data
+[@mcmurdie2014waste; @Schloss2024rarefaction2], which is why rarefaction is
+generally discouraged for differential abundance testing performed on a single
+rarefied table [@McMurdie_and_Holmes_2014].
+
+However, this concern is reduced when rarefaction is treated as a repeated
+resampling step rather than a one-off subsample. By rarefying to the minimum
+library size and repeating the procedure many times, we compute the diversity
+metric (e.g., alpha or beta diversity) for each iteration and average across
+iterations, yielding a stable estimate at a common sequencing effort
+[@Schloss2024rarefaction1; @Schloss2024rarefaction2].
+Patrick Schloss has demonstrated that this repeated rarefaction procedure is
+"the only method that could control for variation in uneven sequencing effort
+when measuring commonly used alpha and beta diversity metrics" [@Schloss2023].
+
+Section [@sec-rarefaction-alpha] demonstrates rarefaction for calculating alpha
+diversity, and Section [@sec-rarefaction_ordination] extends the approach to
+beta diversity.
+
 ::: callout-tip
 ## Summary
 
