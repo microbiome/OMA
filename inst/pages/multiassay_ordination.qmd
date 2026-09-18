@@ -35,8 +35,11 @@ We use the `r BiocStyle::Biocpkg("MOFA2")` package for analysis.
 #| label: mofa_data1
 
 library(mia)
-# Load the data
-data(HintikkaXOData, package = "mia")
+
+# Import dataset
+data("HintikkaXOData", package = "mia")
+
+# Store as mae
 mae <- HintikkaXOData
 ```
 
@@ -44,98 +47,98 @@ The `mae` object could be used straight to create the MOFA model. Yet,
 we transform our assays since the model assumes normality per
 default, and Gaussian model is recommended
 (see [MOFA2 FAQ](https://biofam.github.io/MOFA2/faq.html)). However, Poisson and
-Bernoulli distribution models are also offered.
-
-Note that duplicates, such as "uncultured", might appear when aggregating the
-microbiome data by a taxonomic rank. To check for duplicates, run
-`any(duplicated(rownames(mae[[1]])))`. If it returns `TRUE`, then the
-duplicates are present. We can add
-`rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]], make.unique=TRUE)` to
-remove them.
-
+Bernoulli distribution models are also available.
 
 ```{r}
-#| label: mofa3
+#| label: mofa2
 #| message: false
 #| warning: false
 
 library(MOFA2)
-# For simplicity, classify all high-fat diets as high-fat, and all the low-fat
-# diets as low-fat diets
-colData(mae)$Diet <- ifelse(
-    colData(mae)$Diet == "High-fat" | colData(mae)$Diet == "High-fat + XOS",
+
+# For simplicity, reduce samples to two categories: high vs low fat diet
+mae$Diet <- ifelse(
+    mae$Diet %in% c("High-fat", "High-fat + XOS"),
     "High-fat", "Low-fat"
 )
 
 # Agglomerate microbiome data
 mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Genus")
-# Transforming microbiome data with clr and by scaling
+
+# Apply CLR transformation to microbiome counts assay
 mae[[1]] <- transformAssay(mae[[1]], method = "clr", pseudocount = TRUE)
+
+# Standardize microbiome CLR assay
 mae[[1]] <- transformAssay(
     mae[[1]],
-    assay.type = "clr", method = "standardize", MARGIN = "rows"
+    assay.type = "clr",
+    method = "standardize",
+    MARGIN = "rows",
+    name = "clr-z"
 )
 
-# Transforming metabolomic data with log10 and by scaling
+# Apply log10 transformation to metabolome NMR assay
 mae[[2]] <- transformAssay(mae[[2]], assay.type = "nmr", method = "log10")
+
+# Standardize metabolome log10 assay
 mae[[2]] <- transformAssay(
     mae[[2]],
-    assay.type = "log10", method = "standardize"
+    assay.type = "log10",
+    method = "standardize",
+    name = "log10-z"
 )
 
-# Transforming biomarker data by scaling
+# Standardize biomarker assay
 mae[[3]] <- transformAssay(
     mae[[3]],
-    assay.type = "signals", method = "standardize", MARGIN = "rows"
+    assay.type = "signals",
+    method = "standardize",
+    MARGIN = "rows",
+    name = "z"
 )
-
-# Removing the assays no longer needed
-assays(mae[[1]]) <- assays(mae[[1]])["standardize"]
-assays(mae[[2]]) <- assays(mae[[2]])["standardize"]
-assays(mae[[3]]) <- assays(mae[[3]])["standardize"]
-
-# Building our mofa model
-model <- create_mofa_from_MultiAssayExperiment(
-    mae,
-    groups = "Diet",
-    extract_metadata = TRUE
-)
-model
 ```
 
-Model options can be defined as follows:
+Note that agglomeration by taxonomic rank might produce duplicate feature names,
+such as "uncultured". If present, they can be made unique as follows:
+
+```{r}
+#| label: mofa3
+#| results: false
+
+# Check if any feature names are duplicated
+mae[[1]] |>
+    rownames() |>
+    anyDuplicated()
+
+# If duplicated, make feature names unique
+rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]], make.unique = TRUE)
+```
+
+Then, we prepare the MOFA2 model and define the data and training parameters
+available as additional argument, which will otherwise be set to default values.
+The full parameter list can be found with `?mofa2`.
 
 ```{r}
 #| label: mofa4
-#| message: false
-#| warning: false
 
-model_opts <- get_default_model_options(model)
-model_opts$num_factors <- 5
-model_opts |> head()
+# Build MOFA2 model
+model <- mofa2(
+    mae,
+    experiments = c("microbiota", "metabolites", "biomarkers"),
+    assays = c("clr-z", "log10-z", "z"),
+    groups = "Diet",
+    num_factors = 5
+)
+
+# View model
+model
 ```
 
-Training options for the model are defined in the following way:
+The model is then and trained with `run_mofa`.
 
 ```{r}
 #| label: mofa5
-#| message: false
-#| waring: false
-
-train_opts <- get_default_training_options(model)
-train_opts |> head()
-```
-
-The model is then prepared  with `prepare_mofa()` and trained with `run_mofa()`:
-
-```{r}
-#| label: mofa6
 #| results: false
-
-model <- prepare_mofa(
-    object = model,
-    model_options = model_opts
-)
 
 # Some systems may require the specification `use_basilisk = TRUE`
 # so it has been added to the following code
@@ -146,7 +149,7 @@ The explained variance is visualized with the `plot_variance_explained()`
 function.
 
 ```{r}
-#| label: mofa7
+#| label: mofa6
 #| messsage: false
 #| warning: false
 #| fig-height: 8
@@ -177,7 +180,7 @@ We can then visualize the top weights for microbiota and metabolites for
 the first two factors to analyze co-varying features.
 
 ```{r}
-#| label: mofa8
+#| label: mofa7
 #| warning: false
 #| message: false
 #| fig-height: 10
@@ -243,8 +246,8 @@ results? Do the co-varying features also exhibited correlation?
 Useful functions:
 
 `utils::data()`, `mia::agglomerateByPrevalence`, `mia::transformAssay()`,
-`MOFA2::create_mofa_from_MultiAssayExperiment()`, `MOFA2::run_mofa()`,
-`MOFA2::plot_variance_explained()`, `MOFA2::plot_top_weights()`,
-`mia::getCrossAssociation()`, `ComplexHeatmap::Heatmap()`
+`MOFA2::mofa2()`, `MOFA2::plot_variance_explained()`,
+`MOFA2::plot_top_weights()`, `mia::getCrossAssociation()`,
+`ComplexHeatmap::Heatmap()`
 
 :::
