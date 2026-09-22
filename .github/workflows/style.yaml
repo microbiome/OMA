@@ -51,13 +51,18 @@ jobs:
           )
         shell: Rscript {0}
       - name: Cache styler
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ steps.styler-location.outputs.location }}
           key: ${{ runner.os }}-styler-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-styler-
             ${{ runner.os }}-
+      - name: Strip trailing whitespace
+        run: |
+          git ls-files -z \
+            | grep -zE '\.(R|Rmd|qmd|Rmarkdown)$' \
+            | xargs -0 -r sed -i 's/[[:blank:]]*$//'
       - name: Style
         run: |
           # Style only R files

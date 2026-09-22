@@ -426,42 +426,7 @@ plotReducedDim(tse, "unifrac", colour_by = "Group")
 
 ### Rarefaction to mitigate impacts of uneven sequencing effort {#sec-rarefaction_ordination}
 
-The sequencing depth of a sample refers to the number of metagenomic reads
-obtained from the sequencing process. It is common to find significant variation
-in sequencing depth between samples. For instance, the samples of the
-*TreeSummarizedExperiment* dataset `GlobalPatterns` show up to a 40-fold
-difference in the number of metagenomic reads. Variation in sequencing depth
-across samples in a study can bias the calculation of alpha and beta diversity
-metrics [@Schloss2023]. 
-
-```{r}
-#| label: rarefaction
-
-# Calculate the list of sequencing depths across samples
-sequencing_depths <- colSums(assay(tse))
-
-# Calculate variation between highest and lowest sequencing depth
-depth_variation <- max(sequencing_depths) / min(sequencing_depths)
-depth_variation
-```
-
-To address uneven sequencing effort, rarefaction aims to normalize metagenomic
-reads counts using repeated subsampling. The user first chooses the rarefaction
-depth and a number of iterations N. All the samples with metagenomic read counts
-below the specified depth are removed and then metagenomic reads are randomly
-drawn for the samples left to get subsampled reads at equal read depth.
-Then a beta diversity metric is calculated with the subsampled data and the
-process is iterated N times. Finally, beta diversity is estimated taking the mean
-of all beta diversity values calculated on subsampled data.
-
-There has been a long-lasting controversy surrounding the use of rarefaction in
-microbial ecology. The main concern is that subsampling would omit data
-[@mcmurdie2014waste; @Schloss2024rarefaction2]. However, if the subsampling
-process is repeated a sufficient number of times, and if the rarefaction depth
-is set to the lowest metagenomic reads count found across all samples, no data
-will be omitted. Moreover, Patrick Schloss has demonstrated that rarefaction is
-"the only method that could control for variation in uneven sequencing effort
-when measuring commonly used alpha and beta diversity metrics" [@Schloss2023].
+Background on rarefaction is provided in [@sec-rarefaction].
 
 Let us first convert the count assay to centered log ratio (clr) assay and
 calculate MDS with Aitchison distance without rarefaction:
@@ -763,8 +728,8 @@ groups. A p-value smaller than the significance threshold indicates that the
 groups have a different community composition.
 
 This method is implemented with the
-[`adonis2`](https://www.rdocumentation.org/packages/vegan/versions/2.7-1/topics/adonis)
-function from the `r BiocStyle::CRANpkg("vegan")` package. 
+[`adonis2`](https://vegandevs.github.io/vegan/reference/adonis.html)
+function from the `r BiocStyle::CRANpkg("vegan")` package.
 
 From the results table below, we see that both clinical status and age explain
 more than 10% of the variance, however, only age has statistical significance.
@@ -1100,8 +1065,8 @@ eigenvalues?
 
 6. Visualize the first two principal components.
 
-7. Explore `colData` and visualize the first two principal components again,
-now with samples colored based on a variable from the sample metadata. Can you
+7. Choose one sample-metadata variable from `colData` and visualize the first
+two principal components again, coloring samples by that variable. Can you
 observe any patterns?
 
 8. Visualize the PCA loadings for the two first components. Which features have
@@ -1127,16 +1092,16 @@ the `reducedDimNames()` -function. Is the PCoA reduced dimension available?
 without rarefaction. Do the plots look similar? What does rarefaction do, and
 what is it used for?
 
-**Exercise 3: Distance-based Redundancy Analsis (db-RDA)**
+**Exercise 3: Distance-based Redundancy Analysis (db-RDA)**
 
 1. Load any of the example datasets mentioned in [@sec-example-data].
 
-2. Explore `colData`. Select sample metadata variables and run distance-based
-redundancy analysis (db-RDA) on relative abundances with Bray-Curtis
-dissimilarity.
+2. Explore `colData`. Choose one or more relevant sample-metadata variables
+and run distance-based redundancy analysis (db-RDA) on relative abundances
+with Bray-Curtis dissimilarity.
 
 3. Explore the statistical significance of the results. Do the sample groups
-have homogenic variance? Is there a significant association between any
+have homogeneous variances? Is there a significant association between any
 variables and the microbial profile?
 
 4. Visualize the db-RDA results.
