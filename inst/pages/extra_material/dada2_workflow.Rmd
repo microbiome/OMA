@@ -12,7 +12,8 @@ We recommend to use the most recent reference database. You can find it from
 ```{r dada2_1}
 # GETTING READY
 
-library(dada2); packageVersion("dada2")
+library(dada2)
+packageVersion("dada2")
 ```
 
 ```{r dada2_2}
@@ -22,8 +23,8 @@ list.files(path)
 
 ```{r dada2_3}
 # Forward and reverse fastq filenames have format: SAMPLENAME_R1_001.fastq and SAMPLENAME_R2_001.fastq
-fnFs <- sort(list.files(path, pattern="_R1_001.fastq", full.names = TRUE))
-fnRs <- sort(list.files(path, pattern="_R2_001.fastq", full.names = TRUE))
+fnFs <- sort(list.files(path, pattern = "_R1_001.fastq", full.names = TRUE))
+fnRs <- sort(list.files(path, pattern = "_R2_001.fastq", full.names = TRUE))
 # Extract sample names, assuming filenames have format: SAMPLENAME_XXX.fastq
 sample.names <- sapply(strsplit(basename(fnFs), "_"), `[`, 1)
 ```
@@ -49,34 +50,36 @@ names(filtRs) <- sample.names
 ```
 
 ```{r dada2_7}
-out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs, truncLen=c(240,160),
-              maxN=0, maxEE=c(2,2), truncQ=2, rm.phix=TRUE,
-              compress=TRUE, multithread=TRUE) # On Windows set multithread=FALSE
+out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs,
+    truncLen = c(240, 160),
+    maxN = 0, maxEE = c(2, 2), truncQ = 2, rm.phix = TRUE,
+    compress = TRUE, multithread = TRUE
+) # On Windows set multithread=FALSE
 out |> head()
 ```
 
 ```{r dada2_8}
 # LEARN THE ERROR RATES
 
-errF <- learnErrors(filtFs, multithread=TRUE)
+errF <- learnErrors(filtFs, multithread = TRUE)
 ```
 
 ```{r dada2_9}
-errR <- learnErrors(filtRs, multithread=TRUE)
+errR <- learnErrors(filtRs, multithread = TRUE)
 ```
 
 ```{r dada2_10}
-plotErrors(errF, nominalQ=TRUE)
+plotErrors(errF, nominalQ = TRUE)
 ```
 
 ```{r dada2_11}
 # SAMPLE INFERENCE
 
-dadaFs <- dada(filtFs, err=errF, multithread=TRUE)
+dadaFs <- dada(filtFs, err = errF, multithread = TRUE)
 ```
 
 ```{r dada2_12}
-dadaRs <- dada(filtRs, err=errR, multithread=TRUE)
+dadaRs <- dada(filtRs, err = errR, multithread = TRUE)
 ```
 
 ```{r dada2_13}
@@ -86,7 +89,7 @@ dadaFs[[1]]
 ```{r dada2_14}
 # MERGE PAIRED READS
 
-mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose=TRUE)
+mergers <- mergePairs(dadaFs, filtFs, dadaRs, filtRs, verbose = TRUE)
 # Inspect the merger data.frame from the first sample
 mergers[[1]] |> head()
 ```
@@ -106,12 +109,12 @@ table(nchar(getSequences(seqtab)))
 ```{r dada2_17}
 # REMOVE CHIMERAS
 
-seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=TRUE, verbose=TRUE)
+seqtab.nochim <- removeBimeraDenovo(seqtab, method = "consensus", multithread = TRUE, verbose = TRUE)
 dim(seqtab.nochim)
 ```
 
 ```{r dada2_18}
-sum(seqtab.nochim)/sum(seqtab)
+sum(seqtab.nochim) / sum(seqtab)
 ```
 
 ```{r dada2_19}
@@ -132,7 +135,7 @@ track |> head()
 # https://benjjneb.github.io/dada2/training.html
 
 # Change path
-taxa <- assignTaxonomy(seqtab.nochim, "data/silva_nr_v132_train_set.fa.gz", multithread=TRUE)
+taxa <- assignTaxonomy(seqtab.nochim, "data/silva_nr_v132_train_set.fa.gz", multithread = TRUE)
 ```
 
 ```{r dada2_21}
@@ -149,8 +152,8 @@ taxa.print |> head()
 ```{r dada2_23}
 # EVALUATE ACCURACY
 
-unqs.mock <- seqtab.nochim["Mock",]
-unqs.mock <- sort(unqs.mock[unqs.mock>0], decreasing=TRUE) # Drop ASVs absent in the Mock
+unqs.mock <- seqtab.nochim["Mock", ]
+unqs.mock <- sort(unqs.mock[unqs.mock > 0], decreasing = TRUE) # Drop ASVs absent in the Mock
 cat("DADA2 inferred", length(unqs.mock), "sample sequences present in the Mock community.\n")
 ```
 
@@ -173,28 +176,29 @@ library(Biostrings)
 ```{r dada2_26}
 samples.out <- rownames(seqtab.nochim)
 subject <- sapply(strsplit(samples.out, "D"), `[`, 1)
-gender <- substr(subject,1,1)
-subject <- substr(subject,2,999)
+gender <- substr(subject, 1, 1)
+subject <- substr(subject, 2, 999)
 day <- as.integer(sapply(strsplit(samples.out, "D"), `[`, 2))
-samdf <- data.frame(Subject=subject, Gender=gender, Day=day)
+samdf <- data.frame(Subject = subject, Gender = gender, Day = day)
 samdf$When <- "Early"
-samdf$When[samdf$Day>100] <- "Late"
+samdf$When[samdf$Day > 100] <- "Late"
 rownames(samdf) <- samples.out
 ```
 
 ```{r dada2_27}
-tse <- TreeSummarizedExperiment(assays = SimpleList(counts = t(seqtab.nochim)),
-                                colData = DataFrame(samdf),
-                                rowData = DataFrame(taxa)
-                                )
+tse <- TreeSummarizedExperiment(
+    assays = SimpleList(counts = t(seqtab.nochim)),
+    colData = DataFrame(samdf),
+    rowData = DataFrame(taxa)
+)
 
 # Remove mock sample like it is also done in DADA2 pipeline tutorial
-tse <- tse[ , colnames(tse) != "mock"]
+tse <- tse[, colnames(tse) != "mock"]
 ```
 
 ```{r dada2_38}
-dna <- Biostrings::DNAStringSet( rownames(tse) )
+dna <- Biostrings::DNAStringSet(rownames(tse))
 referenceSeq(tse) <- dna
-rownames(tse) <- paste0("ASV", seq( nrow(tse) ))
+rownames(tse) <- paste0("ASV", seq(nrow(tse)))
 tse
 ```
