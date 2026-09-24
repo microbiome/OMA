@@ -1,0 +1,327 @@
+# Multivariate Mediation Analysis {#sec-MSEA}
+
+```{r}
+#| label: setup
+#| echo: false
+#| results: asis
+remove(list = ls())
+invisible(gc())
+library(rebook)
+chapterPreamble()
+```
+
+Building upon the concepts and workflows presented in the previous chapter on
+mediation analysis, here we demonstrate how to perform **multivariate**
+**mediation analysis** to identify potential mediators when many candidate
+features are measured simultaneously within a single omic layer.
+**Multivariate mediation analysis** examines whether and how an exposure
+(e.g., treatment, diet) affects an outcome (e.g., disease, phenotype)
+**through a high-dimensional set of intermediate variables (mediators)**,
+such as the hundreds of species-level abundances or pathway abundances
+in a microbiome study. It identifies which features act as mediators,
+quantifies indirect (mediated) effects while adjusting for covariates,
+and ranks mediation strength across features, providing mechanistic
+insights into **how exposures impact outcomes via microbial features and**
+**functional pathways**.
+
+```{r}
+#| label: fig_multivariate_mediation
+#| fig-cap: Directed acyclic graph illustrating multivariate mediation where an exposure affects multiple mediators across modalities (microbial species and metabolites), which in turn affect the outcome. A direct path from exposure to outcome is also included (dashed). While gut microbial species biologically influence metabolite levels, for tractability in high-dimensional mediation analysis we assume species and metabolites act as conditionally independent parallel mediators given exposure, acknowledging this as an approximation
+#| echo: false
+
+library(ggdag)
+library(ggraph)
+library(ggplot2)
+
+# Define DAG: exposure -> 4 parallel mediators -> outcome, plus a direct path
+dag <- dagify(
+    outcome ~ sp1 + sp2 + met1 + met2 + exposure,
+    sp1 ~ exposure,
+    sp2 ~ exposure,
+    met1 ~ exposure,
+    met2 ~ exposure,
+    exposure = "exposure",
+    outcome = "outcome",
+    labels = c(
+        exposure = "Exposure",
+        outcome = "Outcome",
+        sp1 = "Species 1",
+        sp2 = "Species 2",
+        met1 = "Metabolite 1",
+        met2 = "Metabolite 2"
+    ),
+    coords = list(
+        x = c(exposure = 0, sp1 = 1, sp2 = 1, met1 = 1, met2 = 1, outcome = 2),
+        y = c(exposure = 0, sp1 = 1.5, sp2 = 0.5, met1 = -0.5, met2 = -1.5, outcome = 0)
+    )
+)
+
+# Flag the direct exposure -> outcome edge so it renders dashed
+tidy_dag <- tidy_dagitty(dag)
+tidy_dag$data$direct <- with(
+    tidy_dag$data, name == "exposure" & !is.na(to) & to == "outcome"
+)
+
+ggplot(tidy_dag, aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_dag_edges(aes(edge_linetype = direct)) +
+    geom_dag_point(color = "lightblue") +
+    geom_dag_text(aes(label = label), color = "black", size = 3) +
+    scale_edge_linetype_manual(values = c("solid", "dashed"), guide = "none") +
+    theme_dag()
+```
+
+In this chapter, we demonstrate multivariate mediation analysis using microbiome
+data from the iHMP IBDMDB study from the R/Bioconductor package
+curatedMetagenomicData. [@Lloyd-Price2019]. Unlike conventional mediation
+analysis, which typically focuses on a single mediator or a small set of
+mediators, we performed multivariate mediation analysis with the R/Bioconductor
+package \[multimedia\] [@Jiang2025] here, which can handle many potential
+mediators within a single omic layer. For example, species-level taxonomic
+abundances or pathway abundances can each serve as a set of parallel mediators.
+This method allows us to estimate and rank each mediator's contribution while
+accounting for correlations between mediators in a high-dimensional setting.
+
+In this example, time point (baseline vs. post-treatment) is used as the
+treatment, and microbiome-based dysbiosis scores are used as the outcome. We
+will first focus on the relative abundances of gut microbial species as
+mediators, followed by pathways abundances.
+
+Generally, we will proceed through the following key steps:
+
+1.  Prepare the microbiome taxonomic data from the iHMP IBDMDB project.
+
+2.  Calculate dysbiosis scores as the outcome.
+
+3.  Define the mediation analysis data structure.
+
+4.  Fit the multivariate mediation model using the R package multimedia.
+
+5.  Interpret both the overall indirect effects and the mediator-specific
+indirect effects.
+
+6.  Visualize the results using forest plots, histograms, and rankings to
+prioritize findings.
+
+7.  Repeat the process for the iHMP microbial pathways.
+
+## Performing multivariate mediation analysis for iHMP species relative abundance {#sec-relative-abundance}
+
+We use a pre-processed subset of the iHMP IBDMDB study, shipped with `miaViz`
+as example data (`tse_relative`). This subset already contains the
+`relabundance` and `scaled` assays, per-sample dysbiosis scores computed from
+Bray–Curtis distance to healthy references, only IBD subjects with paired
+baseline (visit 1) and post-treatment (visit 21) samples, and a `treatment`
+factor with levels `T0` and `T1`. See `?miaViz::multimedia-datasets` for
+details, and `inst/scripts/multimedia_relative_data_prep.R` in the miaViz
+source for the full preparation code.
+
+We first load the packages used below.
+
+```{r}
+#| label: load_libraries_and_helpers
+#| message: false
+
+library(mia)
+library(miaViz)
+library(multimedia)
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+#| label: load_iHMP_relative_demo_data
+#| message: false
+
+data(tse_relative)
+tse <- tse_relative
+```
+
+The mediation analysis components are defined as following:
+
+Treatment: time point (baseline vs. post-baseline)
+Outcome: dysbiosis score
+Mediators: scaled species abundances
+
+These are bundled into a mediation data object (exper), which is passed into the
+multimedia function to estimate path models for the treatment-to-mediator (α
+path), mediator-to-outcome (β path), and the combined indirect effect (α×β
+path).
+
+We now fit the multivariate mediation model and inspect the overall indirect and
+direct effects to understand whether microbiome composition mediates the
+treatment's effect on dysbiosis.
+
+```{r}
+#| label: overall_mediation_analysis
+#| message: false
+
+# Create the mediation data object
+exper <- mediation_data(
+    tse,
+    outcomes = "dysbiosis",
+    treatments = "treatment",
+    mediators = rownames(tse)
+)
+
+# Fit the multivariate mediation model and estimate effects
+mdl <- multimedia(exper)
+res <- estimate(mdl, exper)
+
+# Summarize overall indirect and direct effects
+summary(res)
+print(indirect_overall(res, exper))
+print(direct_effect(res, exper))
+```
+
+Mediator-specific indirect effects are then extracted and ranked by absolute
+effect size.
+
+```{r}
+#| label: specific_mediation
+#| message: false
+
+effects_by_mediator <- indirect_pathwise(res, exper)
+
+# Rank mediators by absolute indirect effect size
+top_mediators <- effects_by_mediator |>
+    arrange(desc(abs(indirect_effect))) |>
+    head(20)
+
+print(top_mediators)
+```
+
+To quantify uncertainty around the indirect effects, we use non-parametric
+bootstrap resampling to compute **95% confidence intervals** for both the
+overall and mediator-specific indirect effects. To keep the book build time
+short, we use only `B = 10` bootstrap iterations below; for real applications
+we recommend `B >= 500` (ideally 1000 or more) to obtain stable percentile
+confidence intervals, so the CI widths shown here should be interpreted as
+illustrative rather than definitive.
+
+```{r}
+#| label: visualization_for_species_overall_indirect_effects
+#| message: false
+
+set.seed(12345)
+
+# Bootstrap the overall indirect effect
+boot_overall <- bootstrap(mdl, exper, c(indirect = indirect_overall), B = 10)
+
+# Summarize the bootstrap distribution and percentile interval
+summary(boot_overall$indirect)
+quantile(boot_overall$indirect$indirect_effect, probs = c(0.025, 0.975))
+
+# Plot the bootstrap distribution
+ggplot(boot_overall$indirect, aes(indirect_effect)) +
+    geom_histogram(bins = 20, fill = "#69b3a2", color = "black") +
+    ggtitle("Bootstrap Distribution of Overall Indirect Effect (B = 10)") +
+    labs(x = "Overall Indirect Effect", y = "Frequency") +
+    theme_classic()
+```
+
+Finally, we visualize the **mediator-specific indirect effects** using a forest
+plot, displaying point estimates and 95% CIs to highlight the most influential
+mediators.
+
+```{r}
+#| label: visualization_for_species_specific_indirect_effects
+#| message: false
+
+# Define mediator-specific indirect effects for bootstrap resampling
+indirect_each <- function(mdl, exper) {
+    res <- estimate(mdl, exper)
+    alpha <- sapply(res@mediation@estimates, function(m) coef(m)["treatmentT1"])
+    names(alpha) <- sub("\\.treatmentT1$", "", names(alpha))
+    beta <- coef(res@outcome@estimates$dysbiosis)[names(alpha)]
+    indirect <- alpha * beta
+    names(indirect) <- names(alpha)
+    indirect <- indirect[!is.na(indirect)]
+    return(indirect)
+}
+
+set.seed(12345)
+
+# Bootstrap mediator-specific indirect effects
+boot_each <- bootstrap(mdl, exper, c(indirect = indirect_each), B = 10)
+
+# Remove bootstrap index
+boot_each <- boot_each$indirect[, -1]
+
+summary(boot_each)
+
+# Calculate percentile intervals and bootstrap means
+lower_upper <- apply(
+    boot_each,
+    MARGIN = 2,
+    quantile,
+    probs = c(0.025, 0.975),
+    na.rm = TRUE
+)
+
+# Collect estimates and interval limits in one data frame
+summary_df <- data.frame(
+    mediator = colnames(boot_each),
+    lower = lower_upper[1, ],
+    upper = lower_upper[2, ]
+)
+
+summary_df$effect <- apply(boot_each, 2, mean, na.rm = TRUE)
+
+summary_df <- summary_df |>
+    mutate(
+        # Flag intervals that do not cross zero
+        significant = lower > 0 | upper < 0,
+        # Add absolute effects for forest plot ordering
+        abs_effect = abs(effect)
+    ) |>
+    # Remove mediators with degenerate bootstrap intervals
+    filter(upper - lower > 0)
+
+# Plot mediator-specific effects with confidence intervals
+plotForest(
+    summary_df,
+    id.var = "mediator",
+    label.by = "CI",
+    order.by = "abs_effect"
+) +
+    ggtitle("Forest Plot of Mediation-specific Indirect Effects for Species") +
+    labs(x = "Observed Indirect Effect with Bootstrap CI", y = "Mediator")
+```
+
+Based on the forest plot results, we can see that the Agathobaculum
+butyriciproducens and Escherichia coli pathways has significant indirect
+mediation effects.
+
+We also inspect the top species mediators with the default mediator-level
+visualization.
+
+```{r}
+#| label: default_visualization_plot_mediators_species
+#| message: false
+
+# Select the top mediators for the default mediator-level plot
+top_meds <- summary_df |>
+    arrange(desc(abs_effect)) |>
+    slice_head(n = 12) |>
+    pull(mediator)
+
+# Create the effect table expected by plot_mediators
+ie_pw_fast <- tibble(
+    outcome = "dysbiosis",
+    mediator = top_meds,
+    direct_setting = levels(tse$treatment)[1],
+    contrast = paste(levels(tse$treatment)[1], "-", levels(tse$treatment)[2]),
+    indirect_effect = summary_df$effect[match(top_meds, summary_df$mediator)]
+)
+
+# Visualize the selected mediators across samples
+plot_mediators(ie_pw_fast, exper, n_panels = 12)
+```
+
+Mediators are standardized (z-scored) for comparability across features; hence values may be negative. Besides, many microbial features are sparse; several mediators exhibit near-zero values for most samples, producing vertical bands.
+
+Next we repeat the mediation analysis with the iHMP pathway abundances using the
+same setup as before, using the time point as the treatment, dysbiosis score as
+the outcome, but pathways abundances as the mediation variables instead of the
+relative species abundance.
