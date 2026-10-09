@@ -1,4 +1,4 @@
-# The code adapted from Huber et al. 2023 
+# The code adapted from Huber et al. 2023
 # https://www.huber.embl.de/msmb/install_packages.R
 
 
@@ -12,22 +12,22 @@ options(install.packages.compile.from.source = "never")
 Sys.setenv(R_REMOTES_UPGRADE = "never")
 
 pkg_type <- switch (Sys.info()["sysname"],
-                    "Linux" = "source", 
+                    "Linux" = "source",
                     "both")
 
 ## Function to install packages one at a time with indication of time left
 ## Overall probably slower than install.packages if everything works
 ## but doesn't require downloading all packages first before trying to install any
 installer_with_progress <- function(pkgs) {
-    
+
     if(length(pkgs) == 0) { invisible(return(NULL)) }
-    
+
     toInstall <- pkgs
     bp <- progress::progress_bar$new(total = length(toInstall),
                                      format = "Installed :current of :total (:percent ) - current package: :package",
                                      show_after = 0,
                                      clear = FALSE)
-    
+
     length_prev <- length(toInstall)
     fail <- NULL
     while(length(toInstall)) {
@@ -44,7 +44,7 @@ installer_with_progress <- function(pkgs) {
         )
     }
     bp$tick(length_prev - length(toInstall),  tokens = list(package = "DONE!"))
-    
+
     return(fail)
 }
 
@@ -70,7 +70,7 @@ pkgs_all <- read.table(packages)[,1]
 
 # This will be installed manually later in this script
 # since it requires the latest devel update
-pkgs_all <- setdiff(pkgs_all, "Maaslin2") 
+pkgs_all <- setdiff(pkgs_all, "Maaslin2")
 
 # Customization
 # Github packages must be installed separately
