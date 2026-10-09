@@ -1,0 +1,311 @@
+# Multi-omics prediction and classification {#sec-multi-omics-integration}
+
+```{r}
+#| label: setup
+#| echo: false
+#| results: asis
+
+library(rebook)
+chapterPreamble()
+```
+
+This chapter illustrates how we can create a classification model that utilizes
+multiomics data. In contrast, [@sec-machine_learning] shows classification 
+models that utilizes single omic data.
+
+In multiview data analysis, there are two main types of approaches: early 
+fusion and late fusion. \underline{Early fusion} combines all datasets into a
+single representation, which then serves as input for a supervised learning
+model. In contrast, \underline{late fusion} builds individual models for each
+data view and combines their predictions using a second-level model as the
+final predictor. However, these traditional paradigms treat the data views in
+isolation and do not allow for interactions or dependencies between them. A
+more advanced method, called cooperative learning [@Ding2022], which is also
+known as \underline{intermediate fusion}, combines the best of both worlds by
+encouraging predictions from different data views to align through an agreement
+parameter ($\rho$).
+
+## Import and preprocess data
+
+We use the publicly available Inflammatory Bowel Diseases (IBD) data from the 
+`r BiocStyle::Biocpkg("curatedMetagenomicData")` package [@Lloyd-Price2019],
+where we aim to predict IBD disease status based on both taxonomic (species
+abundances) and functional (pathway abundances) profiles.
+
+```{r}
+#| label: load_pkg_data
+
+library(curatedMetagenomicData)
+library(dplyr)
+library(mia)
+
+tse1 <- sampleMetadata |>
+    filter(study_name == "HMP_2019_ibdmdb") |>
+    returnSamples("relative_abundance", rownames = "short")
+
+tse2 <- sampleMetadata |>
+    filter(study_name == "HMP_2019_ibdmdb") |>
+    returnSamples("pathway_abundance", rownames = "short")
+
+# Create a MAE object
+mae <- MultiAssayExperiment(
+    ExperimentList(microbiota = tse1, pathway = tse2)
+)
+mae
+```
+
+Let's first check how many patients are in each group.
+
+```{r}
+#| label: check_diagnoses
+
+table(mae[[1]]$disease) / ncol(mae[[1]])
+```
+
+The dataset appears to be imbalanced, with nearly three-quarters of the
+patients having IBD. This imbalance may impact the training process and how
+the model learns to predict outcomes for underrepresented group members.
+
+Further data pre-processing is necessary to handle near-zero-variance features
+in this dataset. A combination of variance and prevalence filtering
+is applied to the dataset to include only meaningful features.
+
+```{r}
+#| label: preprocess
+
+# Subset by prevalence
+mae[[1]] <- subsetByPrevalent(
+    mae[[1]],
+    assay.type = "relative_abundance", prevalence = 0.1,
+    include.lowest = TRUE
+)
+mae[[2]] <- subsetByPrevalent(
+    mae[[2]],
+    assay.type = "pathway_abundance", prevalence = 0.1,
+    include.lowest = TRUE
+)
+
+# Subset those features that have near zero variance
+rowData(mae[[1]])[["sd"]] <- rowSds(assay(mae[[1]], "relative_abundance"))
+rowData(mae[[2]])[["sd"]] <- rowSds(assay(mae[[2]], "pathway_abundance"))
+mae[[1]] <- mae[[1]][rowData(mae[[1]])[["sd"]] > 0.001, ]
+mae[[2]] <- mae[[2]][rowData(mae[[2]])[["sd"]] > 0.001, ]
+
+# Transform the data with CLR
+mae[[1]] <- transformAssay(
+    mae[[1]],
+    assay.type = "relative_abundance", method = "clr",
+    pseudocount = TRUE
+)
+mae[[2]] <- transformAssay(
+    mae[[2]],
+    assay.type = "pathway_abundance", method = "clr",
+    pseudocount = TRUE
+)
+```
+
+Ultimately, `r nrow(mae[[1]]) + nrow(mae[[1]])` features are retained,
+consisting of `r nrow(mae[[1]])` species and `r nrow(mae[[2]])` pathways.
+
+## Fit model
+
+We randomly select 20% of the samples for the validation set, ensuring they are
+not used in training. This approach provides a more robust estimate of how well
+the model generalizes to unseen data.
+
+```{r}
+#| label: select_validation
+
+set.seed(377)
+colData(mae)[["validation_set"]] <- sample(
+    c(TRUE, FALSE),
+    size = ncol(mae[[1]]), replace = TRUE, prob = c(0.2, 0.8)
+)
+```
+
+Now, we are ready to fit the model using the
+`r BiocStyle::Githubpkg("himelmallick/IntegratedLearner")` package, which
+supports early, late, and intermediate fusion methods [@Mallick2024]. Under the
+hood, it leverages the `r BiocStyle::CRANpkg("SuperLearner")` package. 
+
+Currently, `r BiocStyle::Githubpkg("himelmallick/IntegratedLearner")` is only
+available from GitHub. You can install it by running the following chunk.
+
+```{r}
+#| label: install_IL
+#| eval: false
+
+library(remotes)
+
+install_github("himelmallick/IntegratedLearner")
+```
+
+The modeling process begins by fitting "base learners" for each layer,
+with separate models trained for each omic dataset. Then, a "meta learner"
+integrates the outputs from these individual models to make the final
+predictions. For "base learners" and "meta learner", we use _random forest_
+and _rank loss minimization_ models, respectively.
+
+```{r}
+#| label: disable_chunks
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+```{r}
+#| label: fit_model
+
+library(IntegratedLearner)
+library(SuperLearner)
+
+# Fit the model
+fit <- IntegratedLearnerFromMAE(
+    mae,
+    # Select experiments and assays
+    experiment = names(experiments(mae)),
+    assay.type = c("clr", "clr"),
+    # Select columns from sample metadata
+    outcome.col = "disease",
+    valid.col = "validation_set",
+    # Options for base and meta models
+    base_learner = "SL.randomForest",
+    meta_learner = "SL.nnls.auc",
+    # The outcome is binary
+    family = binomial()
+)
+```
+
+The output include the following models:
+
+- Individual models: Trained separately for each omic dataset.
+- Stacked model (late fusion): Combines the predictions from each individual
+model into a single meta-model.
+- Concatenated model (early fusion): Trains a model where all features are
+merged before training.
+
+## Visualize results
+
+We can summarize the model performance using a Receiver Operating
+Characteristic (ROC) plot.
+
+```{r}
+#| label: visualize_result
+
+library(tidyverse)
+library(cowplot)
+
+p <- IntegratedLearner:::plot.learner(fit)
+```
+
+Based on the ROC plot described below, we observe that the AUC is
+`r if(FALSE) fit$AUC.test[[2]] else NA` when considering only the
+pathway abundance data in the model, and
+`r if(FALSE) fit$AUC.test[[1]] else NA` for the model including only the
+species abundance data. The AUC increases to
+`r if(FALSE) fit$AUC.test[[4]] else NA` when using the early fusion
+model and reaches `r if(FALSE) fit$AUC.test[[3]] else NA` with the late
+fusion model. Overall, most integrated classifiers outperform individual layers
+in distinguishing between T2D and healthy controls.
+
+The model's performance can also be evaluated and summarized using a confusion
+matrix.
+
+```{r}
+#| label: conf_matrix
+
+library(caret)
+
+obs <- factor(fit$Y_test)
+pred <- ifelse(fit$yhat.test$stacked > 0.5, levels(obs)[[2]], levels(obs)[[1]])
+pred <- factor(pred, levels = levels(obs))
+conf <- confusionMatrix(data = pred, reference = obs)
+conf
+```
+
+The model appears to be performing well the the accuracy being
+`r if(FALSE) paste0(round(conf$overall[[1]]*100, 2), "%") else NA`. The
+model seems to precict
+correctly almost all IBD patients. It is also worth noting that over
+three-quarters of the controls are classified correctly
+
+Lastly, we may be interested in identifying the features that contribute most
+to predicting the outcome. To do this, we first extract feature importance
+scores from the individual models. Next, we scale these importance scores based
+on the weights assigned to each layer in the stacked model. This process
+provides us with the overall importance of each feature in the final model.
+
+```{r}
+#| label: feat_importance
+
+library(miaViz)
+
+# Get individual models
+models <- fit$model_fits$model_layers
+# Get importances
+importances <- lapply(seq_len(length(models)), function(i) {
+    # Get importances
+    temp <- models[[i]]$importance
+    # Scale based on weight in stacked model
+    temp <- temp * fit$weights[[i]]
+    return(temp)
+})
+# Combine the feature importances
+importances <- do.call(rbind, importances)
+
+# Plot feature importances
+p <- plotLoadings(importances, ncomponents = 1, n = 20, show.color = FALSE)
+p
+```
+
+From the plot, we can observe that
+_`r if(FALSE) rownames(importances)[order(importances, decreasing = TRUE)][[1]] else NA`_ and
+_`r if(FALSE) rownames(importances)[order(importances, decreasing = TRUE)][[2]] else NA`_ appear
+to have the greatest predictive power
+among all the features in determining the outcome. However, the predictive
+power appears to be fairly evenly distributed across all features.
+
+::: {.callout-tip}
+## Summary
+
+For more details on modeling with
+`r BiocStyle::Githubpkg("himelmallick/IntegratedLearner")`, refer to
+[IntegratedLearner vignette](http://htmlpreview.github.io/?https://github.com/himelmallick/IntegratedLearner/blob/master/vignettes/IntegratedLearner.html).
+
+:::
+
+::: {.callout-tip icon=false}
+## Exercises
+
+**Goal:** After completing these exercises, you should be able to fit supervised
+machine learning model utilizing multi-assay data.
+
+**Exercise 1: IntegratedLearner**
+
+1. Load any of the example datasets in `MultiAssayExperiment` format
+mentioned in [@sec-example-data].
+
+2. Observe `colData` and check that the metadata includes outcome variables that
+you want to predict.
+
+3. For each omic, subset features by taking only prevalent features.
+
+4. Subset features by removing features with near zero variance.
+
+5. Apply justified transformation. For microbiota data, apply CLR and for
+metabolite data, apply relative transformation.
+
+6. Fit a model.
+
+7. Visualize and summarize results. Is the model able to predict the outcome
+variable with high accuracy? What is the predictive performance of model
+trained only with the microbiota data? How about the multi-omics model?
+
+8. What features have the highest predictive power?
+
+Useful functions:
+
+`utils::data()`, `SummarizedExperiment::colData()`, `mia::subsetByPrevalent()`,
+`MatrixGenerics::rowSds()`, `SummarizedExperiment::assay()`, `SummarizedExperiment::rowData()`,
+`mia::transformAssay()`, `IntegratedLearner::IntegratedLearnerFromMAE()`,
+`IntegratedLearner:::plot.learner()`, `plotLoadings()`
+
+:::

@@ -1,0 +1,81 @@
+on:
+  pull_request:
+    branches:
+      - devel
+      - RELEASE_**
+    paths:
+      [
+        "**.[rR]",
+        "**.[qrR]md",
+        "**.[rR]markdown",
+        "**.[rR]nw",
+        "**.[rR]profile",
+      ]
+  workflow_dispatch:
+name: Style code
+permissions: read-all
+jobs:
+  style:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - name: Install styler and roxygen2
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: any::styler, any::roxygen2
+          needs: styler
+      - name: Enable styler cache
+        run: styler::cache_activate()
+        shell: Rscript {0}
+      - name: Determine cache location
+        id: styler-location
+        run: |
+          cat(
+            "location=",
+            styler::cache_info(format = "tabular")$location,
+            "\n",
+            file = Sys.getenv("GITHUB_OUTPUT"),
+            append = TRUE,
+            sep = ""
+          )
+        shell: Rscript {0}
+      - name: Cache styler
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.styler-location.outputs.location }}
+          key: ${{ runner.os }}-styler-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-styler-
+            ${{ runner.os }}-
+      - name: Strip trailing whitespace
+        run: |
+          git ls-files -z \
+            | grep -zE '\.(R|Rmd|qmd|Rmarkdown)$' \
+            | xargs -0 -r sed -i 's/[[:blank:]]*$//'
+      - name: Style
+        run: |
+          # Style only R files
+          files <- system(
+            "git diff --name-only origin/${{ github.base_ref }}...${{ github.sha }} | egrep -i '\\.(R|Rmd|qmd|Rmarkdown|Rnw|Rprofile)$'",
+            intern = TRUE
+          )
+          if (length(files)) {
+            styler::style_file(path = files, transformers = styler::tidyverse_style(indent_by = 4L))
+          }
+        shell: Rscript {0}
+      - name: Commit and push changes
+        # Commit all changed files back to the repository
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: Style R code with styler

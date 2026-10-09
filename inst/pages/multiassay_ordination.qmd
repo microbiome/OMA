@@ -1,6 +1,10 @@
 # Ordination-based multiassay analysis {#sec-multiassay_ordination}
 
-```{r setup, echo=FALSE, results="asis"}
+```{r}
+#| label: setup
+#| echo: false
+#| results: asis
+
 library(rebook)
 chapterPreamble()
 ```
@@ -8,7 +12,7 @@ chapterPreamble()
 In this chapter, we continue from where we left off in the previous section
 (referenced as [@sec-cross-correlation]). Specifically, we introduce an
 analytical method called Multi-Omics Factor Analysis. This method is described
-as "ordination-based," meaning it involves techniques that reduce the
+as "ordination-based", meaning it involves techniques that reduce the
 dimensionality of the data while preserving as much variability as possible.
 Ordination methods are often used in multivariate analysis to visualize
 patterns, trends, and relationships in complex data sets, making them
@@ -25,12 +29,11 @@ seen as a generalization of principal component analysis. Yet, with the ability
 to infer a latent (low-dimensional) representation, shared among the multiple
 (-omics) data sets in hand.
 
-We use the R [MOFA2](https://biofam.github.io/MOFA2/index.html)
-package for the analysis, and
-[install](https://biofam.github.io/MOFA2/installation.html) the
-corresponding dependencies.
+We use the `r BiocStyle::Biocpkg("MOFA2")` package for analysis.
 
-```{r mofa_data1}
+```{r}
+#| label: mofa_data1
+
 library(mia)
 # Load the data
 data(HintikkaXOData, package = "mia")
@@ -50,37 +53,6 @@ duplicates are present. We can add
 `rownames(mae[[1]]) <- getTaxonomyLabels(mae[[1]], make.unique=TRUE)` to
 remove them.
 
-To run MOFA2, it needs to connect `mofapy2` Python packages via the `reticulate`
-package, as clarified in the [MOFA2 vignette](https://bioconductor.org/packages/release/bioc/vignettes/MOFA2/inst/doc/getting_started_R.html#6_Build_and_train_the_MOFA_object).
-
-The following chunk checks if Python dependencies are already installed,
-and installs them if they are not available. If this setup causes issues,
-update `miniconda` and `mofapy2`.
-
-```{r}
-#| label: mofapy2
-#| message: false
-#| warning: false
-
-library(reticulate)
-
-# Set miniconda environment
-if( !reticulate:::miniconda_exists() ){
-    install_miniconda()
-}
-if( !condaenv_exists(miniconda_path()) ){
-    use_miniconda(condaenv = miniconda_path(), required = FALSE)
-}
-
-# Check if mofapy2 is installed, and install it if not
-if( !py_module_available("mofapy2") ){
-    py_install(
-        packages = "mofapy2",
-        pip = TRUE,
-        pip_ignore_installed = TRUE,
-    )
-}
-```
 
 ```{r}
 #| label: mofa3
@@ -92,23 +64,30 @@ library(MOFA2)
 # diets as low-fat diets
 colData(mae)$Diet <- ifelse(
     colData(mae)$Diet == "High-fat" | colData(mae)$Diet == "High-fat + XOS",
-    "High-fat", "Low-fat")
+    "High-fat", "Low-fat"
+)
 
 # Agglomerate microbiome data
 mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Genus")
 # Transforming microbiome data with clr and by scaling
 mae[[1]] <- transformAssay(mae[[1]], method = "clr", pseudocount = TRUE)
 mae[[1]] <- transformAssay(
-    mae[[1]], assay.type = "clr", method = "standardize", MARGIN = "rows")
+    mae[[1]],
+    assay.type = "clr", method = "standardize", MARGIN = "rows"
+)
 
 # Transforming metabolomic data with log10 and by scaling
 mae[[2]] <- transformAssay(mae[[2]], assay.type = "nmr", method = "log10")
 mae[[2]] <- transformAssay(
-    mae[[2]], assay.type = "log10", method = "standardize")
+    mae[[2]],
+    assay.type = "log10", method = "standardize"
+)
 
 # Transforming biomarker data by scaling
 mae[[3]] <- transformAssay(
-    mae[[3]], assay.type = "signals", method = "standardize", MARGIN = "rows")
+    mae[[3]],
+    assay.type = "signals", method = "standardize", MARGIN = "rows"
+)
 
 # Removing the assays no longer needed
 assays(mae[[1]]) <- assays(mae[[1]])["standardize"]
@@ -119,14 +98,17 @@ assays(mae[[3]]) <- assays(mae[[3]])["standardize"]
 model <- create_mofa_from_MultiAssayExperiment(
     mae,
     groups = "Diet",
-    extract_metadata = TRUE)
+    extract_metadata = TRUE
+)
 model
 ```
 
 Model options can be defined as follows:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 #| label: mofa4
+#| message: false
+#| warning: false
 
 model_opts <- get_default_model_options(model)
 model_opts$num_factors <- 5
@@ -135,8 +117,10 @@ model_opts |> head()
 
 Training options for the model are defined in the following way:
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 #| label: mofa5
+#| message: false
+#| waring: false
 
 train_opts <- get_default_training_options(model)
 train_opts |> head()
@@ -144,12 +128,13 @@ train_opts |> head()
 
 The model is then prepared  with `prepare_mofa()` and trained with `run_mofa()`:
 
-```{r, results=FALSE}
+```{r}
 #| label: mofa6
+#| results: false
 
 model <- prepare_mofa(
-  object = model,
-  model_options = model_opts
+    object = model,
+    model_options = model_opts
 )
 
 # Some systems may require the specification `use_basilisk = TRUE`
@@ -160,8 +145,12 @@ model <- run_mofa(model, use_basilisk = TRUE)
 The explained variance is visualized with the `plot_variance_explained()`
 function.
 
-```{r, message=FALSE, warning=FALSE, fig.height=8, fig.width=10}
+```{r}
 #| label: mofa7
+#| messsage: false
+#| warning: false
+#| fig-height: 8
+#| fig-width: 10
 
 library(patchwork)
 library(ggplot2)
@@ -169,12 +158,14 @@ library(ggplot2)
 plot_list <- plot_variance_explained(
     model,
     x = "view", y = "factor",
-    plot_total = TRUE)
+    plot_total = TRUE
+)
 
 wrap_plots(plot_list, nrow = 2) +
     plot_annotation(
         title = "Variance Explained per factor and assay",
-        theme = theme(plot.title = element_text(hjust = 0.5)))
+        theme = theme(plot.title = element_text(hjust = 0.5))
+    )
 ```
 
 From the plot, we can observe that the microbiota accounts for most of the
@@ -185,8 +176,12 @@ variability. The variability in the microbiota is primarily captured in factors
 We can then visualize the top weights for microbiota and metabolites for
 the first two factors to analyze co-varying features.
 
-```{r, warning=FALSE, message=FALSE, fig.height=10, fig.width=10}
+```{r}
 #| label: mofa8
+#| warning: false
+#| message: false
+#| fig-height: 10
+#| fig-width: 10
 
 plot_list <- lapply(
     c("microbiota", "metabolites"),
@@ -194,7 +189,7 @@ plot_list <- lapply(
     object = model,
     factors = c(1, 2),
     nfeatures = 10
-    )
+)
 
 wrap_plots(plot_list, ncol = 1) & theme(text = element_text(size = 8))
 ```
@@ -218,8 +213,9 @@ interpret MOFA results.
 
 **Exercise 1: MOFA**
 
-1. Load any of the example datasets in `MultiAssayExperiment` format mentioned
-in [@sec-example-data].
+1. Load any of the example datasets in 
+`r BiocStyle::Biocpkg("MultiAssayExperiment")` format mentioned in
+[@sec-example-data].
 
 2. Agglomerate microbiota data to prevalent phyla.
 
@@ -228,24 +224,27 @@ in [@sec-example-data].
 4. Apply relative transformation and log10 transformation to other metabolite or
 other omic.
 
-5. Create MOFA2 object from the `MultiAssayExperiment`.
+5. Standardize each feature (within each dataset) by centering to mean 0 and
+scaling to unit variance so that all variables are on a comparable scale.
 
-6. Run MOFA.
+6. Create a MOFA2 object from the `MultiAssayExperiment`.
 
-7. Visualize the explained variance. How much variance is explained in total,
+7. Run MOFA.
+
+8. Visualize the explained variance. How much variance is explained in total,
 and which omic accounts the most variance?
 
-8. For each omic, visualize the features with the largest weights. Can you
+9. For each omic, visualize the features with the largest weights. Can you
 identify features that are co-varying?
 
-9. If you completed exercises in [@sec-cross-correlation], did you get similar
+10. If you completed exercises in [@sec-cross-correlation], did you get similar
 results? Do the co-varying features also exhibited correlation?
 
 Useful functions:
 
-`data()`, `agglomerateByPrevalence`, `transformAssay()`,
+`utils::data()`, `mia::agglomerateByPrevalence`, `mia::transformAssay()`,
 `MOFA2::create_mofa_from_MultiAssayExperiment()`, `MOFA2::run_mofa()`,
 `MOFA2::plot_variance_explained()`, `MOFA2::plot_top_weights()`,
-`getCrossAssociation()`, `ComplexHeatmap::Heatmap()`
+`mia::getCrossAssociation()`, `ComplexHeatmap::Heatmap()`
 
 :::

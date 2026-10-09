@@ -1,4 +1,4 @@
-# Example solutions for exercises {#sec-exercises-solutions}
+# Example solutions for exercises {#sec-example-solutions}
 
 ```{r}
 #| label: setup
@@ -20,7 +20,6 @@ These example solutions are related to exercises in
 #| label: intro
 #| code-fold: true
 #| code-summary: "Show the solution"
-
 ```
 
 ## Data containers
@@ -31,7 +30,6 @@ These example solutions are related to exercises in [@sec-containers].
 #| label: containers
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
 ```
 
 ## Import
@@ -42,7 +40,6 @@ These example solutions are related to exercises in [@sec-import].
 #| label: import
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
 ```
 
 ## Convert & export
@@ -53,7 +50,23 @@ These example solutions are related to exercises in [@sec-convert].
 #| label: convert
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
+
+# Load example dataset
+library(mia)
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+
+# Convert to Phyloseq and reconvert to a new Dataset
+ps <- convertToPhyloseq(tse)
+tse_new <- convertFromPhyloseq(ps)
+
+# Save the reconverted file to a RDS file and read it
+saveRDS(tse_new, "tse.rds")
+tse_read <- readRDS("tse.rds")
+
+# Converting TreeSE to long format and writing it in a CSV file
+lf <- meltSE(tse_read)
+write.csv(lf, "long_format_tse.csv")
 ```
 
 ## Taxonomic information
@@ -65,7 +78,39 @@ These example solutions are related to exercises in
 #| label: taxonomy
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
+
+# load example dataset
+library(mia)
+library(miaViz)
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# Available taxonomic ranks
+taxonomyRanks(tse)
+
+# Unique taxonomic features from class
+getUnique(tse, rank = "Order")
+
+# Subsets the data and aligns the tree
+tse_sub <- tse[1:15, ]
+rowTree(tse_sub)$Nnode
+
+tse_sub <- subsetByLeaf(tse_sub, rowLeaf = rownames(tse_sub))
+rowTree(tse_sub)$Nnode
+
+# Creates plot for the phylogeny
+p1 <- plotRowTree(tse_sub)
+
+# Creates taxonomic tree
+tse_sub_hierarchy <- tse_sub
+tse_sub_hierarchy <- addHierarchyTree(tse_sub_hierarchy)
+
+# Creates plot for the taxonomic tree
+p2 <- plotRowTree(tse_sub_hierarchy)
+
+# Plots trees
+library(patchwork)
+p1 + p2
 ```
 
 ## Data wrangling
@@ -76,29 +121,48 @@ These example solutions are related to exercises in [@sec-datawrangling].
 #| label: wrangling
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
-```
 
-## Agglomeration
+# Load first example dataset
+library(mia)
+data("enterotype", package = "mia")
+tse <- enterotype
 
-These example solutions are related to exercises in [@sec-agglomeration].
+# Visualize column metadata
+colData(tse) |> head()
 
-```{r}
-#| label: agglomeration
-#| code-fold: true
-#| code-summary: "Show the solution"
-    
-```
+# Create variable 'group' containing 3 random classifications for each entry
+tse[["group"]] <- sample(
+    c("group_1", "group_2", "group_3"),
+    ncol(tse),
+    replace = TRUE
+)
 
-## Transformation
+# Plot how groups are distributed
+library(miaViz)
+plotBarplot(tse, col.var = "group")
 
-These example solutions are related to exercises in [@sec-assay-transform].
+# Split groups into two different tse objects and outputs a list
+tse_list <- splitOn(tse, by = 2, group = "group")
 
-```{r}
-#| label: transformation
-#| code-fold: true
-#| code-summary: "Show the solution"
-    
+# Count numbers of entries in the group
+tse_list[[1]][["group"]] |> table()
+tse_list[[2]][["group"]] |> table()
+tse_list[[3]][["group"]] |> table()
+
+# Sum the abundances correspondent to each group and
+# merge them back into a single tse object
+tse_list <- lapply(tse_list, function(x) {
+    mat <- assay(x, "counts")
+    sum_val <- sum(mat)
+    x[["summed_value"]] <- sum_val
+    return(x)
+})
+tse <- unsplitOn(tse_list)
+
+# Load second example dataset and merges them
+data("GlobalPatterns")
+tse <- mergeSEs(tse, GlobalPatterns)
+colData(tse)
 ```
 
 ## Exploration & quality control
@@ -109,7 +173,172 @@ These example solutions are related to exercises in [@sec-quality-control].
 #| label: qc
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
+
+# Load example dataset
+library(mia)
+library(miaViz)
+library(scuttle)
+data("GlobalPatterns")
+tse <- GlobalPatterns
+
+# Plot counts with a histogram
+plotHistogram(tse, assay.type = "counts")
+
+# Add prevalence to rowData
+tse <- addPrevalence(tse)
+
+# Plot the distribution of prevalence values
+plotHistogram(tse, row.var = "prevalence")
+
+# Add library size to colData
+tse <- addPerCellQCMetrics(tse)
+# And visualize them
+plotHistogram(tse, col.var = "total")
+
+# Plot categorical values with a barplot
+plotBarplot(tse, col.var = "SampleType")
+
+# Available taxonomic ranks
+taxonomyRanks(tse)
+
+# Checks the dominance of genera
+summarizeDominance(tse, rank = "Genus")
+
+# Get the most prevalent taxa
+getPrevalent(tse, rank = "Genus", prevalence = 0.2, detection = 1)
+
+# Get the most abundant taxa based on their median abundance
+getTop(tse, method = "median")
+
+# Visualzie the most prevalent features
+plotAbundanceDensity(tse)
+```
+
+## Subsetting
+
+These example solutions are related to exercises in [@sec-treese_subsetting].
+
+```{r}
+#| label: subsetting
+#| code-fold: true
+#| code-summary: "Show the solution"
+
+# Loading one of the available example datasets
+library(mia)
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+
+# Adds total size of all libraries to colData
+library(scuttle)
+tse <- addPerCellQCMetrics(tse)
+
+# Visualizes colData and plots distribution of library sizes
+colData(tse) |> head()
+library(miaViz)
+plotHistogram(x = tse, col.var = "total")
+
+# Subsets based on library size and then subsets again based on feature prevalence
+tse_library <- tse[, tse$total > 500000]
+tse_subset <- subsetByPrevalent(tse_library, detection = 1, prevalence = 2 / 10)
+```
+
+## Agglomeration
+
+These example solutions are related to exercises in [@sec-agglomeration].
+
+```{r}
+#| label: agglomeration
+#| code-fold: true
+#| code-summary: "Show the solution"
+
+# Load packages and dataset
+library(mia)
+data("GlobalPatterns")
+tse <- GlobalPatterns
+
+# Show taxonomic ranks
+taxonomyRanks(tse)
+
+# Show the unique values for a rank
+getUnique(tse, rank = "Phylum")
+
+# Agglomerate by rank and shows # of rows
+tse_agglomerated <- agglomerateByRank(tse, rank = "Phylum")
+nrow(tse_agglomerated)
+
+# Show rowData
+rowData(tse_agglomerated)
+
+# Agglomerate by all ranks and shows one
+tse_all_ranks <- agglomerateByRanks(tse)
+altExpNames(tse_all_ranks)
+altExp(tse_all_ranks, "Phylum")
+
+# Agglomerate by prevalence
+tse_prevalence <- agglomerateByPrevalence(tse)
+altExp(tse, "prevalent") <- agglomerateByPrevalence(tse)
+
+# Show column variables and merges the data based on one
+colData(tse) |> colnames()
+tse_variable <- agglomerateByVariable(tse, group = "SampleType", by = "cols")
+```
+
+## Transformation
+
+These example solutions are related to exercises in [@sec-assay-transform].
+
+```{r}
+#| label: transformation
+#| code-fold: true
+#| code-summary: "Show the solution"
+
+# Load the example dataset
+library(mia)
+library(miaViz)
+data("GlobalPatterns")
+tse <- GlobalPatterns
+
+# Visualize counts
+plotHistogram(tse, assay.type = "counts")
+
+# Transformations on the counts assay
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+tse <- transformAssay(tse, assay.type = "counts", method = "clr", pseudocount = 1)
+
+assayNames(tse)
+
+# Plots the two different assays
+library(patchwork)
+p1 <- plotHistogram(tse, assay.type = "counts")
+p2 <- plotHistogram(tse, assay.type = "clr")
+
+p1 + p2
+
+# Subset the abundance table
+clr_matrix <- assay(tse, "clr")
+clr_matrix[1:100, 1:10]
+
+# Agglomerate data by ranks
+tse <- agglomerateByRanks(tse)
+
+# Apply transformations across altExp
+tse <- transformAssay(
+    tse,
+    altexp = altExpNames(tse), assay.type = "counts", method = "relabundance"
+)
+tse <- transformAssay(
+    tse,
+    altexp = altExpNames(tse), assay.type = "counts", method = "clr", pseudocount = 1
+)
+
+# phiLR transformation on family level
+tse <- agglomerateByRank(tse, rank = "Family")
+tse <- transformAssay(
+    tse,
+    assay.type = "counts", method = "philr", MARGIN = 1L, pseudocount = TRUE
+)
+
+assay(altExp(tse, "philr"))
 ```
 
 ## Community composition
@@ -120,7 +349,6 @@ These example solutions are related to exercises in [@sec-microbiome-community].
 #| label: composition
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
 ```
 
 ## Alpha Diversity
@@ -131,7 +359,6 @@ These example solutions are related to exercises in [@sec-alpha-diversity].
 #| label: alpha
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
 ```
 
 ## Community similarity
@@ -142,7 +369,6 @@ These exercises are related to exercises in [@sec-community-similarity].
 #| label: beta
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
 ```
 
 ## Community typing
@@ -153,7 +379,6 @@ These example solutions are related to exercises in [@sec-clustering].
 #| label: cluster
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
 ```
 
 ## Differential abundance
@@ -165,7 +390,6 @@ These example solutions are related to exercises in
 #| label: daa
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
 ```
 
 ## Correlation
@@ -176,7 +400,6 @@ These example solutions are related to exercises in [@sec-correlation].
 #| label: correlation
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
 ```
 
 ## Mediation
@@ -187,29 +410,6 @@ These example solutions are related to exercises in [@sec-mediation].
 #| label: mediation
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
-```
-
-## Network learning & analysis
-
-These example solutions are related to exercises in [@sec-network-learning].
-
-```{r}
-#| label: network1
-#| code-fold: true
-#| code-summary: "Show the solution"
-    
-```
-
-## Network comparison
-
-These example solutions are related to exercises in [@sec-network-comparison].
-
-```{r}
-#| label: network2
-#| code-fold: true
-#| code-summary: "Show the solution"
-    
 ```
 
 ## Cross-association
@@ -220,7 +420,37 @@ These example solutions are related to exercises in [@sec-cross-correlation].
 #| label: cross-corr
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
+
+# Load the example dataset
+library(mia)
+data(HintikkaXOData)
+mae <- HintikkaXOData
+
+# Agglomerate microbiome data
+mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Phylum")
+
+# Apply CLR
+mae[[1]] <- transformAssay(mae[[1]], assay.type = "counts", method = "rclr")
+
+# Apply relative and log10
+mae[[2]] <- transformAssay(mae[[2]], assay.type = "nmr", method = "relabundance")
+mae[[2]] <- transformAssay(mae[[2]], assay.type = "relabundance", method = "log10", pseudocount = TRUE)
+
+# Cross correlates data sets
+res <- getCrossAssociation(
+    mae,
+    experiment1 = 1,
+    experiment2 = 2,
+    assay.type1 = "rclr",
+    assay.type2 = "log10",
+    method = "spearman",
+    mode = "matrix"
+)
+
+# Create a heatmap
+library(ComplexHeatmap)
+p <- Heatmap(res)
+p
 ```
 
 ## Ordination-based multiassay analysis
@@ -232,19 +462,44 @@ These example solutions are related to exercises in
 #| label: mofa
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
-```
 
-## Multi-omics prediction and classification
+# Load the example dataset
+library(mia)
+data(HintikkaXOData)
+mae <- HintikkaXOData
 
-These example solutions are related to exercises in
-[@sec-multi-omics-integration].
+# Select only microbiome and metabolites
+mae <- mae[, , c(1, 2)]
 
-```{r}
-#| label: integratedlearner
-#| code-fold: true
-#| code-summary: "Show the solution"
-    
+# Agglomerate microbiome data
+mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Phylum")
+
+# Apply CLR
+mae[[1]] <- transformAssay(mae[[1]], assay.type = "counts", method = "rclr")
+
+# Apply relative and log10 transformations
+mae[[2]] <- transformAssay(mae[[2]], assay.type = "nmr", method = "relabundance")
+mae[[2]] <- transformAssay(mae[[2]], assay.type = "relabundance", method = "log10", pseudocount = TRUE)
+
+# Scale features
+mae[[1]] <- transformAssay(mae[[1]], assay.type = "rclr", method = "standardize", MARGIN = "rows")
+mae[[2]] <- transformAssay(mae[[2]], assay.type = "log10", method = "standardize", MARGIN = "rows")
+
+# Removing the assays no longer needed
+assays(mae[[1]]) <- assays(mae[[1]])["standardize"]
+assays(mae[[2]]) <- assays(mae[[2]])["standardize"]
+
+# Create a MOFA object
+library(MOFA2)
+model <- create_mofa_from_MultiAssayExperiment(mae)
+
+# Run MOFA
+model <- prepare_mofa(object = model)
+model <- run_mofa(model, use_basilisk = TRUE)
+
+# Visualize variance explained
+p <- plot_variance_explained(model, x = "view", y = "factor")
+p
 ```
 
 ## Machine learning
@@ -255,5 +510,4 @@ These example solutions are related to exercises in [@sec-machine_learning].
 #| label: ml
 #| code-fold: true
 #| code-summary: "Show the solution"
-    
 ```

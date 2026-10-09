@@ -1,20 +1,25 @@
 # Correlation {#sec-correlation}
 
-```{r setup, echo=FALSE, results="asis"}
+```{r}
+#| label: setup
+#| echo: false
+#| results: asis
+
 library(rebook)
 chapterPreamble()
 ```
 
 In correlation — or association analysis more generally — we can evaluate the
-relationships between numeric variables. These variables can be taxa or
-patient metadata. For instance, we might be interested in which taxa are
-present simultaneously with others, or whether body weight is associated with
-the abundance of certain taxa. In this chapter, we will demonstrate how to
-perform correlation analysis with `getCrossAssociation()` method.
+relationships between numeric variables. These variables can be taxonomic
+features or patient metadata. For instance, we might be interested in which
+taxonomic features are present simultaneously with others, or whether body
+weight is associated with the abundance of certain features. In this chapter,
+we will demonstrate how to perform correlation analysis with
+`r BiocStyle::Biocpkg("mia")`'s `getCrossAssociation()` method.
 
-## Association between taxa
+## Association between taxonomic features
 
-Here we demonstrate, how to analyse which bacteria co-exists in the dataset.
+Here we demonstrate how to analyze which bacteria co-exists in the dataset.
 
 ```{r}
 #| label: association1
@@ -30,54 +35,65 @@ tse <- agglomerateByPrevalence(tse, rank = "class")
 # Apply clr-transform and scale
 tse <- transformAssay(tse, method = "clr", pseudocount = TRUE)
 tse <- transformAssay(
-    tse, assay.type = "clr", method = "standardize", MARGIN = "rows")
+    tse,
+    assay.type = "clr", method = "standardize", MARGIN = "rows"
+)
 
 # Get correlation results
 res <- getCrossAssociation(
-    tse, tse, assay.type1 = "clr", assay.type2 = "clr",
-    test.signif = TRUE, mode = "matrix")
+    tse, tse,
+    assay.type1 = "clr", assay.type2 = "clr",
+    test.signif = TRUE, mode = "matrix"
+)
 ```
 
-We can visualize the result with heatmap as we do later in this chapter, or
-we can visualize the results with correlation network plot as done below.
+We can visualize the result with a heatmap as we do later in this chapter, or
+we can visualize the results with a correlation network plot as done below.
 
 ```{r}
-#| label: association3
+#| label: association2
 
 library(qgraph)
 
 # Create correlation network plot
 qgraph(
-    res$cor, layout = "spring", labels = colnames(res$cor),
+    res$cor,
+    layout = "spring", labels = colnames(res$cor),
     label.cex = 1.2, theme = "colorblind",
-    node.width = 1.5, node.height = 2)
+    node.width = 1.5, node.height = 2
+)
 ```
 
 You can find more on networks from [@sec-network-learning].
 
-## Association between taxa and sample metadata
+## Association between taxonomic features and sample metadata
 
 Now, we can calculate alpha diversity indices, and evaluate if they have
-significant association with taxa.
+significant association with taxonomic features.
 
 ```{r}
-#| label: association4
+#| label: association3
 
 # Calculate diversity measures
 index <- c(
-    "shannon", "log_modulo_skewness", "coverage", "inverse_simpson", "gini")
+    "shannon", "log_modulo_skewness", "coverage", "inverse_simpson", "gini"
+)
 tse <- addAlpha(tse, index = index)
 
 # Get correlation results
 res <- getCrossAssociation(
-    tse, tse, assay.type1 = "clr", col.var2 = index,
-    test.signif = TRUE, mode = "matrix")
+    tse, tse,
+    assay.type1 = "clr", col.var2 = index,
+    test.signif = TRUE, mode = "matrix"
+)
 ```
 
-Below, we present the results using a heatmap visualization.
+Below, we present the results using a heatmap visualization with the help
+of the `r BiocStyle::Biocpkg("ComplexHeatmap")` and
+`r BiocStyle::CRANpkg("shadowtext")` R packages.
 
 ```{r}
-#| label: association5
+#| label: association4
 #| fig-width: 8
 #| fig-height: 8
 
@@ -87,10 +103,12 @@ library(shadowtext)
 # Function for marking significant correlations with "X"
 add_signif <- function(j, i, x, y, width, height, fill) {
     # If the p-value is under threshold
-    if( !is.na(res$p_adj[i, j]) & res$p_adj[i, j] < 0.05 ){
+    if (!is.na(res$p_adj[i, j]) & res$p_adj[i, j] < 0.05) {
         # Print "X"
         grid.shadowtext(
-            sprintf("%s", "X"), x, y, gp = gpar(fontsize = 8, col = "#f5f5f5"))
+            sprintf("%s", "X"), x, y,
+            gp = gpar(fontsize = 8, col = "#f5f5f5")
+        )
     }
 }
 
@@ -99,9 +117,10 @@ p <- Heatmap(res$cor,
     # Print values to cells
     cell_fun = add_signif,
     heatmap_legend_param = list(
-        title = "correlation", legend_height = unit(5, "cm")),
+        title = "correlation", legend_height = unit(5, "cm")
+    ),
     column_names_rot = 45
-    )
+)
 p
 ```
 
@@ -115,59 +134,65 @@ allows us to calculate correlations in bulk easily, without the need for
 looping.
 
 ```{r}
-#| label: association6
+#| label: association5
 
 # Get correlation results
 res <- getCrossAssociation(
-    tse, tse, col.var1 = index, col.var2 = index,
-    test.signif = TRUE, mode = "matrix")
+    tse, tse,
+    col.var1 = index, col.var2 = index,
+    test.signif = TRUE, mode = "matrix"
+)
 
 # Create a heatmap and store it
 p <- Heatmap(res$cor,
     # Print values to cells
     cell_fun = add_signif,
     heatmap_legend_param = list(
-        title = "correlation", legend_height = unit(5, "cm")),
+        title = "correlation", legend_height = unit(5, "cm")
+    ),
     column_names_rot = 45
-    )
+)
 p
 ```
 
 ::: {.callout-tip}
 ## Cross-association
 
-See [@sec-cross-correlation] for further information on correlation and association analyses.
+See [@sec-cross-correlation] for further information on correlation and
+association analyses.
 :::
 
 ::: {.callout-tip icon=false}
 ## Exercises
 
 **Goal:** After completing these exercises, you should be able to calculate
-associations between taxa and diversity.
+associations between taxonomic features and diversity.
 
 **Exercise 1: Correlation**
 
 1. Load any of the example datasets mentioned in [@sec-example-data].
 
-2. Agglomerate data to phylum level.
+2. Agglomerate the data to phylum level.
 
-3. Apply CLR transformation.
+3. Apply the CLR transformation.
 
-4. Calculate correlation of abundances of taxa.
+4. Calculate correlations of taxa abundances.
 
-5. Visualize the correlation network. Are there taxa whose abundances correlate?
+5. Visualize the correlation network. Are there taxonomic features whose
+abundances are correlated?
 
 6. Calculate all available alpha diversity indices with the un-agglomerated
 data.
 
 7. Calculate correlation between phyla and alpha diversity indices.
 
-8. Visualize the correlation results with a heatmap. Are there taxa whose
-abundances associate with the diversity? How can you interpret this?
+8. Visualize the correlation results with a heatmap. Are there taxonomic
+features whose abundances associate with diversity? How would you interpret
+this?
 
 Useful functions:
 
-`data()`, `agglomerateByRank`, `transformAssay()`, `getCrossAssociation()`,
-`qgraph::qgraph()`, `addAlpha()`, `ComplexHeatmap::Heatmap()`
+`utils::data()`, `mia::agglomerateByRank`, `mia::transformAssay()`, `mia::getCrossAssociation()`,
+`qgraph::qgraph()`, `mia::addAlpha()`, `ComplexHeatmap::Heatmap()`
 
 :::

@@ -1,7 +1,7 @@
 <!-- badges: start -->
-📦 [Repo](https://github.com/js2264/OMA) [![rworkflows](https://img.shields.io/github/actions/workflow/status/js2264/OMA/rworkflows.yml?label=Package%20check)](https://github.com/js2264/OMA/actions/workflows/rworkflows.yml)
-📖 [Book](https://js2264.github.io/OMA/) [![deployment](https://img.shields.io/github/actions/workflow/status/js2264/OMA/pages/pages-build-deployment?label=Book%20deployment)](https://github.com/js2264/OMA/actions/workflows/pages/pages-build-deployment)
-🐳 [Docker](https://github.com/js2264/OMA/pkgs/container/OMA) [![biocbook](https://img.shields.io/github/actions/workflow/status/js2264/OMA/biocbook.yml?label=Docker%20image)](https://github.com/js2264/OMA/actions/workflows/biocbook.yml)
+📦 [Repo](https://github.com/microbiome/OMA) [![rworkflows](https://img.shields.io/github/actions/workflow/status/microbiome/OMA/rworkflows.yml?label=Package%20check)](https://github.com/microbiome/OMA/actions/workflows/rworkflows.yml)
+📖 [Book](https://bioconductor.org/books/release/OMA/) [![book build](https://img.shields.io/github/actions/workflow/status/microbiome/OMA/biocbook.yml?label=Book%20build)](https://github.com/microbiome/OMA/actions/workflows/biocbook.yml)
+🐳 [Docker](https://github.com/microbiome/OMA/pkgs/container/OMA) [![biocbook](https://img.shields.io/github/actions/workflow/status/microbiome/OMA/biocbook.yml?label=Docker%20image)](https://github.com/microbiome/OMA/actions/workflows/biocbook.yml)
 <!-- badges: end -->
 
 **README from [microbiome/OMA](https://github.com/microbiome/OMA)**
@@ -11,23 +11,29 @@
 ## Overview
 
 This is a reference cookbook for performing **Microbiome Analysis** with
-Bioconductor in R. This is a book based on Quarto and **`BiocBook`**
+Bioconductor in R. This book is based on Quarto and **`BiocBook`**
 (<https://www.bioconductor.org/packages/release/bioc/html/BiocBook.html>).
+
+## Funding
+
+<img src="inst/assets/findingpheno_logo.png" align="right" width="160" />
+
+This project received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement No 952914 ([FindingPheno](https://findingpheno.eu/)).
+
 
 ## Deployment
 
-The book is automatically built and deployed from the `devel` branch to
-the `gh-pages` branch using GitHub Actions.
+The canonical release book is published on Bioconductor. This repository still
+builds the book from the `devel` branch, but the GitHub Pages copy now
+redirects to the Bioconductor release.
 
-You can also preview it locally after _cloning_ this Github
-repository. This is useful for instance if you like to suggest
-improvements in the material. You can use this to test the build
-before making a pull request to add your new changes in the official
-release.
+You can also preview it locally after _cloning_ this Github repository. This
+is useful if you want to suggest improvements to the material or test the
+build before making a pull request.
 
 Building and viewing the book locally involves the following steps:
 
-1. Install the necessary dependencies to build to book, if necessary:
+1. Install the necessary dependencies to build to book:
 
 ```
 BiocManager::install(remotes::local_package_deps(dependencies=TRUE))
@@ -43,7 +49,7 @@ BiocBook::preview(BiocBook::BiocBook('.'))
 ### Docker installation
 
 Pre-built [Docker images](https://github.com/microbiome/OMA/pkgs/container/oma)
-are available for an easy deployment.
+are available for easy deployment.
 
 1. Install Docker for your platform: [Linux](https://docs.docker.com/engine/install/),
 [Mac](https://docs.docker.com/desktop/setup/install/mac-install/),
@@ -64,10 +70,10 @@ the version `0.98.35`.
 to clone the repository to your local machine. This command will create
 the `OMA` directory in the current working directory. For more details, see
 [here](https://git-scm.com/docs/git-clone). Alternatively, you can download the
-repository, and extract the files.
+repository and extract the files.
 
-4. Open terminal in OMA directory. If you followed cloned the repository in the
-point 3, you can switch to the directory by running the command `cd OMA`.
+4. Open terminal in OMA directory. If followed step 3 to clone the repository,
+you can switch to the directory by running the command `cd OMA`.
 
 5. Run the image:
 
@@ -75,15 +81,15 @@ point 3, you can switch to the directory by running the command `cd OMA`.
 docker run --volume ./:/project -p 8787:8787 -e PASSWORD=1234 ghcr.io/microbiome/oma
 ```
 
-The command above will start the image based on the Biocoductor docker image,
+The command above will start the image based on the Bioconductor docker image,
 which includes RStudio Server. The `--volume` maps the path on your host (the
 machine you are using) to the path inside the container. In the command, it maps
 the current working directory to the `/project` directory inside the container.
 If the current directory is the book's repository, it will be available inside
-the container under `/project`. Thus, in this case, the version of the book
+the container under `/project`. The version of the book
 coincides with the bleeding-edge version available in the repo. If you do not
-specify this option, the book Quarto files are still available in the `/opt/pkg`
-directory inside the container, but any changes you make to the files, will be
+specify this option, Quarto files are still available in the `/opt/pkg`
+directory inside the container. However any changes you make to the files will be
 _discarded_ when you stop the container.
 
 6. Access RStudio. When the image is running, the RStudio server is available on
@@ -134,11 +140,9 @@ After you forked OMA, you have two repositories to care about:
 - **origin:** your own Github fork of OMA, under your github account
 - **upstream:** [`devel` branch of OMA](https://github.com/microbiome/OMA/)
 
-The origin you have after you cloned your own fork.
+The origin is set when you fork and clone the repository.
 
-The upstream you can set on command line as follows, for instance (and
-you can educate yourself more through various online resources on
-using Git/hub):
+The upstream can be set on the command line as follows:
 
 ```
 git remote add upstream git@github.com:microbiome/OMA.git
@@ -167,6 +171,8 @@ git push origin devel
 
 After this you can open a PR from origin to the [official devel branch](https://github.com/microbiome/OMA/) in Github.
 
+There are various online resources available to educate yourself further in the use of Git and Github.
+
 ### Adding new sections
 
 Please note that chapters should be independent of each other.
@@ -177,13 +183,12 @@ Please note that chapters should be independent of each other.
 
 ### Styling
 
-1. Use a coding style consistent with the rest of the book. It makes the book
-look coherent.
+1. Use a coding style consistent with the rest of the book. It helps keep the book coherent.
 
 2. Use quarto-styling instead or Rmarkdown style in code options. See
 [quarto execution options](https://quarto.org/docs/computations/execution-options.html).
 
-3. All chunks should have labels. It is easier to see for instance which chunk
+3. All chunks should have labels. It is easier to find which chunk
 is causing problems.
 
 4. Focus on interpreting the results, as this is often what readers find most
