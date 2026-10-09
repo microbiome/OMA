@@ -13,14 +13,14 @@ There are multiple biclustering packages available, In this example, we use foll
 -   cobiclust [@Aubert2021]
 
 _cobiclust_ is especially developed for microbiome data whereas _biclust_ is more
-general method. In this section, we show three different cases and example 
-solutions to apply biclustering to them. 
+general method. In this section, we show three different cases and example
+solutions to apply biclustering to them.
 
 1.   Taxa vs samples
 2.   Taxa vs biomolecule/biomarker
 3.   Taxa vs taxa
 
-Biclusters can be visualized using heatmap or boxplot, for instance. For checking purposes, 
+Biclusters can be visualized using heatmap or boxplot, for instance. For checking purposes,
 also scatter plot might be valid choice.
 
 Check more ideas for heatmaps from chapters \@ref(viz-chapter) and \@ref(microbiome-community).
@@ -29,7 +29,7 @@ Check more ideas for heatmaps from chapters \@ref(viz-chapter) and \@ref(microbi
 ## Taxa vs samples
 
 When you have microbial abundance matrices, we suggest to use _cobiclust_ which is
-designed for microbial data. 
+designed for microbial data.
 
 Load example data
 ```{r load-pkg-data}
@@ -38,7 +38,7 @@ data(HintikkaXOData, package="mia")
 mae <- HintikkaXOData
 ```
 
-Only the most prevalent taxa are included in analysis. 
+Only the most prevalent taxa are included in analysis.
 
 ```{r cobiclust_1}
 # Subset data in the first experiment
@@ -49,7 +49,7 @@ mae[[1]] <- transformAssay(mae[[1]], "relabundance", method = "rclr")
 ```
 
 _cobiclust_ takes counts table as an input and gives _cobiclust_ object as an output.
-It includes clusters for taxa and samples. 
+It includes clusters for taxa and samples.
 
 ```{r cobiclust_2}
 library(cobiclust)
@@ -72,7 +72,7 @@ mae[[1]] <- mae[[1]][order(rowData(mae[[1]])$clusters), order(colData(mae[[1]])$
 clusters$classification
 ```
 
-Next we can plot clusters. Commonly used plot is heatmap with annotations. 
+Next we can plot clusters. Commonly used plot is heatmap with annotations.
 
 ```{r cobiclust_3, fig.width=14, fig.height=18}
 
@@ -83,9 +83,9 @@ mae[[1]] <- transformAssay(mae[[1]], assay.type = "rclr",
                             MARGIN = "rows",
                             method = "standardize", name = "clr_z")
 
-# Create annotations. When column names are equal, they should share levels. 
-# Here samples include 3 clusters, and taxa 2. That is why we have to make 
-# column names unique. 
+# Create annotations. When column names are equal, they should share levels.
+# Here samples include 3 clusters, and taxa 2. That is why we have to make
+# column names unique.
 annotation_col <- data.frame(colData(mae[[1]])[, "clusters", drop = F])
 colnames(annotation_col) <- "col_clusters"
 
@@ -93,7 +93,7 @@ annotation_row <- data.frame(rowData(mae[[1]])[, "clusters", drop = F])
 colnames(annotation_row) <- "row_clusters"
 
 # Create a heatmap
-pheatmap(assay(mae[[1]], "clr_z"), cluster_rows = F, cluster_cols = F, 
+pheatmap(assay(mae[[1]], "clr_z"), cluster_rows = F, cluster_cols = F,
          annotation_col = annotation_col,
          annotation_row = annotation_row)
 
@@ -125,24 +125,24 @@ Here, we analyze cross-correlation between taxa and metabolites. This is a case,
 we use _biclust_ method which is suitable for numeric matrices in general.
 
 ```{r biclust_1}
-# Samples must be in equal order 
+# Samples must be in equal order
 # (Only 1st experiment  was ordered in cobiclust step leading to unequal order)
 mae[[1]] <- mae[[1]][ , colnames(mae[[2]]) ]
 
 # Make rownames unique since it is require by other steps
 rownames(mae[[1]]) <- make.unique(rownames(mae[[1]]))
 # Calculate correlations
-corr <- getCrossAssociation(mae, 1, 2, 
-                              assay.type1 = "rclr", 
-                              assay.type2 = "nmr", 
-                              mode = "matrix", 
+corr <- getCrossAssociation(mae, 1, 2,
+                              assay.type1 = "rclr",
+                              assay.type2 = "nmr",
+                              mode = "matrix",
                               cor.threshold = 0.2,
                               test_significance = FALSE)
 
 ```
 
 
-_biclust_ takes matrix as an input and returns _biclust_ object. 
+_biclust_ takes matrix as an input and returns _biclust_ object.
 
 ```{r biclust_2}
 # Load package
@@ -159,10 +159,10 @@ bc <- biclust(corr, method=BCPlaid(), fit.model = y ~ m,
 bc
 ```
 
-The object includes cluster information. However compared to _cobiclust_, 
+The object includes cluster information. However compared to _cobiclust_,
 _biclust_ object includes only information about clusters that were found, not general cluster.
 
-Meaning that if one cluster size of 5 features was found out of 20 features, 
+Meaning that if one cluster size of 5 features was found out of 20 features,
 those 15 features do not belong to any cluster. That is why we have to create an
 additional cluster for features/samples that are not assigned into any cluster.
 
@@ -176,11 +176,11 @@ additional cluster for features/samples that are not assigned into any cluster.
   bc_columns <- data.frame(bc_columns)
   bc_rows <- bc@RowxNumber
   bc_rows <- data.frame(bc_rows)
-  
+
   # Get data into right format
   bc_columns <- .manipulate_bc_data(bc_columns, assay, "col")
   bc_rows <- .manipulate_bc_data(bc_rows, assay, "row")
-  
+
   return(list(bc_columns = bc_columns, bc_rows = bc_rows))
 }
 
@@ -194,7 +194,7 @@ additional cluster for features/samples that are not assigned into any cluster.
   } else{
     names <- rownames(assay)
   }
-  
+
   # If no clusters were found, create one. Otherwise create additional cluster which
   # contain those samples that are not included in clusters that were found.
   if( nrow(bc_clusters) != dim ){
@@ -227,12 +227,12 @@ bicluster_columns <- bcs$bc_columns
 bicluster_rows |> head()
 ```
 
-Let's collect information for the scatter plot. 
+Let's collect information for the scatter plot.
 
 ```{r biclust_5}
 # Function for obtaining sample-wise sum, mean, median, and mean variance for each cluster
 .sum_mean_median_var <- function(tse1, tse2, assay.type1, assay.type2, clusters1, clusters2){
-  
+
   list <- list()
   # Create a data frame that includes all the information
   for(i in 1:ncol(clusters1) ){
@@ -247,13 +247,13 @@ Let's collect information for the scatter plot.
     mean1 <- colMeans2(assay1, na.rm = TRUE)
     median1 <- colMedians(assay1, na.rm = TRUE)
     var1 <- colVars(assay1, na.rm = TRUE)
-    
+
     sum2 <- colSums2(assay2, na.rm = TRUE)
     mean2 <- colMeans2(assay2, na.rm = TRUE)
     median2 <- colMedians(assay2, na.rm = TRUE)
     var2 <- colVars(assay2, na.rm = TRUE)
-    
-    list[[i]] <- data.frame(sample = colnames(tse1), sum1, sum2, mean1, mean2, 
+
+    list[[i]] <- data.frame(sample = colnames(tse1), sum1, sum2, mean1, mean2,
                      median1, median2, var1, var2)
   }
 
@@ -266,17 +266,17 @@ df <- .sum_mean_median_var(mae[[1]], mae[[2]], "rclr", "nmr", bicluster_rows, bi
 
 Now we can create a scatter plot. X-axis includes median clr abundance of microbiome
 and y-axis median absolute concentration of each metabolite. Each data point represents
-a single sample. 
+a single sample.
 
 From the plots, we can see that there is low negative correlation in both cluster 1 and 3.
-This means that when abundance of bacteria belonging to cluster 1 or 3 is higher, 
-the concentration of metabolites of cluster 1 or 3 is lower, and vice versa. 
+This means that when abundance of bacteria belonging to cluster 1 or 3 is higher,
+the concentration of metabolites of cluster 1 or 3 is lower, and vice versa.
 
 ```{r biclust_6, fig.width=14, fig.height=6, fig.show="keep", out.width="33%"}
 pics <- list()
 for(i in seq_along(df)){
   pics[[i]] <- ggplot(df[[i]])  +
-      geom_point(aes(x = median1, y = median2)) + 
+      geom_point(aes(x = median1, y = median2)) +
       labs(title = paste0("Cluster ", i),
            x = "Taxa (rclr median)",
            y = "Metabolites (abs. median)")
@@ -308,7 +308,7 @@ for(name in cluster_names){
 
 # Create a heatmap
 pheatmap(corr, cluster_cols = F, cluster_rows = F,
-         annotation_col = bicluster_columns, 
+         annotation_col = bicluster_columns,
          annotation_row = bicluster_rows,
          annotation_colors = annotation_colors)
 ```
@@ -316,14 +316,14 @@ pheatmap(corr, cluster_cols = F, cluster_rows = F,
 ## Taxa vs taxa
 
 Third and final example deals with situation where we want to analyze correlation
-between taxa. _biclust_ is suitable for this. 
+between taxa. _biclust_ is suitable for this.
 
 ```{r biclust_9}
 # Calculate cross-correlation
-corr <- getCrossAssociation(mae, 1, 1, 
-                                      assay.type1 = "rclr", assay.type2 = "rclr", 
+corr <- getCrossAssociation(mae, 1, 1,
+                                      assay.type1 = "rclr", assay.type2 = "rclr",
                                       mode = "matrix",
-                                      cor.threshold = 0.2, verbose = F, 
+                                      cor.threshold = 0.2, verbose = F,
                                       show_warning = F,
                                       test_significance = FALSE)
 
@@ -345,11 +345,11 @@ bicluster_columns <- bcs$bc_columns
 ```{r biclust_11}
 # Create a column that combines information
 # If row/column includes in multiple clusters, cluster numbers are separated with "_&_"
-bicluster_columns$clusters <- apply(bicluster_columns, 1, 
+bicluster_columns$clusters <- apply(bicluster_columns, 1,
                                     function(x){paste(paste(which(x)), collapse = "_&_") })
 bicluster_columns <- bicluster_columns[, "clusters", drop = FALSE]
 
-bicluster_rows$clusters <- apply(bicluster_rows, 1, 
+bicluster_rows$clusters <- apply(bicluster_rows, 1,
                                  function(x){paste(paste(which(x)), collapse = "_&_") })
 bicluster_rows <- bicluster_rows[, "clusters", drop = FALSE]
 ```
@@ -360,7 +360,7 @@ bicluster_columns <- data.frame(apply(bicluster_columns, 2, as.factor))
 bicluster_rows <- data.frame(apply(bicluster_rows, 2, as.factor))
 
 pheatmap(corr, cluster_cols = F, cluster_rows = F,
-         annotation_col = bicluster_columns, 
+         annotation_col = bicluster_columns,
          annotation_row = bicluster_rows)
 ```
 
