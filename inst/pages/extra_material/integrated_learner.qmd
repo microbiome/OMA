@@ -10,10 +10,10 @@ chapterPreamble()
 ```
 
 This chapter illustrates how we can create a classification model that utilizes
-multiomics data. In contrast, [@sec-machine_learning] shows classification 
+multiomics data. In contrast, [@sec-machine_learning] shows classification
 models that utilizes single omic data.
 
-In multiview data analysis, there are two main types of approaches: early 
+In multiview data analysis, there are two main types of approaches: early
 fusion and late fusion. \underline{Early fusion} combines all datasets into a
 single representation, which then serves as input for a supervised learning
 model. In contrast, \underline{late fusion} builds individual models for each
@@ -27,7 +27,7 @@ parameter ($\rho$).
 
 ## Import and preprocess data
 
-We use the publicly available Inflammatory Bowel Diseases (IBD) data from the 
+We use the publicly available Inflammatory Bowel Diseases (IBD) data from the
 `r BiocStyle::Biocpkg("curatedMetagenomicData")` package [@Lloyd-Price2019],
 where we aim to predict IBD disease status based on both taxonomic (species
 abundances) and functional (pathway abundances) profiles.
@@ -53,6 +53,30 @@ mae <- MultiAssayExperiment(
 )
 mae
 ```
+
+`IntegratedLearnerFromMAE()` requires complete cases across the selected
+experiments. Every experiment must contain the same samples, and the sample
+names must match character-for-character. A `sampleMap` records relationships
+between samples and subjects in a `MultiAssayExperiment`, but it does not
+impute missing measurements or harmonize names for IntegratedLearner.
+
+Check this requirement before fitting the model:
+
+```{r}
+#| label: check_sample_names
+
+sample_ids <- lapply(experiments(mae), colnames)
+stopifnot(all(vapply(
+    sample_ids,
+    identical,
+    logical(1),
+    y = sample_ids[[1]]
+)))
+```
+
+For other datasets, rename columns to a shared sample or patient identifier
+and subset every experiment to the complete-case intersection before creating
+the `MultiAssayExperiment`.
 
 Let's first check how many patients are in each group.
 
@@ -126,7 +150,7 @@ colData(mae)[["validation_set"]] <- sample(
 Now, we are ready to fit the model using the
 `r BiocStyle::Githubpkg("himelmallick/IntegratedLearner")` package, which
 supports early, late, and intermediate fusion methods [@Mallick2024]. Under the
-hood, it leverages the `r BiocStyle::CRANpkg("SuperLearner")` package. 
+hood, it leverages the `r BiocStyle::CRANpkg("SuperLearner")` package.
 
 Currently, `r BiocStyle::Githubpkg("himelmallick/IntegratedLearner")` is only
 available from GitHub. You can install it by running the following chunk.
