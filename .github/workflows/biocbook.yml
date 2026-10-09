@@ -102,10 +102,29 @@ jobs:
         run: |
           echo target_folder=$(echo ${{ github.ref_name }} | sed 's,RELEASE_,,' | tr '_' '.') >> "${GITHUB_ENV}"
 
-      - name: 🚀 Deploy book to Github Pages on versioned branch
+      - name: 🧭 Prepare GitHub Pages redirect
+        run: |
+          mkdir -p out/redirect
+          cat > out/redirect/index.html <<'EOF'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta http-equiv="refresh" content="0; url=https://bioconductor.org/books/release/OMA/">
+            <link rel="canonical" href="https://bioconductor.org/books/release/OMA/">
+            <title>OMA has moved</title>
+          </head>
+          <body>
+            <p>The OMA book has moved to <a href="https://bioconductor.org/books/release/OMA/">Bioconductor</a>.</p>
+          </body>
+          </html>
+          EOF
+          echo redirect_path=out/redirect >> "${GITHUB_ENV}"
+
+      - name: 🚀 Deploy GitHub Pages redirect on versioned branch
         uses: JamesIves/github-pages-deploy-action@v4.4.3
         with:
-          folder: ${{ env.book_path }}/
+          folder: ${{ env.redirect_path }}/
           target-folder: docs/${{ env.target_folder }}/
           branch: gh-pages
           clean: false
