@@ -470,7 +470,7 @@ tse <- addMDS(
     method = "euclidean",
     niter = 10, # Number of iterations
     sample = min(colSums(assay(tse, "counts"))), # Rarefaction depth
-    ntop = Inf, # Keep all features when determining rarefaction depth
+    ntop = Inf, # Use all features, not only the 500 most variable
     transf = clr, # Applied transformation
     replace = TRUE,
     name = "MDS_aitchison_rarefied"
@@ -496,16 +496,16 @@ wrap_plots(plots) +
     plot_layout(guides = "collect")
 ```
 
-`ntop` is an `addMDS()` option. Here it is set to `Inf` so that all features
-are retained when determining the rarefaction depth. If `ntop` were not set
-to include all features, only the features with the highest variance would be
-used for dimensionality reduction and the other features would be filtered.
+`ntop` is passed to `scater::runMDS()`, which by default uses only the 500
+most variable features (`ntop = 500`) to calculate the dissimilarities. Here it
+is set to `Inf` so that all features are used.
 
 When rarefaction is not done, the `getDissimilarity()` utilizes
 `vegan::vegdist()` function while in rafection `vegan::avgdist()` is applied.
 The argument `sample` is set to the smallest metagenomic reads count across
-all samples. Together with `ntop = Inf`, this ensures that no sample will be
-removed during the rarefaction process.
+all samples. Read counts are summed over the features that are used, so with
+the default `ntop` the smallest sample could fall below this depth and be
+removed during rarefaction. With `ntop = Inf`, no sample is removed.
 
 The argument `niter` is by default set to 100 but 10 iterations is often
 sufficient for beta diversity calculations. To use transformations after the
