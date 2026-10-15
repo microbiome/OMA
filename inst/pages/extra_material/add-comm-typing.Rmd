@@ -41,8 +41,10 @@ km <- kmeans(diss, 2, nstart = 25)
 colData(tse)$clusters <- as.factor(km$cluster)
 
 # Perform PCoA so that we can visualize clusters
-tse <- addMDS(tse, assay.type = "relabundance",
-              FUN = vegan::vegdist, method = "bray")
+tse <- addMDS(tse,
+    assay.type = "relabundance",
+    FUN = vegan::vegdist, method = "bray"
+)
 
 # Plot PCoA and color clusters
 plotReducedDim(tse, "MDS", colour.by = "clusters")
@@ -88,12 +90,14 @@ k <- c(2, 3, 5, 10)
 
 ClustAndPlot <- function(x) {
     # Add the clustering data from the short random walks algorithm to the TSE
-    tse <- addCluster(tse, assay.type = "rclr",
-                   by = "cols", NNGraphParam(k = x))
+    tse <- addCluster(tse,
+        assay.type = "rclr",
+        by = "cols", NNGraphParam(k = x)
+    )
 
     # Plot the results of the clustering as a color for each sample
     plotUMAP(tse, colour.by = I(colData(tse)$clusters)) +
-    labs(title = paste0("k = ", x))
+        labs(title = paste0("k = ", x))
 }
 
 # Apply the function for different k values
@@ -116,9 +120,11 @@ about Silhouettes read [@Rousseeuw1987].
 
 ```{r NNGraph2, message=FALSE, warning=FALSE}
 ClustDiagPlot <- function(x) {
-  # Get the clustering results
-    tse <- addCluster(tse, assay.type = "rclr",
-                   by = "cols", NNGraphParam(k = x))
+    # Get the clustering results
+    tse <- addCluster(tse,
+        assay.type = "rclr",
+        by = "cols", NNGraphParam(k = x)
+    )
 
     # Compute the diagnostic info
     sil <- approxSilhouette(t(assays(tse)$rclr), colData(tse)$clusters)
@@ -143,7 +149,7 @@ library(miaViz)
 # Only consider Forest samples
 tse <- tse[, colData(tse)$Country == "Finland"]
 # Agglomerate to phylum level
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
 # Get top taxa
 rel_taxa <- getTop(tse, top = 8, assay.type = "counts")
 # Take only the top taxa
@@ -164,13 +170,15 @@ library(ComplexHeatmap)
 library(grid)
 library(RColorBrewer)
 # Agglomerate to phylum level
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
 # Take only the top taxa
-tse <- tse[is.element(rownames(tse), rel_taxa),]
+tse <- tse[is.element(rownames(tse), rel_taxa), ]
 
 # CLR and standardize transforms
-tse <- transformAssay(tse, MARGIN = "cols", assay.type = "counts",
-                       method = "clr", pseudocount=1)
+tse <- transformAssay(tse,
+    MARGIN = "cols", assay.type = "counts",
+    method = "clr", pseudocount = 1
+)
 tse <- transformAssay(tse, MARGIN = "rows", assay.type = "clr", method = "standardize")
 
 Countries <- data.frame("Country" = colData(tse)$Country)
@@ -184,10 +192,15 @@ colnames(mat) <- colnames(mat)[order(Countries$Country)]
 rownames(mat) <- stringr::str_remove(rownames(mat), "Phylum:")
 # Make grid for heatmap
 breaks <- seq(-3, 3, length.out = 10)
-setHook("grid.newpage", function() pushViewport(viewport(x = 1, y = 1, width = 0.9,
-                                                         height = 0.9, name = "vp",
-                                                         just = c("right","top"))),
-        action = "prepend")
+setHook("grid.newpage", function() {
+    pushViewport(viewport(
+        x = 1, y = 1, width = 0.9,
+        height = 0.9, name = "vp",
+        just = c("right", "top")
+    ))
+},
+action = "prepend"
+)
 pheatmap(mat, color = rev(brewer.pal(9, "RdBu")), breaks = breaks, main = "Countries", treeheight_row = 0, treeheight_col = 0, show_colnames = 0, annotation_col = Countries, cluster_cols = F)
 setHook("grid.newpage", NULL, "replace")
 grid.text("Sample", x = 0.39, y = -0.04, gp = gpar(fontsize = 16))
@@ -201,15 +214,18 @@ The burden of specifying the number of clusters falls on the researcher. To help
 The scree plot allows us to see how much of the variance is captured by each dimension in the MDS ordination.
 
 ```{r scree}
-library(ggplot2); th <- theme_bw()
+library(ggplot2)
+th <- theme_bw()
 
 # Only consider Finland samples
 tse <- tse[, colData(tse)$Country == "Finland"]
 
 # MDS analysis with the first 20 dimensions
-tse  <- scater::addMDS(tse, FUN = vegan::vegdist, method = "bray",
-                       name = "MDS_BC", assay.type = "counts", ncomponents = 20)
-ord  <- reducedDim(tse, "MDS_BC", withDimnames = TRUE)
+tse <- scater::addMDS(tse,
+    FUN = vegan::vegdist, method = "bray",
+    name = "MDS_BC", assay.type = "counts", ncomponents = 20
+)
+ord <- reducedDim(tse, "MDS_BC", withDimnames = TRUE)
 # retrieve eigenvalues
 eigs <- attr(ord, "eig")
 
@@ -219,10 +235,10 @@ var <- eigs / sum(eigs)
 df <- data.frame(x = c(1:12), y = var[1:12])
 # create scree plot
 p <- ggplot(df, aes(x, y)) +
-     geom_bar(stat="identity") +
-     xlab("Principal Component") +
-     ylab("Variance") +
-     ggtitle("Scree Plot")
+    geom_bar(stat = "identity") +
+    xlab("Principal Component") +
+    ylab("Variance") +
+    ggtitle("Scree Plot")
 p
 ```
 
@@ -248,12 +264,12 @@ library(factoextra)
 
 # take only first 5 dimensions
 NDIM <- 5
-x    <- ord[, 1:NDIM]
+x <- ord[, 1:NDIM]
 
 # Elbow Method
 factoextra::fviz_nbclust(x, kmeans, method = "wss") +
-                         geom_vline(xintercept = 3, linetype = 2) +
-                         labs(subtitle = "Elbow Method") + th
+    geom_vline(xintercept = 3, linetype = 2) +
+    labs(subtitle = "Elbow Method") + th
 ```
 
 The function says that the bend occurs at $k=3$, however it is hard to tell that the bend couldn't equally occur at $k=4$, $5$, or $6$.
@@ -265,7 +281,7 @@ This method on the otherhand returns a width for each $k$. In this case, we want
 ```{r silhouette}
 # Silhouette method
 factoextra::fviz_nbclust(x, kmeans, method = "silhouette") +
-                         labs(subtitle = "Silhouette method") + th
+    labs(subtitle = "Silhouette method") + th
 ```
 
 The graph shows the maximum occurring at $k=6$. At the very least, there is strong evidence for $\geq k=2$ clusters because of the jump in the plot; this result is consistent with what we obtained from the elbow method.
@@ -276,8 +292,8 @@ The Gap-Statistic Method is the most complicated among the methods discussed her
 
 ```{r gap-statistic}
 # Gap Statistic Method
-factoextra::fviz_nbclust(x, kmeans, method = "gap_stat", nboot = 50)+
-                         labs(subtitle = "Gap Statistic Method") + th
+factoextra::fviz_nbclust(x, kmeans, method = "gap_stat", nboot = 50) +
+    labs(subtitle = "Gap Statistic Method") + th
 ```
 
 The peak suggests $k=6$ clusters. If we also look to the points where the graph jumps, we can see there is evidence for $k=2$, $k=6$, and $k=8$. The output indicates that there should be at least three clusters present. Since we have previous evidence for the existence of six clusters from the silhouette and elbow methods, we will go with $k=6$.
@@ -288,7 +304,7 @@ Now, let's divide the subjects into their respective clusters.
 
 ```{r create clusters}
 library(cluster)
-tse2 <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse2 <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
 
 # assume 6 clusters
 K <- 6
@@ -315,12 +331,16 @@ CSTColorScale <- scale_colour_manual(name = "CST", values = CSTColors)
 CSTFillScale <- scale_fill_manual(name = "CST", values = CSTColors)
 
 # plot MDS with Bray-Curtis dimensions 1 and 2
-p1 <- scater::plotReducedDim(tse2, "MDS_BC", colour_by = "CST", point_alpha = 1,
-                             percentVar = var[c(1, 2)]*100) + th + labs(title = "Ordination by Cluster") +
-                             theme(plot.title = element_text(hjust = 0.5))
+p1 <- scater::plotReducedDim(tse2, "MDS_BC",
+    colour_by = "CST", point_alpha = 1,
+    percentVar = var[c(1, 2)] * 100
+) + th + labs(title = "Ordination by Cluster") +
+    theme(plot.title = element_text(hjust = 0.5))
 # plot MDS with Bray-Curtis dimensions 3 and 4
-p2 <- scater::plotReducedDim(tse2, "MDS_BC", colour_by = "CST", point_alpha = 1,
-                             ncomponents = c(3, 4), percentVar = var[c(1, 2, 3, 4)]*100) + th
+p2 <- scater::plotReducedDim(tse2, "MDS_BC",
+    colour_by = "CST", point_alpha = 1,
+    ncomponents = c(3, 4), percentVar = var[c(1, 2, 3, 4)] * 100
+) + th
 # show results
 (p1 + CSTColorScale) / (p2 + CSTColorScale)
 ```
@@ -328,11 +348,13 @@ p2 <- scater::plotReducedDim(tse2, "MDS_BC", colour_by = "CST", point_alpha = 1,
 And now nMDS.
 
 ```{r message = FALSE, warning = FALSE}
-tse2  <- runNMDS(tse2, FUN = vegan::vegdist, method = "bray",
-                name = "NMDS_BC", assay.type = "counts", ncomponents = 20)
+tse2 <- runNMDS(tse2,
+    FUN = vegan::vegdist, method = "bray",
+    name = "NMDS_BC", assay.type = "counts", ncomponents = 20
+)
 scater::plotReducedDim(tse2, "NMDS_BC", colour_by = "CST", point_alpha = 1) + th +
-        labs(title = "NMDS Bray-Curtis by Cluster") +
-        theme(plot.title = element_text(hjust = 0.5)) + CSTColorScale
+    labs(title = "NMDS Bray-Curtis by Cluster") +
+    theme(plot.title = element_text(hjust = 0.5)) + CSTColorScale
 ```
 
 ## CST Analysis
@@ -340,10 +362,11 @@ scater::plotReducedDim(tse2, "NMDS_BC", colour_by = "CST", point_alpha = 1) + th
 Looking at heatmaps of the CSTs can reveal structure on a different level. Using all of the data again (for the top 8 taxa) and taking the `standardize` transformation of the clr transformed counts, we have
 
 ```{r message = FALSE, warning = FALSE, results = FALSE}
-
 # Z transform of CLR counts
-tse2 <- transformAssay(tse2, MARGIN = "cols", assay.type = "counts",
-                        method = "clr", pseudocount=1)
+tse2 <- transformAssay(tse2,
+    MARGIN = "cols", assay.type = "counts",
+    method = "clr", pseudocount = 1
+)
 tse2 <- transformAssay(tse2, MARGIN = "rows", assay.type = "clr", method = "standardize")
 # get top taxa
 tse2 <- tse2[is.element(rownames(tse2), rel_taxa), ]
@@ -358,14 +381,19 @@ rownames(mat) <- stringr::str_remove(rownames(mat), "Phylum:")
 
 ```{r messages = FALSE, warning = FALSE}
 # Plot
-CSTs        <- as.data.frame(sort(clust))
+CSTs <- as.data.frame(sort(clust))
 names(CSTs) <- "CST"
 breaks <- seq(-2, 2, length.out = 10)
 # Make grid for heatmap
-setHook("grid.newpage", function() pushViewport(viewport(x = 1, y = 1, width = 0.9,
-                                                         height = 0.9, name = "vp",
-                                                         just = c("right","top"))),
-        action = "prepend")
+setHook("grid.newpage", function() {
+    pushViewport(viewport(
+        x = 1, y = 1, width = 0.9,
+        height = 0.9, name = "vp",
+        just = c("right", "top")
+    ))
+},
+action = "prepend"
+)
 pheatmap(mat, color = rev(brewer.pal(9, "RdBu")), breaks = breaks, main = "All CSTs", treeheight_row = 0, treeheight_col = 0, show_colnames = 0, annotation_col = CSTs, cluster_cols = F)
 setHook("grid.newpage", NULL, "replace")
 grid.text("Sample", x = 0.39, y = -0.04, gp = gpar(fontsize = 16))
@@ -390,7 +418,7 @@ Let's cluster the data with DMM clustering.
 # Runs model and calculates the most likely number of clusters from 1 to 7.
 # Since this is a large dataset it takes a long time to run
 # For this reason we use only a subset of the data agglomerated to the phylum level
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree=TRUE)
+tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
 tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
 ```
 
@@ -430,8 +458,10 @@ Group samples and return DMNGroup object that contains a summary.
 Sample country is used for grouping.
 
 ```{r}
-dmn_group <- calculateDMNgroup(tse_dmn, variable = "Country",  assay.type = "counts",
-                               k = 3, seed=.Machine$integer.max)
+dmn_group <- calculateDMNgroup(tse_dmn,
+    variable = "Country", assay.type = "counts",
+    k = 3, seed = .Machine$integer.max
+)
 
 dmn_group
 ```
@@ -465,7 +495,7 @@ colnames(prob) <- paste0("comp", seq_len(ncol(prob)))
 
 # For each row, finds column that has the highest value. Then extract the column
 # names of highest values.
-vec <- colnames(prob)[max.col(prob,ties.method = "first")]
+vec <- colnames(prob)[max.col(prob, ties.method = "first")]
 ```
 
 Computing the bray PCoA and storing it as a dataframe
@@ -474,8 +504,10 @@ Computing the bray PCoA and storing it as a dataframe
 # Calculate relative abundances
 tse_dmn <- transformAssay(tse_dmn, method = "relabundance")
 # Does principal coordinate analysis
-bray_pcoa_df <- getMDS(tse_dmn, FUN = vegan::vegdist, method = "bray",
-                             assay.type = "relabundance")
+bray_pcoa_df <- getMDS(tse_dmn,
+    FUN = vegan::vegdist, method = "bray",
+    assay.type = "relabundance"
+)
 
 # Convert to data.frame
 bray_pcoa_df <- as.data.frame(bray_pcoa_df)
@@ -488,13 +520,18 @@ bray_pcoa_df |> head()
 bray_dmm_pcoa_df <- bray_pcoa_df
 bray_dmm_pcoa_df$dmm_component <- vec
 # Creates a plot
-bray_dmm_plot <- ggplot(data = bray_dmm_pcoa_df,
-                        aes(x = pcoa1, y = pcoa2, color = dmm_component)) +
-  geom_point() +
-  labs(x = "Coordinate 1",
-       y = "Coordinate 2",
-       title = "PCoA with Bray-Curtis Dissimilarity") +
-  theme(title = element_text(size = 12)) + theme_bw() # makes titles smaller
+bray_dmm_plot <- ggplot(
+    data = bray_dmm_pcoa_df,
+    aes(x = pcoa1, y = pcoa2, color = dmm_component)
+) +
+    geom_point() +
+    labs(
+        x = "Coordinate 1",
+        y = "Coordinate 2",
+        title = "PCoA with Bray-Curtis Dissimilarity"
+    ) +
+    theme(title = element_text(size = 12)) +
+    theme_bw() # makes titles smaller
 
 bray_dmm_plot
 ```
@@ -503,11 +540,15 @@ Visualise dmm clusters in a heatmap.
 
 ```{r}
 # CLR and standardize transforms
-tse_dmn <- transformAssay(tse_dmn, MARGIN = "cols",
-                           assay.type = "counts", method = "clr",
-			   pseudocount = 1)
-tse_dmn <- transformAssay(tse_dmn, MARGIN = "rows",
-                           assay.type = "clr", method = "standardize")
+tse_dmn <- transformAssay(tse_dmn,
+    MARGIN = "cols",
+    assay.type = "counts", method = "clr",
+    pseudocount = 1
+)
+tse_dmn <- transformAssay(tse_dmn,
+    MARGIN = "rows",
+    assay.type = "clr", method = "standardize"
+)
 # objects containing dmm component information
 clust <- factor(vec)
 names(clust) <- colnames(tse_dmn)
@@ -520,14 +561,19 @@ mat <- mat[, order(clust)]
 colnames(mat) <- names(sort(clust))
 rownames(mat) <- stringr::str_remove(rownames(mat), "Phylum:")
 # Plot
-CSTs        <- as.data.frame(sort(clust))
+CSTs <- as.data.frame(sort(clust))
 names(CSTs) <- "CST"
 breaks <- seq(-2, 2, length.out = 10)
 # Make grid for heatmap
-setHook("grid.newpage", function() pushViewport(viewport(x = 1, y = 1, width = 0.9,
-                                                         height = 0.9, name = "vp",
-                                                         just = c("right","top"))),
-        action = "prepend")
+setHook("grid.newpage", function() {
+    pushViewport(viewport(
+        x = 1, y = 1, width = 0.9,
+        height = 0.9, name = "vp",
+        just = c("right", "top")
+    ))
+},
+action = "prepend"
+)
 pheatmap(mat, color = rev(brewer.pal(9, "RdBu")), breaks = breaks, main = "All CSTs", treeheight_row = 0, treeheight_col = 0, show_colnames = 0, annotation_col = CSTs, cluster_cols = F)
 setHook("grid.newpage", NULL, "replace")
 grid.text("Sample", x = 0.39, y = -0.04, gp = gpar(fontsize = 16))
