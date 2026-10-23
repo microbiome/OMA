@@ -109,18 +109,24 @@ consisting of `r nrow(mae[[1]])` species and `r nrow(mae[[2]])` pathways.
 
 ## Fit model
 
-We randomly select 20% of the samples for the validation set, ensuring they are
-not used in training. This approach provides a more robust estimate of how well
-the model generalizes to unseen data.
+We randomly select 20% of the subjects for the validation set, ensuring they
+are not used in training. All samples of a subject are in the same set, so the
+validation estimates how well the model generalizes to new subjects.
 
 ```{r}
 #| label: select_validation
 
 set.seed(377)
-colData(mae)[["validation_set"]] <- sample(
-    c(TRUE, FALSE),
-    size = ncol(mae[[1]]), replace = TRUE, prob = c(0.2, 0.8)
-)
+# Get the subject of each sample
+subject <- mae[[1]][["subject_id"]]
+names(subject) <- colnames(mae[[1]])
+# Select 20% of subjects for validation
+subjects <- unique(subject)
+valid_subjects <- sample(subjects, round(0.2 * length(subjects)))
+is_valid <- subject[rownames(colData(mae))] %in% valid_subjects
+# Split the data
+mae_train <- mae[, !is_valid, ]
+mae_valid <- mae[, is_valid, ]
 ```
 
 Now, we are ready to fit the model using the
@@ -158,17 +164,18 @@ library(IntegratedLearner)
 library(SuperLearner)
 
 # Fit the model
-fit <- IntegratedLearnerFromMAE(
-    mae,
+fit <- IntegratedLearner(
+    MAE_train = mae_train,
+    MAE_valid = mae_valid,
     # Select experiments and assays
     experiment = names(experiments(mae)),
     assay.type = c("clr", "clr"),
     # Select columns from sample metadata
-    outcome.col = "disease",
-    valid.col = "validation_set",
+    outcome_col = "disease",
+    subject_id_col = "subject_id",
     # Options for base and meta models
     base_learner = "SL.randomForest",
-    meta_learner = "SL.nnls.auc",
+    meta_learner = "sl_nnls_auc",
     # The outcome is binary
     family = binomial()
 )
@@ -190,21 +197,17 @@ Characteristic (ROC) plot.
 ```{r}
 #| label: visualize_result
 
-library(tidyverse)
-library(cowplot)
-
-p <- IntegratedLearner:::plot.learner(fit)
+p <- plot(fit)
 ```
 
 Based on the ROC plot described below, we observe that the AUC is
 `r if(FALSE) fit$AUC.test[[2]] else NA` when considering only the
 pathway abundance data in the model, and
 `r if(FALSE) fit$AUC.test[[1]] else NA` for the model including only the
-species abundance data. The AUC increases to
-`r if(FALSE) fit$AUC.test[[4]] else NA` when using the early fusion
-model and reaches `r if(FALSE) fit$AUC.test[[3]] else NA` with the late
-fusion model. Overall, most integrated classifiers outperform individual layers
-in distinguishing between T2D and healthy controls.
+species abundance data. The early fusion model has an AUC of
+`r if(FALSE) fit$AUC.test[[4]] else NA`, and the late fusion model
+`r if(FALSE) fit$AUC.test[[3]] else NA`. Overall, the models distinguish IBD
+patients from healthy subjects only slightly better than chance.
 
 The model's performance can also be evaluated and summarized using a confusion
 matrix.
@@ -221,11 +224,11 @@ conf <- confusionMatrix(data = pred, reference = obs)
 conf
 ```
 
-The model appears to be performing well the the accuracy being
-`r if(FALSE) paste0(round(conf$overall[[1]]*100, 2), "%") else NA`. The
-model seems to precict
-correctly almost all IBD patients. It is also worth noting that over
-three-quarters of the controls are classified correctly
+The accuracy of the model is
+`r if(FALSE) paste0(round(conf$overall[[1]]*100, 2), "%") else NA`. As most
+samples are from IBD patients, the accuracy should be compared to the
+proportion of IBD samples in the validation set,
+`r if(FALSE) paste0(round(mean(fit$Y_test == 1)*100, 2), "%") else NA`.
 
 Lastly, we may be interested in identifying the features that contribute most
 to predicting the outcome. To do this, we first extract feature importance
@@ -305,7 +308,7 @@ Useful functions:
 
 `utils::data()`, `SummarizedExperiment::colData()`, `mia::subsetByPrevalent()`,
 `MatrixGenerics::rowSds()`, `SummarizedExperiment::assay()`, `SummarizedExperiment::rowData()`,
-`mia::transformAssay()`, `IntegratedLearner::IntegratedLearnerFromMAE()`,
-`IntegratedLearner:::plot.learner()`, `plotLoadings()`
+`mia::transformAssay()`, `IntegratedLearner::IntegratedLearner()`,
+`plot()`, `plotLoadings()`
 
 :::
