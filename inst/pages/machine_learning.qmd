@@ -217,19 +217,11 @@ tse <- preprocess_data(
     outcome_colname = "disease",
     assay.type = "relabundance",
     name = "prep_classification",
-    col.var = alpha_divs, # preprocess these metadata variables too
+    col.var = alpha_divs, # preprocess these and add them to the predictors
     remove_var = "zv",
     collapse_corr_feats = TRUE,
     group_neg_corr = FALSE
 )
-
-# Identify the discarded features (that won't be used as predictors)
-prep_classification <- altExp(tse, "prep_classification")
-removed_feats <- metadata(prep_classification)[["removed_feats"]]
-
-# If any alpha diversity index was removed, it will be discarded
-# from the predictors
-alpha_divs_classification <- setdiff(alpha_divs, removed_feats)
 ```
 
 ### Preprocess for regression task
@@ -246,19 +238,11 @@ tse <- preprocess_data(
     outcome_colname = "BMI",
     assay.type = "relabundance",
     name = "prep_regression",
-    col.var = alpha_divs, # preprocess these metadata variables too
+    col.var = alpha_divs, # preprocess these and add them to the predictors
     remove_var = "zv",
     collapse_corr_feats = TRUE,
     group_neg_corr = FALSE
 )
-
-# Identify the discarded features (that won't be used as predictors)
-prep_regression <- altExp(tse, "prep_regression")
-removed_feats <- metadata(prep_regression)[["removed_feats"]]
-
-# If any alpha diversity index was removed, it will be discarded
-# from the predictors
-alpha_divs_regression <- setdiff(alpha_divs, removed_feats)
 ```
 Note that the preprocessed dataset for the classification and regression
 tasks are stored within the 'tse' object, under the 'altExp' called
@@ -340,7 +324,6 @@ rf_classification <- run_ml(
     outcome_colname = "disease",
     altexp = "prep_classification",
     assay.type = "prep_classification",
-    col.var = alpha_divs_classification, # use these variables as predictors too
     seed = 1,
     kfold = 2,
     cv_times = 2,
@@ -370,7 +353,6 @@ rf_regression <- run_ml(
     outcome_colname = "BMI",
     altexp = "prep_regression",
     assay.type = "prep_regression",
-    col.var = alpha_divs_regression, # use these variables as predictors too
     seed = 1,
     kfold = 2,
     cv_times = 2,
@@ -407,7 +389,6 @@ xgb <- run_ml(
     outcome_colname = "disease",
     altexp = "prep_classification",
     assay.type = "prep_classification",
-    col.var = alpha_divs_classification, # use these variables as predictors too
     seed = 1,
     kfold = 2,
     cv_times = 2,
