@@ -1,0 +1,198 @@
+# Diversity and differential abundance over time {#sec-time-diversity}
+
+```{r}
+#| label: setup
+#| echo: false
+#| results: asis
+
+library(rebook)
+chapterPreamble()
+```
+
+```{r}
+#| label: options
+#| include: false
+
+knitr::opts_chunk$set(
+    message = FALSE,
+    fig.width = 10,
+    dpi = 300,
+    dev = "png",
+    dev.args = list(type = "cairo-png")
+)
+```
+
+Alpha diversity, beta diversity and differential abundance analyses from the
+previous chapters can be applied to longitudinal data. The difference is that
+samples from the same subject are paired, and the analysis has to take this
+into account.
+
+In this chapter, we use an example dataset from a probiotic/placebo
+intervention study. The dataset includes gut microbiota samples from 22
+subjects and 2 time points. The first time point was sampled before
+introducing a treatment.
+
+```{r}
+#| label: load_data
+
+library(mia)
+library(microbiomeDataSets)
+
+mae <- peerj32()
+tse <- getWithColData(mae, 1L)
+tse[["time_point"]] <- tse[["time"]] |> as.factor()
+```
+
+## Alpha diversity
+
+[@sec-alpha-diversity] introduced alpha diversity. Here we calculate the
+Shannon index and visualize it by time point. Lines connect the samples of each
+subject.
+
+```{r}
+#| label: alpha_plot
+
+library(miaViz)
+
+tse <- addAlpha(tse, index = "shannon")
+
+plotBoxplot(
+    tse,
+    col.var = "shannon",
+    x = "time_point",
+    pair.by = "subject",
+    colour.by = "group",
+    facet.by = "group"
+)
+```
+
+The plot does not show a clear change in either group. Because the samples are
+paired, we use the paired Wilcoxon test separately for each group.
+
+```{r}
+#| label: alpha_wilcoxon
+
+df <- colData(tse) |> as.data.frame()
+df <- df[order(df[["subject"]]), ]
+
+lapply(split(df, df[["group"]]), function(x) {
+    wilcox.test(
+        x[x[["time_point"]] == 1, "shannon"],
+        x[x[["time_point"]] == 2, "shannon"],
+        paired = TRUE
+    )
+})
+```
+
+Neither group shows a significant change in Shannon diversity between the
+time points. The tests above do not compare the groups. A linear mixed model
+can test whether the change over time differs between the groups. The
+`time * group` term includes the effects of time and group and their
+interaction, and `(1 | subject)` adds a random effect for each subject to
+account for the repeated measurements.
+
+```{r}
+#| label: alpha_lmm
+
+library(lmerTest)
+
+model <- lmer(shannon ~ time * group + (1 | subject), data = df)
+summary(model)
+```
+
+The interaction term "time:groupPlacebo" tests whether the change in Shannon
+diversity from the first to the second time point differs between the Placebo
+and LGG groups. The interaction is not significant, so the change in diversity
+does not differ between the groups.
+
+## Beta diversity
+
+[@sec-community-similarity] introduced ordination. In longitudinal data, we
+can connect the samples of each subject in the ordination plot to show how the
+communities changed over time.
+
+```{r}
+#| label: beta_ordination
+
+tse <- transformAssay(tse, method = "relabundance")
+tse <- addMDS(tse, assay.type = "relabundance", method = "bray")
+
+plotOrdination(
+    tse,
+    dimred = "MDS",
+    colour.by = "group",
+    pair.by = "subject",
+    sort.by = "time"
+)
+```
+
+The arrows show no consistent shift that would separate the groups.
+
+The change can also be quantified as the dissimilarity between consecutive
+samples of the same subject, i.e., divergence (see [@sec-divergence]).
+
+```{r}
+#| label: beta_divergence
+
+library(miaTime)
+
+tse <- addStepwiseDivergence(
+    tse,
+    time.col = "time",
+    group = "subject",
+    assay.type = "relabundance",
+    method = "bray"
+)
+
+# Divergence is calculated for the second time point
+plotBoxplot(
+    tse[, tse[["time_point"]] == 2],
+    col.var = "divergence",
+    x = "group"
+)
+```
+
+Divergence between the time points is similar in both groups.
+
+## Differential abundance
+
+[@sec-differential-abundance] introduced differential abundance analysis. With
+paired samples, the subject has to be included in the model. Below, we use
+`r BiocStyle::Biocpkg("LimROTS")` [@Anwar2025] to test which taxa changed
+between the time points in the LGG group. The argument `correlation_block`
+specifies the subject, so that samples from the same subject are resampled
+together and their correlation is accounted for in the model. LimROTS requires
+log-transformed data, so we use the CLR transformation.
+
+```{r}
+#| label: daa_limrots
+
+library(LimROTS)
+
+tse <- transformAssay(tse, method = "clr", pseudocount = TRUE)
+tse_lgg <- tse[, tse[["group"]] == "LGG"]
+
+set.seed(123)
+tse_lgg <- LimROTS(
+    tse_lgg,
+    assay.type = "clr",
+    niter = 200,
+    meta.info = c("time_point", "subject"),
+    group = "time_point",
+    formula.str = "~ 0 + time_point",
+    correlation_block = "subject",
+    BPPARAM = BiocParallel::SerialParam(),
+    verbose = FALSE
+)
+
+res <- rowData(tse_lgg)[, c("corrected.logfc", "pvalue", "qvalue")]
+res[order(res[["pvalue"]]), ] |> head()
+```
+
+`corrected.logfc` is the first time point minus the second, so negative values
+mean higher abundance at the second time point. In the LGG group,
+*Lactobacillus plantarum et rel.* increased after the intervention.
+
+LimROTS compares the levels of one categorical variable. To test whether the
+change differs between the groups, use a model with an interaction term as in
+the alpha diversity example above.
