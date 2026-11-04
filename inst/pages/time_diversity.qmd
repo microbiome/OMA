@@ -144,9 +144,8 @@ tse <- addStepwiseDivergence(
     method = "bray"
 )
 
-# Divergence is calculated for the second time point
 plotBoxplot(
-    tse[, tse[["time_point"]] == 2],
+    tse,
     col.var = "divergence",
     x = "group"
 )
@@ -169,29 +168,33 @@ log-transformed data, so we use the CLR transformation.
 
 library(LimROTS)
 
-tse <- transformAssay(tse, method = "clr", pseudocount = TRUE)
+tse <- transformAssay(tse, method = "rclr")
 tse_lgg <- tse[, tse[["group"]] == "LGG"]
 
 set.seed(123)
 tse_lgg <- LimROTS(
     tse_lgg,
-    assay.type = "clr",
+    assay.type = "rclr",
     niter = 200,
     meta.info = c("time_point", "subject"),
     group = "time_point",
     formula.str = "~ 0 + time_point",
     correlation_block = "subject",
-    BPPARAM = BiocParallel::SerialParam(),
     verbose = FALSE
 )
 
 res <- rowData(tse_lgg)[, c("corrected.logfc", "pvalue", "qvalue")]
-res[order(res[["pvalue"]]), ] |> head()
+# Sort the results
+res <- res[order(res[["pvalue"]]), ]
+res |> head()
 ```
 
 `corrected.logfc` is the first time point minus the second, so negative values
 mean higher abundance at the second time point. In the LGG group,
-*Lactobacillus plantarum et rel.* increased after the intervention.
+*`r rownames(res)[[1L]]`*
+`r ifelse(res[1, "corrected.logfc"] > 0, "decreased", "increased")` after the
+intervention. However, the result is not significant which we can see from
+adjusted p-values (qvalue).
 
 LimROTS compares the levels of one categorical variable. To test whether the
 change differs between the groups, use a model with an interaction term as in
