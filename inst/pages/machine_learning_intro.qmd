@@ -1,0 +1,121 @@
+# Machine learning & AI {#sec-ml-intro}
+
+```{r}
+#| label: setup
+#| echo: false
+#| results: asis
+
+library(rebook)
+chapterPreamble()
+```
+
+Machine learning (ML) refers to computational methods that learn patterns
+from data instead of following rules that are explicitly programmed. In
+microbiome research, ML is used, for example, to predict host phenotypes such
+as disease status from abundance profiles, to find groups of similar samples,
+and to identify features that are associated with an outcome.
+
+ML is one part of the broader field of artificial intelligence (AI). The terms
+AI, ML, and deep learning are often used interchangeably, but they form a
+nested hierarchy (@fig-ai-hierarchy).
+
+```{r}
+#| label: fig-ai-hierarchy
+#| fig-cap: "Machine learning is a subfield of artificial intelligence. Deep learning is a subfield of machine learning, and generative AI is built on deep learning."
+#| fig-width: 6
+#| fig-height: 4.5
+#| echo: false
+
+library(ggplot2)
+
+# Nested ellipses that share the same bottom point
+levels <- data.frame(
+    label = c(
+        "Artificial intelligence", "Machine learning", "Deep learning",
+        "Generative\nAI"
+    ),
+    a = c(4, 3, 2, 1.1),
+    b = c(3, 2.2, 1.4, 0.75)
+)
+levels$cy <- levels$b - 3
+levels$label <- factor(levels$label, levels = levels$label)
+# Labels are placed on top of each ellipse, except the innermost one
+levels$ly <- ifelse(
+    seq_len(nrow(levels)) < nrow(levels),
+    levels$cy + levels$b - 0.4,
+    levels$cy
+)
+
+theta <- seq(0, 2 * pi, length.out = 200)
+ellipses <- do.call(rbind, lapply(seq_len(nrow(levels)), function(i) {
+    data.frame(
+        label = levels$label[[i]],
+        x = levels$a[[i]] * cos(theta),
+        y = levels$cy[[i]] + levels$b[[i]] * sin(theta)
+    )
+}))
+
+ggplot() +
+    geom_polygon(
+        data = ellipses,
+        aes(x = x, y = y, group = label, fill = label),
+        colour = "grey30"
+    ) +
+    geom_text(
+        data = levels,
+        aes(x = 0, y = ly, label = label),
+        size = 4.5, fontface = "bold", lineheight = 0.9
+    ) +
+    scale_fill_manual(
+        values = c("#DCEAF7", "#A9CCEB", "#6FA8DC", "#F6B26B")
+    ) +
+    coord_fixed() +
+    theme_void() +
+    theme(legend.position = "none")
+```
+
+- **Artificial intelligence (AI)** is the broad field of building computer
+systems that perform tasks that usually require human intelligence, such as
+reasoning, recognizing patterns, or making decisions.
+
+- **Machine learning (ML)** is a subfield of AI in which models learn from
+data. Methods such as random forest, gradient boosting, and clustering
+belong to this category.
+
+- **Deep learning (DL)** is a subfield of ML that uses neural networks with
+many layers. Deep learning models can learn complex patterns, but they
+usually require large amounts of training data.
+
+- **Generative AI** refers to deep learning models that generate new content,
+such as text, images, or sequences. Large language models (LLMs) are an
+example.
+
+Nowadays, the term "AI" is commonly used to refer to generative AI in
+general, for example, chatbots that are based on LLMs. Increasingly, it also
+refers to AI agents, which are systems that use generative models to plan and
+carry out tasks with some autonomy, such as writing and running code. In the
+scientific literature, however, AI covers a much wider range of methods,
+including classical ML.
+
+Microbiome datasets are often small in sample size but high-dimensional,
+sparse, and they are typically stored as tables. For data like this, classical
+ML methods, such as random forest, often perform as well as or better than
+deep learning, and they are easier to train and interpret. Therefore, the
+chapters in this part focus on classical ML.
+
+ML methods are commonly divided into two groups:
+
+- **Unsupervised learning** discovers patterns and structures in the data
+without a known outcome. Common tasks are dimensionality reduction and
+clustering.
+
+- **Supervised learning** trains a model on observations with a known outcome,
+such as patient status, and then predicts the outcome for new observations.
+Common tasks are classification and regression.
+
+For more details, see the following chapters:
+
+- Unsupervised learning: [@sec-community-similarity] and [@sec-clustering]
+- Supervised learning: [@sec-machine_learning]
+- ML in multi-omics data integration: [@sec-multiassay_ordination] and
+[extra chapter](https://microbiome.github.io/OMA-extras/docs/devel/pages/integrated_learner.html)

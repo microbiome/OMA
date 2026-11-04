@@ -8,60 +8,11 @@
 library(rebook)
 chapterPreamble()
 ```
-## Background
 
-Machine learning (ML) is a branch of artificial intelligence. While there are
-several definitions of machine learning, they generally involve using
-computational methods (i.e., machines) to identify patterns in data
-(i.e., learning).
-
-Machine learning can be divided into supervised and unsupervised learning.
-Supervised ML is used to predict outcomes based on labeled data, whereas
-unsupervised ML is used to discover unknown patterns and structures within
-the data.
-
-### Unsupervised machine learning
-
-"Unsupervised" means that the outcomes (e.g., patient status) are not known
-by the model during its training, and patterns are learned based solely on
-the data, such as an abundance table.
-
-Common tasks in unsupervised machine learning include dimension reduction
-and clustering, tasks discussed in [@sec-community-similarity] and
-[@sec-clustering], respectively.
-
-### Supervised machine learning
-
-"Supervised" means that a model is trained on observations paired with
-a known output (e.g., patient status: healthy or diseased). During
-training, the model learns patterns from a portion of the data and it
-is then evaluated on its ability to generalize to new data. This process
-involves splitting the collected data into a training and testing sets,
-commonly in 80/20 ratio, although other proportions can be used depending
-on the size and applications of the dataset.
-
-Training is usually enhanced with cross-validation to improve the
-model's robustness. However, when the dataset is small, splitting it
-into training and test sets might not be feasible. In such cases,
-cross-validation alone can be used to provide a rough estimate of the
-model's performance. This strategy involves dividing the data into
-K folds (or subsets) of similar size. The model is then trained on
-K-1 folds, and tested on the remaining fold. This process is repeated
-K times, allowing each fold to serve as the test set once. While this
-approach is not as reliable as having a separate test set, it can
-still give valuable insights into how well the model might perform
-on new data.
-
-Common tasks for supervised machine learning includes classification (e.g.,
-predict categorical variables) and regression (e.g., predicting continuous
-variables). This chapter discusses two supervised ML algorithms that can
-be applied to classification and regression tasks.
-
-::: {.callout-note}
-## Note: ML in multi-omics data analysis
-ML applications for the integration of multi-omic datasets are covered
-in [@sec-multiassay_ordination] and [@sec-multi-omics-integration]
-:::
+This chapter demonstrates two supervised ML algorithms, random forest and
+XGBoost, that can be applied to classification and regression tasks. For an
+introduction to ML and supervised learning, see
+[@sec-ml-intro].
 
 ## Setup
 
@@ -299,6 +250,79 @@ implementation and interpretation of these models, other resources are
 suggested for an introduction to the mathematical underpinnings of
 these &mdash;and other&mdash; models [@james2013_ISLR].
 
+To evaluate how well a model generalizes to new data, the data is split into a
+training set and a test set, commonly in an 80/20 ratio. Other proportions can
+be used depending on the size of the dataset and the application.
+
+Training is usually combined with cross-validation to make the model more
+robust. In K-fold cross-validation, the data is divided into K folds (subsets)
+of similar size. The model is trained on K-1 folds and validated on the
+remaining fold. This is repeated K times so that each fold serves as the
+validation set once (@fig-cv).
+
+```{r}
+#| label: fig-cv
+#| fig-cap: "5-fold cross-validation. The data is first split into a training set (80%) and a test set (20%). The training set is divided into five folds. In each iteration, the model is trained on four folds and validated on the remaining fold. The test set is used only for the final evaluation."
+#| fig-width: 8
+#| fig-height: 3.5
+#| echo: false
+
+library(ggplot2)
+
+k <- 5
+# One tile per fold and iteration. The fold that matches the iteration is used
+# for validation.
+cv_df <- expand.grid(fold = seq_len(k), iteration = seq_len(k))
+cv_df$role <- ifelse(cv_df$fold == cv_df$iteration, "Validation", "Training")
+cv_df$x <- cv_df$fold
+# The test set is held out in every iteration
+test_df <- data.frame(
+    x = k + 1.5, iteration = seq_len(k), role = "Test", fold = NA
+)
+cv_df <- rbind(cv_df, test_df)
+cv_df$role <- factor(cv_df$role, levels = c("Training", "Validation", "Test"))
+
+ggplot(cv_df, aes(x = x, y = iteration, fill = role)) +
+    geom_tile(
+        aes(width = ifelse(role == "Test", 1.25, 0.95)),
+        height = 0.8, colour = "white"
+    ) +
+    geom_text(
+        data = cv_df[cv_df$role != "Test", ],
+        aes(label = paste("Fold", fold)),
+        size = 3.2
+    ) +
+    annotate(
+        "text",
+        x = c((k + 1) / 2, k + 1.5), y = 0.25,
+        label = c("Training set (80%)", "Test set (20%)"),
+        fontface = "bold", size = 3.8
+    ) +
+    scale_y_reverse(
+        breaks = seq_len(k), labels = paste("Iteration", seq_len(k))
+    ) +
+    scale_fill_manual(
+        values = c(
+            Training = "#A9CCEB", Validation = "#F6B26B",
+            Test = "grey70"
+        ),
+        name = NULL
+    ) +
+    theme_minimal() +
+    theme(
+        panel.grid = element_blank(),
+        axis.title = element_blank(),
+        axis.text.x = element_blank(),
+        legend.position = "bottom"
+    )
+```
+
+When the dataset is small, splitting it into training and test sets might not
+be feasible. In such cases, cross-validation alone can provide a rough estimate
+of the model's performance. While this approach is not as reliable as having a
+separate test set, it still indicates how well the model might perform on new
+data.
+
 ### Random forest
 
 Random Forests (RF) is an ensemble algorithm. That means that RF deploys
@@ -443,7 +467,7 @@ the type of performance metrics are the same:
 
 Metrics of the RF model:
 
-``` {r}
+```{r}
 #| label: 5.1 - RF classification performance
 
 # RF performance in classification tasks
@@ -452,7 +476,7 @@ rf_classification[["performance"]] |> knitr::kable()
 
 Metrics of the XGBoost model:
 
-``` {r}
+```{r}
 #| label: 5.2 - XGBoost classification performance
 #| eval: false
 
@@ -477,8 +501,8 @@ suggest a relatively good performance considering that predicting
 outcomes based on complex microbiome data is typically a challenging
 task. In addition, notice that the performance of RF and XGBoost are
 similar (RF AUC =
-`{r} round(rf_classification[["performance"]][["AUC"]], 4)` and
-XGBoost AUC = `{r}# round(xgb[["performance"]][["AUC"]], 4)`). This
+`r round(rf_classification[["performance"]][["AUC"]], 4)` and
+XGBoost AUC = `r # round(xgb[["performance"]][["AUC"]], 4)`). This
 illustrates an important point in ML: sometimes simpler models can
 perform as good as more complex ones. Thus, it is often a good idea
 to deploy different models and compare their performance on the same
@@ -539,7 +563,7 @@ data analysis before.
 When RF are used in regression tasks, the performance metrics are
 different to what was discussed for classifications.
 
-``` {r}
+```{r}
 #| label: 5.3 - RF regression performance
 
 # RF performance in regression tasks
@@ -557,9 +581,9 @@ types of RMSE metrics: `cv_metric_RMSE`, which represents RMSE for
 the 80% of data used in training, and `RMSE`, which is the metric
 for the 20% used in testing. Notice, the small drop of model's
 performance in the test
-(`{r} round(rf_regression[["performance"]][["RMSE"]], 3)`)
+(`r round(rf_regression[["performance"]][["RMSE"]], 3)`)
 compared to the train
-(`{r} round(rf_regression[["performance"]][["cv_metric_RMSE"]], 3)`)
+(`r round(rf_regression[["performance"]][["cv_metric_RMSE"]], 3)`)
 tests. As discussed in the classification results, big drops of
 model's performance in the test compared to the train data are
 indicative of overfitting. However, in this case the drop in performance
@@ -626,7 +650,7 @@ in other fields.
 The code below generates the ROC and PRC curves of both models and shows
 them side by side:
 
-``` {r}
+```{r}
 #| label: 6.2 - plot ROC and PRC
 
 library(patchwork)
@@ -695,8 +719,8 @@ Finally, note that the ROC curves of RF and XGBoost have a similar
 shape. This suggests a similar performance in classifying T2D patients.
 This isn't surprising as the AUC of both models were very similar too
 (RF AUC =
-`{r} round(rf_classification[["performance"]][["AUC"]], 4)`
-and XGBoost AUC = `{r}# round(xgb[["performance"]][["AUC"]], 4)`).
+`r round(rf_classification[["performance"]][["AUC"]], 4)`
+and XGBoost AUC = `r # round(xgb[["performance"]][["AUC"]], 4)`).
 
 :::{.callout-note}
 ## Note: Visualization of multiclass ROC curves
@@ -722,7 +746,7 @@ predicted BMI values.
 The code below is used to generate that plot using the observations
 in the test data.
 
-``` {r}
+```{r}
 #| label: 6.2 - plot predicted vs observed
 
 # Get the test set: data not used in training the model
@@ -761,7 +785,7 @@ between the observed and the model-predicted BMI values of each
 participant. Thus, the line indicates perfect performance of the model.
 We can see that while the predictions are around the mean BMI (close
 to 24), the observed values range approximately between
-`{r} round(min(test_data$BMI))` and `{r} round(max(test_data$BMI))`,
+`r round(min(test_data$BMI))` and `r round(max(test_data$BMI))`,
 showing poor correlation between observed and predicted BMI values.
 Note that both groups show a similar spread in BMI.
 
@@ -769,8 +793,8 @@ This plot clearly indicates a poor performance of our model. This
 usually means that either the gut microbiome is not related to BMI,
 making it impossible for the model to use microbiome patterns to predict
 it, or that our model is overfitted. Since the RMSE for training
-(`{r} rf_regression[["performance"]][["cv_metric_RMSE"]]`) and test
-(`{r} rf_regression[["performance"]][["RMSE"]]`) data are similar,
+(`r rf_regression[["performance"]][["cv_metric_RMSE"]]`) and test
+(`r rf_regression[["performance"]][["RMSE"]]`) data are similar,
 we may conclude that gut microbiome composition is not informative
 of BMI.
 
