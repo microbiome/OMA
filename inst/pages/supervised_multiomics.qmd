@@ -1,0 +1,75 @@
+# Supervised integration {#sec-supervised-multiomics}
+
+```{r}
+#| label: setup
+#| echo: false
+#| results: asis
+
+library(rebook)
+chapterPreamble()
+```
+
+In the previous chapter ([@sec-unsupervised-multiomics]), we integrated omic
+layers without using any information on the outcome. The aim was to find the
+main shared patterns of variation in the data. In supervised integration, the
+outcome, such as disease status or a treatment group, guides the analysis.
+The aim is to combine information from multiple omic layers to predict or
+classify the outcome, and to identify the features that contribute to the
+prediction.
+
+Supervised integration builds on the concepts of machine learning (see
+[@sec-machine_learning]). However, combining multiple omic layers
+brings additional challenges, as discussed in [@sec-multi-omics]. For instance,
+the layers can differ in their scale, distribution, and number of features.
+
+This chapter introduces two approaches for supervised integration:
+IntegratedLearner and DIABLO. IntegratedLearner is not yet available in
+Bioconductor, and DIABLO does not yet support `MultiAssayExperiment` data
+containers. Therefore, no code is run in this chapter. Instead, we describe the
+ideas behind the methods and point to further resources.
+
+## IntegratedLearner {#sec-integratedlearner}
+
+IntegratedLearner is a framework for multi-omics prediction and classification
+[@Mallick2024]. It builds on the `r BiocStyle::CRANpkg("SuperLearner")`
+package [@Van2007], which allows a wide range of machine learning algorithms to
+be used as the underlying models.
+
+### Fusion strategies
+
+Multi-omic data can be combined in a predictive model at different stages.
+These strategies are often referred to as fusion strategies:
+
+- **Early fusion** combines all omic layers into a single table, for example,
+  by concatenating the features. A single model is then trained on the combined
+  table. The approach is simple, but the layers with the most features can
+  dominate the model, and the differences between the layers are ignored.
+
+- **Late fusion** trains a separate model, i.e., a base learner, for each omic
+  layer. The predictions of these models are then combined with a second-level
+  model, i.e., a meta learner, which produces the final prediction. This
+  approach is also known as stacking. Each layer is modelled on its own terms,
+  but interactions between the layers are not taken into account.
+
+- **Intermediate fusion** integrates the layers during the model fitting. For
+  example, cooperative learning [@Ding2022] encourages the predictions from
+  different omic layers to agree with each other, which allows the model to
+  exploit information shared between the layers.
+
+IntegratedLearner is not yet available in Bioconductor. An example workflow
+using `MultiAssayExperiment` data is available in the
+[OMA extras](https://microbiome.github.io/OMA-extras/docs/devel/pages/integrated_learner.html).
+
+## DIABLO {#sec-diablo}
+
+DIABLO (Data Integration Analysis for Biomarker Discovery using Latent Variable
+Approaches for Omics Studies) is a supervised integration method implemented in
+the `r BiocStyle::Biocpkg("mixOmics")` package [@Singh2019; @Rohart2017]. It
+extends sparse partial least squares discriminant analysis (sPLS-DA) to
+multiple omic layers. DIABLO identifies correlated features across the
+layers that discriminate between the outcome groups.
+
+DIABLO does not yet support `MultiAssayExperiment` data containers. More
+information and examples can be found from the
+[DIABLO manual](http://mixomics.org/mixdiablo/) and the
+[mixOmics Bioconductor page](https://bioconductor.org/packages/mixOmics).
