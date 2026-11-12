@@ -9,20 +9,102 @@ library(rebook)
 chapterPreamble()
 ```
 
-Multi-omics approaches integrate data from multiple sources. For
-example, we can integrate taxonomic abundance profiles with
-metabolomic or other biomolecular profiling data to observe
-associations, make predictions, or aim at causal
-inferences. Integrating evidence across multiple sources can lead to
-enhanced predictions, more holistic understanding, or facilitate the
-discovery of novel biomarkers.
+Biological systems can rarely be understood by studying their components in
+isolation. The microbiome interacts with its host, diet, and environment, and
+the taxa present in a community are only one part of the story. Which genes
+are expressed, which proteins are produced, and which metabolites are
+consumed or secreted all shape how the system functions. A single omic layer,
+such as taxonomic profiles from 16S rRNA or shotgun metagenomic sequencing,
+offers a snapshot of one aspect of the system. To obtain a fuller picture, we
+need to combine information from multiple omic layers measured from the same
+samples or individuals.
 
-In the following chapters, we explore common approaches for multi-assay data
-integration. These methods can be broadly categorized into association-based
-techniques, ordination models that leverage latent shared factors, and machine
-learning models for classification and regression. For more details, see the
-following chapters:
+This idea is taken further by **holo-omics**, which jointly studies omic data
+from both the host organism and its associated microbiota, together referred
+to as the holobiont [@Nyholm2020]. Rather than
+treating the host and the microbiome as separate systems, holo-omics aims to
+untangle the interactions between them.
 
-- [@sec-cross-correlation]
-- [@sec-multiassay_ordination]
-- [@sec-multi-omics-integration]
+## What do we mean by multi-omics? {#sec-multi-omics-definition}
+
+**Multi-omics** refers to studies where two or more omic layers, such as
+metagenomics, metatranscriptomics, metaproteomics, or metabolomics, are
+measured from the same set of samples. A closely related term is
+**multimodal** data, which refers more broadly to data obtained with
+different measurement modalities. Besides omic layers, these can include, for
+example, clinical variables, imaging, or physiological measurements. In
+practice, the two terms are often used interchangeably.
+
+The term multi-omics also means different things to different people. In
+some studies, multiple omic layers are collected, but each of them is
+analysed separately, and the integration happens only with the researcher's
+pencil when the results are interpreted side by side. In other studies, the
+omic layers are analysed jointly with dedicated statistical methods. In this
+book, we use the term **integration** in the latter, more specific sense:
+two or more tables are analysed together to find shared variance or shared
+information between them.
+
+## Challenges in multi-omic integration {#sec-multi-omics-challenges}
+
+Multi-omic integration is not an easy task. It requires an understanding of
+the individual data tables, the statistical methods applied to them, and how
+these interplay. There is a wide range of integration methods available,
+from simple to highly complex ones, and each comes with its own assumptions
+that need to be taken into account. Some of the common challenges include:
+
+- **Omic-specific properties.** Sparsity, compositionality, missing feature
+  values, and batch effects are common, and they differ between omic layers.
+
+- **Different scales and distributions.** Each omic layer has its own
+  measurement technology and data-generating process. For example, microbiome
+  data consist of compositional sequencing counts, while metabolites might be
+  quantified as concentrations in nmol/ml. The values, and thus the
+  variances, can be on entirely different scales. Without appropriate
+  preprocessing (see [@sec-assay-transform]), the table with the largest
+  variance can dominate the analysis.
+
+- **Unequal dimensionality.** One table may contain many more features than
+  another. For instance, a metagenomic table might have thousands of taxa,
+  while a targeted metabolomic panel only includes a few dozen metabolites.
+  Many methods are sensitive to such imbalance, and the larger table can
+  overshadow the signal in the smaller one.
+
+- **Missing samples.** Not all omic layers are measured from every sample;
+  for instance, there may be more microbiome samples than metabolite
+  samples. Many methods require matched samples, so unmatched ones must be
+  dropped, which reduces sample size.
+
+- **High dimensionality and small sample sizes.** Omic data typically have
+  far more features than samples, which makes models prone to overfitting
+  and complicates statistical inference.
+
+## A stepwise approach {#sec-multi-omics-approach}
+
+Because of these challenges, it is usually wise to start simple. Before any
+integration, each omic layer should first be analysed separately to
+understand the phenomena captured by it, as covered in the earlier chapters
+of this book. Once the individual tables are well understood, we can apply
+the simplest integration methods and gradually build towards more complex
+models. This stepwise strategy is also recommended in holo-omic research
+[@Odriozola2024].
+
+The following chapters follow exactly this path:
+
+1. **Global association.** The first step is exploratory: do the tables
+   associate at all? Methods such as the Mantel test, Procrustes analysis,
+   and MiRKAT assess whether the overall variation in one table is related
+   to that in another ([@sec-global-association]).
+
+2. **Pairwise association.** Next, we test associations between individual
+   features across tables, for example, whether the abundance of a specific
+   taxon correlates with the level of a specific metabolite
+   ([@sec-cross-correlation]).
+
+3. **Unsupervised integration.** Latent factor and ordination-based methods,
+   such as Joint-RPCA [@CordazzoVargas2026] and Multi-Omics Factor Analysis
+   (MOFA) [@Argelaguet2018], identify shared and table-specific sources of
+   variation without using information on the outcome
+   ([@sec-unsupervised-multiomics]).
+
+4. **Supervised integration.** Finally, multiple omic layers can be combined
+   to predict or classify an outcome ([@sec-supervised-multiomics]).
