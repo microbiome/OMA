@@ -1,0 +1,198 @@
+# Global association {#sec-global-association}
+
+```{r}
+#| label: setup
+#| echo: false
+#| results: asis
+
+library(rebook)
+chapterPreamble()
+```
+
+The first step in multi-omic integration is exploratory: do the tables
+associate at all? Global association methods compare the overall variation
+in one table to that in another, without looking at individual features.
+
+This chapter gives examples of three common approaches: the Mantel
+test, Procrustes analysis, and MiRKAT.
+
+## Data
+
+As an example dataset, we use the data from the @Hintikka2021 publication:
+Xylo-Oligosaccharides in prevention of hepatic
+steatosis and adipose tissue inflammation: associating taxonomic and
+metabolomic patterns in fecal microbiota with biclustering.
+In this study, mice were fed either with a high-fat or a low-fat diet,
+and with or without prebiotics, for the purpose of studying whether prebiotics
+attenuate the negative impact of a high-fat diet on health.
+
+This example data can be loaded from the
+`r BiocStyle::Biocpkg("mia")` package. The data is
+already in `MAE` format which is tailored for multi-assay analyses
+(see [@sec-containers]). The dataset includes three different experiments:
+microbial abundance data, metabolite concentrations, and data about
+different biomarkers.
+
+```{r}
+#| label: global_load
+
+library(mia)
+
+# Load the data
+data("HintikkaXOData", package = "mia")
+mae <- HintikkaXOData
+```
+
+```{r}
+#| label: global_experiments
+
+# Available alternative experiments
+experiments(mae)
+```
+
+```{r}
+#| label: global_microbiota
+
+# Microbiome data
+getWithColData(mae, "microbiota")
+```
+
+```{r}
+#| label: global_metabolites
+
+# Metabolite data
+getWithColData(mae, "metabolites")
+```
+
+```{r}
+#| label: global_biomarkers
+
+# Biomarker data
+getWithColData(mae, "biomarkers")
+```
+
+Before the analysis, we preprocess both tables. The microbiome data is
+agglomerated to genus level and transformed to relative abundances. For the
+metabolites, we drop features with missing values, apply a log10
+transformation, and standardize each metabolite.
+
+```{r}
+#| label: global_preprocess
+
+# Microbiome
+mae[["microbiota"]] <- agglomerateByRank(mae[["microbiota"]], rank = "Genus")
+mae[["microbiota"]] <- transformAssay(
+    mae[["microbiota"]],
+    method = "relabundance"
+)
+
+# Metabolites
+tse <- mae[["metabolites"]]
+tse <- tse[rowSums(is.na(assay(tse, "nmr"))) == 0, ]
+tse <- transformAssay(tse, assay.type = "nmr", method = "log10")
+tse <- transformAssay(
+    tse,
+    assay.type = "log10", method = "standardize", MARGIN = "rows"
+)
+mae[["metabolites"]] <- tse
+```
+
+All three methods operate on sample-by-sample distances, so we calculate a
+dissimilarity matrix for each table: Bray-Curtis for the microbiome and
+Euclidean for the metabolites. The samples are in the same order in both
+tables.
+
+```{r}
+#| label: global_dist
+
+dist_mb <- getDissimilarity(
+    mae[["microbiota"]],
+    assay.type = "relabundance",
+    method = "bray"
+)
+
+dist_mt <- getDissimilarity(
+    mae[["metabolites"]],
+    assay.type = "standardize",
+    method = "euclidean"
+)
+```
+
+## Mantel test {#sec-mantel}
+
+The Mantel test [@Mantel1967] correlates two distance matrices. If samples
+that are similar in microbiome composition are also similar in metabolite
+profiles, the correlation is positive. Significance is assessed with
+permutations.
+
+```{r}
+#| label: global_mantel
+
+set.seed(123)
+mantel(dist_mb, dist_mt, method = "spearman", permutations = 999)
+```
+
+## Procrustes analysis {#sec-procrustes}
+
+Procrustes analysis rotates, scales, and reflects one ordination to match
+another as closely as possible. The permutation-based PROTEST
+[@PeresNeto2001] then tests whether the two ordinations agree more than
+expected by chance. Here, we compare the first two axes of principal
+coordinate analysis (PCoA) of each table.
+
+```{r}
+#| label: global_procrustes
+
+pcoa_mb <- cmdscale(dist_mb, k = 2)
+pcoa_mt <- cmdscale(dist_mt, k = 2)
+
+set.seed(123)
+res <- protest(pcoa_mb, pcoa_mt, permutations = 999)
+res
+```
+
+The result can be visualized by plotting how much each sample shifts between
+the two ordinations.
+
+```{r}
+#| label: global_procrustes_plot
+
+plot(res)
+```
+
+## MiRKAT {#sec-mirkat}
+
+MiRKAT is a kernel-based framework for testing associations between
+microbiome profiles and outcomes [@Zhao2015]. Its kernel RV (KRV) test
+[@Zhan2017] assesses the association between the microbiome and a
+multivariate outcome, such as a metabolite table.
+
+```{r}
+#| label: global_mirkat
+
+library(MiRKAT)
+
+kernel_mb <- D2K(as.matrix(dist_mb))
+KRV(kernels.otu = kernel_mb, y = mat_mt, kernel.y = "linear")
+```
+
+The original MiRKAT test takes a single outcome. By running it separately
+for each metabolite, we can see which metabolites are associated with the
+overall microbiome composition. Because we perform multiple tests, the
+p-values are adjusted for multiple testing.
+
+```{r}
+#| label: global_mirkat_per_metabolite
+
+pvals <- apply(mat_mt, 2, function(y) {
+    MiRKAT(y = y, Ks = kernel_mb, out_type = "C", method = "davies")[["p_values"]]
+})
+padj <- p.adjust(pvals, method = "fdr")
+
+res <- data.frame(p = pvals, p_adj = padj)
+res <- res[order(res[["p_adj"]]), ]
+res
+```
+
+The next chapters investigate the associations between the omic layers in
+more detail.
