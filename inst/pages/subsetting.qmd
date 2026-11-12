@@ -245,7 +245,8 @@ comparisons but also helps our machine learning models learn from
 meaningful data without additional noise.
 
 To filter these features, we begin by calculating their standard
-deviation. Then we visualize the variances with histogram.
+deviation across samples. Then we visualize the standard deviations with a
+histogram.
 
 ```{r}
 #| label: standard_deviation
@@ -256,30 +257,27 @@ rowData(tse)[["sd"]] <- rowSds(assay(tse, "counts"))
 hist(log(rowData(tse)[["sd"]]))
 ```
 
-From the histogram of feature variances, we can establish a sensible
-threshold for filtering. For example, using a threshold of 0 would
-effectively remove a large set of features that show no variance.
-
-It's important to note that the data is on a log scale, meaning that a
-log-transformed value of 1 corresponds to 0 (i.e., log(1) = 0). This
-ensures that features with zero variance are correctly identified and
-filtered out.
+The histogram uses log-transformed standard deviations only to make the range
+of values easier to inspect; the values stored in `rowData(tse)[["sd"]]`
+remain on their original scale. Features with a standard deviation of zero
+are constant across all samples. Therefore, selecting values greater than
+zero removes only these zero-variance features. Because the SD is calculated
+from the counts assay, this identifies features that are invariant in the
+raw counts. For filtering variance after normalization or transformation,
+calculate the SD from the corresponding assay instead.
 
 ```{r}
 #| label: filter_sd
 
-th <- 1
-
-selected <- rowData(tse)[["sd"]] > 1
+selected <- rowData(tse)[["sd"]] > 0
 tse_sub <- tse[selected, ]
 tse_sub
 ```
 
 After filtering, the dataset now contains `r nrow(tse_sub)` features,
 compared to the original `r nrow(tse)` features. This means we are left
-with features that exhibit variance. Keep in mind that the choice of
-threshold depends on the specific research question, and in this case,
-we opted for a rather conservative threshold that retains most features.
+with features that exhibit variance. A larger threshold could be used when
+the goal is to remove low-variance features as well.
 
 ## Subset based on prevalence {#sec-subset_prev}
 
