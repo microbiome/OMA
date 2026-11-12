@@ -531,42 +531,6 @@ plotJointRPCALoadings(mae, "JointRPCA", ncomponents = 2, n = 10)
 # Visualize correlations between the top features as a heatmap and a network
 plotJointRPCACovariance(mae, "JointRPCA", ntop = 10, correlation = TRUE)
 plotJointRPCANetwork(mae, "JointRPCA", show.label = TRUE)
-
-# Re-run with more components and a stricter prevalence filter
-mae2 <- HintikkaXOData
-mae2[["microbiota"]] <- agglomerateByRank(mae2[["microbiota"]], rank = "Genus")
-mae2[["microbiota"]] <- getPrevalent(
-    mae2[["microbiota"]],
-    prevalence = 0.3
-)
-mae2[["microbiota"]] <- transformAssay(
-    mae2[["microbiota"]],
-    method = "rclr",
-    impute = FALSE
-)
-mae2[["metabolites"]] <- mae[["metabolites"]]
-mae2[["biomarkers"]] <- mae[["biomarkers"]]
-
-set.seed(123)
-mae2 <- addJointRPCA(
-    mae2,
-    experiments = c("microbiota", "metabolites", "biomarkers"),
-    assay.types = c("rclr", "log10", "standardize"),
-    ncomponents = 5
-)
-
-# Compare sample scores of the first two components between the runs. The sign
-# of a component is arbitrary, so absolute correlations are compared.
-scores1 <- metadata(mae)[["JointRPCA"]]
-scores2 <- metadata(mae2)[["JointRPCA"]]
-abs(cor(scores1[, 1:2], scores2[rownames(scores1), 1:2]))
-
-# Compare the top features of the first component between the runs
-get_top <- function(scores, n = 20) {
-    rot <- attr(scores, "rotation")
-    rownames(rot)[order(abs(rot[, 1]), decreasing = TRUE)][seq_len(n)]
-}
-intersect(get_top(scores1), get_top(scores2))
 ```
 
 ```{r}
