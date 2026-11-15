@@ -456,50 +456,223 @@ p
 ## Ordination-based multiassay analysis
 
 These example solutions are related to exercises in
-[@sec-multiassay_ordination].
+[@sec-unsupervised-multiomics].
+
+```{r}
+#| label: jrpca
+#| code-fold: true
+#| code-summary: "Show the solution"
+
+# Load the example dataset
+library(mia)
+library(miaViz)
+data(HintikkaXOData)
+mae <- HintikkaXOData
+
+# Check the experiments, their assays, and whether samples are matched
+experiments(mae)
+lapply(experiments(mae), assayNames)
+sampleMap(mae)
+complete.cases(mae) |> all()
+
+# Agglomerate microbiome data to genus level
+mae[["microbiota"]] <- agglomerateByRank(mae[["microbiota"]], rank = "Genus")
+
+# Filter rare genera from raw counts. Filtering is based on counts and
+# prevalence, which are not meaningful after the rclr transformation.
+mae[["microbiota"]] <- getPrevalent(
+    mae[["microbiota"]],
+    prevalence = 0.1
+)
+
+# Apply rclr without imputing zeros
+mae[["microbiota"]] <- transformAssay(
+    mae[["microbiota"]],
+    method = "rclr",
+    impute = FALSE
+)
+
+# Number and proportion of missing values
+mat <- assay(mae[["microbiota"]], "rclr")
+sum(is.na(mat))
+mean(is.na(mat))
+
+# Transform the other omics
+mae[["metabolites"]] <- transformAssay(
+    mae[["metabolites"]],
+    assay.type = "nmr",
+    method = "log10"
+)
+mae[["biomarkers"]] <- transformAssay(
+    mae[["biomarkers"]],
+    assay.type = "signals",
+    method = "standardize",
+    MARGIN = "rows"
+)
+
+# Run Joint-RPCA with three components
+set.seed(123)
+mae <- addJointRPCA(
+    mae,
+    experiments = c("microbiota", "metabolites", "biomarkers"),
+    assay.types = c("rclr", "log10", "standardize"),
+    ncomponents = 3
+)
+
+# Visualize explained variance
+plotJointRPCAExplainedVariance(mae, "JointRPCA")
+
+# Visualize samples in the space of the first two components
+plotJointRPCA(mae, "JointRPCA", colour.by = "Diet")
+
+# Visualize features with the largest loadings
+plotJointRPCALoadings(mae, "JointRPCA", ncomponents = 2, n = 10)
+
+# Visualize correlations between the top features as a heatmap and a network
+plotJointRPCACovariance(mae, "JointRPCA", ntop = 10, correlation = TRUE)
+plotJointRPCANetwork(mae, "JointRPCA", show.label = TRUE)
+```
 
 ```{r}
 #| label: mofa
 #| code-fold: true
 #| code-summary: "Show the solution"
 
-# Load the example dataset
+# Use the same dataset as in the Joint-RPCA exercise
 library(mia)
 data(HintikkaXOData)
-mae <- HintikkaXOData
+mae_mofa <- HintikkaXOData
 
-# Select only microbiome and metabolites
-mae <- mae[, , c(1, 2)]
-
-# Agglomerate microbiome data
-mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Phylum")
+# Agglomerate microbiome data to prevalent genera
+mae_mofa[["microbiota"]] <- agglomerateByPrevalence(
+    mae_mofa[["microbiota"]],
+    rank = "Genus"
+)
 
 # Apply CLR
-mae[[1]] <- transformAssay(mae[[1]], assay.type = "counts", method = "rclr")
+mae_mofa[["microbiota"]] <- transformAssay(
+    mae_mofa[["microbiota"]],
+    method = "clr",
+    pseudocount = TRUE
+)
 
-# Apply relative and log10 transformations
-mae[[2]] <- transformAssay(mae[[2]], assay.type = "nmr", method = "relabundance")
-mae[[2]] <- transformAssay(mae[[2]], assay.type = "relabundance", method = "log10", pseudocount = TRUE)
+# Apply relative and log10 transformations to metabolites. Biomarkers
+# contain missing values and zeros, so they are only standardized below.
+mae_mofa[["metabolites"]] <- transformAssay(
+    mae_mofa[["metabolites"]],
+    assay.type = "nmr",
+    method = "relabundance"
+)
+mae_mofa[["metabolites"]] <- transformAssay(
+    mae_mofa[["metabolites"]],
+    assay.type = "relabundance",
+    method = "log10"
+)
 
-# Scale features
-mae[[1]] <- transformAssay(mae[[1]], assay.type = "rclr", method = "standardize", MARGIN = "rows")
-mae[[2]] <- transformAssay(mae[[2]], assay.type = "log10", method = "standardize", MARGIN = "rows")
+# Standardize each feature
+mae_mofa[["microbiota"]] <- transformAssay(
+    mae_mofa[["microbiota"]],
+    assay.type = "clr",
+    method = "standardize",
+    MARGIN = "rows"
+)
+mae_mofa[["metabolites"]] <- transformAssay(
+    mae_mofa[["metabolites"]],
+    assay.type = "log10",
+    method = "standardize",
+    MARGIN = "rows"
+)
+mae_mofa[["biomarkers"]] <- transformAssay(
+    mae_mofa[["biomarkers"]],
+    assay.type = "signals",
+    method = "standardize",
+    MARGIN = "rows"
+)
 
-# Removing the assays no longer needed
-assays(mae[[1]]) <- assays(mae[[1]])["standardize"]
-assays(mae[[2]]) <- assays(mae[[2]])["standardize"]
+# Make feature names unique
+anyDuplicated(rownames(mae_mofa[["microbiota"]]))
+rownames(mae_mofa[["microbiota"]]) <- getTaxonomyLabels(
+    mae_mofa[["microbiota"]],
+    make.unique = TRUE
+)
 
-# Create a MOFA object
+# Create a MOFA object with five factors
 library(MOFA2)
-model <- create_mofa_from_MultiAssayExperiment(mae)
+model <- mofa2(
+    mae_mofa,
+    experiments = c("microbiota", "metabolites", "biomarkers"),
+    assays = c("standardize", "standardize", "standardize"),
+    num_factors = 5
+)
 
-# Run MOFA
-model <- prepare_mofa(object = model)
+# Train the model
 model <- run_mofa(model, use_basilisk = TRUE)
 
-# Visualize variance explained
-p <- plot_variance_explained(model, x = "view", y = "factor")
-p
+# Visualize variance explained per factor and in total
+plot_variance_explained(model, x = "view", y = "factor", plot_total = TRUE)
+
+# Visualize samples in the space of the first two factors
+plot_factors(model, factors = c(1, 2), color_by = "Diet")
+
+# Visualize the features with the largest weights for each omic
+lapply(
+    c("microbiota", "metabolites", "biomarkers"),
+    plot_top_weights,
+    object = model,
+    factors = c(1, 2),
+    nfeatures = 10
+)
+```
+
+```{r}
+#| label: unsupervised_comparison
+#| code-fold: true
+#| code-summary: "Show the solution"
+
+# Sample scores from both methods
+jrpca_scores <- metadata(mae)[["JointRPCA"]]
+mofa_scores <- get_factors(model)[[1]]
+samples <- intersect(rownames(jrpca_scores), rownames(mofa_scores))
+
+# Correlate the components and factors. The sign of a component is
+# arbitrary, so absolute correlations are compared.
+abs(cor(jrpca_scores[samples, ], mofa_scores[samples, ]))
+
+# Top 20 microbial features of the first Joint-RPCA component
+rot <- attr(jrpca_scores, "rotation")
+rot <- rot[rownames(rot) %in% rownames(mae[["microbiota"]]), ]
+jrpca_top <- rownames(rot)[order(abs(rot[, 1]), decreasing = TRUE)][1:20]
+
+# Top 20 microbial features of the first MOFA factor
+w <- get_weights(model, views = "microbiota")[[1]]
+mofa_top <- rownames(w)[order(abs(w[, 1]), decreasing = TRUE)][1:20]
+# MOFA2 adds the view name as a suffix to the feature names
+mofa_top <- sub("_microbiota$", "", mofa_top)
+
+# Features identified by both methods and by only one. Note that duplicated
+# genus names were made unique separately in the two analyses, so names such
+# as "uncultured_1" do not necessarily refer to the same taxon.
+intersect(jrpca_top, mofa_top)
+setdiff(jrpca_top, mofa_top)
+setdiff(mofa_top, jrpca_top)
+
+# Cross-association between the top microbial features and metabolites
+mae_top <- mae_mofa
+mae_top[["microbiota"]] <- mae_top[["microbiota"]][
+    rownames(mae_top[["microbiota"]]) %in% union(jrpca_top, mofa_top),
+]
+res <- getCrossAssociation(
+    mae_top,
+    experiment1 = "microbiota",
+    experiment2 = "metabolites",
+    assay.type1 = "clr",
+    assay.type2 = "log10",
+    method = "spearman",
+    mode = "matrix"
+)
+
+library(ComplexHeatmap)
+Heatmap(res)
 ```
 
 ## Machine learning

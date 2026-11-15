@@ -21,22 +21,10 @@ we can analyze if higher presence of a specific taxon relates to higher
 levels of a biomolecule. Correlation analyses within dataset were already
 discussed in [@sec-correlation].
 
-As an example dataset, we use the data from the @Hintikka2021 publication:
-Xylo-Oligosaccharides in prevention of hepatic
-steatosis and adipose tissue inflammation: associating taxonomic and
-metabolomic patterns in fecal microbiota with biclustering.
-In this study, mice were fed either with a high-fat or a low-fat diet,
-and with or without prebiotics, for the purpose of studying whether prebiotics
-attenuate the negative impact of a high-fat diet on health.
-
-This example data can be loaded from the
-`r BiocStyle::Biocpkg("mia")` package. The data is
-already in `MAE` format which is tailored for multi-assay analyses
-(see [@sec-containers]). The dataset includes three different experiments:
-microbial abundance data, metabolite concentrations, and data about
-different biomarkers. If you like to construct the same data object from the
-original files instead, [here]([@sec-loading-experimental-microbiome-data])
-you can find help for importing data into an `SE` object.
+In this chapter, we continue from where we left off in the previous section
+([@sec-global-association]). There, we tested whether the microbiome and the
+metabolite profiles of the @Hintikka2021 dataset are globally associated.
+Next, we investigate associations between individual features.
 
 ```{r}
 #| label: cross-association1
@@ -46,32 +34,15 @@ data(HintikkaXOData, package = "mia")
 mae <- HintikkaXOData
 ```
 
+We agglomerate the data into prevalent bacteria families and apply logarithmic
+transformation.
+
 ```{r}
 #| label: cross-association2
-
-# Available alternative experiments
-experiments(mae)
-```
-
-```{r}
-#| label: cross-association3
-
-# Microbiome data
-getWithColData(mae, "microbiota")
-```
-
-```{r}
-#| label: cross-association4
-
-# Metabolite data
-getWithColData(mae, "metabolites")
-```
-
-```{r}
-#| label: cross-association5
-
-# Biomarker data
-getWithColData(mae, "biomarkers")
+# Agglomerate microbiome data at family level
+mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family", na.rm = TRUE)
+# Does log10 transform for microbiome data
+mae[[1]] <- transformAssay(mae[[1]], method = "log10", pseudocount = TRUE)
 ```
 
 Next we can perform a cross-association analysis. Let us analyze if
@@ -81,13 +52,6 @@ bacterium X is present, is the concentration of metabolite Y lower or higher"?
 
 ```{r}
 #| label: cross-association6
-
-# Agglomerate microbiome data at family level
-mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family", na.rm = TRUE)
-# Does log10 transform for microbiome data
-mae[[1]] <- transformAssay(mae[[1]], method = "log10", pseudocount = TRUE)
-
-# Cross correlates data sets
 res <- getCrossAssociation(
     mae,
     experiment1 = 1,
@@ -98,7 +62,6 @@ res <- getCrossAssociation(
     test.signif = TRUE,
     p.adj.threshold = NULL,
     cor.threshold = NULL,
-    # Remove when mia is fixed
     mode = "matrix",
     sort = TRUE,
     show.warnings = FALSE
@@ -139,6 +102,13 @@ p <- Heatmap(res$cor,
 )
 p
 ```
+
+Testing all feature pairs quickly leads to a large number of tests. Other
+tools address this in different ways. `r BiocStyle::Biocpkg("anansi")`
+restricts the analysis to biologically plausible feature pairs based on
+prior knowledge, such as functional annotations [@Bastiaanssen2023anansi].
+OmniCorr, on the other hand, first clusters co-varying features into modules
+and then correlates these modules across omic layers [@Gupta2026].
 
 ::: {.callout-tip icon=false}
 ## Exercises
