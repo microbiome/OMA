@@ -331,8 +331,13 @@ tse <- transformAssay(
     altexp = altExpNames(tse), assay.type = "counts", method = "clr", pseudocount = 1
 )
 
-# phiLR transformation on family level
-tse <- agglomerateByRank(tse, rank = "Family")
+# phILR transformation. phILR requires a phylogenetic tree. Agglomerating
+# GlobalPatterns to family level would remove the tree, because the families
+# are not monophyletic. We therefore use prevalent taxa without agglomeration,
+# and prune the tree to match the remaining features.
+prevalent <- getPrevalent(tse, prevalence = 0.2)
+tse <- tse[prevalent, ]
+tse <- subsetByLeaf(tse, rowLeaf = rownames(tse))
 tse <- transformAssay(
     tse,
     assay.type = "counts", method = "philr", MARGIN = 1L, pseudocount = TRUE
