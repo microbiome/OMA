@@ -76,6 +76,14 @@ add_sections <- function() {
         if (!grepl('id="quarto-sidebar"', html, fixed = TRUE)) next
         html <- gsub(old_block, "", html, perl = TRUE)
 
+        # Mark appendix numbers (letters, e.g. "A") so that book.scss can
+        # leave out the "Chapter" label for appendices
+        html <- gsub(
+            '<span class="chapter-number">([A-Z])</span>',
+            '<span class="chapter-number appendix-number">\\1</span>',
+            html
+        )
+
         hits <- gregexpr(link_pattern, html, perl = TRUE)
         links <- regmatches(html, hits)[[1]]
         if (length(links) == 0) next
