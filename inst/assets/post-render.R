@@ -25,14 +25,18 @@ get_sections <- function(html) {
         '<span class="header-section-number">[^<]*</span>\\s*(.*?)\\s*</h2>'
     )
     m <- regmatches(html, gregexpr(pattern, html, perl = TRUE))[[1]]
-    if (length(m) == 0) return(NULL)
+    if (length(m) == 0) {
+        return(NULL)
+    }
     parts <- regmatches(m, regexec(pattern, m, perl = TRUE))
     data.frame(
         number = vapply(parts, `[`, "", 2),
         id = vapply(parts, `[`, "", 3),
         # Keep inline code, drop other tags such as footnote links
         title = gsub("<(?!/?code\\b)[^>]*>", "",
-            vapply(parts, `[`, "", 4), perl = TRUE),
+            vapply(parts, `[`, "", 4),
+            perl = TRUE
+        ),
         stringsAsFactors = FALSE
     )
 }
@@ -42,8 +46,10 @@ sections_html <- function(sec, href) {
         '<li><a href="%s#%s"><span class="section-number">%s</span> %s</a></li>',
         href, sec$id, sec$number, sec$title
     )
-    paste0('<ul class="', block_class, '">', paste(items, collapse = ""),
-        "</ul>")
+    paste0(
+        '<ul class="', block_class, '">', paste(items, collapse = ""),
+        "</ul>"
+    )
 }
 
 add_sections <- function() {
@@ -76,7 +82,9 @@ add_sections <- function() {
         new <- vapply(links, function(link) {
             parts <- regmatches(link, regexec(link_pattern, link, perl = TRUE))[[1]]
             sec <- sections[[parts[3]]]
-            if (is.null(sec)) return(link)
+            if (is.null(sec)) {
+                return(link)
+            }
             paste0(link, sections_html(sec, paste0(parts[2], parts[3])))
         }, "", USE.NAMES = FALSE)
         regmatches(html, hits) <- list(new)
@@ -90,5 +98,7 @@ add_sections <- function() {
 # Do not fail the book build if this optional step breaks
 tryCatch(add_sections(), error = function(e) {
     warning("Could not add chapter sections to the sidebar: ",
-        conditionMessage(e), call. = FALSE)
+        conditionMessage(e),
+        call. = FALSE
+    )
 })
