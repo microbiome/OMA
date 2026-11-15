@@ -1,4 +1,7 @@
-# Post-render step: list each chapter's sections (e.g. 3.1, 3.2) in the left
+# Post-render step (assets/post-render.R is the BiocBook template's slot for
+# this; keep any template code when updating the template).
+#
+# List each chapter's sections (e.g. 3.1, 3.2) in the left
 # sidebar, under the chapter link, on every page of the book.
 #
 # Quarto's book sidebar can only link whole pages, so after rendering we read
