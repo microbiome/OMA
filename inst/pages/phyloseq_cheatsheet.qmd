@@ -40,7 +40,7 @@ tse <- GlobalPatterns # Rename
 tse # Check the tse object
 ```
 
-## Accessing different types of data in `phyloseq` versus `TreeSE`
+## Accessing data
 
 Often microbiome datasets contain three different types of tables, one which
 defines the microbes' taxonomy from domain to species level, one that
@@ -85,7 +85,7 @@ tse_sampledata <-
 
 **Accessing operational taxonomic unit (OTU) abundance objects: otu_table = assay**
 
-OTU tables can be accessed with `otu_table()` and `assay()` commands. The assay 
+OTU tables can be accessed with `otu_table()` and `assay()` commands. The assay
 can also hold other types of information like taxa abundances from shotgun
 metagenomic annotation, or functional gene abundances.
 
@@ -99,7 +99,9 @@ tse_otutable <-
     assay(tse) |> data.frame()
 ```
 
-## Building phyloseq objects vs TreeSE objects: phyloseq = TreeSummarizedExperiment
+## Building objects
+
+*phyloseq:* `phyloseq()` · *TreeSE:* `TreeSummarizedExperiment()`
 
 After learning how to access various data types from `TreeSE`, let's see how
 creating `TreeSE` objects compares to creating
@@ -183,11 +185,11 @@ assayNames(tse)
 ```
 
 
-## Handling different OTU table normalizations in phyloseq vs TreeSE
+## Normalizations
 
 Adding the assays as a list might seem inconvenient if you only have one type
 of OTU table (`counts` in our example), but let's see why it is actually very
-convenient to be able to hold multiple assays in one data object. 
+convenient to be able to hold multiple assays in one data object.
 
 Here we'll show an example of how to add relative abundances and CLR normalized
 OTU tables to your `tse` assays.
@@ -222,7 +224,7 @@ assays(tse) # Let's check
 # phy_CLR <- microbiome::transform(phy, 'clr') # Example, don't run
 ```
 
-## Subsetting samples and taxa
+## Subsetting
 
 **Subsetting samples: subset_samples = indexing columns**
 
@@ -276,7 +278,9 @@ phy_nomock_bacteria # We have 19008 taxa (only bacteria) and before 19216
 tse_nomock_bacteria
 ```
 
-## Calculating alpha diversity: estimate_richness = estimateDiversity
+## Alpha diversity
+
+*phyloseq:* `estimate_richness()` · *TreeSE:* `estimateDiversity()`
 
 Now we know how data stored in `TreeSE` can be accessed and the `TreeSE` data
 objects created. Let's look at how we can calculate alpha diversity using
@@ -332,12 +336,14 @@ df <- colData(tse) |>
     dplyr::select(matches("shannon"))
 ```
 
-## Calculating beta diversity: ordinate = addMDS
+## Beta diversity
+
+*phyloseq:* `ordinate()` · *TreeSE:* `addMDS()`
 
 We can calculate PCoA with Bray-Curtis distances in
 `r BiocStyle::Biocpkg("phyloseq")` using the `ordinate()` command. The beta
 diversity calculation in `r BiocStyle::Biocpkg("mia")` outputs a `TreeSE`
-with a new type of data, reduced dimensions or `reducedDim`. 
+with a new type of data, reduced dimensions or `reducedDim`.
 
 Here we will use the `r BiocStyle::Biocpkg("scater")` package that runs the
 PCoA with `addMDS()`. (PCoA and MDS mean the same thing)
@@ -366,13 +372,16 @@ tse <- addMDS(
 tse # Inspect, now we have new reducedDim "MDS_bray"
 ```
 
-## Plotting ordinations: `plot_ordination()` = `plotReducedDim()`
+## Ordination plots
+
+*phyloseq:* `plot_ordination()` · *TreeSE:* `plotReducedDim()`
 
 `r BiocStyle::Biocpkg("phyloseq")` has it's own plotting fuction for
-ordinations.
+ordinations (@fig-cheatsheet-plot-ordination).
 
 ```{r}
-#| label: plot_ord
+#| label: fig-cheatsheet-plot-ordination
+#| fig-cap: "PCoA of the GlobalPatterns phyloseq object based on Bray-Curtis dissimilarity of relative abundances, plotted with *phyloseq*'s plot_ordination() and coloured by sample type."
 
 plot_ordination(physeq = phy, ordination = phy_ord, color = "SampleType")
 ```
@@ -388,20 +397,21 @@ Bray-Curtis MDS/PCoA was in case we forgot.
 reducedDimNames(tse)
 ```
 
-Let's plot.
+Let's plot. @fig-cheatsheet-plot-reduceddim shows the same ordination drawn
+from the `tse`.
 
 ```{r}
-#| label: plot_red_dim
+#| label: fig-cheatsheet-plot-reduceddim
+#| fig-cap: "PCoA of the GlobalPatterns TreeSE object based on Bray-Curtis dissimilarity of relative abundances, plotted with *scater*'s plotReducedDim() and coloured by sample type."
 
-# Plot
-plotReducedDim(tse, "MDS_bray", color_by = "SampleType")
-# The sign is given arbitrarily. We can change it to match the plot_ordination
-reducedDim(tse)[, 1] <- -reducedDim(tse)[, 1]
-reducedDim(tse)[, 2] <- -reducedDim(tse)[, 2]
+# Plot. The signs of the axes are arbitrary, so the plot can be mirrored
+# compared to plot_ordination(); this does not change the result.
 plotReducedDim(tse, "MDS_bray", color_by = "SampleType")
 ```
 
-## Agglomerating taxa: `tax_glom()` = `agglomerateByRank()`
+## Agglomeration
+
+*phyloseq:* `tax_glom()` · *TreeSE:* `agglomerateByRank()`
 
 Often you might want to study your data using different taxonomic ranks,
 for example check if you see differences in the abundances of higher

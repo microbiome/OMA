@@ -6,7 +6,7 @@
 #| results: asis
 
 library(rebook)
-chapterPreamble()
+chapterPreamble(cache = FALSE)
 ```
 
 Community typing in microbial ecology involves identifying distinct microbial
@@ -119,10 +119,12 @@ Now, we visualize the hierarchical structure of the clusters with a dendrogram
 tree. In dendrograms, the tree is split where the branch length is the largest.
 In each splitting point, the tree is divided into two clusters leading to the
 hierarchy. In this example, each sample is labeled by their dominant taxon
-to visualize ecological differences between the clusters.
+to visualize ecological differences between the clusters
+(@fig-clustering-dendrogram).
 
 ```{r}
-#| label: hclust2
+#| label: fig-clustering-dendrogram
+#| fig-cap: "Dendrogram of the hierarchical clustering (Ward's method on Bray-Curtis dissimilarities) of samples in the prevalent class-level peerj13075 data. Branches and labels are coloured by cluster, and samples are labelled by their dominant taxon."
 
 library(dendextend)
 
@@ -157,6 +159,7 @@ dend |>
 We can also visualize the clusters by projecting the data onto a
 two-dimensional surface that captures the most variability in the data. In this
 example, we use multi-dimensional scaling (MDS) (see [@sec-unsupervised-ordination]).
+The resulting ordination is shown in @fig-clustering-hclust-mds.
 
 ```{r}
 #| label: hclust3
@@ -173,7 +176,8 @@ altExp(tse, "prevalent") <- addMDS(
 ```
 
 ```{r}
-#| label: hclust4
+#| label: fig-clustering-hclust-mds
+#| fig-cap: "MDS ordination based on Bray-Curtis dissimilarities of the prevalent class-level peerj13075 data, with samples coloured by hierarchical clustering assignment."
 #| fig-width: 6
 #| fig-height: 4
 
@@ -223,10 +227,12 @@ tse <- addCluster(
 
 The results are stored in the `rowData` column specified with the `clust.col`
 parameter. To better visualize the results and the distribution of the
-clusters, we can plot the histogram of the clusters.
+clusters, we can plot the histogram of the clusters
+(@fig-clustering-taxa-barplot).
 
 ```{r}
-#| label: taxa_clustering_histrogram
+#| label: fig-clustering-taxa-barplot
+#| fig-cap: "Number of taxonomic features in each cluster obtained by hierarchical clustering of standardized CLR-transformed abundances with Kendall dissimilarity."
 
 library(miaViz)
 
@@ -277,14 +283,15 @@ altExp(tse, "prevalent") <- addCluster(
 )
 ```
 
-The plot below represents the Laplace approximation to the model evidence for
-each of the six models. We can see that the best number of clusters is two, as
-the minimum value of Laplace approximation determines the optimal k. The
-optimal k suggests to fit a model with k mixtures of Dirichlet distributions as
-a prior.
+@fig-clustering-dmm-fit represents the Laplace approximation to the model
+evidence for each of the six models. We can see that the best number of clusters
+is two, as the minimum value of Laplace approximation determines the optimal k.
+The optimal k suggests to fit a model with k mixtures of Dirichlet distributions
+as a prior.
 
 ```{r}
-#| label: dmm2
+#| label: fig-clustering-dmm-fit
+#| fig-cap: "Laplace approximation of model evidence for DMM models with one to six components fitted to the prevalent class-level peerj13075 data. Lower values indicate a better fit."
 #| fig-width: 5
 #| fig-height: 3
 
@@ -296,10 +303,11 @@ p + theme_minimal(base_size = 11)
 
 The plot above confirms our previous suggestion that two clusters describe the
 data the best. Now we can plot which taxonomic features define the key cluster
-features.
+features (@fig-clustering-dmm-drivers).
 
 ```{r}
-#| label: dmm3
+#| label: fig-clustering-dmm-drivers
+#| fig-cap: "Contributions of taxonomic features to each of the two components of the best-fitting DMM model."
 #| fig-width: 6
 #| fig-height: 2
 library(DirichletMultinomial)
@@ -315,11 +323,13 @@ plotLoadings(drivers, ncomponents = 2)
 ```
 
 As well as in hierarchical clustering, we can also visualize the clusters by
-projecting the data onto a two-dimensional surface calculated using MDS. The
-plot rather clearly demonstrates the cluster division.
+projecting the data onto a two-dimensional surface calculated using MDS
+(@fig-clustering-dmm-mds). The plot rather clearly demonstrates the cluster
+division.
 
 ```{r}
-#| label: dmm4
+#| label: fig-clustering-dmm-mds
+#| fig-cap: "MDS ordination based on Bray-Curtis dissimilarities of the prevalent class-level peerj13075 data, with samples coloured by DMM cluster assignment."
 
 # DMM clusters
 plotReducedDim(altExp(tse, "prevalent"), "MDS", theme_size = 13) +
@@ -379,10 +389,11 @@ table(altExp(tse, "prevalent")$NMFcomponent)
 ```
 
 Now, we can plot the NMF community types calculated based on maximum membership
-for each sample onto a two-dimensional surface.
+for each sample onto a two-dimensional surface (@fig-clustering-nmf-mds).
 
 ```{r}
-#| label: nmf2
+#| label: fig-clustering-nmf-mds
+#| fig-cap: "MDS ordination based on Bray-Curtis dissimilarities of the prevalent class-level peerj13075 data, with samples coloured by NMF community type, defined as the component with the highest relative membership."
 
 # NMF community types
 plotReducedDim(
@@ -419,10 +430,12 @@ tse <- transformAssay(
 mat <- assay(tse, "standardize")
 ```
 
-Now we can cluster rows.
+Now we can cluster rows. The resulting tree of taxa is shown in
+@fig-clustering-taxa-tree.
 
 ```{r}
-#| label: pheatmap2
+#| label: fig-clustering-taxa-tree
+#| fig-cap: "Tree from complete-linkage hierarchical clustering of genera based on standardized CLR-transformed abundances in the peerj13075 data."
 
 library(ape)
 library(ggtree)
@@ -454,10 +467,12 @@ tse <- addCluster(
 ```
 
 For the columns, we can utilize k-means clustering. First we have to specify
-the number of clusters.
+the number of clusters. @fig-clustering-kmeans-k shows the elbow and
+silhouette methods for this purpose.
 
 ```{r}
-#| label: pheatmap4
+#| label: fig-clustering-kmeans-k
+#| fig-cap: "Selection of the number of k-means clusters. Left: total within-cluster sum of squares (elbow method). Right: average silhouette width, both as a function of the number of clusters."
 
 library(factoextra)
 library(NbClust)
@@ -487,10 +502,12 @@ tse <- addCluster(
 colData(tse)[["clusters"]]
 ```
 
-Now we can create a heatmap with additional annotations.
+Now we can create a heatmap with additional annotations
+(@fig-clustering-heatmap).
 
 ```{r}
-#| label: pheatmap6
+#| label: fig-clustering-heatmap
+#| fig-cap: "Heatmap of standardized CLR-transformed genus abundances in the peerj13075 data, with rows ordered by hierarchical clusters of taxa and columns by k-means clusters of samples. Annotations show taxa clusters, sample clusters and gender."
 #| fig-width: 13
 #| fig-height: 7
 
@@ -559,10 +576,10 @@ sample metadata? You can, for instance, visualize the variables with a box plot.
 
 Useful functions:
 
-`utils::data()`, `mia::transformAssay()`, `mia::addMDS()`, 
+`utils::data()`, `mia::transformAssay()`, `mia::addMDS()`,
 `SingleCellExperiment::reducedDimNames()`,
-`SingleCellExperiment::reducedDim()`, `mia::addCluster()`, 
-`miaViz::plotBarplot()`, `scater::plotReducedDim()`, 
+`SingleCellExperiment::reducedDim()`, `mia::addCluster()`,
+`miaViz::plotBarplot()`, `scater::plotReducedDim()`,
 `SummarizedExperiment::colData()`, `scater::plotColData()`
 
 :::
