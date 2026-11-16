@@ -16,11 +16,20 @@ intro <- tryCatch(
         license <- description$License
         glue::glue(
             "**Package:** {pkg}<br/>\n",
-            "**Authors:<br/>** {
-                authors |>
+            "**Authors:** {
+                # Named authors, followed by a link to the full list of
+                # contributors instead of the and-others placeholder
+                others <- grepl('contributors', format(authors))
+                named <- authors[!others] |>
                     format(include = c('given', 'family', 'role')) |>
-                    paste('- ', x = _) |>
-                    paste(collapse = '<br/> ')
+                    paste(collapse = ', ')
+                if (any(others)) {
+                    named <- paste0(
+                        named, ', and others (see ',
+                        '[Contributors](pages/contributions.qmd))'
+                    )
+                }
+                named
             }<br/>\n",
             "**Compiled:** {as.character(Sys.Date())}<br/>\n",
             "**Package version:** {version}<br/>\n",
