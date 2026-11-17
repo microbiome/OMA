@@ -61,11 +61,16 @@ mae <- HintikkaXOData
 ```
 
 For Joint-RPCA, we agglomerate the microbiome data to genus level and filter
-out rare genera. Filtering must be done on untransformed counts. Then, we
-apply the rclr transformation. We set `impute = FALSE`, because Joint-RPCA
-handles the zeros, i.e., missing values, itself through matrix completion. The
-metabolite concentrations are log10-transformed. The biomarker data contains
-zeros, so instead of a log transformation, we standardize each biomarker.
+the counts in three steps, in the same order as the original Python
+implementation of Joint-RPCA (gemelli): we remove genera with few reads, then
+genera that are present in few samples, and finally samples with few reads.
+Each step is computed from the data left by the previous step, so, for
+instance, library sizes are calculated after the rare genera are removed.
+Filtering must be done on untransformed counts. Then, we apply the rclr
+transformation. We set `impute = FALSE`, because Joint-RPCA handles the zeros,
+i.e., missing values, itself through matrix completion. The metabolite
+concentrations are log10-transformed. The biomarker data contains zeros, so
+instead of a log transformation, we standardize each biomarker.
 
 ```{r}
 #| label: jrpca_preprocess
@@ -73,9 +78,15 @@ zeros, so instead of a log transformation, we standardize each biomarker.
 # Agglomerate microbiome data
 mae[["microbiota"]] <- agglomerateByRank(mae[["microbiota"]], rank = "Genus")
 
-# Remove genera that are present in 10% or less of the samples
+# Filter the raw counts in steps
 tse <- mae[["microbiota"]]
-mae[["microbiota"]] <- tse[rowMeans(assay(tse, "counts") > 0) > 0.1, ]
+# 1. Remove genera with 10 reads or fewer in total
+tse <- tse[rowSums(assay(tse, "counts")) > 10, ]
+# 2. Remove genera that are present in 10% or less of the samples
+tse <- tse[rowMeans(assay(tse, "counts") > 0) > 0.1, ]
+# 3. Remove samples with 1000 reads or fewer
+tse <- tse[, colSums(assay(tse, "counts")) > 1000]
+mae[["microbiota"]] <- tse
 
 # Apply rclr transformation without imputing zeros
 mae[["microbiota"]] <- transformAssay(
