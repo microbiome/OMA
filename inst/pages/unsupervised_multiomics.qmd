@@ -61,12 +61,17 @@ mae <- HintikkaXOData
 ```
 
 For Joint-RPCA, we agglomerate the microbiome data to genus level and filter
-out rare genera with `filterRPCAInput()`. Filtering must be done on
-untransformed counts. Then, we apply the rclr transformation. We set
-`impute = FALSE`, because Joint-RPCA handles the zeros, i.e., missing values,
-itself through matrix completion. The metabolite concentrations are
-log10-transformed. The biomarker data contains zeros, so instead of a log
-transformation, we standardize each biomarker.
+the counts in three steps, in the same order as
+[gemelli](https://github.com/biocore/gemelli), the original Python
+implementation of Joint-RPCA: we remove genera with few reads, then genera that
+are present in few samples, and finally samples with few reads.
+Each step is computed from the data left by the previous step, so, for
+instance, library sizes are calculated after the rare genera are removed.
+Filtering must be done on untransformed counts. Then, we apply the rclr
+transformation. We set `impute = FALSE`, because Joint-RPCA handles the zeros,
+i.e., missing values, itself through matrix completion. The metabolite
+concentrations are log10-transformed. The biomarker data contains zeros, so
+instead of a log transformation, we standardize each biomarker.
 
 ```{r}
 #| label: jrpca_preprocess
@@ -74,11 +79,15 @@ transformation, we standardize each biomarker.
 # Agglomerate microbiome data
 mae[["microbiota"]] <- agglomerateByRank(mae[["microbiota"]], rank = "Genus")
 
-# Remove genera that are present in 10% or less of the samples
-mae[["microbiota"]] <- filterRPCAInput(
-    mae[["microbiota"]],
-    min.feature.frequency = 0.1
-)
+# Filter the raw counts in steps
+tse <- mae[["microbiota"]]
+# 1. Remove genera with 10 reads or fewer in total
+tse <- tse[rowSums(assay(tse, "counts")) > 10, ]
+# 2. Remove genera that are present in 10% or less of the samples
+tse <- tse[rowMeans(assay(tse, "counts") > 0) > 0.1, ]
+# 3. Remove samples with 1000 reads or fewer
+tse <- tse[, colSums(assay(tse, "counts")) > 1000]
+mae[["microbiota"]] <- tse
 
 # Apply rclr transformation without imputing zeros
 mae[["microbiota"]] <- transformAssay(
@@ -102,6 +111,15 @@ mae[["biomarkers"]] <- transformAssay(
     MARGIN = "rows"
 )
 ```
+
+::: callout-note
+## Note: Filtering with mia functions
+
+The metrics can also be calculated with `getPrevalence()` and `addQC()` from
+`r BiocStyle::Biocpkg("mia")`. If so, recalculate them after each step: metrics
+calculated once from the original object ignore the earlier steps, e.g.,
+library sizes would still include the reads of the removed genera.
+:::
 
 ## Joint-RPCA {#sec-joint-rpca}
 
@@ -406,8 +424,7 @@ as a network.
 Useful functions:
 
 `utils::data()`, `MultiAssayExperiment::experiments()`,
-`mia::agglomerateByRank()`, `mia::filterRPCAInput()`,
-`mia::transformAssay()`, `mia::addJointRPCA()`,
+`mia::agglomerateByRank()`, `mia::transformAssay()`, `mia::addJointRPCA()`,
 `miaViz::plotJointRPCAExplainedVariance()`, `miaViz::plotJointRPCA()`,
 `miaViz::plotJointRPCALoadings()`, `miaViz::plotJointRPCACovariance()`,
 `miaViz::plotJointRPCANetwork()`
