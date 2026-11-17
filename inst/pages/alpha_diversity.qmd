@@ -345,78 +345,25 @@ pairwise.wilcox.test(
 #### Visualizing significance in group-wise comparisons
 
 Next, let's compare the Shannon index between sample groups and visualize the
-statistical significance. Using the `stat_compare_means` function from the
-`r BiocStyle::CRANpkg("ggpubr")` package, we can add visually appealing
-p-values to our plots.
-
-To add adjusted p-values, we first have to calculate them. The resulting plot
-is shown in @fig-alpha-shannon-pvalues.
+statistical significance. `plotBoxplot()` can annotate pairwise group
+comparisons directly. By default, it uses Wilcoxon tests and adjusts p-values
+with the FDR method. The resulting plot is shown in
+@fig-alpha-shannon-pvalues.
 
 ```{r}
 #| label: fig-alpha-shannon-pvalues
-#| code-fold: true
-#| code-summary: "Show the plotting code"
 #| fig-cap: "Shannon diversity in feces, skin and tongue samples of the GlobalPatterns data shown as boxplots, annotated with FDR-adjusted p-values from pairwise Wilcoxon tests."
 
-library(ggpubr)
-library(tidyverse)
-
-
-index <- "shannon_diversity"
-group_var <- "SampleType"
-
 # Subsets the data by selecting only samples from feces, skin, or tongue.
-tse_sub <- tse[, tse[[group_var]] %in% c("Feces", "Skin", "Tongue")]
+tse_sub <- tse[, tse[["SampleType"]] %in% c("Feces", "Skin", "Tongue")]
 
-# Updates factor levels to reflect selected groups
-tse_sub$SampleType <- factor(tse_sub$SampleType)
-
-# Calculate p-values
-pvals <- pairwise.wilcox.test(
-    tse_sub[[index]], tse_sub[[group_var]],
-    p.adjust.method = "fdr"
-)
-
-# Put them to data.frame format
-pvals <- pvals[["p.value"]] |>
-    as.data.frame()
-varname <- "group1"
-pvals[[varname]] <- rownames(pvals)
-
-# To long format
-pvals <- reshape(
-    pvals,
-    direction = "long",
-    varying = colnames(pvals)[!colnames(pvals) %in% varname],
-    times = colnames(pvals)[!colnames(pvals) %in% varname],
-    v.names = "p",
-    timevar = "group2",
-    idvar = "group1"
-) |>
-    na.omit()
-
-# Add y-axis position
-pvals[["y.position"]] <- apply(pvals, 1, function(x) {
-    temp1 <- tse[[index]][tse[[group_var]] == x[["group1"]]]
-    temp2 <- tse[[index]][tse[[group_var]] == x[["group2"]]]
-    temp <- max(c(temp1, temp2))
-    return(temp)
-})
-pvals[["y.position"]] <- max(pvals[["y.position"]]) +
-    order(pvals[["y.position"]]) * 0.2
-
-# Round values
-pvals[["p"]] <- round(pvals[["p"]], 3)
-
-# Create a boxplot
-p <- plotColData(
+plotBoxplot(
     tse_sub,
-    x = group_var, y = index,
-    show_boxplot = TRUE, show_violin = FALSE
-) +
-    theme(text = element_text(size = 10)) +
-    stat_pvalue_manual(pvals)
-p
+    col.var = "shannon_diversity",
+    x = "SampleType",
+    add.significance = TRUE,
+    label = "p.adj"
+)
 ```
 
 ## Further reading
