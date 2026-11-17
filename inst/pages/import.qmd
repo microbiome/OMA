@@ -11,8 +11,11 @@ chapterPreamble(cache = FALSE)
 ```
 
 This chapter demonstrates how data can be imported into data containers
-from files. Additionally, multiple databases offer curated microbiome
-data, which are introduced in [@sec-example-data].
+from files ([@sec-loading-experimental-microbiome-data]) and converted from
+other R objects, such as `phyloseq`
+([@sec-conversions-between-data-formats-in-r]). Additionally, multiple
+databases offer curated microbiome data, which are introduced in
+[@sec-example-data].
 
 In prior to importing the data to container, the raw sequences must be
 mapped to abundances. The specific method depends on sequencing type and
@@ -402,12 +405,62 @@ mae <- MultiAssayExperiment(experiments = experiments)
 mae
 ```
 
+## From other R objects {#sec-conversions-between-data-formats-in-r}
+
+If the data has already been imported in R in another format, it can be
+readily converted into `TreeSE`, as shown in our next example. Note that
+similar conversion functions to `TreeSE` are available for multiple data
+formats via the `r BiocStyle::Biocpkg("mia")` package (see convertFrom\*
+for `r BiocStyle::Biocpkg("phyloseq")`, `r BiocStyle::Githubpkg("joey711/biom")`,
+and `r BiocStyle::Biocpkg("dada2")`).
+
+```{r}
+#| label: load_pkg_data
+#| message: false
+
+library(mia)
+
+# Phyloseq example data
+data(GlobalPatterns, package = "phyloseq")
+GlobalPatterns_phyloseq <- GlobalPatterns
+GlobalPatterns_phyloseq
+```
+
+```{r}
+#| label: convert_phyloseq1
+#| message: false
+
+# convert phyloseq to TSE
+GlobalPatterns_TSE <- convertFromPhyloseq(GlobalPatterns_phyloseq)
+GlobalPatterns_TSE
+```
+
+We can also convert `TreeSE` objects into `phyloseq` with respect to the
+shared components that are supported by both formats (i.e. taxonomic
+abundance table, sample metadata, taxonomic table, phylogenetic tree,
+sequence information). This is useful for instance when additional
+methods are available for `phyloseq`.
+
+```{r}
+#| label: convert_phyloseq2
+#| message: false
+
+# convert TSE to phyloseq
+GlobalPatterns_phyloseq2 <- convertToPhyloseq(GlobalPatterns_TSE)
+GlobalPatterns_phyloseq2
+```
+
+Conversion is possible between other data formats. Interested readers
+can refer to the following functions:
+
+- [convertFromDADA2](https://microbiome.github.io/mia/reference/convertFromDADA2.html)
+- [convertToBIOM / convertFromBIOM](https://microbiome.github.io/mia/reference/convertFromBIOM.html)
+
 ## Data resources {#sec-example-data}
 
 Open demonstration data for testing and benchmarking purposes is
 available from multiple locations. This chapter introduces some options.
-The other chapters of this book provide ample examples about the use of
-the data.
+The data sets used in this book are described in [@sec-data-sets].
 
 ### Package data {#sec-package-data}
 
