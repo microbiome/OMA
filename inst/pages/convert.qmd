@@ -61,9 +61,70 @@ can refer to the following functions:
 - [convertFromDADA2](https://microbiome.github.io/mia/reference/convertFromDADA2.html)
 - [convertToBIOM / convertFromBIOM](https://microbiome.github.io/mia/reference/convertFromBIOM.html)
 
-## Exporting data container {#sec-exporting-data-container}
+## Exporting {#sec-exporting-data-container}
 
-### Export TreeSummarizedExperiment
+There are two main ways to export data. The whole data container can be saved
+to a file, which preserves all of its components and allows loading it back
+later as the same object. Alternatively, the data can be exported as tables,
+which can be opened with other tools, such as spreadsheet programs or other
+programming languages, but which do not preserve the structure of the object.
+
+### Save the data container {#sec-save-data-container}
+
+#### RDS files {#sec-rds}
+
+The simplest way to save any R object, including `TreeSE` and
+`MultiAssayExperiment`, is to write it to an RDS file with `saveRDS()`. The
+file can be loaded back with `readRDS()`.
+
+```{r}
+#| label: save_rds
+#| eval: false
+
+data(GlobalPatterns, package = "mia")
+tse <- GlobalPatterns
+
+# Save TreeSE as an RDS file
+saveRDS(tse, "path/to/tse.rds")
+
+# Load the TreeSE back
+tse <- readRDS("path/to/tse.rds")
+```
+
+RDS files are convenient for saving and reloading data in R, for example
+between analysis sessions. However, they can only be read in R, and files
+saved with old package versions are not always fully compatible with newer
+versions. For long-term storage or for sharing data across tools, the
+alabaster format described below is more robust.
+
+#### alabaster {#sec-alabaster}
+
+The alabaster framework provides an alternative to RDS files. It saves the
+data container as a directory of files in standard formats, which are not tied
+to R. This makes the data easier to store long term and to share with other
+programming languages. The `saveObject()` function writes the data to a
+directory, and `readObject()` loads it back.
+
+```{r}
+#| label: alabaster
+#| eval: false
+
+# Requires the alabaster.treese package to be installed
+library(alabaster)
+
+# Save TreeSE into a directory
+saveObject(tse, "path/to/tse")
+
+# Load the TreeSE back
+tse <- readObject("path/to/tse")
+```
+
+The same functions can be used to save and load `MultiAssayExperiment`
+objects.
+
+### Export as table {#sec-export-table}
+
+#### TreeSummarizedExperiment
 
 Transforming a `TreeSE` object into a dataframe is straightforward with
 the `r BiocStyle::Biocpkg("mia")` package. The `meltSE` function is
@@ -83,9 +144,6 @@ library.
 #| label: write_feather
 #| eval: false
 
-data(GlobalPatterns, package = "mia")
-tse <- GlobalPatterns
-
 molten_tse <- meltSE(
     tse,
     add_row_data = TRUE,
@@ -95,8 +153,7 @@ molten_tse <- meltSE(
 
 # Export as a feather file
 library(feather)
-path <- "path/to/tse.feather"
-write_feather(molten_tse, path)
+write_feather(molten_tse, "path/to/tse.feather")
 ```
 
 Another way could be using a CSV file. This works the same as for a
@@ -125,20 +182,19 @@ library(SEtools)
 se2xls(tse, filename = "path/to/tse.xlsx")
 ```
 
-### Export MultiAssayExperiment
+#### MultiAssayExperiment
 
 Exporting a `MultiAssayExperiment` data container can also be done using
 `r BiocStyle::CRANpkg("feather")` package.
 
 ```{r}
-#| label: write_feater_mae
+#| label: write_feather_mae
 #| eval: false
 
 # Convert into a data.frame
 molten_mae <- longForm(mae)
 molten_mae <- data.frame(molten_mae)
-path <- "path/to/mae.feather"
-write_feather(molten_mae, path)
+write_feather(molten_mae, "path/to/mae.feather")
 ```
 
 And as a CSV file.
@@ -173,6 +229,7 @@ save the data.
 Useful functions:
 
 `utils::data()`, `mia::convertToPhyloseq()`, `mia::convertFromPhyloseq()`,
-`BiocGenerics::saveRDS()`, `base::readRDS`, `mia::meltSE()`, `utils::write.csv()`
+`BiocGenerics::saveRDS()`, `base::readRDS`, `alabaster.base::saveObject()`,
+`alabaster.base::readObject()`, `mia::meltSE()`, `utils::write.csv()`
 
 :::
