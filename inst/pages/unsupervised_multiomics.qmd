@@ -61,12 +61,11 @@ mae <- HintikkaXOData
 ```
 
 For Joint-RPCA, we agglomerate the microbiome data to genus level and filter
-out rare genera with `filterRPCAInput()`. Filtering must be done on
-untransformed counts. Then, we apply the rclr transformation. We set
-`impute = FALSE`, because Joint-RPCA handles the zeros, i.e., missing values,
-itself through matrix completion. The metabolite concentrations are
-log10-transformed. The biomarker data contains zeros, so instead of a log
-transformation, we standardize each biomarker.
+out rare genera. Filtering must be done on untransformed counts. Then, we
+apply the rclr transformation. We set `impute = FALSE`, because Joint-RPCA
+handles the zeros, i.e., missing values, itself through matrix completion. The
+metabolite concentrations are log10-transformed. The biomarker data contains
+zeros, so instead of a log transformation, we standardize each biomarker.
 
 ```{r}
 #| label: jrpca_preprocess
@@ -75,10 +74,8 @@ transformation, we standardize each biomarker.
 mae[["microbiota"]] <- agglomerateByRank(mae[["microbiota"]], rank = "Genus")
 
 # Remove genera that are present in 10% or less of the samples
-mae[["microbiota"]] <- filterRPCAInput(
-    mae[["microbiota"]],
-    min.feature.frequency = 0.1
-)
+tse <- mae[["microbiota"]]
+mae[["microbiota"]] <- tse[rowMeans(assay(tse, "counts") > 0) > 0.1, ]
 
 # Apply rclr transformation without imputing zeros
 mae[["microbiota"]] <- transformAssay(
@@ -405,8 +402,7 @@ as a network.
 Useful functions:
 
 `utils::data()`, `MultiAssayExperiment::experiments()`,
-`mia::agglomerateByRank()`, `mia::filterRPCAInput()`,
-`mia::transformAssay()`, `mia::addJointRPCA()`,
+`mia::agglomerateByRank()`, `mia::transformAssay()`, `mia::addJointRPCA()`,
 `miaViz::plotJointRPCAExplainedVariance()`, `miaViz::plotJointRPCA()`,
 `miaViz::plotJointRPCALoadings()`, `miaViz::plotJointRPCACovariance()`,
 `miaViz::plotJointRPCANetwork()`
