@@ -248,35 +248,40 @@ histogram (@fig-subsetting-sd-histogram).
 
 ```{r}
 #| label: fig-subsetting-sd-histogram
-#| fig-cap: "Histogram of the log-transformed standard deviations of feature counts in the GlobalPatterns data set."
+#| fig-cap: "Histogram of the standard deviations of feature counts in the GlobalPatterns data set, shown on a logarithmic x-axis."
+#| warning: false
 
-# Calculate
-rowData(tse)[["sd"]] <- rowSds(assay(tse, "counts"))
+library(miaViz)
+
+# Calculate per-feature QC metrics, including standard deviation
+tse <- addQC(tse, assay.type = "counts", by = "rows")
+
 # Plot
-hist(log(rowData(tse)[["sd"]]))
+plotHistogram(tse, row.var = "sd") +
+    scale_x_log10()
 ```
 
-The histogram uses log-transformed standard deviations only to make the range
-of values easier to inspect; the values stored in `rowData(tse)[["sd"]]`
-remain on their original scale. Features with a standard deviation of zero
-are constant across all samples. Therefore, selecting values greater than
-zero removes only these zero-variance features. Because the SD is calculated
-from the counts assay, this identifies features that are invariant in the
-raw counts. For filtering variance after normalization or transformation,
+`addQC()` stores the metrics in `rowData()`; the standard deviations are in
+`rowData(tse)[["sd"]]`. The logarithmic x-axis only makes the range of values
+easier to inspect; the stored values remain on their original scale. Features
+with a standard deviation of zero cannot be shown on a logarithmic axis, so
+they are left out of the histogram.
+
+Features with a standard deviation of zero are constant across all samples.
+Therefore, selecting values greater than zero removes only these
+zero-variance features. Because `addQC()` calculates the SD from the counts
+assay by default, this identifies features that are invariant in the raw
+counts. For filtering variance after normalization or transformation,
 calculate the SD from the corresponding assay instead.
 
-The filtering can be written with the `filter()` function from the
-`r BiocStyle::Biocpkg("tidySummarizedExperiment")` package, which brings the
-tidyverse syntax to `SummarizedExperiment` objects, including `TreeSE`
-(see also the tidy R programming section in [@sec-datawrangling]). Here we keep
-the features with a standard deviation above zero.
+To filter the data, we select the rows whose standard deviation exceeds the
+desired threshold. Here, the threshold is zero, as we want to keep only
+features that vary across samples.
 
 ```{r}
 #| label: filter_sd
 
-library(tidySummarizedExperiment)
-
-tse_sub <- tse |> filter(sd > 0)
+tse_sub <- tse[rowData(tse)[["sd"]] > 0, ]
 tse_sub
 ```
 
@@ -284,6 +289,25 @@ After filtering, the dataset now contains `r nrow(tse_sub)` features,
 compared to the original `r nrow(tse)` features. This means we are left
 with features that exhibit variance. A larger threshold could be used when
 the goal is to remove low-variance features as well.
+
+::: callout-tip
+## Tidy alternative
+
+If you are more familiar with tidyverse syntax, the same filtering can be
+done with the `filter()` function from the
+`r BiocStyle::Biocpkg("tidySummarizedExperiment")` package.
+
+```{r}
+#| label: filter_sd_tidy
+#| eval: false
+
+library(tidySummarizedExperiment)
+
+tse_sub <- tse |> filter(sd > 0)
+```
+
+See [@sec-tidy] for more information on tidy R programming.
+:::
 
 ## Subset based on prevalence {#sec-subset_prev}
 
