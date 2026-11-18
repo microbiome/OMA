@@ -49,7 +49,7 @@ field including online book Orchestrating Single-Cell Analysis in Bioconductor
 (OSCA) [@Amezquita2020]. `SCE`, on the other hand, is further derived from
 the `r BiocStyle::Biocpkg("SummarizedExperiment")` (`SE`) class.
 This hierarchical relationship among data containers means that all methods
-applicable to `SCE` and `SE` objects can also be applied to `TreeSE)` objects.
+applicable to `SCE` and `SE` objects can also be applied to `TreeSE` objects.
 
 - `r BiocStyle::Biocpkg("SummarizedExperiment")` (`SE`)
 [@R_SummarizedExperiment] is a generic
@@ -180,8 +180,7 @@ access to the latest updates.
 #| label: bioc_devel
 #| eval: false
 
-library(BiocManager)
-install("mia", version = "devel")
+BiocManager::install("mia", version = "devel")
 ```
 
 **GitHub development version** is usually the same as the Bioconductor
@@ -192,8 +191,7 @@ are not yet available in Bioconductor.
 #| label: github
 #| eval: false
 
-library(remotes)
-install_github("microbiome/mia")
+remotes::install_github("microbiome/mia")
 ```
 
 ### Key packages {#sec-key-packages}
@@ -204,55 +202,43 @@ required to run common tasks and most example workflows. You can then
 install additional packages as needed, depending on the specific
 requirements of your analysis.
 
-Let us first define a script to install packages.
-
-```{r}
-#| label: install_function
-
-install_packages <- function(pkg) {
-    # Get packages that are already installed installed
-    pkg_installed <- pkg[pkg %in% installed.packages()]
-
-    # Get packages that need to be installed
-    pkg_to_install <- setdiff(pkg, pkg_installed)
-
-    # Loads BiocManager into the session. Install it if it not already
-    # installed.
-    if (!require("BiocManager")) {
-        install.packages("BiocManager")
-        library("BiocManager")
-    }
-
-    # If there are packages that need to be installed, installs them with
-    # BiocManager.
-    if (length(pkg_to_install) > 0) {
-        install(pkg_to_install, ask = FALSE)
-    }
-
-    # Load all packages into session. Stop if there are packages that were not
-    # successfully loaded.
-    pkgs_not_loaded <- !sapply(pkg, require, character.only = TRUE)
-    pkgs_not_loaded <- names(pkgs_not_loaded)[pkgs_not_loaded]
-    if (length(pkgs_not_loaded) > 0) {
-        stop(
-            "Error in loading the following packages into the session: '",
-            paste0(pkgs_not_loaded, collapse = "', '"), "'"
-        )
-    }
-    return(TRUE)
-}
-```
-
 The core packages include `r BiocStyle::Biocpkg("mia")`,
 `r BiocStyle::Biocpkg("miaViz")`, `r BiocStyle::Biocpkg("maaslin3")`
 (for differential abundance), and `r BiocStyle::CRANpkg("mikropml")`
 (for supervised ML).
 
+Bioconductor packages are installed with the
+`r BiocStyle::CRANpkg("BiocManager")` package. First, install
+`r BiocStyle::CRANpkg("BiocManager")` if you do not have it yet.
+
+```{r}
+#| label: install_biocmanager
+#| eval: false
+
+install.packages("BiocManager")
+```
+
+Then, install the core packages. `BiocManager::install()` installs both
+Bioconductor and CRAN packages.
+
 ```{r}
 #| label: install_key_packages
+#| eval: false
 
-pkgs <- c("mia", "miaViz", "maaslin3", "mikropml")
-install_packages(pkgs)
+BiocManager::install(c("mia", "miaViz", "maaslin3", "mikropml"))
+```
+
+Installed packages are loaded into the R session with `library()`. If a
+package loads without an error, it was installed successfully.
+
+```{r}
+#| label: load_key_packages
+#| message: false
+
+library(mia)
+library(miaViz)
+library(maaslin3)
+library(mikropml)
 ```
 
 ### All packages
@@ -264,12 +250,11 @@ this book via the following command:
 #| label: install_packages
 #| eval: false
 
-library(remotes)
-install_github("microbiome/OMA", dependencies = TRUE, upgrade = TRUE)
+remotes::install_github("microbiome/OMA", dependencies = TRUE, upgrade = TRUE)
 ```
 
-Optionally, you can install all packages or just certain ones with the
-following script.
+Alternatively, you can install the packages from the list of all packages
+used in this book.
 
 ```{r}
 #| label: all_packages
@@ -283,7 +268,7 @@ df <- read.csv(url)
 packages <- df[[1]]
 
 # Install packages
-install_packages(packages)
+BiocManager::install(packages)
 ```
 
 ### Docker container
