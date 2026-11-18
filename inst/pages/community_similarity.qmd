@@ -95,12 +95,14 @@ library(patchwork)
 local({
     # Toy abundance table: 6 samples (two groups) x 5 taxa
     counts <- matrix(
-        c(30, 25, 5, 10, 30,
-          40, 10, 10, 5, 35,
-          20, 35, 12, 20, 13,
-          8, 15, 35, 30, 12,
-          15, 5, 30, 20, 30,
-          5, 20, 25, 45, 5),
+        c(
+            30, 25, 5, 10, 30,
+            40, 10, 10, 5, 35,
+            20, 35, 12, 20, 13,
+            8, 15, 35, 30, 12,
+            15, 5, 30, 20, 30,
+            5, 20, 25, 45, 5
+        ),
         nrow = 6, byrow = TRUE,
         dimnames = list(paste0("S", 1:6), paste0("Taxon ", LETTERS[1:5]))
     )
@@ -110,7 +112,8 @@ local({
     # Abundance table
     tab <- data.frame(
         sample = factor(rep(rownames(counts), ncol(counts)),
-                        levels = rev(rownames(counts))),
+            levels = rev(rownames(counts))
+        ),
         taxon = rep(colnames(counts), each = nrow(counts)),
         value = as.vector(counts)
     )
@@ -119,13 +122,16 @@ local({
         scale_fill_gradient(low = "#f2f2f2", high = "#0087af", guide = "none") +
         labs(title = "1. Abundance table", x = NULL, y = NULL) +
         theme_minimal(base_size = 12) +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1),
-              panel.grid = element_blank())
+        theme(
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            panel.grid = element_blank()
+        )
     # Lower triangle of the dissimilarity matrix
     dd <- data.frame(
         s1 = factor(rep(rownames(dm), ncol(dm)), levels = rownames(dm)),
         s2 = factor(rep(colnames(dm), each = nrow(dm)),
-                    levels = rev(colnames(dm))),
+            levels = rev(colnames(dm))
+        ),
         value = as.vector(dm)
     )
     dd <- dd[as.integer(dd$s1) < (nrow(dm) + 1 - as.integer(dd$s2)), ]
@@ -142,13 +148,17 @@ local({
     ord <- data.frame(pcoa$points, sample = rownames(counts), group = group)
     p3 <- ggplot(ord, aes(X1, X2, colour = group)) +
         geom_point(size = 3) +
-        geom_text(aes(label = sample), vjust = -1, size = 3.2,
-                  show.legend = FALSE) +
+        geom_text(aes(label = sample),
+            vjust = -1, size = 3.2,
+            show.legend = FALSE
+        ) +
         scale_colour_manual(values = c("#0072B2", "#D55E00"), name = NULL) +
         scale_y_continuous(expand = expansion(mult = 0.25)) +
-        labs(title = "3. Ordination (PCoA)",
-             x = paste0("PCoA 1 (", expl[1], "%)"),
-             y = paste0("PCoA 2 (", expl[2], "%)")) +
+        labs(
+            title = "3. Ordination (PCoA)",
+            x = paste0("PCoA 1 (", expl[1], "%)"),
+            y = paste0("PCoA 2 (", expl[2], "%)")
+        ) +
         theme_minimal(base_size = 12) +
         theme(legend.position = "bottom", axis.text = element_blank())
     p1 + p2 + p3 + plot_layout(widths = c(1, 1, 1))
@@ -338,22 +348,32 @@ local({
     p1 <- ggplot(ord, aes(PC1, PC2, colour = group)) +
         geom_segment(aes(xend = PC1.c, yend = PC2.c), alpha = 0.4) +
         geom_point(size = 2.5) +
-        geom_point(data = cen, shape = 4, size = 5, stroke = 2,
-                   colour = "black") +
+        geom_point(
+            data = cen, shape = 4, size = 5, stroke = 2,
+            colour = "black"
+        ) +
         scale_colour_manual(values = cols, name = NULL) +
-        labs(title = "Within-group spread vs. distance between centroids",
-             x = "PCoA 1", y = "PCoA 2") +
+        labs(
+            title = "Within-group spread vs. distance between centroids",
+            x = "PCoA 1", y = "PCoA 2"
+        ) +
         theme_minimal(base_size = 12) +
-        theme(legend.position = "bottom", axis.text = element_blank(),
-              plot.title = element_text(size = 12))
+        theme(
+            legend.position = "bottom", axis.text = element_blank(),
+            plot.title = element_text(size = 12)
+        )
     p2 <- ggplot(data.frame(f = f_null), aes(f)) +
         geom_histogram(bins = 30, fill = "grey75", colour = "white") +
         geom_vline(xintercept = f_obs, colour = "#D55E00", linewidth = 1) +
-        annotate("text", x = f_obs, y = Inf, vjust = 1.5, hjust = 1.05,
-                 label = sprintf("Observed F = %.1f\np = %.3f", f_obs, p_val),
-                 colour = "#D55E00", size = 3.8) +
-        labs(title = "Pseudo-F after permuting the group labels",
-             x = "Pseudo-F", y = "Permutations") +
+        annotate("text",
+            x = f_obs, y = Inf, vjust = 1.5, hjust = 1.05,
+            label = sprintf("Observed F = %.1f\np = %.3f", f_obs, p_val),
+            colour = "#D55E00", size = 3.8
+        ) +
+        labs(
+            title = "Pseudo-F after permuting the group labels",
+            x = "Pseudo-F", y = "Permutations"
+        ) +
         theme_minimal(base_size = 12) +
         theme(plot.title = element_text(size = 12))
     p1 + p2
