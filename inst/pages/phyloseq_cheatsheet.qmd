@@ -280,14 +280,14 @@ tse_nomock_bacteria
 
 ## Alpha diversity
 
-*phyloseq:* `estimate_richness()` · *TreeSE:* `estimateDiversity()`
+*phyloseq:* `estimate_richness()` · *TreeSE:* `addAlpha()`
 
 Now we know how data stored in `TreeSE` can be accessed and the `TreeSE` data
 objects created. Let's look at how we can calculate alpha diversity using
 `r BiocStyle::Biocpkg("mia")` compared to `r BiocStyle::Biocpkg("phyloseq")`
 package.
 
-The `r BiocStyle::Biocpkg("mia")` command  `estimateDiversity()` will return a
+The `r BiocStyle::Biocpkg("mia")` command `addAlpha()` will return a
 `TreeSE` and the results are stored in `colData`, unlike the
 `r BiocStyle::Biocpkg("phyloseq")` command that outputs a data frame with
 just the diversity estimates.
@@ -319,7 +319,7 @@ relative abundance and CLR. We can check the assay names first.
 
 assayNames(tse) # Check the assay names
 
-tse <- estimateDiversity(tse, assay.type = "counts", index = "shannon") # Let's use counts
+tse <- addAlpha(tse, assay.type = "counts", index = "shannon") # Let's use counts
 # Inspect the new colData with added alpha diversity estimate
 colData(tse) |> names() # shannon has been added to the colData
 ```
@@ -427,14 +427,17 @@ This family level data object can again be conveniently stored in a `tse`
 object under `altExp`.
 
 `tax_glom()` removes the taxa which have not been assigned to the level given
-in taxrank by default (NArm = TRUE). So we will add the na.rm = TRUE to
-`agglomerateByRank()` function which is equivalent to the default behavior
-of `tax_glom()`.
+in taxrank by default (NArm = TRUE). `agglomerateByRank()` does the same by
+default (`empty.rm = TRUE`); we set it explicitly here to show the
+equivalence with `tax_glom()`.
 
 ```{r}
 #| label: agglomerateByRank
 
-altExp(tse, "Family") <- agglomerateByRank(tse, rank = "Family")
+altExp(tse, "Family") <- agglomerateByRank(
+    tse,
+    rank = "Family", empty.rm = TRUE
+)
 altExp(tse, "Family")
 ```
 
@@ -457,7 +460,7 @@ df <-
             "Plot ordination",
             "Subset taxa",
             "Subset samples",
-            "Aggromerate taxa"
+            "Agglomerate taxa"
         ),
         phyloseq = c(
             "sample_data()",
@@ -472,11 +475,11 @@ df <-
             "tax_glom()"
         ),
         "mia/TreeSE" = c(
-            "Index columns",
-            "Index rows",
+            "colData()",
+            "rowData()",
             "assays()",
             "TreeSummarizedExperiment()",
-            "estimateDiversity()",
+            "addAlpha()",
             "addMDS()",
             "plotOrdination()",
             "Index rows",
