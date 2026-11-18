@@ -648,6 +648,56 @@ using the standard R syntax, e.g.,
 `formula = ~ patient_status + cohort + patient_status:cohort + total` or
 alternatively `formula = ~ patient_status * cohort + total`
 
+#### DPA with DiPPER {#sec-dpa-dipper}
+
+`r BiocStyle::Biocpkg("DiPPER")` [@Pelto2026] is a Bayesian method for DPA. It
+fits a logistic regression model for each taxon, and the models are connected
+by a common hierarchical prior for the variable of interest. This has some
+potential advantages over standard logistic regression. The estimates and
+their uncertainty intervals remain finite even when a taxon is absent from all
+samples of one group, where standard logistic regression fails. The
+hierarchical shrinkage also adjusts the results for multiple testing, so no
+separate q-value correction is needed. Furthermore, DiPPER can analyze
+longitudinal data by including a random intercept for the subjects in the
+model. DiPPER works directly with `TreeSE` data and can control for the
+sequencing depth.
+
+DiPPER fits its models with the Stan software, which needs the
+[CmdStan](https://mc-stan.org/users/interfaces/cmdstan) backend to be installed
+separately (see the [installation instructions](https://github.com/jepelt/DiPPER#installation)).
+For this reason, the code below is not run in this book. It repeats the
+analysis above, comparing ADHD and control groups while controlling for
+`cohort`. The first term of the formula is the variable of interest, and
+`read.depth = TRUE` controls for the sequencing depth of the counts.
+
+```{r}
+#| label: run_dpa_dipper
+#| eval: false
+
+library(DiPPER)
+
+fit_dipper <- dipper(
+    tse = tse,
+    assay.type = "counts",
+    data.type = "counts", # Presence is defined as a count above zero
+    formula = ~ patient_status + cohort,
+    read.depth = TRUE # Control for the sequencing depth
+)
+
+# Results for patient_status: log-odds ratio estimates, 95% credible
+# intervals and pseudo q-values
+res_dipper <- summary(fit_dipper)
+
+# Forest plot of the taxa whose credible interval excludes zero
+plot(fit_dipper)
+```
+
+The `summary()` gives, for each taxon, the estimated difference in prevalence
+as a log-odds ratio with its credible interval. The `pseudo_q` value resembles
+a multiplicity-adjusted p-value, and a taxon is flagged as `significant` when
+its credible interval excludes zero. See the package vignette for more
+details, including an example with longitudinal data.
+
 ### Positive abundances {#sec-daa-pos}
 
 It may sometimes be biologically relevant to analyze only the positive
