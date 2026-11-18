@@ -173,8 +173,8 @@ used by default. However, the optional argument `tree` must be provided if
 As alpha diversity metrics typically summarize high-dimensional samples into
 singular values, many visualization approaches are available. Once calculated,
 these metrics can be analyzed directly from the `colData`, for example, by
-plotting them using `plotColData()` from the `r BiocStyle::Biocpkg("scater")`
-package [@R_scater].
+plotting them using `plotBoxplot()` from the `r BiocStyle::Biocpkg("miaViz")`
+package.
 Here, we use the `observed` species as a measure of richness. Let's visualize
 the results against selected `colData` variables (sample type and final
 barcode) in @fig-alpha-richness.
@@ -184,12 +184,12 @@ barcode) in @fig-alpha-richness.
 #| fig-cap: "Observed richness of the GlobalPatterns samples grouped by sample type (x-axis), with points coloured by final barcode."
 #| message: false
 
-library(scater)
-plotColData(
+library(miaViz)
+plotBoxplot(
     tse,
-    "observed_richness",
-    "SampleType",
-    colour_by = "Final_Barcode"
+    col.var = "observed_richness",
+    x = "SampleType",
+    colour.by = "Final_Barcode"
 ) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     labs(x = "Sample types", y = expression(Richness[observed_richness]))
@@ -206,6 +206,7 @@ Shannon and Faith indices as a scatter plot.
 #| fig-cap: "Scatter plot of Shannon index (x-axis) against Faith's phylogenetic diversity (y-axis) in the GlobalPatterns samples, with a fitted linear regression line and its confidence band."
 #| fig-width: 6.5
 
+library(scater)
 plotColData(tse, x = "shannon_diversity", y = "faith_diversity") +
     labs(x = "Shannon index", y = "Faith (phylogenetic) index") +
     geom_smooth(method = "lm")
@@ -233,31 +234,27 @@ plotting (@fig-alpha-all-indices).
 library(patchwork)
 
 # Create the plots
-indices <- c(
-    "observed_richness", "dbp_dominance", "shannon_diversity",
-    "faith_diversity"
+p1 <- plotBoxplot(
+    tse, col.var = "observed_richness", x = "SampleType", fill.by = "SampleType"
 )
-plots <- lapply(
-    indices,
-    plotColData,
-    object = tse,
-    x = "SampleType",
-    colour_by = "SampleType"
+p2 <- plotBoxplot(
+    tse, col.var = "dbp_dominance", x = "SampleType", fill.by = "SampleType"
+)
+p3 <- plotBoxplot(
+    tse, col.var = "shannon_diversity", x = "SampleType", fill.by = "SampleType"
+)
+p4 <- plotBoxplot(
+    tse, col.var = "faith_diversity", x = "SampleType", fill.by = "SampleType"
 )
 
-# Fine-tune visual appearance
-plots <- lapply(
-    plots, "+",
+# Combine the plots and remove the sample type labels from the x-axis
+wrap_plots(p1, p2, p3, p4, ncol = 1) +
+    plot_layout(guides = "collect") &
     theme(
         axis.text.x = element_blank(),
         axis.title.x = element_blank(),
         axis.ticks.x = element_blank()
     )
-)
-
-# Plot the figures
-wrap_plots(plots, ncol = 1) +
-    plot_layout(guides = "collect")
 ```
 
 All these different metrics provide information from different aspects of alpha

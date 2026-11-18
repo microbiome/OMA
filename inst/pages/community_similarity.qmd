@@ -281,8 +281,8 @@ contained by the `addMDS()` and `addNMDS()` functions.
 ```{r}
 #| label: addMDS
 
-# Load package to plot reducedDim
-library(scater)
+# Load package to plot ordinations
+library(miaViz)
 
 # Run PCoA on relabundance assay with Bray-Curtis distances
 tse <- addMDS(
@@ -295,8 +295,8 @@ tse <- addMDS(
 ```
 
 Sample dissimilarity can be visualized on a lower-dimensional display
-(typically 2D) using the `plotReducedDim()` function from the
-`r BiocStyle::Biocpkg("scater")` package.
+(typically 2D) using the `plotOrdination()` function from the
+`r BiocStyle::Biocpkg("miaViz")` package.
 This also provides tools to incorporate additional information encoded by
 color, shape, size and other aesthetics. Can you find any difference between
 the groups in @fig-community-mds-bray?
@@ -305,17 +305,11 @@ the groups in @fig-community-mds-bray?
 #| label: fig-community-mds-bray
 #| fig-cap: "MDS (PCoA) plot based on the Bray-Curtis dissimilarities of relative abundances in the GlobalPatterns data set. Points are coloured by group (faecal or non-faecal sample), and axis labels show the proportion of variance explained."
 
-# Create ggplot object
-p <- plotReducedDim(tse, "MDS_bray", colour_by = "Group")
-
-# Calculate explained variance
-e <- attr(reducedDim(tse, "MDS_bray"), "eig")
-rel_eig <- e / sum(e[e > 0])
-
-# Add explained variance for each axis
-p <- p + labs(
-    x = paste("PCoA 1 (", round(100 * rel_eig[[1]], 1), "%", ")", sep = ""),
-    y = paste("PCoA 2 (", round(100 * rel_eig[[2]], 1), "%", ")", sep = "")
+# Create ggplot object with explained variance in the axis labels
+p <- plotOrdination(
+    tse, "MDS_bray",
+    colour.by = "Group",
+    add.expl.var = TRUE
 )
 
 p
@@ -391,15 +385,13 @@ suitable one to visualize beta diversity in the light of the research question.
 library(patchwork)
 
 # Generate plots for all 4 reducedDims
-plots <- lapply(
-    c("MDS_bray", "MDS_aitchison", "NMDS_bray", "NMDS_aitchison"),
-    plotReducedDim,
-    object = tse,
-    colour_by = "Group"
-)
+p1 <- plotOrdination(tse, "MDS_bray", colour.by = "Group")
+p2 <- plotOrdination(tse, "MDS_aitchison", colour.by = "Group")
+p3 <- plotOrdination(tse, "NMDS_bray", colour.by = "Group")
+p4 <- plotOrdination(tse, "NMDS_aitchison", colour.by = "Group")
 
 # Generate multi-panel plot
-wrap_plots(plots) +
+wrap_plots(p1, p2, p3, p4) +
     plot_layout(guides = "collect")
 ```
 
@@ -422,7 +414,7 @@ tse <- addMDS(
     assay.type = "counts"
 )
 
-plotReducedDim(tse, "unifrac", colour_by = "Group")
+plotOrdination(tse, "unifrac", colour.by = "Group")
 ```
 
 ### Rarefaction {#sec-rarefaction_ordination}
@@ -485,16 +477,12 @@ Now we are ready for plot non-rarefied and rarefied MDS plots side-by-side
 #| fig-cap: "MDS plots based on Aitchison distances of the GlobalPatterns data set without rarefaction (left) and with rarefaction (right). Points are coloured by sample type."
 #| fig-width: 12
 
-# Generate plots for non-rarefied and rarefied Bray-Curtis distances scaled by MDS
-plots <- lapply(
-    c("MDS_aitchison", "MDS_aitchison_rarefied"),
-    plotReducedDim,
-    object = tse,
-    colour_by = "SampleType"
-)
+# Generate plots for non-rarefied and rarefied Aitchison distances scaled by MDS
+p1 <- plotOrdination(tse, "MDS_aitchison", colour.by = "SampleType")
+p2 <- plotOrdination(tse, "MDS_aitchison_rarefied", colour.by = "SampleType")
 
 # Generate multi-panel plot
-wrap_plots(plots) +
+wrap_plots(p1, p2) +
     plot_layout(guides = "collect")
 ```
 
@@ -555,15 +543,16 @@ subsampling of a given assay within a `TreeSummarizedExperiment` dataset.
 
 ### Other methods {#sec-other-ord-methods}
 
-Other dimension reduction methods, such as PCA and UMAP, are inherited from the
-`r BiocStyle::Biocpkg("scater")` package. PCA is shown in @fig-community-pca and
-UMAP in @fig-community-umap.
+Other dimension reduction methods, such as PCA and UMAP, are also available.
+PCA is calculated with `addPCA()` from `r BiocStyle::Biocpkg("mia")`, and UMAP
+with `runUMAP()` from the `r BiocStyle::Biocpkg("scater")` package. PCA is
+shown in @fig-community-pca and UMAP in @fig-community-umap.
 
 ```{r}
 #| label: fig-community-pca
-#| fig-cap: "PCA plot of the counts in the GlobalPatterns data set containing samples from different sources. Points are coloured by group (faecal or non-faecal sample)."
+#| fig-cap: "PCA plot of the counts in the GlobalPatterns data set containing samples from different sources. Points are coloured by group (faecal or non-faecal sample), and axis labels show the proportion of variance explained."
 
-tse <- runPCA(
+tse <- addPCA(
     tse,
     name = "PCA",
     assay.type = "counts",
@@ -571,7 +560,7 @@ tse <- runPCA(
 )
 
 # Visualize the result
-plotReducedDim(tse, "PCA", colour_by = "Group")
+plotOrdination(tse, "PCA", colour.by = "Group", add.expl.var = TRUE)
 ```
 
 As mentioned before, applicability of the different methods depends on your
@@ -579,7 +568,9 @@ sample set and research question.
 
 ```{r}
 #| label: fig-community-umap
-#| fig-cap: "Pairwise scatter plots of the first three UMAP components of the GlobalPatterns data set containing samples from different sources. Points are coloured by group (faecal or non-faecal sample)."
+#| fig-cap: "UMAP plot of the first two components of the GlobalPatterns data set containing samples from different sources. Points are coloured by group (faecal or non-faecal sample)."
+
+library(scater)
 
 tse <- runUMAP(
     tse,
@@ -589,7 +580,7 @@ tse <- runUMAP(
 )
 
 # Visualize the result
-plotReducedDim(tse, "UMAP", colour_by = "Group", ncomponents = c(1:3))
+plotOrdination(tse, "UMAP", colour.by = "Group")
 ```
 
 ### Explained variance
@@ -961,28 +952,24 @@ most_abundant_percent <- round(
     1
 )
 
-# Retrieving the explained variance
-e <- attr(reducedDim(tse_genus, "PCoA_BC"), "eig")
-var_explained <- e / sum(e[e > 0]) * 100
-
 # Define colors for visualization
 my_colors <- c(
     "black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"
 )
 
 # Visualization
-p <- plotReducedDim(tse_genus, "PCoA_BC", colour_by = "most_abundant") +
+p <- plotOrdination(
+    tse_genus, "PCoA_BC",
+    colour.by = "most_abundant",
+    add.expl.var = TRUE
+) +
     scale_colour_manual(
         values = my_colors,
         labels = paste0(
             names(most_abundant_percent), "(", most_abundant_percent, "%)"
         )
     ) +
-    labs(
-        x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
-        y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
-        color = ""
-    )
+    labs(color = "")
 
 p
 ```
@@ -994,51 +981,18 @@ Similarly, we visualize and compare the sub-population
 #| label: fig-community-pcoa-dominant-groups
 #| code-fold: true
 #| code-summary: "Show the plotting code"
-#| fig-cap: "Bray-Curtis PCoA of the GlobalPatterns samples coloured by their dominant taxon, shown separately for faecal and non-faecal samples."
-#| fig-subcap:
-#|   - "Faecal samples (Group = TRUE)."
-#|   - "Non-faecal samples (Group = FALSE)."
-#| layout-ncol: 2
+#| fig-cap: "Bray-Curtis PCoA of the GlobalPatterns samples coloured by their dominant taxon, shown separately for non-faecal (FALSE) and faecal (TRUE) samples."
+#| fig-width: 10
 
-# Calculating the frequencies and percentages for both categories
-freq_TRUE <- table(as.character(most_abundant[tse_genus$Group]))
-freq_FALSE <- table(as.character(most_abundant[!tse_genus$Group]))
-percent_TRUE <- round(freq_TRUE / sum(freq_TRUE) * 100, 1)
-percent_FALSE <- round(freq_FALSE / sum(freq_FALSE) * 100, 1)
-
-# Visualization with Group == TRUE
-plotReducedDim(
-    tse_genus[, colData(tse_genus)$Group == TRUE], "PCoA_BC",
-    colour_by = "most_abundant"
+# Visualization split by group
+plotOrdination(
+    tse_genus, "PCoA_BC",
+    colour.by = "most_abundant",
+    facet.by = "Group",
+    add.expl.var = TRUE
 ) +
-
-    scale_colour_manual(
-        values = my_colors,
-        labels = paste0(names(percent_TRUE), "(", percent_TRUE, "%)")
-    ) +
-
-    labs(
-        x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
-        y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
-        title = "Group = TRUE", color = ""
-    )
-
-# Visualization with Group == FALSE
-plotReducedDim(
-    tse_genus[, colData(tse_genus)$Group == FALSE], "PCoA_BC",
-    colour_by = "most_abundant"
-) +
-
-    scale_colour_manual(
-        values = my_colors,
-        labels = paste0(names(percent_FALSE), "(", percent_FALSE, "%)")
-    ) +
-
-    labs(
-        x = paste("PC 1 (", round(var_explained[1], 1), "%)"),
-        y = paste("PC 2 (", round(var_explained[2], 1), "%)"),
-        title = "Group = FALSE", color = ""
-    )
+    scale_colour_manual(values = my_colors) +
+    labs(color = "")
 ```
 
 ::: {.callout-tip}
