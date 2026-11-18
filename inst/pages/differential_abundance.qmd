@@ -752,6 +752,73 @@ using the standard R syntax, e.g.,
 `formula = ~ patient_status + cohort + patient_status:cohort + total` or
 alternatively `formula = ~ patient_status * cohort + total`
 
+#### DPA with DiPPER {#sec-dpa-dipper}
+
+`r BiocStyle::Biocpkg("DiPPER")` [@Pelto2026] is a Bayesian method for DPA
+that connects the logistic regression models of the taxa with a common
+hierarchical prior. Unlike standard logistic regression, it gives finite
+estimates even when a taxon is absent from one group, and its results are
+adjusted for multiple testing without a separate q-value correction. It also
+supports longitudinal data and works directly with `TreeSE`.
+
+The code below repeats the analysis above. It is not run when the book is
+built, as DiPPER needs the separately installed
+[CmdStan](https://github.com/jepelt/DiPPER#installation) backend. Instead,
+the results shown below were computed beforehand with DiPPER 0.99.1 (see
+`inst/scripts/dipper_precompute.R` in the book repository). The first term of
+the formula is the variable of interest.
+
+```{r}
+#| label: run_dpa_dipper
+#| eval: false
+
+library(DiPPER)
+
+fit_dipper <- dipper(
+    tse = tse,
+    assay.type = "counts",
+    data.type = "counts", # Presence is defined as a count above zero
+    formula = ~ patient_status + cohort,
+    read.depth = TRUE # Control for the sequencing depth
+)
+
+# Results for patient_status: log-odds ratio estimates, 95% credible
+# intervals and pseudo q-values
+res_dipper <- summary(fit_dipper)
+
+# Forest plot of the taxa whose credible interval excludes zero
+plot(fit_dipper)
+```
+
+The `summary()` gives log-odds ratio estimates (`log_or`) with 95% credible
+intervals (`lwr`, `upr`) and a `pseudo_q` value that resembles a q-value. A
+taxon is flagged as `significant` when its credible interval excludes zero.
+
+```{r}
+#| label: results_dpa_dipper
+#| echo: false
+
+# Precomputed results of summary(fit_dipper)
+res_dipper <- read.csv("../extdata/dipper_tengeler2020.csv")
+
+res_dipper |>
+    head() |>
+    kable()
+```
+
+![Differential prevalence between the ADHD and control groups estimated with
+DiPPER, controlling for cohort and sequencing depth. The points are the
+odds ratio estimates and the lines their 95% credible intervals, shown for the
+genera whose interval excludes one. Computed beforehand with
+DiPPER 0.99.1.](figures/dipper_tengeler2020.png){#fig-dpa-dipper width="80%"
+fig-alt="Forest plot of differential prevalence odds ratios on a log scale with a dashed vertical line at one. Erysipelatoclostridium and the [Ruminococcus] gauvreauii group have odds ratios below one, that is, they are less prevalent in the ADHD group, while Barnesiella and Ruminococcaceae UCG-014 have odds ratios above one."}
+
+As with maaslin3 above, _Erysipelatoclostridium_ has the strongest evidence
+for a difference in prevalence, and it is less prevalent in the ADHD group
+(@fig-dpa-dipper). See the
+[DiPPER vignette](https://bioconductor.org/packages/devel/bioc/vignettes/DiPPER/inst/doc/DiPPER.html)
+for more information.
+
 ### Positive abundances {#sec-daa-pos}
 
 It may sometimes be biologically relevant to analyze only the positive
