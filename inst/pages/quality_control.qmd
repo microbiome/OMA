@@ -546,28 +546,47 @@ sequenced in several batches, make this easier.
 
 **Accounting for batch.** Often the simplest approach is to include the batch
 as a covariate in the statistical model, for instance in differential
-abundance analysis (see [@sec-daa-cov]) or in PERMANOVA. This keeps the
-original data unchanged.
+abundance analysis (see [@sec-daa-cov]) or in PERMANOVA (see
+[@sec-permanova]). This keeps the original data unchanged.
 
 **Correcting the data.** When the batch-corrected data itself is needed, for
 example for visualization or for methods that cannot include covariates,
-several methods are available:
+several Bioconductor packages are available. They differ in whether they were
+designed for microbiome data and in how directly they work with
+`TreeSummarizedExperiment` (`TreeSE`) data.
+
+*Microbiome-specific tools:*
 
 - `r BiocStyle::Biocpkg("PLSDAbatch")` corrects batch effects with a
-multivariate framework designed for microbiome data [@Wang2023]. It is
-actively maintained and works with `TreeSummarizedExperiment` data.
-- `r BiocStyle::Biocpkg("MMUPHin")` adjusts for study or batch effects
-especially in meta-analyses of several studies [@Ma2022].
-- [ConQuR](https://github.com/wdl2459/ConQuR) removes batch effects with
-conditional quantile regression [@Ling2022], but it is not available in
-Bioconductor and no longer actively developed.
+multivariate framework based on partial least squares discriminant analysis
+[@Wang2023]. Its functions take an abundance matrix, which can be extracted
+from a `TreeSE` with `assay()`. The package provides its example data as
+`TreeSE`.
+- `r BiocStyle::Biocpkg("MMUPHin")` adjusts for batch or study effects,
+especially in meta-analyses of several studies [@Ma2022]. It takes an
+abundance matrix and a data frame of sample metadata, which can be extracted
+from a `TreeSE` with `assay()` and `colData()`. `TreeSE` is not supported
+directly.
 - `r BiocStyle::Biocpkg("MBECS")` collects several correction methods and
-tools to evaluate them [@Olbrich2023], but it does not support
-`TreeSummarizedExperiment` data.
-- General-purpose methods from other fields, such as
-`r BiocStyle::Biocpkg("batchelor")` for single-cell data and
-`r BiocStyle::Biocpkg("corral")`, which is based on correspondence analysis,
-can be applied as well, but they were not designed for microbiome data.
+tools to evaluate them [@Olbrich2023]. It accepts `phyloseq` objects or a list
+of an abundance matrix and sample metadata, but not `TreeSE`. The data can be
+converted with `convertToPhyloseq()`.
+
+*General-purpose tools:*
+
+- `r BiocStyle::Biocpkg("batchelor")` was developed for single-cell data. It
+accepts `TreeSE` directly, because `TreeSE` extends `SingleCellExperiment`.
+For instance, `regressBatches()` removes the batch effect from log-transformed
+data, such as clr-transformed abundances, with a linear model. It returns the
+corrected values as a new `SingleCellExperiment`, which can be added as an
+assay to the original `TreeSE`.
+- `r BiocStyle::Biocpkg("corral")` is based on correspondence analysis and
+accepts `TreeSE` directly. Its `corralm()` function returns the same object
+with a batch-integrated reduced-dimensional representation that can be used
+for ordination, but not corrected abundances.
+
+The general-purpose tools were not designed for microbiome data, so it should
+be checked that their assumptions suit the data.
 
 Correction methods can remove biological signal together with the batch
 effect, especially when batch and group are partly confounded, so the results
