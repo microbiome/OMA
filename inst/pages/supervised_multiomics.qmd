@@ -1,14 +1,5 @@
 # Supervised integration {#sec-supervised-multiomics}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 In the previous chapter ([@sec-unsupervised-multiomics]), we integrated omic
 layers without using any information on the outcome. The aim was to find the
 main shared patterns of variation in the data. In supervised integration, the
@@ -25,8 +16,8 @@ the layers can differ in their scale, distribution, and number of features.
 This chapter introduces two approaches for supervised integration:
 IntegratedLearner and DIABLO. IntegratedLearner is not yet available in
 Bioconductor, and DIABLO does not yet support `MultiAssayExperiment` data
-containers. Therefore, no code is run in this chapter. Instead, we describe the
-ideas behind the methods and point to further resources.
+containers [@Ramos2017]. Therefore, no code is run in this chapter. Instead,
+we describe the ideas behind the methods and point to further resources.
 
 ## IntegratedLearner {#sec-integratedlearner}
 
@@ -38,7 +29,7 @@ be used as the underlying models.
 ### Fusion strategies
 
 Multi-omic data can be combined in a predictive model at different stages.
-These strategies are often referred to as fusion strategies:
+These strategies are often referred to as fusion strategies (@fig-fusion):
 
 - **Early fusion** combines all omic layers into a single table, for example,
   by concatenating the features. A single model is then trained on the combined
@@ -48,13 +39,39 @@ These strategies are often referred to as fusion strategies:
 - **Late fusion** trains a separate model, i.e., a base learner, for each omic
   layer. The predictions of these models are then combined with a second-level
   model, i.e., a meta learner, which produces the final prediction. This
-  approach is also known as stacking. Each layer is modelled on its own terms,
-  but interactions between the layers are not taken into account.
+  approach is also known as stacking [@Wolpert1992]. Each layer is modelled
+  on its own terms, but interactions between the layers are not taken into
+  account.
 
 - **Intermediate fusion** integrates the layers during the model fitting. For
   example, cooperative learning [@Ding2022] encourages the predictions from
   different omic layers to agree with each other, which allows the model to
   exploit information shared between the layers.
+
+```{mermaid}
+%%| label: fig-fusion
+%%| fig-cap: "Fusion strategies for combining omic layers in a predictive model. Early fusion concatenates the layers before modelling, late fusion combines the predictions of layer-specific base learners with a meta learner, and intermediate fusion models the layers jointly."
+flowchart LR
+    subgraph early["Early fusion"]
+        direction TB
+        e1["Omic 1"] & e2["Omic 2"] --> ec["Combined<br/>table"] --> em["Model"] --> ep(["Prediction"])
+    end
+    subgraph late["Late fusion"]
+        direction TB
+        l1["Omic 1"] --> b1["Base<br/>learner"]
+        l2["Omic 2"] --> b2["Base<br/>learner"]
+        b1 & b2 --> meta["Meta<br/>learner"] --> lp(["Prediction"])
+    end
+    subgraph inter["Intermediate fusion"]
+        direction TB
+        i1["Omic 1"] & i2["Omic 2"] --> im["Joint model,<br/>layers agree"] --> ip(["Prediction"])
+    end
+    early ~~~ late ~~~ inter
+    classDef omic fill:#ffffff,stroke:#6c757d,color:#070707
+    classDef model fill:#e6f3f7,stroke:#0087af,color:#070707
+    class e1,e2,l1,l2,i1,i2 omic
+    class ec,em,b1,b2,meta,im model
+```
 
 IntegratedLearner is not yet available in Bioconductor. An example workflow
 using `MultiAssayExperiment` data is available in the
@@ -65,9 +82,9 @@ using `MultiAssayExperiment` data is available in the
 DIABLO (Data Integration Analysis for Biomarker Discovery using Latent Variable
 Approaches for Omics Studies) is a supervised integration method implemented in
 the `r BiocStyle::Biocpkg("mixOmics")` package [@Singh2019; @Rohart2017]. It
-extends sparse partial least squares discriminant analysis (sPLS-DA) to
-multiple omic layers. DIABLO identifies correlated features across the
-layers that discriminate between the outcome groups.
+extends sparse partial least squares discriminant analysis (sPLS-DA)
+[@LeCao2011] to multiple omic layers. DIABLO identifies correlated features
+across the layers that discriminate between the outcome groups.
 
 DIABLO does not yet support `MultiAssayExperiment` data containers. More
 information and examples can be found from the

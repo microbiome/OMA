@@ -1,26 +1,10 @@
 # Community similarity {#sec-community-similarity}
 
 ```{r}
-#| label: setup1
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
-```{r}
-#| label: setup2
+#| label: setup
 #| include: false
 
-# global knitr options
-knitr::opts_chunk$set(
-    message = FALSE,
-    fig.width = 10,
-    dpi = 300,
-    dev = "png",
-    dev.args = list(type = "cairo-png")
-)
+knitr::opts_chunk$set(fig.width = 10, dpi = 300)
 ```
 
 Beta diversity quantifies the dissimilarity between communities (multiple
@@ -28,11 +12,13 @@ samples), as opposed to alpha diversity, which focuses on variation within a
 community (one sample). In microbiome research, commonly used metrics
 of beta diversity include:
 
-- Bray-Curtis index (for compositional data)
+- Bray-Curtis index (for compositional data) [@Bray1957]
 - Jaccard index (for presence/absence data, ignoring abundance information)
+[@Jaccard1912]
 - Aitchison distance (Euclidean distance for clr-transformed abundances, aiming
-to avoid the compositionality bias)
-- Unifrac distance (takes into account the phylogenetic tree information).
+to avoid the compositionality bias) [@Aitchison1986]
+- Unifrac distance (takes into account the phylogenetic tree information)
+[@Lozupone2005].
 
 Notably, only some of these measures are actual _distances_, as this is a
 mathematical concept whose definition is not satisfied by certain ecological
@@ -73,14 +59,98 @@ detour through a third point.
 
 In practice, beta diversity is usually represented as a `dist` object. Such an
 object is a triangular matrix where the distance between each pair of samples
-is encoded by a specific cell. This distance matrix can then undergo
-ordination, which is an important ecological tool to reduce the dimensionality
-of data for a more efficient analysis and visualization. Ordination techniques
+is encoded by a specific cell (@fig-beta-workflow). This distance matrix can
+then undergo ordination, which is an important ecological tool to reduce the
+dimensionality of data for a more efficient analysis and visualization. Ordination techniques
 aim to capture as much essential information from the data as possible and turn
 it into a lower dimensional representation. While dimension reduction
 inevitably results in some information loss, commonly utilized ordination
 techniques aim to optimally preserve meaningful patterns of sample similarity,
 with the definition of “optimal” varying by method.
+
+```{r}
+#| label: fig-beta-workflow
+#| fig-cap: "From abundances to an ordination. Beta diversity compares the abundance profiles of each pair of samples (1) and stores the dissimilarities, here Bray-Curtis, in a triangular matrix (2). Ordination, here PCoA, places the samples in a low-dimensional space so that similar samples lie close to each other (3). Toy data."
+#| fig-alt: "Three panels from left to right. Panel 1 is a tile grid of six samples by five taxa shaded by abundance; panel 2 is a triangular matrix of pairwise dissimilarities with values printed in the cells; panel 3 is a scatter plot of the six samples on PCoA 1 and PCoA 2, coloured by Group 1 and Group 2."
+#| fig-width: 10
+#| fig-height: 3.8
+#| echo: false
+library(ggplot2)
+library(patchwork)
+# Toy data; run in local() so that helper objects do not leak into later
+# chunks.
+local({
+    # Toy abundance table: 6 samples (two groups) x 5 taxa
+    counts <- matrix(
+        c(
+            30, 25, 5, 10, 30,
+            40, 10, 10, 5, 35,
+            20, 35, 12, 20, 13,
+            8, 15, 35, 30, 12,
+            15, 5, 30, 20, 30,
+            5, 20, 25, 45, 5
+        ),
+        nrow = 6, byrow = TRUE,
+        dimnames = list(paste0("S", 1:6), paste0("Taxon ", LETTERS[1:5]))
+    )
+    group <- rep(c("Group 1", "Group 2"), each = 3)
+    d <- vegan::vegdist(counts, method = "bray")
+    dm <- as.matrix(d)
+    # Abundance table
+    tab <- data.frame(
+        sample = factor(rep(rownames(counts), ncol(counts)),
+            levels = rev(rownames(counts))
+        ),
+        taxon = rep(colnames(counts), each = nrow(counts)),
+        value = as.vector(counts)
+    )
+    p1 <- ggplot(tab, aes(taxon, sample, fill = value)) +
+        geom_tile(colour = "white") +
+        scale_fill_gradient(low = "#f2f2f2", high = "#0087af", guide = "none") +
+        labs(title = "1. Abundance table", x = NULL, y = NULL) +
+        theme_minimal(base_size = 12) +
+        theme(
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            panel.grid = element_blank()
+        )
+    # Lower triangle of the dissimilarity matrix
+    dd <- data.frame(
+        s1 = factor(rep(rownames(dm), ncol(dm)), levels = rownames(dm)),
+        s2 = factor(rep(colnames(dm), each = nrow(dm)),
+            levels = rev(colnames(dm))
+        ),
+        value = as.vector(dm)
+    )
+    dd <- dd[as.integer(dd$s1) < (nrow(dm) + 1 - as.integer(dd$s2)), ]
+    p2 <- ggplot(dd, aes(s1, s2, fill = value)) +
+        geom_tile(colour = "white") +
+        geom_text(aes(label = sprintf("%.2f", value)), size = 3) +
+        scale_fill_gradient(low = "#ffffff", high = "#E69F00", guide = "none") +
+        labs(title = "2. Dissimilarities", x = NULL, y = NULL) +
+        theme_minimal(base_size = 12) +
+        theme(panel.grid = element_blank())
+    # PCoA
+    pcoa <- cmdscale(d, k = 2, eig = TRUE)
+    expl <- round(100 * pcoa$eig[1:2] / sum(pcoa$eig[pcoa$eig > 0]))
+    ord <- data.frame(pcoa$points, sample = rownames(counts), group = group)
+    p3 <- ggplot(ord, aes(X1, X2, colour = group)) +
+        geom_point(size = 3) +
+        geom_text(aes(label = sample),
+            vjust = -1, size = 3.2,
+            show.legend = FALSE
+        ) +
+        scale_colour_manual(values = c("#0072B2", "#D55E00"), name = NULL) +
+        scale_y_continuous(expand = expansion(mult = 0.25)) +
+        labs(
+            title = "3. Ordination (PCoA)",
+            x = paste0("PCoA 1 (", expl[1], "%)"),
+            y = paste0("PCoA 2 (", expl[2], "%)")
+        ) +
+        theme_minimal(base_size = 12) +
+        theme(legend.position = "bottom", axis.text = element_blank())
+    p1 + p2 + p3 + plot_layout(widths = c(1, 1, 1))
+})
+```
 
 Based on the type of algorithm, ordination methods in microbiome research can
 be generally divided in two categories:
@@ -88,10 +158,11 @@ be generally divided in two categories:
 - unsupervised ordination
 - supervised ordination
 
-The former includes Principal Coordinate Analysis (PCoA), Principal Component
-Analysis (PCA), and Uniform Manifold Approximation and Projection for Dimension
-Reduction (UMAP), whereas the latter is mainly represented by distance-based
-redundancy analysis (dbRDA). First, we will discuss unsupervised ordination
+The former includes Principal Coordinate Analysis (PCoA) [@Gower1966],
+Principal Component Analysis (PCA), and Uniform Manifold Approximation and
+Projection for Dimension Reduction (UMAP) [@McInnes2018], whereas the latter
+is mainly represented by distance-based redundancy analysis (dbRDA)
+[@Legendre1999]. First, we will discuss unsupervised ordination
 methods and then proceed to supervised ones.
 
 Let us now prepare some demonstration data for the practical examples.
@@ -174,6 +245,7 @@ the plot.
 ```{r}
 #| label: fig-community-dissimilarity-heatmap
 #| fig-cap: "Heatmap of pairwise UniFrac dissimilarities between the GlobalPatterns samples. Samples are ordered by seriation and split by sample type."
+#| fig-alt: "Square heatmap with the samples on both axes, where cell colour shows the UniFrac dissimilarity of each sample pair. Samples are split into blocks by sample type, and samples of the same type tend to be the most similar to each other."
 
 library(miaViz)
 
@@ -214,9 +286,89 @@ the dissimilarities between samples, then compares the centroids (multivariate
 means) of each group to determine if they differ significantly.
 
 PERMANOVA determines statistical significance by permuting (randomly shuffling)
-group labels many times. By comparing the observed test statistic to those from
-the permutations, it assesses if the observed group differences are likely due
-to chance, without relying on parametric assumptions.
+group labels many times (@fig-permanova-idea). By comparing the observed test
+statistic to those from the permutations, it assesses if the observed group
+differences are likely due to chance, without relying on parametric
+assumptions.
+
+```{r}
+#| label: fig-permanova-idea
+#| fig-cap: "The idea of PERMANOVA. The test statistic (pseudo-F) compares the distances between group centroids (crosses) to the spread of samples around their own centroid (left). Permuting the group labels gives the distribution of pseudo-F when groups do not differ; the p-value is the proportion of permutations with a pseudo-F at least as large as the observed one (right). Toy data."
+#| fig-alt: "Two panels. Left: a scatter plot of two coloured groups of toy samples on two PCoA axes, with a black cross at each group centroid and faint lines from every sample to its centroid. Right: a grey histogram of pseudo-F values from permutations, with a vertical line marking the observed pseudo-F and a label giving its value and the p-value."
+#| fig-width: 10
+#| fig-height: 4
+#| echo: false
+library(ggplot2)
+library(patchwork)
+# Toy data; run in local() so that helper objects do not leak into later
+# chunks.
+local({
+    set.seed(1)
+    # Toy data: 10 samples per group, 8 taxa; group means differ
+    n <- 10
+    mu1 <- c(30, 25, 15, 10, 8, 5, 4, 3)
+    mu2 <- c(12, 15, 25, 20, 10, 8, 6, 4)
+    counts <- rbind(
+        t(replicate(n, rpois(8, mu1 * exp(rnorm(8, 0, 0.5))))),
+        t(replicate(n, rpois(8, mu2 * exp(rnorm(8, 0, 0.5)))))
+    )
+    group <- factor(rep(c("Group 1", "Group 2"), each = n))
+    d <- vegan::vegdist(counts, method = "bray")
+    # Pseudo-F statistic of PERMANOVA (Anderson 2001)
+    pseudo_f <- function(d, g) {
+        d2 <- as.matrix(d)^2
+        N <- length(g)
+        a <- nlevels(g)
+        ss_tot <- sum(d2[upper.tri(d2)]) / N
+        ss_w <- sum(vapply(levels(g), function(l) {
+            i <- which(g == l)
+            sum(d2[i, i][upper.tri(d2[i, i])]) / length(i)
+        }, numeric(1)))
+        ((ss_tot - ss_w) / (a - 1)) / (ss_w / (N - a))
+    }
+    f_obs <- pseudo_f(d, group)
+    f_null <- replicate(999, pseudo_f(d, sample(group)))
+    p_val <- (sum(f_null >= f_obs) + 1) / (length(f_null) + 1)
+    # Ordination with group centroids and "spokes" to each sample
+    pcoa <- cmdscale(d, k = 2)
+    ord <- data.frame(PC1 = pcoa[, 1], PC2 = pcoa[, 2], group = group)
+    cen <- aggregate(cbind(PC1, PC2) ~ group, data = ord, FUN = mean)
+    ord <- merge(ord, cen, by = "group", suffixes = c("", ".c"))
+    cols <- c("Group 1" = "#0072B2", "Group 2" = "#D55E00")
+    p1 <- ggplot(ord, aes(PC1, PC2, colour = group)) +
+        geom_segment(aes(xend = PC1.c, yend = PC2.c), alpha = 0.4) +
+        geom_point(size = 2.5) +
+        geom_point(
+            data = cen, shape = 4, size = 5, stroke = 2,
+            colour = "black"
+        ) +
+        scale_colour_manual(values = cols, name = NULL) +
+        labs(
+            title = "Within-group spread vs. distance between centroids",
+            x = "PCoA 1", y = "PCoA 2"
+        ) +
+        theme_minimal(base_size = 12) +
+        theme(
+            legend.position = "bottom", axis.text = element_blank(),
+            plot.title = element_text(size = 12)
+        )
+    p2 <- ggplot(data.frame(f = f_null), aes(f)) +
+        geom_histogram(bins = 30, fill = "grey75", colour = "white") +
+        geom_vline(xintercept = f_obs, colour = "#D55E00", linewidth = 1) +
+        annotate("text",
+            x = f_obs, y = Inf, vjust = 1.5, hjust = 1.05,
+            label = sprintf("Observed F = %.1f\np = %.3f", f_obs, p_val),
+            colour = "#D55E00", size = 3.8
+        ) +
+        labs(
+            title = "Pseudo-F after permuting the group labels",
+            x = "Pseudo-F", y = "Permutations"
+        ) +
+        theme_minimal(base_size = 12) +
+        theme(plot.title = element_text(size = 12))
+    p1 + p2
+})
+```
 
 Since PERMANOVA relies on comparing centroids, it assumes that the groups have
 similar within-group variation, i.e., homogeneous multivariate dispersions. If
@@ -260,11 +412,11 @@ can also be visualized.
 Unsupervised ordination methods analyze variation in the data without
 additional information on covariates or other supervision of the model. Among
 the different approaches, Multi-Dimensional Scaling (MDS) and non-metric MDS
-(NMDS) can be regarded as the standard. Metric MDS is also known as Principal
-Coordinate Analysis (PCoA).
+(NMDS) [@Kruskal1964] can be regarded as the standard. Metric MDS is also
+known as Principal Coordinate Analysis (PCoA).
 For this demonstration, we will analyze beta diversity in `GlobalPatterns`
-([@sec-data-globalpatterns]), and observe the variation between stool samples
-and samples of differing origin.
+[@Caporaso2011] ([@sec-data-globalpatterns]), and observe the variation
+between stool samples and samples of differing origin.
 
 ### Comparing communities {#sec-comparing-communities-by-beta-diversity-analysis}
 
@@ -309,6 +461,7 @@ the groups in @fig-community-mds-bray?
 ```{r}
 #| label: fig-community-mds-bray
 #| fig-cap: "MDS (PCoA) plot based on the Bray-Curtis dissimilarities of relative abundances in the GlobalPatterns data set. Points are coloured by group (faecal or non-faecal sample), and axis labels show the proportion of variance explained."
+#| fig-alt: "Scatter plot of the samples on the first two MDS axes, with the percentage of variance explained in the axis labels. Points are coloured by whether the sample is faecal (TRUE) or not (FALSE)."
 
 # Create ggplot object with explained variance in the axis labels
 p <- plotOrdination(
@@ -327,6 +480,7 @@ that display the distribution of the scores with respect to each group
 ```{r}
 #| label: fig-community-mds-bray-boxplots
 #| fig-cap: "Bray-Curtis MDS plot of the GlobalPatterns data set with marginal boxplots showing the distribution of the scores on each axis for faecal and non-faecal samples."
+#| fig-alt: "The same MDS scatter plot coloured by faecal versus non-faecal samples, with boxplots along the top and right margins comparing the two groups' scores on the horizontal and vertical axes."
 
 library(ggExtra)
 
@@ -376,15 +530,17 @@ tse <- addNMDS(
 
 Multiple ordination plots are combined into a multi-panel plot
 (@fig-community-mds-nmds-comparison) with the
-`r BiocStyle::CRANpkg("patchwork")` package, so that different methods
-can be compared to find similarities between them or select the most
-suitable one to visualize beta diversity in the light of the research question.
+`r BiocStyle::CRANpkg("patchwork")` package, so that
+different methods can be compared to find similarities between them or select
+the most suitable one to visualize beta diversity in the light of the research
+question.
 
 ```{r}
 #| label: fig-community-mds-nmds-comparison
 #| code-fold: true
 #| code-summary: "Show the plotting code"
 #| fig-cap: "Comparison of MDS and NMDS plots based on the Bray-Curtis or Aitchison distances on the GlobalPatterns data set. Points are coloured by group (faecal or non-faecal sample)."
+#| fig-alt: "Grid of four scatter plots: MDS and NMDS ordinations with Bray-Curtis and with Aitchison distances. In every panel, points are coloured by faecal (TRUE) or non-faecal (FALSE) sample, with a shared legend."
 
 # Load package for multi-panel plotting
 library(patchwork)
@@ -408,6 +564,7 @@ used within `addMDS()` (@fig-community-mds-unifrac).
 ```{r}
 #| label: fig-community-mds-unifrac
 #| fig-cap: "UniFrac distances scaled by MDS of the GlobalPatterns data set. Points are coloured by group (faecal or non-faecal sample)."
+#| fig-alt: "Scatter plot of the samples on the first two MDS axes based on UniFrac distances, with points coloured by faecal (TRUE) or non-faecal (FALSE) sample."
 
 tse <- addMDS(
     tse,
@@ -480,6 +637,7 @@ Now we are ready for plot non-rarefied and rarefied MDS plots side-by-side
 ```{r}
 #| label: fig-community-mds-rarefaction
 #| fig-cap: "MDS plots based on Aitchison distances of the GlobalPatterns data set without rarefaction (left) and with rarefaction (right). Points are coloured by sample type."
+#| fig-alt: "Two scatter plots side by side, showing Aitchison MDS ordinations of the samples without rarefaction (left) and with rarefaction (right). Points are coloured by sample type, with a shared legend."
 #| fig-width: 12
 
 # Generate plots for non-rarefied and rarefied Aitchison distances scaled by MDS
@@ -520,6 +678,7 @@ calculations (@fig-community-rarefaction-pc-correlation):
 #| code-fold: true
 #| code-summary: "Show the plotting code"
 #| fig-cap: "Correlation between the sample scores of the non-rarefied (x-axis) and rarefied (y-axis) Aitchison MDS for the first two principal coordinates. Lines show linear fits with Pearson correlations."
+#| fig-alt: "Two scatter plots, one per principal coordinate, with the non-rarefied sample scores on the x-axis and the rarefied scores on the y-axis. Each panel has a linear regression line with a confidence band and a printed Pearson correlation coefficient and p-value."
 
 library(ggpubr)
 
@@ -554,12 +713,14 @@ subsampling of a given assay within a `TreeSummarizedExperiment` dataset.
 
 Other dimension reduction methods, such as PCA and UMAP, are also available.
 PCA is calculated with `addPCA()` from `r BiocStyle::Biocpkg("mia")`, and UMAP
-with `runUMAP()` from the `r BiocStyle::Biocpkg("scater")` package. PCA is
-shown in @fig-community-pca and UMAP in @fig-community-umap.
+with `runUMAP()` from the `r BiocStyle::Biocpkg("scater")` package
+[@McCarthy2017]. PCA is shown in @fig-community-pca and UMAP in
+@fig-community-umap.
 
 ```{r}
 #| label: fig-community-pca
 #| fig-cap: "PCA plot of the counts in the GlobalPatterns data set containing samples from different sources. Points are coloured by group (faecal or non-faecal sample), and axis labels show the proportion of variance explained."
+#| fig-alt: "Scatter plot of the samples on the first two principal components, with the percentage of variance explained in the axis labels. Points are coloured by faecal (TRUE) or non-faecal (FALSE) sample."
 
 tse <- addPCA(
     tse,
@@ -578,6 +739,7 @@ sample set and research question.
 ```{r}
 #| label: fig-community-umap
 #| fig-cap: "UMAP plot of the first two components of the GlobalPatterns data set containing samples from different sources. Points are coloured by group (faecal or non-faecal sample)."
+#| fig-alt: "Scatter plot of the samples on the first two UMAP components, with points coloured by faecal (TRUE) or non-faecal (FALSE) sample."
 
 library(scater)
 
@@ -649,6 +811,7 @@ between the observations (@fig-community-shepard).
 #| code-fold: true
 #| code-summary: "Show the plotting code"
 #| fig-cap: "Shepard plot comparing the original Bray-Curtis dissimilarities (x-axis) with the distances in the PCoA space (y-axis) for the GlobalPatterns samples. The relative stress is shown in the subtitle."
+#| fig-alt: "Scatter plot with the original Bray-Curtis dissimilarity on the x-axis and the distance in the PCoA space on the y-axis, one point per sample pair, with a smoothed trend line. The subtitle gives the stress value."
 
 ord <- order(as.vector(d0))
 df <- data.frame(
@@ -688,7 +851,7 @@ Euclidean distances, which is equivalent to the ordinary RDA. However, the
 dbRDA method (`mia::getRDA()`) allows the use of other dissimilarity indices as
 well.
 
-Let us next demonstrate dbRDA with the enterotype data set
+Let us next demonstrate dbRDA with the enterotype data set [@Arumugam2011]
 ([@sec-data-enterotype]). Here samples
 correspond to patients. The `colData` lists the clinical status of each patient
 and a few covariates such as gender and age.
@@ -765,6 +928,7 @@ the `plotRDA()` function from the `r BiocStyle::Biocpkg("miaViz")` package
 ```{r}
 #| label: fig-community-rda
 #| fig-cap: "dbRDA plot of the enterotype data set with samples coloured by clinical status. Arrows show the contributions of the covariates clinical status, gender and age."
+#| fig-alt: "Scatter plot of the samples on the first two dbRDA axes, with points coloured by clinical status. Arrows from the origin show the directions of the covariates clinical status, gender and age."
 
 # Load packages for plotting function
 library(miaViz)
@@ -835,6 +999,7 @@ the groups tend to differ from each other in terms of community composition
 ```{r}
 #| label: fig-community-rda-loadings
 #| fig-cap: "Loadings of the 20 taxa with the largest contributions to the first two dbRDA components in the enterotype data set."
+#| fig-alt: "Two panels of horizontal bar charts, one for each of the first two dbRDA components, with the 20 taxa on the y-axis and their loadings on the x-axis."
 
 plotLoadings(tse2, "RDA", ncomponents = 2, n = 20)
 ```
@@ -903,7 +1068,7 @@ tse_genus <- agglomerateByRank(tse, rank = "Genus")
 
 # Convert to relative abundances
 tse_genus <- transformAssay(
-    tse,
+    tse_genus,
     method = "relabundance", assay.type = "counts"
 )
 
@@ -941,7 +1106,8 @@ on PCoA (@fig-community-pcoa-dominant).
 #| label: fig-community-pcoa-dominant
 #| code-fold: true
 #| code-summary: "Show the plotting code"
-#| fig-cap: "Bray-Curtis PCoA of the GlobalPatterns samples coloured by their dominant taxon. The six top taxa are shown separately and the remaining taxa are grouped as Other; the legend shows the percentage of samples dominated by each taxon."
+#| fig-cap: "Bray-Curtis PCoA of the GlobalPatterns samples coloured by their dominant genus. The six top genera are shown separately and the remaining genera are grouped as Other; the legend shows the percentage of samples dominated by each genus."
+#| fig-alt: "Scatter plot of the samples on the first two PCoA axes, with the percentage of variance explained in the axis labels. Points are coloured by dominant genus, with seven colours for the six top genera and Other, and the legend shows each genus with its percentage of samples."
 
 # Getting the top taxa
 top_taxa <- getTop(tse_genus, top = 6, assay.type = "relabundance")
@@ -996,7 +1162,8 @@ Similarly, we visualize and compare the sub-population
 #| label: fig-community-pcoa-dominant-groups
 #| code-fold: true
 #| code-summary: "Show the plotting code"
-#| fig-cap: "Bray-Curtis PCoA of the GlobalPatterns samples coloured by their dominant taxon, shown separately for non-faecal (FALSE) and faecal (TRUE) samples."
+#| fig-cap: "Bray-Curtis PCoA of the GlobalPatterns samples coloured by their dominant genus, shown separately for non-faecal (FALSE) and faecal (TRUE) samples."
+#| fig-alt: "Two scatter plots side by side, one for non-faecal (FALSE) and one for faecal (TRUE) samples, showing the samples on the first two PCoA axes. Points are coloured by dominant genus, using the six top genera and Other."
 #| fig-width: 10
 
 # Visualization split by group

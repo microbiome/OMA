@@ -1,14 +1,5 @@
 # Differential abundance {#sec-differential-abundance}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 An important component of many microbiome studies is differential abundance
 analysis (DAA). It is mainly used to identify differences in the abundances of
 individual taxa (at any taxonomic level) between two or more groups, such as
@@ -68,17 +59,19 @@ evaluated the number of detected taxa (ASVs), consistency of the detected taxa
 between methods, replication of results between studies and error rate on
 datasets with randomly assigned groups. They emphasized conservatism
 (low error rate) in their recommendations and ended up recommending
-`r BiocStyle::Biocpkg("ALDEx2")` [@Fernandes2014] and
-`r BiocStyle::Biocpkg("ANCOMBC")` [@Mandal2015]. Additionally, they recommended
-`r BiocStyle::Biocpkg("Maaslin2")` [@Mallick2020] (i.e. analyzing arcsine
+`r BiocStyle::Biocpkg("ALDEx2")` [@Fernandes2014] and ANCOM [@Mandal2015].
+In this book, we use the newer ANCOM-BC method [@ancombc2020] from the
+`r BiocStyle::Biocpkg("ANCOMBC")` package instead of the original ANCOM.
+@Nearing2022 also recommended
+`r BiocStyle::Biocpkg("Maaslin2")` [@Mallick2021] (i.e. analyzing arcsine
 square root transformed relative abundances with linear regression) as a more
 powerful option.
 
 - In addition to simulations, @Yang2022 estimated the FDR of different DAA
 methods on 106 real datasets with randomly created groups. They found that,
 the observed FDR was at the nominal level when, for instance, analyzing
-relative abundances either with the Wilcoxon test or with linear regression
-(`r BiocStyle::Biocpkg("Maaslin2")`).
+relative abundances either with the Wilcoxon test [@Wilcoxon1945] or with
+linear regression (`r BiocStyle::Biocpkg("Maaslin2")`).
 
 -	@Pelto2025 studied how the results from different DAA methods replicate
 between random partitions of datasets and between datasets from independent
@@ -86,12 +79,22 @@ studies. They found that when considering consistency along with sensitivity,
 the best performance was obtained by analyzing relative abundances with a
 non-parametric method or (after log transformation) with linear
 regression/t-test (`r BiocStyle::Biocpkg("Maaslin2")`) or analyzing
-presence/absence of taxa with logistic regression.
+presence/absence of taxa with logistic regression. Their approach is
+illustrated in @fig-daa-replicability.
 
 -	@Gamboa-Tuz2025 employed three real datasets to benchmark different DAA
 methods against biological ground truth. They found that methods employing the
 TSS normalization (with e.g. the Wilcoxon test) and RNA-seq-derived methods
 performed best.
+
+![Assessing the replicability of differential abundance analysis. (a) DAA is
+performed separately on an exploratory and a validation dataset, and the
+estimates for each taxon are compared. A taxon whose estimates point in
+opposite directions is a conflicting finding, and a taxon whose estimates
+agree is a replicated finding. The exploratory and
+validation datasets are obtained (b) by randomly splitting one dataset or
+(c) from two independent studies. Reproduced from @Pelto2025 under CC BY 4.0.](figures/daa_replicability.jpg){#fig-daa-replicability width="80%"
+fig-alt="Schematic in three panels. Panel a: an exploratory and a validation dataset, each with a control and a case group, are analysed separately; the forest plots of five taxa are then overlaid, showing taxon 1 with conflicting estimates and taxon 4 with replicated estimates. Panel b: one original dataset is randomly split into exploratory and validation sets. Panel c: two separate studies serve as the exploratory and validation sets."}
 
 We therefore recommend performing DAA by analyzing
 **relative (TSS normalized) abundances by a non-parametric method**
@@ -128,10 +131,10 @@ analysis and the differential analysis of positive (non-zero) abundances.
 
 ### Preparing the data {#sec-prepare-data}
 
-We use the Tengeler2020 data set ([@sec-data-tengeler2020]), in which mice
-were humanized with the gut microbiota of either individuals with ADHD
-(N = 13) or healthy controls (N = 14). The samples belong to three different
-cohorts.
+We use the Tengeler2020 data set [@Tengeler2020] ([@sec-data-tengeler2020]),
+in which mice were humanized with the gut microbiota of either individuals
+with ADHD (N = 13) or healthy controls (N = 14). The samples belong to three
+different cohorts.
 
 ```{r}
 #| label: load_packages_and_data
@@ -184,7 +187,7 @@ In our case, this means comparing the relative abundances of genera between the
 microbiome of ADHD individuals versus control.
 
 We employ the `Maaslin2` function from the `r BiocStyle::Biocpkg("Maaslin2")`
-package [@Mallick2020]. The function
+package [@Mallick2021]. The function
 
 - transforms counts to relative abundances,
 - replaces zeros by half of the smallest non-zero relative abundance,
@@ -254,9 +257,9 @@ non-reference group (here `ADHD`). More precisely, `2 ^ coef` would be
 interpreted as the ratio of geometric means of the relative abundances
 between the ADHD and Control groups.
 - `pval` is the unadjusted p-value.
-- `qval` (q-value) is the FDR adjusted p-value. This is generally used to define
-statistical significance. Typically, q-values < .05 are considered
-(statistically) significant.
+- `qval` (q-value) is the FDR adjusted p-value [@Benjamini1995]. This is
+generally used to define statistical significance. Typically, q-values < .05
+are considered (statistically) significant.
 - `ci_lwr` and `ci_upr` are the lower and upper bounds of the 95% confidence
 intervals for the log~2~-fold change.
 
@@ -282,6 +285,7 @@ the `r BiocStyle::Biocpkg("miaViz")` package (@fig-daa-boxplots).
 ```{r}
 #| label: fig-daa-boxplots
 #| fig-cap: "Relative abundances of five significant genera in the ADHD and Control groups of the Tengeler2020 data, shown as strip plots with boxplots in a separate facet for each genus. The bars at the bottom show the prevalence of each genus in each group."
+#| fig-alt: "Five facets, one per genus, each with free y-axis scales and showing relative abundance in the ADHD and Control groups as boxplots overlaid with points for individual samples, plus horizontal prevalence bars below the boxes."
 
 library(miaViz)
 
@@ -333,6 +337,7 @@ intervals (@fig-daa-forest).
 ```{r}
 #| label: fig-daa-forest
 #| fig-cap: "Forest plot of the log2-fold change estimates (ADHD vs. Control) and their 95% confidence intervals for all genera in the Tengeler2020 data, ordered by the estimate."
+#| fig-alt: "Forest plot with one row per genus, sorted by estimate, showing the log2-fold change as a point with a horizontal 95% confidence interval."
 # Plot the log2-fold changes and the 95% confidence intervals
 plotForest(
     res_daa_basic,
@@ -522,6 +527,7 @@ abundances of _Coprobacter_ by `patient_status` and `cohort`
 ```{r}
 #| label: fig-daa-interaction
 #| fig-cap: "Relative abundances of Coprobacter in the ADHD and Control groups of the Tengeler2020 data, shown separately for each cohort. The bars at the bottom show the prevalence of Coprobacter in each group."
+#| fig-alt: "Facets for each cohort with the same y-axis scale, each showing Coprobacter relative abundance in the ADHD and Control groups as boxplots with points for individual samples and prevalence bars below. ADHD is higher in Cohort 1 and Control is higher in Cohort 3."
 
 # Plot the abundances of Coprobacter by patient_status and cohort
 plotBoxplot(
