@@ -131,7 +131,7 @@ se2xls(tse, filename = "path/to/tse.xlsx")
 
 ### MultiAssayExperiment
 
-Exporting a `MultiAssayExperiment` data container can also be done using
+Exporting a `MultiAssayExperiment` data container can also be done using the
 `r BiocStyle::CRANpkg("feather")` package.
 
 ```{r}
@@ -151,6 +151,83 @@ And as a CSV file.
 #| eval: false
 
 write.csv(molten_mae, "path/to/mae.csv", row.names = FALSE)
+```
+
+## Export to standard data formats
+
+Inspired by the
+[rbiom vignettes](https://cmmr.github.io/rbiom/articles/convert.html),
+`exportQIIME2()` and `exportMothur()` allow to save the data in a near-ready
+format for analysis with QIIME2 and mothur, respectively. The output will need
+additional processing in the target framework.
+
+```{r}
+#| label: write_qiime
+#| eval: false
+
+exportQIIME2(tse, "qiime2_folder")
+```
+
+Conversion is completed in the terminal using QIIME2. The output files can be converted to the standard QZA format as follows:
+
+```bash
+# Navigate to output folder
+cd qiime2_folder
+
+# Convert classic BIOM table to HDF5
+biom convert -i counts.tsv -o counts.hdf5 --to-hdf5
+
+# Convert counts to QZA
+qiime tools import \
+  --input-path counts.hdf5 \
+  --type 'FeatureTable[Frequency]' \
+  --input-format BIOMV210Format \
+  --output-path counts.qza
+
+# Convert taxonomy to QZA
+qiime tools import \
+ --input-path taxonomy.tsv \
+ --type FeatureData[Taxonomy] \
+ --output-path taxonomy.qza
+
+# Convert tree to QZA
+qiime tools import \
+  --input-path tree.nwk \
+  --type 'Phylogeny[Rooted]' \
+  --output-path tree.qza
+```
+
+Alternatively, data can be exported to be used with mothur:
+
+```{r}
+#| label: write_mothur
+#| eval: false
+
+exportMothur(tse, "path/to/mothur_folder")
+```
+
+Again, conversion can be completed in the terminal using mothur:
+
+```bash
+# Navigate to output folder
+cd mothur_folder
+
+# Create shared file from counts table
+mothur "#make.shared(count=counts.tsv, label=asv);"
+```
+
+In addition, the `r BiocStyle::Biocpkg("rbiom")` package can be used to export
+the data in the BIOM format.
+
+```{r}
+#| label: write_biom
+#| eval: false
+
+# Convert TreeSE to BIOM
+biom <- convertToBIOM(tse)
+
+library(rbiom)
+write_biom(biom, "path/to/tse.biom", format = "hdf5")
 ```
 
 ::: {.callout-tip icon="false"}
@@ -173,10 +250,12 @@ save the data.
 
 6. Convert the data to long format and save it as a CSV file.
 
+7. Export the data in a near-ready QIIME2 format
+
 Useful functions:
 
 `utils::data()`, `mia::convertToPhyloseq()`, `mia::convertFromPhyloseq()`,
 `BiocGenerics::saveRDS()`, `base::readRDS()`, `mia::meltSE()`,
-`utils::write.csv()`
+`utils::write.csv()`, `mia::exportQIIME2()`
 
 :::
