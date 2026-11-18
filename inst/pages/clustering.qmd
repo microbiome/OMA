@@ -1,14 +1,5 @@
 # Community typing {#sec-clustering}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 Community typing in microbial ecology involves identifying distinct microbial
 communities by recognizing patterns in the data. The community types are
 described based on taxonomic feature characteristics, representing each
@@ -34,9 +25,9 @@ either based on features or on samples. The examples below are focused on
 sample clustering.
 
 There are multiple clustering algorithms available.
-`r BiocStyle::Biocpkg("bluster")` is a Bioconductor package providing tools
-for clustering data in the `SummarizedExperiment` container. It offers multiple
-algorithms such as hierarchical clustering, DBSCAN, and K-means.
+`r BiocStyle::Biocpkg("bluster")` is a Bioconductor package
+providing tools for clustering data in the `SummarizedExperiment` container. It
+offers multiple algorithms such as hierarchical clustering, DBSCAN, and K-means.
 
 ```{r}
 #| label: load_bluster
@@ -46,12 +37,13 @@ library(bluster)
 ```
 
 In the examples of this chapter we use the `peerj13075` data
-([@sec-data-peerj13075]) for microbiota community typing. This chapter
-illustrates how different results can be obtained depending on the choice of
-the algorithm. To reduce calculation time we decided to agglomerate taxonomic
-features onto 'Class' level and filter out
+[@potbhare2022skin] ([@sec-data-peerj13075]) for microbiota community typing.
+This chapter illustrates how different results can be obtained depending on
+the choice of the algorithm. To reduce calculation time we decided to
+agglomerate taxonomic features onto 'Class' level and filter out
 the least prevalent taxonomic features as well as less commonly detected within
-a sample resulting in 25 features in the data.
+a sample resulting in 26 features in the data (25 classes and an "Other"
+group that combines the remaining features).
 
 ```{r}
 #| label: load_pkg_data
@@ -83,13 +75,15 @@ In this example we use the `addCluster()` function from
 function allows to choose a clustering algorithm and offers multiple
 parameters to shape the result. The `HclustParam()` parameter
 is used for hierarchical clustering, and it accepts several sub-parameters, as
-further detailed in [HclustParam documentation](https://rdrr.io/github/LTLA/bluster/man/HclustParam-class.html).
+further detailed in the `HclustParam` documentation of
+`r BiocStyle::Biocpkg("bluster")` (see `?bluster::HclustParam`).
 Notably, the `by` argument specifies whether clustering is performed based on
 features or samples. Here, we cluster counts data, for which we compute the
-dissimilarities with the Bray-Curtis distance using the `ward.d2` method.
+dissimilarities with the Bray-Curtis distance [@Bray1957] using the `ward.d2`
+method [@Ward1963; @Murtagh2014].
 Statistical information can be optionally returned with the `full` parameter.
 Finally, the `clust.col` parameter allows us to choose the name of the column
-in the colData (default name is `clusters`).
+in the colData (default name is `cluster`).
 
 ```{r}
 #| label: hclust1
@@ -114,18 +108,21 @@ table(altExp(tse, "prevalent")$hclust)
 ```
 
 From the table we can see that the hierarchical clustering suggests six
-clusters to describe the data.
+clusters to describe the data. Unless the number of clusters (`k`) or the
+cutting height (`h`) is given in the `cut.params` argument of `HclustParam()`,
+the tree is cut at half of its total height; the number of branches crossing
+this height determines the number of clusters.
 
 Now, we visualize the hierarchical structure of the clusters with a dendrogram
-tree. In dendrograms, the tree is split where the branch length is the largest.
-In each splitting point, the tree is divided into two clusters leading to the
-hierarchy. In this example, each sample is labeled by their dominant taxon
-to visualize ecological differences between the clusters
-(@fig-clustering-dendrogram).
+tree using `r BiocStyle::CRANpkg("dendextend")` [@Galili2015]. In each splitting
+point, the tree is divided into two clusters leading to the hierarchy. In this
+example, each sample is labeled by their dominant taxon to visualize ecological
+differences between the clusters (@fig-clustering-dendrogram).
 
 ```{r}
 #| label: fig-clustering-dendrogram
 #| fig-cap: "Dendrogram of the hierarchical clustering (Ward's method on Bray-Curtis dissimilarities) of samples in the prevalent class-level peerj13075 data. Branches and labels are coloured by cluster, and samples are labelled by their dominant taxon."
+#| fig-alt: "Dendrogram with the samples as leaves along the bottom and merge height on the vertical axis. Branches and leaf labels are drawn in six colours, one per cluster, and each leaf is labelled with the sample's dominant taxon."
 
 library(dendextend)
 
@@ -165,7 +162,7 @@ The resulting ordination is shown in @fig-clustering-hclust-mds.
 ```{r}
 #| label: hclust3
 
-library(scater)
+library(miaViz)
 
 # Add the MDS dimensions for plotting
 altExp(tse, "prevalent") <- addMDS(
@@ -179,13 +176,13 @@ altExp(tse, "prevalent") <- addMDS(
 ```{r}
 #| label: fig-clustering-hclust-mds
 #| fig-cap: "MDS ordination based on Bray-Curtis dissimilarities of the prevalent class-level peerj13075 data, with samples coloured by hierarchical clustering assignment."
+#| fig-alt: "Scatter plot of the samples on the first two MDS axes, with points coloured by their hierarchical clustering assignment."
 #| fig-width: 6
 #| fig-height: 4
 
-plotReducedDim(
+plotOrdination(
     altExp(tse, "prevalent"), "MDS",
-    colour_by = "hclust",
-    theme_size = 13, point_size = 4
+    colour.by = "hclust"
 ) +
     labs(color = "HClust", title = "Hclust") + theme_minimal()
 ```
@@ -221,7 +218,7 @@ tse <- addCluster(
     tse,
     assay.type = "standardize",
     clust.col = "hclustKendall",
-    MARGIN = "rows",
+    by = "rows",
     HclustParam(dist.fun = kendall_dissimilarity, method = "ward.D2")
 )
 ```
@@ -234,6 +231,7 @@ clusters, we can plot the histogram of the clusters
 ```{r}
 #| label: fig-clustering-taxa-barplot
 #| fig-cap: "Number of taxonomic features in each cluster obtained by hierarchical clustering of standardized CLR-transformed abundances with Kendall dissimilarity."
+#| fig-alt: "Bar plot with one bar per cluster on the x-axis and the number of taxonomic features in that cluster on the y-axis."
 
 library(miaViz)
 
@@ -246,7 +244,7 @@ Then we can merge data to clusters.
 #| label: taxa_clustering_row_merge
 
 # Aggregate clusters as a sum of each cluster values
-tse_merged <- agglomerateByVariable(tse, by = "rows", f = "hclustKendall")
+tse_merged <- agglomerateByVariable(tse, by = "rows", group = "hclustKendall")
 tse_merged
 ```
 
@@ -257,9 +255,9 @@ the number of clusters. You can find more information on agglomeration from
 ### DMM
 
 This section focuses on [Dirichlet Multinomial Mixture Model](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030126)
-(DMM) analysis. It is a Bayesian clustering technique that allows searching for
-sample patterns that reflect sample similarity in the data using both prior
-information and the data.
+(DMM) analysis [@Holmes2012]. It is a Bayesian clustering technique that allows
+searching for sample patterns that reflect sample similarity in the data using
+both prior information and the data.
 
 In this example, we cluster the data with DMM clustering. In the example below,
 we calculate model fit using Laplace approximation to reduce the calculation
@@ -278,7 +276,7 @@ altExp(tse, "prevalent") <- addCluster(
     assay.type = "counts",
     name = "DMM",
     DmmParam(k = 1:6, type = "laplace"),
-    MARGIN = "samples",
+    by = "samples",
     full = TRUE,
     clust.col = "dmmclust"
 )
@@ -293,6 +291,7 @@ as a prior.
 ```{r}
 #| label: fig-clustering-dmm-fit
 #| fig-cap: "Laplace approximation of model evidence for DMM models with one to six components fitted to the prevalent class-level peerj13075 data. Lower values indicate a better fit."
+#| fig-alt: "Line plot with the number of DMM components (1 to 6) on the x-axis and the Laplace approximation on the y-axis. The line reaches its lowest value at two components."
 #| fig-width: 5
 #| fig-height: 3
 
@@ -309,6 +308,7 @@ features (@fig-clustering-dmm-drivers).
 ```{r}
 #| label: fig-clustering-dmm-drivers
 #| fig-cap: "Contributions of taxonomic features to each of the two components of the best-fitting DMM model."
+#| fig-alt: "Two panels of horizontal bar charts, one per DMM component, with taxonomic features on the y-axis and the size of their contribution to that component on the x-axis."
 #| fig-width: 6
 #| fig-height: 2
 library(DirichletMultinomial)
@@ -331,13 +331,13 @@ division.
 ```{r}
 #| label: fig-clustering-dmm-mds
 #| fig-cap: "MDS ordination based on Bray-Curtis dissimilarities of the prevalent class-level peerj13075 data, with samples coloured by DMM cluster assignment."
+#| fig-alt: "Scatter plot of the samples on the first two MDS axes, with points coloured by the two DMM clusters, which occupy separate areas of the plot."
 
 # DMM clusters
-plotReducedDim(altExp(tse, "prevalent"), "MDS", theme_size = 13) +
-    geom_point(
-        size = 3, alpha = 0.6,
-        aes(color = altExp(tse, "prevalent")$dmmclust)
-    ) +
+plotOrdination(
+    altExp(tse, "prevalent"), "MDS",
+    colour.by = "dmmclust"
+) +
     labs(color = "DMMclust", title = "DMM") + theme_minimal()
 ```
 
@@ -356,14 +356,15 @@ in more detail in [@sec-community-similarity].
 
 ### NMF
 
-In this section, we will particularly focus on Non-negative Matrix
-Factorization (NMF). NMF decomposes the original data *X* into two lower rank
+In this section, we will particularly focus on Non-negative Matrix Factorization
+(NMF) [@Lee1999]. NMF decomposes the original data *X* into two lower rank
 matrices: *H* representing key taxonomic feature characteristics of each
 community type and *W* representing continuous sample memberships across all
 community types. The NMF algorithm calculates the minimum distance between the
 original data and its approximation using Kullback-Leibler divergence.
 
-Here, we use the `r BiocStyle::Biocpkg("mia")` wrapper `getNMF`. To reduce
+Here, we use the `r BiocStyle::Biocpkg("mia")` wrapper `getNMF` for the
+`r BiocStyle::CRANpkg("NMF")` package [@Gaujoux2010]. To reduce
 calculation time, we set the number of components `k` to four instead of
 optimizing the number of components that describe the original data the best.
 The matrix returned by `getNMF` contains the sample scores, while the NMF
@@ -395,14 +396,13 @@ for each sample onto a two-dimensional surface (@fig-clustering-nmf-mds).
 ```{r}
 #| label: fig-clustering-nmf-mds
 #| fig-cap: "MDS ordination based on Bray-Curtis dissimilarities of the prevalent class-level peerj13075 data, with samples coloured by NMF community type, defined as the component with the highest relative membership."
+#| fig-alt: "Scatter plot of the samples on the first two MDS axes, with points coloured by NMF community type, one of four components."
 
 # NMF community types
-plotReducedDim(
+plotOrdination(
     altExp(tse, "prevalent"), "MDS",
-    colour_by = "NMFcomponent",
-    point_size = 3, theme_size = 13
+    colour.by = "NMFcomponent"
 ) +
-
     labs(color = "NMFcomponent", title = "NMF") + theme_minimal()
 ```
 
@@ -413,9 +413,10 @@ heatmaps. We can visualize the data similarly but add additional information on
 clusters.
 
 ```{r}
-#| label: pheatmap1
+#| label: clustered_heatmap_prep
 
-library(ComplexHeatmap)
+# Keep only counts; transformed assays cannot be meaningfully agglomerated
+assays(tse) <- assays(tse)["counts"]
 
 # Agglomerate to Genus level
 tse <- agglomerateByPrevalence(tse, rank = "genus")
@@ -426,17 +427,16 @@ tse <- transformAssay(
     tse,
     assay.type = "clr", method = "standardize", MARGIN = "rows"
 )
-
-# Gets the assay table
-mat <- assay(tse, "standardize")
 ```
 
-Now we can cluster rows. The resulting tree of taxa is shown in
+Now we can cluster rows. The resulting tree of taxa, plotted with
+`r BiocStyle::Biocpkg("ggtree")` [@Yu2017], is shown in
 @fig-clustering-taxa-tree.
 
 ```{r}
 #| label: fig-clustering-taxa-tree
 #| fig-cap: "Tree from complete-linkage hierarchical clustering of genera based on standardized CLR-transformed abundances in the peerj13075 data."
+#| fig-alt: "Tree drawn with straight right-angled branches, splitting from a single root on the left into the genera as tips on the right, showing how the genera group by similar abundance profiles."
 
 library(ape)
 library(ggtree)
@@ -457,90 +457,74 @@ ggtree(taxa_tree)
 Based on the phylo tree, we decide to create eight clusters.
 
 ```{r}
-#| label: pheatmap3
+#| label: taxa_clusters
 
 # Hierarchical clustering with k = 8
 tse <- addCluster(
     tse,
     assay.type = "standardize",
-    HclustParam(method = "complete", cut.fun = cutree, k = 8)
+    HclustParam(method = "complete", cut.params = list(k = 8)),
+    clust.col = "taxa_cluster"
 )
 ```
 
-For the columns, we can utilize k-means clustering. First we have to specify
-the number of clusters. @fig-clustering-kmeans-k shows the elbow and
-silhouette methods for this purpose.
+For the columns, we can utilize k-means clustering [@Hartigan1979]. First we
+have to specify the number of clusters. @fig-clustering-kmeans-k shows the elbow
+and silhouette [@Rousseeuw1987] methods for this purpose.
 
 ```{r}
 #| label: fig-clustering-kmeans-k
 #| fig-cap: "Selection of the number of k-means clusters. Left: total within-cluster sum of squares (elbow method). Right: average silhouette width, both as a function of the number of clusters."
+#| fig-alt: "Two line plots with the number of clusters on the x-axis. Left: total within-cluster sum of squares, which levels off after about three clusters. Right: average silhouette width, which is highest at two to three clusters."
 
 library(factoextra)
 library(NbClust)
 library(patchwork)
 
+# Samples must be in rows, so we transpose the assay
+mat <- t(assay(tse, "standardize"))
 # Elbow method
-p1 <- fviz_nbclust(assay(tse, "standardize"), kmeans, method = "wss")
+p1 <- fviz_nbclust(mat, kmeans, method = "wss")
 # Silhouette method
-p2 <- fviz_nbclust(assay(tse, "standardize"), kmeans, method = "silhouette")
+p2 <- fviz_nbclust(mat, kmeans, method = "silhouette")
 
 p1 + p2
 ```
 
-Based on the results, we split the columns into six clusters.
+The decrease in the within-cluster sum of squares levels off after about three
+clusters, and the average silhouette width is highest for two to three
+clusters. Based on the results, we split the columns into three clusters.
 
 ```{r}
-#| label: pheatmap5
+#| label: sample_clusters
 
-# Hierarchical clustering with k = 4
+# K-means clustering with 3 clusters
 tse <- addCluster(
     tse,
     assay.type = "standardize", by = "cols",
-    KmeansParam(centers = 6)
+    KmeansParam(centers = 3),
+    clust.col = "sample_cluster"
 )
 
 # Prints samples and their clusters
-colData(tse)[["clusters"]]
+colData(tse)[["sample_cluster"]]
 ```
 
-Now we can create a heatmap with additional annotations
-(@fig-clustering-heatmap).
+Now we can create a heatmap where the taxa are grouped by their clusters, and
+the samples by their clusters and gender (@fig-clustering-heatmap).
 
 ```{r}
 #| label: fig-clustering-heatmap
-#| fig-cap: "Heatmap of standardized CLR-transformed genus abundances in the peerj13075 data, with rows ordered by hierarchical clusters of taxa and columns by k-means clusters of samples. Annotations show taxa clusters, sample clusters and gender."
+#| fig-cap: "Heatmap of standardized CLR-transformed genus abundances in the peerj13075 data. Rows are grouped by hierarchical clusters of taxa, and columns by k-means clusters of samples and by gender."
+#| fig-alt: "Large heatmap with genera as rows and samples as columns, coloured by standardized CLR abundance. Rows are split into eight blocks by taxa cluster, and columns into blocks by k-means sample cluster and gender, with annotation bars marking the groups."
 #| fig-width: 13
 #| fig-height: 7
 
-# Order the data based on clusters
-tse <- tse[
-    order(rowData(tse)[["cluster"]]),
-    order(colData(tse)[["cluster"]])
-]
-
-# Get data for plotting
-mat <- assay(tse, "standardize")
-taxa_clusters <- rowData(tse)[, "cluster", drop = FALSE] |>
-    as.data.frame()
-sample_data <- colData(tse)[, c("cluster", "Gender"), drop = FALSE] |>
-    as.data.frame()
-colnames(sample_data) <- c("clusters_col", "gender")
-
-# Determine the scaling of colors
-# Scale colors
-breaks <- seq(
-    -ceiling(max(abs(mat))), ceiling(max(abs(mat))),
-    length.out = ifelse(max(abs(mat)) > 5, 2 * ceiling(max(abs(mat))), 10)
-)
-colors <- colorRampPalette(c("darkblue", "blue", "white", "red", "darkred"))(length(breaks) - 1)
-
-pheatmap(
-    mat,
-    annotation_row = taxa_clusters,
-    annotation_col = sample_data,
-    cluster_cols = FALSE, cluster_rows = FALSE,
-    breaks = breaks,
-    color = colors
+plotHeatmap(
+    tse,
+    assay.type = "standardize",
+    row.var = "taxa_cluster",
+    col.var = c("sample_cluster", "Gender")
 )
 ```
 
