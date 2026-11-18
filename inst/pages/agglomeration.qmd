@@ -60,7 +60,9 @@ composition at different taxonomic levels. For this,
 At its simplest, the function takes a `TreeSE` object as input and outputs a
 `TreeSE` object agglomerated to a specified taxonomy level using the `rank`
 parameter. Note that we can also choose to prune the phylogenetic tree to
-correspond to the agglomerated data, by setting `update.tree = TRUE`.
+correspond to the agglomerated data, by setting `update.tree = TRUE`. The tree
+can be pruned only if the features of each group form a subtree of their own,
+i.e., the groups are monophyletic. Otherwise, the tree is removed.
 
 ```{r}
 #| label: agg_phylum
@@ -86,16 +88,19 @@ As we observe from the taxonomy table, all lower ranks below Phylum now contain
 level, meaning that the lowest rank that rows can be uniquely mapped to is the
 Phylum rank.
 
-Since we specified `update.tree = TRUE`, the phylogenetic tree has also been
-agglomerated. This is evident from the tree, which now has only
-`r length(TreeSummarizedExperiment::rowTree(tse_phylum)$tip.label)` tips, each corresponding to a single
-row in the dataset.
+Since we specified `update.tree = TRUE`, the function tried to prune the
+phylogenetic tree. In this dataset, however, some phyla are not monophyletic:
+their features are spread across different branches of the tree. The tree
+could therefore not be agglomerated, and it was removed.
 
 ```{r}
 #| label: agg_phylum_rowtree
 
 rowTree(tse_phylum)
 ```
+
+If a tree is needed for the agglomerated data, a hierarchy tree can be created
+from the taxonomy table instead (see [@sec-fly-tree]).
 
 Additionally, we can examine the counts assay table to assess how the
 agglomeration has affected the counts of unique features per sample.
