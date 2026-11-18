@@ -398,14 +398,14 @@ rf_classification[["performance"]] |> knitr::kable()
 A common metric to quickly assess model performance in binary
 classification tasks is the area under the receiver operator
 characteristic curve 'AUC'. Notice that the result tables
-include two types of AUC metrics: `cv_metric_AUC`,
-which represents AUC for the 80% of data used in training,
-and `AUC`, which is the AUC for the 20% used in testing.
-Thus, results where the performance of the model in the train set
-highly exceeds its performance in the test set suggest overfiting,
-meaning that the model fails to generalize to new data.
-Notice, however, that small drops of model's performance in the test
-compared to the train data are expected and thus shouldn't be a concern.
+include two types of AUC metrics: `cv_metric_AUC`, which is the
+cross-validated AUC within the 80% of data used in training (each fold is
+predicted by a model that did not see it during fitting), and `AUC`, which is
+the AUC for the 20% used in testing. Both estimate performance on unseen data,
+so they should be similar. A cross-validation AUC that clearly exceeds the test
+AUC may indicate that the model selection overfitted the training set or that
+the test set differs from the training set. Small differences in either
+direction are expected by chance and thus shouldn't be a concern.
 
 Now let's take a look at the results. The AUC values
 (cross-validation AUC =
@@ -418,12 +418,11 @@ chance, in either direction.
 
 Now let's interpret our results at the light of previous research.
 In the largest multi-cohort analysis of gut microbiome associations
-with T2D published to date [@mei2024_t2d], authors report similar AUC values
-to ours when training RF models to discriminate healthy participants
-and T2D patients using microbiome and anthropometric variables like
-age, sex and BMI. Interestingly, they included the study we are
-working with in their analysis. Their reported AUC of 0.74
-is in the same range as ours. This further validates the potential
+with T2D published to date [@mei2024_t2d], authors trained RF models to
+discriminate healthy participants and T2D patients using microbiome and
+anthropometric variables like age, sex and BMI. Interestingly, they included
+the study we are working with in their analysis. Their reported AUC of 0.74
+can be compared with ours. Comparable values would support the potential
 of the gut microbiome to discriminate between healthy individuals
 and T2D patients.
 
@@ -500,9 +499,10 @@ senspec |>
 
 The metrics 'Sensitivity' and 'Specificity' are used in ROC curves, and
 'Sensitivity' and 'Precision' are used in PRC curves. Note that
-'Precision' and 'Recall' are the same metric. While the term 'Precision'
+'Sensitivity' and 'Recall' are the same metric. While the term 'Sensitivity'
 is preferred in the biomedical literature, 'Recall' is more prevalent
-in other fields.
+in other fields. 'Precision', also called positive predictive value, is the
+proportion of samples predicted as positive that are truly positive.
 
 The code below generates the ROC and PRC curves and shows them side by side
 (@fig-ml-roc-prc):
@@ -530,9 +530,12 @@ roc_p <- roc_p +
 # 2. Plot the PRC curve
 prc_p <- ggplot(data = senspec) +
     geom_path(aes(x = sensitivity, y = precision, color = model))
-# 2.1 Add line representing 'random guess' performance
+# 2.1 Add line representing 'random guess' performance, which is the
+# proportion of the positive class in the test data
+pos_class <- rf_classification[["trained_model"]][["levels"]][[1]]
+baseline <- mean(rf_classification[["test_data"]][["disease"]] == pos_class)
 prc_p <- prc_p +
-    geom_hline(color = "grey30", linetype = "dashed", yintercept = 0.5)
+    geom_hline(color = "grey30", linetype = "dashed", yintercept = baseline)
 # 2.2 Add axis titles and custom theme
 prc_p <- prc_p +
     labs(x = "Recall or Sensitivity", y = "Precision", title = "PRC") +
@@ -554,7 +557,8 @@ using different microbiome-derived information.
 
 Regarding our figures, note the dashed gray lines in both plots
 representing the expected performance of a model that is classifying
-samples randomly. Therefore, the greater the distance between that
+samples randomly. In the PRC plot, this is the proportion of the positive
+class (`r pos_class`) in the test data, here `r round(baseline, 2)`. Therefore, the greater the distance between that
 reference and the line representing our model's performance, the better.
 Thus, perfect performance will be achieve when the line is the
 farthest from that reference.
@@ -632,7 +636,7 @@ feat_imp <- feat_imp[ordered_features, ]
 # Conver column 'feat' into a factor to fix its order in the plot
 feat_imp$feat <- factor(feat_imp$feat, levels = rev(feat_imp$feat))
 
-# Plot mean feature importance with 95% CI
+# Plot mean feature importance
 ggplot(feat_imp) +
     geom_col(aes(x = perf_metric_diff, y = feat)) +
     labs(x = "Decrease in performance", y = "Feature") +
@@ -720,17 +724,28 @@ between the observed and predicted values of the outcome variable
 (patient's BMI in this example).
 
 Similarly to AUC in classification, the results table include two
-types of RMSE metrics: `cv_metric_RMSE`, which represents RMSE for
-the training data, and `RMSE`, which is the metric
-for the test data. Notice, the small drop of model's
-performance in the test
-(`r round(rf_regression[["performance"]][["RMSE"]], 3)`)
-compared to the train
-(`r round(rf_regression[["performance"]][["cv_metric_RMSE"]], 3)`)
-tests. As discussed in the classification results, big drops of
-model's performance in the test compared to the train data are
-indicative of overfitting. However, in this case the drop in performance
-is small and thus it shouldn't be a concern.
+types of RMSE metrics: `cv_metric_RMSE`, which is the cross-validated RMSE
+within the training data, and `RMSE`, which is the metric for the test data.
+The cross-validation
+(`r round(rf_regression[["performance"]][["cv_metric_RMSE"]], 3)`) and
+test (`r round(rf_regression[["performance"]][["RMSE"]], 3)`) RMSE are
+similar. As discussed in the classification results, a clearly worse test
+performance would suggest overfitting, which doesn't seem to be the case here.
+However, this does not tell whether the predictions are useful. For that, we
+compare the model with a null model that predicts the mean BMI of the training
+samples for every test sample.
+
+```{r}
+#| label: 5.4 - null model for regression
+
+# BMI of the training and test samples
+train_bmi <- colData(tse)[train_idx, "BMI"]
+test_bmi <- rf_regression[["test_data"]][["BMI"]]
+
+# RMSE of the null model in the test data
+null_rmse <- sqrt(mean((test_bmi - mean(train_bmi))^2))
+null_rmse
+```
 
 ### Visualization
 
@@ -782,7 +797,7 @@ The dashed gray line in the plot above represents a perfect correlation
 between the observed and the model-predicted BMI values of each
 participant. Thus, the line indicates perfect performance of the model.
 We can see that while the predictions are around the mean BMI (close
-to 24), the observed values range approximately between
+to `r round(mean(train_bmi))`), the observed values range approximately between
 `r round(min(test_data$BMI))` and `r round(max(test_data$BMI))`,
 showing poor correlation between observed and predicted BMI values.
 Note that both groups show a similar spread in BMI.
@@ -790,11 +805,12 @@ Note that both groups show a similar spread in BMI.
 This plot clearly indicates a poor performance of our model. This
 usually means that either the gut microbiome is not related to BMI,
 making it impossible for the model to use microbiome patterns to predict
-it, or that our model is overfitted. Since the RMSE for training
-(`r rf_regression[["performance"]][["cv_metric_RMSE"]]`) and test
-(`r rf_regression[["performance"]][["RMSE"]]`) data are similar,
-we may conclude that gut microbiome composition is not informative
-of BMI.
+it, or that our model is overfitted. The similar cross-validation and test
+RMSE suggest that the model is not overfitted. Moreover, the test RMSE of the
+model (`r round(rf_regression[["performance"]][["RMSE"]], 3)`) is not much
+better than that of the null model (`r round(null_rmse, 3)`). Thus, in this
+dataset the gut microbiome composition, as used here, seems to carry little
+information about BMI.
 
 This illustrate another important aspect of supervised ML.
 Regardless of the complexity of the models deployed, their
@@ -813,8 +829,9 @@ new tree improves the performance of the previous.
 When applied to classification, each tree predicts the class of an
 observation (e.g., healthy or T2D) based on feature values (e.g.,
 taxonomic). However, instead of 'voting' like in Random Forest,
-XGBoost improves the performance by assigning higher weights (or
-penalties) to missclassified observations.
+XGBoost adds the predictions of the trees. Each new tree is fitted to the
+gradient of the loss function (for squared error loss, the residuals) of the
+current ensemble, so that it corrects the errors of the previous trees.
 
 It must be noted that XGBoost is a more complex model usually
 described as one of the best performing models for tabular data
@@ -881,7 +898,7 @@ See the RF example as a reference.
 ## Exercises
 
 **Goal:** After completing these exercises, you should be able to fit supervised
-machine learning model utilizing multi-assay data.
+machine learning model to microbiome data.
 
 **Exercise 1: Supervised ML**
 
@@ -894,7 +911,8 @@ you want to model.
 continuous, or a bar plot if it is categorical. What is the distribution? If
 the distribution is biased, how can this affect the training of the model?
 
-4. Apply CLR transformation.
+4. Apply a transformation, such as relative abundance or presence/absence
+(see the note on preprocessing strategies above).
 
 5. Split the samples into training and test sets. Filter the features using
 only the training samples, and preprocess the data without steps that learn
