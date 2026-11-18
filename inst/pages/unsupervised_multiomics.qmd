@@ -1,15 +1,6 @@
 # Multi-omics ordination {#sec-unsupervised-multiomics}
 
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 In this chapter, we continue from where we left off in the previous section
 ([@sec-cross-correlation]). Instead of testing feature pairs one by one, we
 now look for patterns that are shared across the omic layers. We introduce two
@@ -127,7 +118,7 @@ Joint-RPCA (joint robust principal component analysis) is available in
 `r BiocStyle::Biocpkg("mia")` and its results can be visualized with
 `r BiocStyle::Biocpkg("miaViz")`. We run the analysis with
 `addJointRPCA()`, which stores the results in the `metadata` of the
-`MultiAssayExperiment`.
+`MultiAssayExperiment` [@Ramos2017].
 
 ```{r}
 #| label: jrpca_run
@@ -154,6 +145,7 @@ not the proportion of variance explained in the observed data
 ```{r}
 #| label: fig-jrpca-variance
 #| fig-cap: "Variance explained by the Joint-RPCA model of the Hintikka et al. (2021) data. The heatmap shows the variance of each omic layer (microbiota, metabolites, biomarkers) explained by each of the five components, and the barplot shows the share of total variance per layer."
+#| fig-alt: "Two panels: a heatmap with the five Joint-RPCA components against the microbiota, metabolite and biomarker layers, filled by the variance explained, and a barplot with one bar per omic layer showing its share of the total variance."
 #| fig-height: 6
 #| fig-width: 10
 
@@ -162,12 +154,13 @@ library(miaViz)
 plotJointRPCAExplainedVariance(mae, "JointRPCA")
 ```
 
-Similarly to MOFA, the samples can be visualized in the space of the first two
-components (@fig-jrpca-ordination).
+As in other ordination methods, the samples can be visualized in the space of
+the first two components (@fig-jrpca-ordination).
 
 ```{r}
 #| label: fig-jrpca-ordination
 #| fig-cap: "Joint-RPCA sample scores of the Hintikka et al. (2021) data on the first two components, coloured by diet."
+#| fig-alt: "Scatter plot of samples on Joint-RPCA component 1 (x-axis) and component 2 (y-axis), with points coloured by diet."
 
 plotJointRPCA(mae, "JointRPCA", colour.by = "Diet")
 ```
@@ -179,6 +172,7 @@ layer for the first two components to analyze co-varying features
 ```{r}
 #| label: fig-jrpca-loadings
 #| fig-cap: "Top 10 features with the largest Joint-RPCA loadings on the first two components in each omic layer (microbiota genera, metabolites and biomarkers) of the Hintikka et al. (2021) data."
+#| fig-alt: "Grid of horizontal bar charts, one per omic layer and component, each listing the ten microbiota genera, metabolites or biomarkers with the largest loadings on components 1 and 2 and the size and sign of each loading."
 #| fig-height: 10
 #| fig-width: 10
 
@@ -194,6 +188,7 @@ observed data (@fig-jrpca-covariance).
 ```{r}
 #| label: fig-jrpca-covariance
 #| fig-cap: "Heatmap of correlations between the top features of the microbiota, metabolite and biomarker layers, derived from the Joint-RPCA model of the Hintikka et al. (2021) data."
+#| fig-alt: "Square heatmap with the top features of the microbiota, metabolite and biomarker layers on both axes, where cell colour shows the correlation between each pair of features within and across layers."
 #| fig-height: 8
 #| fig-width: 9
 
@@ -206,6 +201,7 @@ strongly correlated features (@fig-jrpca-network).
 ```{r}
 #| label: fig-jrpca-network
 #| fig-cap: "Network of features from the microbiota, metabolite and biomarker layers based on the Joint-RPCA model of the Hintikka et al. (2021) data. Edges connect strongly correlated features."
+#| fig-alt: "Network graph whose labelled nodes are features from the microbiota, metabolite and biomarker layers, joined by edges between strongly correlated features."
 #| fig-height: 8
 #| fig-width: 9
 
@@ -220,7 +216,8 @@ seen as a generalization of principal component analysis. Yet, with the ability
 to infer a latent (low-dimensional) representation, shared among the multiple
 (-omics) data sets in hand.
 
-We use the `r BiocStyle::Biocpkg("MOFA2")` package for analysis.
+We use the `r BiocStyle::Biocpkg("MOFA2")` package [@Argelaguet2020] for
+analysis.
 
 ```{r}
 #| label: mofa_data1
@@ -270,6 +267,7 @@ mae[[2]] <- transformAssay(
     mae[[2]],
     assay.type = "log10",
     method = "standardize",
+    MARGIN = "rows",
     name = "log10-z"
 )
 
@@ -321,7 +319,8 @@ function (@fig-mofa-variance).
 #| code-fold: true
 #| code-summary: "Show the plotting code"
 #| fig-cap: "Variance explained by the MOFA model of the Hintikka et al. (2021) data. The heatmap shows the variance explained per factor (rows) and omic layer (columns), and the barplot shows the total variance explained per layer."
-#| messsage: false
+#| fig-alt: "Two stacked panels: a heatmap of MOFA factors (rows) against the omic layers (columns), filled by the variance explained, and a barplot of the total variance explained in each layer."
+#| message: false
 #| warning: false
 #| fig-height: 8
 #| fig-width: 10
@@ -348,6 +347,7 @@ first two factors (@fig-mofa-factors).
 ```{r}
 #| label: fig-mofa-factors
 #| fig-cap: "MOFA sample scores of the Hintikka et al. (2021) data on factors 1 and 2, coloured by diet."
+#| fig-alt: "Scatter plot of samples on MOFA factor 1 (x-axis) and factor 2 (y-axis), with points coloured by diet."
 
 plot_factors(model, factors = c(1, 2), color_by = "Diet")
 ```
@@ -358,20 +358,27 @@ the first two factors to analyze co-varying features (@fig-mofa-weights).
 ```{r}
 #| label: fig-mofa-weights
 #| fig-cap: "Top 10 features with the largest absolute MOFA weights on factors 1 and 2 for the microbiota (top) and metabolite (bottom) layers of the Hintikka et al. (2021) data."
+#| fig-alt: "Two stacked rows of panels for factors 1 and 2, showing the ten microbiota features (top) and the ten metabolites (bottom) with the largest absolute weights, each drawn as a point along the weight axis."
 #| warning: false
 #| message: false
 #| fig-height: 10
 #| fig-width: 10
 
-plot_list <- lapply(
-    c("microbiota", "metabolites"),
-    plot_top_weights,
-    object = model,
+p1 <- plot_top_weights(
+    model,
+    view = "microbiota",
     factors = c(1, 2),
     nfeatures = 10
 )
 
-wrap_plots(plot_list, ncol = 1) & theme(text = element_text(size = 8))
+p2 <- plot_top_weights(
+    model,
+    view = "metabolites",
+    factors = c(1, 2),
+    nfeatures = 10
+)
+
+wrap_plots(p1, p2, ncol = 1) & theme(text = element_text(size = 8))
 ```
 
 More tutorials and examples of using the package are found at
@@ -437,7 +444,8 @@ Useful functions:
 
 3. Apply the CLR transformation to the microbiota data.
 
-4. Apply the relative and log10 transformations to the other omics.
+4. Apply the log10 transformation to the other omics where appropriate, for
+example, to metabolite concentrations.
 
 5. Standardize each feature within each omic so that all features have mean
 0 and unit variance.

@@ -1,23 +1,50 @@
 # Agglomeration {#sec-agglomeration}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 In [@sec-treese_subsetting], we covered how to select features from the dataset.
 Agglomeration, on the other hand, involves combining data points into broader
 feature categories by summing their values. For instance, if you have counts
 for individual species, you might agglomerate them into groups based on the
 family of each species. This means you would add up the counts of all species
-within a particular family to get a single value that represents that family.
+within a particular family to get a single value that represents that family
+(@fig-agglomeration).
 While this method simplifies your dataset and you lose the specific information
 about individual species, it can, however, be useful in highlighting overall
 trends.
+
+```{mermaid}
+%%| label: fig-agglomeration
+%%| fig-cap: "Agglomeration sums the counts of features up the taxonomy tree. In this sample, four species are agglomerated into three genera and two families; the total count (18) stays the same."
+flowchart LR
+    subgraph sp["Species"]
+        direction TB
+        s1["<i>Roseburia intestinalis</i><br/>6"]
+        s2["<i>Roseburia hominis</i><br/>3"]
+        s3["<i>Blautia obeum</i><br/>4"]
+        s4["<i>Bacteroides fragilis</i><br/>5"]
+    end
+    subgraph ge["Genus"]
+        direction TB
+        g1["<i>Roseburia</i><br/>6 + 3 = 9"]
+        g2["<i>Blautia</i><br/>4"]
+        g3["<i>Bacteroides</i><br/>5"]
+    end
+    subgraph fa["Family"]
+        direction TB
+        f1["Lachnospiraceae<br/>9 + 4 = 13"]
+        f2["Bacteroidaceae<br/>5"]
+    end
+    s1 --> g1
+    s2 --> g1
+    s3 --> g2
+    s4 --> g3
+    g1 --> f1
+    g2 --> f1
+    g3 --> f2
+    classDef leaf fill:#ffffff,stroke:#6c757d,color:#070707
+    classDef agg fill:#e6f3f7,stroke:#0087af,color:#070707
+    class s1,s2,s3,s4 leaf
+    class g1,g2,g3,f1,f2 agg
+```
 
 The choice between subsetting and agglomeration depends on your research goals
 and the type of insights you want to gain from your data. For example, if you
@@ -60,7 +87,9 @@ composition at different taxonomic levels. For this,
 At its simplest, the function takes a `TreeSE` object as input and outputs a
 `TreeSE` object agglomerated to a specified taxonomy level using the `rank`
 parameter. Note that we can also choose to prune the phylogenetic tree to
-correspond to the agglomerated data, by setting `update.tree = TRUE`.
+correspond to the agglomerated data, by setting `update.tree = TRUE`. The tree
+can be pruned only if the features of each group form a subtree of their own,
+i.e., the groups are monophyletic. Otherwise, the tree is removed.
 
 ```{r}
 #| label: agg_phylum
@@ -86,16 +115,19 @@ As we observe from the taxonomy table, all lower ranks below Phylum now contain
 level, meaning that the lowest rank that rows can be uniquely mapped to is the
 Phylum rank.
 
-Since we specified `update.tree = TRUE`, the phylogenetic tree has also been
-agglomerated. This is evident from the tree, which now has only
-`r length(TreeSummarizedExperiment::rowTree(tse_phylum)$tip.label)` tips, each corresponding to a single
-row in the dataset.
+Since we specified `update.tree = TRUE`, the function tried to prune the
+phylogenetic tree. In this dataset, however, some phyla are not monophyletic:
+their features are spread across different branches of the tree. The tree
+could therefore not be agglomerated, and it was removed.
 
 ```{r}
 #| label: agg_phylum_rowtree
 
 rowTree(tse_phylum)
 ```
+
+If a tree is needed for the agglomerated data, a hierarchy tree can be created
+from the taxonomy table instead (see [@sec-fly-tree]).
 
 Additionally, we can examine the counts assay table to assess how the
 agglomeration has affected the counts of unique features per sample.
@@ -165,7 +197,7 @@ altExp(tse, "phylum") <- tse_phylum
 altExpNames(tse)
 ```
 
-`altExpNames` now consists of `Phylum` level data. This can be extended to use
+`altExpNames` now consists of `phylum` level data. This can be extended to use
 any taxonomic level listed in `taxonomyRanks(tse)`. While it is certainly
 possible to agglomerate data one taxonomic level at a time, you can also
 aggregate data across all available ranks in a single step using the
@@ -189,8 +221,10 @@ the agglomerates are made based on features, such as taxonomy information.
 Alternatively, you can use `agglomerateByVariable()` to aggregate the data.
 
 `agglomerateByVariable()` is designed to aggregate data based on other criteria
-than taxa, such as sample groups or clusters. The function operates similarly
-to feature aggregation, but the `by` parameter must be set to "rows."
+than taxa, such as sample groups or clusters. The `by` parameter specifies
+whether features (`by = "rows"`) or samples (`by = "cols"`) are aggregated, and
+`group` names the `rowData` or `colData` variable that defines the groups.
+Below, we aggregate samples by their sample type.
 
 ::: {.callout-note}
 ## Note
@@ -222,13 +256,13 @@ can combine the reads from all these rare taxa under a new feature which we can
 call "Rare taxa". The function `agglomerateByPrevalence()` accomplishes this by
 merging filtered features into a single feature called "Other" by default,
 preventing unnecessary loss of information. This is particularly useful when
-working with left-skewed feature data, such as soil microbiome data sets where
+working with right-skewed feature data, such as soil microbiome data sets where
 rare taxa may represent a significant proportion of the reads when combined.
 
 Here, we demonstrate how to agglomerate the data using prevalence and abundance
 thresholds of 20% and 0.1%, respectively. This means that for a feature to be
 considered detected in a sample, its relative abundance must exceed 0.1% and
-after this, the feature must be detected in at least 20% of samples. Taxa that
+after this, the feature must be detected in more than 20% of samples. Taxa that
 do not meet these criteria are combined in the "Other" group.
 
 To use relative abundances for the detection threshold, we must first transform

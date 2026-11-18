@@ -1,21 +1,24 @@
-# Importing data {#sec-import}
+---
+aliases:
+  - convert.html
+---
+
+# Importing and exporting data {#sec-import}
 
 ```{r}
 #| label: setup
-#| echo: false
-#| results: asis
+#| include: false
 
-library(rebook)
 library(DT)
-chapterPreamble(cache = FALSE)
 ```
 
 This chapter demonstrates how data can be imported into data containers
 from files ([@sec-loading-experimental-microbiome-data]) and converted from
-other R objects, such as `phyloseq`
+other R objects, such as `phyloseq` [@McMurdie2013]
 ([@sec-conversions-between-data-formats-in-r]). Additionally, multiple
 databases offer curated microbiome data, which are introduced in
-[@sec-example-data].
+[@sec-example-data]. Finally, [@sec-convert] shows how to save the data
+containers and export them as tables.
 
 In prior to importing the data to container, the raw sequences must be
 mapped to abundances. The specific method depends on sequencing type and
@@ -23,9 +26,9 @@ other data-specific factors. There are several resources available to
 guide this process, [Metagenomics wiki](https://www.metagenomics.wiki/)
 being one of them. [Here](https://github.com/microbiome/OMA/blob/devel/inst/pages/extra_material/dada2_workflow.Rmd)
 you can find an example workflow for processing 16S rRNA sequences into
-a data container using `r BiocStyle::Biocpkg("dada2")`.
+a data container using `r BiocStyle::Biocpkg("dada2")` [@Callahan2016dada2].
 
-## From files {#sec-loading-experimental-microbiome-data}
+## Import from files {#sec-loading-experimental-microbiome-data}
 
 The data containers can be constructed from scratch. For most common
 microbiome data formats, there are dedicated importers available which
@@ -35,16 +38,16 @@ streamlines the importing.
 
 Specific import functions are provided for:
 
-- BIOM files (see `help(importBIOM, package = "mia")`)
-- QIIME2 files (see `help(importQIIME2, package = "mia")`)
-- Mothur files (see `help(importMothur, package = "mia")`)
-- MetaPhlAn files (see `help(importMetaPhlAn, package = "mia")`)
-- HUMAnN files (see `help(importHUMAnN, package = "mia")`)
-- taxpasta files (see `help(importTaxpasta, package = "mia")`)
+- BIOM files [@McDonald2012] (see `help(importBIOM, package = "mia")`)
+- QIIME2 files [@Bolyen2019] (see `help(importQIIME2, package = "mia")`)
+- Mothur files [@Schloss2009] (see `help(importMothur, package = "mia")`)
+- MetaPhlAn files [@Beghini2021] (see `help(importMetaPhlAn, package = "mia")`)
+- HUMAnN files [@Beghini2021] (see `help(importHUMAnN, package = "mia")`)
+- taxpasta files [@Beber2023] (see `help(importTaxpasta, package = "mia")`)
 
 Here we show how [Biom files](https://biom-format.org/) are imported
-into a `TreeSE` object using as an example Tengeler2020, which is
-further described
+into a `TreeSE` object [@Huang2021] using as an example Tengeler2020
+[@Tengeler2020], which is further described
 [here](https://microbiome.github.io/mia/reference/Tengeler2020.html).
 This dataset consists of 3 files, which can be fetched or downloaded
 from [this repository](https://github.com/microbiome/data/tree/main/Tengeler2020):
@@ -53,8 +56,9 @@ from [this repository](https://github.com/microbiome/data/tree/main/Tengeler2020
 - csv file: sample metadata
 - tree file: phylogenetic tree
 
-To begin with, we store the data in a local directory within the working
-directory, such as *data/*, and define the source file paths.
+In your own analysis, you would store the data in a local directory, such
+as *data/*, and define the source file paths. Here, the example files are
+shipped with the OMA package, so we locate them with `system.file()`.
 
 ```{r}
 #| label: import1
@@ -108,9 +112,6 @@ assay(tse, "counts")[1:3, 1:3]
 The `rowdata` includes taxonomic information from the biom file. The
 `head()` command shows just the beginning of the data table for an
 overview.
-
-The `kable()` function from the `r BiocStyle::CRANpkg("knitr")` package
-helps print the information more nicely.
 
 ```{r}
 #| label: import4
@@ -176,7 +177,7 @@ colData(tse) <- DataFrame(sample_meta)
 colData(tse) |> head()
 ```
 
-Finally, we add a phylogenetic tree to the `rowData` slot. Such feature
+Finally, we add a phylogenetic tree to the `rowTree` slot. Such feature
 is available only in `TreeSE` objects. Similarly, Trees specifying the
 sample hierarchy can be stored in the `colTree` slot.
 
@@ -212,8 +213,8 @@ file formats. You can import such external data files as a `TreeSE`
 object, but the details depend on the file format. Here, we provide
 examples for common formats. Some datasets and raw files to learn how to
 import raw data and construct `r BiocStyle::Biocpkg("TreeSummarizedExperiment")`
-/ `r BiocStyle::Biocpkg("MultiAssayExperiment")` containers are available in
-the [microbiome data repository](https://github.com/microbiome/data).
+/ `r BiocStyle::Biocpkg("MultiAssayExperiment")` [@Ramos2017] containers are
+available in the [microbiome data repository](https://github.com/microbiome/data).
 
 #### CSV import
 
@@ -332,7 +333,7 @@ this can lead to errors!
 Now, let's create the `TreeSE` object from the input data tables. Here
 we also convert the data objects in their preferred formats:
 
-- `counts` → numeric `matrix```
+- `counts` → numeric `matrix`
 - `rowData` → `DataFrame` or `data.frame`
 - `colData` → `DataFrame` or `data.frame`
 
@@ -405,7 +406,7 @@ mae <- MultiAssayExperiment(experiments = experiments)
 mae
 ```
 
-## From other R objects {#sec-conversions-between-data-formats-in-r}
+## Import from other R objects {#sec-conversions-between-data-formats-in-r}
 
 If the data has already been imported in R in another format, it can be
 readily converted into `TreeSE`, as shown in our next example. Note that
@@ -456,7 +457,7 @@ can refer to the following functions:
 - [convertFromDADA2](https://microbiome.github.io/mia/reference/convertFromDADA2.html)
 - [convertToBIOM / convertFromBIOM](https://microbiome.github.io/mia/reference/convertFromBIOM.html)
 
-## Data resources {#sec-example-data}
+## Open data resources {#sec-example-data}
 
 Open demonstration data for testing and benchmarking purposes is
 available from multiple locations. This chapter introduces some options.
@@ -515,7 +516,10 @@ All data are downloaded from `ExperimentHub` and cached for local re-use.
 Check the
 [manual pages of each function](https://microbiome.github.io/microbiomeDataSets/reference/index.html)
 for a detailed documentation of the data contents and references. Let us
-retrieve a `r BiocStyle::Biocpkg("MultiAssayExperiment")` dataset:
+retrieve a `r BiocStyle::Biocpkg("MultiAssayExperiment")` dataset. The
+HintikkaXOData dataset was originally distributed through
+`r BiocStyle::Biocpkg("microbiomeDataSets")` and is now also included in
+`r BiocStyle::Biocpkg("mia")`, so here we load it from there:
 
 ```{r}
 #| label: package_datasets
@@ -532,7 +536,7 @@ mae <- HintikkaXOData
 Data is available in `r BiocStyle::Biocpkg("SummarizedExperiment")` (`SE`),
 `r BiocStyle::Biocpkg("TreeSummarizedExperiment")` (`TreeSE`), and
 `r BiocStyle::Biocpkg("MultiAssayExperiment")` (`MAE`) data containers;
-see [@sec-cross-correlation] for more details.
+see [@sec-containers] and [@sec-mae] for more details.
 
 ### Curated metagenomic data
 
@@ -558,10 +562,10 @@ tse <- curatedMetagenomicData("Vatanen*", dryrun = FALSE, counts = TRUE)
 
 ### Microbiome compendium
 
-The [MicroBioMap](https://microbiomap.org/) dataset includes
+The [MicroBioMap](https://github.com/blekhmanlab/MicroBioMap) dataset includes
 almost 170k samples of publicly available 16S rRNA amplicon sequencing
 data, all processed using the same pipeline and reference database
-[@microbiomap]. After installing the
+[@microbiomap; @Abdill2025]. After installing the
 `r BiocStyle::Githubpkg("blekhmanlab/MicroBioMap")` package (see
 [their GitHub page](https://github.com/blekhmanlab/MicroBioMap#microbiome-compendium)
 for instructions), you can load the compendium as below.
@@ -588,7 +592,7 @@ database. For more use examples in R/Bioconductor, see the
 
 `r BiocStyle::Biocpkg("HMP2Data")` provides 16S rRNA sequencing data from the
 second phase of the Human Microbiome Project, also known as the Integrative
-Human Microbiome Project (iHMP) [@HMP2data]. Additional data, *e.g.*
+Human Microbiome Project (iHMP) [@HMP2data; @iHMP2019]. Additional data, *e.g.*
 cytokines, are included when available. The data are offered as
 `SummarizedExperiment` and `MultiAssayExperiment` objects.
 
@@ -607,15 +611,165 @@ and return the data as `TreeSE` or `MAE` objects.
 
 | Package | Resource |
 |---------|----------|
-| `r BiocStyle::Biocpkg("MGnifyR")` | [EBI/MGnify](https://www.ebi.ac.uk/metagenomics/) |
-| `r BiocStyle::Biocpkg("HoloFoodR")` | [EBI/HoloFood](https://www.holofooddata.org/) |
-| `r BiocStyle::Githubpkg("jbisanz/qiime2R")` | [QIIME2](https://amplicon-docs.qiime2.org/en/latest/) |
+| `r BiocStyle::Biocpkg("MGnifyR")` | [EBI/MGnify](https://www.ebi.ac.uk/metagenomics/) [@Richardson2022] |
+| `r BiocStyle::Biocpkg("HoloFoodR")` [@Borman2025a] | [EBI/HoloFood](https://www.holofooddata.org/) |
+| `r BiocStyle::Githubpkg("jbisanz/qiime2R")` | [QIIME2](https://amplicon-docs.qiime2.org/en/latest/) artifacts with `qza_to_tse()` |
+
+QIIME2 artifacts can also be imported with `importQIIME2()` from
+`r BiocStyle::Biocpkg("mia")` (see [@sec-loading-experimental-microbiome-data]).
+
+## Exporting data {#sec-convert}
+
+There are two main ways to export data. The whole data container can be saved
+to a file, which preserves all of its components and allows loading it back
+later as the same object. Alternatively, the data can be exported as tables,
+which can be opened with other tools, such as spreadsheet programs or other
+programming languages, but which do not preserve the structure of the object.
+
+### Save the data container {#sec-save-data-container}
+
+#### RDS files {#sec-rds}
+
+The simplest way to save any R object, including `TreeSE` [@Huang2021] and
+`MultiAssayExperiment` [@Ramos2017], is to write it to an RDS file with
+`saveRDS()`. The file can be loaded back with `readRDS()`.
+
+```{r}
+#| label: save_rds
+#| eval: false
+
+data(GlobalPatterns, package = "mia")
+tse <- GlobalPatterns
+
+# Save TreeSE as an RDS file
+saveRDS(tse, "path/to/tse.rds")
+
+# Load the TreeSE back
+tse <- readRDS("path/to/tse.rds")
+```
+
+RDS files are convenient for saving and reloading data in R, for example
+between analysis sessions. However, they can only be read in R, and files
+saved with old package versions are not always fully compatible with newer
+versions. For long-term storage or for sharing data across tools, the
+alabaster format described below is more robust.
+
+#### alabaster {#sec-alabaster}
+
+The alabaster framework provides an alternative to RDS files. It saves the
+data container as a directory of files in standard formats, which are not tied
+to R. This makes the data easier to store long term and to share with other
+programming languages. The `saveObject()` function writes the data to a
+directory, and `readObject()` loads it back.
+
+```{r}
+#| label: alabaster
+#| eval: false
+
+# Requires the alabaster.treese package to be installed
+library(alabaster)
+
+# Save TreeSE into a directory
+saveObject(tse, "path/to/tse")
+
+# Load the TreeSE back
+tse <- readObject("path/to/tse")
+```
+
+The same functions can be used to save and load `MultiAssayExperiment`
+objects.
+
+### Export as table {#sec-export-table}
+
+#### TreeSummarizedExperiment
+
+Transforming a `TreeSE` object into a dataframe is straightforward with
+the `r BiocStyle::Biocpkg("mia")` package. The `meltSE` function is
+particularly handy for this purpose. It allows you to melt various parts
+of a `TreeSE` object into a dataframe based on the parameters you specify.
+
+Exporting a `TreeSE` data container can be done using the
+`r BiocStyle::CRANpkg("feather")` package, which builds on the
+`r BiocStyle::CRANpkg("arrow")` implementation of the Feather format; the same
+files can also be written with `arrow::write_feather()`. The `TreeSE` object
+has to be converted into a dataframe (`data.frame` and not `DataFrame`). The output
+file is a .feather file, which can be imported in other languages such as
+Julia or Python. For more information, have a look at the
+[FeatherFile](https://juliapackages.com/p/featherfiles) Julia package and
+[feather-format](https://pypi.org/project/feather-format/) Python
+library.
+
+```{r}
+#| label: write_feather
+#| eval: false
+
+molten_tse <- meltSE(
+    tse,
+    add.row = TRUE,
+    add.col = TRUE,
+    assay.type = "counts"
+)
+
+# Export as a feather file
+library(feather)
+write_feather(molten_tse, "path/to/tse.feather")
+```
+
+Another way could be using a CSV file. This works the same as for a
+feather file, make sure you have converted your `TreeSE` data container
+as a dataframe. Note that you can decide whether you want to write
+the row names or not.
+
+```{r}
+#| label: write_csv
+#| eval: false
+
+write.csv(molten_tse, "path/to/tse.csv", row.names = FALSE)
+```
+
+To share the data with collaborators who work with spreadsheets, the
+`se2xls()` function from the `r BiocStyle::Biocpkg("SEtools")` package
+writes a `TreeSE` to an Excel file without melting it first. The sample
+data (`colData`), feature data (`rowData`) and each assay are saved on
+separate sheets. Note that the phylogenetic tree is not included.
+
+```{r}
+#| label: write_xlsx
+#| eval: false
+
+library(SEtools)
+se2xls(tse, filename = "path/to/tse.xlsx")
+```
+
+#### MultiAssayExperiment
+
+Exporting a `MultiAssayExperiment` data container can also be done using
+`r BiocStyle::CRANpkg("feather")` package.
+
+```{r}
+#| label: write_feather_mae
+#| eval: false
+
+# Convert into a data.frame
+molten_mae <- longForm(mae)
+molten_mae <- data.frame(molten_mae)
+write_feather(molten_mae, "path/to/mae.feather")
+```
+
+And as a CSV file.
+
+```{r}
+#| label: write_csv_mae
+#| eval: false
+
+write.csv(molten_mae, "path/to/mae.csv", row.names = FALSE)
+```
 
 ::: {.callout-tip icon="false"}
 ## Exercises
 
 **Goal:** The goal of these exercises is to learn how to import data
-from files or database.
+from files or databases, convert it between formats and save it.
 
 **Exercise 1: Construct a `TreeSE`**
 
@@ -643,7 +797,7 @@ in the following variables:
 `rowdata` correspond to rows of `assay` and rows of `coldata` match
 with columns of `assay`.
 
-5. Create a `SimpeList` containing the abundance table.
+5. Create a `SimpleList` containing the abundance table.
 
 6. Create a `TreeSummarizedExperiment` object.
 
@@ -676,12 +830,30 @@ fetch. Select analyses only from single analysis pipeline.
 
 5. Retrieve data into `TreeSE`.
 
+**Exercise 4: Convert and save**
+
+1. Load any of the example data sets described in [@sec-data-sets].
+
+2. Convert data to a `phyloseq` object.
+
+3. Convert the `phyloseq` data back to `TreeSE`.
+
+4. Save a `TreeSE` object as a RDS file.
+
+5. Read the RDS file into a `TreeSE` object.
+
+6. Convert the data to long format and save it as a CSV file.
+
 Useful functions:
 
 `utils::read.csv()`, `MultiAssayExperiment::DataFrame()`,
 `TreeSummarizedExperiment::TreeSummarizedExperiment()`, `base::matrix()`,
-`BiocGenerics::rownames()`, `BiocGenerics::colnames()`, `S4Vectors::SimpleList()`,
-`utils::download.file()`, `mia::importBIOM()`, `MGnifyR::MgnifyClient()`,
-`MGnifyR::searchAnalysis()`, `MGnifyR::getMetadata()`, `MGnifyR::getResult()`
+`BiocGenerics::rownames()`, `BiocGenerics::colnames()`,
+`S4Vectors::SimpleList()`, `utils::download.file()`, `mia::importBIOM()`,
+`MGnifyR::MgnifyClient()`, `MGnifyR::searchAnalysis()`,
+`MGnifyR::getMetadata()`, `MGnifyR::getResult()`, `utils::data()`,
+`mia::convertToPhyloseq()`, `mia::convertFromPhyloseq()`,
+`BiocGenerics::saveRDS()`, `base::readRDS()`, `mia::meltSE()`,
+`utils::write.csv()`
 
 :::
