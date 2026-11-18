@@ -316,7 +316,70 @@ with independent feature data.
 The following shows how to store taxonomic abundance tables agglomerated
 at different taxonomic levels. However, the data could as well originate
 from entirely different measurement sources (e.g., 16S amplicon and
-metagenomic sequence data) as long as the samples match.
+metagenomic sequence data) as long as the samples match
+(@fig-altexp).
+
+```{r}
+#| label: fig-altexp
+#| fig-cap: "Alternative experiments. The main experiment and each alternative experiment have their own features (rows) but share the same samples (columns). Subsetting the samples, for example with `tse[, 1]`, therefore applies to all of them."
+#| fig-alt: "Three stacked grids with the same six columns: a main experiment with eight species rows, an altExp called genus with four rows and an altExp called phylum with two rows. A dashed box around the first column spans all three grids."
+#| fig-width: 6.5
+#| fig-height: 4.5
+#| echo: false
+library(ggplot2)
+# Schematic of a TreeSE with two alternative experiments. Run in local() so
+# that the helper objects do not leak into later chunks.
+local({
+    n_samples <- 6
+    blocks <- data.frame(
+        name = c(
+            "Main experiment\nspecies, 8 rows",
+            "altExp \"genus\"\n4 rows",
+            "altExp \"phylum\"\n2 rows"
+        ),
+        n_rows = c(8, 4, 2),
+        fill = c("#e6f3f7", "#fdf0d9", "#dcf1ea"),
+        stroke = c("#0087af", "#E69F00", "#009E73")
+    )
+    # Stack the blocks vertically with a one-row gap between them
+    blocks$top <- rev(cumsum(rev(blocks$n_rows + 1))) - 1
+    tiles <- do.call(rbind, lapply(seq_len(nrow(blocks)), function(i) {
+        expand.grid(
+            x = seq_len(n_samples),
+            y = blocks$top[i] - seq_len(blocks$n_rows[i]) + 1,
+            block = blocks$name[i]
+        )
+    }))
+    tiles$block <- factor(tiles$block, levels = blocks$name)
+    ggplot(tiles, aes(x, y)) +
+        geom_tile(aes(fill = block, colour = block),
+            width = 0.92, height = 0.85, linewidth = 0.4
+        ) +
+        scale_fill_manual(values = setNames(blocks$fill, blocks$name)) +
+        scale_colour_manual(values = setNames(blocks$stroke, blocks$name)) +
+        annotate("text",
+            x = 0.3, y = blocks$top - (blocks$n_rows - 1) / 2,
+            label = blocks$name, hjust = 1, size = 3.8, lineheight = 0.9
+        ) +
+        annotate("text",
+            x = (n_samples + 1) / 2, y = max(blocks$top) + 1.3,
+            label = "Samples: the same columns in every experiment",
+            size = 3.8
+        ) +
+        annotate("rect",
+            xmin = 0.45, xmax = 1.55, ymin = 0.35,
+            ymax = max(blocks$top) + 0.65, fill = NA,
+            colour = "#D55E00", linewidth = 0.9, linetype = "dashed"
+        ) +
+        annotate("text",
+            x = 1.75, y = -0.6, hjust = 0, size = 3.4, colour = "#D55E00",
+            label = "tse[, 1] keeps sample 1 in all experiments"
+        ) +
+        coord_cartesian(xlim = c(-2.4, n_samples + 0.5), clip = "off") +
+        theme_void(base_size = 13) +
+        theme(legend.position = "none")
+})
+```
 
 Let us first subset the data so that it has only two rows.
 
