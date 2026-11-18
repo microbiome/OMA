@@ -51,7 +51,8 @@ illustrates how different results can be obtained depending on the choice of
 the algorithm. To reduce calculation time we decided to agglomerate taxonomic
 features onto 'Class' level and filter out
 the least prevalent taxonomic features as well as less commonly detected within
-a sample resulting in 25 features in the data.
+a sample resulting in 26 features in the data (25 classes and an "Other"
+group that combines the remaining features).
 
 ```{r}
 #| label: load_pkg_data
@@ -83,13 +84,14 @@ In this example we use the `addCluster()` function from
 function allows to choose a clustering algorithm and offers multiple
 parameters to shape the result. The `HclustParam()` parameter
 is used for hierarchical clustering, and it accepts several sub-parameters, as
-further detailed in [HclustParam documentation](https://rdrr.io/github/LTLA/bluster/man/HclustParam-class.html).
+further detailed in the `HclustParam` documentation of
+`r BiocStyle::Biocpkg("bluster")` (see `?bluster::HclustParam`).
 Notably, the `by` argument specifies whether clustering is performed based on
 features or samples. Here, we cluster counts data, for which we compute the
 dissimilarities with the Bray-Curtis distance using the `ward.d2` method.
 Statistical information can be optionally returned with the `full` parameter.
 Finally, the `clust.col` parameter allows us to choose the name of the column
-in the colData (default name is `clusters`).
+in the colData (default name is `cluster`).
 
 ```{r}
 #| label: hclust1
@@ -114,12 +116,14 @@ table(altExp(tse, "prevalent")$hclust)
 ```
 
 From the table we can see that the hierarchical clustering suggests six
-clusters to describe the data.
+clusters to describe the data. Unless the number of clusters (`k`) or the
+cutting height (`h`) is given in the `cut.params` argument of `HclustParam()`,
+the tree is cut at half of its total height; the number of branches crossing
+this height determines the number of clusters.
 
 Now, we visualize the hierarchical structure of the clusters with a dendrogram
-tree. In dendrograms, the tree is split where the branch length is the largest.
-In each splitting point, the tree is divided into two clusters leading to the
-hierarchy. In this example, each sample is labeled by their dominant taxon
+tree. In each splitting point, the tree is divided into two clusters leading
+to the hierarchy. In this example, each sample is labeled by their dominant taxon
 to visualize ecological differences between the clusters
 (@fig-clustering-dendrogram).
 
@@ -221,7 +225,7 @@ tse <- addCluster(
     tse,
     assay.type = "standardize",
     clust.col = "hclustKendall",
-    MARGIN = "rows",
+    by = "rows",
     HclustParam(dist.fun = kendall_dissimilarity, method = "ward.D2")
 )
 ```
@@ -246,7 +250,7 @@ Then we can merge data to clusters.
 #| label: taxa_clustering_row_merge
 
 # Aggregate clusters as a sum of each cluster values
-tse_merged <- agglomerateByVariable(tse, by = "rows", f = "hclustKendall")
+tse_merged <- agglomerateByVariable(tse, by = "rows", group = "hclustKendall")
 tse_merged
 ```
 
@@ -278,7 +282,7 @@ altExp(tse, "prevalent") <- addCluster(
     assay.type = "counts",
     name = "DMM",
     DmmParam(k = 1:6, type = "laplace"),
-    MARGIN = "samples",
+    by = "samples",
     full = TRUE,
     clust.col = "dmmclust"
 )
@@ -414,6 +418,9 @@ clusters.
 
 ```{r}
 #| label: clustered_heatmap_prep
+
+# Keep only counts; transformed assays cannot be meaningfully agglomerated
+assays(tse) <- assays(tse)["counts"]
 
 # Agglomerate to Genus level
 tse <- agglomerateByPrevalence(tse, rank = "genus")
