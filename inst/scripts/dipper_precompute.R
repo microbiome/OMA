@@ -1,5 +1,5 @@
-# Precompute the DiPPER results shown in the differential abundance chapter
-# (section "DPA with DiPPER", @sec-dpa-dipper).
+# Precompute the DiPPER results shown in the differential prevalence chapter
+# (section "DiPPER", @sec-dpa-dipper).
 #
 # The book does not run DiPPER, because it needs the CmdStan backend, which is
 # installed separately (https://github.com/jepelt/DiPPER#installation).
@@ -18,8 +18,7 @@ library(mia)
 library(DiPPER)
 library(ggplot2)
 
-# Prepare the data as in the chapter (chunks load_packages_and_data and
-# prepare_data)
+# Prepare the data as in the chapter (chunk dpa_prepare_data)
 data("Tengeler2020", package = "mia")
 tse <- Tengeler2020
 tse <- subsetByPrevalent(tse, rank = "Genus", prevalence = 0.10)
