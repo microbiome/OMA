@@ -523,6 +523,73 @@ as reduced interpretability, overfitting and incorrect estimations.
 Collinearity of variables can be assessed, for instance, with correlation
 heatmaps (see [@sec-correlation]) or with scatter plots.
 
+## Batch effects {#sec-batch-effects}
+
+Batch effects are technical differences between groups of samples that were
+processed differently, for instance in different sequencing runs,
+laboratories, extraction kits or studies. They can be as large as the
+biological differences of interest and, if the batches are confounded with
+the groups being compared, they can lead to false conclusions. Batch effects
+in microbiome data, and methods to detect and correct them, are reviewed by
+@Wang2020batch and, as part of data preprocessing, by @Zhou2023.
+
+**Design.** Batch effects are best handled in the study design. If samples
+from all groups are distributed across batches, the batch can be accounted for
+in the analysis. If each batch contains only one group, the batch and group
+effects cannot be separated by any method.
+
+**Detection.** Batch effects can be explored by colouring an ordination by
+batch (see [@sec-unsupervised-ordination]), and their size can be estimated,
+for instance, with PERMANOVA that includes batch as a variable (see
+[@sec-permanova]). Technical controls, such as mock communities or samples
+sequenced in several batches, make this easier.
+
+**Accounting for batch.** Often the simplest approach is to include the batch
+as a covariate in the statistical model, for instance in differential
+abundance analysis (see [@sec-daa-cov]) or in PERMANOVA (see
+[@sec-permanova]). This keeps the original data unchanged.
+
+**Correcting the data.** When the batch-corrected data itself is needed, for
+example for visualization or for methods that cannot include covariates,
+several Bioconductor packages are available. They differ in whether they were
+designed for microbiome data and in how directly they work with
+`TreeSummarizedExperiment` (`TreeSE`) data.
+
+*Microbiome-specific tools:*
+
+- `r BiocStyle::Biocpkg("PLSDAbatch")` corrects batch effects with a
+multivariate framework based on partial least squares discriminant analysis
+[@Wang2023]. Its functions take an abundance matrix, which can be extracted
+from a `TreeSE` with `assay()`. The package provides its example data as
+`TreeSE`.
+- `r BiocStyle::Biocpkg("MMUPHin")` adjusts for batch or study effects,
+especially in meta-analyses of several studies [@Ma2022]. It takes an
+abundance matrix and a data frame of sample metadata, which can be extracted
+from a `TreeSE` with `assay()` and `colData()`. `TreeSE` is not supported
+directly.
+
+*General-purpose tools:*
+
+- `r BiocStyle::Biocpkg("batchelor")` was developed for single-cell data. It
+accepts `TreeSE` directly, because `TreeSE` extends `SingleCellExperiment`.
+For instance, `regressBatches()` removes the batch effect from log-transformed
+data, such as clr-transformed abundances, with a linear model. It returns the
+corrected values as a new `SingleCellExperiment`, which can be added as an
+assay to the original `TreeSE`.
+- `r BiocStyle::Biocpkg("corral")` is based on correspondence analysis and
+accepts `TreeSE` directly. Its `corralm()` function returns the same object
+with a batch-integrated reduced-dimensional representation that can be used
+for ordination, but not corrected abundances.
+
+The general-purpose tools were not designed for microbiome data, so it should
+be checked that their assumptions suit the data.
+
+Correction methods can remove biological signal together with the batch
+effect, especially when batch and group are partly confounded, so the results
+should be checked, for instance by repeating the ordination after correction.
+An [online tutorial](https://evayiwenwang.github.io/Managing_batch_effects/index.html)
+by @Wang2020batch demonstrates many of these methods in practice.
+
 ::: {.callout-tip icon="false"}
 ## Exercises
 
