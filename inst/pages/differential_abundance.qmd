@@ -127,11 +127,12 @@ covered in @sec-differential-prevalence.
 Following the recommendations above, we show in this section how to perform DAA
 by analyzing (log transformed) relative abundances with linear regression
 models, using `r BiocStyle::Biocpkg("LimROTS")` and
-`r BiocStyle::Biocpkg("Maaslin2")`. We first illustrate the analysis in the simplest case where
-two groups are compared, and no other covariates are included in the analysis.
-After that we illustrate more complex analyses, namely, the analysis with
-additional covariate(s) included, the same analysis with LimROTS (@sec-daa-limrots) and the analysis
-with interaction of two variables. Furthermore, we illustrate the differential
+`r BiocStyle::Biocpkg("Maaslin2")`. We first compare two groups with LimROTS
+while controlling for a covariate (@sec-daa-limrots). We then show with
+MaAsLin2 the simplest case where two groups are compared without other
+covariates, followed by more complex analyses, namely, the analysis with
+additional covariate(s) included and the analysis with interaction of two
+variables. Furthermore, we illustrate the differential
 analysis of positive (non-zero) abundances. Differential prevalence analysis is
 shown in @sec-differential-prevalence.
 
@@ -184,6 +185,106 @@ tse$patient_status <- factor(tse$patient_status, levels = c("Control", "ADHD"))
 # We also transform cohort as a factor
 tse$cohort <- factor(tse$cohort, levels = c("Cohort_1", "Cohort_2", "Cohort_3"))
 ```
+
+### With LimROTS {#sec-daa-limrots}
+
+We first perform DAA with `r BiocStyle::Biocpkg("LimROTS")` [@Anwar2025],
+which fits a linear model for each taxon. It combines the linear model and the
+empirical Bayes variance moderation of `r BiocStyle::Biocpkg("limma")`
+[@Ritchie2015] with a reproducibility-optimized test statistic. The LimROTS
+method was inspired by @Elo2008, and added support for covariates. The
+statistic is tuned with bootstrap resampling so that the ranking of the taxa
+is as reproducible as possible, and the p-values are obtained by permutation.
+LimROTS works directly with
+`SummarizedExperiment` objects, including `TreeSE`, and it adds the results to
+the `rowData` of the data. LimROTS applies to log-transformed omics data.
+
+Compared with standard linear models, such as those fitted by MaAsLin2
+(@sec-daa-basic), LimROTS has some potential advantages. The empirical Bayes
+moderation borrows information across taxa to stabilize the variance
+estimates, which helps when there are few samples. The reproducibility
+optimization adapts the test statistic to the data at hand, and the
+permutation-based p-values do not rely on the distributional assumptions of
+the linear model, which log-transformed abundances with many zeros often
+violate [@Anwar2025].
+
+LimROTS expects log-transformed data. We analyze log~2~ transformed relative
+abundances, and the zeros are replaced by half of the smallest non-zero
+relative abundance in the data before the transformation. We compare the ADHD
+and control groups while controlling for `cohort` as a covariate (the role of
+covariates is discussed in @sec-daa-cov). The group variable must be a factor,
+and LimROTS reports the difference between its first and second level. To
+obtain the log~2~-fold change of ADHD versus Control, we therefore put `ADHD`
+first. The number of
+bootstrap and permutation iterations is set with `niter`, and the runs can be
+parallelized with the `BPPARAM` argument.
+
+```{r}
+#| label: run_daa_limrots
+#| message: false
+
+library(LimROTS)
+library(BiocParallel)
+
+# Log2-transform relative abundances; zeros are replaced by half of the
+# smallest non-zero relative abundance
+tse <- transformAssay(
+    tse,
+    assay.type = "relabundance",
+    method = "log2",
+    pseudocount = TRUE,
+    name = "log2_relabundance"
+)
+
+# LimROTS reports the first level minus the second level of the group
+tse_limrots <- tse
+tse_limrots$patient_status <- factor(
+    tse_limrots$patient_status,
+    levels = c("ADHD", "Control")
+)
+
+set.seed(123)
+tse_limrots <- LimROTS(
+    tse_limrots,
+    assay.type = "log2_relabundance",
+    meta.info = c("patient_status", "cohort"), # Variables used in the model
+    group = "patient_status", # The variable of interest
+    formula.str = "~ 0 + patient_status + cohort",
+    niter = 1000, # Bootstrap and permutation iterations
+    BPPARAM = SerialParam(), # For example, MulticoreParam(4) to parallelize
+    verbose = FALSE
+)
+```
+
+The results are stored in the `rowData`. We extract the log~2~-fold change
+estimates (`corrected.logfc`), the permutation-based p-values (`pvalue`) and
+the Benjamini-Hochberg adjusted p-values (`BH.pvalue`), that is, the q-values
+[@Benjamini1995]. Positive log~2~-fold changes (`coef`) indicate a higher
+abundance in the ADHD group.
+
+```{r}
+#| label: results_daa_limrots
+
+res_limrots <- data.frame(
+    feature = rownames(tse_limrots),
+    coef = rowData(tse_limrots)$corrected.logfc,
+    pval = rowData(tse_limrots)$pvalue,
+    qval = rowData(tse_limrots)$BH.pvalue
+)
+
+# Print the results for taxa with the smallest p-values
+res_limrots |>
+    arrange(pval) |>
+    head() |>
+    kable()
+```
+
+Using the standard criterion for statistical significance, q-value < 0.05, the
+abundances of several genera differ between the groups. For instance,
+_Faecalibacterium_ has a positive log~2~-fold change, so it is more abundant
+in the ADHD group, while _Erysipelatoclostridium_ is less abundant. We repeat
+the analysis with MaAsLin2 in the following sections and compare the results
+in @sec-daa-cov.
 
 ### Two groups {#sec-daa-basic}
 
@@ -433,105 +534,14 @@ rather similar to the results without the covariate included. Therefore, cohort
 does not seem to be a confounder causing spurious associations between
 patient status and the abundances of any taxa.
 
-### With LimROTS {#sec-daa-limrots}
-
-`r BiocStyle::Biocpkg("LimROTS")` [@Anwar2025] also fits a linear model for
-each taxon, similarly to MaAsLin2. It combines the linear model and the
-empirical Bayes variance moderation of `r BiocStyle::Biocpkg("limma")`
-[@Ritchie2015] with a reproducibility-optimized test statistic. The LimROTS
-method was inspired by @Elo2008, and added support for covariates. The
-statistic is tuned with bootstrap resampling so that the ranking of the taxa
-is as reproducible as possible, and the p-values are obtained by permutation.
-Unlike MaAsLin2, LimROTS works directly with
-`SummarizedExperiment` objects, including `TreeSE`, and it adds the results to
-the `rowData` of the data. LimROTS applies to log-transformed omics data.
-
-Compared with standard linear models, which MaAsLin2 fits for each taxon
-separately, LimROTS has some potential advantages. The empirical Bayes
-moderation borrows information across taxa to stabilize the variance
-estimates, which helps when there are few samples. The reproducibility
-optimization adapts the test statistic to the data at hand, and the
-permutation-based p-values do not rely on the distributional assumptions of
-the linear model, which log-transformed abundances with many zeros often
-violate [@Anwar2025].
-
-LimROTS expects log-transformed data. As in MaAsLin2, we analyze log~2~
-transformed relative abundances, and the zeros are replaced by half of the
-smallest non-zero relative abundance in the data before the transformation.
-We repeat the analysis with `cohort` as a covariate (@sec-daa-cov). The group
-variable must be a factor, and LimROTS reports the difference between its
-first and second level. To obtain the log~2~-fold change of ADHD versus
-Control, as with MaAsLin2, we therefore put `ADHD` first. The number of
-bootstrap and permutation iterations is set with `niter`, and the runs can be
-parallelized with the `BPPARAM` argument.
-
-```{r}
-#| label: run_daa_limrots
-#| message: false
-
-library(LimROTS)
-library(BiocParallel)
-
-# Log2-transform relative abundances; zeros are replaced by half of the
-# smallest non-zero relative abundance
-tse <- transformAssay(
-    tse,
-    assay.type = "relabundance",
-    method = "log2",
-    pseudocount = TRUE,
-    name = "log2_relabundance"
-)
-
-# LimROTS reports the first level minus the second level of the group
-tse_limrots <- tse
-tse_limrots$patient_status <- factor(
-    tse_limrots$patient_status,
-    levels = c("ADHD", "Control")
-)
-
-set.seed(123)
-tse_limrots <- LimROTS(
-    tse_limrots,
-    assay.type = "log2_relabundance",
-    meta.info = c("patient_status", "cohort"), # Variables used in the model
-    group = "patient_status", # The variable of interest
-    formula.str = "~ 0 + patient_status + cohort",
-    niter = 1000, # Bootstrap and permutation iterations
-    BPPARAM = SerialParam(), # For example, MulticoreParam(4) to parallelize
-    verbose = FALSE
-)
-```
-
-The results are stored in the `rowData`. We extract the log~2~-fold change
-estimates (`corrected.logfc`), the permutation-based p-values (`pvalue`) and
-the Benjamini-Hochberg adjusted p-values (`BH.pvalue`), which correspond to
-the q-values reported for MaAsLin2 above.
-
-```{r}
-#| label: results_daa_limrots
-
-res_limrots <- data.frame(
-    feature = rownames(tse_limrots),
-    coef = rowData(tse_limrots)$corrected.logfc,
-    pval = rowData(tse_limrots)$pvalue,
-    qval = rowData(tse_limrots)$BH.pvalue
-)
-
-# Print the results for taxa with the smallest p-values
-res_limrots |>
-    arrange(pval) |>
-    head() |>
-    kable()
-```
-
-The results agree well with those of MaAsLin2 with the same covariate
-(@sec-daa-cov). The same genera have the smallest p-values, and their
-log~2~-fold changes have the same signs. For instance, _Faecalibacterium_ is
-again more abundant in the ADHD group. The estimates are not identical, as the
-zeros are replaced differently (MaAsLin2 uses the smallest non-zero value of
-each taxon, whereas here the smallest value in the whole data is used) and the
-p-values are computed differently. In this example, LimROTS gives somewhat
-smaller q-values, so a few more genera pass the q < 0.05 threshold.
+These results also agree well with those of LimROTS with the same model
+(@sec-daa-limrots). The same genera have the smallest p-values, and their
+log~2~-fold changes have the same signs. The estimates are not identical, as
+the zeros are replaced differently (MaAsLin2 uses the smallest non-zero value
+of each taxon, whereas we used the smallest value in the whole data with
+LimROTS) and the p-values are computed differently. In this example, LimROTS
+gave somewhat smaller q-values, so a few more genera passed the q < 0.05
+threshold.
 
 ### With an interaction {#sec-daa-ia}
 
