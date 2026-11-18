@@ -134,34 +134,232 @@ Heatmaps that show clusters of taxa and samples are explained in
 [@sec-clustered-heatmap].
 :::
 
-::: {.callout-tip icon="false"}
-## Exercises
+## Exercises {#sec-microbiome-community-exercises}
 
-**Goal:** After this exercise, you are able to visualize a summary of
-microbial composition.
+In these exercises, you will practise the main steps of this chapter:
+visualizing community composition with relative abundance barplots, combining
+less abundant taxa into a single group, and visualizing composition with a
+heatmap and a NeatMap.
 
-**Exercise 1: Community composition**
+We use the `Tengeler2020` dataset from the `r BiocStyle::Biocpkg("mia")`
+package. It contains gut microbiome profiles of 27 mice that were colonized
+with stool from either individuals with attention-deficit/hyperactivity
+disorder (ADHD) or healthy controls. The taxonomy of the features is stored in
+`rowData`.
 
-1. Load any of the example data sets described in [@sec-data-sets].
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-2. Agglomerate data to phylum level.
+:::: {.callout-tip icon="false"}
+## Exercise 1: Composition barplot
 
-3. Transform data to relative abundances.
+**Goal:** Learn to visualize community composition with a relative abundance
+barplot.
 
-4. Visualize community composition with a relative abundance bar plot. Which
-taxonomic features are most prevalent?
+1. Load the `Tengeler2020` dataset from the `mia` package and store it in a
+variable called `tse`.
 
-5. Choose one categorical variable from `colData` and use it to group a
-relative abundance bar plot. Does the community composition associate with
-the grouping?
+2. Transform the `counts` assay into relative abundances.
 
-6. Normalize abundances to a standardized scale, i.e., calculate Z-scores.
+3. Agglomerate the data to the Phylum rank and store the result in a variable
+called `tse_phylum`.
 
-7. Plot normalized abundances with a heatmap.
+4. Visualize the relative abundances of the phyla with a composition barplot.
+Order the phyla by abundance and the samples by the relative abundance of
+`"Bacteroidetes"`.
 
-Useful functions:
+5. How do you read the barplot? Why do we visualize relative abundances
+instead of counts?
 
-`utils::data()`, `mia::agglomerateByRank()`, `mia::transformAssay()`,
-`miaViz::plotAbundance()`, `SummarizedExperiment::colData()`, `sechm::sechm()`
+**Useful functions:** `data()`, `mia::transformAssay()`,
+`mia::agglomerateByRank()`, `miaViz::plotAbundance()`
 
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_composition_barplot
+
+library(miaViz)
+
+# 1. Load the data
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# 2. Relative abundances
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+
+# 3. Agglomerate to Phylum rank
+tse_phylum <- agglomerateByRank(tse, rank = "Phylum")
+
+# 4. Composition barplot
+plotAbundance(
+    tse_phylum,
+    assay.type = "relabundance",
+    order.row.by = "abund",
+    order.col.by = "Bacteroidetes"
+)
+```
+
+5. Each bar is one sample, and the coloured segments show the proportions of
+the phyla in that sample. Because the values are relative abundances, every
+bar sums up to 1. Counts depend on the sequencing depth of each sample, so
+bars of counts would have different heights, and the samples could not be
+compared directly. Ordering the samples by one phylum makes it easier to see
+how its proportion varies between samples and how the other phyla change
+along with it.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Combine rare taxa into "Other"
+
+**Goal:** Learn to show the common taxa in a barplot and to combine the rest
+into a single group.
+
+1. Agglomerate `tse` to the Family rank so that families that are not
+prevalent are combined into "Other". Use the `relabundance` assay, a
+detection threshold of 1% and a prevalence threshold of 20%. Store the
+result in a variable called `tse_family`.
+
+2. Check the row names of `tse_family`. Which families are shown separately?
+
+3. Visualize the composition of `tse_family` with a barplot. Order the
+families by abundance and the samples by the relative abundance of
+`"Lachnospiraceae"`.
+
+4. Why is it useful to combine the less common taxa into "Other" before
+drawing a composition barplot?
+
+**Useful functions:** `mia::agglomerateByPrevalence()`, `rownames()`,
+`miaViz::plotAbundance()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_composition_top
+
+# 1. Agglomerate to families and combine the non-prevalent ones into "Other"
+tse_family <- agglomerateByPrevalence(
+    tse,
+    rank = "Family",
+    assay.type = "relabundance",
+    detection = 1 / 100,
+    prevalence = 20 / 100
+)
+
+# 2. Families in the data
+rownames(tse_family)
+
+# 3. Composition barplot
+plotAbundance(
+    tse_family,
+    assay.type = "relabundance",
+    order.row.by = "abund",
+    order.col.by = "Lachnospiraceae"
+)
+```
+
+4. A barplot with many taxa has many colours that are hard to tell apart.
+Showing only the common taxa keeps the plot readable. Combining the
+rest into "Other" keeps their share in the plot, so each bar still sums up
+to 1.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Composition heatmap
+
+**Goal:** Learn to visualize community composition with a heatmap.
+
+1. Agglomerate the original `Tengeler2020` data to the Family rank and store
+the result in `tse`.
+
+2. Transform the `counts` assay into relative abundances with
+`pseudocount = 1`. Then apply the clr transformation to the `relabundance`
+assay.
+
+3. Standardize the `clr` assay feature-wise, that is, with
+`MARGIN = "rows"`. Name the new assay `"clr_z"`.
+
+4. Visualize the `clr_z` assay with a heatmap. Order the rows and columns
+with hierarchical clustering.
+
+5. How do you read the heatmap? Why are the values standardized for each
+family before plotting?
+
+**Useful functions:** `mia::agglomerateByRank()`, `mia::transformAssay()`,
+`miaViz::plotHeatmap()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_composition_heatmap
+
+library(miaViz)
+
+# 1. Agglomerate to Family rank
+tse <- agglomerateByRank(Tengeler2020, rank = "Family")
+
+# 2. Relative abundances with a pseudocount, then clr
+tse <- transformAssay(
+    tse,
+    assay.type = "counts", method = "relabundance", pseudocount = 1
+)
+tse <- transformAssay(tse, assay.type = "relabundance", method = "clr")
+
+# 3. Standardize the families
+tse <- transformAssay(
+    tse,
+    assay.type = "clr", MARGIN = "rows", method = "standardize",
+    name = "clr_z"
+)
+
+# 4. Heatmap ordered by hierarchical clustering
+plotHeatmap(tse, assay.type = "clr_z", sort.method = "Heatmap")
+```
+
+5. Each row is a family and each column is a sample. The colour shows whether
+the family is more (positive values) or less (negative values) abundant in that
+sample than on average across the samples. Families differ a lot in their
+overall abundance. After standardization, each family has zero mean and unit
+variance, so the colours show the variation of each family across the samples,
+and abundant families do not dominate the colour scale.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: NeatMap
+
+**Goal:** Learn to order a heatmap with the NeatMap approach.
+
+1. Visualize the `clr_z` assay with a heatmap as in Exercise 3, but order the
+rows and columns with the NeatMap approach, that is, by their angle on the
+first two principal components.
+
+2. How does the NeatMap order the samples? How does this differ from the
+heatmap in Exercise 3?
+
+**Useful functions:** `miaViz::plotHeatmap()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_composition_neatmap
+
+# 1. NeatMap
+plotHeatmap(tse, assay.type = "clr_z", sort.method = "PCA_angle")
+```
+
+2. The NeatMap calculates the angle of each sample around the center of the
+PCA plot and orders the samples by this angle. Samples that are close to each
+other in the ordination are therefore also close to each other in the
+heatmap, so gradual changes in composition can be followed from left to
+right. In the heatmap of Exercise 3, the samples are ordered by hierarchical
+clustering instead, which groups similar samples but does not follow the
+ordination.
+:::
+::::

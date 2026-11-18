@@ -413,24 +413,160 @@ Feature requests and bug reports can be submitted
 `r BiocStyle::Biocpkg("SingleCellExperiment")` and `SummarizedExperiment`.
 :::
 
-::: {.callout-tip icon="false"}
-## Exercises
+## Exercises {#sec-ecosystem-exercises}
 
-**Goal:** Learn related packages and resources.
+In these exercises, you will practise the main ideas of this chapter: how the
+data containers of the OMA framework are related to each other, how to find
+packages for different tasks in the package ecosystem, how to install
+packages, and where to find help.
 
-**Exercise 1: Introduction to OMA**
+Exercises 1 and 2 can be answered without writing code. Try to solve each
+exercise yourself before opening the solution.
 
-1. How are `SummarizedExperiment`, `SingleCellExperiment` and
-`TreeSummarizedExperiment` related?
+:::: {.callout-tip icon="false"}
+## Exercise 1: Data containers in OMA
 
-2. Go and explore
-[this CSV file](https://raw.githubusercontent.com/microbiome/OMA/devel/oma_packages/oma_packages.csv).
-Which packages have you already used? Which packages are new to you?
+**Goal:** Understand how the data containers used in OMA are related to each
+other.
 
-3. Search each package from internet. What tools does each package offer?
+Answer the following questions without writing any code. [@sec-data-containers]
+will help you.
 
-4. Go to [the discussion forum](https://github.com/microbiome/OMA/discussions).
-Here you can get help and ask questions if you come up with one.
+1. Put the data containers `TreeSummarizedExperiment` (`TreeSE`),
+`SummarizedExperiment` (`SE`) and `SingleCellExperiment` (`SCE`) in order,
+starting from the one that the others are derived from.
 
-5. Visit [@sec-resources] for additional resources.
+2. What does each of the three data containers add to the one it is derived
+from?
+
+3. A package provides a method for `SCE` objects. Can you use it for a
+`TreeSE` object? Why?
+
+4. You have measured both the microbiome and the metabolome from the same
+samples. Which data container can bind these two datasets together in a
+single object?
+
+::: {.callout-note collapse="true"}
+## Solution
+
+1. `SE` → `SCE` → `TreeSE`. `SCE` is derived from `SE`, and `TreeSE` is
+derived from `SCE`.
+
+2. `SE` is a generic container for complex data structures, such as
+abundance tables and the metadata of samples and features. `SCE` adds the
+possibility to store copies of the data, such as alternative experiments, in
+the same container. `TreeSE` adds hierarchical information, such as
+phylogenetic trees and sample hierarchies, and reference sequences.
+
+3. Yes. Because `TreeSE` is derived from `SCE`, all methods that are
+applicable to `SCE` objects can also be applied to `TreeSE` objects. This
+allows OMA to borrow methods from other fields, such as single-cell
+sequencing.
+
+4. `MultiAssayExperiment` (`MAE`). It binds several data containers, for
+example a `TreeSE` with microbiome data and an `SE` with metabolomic data,
+together in a single object.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Package ecosystem
+
+**Goal:** Learn to find packages for different tasks in the OMA package
+ecosystem.
+
+Use the lists of packages in [@sec-packages] to answer the following
+questions.
+
+1. Which package family provides general methods for microbiome data
+wrangling, analysis and visualization? Which package of this family would
+you use for each of the following tasks?
+    - Visualizing microbiome data
+    - Analyzing time series
+    - Simulating microbiome data
+    - Analyzing data interactively
+
+2. Name three packages that can be used for differential abundance analysis
+of `(Tree)SummarizedExperiment` data.
+
+3. You want to use a method from a package that is based on `phyloseq`
+objects. How can you use your `TreeSE` data with it?
+
+4. Open the
+[list of packages used in this book](https://raw.githubusercontent.com/microbiome/OMA/devel/oma_packages/oma_packages.csv).
+Which packages have you already used? Which packages are new to you? Any
+answer is correct.
+
+::: {.callout-note collapse="true"}
+## Solution
+
+1. The `mia` package family. Visualization: `miaViz`. Time series:
+`miaTime`. Simulations: `miaSim`. Interactive analysis: `miaDash`.
+
+2. For example `ALDEx2`, `ANCOMBC` and `maaslin3`. Also `DESeq2`, `radEmu`,
+`dar` and `MicrobiomeStat` (LinDA) are mentioned in this chapter.
+
+3. Convert the `TreeSE` object into a `phyloseq` object with
+`convertToPhyloseq()` (see [@sec-convert]).
+
+4. Any answer is correct. The list contains all packages that are needed to
+run the examples in this book.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Install packages
+
+**Goal:** Learn to install packages and to load them into the R session.
+
+1. Bioconductor packages are available as release, devel and GitHub
+versions. What is the difference between these versions?
+
+2. Install the packages `mia` and `miaViz` as shown in [@sec-key-packages].
+If you do not have the `BiocManager` package yet, install it first.
+
+3. Load `mia` and `miaViz` into the R session. How can you tell that the
+packages were installed successfully?
+
+4. Check which version of `mia` you have installed.
+
+**Useful functions:** `install.packages()`, `BiocManager::install()`,
+`library()`, `packageVersion()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+1. The release version is the most stable and tested version, but it might miss
+the latest methods. The devel version contains the latest updates of
+Bioconductor, but it is still under development and may require a newer R
+version. The GitHub version is usually the same as the devel version. Only in
+rare cases does it contain changes that are not yet in Bioconductor.
+
+```{r}
+#| label: exercise_oma_install
+#| eval: false
+
+# 2. Install BiocManager (only if needed), and then mia and miaViz
+install.packages("BiocManager")
+BiocManager::install(c("mia", "miaViz"))
+```
+
+```{r}
+#| label: exercise_oma_load
+#| message: false
+
+# 3. Load the packages
+library(mia)
+library(miaViz)
+
+# 4. Version of mia
+packageVersion("mia")
+```
+
+3. If `library()` loads a package without an error, the package was installed
+successfully. Messages that are printed while loading are not errors.
+
+4. Any version is a correct answer. You can compare it with the version on
+the package page on the Bioconductor website.
+:::
+::::

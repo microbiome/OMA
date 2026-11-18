@@ -166,37 +166,260 @@ See [@sec-cross-correlation] for further information on correlation and
 association analyses.
 :::
 
-::: {.callout-tip icon=false}
-## Exercises
+## Exercises {#sec-correlation-exercises}
 
-**Goal:** After completing these exercises, you should be able to calculate
-associations between taxonomic features and diversity.
+In these exercises, you will practise the main steps of this chapter:
+calculating correlations between taxonomic features, visualizing them as a
+network, and calculating correlations between taxonomic features and sample
+metadata, and between sample metadata variables.
 
-**Exercise 1: Correlation**
+We use the `Tengeler2020` dataset from the `r BiocStyle::Biocpkg("mia")`
+package. It contains gut microbiome profiles of 27 mice that were colonized
+with stool from either individuals with attention-deficit/hyperactivity
+disorder (ADHD) or healthy controls. As sample metadata, we use alpha
+diversity indices that we calculate from the data and store in `colData`.
 
-1. Load any of the example data sets described in [@sec-data-sets].
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-2. Agglomerate the data to phylum level.
+:::: {.callout-tip icon="false"}
+## Exercise 1: Correlation between taxonomic features
 
-3. Apply the CLR transformation.
+**Goal:** Learn to calculate correlations between taxonomic features and to
+find the results.
 
-4. Calculate correlations of taxa abundances.
+1. Load the `Tengeler2020` dataset from the `mia` package and store it in a
+variable called `tse`.
 
-5. Visualize the correlation network. Are there taxonomic features whose
-abundances are correlated?
+2. Agglomerate the data to prevalent families with
+`agglomerateByPrevalence()` (`rank = "Family"`). How many features are left?
 
-6. Calculate all available alpha diversity indices with the un-agglomerated
-data.
+3. Apply the clr transformation to the `counts` assay with
+`pseudocount = TRUE`.
 
-7. Calculate correlation between phyla and alpha diversity indices.
+4. Calculate the correlations between all pairs of families from the `clr`
+assay with `getCrossAssociation()`. Give `tse` as both the first and the
+second object, test the significance of the correlations
+(`test.signif = TRUE`) and return the results as matrices
+(`mode = "matrix"`). Store the result in `res`.
 
-8. Visualize the correlation results with a heatmap. Are there taxonomic
-features whose abundances associate with diversity? How would you interpret
-this?
+5. Check the names of the elements in `res`. Show the correlations rounded to
+two decimals.
 
-Useful functions:
+6. Count how many correlations have an adjusted p-value below 0.05.
 
-`utils::data()`, `mia::agglomerateByRank`, `mia::transformAssay()`, `mia::getCrossAssociation()`,
-`qgraph::qgraph()`, `mia::addAlpha()`, `ComplexHeatmap::Heatmap()`
+7. What do the values on the diagonal of the correlation matrix show? What
+does a correlation close to 1, close to -1 and close to 0 mean? Why do we use
+adjusted p-values instead of raw p-values?
 
+**Useful functions:** `data()`, `mia::agglomerateByPrevalence()`, `nrow()`,
+`mia::transformAssay()`, `mia::getCrossAssociation()`, `names()`, `round()`,
+`sum()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_correlation_taxa
+
+library(mia)
+
+# 1. Load the data
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# 2. Agglomerate to prevalent families
+tse <- agglomerateByPrevalence(tse, rank = "Family")
+nrow(tse)
+
+# 3. clr transformation
+tse <- transformAssay(
+    tse,
+    assay.type = "counts", method = "clr", pseudocount = TRUE
+)
+
+# 4. Correlations between families
+res <- getCrossAssociation(
+    tse, tse,
+    assay.type1 = "clr", assay.type2 = "clr",
+    test.signif = TRUE, mode = "matrix"
+)
+
+# 5. Elements of the result and the correlations
+names(res)
+round(res$cor, 2)
+
+# 6. Number of correlations with adjusted p-value below 0.05
+sum(res$p_adj < 0.05, na.rm = TRUE)
+```
+
+7. The diagonal shows the correlation of each family with itself, which is
+always 1. These values should be ignored, and so should the duplicates, as
+the matrix is symmetric. A correlation close to 1 means that the two families
+tend to be abundant in the same samples. A correlation close to -1 means that
+when one family is abundant, the other tends to be rare. A correlation close
+to 0 means that there is no clear association. When many correlations are
+tested at once, some of them are significant just by chance. The adjusted
+p-values (`p_adj`) correct for this multiple testing.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Correlation network
+
+**Goal:** Learn to visualize the correlations between taxonomic features as
+a network.
+
+1. Visualize the correlation matrix `res$cor` from Exercise 1 as a network
+with `qgraph()`. Use the spring layout (`layout = "spring"`), label the nodes
+with the column names of the matrix and use `theme = "colorblind"`.
+
+2. How do you read the network? What do the nodes, the colour of the edges
+and the width of the edges show?
+
+**Useful functions:** `qgraph::qgraph()`, `colnames()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_correlation_network
+
+library(qgraph)
+
+# 1. Correlation network
+qgraph(
+    res$cor,
+    layout = "spring", labels = colnames(res$cor),
+    theme = "colorblind"
+)
+```
+
+2. Each node is a family, and each edge shows the correlation between two
+families. The colour of an edge shows the sign of the correlation (positive or
+negative), and the width shows its strength. In the spring layout, strongly
+connected families are placed close to each other. A group of families
+connected with strong positive edges tends to occur together in the samples.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Correlation between taxonomic features and alpha diversity
+
+**Goal:** Learn to calculate correlations between taxonomic features and
+sample metadata.
+
+1. Calculate the alpha diversity indices `"shannon"`, `"observed"`, `"gini"`
+and `"inverse_simpson"` from the `counts` assay with `addAlpha()`. Store the
+names of the indices in a vector called `index`.
+
+2. Calculate the correlations between the families in the `clr` assay and the
+alpha diversity indices with `getCrossAssociation()`. Give the indices with
+the `col.var2` argument, test the significance and return the results as
+matrices. To hide the warnings about ties, set `show.warnings = FALSE`.
+
+3. Visualize the correlations with a heatmap.
+
+4. Show the adjusted p-values rounded to three decimals. Which pairs of a
+family and an index have an adjusted p-value below 0.05?
+
+5. How do you read the heatmap? What would a positive correlation between a
+family and Shannon diversity mean?
+
+**Useful functions:** `mia::addAlpha()`, `mia::getCrossAssociation()`,
+`ComplexHeatmap::Heatmap()`, `round()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_correlation_alpha
+
+library(ComplexHeatmap)
+
+# 1. Alpha diversity indices
+index <- c("shannon", "observed", "gini", "inverse_simpson")
+tse <- addAlpha(tse, assay.type = "counts", index = index)
+
+# 2. Correlations between families and alpha diversity indices
+res <- getCrossAssociation(
+    tse, tse,
+    assay.type1 = "clr", col.var2 = index,
+    test.signif = TRUE, mode = "matrix", show.warnings = FALSE
+)
+
+# 3. Heatmap of the correlations
+Heatmap(res$cor)
+
+# 4. Adjusted p-values
+round(res$p_adj, 3)
+```
+
+5. Each row is a family and each column an alpha diversity index, and the
+colour of a cell shows the correlation. The rows and columns are ordered with
+hierarchical clustering, so that families with similar correlation patterns
+are next to each other. A positive correlation with Shannon diversity means
+that samples with a higher abundance of the family tend to have higher
+diversity. A correlation does not tell whether the family causes the
+difference in diversity. Note that Gini is an inequality index: high values
+mean low evenness, so its correlations tend to have the opposite sign
+compared to the diversity indices.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Correlation between sample metadata variables
+
+**Goal:** Learn to calculate correlations between sample metadata variables.
+
+1. Calculate the correlations between the alpha diversity indices in `index`
+with `getCrossAssociation()`. Give the indices with both `col.var1` and
+`col.var2`, test the significance, return the results as matrices and set
+`show.warnings = FALSE`.
+
+2. Visualize the correlations with a heatmap.
+
+3. Make a scatter plot with the Shannon diversity on the x-axis and the
+inverse Simpson diversity on the y-axis. Add a linear regression line to the
+plot.
+
+4. How do you read the scatter plot? How does it relate to the correlation
+between the two indices in the heatmap?
+
+**Useful functions:** `mia::getCrossAssociation()`,
+`ComplexHeatmap::Heatmap()`, `scater::plotColData()`,
+`ggplot2::geom_smooth()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_correlation_metadata
+
+library(scater)
+
+# 1. Correlations between alpha diversity indices
+res <- getCrossAssociation(
+    tse, tse,
+    col.var1 = index, col.var2 = index,
+    test.signif = TRUE, mode = "matrix", show.warnings = FALSE
+)
+
+# 2. Heatmap of the correlations
+Heatmap(res$cor)
+
+# 3. Scatter plot with a linear regression line
+plotColData(tse, x = "shannon", y = "inverse_simpson") +
+    geom_smooth(method = "lm")
+```
+
+4. In the scatter plot, each point is a sample. The scatter plot shows the
+same relationship that is summarized by a single correlation value in the
+heatmap. If the points follow the regression line closely, the two indices
+are strongly correlated and carry largely the same information. If the
+points are widely scattered, the correlation is weak and the indices describe
+different aspects of the communities. The scatter plot also shows whether
+the relationship is driven by a few outlying samples, which a single
+correlation value cannot show.
+:::
+::::

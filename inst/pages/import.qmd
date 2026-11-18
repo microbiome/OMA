@@ -611,77 +611,413 @@ and return the data as `TreeSE` or `MAE` objects.
 | `r BiocStyle::Biocpkg("HoloFoodR")` | [EBI/HoloFood](https://www.holofooddata.org/) |
 | `r BiocStyle::Githubpkg("jbisanz/qiime2R")` | [QIIME2](https://amplicon-docs.qiime2.org/en/latest/) |
 
-::: {.callout-tip icon="false"}
-## Exercises
+## Exercises {#sec-import-exercises}
 
-**Goal:** The goal of these exercises is to learn how to import data
-from files or database.
+In these exercises, you will practise the main steps of this chapter:
+importing a BIOM file, adding sample metadata and a phylogenetic tree,
+constructing `TreeSE` and `MAE` objects from CSV files, loading example
+datasets from packages, and converting data between `TreeSE` and
+`phyloseq`.
 
-**Exercise 1: Construct a `TreeSE`**
+In Exercises 1 and 2, we use the files of the `Tengeler2020` dataset. It
+contains gut microbiome profiles of 27 mice that were colonized with stool
+from either individuals with attention-deficit/hyperactivity disorder (ADHD)
+or healthy controls. In Exercises 3 and 4, we use CSV files with microbiome
+and metabolite data from 40 rats. All files are shipped with the
+`r BiocStyle::Githubpkg("microbiome/OMA")` package, so you can find them with
+`system.file()` as shown in this chapter. In Exercises 5 and 6, we use the
+`Tengeler2020` dataset from the `r BiocStyle::Biocpkg("mia")` package.
 
-1. Download the data.
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-Download the CSV files from
-[this directory](https://github.com/microbiome/data/tree/main/OKeefeDSData).
+:::: {.callout-tip icon="false"}
+## Exercise 1: Import a BIOM file
 
-2. Load the data into R.
+**Goal:** Learn to import a BIOM file into a `TreeSE` object.
 
-Read the downloaded CSV files into R using `read.csv()` and store them
-in the following variables:
+1. Get the path to the BIOM file `"Aggregated_humanization2.biom"` in the
+`extdata` folder of the `OMA` package, and store it in a variable called
+`biom_file_path`.
 
-- `assay` → contains the main data matrix (e.g., microbial counts)
-- `rowdata` → contains metadata for features (e.g., taxonomic information)
-- `coldata` → contains metadata for samples (e.g., sample descriptions)
+2. Import the BIOM file with `importBIOM()` without any optional arguments,
+and store the result in a variable called `tse_raw`. Show the first rows of
+its `rowData`. What are the column names, and what do the values look like?
 
-3. Convert data into correct format.
+3. Import the BIOM file again, now with the arguments
+`rank.from.prefix = TRUE`, `prefix.rm = TRUE` and `artifact.rm = TRUE`. Store
+the result in a variable called `tse`. Show the first rows of its `rowData`.
+What changed?
 
-- `assay` → converted into a `matrix`
-- `rowdata` → converted into a `DataFrame`
-- `coldata` → converted into a `DataFrame`
+4. Check the `colData` and the `rowTree` of `tse`. Do they contain any data
+yet?
 
-4. Ensure that all tables have row and column names and rows of
-`rowdata` correspond to rows of `assay` and rows of `coldata` match
-with columns of `assay`.
+5. Which function would you use to import data from QIIME2? And from
+MetaPhlAn?
 
-5. Create a `SimpeList` containing the abundance table.
+**Useful functions:** `system.file()`, `mia::importBIOM()`,
+`SummarizedExperiment::rowData()`, `SummarizedExperiment::colData()`,
+`TreeSummarizedExperiment::rowTree()`, `head()`
 
-6. Create a `TreeSummarizedExperiment` object.
+::: {.callout-note collapse="true"}
+## Solution
 
-7. Verify the import.
+```{r}
+#| label: exercise_import_biom
 
-Ensure that the data has been correctly imported by checking that the
-values in the `TreeSE` object match those in the original CSV files. -
-Pick a random row (feature) and column (sample). - Compare the
-corresponding value in the original assay data and the `TreeSE` object.
+library(mia)
 
-**Exercise 2: Load BIOM file**
+# 1. Path to the BIOM file
+biom_file_path <- system.file(
+    "extdata", "Aggregated_humanization2.biom",
+    package = "OMA"
+)
 
-1. Download
-[this BIOM file](https://raw.githubusercontent.com/microbiome/OMA/refs/heads/devel/inst/extdata/Aggregated_humanization2.biom).
+# 2. Import without optional arguments
+tse_raw <- importBIOM(biom_file_path)
+rowData(tse_raw) |> head()
 
-2. Import the BIOM file to R.
+# 3. Import with optional arguments
+tse <- importBIOM(
+    biom_file_path,
+    rank.from.prefix = TRUE,
+    prefix.rm = TRUE,
+    artifact.rm = TRUE
+)
+rowData(tse) |> head()
 
-**Exercise 3: Fetch data from MGnify**
+# 4. Sample metadata and phylogenetic tree
+colData(tse)
+rowTree(tse)
+```
 
-1. Explore available data from
-[here](https://www.ebi.ac.uk/metagenomics) and choose study or
-sample. How many public samples are available?
+2. Without the optional arguments, the columns get generic names, and the
+values contain prefixes such as `k__` and `p__` that tell the taxonomic rank.
+The values can also contain artifacts, such as extra quotation marks.
 
-2. Create `MgnifyClient()` object.
+3. With `rank.from.prefix = TRUE`, the column names are taken from the
+prefixes, so they are taxonomic ranks. `prefix.rm = TRUE` removes the
+prefixes from the values, and `artifact.rm = TRUE` removes artifacts, such as
+extra quotation marks.
 
-3. Search available analyses on the selected sample or study.
+4. No. `colData` has no columns, and `rowTree` is `NULL`. The BIOM file
+contains only the abundance table and the taxonomy. The sample metadata and
+the tree are added in Exercise 2.
 
-4. Fetch associated metadata on the analyses, and select analyses to
-fetch. Select analyses only from single analysis pipeline.
-
-5. Retrieve data into `TreeSE`.
-
-Useful functions:
-
-`utils::read.csv()`, `MultiAssayExperiment::DataFrame()`,
-`TreeSummarizedExperiment::TreeSummarizedExperiment()`, `base::matrix()`,
-`BiocGenerics::rownames()`, `BiocGenerics::colnames()`, `S4Vectors::SimpleList()`,
-`utils::download.file()`, `mia::importBIOM()`, `MGnifyR::MgnifyClient()`,
-`MGnifyR::searchAnalysis()`, `MGnifyR::getMetadata()`, `MGnifyR::getResult()`
-
+5. `importQIIME2()` for QIIME2 files and `importMetaPhlAn()` for MetaPhlAn
+files.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Add sample metadata and a phylogenetic tree
+
+**Goal:** Learn to add sample metadata and a phylogenetic tree to a `TreeSE`
+object.
+
+1. Read the sample metadata from the file `"Mapping_file_ADHD_aggregated.csv"`
+in the `extdata` folder of the `OMA` package. Use the first column as row
+names, and store the result in a variable called `sample_meta`. Show the
+first rows.
+
+2. Check that both `sample_meta` and `tse` from Exercise 1 have sample names.
+Then reorder the rows of `sample_meta` so that they are in the same order as
+the columns of `tse`.
+
+3. Add `sample_meta` to `tse` as `colData`. Show the first rows of the new
+`colData`.
+
+4. Read the phylogenetic tree from the file
+`"Data_humanization_phylo_aggregation.tre"` in the same folder, and add it to
+the `rowTree` slot of `tse`. Print `tse`.
+
+5. Why must you check the order of the samples yourself before you add the
+sample metadata?
+
+**Useful functions:** `system.file()`, `read.csv()`, `rownames()`,
+`colnames()`, `match()`, `S4Vectors::DataFrame()`,
+`SummarizedExperiment::colData()`, `ape::read.tree()`,
+`TreeSummarizedExperiment::rowTree()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_import_coldata_tree
+
+# 1. Read the sample metadata
+sample_meta_file_path <- system.file(
+    "extdata", "Mapping_file_ADHD_aggregated.csv",
+    package = "OMA"
+)
+sample_meta <- read.csv(sample_meta_file_path, row.names = 1)
+sample_meta |> head()
+
+# 2. Check the sample names and reorder the sample metadata
+if (is.null(rownames(sample_meta)) || is.null(colnames(tse))) {
+    stop("Sample names missing!", call. = FALSE)
+}
+sample_order <- match(colnames(tse), rownames(sample_meta))
+sample_meta <- sample_meta[sample_order, , drop = FALSE]
+rownames(sample_meta) <- colnames(tse)
+
+# 3. Add the sample metadata
+colData(tse) <- DataFrame(sample_meta)
+colData(tse) |> head()
+
+# 4. Read and add the phylogenetic tree
+tree_file_path <- system.file(
+    "extdata", "Data_humanization_phylo_aggregation.tre",
+    package = "OMA"
+)
+tree <- ape::read.tree(tree_file_path)
+rowTree(tse) <- tree
+tse
+```
+
+5. Replacing `colData` does not check the sample names. The rows of the
+sample metadata are matched to the columns of the abundance table by their
+position. If the order differs, the metadata of one sample is attached to
+another sample, and all later analyses that use the metadata are wrong.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Construct a TreeSE from CSV files
+
+**Goal:** Learn to construct a `TreeSE` object from an abundance table, a
+taxonomy table and a sample metadata table.
+
+1. Read the files `"assay_taxa.csv"`, `"rowdata_taxa.csv"` and
+`"coldata.csv"` from the `extdata` folder of the `OMA` package. Use the first
+column of each file as row names, and store the tables in variables called
+`counts`, `tax` and `samples`, respectively.
+
+2. Reorder the rows of `counts` to match the rows of `tax`, and its columns
+to match the rows of `samples`. Then convert `counts` into a matrix.
+
+3. Check that the row names of `samples` match the column names of `counts`,
+and that the row names of `tax` match the row names of `counts`. Check also
+the classes of the three tables.
+
+4. Create a `TreeSE` object from the three tables, with the abundance table
+as an assay called `"counts"`. Store it in a variable called `tse_taxa` and
+print it.
+
+5. Verify the import. Read `"assay_taxa.csv"` again and compare the value of
+the feature `"CVJT01000011.50.2173"` in the sample `"C1"` with the same value
+in the `counts` assay of `tse_taxa`.
+
+6. Why should all the tables have row names?
+
+**Useful functions:** `system.file()`, `read.csv()`, `as.matrix()`,
+`rownames()`, `colnames()`, `all()`, `class()`,
+`TreeSummarizedExperiment::TreeSummarizedExperiment()`,
+`S4Vectors::SimpleList()`, `SummarizedExperiment::assay()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_import_csv
+
+# 1. Read the files
+count_file <- system.file("extdata", "assay_taxa.csv", package = "OMA")
+tax_file <- system.file("extdata", "rowdata_taxa.csv", package = "OMA")
+sample_file <- system.file("extdata", "coldata.csv", package = "OMA")
+
+counts <- read.csv(count_file, row.names = 1)
+tax <- read.csv(tax_file, row.names = 1)
+samples <- read.csv(sample_file, row.names = 1)
+
+# 2. Match the rows and columns, and convert into a matrix
+counts <- counts[rownames(tax), rownames(samples)]
+counts <- as.matrix(counts)
+
+# 3. Check the names and the classes
+all(rownames(samples) == colnames(counts))
+all(rownames(tax) == rownames(counts))
+class(samples)
+class(tax)
+class(counts)
+
+# 4. Create the TreeSE
+tse_taxa <- TreeSummarizedExperiment(
+    assays = SimpleList(counts = counts),
+    colData = samples,
+    rowData = tax
+)
+tse_taxa
+
+# 5. Compare a value in the file and in the TreeSE
+counts_file <- read.csv(count_file, row.names = 1)
+counts_file["CVJT01000011.50.2173", "C1"]
+assay(tse_taxa, "counts")["CVJT01000011.50.2173", "C1"]
+```
+
+5. The two values should be the same. If they differ, the rows or columns of
+the tables were not matched correctly.
+
+6. The `TreeSummarizedExperiment()` constructor uses the row names to make
+sure that the right features and samples are linked to each other. Without
+names, the tables can only be matched by their position, and a mistake in
+the order goes unnoticed.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Construct a MAE
+
+**Goal:** Learn to combine several experiments into a `MAE` object.
+
+1. Read the file `"assay_metabolites.csv"` from the `extdata` folder of the
+`OMA` package, using the first column as row names. Create a `TreeSE` object
+from it with the metabolite concentrations as an assay called `"concs"` and
+the `samples` table from Exercise 3 as `colData`. Store it in a variable
+called `tse_metabolite`.
+
+2. Combine `tse_taxa` from Exercise 3 and `tse_metabolite` into an
+`ExperimentList`, with the names `"microbiome"` and `"metabolite"`.
+
+3. Create a `MAE` object from the `ExperimentList`, store it in a variable
+called `mae`, and print it.
+
+4. The two experiments have very different numbers of features. Why can they
+still be stored in the same `MAE` object?
+
+**Useful functions:** `read.csv()`, `as.matrix()`,
+`TreeSummarizedExperiment::TreeSummarizedExperiment()`,
+`S4Vectors::SimpleList()`, `MultiAssayExperiment::ExperimentList()`,
+`MultiAssayExperiment::MultiAssayExperiment()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_import_mae
+
+# 1. Create a TreeSE for the metabolite data
+metabolite_file <- system.file(
+    "extdata", "assay_metabolites.csv",
+    package = "OMA"
+)
+concs <- read.csv(metabolite_file, row.names = 1)
+
+tse_metabolite <- TreeSummarizedExperiment(
+    assays = SimpleList(concs = as.matrix(concs)),
+    colData = samples
+)
+
+# 2. Create an ExperimentList
+experiments <- ExperimentList(
+    microbiome = tse_taxa, metabolite = tse_metabolite
+)
+
+# 3. Create the MAE
+mae <- MultiAssayExperiment(experiments = experiments)
+mae
+```
+
+4. Each experiment in a `MAE` object is a separate data container with its
+own features. Only the samples are linked between the experiments, so the
+numbers of features can differ.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Example datasets in packages
+
+**Goal:** Learn to find and load example datasets from packages.
+
+1. List the datasets that are available in the `mia` package.
+
+2. Load the `Tengeler2020` dataset from the `mia` package and print it.
+
+3. Compare the `Tengeler2020` dataset with the `tse` object that you imported
+from files in Exercises 1 and 2. Do they have the same number of features and
+samples? Do they have a phylogenetic tree?
+
+4. When are example datasets from packages useful, and when do you need to
+import data from files?
+
+**Useful functions:** `data()`, `dim()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_import_package_data
+
+# 1. List the datasets in mia
+data(package = "mia")
+
+# 2. Load Tengeler2020
+data("Tengeler2020", package = "mia")
+Tengeler2020
+
+# 3. Compare the dimensions
+dim(Tengeler2020)
+dim(tse)
+```
+
+3. `dim()` shows the number of features and samples, and the `rowTree` line
+of the printed object tells whether a phylogenetic tree is available. If the
+numbers match, the objects contain the same features and samples. Note that
+the feature names and the `colData` columns can still differ, because the
+package version of the data was prepared separately from the files.
+
+4. Example datasets are ready to use, so they are useful for learning,
+testing methods and benchmarking. Your own data, or other data that is not
+available in a package or database, must be imported from files.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 6: Convert between TreeSE and phyloseq
+
+**Goal:** Learn to convert data from `TreeSE` to `phyloseq` and back.
+
+1. Convert the `Tengeler2020` dataset that you loaded in Exercise 5 into a
+`phyloseq` object and store it in a variable called `ps`. Print it.
+
+2. Look at the printed `phyloseq` object. Which components of the `TreeSE`
+can you find in it?
+
+3. Convert `ps` back into a `TreeSE` and store it in a variable called
+`tse_ps`. Print it and compare its dimensions to those of `Tengeler2020`.
+
+4. Why can only some components of a `TreeSE` be converted into `phyloseq`?
+
+**Useful functions:** `mia::convertToPhyloseq()`,
+`mia::convertFromPhyloseq()`, `dim()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_import_phyloseq
+
+# 1. Convert TreeSE to phyloseq
+ps <- convertToPhyloseq(Tengeler2020)
+ps
+
+# 3. Convert phyloseq back to TreeSE
+tse_ps <- convertFromPhyloseq(ps)
+tse_ps
+
+dim(Tengeler2020)
+dim(tse_ps)
+```
+
+2. The `phyloseq` object contains the abundance table (`otu_table()`), the
+sample information (`sample_data()`), the taxonomy table (`tax_table()`) and
+the phylogenetic tree (`phy_tree()`). They correspond to the counts assay,
+`colData`, `rowData` and `rowTree` of the `TreeSE`.
+
+4. Only the components that are supported by both formats can be converted:
+the abundance table, sample metadata, taxonomy table, phylogenetic tree and
+sequence information. A `TreeSE` can contain components that `phyloseq`
+does not support, such as several assays or alternative experiments. These
+components are not included in the `phyloseq` object.
+:::
+::::

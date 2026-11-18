@@ -896,39 +896,407 @@ bear that in mind when interpreting the results of our models.
 :::
 
 
-::: {.callout-tip icon=false}
-## Exercises
+## Exercises {#sec-machine_learning-exercises}
 
-**Goal:** After completing these exercises, you should be able to fit supervised
-machine learning model utilizing multi-assay data.
+In these exercises, you will practise the main steps of this chapter:
+preprocessing the data, training random forest models for classification and
+regression with `r BiocStyle::CRANpkg("mikropml")`, assessing and visualizing
+the performance of the models, and estimating feature importance.
 
-**Exercise 1: Supervised ML**
+We use the same QinJ_2012 dataset from
+`r BiocStyle::Biocpkg("curatedMetagenomicData")` as in this chapter. It
+contains gut microbiome profiles of 363 individuals. The diagnosis of each
+individual (`healthy` or `T2D`) is stored in the `disease` column of
+`colData`, and the age in years is stored in the `age` column. To make the
+models faster to train, we analyze the data at genus level.
 
-1. Load any of the example datasets mentioned in [@sec-example-data].
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-2. Observe `colData` and check that the metadata includes outcome variables that
-you want to model.
+:::: {.callout-tip icon="false"}
+## Exercise 1: Training, validation and test data
 
-3. Visualize the selected outcome variable with a histogram if it is
-continuous, or a bar plot if it is categorical. What is the distribution? If
-the distribution is biased, how can this affect the training of the model?
+**Goal:** Understand how the data is used to train and evaluate a model.
 
-4. Apply CLR transformation.
+Answer the following questions without writing any code. The section on model
+training and @fig-cv will help you.
 
-5. Preprocess data by removing features with near-zero variance and by grouping
-correlated features.
+1. Why is the performance of a model evaluated on a test set instead of on the
+data that was used to train it?
 
-6. Fit a random forest model with `find_feature_importance = TRUE`.
+2. In 5-fold cross-validation, how many times is the model trained? Which
+part of the training set is used for validation in each iteration?
 
-7. Visualize results. Do the model perform well by predicting the outcome with
-a high accuracy?
+3. A researcher standardizes all features using the whole dataset, and only
+after that splits the data into training and test sets. What is the problem?
 
-8. What features are the most important for predicting the outcome?
+4. A dataset contains 95 healthy individuals and 5 patients. A model labels
+every individual as healthy. What is its accuracy? Is it a good model?
 
-Useful functions:
+::: {.callout-note collapse="true"}
+## Solution
 
-`utils::data()`, `SummarizedExperiment::colData()`, `miaViz::plotHistogram()`,
-`miaViz::plotBarplot()`, `mia::subsetByPrevalent()`, `mia::transformAssay()`,
-`mikropml::preprocess_data()`, `mikropml::run_ml()`, `mikropml::plot_model_performance()`
+1. A model can learn patterns that are specific to the training data,
+including noise. The test set contains data that the model has not seen, so it
+shows how well the model generalizes to new data.
 
+2. The model is trained five times. The training set is divided into five
+folds, and in each iteration, the model is trained on four folds and validated
+on the remaining one. Each fold is used for validation once.
+
+3. This is data leakage. The means and standard deviations used for
+standardizing are calculated also from the test data, so information from the
+test set influences the training. The performance on the test set can then be
+too optimistic.
+
+4. The accuracy is 95/100 = 95%, but the model is useless, because it never
+detects a patient. With imbalanced classes, it is better to look at several
+metrics, such as the F1-score and the area under the precision-recall curve
+(prAUC).
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Preprocess the data
+
+**Goal:** Learn to prepare microbiome data for a classification task.
+
+1. Load the QinJ_2012 data as shown in the beginning of this chapter, rename
+the assay to `"counts"`, and store the data in a variable called `tse`.
+
+2. Check how many individuals there are in each group of the `disease`
+column.
+
+3. Agglomerate the data to genus level and keep only the genera that are
+present in at least 20% of the samples. Use `subsetByPrevalent()` with
+`rank = "genus"` and `prevalence = 0.2`. (Note that the rank names of this
+dataset are written in lowercase.)
+
+4. Add an assay of relative abundances called `"relabundance"`.
+
+5. Calculate the observed richness and the Shannon diversity from the
+`counts` assay.
+
+6. Preprocess the data for classification with `preprocess_data()`. Use
+`disease` as the outcome, the `relabundance` assay, and the two alpha diversity
+indices as additional predictors (`col.var`). Remove features with zero
+variance and collapse correlated features, as in this chapter. Store the
+result under the name `"prep_disease"`.
+
+7. Where is the preprocessed data stored? How many features are left in it?
+
+**Useful functions:** `curatedMetagenomicData::returnSamples()`,
+`assayNames()`, `table()`, `mia::subsetByPrevalent()`,
+`mia::transformAssay()`, `mia::addAlpha()`, `mikropml::preprocess_data()`,
+`altExp()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_ml_preprocess
+#| message: false
+
+library(curatedMetagenomicData)
+library(mia)
+library(mikropml)
+
+# 1. Load the data
+samples <- sampleMetadata[sampleMetadata[["study_name"]] == "QinJ_2012", ]
+tse <- returnSamples(
+    samples,
+    dataType = "relative_abundance",
+    counts = TRUE,
+    rownames = "short"
+)
+assayNames(tse) <- "counts"
+
+# 2. Number of individuals in each group
+table(tse[["disease"]])
+
+# 3. Agglomerate to genus level and keep prevalent genera
+tse <- subsetByPrevalent(tse, rank = "genus", prevalence = 0.2)
+
+# 4. Add relative abundances
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+
+# 5. Calculate alpha diversity
+alpha_divs <- c("observed_richness", "shannon_diversity")
+tse <- addAlpha(tse, assay.type = "counts", index = alpha_divs)
+
+# 6. Preprocess the data for classification
+tse <- preprocess_data(
+    dataset = tse,
+    outcome_colname = "disease",
+    assay.type = "relabundance",
+    name = "prep_disease",
+    col.var = alpha_divs,
+    remove_var = "zv",
+    collapse_corr_feats = TRUE,
+    group_neg_corr = FALSE
+)
+
+# 7. The preprocessed data is in an altExp
+altExpNames(tse)
+nrow(altExp(tse, "prep_disease"))
+```
+
+7. The alpha diversity indices were added as features, so the set of features
+changed. The result is therefore stored in the `altExp` called
+`"prep_disease"`. The number of rows of the `altExp` is the number of features
+left after the preprocessing. It can be smaller than the number of genera plus
+two, because features with zero variance were removed and correlated features
+were collapsed into one.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Train a classification model
+
+**Goal:** Learn to train a random forest classifier and to read its
+performance metrics.
+
+1. Train a random forest model with `run_ml()` to classify the individuals
+by `disease`. Use the `altExp` and assay `"prep_disease"`, `seed = 1`,
+`kfold = 2`, `cv_times = 2`, `training_frac = 0.8` and
+`find_feature_importance = FALSE`. Store the result in a variable called
+`rf_disease`.
+
+2. Show the performance metrics of the model.
+
+3. Which column shows the AUC on the training data (cross-validation) and
+which on the test data? How would you recognize overfitting from these two
+values?
+
+**Useful functions:** `mikropml::run_ml()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_ml_classification
+
+# 1. Train a random forest model for classification
+rf_disease <- run_ml(
+    dataset = tse,
+    method = "rf",
+    outcome_colname = "disease",
+    altexp = "prep_disease",
+    assay.type = "prep_disease",
+    seed = 1,
+    kfold = 2,
+    cv_times = 2,
+    training_frac = 0.8,
+    find_feature_importance = FALSE
+)
+
+# 2. Performance metrics
+rf_disease[["performance"]]
+```
+
+3. `cv_metric_AUC` is the AUC from the cross-validation on the training data
+(80% of the samples), and `AUC` is the AUC on the test data (20% of the
+samples). The AUC ranges from 0.5 (random guessing) to 1 (perfect
+classification). A small drop from the training to the test data is
+expected. If the AUC on the training data is much higher than on the test
+data, the model is overfitted, that is, it does not generalize well to new
+data.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Visualize the classification performance
+
+**Goal:** Learn to visualize the performance of a classifier with ROC and
+precision-recall curves.
+
+1. Calculate the sensitivity, specificity and precision of `rf_disease` on
+its test data with `calc_model_sensspec()`. Store the result in a variable
+called `senspec`.
+
+2. Plot the ROC curve: the false positive rate (`fpr`) on the x-axis and
+the `sensitivity` on the y-axis. Use `geom_path()` and add a dashed diagonal
+line that shows the performance of random guessing.
+
+3. Plot the precision-recall curve: the `sensitivity` on the x-axis and the
+`precision` on the y-axis. Add a dashed horizontal line at 0.5 that shows the
+approximate performance of random guessing.
+
+4. Where would the curves of a perfect model lie in each plot?
+
+**Useful functions:** `mikropml::calc_model_sensspec()`, `ggplot2::ggplot()`,
+`ggplot2::geom_path()`, `ggplot2::geom_abline()`, `ggplot2::geom_hline()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_ml_curves
+
+library(ggplot2)
+
+# 1. Calculate the metrics for the curves
+senspec <- calc_model_sensspec(
+    rf_disease[["trained_model"]],
+    rf_disease[["test_data"]]
+)
+
+# 2. ROC curve
+ggplot(senspec, aes(x = fpr, y = sensitivity)) +
+    geom_path() +
+    geom_abline(linetype = "dashed")
+
+# 3. Precision-recall curve
+ggplot(senspec, aes(x = sensitivity, y = precision)) +
+    geom_path() +
+    geom_hline(yintercept = 0.5, linetype = "dashed")
+```
+
+4. The further the curve is from the dashed line, the better the model. In
+the ROC plot, a perfect model reaches a sensitivity of 1 with a false
+positive rate of 0, so the curve goes through the top left corner. In the
+precision-recall plot, a perfect model has both a sensitivity (recall) and a
+precision of 1, so the curve goes through the top right corner.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Train a regression model
+
+**Goal:** Learn to train a random forest model for a continuous outcome and to
+assess its performance.
+
+1. Preprocess the data again with `preprocess_data()`, now with `age` as the
+outcome. Use the same other settings as in Exercise 2, and store the result
+under the name `"prep_age"`. In this and the next step, `mikropml` warns that
+all outcome values are integers. Age is a continuous variable, so this warning
+can be ignored.
+
+2. Train a random forest model with `run_ml()` to predict `age`. Use the same
+settings as in Exercise 3, but with the `altExp` and assay `"prep_age"`. Store
+the result in a variable called `rf_age`.
+
+3. Show the performance metrics of the model. What does the RMSE describe, and
+in which unit is it?
+
+4. Predict the age of the individuals in the test data with the trained
+model. Plot the predicted age on the x-axis and the observed age on the
+y-axis, and add a dashed diagonal line that shows perfect prediction.
+
+5. How would the points lie if the model predicted age well?
+
+**Useful functions:** `mikropml::preprocess_data()`, `mikropml::run_ml()`,
+`predict()`, `ggplot2::geom_point()`, `ggplot2::geom_abline()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_ml_regression
+
+# 1. Preprocess the data for regression
+tse <- preprocess_data(
+    dataset = tse,
+    outcome_colname = "age",
+    assay.type = "relabundance",
+    name = "prep_age",
+    col.var = alpha_divs,
+    remove_var = "zv",
+    collapse_corr_feats = TRUE,
+    group_neg_corr = FALSE
+)
+
+# 2. Train a random forest model for regression
+rf_age <- run_ml(
+    dataset = tse,
+    method = "rf",
+    outcome_colname = "age",
+    altexp = "prep_age",
+    assay.type = "prep_age",
+    seed = 1,
+    kfold = 2,
+    cv_times = 2,
+    training_frac = 0.8,
+    find_feature_importance = FALSE
+)
+
+# 3. Performance metrics
+rf_age[["performance"]]
+
+# 4. Predict age in the test data and plot observed vs. predicted age
+test_data <- rf_age[["test_data"]]
+model <- rf_age[["trained_model"]][["finalModel"]]
+test_data$pred <- predict(model, test_data)
+
+ggplot(test_data, aes(x = pred, y = age)) +
+    geom_point() +
+    geom_abline(linetype = "dashed")
+```
+
+3. The RMSE (root mean square error) is the square root of the mean squared
+difference between the observed and predicted values. It is in the same unit
+as the outcome, here years. The smaller the RMSE, the better the predictions.
+`cv_metric_RMSE` is calculated from the training data and `RMSE` from the test
+data. As with the AUC, a much better value in the training data than in the
+test data indicates overfitting.
+
+5. If the model predicted age well, the points would lie close to the dashed
+line, and the predicted values would cover the same range as the observed
+values. If the predictions stay close to the mean age regardless of the
+observed age, the model has not learned patterns that are informative of age.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 6: Feature importance
+
+**Goal:** Learn to find the features that are most important for the
+classification model.
+
+1. Estimate the feature importance of `rf_disease` with
+`get_feature_importance()`. Use the test data of the model, `disease` as the
+outcome, `perf_metric_function = multiClassSummary`,
+`perf_metric_name = "AUC"`, `class_probs = TRUE`, `method = "rf"`,
+`seed = 1` and `nperms = 5`. Store the result in a variable called
+`feat_imp`.
+
+2. Show the columns `feat` and `perf_metric_diff` of `feat_imp`. The
+`perf_metric_diff` column shows how much the performance of the model
+decreases when the values of the feature are permuted.
+
+3. How is the feature importance measured? Does a large importance mean that
+the feature alone determines the outcome?
+
+**Useful functions:** `mikropml::get_feature_importance()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_ml_importance
+
+# 1. Estimate the feature importance
+feat_imp <- get_feature_importance(
+    trained_model = rf_disease[["trained_model"]],
+    test_data = rf_disease[["test_data"]],
+    outcome_colname = "disease",
+    perf_metric_function = multiClassSummary,
+    perf_metric_name = "AUC",
+    class_probs = TRUE,
+    method = "rf",
+    seed = 1,
+    nperms = 5
+)
+
+# 2. Decrease in performance for each feature
+feat_imp[, c("feat", "perf_metric_diff")]
+```
+
+3. The values of one feature are randomly permuted across the samples, and
+the AUC of the model is calculated again. The decrease in AUC tells how much
+the model relies on that feature. Values close to zero mean that the feature
+has little effect on the performance. A large importance does not mean that
+the feature alone determines the outcome. Microbes interact with each other,
+and the model uses the features together.
+:::
+::::

@@ -311,39 +311,285 @@ structure. While this chapter proposed a standard approach to mediation
 analysis, in the future fine-tuned solutions for the microbiome may also become
 common.
 
-::: {.callout-tip icon=false}
-## Exercises
+## Exercises {#sec-mediation-exercises}
 
-**Goal:** After completing these exercises, you should be able to calculate
-associations between taxonomic feature and diversity.
+In these exercises, you will practise the main steps of this chapter:
+understanding the concepts of mediation analysis, and analysing alpha
+diversity, individual taxa and reduced dimensions as mediators.
 
-**Exercise 1: Mediation**
+We use the same `hitchip1006` dataset from the
+`r BiocStyle::Biocpkg("miaTime")` package as in this chapter. It contains gut
+microbiome profiles of 1006 Western adults. The nationality of each
+participant is stored in the `nationality` column of `colData`, the BMI group
+in the `bmi_group` column, and the alpha diversity in the `diversity` column.
+Unlike in this chapter, we compare Southern Europeans (`SouthEurope`,
+treatment) to Central Europeans (`CentralEurope`, control).
 
-1. Load any of the example data sets described in [@sec-data-sets].
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-2. Observe `colData`. Ensure that the data includes meaningful outcome
-(variable that you expect to be affected by treatment through mediator) and
-treatment (variable that you expect is causing the change) variables.
-If it does not, choose another dataset.
+:::: {.callout-tip icon="false"}
+## Exercise 1: Concepts of mediation
 
-3. Check the available taxonomy ranks in the dataset.
+**Goal:** Understand the effects that are estimated in mediation analysis.
 
-4. Agglomerate data to most prevalent genera or any other taxonomy rank.
+Imagine a study where the exposure (X) is a diet, the mediator (M) is the gut
+microbiome, and the outcome (Y) is a health marker. The analysis gives a total
+effect (TE) of 0.6 and an average direct effect (ADE) of 0.4.
 
-5. Apply CLR transformation.
+Answer the following questions without writing any code. The beginning of
+this chapter and @fig-mediation will help you.
 
-6. Perform mediation analysis. Analyze genera as mediators of the treatment
-effect on the outcome.
+1. What is the average causal mediated effect (ACME)?
 
-7. Observe the results. Is there any taxonomic features that have significant
-causal effect (ACME)?
+2. Both ACME and ADE are statistically significant. Is this partial or
+complete mediation?
 
-8. Visualize the results. Do the treatment have direct effect that is not
-associated with the taxonomic features (ADE)?
+3. Which type of mediation would you infer if ACME was significant but ADE was
+not?
 
-Useful functions:
+4. Why is mediation analysis better suited for longitudinal studies than for
+cross-sectional studies?
 
-`utils::data()`, `mia::taxonomyRanks()`, `mia::agglomerateByPrevalence`, `mia::transformAssay()`,
-`mia::addMediation()`, `miaViz::plotMediation()`
+::: {.callout-note collapse="true"}
+## Solution
 
+1. $ACME = TE - ADE = 0.6 - 0.4 = 0.2$. This is the part of the effect of the
+diet on the health marker that goes through the gut microbiome.
+
+2. Partial mediation. The microbiome conveys part of the effect, but the diet
+also has a direct effect on the outcome.
+
+3. Complete mediation. The effect of the exposure on the outcome goes through
+the mediator.
+
+4. Mediation analysis assumes that the exposure comes before the mediator,
+and the mediator before the outcome. In a longitudinal study, this temporal
+order can be observed. In a cross-sectional study, all variables are measured
+at the same time, so the order cannot be verified.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Alpha diversity as mediator
+
+**Goal:** Learn to analyse whether alpha diversity mediates the effect of an
+exposure on an outcome.
+
+1. Load the `hitchip1006` dataset from the `miaTime` package and store it in
+a variable called `tse`.
+
+2. Check how many participants there are in each group of the `nationality`
+column.
+
+3. Convert the `bmi_group` column to numeric, as in this chapter.
+
+4. Run the mediation analysis with `getMediation()`. Use `nationality` as the
+treatment, `bmi_group` as the outcome and `diversity` as the mediator. Control
+for `sex` and `age`, and compare `SouthEurope` (`treat.value`) to
+`CentralEurope` (`control.value`). Use `boot = TRUE` and `sims = 100`, and set
+a seed first. Store the result in a variable called `med_df`.
+
+5. Show the results table and visualize the results as a forest plot.
+
+6. Check from the results table that ACME is approximately TE - ADE. How can
+you see from the forest plot whether the mediation is partial or complete?
+
+**Useful functions:** `data()`, `table()`, `as.numeric()`, `set.seed()`,
+`mia::getMediation()`, `miaViz::plotMediation()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_mediation_alpha
+#| message: false
+
+library(mia)
+library(miaViz)
+
+# 1. Load the data
+data(hitchip1006, package = "miaTime")
+tse <- hitchip1006
+
+# 2. Number of participants in each nationality group
+table(tse$nationality)
+
+# 3. Convert BMI group to numeric
+tse$bmi_group <- as.numeric(tse$bmi_group)
+
+# 4. Alpha diversity as mediator
+set.seed(123)
+med_df <- getMediation(
+    tse,
+    treatment = "nationality",
+    outcome = "bmi_group",
+    mediator = "diversity",
+    covariates = c("sex", "age"),
+    treat.value = "SouthEurope",
+    control.value = "CentralEurope",
+    boot = TRUE, sims = 100
+)
+
+# 5. Results table and forest plot
+med_df
+plotMediation(med_df, layout = "forest")
+```
+
+6. In the results table, the `acme` column is approximately the `total` column
+minus the `ade` column. The difference is not exact, because the effects are
+estimated with bootstrapping. In the forest plot, an effect is significant if
+its confidence interval does not cross zero (the dashed line). If both ACME
+and ADE are significant, the mediation is partial. If only ACME is
+significant, the mediation is complete. If ACME is not significant, there is
+no evidence that alpha diversity mediates the effect.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Taxa as mediators
+
+**Goal:** Learn to analyse individual taxa as mediators.
+
+1. Agglomerate the data to phylum level.
+
+2. Apply the CLR transformation to the `counts` assay with `pseudocount = 1`.
+
+3. Run the mediation analysis for each phylum with `addMediation()`. Use the
+`clr` assay and the same other settings as in Exercise 2. Adjust the p-values
+with the FDR method (`p.adj.method = "fdr"`), and store the results under the
+name `"assay_mediation"`. Set a seed first.
+
+4. Show the results table, which is stored in `metadata(tse)`.
+
+5. Visualize the results as a heatmap, and mark significant effects with
+stars.
+
+6. Why are the p-values adjusted? Which columns of the results table should
+you use to decide which phyla are significant mediators?
+
+**Useful functions:** `mia::agglomerateByRank()`, `mia::transformAssay()`,
+`mia::addMediation()`, `metadata()`, `miaViz::plotMediation()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_mediation_assay
+#| message: false
+
+# 1. Agglomerate to phylum level
+tse <- agglomerateByRank(tse, rank = "Phylum")
+
+# 2. CLR transformation
+tse <- transformAssay(tse, method = "clr", pseudocount = 1)
+
+# 3. Phyla as mediators
+set.seed(123)
+tse <- addMediation(
+    tse,
+    name = "assay_mediation",
+    treatment = "nationality",
+    outcome = "bmi_group",
+    assay.type = "clr",
+    covariates = c("sex", "age"),
+    treat.value = "SouthEurope",
+    control.value = "CentralEurope",
+    boot = TRUE, sims = 100,
+    p.adj.method = "fdr"
+)
+
+# 4. Results table
+metadata(tse)$assay_mediation
+
+# 5. Heatmap with significance stars
+plotMediation(
+    tse, "assay_mediation",
+    layout = "heatmap",
+    add.significance = "symbol"
+)
+```
+
+6. One model is fitted for each phylum, so many tests are performed. The more
+tests there are, the more likely it is to find small p-values just by chance.
+The adjusted p-values are in the columns ending with `_padj`. A phylum is a
+significant mediator if its `acme_padj` is small, for example, below 0.05. If
+also `ade_padj` is small, the mediation is partial. The sign of `acme` shows
+the direction of the mediated effect.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Reduced dimensions as mediators
+
+**Goal:** Learn to analyse the joint contribution of groups of taxa as
+mediators.
+
+1. Run PCA on the `clr` assay with three components with `addPCA()`, and
+store the result under the name `"PCA"`.
+
+2. Run the mediation analysis for each principal component with
+`addMediation()`. Use `dimred = "PCA"` and the same other settings as in
+Exercise 3, and store the results under the name `"reddim_mediation"`. Set a
+seed first.
+
+3. Show the results table.
+
+4. Visualize the results as forest plots, one for each principal component.
+
+5. In a separate plot, visualize the loadings of the phyla on the three
+principal components as a heatmap.
+
+6. How do the loadings help to interpret the results? Why can reduced
+dimensions be a better choice than individual taxa when there are many taxa?
+
+**Useful functions:** `mia::addPCA()`, `mia::addMediation()`,
+`metadata()`, `miaViz::plotMediation()`, `miaViz::plotLoadings()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_mediation_reddim
+#| message: false
+
+# 1. PCA with three components
+tse <- addPCA(tse, name = "PCA", assay.type = "clr", ncomponents = 3)
+
+# 2. Principal components as mediators
+set.seed(123)
+tse <- addMediation(
+    tse,
+    name = "reddim_mediation",
+    treatment = "nationality",
+    outcome = "bmi_group",
+    dimred = "PCA",
+    covariates = c("sex", "age"),
+    treat.value = "SouthEurope",
+    control.value = "CentralEurope",
+    boot = TRUE, sims = 100,
+    p.adj.method = "fdr"
+)
+
+# 3. Results table
+metadata(tse)$reddim_mediation
+
+# 4. Forest plots
+plotMediation(tse, "reddim_mediation", layout = "forest")
+
+# 5. Heatmap of the loadings
+plotLoadings(tse, "PCA", ncomponents = 3, n = 8, layout = "heatmap")
+```
+
+6. Each principal component is a combination of the phyla. The loadings show
+how much and in which direction each phylum contributes to a component. If a
+component is a significant mediator, the phyla with the largest absolute
+loadings on it are the ones that contribute most to the mediated effect.
+Mediation can emerge from the joint contribution of several phyla, even if
+the phyla are not significant individually.
+
+When there are many taxa, testing each of them separately requires a strong
+correction for multiple testing, which reduces statistical power. A few
+principal components summarize the taxa, so fewer tests are needed.
+:::
+::::
