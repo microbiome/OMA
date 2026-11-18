@@ -103,8 +103,29 @@ model training process, leading to overly optimistic performance
 estimates. This can happen, for example, if preprocessing steps like
 scaling are applied to both the training and test data together, allowing
 the model to indirectly "see" the test data during training.
-Fortunately, there are questions we can ask ourselves to void data
-leakage [@bernett2024_dataLeakage]
+Fortunately, there are questions we can ask ourselves to avoid data
+leakage [@bernett2024_dataLeakage]. The key rule is to split the data
+first and fit any data-dependent preprocessing on the training set only
+(@fig-data-leakage).
+
+```{mermaid}
+%%| label: fig-data-leakage
+%%| fig-cap: "Data-dependent preprocessing, such as scaling or filtering, causes leakage when it is fitted on all data before the split (top). Split first, fit the preprocessing on the training set, and apply the same fitted steps to the test set (bottom)."
+flowchart TB
+    subgraph wrong["Leakage"]
+        direction LR
+        w1["All data"] --> w2["Preprocess"] --> w3["Split into<br/>train / test"] --> w4["Train &<br/>evaluate"]
+    end
+    subgraph right["No leakage"]
+        direction LR
+        r1["All data"] --> r2["Split into<br/>train / test"] --> r3["Fit preprocessing<br/>on train"] --> r4["Apply to test,<br/>train & evaluate"]
+    end
+    wrong ~~~ right
+    classDef bad fill:#fbe9eb,stroke:#b2182b,color:#070707
+    classDef good fill:#e6f3f7,stroke:#0087af,color:#070707
+    class w1,w2,w3,w4 bad
+    class r1,r2,r3,r4 good
+```
 :::
 
 The code below shows how to obtain the relative abundances of each
