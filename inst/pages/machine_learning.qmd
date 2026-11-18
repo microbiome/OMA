@@ -483,11 +483,15 @@ both curves:
 ```{r}
 #| label: 6.1 - calculate metrics for ROC and PRC
 
+# calc_model_sensspec() treats the first class level of the model as the
+# positive class. The levels are in alphabetical order (healthy, T2D), so we
+# reorder them to make T2D the positive class.
+pos_class <- "T2D"
+model_t2d <- rf_classification[["trained_model"]]
+model_t2d[["levels"]] <- c(pos_class, setdiff(model_t2d[["levels"]], pos_class))
+
 # Calculate RF model metrics required for plotting
-senspec <- calc_model_sensspec(
-    rf_classification[["trained_model"]],
-    rf_classification[["test_data"]]
-)
+senspec <- calc_model_sensspec(model_t2d, rf_classification[["test_data"]])
 # Add model label to data
 senspec$model <- "rf"
 
@@ -532,7 +536,6 @@ prc_p <- ggplot(data = senspec) +
     geom_path(aes(x = sensitivity, y = precision, color = model))
 # 2.1 Add line representing 'random guess' performance, which is the
 # proportion of the positive class in the test data
-pos_class <- rf_classification[["trained_model"]][["levels"]][[1]]
 baseline <- mean(rf_classification[["test_data"]][["disease"]] == pos_class)
 prc_p <- prc_p +
     geom_hline(color = "grey30", linetype = "dashed", yintercept = baseline)
@@ -877,7 +880,9 @@ rbind(
 
 # Compare ROC curves: combine the metrics of both models and plot them
 # with the code used for the random forest above
-xgb_senspec <- calc_model_sensspec(xgb[["trained_model"]], xgb[["test_data"]])
+xgb_model <- xgb[["trained_model"]]
+xgb_model[["levels"]] <- model_t2d[["levels"]] # T2D as the positive class
+xgb_senspec <- calc_model_sensspec(xgb_model, xgb[["test_data"]])
 xgb_senspec$model <- "XGBoost"
 senspec <- rbind(senspec, xgb_senspec)
 ```
