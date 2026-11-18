@@ -413,9 +413,7 @@ heatmaps. We can visualize the data similarly but add additional information on
 clusters.
 
 ```{r}
-#| label: pheatmap1
-
-library(ComplexHeatmap)
+#| label: clustered_heatmap_prep
 
 # Agglomerate to Genus level
 tse <- agglomerateByPrevalence(tse, rank = "genus")
@@ -426,9 +424,6 @@ tse <- transformAssay(
     tse,
     assay.type = "clr", method = "standardize", MARGIN = "rows"
 )
-
-# Gets the assay table
-mat <- assay(tse, "standardize")
 ```
 
 Now we can cluster rows. The resulting tree of taxa is shown in
@@ -457,13 +452,14 @@ ggtree(taxa_tree)
 Based on the phylo tree, we decide to create eight clusters.
 
 ```{r}
-#| label: pheatmap3
+#| label: taxa_clusters
 
 # Hierarchical clustering with k = 8
 tse <- addCluster(
     tse,
     assay.type = "standardize",
-    HclustParam(method = "complete", cut.fun = cutree, k = 8)
+    HclustParam(method = "complete", cut.params = list(k = 8)),
+    clust.col = "taxa_cluster"
 )
 ```
 
@@ -490,57 +486,34 @@ p1 + p2
 Based on the results, we split the columns into six clusters.
 
 ```{r}
-#| label: pheatmap5
+#| label: sample_clusters
 
-# Hierarchical clustering with k = 4
+# K-means clustering with 6 clusters
 tse <- addCluster(
     tse,
     assay.type = "standardize", by = "cols",
-    KmeansParam(centers = 6)
+    KmeansParam(centers = 6),
+    clust.col = "sample_cluster"
 )
 
 # Prints samples and their clusters
-colData(tse)[["clusters"]]
+colData(tse)[["sample_cluster"]]
 ```
 
-Now we can create a heatmap with additional annotations
-(@fig-clustering-heatmap).
+Now we can create a heatmap where the taxa are grouped by their clusters, and
+the samples by their clusters and gender (@fig-clustering-heatmap).
 
 ```{r}
 #| label: fig-clustering-heatmap
-#| fig-cap: "Heatmap of standardized CLR-transformed genus abundances in the peerj13075 data, with rows ordered by hierarchical clusters of taxa and columns by k-means clusters of samples. Annotations show taxa clusters, sample clusters and gender."
+#| fig-cap: "Heatmap of standardized CLR-transformed genus abundances in the peerj13075 data. Rows are grouped by hierarchical clusters of taxa, and columns by k-means clusters of samples and by gender."
 #| fig-width: 13
 #| fig-height: 7
 
-# Order the data based on clusters
-tse <- tse[
-    order(rowData(tse)[["cluster"]]),
-    order(colData(tse)[["cluster"]])
-]
-
-# Get data for plotting
-mat <- assay(tse, "standardize")
-taxa_clusters <- rowData(tse)[, "cluster", drop = FALSE] |>
-    as.data.frame()
-sample_data <- colData(tse)[, c("cluster", "Gender"), drop = FALSE] |>
-    as.data.frame()
-colnames(sample_data) <- c("clusters_col", "gender")
-
-# Determine the scaling of colors
-# Scale colors
-breaks <- seq(
-    -ceiling(max(abs(mat))), ceiling(max(abs(mat))),
-    length.out = ifelse(max(abs(mat)) > 5, 2 * ceiling(max(abs(mat))), 10)
-)
-colors <- colorRampPalette(c("darkblue", "blue", "white", "red", "darkred"))(length(breaks) - 1)
-
-pheatmap(
-    mat,
-    annotation_row = taxa_clusters,
-    annotation_col = sample_data,
-    cluster_cols = FALSE, cluster_rows = FALSE,
-    breaks = breaks,
-    color = colors
+plotHeatmap(
+    tse,
+    assay.type = "standardize",
+    row.var = "taxa_cluster",
+    col.var = c("sample_cluster", "Gender")
 )
 ```
 
