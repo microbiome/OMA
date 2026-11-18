@@ -10,12 +10,14 @@ chapterPreamble(cache = FALSE)
 ```
 
 Mediation analysis is used to study the effect of an exposure variable (X) on
-the outcome (Y) through a third factor, known as mediator (M). In statistics,
-this relationship can be described as follows:
+the outcome (Y) through a third factor, known as mediator (M):
 
 $$
-Y \thicksim X * M
+X \rightarrow M \rightarrow Y
 $$
+
+In practice, two regression models are fitted: one for the mediator
+($M \sim X$) and one for the outcome ($Y \sim X + M$).
 
 The contribution of a mediator is typically quantified in terms of Average
 Causal Mediated Effect (ACME), that is, the portion of the association between X
@@ -55,12 +57,12 @@ library(ggdag)
 library(ggplot2)
 library(patchwork)
 
-# Plot triangle for complete mediation
+# Plot triangle for partial mediation
 p1 <- ggdag_mediation_triangle(x_y_associated = TRUE, stylized = TRUE) +
     ggtitle("A: Partial mediation") +
     theme_dag()
 
-# Plot triangle for partial mediation
+# Plot triangle for complete mediation
 p2 <- ggdag_mediation_triangle(stylized = TRUE) +
     ggtitle("B: Complete mediation") +
     theme_dag()
@@ -75,8 +77,13 @@ investigating mediation is a suitable analytical choice in longitudinal studies,
 whereas it is discouraged in cross-sectional ones [@Fairchild2017best].
 
 We demonstrate a standard mediation analysis with the `hitchip1006` data set
-([@sec-data-hitchip1006]), which contains genus-level profiles of 1006 Western
-adults of 6 different nationalities.
+([@sec-data-hitchip1006]), which contains 1151 genus-level profiles from 1006
+Western adults of 6 different nationalities. Some subjects were sampled more
+than once. As the models assume independent observations, we keep only the
+baseline sample (`time == 0`) of each subject. Note also that the exposure,
+mediator and outcome were measured at the same time point. This
+cross-sectional example cannot thus confirm the temporal order that mediation
+assumes, and it illustrates the method rather than a causal finding.
 
 ```{r}
 #| label: mediation1
@@ -85,13 +92,15 @@ adults of 6 different nationalities.
 # Import libraries
 library(mia)
 library(miaViz)
-library(scater)
 library(patchwork)
 library(knitr)
 
 # Load dataset
 data(hitchip1006, package = "miaTime")
 tse <- hitchip1006
+
+# Keep only the baseline sample of each subject
+tse <- tse[, tse$time == 0]
 ```
 
 In our analyses, nationality and BMI group will represent the exposure (X)
@@ -136,7 +145,8 @@ Europeans (control) vs. Scandinavians (treatment).
 #| message: false
 
 # Analyse mediated effect of nationality on BMI via alpha diversity
-# 100 permutations were done to speed up execution, but ~1000 are recommended
+# 100 bootstrap simulations to speed up execution, but ~1000 are recommended
+set.seed(123)
 med_df <- getMediation(
     tse,
     treatment = "nationality",
@@ -155,8 +165,13 @@ plotMediation(med_df, layout = "forest") + theme_minimal()
 The forest plot in @fig-mediation-alpha shows significance for both ACME and
 ADE, which suggests that alpha diversity is a partial mediator of living
 environment on BMI. In contrast, if ACME but not ADE were significant, complete
-mediation would be inferred. The negative sign of the effect means that a lower BMI and alpha
-diversity are associated with the control group (Scandinavians).
+mediation would be inferred. The negative ACME means that the path through
+alpha diversity is associated with a lower BMI in the treatment group
+(Scandinavians) compared to the control group (Central Europeans). The sign of
+ACME combines the effects of X on M and of M on Y, so it does not alone tell
+whether the mediator is higher or lower in the treatment group. Here, alpha
+diversity is slightly higher in Scandinavians, and higher diversity is
+associated with a lower BMI.
 
 ## Features
 
@@ -171,7 +186,8 @@ adjust p-values.
 #| message: false
 
 # Analyse mediated effect of nationality on BMI via clr-transformed features
-# 100 permutations were done to speed up execution, but ~1000 are recommended
+# 100 bootstrap simulations to speed up execution, but ~1000 are recommended
+set.seed(123)
 tse <- addMediation(
     tse,
     name = "assay_mediation",
@@ -208,11 +224,13 @@ p <- plotMediation(
 p + theme_minimal()
 ```
 
-Results suggest that only four out of eight features (Bacteroidetes, Firmicutes,
-Proteobacteria and Verrucomicrobia) partially mediate the effect of living
-environment on BMI. As the sign is negative, a smaller abundance of these
-mediators is found in Scandinavians compared to Central Europeans, which matches
-the negative trend of alpha diversity.
+Results suggest that only two out of eight features (Bacteroidetes and
+Verrucomicrobia) partially mediate the effect of living environment on BMI. The
+negative ACME means that the paths through these phyla are associated with a
+lower BMI in Scandinavians compared to Central Europeans. As explained above,
+the sign does not tell the direction of the abundance difference; for example,
+Bacteroidetes is less abundant and Verrucomicrobia more abundant in
+Scandinavians.
 
 While analyses were conducted at the phylum level to simplify results, using
 original assays without agglomeration also represents a valid option. However,
@@ -233,7 +251,7 @@ by means of dimensionality reduction.
 #| message: false
 
 # Reduce dimensions with PCA
-tse <- runPCA(
+tse <- addPCA(
     tse,
     name = "PCA",
     assay.type = "clr",
@@ -241,7 +259,8 @@ tse <- runPCA(
 )
 
 # Analyse mediated effect of nationality on BMI via principal components
-# 100 permutations were done to speed up execution, but ~1000 are recommended
+# 100 bootstrap simulations to speed up execution, but ~1000 are recommended
+set.seed(123)
 tse <- addMediation(
     tse,
     name = "reddim_mediation",
@@ -285,7 +304,7 @@ p2 <- plotLoadings(
 (p1 / p2) & theme_minimal()
 ```
 
-The plot above suggests that only PC1 partially mediates the effect of living
+The plot above suggests that only PC1 mediates the effect of living
 environment on BMI. Within this dimension, Bacteroidetes and Actinobacteria are
 the largest contributors in opposite directions. Interestingly, in the previous
 section the former but not the latter appeared significant individually, which
@@ -314,8 +333,8 @@ common.
 ::: {.callout-tip icon=false}
 ## Exercises
 
-**Goal:** After completing these exercises, you should be able to calculate
-associations between taxonomic feature and diversity.
+**Goal:** After completing these exercises, you should be able to analyse
+taxonomic features as mediators of the effect of an exposure on an outcome.
 
 **Exercise 1: Mediation**
 
