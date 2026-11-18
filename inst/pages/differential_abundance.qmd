@@ -101,7 +101,10 @@ We therefore recommend performing DAA by analyzing
 (e.g., the Wilcoxon test or ordinal regression model) or, after a log
 transformation, with **t-test/linear regression**. In addition to their
 good performance on real data they have the benefit of being **intuitive and
-easy to understand**.
+easy to understand**. Linear regression of log-transformed relative abundances
+is implemented, for instance, in `r BiocStyle::Biocpkg("LimROTS")`
+[@Anwar2025] and `r BiocStyle::Biocpkg("Maaslin2")` [@Mallick2021], which we
+demonstrate below (@sec-daa).
 
 We note, however, that the performance of DAA methods likely depends
 on the characteristics of the analyzed data [@Weiss2017; @Calgaro2020].
@@ -122,11 +125,12 @@ is thus **differential prevalence analysis** (see also @Pelto2025).
 
 Following the recommendations above, we show in this section how to perform DAA
 by analyzing (log transformed) relative abundances with linear regression
-models. We first illustrate the analysis in the simplest case where
+models, using `r BiocStyle::Biocpkg("LimROTS")` and
+`r BiocStyle::Biocpkg("Maaslin2")`. We first illustrate the analysis in the simplest case where
 two groups are compared, and no other covariates are included in the analysis.
 After that we illustrate more complex analyses, namely, the analysis with
-additional covariate(s) included and the analysis with interaction of two
-variables. Furthermore, we illustrate how to perform differential prevalence
+additional covariate(s) included, the same analysis with LimROTS (@sec-daa-limrots) and the analysis
+with interaction of two variables. Furthermore, we illustrate how to perform differential prevalence
 analysis and the differential analysis of positive (non-zero) abundances.
 
 ### Preparing the data {#sec-prepare-data}
@@ -427,6 +431,106 @@ rather similar to the results without the covariate included. Therefore, cohort
 does not seem to be a confounder causing spurious associations between
 patient status and the abundances of any taxa.
 
+### With LimROTS {#sec-daa-limrots}
+
+`r BiocStyle::Biocpkg("LimROTS")` [@Anwar2025] also fits a linear model for
+each taxon, similarly to MaAsLin2. It combines the linear model and the
+empirical Bayes variance moderation of `r BiocStyle::Biocpkg("limma")`
+[@Ritchie2015] with a reproducibility-optimized test statistic. The LimROTS
+method was inspired by @Elo2008, and added support for covariates. The
+statistic is tuned with bootstrap resampling so that the ranking of the taxa
+is as reproducible as possible, and the p-values are obtained by permutation.
+Unlike MaAsLin2, LimROTS works directly with
+`SummarizedExperiment` objects, including `TreeSE`, and it adds the results to
+the `rowData` of the data. LimROTS applies to log-transformed omics data.
+
+Compared with standard linear models, which MaAsLin2 fits for each taxon
+separately, LimROTS has some potential advantages. The empirical Bayes
+moderation borrows information across taxa to stabilize the variance
+estimates, which helps when there are few samples. The reproducibility
+optimization adapts the test statistic to the data at hand, and the
+permutation-based p-values do not rely on the distributional assumptions of
+the linear model, which log-transformed abundances with many zeros often
+violate [@Anwar2025].
+
+LimROTS expects log-transformed data. As in MaAsLin2, we analyze log~2~
+transformed relative abundances, and the zeros are replaced by half of the
+smallest non-zero relative abundance in the data before the transformation.
+We repeat the analysis with `cohort` as a covariate (@sec-daa-cov). The group
+variable must be a factor, and LimROTS reports the difference between its
+first and second level. To obtain the log~2~-fold change of ADHD versus
+Control, as with MaAsLin2, we therefore put `ADHD` first. The number of
+bootstrap and permutation iterations is set with `niter`, and the runs can be
+parallelized with the `BPPARAM` argument.
+
+```{r}
+#| label: run_daa_limrots
+#| message: false
+
+library(LimROTS)
+library(BiocParallel)
+
+# Log2-transform relative abundances; zeros are replaced by half of the
+# smallest non-zero relative abundance
+tse <- transformAssay(
+    tse,
+    assay.type = "relabundance",
+    method = "log2",
+    pseudocount = TRUE,
+    name = "log2_relabundance"
+)
+
+# LimROTS reports the first level minus the second level of the group
+tse_limrots <- tse
+tse_limrots$patient_status <- factor(
+    tse_limrots$patient_status,
+    levels = c("ADHD", "Control")
+)
+
+set.seed(123)
+tse_limrots <- LimROTS(
+    tse_limrots,
+    assay.type = "log2_relabundance",
+    meta.info = c("patient_status", "cohort"), # Variables used in the model
+    group = "patient_status", # The variable of interest
+    formula.str = "~ 0 + patient_status + cohort",
+    niter = 1000, # Bootstrap and permutation iterations
+    BPPARAM = SerialParam(), # For example, MulticoreParam(4) to parallelize
+    verbose = FALSE
+)
+```
+
+The results are stored in the `rowData`. We extract the log~2~-fold change
+estimates (`corrected.logfc`), the permutation-based p-values (`pvalue`) and
+the Benjamini-Hochberg adjusted p-values (`BH.pvalue`), which correspond to
+the q-values reported for MaAsLin2 above.
+
+```{r}
+#| label: results_daa_limrots
+
+res_limrots <- data.frame(
+    feature = rownames(tse_limrots),
+    coef = rowData(tse_limrots)$corrected.logfc,
+    pval = rowData(tse_limrots)$pvalue,
+    qval = rowData(tse_limrots)$BH.pvalue
+)
+
+# Print the results for taxa with the smallest p-values
+res_limrots |>
+    arrange(pval) |>
+    head() |>
+    kable()
+```
+
+The results agree well with those of MaAsLin2 with the same covariate
+(@sec-daa-cov). The same genera have the smallest p-values, and their
+log~2~-fold changes have the same signs. For instance, _Faecalibacterium_ is
+again more abundant in the ADHD group. The estimates are not identical, as the
+zeros are replaced differently (MaAsLin2 uses the smallest non-zero value of
+each taxon, whereas here the smallest value in the whole data is used) and the
+p-values are computed differently. In this example, LimROTS gives somewhat
+smaller q-values, so a few more genera pass the q < 0.05 threshold.
+
 ### With an interaction {#sec-daa-ia}
 
 Here we show a more complex version of DAA, namely, a case where the interaction
@@ -648,6 +752,73 @@ using the standard R syntax, e.g.,
 `formula = ~ patient_status + cohort + patient_status:cohort + total` or
 alternatively `formula = ~ patient_status * cohort + total`
 
+#### DPA with DiPPER {#sec-dpa-dipper}
+
+`r BiocStyle::Biocpkg("DiPPER")` [@Pelto2026] is a Bayesian method for DPA
+that connects the logistic regression models of the taxa with a common
+hierarchical prior. Unlike standard logistic regression, it gives finite
+estimates even when a taxon is absent from one group, and its results are
+adjusted for multiple testing without a separate q-value correction. It also
+supports longitudinal data and works directly with `TreeSE`.
+
+The code below repeats the analysis above. It is not run when the book is
+built, as DiPPER needs the separately installed
+[CmdStan](https://github.com/jepelt/DiPPER#installation) backend. Instead,
+the results shown below were computed beforehand with DiPPER 0.99.1 (see
+`inst/scripts/dipper_precompute.R` in the book repository). The first term of
+the formula is the variable of interest.
+
+```{r}
+#| label: run_dpa_dipper
+#| eval: false
+
+library(DiPPER)
+
+fit_dipper <- dipper(
+    tse = tse,
+    assay.type = "counts",
+    data.type = "counts", # Presence is defined as a count above zero
+    formula = ~ patient_status + cohort,
+    read.depth = TRUE # Control for the sequencing depth
+)
+
+# Results for patient_status: log-odds ratio estimates, 95% credible
+# intervals and pseudo q-values
+res_dipper <- summary(fit_dipper)
+
+# Forest plot of the taxa whose credible interval excludes zero
+plot(fit_dipper)
+```
+
+The `summary()` gives log-odds ratio estimates (`log_or`) with 95% credible
+intervals (`lwr`, `upr`) and a `pseudo_q` value that resembles a q-value. A
+taxon is flagged as `significant` when its credible interval excludes zero.
+
+```{r}
+#| label: results_dpa_dipper
+#| echo: false
+
+# Precomputed results of summary(fit_dipper)
+res_dipper <- read.csv("../extdata/dipper_tengeler2020.csv")
+
+res_dipper |>
+    head() |>
+    kable()
+```
+
+![Differential prevalence between the ADHD and control groups estimated with
+DiPPER, controlling for cohort and sequencing depth. The points are the
+odds ratio estimates and the lines their 95% credible intervals, shown for the
+genera whose interval excludes one. Computed beforehand with
+DiPPER 0.99.1.](figures/dipper_tengeler2020.png){#fig-dpa-dipper width="80%"
+fig-alt="Forest plot of differential prevalence odds ratios on a log scale with a dashed vertical line at one. Erysipelatoclostridium and the [Ruminococcus] gauvreauii group have odds ratios below one, that is, they are less prevalent in the ADHD group, while Barnesiella and Ruminococcaceae UCG-014 have odds ratios above one."}
+
+As with maaslin3 above, _Erysipelatoclostridium_ has the strongest evidence
+for a difference in prevalence, and it is less prevalent in the ADHD group
+(@fig-dpa-dipper). See the
+[DiPPER vignette](https://bioconductor.org/packages/devel/bioc/vignettes/DiPPER/inst/doc/DiPPER.html)
+for more information.
+
 ### Positive abundances {#sec-daa-pos}
 
 It may sometimes be biologically relevant to analyze only the positive
@@ -743,8 +914,6 @@ newer version (ANCOM-BC2) available, but some problems have been observed in its
 performance (e.g., @Pelto2025).
   - `LinDA` [@Zhou2022] from the `r BiocStyle::CRANpkg("MicrobiomeStat")` package,
   [reference manual](https://cran.r-project.org/web/packages/MicrobiomeStat/MicrobiomeStat.pdf).
-  - `ZicoSeq` [@Yang2022] from the `r BiocStyle::CRANpkg("GUniFrac")` package,
-  [vignette](https://cran.r-project.org/web/packages/GUniFrac/vignettes/ZicoSeq.html).
 
 #### A non-parametic alternative to MaAsLin2
 
