@@ -1,15 +1,6 @@
 # Multi-omics ordination {#sec-unsupervised-multiomics}
 
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 In this chapter, we continue from where we left off in the previous section
 ([@sec-cross-correlation]). Instead of testing feature pairs one by one, we
 now look for patterns that are shared across the omic layers. We introduce two
@@ -127,7 +118,7 @@ Joint-RPCA (joint robust principal component analysis) is available in
 `r BiocStyle::Biocpkg("mia")` and its results can be visualized with
 `r BiocStyle::Biocpkg("miaViz")`. We run the analysis with
 `addJointRPCA()`, which stores the results in the `metadata` of the
-`MultiAssayExperiment`.
+`MultiAssayExperiment` [@Ramos2017].
 
 ```{r}
 #| label: jrpca_run
@@ -154,6 +145,7 @@ not the proportion of variance explained in the observed data
 ```{r}
 #| label: fig-jrpca-variance
 #| fig-cap: "Variance explained by the Joint-RPCA model of the Hintikka et al. (2021) data. The heatmap shows the variance of each omic layer (microbiota, metabolites, biomarkers) explained by each of the five components, and the barplot shows the share of total variance per layer."
+#| fig-alt: "Two panels: a heatmap with the five Joint-RPCA components against the microbiota, metabolite and biomarker layers, filled by the variance explained, and a barplot with one bar per omic layer showing its share of the total variance."
 #| fig-height: 6
 #| fig-width: 10
 
@@ -162,12 +154,13 @@ library(miaViz)
 plotJointRPCAExplainedVariance(mae, "JointRPCA")
 ```
 
-Similarly to MOFA, the samples can be visualized in the space of the first two
-components (@fig-jrpca-ordination).
+As in other ordination methods, the samples can be visualized in the space of
+the first two components (@fig-jrpca-ordination).
 
 ```{r}
 #| label: fig-jrpca-ordination
 #| fig-cap: "Joint-RPCA sample scores of the Hintikka et al. (2021) data on the first two components, coloured by diet."
+#| fig-alt: "Scatter plot of samples on Joint-RPCA component 1 (x-axis) and component 2 (y-axis), with points coloured by diet."
 
 plotJointRPCA(mae, "JointRPCA", colour.by = "Diet")
 ```
@@ -179,6 +172,7 @@ layer for the first two components to analyze co-varying features
 ```{r}
 #| label: fig-jrpca-loadings
 #| fig-cap: "Top 10 features with the largest Joint-RPCA loadings on the first two components in each omic layer (microbiota genera, metabolites and biomarkers) of the Hintikka et al. (2021) data."
+#| fig-alt: "Grid of horizontal bar charts, one per omic layer and component, each listing the ten microbiota genera, metabolites or biomarkers with the largest loadings on components 1 and 2 and the size and sign of each loading."
 #| fig-height: 10
 #| fig-width: 10
 
@@ -194,6 +188,7 @@ observed data (@fig-jrpca-covariance).
 ```{r}
 #| label: fig-jrpca-covariance
 #| fig-cap: "Heatmap of correlations between the top features of the microbiota, metabolite and biomarker layers, derived from the Joint-RPCA model of the Hintikka et al. (2021) data."
+#| fig-alt: "Square heatmap with the top features of the microbiota, metabolite and biomarker layers on both axes, where cell colour shows the correlation between each pair of features within and across layers."
 #| fig-height: 8
 #| fig-width: 9
 
@@ -206,6 +201,7 @@ strongly correlated features (@fig-jrpca-network).
 ```{r}
 #| label: fig-jrpca-network
 #| fig-cap: "Network of features from the microbiota, metabolite and biomarker layers based on the Joint-RPCA model of the Hintikka et al. (2021) data. Edges connect strongly correlated features."
+#| fig-alt: "Network graph whose labelled nodes are features from the microbiota, metabolite and biomarker layers, joined by edges between strongly correlated features."
 #| fig-height: 8
 #| fig-width: 9
 
@@ -220,7 +216,8 @@ seen as a generalization of principal component analysis. Yet, with the ability
 to infer a latent (low-dimensional) representation, shared among the multiple
 (-omics) data sets in hand.
 
-We use the `r BiocStyle::Biocpkg("MOFA2")` package for analysis.
+We use the `r BiocStyle::Biocpkg("MOFA2")` package [@Argelaguet2020] for
+analysis.
 
 ```{r}
 #| label: mofa_data1
@@ -248,7 +245,12 @@ Bernoulli distribution models are also available.
 library(MOFA2)
 
 # Agglomerate microbiome data
-mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Genus")
+mae[[1]] <- agglomerateByRank(mae[[1]], rank = "Genus")
+mae[[1]] <- addPrevalence(mae[[1]])
+mae[[1]] <- subsetBy(
+    mae[[1]],
+    rows = prevalence > 0.5, collapse = TRUE
+)
 
 # Apply CLR transformation to microbiome counts assay
 mae[[1]] <- transformAssay(mae[[1]], method = "clr", pseudocount = TRUE)
@@ -270,6 +272,7 @@ mae[[2]] <- transformAssay(
     mae[[2]],
     assay.type = "log10",
     method = "standardize",
+    MARGIN = "rows",
     name = "log10-z"
 )
 
@@ -321,7 +324,8 @@ function (@fig-mofa-variance).
 #| code-fold: true
 #| code-summary: "Show the plotting code"
 #| fig-cap: "Variance explained by the MOFA model of the Hintikka et al. (2021) data. The heatmap shows the variance explained per factor (rows) and omic layer (columns), and the barplot shows the total variance explained per layer."
-#| messsage: false
+#| fig-alt: "Two stacked panels: a heatmap of MOFA factors (rows) against the omic layers (columns), filled by the variance explained, and a barplot of the total variance explained in each layer."
+#| message: false
 #| warning: false
 #| fig-height: 8
 #| fig-width: 10
@@ -348,6 +352,7 @@ first two factors (@fig-mofa-factors).
 ```{r}
 #| label: fig-mofa-factors
 #| fig-cap: "MOFA sample scores of the Hintikka et al. (2021) data on factors 1 and 2, coloured by diet."
+#| fig-alt: "Scatter plot of samples on MOFA factor 1 (x-axis) and factor 2 (y-axis), with points coloured by diet."
 
 plot_factors(model, factors = c(1, 2), color_by = "Diet")
 ```
@@ -358,128 +363,427 @@ the first two factors to analyze co-varying features (@fig-mofa-weights).
 ```{r}
 #| label: fig-mofa-weights
 #| fig-cap: "Top 10 features with the largest absolute MOFA weights on factors 1 and 2 for the microbiota (top) and metabolite (bottom) layers of the Hintikka et al. (2021) data."
+#| fig-alt: "Two stacked rows of panels for factors 1 and 2, showing the ten microbiota features (top) and the ten metabolites (bottom) with the largest absolute weights, each drawn as a point along the weight axis."
 #| warning: false
 #| message: false
 #| fig-height: 10
 #| fig-width: 10
 
-plot_list <- lapply(
-    c("microbiota", "metabolites"),
-    plot_top_weights,
-    object = model,
+p1 <- plot_top_weights(
+    model,
+    view = "microbiota",
     factors = c(1, 2),
     nfeatures = 10
 )
 
-wrap_plots(plot_list, ncol = 1) & theme(text = element_text(size = 8))
+p2 <- plot_top_weights(
+    model,
+    view = "metabolites",
+    factors = c(1, 2),
+    nfeatures = 10
+)
+
+wrap_plots(p1, p2, ncol = 1) & theme(text = element_text(size = 8))
 ```
 
 More tutorials and examples of using the package are found at
 [MOFA2 tutorials](https://biofam.github.io/MOFA2/tutorials.html).
 
-::: {.callout-tip icon=false}
-## Exercises
+## Exercises {#sec-unsupervised-multiomics-exercises}
 
-**Goal:** After completing these exercises, you should be able to integrate
-multiple omics with Joint-RPCA and MOFA, visualize the results, and compare
-the two methods.
+We use the [`HintikkaXOData`](data_sets.qmd#sec-data-hintikka) dataset, as in
+this chapter.
 
-**Exercise 1: Joint-RPCA**
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-1. Load any of the example datasets in
-`r BiocStyle::Biocpkg("MultiAssayExperiment")` format mentioned in
-[@sec-example-data], for example, `HintikkaXOData` from
-`r BiocStyle::Biocpkg("mia")`.
+:::: {.callout-tip icon="false"}
+## Exercise 1: Shared components
 
-2. Check which experiments the dataset contains and what assays they have.
-Are the samples matched across the experiments?
+**Goal:** Understand what the ordination-based integration methods estimate
+and how Joint-RPCA and MOFA differ.
+
+Answer the following questions without writing any code. The beginning of
+this chapter will help you.
+
+1. How do Joint-RPCA and MOFA differ from a PCA that is run on a single
+table?
+
+2. A bacterial genus and a metabolite both have a large positive loading on
+the first component. What does this tell about them?
+
+3. How does the rclr transformation used in Joint-RPCA handle zeros? Why does
+this suit microbiome data?
+
+4. Why is the data usually transformed and standardized before running MOFA?
+
+::: {.callout-note collapse="true"}
+## Solution
+
+1. Like PCA, they reduce the data into a small number of components or
+factors that capture the main patterns of variation. Unlike in single-table
+PCA, the components are shared across the omic layers, and each feature in
+each layer gets a loading or weight on them.
+
+2. Features with large loadings on the same component co-vary across the
+samples. Here, samples with a high score on the first component tend to have
+high values of both the genus and the metabolite.
+
+3. The rclr transformation treats zeros as missing values, and Joint-RPCA
+estimates them with matrix completion. Microbiome data is sparse and
+compositional, so it has many zeros that may not be true absences. The method
+is designed for these properties.
+
+4. By default, MOFA assumes normally distributed data, and it does not assume
+any microbiome-specific properties. The transformations make the data closer
+to normal, and the standardization puts all features on the same scale.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Prepare the data for Joint-RPCA
+
+**Goal:** Learn to prepare multi-omic data for Joint-RPCA.
+
+1. Load the `HintikkaXOData` dataset from the `mia` package and store it in a
+variable called `mae`.
+
+2. Check which experiments the dataset contains and which assays each
+experiment has.
 
 3. Agglomerate the microbiota data to genus level.
 
-4. Filter out rare features from the raw microbiota counts. Why must the
-filtering be done before the transformation?
+4. Filter the `counts` assay of the microbiota data in three steps: remove the
+genera with 10 reads or fewer in total, then the genera that are present in
+10% or less of the samples, and finally the samples with 1000 reads or fewer.
+How many genera and samples remain?
 
 5. Apply the rclr transformation to the microbiota data without imputing the
-zeros. How many values are missing after the transformation?
+zeros (`impute = FALSE`).
 
-6. Transform the other omics to an appropriate scale, for example, with log10
-transformation or standardization.
+6. Count the zeros in the `counts` assay and the missing values in the `rclr`
+assay of the microbiota data. Compare the two numbers.
 
-7. Run Joint-RPCA with three components. Set a seed first so that the results
-are reproducible.
+7. Apply the log10 transformation to the `nmr` assay of the metabolites, and
+standardize each biomarker in the `signals` assay.
 
-8. Visualize the explained variance. Which omic layer contributes most to the
-model, and which components capture most of its variance?
+**Useful functions:** `data()`, `MultiAssayExperiment::experiments()`,
+`assayNames()`, `mia::agglomerateByRank()`, `assay()`, `rowSums()`,
+`rowMeans()`, `colSums()`, `dim()`, `mia::transformAssay()`, `is.na()`,
+`sum()`
 
-9. Plot the samples in the space of the first two components and colour them
-by a sample variable, such as diet or diagnosis. Is there visible separation
-between the groups?
+::: {.callout-note collapse="true"}
+## Solution
 
-10. For each omic, visualize the features with the largest loadings on the
-first two components. Which features co-vary across the omic layers?
+```{r}
+#| label: exercise_multiomics_prepare
 
-11. Visualize the correlations between the top features both as a heatmap and
-as a network.
+library(mia)
 
-Useful functions:
+# 1. Load the data
+data("HintikkaXOData", package = "mia")
+mae <- HintikkaXOData
 
-`utils::data()`, `MultiAssayExperiment::experiments()`,
-`mia::agglomerateByRank()`, `mia::transformAssay()`, `mia::addJointRPCA()`,
-`miaViz::plotJointRPCAExplainedVariance()`, `miaViz::plotJointRPCA()`,
-`miaViz::plotJointRPCALoadings()`, `miaViz::plotJointRPCACovariance()`,
-`miaViz::plotJointRPCANetwork()`
+# 2. Experiments and their assays
+experiments(mae)
+assayNames(mae[["microbiota"]])
+assayNames(mae[["metabolites"]])
+assayNames(mae[["biomarkers"]])
 
-**Exercise 2: MOFA**
+# 3. Agglomerate the microbiota data to genus level
+mae[["microbiota"]] <- agglomerateByRank(mae[["microbiota"]], rank = "Genus")
 
-1. Use the same dataset as in Exercise 1.
+# 4. Filter the counts in three steps
+tse <- mae[["microbiota"]]
+tse <- tse[rowSums(assay(tse, "counts")) > 10, ]
+tse <- tse[rowMeans(assay(tse, "counts") > 0) > 0.1, ]
+tse <- tse[, colSums(assay(tse, "counts")) > 1000]
+mae[["microbiota"]] <- tse
+dim(mae[["microbiota"]])
 
-2. Agglomerate the microbiota data to prevalent genera.
+# 5. rclr transformation without imputing zeros
+mae[["microbiota"]] <- transformAssay(
+    mae[["microbiota"]],
+    method = "rclr",
+    impute = FALSE
+)
 
-3. Apply the CLR transformation to the microbiota data.
+# 6. Zeros in counts and missing values in rclr
+sum(assay(mae[["microbiota"]], "counts") == 0)
+sum(is.na(assay(mae[["microbiota"]], "rclr")))
 
-4. Apply the relative and log10 transformations to the other omics.
+# 7. Transform metabolites and biomarkers
+mae[["metabolites"]] <- transformAssay(
+    mae[["metabolites"]],
+    assay.type = "nmr",
+    method = "log10"
+)
+mae[["biomarkers"]] <- transformAssay(
+    mae[["biomarkers"]],
+    assay.type = "signals",
+    method = "standardize",
+    MARGIN = "rows"
+)
+```
 
-5. Standardize each feature within each omic so that all features have mean
-0 and unit variance.
+6. The two numbers are equal, because each zero in the counts becomes a
+missing value in the rclr assay. Joint-RPCA estimates these missing values
+itself.
+:::
+::::
 
-6. Make sure that the feature names are unique.
+:::: {.callout-tip icon="false"}
+## Exercise 3: Run Joint-RPCA
 
-7. Create a MOFA2 object from the `MultiAssayExperiment` and train the model
-with five factors.
+**Goal:** Learn to run Joint-RPCA and to visualize the explained variance and
+the samples.
 
-8. Visualize the explained variance. How much variance is explained in total,
-and which omic accounts for the most variance?
+1. Set the seed to 123 and run Joint-RPCA with `addJointRPCA()` on all three
+experiments. Use the assays `rclr`, `log10` and `standardize`, and three
+components (`ncomponents = 3`).
 
-9. Plot the samples in the space of the first two factors and colour them by
-the same sample variable as in Exercise 1.
+2. Show the first sample scores, which are stored in `metadata(mae)`.
 
-10. For each omic, visualize the features with the largest weights. Which
-features co-vary across the omic layers?
+3. Visualize the explained variance.
 
-Useful functions:
+4. Plot the samples in the space of the first two components, and colour them
+by `Diet`.
 
-`mia::agglomerateByPrevalence()`, `mia::transformAssay()`,
-`mia::getTaxonomyLabels()`, `MOFA2::mofa2()`, `MOFA2::run_mofa()`,
+5. How do you read the explained variance plot? How can you see from the
+sample plot whether the diet groups differ?
+
+**Useful functions:** `set.seed()`, `mia::addJointRPCA()`, `metadata()`,
+`head()`, `miaViz::plotJointRPCAExplainedVariance()`,
+`miaViz::plotJointRPCA()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_multiomics_jrpca
+
+library(miaViz)
+
+# 1. Run Joint-RPCA with three components
+set.seed(123)
+mae <- addJointRPCA(
+    mae,
+    experiments = c("microbiota", "metabolites", "biomarkers"),
+    assay.types = c("rclr", "log10", "standardize"),
+    ncomponents = 3
+)
+
+# 2. Sample scores
+metadata(mae)[["JointRPCA"]] |> head()
+
+# 3. Explained variance
+plotJointRPCAExplainedVariance(mae, "JointRPCA")
+
+# 4. Samples coloured by diet
+plotJointRPCA(mae, "JointRPCA", colour.by = "Diet")
+```
+
+5. The heatmap shows how the variance of each omic layer is divided across
+the components, and the barplot shows how the total variance is divided
+across the layers. A component that explains much variance in several layers
+captures a pattern that is shared by them. Note that the values describe the
+low-rank Joint-RPCA model, not the observed data. In the sample plot, each
+point is a sample. If the colours form separate groups along a component, that
+component captures differences between the diet groups.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Co-varying features in Joint-RPCA
+
+**Goal:** Learn to find features that co-vary across the omic layers.
+
+1. Visualize the ten features with the largest loadings on the first two
+components in each omic layer.
+
+2. Visualize the correlations between the top ten features of each layer as a
+heatmap (`ntop = 10`, `correlation = TRUE`).
+
+3. Visualize the same correlations as a network with feature labels.
+
+4. How do you read the heatmap and the network? Are these correlations
+calculated from the observed data?
+
+**Useful functions:** `miaViz::plotJointRPCALoadings()`,
+`miaViz::plotJointRPCACovariance()`, `miaViz::plotJointRPCANetwork()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_multiomics_jrpca_features
+
+# 1. Top loadings in each omic layer
+plotJointRPCALoadings(mae, "JointRPCA", ncomponents = 2, n = 10)
+
+# 2. Correlations between the top features as a heatmap
+plotJointRPCACovariance(mae, "JointRPCA", ntop = 10, correlation = TRUE)
+
+# 3. Correlations as a network
+plotJointRPCANetwork(mae, "JointRPCA", show.label = TRUE)
+```
+
+4. In the heatmap, each cell shows the correlation between two features,
+both within and across the omic layers. Positive values mean that the features
+increase together, and negative values that one increases when the other
+decreases. In the network, the nodes are features and the edges connect
+strongly correlated features. The correlations are not calculated from the
+observed data. They are derived from the Joint-RPCA model and describe how the
+features align in the Joint-RPCA space.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Run MOFA
+
+**Goal:** Learn to prepare the data for MOFA, train the model and visualize
+the results.
+
+1. Load `HintikkaXOData` again and store it in `mae`, so that you start from
+the original data.
+
+2. Agglomerate the microbiota data to the Genus rank. Then add the
+prevalence, and combine the genera with a prevalence of 0.5 or less into
+"Other". Apply the CLR transformation with
+`pseudocount = TRUE`, and then standardize each genus. Store the
+standardized assay under the name `"clr-z"`.
+
+3. Apply the log10 transformation to the `nmr` assay of the metabolites, and
+then standardize each metabolite. Store the standardized assay under the name
+`"log10-z"`.
+
+4. Standardize each biomarker in the `signals` assay, and store the result
+under the name `"z"`.
+
+5. Create a MOFA model with `mofa2()` from the three experiments and the
+assays `clr-z`, `log10-z` and `z`, with three factors (`num_factors = 3`).
+Train the model with `run_mofa()` and `use_basilisk = TRUE`.
+
+6. Visualize the explained variance per factor and omic layer, with the
+layers on the x-axis and the factors on the y-axis. Then, in a separate plot,
+visualize the total variance explained in each layer.
+
+7. Plot the samples in the space of the first two factors, and colour them by
+`Diet`.
+
+8. Visualize the ten features with the largest weights on the first two
+factors for the microbiota. Then make the same plot for the metabolites.
+
+9. Compare the sample plot and the top features to those from Joint-RPCA in
+Exercises 3 and 4. Why might the two methods give different results?
+
+**Useful functions:** `mia::agglomerateByRank()`, `mia::addPrevalence()`,
+`mia::subsetBy()`,
+`mia::transformAssay()`, `MOFA2::mofa2()`, `MOFA2::run_mofa()`,
 `MOFA2::plot_variance_explained()`, `MOFA2::plot_factors()`,
 `MOFA2::plot_top_weights()`
 
-**Exercise 3: Comparing the methods**
+::: {.callout-note collapse="true"}
+## Solution
 
-1. Compare the sample ordinations from Joint-RPCA and MOFA. Do the methods
-separate the samples similarly?
+```{r}
+#| label: exercise_multiomics_mofa
+#| message: false
+#| warning: false
+#| results: hide
 
-2. Compare the top features. Which features are identified by both methods,
-and which by only one?
+library(MOFA2)
 
-3. Joint-RPCA and MOFA rely on different transformations and assumptions.
-Which properties of your data could explain the differences between the
-results?
+# 1. Load the original data
+data("HintikkaXOData", package = "mia")
+mae <- HintikkaXOData
 
-4. If you completed the exercises in [@sec-cross-correlation], do the
-co-varying features also show correlation in the cross-association analysis?
+# 2. Microbiota: prevalent genera, CLR and standardization
+mae[["microbiota"]] <- agglomerateByRank(
+    mae[["microbiota"]],
+    rank = "Genus"
+)
+mae[["microbiota"]] <- addPrevalence(mae[["microbiota"]])
+mae[["microbiota"]] <- subsetBy(
+    mae[["microbiota"]],
+    rows = prevalence > 0.5,
+    collapse = TRUE
+)
+mae[["microbiota"]] <- transformAssay(
+    mae[["microbiota"]],
+    method = "clr",
+    pseudocount = TRUE
+)
+mae[["microbiota"]] <- transformAssay(
+    mae[["microbiota"]],
+    assay.type = "clr",
+    method = "standardize",
+    MARGIN = "rows",
+    name = "clr-z"
+)
 
-Useful functions:
+# 3. Metabolites: log10 and standardization
+mae[["metabolites"]] <- transformAssay(
+    mae[["metabolites"]],
+    assay.type = "nmr",
+    method = "log10"
+)
+mae[["metabolites"]] <- transformAssay(
+    mae[["metabolites"]],
+    assay.type = "log10",
+    method = "standardize",
+    MARGIN = "rows",
+    name = "log10-z"
+)
 
-`mia::getCrossAssociation()`, `ComplexHeatmap::Heatmap()`, `base::intersect()`
+# 4. Biomarkers: standardization
+mae[["biomarkers"]] <- transformAssay(
+    mae[["biomarkers"]],
+    assay.type = "signals",
+    method = "standardize",
+    MARGIN = "rows",
+    name = "z"
+)
 
+# 5. Create and train the MOFA model
+model <- mofa2(
+    mae,
+    experiments = c("microbiota", "metabolites", "biomarkers"),
+    assays = c("clr-z", "log10-z", "z"),
+    num_factors = 3
+)
+model <- run_mofa(model, use_basilisk = TRUE)
+```
+
+```{r}
+#| label: exercise_multiomics_mofa_plots
+#| warning: false
+
+# 6. Explained variance per factor and layer, and in total
+plot_list <- plot_variance_explained(
+    model,
+    x = "view", y = "factor",
+    plot_total = TRUE
+)
+plot_list[[1]]
+plot_list[[2]]
+
+# 7. Samples coloured by diet
+plot_factors(model, factors = c(1, 2), color_by = "Diet")
+
+# 8. Top weights for the microbiota and the metabolites
+plot_top_weights(model, view = "microbiota", factors = c(1, 2), nfeatures = 10)
+plot_top_weights(model, view = "metabolites", factors = c(1, 2), nfeatures = 10)
+```
+
+9. Compare whether the diet groups are separated along the first components
+or factors in both methods, and which features have the largest loadings or
+weights in both. Note that the sign and order of the components can differ
+between the methods. The methods can give different results, because they
+use different transformations and assumptions. Joint-RPCA uses the rclr
+transformation, treats zeros as missing values and is designed for sparse and
+compositional data. MOFA assumes normally distributed data, and the
+microbiota data was CLR-transformed with a pseudocount and standardized. Also
+the filtering of the genera differed between the methods.
 :::
+::::

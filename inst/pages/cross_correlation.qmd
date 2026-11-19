@@ -1,15 +1,6 @@
 # Cross-association {#sec-cross-correlation}
 
 ```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
-```{r}
 #| label: load_pkg
 
 library(mia)
@@ -40,13 +31,18 @@ transformation.
 ```{r}
 #| label: cross-association2
 # Agglomerate microbiome data at family level
-mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family", na.rm = TRUE)
+mae[[1]] <- agglomerateByRank(mae[[1]], rank = "Family", na.rm = TRUE)
+mae[[1]] <- addPrevalence(mae[[1]])
+mae[[1]] <- subsetBy(
+    mae[[1]],
+    rows = prevalence > 0.5, collapse = TRUE
+)
 # Does log10 transform for microbiome data
 mae[[1]] <- transformAssay(mae[[1]], method = "log10", pseudocount = TRUE)
 ```
 
 Next we can perform a cross-association analysis. Let us analyze if
-individual bacteria genera are correlated with concentrations of
+individual bacterial families are correlated with concentrations of
 individual metabolites. This helps to answer the following question: "If
 bacterium X is present, is the concentration of metabolite Y lower or higher"?
 
@@ -69,11 +65,12 @@ res <- getCrossAssociation(
 ```
 
 Next, we create a heatmap depicting all cross-correlations between bacterial
-genera and metabolite concentrations (@fig-cross-association-heatmap).
+families and metabolite concentrations (@fig-cross-association-heatmap).
 
 ```{r}
 #| label: fig-cross-association-heatmap
 #| fig-cap: "Heatmap of Spearman correlations between log10-transformed abundances of prevalent bacterial families (rows) and NMR metabolite concentrations (columns) in the Hintikka et al. (2021) data. Colour shows the correlation and X marks correlations with adjusted p-value below 0.05."
+#| fig-alt: "Clustered heatmap with bacterial families as rows and metabolites as columns, filled by Spearman correlation on a colour scale, with an X in the cells of significant correlations."
 #| fig-width: 10
 #| fig-height: 8
 
@@ -111,34 +108,205 @@ prior knowledge, such as functional annotations [@Bastiaanssen2023anansi].
 OmniCorr, on the other hand, first clusters co-varying features into modules
 and then correlates these modules across omic layers [@Gupta2026].
 
-::: {.callout-tip icon=false}
-## Exercises
+## Exercises {#sec-cross-correlation-exercises}
 
-**Goal:** After completing these exercises, you should be able to calculate
-associations between two omics.
+We use the [`HintikkaXOData`](data_sets.qmd#sec-data-hintikka) dataset. Unlike
+in this chapter, we compare the microbiota with the biomarkers.
 
-**Exercise 1: Cross-association**
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-1. Load any of the example datasets in `MultiAssayExperiment` format mentioned
-in [@sec-example-data].
+:::: {.callout-tip icon="false"}
+## Exercise 1: Cross-association and multiple testing
 
-2. Agglomerate microbiota data to prevalent phyla.
+**Goal:** Understand what cross-association analysis tells and why the
+number of tests matters.
 
-3. Apply the CLR transformation to microbiota data.
+Answer the following questions without writing any code. The beginning and
+the end of this chapter will help you.
 
-4. Apply the relative and log10 transformations to the other omic data.
+1. What kind of question can be answered with cross-association analysis
+between bacterial taxa and metabolites?
 
-5. Calculate correlations between the different omics data.
+2. Suppose that the microbiota data has 38 families and the biomarker data
+has 39 biomarkers. How many correlations are tested if every family is
+tested against every biomarker?
 
-6. Visualize the results with a heatmap.
+3. Why does a large number of tests cause a problem, and how is it taken
+into account?
 
-7. Are there taxonomic features that associate with the features of the other
-omic? Do a literature search for the function of the features that show associations.
-Do the associations make sense in light of the literature?
+::: {.callout-note collapse="true"}
+## Solution
 
-Useful functions:
+1. For example: "If bacterium X is abundant, is the concentration of
+metabolite Y lower or higher?" Cross-association analysis tells the strength
+and direction of the association between each feature of one omic and each
+feature of the other omic.
 
-`utils::data()`, `mia::agglomerateByPrevalence`, `mia::transformAssay()`,
-`mia::getCrossAssociation()`, `ComplexHeatmap::Heatmap()`
+2. 38 x 39 = 1482 correlations.
 
+3. When many tests are done, some of them are significant just by chance.
+Therefore, the p-values are adjusted for multiple testing, and the adjusted
+p-values (`p_adj`) are used to decide which associations are significant.
+Another approach is to test only biologically plausible pairs of features,
+as is done in the `anansi` package.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Prepare the data
+
+**Goal:** Learn to explore a `MultiAssayExperiment` and to prepare the
+microbiota data for cross-association analysis.
+
+1. Load the `HintikkaXOData` dataset from the `mia` package and store it in a
+variable called `mae`.
+
+2. Show the experiments of `mae`. Check the names of the assays in the
+`microbiota` and `biomarkers` experiments.
+
+3. Agglomerate the `microbiota` experiment to the Family rank with
+`na.rm = TRUE`. Then add the prevalence, and combine the families with a
+prevalence of 0.5 or less into "Other". How many families are left
+(including "Other")?
+
+4. Apply the log10 transformation to the `counts` assay of the `microbiota`
+experiment with `pseudocount = TRUE`.
+
+**Useful functions:** `data()`, `MultiAssayExperiment::experiments()`,
+`SummarizedExperiment::assayNames()`, `mia::agglomerateByRank()`,
+`mia::addPrevalence()`, `mia::subsetBy()`,
+`nrow()`, `mia::transformAssay()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_cross_correlation_prepare
+
+library(mia)
+
+# 1. Load the data
+data("HintikkaXOData", package = "mia")
+mae <- HintikkaXOData
+
+# 2. Experiments and their assays
+experiments(mae)
+assayNames(mae[["microbiota"]])
+assayNames(mae[["biomarkers"]])
+
+# 3. Agglomerate microbiota to prevalent families
+mae[["microbiota"]] <- agglomerateByRank(
+    mae[["microbiota"]],
+    rank = "Family", na.rm = TRUE
+)
+mae[["microbiota"]] <- addPrevalence(mae[["microbiota"]])
+mae[["microbiota"]] <- subsetBy(
+    mae[["microbiota"]],
+    rows = prevalence > 0.5, collapse = TRUE
+)
+nrow(mae[["microbiota"]])
+
+# 4. log10 transformation
+mae[["microbiota"]] <- transformAssay(
+    mae[["microbiota"]],
+    assay.type = "counts", method = "log10", pseudocount = TRUE
+)
+```
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Calculate cross-associations
+
+**Goal:** Learn to calculate correlations between the features of two
+experiments.
+
+1. Calculate the Spearman correlations between the families in the `log10`
+assay of the `microbiota` experiment and the biomarkers in the `signals`
+assay of the `biomarkers` experiment with `getCrossAssociation()`. Test the
+significance of the correlations, keep all results
+(`p.adj.threshold = NULL`, `cor.threshold = NULL`), return them as matrices,
+sort them (`sort = TRUE`) and set `show.warnings = FALSE`. Store the result
+in `res`.
+
+2. Check the dimensions of the correlation matrix `res$cor`. What do the rows
+and columns represent?
+
+3. Count how many correlations have an adjusted p-value below 0.05.
+
+**Useful functions:** `mia::getCrossAssociation()`, `dim()`, `sum()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_cross_correlation_calculate
+
+# 1. Cross-associations between microbiota and biomarkers
+res <- getCrossAssociation(
+    mae,
+    experiment1 = "microbiota",
+    experiment2 = "biomarkers",
+    assay.type1 = "log10",
+    assay.type2 = "signals",
+    method = "spearman",
+    test.signif = TRUE,
+    p.adj.threshold = NULL,
+    cor.threshold = NULL,
+    mode = "matrix",
+    sort = TRUE,
+    show.warnings = FALSE
+)
+
+# 2. Dimensions of the correlation matrix
+dim(res$cor)
+
+# 3. Number of correlations with adjusted p-value below 0.05
+sum(res$p_adj < 0.05, na.rm = TRUE)
+```
+
+2. The rows are the families of the first experiment (`microbiota`) and the
+columns are the biomarkers of the second experiment (`biomarkers`). Each cell
+is the correlation between one family and one biomarker.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Visualize cross-associations
+
+**Goal:** Learn to visualize cross-associations with a heatmap.
+
+1. Visualize the correlation matrix `res$cor` from Exercise 3 with a heatmap.
+Rotate the column names by 45 degrees (`column_names_rot = 45`).
+
+2. How do you read the heatmap? What does a positive and a negative
+correlation between a family and a biomarker mean?
+
+**Useful functions:** `ComplexHeatmap::Heatmap()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_cross_correlation_heatmap
+#| fig-width: 10
+#| fig-height: 8
+
+library(ComplexHeatmap)
+
+# 1. Heatmap of the correlations
+Heatmap(res$cor, column_names_rot = 45)
+```
+
+2. Each row is a family and each column a biomarker, and the colour of a cell
+shows the Spearman correlation between them. A positive correlation means
+that in rats with a higher abundance of the family, the biomarker tends to
+have higher values. A negative correlation means that the biomarker tends to
+have lower values. Blocks of cells with the same colour show groups of
+families and biomarkers that are associated in a similar way. To see which
+correlations are significant, check the adjusted p-values in `res$p_adj`.
+A correlation does not tell whether the bacteria affect the biomarker, or the
+other way around.
+:::
+::::

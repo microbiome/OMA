@@ -1,14 +1,5 @@
 # Transformation {#sec-assay-transform}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 Data transformations are common in (microbial) ecology [@Legendre2001].
 They are used to mitigate technical biases in the data, to obtain more
 interpretable values, to enhance the comparability of samples/features or
@@ -30,10 +21,58 @@ taxa per sample are thus not comparable between samples.
 
 This **Compositionality** means that a change in the absolute abundance of
 one taxon will lead to apparent variations in the relative abundances of other
-taxa in the same sample. If neglected, such properties may cause significant
-bias in the results of statistical tests. The above-mentioned transformation
-processes are one method developed to overcome these issues by making taxon
-abundances comparable across samples.
+taxa in the same sample (@fig-compositionality). If neglected, such
+properties may cause significant bias in the results of statistical tests.
+The above-mentioned transformation processes are one method developed to
+overcome these issues by making taxon abundances comparable across samples.
+
+```{r}
+#| label: fig-compositionality
+#| fig-cap: "Compositionality. The absolute abundance of taxon A doubles while taxa B and C do not change (left). In relative abundances, B and C appear to decrease (right), because the proportions in each sample must sum to one."
+#| fig-alt: "Two panels of stacked bars for a before and an after sample made of taxa A, B and C. In the absolute panel, A grows from 40 to 80 while B and C stay at 30; in the relative panel, A grows from 40% to 57% and B and C shrink from 30% to 21%."
+#| fig-width: 6
+#| fig-height: 3.5
+#| echo: false
+library(ggplot2)
+# Toy data: taxon A doubles from "Before" to "After", B and C do not change.
+# Run in local() so that the helper objects do not leak into later chunks.
+local({
+    df <- data.frame(
+        sample = factor(rep(c("Before", "After"), each = 3),
+            levels = c("Before", "After")
+        ),
+        taxon = factor(rep(c("A", "B", "C"), 2), levels = c("C", "B", "A")),
+        count = c(40, 30, 30, 80, 30, 30)
+    )
+    rel <- ave(df$count, df$sample, FUN = function(x) x / sum(x))
+    df <- rbind(
+        data.frame(df,
+            scale = "Absolute abundance", value = df$count,
+            label = df$count
+        ),
+        data.frame(df,
+            scale = "Relative abundance", value = rel,
+            label = paste0(round(100 * rel), "%")
+        )
+    )
+    ggplot(df, aes(x = sample, y = value, fill = taxon)) +
+        geom_col(width = 0.6, colour = "white") +
+        geom_text(aes(label = label),
+            position = position_stack(vjust = 0.5), size = 3.5
+        ) +
+        facet_wrap(~scale, scales = "free_y") +
+        scale_fill_manual(
+            values = c(A = "#E69F00", B = "#56B4E9", C = "#009E73"),
+            breaks = c("A", "B", "C"), name = "Taxon"
+        ) +
+        labs(x = NULL, y = NULL) +
+        theme_minimal(base_size = 13) +
+        theme(
+            axis.text.y = element_blank(), panel.grid = element_blank(),
+            strip.text = element_text(face = "bold")
+        )
+})
+```
 
 In addition to this compositionality, other special characteristics of
 microbiome sequencing data are high variability and zero-inflation.
@@ -141,8 +180,8 @@ fundamentally change the data distribution [@Costea2014].
 `Pseudocount` should be chosen consistently across all normalization
 methods being compared, for example, by setting it to a value smaller
 than the minimum abundance value before transformation. Some tools, like
-`r BiocStyle::Biocpkg("ANCOMBC")`, take into account the effect of the
-`pseudocount` by performing sensitivity tests using multiple pseudocount
+`r BiocStyle::Biocpkg("ANCOMBC")` [@ancombc2020], take into account the effect
+of the `pseudocount` by performing sensitivity tests using multiple pseudocount
 values. See [@sec-differential-abundance].
 :::
 
@@ -254,6 +293,40 @@ this new dataset is stored into `altExp`.
 altExp(tse, "philr")
 ```
 
+## Choosing a transformation {#sec-choose-transformation}
+
+The most suitable transformation depends on the research question and the
+analysis method, and there is no single best choice. The table below lists
+common choices that are supported by benchmarking studies or widely used in
+the field, with links to the chapters where they are applied. They are
+reasonable starting points rather than strict rules.
+
+| Analysis | Common choice | Rationale |
+|:---------|:--------------|:----------|
+| Alpha diversity | Counts, rarefied if sequencing depths differ (@sec-rarefaction-alpha); relative abundances when counts are not available | Richness depends on sequencing depth [@Schloss2024rarefaction1], and richness estimators such as Chao1 need counts. Shannon and Simpson indices depend only on the proportions, so they give the same result with relative abundances, such as the profiles from MetaPhlAn [@Beghini2021], which are commonly used and do not include counts. |
+| Beta diversity and ordination | Relative abundances with Bray-Curtis; clr or rclr with Euclidean distance (Aitchison distance); presence/absence with Jaccard | Each dissimilarity assumes a specific transformation; see the table in @sec-community-similarity. |
+| Differential abundance | Relative abundances, analyzed with a non-parametric test or, after log transformation, with linear regression | This has performed well in benchmarks on real data [@Nearing2022; @Yang2022; @Pelto2025; @Gamboa-Tuz2025]; see @sec-daa-recommendations. |
+| Correlation and cross-association, e.g. taxa vs. metabolites | clr, or rclr when there are many zeros | Log-ratios reduce the spurious correlations caused by compositionality [@Gloor2017]; see @sec-correlation. |
+| Heatmaps | clr, then standardization of each feature (Z-transformation) | Puts features with very different abundances on a comparable scale; see @sec-composition-heatmap. |
+| Supervised machine learning | Relative abundances or presence/absence | Simple transformations often perform as well as or better than compositional ones [@yerke2024; @Giliberti2022; @Karwowska2025]; see the [machine learning chapter](https://microbiome.github.io/OMA-extras/docs/devel/pages/machine_learning.html) in OMA extras. |
+
+The transformation also determines how the values are interpreted:
+
+- **Relative abundance** is the proportion of a feature in a sample, which is
+easy to interpret but depends on the other features in the sample.
+- **clr** is the logarithm of a feature's abundance relative to the geometric
+mean of all features in the sample. A positive value means that the feature is
+more abundant than an average feature in that sample. Because the reference is
+sample-specific, differences between samples are relative rather than absolute
+[@Gloor2017].
+- **rclr** is interpreted like clr, but it is computed from the non-zero values
+only, and zeros are kept as missing values.
+- **Presence/absence** only tells whether a feature was detected, which makes
+it robust to differences in sequencing depth and to noise in the abundances.
+
+For choosing the taxonomic level of the analysis, see
+@sec-choose-rank.
+
 ## Rarefaction {#sec-rarefaction}
 
 The number of taxa we observe in a sample depends strongly on how deeply the
@@ -269,6 +342,7 @@ of reads sampled (@fig-transformation-rarefaction-curve).
 ```{r}
 #| label: fig-transformation-rarefaction-curve
 #| fig-cap: "Rarefaction curves for the GlobalPatterns samples, showing the number of observed taxa as a function of the number of sampled reads. Each line represents one sample."
+#| fig-alt: "Line plot with sample size in reads on the x-axis and number of observed taxa on the y-axis, with one rising curve per sample that levels off at a different height and reaches a different maximum depth."
 library(mia)
 library(vegan)
 
@@ -297,6 +371,7 @@ counts per sample (@fig-transformation-library-size).
 ```{r}
 #| label: fig-transformation-library-size
 #| fig-cap: "Library sizes (total counts per sample) in the GlobalPatterns data set, grouped by sample type."
+#| fig-alt: "Boxplots of total counts per sample (y-axis) for each sample type (x-axis), with the individual samples drawn as points."
 library(scater)
 library(miaViz)
 
@@ -360,8 +435,8 @@ The relative benefits of rarefaction and of robust Aitchison PCA and other
 compositional data analysis methods in controlling for uneven sequencing
 effort are currently being debated [@Schloss2026].
 
-Section [@sec-rarefaction-alpha] demonstrates rarefaction for calculating alpha
-diversity, and Section [@sec-rarefaction_ordination] extends the approach to
+[@sec-rarefaction-alpha] demonstrates rarefaction for calculating alpha
+diversity, and [@sec-rarefaction_ordination] extends the approach to
 beta diversity.
 
 ::: callout-tip
@@ -379,48 +454,322 @@ single-cell analysis.
 
 :::
 
-::: {.callout-tip icon="false"}
-## Exercises
+## Exercises {#sec-assay-transform-exercises}
 
-**Goal:** The goal is to learn how to apply different transformations.
+We use the [`Tengeler2020`](data_sets.qmd#sec-data-tengeler2020) dataset.
 
-**Exercise 1: Transform data**
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-1. Load any of the example data sets described in [@sec-data-sets].
+:::: {.callout-tip icon="false"}
+## Exercise 1: Compositionality and zeros
 
-2. Visualize counts with a histogram. Describe the data distribution.
-Is there a lot of zeros?
+**Goal:** Understand why microbiome data needs to be transformed.
 
-3. Transform the counts assay into relative abundances and store it
-into the `TreeSE` as an assay named `relabund`.
+Imagine the true number of cells of three taxa in two samples. Between the
+samples, only Taxon 1 has changed:
 
-4. Similarly, perform a CLR transformation on the counts assay with a
-`pseudocount` of 1 and add it to the `TreeSE` as a new assay.
+| Taxon   | Sample A | Sample B |
+|---------|---------:|---------:|
+| Taxon 1 | 100      | 300      |
+| Taxon 2 | 100      | 100      |
+| Taxon 3 | 200      | 200      |
 
-5. List the available assays by name.
+Answer the following questions without writing any code. The sections
+"Characteristics of microbiome data to inform data transformations" and
+"Common transformation methods" will help you.
 
-6. Visualize the CLR-transformed data with a histogram. Compare the
-distribution with distribution of counts data.
+1. Calculate the relative abundances of the taxa in both samples.
 
-7. Access the CLR-assay and store it to variable. Select a subset
-of its first 100 features and 10 samples, and print the abundance table.
-Explore the data.
+2. Which taxa have changed in their absolute abundance? Which taxa seem to
+change when you look at the relative abundances? What is this property of the
+data called?
 
-8. Agglomerate the data with `agglomerateByRanks()` then apply transformations
-to the stored alternative experiments created. Use the option
-`altexp = altExpNames(tse)`.
+3. Sequencing gives a number of reads that does not depend on the number of
+cells in the original sample. Why can the raw counts of a taxon not be
+compared directly between samples?
 
-9. If the data has a phylogenetic tree, perform the phILR transformation.
-Where was the transformed data stored? Compare the feature names with original
-data. Why do the names differ?
+4. The clr transformation takes the logarithm of the abundances. Why is this
+a problem with microbiome data, and how can the problem be avoided?
 
-For exercises on rarefaction, see the exercises in [@sec-alpha-diversity]
-and [@sec-community-similarity].
+::: {.callout-note collapse="true"}
+## Solution
 
-Useful functions:
+1. The relative abundance is the count of a taxon divided by the total count
+of the sample. In Sample A, the relative abundances are 100 / 400 = 0.25,
+0.25 and 0.5. In Sample B, they are 300 / 600 = 0.5, 100 / 600 = 0.17 and
+200 / 600 = 0.33.
 
-`utils::data()`, `miaViz::plotHistogram()`, `mia::transformAssay()`,
-`mia::assayNames()`, `SummarizedExperiment::assay()`,
-`mia::agglomerateByRanks()`, `mia::altExp()`, `BiocGenerics::rownames()`
+2. Only Taxon 1 has changed in absolute abundance. However, the relative
+abundances of all three taxa change, because they always sum up to 1. When
+Taxon 1 increases, the proportions of the other taxa must decrease. This is
+called compositionality.
 
+3. The number of reads depends on the sequencing, not on the number of
+microbes in the sample. A taxon can have more reads in one sample just
+because that sample was sequenced more deeply. Transformations such as
+relative abundance or clr make the samples comparable.
+
+4. Microbiome data is zero-inflated: most of the values are often zeros, and
+the logarithm of zero is not defined. A common solution is to add a small
+pseudocount to all values before the transformation. Another solution is the
+robust clr (rclr) transformation, which does not need a pseudocount.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Relative abundance and presence/absence
+
+**Goal:** Learn to transform an assay with `transformAssay()` and to find the
+transformed values.
+
+1. Load the `Tengeler2020` dataset from the `mia` package and store it in a
+variable called `tse`.
+
+2. Transform the `counts` assay into relative abundances.
+
+3. Show the first rows of the `relabundance` assay.
+
+4. Calculate the sum of the relative abundances in each sample, that is, the
+column sums of the `relabundance` assay. What values do you get, and why?
+
+5. Apply the presence/absence (`pa`) transformation to the `counts` assay and
+show the first rows of the `pa` assay. What do the values mean?
+
+6. List the names of all assays in `tse`. Was the original `counts` assay
+kept?
+
+**Useful functions:** `data()`, `mia::transformAssay()`, `assay()`, `head()`,
+`colSums()`, `assayNames()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_transformation_relabundance
+
+library(mia)
+
+# 1. Load the data
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# 2. Relative abundances
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+
+# 3. First rows of the relabundance assay
+assay(tse, "relabundance") |> head()
+
+# 4. Sum of relative abundances in each sample
+colSums(assay(tse, "relabundance")) |> head()
+
+# 5. Presence/absence transformation
+tse <- transformAssay(tse, assay.type = "counts", method = "pa")
+assay(tse, "pa") |> head()
+
+# 6. Assay names
+assayNames(tse)
+```
+
+4. Every sample sums up to 1. The relative abundance transformation divides
+each count by the total count of the sample, so the values are proportions of
+the sample.
+
+5. A value of 1 means that the feature is detected in the sample, and 0 means
+that it is not. The abundances are ignored.
+
+6. Yes. `transformAssay()` adds the transformed values as a new assay and
+keeps the original assays in the object.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Centered log-ratio transformation
+
+**Goal:** Learn to apply the clr transformation and to understand the role of
+the pseudocount.
+
+1. Check whether the `counts` assay contains zeros.
+
+2. Apply the clr transformation to the `counts` assay. Add a pseudocount by
+setting `pseudocount = TRUE`, and name the new assay `"clr"`.
+
+3. Show the first rows of the `clr` assay and compare them with the first rows
+of the `counts` assay. What happened to the zeros?
+
+4. Why should the same pseudocount be used when you compare different
+transformations?
+
+**Useful functions:** `assay()`, `any()`, `mia::transformAssay()`, `head()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_transformation_clr
+
+# 1. Check for zeros
+any(assay(tse, "counts") == 0)
+
+# 2. clr transformation with a pseudocount
+tse <- transformAssay(
+    tse,
+    assay.type = "counts",
+    method = "clr",
+    pseudocount = TRUE,
+    name = "clr"
+)
+
+# 3. Compare clr values with counts
+assay(tse, "clr") |> head()
+assay(tse, "counts") |> head()
+```
+
+3. The pseudocount is added to all values before the logarithm is taken, so
+the zeros become small positive values and get a clr value. The clr values
+are on a logarithmic scale and centered within each sample: a positive value
+means that the feature is more abundant than the average feature of the
+sample (on the log scale), and a negative value means that it is less
+abundant.
+
+4. The logarithm is a nonlinear operation, so the size of the pseudocount can
+change the distribution of the transformed values considerably. If different
+pseudocounts were used, the differences between the results could be caused
+by the pseudocounts and not by the transformations.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Phylogenetic transformation
+
+**Goal:** Learn to apply the phILR transformation and to find where the
+result is stored.
+
+1. Apply the phILR transformation to `tse`. Use `MARGIN = 1L` and add a
+pseudocount by setting `pseudocount = TRUE`.
+
+2. List the assay names and the alternative experiment names of `tse`. Where
+was the transformed data stored?
+
+3. Retrieve the phILR-transformed data from the alternative experiments.
+Compare its number of rows and its first row names with those of `tse`. Why
+do they differ?
+
+**Useful functions:** `mia::transformAssay()`, `assayNames()`,
+`altExpNames()`, `altExp()`, `nrow()`, `rownames()`, `head()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_transformation_philr
+#| warning: false
+
+# 1. phILR transformation
+tse <- transformAssay(tse, method = "philr", MARGIN = 1L, pseudocount = TRUE)
+
+# 2. Assays and alternative experiments
+assayNames(tse)
+altExpNames(tse)
+
+# 3. Compare the features
+tse_philr <- altExp(tse, "philr")
+nrow(tse)
+nrow(tse_philr)
+rownames(tse) |> head()
+rownames(tse_philr) |> head()
+```
+
+2. The result was not added as an assay but as an alternative experiment
+called `"philr"`.
+
+3. In the phILR-transformed data, the rows represent the internal nodes
+(balances) of the phylogenetic tree, not the original features. The rows no
+longer match the features of `tse`, so the data cannot be stored as an assay
+of `tse`.
+Alternative experiments can have different features than the main
+experiment, as long as the samples are the same.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Sequencing depth and rarefaction
+
+**Goal:** Learn to examine variation in sequencing depth and to rarefy the
+data.
+
+1. Draw rarefaction curves for the samples from the `counts` assay. Use a
+step size of 1000 reads.
+
+2. Calculate the library size of each sample and add it to `colData`.
+
+3. Visualize the library sizes as boxplots, with one box for each group in
+`patient_status`.
+
+4. Calculate how many times larger the largest library is than the smallest
+library.
+
+5. Rarefy the `counts` assay to the smallest library size, which is the
+default. Store the result in a variable called `tse_rarefied`, and list its
+assay names.
+
+6. Calculate the library sizes of the rarefied assay. What do you notice?
+
+7. How do you read a rarefaction curve? What does it mean if a curve has not
+levelled off?
+
+8. What is the main criticism of rarefaction, and how can it be reduced when
+calculating diversity metrics?
+
+**Useful functions:** `assay()`, `t()`, `vegan::rarecurve()`,
+`mia::addQC()`, `miaViz::plotBoxplot()`, `max()`, `min()`,
+`mia::rarefyAssay()`, `assayNames()`, `colSums()`, `head()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_transformation_rarefaction
+
+library(vegan)
+library(miaViz)
+
+# 1. Rarefaction curves
+mat <- tse |>
+    assay("counts") |>
+    t()
+rarecurve(mat, step = 1000)
+
+# 2. Library sizes
+tse <- addQC(tse, assay.type = "counts")
+
+# 3. Library sizes by group
+plotBoxplot(tse, col.var = "total", x = "patient_status")
+
+# 4. Ratio between the largest and smallest library
+max(tse$total) / min(tse$total)
+
+# 5. Rarefy the counts
+tse_rarefied <- rarefyAssay(tse, assay.type = "counts")
+assayNames(tse_rarefied)
+
+# 6. Library sizes after rarefaction
+colSums(assay(tse_rarefied, "subsampled")) |> head()
+```
+
+6. The rarefied values are stored in the `subsampled` assay. Every sample
+now has the same number of reads, which equals the smallest library size,
+because the reads of each sample were randomly subsampled to that depth.
+
+7. A rarefaction curve shows how many features are observed when an
+increasing number of reads is sampled. If a curve levels off, sequencing
+more reads would reveal only few new features, so the sample was sequenced
+deeply enough. If a curve is still rising at its end, the observed richness of
+the sample is underestimated because of limited sequencing depth.
+
+8. Rarefaction discards reads, so part of the data is not used. When
+rarefaction is repeated many times and the diversity metric is averaged over
+the iterations, the estimate becomes stable and less data is effectively
+lost.
+:::
+::::

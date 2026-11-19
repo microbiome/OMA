@@ -1,14 +1,5 @@
 # Exploration & quality control {#sec-quality-control}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 This chapter focuses on the quality control (QC) and exploration of microbiome
 data and establishes commonly used descriptive summaries. Familiarizing
 yourself with the peculiarities of a given dataset is essential for data
@@ -29,7 +20,8 @@ illustrated by a common expression in computer science:
 
 > *"Garbage in, garbage out"*
 
-Below we download the baboon gut data set ([@sec-data-baboongut]) from
+Below we download the baboon gut data set [@Grieneisen2021]
+([@sec-data-baboongut]) from
 `r BiocStyle::Biocpkg("microbiomeDataSets")`.
 
 ```{r}
@@ -43,9 +35,9 @@ tse <- baboongut()
 
 When you first get your hands dirty with the data, the first step is to
 summarize it and get a sense of what kind of data you're dealing with. Printing
-the `r BiocStyle::Biocpkg("TreeSummarizedExperiment")` object already provides
-useful information about the dataset's dimensions, such as the number of
-samples and taxonomic features.
+the `r BiocStyle::Biocpkg("TreeSummarizedExperiment")` object [@Huang2021]
+already provides useful information about the dataset's dimensions, such as
+the number of samples and taxonomic features.
 
 ```{r}
 #| label: explore1
@@ -184,16 +176,17 @@ tse <- addQC(tse)
 ```
 
 The results are stored in `colData`. We can then visualize these results with a
-violin plot and histogram (@fig-qc-library-size).
+box plot and histogram (@fig-qc-library-size).
 
 ```{r}
 #| label: fig-qc-library-size
-#| fig-cap: "Library sizes (total counts per sample) in the baboon gut data. Left: violin plot of library size by sex, with points coloured by age. Right: histogram of library sizes across samples."
+#| fig-cap: "Library sizes (total counts per sample) in the baboon gut data. Left: box plot of library size by sex. Right: histogram of library sizes across samples."
+#| fig-alt: "Two panels. Left: box plots of total counts per sample, one for each sex. Right: histogram of total counts across samples, which is skewed to the right."
 
 library(miaViz)
 library(patchwork)
 
-p1 <- plotColData(tse, x = "sex", y = "total", colour_by = "age")
+p1 <- plotBoxplot(tse, col.var = "total", x = "sex", add.points = FALSE)
 p2 <- plotHistogram(tse, col.var = "total")
 
 p1 + p2
@@ -217,8 +210,9 @@ Samples might be contaminated with exogenous sequences. The impact of each
 contaminant can be estimated based on its frequencies and concentrations across
 the samples.
 
-The following `r BiocStyle::Biocpkg("decontam")` functions are based on
-@davis2018simple and support such functionality:
+The following `r BiocStyle::Biocpkg("mia")` functions wrap the
+`r BiocStyle::Biocpkg("decontam")` methods [@davis2018simple] for
+`SummarizedExperiment` objects and support such functionality:
 
 - `isContaminant()`, `isNotContaminant()`
 - `addContaminantQC()`, `addNotContaminantQC()`
@@ -277,7 +271,7 @@ rowData(tse) |>
 The method performs statistical tests to identify contaminants. By default, it
 uses a 0.1 probability threshold for identifying contaminants, which can be
 adjusted as needed. In this case,
-`r (sum(rowData(tse)[["contaminant_contaminant"]])/nrow(tse))*100`% of
+`r round(sum(rowData(tse)[["contaminant"]])/nrow(tse)*100, 1)`% of
 sequences were detected to be contaminants. We can then filter out these
 features from the data.
 
@@ -324,7 +318,7 @@ Microbiome counts data is rarely normally distributed (see
 [@sec-stat-challenges]). However, many common statistical tests assume
 normality and using them while violating the assumptions might lead to
 incorrect conclusions. While several tests for normality exist — such as
-Shapiro-Wilk test — they do not replace visual observation.
+Shapiro-Wilk test [@Shapiro1965] — they do not replace visual observation.
 
 The `plotHistogram()` function provides an easy way to visualize the counts
 distribution with a histogram (@fig-qc-counts-histogram).
@@ -332,6 +326,7 @@ distribution with a histogram (@fig-qc-counts-histogram).
 ```{r}
 #| label: fig-qc-counts-histogram
 #| fig-cap: "Histogram of all values in the counts assay of the baboon gut data, showing the zero-inflated, right-skewed distribution of microbiome counts."
+#| fig-alt: "Histogram of count values with a very tall bar at zero and a long, thin tail towards large counts."
 
 plotHistogram(tse, assay.type = "counts")
 ```
@@ -344,6 +339,7 @@ zeroes. The same method can also be used to visualize continuous variables from
 ```{r}
 #| label: fig-qc-age-sex
 #| fig-cap: "Distribution of sample metadata in the baboon gut data. Left: histogram of age. Right: bar plot of the number of samples per sex."
+#| fig-alt: "Two panels. Left: histogram of sample age. Right: bar chart with one bar per sex showing the number of samples."
 
 p1 <- plotHistogram(tse, col.var = "age") +
     labs(x = "Age")
@@ -367,6 +363,7 @@ plot based on relative abundance data, similar to the one presented by
 ```{r}
 #| label: fig-qc-abundance-jitter
 #| fig-cap: "Jitter plot of the relative abundances of the 40 most abundant taxonomic features in the baboon gut data. The x-axis shows relative abundance on a log scale and each point is one sample."
+#| fig-alt: "Jitter plot with the 40 most abundant taxonomic features as rows on the y-axis and relative abundance on a logarithmic x-axis in percent. Each faint point is one sample's abundance of that feature."
 
 # Add relative abundances
 tse <- transformAssay(tse, method = "relabundance")
@@ -388,6 +385,7 @@ colors (@fig-qc-abundance-density):
 ```{r}
 #| label: fig-qc-abundance-density
 #| fig-cap: "Density plot of the relative abundances of the five most abundant taxonomic features on a log-scaled x-axis, with colours indicating sex."
+#| fig-alt: "Density curves of relative abundance on a logarithmic x-axis for each of the five most abundant taxonomic features, with separate curves coloured by sex."
 
 plotAbundanceDensity(
     tse,
@@ -400,13 +398,14 @@ plotAbundanceDensity(
 ```
 
 Alternatively, the `plotExpression()` function from the
-`r BiocStyle::Biocpkg("scater")` package can be used to visualize taxonomic
-features with a violin plot. Below, we visualize top-10 features, selected
-based on their mean abundance (@fig-qc-abundance-violin).
+`r BiocStyle::Biocpkg("scater")` package [@McCarthy2017] can be used to
+visualize taxonomic features with a violin plot. Below, we visualize top-10
+features, selected based on their mean abundance (@fig-qc-abundance-violin).
 
 ```{r}
 #| label: fig-qc-abundance-violin
 #| fig-cap: "Violin plots of the relative abundances (log scale) of the ten taxonomic features with the highest mean abundance, shown separately for each sex."
+#| fig-alt: "Ten violin plots, one per taxonomic feature, each comparing the two sexes on the x-axis with relative abundance on a logarithmic y-axis."
 
 # Select top features
 top <- getTop(tse, top = 10L, method = "mean")
@@ -434,12 +433,13 @@ the majority of the samples, or identify rare microbes, which may be
 We can plot a histogram of the prevalence of features. This would tell us
 whether there are many features present in most of the samples or if there are
 mostly rare taxonomic features. The population prevalence (frequency) at a
-0.01% relative abundance threshold (`detection = 0.1/100` and
+0.1% relative abundance threshold (`detection = 0.1/100` and
 `as.relative = TRUE`) can look like @fig-qc-prevalence-histogram.
 
 ```{r}
 #| label: fig-qc-prevalence-histogram
 #| fig-cap: "Histogram of feature prevalence, i.e. the proportion of samples in which each taxonomic feature exceeds a 0.1% relative abundance detection threshold."
+#| fig-alt: "Histogram of prevalence values from 0 to 1 across taxonomic features. Most features fall at low prevalence, meaning they are detected in a minority of samples."
 
 # Add prevalence of features
 tse <- addPrevalence(tse, detection = 0.1 / 100, as.relative = TRUE)
@@ -456,6 +456,7 @@ visualizations generated with the `plotPrevalentAbundance()` or
 ```{r}
 #| label: fig-qc-prevalent-abundance
 #| fig-cap: "Prevalence and abundance of taxonomic features. Left: prevalence plotted against relative abundance for each feature. Right: prevalence of each feature across detection thresholds, with feature names on the y-axis omitted."
+#| fig-alt: "Two panels. Left: scatter plot of features with relative abundance on the x-axis and prevalence on the y-axis, where most points lie at low abundance. Right: a dense tile plot with detection thresholds on the x-axis and the features on the y-axis, shaded by prevalence."
 
 p1 <- plotPrevalentAbundance(tse, as.relative = TRUE)
 
@@ -481,6 +482,7 @@ microbiome datasets, and can be further visualized as follows
 ```{r}
 #| label: fig-qc-prevalence-abundance
 #| fig-cap: "Number of taxonomic features (N) that exceed each relative abundance detection threshold (x-axis), shown as one line per prevalence level (colours)."
+#| fig-alt: "Line plot with relative abundance detection thresholds on the x-axis and the number of taxonomic features on the y-axis, one line per prevalence level coloured on a purple-to-yellow scale. The number of features drops as the detection threshold increases."
 
 plotPrevalence(tse, as.relative = TRUE)
 ```
@@ -498,6 +500,7 @@ can then visualize this distribution again with a histogram
 ```{r}
 #| label: fig-qc-core-abundance
 #| fig-cap: "Histogram of the proportion of each sample made up by core taxonomic features, defined with 50% prevalence and 0.1% detection thresholds."
+#| fig-alt: "Histogram of the proportion of each sample made up by core taxonomic features, with the proportion on the x-axis and the number of samples on the y-axis."
 
 # Calculate the proportion of core taxa
 tse <- addPrevalentAbundance(tse, prevalence = 50 / 100, detection = 0.1 / 100)
@@ -506,8 +509,10 @@ tse <- addPrevalentAbundance(tse, prevalence = 50 / 100, detection = 0.1 / 100)
 plotHistogram(tse, col.var = "prevalent_abundance")
 ```
 
-In most of the samples, the core taxonomic features represent over 3/4 of
-species. However, there are some samples where this proportion is much lower.
+The histogram shows how many samples have a given proportion of core
+features. A value close to 1 means that the sample consists mostly of core
+features, while a small value means that most of the sample consists of
+features that are not common in the dataset.
 
 ## Collinearity
 
@@ -520,51 +525,396 @@ as reduced interpretability, overfitting and incorrect estimations.
 Collinearity of variables can be assessed, for instance, with correlation
 heatmaps (see [@sec-correlation]) or with scatter plots.
 
-::: {.callout-tip icon="false"}
-## Exercises
+## Batch effects {#sec-batch-effects}
 
-**Goal:** The goal is to learn relevant functions in quality control and
-initial exploration of the data.
+Batch effects are technical differences between groups of samples that were
+processed differently, for instance in different sequencing runs,
+laboratories, extraction kits or studies. They can be as large as the
+biological differences of interest and, if the batches are confounded with
+the groups being compared, they can lead to false conclusions. Batch effects
+in microbiome data, and methods to detect and correct them, are reviewed by
+@Wang2020batch and, as part of data preprocessing, by @Zhou2023.
 
-**Exercise 1: QC and exploration**
+**Design.** Batch effects are best handled in the study design. If samples
+from all groups are distributed across batches, the batch can be accounted for
+in the analysis. If each batch contains only one group, the batch and group
+effects cannot be separated by any method.
 
-1. Load any of the example data sets described in [@sec-data-sets].
+**Detection.** Batch effects can be explored by colouring an ordination by
+batch (see [@sec-unsupervised-ordination]), and their size can be estimated,
+for instance, with PERMANOVA that includes batch as a variable (see
+[@sec-permanova]). Technical controls, such as mock communities or samples
+sequenced in several batches, make this easier.
 
-2. Summarize the counts with histogram.
+**Accounting for batch.** Often the simplest approach is to include the batch
+as a covariate in the statistical model, for instance in differential
+abundance analysis (see [@sec-daa-cov]) or in PERMANOVA (see
+[@sec-permanova]). This keeps the original data unchanged.
 
-3. Add prevalence of taxonomic features to `rowData`.
+**Correcting the data.** When the batch-corrected data itself is needed, for
+example for visualization or for methods that cannot include covariates,
+several Bioconductor packages are available. They differ in whether they were
+designed for microbiome data and in how directly they work with
+`TreeSummarizedExperiment` (`TreeSE`) data.
 
-4. Visualize the prevalence distribution with histogram. Does the data include
-many prevalent taxonomic features or are they found only in a small part of the
-samples?
+*Microbiome-specific tools:*
 
-5. Add library sizes to `colData`.
+- `r BiocStyle::Biocpkg("PLSDAbatch")` corrects batch effects with a
+multivariate framework based on partial least squares discriminant analysis
+[@Wang2023]. Its functions take an abundance matrix, which can be extracted
+from a `TreeSE` with `assay()`. The package provides its example data as
+`TreeSE`.
+- `r BiocStyle::Biocpkg("MMUPHin")` adjusts for batch or study effects,
+especially in meta-analyses of several studies [@Ma2022]. It takes an
+abundance matrix and a data frame of sample metadata, which can be extracted
+from a `TreeSE` with `assay()` and `colData()`. `TreeSE` is not supported
+directly.
 
-6. Visualize the library size distribution with histogram. Does the sampling
-depth differ a lot?
+*General-purpose tools:*
 
-7. Choose one categorical variable from `colData` (for example, `sex`) and
-visualize its value counts with `plotBarplot()`.
+- `r BiocStyle::Biocpkg("batchelor")` was developed for single-cell data. It
+accepts `TreeSE` directly, because `TreeSE` extends `SingleCellExperiment`.
+For instance, `regressBatches()` removes the batch effect from log-transformed
+data, such as clr-transformed abundances, with a linear model. It returns the
+corrected values as a new `SingleCellExperiment`, which can be added as an
+assay to the original `TreeSE`.
+- `r BiocStyle::Biocpkg("corral")` is based on correspondence analysis and
+accepts `TreeSE` directly. Its `corralm()` function returns the same object
+with a batch-integrated reduced-dimensional representation that can be used
+for ordination, but not corrected abundances.
 
-8. Get the available taxonomy ranks in the data.
+The general-purpose tools were not designed for microbiome data, so it should
+be checked that their assumptions suit the data.
 
-9. Calculate a table that summarizes the dominance of genera or any other
-rank. Which features are present in the highest number of samples? In how many
-samples is it present? What percentage of samples does the number correspond to?
+Correction methods can remove biological signal together with the batch
+effect, especially when batch and group are partly confounded, so the results
+should be checked, for instance by repeating the ordination after correction.
+An [online tutorial](https://evayiwenwang.github.io/Managing_batch_effects/index.html)
+by @Wang2020batch demonstrates many of these methods in practice.
 
-10. Get the most prevalent features in specific taxonomy rank. Use counts
-table, and set prevalence and detection threshold to 20% and 1, respectively.
+## Exercises {#sec-quality-control-exercises}
 
-11. Get the most abundant features based on median abundance. How does this
-differ from prevalent features?
+We use the [`peerj13075`](data_sets.qmd#sec-data-peerj13075) dataset. Note that
+its taxonomy ranks are written in lowercase (for example, `genus`).
 
-12. Visualize the most prevalent features.
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-Useful functions:
+:::: {.callout-tip icon="false"}
+## Exercise 1: Summarize the data
 
-`utils::data()`, `miaViz::plotHistogram()`, `mia::addPrevalence()`,
-`SummarizedExperiment::rowData()`, `mia::addQC()`,
-`SummarizedExperiment::colData()`, `miaViz::plotBarplot()`,
-`mia::taxonomyRanks()`, `summarizeDominance()`, `mia::getPrevalent()`,
-`mia::getTop()`, `miaViz::plotAbundanceDensity()`
+**Goal:** Learn to get an overview of the dataset.
+
+1. Load the `peerj13075` dataset from the `mia` package and store it in a
+variable called `tse`.
+
+2. Print `tse`. How many features and samples are there?
+
+3. Summarize the `counts` assay with `summary()`.
+
+4. Summarize the dominant genera of the samples. How do you read the
+resulting table?
+
+5. Get the unique phyla in the data. How many phyla are there?
+
+**Useful functions:** `data()`, `summary()`, `mia::summarizeDominance()`,
+`mia::getUnique()`, `length()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_qc_summarize
+
+library(mia)
+
+# 1. Load the data
+data("peerj13075", package = "mia")
+tse <- peerj13075
+
+# 2. Print the object
+tse
+
+# 3. Summary of counts
+summary(tse, assay.type = "counts")
+
+# 4. Dominant genera
+summarizeDominance(tse, rank = "genus")
+
+# 5. Unique phyla
+phyla <- getUnique(tse, rank = "phylum")
+phyla
+length(phyla)
+```
+
+2. The dimensions are shown on the `dim` line: the first number is the number
+of features (rows) and the second the number of samples (columns).
+
+4. Each row is a genus that is the most abundant genus in at least one
+sample. The columns show in how many samples the genus is dominant, and what
+proportion of all samples this is. A genus at the top of the table is the most
+abundant genus in the largest number of samples.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Top, prevalent and rare features
+
+**Goal:** Learn to find the most abundant, prevalent and rare features.
+
+1. Get the 10 features that have the highest median abundance.
+
+2. Get the prevalent genera. Use a prevalence threshold of 20% and a
+detection threshold of 0, and store them in a variable called `prev`.
+
+3. Get the rare genera with the same thresholds and store them in a variable
+called `rare`.
+
+4. What is the difference between the features returned by `getTop()` and
+`getPrevalent()`?
+
+**Useful functions:** `mia::getTop()`, `mia::getPrevalent()`,
+`mia::getRare()`, `length()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_qc_features
+
+# 1. Top 10 features by median abundance
+getTop(tse, method = "median", top = 10)
+
+# 2. Prevalent genera
+prev <- getPrevalent(tse, rank = "genus", prevalence = 0.2, detection = 0)
+length(prev)
+
+# 3. Rare genera
+rare <- getRare(tse, rank = "genus", prevalence = 0.2, detection = 0)
+length(rare)
+```
+
+4. `getTop()` ranks the features by a summary of their abundance, here the
+median across samples, and returns a fixed number of them. `getPrevalent()`
+returns all features that are detected above the detection threshold in a
+large enough proportion of samples, so the number of returned features
+depends on the thresholds. A feature can be prevalent but have a low
+abundance, or be abundant in a few samples but not prevalent.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Library size and sample metadata
+
+**Goal:** Learn to examine the library sizes and the sample metadata.
+
+1. Calculate the QC metrics of the samples and add them to `colData`. In
+which column is the library size stored?
+
+2. Visualize the distribution of the library sizes with a histogram.
+
+3. Visualize the number of samples in each group of `Diet` with a barplot.
+
+4. What can you do if the library sizes vary a lot between samples?
+
+**Useful functions:** `mia::addQC()`, `colData()`, `miaViz::plotHistogram()`,
+`miaViz::plotBarplot()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_qc_library_size
+
+library(miaViz)
+
+# 1. QC metrics
+tse <- addQC(tse)
+colnames(colData(tse))
+
+# 2. Histogram of library sizes
+plotHistogram(tse, col.var = "total")
+
+# 3. Number of samples by diet
+plotBarplot(tse, col.var = "Diet")
+```
+
+1. The library size, that is, the total count of each sample, is stored in
+the `total` column.
+
+2. The histogram shows how many samples have a library size in each range.
+A wide spread or a long tail means that the sequencing depth differs a lot
+between samples.
+
+4. First, check that the sampling depth is sufficient. Samples with a very
+small library size can be removed. Uneven sampling depth can be taken into
+account with data transformations or rarefaction.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Distribution and abundance
+
+**Goal:** Learn to visualize the distribution of the counts and the
+abundances of the features.
+
+1. Visualize the distribution of all values in the `counts` assay with a
+histogram. What do you notice?
+
+2. Visualize the abundances of the 20 most abundant features with a jitter
+plot. Use a log-scaled x-axis.
+
+3. Visualize the abundances of the 5 most abundant features with a density
+plot, coloured by `Diet`. Use a log-scaled x-axis.
+
+4. Why is it important to look at the distribution of the data before
+choosing a statistical test?
+
+**Useful functions:** `miaViz::plotHistogram()`,
+`miaViz::plotAbundanceDensity()`, `ggplot2::scale_x_log10()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_qc_abundance
+#| warning: false
+
+# 1. Histogram of counts
+plotHistogram(tse, assay.type = "counts")
+
+# 2. Jitter plot of the top 20 features
+plotAbundanceDensity(
+    tse,
+    layout = "jitter",
+    assay.type = "counts",
+    n = 20
+) +
+    scale_x_log10()
+
+# 3. Density plot of the top 5 features
+plotAbundanceDensity(
+    tse,
+    layout = "density",
+    assay.type = "counts",
+    n = 5,
+    colour.by = "Diet"
+) +
+    scale_x_log10()
+```
+
+1. Microbiome counts are typically zero-inflated and right-skewed: a large
+bar at zero shows that many values are zeros, and a long tail shows that a
+few values are very large.
+
+2. Each row is a feature and each point is one sample. The x-axis shows the
+abundance of the feature in that sample. A wide spread of points
+means that the abundance of the feature varies a lot between samples.
+
+4. Many common statistical tests assume that the data is normally
+distributed. Microbiome data rarely is, and using such tests anyway can lead
+to incorrect conclusions.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Prevalence
+
+**Goal:** Learn to calculate and visualize the prevalence of features.
+
+1. Calculate the prevalence of the features and add it to `rowData`. Use a
+detection threshold of 0.1% relative abundance, that is,
+`detection = 0.1 / 100` and `as.relative = TRUE`.
+
+2. Visualize the distribution of the prevalences with a histogram.
+
+3. Visualize the prevalence of the features against their relative
+abundance.
+
+4. Calculate the proportion of core features in each sample and add it to
+`colData`. Use a prevalence threshold of 50% and a detection threshold of
+0.1%. Visualize the result with a histogram.
+
+5. How do you read the prevalence histogram? What does a value of 0.5 mean?
+
+**Useful functions:** `mia::addPrevalence()`, `miaViz::plotHistogram()`,
+`miaViz::plotPrevalentAbundance()`, `mia::addPrevalentAbundance()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_qc_prevalence
+
+# 1. Prevalence of features
+tse <- addPrevalence(tse, detection = 0.1 / 100, as.relative = TRUE)
+
+# 2. Histogram of prevalences
+plotHistogram(tse, row.var = "prevalence")
+
+# 3. Prevalence against abundance
+plotPrevalentAbundance(tse, as.relative = TRUE)
+
+# 4. Proportion of core features in each sample
+tse <- addPrevalentAbundance(
+    tse,
+    prevalence = 50 / 100,
+    detection = 0.1 / 100
+)
+plotHistogram(tse, col.var = "prevalent_abundance")
+```
+
+4. The histogram shows how large a proportion of each sample consists of the
+core features, that is, the features that are present in more than half of
+the samples. A value close to 1 means that the sample consists almost only of
+core features, and a small value means that most of the sample consists of
+features that are not common in the dataset.
+
+5. Prevalence is the proportion of samples in which a feature exceeds the
+detection threshold. A value of 0.5 means that the feature is detected in
+half of the samples. If most of the features are on the left side of the
+histogram, most features are found only in a small part of the samples. If
+many features are on the right side, many features are found in most
+samples.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 6: Contaminants
+
+**Goal:** Understand how contaminant sequences can be detected.
+
+Answer the following questions without writing any code. The section
+"Contaminant sequences" will help you.
+
+1. What are the two main approaches to detect contaminants, and what
+information does each of them need?
+
+2. In the frequency-based approach, how is a contaminant expected to behave
+when the DNA concentration of the samples increases? Why?
+
+3. Why are contaminants expected to be more prevalent in negative control
+samples than in true samples?
+
+4. What is the difference between `addContaminantQC()` and
+`isContaminant()`?
+
+::: {.callout-note collapse="true"}
+## Solution
+
+1. Frequency-based testing needs the DNA concentration of each sample.
+Prevalence-based testing needs information on which samples are negative
+controls.
+
+2. Its relative abundance is expected to decrease. A contaminant adds about
+the same amount of DNA to every sample, so it makes up a larger fraction of
+samples with little DNA and a smaller fraction of samples with much DNA.
+
+3. Negative controls lack true biological DNA, so the sequences found in them
+mainly come from contamination sources.
+
+4. `addContaminantQC()` adds the results to `rowData` of the object, whereas
+`isContaminant()` returns only the results. With `detailed = FALSE`, the
+result is a logical vector that can be used for subsetting the data.
+:::
+::::

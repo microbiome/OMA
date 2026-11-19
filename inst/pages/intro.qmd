@@ -1,13 +1,8 @@
+---
+engine: knitr
+---
+
 # Microbiome data science {#sec-microbiome-in-bioconductor}
-
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
 
 This work - [**Orchestrating Microbiome Analysis with
 Bioconductor**](https://bioconductor.org/books/release/OMA/) [@OMA] - contributes
@@ -29,7 +24,7 @@ high-quality open research software for life sciences [@Gentleman2004;
 @Huber2015]. The software packages are primarily coded in R, and they
 undergo continuous testing and peer review to ensure high quality.
 
-![Bioconductor logo.](figures/bioconductor_logo_cmyk.svg){width="40%"}
+![](figures/bioconductor_logo_cmyk.svg){width="40%" fig-alt="Bioconductor logo."}
 
 Central to the software in Bioconductor are data containers, which
 provide a structured presentation of data. A data container consists of
@@ -61,8 +56,12 @@ The Bioconductor microbiome data science framework consists of:
 - **R/Bioconductor packages** that provide dedicated methods
 - **Community** of users and developers
 
+These components build on each other (@fig-ecosystem).
+
 ![Data containers are central in
-Bioconductor.](figures/ecosystem.png){width="50%"}
+Bioconductor.](figures/ecosystem.png){#fig-ecosystem width="50%"
+fig-alt="Three nested ellipses: data at the core, surrounded by packages,
+surrounded by community."}
 
 If you are new to R or Bioconductor, the following
 [Carpentries](https://carpentries.org/) lessons, contributed by Bioconductor,
@@ -85,14 +84,17 @@ the needs of current research, as it was originally developed for 16S
 sequencing data. For instance, incorporating diverse multi-omics datasets
 has become increasingly common.
 
-An optimal data container should efficiently store and manage large
-volumes of data, including modified or transformed copies of different
-measurements. Furthermore, it should seamlessly integrate into the
+An optimal data container (@fig-optimal-container) should efficiently
+store and manage large volumes of data, including modified or transformed
+copies of different measurements. Furthermore, it should seamlessly integrate into the
 broader ecosystem of Bioconductor, minimizing duplication of effort and
 facilitating interoperability with other tools and packages.
 
-![Optimal data
-container.](figures/optimal_data_container.png){width="50%"}
+![Requirements for an optimal data container for microbiome
+data.](figures/optimal_data_container.png){#fig-optimal-container width="50%"
+fig-alt="Requirements: multiple assays with seamless interlinking,
+hierarchical data, side information, optimized for speed and memory, and
+integrated with other applications and frameworks."}
 
 `r BiocStyle::Biocpkg("TreeSummarizedExperiment")` was developed to address
 these requirements [@Huang2021]. The [OMA microbiome data science framework](https://microbiome.github.io/)
@@ -109,6 +111,70 @@ progress. As open science is a fundamental concept in microbiome
 research, this book aims to educate readers about reproducible reporting
 practices.
 
+### Reproducible reporting with Quarto {#sec-reproducible-reporting}
+
+A reproducible report combines the text, the code and the results of an
+analysis in a single document. When the data or the code change, the report
+is rendered again, and all numbers, figures and tables are updated
+automatically. This avoids errors from copying results by hand, and it shows
+others exactly how the results were obtained.
+
+[Quarto](https://quarto.org/) is an open-source system for writing such
+reports. A Quarto document is a text file with the extension `.qmd`, and it
+can be rendered, for example, into an HTML page, a PDF or a Word document.
+This book is also written with Quarto: each chapter is a Quarto document, and
+the code in the chapters is run every time the book is built. Quarto is
+included in RStudio, where you can create a new document from
+**File > New File > Quarto Document** and render it with the **Render**
+button.
+
+A Quarto document has three main parts:
+
+- **YAML header**, between the two `---` lines at the top of the document. It
+sets, for example, the title and the output format.
+- **Text**, written in [Markdown](https://quarto.org/docs/authoring/markdown-basics.html).
+For instance, `#` starts a heading, `-` starts a list item and
+`[text](url)` creates a link.
+- **Code chunks**, which start with ```` ```{r} ```` and end with
+```` ``` ````. The code is run when the document is rendered, and its output
+is shown below the chunk. Chunk options at the beginning of the chunk start
+with `#|`. They give the chunk a label and control, for instance, whether the
+code is shown (`echo`) and what the caption of a figure is (`fig-cap`). R
+code can also be placed inside the text, so that a number in a sentence is
+calculated from the data.
+
+Below is a small Quarto document that loads example data with
+`r BiocStyle::Biocpkg("mia")`. You can copy it into a new Quarto document in
+RStudio and render it. If the rendering succeeds, Quarto and the
+`r BiocStyle::Biocpkg("mia")` package are working.
+
+````markdown
+---
+title: "My first analysis"
+format: html
+---
+
+## Data
+
+We use the `GlobalPatterns` dataset from the mia package.
+
+```{{r}}
+#| label: load-data
+library(mia)
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+tse
+```
+
+The data has `r knitr::inline_expr("nrow(tse)")` features and
+`r knitr::inline_expr("ncol(tse)")` samples.
+````
+
+Most of the code in this book can be copied into a Quarto document in the
+same way, which makes Quarto a convenient way to follow the book and to keep
+your own analyses reproducible. More material on Quarto is listed in
+[@sec-quarto].
+
 ::: callout-tip
 ## Summary
 
@@ -116,132 +182,409 @@ practices.
 - Data containers are fundamental in Bioconductor.
 - `r BiocStyle::Biocpkg("SummarizedExperiment")` is the most common data
 container in Bioconductor.
+- Quarto documents combine text, code and results into reproducible reports.
 :::
 
-::: {.callout-tip icon="false"}
-## Exercises
+## Exercises {#sec-microbiome-in-bioconductor-exercises}
 
-**Exercise 1: Introduction to Bioconductor**
+Exercises 3-6 build a small reproducible report on the alpha diversity of
+the `GlobalPatterns` dataset, so solve them in order. Before starting them,
+read [@sec-reproducible-reporting]. You do not need to write the analysis
+code yourself: you copy it from this book, and focus on how the Quarto
+document is built and how its output is controlled. Try to solve each
+exercise yourself before opening the solution.
 
-**Goal:** Learn how to navigate Bioconductor website and get an idea of
-the available packages.
+:::: {.callout-tip icon="false"}
+## Exercise 1: Data containers
+
+**Goal:** Understand what data containers are and why they are central in
+Bioconductor.
+
+Answer the following questions without writing any code.
+[@sec-bioconductor] and [@sec-microbiome-bioc] will help you.
+
+1. What is a data container? Name two types of data that are stored in its
+slots.
+
+2. List the three advantages of data containers that are described in this
+chapter.
+
+3. Imagine that you store the abundance table and the sample metadata as two
+separate tables. You remove three samples from the abundance table but forget
+to remove them from the sample metadata. What problem does this cause? How
+does a data container help to avoid it?
+
+4. Which data container is the most common in Bioconductor? Which data
+container is the OMA framework built around?
+
+5. Why does the `phyloseq` data container no longer meet the needs of
+current microbiome research?
+
+6. What are the three parts of the Bioconductor microbiome data science
+framework?
+
+::: {.callout-note collapse="true"}
+## Solution
+
+1. A data container is an object that stores data in a structured way. It
+consists of slots, each dedicated to a certain type of data, for example the
+abundance table and the sample metadata.
+
+2. The advantages are ease of handling (subsetting and bookkeeping are more
+straightforward), development efficiency (developers can rely on a consistent
+data format), and user accessibility (users can easily apply complex methods
+to their data).
+
+3. The two tables no longer describe the same samples, and the sample
+metadata can be matched to the wrong samples in later analyses. A data
+container keeps the abundance table and the sample metadata linked. When you
+subset the container, all its parts are subsetted at the same time, so they
+stay matched.
+
+4. `SummarizedExperiment` is the most common data container in Bioconductor.
+The OMA framework is built around `TreeSummarizedExperiment`.
+
+5. `phyloseq` was originally developed for 16S sequencing data. It does not
+adequately support, for example, multi-omics datasets, which have become
+increasingly common.
+
+6. Data containers, R/Bioconductor packages that provide dedicated methods,
+and a community of users and developers.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Bioconductor website
+
+**Goal:** Learn to navigate the Bioconductor website and to find information
+about packages.
 
 1. Go to the [Bioconductor website](https://bioconductor.org/).
 
-2. Navigate to "Packages" section.
+2. Open the "Packages" section and go to the list of software packages.
 
-3. Search for packages with the biocViews category "microbiome". How
-many different packages are available?
+3. Use the biocViews categories to list the packages in the category
+"Microbiome". Note how many packages are listed. The number grows over time,
+so any current number is a correct answer.
 
-4. Look up the `mia` package. What is its current version? Is it released
-or devel version?
+4. Open the page of the `mia` package. Which version of `mia` does the page
+describe? Is it the release or the devel version? How can you tell?
 
-5. Locate the `mia` package's Reference Manual. When was it last updated?
+5. On the same page, find the installation instructions, the vignettes and
+the reference manual of `mia`.
 
-------------------------------------------------------------------------
+::: {.callout-note collapse="true"}
+## Solution
 
-**Reproducible reporting with Quarto**
+3. The packages of the "Microbiome" category are listed on the biocViews
+page. Any current number of packages is a correct answer.
 
-Before starting, read the [Quarto guidelines for
-RStudio](https://quarto.org/docs/tools/rstudio.html). This will help you
-understand the basics.
+4. The version is shown in the "Version" field of the package page. The page
+tells whether it describes the release or the devel version. The address of
+the page also contains either `release` or `devel`.
 
-**Exercise 2: Creating a Quarto Document**
+5. The installation instructions are under "Installation". The vignettes and
+the reference manual are listed under "Documentation".
 
-**Goal:** Learn how to create a Quarto document, add text, and structure
-content with Markdown.
-
-1. Open RStudio and create a new Quarto file.
-
-2. In the YAML metadata section at the top, change `title: Untitled` to
-`title: "My First Quarto"`.
-
-3. Add a section with the heading `# My first section` and write a
-short paragraph underneath.
-
-4. Add a subsection `## List of items` and create:
-    - An ordered list (e.g., `1. First item`)
-    - An unordered list (e.g., `- Bullet point`)
-5. Add another subsection `## Link to web` and create a link to the
-[OMA book](https://bioconductor.org/books/release/OMA/) using `[text](url)`.
-
-6. Click **Render** and check how your document looks.
-
-**Expected Outcome:** A properly structured Quarto document with
-headings, lists, and a clickable link.
-
-**Exercise 3: Adding code chunks**
-
-**Goal:** Learn how to integrate R code within a Quarto document.
-
-1. Open RStudio and create a new Quarto file.
-
-2. **Insert a code chunk** by pressing **Alt + Cmd + I** (Mac) or
-**Ctrl + Alt + I** (Windows, Linux) or from the navigation bar.
-
-3. Inside the chunk, define:
-
-    ```
-    A <- "my name"
-    B <- 0
-    ```
-
-4. Above the chunk, write: `Below is my first code chunk`.
-
-5. Insert another chunk below and modify `B`:
-
-    ```
-    B <- B + 100
-    ```
-
-6. Add a name for this the chunk: `Below I change variable B`.
-
-7. Display `A` and `B` dynamically in text using inline R code. For
-example, you can write "My name is A and I have B dogs", where `A`
-and `B` are the variables above thus automatically updating the text
-based on their values.
-
-**Expected Outcome:** Rendered document showing code execution, and
-dynamic text updates.
-
-**Exercise 4: Customizing code chunk output**
-
-**Goal:** Learn to control visibility and formatting of code chunks.
-
-1. Create a new Quarto file.
-
-2. Insert three labeled code chunks (`first_chunk`, `fig-box`,
-`tbl-coldata`).
-
-3. Copy-paste the following code:
-
-    ```
-    #| label: first_chunk
-    #| code-fold: true
-    #| code-summary: "Show the code"
-    x <- 1:10
-    y <- x^2
-    ```
-
-    ```
-    #| label: fig-box
-    #| fig-width: 10
-    plot(x, y)
-    ```
-
-    ```
-    #| label: tbl-coldata
-    #| echo: false
-    data.frame(x, y)
-    ```
-4. Render and observe:
-   - The code of first chunk is folded.
-   - The figure is wider.
-   - The table appears without showing its generating code.
-
-5. Add `fig-cap` and `tbl-cap` options.
-
-6. Cross-reference the figure using `@fig-box`.
-
-**Expected Outcome:** Cleaner output with formatted figures and tables.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Create a Quarto document
+
+**Goal:** Learn to create and render a Quarto document, and to write text
+with Markdown.
+
+1. Open RStudio and create a new Quarto document from
+**File > New File > Quarto Document**. Remove the example content that
+RStudio adds to the new document.
+
+2. Copy the example document from [@sec-reproducible-reporting] into your
+document. Save the file, for example as `report.qmd`, and render it with the
+**Render** button. If RStudio asks to install packages, accept. If the
+rendering fails, check that the `mia` package is installed.
+
+3. Change the title in the YAML header to `"Alpha diversity in
+GlobalPatterns"` and render the document again.
+
+4. At the end of the document, add a section with the heading
+`## Alpha diversity`. Under it, write a sentence that explains that alpha
+diversity measures the diversity within each sample.
+
+5. Under the sentence, add a link to the Alpha diversity chapter
+([@sec-alpha-diversity]) with the syntax `[text](url)`. You can copy the
+address of the chapter from your browser. Render the document.
+
+**Useful resources:** [@sec-reproducible-reporting],
+[Markdown basics](https://quarto.org/docs/authoring/markdown-basics.html)
+
+::: {.callout-note collapse="true"}
+## Solution
+
+Your document should look similar to the following:
+
+````markdown
+---
+title: "Alpha diversity in GlobalPatterns"
+format: html
+---
+
+## Data
+
+We use the `GlobalPatterns` dataset from the mia package.
+
+```{{r}}
+#| label: load-data
+library(mia)
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+tse
+```
+
+The data has `r knitr::inline_expr("nrow(tse)")` features and
+`r knitr::inline_expr("ncol(tse)")` samples.
+
+## Alpha diversity
+
+Alpha diversity measures the diversity within each sample. The methods are
+explained in the
+[Alpha diversity chapter](https://bioconductor.org/books/release/OMA/pages/alpha_diversity.html)
+of the OMA book.
+````
+
+In the rendered document, the headings are shown as section titles, the
+inline code is replaced by the numbers of features and samples, and the link
+is clickable.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Add code from the book
+
+**Goal:** Learn to add code chunks and inline code to a Quarto document, and
+to see how the results update automatically.
+
+Continue with the document from Exercise 3.
+
+1. Go to [@sec-estimate-diversity]. Copy the whole code chunk that
+calculates the alpha diversity indices with `addAlpha()`. Paste it into a new
+code chunk at the end of your document. You can insert a chunk with
+**Ctrl + Alt + I** (Windows, Linux) or **Cmd + Option + I** (Mac). The chunk
+loads the data again, which does no harm.
+
+2. Go to [@sec-plot-diversity]. Copy the whole code chunk that plots the
+observed richness by sample type (@fig-alpha-richness) into a second code
+chunk, and render the document.
+
+3. Under the figure, write the sentence "The median observed richness is X.",
+where X is calculated with inline R code from `tse$observed_richness`. Render
+the document.
+
+4. Add the argument `detection = 10` to the `addAlpha()` call, so that only
+features with more than 10 counts are counted as observed. Render the document
+again. Which parts of the report change? Did you need to edit them by hand?
+
+**Useful resources:** [@sec-reproducible-reporting],
+[@sec-estimate-diversity], [@sec-plot-diversity]
+
+::: {.callout-note collapse="true"}
+## Solution
+
+The new part of the document should look similar to the following:
+
+````markdown
+```{{r}}
+# First, let's load some example data.
+library(mia)
+data("GlobalPatterns")
+tse <- GlobalPatterns
+
+# The 'index' parameter allows computing multiple diversity indices
+# simultaneously. Without specification, four standard indices are calculated:
+# dbp_dominance, faith_diversity, observed_richness, and shannon_diversity.
+tse <- addAlpha(
+    tse,
+    assay.type = "counts",
+    detection = 10
+)
+
+# Check some of the first values in colData
+tse$observed_richness |> head()
+tse$shannon_diversity |> head()
+```
+
+```{{r}}
+library(miaViz)
+plotBoxplot(
+    tse,
+    col.var = "observed_richness",
+    x = "SampleType",
+    colour.by = "Final_Barcode"
+) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Sample types", y = expression(Richness[observed_richness]))
+```
+
+The median observed richness is
+`r knitr::inline_expr("median(tse$observed_richness)")`.
+````
+
+4. The detection threshold (0 by default) affects which features are counted
+as observed, so the richness values change. Both the figure and the sentence
+are updated automatically when the document is rendered, without any manual
+editing. This is the main benefit of reproducible reporting.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Control the output
+
+**Goal:** Learn to control with chunk options how the code and its output are
+shown in the rendered document.
+
+Continue with the document from Exercise 4. Keep the argument
+`detection = 10` in the `addAlpha()` call.
+
+1. Loading packages prints messages that are not needed in the report. Add
+the chunk option `#| message: false` to the chunks that load packages, and
+render the document. Are the messages gone?
+
+2. Readers of the report may not want to see all the code. Add the chunk
+options `#| code-fold: true` and `#| code-summary: "Show the code"` to the
+chunk that calculates the alpha diversity. Render the document. How is the
+code shown now?
+
+3. Make the figure wider by adding `#| fig-width: 10` to the figure chunk.
+Render the document.
+
+**Useful resources:** [@sec-reproducible-reporting],
+[Code cell options](https://quarto.org/docs/reference/cells/cells-knitr.html)
+
+::: {.callout-note collapse="true"}
+## Solution
+
+The chunk options are added to the beginning of the chunks:
+
+````markdown
+```{{r}}
+#| label: load-data
+#| message: false
+library(mia)
+...
+```
+
+```{{r}}
+#| message: false
+#| code-fold: true
+#| code-summary: "Show the code"
+# First, let's load some example data.
+library(mia)
+...
+```
+
+```{{r}}
+#| message: false
+#| fig-width: 10
+library(miaViz)
+plotBoxplot(
+    tse,
+    col.var = "observed_richness",
+    x = "SampleType",
+    colour.by = "Final_Barcode"
+) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Sample types", y = expression(Richness[observed_richness]))
+```
+````
+
+1. Yes. With `message: false`, the messages are not shown in the rendered
+document, but the code is still run.
+
+2. The code is hidden behind a clickable "Show the code" button, and the
+reader can open it when needed. The output of the chunk is still shown.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 6: Tables and cross-references
+
+**Goal:** Learn to add captions to figures and tables and to refer to them in
+the text.
+
+Continue with the document from Exercise 5.
+
+1. Give the figure chunk the label `fig-richness` with `#| label:`, and add a
+caption with `#| fig-cap:`.
+
+2. Add a new code chunk that shows the sample type and the alpha diversity of
+the first five samples as a table:
+
+    ```r
+    knitr::kable(
+        as.data.frame(
+            colData(tse)[1:5, c("SampleType", "observed_richness",
+                "shannon_diversity")]
+        )
+    )
+    ```
+
+    Give the chunk the label `tbl-alpha`, add a caption with `#| tbl-cap:`, and
+    hide its code with `#| echo: false`.
+
+3. Under the figure and the table, write a sentence that refers to them with
+`@fig-richness` and `@tbl-alpha`. Render the document.
+
+4. Why must the labels of the figure and table chunks start with `fig-` and
+`tbl-`?
+
+**Useful resources:** [@sec-reproducible-reporting],
+[Cross-references](https://quarto.org/docs/authoring/cross-references.html)
+
+::: {.callout-note collapse="true"}
+## Solution
+
+The figure chunk and the new part of the document should look similar to the
+following:
+
+````markdown
+```{{r}}
+#| label: fig-richness
+#| fig-cap: "Observed richness by sample type."
+#| message: false
+#| fig-width: 10
+library(miaViz)
+plotBoxplot(
+    tse,
+    col.var = "observed_richness",
+    x = "SampleType",
+    colour.by = "Final_Barcode"
+) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(x = "Sample types", y = expression(Richness[observed_richness]))
+```
+
+```{{r}}
+#| label: tbl-alpha
+#| tbl-cap: "Sample type and alpha diversity of the first five samples."
+#| echo: false
+knitr::kable(
+    as.data.frame(
+        colData(tse)[1:5, c("SampleType", "observed_richness",
+            "shannon_diversity")]
+    )
+)
+```
+
+@fig-richness shows the observed richness by sample type, and @tbl-alpha
+lists the values of the first five samples.
+````
+
+3. In the rendered document, `@fig-richness` and `@tbl-alpha` are replaced by
+clickable references, such as "Figure 1" and "Table 1".
+
+4. Quarto uses the prefix of the label to recognize what the chunk produces.
+Only chunks whose label starts with `fig-` or `tbl-` are numbered as figures
+or tables, and only they can be cross-referenced. A caption is not required,
+but it helps the reader to understand the figure or table.
+:::
+::::

@@ -1,20 +1,12 @@
 # Data wrangling {#sec-datawrangling}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 This chapter introduces several essential techniques for preparing data
 for analysis. These techniques include splitting data, modifying data, and
 converting data to a `data.frame`. Additionally, it explains how to merge
-multiple `r BiocStyle::Biocpkg("SummarizedExperiment")` objects when needed.
-For a basic understanding of `r BiocStyle::Biocpkg("TreeSummarizedExperiment")`
-please refer to [@sec-containers].
+multiple `r BiocStyle::Biocpkg("SummarizedExperiment")`
+objects when needed. For a basic understanding of
+`r BiocStyle::Biocpkg("TreeSummarizedExperiment")` [@Huang2021] please refer to
+[@sec-containers].
 
 ## Splitting {#sec-splitting}
 
@@ -133,8 +125,8 @@ assayNames(tse)
 Now we can see that the `r BiocStyle::Biocpkg("TreeSummarizedExperiment")`
 object has an additional assay called
 "random". When adding new samples or features to your existing dataset,
-you can use `cbind()` to combine columns for new features or `rbind()`
-to add rows for new samples.
+you can use `cbind()` to combine columns for new samples or `rbind()`
+to add rows for new features.
 
 ```{r}
 #| label: combine-cols
@@ -190,7 +182,7 @@ tse
 ## Melting
 
 For several custom analysis and visualization packages, such as those from
-`r BiocStyle::CRANpkg("tidyverse")`, the
+`r BiocStyle::CRANpkg("tidyverse")` [@Wickham2019], the
 `r BiocStyle::Biocpkg("SummarizedExperiment")` data can be converted to a long
 `data.frame` format with `meltSE()`.
 
@@ -212,8 +204,8 @@ molten_tse |>
     kable()
 ```
 
-For `r BiocStyle::Biocpkg("MultiAssayExperiment")` data, you can instead
-utilize `longForm()`.
+For `r BiocStyle::Biocpkg("MultiAssayExperiment")` [@Ramos2017] data, you can
+instead utilize `longForm()`.
 
 ```{r}
 #| label: melt-mae-data
@@ -241,7 +233,7 @@ Bioconductor’s `r BiocStyle::Biocpkg("SummarizedExperiment")` ecosystem and
 the `r BiocStyle::CRANpkg("tidyverse")` [@Hutchison2024].
 
 The package `r BiocStyle::Biocpkg("tidySingleCellExperiment")` can be used to
-manage data in `r BiocStyle::Biocpkg("SummarizedExperiment")`. For instance,
+manage data in `TreeSE`, which extends `SingleCellExperiment`. For instance,
 we can easily view the object as a `r BiocStyle::CRANpkg("tibble")`
 abstraction, familiar from `r BiocStyle::CRANpkg("tidyverse")`.
 
@@ -274,16 +266,17 @@ tse %>%
     summarise(total_counts = mean(total_counts))
 ```
 
-We can then filter samples and leverage `r BiocStyle::CRANpkg("ggplot2")` for
-plotting. In the example below, we select soil samples and visualize their
-abundances with a boxplot (@fig-wrangling-soil-boxplot). Of course, these tidy
-commands can be combined with `r BiocStyle::Biocpkg("mia")` tools. Before plotting, we apply CLR
-transformation by using `trasformAssay()` (see more on transformation from
-[@sec-assay-transform]).
+We can then filter samples and leverage `r BiocStyle::CRANpkg("ggplot2")`
+[@Wickham2016] for plotting. In the example below, we select soil samples and
+visualize their abundances with a boxplot (@fig-wrangling-soil-boxplot). Of
+course, these tidy commands can be combined with `r BiocStyle::Biocpkg("mia")`
+tools. Before plotting, we apply CLR transformation by using `transformAssay()`
+(see more on transformation from [@sec-assay-transform]).
 
 ```{r}
 #| label: fig-wrangling-soil-boxplot
 #| fig-cap: "Distribution of CLR-transformed feature abundances in each soil sample of the GlobalPatterns data set. Each box represents one sample."
+#| fig-alt: "Boxplots of CLR-transformed abundances (y-axis), one box per soil sample (x-axis), with each box filled in a different colour by sample."
 
 library(ggplot2)
 
@@ -302,50 +295,324 @@ and
 [tidySingleCellExperiment](https://www.bioconductor.org/packages/release/bioc/vignettes/tidySingleCellExperiment/inst/doc/introduction.html)
 vignettes for more examples.
 
-::: {.callout-tip icon="false"}
-## Exercises
+## Exercises {#sec-datawrangling-exercises}
 
-**Goal:** The goal is to learn how to work with multiple datasets by
-merging them and splitting datasets into lists of
-`r BiocStyle::Biocpkg("TreeSummarizedExperiment")`s (`TreeSE`).
+We use the [`Tengeler2020`](data_sets.qmd#sec-data-tengeler2020) dataset,
+and in Exercise 4 also the [`HintikkaXOData`](data_sets.qmd#sec-data-hintikka)
+dataset.
 
-**Exercise 1: Working with multiple datasets**
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-1. Load any of the example data sets described in [@sec-data-sets].
+:::: {.callout-tip icon="false"}
+## Exercise 1: Split the data
 
-2. Explore the sample metadata.
+**Goal:** Learn to split the data into a list of `TreeSE` objects based on a
+sample variable.
 
-3. Add arbitrary groups to `colData`. For instance, you can create
-groups like this:
-`sample(c("group1", "group2"), size = ncol(tse), replace = TRUE)`.
+1. Load the `Tengeler2020` dataset from the `mia` package and store it in a
+variable called `tse`.
 
-4. Explore the group distribution with a bar plot.
+2. Split `tse` by samples based on the `cohort` column. Store the result in a
+variable called `tse_list`.
 
-5. Split the data based on groups. The result should be a list
-containing each group in separate `TreeSE`.
+3. How many elements does `tse_list` have, and what are their names? How
+many samples does each element contain?
 
-6. For each `TreeSE`, explore the grouping variable in `colData`. Does
-each `TreeSE` include only one unique value?
+4. Get the top 5 features of each cohort by looping over `tse_list`.
 
-7. Calculate the total number of counts in each group.
+5. Why would you split the data before getting the top features, instead of
+getting the top features from the whole dataset?
 
-    - Loop through elements of the list.
-    - For single `TreeSE`, retrieve `assay`, sum all the values, and
-    add the calculated sum to `colData` (all the samples in a
-    certain group should have the same value).
-    - The result should be a list of `TreeSE`s with an additional
-    sample metadata column.
+**Useful functions:** `data()`, `mia::splitOn()`,
+`length()`, `names()`, `ncol()`, `sapply()`, `mia::getTop()`
 
-8. Combine the list back to a single `TreeSE` object.
+::: {.callout-note collapse="true"}
+## Solution
 
-9. Load another dataset from [@sec-example-data] and merge it with the
-one You've been using. Explore the data.
+```{r}
+#| label: exercise_wrangling_split
 
-Useful functions:
+library(mia)
 
-`utils::data()`, `SummarizedExperiment::colData()`, `base::sample()`,
-`miaViz::plotBarplot()`, `mia::splitOn()`, `BiocGenerics::lapply()`,
-`SummarizedExperiment::assay()`, `base::sum()`, `mia::unsplitOn()`,
+# 1. Load the data
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# 2. Split by cohort
+tse_list <- splitOn(tse, by = "samples", group = "cohort")
+
+# 3. Number of elements, their names and number of samples
+length(tse_list)
+names(tse_list)
+sapply(tse_list, ncol)
+
+# 4. Top 5 features in each cohort
+sapply(tse_list, getTop, top = 5)
+```
+
+3. The list has one `TreeSE` for each unique value in `cohort`, and the
+elements are named after these values. Each element contains only the
+samples of one cohort.
+
+5. The top features of the whole dataset describe all samples together.
+Features that are abundant only in some of the groups can then be hidden.
+Splitting the data first gives the top features of each group separately.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Add and modify data
+
+**Goal:** Learn to add and modify variables in `colData` and to add a new
+assay.
+
+1. Modify the `sample_name` column of `colData(tse)` by adding the text
+`"mouse"` before each sample name. Show the first values of the modified
+column.
+
+2. Calculate the library size of each sample, that is, the sum of counts in
+each sample, with `colSums(assay(tse, "counts"))`. Store it in `colData` as a
+new variable called `library_size`.
+
+3. Simulate body weights for the mice with
+`runif(ncol(tse), min = 20, max = 30)` and ages with
+`sample(8:12, ncol(tse), replace = TRUE)`. Store them in a `data.frame`
+with the columns `weight` and `age`, and set the sample names of `tse` as
+its row names. Add the table to `colData(tse)`.
+
+4. Check the column names of `colData(tse)`. Which columns were added?
+
+5. Apply the log10 transformation with a pseudocount of 1 to the counts assay
+with `transformAssay()`, and store the result as a new assay called
+`"log10_counts"`. Check the names of the assays.
+
+**Useful functions:** `colData()`, `paste()`, `head()`, `assay()`,
+`colSums()`, `runif()`, `sample()`, `data.frame()`, `colnames()`, `cbind()`,
+`mia::transformAssay()`, `assayNames()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_wrangling_modify
+
+# 1. Modify an existing variable
+colData(tse)$sample_name <- paste("mouse", colData(tse)$sample_name)
+head(tse$sample_name)
+
+# 2. Add a new variable
+colData(tse)$library_size <- colSums(assay(tse, "counts"))
+
+# 3. Add a table of new variables
+new_data <- data.frame(
+    weight = runif(ncol(tse), min = 20, max = 30),
+    age = sample(8:12, ncol(tse), replace = TRUE)
+)
+rownames(new_data) <- colnames(tse)
+colData(tse) <- cbind(colData(tse), new_data)
+
+# 4. Check the columns of colData
+colnames(colData(tse))
+
+# 5. Add a new assay
+tse <- transformAssay(
+    tse,
+    assay.type = "counts",
+    method = "log10",
+    pseudocount = 1,
+    name = "log10_counts"
+)
+assayNames(tse)
+```
+
+4. The columns `library_size`, `weight` and `age` were added to the end of
+`colData`.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Combine and merge data
+
+**Goal:** Learn to combine datasets that have the same features, and to
+merge datasets that have different features.
+
+1. Split `tse` by samples based on the `patient_status` column, and store
+the result in a variable called `status_list`. Store its elements in
+variables called `tse_adhd` (`"ADHD"`) and `tse_control` (`"Control"`).
+
+2. Combine the two subsets back into one `TreeSE` by their columns. Check
+the dimensions of the result.
+
+3. Create two more subsets from `tse_list` of Exercise 1: `tse1` with the
+rows 1 to 100 of `"Cohort_1"`, and `tse2` with the rows 51 to 151 of
+`"Cohort_2"`. Check their dimensions. How many features do they have in
+common?
+
+4. Merge `tse1` and `tse2` with an inner join. Check the dimensions of the
+result.
+
+5. Merge `tse1` and `tse2` with a left join, and fill the missing values with
+0. Check the dimensions of the result.
+
+6. Why do the inner join and the left join give a different number of rows?
+Why can `cbind()` be used in step 2, but not to combine `tse1` and `tse2`?
+
+**Useful functions:** `mia::splitOn()`, `cbind()`, `dim()`,
 `mia::mergeSEs()`
 
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_wrangling_merge
+
+# 1. Subsets by patient status
+status_list <- splitOn(tse, by = "samples", group = "patient_status")
+tse_adhd <- status_list[["ADHD"]]
+tse_control <- status_list[["Control"]]
+
+# 2. Combine by columns
+tse_combined <- cbind(tse_adhd, tse_control)
+dim(tse_combined)
+
+# 3. Subsets with different features and samples
+tse1 <- tse_list[["Cohort_1"]][1:100, ]
+tse2 <- tse_list[["Cohort_2"]][51:151, ]
+dim(tse1)
+dim(tse2)
+
+# 4. Inner join
+tse_inner <- mergeSEs(tse1, tse2, join = "inner")
+dim(tse_inner)
+
+# 5. Left join
+tse_left <- mergeSEs(tse1, tse2, missing.values = 0, join = "left")
+dim(tse_left)
+```
+
+3. Rows 51 to 100 are included in both subsets, so they have 50 features in
+common.
+
+6. The inner join keeps only the features that are found in both datasets.
+The left join keeps all features of the first dataset; the features that
+are missing from the second dataset get the value given in
+`missing.values`. In both cases, all samples are kept. `cbind()` assumes
+that the rows of the datasets are the same and in the same order. This is
+true for `tse_adhd` and `tse_control`, which contain all features, but not
+for `tse1` and `tse2`, which contain different features.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Melt data
+
+**Goal:** Learn to convert the data into a long `data.frame`.
+
+1. Convert `tse` from Exercise 2 into a long `data.frame` with the
+`"log10_counts"` assay. Include both the feature information (`rowData`) and
+the sample information (`colData`). Store the result in a variable called
+`molten_tse`.
+
+2. Show the first rows of `molten_tse` and its column names. Which columns
+contain the variables that you added in Exercise 2?
+
+3. Load the `HintikkaXOData` dataset from the `mia` package and store it in a
+variable called `mae`.
+
+4. Convert `mae` into a long format with the assays `"counts"`, `"nmr"` and
+`"signals"`, and include the sample variables `"Rat"` and `"Diet"`. Store
+the result in a variable called `molten_mae` and show its first rows.
+
+**Useful functions:** `mia::meltSE()`, `head()`, `colnames()`, `data()`,
+`MultiAssayExperiment::longForm()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_wrangling_melt
+
+# 1. Melt TreeSE
+molten_tse <- meltSE(
+    tse,
+    assay.type = "log10_counts",
+    add.row = TRUE,
+    add.col = TRUE
+)
+
+# 2. First rows and column names
+head(molten_tse)
+colnames(molten_tse)
+
+# 3. Load the MultiAssayExperiment
+data("HintikkaXOData", package = "mia")
+mae <- HintikkaXOData
+
+# 4. Convert the MultiAssayExperiment into a long format
+molten_mae <- longForm(
+    mae,
+    i = c("counts", "nmr", "signals"),
+    colDataCols = c("Rat", "Diet")
+)
+head(molten_mae)
+```
+
+2. Each row contains the value of one feature in one sample, together with
+the information on that feature and that sample. The `colData` variables
+`library_size`, `weight` and `age` that you added in Exercise 2 are included
+as columns, and their values are repeated for each feature of the
+sample.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Tidy R programming
+
+**Goal:** Learn to manipulate a `TreeSE` with tidy R programming.
+
+1. Load the `tidySingleCellExperiment` package and print `tse`. How does the
+printed object look now?
+
+2. With tidy R programming, calculate the library size of each sample and
+then the mean library size in each group of `patient_status`. Follow the
+example in the chapter.
+
+3. Select the samples of `"Cohort_1"` with `filter()` and store the result in
+a variable called `tse_cohort1`. Check the number of samples in
+`tse_cohort1`.
+
+**Useful functions:** `tidySingleCellExperiment::join_features()`,
+`dplyr::group_by()`, `dplyr::mutate()`, `dplyr::summarise()`,
+`dplyr::filter()`, `ncol()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_wrangling_tidy
+
+# 1. Print TreeSE as a tibble
+library(tidySingleCellExperiment)
+
+tse
+
+# 2. Mean library size in each group
+tse %>%
+    join_features(features = rownames(tse), shape = "long") %>%
+    group_by(.cell) %>%
+    mutate(total_counts = sum(.abundance_counts)) %>%
+    group_by(patient_status) %>%
+    summarise(total_counts = mean(total_counts))
+
+# 3. Select samples of Cohort_1
+tse_cohort1 <- tse %>%
+    filter(cohort == "Cohort_1")
+ncol(tse_cohort1)
+```
+
+1. The object is shown as a tibble, where each row is a sample and the
+columns are the sample variables in `colData`. The data is still a
+`TreeSE`, and all the usual functions can be used with it.
+:::
+::::

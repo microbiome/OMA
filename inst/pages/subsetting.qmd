@@ -1,14 +1,5 @@
 # Subsetting {#sec-treese_subsetting}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 In this chapter, we explore the concept of subsetting. Subsetting or
 filtering is the process of selecting specific rows or columns from a
 dataset based on certain criteria. When you subset your data, you retain
@@ -23,8 +14,8 @@ sets of samples and / or features. When dealing with large datasets, the
 subset of interest can be extracted and investigated separately. This
 might improve performance and reduce the computational load.
 
-Let us store `GlobalPatterns` into `tse` and check its original number
-of features (rows) and samples (columns).
+Let us store `GlobalPatterns` [@Caporaso2011] into `tse` and check its original
+number of features (rows) and samples (columns).
 
 ```{r}
 #| label: load_data
@@ -91,7 +82,7 @@ dim(tse_sub)
 ::: callout-note
 ## Note
 
-After subsetting, expect the number of columns to equal the sum of the
+After subsetting, expect the number of rows to equal the sum of the
 frequencies of the samples that you are interested in. For instance,
 `ncols = Feces + Skin + Tongue = 4 + 3 + 2 = 9`.
 :::
@@ -120,7 +111,7 @@ rowData(tse)$Phylum |>
 ::: callout-note
 ## Note
 
-After subsetting, expect the number of columns to equal the sum of the
+After subsetting, expect the number of rows to equal the sum of the
 frequencies of the feature(s) that you are interested in. For instance,
 `nrows = Actinobacteria + Chlamydiae = 1631 + 21 = 1652`.
 :::
@@ -136,7 +127,7 @@ details).
 Next, we *logically index* across the rows of `tse` (make sure to leave
 the second index empty to select all columns) and filter for the
 features that fall in either *Actinobacteria* or *Chlamydiae* group. For
-this, we use the information on the samples from the metadata
+this, we use the information on the features from the metadata
 `rowData(tse)`.
 
 The first term with the `%in%` operator includes all the features of
@@ -249,6 +240,7 @@ histogram (@fig-subsetting-sd-histogram).
 ```{r}
 #| label: fig-subsetting-sd-histogram
 #| fig-cap: "Histogram of the standard deviations of feature counts in the GlobalPatterns data set, shown on a logarithmic x-axis."
+#| fig-alt: "Histogram with the standard deviation of feature counts on a log10 x-axis and the number of features on the y-axis."
 #| warning: false
 
 library(miaViz)
@@ -293,9 +285,9 @@ the goal is to remove low-variance features as well.
 ::: callout-tip
 ## Tidy alternative
 
-If you are more familiar with tidyverse syntax, the same filtering can be
-done with the `filter()` function from the
-`r BiocStyle::Biocpkg("tidySummarizedExperiment")` package.
+If you are more familiar with tidyverse [@Wickham2019] syntax, the same
+filtering can be done with the `filter()` function from the
+`r BiocStyle::Biocpkg("tidySummarizedExperiment")` package [@Hutchison2024].
 
 ```{r}
 #| label: filter_sd_tidy
@@ -311,22 +303,32 @@ See [@sec-tidy] for more information on tidy R programming.
 
 ## By prevalence {#sec-subset_prev}
 
-We can subset the data based on prevalence using `subsetByPrevalent()`,
-which filters features that exceed a specified prevalence threshold,
-helping to remove rare features that may be artifacts. Conversely,
-`subsetByRare()` allows us to retain only features below the threshold,
-enabling a focus on rare features within the dataset.
+We can subset the data based on prevalence with `subsetBy()`. The function
+keeps the features (`rows`) and samples (`cols`) that meet a condition. The
+condition is an R expression that can refer to the assays by their names (e.g.,
+`counts`) and to the columns of `rowData` or `colData`. Filtering prevalent
+features helps to remove rare features that may be artifacts. Conversely,
+keeping only the features below the threshold enables a focus on rare features
+within the dataset.
 
 Here, we apply a prevalence threshold of 10% and a detection threshold
-of 1. A feature is considered detected if it has at least one count in a
-sample, and prevalent if it is detected in at least 10% of the samples.
-The function `subsetByPrevalent()` retains the prevalent features, while
-`subsetByRare()` keeps the features that are not prevalent.
+of 0. Both thresholds are strict: a feature is considered detected if it has
+more than zero counts (i.e., at least one count) in a sample, and prevalent if
+it is detected in more than 10% of the samples. `addPrevalence()` calculates
+the proportion of samples in which each feature is detected and stores it in
+the `prevalence` column of `rowData`. The condition `prevalence > 0.1` would
+retain the prevalent features, while `prevalence <= 0.1` keeps the features
+that are not prevalent.
+
+To evaluate prevalence for genera rather than for the original features, we
+first agglomerate the data to the genus level with `agglomerateByRank()`.
 
 ```{r}
 #| label: subset_by_rare
 
-tse_sub <- subsetByRare(tse, rank = "Genus", prevalence = 0.1, detection = 1)
+tse_sub <- agglomerateByRank(tse, rank = "Genus")
+tse_sub <- addPrevalence(tse_sub)
+tse_sub <- subsetBy(tse_sub, rows = prevalence <= 0.1)
 tse_sub
 ```
 
@@ -334,30 +336,322 @@ In some cases, agglomerating based on prevalence can provide more
 meaningful insights. This process is illustrated in
 [@sec-agglomerate_prev].
 
-::: {.callout-tip icon="false"}
-## Exercises
+## Exercises {#sec-treese_subsetting-exercises}
 
-**Goal:** The goal is to learn how to subset the data.
+We use the [`Tengeler2020`](data_sets.qmd#sec-data-tengeler2020) dataset.
 
-**Exercise 1: Subsetting**
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-1. Load any of the example data sets described in [@sec-data-sets].
+:::: {.callout-tip icon="false"}
+## Exercise 1: Rows and columns
 
-2. Calculate library sizes and add them to `colData`.
+**Goal:** Understand how subsetting changes the dimensions of the data.
 
-3. Explore `colData`. Visualize library sizes with a histogram. Is
-there a lot of variance in sampling depth?
+The `Tengeler2020` dataset has 151 features and 27 samples, so `dim(tse)`
+returns `151 27`. The samples come from three cohorts: 10 samples from
+`"Cohort_1"`, 10 from `"Cohort_2"` and 7 from `"Cohort_3"`.
 
-4. Select samples that exceed specific library size threshold that you
-have selected based on histogram.
+Answer the following questions without writing any code. The beginning of
+this chapter will help you.
 
-5. Subset data by selecting only prevalent features. Use counts assay.
-Specify detection threshold `1` and prevalence threshold `20%`.
+1. What is the difference between `tse[x, ]` and `tse[, x]`?
 
-Useful functions:
+2. You select the samples of `"Cohort_1"` and `"Cohort_3"`. What are the
+dimensions of the result?
 
-`utils::data()`, `SummarizedExperiment::colData()`,
-`mia::addQC()`, `miaViz::plotHistogram()`,
-`mia::subsetByPrevalent()`
+3. You select the features of a phylum. Which dimension of the data
+changes, and which stays the same?
 
+4. When you select features based on a `rowData` column, why might you need
+to remove the `NA` values?
+
+::: {.callout-note collapse="true"}
+## Solution
+
+1. `tse[x, ]` selects rows, that is, features, and keeps all samples.
+`tse[, x]` selects columns, that is, samples, and keeps all features.
+
+2. The number of samples is 10 + 7 = 17, and all features are kept, so the
+dimensions are `151 17`.
+
+3. The number of rows (features) decreases, while the number of columns
+(samples) stays the same.
+
+4. Features with an unknown taxonomy can have `NA` in the `rowData` column.
+For example, comparing `NA` with `==` gives `NA` instead of `TRUE` or
+`FALSE`, and subsetting the data with a vector that contains `NA` values gives
+an error. Removing the `NA` values from the selection makes sure that only the
+features of interest are selected. Note that `%in%` never returns `NA`: it
+returns `FALSE` for the `NA` values.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Subset by sample
+
+**Goal:** Learn to subset the data by samples based on a `colData` variable.
+
+1. Load the `Tengeler2020` dataset from the `mia` package and store it in a
+variable called `tse`. Check its dimensions.
+
+2. Show the frequency of each value in the `cohort` column.
+
+3. Select the samples of `"Cohort_1"` and `"Cohort_2"`. Store the result in a
+variable called `tse_samples`.
+
+4. Check the dimensions of `tse_samples`. Is the number of samples equal to
+the sum of the frequencies of the selected cohorts?
+
+**Useful functions:** `data()`, `dim()`, `table()`, `%in%`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_subsetting_samples
+
+library(mia)
+
+# 1. Load the data
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+dim(tse)
+
+# 2. Frequency of each cohort
+table(tse$cohort)
+
+# 3. Subset by sample
+tse_samples <- tse[, tse$cohort %in% c("Cohort_1", "Cohort_2")]
+
+# 4. Check the dimensions
+dim(tse_samples)
+```
+
+4. The number of columns should equal the sum of the frequencies of
+`"Cohort_1"` and `"Cohort_2"` in the table, while the number of rows stays
+the same.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Subset by feature
+
+**Goal:** Learn to subset the data by features based on a `rowData`
+variable, and by samples and features at once.
+
+1. Show the frequency of each value in the `Phylum` column of `rowData`.
+
+2. Select the features that belong to the phyla *Proteobacteria* and
+*Verrucomicrobia*. Make sure that features with `NA` as their phylum are not
+selected. Store the result in a variable called `tse_features`.
+
+3. Check the dimensions of `tse_features`. Is the number of features equal to
+the sum of the frequencies of the selected phyla?
+
+4. Select the features of step 2 and the samples of Exercise 2 at once. Store
+the result in a variable called `tse_both`. Check its dimensions.
+
+**Useful functions:** `rowData()`, `table()`, `%in%`, `dim()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_subsetting_features
+
+# 1. Frequency of each phylum
+table(rowData(tse)$Phylum)
+
+# 2. Subset by feature
+selected_rows <- rowData(tse)$Phylum %in%
+    c("Proteobacteria", "Verrucomicrobia")
+tse_features <- tse[selected_rows, ]
+
+# 3. Check the dimensions
+dim(tse_features)
+
+# 4. Subset by sample and feature
+selected_cols <- tse$cohort %in% c("Cohort_1", "Cohort_2")
+tse_both <- tse[selected_rows, selected_cols]
+dim(tse_both)
+```
+
+2. `%in%` returns `FALSE` for the features whose phylum is `NA`, so they are
+not selected.
+
+3. The number of rows should equal the sum of the frequencies of
+*Proteobacteria* and *Verrucomicrobia* in the table, while the number of
+columns stays the same.
+
+4. The number of rows equals that of `tse_features` and the number of
+columns equals that of `tse_samples` from Exercise 2.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Remove empty samples
+
+**Goal:** Learn to remove samples that do not contain any counts after
+subsetting.
+
+1. Select the features whose genus is *Blautia*. Store the result in a
+variable called `tse_blautia`. Make sure that features with `NA` as their
+genus are not selected.
+
+2. Calculate the total number of counts in each sample of `tse_blautia`.
+Show the first values.
+
+3. Remove the samples whose total number of counts is 0. Check the
+dimensions of the result.
+
+4. Why can samples become empty after subsetting features?
+
+**Useful functions:** `rowData()`, `%in%`, `mia::addQC()`, `head()`,
+`dim()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_subsetting_empty
+
+# 1. Select the features of Blautia
+ind <- rowData(tse)$Genus %in% c("Blautia")
+tse_blautia <- tse[ind, ]
+
+# 2. Total number of counts in each sample
+tse_blautia <- addQC(tse_blautia)
+head(tse_blautia$total)
+
+# 3. Remove empty samples
+tse_blautia <- tse_blautia[, tse_blautia$total != 0]
+dim(tse_blautia)
+```
+
+1. As in Exercise 3, `%in%` returns `FALSE` for the features whose genus is
+`NA`, so they are not selected.
+
+4. After subsetting, the data contains only the selected features. If none
+of these features was detected in a sample, all its counts are zero. Such
+a sample does not contain any information on the selected features.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Filter out zero-variance features
+
+**Goal:** Learn to find and remove features that do not vary across
+samples.
+
+1. Select the samples of `"Cohort_3"` and store the result in a variable
+called `tse_cohort3`.
+
+2. Calculate the quality control metrics for each feature of `tse_cohort3`
+from the counts assay.
+
+3. Visualize the standard deviations of the features with a histogram. Use
+a logarithmic x-axis.
+
+4. Remove the features whose standard deviation is 0. Store the result in a
+variable called `tse_var`. Compare the number of features in `tse_cohort3`
+and `tse_var`.
+
+5. All features vary across the samples of the whole dataset. Why can
+zero-variance features appear after selecting only some of the samples?
+
+**Useful functions:** `mia::addQC()`, `miaViz::plotHistogram()`,
+`ggplot2::scale_x_log10()`, `rowData()`, `nrow()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_subsetting_variance
+#| warning: false
+
+library(miaViz)
+
+# 1. Select the samples of Cohort_3
+tse_cohort3 <- tse[, tse$cohort == "Cohort_3"]
+
+# 2. Quality control metrics for each feature
+tse_cohort3 <- addQC(tse_cohort3, assay.type = "counts", by = "rows")
+
+# 3. Histogram of standard deviations
+plotHistogram(tse_cohort3, row.var = "sd") +
+    scale_x_log10()
+
+# 4. Remove zero-variance features
+tse_var <- tse_cohort3[rowData(tse_cohort3)[["sd"]] > 0, ]
+nrow(tse_cohort3)
+nrow(tse_var)
+```
+
+3. Features with a standard deviation of zero cannot be shown on a
+logarithmic axis, so they are left out of the histogram.
+
+5. A feature has zero variance when it has the same count in every sample.
+Typically, this happens when a feature is not detected in any of the
+selected samples, so all its counts are zero. The fewer samples there are,
+the more likely this is.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 6: Subset based on prevalence
+
+**Goal:** Learn to subset the data to prevalent or rare features.
+
+1. Agglomerate `tse` to the Genus rank and store the result in a variable
+called `tse_genus`.
+
+2. Add the prevalence of each genus to `rowData` with a detection threshold
+of 1.
+
+3. Subset `tse_genus` to the genera with a prevalence over 0.2. Store the
+result in a variable called `tse_prevalent`.
+
+4. Subset `tse_genus` to the rest of the genera, that is, the rare genera.
+Store the result in a variable called `tse_rare`.
+
+5. Check the number of features in `tse_prevalent` and `tse_rare`.
+
+6. What does it mean that a genus is prevalent with these thresholds?
+
+7. How are the features in `tse_prevalent` and `tse_rare` related to each
+other?
+
+**Useful functions:** `mia::agglomerateByRank()`, `mia::addPrevalence()`,
+`mia::subsetBy()`, `nrow()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_subsetting_prevalence
+
+# 1. Agglomerate to genus level
+tse_genus <- agglomerateByRank(tse, rank = "Genus")
+
+# 2. Add prevalence
+tse_genus <- addPrevalence(tse_genus, detection = 1)
+
+# 3. Prevalent genera
+tse_prevalent <- subsetBy(tse_genus, rows = prevalence > 0.2)
+
+# 4. Rare genera
+tse_rare <- subsetBy(tse_genus, rows = prevalence <= 0.2)
+
+# 5. Number of features
+nrow(tse_prevalent)
+nrow(tse_rare)
+```
+
+6. A genus is detected in a sample if it has more than 1 count in it. It is
+prevalent if it is detected in more than 20% of the samples.
+
+7. The two subsets are complementary: each genus is either prevalent or
+rare. Together, they contain all genera of the data.
+:::
+::::
