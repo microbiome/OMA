@@ -12,23 +12,25 @@ The aim is to combine information from multiple omic layers to predict or
 classify the outcome, and to identify the features that contribute to the
 prediction.
 
-Supervised integration builds on the concepts of machine learning (see
-[@sec-machine_learning]). However, combining multiple omic layers
+Supervised integration builds on the concepts of machine learning (see the
+[machine learning chapter](https://microbiome.github.io/OMA-extras/docs/devel/pages/machine_learning.html) in OMA extras). However, combining multiple omic layers
 brings additional challenges, as discussed in [Introduction to multi-omics](multiomics.qmd). For instance,
 the layers can differ in their scale, distribution, and number of features.
 
 This chapter introduces two approaches for supervised integration:
-IntegratedLearner and DIABLO. IntegratedLearner is not yet available in
-Bioconductor, and DIABLO does not yet support `MultiAssayExperiment` data
-containers [@Ramos2017]. Therefore, no code is run in this chapter. Instead,
-we describe the ideas behind the methods and point to further resources.
+IntegratedLearner and DIABLO. IntegratedLearner works directly with
+`MultiAssayExperiment` data containers [@Ramos2017], and we show a complete
+workflow with it. DIABLO does not yet support `MultiAssayExperiment`, so we
+describe the ideas behind it and point to further resources.
 
 ## IntegratedLearner {#sec-integratedlearner}
 
 IntegratedLearner is a framework for multi-omics prediction and classification
-[@Mallick2024]. It builds on the `r BiocStyle::CRANpkg("SuperLearner")`
-package [@Van2007], which allows a wide range of machine learning algorithms to
-be used as the underlying models.
+[@Mallick2024], available in the `r BiocStyle::Biocpkg("IntegratedLearner")`
+package. It builds on the `r BiocStyle::CRANpkg("SuperLearner")` package
+[@Van2007], which allows a wide range of machine learning algorithms to be used
+as the underlying models. IntegratedLearner supports early, late and
+intermediate fusion.
 
 ### Fusion strategies
 
@@ -77,9 +79,244 @@ flowchart LR
     class ec,em,b1,b2,meta,im model
 ```
 
-IntegratedLearner is not yet available in Bioconductor. An example workflow
-using `MultiAssayExperiment` data is available in the
-[OMA extras](https://microbiome.github.io/OMA-extras/docs/devel/pages/integrated_learner.html).
+### Preparing the data {#sec-integratedlearner-data}
+
+We use the Inflammatory Bowel Diseases (IBD) data from the Human Microbiome
+Project 2 [@Lloyd-Price2019], which is available in the
+`r BiocStyle::Biocpkg("curatedMetagenomicData")` package. The aim is to
+classify the samples into IBD patients and healthy controls based on two omic
+layers: the abundances of species (taxonomic profiles) and of metabolic
+pathways (functional profiles).
+
+```{r}
+#| label: il_load_data
+#| message: false
+
+library(curatedMetagenomicData)
+library(dplyr)
+library(mia)
+
+# Select the samples of the study
+samples <- sampleMetadata |>
+    filter(study_name == "HMP_2019_ibdmdb")
+
+# Species and pathway abundances
+tse_species <- returnSamples(samples, "relative_abundance", rownames = "short")
+tse_pathway <- returnSamples(samples, "pathway_abundance", rownames = "short")
+
+# Create a MultiAssayExperiment
+mae <- MultiAssayExperiment(
+    ExperimentList(microbiota = tse_species, pathway = tse_pathway)
+)
+mae
+```
+
+IntegratedLearner matches the samples across the experiments by their column
+names, so each experiment should contain the same samples.
+`intersectColumns()` keeps only the samples that are found in all
+experiments.
+
+```{r}
+#| label: il_intersect_samples
+
+mae <- intersectColumns(mae)
+```
+
+Next, we check how the samples are divided between the groups.
+
+```{r}
+#| label: il_check_groups
+
+table(mae[["microbiota"]]$disease)
+```
+
+The groups are of different sizes. With imbalanced groups, a model can
+achieve a high accuracy just by predicting the larger group, which should be
+taken into account when the performance of the model is assessed.
+
+The pathway table contains, in addition to the abundances of the pathways,
+the abundances that HUMAnN could not assign to any pathway (`UNMAPPED` and
+`UNINTEGRATED`), and the pathway abundances divided between the species that
+contribute to them (rows with `|` in their name). We keep only the abundances
+of the pathways.
+
+```{r}
+#| label: il_pathways
+
+pathways <- rownames(mae[["pathway"]])
+keep <- !grepl("\\|", pathways) & !pathways %in% c("UNMAPPED", "UNINTEGRATED")
+mae[["pathway"]] <- mae[["pathway"]][keep, ]
+```
+
+Microbiome data contains many rare features. We keep only the features that
+are present in at least 10% of the samples (see [@sec-subset_prev]) and that
+vary between the samples, that is, have a standard deviation over zero.
+Finally, we apply the CLR transformation to both layers (see
+[@sec-assay-transform]).
+
+```{r}
+#| label: il_preprocess
+
+# Keep prevalent features that vary between samples
+mae[["microbiota"]] <- addPrevalence(
+    mae[["microbiota"]], assay.type = "relative_abundance")
+mae[["microbiota"]] <- addQC(
+    mae[["microbiota"]], assay.type = "relative_abundance", by = "rows")
+mae[["microbiota"]] <- subsetBy(
+    mae[["microbiota"]],
+    rows = prevalence >= 0.1 & sd > 0
+)
+mae[["pathway"]] <- addPrevalence(
+    mae[["pathway"]], assay.type = "pathway_abundance")
+mae[["pathway"]] <- addQC(
+    mae[["pathway"]], assay.type = "pathway_abundance", by = "rows")
+mae[["pathway"]] <- subsetBy(
+    mae[["pathway"]],
+    rows = prevalence >= 0.1 & sd > 0
+)
+
+# Apply CLR transformation
+mae[["microbiota"]] <- transformAssay(
+    mae[["microbiota"]],
+    assay.type = "relative_abundance", method = "clr", pseudocount = TRUE
+)
+mae[["pathway"]] <- transformAssay(
+    mae[["pathway"]],
+    assay.type = "pathway_abundance", method = "clr", pseudocount = TRUE
+)
+```
+
+After the filtering, the data contains `r nrow(mae[["microbiota"]])` species
+and `r nrow(mae[["pathway"]])` pathways.
+
+The data includes several samples from each subject. To estimate how well the
+model generalizes to new subjects, we select 20% of the subjects for a
+validation set, which is not used in training. All samples of a subject are
+placed in the same set.
+
+```{r}
+#| label: il_split_data
+
+set.seed(377)
+
+# Subject of each sample
+subject <- mae[["microbiota"]]$subject_id
+names(subject) <- colnames(mae[["microbiota"]])
+
+# Select 20% of the subjects for validation
+subjects <- unique(subject)
+valid_subjects <- sample(subjects, round(0.2 * length(subjects)))
+
+# Match the samples in the order of the MultiAssayExperiment
+is_valid <- subject[rownames(colData(mae))] %in% valid_subjects
+
+# Split the data
+mae_train <- mae[, !is_valid, ]
+mae_valid <- mae[, is_valid, ]
+```
+
+### Fitting the model {#sec-integratedlearner-fit}
+
+We fit the model with `IntegratedLearner()`. First, a base learner is trained
+for each omic layer separately. Then, a meta learner combines the predictions
+of the base learners into the final prediction. We use random forest
+(`"SL.randomForest"`) as the base learner and rank loss minimization
+(`"sl_nnls_auc"`) as the meta learner. The outcome is binary, so we use the
+binomial family.
+
+```{r}
+#| label: il_fit_model
+#| message: false
+#| warning: false
+
+library(IntegratedLearner)
+library(SuperLearner)
+
+fit <- IntegratedLearner(
+    MAE_train = mae_train,
+    MAE_valid = mae_valid,
+    # Experiments and assays
+    experiment = c("microbiota", "pathway"),
+    assay.type = c("clr", "clr"),
+    # Columns of the sample metadata
+    outcome_col = "disease",
+    subject_id_col = "subject_id",
+    # Base and meta learners
+    base_learner = "SL.randomForest",
+    meta_learner = "sl_nnls_auc",
+    # Binary outcome
+    family = binomial()
+)
+```
+
+The result includes the following models:
+
+- **Individual models** (`microbiota` and `pathway`) are trained separately
+  for each omic layer.
+- **The stacked model** (late fusion) combines the predictions of the
+  individual models with the meta learner.
+- **The concatenated model** (early fusion) is trained on all features of the
+  layers combined.
+
+### Model performance {#sec-integratedlearner-performance}
+
+The performance of the models can be visualized with Receiver Operating
+Characteristic (ROC) curves (@fig-il-roc). The curve shows the true positive
+rate against the false positive rate at different classification thresholds.
+The area under the curve (AUC) summarizes the performance: an AUC of 1 means a
+perfect classification, and an AUC of 0.5 a classification that is no better
+than chance. The upper panel shows the performance in the cross-validation of
+the training data, and the lower panel in the independent validation set.
+
+```{r}
+#| label: fig-il-roc
+#| fig-cap: "ROC curves of the IntegratedLearner models that classify the samples of the HMP2 IBD data into IBD patients and healthy controls. Panel A shows the performance in five-fold cross-validation of the training data and panel B in the independent validation set, for the models based on species, on pathways, and on both layers with late fusion (stacked) and early fusion (concatenated)."
+#| fig-alt: "Two panels of ROC curves, cross-validation on top and independent validation below. Each panel has the false positive rate on the x-axis and the true positive rate on the y-axis, with one curve per model: microbiota, pathway, stacked and concatenated."
+#| fig-height: 8
+
+p <- plot(fit)
+p$plot
+```
+
+The AUC, the accuracy and the balanced accuracy of each model in the
+validation set are stored in the result. The balanced accuracy is the average
+of the accuracies within each group, so it is not affected by the imbalance of
+the groups.
+
+```{r}
+#| label: il_metrics
+
+fit$metrics.test
+```
+
+### Feature importance {#sec-integratedlearner-importance}
+
+To identify the features that contribute most to the prediction, we take the
+importance scores of the features from the random forest models of the
+individual layers. We then scale them by the weight that each layer has in
+the stacked model, which gives the importance of each feature in the final
+model (@fig-il-importance).
+
+```{r}
+#| label: fig-il-importance
+#| fig-cap: "The 20 most important features of the stacked IntegratedLearner model of the HMP2 IBD data. The importance of each feature is its random forest importance (mean decrease in Gini impurity) scaled by the weight of its omic layer in the stacked model."
+#| fig-alt: "Lollipop plot of the 20 features with the highest importance in the stacked model, with the features on the y-axis and the scaled importance on the x-axis."
+
+library(miaViz)
+
+# Feature importances of each layer, scaled by the weight of the layer
+layers <- fit$model_fits$model_layers
+importance <- rbind(
+    layers[["microbiota"]]$importance * fit$weights[["microbiota"]],
+    layers[["pathway"]]$importance * fit$weights[["pathway"]]
+)
+
+plotLoadings(importance, ncomponents = 1, n = 20, show.color = FALSE)
+```
+
+More details on modelling with IntegratedLearner, including intermediate
+fusion and other types of outcomes, can be found from the
+[IntegratedLearner vignette](https://bioconductor.org/packages/IntegratedLearner).
 
 ## DIABLO {#sec-diablo}
 
@@ -94,3 +331,109 @@ DIABLO does not yet support `MultiAssayExperiment` data containers. More
 information and examples can be found from the
 [DIABLO manual](http://mixomics.org/mixdiablo/) and the
 [mixOmics Bioconductor page](https://bioconductor.org/packages/mixOmics).
+
+## Exercises {#sec-supervised-multiomics-exercises}
+
+We use the HMP2 IBD data from
+`r BiocStyle::Biocpkg("curatedMetagenomicData")`, as in this chapter.
+
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
+
+:::: {.callout-tip icon="false"}
+## Exercise 1: Fusion strategies
+
+**Goal:** Understand how the fusion strategies combine the omic layers.
+
+Answer the following questions without writing any code. The section
+[@sec-integratedlearner] will help you.
+
+1. How do early and late fusion differ?
+
+2. In early fusion, one omic layer has 1000 features and another 50 features.
+Why can this be a problem?
+
+3. In the stacked model, the meta learner gives a weight to each omic layer.
+What does a large weight tell about the layer?
+
+4. Why are all samples of a subject placed either in the training set or in
+the validation set?
+
+::: {.callout-note collapse="true"}
+## Solution
+
+1. Early fusion combines the omic layers into a single table before
+modelling, and a single model is trained on it. Late fusion trains a separate
+model for each layer and combines their predictions with a meta learner.
+
+2. The layer with more features can dominate the model, and the smaller layer
+has little influence on the prediction, even if it is informative.
+
+3. The predictions based on that layer contribute much to the final
+prediction of the stacked model.
+
+4. The samples of the same subject are similar to each other. If they were in
+both sets, the model would be validated partly on subjects that it has
+already seen, and the performance would be overestimated for new subjects.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Use another base learner
+
+**Goal:** Learn to fit a model with IntegratedLearner and to compare the
+performance of models.
+
+1. Prepare and split the data as in this chapter, so that you have the
+objects `mae_train` and `mae_valid`.
+
+2. Fit a model with `IntegratedLearner()` as in this chapter, but use lasso
+regression (`"SL.glmnet"`) as the base learner. Store the result in a
+variable called `fit_lasso`.
+
+3. Visualize the ROC curves of `fit_lasso`.
+
+4. Show the performance metrics of `fit_lasso` in the validation set, and
+compare them to those of the random forest model of this chapter.
+
+5. Why is the balanced accuracy a better measure than the accuracy for these
+data?
+
+**Useful functions:** `IntegratedLearner::IntegratedLearner()`, `plot()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_il_lasso
+#| message: false
+#| warning: false
+
+# 2. Fit a model with lasso as the base learner
+fit_lasso <- IntegratedLearner(
+    MAE_train = mae_train,
+    MAE_valid = mae_valid,
+    experiment = c("microbiota", "pathway"),
+    assay.type = c("clr", "clr"),
+    outcome_col = "disease",
+    subject_id_col = "subject_id",
+    base_learner = "SL.glmnet",
+    meta_learner = "sl_nnls_auc",
+    family = binomial()
+)
+
+# 3. ROC curves
+p <- plot(fit_lasso)
+p$plot
+
+# 4. Performance metrics of both models
+fit_lasso$metrics.test
+fit$metrics.test
+```
+
+5. Most samples are from IBD patients. A model that predicts IBD for all
+samples has a high accuracy, although it does not separate the groups at
+all. The balanced accuracy averages the accuracies within each group, so it
+is not affected by the sizes of the groups.
+:::
+::::
