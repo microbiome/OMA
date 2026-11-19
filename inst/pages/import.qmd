@@ -20,8 +20,8 @@ databases offer curated microbiome data, which are introduced in
 [@sec-example-data]. Finally, [@sec-convert] shows how to save the data
 containers and export them as tables.
 
-In prior to importing the data to container, the raw sequences must be
-mapped to abundances. The specific method depends on sequencing type and
+Before importing the data into a container, the raw sequences must be
+mapped to abundances. The specific method depends on the sequencing type and
 other data-specific factors. There are several resources available to
 guide this process, [Metagenomics wiki](https://www.metagenomics.wiki/)
 being one of them. [Here](https://github.com/microbiome/OMA/blob/devel/inst/pages/extra_material/dada2_workflow.Rmd)
@@ -31,8 +31,8 @@ a data container using `r BiocStyle::Biocpkg("dada2")` [@Callahan2016dada2].
 ## Import from files {#sec-loading-experimental-microbiome-data}
 
 The data containers can be constructed from scratch. For most common
-microbiome data formats, there are dedicated importers available which
-streamlines the importing.
+microbiome data formats, there are dedicated importers available that
+streamline the importing.
 
 ### Standard data formats
 
@@ -45,9 +45,9 @@ Specific import functions are provided for:
 - HUMAnN files [@Beghini2021] (see `help(importHUMAnN, package = "mia")`)
 - taxpasta files [@Beber2023] (see `help(importTaxpasta, package = "mia")`)
 
-Here we show how [Biom files](https://biom-format.org/) are imported
-into a `TreeSE` object [@Huang2021] using as an example Tengeler2020
-[@Tengeler2020], which is further described
+Here we show how [BIOM files](https://biom-format.org/) are imported
+into a `TreeSE` object [@Huang2021] using Tengeler2020 [@Tengeler2020]
+as an example, which is further described
 [here](https://microbiome.github.io/mia/reference/Tengeler2020.html).
 This dataset consists of 3 files, which can be fetched or downloaded
 from [this repository](https://github.com/microbiome/data/tree/main/Tengeler2020):
@@ -100,7 +100,7 @@ tse
 ```
 
 The `assays` slot includes a list of abundance tables. The imported
-abundance table is named as "counts". Let us inspect only the first
+abundance table is named "counts". Let us inspect only the first
 columns and rows.
 
 ```{r}
@@ -109,7 +109,7 @@ columns and rows.
 assay(tse, "counts")[1:3, 1:3]
 ```
 
-The `rowdata` includes taxonomic information from the biom file. The
+The `rowData` includes taxonomic information from the biom file. The
 `head()` command shows just the beginning of the data table for an
 overview.
 
@@ -167,8 +167,8 @@ rownames(sample_meta) <- colnames(tse)
 ```
 
 Now, we can add sample metadata to the `colData` as `DataFrame` class.
-(`DataFrame` is just like base R `data.frame` but some additional
-functionalities).
+(`DataFrame` is just like base R `data.frame` but with some additional
+functionality.)
 
 ```{r}
 #| label: import8
@@ -177,8 +177,8 @@ colData(tse) <- DataFrame(sample_meta)
 colData(tse) |> head()
 ```
 
-Finally, we add a phylogenetic tree to the `rowTree` slot. Such feature
-is available only in `TreeSE` objects. Similarly, Trees specifying the
+Finally, we add a phylogenetic tree to the `rowTree` slot. Such a feature
+is available only in `TreeSE` objects. Similarly, trees specifying the
 sample hierarchy can be stored in the `colTree` slot.
 
 Here, we read in the file containing the phylogenetic tree and insert it
@@ -201,9 +201,8 @@ Now the `rowTree` slot contains the phylogenetic tree:
 
 ```{r}
 #| label: import10
-#| eval: false
 
-rowTree(tse) |> head()
+rowTree(tse)
 ```
 
 ### Non-standard formats {#sec-import-from-file}
@@ -238,7 +237,8 @@ feature IDs (row names) match one-to-one with the abundance table row names.
 
 - Column data (`coldata.csv`): data table (samples x info); first column
 provides sample IDs, the first row provides column headers; this file usually
-contains the sample metadata/phenodata (such as subject age, health etc).
+contains the sample metadata/phenodata (such as subject age, health,
+etc.).
 Ideally, the sample IDs match one-to-one with the abundance table column names.
 
 After you have set up the CSV files, you can read them in R:
@@ -262,20 +262,20 @@ After reading the data in R, ensure the following:
 - abundance table (`counts`): numeric `matrix`, with feature IDs as rownames
 and sample IDs as column names.
 
-- `rowdata` (`tax`): `DataFrame` or `data.frame`, with feature IDs as rownames.
+- `rowData` (`tax`): `DataFrame` or `data.frame`, with feature IDs as rownames.
 If this is a `data.frame`, the `TreeSummarizedExperiment()` constructor
 converts the table automatically into `DataFrame` format (you can also do that
 manually with a `DataFrame()` function).
 Column names are free but in microbiome analysis they usually refer to
-taxonomic ranks. The rownames in rowdata should match with rownames in
+taxonomic ranks. The rownames in `rowData` should match the rownames in the
 abundance table.
 
-- `coldata` (`samples`): `DataFrame` or `data.frame`, with sample IDs as
+- `colData` (`samples`): `DataFrame` or `data.frame`, with sample IDs as
 rownames. If this is a `data.frame`, the `TreeSummarizedExperiment()`
 constructor converts the table automatically into `DataFrame` format (you can
 also do that manually with a `DataFrame()` function).
-Column names are free. The rownames in `coldata` should match with colnames
-in abundance table.
+Column names are free. The rownames in `colData` should match the colnames
+in the abundance table.
 
 **Always ensure that the tables have rownames!** The
 `r BiocStyle::Biocpkg("TreeSummarizedExperiment")` (`TreeSE`)
@@ -283,7 +283,7 @@ constructor compares rownames and ensures that, for example, the right
 samples are linked to the right patient.
 
 Also, ensure that the row and column names match one-to-one between
-abundance table, `rowdata`, and `coldata`:
+abundance table, `rowData`, and `colData`:
 
 ```{r}
 #| label: import_csv2
@@ -295,7 +295,7 @@ counts <- counts[rownames(tax), rownames(samples)]
 counts <- as.matrix(counts)
 ```
 
-If you hesitate about the format of the data, you can compare to one of
+If you are unsure about the format of the data, you can compare to one of
 the available demonstration datasets, and make sure that your data
 components have the same format.
 
@@ -315,7 +315,8 @@ all(rownames(tax) == rownames(counts)) # our dataset
 class(tax) # should be data.frame or DataFrame
 
 # Counts
-class(counts) # should be a numeric matrix
+class(counts) # should be a matrix
+is.numeric(counts) # should be TRUE
 ```
 
 ::: callout-important
@@ -331,7 +332,7 @@ this can lead to errors!
 #### Constructing TreeSE
 
 Now, let's create the `TreeSE` object from the input data tables. Here
-we also convert the data objects in their preferred formats:
+we also convert the data objects into their preferred formats:
 
 - `counts` → numeric `matrix`
 - `rowData` → `DataFrame` or `data.frame`
@@ -367,16 +368,16 @@ Here we import metabolite data from the same study.
 #| label: import_mae1
 #| message: false
 
-count_file <- system.file("extdata", "assay_metabolites.csv", package = "OMA")
+conc_file <- system.file("extdata", "assay_metabolites.csv", package = "OMA")
 sample_file <- system.file("extdata", "coldata.csv", package = "OMA")
 
 # Load files
-counts <- read.csv(count_file, row.names = 1)
+concs <- read.csv(conc_file, row.names = 1)
 samples <- read.csv(sample_file, row.names = 1)
 
 # Create a TreeSE for the metabolite data
 tse_metabolite <- TreeSummarizedExperiment(
-    assays = SimpleList(concs = as.matrix(counts)),
+    assays = SimpleList(concs = as.matrix(concs)),
     colData = samples
 )
 
@@ -412,7 +413,7 @@ If the data has already been imported in R in another format, it can be
 readily converted into `TreeSE`, as shown in our next example. Note that
 similar conversion functions to `TreeSE` are available for multiple data
 formats via the `r BiocStyle::Biocpkg("mia")` package (see convertFrom\*
-for `r BiocStyle::Biocpkg("phyloseq")`, `r BiocStyle::Githubpkg("joey711/biom")`,
+for `r BiocStyle::Biocpkg("phyloseq")`, `r BiocStyle::Biocpkg("biomformat")`,
 and `r BiocStyle::Biocpkg("dada2")`).
 
 ```{r}
@@ -460,8 +461,8 @@ can refer to the following functions:
 ## Open data resources {#sec-example-data}
 
 Open demonstration data for testing and benchmarking purposes is
-available from multiple locations. This chapter introduces some options.
-The data sets used in this book are described in [@sec-data-sets].
+available from multiple locations. This section introduces some options.
+The datasets used in this book are described in [@sec-data-sets].
 
 ### Package data {#sec-package-data}
 
@@ -488,7 +489,7 @@ data("GlobalPatterns", package = "mia")
 GlobalPatterns
 ```
 
-R packages contain additional demonstration data sets (see the Datasets
+R packages contain additional demonstration datasets (see the Datasets
 section of the reference page):
 
 - `r BiocStyle::Biocpkg("mia")`; [reference](https://microbiome.github.io/mia/reference/index.html)
@@ -515,7 +516,7 @@ availableDataSets()
 All data are downloaded from `ExperimentHub` and cached for local re-use.
 Check the
 [manual pages of each function](https://microbiome.github.io/microbiomeDataSets/reference/index.html)
-for a detailed documentation of the data contents and references. Let us
+for detailed documentation of the data contents and references. Let us
 retrieve a `r BiocStyle::Biocpkg("MultiAssayExperiment")` dataset. The
 HintikkaXOData dataset was originally distributed through
 `r BiocStyle::Biocpkg("microbiomeDataSets")` and is now also included in
@@ -548,8 +549,9 @@ presence, pathway abundance, pathway coverage, and relative abundance
 for samples from different body sites. See the package homepage for more
 details on data availability and access.
 
-As one example, let us retrieve the @Vatanen2016 data
-set. This is a larger collection with a bit longer download time.
+As one example, let us retrieve the @Vatanen2016
+dataset. This is a larger collection with a bit longer download time.
+The function returns a list with one object for each data type.
 
 ```{r}
 #| label: metagenome_datasets
@@ -557,7 +559,7 @@ set. This is a larger collection with a bit longer download time.
 #| eval: false
 
 library(curatedMetagenomicData)
-tse <- curatedMetagenomicData("Vatanen*", dryrun = FALSE, counts = TRUE)
+tse_list <- curatedMetagenomicData("Vatanen*", dryrun = FALSE, counts = TRUE)
 ```
 
 ### Microbiome compendium
@@ -669,7 +671,7 @@ directory, and `readObject()` loads it back.
 #| eval: false
 
 # Requires the alabaster.treese package to be installed
-library(alabaster)
+library(alabaster.treese)
 
 # Save TreeSE into a directory
 saveObject(tse, "path/to/tse")
@@ -685,19 +687,19 @@ objects.
 
 #### TreeSummarizedExperiment
 
-Transforming a `TreeSE` object into a dataframe is straightforward with
+Transforming a `TreeSE` object into a data frame is straightforward with
 the `r BiocStyle::Biocpkg("mia")` package. The `meltSE` function is
 particularly handy for this purpose. It allows you to melt various parts
-of a `TreeSE` object into a dataframe based on the parameters you specify.
+of a `TreeSE` object into a data frame based on the parameters you specify.
 
 Exporting a `TreeSE` data container can be done using the
 `r BiocStyle::CRANpkg("feather")` package, which builds on the
 `r BiocStyle::CRANpkg("arrow")` implementation of the Feather format; the same
 files can also be written with `arrow::write_feather()`. The `TreeSE` object
-has to be converted into a dataframe (`data.frame` and not `DataFrame`). The output
-file is a .feather file, which can be imported in other languages such as
+has to be converted into a data frame (`data.frame` and not `DataFrame`). The
+output file is a .feather file, which can be imported in other languages such as
 Julia or Python. For more information, have a look at the
-[FeatherFile](https://juliapackages.com/p/featherfiles) Julia package and
+[FeatherFiles](https://juliapackages.com/p/featherfiles) Julia package and
 [feather-format](https://pypi.org/project/feather-format/) Python
 library.
 
@@ -717,9 +719,9 @@ library(feather)
 write_feather(molten_tse, "path/to/tse.feather")
 ```
 
-Another way could be using a CSV file. This works the same as for a
-feather file, make sure you have converted your `TreeSE` data container
-as a dataframe. Note that you can decide whether you want to write
+Another way could be using a CSV file. This works the same way as for a
+feather file: make sure you have converted your `TreeSE` data container
+into a data frame. Note that you can decide whether you want to write
 the row names or not.
 
 ```{r}
@@ -1104,7 +1106,7 @@ the order goes unnoticed.
 :::: {.callout-tip icon="false"}
 ## Exercise 4: Construct a MAE
 
-**Goal:** Learn to combine several experiments into a `MAE` object.
+**Goal:** Learn to combine several experiments into an `MAE` object.
 
 1. Read the file `"assay_metabolites.csv"` from the `extdata` folder of the
 `OMA` package, using the first column as row names. Create a `TreeSE` object
@@ -1115,7 +1117,7 @@ called `tse_metabolite`.
 2. Combine `tse_taxa` from Exercise 3 and `tse_metabolite` into an
 `ExperimentList`, with the names `"microbiome"` and `"metabolite"`.
 
-3. Create a `MAE` object from the `ExperimentList`, store it in a variable
+3. Create an `MAE` object from the `ExperimentList`, store it in a variable
 called `mae`, and print it.
 
 4. The two experiments have very different numbers of features. Why can they
@@ -1154,7 +1156,7 @@ mae <- MultiAssayExperiment(experiments = experiments)
 mae
 ```
 
-4. Each experiment in a `MAE` object is a separate data container with its
+4. Each experiment in an `MAE` object is a separate data container with its
 own features. Only the samples are linked between the experiments, so the
 numbers of features can differ.
 :::
@@ -1332,8 +1334,8 @@ Why might the alabaster format be easier to share with others and to read
 years later?
 
 **Useful functions:** `data()`, `tempfile()`, `saveRDS()`, `readRDS()`,
-`identical()`, `library()`, `alabaster::saveObject()`,
-`alabaster::readObject()`, `list.files()`
+`identical()`, `library()`, `alabaster.base::saveObject()`,
+`alabaster.base::readObject()`, `list.files()`
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -1363,7 +1365,7 @@ identical(tse, tse_rds)
 #| eval: false
 
 # 5. Save TreeSE with alabaster (requires the alabaster.treese package)
-library(alabaster)
+library(alabaster.treese)
 
 alabaster_dir <- tempfile()
 saveObject(tse, alabaster_dir)
