@@ -767,53 +767,51 @@ And as a CSV file.
 write.csv(molten_mae, "path/to/mae.csv", row.names = FALSE)
 ```
 
-### Export to other tools {#sec-export-tools}
+## Export to standard data formats
 
-The data can be exported in formats that are nearly ready for analysis with
-other microbiome analysis tools. `exportQIIME2()` and `exportMothur()` write
-the abundance table, taxonomy table, sample metadata and phylogenetic tree as
-separate files for [QIIME 2](https://qiime2.org/) and
-[mothur](https://mothur.org/), respectively. The files need some further
-processing in the target tool.
+Inspired by the
+[rbiom vignettes](https://cmmr.github.io/rbiom/articles/convert.html),
+`exportQIIME2()` and `exportMothur()` allow to save the data in a near-ready
+format for analysis with QIIME2 and mothur, respectively. The output will need
+additional processing in the target framework.
 
 ```{r}
-#| label: write_qiime2
+#| label: write_qiime
 #| eval: false
 
-exportQIIME2(tse, "path/to/qiime2_folder")
+exportQIIME2(tse, "qiime2_folder")
 ```
 
-In QIIME 2, the files can be converted into QIIME 2 artifacts (QZA files) in
-the terminal as follows.
+Conversion is completed in the terminal using QIIME2. The output files can be converted to the standard QZA format as follows:
 
 ```bash
-# Navigate to the output folder
-cd path/to/qiime2_folder
+# Navigate to output folder
+cd qiime2_folder
 
-# Convert the abundance table to BIOM format (HDF5)
+# Convert classic BIOM table to HDF5
 biom convert -i counts.tsv -o counts.hdf5 --to-hdf5
 
-# Import the abundance table
+# Convert counts to QZA
 qiime tools import \
-    --input-path counts.hdf5 \
-    --type 'FeatureTable[Frequency]' \
-    --input-format BIOMV210Format \
-    --output-path counts.qza
+  --input-path counts.hdf5 \
+  --type 'FeatureTable[Frequency]' \
+  --input-format BIOMV210Format \
+  --output-path counts.qza
 
-# Import the taxonomy table
+# Convert taxonomy to QZA
 qiime tools import \
-    --input-path taxonomy.tsv \
-    --type 'FeatureData[Taxonomy]' \
-    --output-path taxonomy.qza
+ --input-path taxonomy.tsv \
+ --type FeatureData[Taxonomy] \
+ --output-path taxonomy.qza
 
-# Import the phylogenetic tree
+# Convert tree to QZA
 qiime tools import \
-    --input-path tree.nwk \
-    --type 'Phylogeny[Rooted]' \
-    --output-path tree.qza
+  --input-path tree.nwk \
+  --type 'Phylogeny[Rooted]' \
+  --output-path tree.qza
 ```
 
-Similarly, the data can be exported for mothur.
+Alternatively, data can be exported to be used with mothur:
 
 ```{r}
 #| label: write_mothur
@@ -822,28 +820,28 @@ Similarly, the data can be exported for mothur.
 exportMothur(tse, "path/to/mothur_folder")
 ```
 
-In mothur, a shared file can be created from the abundance table in the
-terminal.
+Again, conversion can be completed in the terminal using mothur:
 
 ```bash
-# Navigate to the output folder
-cd path/to/mothur_folder
+# Navigate to output folder
+cd mothur_folder
 
-# Create a shared file from the abundance table
+# Create shared file from counts table
 mothur "#make.shared(count=counts.tsv, label=asv);"
 ```
 
-Many tools can also read BIOM files [@McDonald2012]. `convertToBIOM()`
-converts `TreeSE` into a BIOM object, which can be saved with
-`r BiocStyle::Biocpkg("biomformat")`.
+In addition, the `r BiocStyle::Biocpkg("rbiom")` package can be used to export
+the data in the BIOM format.
 
 ```{r}
 #| label: write_biom
 #| eval: false
 
-# Convert TreeSE into BIOM object and save it
+# Convert TreeSE to BIOM
 biom <- convertToBIOM(tse)
-biomformat::write_biom(biom, "path/to/tse.biom")
+
+library(rbiom)
+write_biom(biom, "path/to/tse.biom", format = "hdf5")
 ```
 
 ## Exercises {#sec-import-exercises}
@@ -1511,7 +1509,7 @@ feature (`rowname`) and the value.
 ::::
 
 :::: {.callout-tip icon="false"}
-## Exercise 11: Export for other tools
+## Exercise 11: Export to standard data formats
 
 **Goal:** Learn to export the data for other microbiome analysis tools.
 
