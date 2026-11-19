@@ -149,7 +149,7 @@ library(miaViz)
 # Only consider Forest samples
 tse <- tse[, colData(tse)$Country == "Finland"]
 # Agglomerate to phylum level
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
+tse <- agglomerateByRank(tse, rank = "Phylum", update.tree = TRUE)
 # Get top taxa
 rel_taxa <- getTop(tse, top = 8, assay.type = "counts")
 # Take only the top taxa
@@ -170,7 +170,7 @@ library(ComplexHeatmap)
 library(grid)
 library(RColorBrewer)
 # Agglomerate to phylum level
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
+tse <- agglomerateByRank(tse, rank = "Phylum", update.tree = TRUE)
 # Take only the top taxa
 tse <- tse[is.element(rownames(tse), rel_taxa), ]
 
@@ -304,7 +304,7 @@ Now, let's divide the subjects into their respective clusters.
 
 ```{r create clusters}
 library(cluster)
-tse2 <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
+tse2 <- agglomerateByRank(tse, rank = "Phylum", update.tree = TRUE)
 
 # assume 6 clusters
 K <- 6
@@ -418,8 +418,18 @@ Let's cluster the data with DMM clustering.
 # Runs model and calculates the most likely number of clusters from 1 to 7.
 # Since this is a large dataset it takes a long time to run
 # For this reason we use only a subset of the data agglomerated to the phylum level
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
-tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
+library(bluster)
+
+tse <- agglomerateByRank(tse, rank = "Phylum", update.tree = TRUE)
+tse_dmn <- addCluster(
+    tse,
+    assay.type = "counts",
+    name = "DMN",
+    DmmParam(k = 1:7, type = "laplace"),
+    by = "samples",
+    full = TRUE,
+    clust.col = "dmmclust"
+)
 ```
 
 ```{r}
@@ -436,7 +446,8 @@ names(metadata(tse_dmn))
 This returns a list of DMN objects for closer investigation.
 
 ```{r}
-getDMN(tse_dmn)
+dmn_models <- metadata(tse_dmn)[["DMN"]]
+dmn_models[["dmm"]]
 ```
 
 
@@ -444,13 +455,14 @@ Show Laplace approximation (model evidence) for each model of every value of $k$
 
 ```{r}
 library(miaViz)
-plotDMNFit(tse_dmn, type = "laplace")
+plotDMNFit(tse_dmn, type = "laplace", name = "DMN")
 ```
 
 Return the model that has the best fit.
 
 ```{r}
-getBestDMNFit(tse_dmn, type = "laplace")
+best_model <- dmn_models[["dmm"]][[dmn_models[["best"]]]]
+best_model
 ```
 ### PCoA for ASV-level data with Bray-Curtis
 
@@ -470,7 +482,7 @@ Mixture weights (rough measure of the cluster size).
 
 
 ```{r}
-DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
+DirichletMultinomial::mixturewt(best_model)
 ```
 
 
@@ -478,18 +490,18 @@ Samples-cluster assignment probabilities / how probable it is that a sample belo
 to each cluster
 
 ```{r}
-DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)) |> head()
+DirichletMultinomial::mixture(best_model) |> head()
 ```
 
 Contribution of each taxa to each component
 
 ```{r}
-DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)) |> head()
+DirichletMultinomial::fitted(best_model) |> head()
 ```
 Get the assignment probabilities
 
 ```{r}
-prob <- DirichletMultinomial::mixture(getBestDMNFit(tse_dmn))
+prob <- DirichletMultinomial::mixture(best_model)
 # Add column names
 colnames(prob) <- paste0("comp", seq_len(ncol(prob)))
 
