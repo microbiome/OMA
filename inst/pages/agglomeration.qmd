@@ -1,23 +1,50 @@
 # Agglomeration {#sec-agglomeration}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 In [@sec-treese_subsetting], we covered how to select features from the dataset.
 Agglomeration, on the other hand, involves combining data points into broader
 feature categories by summing their values. For instance, if you have counts
 for individual species, you might agglomerate them into groups based on the
 family of each species. This means you would add up the counts of all species
-within a particular family to get a single value that represents that family.
+within a particular family to get a single value that represents that family
+(@fig-agglomeration).
 While this method simplifies your dataset and you lose the specific information
 about individual species, it can, however, be useful in highlighting overall
 trends.
+
+```{mermaid}
+%%| label: fig-agglomeration
+%%| fig-cap: "Agglomeration sums the counts of features up the taxonomy tree. In this sample, four species are agglomerated into three genera and two families; the total count (18) stays the same."
+flowchart LR
+    subgraph sp["Species"]
+        direction TB
+        s1["<i>Roseburia intestinalis</i><br/>6"]
+        s2["<i>Roseburia hominis</i><br/>3"]
+        s3["<i>Blautia obeum</i><br/>4"]
+        s4["<i>Bacteroides fragilis</i><br/>5"]
+    end
+    subgraph ge["Genus"]
+        direction TB
+        g1["<i>Roseburia</i><br/>6 + 3 = 9"]
+        g2["<i>Blautia</i><br/>4"]
+        g3["<i>Bacteroides</i><br/>5"]
+    end
+    subgraph fa["Family"]
+        direction TB
+        f1["Lachnospiraceae<br/>9 + 4 = 13"]
+        f2["Bacteroidaceae<br/>5"]
+    end
+    s1 --> g1
+    s2 --> g1
+    s3 --> g2
+    s4 --> g3
+    g1 --> f1
+    g2 --> f1
+    g3 --> f2
+    classDef leaf fill:#ffffff,stroke:#6c757d,color:#070707
+    classDef agg fill:#e6f3f7,stroke:#0087af,color:#070707
+    class s1,s2,s3,s4 leaf
+    class g1,g2,g3,f1,f2 agg
+```
 
 The choice between subsetting and agglomeration depends on your research goals
 and the type of insights you want to gain from your data. For example, if you
@@ -170,7 +197,7 @@ altExp(tse, "phylum") <- tse_phylum
 altExpNames(tse)
 ```
 
-`altExpNames` now consists of `Phylum` level data. This can be extended to use
+`altExpNames` now consists of `phylum` level data. This can be extended to use
 any taxonomic level listed in `taxonomyRanks(tse)`. While it is certainly
 possible to agglomerate data one taxonomic level at a time, you can also
 aggregate data across all available ranks in a single step using the
@@ -194,8 +221,10 @@ the agglomerates are made based on features, such as taxonomy information.
 Alternatively, you can use `agglomerateByVariable()` to aggregate the data.
 
 `agglomerateByVariable()` is designed to aggregate data based on other criteria
-than taxa, such as sample groups or clusters. The function operates similarly
-to feature aggregation, but the `by` parameter must be set to "rows."
+than taxa, such as sample groups or clusters. The `by` parameter specifies
+whether features (`by = "rows"`) or samples (`by = "cols"`) are aggregated, and
+`group` names the `rowData` or `colData` variable that defines the groups.
+Below, we aggregate samples by their sample type.
 
 ::: {.callout-note}
 ## Note
@@ -224,16 +253,16 @@ to agglomerate data effectively.
 features. In some cases, it might be beneficial to combine the features that
 would otherwise be removed. For example, instead of filtering out rare taxa, we
 can combine the reads from all these rare taxa under a new feature which we can
-call "Rare taxa". The function `agglomerateByPrevalence()` accomplishes this by
-merging filtered features into a single feature called "Other" by default,
+call "Rare taxa". The function `subsetBy()` with `collapse = TRUE` accomplishes
+this by merging filtered features into a single feature called "Other" by default,
 preventing unnecessary loss of information. This is particularly useful when
-working with left-skewed feature data, such as soil microbiome data sets where
+working with right-skewed feature data, such as soil microbiome data sets where
 rare taxa may represent a significant proportion of the reads when combined.
 
 Here, we demonstrate how to agglomerate the data using prevalence and abundance
 thresholds of 20% and 0.1%, respectively. This means that for a feature to be
 considered detected in a sample, its relative abundance must exceed 0.1% and
-after this, the feature must be detected in at least 20% of samples. Taxa that
+after this, the feature must be detected in more than 20% of samples. Taxa that
 do not meet these criteria are combined in the "Other" group.
 
 To use relative abundances for the detection threshold, we must first transform
@@ -247,11 +276,11 @@ transformations are introduced in more detail in [@sec-assay-transform].
 tse <- transformAssay(tse, method = "relabundance")
 
 # Agglomerate
-tse_prev <- agglomerateByPrevalence(
+tse <- addPrevalence(tse, assay.type = "relabundance", detection = 0.001)
+tse_prev <- subsetBy(
     tse,
-    assay.type = "relabundance",
-    prevalence = 20 / 100,
-    detection = 0.1 / 100
+    rows = prevalence > 0.2,
+    collapse = TRUE
 )
 tse_prev
 ```
@@ -259,34 +288,25 @@ tse_prev
 We have now successfully agglomerated the data based on prevalence. Similarly,
 if we were interested in only the most prevalent phyla, we can certainly first
 agglomerate the data by Phylum rank and then by prevalence, combining the rarer
-Phyla into one category. In fact, the function `agglomerateByPrevalence()`
-allows us to accomplish both tasks simultaneously.
+Phyla into one category. This is done by agglomerating the data with
+`agglomerateByRank()` before `subsetBy()`.
 
 ```{r}
 #| label: agg_prev_phylum
 
-tse_prev_phylum <- agglomerateByPrevalence(
-    tse,
-    rank = "Phylum",
-    prevalence = 20 / 100,
-    detection = 1
+tse_prev_phylum <- agglomerateByRank(tse, rank = "Phylum")
+tse_prev_phylum <- addPrevalence(tse_prev_phylum, detection = 1)
+tse_prev_phylum <- subsetBy(
+    tse_prev_phylum,
+    rows = prevalence > 0.2,
+    collapse = TRUE
 )
 tse_prev_phylum
 ```
 
 ## Exercises {#sec-agglomeration-exercises}
 
-In these exercises, you will practise the main steps of this chapter:
-agglomerating features to a taxonomy rank, storing agglomerated data in
-alternative experiments, agglomerating samples based on a sample variable, and
-agglomerating rare features based on prevalence.
-
-We use the `Tengeler2020` dataset from the `r BiocStyle::Biocpkg("mia")`
-package. It contains gut microbiome profiles of 27 mice that were colonized
-with stool from either individuals with attention-deficit/hyperactivity
-disorder (ADHD) or healthy controls. The taxonomy of the features is stored in
-`rowData`, and the group of each sample is stored in the `patient_status`
-column of `colData`.
+We use the [`Tengeler2020`](data_sets.qmd#sec-data-tengeler2020) dataset.
 
 Solve the exercises in order, as each exercise continues from the previous
 one. Try to solve each exercise yourself before opening the solution.
@@ -296,21 +316,21 @@ one. Try to solve each exercise yourself before opening the solution.
 
 **Goal:** Understand how agglomeration combines features.
 
-Imagine a dataset with four species from two families, measured in two
-samples:
+Imagine a dataset with four bacterial species from two genera, measured in
+two samples:
 
-| Species   | Family   | Sample A | Sample B |
-|-----------|----------|---------:|---------:|
-| Species 1 | Family X | 10       | 0        |
-| Species 2 | Family X | 30       | 5        |
-| Species 3 | Family Y | 55       | 90       |
-| Species 4 | Family Y | 5        | 5        |
+| Species                | Genus       | Sample A | Sample B |
+|------------------------|-------------|---------:|---------:|
+| *Bacteroides fragilis* | Bacteroides | 10       | 0        |
+| *Bacteroides ovatus*   | Bacteroides | 30       | 5        |
+| *Prevotella copri*     | Prevotella  | 55       | 90       |
+| *Prevotella bivia*     | Prevotella  | 5        | 5        |
 
 Answer the following questions without writing any code. The beginning of
 this chapter will help you.
 
-1. What are the counts of Family X and Family Y in both samples after the
-data is agglomerated to the Family rank?
+1. What are the counts of *Bacteroides* and *Prevotella* in both samples
+after the data is agglomerated to the Genus rank?
 
 2. How many rows and columns does the agglomerated data have?
 
@@ -319,29 +339,29 @@ the taxonomy table? Why?
 
 4. Does the total number of reads in each sample change in agglomeration?
 
-5. Suppose Species 4 is considered rare. What happens to its reads if rare
-features are removed, and what happens if they are agglomerated based on
-prevalence instead?
+5. Suppose *Prevotella bivia* is considered rare. What happens to its reads
+if rare features are removed, and what happens if they are agglomerated based
+on prevalence instead?
 
 ::: {.callout-note collapse="true"}
 ## Solution
 
-1. The counts of the species in the same family are summed. Family X has
-10 + 30 = 40 reads in Sample A and 0 + 5 = 5 reads in Sample B. Family Y has
-55 + 5 = 60 reads in Sample A and 90 + 5 = 95 reads in Sample B.
+1. The counts of the species in the same genus are summed. *Bacteroides* has
+10 + 30 = 40 reads in Sample A and 0 + 5 = 5 reads in Sample B. *Prevotella*
+has 55 + 5 = 60 reads in Sample A and 90 + 5 = 95 reads in Sample B.
 
-2. The data has two rows, one for each family, and two columns. Agglomeration
+2. The data has two rows, one for each genus, and two columns. Agglomeration
 of features does not change the samples.
 
 3. The Species column would contain `NA`. Each row now represents a whole
-family that contains several species, so it cannot be mapped to a single
+genus that contains several species, so it cannot be mapped to a single
 species.
 
 4. No. The counts are only summed into larger groups, so each sample has
 the same total number of reads as before (100 reads in both samples here).
 This holds as long as all features have a value in the chosen rank.
 
-5. If rare features are removed, the reads of Species 4 are lost. In
+5. If rare features are removed, the reads of *Prevotella bivia* are lost. In
 agglomeration based on prevalence, the rare features are combined into a
 single feature called "Other", so their reads are kept in the data.
 :::
@@ -529,19 +549,21 @@ longer match those of `tse`.
 **Goal:** Learn to combine rare features into a single feature with
 prevalence-based agglomeration.
 
-1. Agglomerate `tse` based on prevalence using the `counts` assay. Use a
-prevalence threshold of 20% and a detection threshold of 1 count, and store
-the result in a variable called `tse_prev`.
+1. Add the prevalence of each feature to `rowData` with `addPrevalence()`.
+Use the `counts` assay and a detection threshold of 1 count.
 
-2. How many rows does `tse_prev` have? Show the last row names. Which feature
+2. Keep the features with a prevalence over 0.2 and combine the rest into a
+single feature with `subsetBy()` and `collapse = TRUE`. Store the result in a
+variable called `tse_prev`.
+
+3. How many rows does `tse_prev` have? Show the last row names. Which feature
 contains the rare features?
 
-3. Agglomerate `tse` to the Phylum rank and based on prevalence in a single
-step. Use a prevalence threshold of 20% and a detection threshold of 1 count.
-Show the row names of the result.
+4. Agglomerate `tse` to the Phylum rank, and then combine the phyla in the
+same way. Show the row names of the result.
 
-**Useful functions:** `mia::agglomerateByPrevalence()`, `nrow()`,
-`rownames()`, `tail()`
+**Useful functions:** `mia::addPrevalence()`, `mia::subsetBy()`,
+`mia::agglomerateByRank()`, `nrow()`, `rownames()`, `tail()`
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -549,35 +571,31 @@ Show the row names of the result.
 ```{r}
 #| label: exercise_agglomeration_prevalence
 
-# 1. Agglomerate based on prevalence
-tse_prev <- agglomerateByPrevalence(
-    tse,
-    assay.type = "counts",
-    prevalence = 20 / 100,
-    detection = 1
-)
+# 1. Add prevalence to rowData
+tse <- addPrevalence(tse, assay.type = "counts", detection = 1)
 
-# 2. Number of rows and the last row names
+# 2. Keep prevalent features and combine the rest
+tse_prev <- subsetBy(tse, rows = prevalence > 0.2, collapse = TRUE)
+
+# 3. Number of rows and the last row names
 nrow(tse_prev)
 rownames(tse_prev) |> tail()
 
-# 3. Agglomerate to Phylum rank and based on prevalence
-tse_prev_phylum <- agglomerateByPrevalence(
-    tse,
-    rank = "Phylum",
-    prevalence = 20 / 100,
-    detection = 1
-)
+# 4. Agglomerate to Phylum rank, and then based on prevalence
+tse_prev_phylum <- agglomerateByRank(tse, rank = "Phylum")
+tse_prev_phylum <- addPrevalence(tse_prev_phylum, detection = 1)
+tse_prev_phylum <- subsetBy(
+    tse_prev_phylum, rows = prevalence > 0.2, collapse = TRUE)
 rownames(tse_prev_phylum)
 ```
 
-2. The features that are detected with a count over 1 in at least 20% of
-the samples are kept as they are. All other features are summed
-into the last row, which is called "Other".
+3. The features that have more than 1 count in more than 20% of the samples
+are kept as they are. All other features are summed into the last row, which
+is called "Other".
 
-3. The data is first agglomerated to the Phylum rank, and then the phyla that
-do not exceed the thresholds are combined into "Other". Here, the detection
-threshold of 1 refers to the counts, because the `counts` assay is used by
-default.
+4. The data is first agglomerated to the Phylum rank, and then the phyla that
+do not exceed the thresholds are combined into "Other". The prevalence is
+calculated again after the agglomeration, because the prevalence of a phylum
+differs from the prevalence of the features that it contains.
 :::
 ::::

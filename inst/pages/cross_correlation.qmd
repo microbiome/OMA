@@ -1,15 +1,6 @@
 # Cross-association {#sec-cross-correlation}
 
 ```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
-```{r}
 #| label: load_pkg
 
 library(mia)
@@ -40,13 +31,18 @@ transformation.
 ```{r}
 #| label: cross-association2
 # Agglomerate microbiome data at family level
-mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family", na.rm = TRUE)
+mae[[1]] <- agglomerateByRank(mae[[1]], rank = "Family", na.rm = TRUE)
+mae[[1]] <- addPrevalence(mae[[1]])
+mae[[1]] <- subsetBy(
+    mae[[1]],
+    rows = prevalence > 0.5, collapse = TRUE
+)
 # Does log10 transform for microbiome data
 mae[[1]] <- transformAssay(mae[[1]], method = "log10", pseudocount = TRUE)
 ```
 
 Next we can perform a cross-association analysis. Let us analyze if
-individual bacteria genera are correlated with concentrations of
+individual bacterial families are correlated with concentrations of
 individual metabolites. This helps to answer the following question: "If
 bacterium X is present, is the concentration of metabolite Y lower or higher"?
 
@@ -69,11 +65,12 @@ res <- getCrossAssociation(
 ```
 
 Next, we create a heatmap depicting all cross-correlations between bacterial
-genera and metabolite concentrations (@fig-cross-association-heatmap).
+families and metabolite concentrations (@fig-cross-association-heatmap).
 
 ```{r}
 #| label: fig-cross-association-heatmap
 #| fig-cap: "Heatmap of Spearman correlations between log10-transformed abundances of prevalent bacterial families (rows) and NMR metabolite concentrations (columns) in the Hintikka et al. (2021) data. Colour shows the correlation and X marks correlations with adjusted p-value below 0.05."
+#| fig-alt: "Clustered heatmap with bacterial families as rows and metabolites as columns, filled by Spearman correlation on a colour scale, with an X in the cells of significant correlations."
 #| fig-width: 10
 #| fig-height: 8
 
@@ -113,17 +110,8 @@ and then correlates these modules across omic layers [@Gupta2026].
 
 ## Exercises {#sec-cross-correlation-exercises}
 
-In these exercises, you will practise the main steps of this chapter:
-preparing the data of two omics, calculating cross-associations between
-their features, and visualizing the results.
-
-We use the `HintikkaXOData` dataset from the `r BiocStyle::Biocpkg("mia")`
-package, which is also used in this chapter. It is a `MultiAssayExperiment`
-with three experiments measured from the same 40 rats: `microbiota`,
-`metabolites` and `biomarkers`. In the chapter, the microbiota was compared
-with the metabolites. In these exercises, we compare the microbiota with the
-biomarkers, which are stored in the `signals` assay of the `biomarkers`
-experiment.
+We use the [`HintikkaXOData`](data_sets.qmd#sec-data-hintikka) dataset. Unlike
+in this chapter, we compare the microbiota with the biomarkers.
 
 Solve the exercises in order, as each exercise continues from the previous
 one. Try to solve each exercise yourself before opening the solution.
@@ -177,15 +165,16 @@ variable called `mae`.
 2. Show the experiments of `mae`. Check the names of the assays in the
 `microbiota` and `biomarkers` experiments.
 
-3. Agglomerate the `microbiota` experiment to prevalent families with
-`agglomerateByPrevalence()`. Use `rank = "Family"` and `na.rm = TRUE`. How
-many families are left?
+3. Agglomerate the `microbiota` experiment to the Family rank with
+`na.rm = TRUE`. Then add the prevalence, and combine the families with a
+prevalence of 0.5 or less into "Other". How many families are left?
 
 4. Apply the log10 transformation to the `counts` assay of the `microbiota`
 experiment with `pseudocount = TRUE`.
 
 **Useful functions:** `data()`, `MultiAssayExperiment::experiments()`,
-`SummarizedExperiment::assayNames()`, `mia::agglomerateByPrevalence()`,
+`SummarizedExperiment::assayNames()`, `mia::agglomerateByRank()`,
+`mia::addPrevalence()`, `mia::subsetBy()`,
 `nrow()`, `mia::transformAssay()`
 
 ::: {.callout-note collapse="true"}
@@ -206,10 +195,11 @@ assayNames(mae[["microbiota"]])
 assayNames(mae[["biomarkers"]])
 
 # 3. Agglomerate microbiota to prevalent families
-mae[["microbiota"]] <- agglomerateByPrevalence(
-    mae[["microbiota"]],
-    rank = "Family", na.rm = TRUE
-)
+mae[["microbiota"]] <- agglomerateByRank(
+    mae[["microbiota"]], rank = "Family", na.rm = TRUE)
+mae[["microbiota"]] <- addPrevalence(mae[["microbiota"]])
+mae[["microbiota"]] <- subsetBy(
+    mae[["microbiota"]], rows = prevalence > 0.5, collapse = TRUE)
 nrow(mae[["microbiota"]])
 
 # 4. log10 transformation

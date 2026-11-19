@@ -1,14 +1,5 @@
 # Subsetting {#sec-treese_subsetting}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 In this chapter, we explore the concept of subsetting. Subsetting or
 filtering is the process of selecting specific rows or columns from a
 dataset based on certain criteria. When you subset your data, you retain
@@ -23,8 +14,8 @@ sets of samples and / or features. When dealing with large datasets, the
 subset of interest can be extracted and investigated separately. This
 might improve performance and reduce the computational load.
 
-Let us store `GlobalPatterns` into `tse` and check its original number
-of features (rows) and samples (columns).
+Let us store `GlobalPatterns` [@Caporaso2011] into `tse` and check its original
+number of features (rows) and samples (columns).
 
 ```{r}
 #| label: load_data
@@ -91,7 +82,7 @@ dim(tse_sub)
 ::: callout-note
 ## Note
 
-After subsetting, expect the number of columns to equal the sum of the
+After subsetting, expect the number of rows to equal the sum of the
 frequencies of the samples that you are interested in. For instance,
 `ncols = Feces + Skin + Tongue = 4 + 3 + 2 = 9`.
 :::
@@ -120,7 +111,7 @@ rowData(tse)$Phylum |>
 ::: callout-note
 ## Note
 
-After subsetting, expect the number of columns to equal the sum of the
+After subsetting, expect the number of rows to equal the sum of the
 frequencies of the feature(s) that you are interested in. For instance,
 `nrows = Actinobacteria + Chlamydiae = 1631 + 21 = 1652`.
 :::
@@ -136,7 +127,7 @@ details).
 Next, we *logically index* across the rows of `tse` (make sure to leave
 the second index empty to select all columns) and filter for the
 features that fall in either *Actinobacteria* or *Chlamydiae* group. For
-this, we use the information on the samples from the metadata
+this, we use the information on the features from the metadata
 `rowData(tse)`.
 
 The first term with the `%in%` operator includes all the features of
@@ -249,6 +240,7 @@ histogram (@fig-subsetting-sd-histogram).
 ```{r}
 #| label: fig-subsetting-sd-histogram
 #| fig-cap: "Histogram of the standard deviations of feature counts in the GlobalPatterns data set, shown on a logarithmic x-axis."
+#| fig-alt: "Histogram with the standard deviation of feature counts on a log10 x-axis and the number of features on the y-axis."
 #| warning: false
 
 library(miaViz)
@@ -293,9 +285,9 @@ the goal is to remove low-variance features as well.
 ::: callout-tip
 ## Tidy alternative
 
-If you are more familiar with tidyverse syntax, the same filtering can be
-done with the `filter()` function from the
-`r BiocStyle::Biocpkg("tidySummarizedExperiment")` package.
+If you are more familiar with tidyverse [@Wickham2019] syntax, the same
+filtering can be done with the `filter()` function from the
+`r BiocStyle::Biocpkg("tidySummarizedExperiment")` package [@Hutchison2024].
 
 ```{r}
 #| label: filter_sd_tidy
@@ -311,22 +303,32 @@ See [@sec-tidy] for more information on tidy R programming.
 
 ## By prevalence {#sec-subset_prev}
 
-We can subset the data based on prevalence using `subsetByPrevalent()`,
-which filters features that exceed a specified prevalence threshold,
-helping to remove rare features that may be artifacts. Conversely,
-`subsetByRare()` allows us to retain only features below the threshold,
-enabling a focus on rare features within the dataset.
+We can subset the data based on prevalence with `subsetBy()`. The function
+keeps the features (`rows`) and samples (`cols`) that meet a condition. The
+condition is an R expression that can refer to the assays by their names (e.g.,
+`counts`) and to the columns of `rowData` or `colData`. Filtering prevalent
+features helps to remove rare features that may be artifacts. Conversely,
+keeping only the features below the threshold enables a focus on rare features
+within the dataset.
 
 Here, we apply a prevalence threshold of 10% and a detection threshold
-of 1. A feature is considered detected if it has at least one count in a
-sample, and prevalent if it is detected in at least 10% of the samples.
-The function `subsetByPrevalent()` retains the prevalent features, while
-`subsetByRare()` keeps the features that are not prevalent.
+of 0. Both thresholds are strict: a feature is considered detected if it has
+more than zero counts (i.e., at least one count) in a sample, and prevalent if
+it is detected in more than 10% of the samples. `addPrevalence()` calculates
+the proportion of samples in which each feature is detected and stores it in
+the `prevalence` column of `rowData`. The condition `prevalence > 0.1` would
+retain the prevalent features, while `prevalence <= 0.1` keeps the features
+that are not prevalent.
+
+To evaluate prevalence for genera rather than for the original features, we
+first agglomerate the data to the genus level with `agglomerateByRank()`.
 
 ```{r}
 #| label: subset_by_rare
 
-tse_sub <- subsetByRare(tse, rank = "Genus", prevalence = 0.1, detection = 1)
+tse_sub <- agglomerateByRank(tse, rank = "Genus")
+tse_sub <- addPrevalence(tse_sub)
+tse_sub <- subsetBy(tse_sub, rows = prevalence <= 0.1)
 tse_sub
 ```
 
@@ -336,15 +338,7 @@ meaningful insights. This process is illustrated in
 
 ## Exercises {#sec-treese_subsetting-exercises}
 
-In these exercises, you will practise the main steps of this chapter:
-subsetting the data by samples and by features, removing empty samples,
-filtering out zero-variance features and subsetting based on prevalence.
-
-We use the `Tengeler2020` dataset from the `r BiocStyle::Biocpkg("mia")`
-package. It contains gut microbiome profiles of 27 mice (columns) and 151
-features (rows). The cohort of each mouse is stored in the `cohort` column
-of `colData`, and the taxonomy of each feature in the `rowData` columns
-`Kingdom`, `Phylum`, `Class`, `Order`, `Family` and `Genus`.
+We use the [`Tengeler2020`](data_sets.qmd#sec-data-tengeler2020) dataset.
 
 Solve the exercises in order, as each exercise continues from the previous
 one. Try to solve each exercise yourself before opening the solution.
@@ -602,22 +596,27 @@ the more likely this is.
 
 **Goal:** Learn to subset the data to prevalent or rare features.
 
-1. Subset `tse` to the prevalent genera. Use a detection threshold of 1 and
-a prevalence threshold of 20%. Store the result in a variable called
-`tse_prevalent`.
+1. Agglomerate `tse` to the Genus rank and store the result in a variable
+called `tse_genus`.
 
-2. Subset `tse` to the rare genera with the same thresholds. Store the
-result in a variable called `tse_rare`.
+2. Add the prevalence of each genus to `rowData` with a detection threshold
+of 1.
 
-3. Check the number of features in `tse_prevalent` and `tse_rare`.
+3. Subset `tse_genus` to the genera with a prevalence over 0.2. Store the
+result in a variable called `tse_prevalent`.
 
-4. What does it mean that a genus is prevalent with these thresholds?
+4. Subset `tse_genus` to the rest of the genera, that is, the rare genera.
+Store the result in a variable called `tse_rare`.
 
-5. How are the features in `tse_prevalent` and `tse_rare` related to each
+5. Check the number of features in `tse_prevalent` and `tse_rare`.
+
+6. What does it mean that a genus is prevalent with these thresholds?
+
+7. How are the features in `tse_prevalent` and `tse_rare` related to each
 other?
 
-**Useful functions:** `mia::subsetByPrevalent()`, `mia::subsetByRare()`,
-`nrow()`
+**Useful functions:** `mia::agglomerateByRank()`, `mia::addPrevalence()`,
+`mia::subsetBy()`, `nrow()`
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -625,31 +624,27 @@ other?
 ```{r}
 #| label: exercise_subsetting_prevalence
 
-# 1. Prevalent genera
-tse_prevalent <- subsetByPrevalent(
-    tse,
-    rank = "Genus",
-    prevalence = 0.2,
-    detection = 1
-)
+# 1. Agglomerate to genus level
+tse_genus <- agglomerateByRank(tse, rank = "Genus")
 
-# 2. Rare genera
-tse_rare <- subsetByRare(
-    tse,
-    rank = "Genus",
-    prevalence = 0.2,
-    detection = 1
-)
+# 2. Add prevalence
+tse_genus <- addPrevalence(tse_genus, detection = 1)
 
-# 3. Number of features
+# 3. Prevalent genera
+tse_prevalent <- subsetBy(tse_genus, rows = prevalence > 0.2)
+
+# 4. Rare genera
+tse_rare <- subsetBy(tse_genus, rows = prevalence <= 0.2)
+
+# 5. Number of features
 nrow(tse_prevalent)
 nrow(tse_rare)
 ```
 
-4. A genus is detected in a sample if it has at least 1 count in it. It is
-prevalent if it is detected in at least 20% of the samples.
+6. A genus is detected in a sample if it has more than 1 count in it. It is
+prevalent if it is detected in more than 20% of the samples.
 
-5. The two subsets are complementary: each genus is either prevalent or
+7. The two subsets are complementary: each genus is either prevalent or
 rare. Together, they contain all genera of the data.
 :::
 ::::

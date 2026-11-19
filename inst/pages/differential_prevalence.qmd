@@ -1,0 +1,351 @@
+# Differential prevalence {#sec-differential-prevalence}
+
+Differential prevalence analysis (DPA) compares the presence/absence of taxa,
+instead of their abundances, between groups. Based on recent studies on the
+classification accuracy of healthy vs. non-healthy individuals, a high
+proportion of the information in microbiome data seems to be included in the
+mere presence/absence of taxa [@Giliberti2022; @Karwowska2025]. DPA is thus a
+viable, and even simpler, alternative to differential abundance analysis
+(DAA, @sec-differential-abundance). It has also given replicable results in a
+benchmark study [@Pelto2025].
+
+Because the detection (observed presence) of a taxon depends on the
+sequencing depth, DPA should control for it. In this chapter, we show how to
+perform DPA with logistic regression (@sec-DPA), with the Bayesian method
+DiPPER (@sec-dpa-dipper) and with Firth logistic regression (@sec-dpa-firth).
+
+## Preparing the data {#sec-dpa-prepare}
+
+We use the same Tengeler2020 data set [@Tengeler2020] as in DAA
+(@sec-prepare-data), and prepare it in the same way: the data is
+agglomerated to the genus level and filtered by a prevalence threshold of
+10%, and we compare the ADHD and control groups while controlling for
+`cohort`.
+
+```{r}
+#| label: dpa_prepare_data
+
+library(mia)
+library(knitr)
+library(dplyr)
+
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# Agglomerate by genus and subset by prevalence
+tse <- agglomerateByRank(tse, rank = "Genus")
+tse <- addPrevalence(tse)
+tse <- subsetBy(tse, rows = prevalence > 0.1)
+
+# Transform patient_status to a factor and set "Control" as the reference level
+tse$patient_status <- factor(tse$patient_status, levels = c("Control", "ADHD"))
+
+# We also transform cohort as a factor
+tse$cohort <- factor(tse$cohort, levels = c("Cohort_1", "Cohort_2", "Cohort_3"))
+```
+
+## Logistic regression {#sec-DPA}
+
+We show here how to perform differential prevalence analysis (DPA) with
+logistic regression. We show the case where we compare subjects with and
+without ADHD while controlling for `cohort`.
+Due to the convenient implementation of logistic regression for DPA,
+we employ here the `maaslin3()` function from the
+`r BiocStyle::Biocpkg("maaslin3")` package [@Nickols2024].
+
+To run the `maaslin3()` function, we need to provide it with
+
+- a `tse` object,
+- a model formula, in this case `~ patient_status + cohort + total`, and
+- a folder for output files
+
+Note that we also control for the sequencing depth/library size/total read
+count (`total`) in the analysis. This is because the detection
+(observed presence) of taxa may depend on the sequencing depth.
+
+```{r}
+#| label: run_dpa_cov
+
+library(scater)
+library(maaslin3)
+
+# Calculate the sequencing depth (the total number of reads/counts) for each
+# sample
+tse <- addQC(tse)
+
+# Run maaslin3 with patient_status, cohort and total as the predictor variables
+obj_DPA_cov <- maaslin3(
+    tse,
+    formula = ~ patient_status + cohort + total, # Model formula
+    output = "output", # The name of the folder for some output files
+    plot_associations = FALSE, # To prevent some unnecessary plots
+    plot_summary_plot = FALSE,
+    verbosity = "ERROR"
+) # To prevent some unnecessary output
+```
+
+Next, we extract the `data.frame` of results from the list object returned by
+`maaslin3()`. We remove the variable `total` from the output as it is merely a
+technical covariate that we are not interested in. We also calculate the 95%
+confidence intervals. Furthermore, as with `r BiocStyle::Biocpkg("Maaslin2")`,
+we calculate the q-values separately for `patient_status` and `cohort`.
+Lastly, we transform the results to a slightly more convenient format.
+
+```{r}
+#| label: results_DPA_cov
+
+# Extract the results and calculate the 95% CIs and q-values
+res_DPA_cov <- obj_DPA_cov$fit_data_prevalence$results |>
+    filter(name != "total") |>
+    mutate(
+        ci_lwr = coef - qnorm(.975) * stderr,
+        ci_upr = coef + qnorm(.975) * stderr
+    ) |>
+    group_by(metadata) |>
+    mutate(qval = p.adjust(pval_individual, method = "fdr")) |>
+    ungroup() |>
+    select(feature, name, coef, pval = pval_individual, qval, ci_lwr, ci_upr)
+
+# Print the results for taxa with the smallest p-values for patient_status
+res_DPA_cov |>
+    filter(name == "patient_statusADHD") |>
+    arrange(pval) |>
+    head() |>
+    kable()
+```
+
+The results are in the same format as the DAA results in @sec-daa-cov. The
+only difference is `coef` now indicates the log-odds ratio for the difference
+in prevalences. The odds ratios (OR) would thus be calculated as
+`or = exp(coef)`. Note also that the results are not provided for taxa that
+were present in all samples (as it is not sensible to analyze presence/absence
+differences for such taxa).
+
+By examining the results we see that the smallest p-value was observed for
+genus _Erysipelatoclostridium_. As the sign of the estimate is _negative_ is
+means that the genus is more prevalent in the control group. (This is can be
+seen from the prevalence bars of _Erysipelatoclostridium_ in the strip plots in
+@fig-daa-boxplots.)
+
+### With an interaction {#sec-logr-ia}
+
+Contrary to `Maaslin2()`, the `maaslin3()` function supports also the analysis
+with interaction terms. Therefore, in the analysis with interaction(s), one can
+just add the interaction term(s) in to the model formula by
+using the standard R syntax, e.g.,
+`formula = ~ patient_status + cohort + patient_status:cohort + total` or
+alternatively `formula = ~ patient_status * cohort + total`
+
+## DiPPER {#sec-dpa-dipper}
+
+`r BiocStyle::Biocpkg("DiPPER")` [@Pelto2026] is a Bayesian method for DPA
+that connects the logistic regression models of the taxa with a common
+hierarchical prior. Unlike standard logistic regression, it gives finite
+estimates even when a taxon is absent from one group, and its results are
+adjusted for multiple testing without a separate q-value correction. It also
+supports longitudinal data and works directly with `TreeSE`.
+
+The code below repeats the logistic regression analysis above (@sec-DPA). It is not run when the book is
+built, as DiPPER needs the separately installed
+[CmdStan](https://github.com/jepelt/DiPPER#installation) backend. Instead,
+the results shown below were computed beforehand with DiPPER 0.99.1 (see
+`inst/scripts/dipper_precompute.R` in the book repository). The first term of
+the formula is the variable of interest.
+
+```{r}
+#| label: run_dpa_dipper
+#| eval: false
+
+library(DiPPER)
+
+fit_dipper <- dipper(
+    tse = tse,
+    assay.type = "counts",
+    data.type = "counts", # Presence is defined as a count above zero
+    formula = ~ patient_status + cohort,
+    read.depth = TRUE # Control for the sequencing depth
+)
+
+# Results for patient_status: log-odds ratio estimates, 95% credible
+# intervals and pseudo q-values
+res_dipper <- summary(fit_dipper)
+
+# Forest plot of the taxa whose credible interval excludes zero
+plot(fit_dipper)
+```
+
+The `summary()` gives log-odds ratio estimates (`log_or`) with 95% credible
+intervals (`lwr`, `upr`) and a `pseudo_q` value that resembles a q-value. A
+taxon is flagged as `significant` when its credible interval excludes zero.
+
+```{r}
+#| label: results_dpa_dipper
+#| echo: false
+
+# Precomputed results of summary(fit_dipper)
+res_dipper <- read.csv("../extdata/dipper_tengeler2020.csv")
+
+res_dipper |>
+    head() |>
+    kable()
+```
+
+![Differential prevalence between the ADHD and control groups estimated with
+DiPPER, controlling for cohort and sequencing depth. The points are the
+odds ratio estimates and the lines their 95% credible intervals, shown for the
+genera whose interval excludes one. Computed beforehand with
+DiPPER 0.99.1.](figures/dipper_tengeler2020.png){#fig-dpa-dipper width="80%"
+fig-alt="Forest plot of differential prevalence odds ratios on a log scale with a dashed vertical line at one. Erysipelatoclostridium and the [Ruminococcus] gauvreauii group have odds ratios below one, that is, they are less prevalent in the ADHD group, while Barnesiella and Ruminococcaceae UCG-014 have odds ratios above one."}
+
+As with maaslin3 above, _Erysipelatoclostridium_ has the strongest evidence
+for a difference in prevalence, and it is less prevalent in the ADHD group
+(@fig-dpa-dipper). See the
+[DiPPER vignette](https://bioconductor.org/packages/devel/bioc/vignettes/DiPPER/inst/doc/DiPPER.html)
+for more information.
+
+## Firth logistic regression {#sec-dpa-firth}
+
+While the `r BiocStyle::Biocpkg("maaslin3")` package provides a convenient
+implementation of logistic regression for microbial DPA, we note, that it may
+provide somewhat conservative results, that is, it rarely provides false
+positive results but it may fail to detect some true effects. To obtain higher
+statistical power, we recommend using a version of logistic regression
+introduced by @Firth1993. As there currently exists no convenient
+implementation of Firth logistic regression for DPA, one needs to use a custom
+function. Such custom function with application examples is given in the
+[extra materials](https://microbiome.github.io/OMA-extras/docs/devel/pages/extra_daa.html#sec-firth).
+
+## Exercises {#sec-differential-prevalence-exercises}
+
+We use the [`peerj13075`](data_sets.qmd#sec-data-peerj13075) dataset, as in
+the exercises of [@sec-differential-abundance].
+
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
+
+:::: {.callout-tip icon="false"}
+## Exercise 1: Prepare the data
+
+**Goal:** Learn to prepare the data for DPA.
+
+1. Load the `peerj13075` dataset from the `mia` package and store it in a
+variable called `tse`.
+
+2. Agglomerate the data to genus level with `rank = "genus"`. (Note that the
+rank names of this dataset are written in lowercase.) Then add the prevalence
+and keep only the genera that are present in more than 50% of the samples.
+
+3. Convert the `Diet` column to a factor and set `Mixed` as the reference
+level.
+
+**Useful functions:** `data()`, `mia::agglomerateByRank()`,
+`mia::addPrevalence()`, `mia::subsetBy()`, `factor()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_dpa_prepare
+
+library(mia)
+
+# 1. Load the data
+data("peerj13075", package = "mia")
+tse <- peerj13075
+
+# 2. Agglomerate to genus level and keep prevalent genera
+tse <- agglomerateByRank(tse, rank = "genus")
+tse <- addPrevalence(tse)
+tse <- subsetBy(tse, rows = prevalence > 0.5)
+
+# 3. Set Mixed as the reference level
+tse$Diet <- factor(tse$Diet, levels = c("Mixed", "Veg"))
+```
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Logistic regression
+
+**Goal:** Learn to compare the presence and absence of taxa between groups
+with `maaslin3()`.
+
+1. Calculate the total number of reads in each sample with `addQC()`. The
+results are stored in the `total` column of `colData`.
+
+2. Run `maaslin3()` with `tse` and the formula
+`~ Diet + Geographical_location + total`. Set `output = "output"`,
+`plot_associations = FALSE`, `plot_summary_plot = FALSE` and
+`verbosity = "ERROR"`. Store the result in a variable called `obj_dpa`.
+
+3. Extract the results of the prevalence model (`fit_data_prevalence`).
+Remove the rows for `total`, add the 95% confidence intervals, calculate the
+q-values separately for each variable, and keep the columns `feature`,
+`name`, `coef`, `pval` (renamed from `pval_individual`), `qval`, `ci_lwr`
+and `ci_upr`, as shown in @sec-DPA. Store the table in a variable called
+`res_dpa`.
+
+4. Show the six genera with the smallest p-values for `DietVeg`.
+
+5. What does `coef` describe in these results? Why is the total number of
+reads included in the model? Why are the results not given for all genera?
+
+**Useful functions:** `scater::addQC()`, `maaslin3::maaslin3()`,
+`dplyr::filter()`, `stats::qnorm()`, `dplyr::group_by()`, `stats::p.adjust()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_dpa_maaslin3
+
+library(scater)
+library(maaslin3)
+library(dplyr)
+
+# 1. Calculate the total number of reads in each sample
+tse <- addQC(tse)
+
+# 2. Run maaslin3 with diet, city and total number of reads
+obj_dpa <- maaslin3(
+    tse,
+    formula = ~ Diet + Geographical_location + total,
+    output = "output",
+    plot_associations = FALSE,
+    plot_summary_plot = FALSE,
+    verbosity = "ERROR"
+)
+
+# 3. Extract the results of the prevalence model
+res_dpa <- obj_dpa$fit_data_prevalence$results |>
+    filter(name != "total") |>
+    mutate(
+        ci_lwr = coef - qnorm(.975) * stderr,
+        ci_upr = coef + qnorm(.975) * stderr
+    ) |>
+    group_by(metadata) |>
+    mutate(qval = p.adjust(pval_individual, method = "fdr")) |>
+    ungroup() |>
+    select(feature, name, coef, pval = pval_individual, qval, ci_lwr, ci_upr)
+
+# 4. Genera with the smallest p-values for diet
+res_dpa |>
+    filter(name == "DietVeg") |>
+    arrange(pval) |>
+    head()
+```
+
+5. In DPA, `coef` is the log-odds ratio of the presence of the genus between
+the `Veg` and `Mixed` groups. A positive value means that the genus is
+estimated to be more prevalent in the `Veg` group, and a negative value that
+it is less prevalent. The odds ratio is `exp(coef)`.
+
+The more reads a sample has, the more likely it is that a taxon is detected.
+The total number of reads is therefore included as a technical covariate, so
+that differences in sequencing depth do not appear as differences in
+prevalence.
+
+The results are not given for genera that are present in all samples,
+because their presence and absence does not vary.
+:::
+::::
