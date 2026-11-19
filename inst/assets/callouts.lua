@@ -1,16 +1,30 @@
--- Give the recurring "Exercises" and "Summary" callouts their own look.
+-- Give the recurring exercise and "Summary" callouts their own look.
 -- Each such callout is wrapped in a div (.oma-exercises, .oma-summary)
--- that book.scss styles. Chapters keep using plain callout blocks:
+-- that book.scss styles. Chapters keep using plain callout blocks, either
+-- one block for all exercises or one block for each exercise:
 --
 --   ::: {.callout-tip}
 --   ## Exercises
 --   ...
 --   :::
 --
+--   :::: {.callout-tip}
+--   ## Exercise 1: Title
+--   ...
+--   ::::
+--
 -- Runs before Quarto parses callouts (at: pre-ast in _quarto.yml), because
 -- Quarto drops extra classes from callouts and loses the content of
 -- callouts wrapped later in the pipeline.
 local kinds = { Exercises = "oma-exercises", Summary = "oma-summary" }
+
+-- Class for a callout title: "Exercises", "Summary", or "Exercise 1: ..."
+local function kind_of(title)
+  if not title then return nil end
+  if kinds[title] then return kinds[title] end
+  if title:match("^Exercise %d") then return "oma-exercises" end
+  return nil
+end
 
 local function is_callout(el)
   for _, c in ipairs(el.classes) do
@@ -28,7 +42,7 @@ function Div(el)
       title = pandoc.utils.stringify(first)
     end
   end
-  local cls = title and kinds[title]
+  local cls = kind_of(title)
   if cls then
     return pandoc.Div({ el }, pandoc.Attr("", { cls }))
   end
