@@ -4,7 +4,26 @@
 // browsers fall back to a generic sans-serif.
 @import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
-$primary: #0087af !default;
+// Brand colours: Bioconductor blue and green, and the brown of the sticker
+// edge. Each has one role:
+// - blue: main colour (frames, heading underlines, links)
+// - green: accents that mark position (active items, list markers)
+// - brown: Exercises callouts
+// The darker shades are for text and small marks, which need more contrast
+// on white (links 4.9:1, green marks 3.1:1).
+$bioc-blue: #1892AA;
+$bioc-blue-dark: #147C90;
+$bioc-green: #99C53C;
+$bioc-green-dark: #7A9D30;
+$sticker-brown: #704214;
+
+$primary: $bioc-blue !default;
+$link-color: $bioc-blue-dark !default;
+
+// Callouts in the brand colours instead of the Bootstrap blue and green.
+// Warning and important callouts keep their yellow and red.
+$callout-color-note: $bioc-blue;
+$callout-color-tip: $bioc-green-dark;
 $body-color: #070707 !default;
 
 /*-- scss:rules --*/
@@ -28,7 +47,7 @@ span.navbar-title {
 
 #quarto-header {
   background:
-    linear-gradient(90deg, rgba(26, 129, 194, 1) 50%, rgba(26, 129, 194, 0) 100%), /* Solid blue to transparent gradient */
+    linear-gradient(90deg, rgba($bioc-blue, 1) 50%, rgba($bioc-blue, 0) 100%), /* Solid blue to transparent gradient */
     url("assets/header_figure.jpg"); /* Background image */
   background-blend-mode: normal; /* No blending mode to apply image on top of gradient */
   background-size: cover;
@@ -36,11 +55,28 @@ span.navbar-title {
   background-position: center right;
 }
 
+// Bioconductor blue-to-green stripe below the header, as on bioconductor.org
+#quarto-header {
+  border-bottom: 5px solid;
+  border-image: linear-gradient(90deg, $bioc-blue, $bioc-green) 1;
+}
+
+// On narrow screens, show only the abbreviation so that it is not cut off
+@media (max-width: 1199.98px) {
+  #quarto-header .navbar-title .navbar-full {
+    display: none;
+  }
+}
+
 #quarto-header a.navbar-brand,
 #quarto-header .navbar-title,
 #quarto-header .bi.bi-git,
 #quarto-header a.nav-link{
   color: white; // Set text color to white for these elements
+}
+
+#quarto-header .navbar-title {
+  font-weight: 700;
 }
 
 .navbar-brand-container {
@@ -94,26 +130,29 @@ nav .nav-item.compact .nav-link {
 }
 
 main>#title-block-header {
-  text-align: center;
-  background-color: #6c757d8f;
-  color: #fff; // Set text color to white
-  padding: 20px; // Set padding for the header
-  border-bottom-style: none;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  margin-top: -10px;
-  margin-bottom: 0px;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  padding: 0;
+  border-bottom: none;
+  background: none;
   font-family: "Atkinson Hyperlegible", sans-serif; // Set font
 }
 
 main>#title-block-header .title {
-  border-bottom: none; // Remove bottom border for title
+  margin: 0;
+  padding-bottom: 0.5rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: $body-color;
+  border-bottom: 4px solid;
+  border-image: linear-gradient(90deg, $bioc-blue 60%, $bioc-green) 1; // As the header stripe
+  width: 100%; // Underline spans the full content width
 }
 
-main>header#title-block-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+// Chapter titles wrap the number and name in spans with their own weight
+main>#title-block-header .title span {
+  font-weight: 700;
 }
 
 span.quarto-section-identifier {
@@ -130,7 +169,7 @@ h2.anchored {
   margin-top: 3rem;
   margin-bottom: 1rem;
   font-size: 28px;
-  border-color: #0087af ; // Set border color and style
+  border-color: $bioc-blue; // Set border color and style
   border-bottom-style: solid;
   border-bottom-width: 4px;
 }
@@ -178,7 +217,7 @@ li.dropdown-header > span.menu-text {
   float: right;
   width: 40%;
   margin: 0.3rem 0 1rem 1.5rem;
-  border: solid #037da1;
+  border: solid $bioc-blue;
   border-radius: 5%;
 }
 
@@ -244,6 +283,31 @@ main div.sourceCode code span.co {
   content: none;
 }
 
+// Exercises and Summary callouts (wrapped by assets/callouts.lua) get
+// their own colour and a Bootstrap icon (bundled with Quarto), so that
+// plain tip callouts stand out again.
+.oma-exercises .callout,
+.oma-summary .callout {
+  .callout-icon-container { display: none; }
+  .callout-title-container::before {
+    font-family: "bootstrap-icons";
+    margin-right: 0.5em;
+    vertical-align: -0.1em;
+  }
+}
+
+.oma-exercises .callout.callout-tip {
+  border-left-color: $sticker-brown;
+  .callout-header { background-color: rgba($sticker-brown, 0.08); }
+  .callout-title-container::before { content: "\f4ca"; color: $sticker-brown; } // pencil-square
+}
+
+.oma-summary .callout.callout-tip {
+  border-left-color: $bioc-green-dark;
+  .callout-header { background-color: rgba($bioc-green, 0.12); }
+  .callout-title-container::before { content: "\f473"; color: $bioc-green-dark; } // list-check
+}
+
 /* ------------------------------------------------------ */
 /* ------------------------------------------------------ */
 /* ----------------- DEFAULT RULES ---------------------- */
@@ -261,25 +325,14 @@ div.sourceCode {
   box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.06), 0 2px 5px 0 rgba(0, 0, 0, 0.06), 0 10px 10px 0 rgba(0, 0, 0, 0.05), 0 22px 13px 0 rgba(0, 0, 0, 0.03), 0 39px 16px 0 rgba(0, 0, 0, 0.01), 0 61px 17px 0 rgba(0, 0, 0, 0);
 }
 
-pre.sourceCode.r, code.sourceCode.r {
-
-  $border: 2px;
+// Blue frame as a plain border. Long lines scroll inside the white box
+// instead of the frame colour leaking behind the code.
+pre.sourceCode.r {
   color: #070707;
   background: #FFF;
-  background-clip: padding-box; /* !importanté */
-  border: solid $border transparent; /* !importanté */
+  border: 1px solid rgba($bioc-blue, 0.5); // Light frame, so that the code stands out more than the frame
   border-radius: 8px;
-
-  &:before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0; bottom: 0; left: 0;
-    z-index: -1;
-    margin: -$border; /* !importanté */
-    border-radius: inherit; /* !importanté */
-    background: #0087af;
-  }
-
+  overflow-x: auto;
 }
 
 /* Chapter label ---------------------------------------- */
@@ -310,7 +363,7 @@ div.sidebar-item-container .active, div.sidebar-item-container .show>.nav-link, 
 
 .sidebar-title {
   font-weight: 800;
-  background: #0087af;
+  background: $bioc-blue-dark;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -348,7 +401,7 @@ div.sidebar-item-container .active, div.sidebar-item-container .show>.nav-link, 
 }
 
 .sidebar-menu-container {
-  border: solid #0087af 2px;
+  border: solid rgba($bioc-blue, 0.4) 1px;
   border-radius: 8px;
   padding: 8px;
   margin-top: 25px;
@@ -357,7 +410,7 @@ div.sidebar-item-container .active, div.sidebar-item-container .show>.nav-link, 
 /* right navbar ----------------------------------------- */
 
 .sidebar nav[role=doc-toc] ul>li>a.active, .sidebar nav[role=doc-toc] ul>li>ul>li>a.active {
-  border-left: 4px solid #3792ad;
+  border-left: 4px solid $bioc-green-dark;
   font-weight: 800;
 }
 
@@ -373,7 +426,7 @@ h1 {
   font-size: 36px;
   color: #070707;
   font-weight: 700;
-  border-image: linear-gradient(to right, #0087af, #0087af) 1;
+  border-image: linear-gradient(to right, $bioc-blue, $bioc-blue) 1;
   border-bottom-style: solid;
   border-bottom-width: 4px;
 }
@@ -415,7 +468,7 @@ p {
 }
 
 ul li::marker {
-  color: #3792ad;
+  color: $bioc-green-dark;
 }
 
 /* Underlining links ------------------------------------ */
@@ -470,6 +523,6 @@ ul.sidebar-chapter-sections {
 }
 
 ul.sidebar-chapter-sections .section-number {
-  color: #0087af;
+  color: $bioc-blue-dark;
   margin-right: 0.3rem;
 }

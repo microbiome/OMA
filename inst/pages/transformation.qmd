@@ -1,14 +1,5 @@
 # Transformation {#sec-assay-transform}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 Data transformations are common in (microbial) ecology [@Legendre2001].
 They are used to mitigate technical biases in the data, to obtain more
 interpretable values, to enhance the comparability of samples/features or
@@ -30,10 +21,58 @@ taxa per sample are thus not comparable between samples.
 
 This **Compositionality** means that a change in the absolute abundance of
 one taxon will lead to apparent variations in the relative abundances of other
-taxa in the same sample. If neglected, such properties may cause significant
-bias in the results of statistical tests. The above-mentioned transformation
-processes are one method developed to overcome these issues by making taxon
-abundances comparable across samples.
+taxa in the same sample (@fig-compositionality). If neglected, such
+properties may cause significant bias in the results of statistical tests.
+The above-mentioned transformation processes are one method developed to
+overcome these issues by making taxon abundances comparable across samples.
+
+```{r}
+#| label: fig-compositionality
+#| fig-cap: "Compositionality. The absolute abundance of taxon A doubles while taxa B and C do not change (left). In relative abundances, B and C appear to decrease (right), because the proportions in each sample must sum to one."
+#| fig-alt: "Two panels of stacked bars for a before and an after sample made of taxa A, B and C. In the absolute panel, A grows from 40 to 80 while B and C stay at 30; in the relative panel, A grows from 40% to 57% and B and C shrink from 30% to 21%."
+#| fig-width: 6
+#| fig-height: 3.5
+#| echo: false
+library(ggplot2)
+# Toy data: taxon A doubles from "Before" to "After", B and C do not change.
+# Run in local() so that the helper objects do not leak into later chunks.
+local({
+    df <- data.frame(
+        sample = factor(rep(c("Before", "After"), each = 3),
+            levels = c("Before", "After")
+        ),
+        taxon = factor(rep(c("A", "B", "C"), 2), levels = c("C", "B", "A")),
+        count = c(40, 30, 30, 80, 30, 30)
+    )
+    rel <- ave(df$count, df$sample, FUN = function(x) x / sum(x))
+    df <- rbind(
+        data.frame(df,
+            scale = "Absolute abundance", value = df$count,
+            label = df$count
+        ),
+        data.frame(df,
+            scale = "Relative abundance", value = rel,
+            label = paste0(round(100 * rel), "%")
+        )
+    )
+    ggplot(df, aes(x = sample, y = value, fill = taxon)) +
+        geom_col(width = 0.6, colour = "white") +
+        geom_text(aes(label = label),
+            position = position_stack(vjust = 0.5), size = 3.5
+        ) +
+        facet_wrap(~scale, scales = "free_y") +
+        scale_fill_manual(
+            values = c(A = "#E69F00", B = "#56B4E9", C = "#009E73"),
+            breaks = c("A", "B", "C"), name = "Taxon"
+        ) +
+        labs(x = NULL, y = NULL) +
+        theme_minimal(base_size = 13) +
+        theme(
+            axis.text.y = element_blank(), panel.grid = element_blank(),
+            strip.text = element_text(face = "bold")
+        )
+})
+```
 
 In addition to this compositionality, other special characteristics of
 microbiome sequencing data are high variability and zero-inflation.
@@ -141,8 +180,8 @@ fundamentally change the data distribution [@Costea2014].
 `Pseudocount` should be chosen consistently across all normalization
 methods being compared, for example, by setting it to a value smaller
 than the minimum abundance value before transformation. Some tools, like
-`r BiocStyle::Biocpkg("ANCOMBC")`, take into account the effect of the
-`pseudocount` by performing sensitivity tests using multiple pseudocount
+`r BiocStyle::Biocpkg("ANCOMBC")` [@ancombc2020], take into account the effect
+of the `pseudocount` by performing sensitivity tests using multiple pseudocount
 values. See [@sec-differential-abundance].
 :::
 
@@ -269,6 +308,7 @@ of reads sampled (@fig-transformation-rarefaction-curve).
 ```{r}
 #| label: fig-transformation-rarefaction-curve
 #| fig-cap: "Rarefaction curves for the GlobalPatterns samples, showing the number of observed taxa as a function of the number of sampled reads. Each line represents one sample."
+#| fig-alt: "Line plot with sample size in reads on the x-axis and number of observed taxa on the y-axis, with one rising curve per sample that levels off at a different height and reaches a different maximum depth."
 library(mia)
 library(vegan)
 
@@ -297,6 +337,7 @@ counts per sample (@fig-transformation-library-size).
 ```{r}
 #| label: fig-transformation-library-size
 #| fig-cap: "Library sizes (total counts per sample) in the GlobalPatterns data set, grouped by sample type."
+#| fig-alt: "Boxplots of total counts per sample (y-axis) for each sample type (x-axis), with the individual samples drawn as points."
 library(scater)
 library(miaViz)
 
@@ -360,8 +401,8 @@ The relative benefits of rarefaction and of robust Aitchison PCA and other
 compositional data analysis methods in controlling for uneven sequencing
 effort are currently being debated [@Schloss2026].
 
-Section [@sec-rarefaction-alpha] demonstrates rarefaction for calculating alpha
-diversity, and Section [@sec-rarefaction_ordination] extends the approach to
+[@sec-rarefaction-alpha] demonstrates rarefaction for calculating alpha
+diversity, and [@sec-rarefaction_ordination] extends the approach to
 beta diversity.
 
 ::: callout-tip
@@ -420,7 +461,8 @@ and [@sec-community-similarity].
 Useful functions:
 
 `utils::data()`, `miaViz::plotHistogram()`, `mia::transformAssay()`,
-`mia::assayNames()`, `SummarizedExperiment::assay()`,
-`mia::agglomerateByRanks()`, `mia::altExp()`, `BiocGenerics::rownames()`
+`SummarizedExperiment::assayNames()`, `SummarizedExperiment::assay()`,
+`mia::agglomerateByRanks()`, `SingleCellExperiment::altExp()`,
+`BiocGenerics::rownames()`
 
 :::

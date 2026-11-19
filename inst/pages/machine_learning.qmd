@@ -1,14 +1,5 @@
 # Machine learning {#sec-machine_learning}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 This chapter demonstrates two supervised ML algorithms, random forest and
 XGBoost, that can be applied to classification and regression tasks. For an
 introduction to ML and supervised learning, see
@@ -16,7 +7,8 @@ introduction to ML and supervised learning, see
 
 ## Setup
 
-Published fecal microbiome data [@qin2012_t2d] (see [@sec-data-qin2012])
+Published fecal microbiome data [@qin2012_t2d; @Pasolli2017] (see
+[@sec-data-qin2012])
 will be used to
 illustrate how to deploy supervised machine learning algorithms to
 address classification and regression problems. For classification,
@@ -44,7 +36,7 @@ To do so, the R package `r BiocStyle::CRANpkg("mikropml")`
 [@topcuoglu2020;@topcuoglu2021] will be used throughout this chapter.
 This package was developed to offer a
 user-friendly interface to supervised ML algorithms implemented in the
-`r BiocStyle::CRANpkg("caret")` package.
+`r BiocStyle::CRANpkg("caret")` package [@Kuhn2008].
 [Here](https://www.schlosslab.org/mikropml/articles/introduction.html#the-methods-we-support)
 is a list of models supported by `r BiocStyle::CRANpkg("mikropml")`.
 
@@ -103,8 +95,29 @@ model training process, leading to overly optimistic performance
 estimates. This can happen, for example, if preprocessing steps like
 scaling are applied to both the training and test data together, allowing
 the model to indirectly "see" the test data during training.
-Fortunately, there are questions we can ask ourselves to void data
-leakage [@bernett2024_dataLeakage]
+Fortunately, there are questions we can ask ourselves to avoid data
+leakage [@bernett2024_dataLeakage]. The key rule is to split the data
+first and fit any data-dependent preprocessing on the training set only
+(@fig-data-leakage).
+
+```{mermaid}
+%%| label: fig-data-leakage
+%%| fig-cap: "Data-dependent preprocessing, such as scaling or filtering, causes leakage when it is fitted on all data before the split (top). Split first, fit the preprocessing on the training set, and apply the same fitted steps to the test set (bottom)."
+flowchart TB
+    subgraph wrong["Leakage"]
+        direction LR
+        w1["All data"] --> w2["Preprocess"] --> w3["Split into<br/>train / test"] --> w4["Train &<br/>evaluate"]
+    end
+    subgraph right["No leakage"]
+        direction LR
+        r1["All data"] --> r2["Split into<br/>train / test"] --> r3["Fit preprocessing<br/>on train"] --> r4["Apply to test,<br/>train & evaluate"]
+    end
+    wrong ~~~ right
+    classDef bad fill:#fbe9eb,stroke:#b2182b,color:#070707
+    classDef good fill:#e6f3f7,stroke:#0087af,color:#070707
+    class w1,w2,w3,w4 bad
+    class r1,r2,r3,r4 good
+```
 :::
 
 The code below shows how to obtain the relative abundances of each
@@ -118,11 +131,8 @@ on alpha diversity.
 library(mia)
 
 # Keep taxa present in more than 10% of samples
-tse <- subsetByPrevalent(
-    x = tse,
-    assay.type = "counts",
-    prevalence = 10 / 100
-)
+tse <- addPrevalence(tse)
+tse <- subsetBy(tse, rows = prevalence > 0.1)
 
 # Transform to relative abundances
 tse <- transformAssay(
@@ -257,15 +267,16 @@ To evaluate how well a model generalizes to new data, the data is split into a
 training set and a test set, commonly in an 80/20 ratio. Other proportions can
 be used depending on the size of the dataset and the application.
 
-Training is usually combined with cross-validation to make the model more
-robust. In K-fold cross-validation, the data is divided into K folds (subsets)
-of similar size. The model is trained on K-1 folds and validated on the
-remaining fold. This is repeated K times so that each fold serves as the
-validation set once (@fig-cv).
+Training is usually combined with cross-validation [@Stone1974] to make the
+model more robust. In K-fold cross-validation, the data is divided into K
+folds (subsets) of similar size. The model is trained on K-1 folds and
+validated on the remaining fold. This is repeated K times so that each fold
+serves as the validation set once (@fig-cv).
 
 ```{r}
 #| label: fig-cv
 #| fig-cap: "5-fold cross-validation. The data is first split into a training set (80%) and a test set (20%). The training set is divided into five folds. In each iteration, the model is trained on four folds and validated on the remaining fold. The test set is used only for the final evaluation."
+#| fig-alt: "Grid of tiles with five rows, one per iteration, and five fold columns plus a separate test-set column. In each row one fold, moving along the diagonal, is coloured as validation and the other four as training, while the test-set tile is coloured as test in every row."
 #| fig-width: 8
 #| fig-height: 3.5
 #| echo: false
@@ -328,10 +339,10 @@ data.
 
 ### Random forest
 
-Random Forests (RF) is an ensemble algorithm. That means that RF deploys
-and combines the outputs of multiple decision trees through majority
-voting or averaging the predicted numerical outcome. Since each tree is
-trained on a random subset of the data and features, RF reduces
+Random Forests (RF) [@Breiman2001] is an ensemble algorithm. That means
+that RF deploys and combines the outputs of multiple decision trees through
+majority voting or averaging the predicted numerical outcome. Since each tree
+is trained on a random subset of the data and features, RF reduces
 overfitting and enhance generalization to new data.
 
 When applied to classification problems, each tree predicts
@@ -390,8 +401,8 @@ rf_regression <- run_ml(
 
 ### XGBoost
 
-Extreme Gradient Boosting (XGBoost) is another ensemble algorithm
-where decision trees are sequentially built. In this strategy, each
+Extreme Gradient Boosting (XGBoost) [@Chen2016a] is another ensemble
+algorithm where decision trees are sequentially built. In this strategy, each
 new tree improves the performance of the previous.
 
 When applied to classification, each tree predicts the class of an
@@ -658,6 +669,7 @@ them side by side (@fig-ml-roc-prc):
 #| code-fold: true
 #| code-summary: "Show the plotting code"
 #| fig-cap: "ROC curve (left) and precision-recall curve (right) of the random forest model classifying T2D patients and healthy individuals in the QinJ_2012 test data. Dashed grey lines show the expected performance of random guessing."
+#| fig-alt: "Two side-by-side line plots. The left ROC panel plots sensitivity against false positive rate with a dashed diagonal line, and the right precision-recall panel plots precision against recall with a dashed horizontal line at 0.5."
 
 library(patchwork)
 
@@ -737,8 +749,8 @@ data to train different classification supervised ML algorithms to
 discriminate between patients of 9 different diseases. Notice that
 the visualization of multiclass ROC curves can be achieved in a similar
 way to what was described in this chapter. In addition, the R package
-`r BiocStyle::CRANpkg("pROC")` provides handy functions to build
-multiclass visualizations.
+`r BiocStyle::CRANpkg("pROC")` [@Robin2011] provides handy functions to
+build multiclass visualizations.
 :::
 
 
@@ -755,6 +767,7 @@ in the test data (@fig-ml-bmi-pred-obs).
 ```{r}
 #| label: fig-ml-bmi-pred-obs
 #| fig-cap: "Observed versus random forest-predicted BMI in the QinJ_2012 test data, coloured by disease status. The dashed grey line shows perfect prediction."
+#| fig-alt: "Scatter plot of predicted BMI (x-axis) against observed BMI (y-axis) on equal scales from 17 to 30, with points coloured by disease status and a dashed diagonal line marking perfect prediction."
 
 # Get the test set: data not used in training the model
 test_data <- rf_regression[["test_data"]]
@@ -835,6 +848,7 @@ the RF model used in regression. The ten most important features are shown in
 ```{r}
 #| label: fig-ml-feature-importance
 #| fig-cap: "The ten most important features of the random forest model classifying T2D patients and healthy individuals in the QinJ_2012 data, measured as the decrease in test AUC when the values of each feature are permuted."
+#| fig-alt: "Horizontal bar chart of ten taxonomic features (y-axis) ordered by their decrease in model performance (x-axis), with the most important feature at the top."
 
 # estimate features importance
 feat_imp <- get_feature_importance(
@@ -928,7 +942,7 @@ a high accuracy?
 Useful functions:
 
 `utils::data()`, `SummarizedExperiment::colData()`, `miaViz::plotHistogram()`,
-`miaViz::plotBarplot()`, `mia::subsetByPrevalent()`, `mia::transformAssay()`,
+`miaViz::plotBarplot()`, `mia::addPrevalence()`, `mia::subsetBy()`, `mia::transformAssay()`,
 `mikropml::preprocess_data()`, `mikropml::run_ml()`, `mikropml::plot_model_performance()`
 
 :::

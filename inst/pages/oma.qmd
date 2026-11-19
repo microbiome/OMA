@@ -1,14 +1,5 @@
 # Getting started {#sec-ecosystem}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 This chapter provides an overview of the OMA ecosystem.
 [@sec-data-containers] aims to describe the relationship between data
 containers utilized in [OMA](https://microbiome.github.io/). [@sec-packages] details the packages
@@ -35,7 +26,19 @@ Bioconductor framework, facilitating access to an expanding array of
 tools. In practice, this approach allows for the integration of
 promising methods from related fields, such as single-cell sequencing.
 
-![OMA framework.](figures/FigureOverviewV2_mod.png){width="100%"}
+@fig-oma-workflow shows how a typical microbiome study proceeds from data
+generation to results, and which steps `OMA` covers.
+
+![Microbiome data science workflow. After data generation and
+preprocessing (top), `OMA` covers five steps: 1) the data are wrapped
+in a `TreeSummarizedExperiment` object, 2) processed with quality
+control, transformations and agglomeration, 3) analysed statistically,
+4) integrated with other omic layers in a `MultiAssayExperiment`, and
+5) reported reproducibly. Reproduced from @Borman2025 under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).](figures/oma_workflow.jpg){#fig-oma-workflow
+width="70%" fig-alt="Flowchart from study system, sampling and sequencing
+through preprocessing to five OMA steps: data object, data processing,
+statistical analysis, data integration and results."}
 
 ## Data containers {#sec-data-containers}
 
@@ -49,7 +52,7 @@ field including online book Orchestrating Single-Cell Analysis in Bioconductor
 (OSCA) [@Amezquita2020]. `SCE`, on the other hand, is further derived from
 the `r BiocStyle::Biocpkg("SummarizedExperiment")` (`SE`) class.
 This hierarchical relationship among data containers means that all methods
-applicable to `SCE` and `SE` objects can also be applied to `TreeSE)` objects.
+applicable to `SCE` and `SE` objects can also be applied to `TreeSE` objects.
 
 - `r BiocStyle::Biocpkg("SummarizedExperiment")` (`SE`)
 [@R_SummarizedExperiment] is a generic
@@ -107,10 +110,11 @@ by using the `TreeSE`, `MAE`, and classes beyond.
 Beyond `SCE` and `TreeSE`, `SE` has been extended for many other purposes.
 Although these extensions were not developed specifically for microbiome data,
 they can be useful for it in certain cases. Examples include
-`r BiocStyle::Biocpkg("SpatialExperiment")` for
-spatially resolved data, `r BiocStyle::Biocpkg("GraphExperiment")` for
-graph-structured data, `r BiocStyle::Biocpkg("DeeDeeExperiment")` for storing
-differential analysis results, and `r BiocStyle::Biocpkg("ReducedExperiment")`
+`r BiocStyle::Biocpkg("SpatialExperiment")` [@Righelli2022] for
+spatially resolved data, `r BiocStyle::Biocpkg("GraphExperiment")`
+[@AlmeidaSilva2026] for graph-structured data,
+`r BiocStyle::Biocpkg("DeeDeeExperiment")` for storing differential analysis
+results, and `r BiocStyle::Biocpkg("ReducedExperiment")`
 [@R_ReducedExperiment] for dimensionality reduction results together with
 their feature loadings.
 These classes build on the same `SE` structure, so the skills covered in this
@@ -129,12 +133,12 @@ and vignettes that show how to use their methods.
 The `r BiocStyle::Biocpkg("mia")` package family provides general methods
 for microbiome data wrangling, analysis and visualization.
 
-- `r BiocStyle::Biocpkg("mia")`: Microbiome analysis tools [@R_mia]
+- `r BiocStyle::Biocpkg("mia")`: Microbiome analysis tools [@Borman2025]
 - `r BiocStyle::Biocpkg("miaViz")`: Microbiome analysis specific visualization
-[@Borman2024]
-- `r BiocStyle::Biocpkg("miaSim")`: Microbiome data simulations [@Simsek2021]
+[@Borman2025]
+- `r BiocStyle::Biocpkg("miaSim")`: Microbiome data simulations [@Gao2023]
 - `r BiocStyle::Biocpkg("miaTime")`: Microbiome time series analysis
-[@Lahti2021]
+[@Borman2025]
 - `r BiocStyle::Biocpkg("miaDash")`: Interactive analysis and visualization
 [@Benedetti2024miadash]
 
@@ -180,8 +184,7 @@ access to the latest updates.
 #| label: bioc_devel
 #| eval: false
 
-library(BiocManager)
-install("mia", version = "devel")
+BiocManager::install("mia", version = "devel")
 ```
 
 **GitHub development version** is usually the same as the Bioconductor
@@ -192,8 +195,7 @@ are not yet available in Bioconductor.
 #| label: github
 #| eval: false
 
-library(remotes)
-install_github("microbiome/mia")
+remotes::install_github("microbiome/mia")
 ```
 
 ### Key packages {#sec-key-packages}
@@ -204,55 +206,43 @@ required to run common tasks and most example workflows. You can then
 install additional packages as needed, depending on the specific
 requirements of your analysis.
 
-Let us first define a script to install packages.
-
-```{r}
-#| label: install_function
-
-install_packages <- function(pkg) {
-    # Get packages that are already installed installed
-    pkg_installed <- pkg[pkg %in% installed.packages()]
-
-    # Get packages that need to be installed
-    pkg_to_install <- setdiff(pkg, pkg_installed)
-
-    # Loads BiocManager into the session. Install it if it not already
-    # installed.
-    if (!require("BiocManager")) {
-        install.packages("BiocManager")
-        library("BiocManager")
-    }
-
-    # If there are packages that need to be installed, installs them with
-    # BiocManager.
-    if (length(pkg_to_install) > 0) {
-        install(pkg_to_install, ask = FALSE)
-    }
-
-    # Load all packages into session. Stop if there are packages that were not
-    # successfully loaded.
-    pkgs_not_loaded <- !sapply(pkg, require, character.only = TRUE)
-    pkgs_not_loaded <- names(pkgs_not_loaded)[pkgs_not_loaded]
-    if (length(pkgs_not_loaded) > 0) {
-        stop(
-            "Error in loading the following packages into the session: '",
-            paste0(pkgs_not_loaded, collapse = "', '"), "'"
-        )
-    }
-    return(TRUE)
-}
-```
-
 The core packages include `r BiocStyle::Biocpkg("mia")`,
 `r BiocStyle::Biocpkg("miaViz")`, `r BiocStyle::Biocpkg("maaslin3")`
-(for differential abundance), and `r BiocStyle::CRANpkg("mikropml")`
-(for supervised ML).
+[@Nickols2024] (for differential abundance), and
+`r BiocStyle::CRANpkg("mikropml")` [@topcuoglu2021] (for supervised ML).
+
+Bioconductor packages are installed with the
+`r BiocStyle::CRANpkg("BiocManager")` package. First, install
+`r BiocStyle::CRANpkg("BiocManager")` if you do not have it yet.
+
+```{r}
+#| label: install_biocmanager
+#| eval: false
+
+install.packages("BiocManager")
+```
+
+Then, install the core packages. `BiocManager::install()` installs both
+Bioconductor and CRAN packages.
 
 ```{r}
 #| label: install_key_packages
+#| eval: false
 
-pkgs <- c("mia", "miaViz", "maaslin3", "mikropml")
-install_packages(pkgs)
+BiocManager::install(c("mia", "miaViz", "maaslin3", "mikropml"))
+```
+
+Installed packages are loaded into the R session with `library()`. If a
+package loads without an error, it was installed successfully.
+
+```{r}
+#| label: load_key_packages
+#| message: false
+
+library(mia)
+library(miaViz)
+library(maaslin3)
+library(mikropml)
 ```
 
 ### All packages
@@ -264,12 +254,11 @@ this book via the following command:
 #| label: install_packages
 #| eval: false
 
-library(remotes)
-install_github("microbiome/OMA", dependencies = TRUE, upgrade = TRUE)
+remotes::install_github("microbiome/OMA", dependencies = TRUE, upgrade = TRUE)
 ```
 
-Optionally, you can install all packages or just certain ones with the
-following script.
+Alternatively, you can install the packages from the list of all packages
+used in this book.
 
 ```{r}
 #| label: all_packages
@@ -283,7 +272,7 @@ df <- read.csv(url)
 packages <- df[[1]]
 
 # Install packages
-install_packages(packages)
+BiocManager::install(packages)
 ```
 
 ### Docker container
@@ -296,17 +285,15 @@ from [@sec-docker-image].
 ### Troubleshooting
 
 If you encounter installation issue related to package dependencies
-please see the troubleshoot page
-[here](https://github.com/microbiome/OMA/blob/devel/PackageInstallations_Troubleshoots.qmd)
-and [@sec-support].
+please see [@sec-install-troubleshooting] and [@sec-support].
 
 ## Colours in figures {#sec-figure-colours}
 
 The figures in this book use colour-blind-friendly palettes: the Okabe-Ito
 palette [@Okabe2008] for groups and viridis for continuous values. These are
-set as the defaults with `ggplot2` options, which the plotting functions of
-`r BiocStyle::Biocpkg("miaViz")` also follow. You can use the same palettes in
-your own analysis by running the following before plotting:
+set as the defaults with `ggplot2` [@Wickham2016] options, which the plotting
+functions of `r BiocStyle::Biocpkg("miaViz")` also follow. You can use the same
+palettes in your own analysis by running the following before plotting:
 
 ```{r}
 #| label: figure_colours
@@ -323,9 +310,9 @@ options(
 
 The Okabe-Ito palette has eight colours. When a figure shows more groups,
 `r BiocStyle::Biocpkg("miaViz")` uses its own, larger palettes instead, and
-plots from other packages, such as `r BiocStyle::Biocpkg("scater")`, may use
-their own palettes. The code in the book is highlighted with the accessible
-a11y theme.
+plots from other packages, such as `r BiocStyle::Biocpkg("scater")`
+[@McCarthy2017], may use their own palettes. The code in the book is
+highlighted with the accessible a11y theme.
 
 ## Interactive analysis {#sec-webapp}
 

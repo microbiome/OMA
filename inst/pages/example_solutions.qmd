@@ -2,49 +2,16 @@
 
 ```{r}
 #| label: setup
-#| echo: false
-#| results: asis
+#| include: false
 
-library(rebook)
-chapterPreamble(cache = FALSE)
-
-knitr::opts_chunk$set(warning = FALSE, message = FALSE, output = FALSE)
+knitr::opts_chunk$set(output = FALSE)
 ```
 
-## Introduction
+Example solutions are available for the exercises of the following chapters.
 
-These example solutions are related to exercises in
-[@sec-microbiome-in-bioconductor] and [@sec-ecosystem].
+## Importing and exporting data
 
-```{r}
-#| label: intro
-#| code-fold: true
-#| code-summary: "Show the solution"
-```
-
-## Data elements
-
-These example solutions are related to exercises in [@sec-containers].
-
-```{r}
-#| label: containers
-#| code-fold: true
-#| code-summary: "Show the solution"
-```
-
-## Importing data
-
-These example solutions are related to exercises in [@sec-import].
-
-```{r}
-#| label: import
-#| code-fold: true
-#| code-summary: "Show the solution"
-```
-
-## Exporting data
-
-These example solutions are related to exercises in [@sec-convert].
+These example solutions are related to Exercise 4 in [@sec-import].
 
 ```{r}
 #| label: convert
@@ -88,7 +55,7 @@ tse <- Tengeler2020
 # Available taxonomic ranks
 taxonomyRanks(tse)
 
-# Unique taxonomic features from class
+# Unique taxonomic features at the order level
 getUnique(tse, rank = "Order")
 
 # Subsets the data and aligns the tree
@@ -141,7 +108,7 @@ tse[["group"]] <- sample(
 library(miaViz)
 plotBarplot(tse, col.var = "group")
 
-# Split groups into two different tse objects and outputs a list
+# Split the samples by group into a list with one tse object per group
 tse_list <- splitOn(tse, by = 2, group = "group")
 
 # Count numbers of entries in the group
@@ -237,7 +204,8 @@ plotHistogram(x = tse, col.var = "total")
 
 # Subsets based on library size and then subsets again based on feature prevalence
 tse_library <- tse[, tse$total > 500000]
-tse_subset <- subsetByPrevalent(tse_library, detection = 1, prevalence = 2 / 10)
+tse_library <- addPrevalence(tse_library, detection = 1)
+tse_subset <- subsetBy(tse_library, rows = prevalence > 0.2)
 ```
 
 ## Agglomeration
@@ -273,8 +241,12 @@ altExpNames(tse_all_ranks)
 altExp(tse_all_ranks, "Phylum")
 
 # Agglomerate by prevalence
-tse_prevalence <- agglomerateByPrevalence(tse)
-altExp(tse, "prevalent") <- agglomerateByPrevalence(tse)
+tse <- addPrevalence(tse)
+tse_prevalence <- subsetBy(
+    tse,
+    rows = prevalence > 0.5, collapse = TRUE
+)
+altExp(tse, "prevalent") <- tse_prevalence
 
 # Show column variables and merges the data based on one
 colData(tse) |> colnames()
@@ -300,7 +272,10 @@ tse <- GlobalPatterns
 plotHistogram(tse, assay.type = "counts")
 
 # Transformations on the counts assay
-tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+tse <- transformAssay(
+    tse,
+    assay.type = "counts", method = "relabundance", name = "relabund"
+)
 tse <- transformAssay(tse, assay.type = "counts", method = "clr", pseudocount = 1)
 
 assayNames(tse)
@@ -344,77 +319,6 @@ tse <- transformAssay(
 assay(altExp(tse, "philr"))
 ```
 
-## Community composition
-
-These example solutions are related to exercises in [@sec-microbiome-community].
-
-```{r}
-#| label: composition
-#| code-fold: true
-#| code-summary: "Show the solution"
-```
-
-## Alpha Diversity
-
-These example solutions are related to exercises in [@sec-alpha-diversity].
-
-```{r}
-#| label: alpha
-#| code-fold: true
-#| code-summary: "Show the solution"
-```
-
-## Community similarity
-
-These exercises are related to exercises in [@sec-community-similarity].
-
-```{r}
-#| label: beta
-#| code-fold: true
-#| code-summary: "Show the solution"
-```
-
-## Community typing
-
-These example solutions are related to exercises in [@sec-clustering].
-
-```{r}
-#| label: cluster
-#| code-fold: true
-#| code-summary: "Show the solution"
-```
-
-## Differential abundance
-
-These example solutions are related to exercises in
-[@sec-differential-abundance].
-
-```{r}
-#| label: daa
-#| code-fold: true
-#| code-summary: "Show the solution"
-```
-
-## Correlation
-
-These example solutions are related to exercises in [@sec-correlation].
-
-```{r}
-#| label: correlation
-#| code-fold: true
-#| code-summary: "Show the solution"
-```
-
-## Mediation
-
-These example solutions are related to exercises in [@sec-mediation].
-
-```{r}
-#| label: mediation
-#| code-fold: true
-#| code-summary: "Show the solution"
-```
-
 ## Cross-association
 
 These example solutions are related to exercises in [@sec-cross-correlation].
@@ -430,9 +334,15 @@ data(HintikkaXOData)
 mae <- HintikkaXOData
 
 # Agglomerate microbiome data
-mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Phylum")
+mae[[1]] <- agglomerateByRank(mae[[1]], rank = "Phylum")
+mae[[1]] <- addPrevalence(mae[[1]])
+mae[[1]] <- subsetBy(
+    mae[[1]],
+    rows = prevalence > 0.5, collapse = TRUE
+)
 
-# Apply CLR
+# Apply robust CLR (rclr), a CLR variant that handles zeros without a
+# pseudocount
 mae[[1]] <- transformAssay(mae[[1]], assay.type = "counts", method = "rclr")
 
 # Apply relative and log10
@@ -545,9 +455,15 @@ data(HintikkaXOData)
 mae_mofa <- HintikkaXOData
 
 # Agglomerate microbiome data to prevalent genera
-mae_mofa[["microbiota"]] <- agglomerateByPrevalence(
+mae_mofa[["microbiota"]] <- agglomerateByRank(
     mae_mofa[["microbiota"]],
     rank = "Genus"
+)
+mae_mofa[["microbiota"]] <- addPrevalence(mae_mofa[["microbiota"]])
+mae_mofa[["microbiota"]] <- subsetBy(
+    mae_mofa[["microbiota"]],
+    rows = prevalence > 0.5,
+    collapse = TRUE
 )
 
 # Apply CLR
@@ -674,14 +590,4 @@ res <- getCrossAssociation(
 
 library(ComplexHeatmap)
 Heatmap(res)
-```
-
-## Machine learning
-
-These example solutions are related to exercises in [@sec-machine_learning].
-
-```{r}
-#| label: ml
-#| code-fold: true
-#| code-summary: "Show the solution"
 ```

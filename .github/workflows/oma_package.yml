@@ -1,19 +1,31 @@
-name: Extract Packages
+name: Check package list
+
+# oma_packages/oma_packages.csv lists the packages needed to run the book
+# (the Suggests field of DESCRIPTION). Readers install them with the code in
+# the Getting started chapter or install_packages.R, which download the file
+# from the devel branch. This check fails when the file is out of date.
+#
+# To update the file, run in the oma_packages folder:
+#   Rscript extract_packages.R
+# and commit oma_packages.csv in the same pull request.
 
 on:
+  pull_request:
+    branches:
+      - devel
+    paths:
+      - 'DESCRIPTION'
+      - 'oma_packages/**'
   push:
     branches:
       - devel
     paths:
       - 'DESCRIPTION'
-
-permissions: write-all
+      - 'oma_packages/**'
 
 jobs:
-  extract_packages:
+  check_packages:
     runs-on: ubuntu-latest
-    env:
-      R_LIBS_USER: ${{ github.workspace }}/R/library
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -21,26 +33,13 @@ jobs:
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
 
-      - name: Cache R packages
-        uses: actions/cache@v6
-        with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-r-${{ hashFiles('**/DESCRIPTION') }}
-          restore-keys: |
-            ${{ runner.os }}-r-
-
-      - name: Install R dependencies
-        run: Rscript -e 'if (!require("stringi", quietly = TRUE)) install.packages("stringi")'
-
-      - name: Run extract_packages script
+      - name: Regenerate the package list
         working-directory: ./oma_packages
         run: Rscript extract_packages.R
 
-      - name: Commit and push changes
+      - name: Check that the package list is up to date
         run: |
-          git config --local user.name "$GITHUB_ACTOR"
-          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          cd oma_packages
-          git add oma_packages.csv
-          git commit -m "Update oma_packages.csv" -a || echo "No changes to commit"
-          git push origin || echo "No changes to commit"
+          if ! git diff --exit-code -- oma_packages/oma_packages.csv; then
+            echo "::error file=oma_packages/oma_packages.csv::oma_packages.csv does not match the Suggests field of DESCRIPTION. Run 'Rscript extract_packages.R' in the oma_packages folder and commit oma_packages.csv."
+            exit 1
+          fi
