@@ -334,40 +334,311 @@ plotRowTree(
 )
 ```
 
-::: {.callout-tip icon="false"}
-## Exercises
+## Exercises {#sec-taxonomic-information-exercises}
 
-**Goal:** Learn how to handle taxonomy information.
+We use the [`Tengeler2020`](data_sets.qmd#sec-data-tengeler2020) dataset.
 
-**Exercise 1: Taxonomy information**
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-1. Load any of the example data sets described in [@sec-data-sets].
+:::: {.callout-tip icon="false"}
+## Exercise 1: Taxonomy table in mia
 
-2. Ensure that the data includes `rowData` and `rowTree`. If not,
-select some other dataset.
+**Goal:** Understand what kind of taxonomy information
+`r BiocStyle::Biocpkg("mia")` expects.
 
-3. List the available taxonomic ranks in the data.
+Imagine three datasets whose `rowData` contain the following columns, in
+this order:
 
-4. List the unique taxonomic features from specific taxonomy rank.
+| Dataset | Columns of `rowData`                                     |
+|---------|----------------------------------------------------------|
+| A       | `Kingdom`, `Phylum`, `Class`, `Order`, `Family`, `Genus` |
+| B       | `phylum`, `class`, `family`                              |
+| C       | `Genus`, `Family`, `Order`                               |
 
-5. Subset data by taking, e.g., the first 10 rows.
+Answer the following questions without writing any code. The beginning of
+this chapter will help you.
 
-6. How many nodes does the phylogeny include?
+1. In which of the datasets can `r BiocStyle::Biocpkg("mia")` use the
+taxonomy information? Why?
 
-7. Prune the tree to correspond the subsetted data. How many nodes are
-left after pruning?
+2. The `rowData` of a dataset contains, in addition to the taxonomy
+columns, a column called `GC_content`. Which function would you use to get
+only the names of the taxonomy columns?
 
-8. Visualize the phylogeny.
+3. Your data contains taxonomy ranks that are not among the default ranks
+of `r BiocStyle::Biocpkg("mia")`. How can you make
+`r BiocStyle::Biocpkg("mia")` recognize them?
 
-9. Save the data to another variable. Calculate the hierarchy tree, and
-visualize it. How does the tree differ from phylogeny?
+::: {.callout-note collapse="true"}
+## Solution
 
-Useful functions:
+1. Datasets A and B. In dataset A, the columns have the expected names and
+are in the expected order. In dataset B, the names are written in lower case
+and some ranks are omitted, which is allowed as long as the order remains.
+In dataset C, the columns are in the wrong order, so the taxonomy cannot be
+used. You can check this with `checkTaxonomy()`.
 
-`utils::data()`, `SummarizedExperiment::rowData()`,
-`TreeSummarizedExperiment::rowTree()`, `mia::taxonomyRanks()`,
-`mia::getUnique()`, `TreeSummarizedExperiment::rowTree(tse)$Nnode`,
-`TreeSummarizedExperiment::subsetByLeaf()`, `miaViz::plotRowTree()`,
-`mia::addHierarchyTree()`
+2. `taxonomyRanks()` returns the columns of `rowData` that
+`r BiocStyle::Biocpkg("mia")` assumes to contain taxonomy information.
 
+3. Set your own ranks with `setTaxonomyRanks()`. The order of the ranks is
+meaningful, so give them from the highest to the lowest rank. You can check
+the current ranks with `getTaxonomyRanks()`.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Explore the taxonomy information
+
+**Goal:** Learn to check and explore the taxonomy information of a dataset.
+
+1. Load the `Tengeler2020` dataset from the `mia` package and store it in a
+variable called `tse`.
+
+2. Check whether the taxonomy information is usable for `mia`.
+
+3. List the taxonomy ranks of the data.
+
+4. Show the taxonomy table, that is, the columns of `rowData` that contain
+taxonomy ranks.
+
+5. How many features do not have information at the genus level?
+
+6. List the unique phyla in the data.
+
+**Useful functions:** `data()`, `mia::checkTaxonomy()`,
+`mia::taxonomyRanks()`, `rowData()`, `mia::taxonomyRankEmpty()`, `table()`,
+`mia::getUnique()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_taxonomy_explore
+
+library(mia)
+
+# 1. Load the data
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# 2. Check the taxonomy information
+checkTaxonomy(tse)
+
+# 3. Taxonomy ranks
+taxonomyRanks(tse)
+
+# 4. Taxonomy table
+rowData(tse)[, taxonomyRanks(tse)]
+
+# 5. Features with empty genus information
+table(taxonomyRankEmpty(tse, rank = "Genus"))
+
+# 6. Unique phyla
+getUnique(tse, rank = "Phylum")
+```
+
+5. `taxonomyRankEmpty()` returns `TRUE` for the features whose genus is
+empty. The number of `TRUE` values in the table is the number of features
+without genus information.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Taxonomy labels
+
+**Goal:** Learn to create taxonomy labels and to search for information on
+specific taxa.
+
+1. Create taxonomy labels for the features and show the first of them.
+
+2. Most labels start with `Genus:`, but some start with another rank, such
+as `Family:`. Why?
+
+3. Create the labels again, but do not make them unique. Show the first
+labels and compare them to the labels from step 1.
+
+4. Search the taxonomy table for the genus *Akkermansia*. To which phylum
+does it belong?
+
+**Useful functions:** `mia::getTaxonomyLabels()`, `head()`,
+`mia::mapTaxonomy()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_taxonomy_labels
+
+# 1. Taxonomy labels
+labels <- getTaxonomyLabels(tse)
+head(labels)
+
+# 3. Labels that are not made unique
+labels_not_unique <- getTaxonomyLabels(tse, make.unique = FALSE)
+head(labels_not_unique)
+
+# 4. Search for Akkermansia
+mapTaxonomy(tse, taxa = "Akkermansia")
+```
+
+2. `getTaxonomyLabels()` uses the lowest rank that is not empty. Most
+features have genus information, but some are classified only to a higher
+rank, such as family or order. Because the labels come from different ranks,
+the rank is added to the label.
+
+3. Several features can belong to the same genus. By default, these
+duplicated labels are made unique by adding a number to the end, for
+example `Genus:Bacteroides_1`. With `make.unique = FALSE`, the labels are
+returned as they are, so the same label can appear several times.
+
+4. The output of `mapTaxonomy()` shows the full taxonomy of the matching
+features. The phylum is shown in the `Phylum` column.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Prune the tree
+
+**Goal:** Learn to update the phylogenetic tree after subsetting the data.
+
+1. Select the first 10 rows of `tse` with the `[]` operator and store the
+result in a variable called `tse_sub`.
+
+2. Print `tse` and `tse_sub`. How many leaves does the `rowTree` have in each
+of them?
+
+3. Prune the tree of `tse_sub` so that it includes only the selected
+features. Print `tse_sub` again. How many leaves does the tree have now?
+
+4. Why do you need to prune the tree yourself after subsetting with `[]`?
+
+**Useful functions:** `TreeSummarizedExperiment::subsetByLeaf()`,
+`rownames()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_taxonomy_prune
+
+# 1. Select the first 10 rows
+tse_sub <- tse[1:10, ]
+
+# 2. Number of leaves before pruning
+tse
+tse_sub
+
+# 3. Prune the tree
+tse_sub <- subsetByLeaf(tse_sub, rowLeaf = rownames(tse_sub))
+tse_sub
+```
+
+2. The number of leaves is shown on the `rowTree` line of the printed
+object. After subsetting with `[]`, the tree still has the same number of
+leaves as the tree of the original data.
+
+3. After pruning, the tree has one leaf for each selected feature.
+
+4. The `[]` operator keeps the links between the rows and the tree nodes
+correct, but it does not change the tree itself.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Visualize the tree
+
+**Goal:** Learn to visualize the phylogenetic tree together with the
+taxonomy information.
+
+1. Visualize the phylogenetic tree of `tse`.
+
+2. Visualize the tree again and colour the tips by `Phylum`.
+
+3. Visualize the tree with a dendrogram layout, and colour the edges by
+`Phylum`.
+
+**Useful functions:** `miaViz::plotRowTree()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_taxonomy_plot_tree
+#| warning: false
+
+library(miaViz)
+
+# 1. Visualize the tree
+plotRowTree(tse)
+
+# 2. Colour tips by phylum
+plotRowTree(tse, tip.colour.by = "Phylum")
+
+# 3. Dendrogram layout with edges coloured by phylum
+plotRowTree(tse, layout = "dendrogram", edge.colour.by = "Phylum")
+```
+
+When the tips or edges are coloured by phylum, you can see where the
+features of each phylum are located in the tree. If the features of a phylum
+are close to each other in the tree, the phylogeny and the taxonomy agree
+for that phylum.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 6: Hierarchy tree
+
+**Goal:** Learn to create a hierarchy tree from the taxonomy table and to
+understand how it differs from a phylogenetic tree.
+
+1. Create a hierarchy tree from the taxonomy table of `tse` and print it.
+
+2. Add the hierarchy tree to the data. Store the result in a new variable
+called `tse_hierarchy`, so that `tse` keeps the phylogenetic tree. Print
+`tse_hierarchy`.
+
+3. How many leaves does the hierarchy tree have? Compare it to the number of
+leaves in the phylogenetic tree of `tse`. Why do the numbers differ?
+
+4. Visualize the hierarchy tree and colour the tips by `Phylum`. Compare the
+plot to the plot of the phylogenetic tree in Exercise 5.
+
+5. What is the difference between a hierarchy tree and a phylogenetic tree?
+
+**Useful functions:** `mia::getHierarchyTree()`, `mia::addHierarchyTree()`,
+`miaViz::plotRowTree()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_taxonomy_hierarchy_tree
+#| warning: false
+
+# 1. Create a hierarchy tree
+getHierarchyTree(tse)
+
+# 2. Add the hierarchy tree to a copy of the data
+tse_hierarchy <- addHierarchyTree(tse)
+tse_hierarchy
+
+# 4. Visualize the hierarchy tree
+plotRowTree(tse_hierarchy, tip.colour.by = "Phylum")
+```
+
+3. The hierarchy tree is built from the taxonomy table, and duplicate
+information is removed. Features with exactly the same taxonomy, for example
+several features of the same genus, share one leaf. Therefore, the hierarchy
+tree can have fewer leaves than there are features, while the phylogenetic
+tree has one leaf for each feature.
+
+5. A hierarchy tree only shows how the taxonomic levels in the taxonomy
+table map to each other, for example which genera belong to which family.
+A phylogenetic tree describes the evolutionary relations between the
+features, which are usually estimated from their sequences. In the
+hierarchy tree, all features of the same taxonomic group are always next to
+each other, while in a phylogenetic tree this is not necessarily the case.
+:::
+::::

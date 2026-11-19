@@ -376,47 +376,263 @@ plotBoxplot(
 An article on [ggpubr package](http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/76-add-p-values-and-significance-levels-to-ggplots/)
 provides further examples for estimating and highlighting significances.
 
-::: {.callout-tip icon="false"}
-## Exercises
+## Exercises {#sec-alpha-diversity-exercises}
 
-**Goal:** The goal of this exercise is to learn to calculate alpha
-diversities and to compare them between sample groups.
+We use the [`Tengeler2020`](data_sets.qmd#sec-data-tengeler2020) dataset.
 
-**Exercise 1: Alpha diversity**
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-1. Load any of the example data sets described in [@sec-data-sets].
+:::: {.callout-tip icon="false"}
+## Exercise 1: Richness and evenness
 
-2. Calculate the Shannon diversity index, and add the results to `colData()`.
+**Goal:** Understand what richness and evenness mean.
 
-3. Observe `colData`, particularly focusing on the column names.
+Imagine two samples that both contain the same four taxa and 100 reads in
+total:
 
-4. Summarize the distribution of Shannon diversity with a histogram. Is there
-variance in alpha diversities?
+| Taxon   | Sample A | Sample B |
+|---------|---------:|---------:|
+| Taxon 1 | 25       | 97       |
+| Taxon 2 | 25       | 1        |
+| Taxon 3 | 25       | 1        |
+| Taxon 4 | 25       | 1        |
 
-5. Calculate the Shannon diversity index with rarefaction and store it to
-`colData` as column `"shannon_rarefaction"`.
+Answer the following questions without writing any code. The Background
+section at the beginning of this chapter will help you.
 
-6. Calculate correlation between Shannon indices, with and without rarefaction.
-Do they correlate? If the correlation is relatively weak, what might explain
-this? If they correlate very strongly, why is that? What does rarefaction do
-and what can it be used for?
+1. What is the observed richness of each sample?
 
-7. Visualize the correlation.
+2. Which sample is more even?
 
-8. Calculate all available indices.
+3. Which sample would you expect to have a higher Shannon diversity? Why?
 
-9. Visualize single diversity index in respect to some sample grouping that you
-can find from `colData`. Can you see a difference between groups?
+4. Which sample would you expect to have a higher Berger-Parker dominance?
 
-10. Calculate statistical significance of difference in selected alpha
-diversity index between the sample groups. Do the results confirm your
-observation in step 9?
+::: {.callout-note collapse="true"}
+## Solution
 
-Useful functions:
+1. The observed richness is the number of taxa present. Both samples contain
+four taxa, so both have an observed richness of 4.
 
-`utils::data()`, `mia::addAlpha()`, `miaViz::plotHistogram()`,
-`mia::getCrossAssociation()`, `scater::plotColData()`,
-`geom_smooth(method = "lm")`, `stats::wilcox.test()`,
-`stats::pairwise.wilcox.test()`, `stats::kruskal.test()`
+2. Sample A is more even, because all taxa have the same abundance. In
+Sample B, one taxon has almost all the reads.
 
+3. Sample A. Shannon diversity accounts for both richness and evenness. The
+samples have the same richness, but Sample A is more even.
+
+4. Sample B. Berger-Parker dominance is the relative abundance of the most
+abundant taxon: 0.97 in Sample B and 0.25 in Sample A.
+
+Richness alone cannot tell these two samples apart. This is why it is
+recommended to calculate several indices that describe different aspects of
+alpha diversity.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Calculate alpha diversity
+
+**Goal:** Calculate alpha diversity indices and find where they are stored.
+
+1. Load the `Tengeler2020` dataset from the `mia` package and store it in a
+variable called `tse`.
+
+2. Calculate alpha diversity with `addAlpha()` from the `counts` assay. Use
+the default indices, that is, do not specify the `index` argument.
+
+3. Check the column names of `colData(tse)`. Which new columns were added?
+
+4. Each of the default indices represents one of the four categories of alpha
+diversity described in the Background section of this chapter. Match
+each new column to its category: richness, dominance, information or
+phylogenetics.
+
+5. Show the first values of the Shannon diversity.
+
+**Useful functions:** `data()`, `mia::addAlpha()`, `colData()`, `colnames()`,
+`head()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_alpha_calculate
+
+library(mia)
+
+# 1. Load the data
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# 2. Calculate the default alpha diversity indices
+tse <- addAlpha(tse, assay.type = "counts")
+
+# 3. Check the columns of colData
+colnames(colData(tse))
+
+# 5. Show the first values of Shannon diversity
+head(tse$shannon_diversity)
+```
+
+4. The new columns and their categories are:
+
+- `observed_richness`: richness
+- `dbp_dominance`: dominance (Berger-Parker)
+- `shannon_diversity`: information
+- `faith_diversity`: phylogenetics. It can be calculated because the dataset
+contains a phylogenetic tree in `rowTree(tse)`.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Compare alpha diversity indices
+
+**Goal:** Learn to compare alpha diversity indices with each other.
+
+1. Make a scatter plot with the observed richness on the x-axis and the
+Shannon diversity on the y-axis. Add a linear regression line to the plot.
+
+2. Calculate the correlation between the observed richness and the Shannon
+diversity, and test whether it is statistically significant.
+
+3. Look at the plot and the correlation. Do the two indices give similar
+information? Think about what each index measures (see Exercise 1).
+
+**Useful functions:** `scater::plotColData()`, `ggplot2::geom_smooth()`,
+`stats::cor.test()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_alpha_compare
+
+library(scater)
+
+# 1. Scatter plot with a linear regression line
+plotColData(tse, x = "observed_richness", y = "shannon_diversity") +
+    geom_smooth(method = "lm")
+
+# 2. Correlation and its significance
+cor.test(tse$observed_richness, tse$shannon_diversity)
+```
+
+3. Observed richness only counts the taxa, while Shannon diversity also
+accounts for how evenly the reads are distributed among them. A strong
+correlation means that the indices largely carry the same information in
+this dataset. A weak correlation means that evenness differs between samples
+independently of richness, and the indices describe different aspects of
+the communities.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Rarefaction
+
+**Goal:** Learn how uneven sequencing depth can be taken into account with
+rarefaction.
+
+1. Calculate the library size of each sample, that is, the total number of
+reads in each sample. Summarize the library sizes. How large is the difference
+between the smallest and the largest library?
+
+2. Calculate the observed richness again with rarefaction. Set the
+rarefaction depth `sample` to the smallest library size, use `niter = 10`
+iterations, and store the result in `colData` under the name
+`"richness_rarefied"`. Set a seed before the calculation, as rarefaction is
+random.
+
+3. Visualize the observed richness without rarefaction as boxplots, with one
+box for each group in `patient_status`. Then make the same plot for the
+observed richness with rarefaction, and compare the two plots.
+
+4. Why might the two values differ? Why do we use the smallest library size
+as the rarefaction depth?
+
+**Useful functions:** `assay()`, `colSums()`, `summary()`, `min()`,
+`set.seed()`, `mia::addAlpha()`, `miaViz::plotBoxplot()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_alpha_rarefaction
+
+# 1. Library sizes
+lib_size <- colSums(assay(tse, "counts"))
+summary(lib_size)
+
+# 2. Observed richness with rarefaction
+set.seed(123)
+tse <- addAlpha(
+    tse,
+    assay.type = "counts",
+    index = "observed_richness",
+    name = "richness_rarefied",
+    sample = min(lib_size),
+    niter = 10
+)
+
+# 3. Compare richness without and with rarefaction
+library(miaViz)
+
+plotBoxplot(tse, col.var = "observed_richness", x = "patient_status")
+plotBoxplot(tse, col.var = "richness_rarefied", x = "patient_status")
+```
+
+4. The more reads a sample has, the more taxa are likely to be detected.
+Without rarefaction, part of the differences in richness can therefore be
+due to differences in sequencing depth. Rarefaction subsamples every sample
+to the same number of reads, so the samples are compared at equal depth. The
+depth cannot be larger than the smallest library, because a sample cannot be
+subsampled to more reads than it contains. Samples with fewer reads than the
+chosen depth would have to be removed.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Compare groups
+
+**Goal:** Learn to compare alpha diversity between sample groups and to test
+the difference statistically.
+
+1. Visualize the Shannon diversity of the samples as boxplots, with one box
+for each group in `patient_status`.
+
+2. Test whether the Shannon diversity differs between the groups with the
+Wilcoxon test.
+
+3. Add the p-value of the test to the boxplot.
+
+4. Why does this chapter use the Wilcoxon test instead of Student's t-test?
+
+**Useful functions:** `miaViz::plotBoxplot()`, `stats::wilcox.test()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_alpha_groups
+
+# 1. Boxplot of Shannon diversity by group
+plotBoxplot(tse, col.var = "shannon_diversity", x = "patient_status")
+
+# 2. Wilcoxon test
+wilcox.test(shannon_diversity ~ patient_status, data = colData(tse))
+
+# 3. Boxplot with the p-value
+plotBoxplot(
+    tse,
+    col.var = "shannon_diversity",
+    x = "patient_status",
+    add.significance = TRUE
+)
+```
+
+4. Student's t-test assumes that the values are normally distributed in each
+group. The Wilcoxon test is non-parametric and does not make this assumption,
+so it is more flexible for alpha diversity values, which are often not
+normally distributed.
+:::
+::::

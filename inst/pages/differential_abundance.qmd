@@ -800,48 +800,371 @@ We also note that, in contrast to
 `Maaslin2()` function, the custom function provides confidence intervals and
 q-values (calculated for the variable of interest) automatically in its output.
 
-::: {.callout-tip icon=false}
+## Exercises {#sec-differential-abundance-exercises}
 
-## Exercises
+We use the [`peerj13075`](data_sets.qmd#sec-data-peerj13075) dataset.
 
-**Goal:** The goal of these exercises it to learn how to perform differential
-abundance analysis and how to visualize the results.
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-**Exercises: Differential abundance analysis (DAA)**
+:::: {.callout-tip icon="false"}
+## Exercise 1: Reading DAA results
 
-1. Load any of the example data sets mentioned in [@sec-example-data].
+**Goal:** Understand how the results of DAA are read.
 
-2. Observe `colData`. Ensure that the data includes a meaningful way to group
-samples
-(e.g., Region, Treatment, Diagnosis). If it does not, choose another dataset.
+Imagine that you have compared the relative abundances of three taxa between a
+`Treatment` group and a `Control` group. `Control` was set as the reference
+level. The results are the following:
 
-3. Agglomerate the data to the genus level and filter by a prevalence of 10%.
+| feature | coef | pval  | qval |
+|---------|-----:|------:|-----:|
+| Taxon A | 1.0  | 0.001 | 0.01 |
+| Taxon B | -2.0 | 0.004 | 0.03 |
+| Taxon C | 1.5  | 0.020 | 0.12 |
 
-4. Run the basic two-group DAA.
+Answer the following questions without writing any code. The section
+@sec-daa-basic will help you.
 
-5. Explore the results tables. Are there any taxa with significant
-abundance differences?
+1. Which taxa are statistically significant when the standard criterion
+q-value < 0.05 is used?
 
-6. Visualize the results (for significant taxa) with strip plots and boxplots.
-Can you "see" how the abundances of (possible)
-significant taxa differ between the groups?
+2. For which taxa is the estimated abundance higher in the `Treatment` group?
 
-7. Run the same analysis now with an additional covariate(s). Do the results
-differ? Why?
+3. The log~2~-fold change (`coef`) of Taxon A is 1. What is the ratio of the
+geometric means of the relative abundances between the `Treatment` and
+`Control` groups? What is the ratio for Taxon B?
 
-8. You can try also more complex analysis, e.g. with several covariates and/or
-with interactions.
+4. The p-value of Taxon C is smaller than 0.05. Why do we use the q-value
+instead of the p-value to define statistical significance?
 
-9. Bonus 1: Try also the analysis of positive abundances with your data.
+5. Why is it not a good idea to run several DAA methods and report the one
+that gives the most significant taxa?
 
-10. Bonus 2: Try to run DAA with ordinal regression model with the custom
-function provided in the
-[extra materials](https://microbiome.github.io/OMA-extras/docs/devel/pages/extra_daa.html#sec-orm).
-See how the results differ from the results obtained with `Maaslin2()`.
+::: {.callout-note collapse="true"}
+## Solution
 
-Useful functions:
+1. Taxon A and Taxon B, because their q-values are smaller than 0.05.
 
-`SummarizedExperiment::colData()`, `mia::agglomerateByRank()`, `mia::addPrevalence()`, `mia::subsetBy()`,
-`Maaslin2::Maaslin2()`, `maaslin3::maaslin3()`
+2. Taxon A and Taxon C, because their log~2~-fold changes are positive. The
+abundance is higher in the non-reference group (`Treatment`) when `coef` is
+positive. Note that the difference is not statistically significant for
+Taxon C.
 
+3. The ratio is `2 ^ coef`. For Taxon A, it is $2^{1} = 2$, that is, the
+geometric mean is two times higher in the `Treatment` group. For Taxon B, it
+is $2^{-2} = 0.25$, that is, the geometric mean in the `Treatment` group is a
+quarter of that in the `Control` group.
+
+4. In DAA, one test is performed for each taxon. The more tests we perform,
+the more likely it is that some of them give small p-values just by chance.
+The q-value is a p-value adjusted for multiple testing, and it controls the
+false discovery rate (FDR).
+
+5. Different DAA methods often give very different results. If we try many
+methods, we are likely to find a method that supports our hypothesis just by
+chance (cherry-picking). The method should therefore be chosen before the
+analysis, for example, based on the recommendations in
+@sec-daa-recommendations.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Prepare the data
+
+**Goal:** Learn to prepare the data for DAA.
+
+1. Load the `peerj13075` dataset from the `mia` package and store it in a
+variable called `tse`.
+
+2. Check how many samples there are in each group of the `Diet` column.
+
+3. Agglomerate the data to genus level with `rank = "genus"`. (Note that
+the rank names of this dataset are written in lowercase.) Then add the
+prevalence and keep only the genera that are present in more than 50% of the
+samples. How many genera remain?
+
+4. Add an assay of relative abundances called `"relabundance"`.
+
+5. Convert the `Diet` column to a factor and set `Mixed` as the reference
+level.
+
+6. Why is it important to know which group is the reference level?
+
+**Useful functions:** `data()`, `table()`, `mia::agglomerateByRank()`,
+`mia::addPrevalence()`, `mia::subsetBy()`,
+`mia::transformAssay()`, `factor()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_daa_prepare
+
+library(mia)
+
+# 1. Load the data
+data("peerj13075", package = "mia")
+tse <- peerj13075
+
+# 2. Number of samples in each diet group
+table(tse$Diet)
+
+# 3. Agglomerate to genus level and keep prevalent genera
+tse <- agglomerateByRank(tse, rank = "genus")
+tse <- addPrevalence(tse)
+tse <- subsetBy(tse, rows = prevalence > 0.5)
+nrow(tse)
+
+# 4. Add relative abundances
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+
+# 5. Set Mixed as the reference level
+tse$Diet <- factor(tse$Diet, levels = c("Mixed", "Veg"))
+```
+
+6. The log~2~-fold changes compare the non-reference group to the reference
+group. Here, a positive `coef` will mean that the abundance is higher in the
+`Veg` group than in the `Mixed` group, and a negative `coef` the opposite. If
+the reference level was `Veg`, the signs would be reversed.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Compare two groups
+
+**Goal:** Learn to perform a simple two-group DAA with `Maaslin2()` and to read
+its results.
+
+1. Run `Maaslin2()` to compare the genera between the diet groups. Give it the
+`counts` assay as `input_data`, `colData(tse)` converted to a `data.frame` as
+`input_metadata`, and `fixed_effects = "Diet"`. Set `output = "output"`,
+`plot_heatmap = FALSE` and `plot_scatter = FALSE`. Store the result in a
+variable called `obj_daa`.
+
+2. Extract the `results` table from `obj_daa`. Add the lower and upper bounds
+of the 95% confidence intervals as columns `ci_lwr` and `ci_upr`, as shown in
+@sec-daa-basic. Keep the columns `feature`, `name`, `coef`, `pval`, `qval`,
+`ci_lwr` and `ci_upr`, and store the table in a variable called `res_daa`.
+
+3. Show the six genera with the smallest p-values.
+
+4. How many genera have a q-value smaller than 0.05?
+
+5. What does the value `DietVeg` in the `name` column tell? How would you read
+a negative value in the `coef` column?
+
+**Useful functions:** `Maaslin2::Maaslin2()`, `colData()`, `as.data.frame()`,
+`dplyr::mutate()`, `stats::qt()`, `dplyr::select()`, `dplyr::arrange()`,
+`head()`, `sum()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_daa_basic
+#| results: hide
+
+library(Maaslin2)
+library(dplyr)
+
+# 1. Run Maaslin2 with diet as the predictor variable
+obj_daa <- Maaslin2(
+    input_data = assay(tse, "counts"),
+    input_metadata = colData(tse) |> as.data.frame(),
+    fixed_effects = "Diet",
+    output = "output",
+    plot_heatmap = FALSE,
+    plot_scatter = FALSE
+)
+```
+
+```{r}
+#| label: exercise_daa_basic_results
+
+# 2. Extract the results and calculate the 95% CIs
+res_daa <- obj_daa$results |>
+    mutate(
+        ci_lwr = coef - qt(.975, df = N) * stderr,
+        ci_upr = coef + qt(.975, df = N) * stderr
+    ) |>
+    select(feature, name, coef, pval, qval, ci_lwr, ci_upr)
+
+# 3. Genera with the smallest p-values
+res_daa |>
+    arrange(pval) |>
+    head()
+
+# 4. Number of genera with q-value < 0.05
+sum(res_daa$qval < 0.05)
+```
+
+5. `DietVeg` tells that the predictor variable is `Diet` and that the results
+compare the `Veg` group to the reference group `Mixed`. A negative log~2~-fold
+change means that the estimated relative abundance of the genus is lower in
+the `Veg` group than in the `Mixed` group. Whether the difference is
+statistically significant is seen from the q-value.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Visualize the results
+
+**Goal:** Learn to visualize DAA results with strip plots, boxplots and a
+forest plot.
+
+1. Take the names of the three genera with the smallest p-values from
+`res_daa`. Plot their relative abundances in the diet groups with
+`plotBoxplot()`. Use `assay.type = "relabundance"`, `x = "Diet"`,
+`facet.by = "rownames"`, `scales = "free_y"` and `add.proportion = TRUE`.
+
+2. Plot the log~2~-fold changes and their 95% confidence intervals for all
+genera with `plotForest()`. Order the genera by their log~2~-fold change.
+
+3. How can you see from the forest plot whether the abundance of a genus is
+higher or lower in the `Veg` group? How can you see whether the 95%
+confidence interval contains zero?
+
+**Useful functions:** `dplyr::arrange()`, `head()`, `dplyr::pull()`,
+`miaViz::plotBoxplot()`, `miaViz::plotForest()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_daa_visualize
+
+library(miaViz)
+
+# 1. Strip plots with boxplots for the three genera with the smallest p-values
+top_genera <- res_daa |>
+    arrange(pval) |>
+    head(3) |>
+    pull(feature)
+
+plotBoxplot(
+    tse,
+    features = top_genera,
+    assay.type = "relabundance",
+    x = "Diet",
+    facet.by = "rownames",
+    scales = "free_y",
+    add.proportion = TRUE
+)
+
+# 2. Forest plot of the log2-fold changes and their 95% CIs
+plotForest(
+    res_daa,
+    effect.var = "coef",
+    ci.lower.var = "ci_lwr",
+    ci.upper.var = "ci_upr",
+    id.var = "feature",
+    order.by = "coef"
+)
+```
+
+3. Each point shows the log~2~-fold change of one genus, and the line shows its
+95% confidence interval. Points to the right of zero mean that the abundance
+is estimated to be higher in the `Veg` group, and points to the left of zero
+that it is lower. If the line crosses zero, the confidence interval contains
+zero, and the difference is not statistically significant at the 5% level
+before adjusting for multiple testing.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Add a covariate
+
+**Goal:** Learn to include a covariate in DAA.
+
+1. Make a cross-table of the `Diet` and `Geographical_location` columns. Are
+the diet groups evenly distributed across the cities?
+
+2. Convert the `Geographical_location` column to a factor with the levels
+`Pune`, `Ahmednagar` and `Nashik`, in this order. `Pune` is then the
+reference level.
+
+3. Run `Maaslin2()` again, now with
+`fixed_effects = c("Diet", "Geographical_location")`. Store the result in a
+variable called `obj_daa_cov`.
+
+4. Extract the results and calculate the q-values separately for each
+variable, as shown in @sec-daa-cov. Store the table in a variable called
+`res_daa_cov`.
+
+5. Show the six genera with the smallest p-values for `DietVeg`.
+
+6. Why can it be important to include the city as a covariate? Why are the
+q-values calculated separately for each variable?
+
+**Useful functions:** `table()`, `factor()`, `Maaslin2::Maaslin2()`,
+`dplyr::group_by()`, `dplyr::mutate()`, `stats::p.adjust()`,
+`dplyr::ungroup()`, `dplyr::select()`, `dplyr::filter()`,
+`dplyr::arrange()`, `head()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_daa_covariate_prepare
+
+# 1. Cross-table of diet and city
+table(tse$Diet, tse$Geographical_location)
+
+# 2. Set Pune as the reference level
+tse$Geographical_location <- factor(
+    tse$Geographical_location,
+    levels = c("Pune", "Ahmednagar", "Nashik")
+)
+```
+
+1. In the cross-table, the rows are the diet groups and the columns are the
+cities, and each cell is the number of samples with that diet from that city.
+The groups are evenly distributed if the proportions of `Mixed` and `Veg`
+samples are similar in each city (column).
+
+```{r}
+#| label: exercise_daa_covariate
+#| results: hide
+
+# 3. Run Maaslin2 with diet and city as the predictor variables
+obj_daa_cov <- Maaslin2(
+    input_data = assay(tse, "counts"),
+    input_metadata = colData(tse) |> as.data.frame(),
+    fixed_effects = c("Diet", "Geographical_location"),
+    output = "output",
+    plot_heatmap = FALSE,
+    plot_scatter = FALSE
+)
+```
+
+```{r}
+#| label: exercise_daa_covariate_results
+
+# 4. Extract the results and calculate the q-values for each variable
+res_daa_cov <- obj_daa_cov$results |>
+    group_by(metadata) |>
+    mutate(qval = p.adjust(pval, method = "fdr")) |>
+    ungroup() |>
+    select(feature, name, coef, pval, qval)
+
+# 5. Genera with the smallest p-values for diet
+res_daa_cov |>
+    filter(name == "DietVeg") |>
+    arrange(pval) |>
+    head()
+```
+
+6. If the diet groups are not evenly distributed across the cities, and the
+city itself is associated with the skin microbiome, the city can act as a
+confounder. Differences that we see between the diet groups could then be
+partly due to differences between the cities. With the city as a covariate,
+the diet effect is estimated while the city is held constant. You can compare
+the results to those of Exercise 3: if the estimates and q-values for diet
+change a lot, the covariate affects the diet results.
+
+`Maaslin2()` adjusts the p-values over all variables in the model. We are
+mainly interested in diet, so we adjust the p-values only over the tests
+for diet. This way, the tests for the city do not affect the q-values of
+diet.
+:::
+::::
