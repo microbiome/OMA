@@ -1251,7 +1251,8 @@ in Jaccard index" will help you.
 
 1. What is the (presence/absence) Jaccard dissimilarity between the samples?
 
-2. Would the Bray-Curtis dissimilarity between the samples also be zero? Why?
+2. Would the Bray-Curtis dissimilarity between the samples be the same as the
+Jaccard dissimilarity? Why?
 
 3. Which metric would you choose if you wanted to take into account how
 closely related the taxa are in the phylogenetic tree?
@@ -1269,7 +1270,7 @@ compares which taxa are present, and both samples contain the same three taxa.
 
 2. No. Bray-Curtis takes the abundances of the taxa into account. The samples
 contain the same taxa, but in very different proportions, so the Bray-Curtis
-dissimilarity is larger than zero.
+dissimilarity is larger than zero, whereas the Jaccard dissimilarity is zero.
 
 3. UniFrac, which uses the phylogenetic tree of the taxa.
 
@@ -1389,7 +1390,7 @@ by `patient_status`. Compare the plot with the plot from step 3.
 though they are based on the same samples?
 
 **Useful functions:** `mia::addMDS()`, `mia::getDissimilarity()`,
-`SingleCellExperiment::reducedDimNames()`, `scater::plotOrdination()`,
+`SingleCellExperiment::reducedDimNames()`, `miaViz::plotOrdination()`,
 `mia::transformAssay()`
 
 ::: {.callout-note collapse="true"}
@@ -1438,9 +1439,10 @@ compositions. If the samples of a group cluster together and apart from the
 other group, the groups differ in community composition. If the groups
 overlap, the ordination does not show a clear difference. The two plots are
 based on different metrics. Bray-Curtis on relative abundances is dominated
-by the most abundant taxa, while the Aitchison distance compares log-ratios
-and gives more weight to rare taxa. Therefore, the metric and assay should be
-chosen to fit the research question.
+by the most abundant taxa. The Aitchison distance compares log-ratios, so a
+relative (fold) change counts equally regardless of the abundance of the
+taxon, and rare taxa have more influence than in Bray-Curtis. Therefore,
+the metric and assay should be chosen to fit the research question.
 :::
 ::::
 
@@ -1467,7 +1469,8 @@ Exercise 3.
 rarefaction depth?
 
 **Useful functions:** `assay()`, `colSums()`, `summary()`, `min()`,
-`set.seed()`, `mia::addMDS()`, `scater::plotOrdination()`
+`set.seed()`, `mia::addMDS()`, `mia::getDissimilarity()`,
+`miaViz::plotOrdination()`
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -1498,13 +1501,14 @@ plotOrdination(tse, "MDS_bray_rarefied", colour.by = "patient_status")
 4. Samples with more reads tend to have more taxa detected, so part of the
 differences between samples can be due to sequencing depth. Rarefaction
 subsamples every sample to the same number of reads, and the dissimilarities
-are averaged over the iterations. The depth cannot be larger than the
-smallest library, because a sample cannot be subsampled to more reads than it
-contains, and no samples need to be removed. If the rarefied and non-rarefied
-plots look similar, the differences in sequencing depth have little effect on
-the ordination. If they look different, sequencing depth affects the result.
-Note that PCoA axes can be flipped between runs, so compare the relative
-positions of the samples rather than the signs of the coordinates.
+are averaged over the iterations. A sample cannot be subsampled to more reads
+than it contains, so samples with fewer reads than the chosen depth would
+have to be removed. Using the smallest library size keeps all the samples.
+If the rarefied and non-rarefied plots look similar, the differences in
+sequencing depth have little effect on the ordination. If they look
+different, sequencing depth affects the result. Note that PCoA axes can be
+flipped between runs, so compare the relative positions of the samples
+rather than the signs of the coordinates.
 :::
 ::::
 

@@ -386,21 +386,24 @@ exposure on an outcome.
 1. Load the `hitchip1006` dataset from the `miaTime` package and store it in
 a variable called `tse`.
 
-2. Check how many participants there are in each group of the `nationality`
+2. The dataset contains repeated samples from some participants. As in this
+chapter, keep only the baseline sample (`time == 0`) of each participant.
+
+3. Check how many participants there are in each group of the `nationality`
 column.
 
-3. Convert the `bmi_group` column to numeric, as in this chapter.
+4. Convert the `bmi_group` column to numeric, as in this chapter.
 
-4. Run the mediation analysis with `getMediation()`. Use `nationality` as the
+5. Run the mediation analysis with `getMediation()`. Use `nationality` as the
 treatment, `bmi_group` as the outcome and `diversity` as the mediator. Control
 for `sex` and `age`, and compare `SouthEurope` (`treat.value`) to
 `CentralEurope` (`control.value`). Use `boot = TRUE` and `sims = 100`, and set
 a seed first. Store the result in a variable called `med_df`.
 
-5. Show the results table and visualize the results as a forest plot.
+6. Show the results table and visualize the results as a forest plot.
 
-6. Check from the results table that ACME is approximately TE - ADE. How can
-you see from the forest plot whether the mediation is partial or complete?
+7. Check from the results table that ACME equals TE - ADE. How can you see
+from the forest plot whether the mediation is partial or complete?
 
 **Useful functions:** `data()`, `table()`, `as.numeric()`, `set.seed()`,
 `mia::getMediation()`, `miaViz::plotMediation()`
@@ -419,13 +422,16 @@ library(miaViz)
 data(hitchip1006, package = "miaTime")
 tse <- hitchip1006
 
-# 2. Number of participants in each nationality group
+# 2. Keep only the baseline sample of each participant
+tse <- tse[, tse$time == 0]
+
+# 3. Number of participants in each nationality group
 table(tse$nationality)
 
-# 3. Convert BMI group to numeric
+# 4. Convert BMI group to numeric
 tse$bmi_group <- as.numeric(tse$bmi_group)
 
-# 4. Alpha diversity as mediator
+# 5. Alpha diversity as mediator
 set.seed(123)
 med_df <- getMediation(
     tse,
@@ -438,14 +444,14 @@ med_df <- getMediation(
     boot = TRUE, sims = 100
 )
 
-# 5. Results table and forest plot
+# 6. Results table and forest plot
 med_df
 plotMediation(med_df, layout = "forest")
 ```
 
-6. In the results table, the `acme` column is approximately the `total` column
-minus the `ade` column. The difference is not exact, because the effects are
-estimated with bootstrapping. In the forest plot, an effect is significant if
+7. In the results table, the `acme` column equals the `total` column minus the
+`ade` column. Bootstrapping is used only to estimate the confidence intervals
+and p-values. In the forest plot, an effect is significant if
 its confidence interval does not cross zero (the dashed line). If both ACME
 and ADE are significant, the mediation is partial. If only ACME is
 significant, the mediation is complete. If ACME is not significant, there is

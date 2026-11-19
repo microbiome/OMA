@@ -553,7 +553,8 @@ one. Try to solve each exercise yourself before opening the solution.
 **Goal:** Understand the main ideas of community typing.
 
 Answer the following questions without writing any code. The beginning of
-this chapter and the sections "Clustering" and "Dimensionality reduction"
+this chapter and the sections "Clustering methods" and "Dimensionality
+reduction"
 will help you.
 
 1. Clustering of samples consists of two steps. What are they?
@@ -591,9 +592,10 @@ visualize the clusters.
 1. Load the `GlobalPatterns` dataset from the `mia` package and store it in a
 variable called `tse`.
 
-2. Agglomerate the data to the Class rank. Then add the prevalence with a
-detection threshold of 0.01, and combine the classes with a prevalence of 0.2
-or less into "Other". How many features are left?
+2. Agglomerate the data to the Class rank, and transform the `counts` assay
+into relative abundances. Then add the prevalence using the `relabundance`
+assay and a detection threshold of 0.01, and combine the classes with a
+prevalence of 0.2 or less into "Other". How many features are left?
 
 3. Cluster the samples with hierarchical clustering with `addCluster()`. Use
 the `counts` assay, Bray-Curtis dissimilarity and the `ward.D2` method.
@@ -615,9 +617,9 @@ clusters with `SampleType`.
 clusters correspond to the sample types?
 
 **Useful functions:** `data()`, `mia::agglomerateByRank()`,
-`mia::addPrevalence()`, `mia::subsetBy()`,
+`mia::transformAssay()`, `mia::addPrevalence()`, `mia::subsetBy()`,
 `mia::addCluster()`, `bluster::HclustParam()`, `mia::getDissimilarity()`,
-`table()`, `metadata()`, `plot()`, `mia::addMDS()`, `scater::plotOrdination()`
+`table()`, `metadata()`, `plot()`, `mia::addMDS()`, `miaViz::plotOrdination()`
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -635,7 +637,8 @@ tse <- GlobalPatterns
 
 # 2. Agglomerate to prevalent classes
 tse <- agglomerateByRank(tse, rank = "Class")
-tse <- addPrevalence(tse, detection = 0.01)
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+tse <- addPrevalence(tse, assay.type = "relabundance", detection = 0.01)
 tse <- subsetBy(tse, rows = prevalence > 0.2, collapse = TRUE)
 nrow(tse)
 
@@ -706,7 +709,7 @@ the contributions.
 
 **Useful functions:** `set.seed()`, `mia::addCluster()`,
 `bluster::DmmParam()`, `miaViz::plotDMNFit()`, `table()`,
-`scater::plotOrdination()`, `metadata()`,
+`miaViz::plotOrdination()`, `metadata()`,
 `DirichletMultinomial::fitted()`, `miaViz::plotLoadings()`
 
 ::: {.callout-note collapse="true"}
@@ -772,10 +775,11 @@ the rows of the data, so give the function the transposed `clr` assay, where
 the samples are in rows. Use `nstart = 25`, so that k-means is run from 25
 random starting points and the result is stable.
 
-3. Cluster the samples with k-means with `addCluster()`. Use the `clr` assay,
-the number of clusters with the highest average silhouette width in the plot
-from step 2, and `nstart = 25`. Store the clusters in the `colData` column
-`"kmeans"`.
+3. Set a seed again, and cluster the samples with k-means with
+`addCluster()`. Use the `clr` assay, 5 clusters (`centers = 5`) and
+`nstart = 25`. Store the clusters in the `colData` column `"kmeans"`. Check
+the plot from step 2: how does the average silhouette width of 5 clusters
+compare to the other numbers of clusters?
 
 4. Cross-tabulate the k-means clusters with `SampleType`.
 
@@ -804,7 +808,7 @@ fviz_nbclust(
     method = "silhouette", nstart = 25
 )
 
-# 3. k-means clustering with the k that has the highest silhouette width
+# 3. k-means clustering with 5 clusters
 set.seed(123)
 tse <- addCluster(
     tse,
@@ -877,7 +881,10 @@ tse <- addCluster(
 plotBarplot(tse, row.var = "taxa_clusters")
 
 # 4. Agglomerate the data based on the clusters
-tse_merged <- agglomerateByVariable(tse, by = "rows", f = "taxa_clusters")
+tse_merged <- agglomerateByVariable(
+    tse,
+    by = "rows", group = "taxa_clusters"
+)
 nrow(tse_merged)
 ```
 

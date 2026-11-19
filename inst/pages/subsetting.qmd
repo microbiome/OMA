@@ -380,9 +380,10 @@ dimensions are `151 17`.
 
 4. Features with an unknown taxonomy can have `NA` in the `rowData` column.
 For example, comparing `NA` with `==` gives `NA` instead of `TRUE` or
-`FALSE`, and indexing with `NA` adds rows that do not correspond to any
-feature. Removing or replacing the `NA` values makes sure that only the
-features of interest are selected.
+`FALSE`, and subsetting the data with a vector that contains `NA` values gives
+an error. Removing the `NA` values from the selection makes sure that only the
+features of interest are selected. Note that `%in%` never returns `NA`: it
+returns `FALSE` for the `NA` values.
 :::
 ::::
 
@@ -442,8 +443,8 @@ variable, and by samples and features at once.
 1. Show the frequency of each value in the `Phylum` column of `rowData`.
 
 2. Select the features that belong to the phyla *Proteobacteria* and
-*Verrucomicrobia*, and that do not have `NA` as their phylum. Store the
-result in a variable called `tse_features`.
+*Verrucomicrobia*. Make sure that features with `NA` as their phylum are not
+selected. Store the result in a variable called `tse_features`.
 
 3. Check the dimensions of `tse_features`. Is the number of features equal to
 the sum of the frequencies of the selected phyla?
@@ -451,7 +452,7 @@ the sum of the frequencies of the selected phyla?
 4. Select the features of step 2 and the samples of Exercise 2 at once. Store
 the result in a variable called `tse_both`. Check its dimensions.
 
-**Useful functions:** `rowData()`, `table()`, `%in%`, `is.na()`, `dim()`
+**Useful functions:** `rowData()`, `table()`, `%in%`, `dim()`
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -464,8 +465,7 @@ table(rowData(tse)$Phylum)
 
 # 2. Subset by feature
 selected_rows <- rowData(tse)$Phylum %in%
-    c("Proteobacteria", "Verrucomicrobia") &
-    !is.na(rowData(tse)$Phylum)
+    c("Proteobacteria", "Verrucomicrobia")
 tse_features <- tse[selected_rows, ]
 
 # 3. Check the dimensions
@@ -476,6 +476,9 @@ selected_cols <- tse$cohort %in% c("Cohort_1", "Cohort_2")
 tse_both <- tse[selected_rows, selected_cols]
 dim(tse_both)
 ```
+
+2. `%in%` returns `FALSE` for the features whose phylum is `NA`, so they are
+not selected.
 
 3. The number of rows should equal the sum of the frequencies of
 *Proteobacteria* and *Verrucomicrobia* in the table, while the number of
@@ -493,7 +496,8 @@ columns equals that of `tse_samples` from Exercise 2.
 subsetting.
 
 1. Select the features whose genus is *Blautia*. Store the result in a
-variable called `tse_blautia`. Remember to handle the `NA` values.
+variable called `tse_blautia`. Make sure that features with `NA` as their
+genus are not selected.
 
 2. Calculate the total number of counts in each sample of `tse_blautia`.
 Show the first values.
@@ -503,7 +507,7 @@ dimensions of the result.
 
 4. Why can samples become empty after subsetting features?
 
-**Useful functions:** `rowData()`, `is.na()`, `mia::addQC()`, `head()`,
+**Useful functions:** `rowData()`, `%in%`, `mia::addQC()`, `head()`,
 `dim()`
 
 ::: {.callout-note collapse="true"}
@@ -524,6 +528,9 @@ head(tse_blautia$total)
 tse_blautia <- tse_blautia[, tse_blautia$total != 0]
 dim(tse_blautia)
 ```
+
+1. As in Exercise 3, `%in%` returns `FALSE` for the features whose genus is
+`NA`, so they are not selected.
 
 4. After subsetting, the data contains only the selected features. If none
 of these features was detected in a sample, all its counts are zero. Such

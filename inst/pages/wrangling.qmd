@@ -297,7 +297,9 @@ vignettes for more examples.
 
 ## Exercises {#sec-datawrangling-exercises}
 
-We use the [`Tengeler2020`](data_sets.qmd#sec-data-tengeler2020) dataset.
+We use the [`Tengeler2020`](data_sets.qmd#sec-data-tengeler2020) dataset,
+and in Exercise 4 also the [`HintikkaXOData`](data_sets.qmd#sec-data-hintikka)
+dataset.
 
 Solve the exercises in order, as each exercise continues from the previous
 one. Try to solve each exercise yourself before opening the solution.
@@ -370,7 +372,8 @@ assay.
 column.
 
 2. Calculate the library size of each sample, that is, the sum of counts in
-each sample. Store it in `colData` as a new variable called `library_size`.
+each sample, with `colSums(assay(tse, "counts"))`. Store it in `colData` as a
+new variable called `library_size`.
 
 3. Simulate body weights for the mice with
 `runif(ncol(tse), min = 20, max = 30)` and ages with
@@ -380,13 +383,13 @@ its row names. Add the table to `colData(tse)`.
 
 4. Check the column names of `colData(tse)`. Which columns were added?
 
-5. Calculate `log10(counts + 1)` from the counts assay and add the result to
-`tse` as a new assay called `"log10_counts"`. Check the names of the
-assays.
+5. Apply the log10 transformation with a pseudocount of 1 to the counts assay
+with `transformAssay()`, and store the result as a new assay called
+`"log10_counts"`. Check the names of the assays.
 
 **Useful functions:** `colData()`, `paste()`, `head()`, `assay()`,
 `colSums()`, `runif()`, `sample()`, `data.frame()`, `colnames()`, `cbind()`,
-`log10()`, `assayNames()`
+`mia::transformAssay()`, `assayNames()`
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -413,7 +416,13 @@ colData(tse) <- cbind(colData(tse), new_data)
 colnames(colData(tse))
 
 # 5. Add a new assay
-assay(tse, "log10_counts") <- log10(assay(tse, "counts") + 1)
+tse <- transformAssay(
+    tse,
+    assay.type = "counts",
+    method = "log10",
+    pseudocount = 1,
+    name = "log10_counts"
+)
 assayNames(tse)
 ```
 
@@ -428,15 +437,15 @@ assayNames(tse)
 **Goal:** Learn to combine datasets that have the same features, and to
 merge datasets that have different features.
 
-1. Create two subsets of `tse`: `tse_adhd` with the samples whose
-`patient_status` is `"ADHD"`, and `tse_control` with the samples whose
-`patient_status` is `"Control"`.
+1. Split `tse` by samples based on the `patient_status` column, and store
+the result in a variable called `status_list`. Store its elements in
+variables called `tse_adhd` (`"ADHD"`) and `tse_control` (`"Control"`).
 
 2. Combine the two subsets back into one `TreeSE` by their columns. Check
 the dimensions of the result.
 
-3. Create two more subsets: `tse1` with the rows 1 to 100 and the samples of
-`"Cohort_1"`, and `tse2` with the rows 51 to 151 and the samples of
+3. Create two more subsets from `tse_list` of Exercise 1: `tse1` with the
+rows 1 to 100 of `"Cohort_1"`, and `tse2` with the rows 51 to 151 of
 `"Cohort_2"`. Check their dimensions. How many features do they have in
 common?
 
@@ -449,7 +458,8 @@ result.
 6. Why do the inner join and the left join give a different number of rows?
 Why can `cbind()` be used in step 2, but not to combine `tse1` and `tse2`?
 
-**Useful functions:** `cbind()`, `dim()`, `mia::mergeSEs()`
+**Useful functions:** `mia::splitOn()`, `cbind()`, `dim()`,
+`mia::mergeSEs()`
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -458,16 +468,17 @@ Why can `cbind()` be used in step 2, but not to combine `tse1` and `tse2`?
 #| label: exercise_wrangling_merge
 
 # 1. Subsets by patient status
-tse_adhd <- tse[, tse$patient_status == "ADHD"]
-tse_control <- tse[, tse$patient_status == "Control"]
+status_list <- splitOn(tse, by = "samples", group = "patient_status")
+tse_adhd <- status_list[["ADHD"]]
+tse_control <- status_list[["Control"]]
 
 # 2. Combine by columns
 tse_combined <- cbind(tse_adhd, tse_control)
 dim(tse_combined)
 
 # 3. Subsets with different features and samples
-tse1 <- tse[1:100, tse$cohort == "Cohort_1"]
-tse2 <- tse[51:151, tse$cohort == "Cohort_2"]
+tse1 <- tse_list[["Cohort_1"]][1:100, ]
+tse2 <- tse_list[["Cohort_2"]][51:151, ]
 dim(tse1)
 dim(tse2)
 
@@ -498,12 +509,13 @@ for `tse1` and `tse2`, which contain different features.
 
 **Goal:** Learn to convert the data into a long `data.frame`.
 
-1. Convert `tse` into a long `data.frame` with the counts assay. Include
-both the feature information (`rowData`) and the sample information
-(`colData`). Store the result in a variable called `molten_tse`.
+1. Convert `tse` from Exercise 2 into a long `data.frame` with the
+`"log10_counts"` assay. Include both the feature information (`rowData`) and
+the sample information (`colData`). Store the result in a variable called
+`molten_tse`.
 
-2. Show the first rows of `molten_tse` and check its dimensions. What does
-one row represent?
+2. Show the first rows of `molten_tse` and its column names. Which columns
+contain the variables that you added in Exercise 2?
 
 3. Load the `HintikkaXOData` dataset from the `mia` package and store it in a
 variable called `mae`.
@@ -512,7 +524,7 @@ variable called `mae`.
 `"signals"`, and include the sample variables `"Rat"` and `"Diet"`. Store
 the result in a variable called `molten_mae` and show its first rows.
 
-**Useful functions:** `mia::meltSE()`, `head()`, `dim()`, `data()`,
+**Useful functions:** `mia::meltSE()`, `head()`, `colnames()`, `data()`,
 `MultiAssayExperiment::longForm()`
 
 ::: {.callout-note collapse="true"}
@@ -524,14 +536,14 @@ the result in a variable called `molten_mae` and show its first rows.
 # 1. Melt TreeSE
 molten_tse <- meltSE(
     tse,
-    assay.type = "counts",
+    assay.type = "log10_counts",
     add.row = TRUE,
     add.col = TRUE
 )
 
-# 2. First rows and dimensions
+# 2. First rows and column names
 head(molten_tse)
-dim(molten_tse)
+colnames(molten_tse)
 
 # 3. Load the MultiAssayExperiment
 data("HintikkaXOData", package = "mia")
@@ -546,9 +558,11 @@ molten_mae <- longForm(
 head(molten_mae)
 ```
 
-2. Each row contains the count of one feature in one sample, together with
-the information on that feature and that sample. Therefore, the number of
-rows equals the number of features multiplied by the number of samples.
+2. Each row contains the value of one feature in one sample, together with
+the information on that feature and that sample. The `colData` variables
+`library_size`, `weight` and `age` that you added in Exercise 2 are included
+as columns, and their values are repeated for each feature of the
+sample.
 :::
 ::::
 

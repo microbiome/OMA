@@ -192,7 +192,9 @@ second object, test the significance of the correlations
 5. Check the names of the elements in `res`. Show the correlations rounded to
 two decimals.
 
-6. Count how many correlations have an adjusted p-value below 0.05.
+6. Count how many pairs of families have an adjusted p-value below 0.05.
+The matrix is symmetric and its diagonal compares each family with itself, so
+count only the values above the diagonal.
 
 7. What do the values on the diagonal of the correlation matrix show? What
 does a correlation close to 1, close to -1 and close to 0 mean? Why do we use
@@ -201,7 +203,7 @@ adjusted p-values instead of raw p-values?
 **Useful functions:** `data()`, `mia::agglomerateByRank()`,
 `mia::addPrevalence()`, `mia::subsetBy()`, `nrow()`,
 `mia::transformAssay()`, `mia::getCrossAssociation()`, `names()`, `round()`,
-`sum()`
+`upper.tri()`, `sum()`
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -238,9 +240,13 @@ res <- getCrossAssociation(
 names(res)
 round(res$cor, 2)
 
-# 6. Number of correlations with adjusted p-value below 0.05
-sum(res$p_adj < 0.05, na.rm = TRUE)
+# 6. Number of family pairs with adjusted p-value below 0.05
+sum(res$p_adj[upper.tri(res$p_adj)] < 0.05, na.rm = TRUE)
 ```
+
+6. `upper.tri()` selects the values above the diagonal, so each pair of
+families is counted once and the comparisons of a family with itself are
+left out.
 
 7. The diagonal shows the correlation of each family with itself, which is
 always 1. These values should be ignored, and so should the duplicates, as
@@ -404,10 +410,13 @@ plotColData(tse, x = "shannon", y = "inverse_simpson") +
 
 4. In the scatter plot, each point is a sample. The scatter plot shows the
 same relationship that is summarized by a single correlation value in the
-heatmap. If the points follow the regression line closely, the two indices
-are strongly correlated and carry largely the same information. If the
-points are widely scattered, the correlation is weak and the indices describe
-different aspects of the communities. The scatter plot also shows whether
+heatmap. By default, `getCrossAssociation()` calculates Kendall's rank
+correlation, which measures whether one index tends to increase (or decrease)
+when the other increases, even if the relationship is not linear. If the
+points form a clear increasing or decreasing trend, the two indices are
+strongly correlated and carry largely the same information. If the points are
+widely scattered, the correlation is weak and the indices describe different
+aspects of the communities. The scatter plot also shows whether
 the relationship is driven by a few outlying samples, which a single
 correlation value cannot show.
 :::
