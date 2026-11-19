@@ -53,9 +53,11 @@ data("peerj13075", package = "mia")
 tse <- peerj13075
 
 # Filter out most taxa to ease the calculation
-altExp(tse, "prevalent") <- agglomerateByPrevalence(
-    tse,
-    rank = "class", prevalence = 20 / 100, detection = 1 / 100
+tse_prev <- agglomerateByRank(tse, rank = "class")
+tse_prev <- addPrevalence(tse_prev, detection = 0.01)
+altExp(tse, "prevalent") <- subsetBy(
+    tse_prev,
+    rows = prevalence > 0.2, collapse = TRUE
 )
 ```
 
@@ -419,7 +421,9 @@ clusters.
 assays(tse) <- assays(tse)["counts"]
 
 # Agglomerate to Genus level
-tse <- agglomerateByPrevalence(tse, rank = "genus")
+tse <- agglomerateByRank(tse, rank = "genus")
+tse <- addPrevalence(tse)
+tse <- subsetBy(tse, rows = prevalence > 0.5, collapse = TRUE)
 
 # Apply clr and scale data
 tse <- transformAssay(tse, method = "clr", pseudocount = TRUE)

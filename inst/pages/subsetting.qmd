@@ -303,29 +303,34 @@ See [@sec-tidy] for more information on tidy R programming.
 
 ## By prevalence {#sec-subset_prev}
 
-We can subset the data based on prevalence using `subsetByPrevalent()`,
-which filters features that exceed a specified prevalence threshold,
-helping to remove rare features that may be artifacts. Conversely,
-`subsetByRare()` allows us to retain only features below the threshold,
-enabling a focus on rare features within the dataset.
+We can subset the data based on prevalence with `subsetBy()`. The function
+keeps the features (`rows`) and samples (`cols`) that meet a condition. The
+condition is an R expression that can refer to the assays by their names (e.g.,
+`counts`) and to the columns of `rowData` or `colData`. Filtering prevalent
+features helps to remove rare features that may be artifacts. Conversely,
+keeping only the features below the threshold enables a focus on rare features
+within the dataset.
 
 Here, we apply a prevalence threshold of 10% and a detection threshold
 of 0. Both thresholds are strict: a feature is considered detected if it has
 more than zero counts (i.e., at least one count) in a sample, and prevalent if
-it is detected in more than 10% of the samples.
-The function `subsetByPrevalent()` retains the prevalent features, while
-`subsetByRare()` keeps the features that are not prevalent.
+it is detected in more than 10% of the samples. `addPrevalence()` calculates
+the proportion of samples in which each feature is detected and stores it in
+the `prevalence` column of `rowData`. The condition `prevalence > 0.1` would
+retain the prevalent features, while `prevalence <= 0.1` keeps the features
+that are not prevalent.
+
+To evaluate prevalence for genera rather than for the original features, we
+first agglomerate the data to the genus level with `agglomerateByRank()`.
 
 ```{r}
 #| label: subset_by_rare
 
-tse_sub <- subsetByRare(tse, rank = "Genus", prevalence = 0.1, detection = 0)
+tse_sub <- agglomerateByRank(tse, rank = "Genus")
+tse_sub <- addPrevalence(tse_sub)
+tse_sub <- subsetBy(tse_sub, rows = prevalence <= 0.1)
 tse_sub
 ```
-
-Because we specified `rank = "Genus"`, the data were first agglomerated to the
-genus level, so prevalence is evaluated for genera rather than for the
-original features, and the result contains genera.
 
 In some cases, agglomerating based on prevalence can provide more
 meaningful insights. This process is illustrated in
@@ -355,6 +360,6 @@ Useful functions:
 
 `utils::data()`, `SummarizedExperiment::colData()`,
 `mia::addQC()`, `miaViz::plotHistogram()`,
-`mia::subsetByPrevalent()`
+`mia::addPrevalence()`, `mia::subsetBy()`
 
 :::

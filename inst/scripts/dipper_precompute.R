@@ -21,7 +21,9 @@ library(ggplot2)
 # Prepare the data as in the chapter (chunk dpa_prepare_data)
 data("Tengeler2020", package = "mia")
 tse <- Tengeler2020
-tse <- subsetByPrevalent(tse, rank = "Genus", prevalence = 0.10)
+tse <- agglomerateByRank(tse, rank = "Genus")
+tse <- addPrevalence(tse)
+tse <- subsetBy(tse, rows = prevalence > 0.1)
 tse$patient_status <- factor(tse$patient_status, levels = c("Control", "ADHD"))
 tse$cohort <- factor(tse$cohort, levels = c("Cohort_1", "Cohort_2", "Cohort_3"))
 
