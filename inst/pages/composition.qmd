@@ -1,26 +1,19 @@
 # Community composition {#sec-microbiome-community}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 ## Composition barplot {#sec-composition-barplot}
 
 A typical way to visualize microbiome composition is by using a composition
 barplot which shows the relative abundances of selected taxonomic features.
-In the following code chunk, relative abundance is calculated, and top
-taxonomic features are retrieved for the phylum rank. Then, the barplot is
-visualized ordering rank by abundance values and samples by "Bacteroidetes"
-(@fig-composition-barplot):
+In the following code chunk, relative abundance is calculated, and the data
+is agglomerated to the phylum rank. Phyla that are not prevalent are combined
+into a single group called "Other" (see [@sec-agglomeration]). Then, the
+barplot is visualized ordering rank by abundance values and samples by
+"Bacteroidetes" (@fig-composition-barplot):
 
 ```{r}
 #| label: fig-composition-barplot
-#| fig-cap: "Relative abundances of the top 10 phyla in the GlobalPatterns samples, with the remaining phyla grouped as Other. Phyla are ordered by abundance and samples by the relative abundance of Bacteroidetes."
+#| fig-cap: "Relative abundances of the prevalent phyla in the GlobalPatterns samples, with the remaining phyla grouped as Other. Phyla are ordered by abundance and samples by the relative abundance of Bacteroidetes."
+#| fig-alt: "Stacked bar chart with one bar per sample on the x-axis and relative abundance from 0 to 1 on the y-axis. Each bar is divided into coloured segments for the prevalent phyla and Other, and samples are sorted by their share of Bacteroidetes."
 
 library(miaViz)
 data("GlobalPatterns")
@@ -29,22 +22,10 @@ tse <- GlobalPatterns
 # Computing relative abundance
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 
-# Getting top taxa on a Phylum level
-tse <- agglomerateByRank(tse, rank = "Phylum")
-top_taxa <- getTop(tse, top = 10, assay.type = "relabundance")
-
-# Renaming the "Phylum" rank to keep only top taxa and assign the rest to "Other"
-phylum_renamed <- lapply(rowData(tse)$Phylum, function(x) {
-    if (x %in% top_taxa) {
-        x
-    } else {
-        "Other"
-    }
-})
-rowData(tse)$Phylum_sub <- as.character(phylum_renamed)
-
-# Agglomerate the data based on specified taxa
-tse_sub <- agglomerateByVariable(tse, by = "rows", f = "Phylum_sub")
+# Agglomerate to phyla and combine the non-prevalent phyla into "Other"
+tse_sub <- agglomerateByRank(tse, rank = "Phylum")
+tse_sub <- addPrevalence(tse_sub, assay.type = "relabundance", detection = 0.01)
+tse_sub <- subsetBy(tse_sub, rows = prevalence > 0.2, collapse = TRUE)
 
 # Visualizing the composition barplot, with samples ordered by "Bacteroidetes"
 plotAbundance(
@@ -54,6 +35,12 @@ plotAbundance(
 )
 ```
 
+Composition barplots often show more groups than colour-blind-friendly
+palettes have colours (@sec-figure-colours). The
+[microshades](https://github.com/KarstensLab/microshades) package [@Dahl2022]
+addresses this with palettes in which taxa of the same higher rank share
+shades of one colour, e.g., genera within a phylum.
+
 ## Composition heatmap {#sec-composition-heatmap}
 
 Community composition can be visualized with a heatmap, where the horizontal
@@ -61,9 +48,9 @@ axis represents samples and the vertical axis the taxonomic features. The color
 of each intersection point represents abundance of a taxon in a specific
 sample.
 
-Here, abundances are first transformed with CLR (centered log-ratio) to
-remove compositionality bias. Then standardization transformation is applied
-to the CLR-transformed data. This shifts all taxonomic features to zero
+Here, abundances are first transformed with CLR (centered log-ratio)
+[@Aitchison1986] to remove compositionality bias. Then standardization
+transformation is applied to the CLR-transformed data. This shifts all taxonomic features to zero
 mean and unit variance, allowing visual comparison between taxonomic
 features that have different absolute abundance levels. For more information
 on transformation methods, refer to [@sec-assay-transform].
@@ -74,7 +61,9 @@ on transformation methods, refer to [@sec-assay-transform].
 tse <- GlobalPatterns
 
 # Agglomerate to phylum level
-tse <- agglomerateByPrevalence(tse, rank = "Phylum")
+tse <- agglomerateByRank(tse, rank = "Phylum")
+tse <- addPrevalence(tse)
+tse <- subsetBy(tse, rows = prevalence > 0.5, collapse = TRUE)
 
 # Add clr-transformation on samples
 tse <- transformAssay(
@@ -91,83 +80,51 @@ tse <- transformAssay(
 )
 ```
 
-We can visualize the heatmap with the `r BiocStyle::Biocpkg("sechm")`
-package. It is a wrapper for the `r BiocStyle::Biocpkg("ComplexHeatmap")`
-package [@ComplexHeatmap]. The resulting heatmap is shown in
-@fig-composition-heatmap.
+We can visualize the heatmap with the `plotHeatmap()` function from the
+`r BiocStyle::Biocpkg("miaViz")` package. With `sort.method = "Heatmap"`, the
+rows and columns are ordered with hierarchical clustering, so that similar
+taxa and similar samples are placed next to each other. The resulting heatmap
+is shown in @fig-composition-heatmap.
 
 ```{r}
 #| label: fig-composition-heatmap
-#| fig-cap: "Heatmap of the phyla in the GlobalPatterns data (rows) across samples (columns). Colours show CLR-transformed abundances standardized per phylum, from low (blue) to high (red)."
+#| fig-cap: "Heatmap of the phyla in the GlobalPatterns data (rows) across samples (columns), both ordered by hierarchical clustering. Colours show CLR-transformed abundances standardized per phylum."
+#| fig-alt: "Heatmap with phyla as rows and samples as columns, both reordered by hierarchical clustering so that similar phyla and similar samples sit next to each other. Cell colour shows the standardized CLR abundance."
 
-library(sechm)
+library(miaViz)
 
-# Plot heatMap with sechm
-heatmap <- sechm(
-    tse,
-    assayName = "clr_z", features = rownames(tse),
-    show_rownames = TRUE, show_colnames = TRUE,
-    row_names_gp = gpar(fontsize = 6), column_names_gp = gpar(fontsize = 8),
-    breaks = 1, hmcols = c("blue", "white", "red")
-)
-
-heatmap
+plotHeatmap(tse, assay.type = "clr_z", sort.method = "Heatmap")
 ```
 
 Another method to visualize community composition is by plotting a
 NeatMap, which employs radial theta sorting when plotting the heatmap
-[@Rajaram2010]. The `getNeatOrder()` function in the `r BiocStyle::Biocpkg("miaViz")`
-package allows us to achieve this. This method sorts data points based
-on their angular position in a 2D space, typically after an ordination
-technique such as PCA or NMDS has been applied. The `getNeatOrder()` method
-calculates the angle (theta) for each point
-relative to the centroid and sorts data points based on these theta
-values in ascending order. This approach preserves the relationships
-between data points according to the ordination method's spatial
-configuration, rather than relying on hierarchical clustering.
+[@Rajaram2010]. With `sort.method = "PCA_angle"`, `plotHeatmap()` performs a
+principal component analysis (PCA), calculates the angle (theta) of each data
+point on the first two principal components relative to the centroid, and
+sorts the data points based on these angles. This approach preserves the
+relationships between data points according to the ordination, rather than
+relying on hierarchical clustering. The order itself can be obtained with the
+`getHeatmapOrder()` function, which `plotHeatmap()` uses internally.
 
-Now, we'll perform the aforementioned steps to create a NeatMap using the
-`r BiocStyle::Biocpkg("sechm")` package and the `getNeatOrder()` function
-(@fig-composition-neatmap).
+The NeatMap is shown in @fig-composition-neatmap.
 
 ```{r}
 #| label: fig-composition-neatmap
-#| fig-cap: "NeatMap of the phyla in the GlobalPatterns data. Samples (columns) are ordered by their radial angle on the first two principal components, and colours show standardized CLR-transformed abundances from low (blue) to high (red)."
+#| fig-cap: "NeatMap of the phyla in the GlobalPatterns data. Phyla (rows) and samples (columns) are ordered by their radial angle on the first two principal components, and colours show standardized CLR-transformed abundances."
+#| fig-alt: "Heatmap with phyla as rows and samples as columns, both ordered by their angle on the first two principal components instead of by clustering. Cell colour shows the standardized CLR abundance."
 
-library(scater)
-library(sechm)
-
-# Perform PCA on the dataset
-tse <- runPCA(tse, ncomponents = 10, assay.type = "clr_z")
-
-# Sort by radial theta using the first two principal components
-sorted_order <- getNeatOrder(
-    reducedDim(tse, "PCA")[, c(1, 2)],
-    centering = "mean"
-)
-tse <- tse[, sorted_order]
-
-# Plot NeatMap with sechm
-neatmap <- sechm(
-    tse,
-    assayName = "clr_z", features = rownames(tse),
-    show_rownames = TRUE, show_colnames = TRUE,
-    do.scale = FALSE, cluster_rows = FALSE, sortRowsOn = NULL,
-    row_names_gp = gpar(fontsize = 6), column_names_gp = gpar(fontsize = 8),
-    breaks = 1, hmcols = c("blue", "white", "red")
-)
-
-neatmap
+plotHeatmap(tse, assay.type = "clr_z", sort.method = "PCA_angle")
 ```
 
 ::: callout-tip
-## Additional heatmap visualization
+## Heatmap options
 
 In addition, there are also other packages that provide functions for more
 complex heatmaps, such as those provided by `r BiocStyle::CRANpkg("iheatmapr")`
-and `r BiocStyle::Biocpkg("ComplexHeatmap")` [@ComplexHeatmap]. The utilization
-of `r BiocStyle::Biocpkg("ComplexHeatmap")` for clustered heatmaps is explained
-in [@sec-clustered-heatmap].
+[@Schep2017] and `r BiocStyle::Biocpkg("ComplexHeatmap")`
+[@Gu2016; @ComplexHeatmap].
+Heatmaps that show clusters of taxa and samples are explained in
+[@sec-clustered-heatmap].
 :::
 
 ::: {.callout-tip icon="false"}
@@ -178,14 +135,14 @@ microbial composition.
 
 **Exercise 1: Community composition**
 
-1. Load any of the example datasets mentioned in [@sec-example-data].
+1. Load any of the example data sets described in [@sec-data-sets].
 
 2. Agglomerate data to phylum level.
 
 3. Transform data to relative abundances.
 
 4. Visualize community composition with a relative abundance bar plot. Which
-taxonomic features are most prevalent?
+taxonomic features are most abundant?
 
 5. Choose one categorical variable from `colData` and use it to group a
 relative abundance bar plot. Does the community composition associate with
@@ -198,6 +155,7 @@ the grouping?
 Useful functions:
 
 `utils::data()`, `mia::agglomerateByRank()`, `mia::transformAssay()`,
-`miaViz::plotAbundance()`, `SummarizedExperiment::colData()`, `sechm::sechm()`
+`miaViz::plotAbundance()`, `SummarizedExperiment::colData()`,
+`miaViz::plotHeatmap()`
 
 :::

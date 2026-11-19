@@ -1,14 +1,5 @@
 # Transformation {#sec-assay-transform}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 Data transformations are common in (microbial) ecology [@Legendre2001].
 They are used to mitigate technical biases in the data, to obtain more
 interpretable values, to enhance the comparability of samples/features or
@@ -18,7 +9,7 @@ Examples include transforming feature counts into relative abundances
 (i.e., "normalizing as proportions"), or with compositionality-aware
 transformations such as the centered log-ratio transformation (clr).
 
-## Characteristics of microbiome data to inform data transformations {#sec-stat-challenges}
+## Why transform the data {#sec-stat-challenges}
 
 Transformations are important in working with microbiome data due to
 various unique characteristics of sequencing data. For example, the above
@@ -30,10 +21,58 @@ taxa per sample are thus not comparable between samples.
 
 This **Compositionality** means that a change in the absolute abundance of
 one taxon will lead to apparent variations in the relative abundances of other
-taxa in the same sample. If neglected, such properties may cause significant
-bias in the results of statistical tests. The above-mentioned transformation
-processes are one method developed to overcome these issues by making taxon
-abundances comparable across samples.
+taxa in the same sample (@fig-compositionality). If neglected, such
+properties may cause significant bias in the results of statistical tests.
+The above-mentioned transformation processes are one method developed to
+overcome these issues by making taxon abundances comparable across samples.
+
+```{r}
+#| label: fig-compositionality
+#| fig-cap: "Compositionality. The absolute abundance of taxon A doubles while taxa B and C do not change (left). In relative abundances, B and C appear to decrease (right), because the proportions in each sample must sum to one."
+#| fig-alt: "Two panels of stacked bars for a before and an after sample made of taxa A, B and C. In the absolute panel, A grows from 40 to 80 while B and C stay at 30; in the relative panel, A grows from 40% to 57% and B and C shrink from 30% to 21%."
+#| fig-width: 6
+#| fig-height: 3.5
+#| echo: false
+library(ggplot2)
+# Toy data: taxon A doubles from "Before" to "After", B and C do not change.
+# Run in local() so that the helper objects do not leak into later chunks.
+local({
+    df <- data.frame(
+        sample = factor(rep(c("Before", "After"), each = 3),
+            levels = c("Before", "After")
+        ),
+        taxon = factor(rep(c("A", "B", "C"), 2), levels = c("C", "B", "A")),
+        count = c(40, 30, 30, 80, 30, 30)
+    )
+    rel <- ave(df$count, df$sample, FUN = function(x) x / sum(x))
+    df <- rbind(
+        data.frame(df,
+            scale = "Absolute abundance", value = df$count,
+            label = df$count
+        ),
+        data.frame(df,
+            scale = "Relative abundance", value = rel,
+            label = paste0(round(100 * rel), "%")
+        )
+    )
+    ggplot(df, aes(x = sample, y = value, fill = taxon)) +
+        geom_col(width = 0.6, colour = "white") +
+        geom_text(aes(label = label),
+            position = position_stack(vjust = 0.5), size = 3.5
+        ) +
+        facet_wrap(~scale, scales = "free_y") +
+        scale_fill_manual(
+            values = c(A = "#E69F00", B = "#56B4E9", C = "#009E73"),
+            breaks = c("A", "B", "C"), name = "Taxon"
+        ) +
+        labs(x = NULL, y = NULL) +
+        theme_minimal(base_size = 13) +
+        theme(
+            axis.text.y = element_blank(), panel.grid = element_blank(),
+            strip.text = element_text(face = "bold")
+        )
+})
+```
 
 In addition to this compositionality, other special characteristics of
 microbiome sequencing data are high variability and zero-inflation.
@@ -43,7 +82,7 @@ typically more than 70% of the taxa-per-sample values are zeros, which could
 be due to either physical absence (structural zeros) or insufficient sequencing
 coverage (sampling zeros).
 
-## Common transformation methods
+## Common methods
 
 Let us now summarize some commonly used transformations in microbiome data
 science; further details and benchmarkings are available in the
@@ -141,12 +180,12 @@ fundamentally change the data distribution [@Costea2014].
 `Pseudocount` should be chosen consistently across all normalization
 methods being compared, for example, by setting it to a value smaller
 than the minimum abundance value before transformation. Some tools, like
-`r BiocStyle::Biocpkg("ANCOMBC")`, take into account the effect of the
-`pseudocount` by performing sensitivity tests using multiple pseudocount
+`r BiocStyle::Biocpkg("ANCOMBC")` [@ancombc2020], take into account the effect
+of the `pseudocount` by performing sensitivity tests using multiple pseudocount
 values. See [@sec-differential-abundance].
 :::
 
-## Transformations in practice
+## In practice
 
 Below, we apply relative transformation to counts table.
 
@@ -254,6 +293,40 @@ this new dataset is stored into `altExp`.
 altExp(tse, "philr")
 ```
 
+## Choosing a transformation {#sec-choose-transformation}
+
+The most suitable transformation depends on the research question and the
+analysis method, and there is no single best choice. The table below lists
+common choices that are supported by benchmarking studies or widely used in
+the field, with links to the chapters where they are applied. They are
+reasonable starting points rather than strict rules.
+
+| Analysis | Common choice | Rationale |
+|:---------|:--------------|:----------|
+| Alpha diversity | Counts, rarefied if sequencing depths differ (@sec-rarefaction-alpha); relative abundances when counts are not available | Richness depends on sequencing depth [@Schloss2024rarefaction1], and richness estimators such as Chao1 need counts. Shannon and Simpson indices depend only on the proportions, so they give the same result with relative abundances, such as the profiles from MetaPhlAn [@Beghini2021], which are commonly used and do not include counts. |
+| Beta diversity and ordination | Relative abundances with Bray-Curtis; clr or rclr with Euclidean distance (Aitchison distance); presence/absence with Jaccard | Each dissimilarity assumes a specific transformation; see the table in @sec-community-similarity. |
+| Differential abundance | Relative abundances, analyzed with a non-parametric test or, after log transformation, with linear regression | This has performed well in benchmarks on real data [@Nearing2022; @Yang2022; @Pelto2025; @Gamboa-Tuz2025]; see @sec-daa-recommendations. |
+| Correlation and cross-association, e.g. taxa vs. metabolites | clr, or rclr when there are many zeros | Log-ratios reduce the spurious correlations caused by compositionality [@Gloor2017]; see @sec-correlation. |
+| Heatmaps | clr, then standardization of each feature (Z-transformation) | Puts features with very different abundances on a comparable scale; see @sec-composition-heatmap. |
+| Supervised machine learning | Relative abundances or presence/absence | Simple transformations often perform as well as or better than compositional ones [@yerke2024; @Giliberti2022; @Karwowska2025]; see @sec-machine_learning. |
+
+The transformation also determines how the values are interpreted:
+
+- **Relative abundance** is the proportion of a feature in a sample, which is
+easy to interpret but depends on the other features in the sample.
+- **clr** is the logarithm of a feature's abundance relative to the geometric
+mean of all features in the sample. A positive value means that the feature is
+more abundant than an average feature in that sample. Because the reference is
+sample-specific, differences between samples are relative rather than absolute
+[@Gloor2017].
+- **rclr** is interpreted like clr, but it is computed from the non-zero values
+only, and zeros are kept as missing values.
+- **Presence/absence** only tells whether a feature was detected, which makes
+it robust to differences in sequencing depth and to noise in the abundances.
+
+For choosing the taxonomic level of the analysis, see
+@sec-choose-rank.
+
 ## Rarefaction {#sec-rarefaction}
 
 The number of taxa we observe in a sample depends strongly on how deeply the
@@ -269,6 +342,7 @@ of reads sampled (@fig-transformation-rarefaction-curve).
 ```{r}
 #| label: fig-transformation-rarefaction-curve
 #| fig-cap: "Rarefaction curves for the GlobalPatterns samples, showing the number of observed taxa as a function of the number of sampled reads. Each line represents one sample."
+#| fig-alt: "Line plot with sample size in reads on the x-axis and number of observed taxa on the y-axis, with one rising curve per sample that levels off at a different height and reaches a different maximum depth."
 library(mia)
 library(vegan)
 
@@ -297,6 +371,7 @@ counts per sample (@fig-transformation-library-size).
 ```{r}
 #| label: fig-transformation-library-size
 #| fig-cap: "Library sizes (total counts per sample) in the GlobalPatterns data set, grouped by sample type."
+#| fig-alt: "Boxplots of total counts per sample (y-axis) for each sample type (x-axis), with the individual samples drawn as points."
 library(scater)
 library(miaViz)
 
@@ -360,8 +435,8 @@ The relative benefits of rarefaction and of robust Aitchison PCA and other
 compositional data analysis methods in controlling for uneven sequencing
 effort are currently being debated [@Schloss2026].
 
-Section [@sec-rarefaction-alpha] demonstrates rarefaction for calculating alpha
-diversity, and Section [@sec-rarefaction_ordination] extends the approach to
+[@sec-rarefaction-alpha] demonstrates rarefaction for calculating alpha
+diversity, and [@sec-rarefaction_ordination] extends the approach to
 beta diversity.
 
 ::: callout-tip
@@ -386,7 +461,7 @@ single-cell analysis.
 
 **Exercise 1: Transform data**
 
-1. Load any of the example datasets mentioned in [@sec-example-data].
+1. Load any of the example data sets described in [@sec-data-sets].
 
 2. Visualize counts with a histogram. Describe the data distribution.
 Is there a lot of zeros?
@@ -420,7 +495,8 @@ and [@sec-community-similarity].
 Useful functions:
 
 `utils::data()`, `miaViz::plotHistogram()`, `mia::transformAssay()`,
-`mia::assayNames()`, `SummarizedExperiment::assay()`,
-`mia::agglomerateByRanks()`, `mia::altExp()`, `BiocGenerics::rownames()`
+`SummarizedExperiment::assayNames()`, `SummarizedExperiment::assay()`,
+`mia::agglomerateByRanks()`, `SingleCellExperiment::altExp()`,
+`BiocGenerics::rownames()`
 
 :::

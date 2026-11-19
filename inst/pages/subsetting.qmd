@@ -1,14 +1,5 @@
 # Subsetting {#sec-treese_subsetting}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 In this chapter, we explore the concept of subsetting. Subsetting or
 filtering is the process of selecting specific rows or columns from a
 dataset based on certain criteria. When you subset your data, you retain
@@ -23,8 +14,8 @@ sets of samples and / or features. When dealing with large datasets, the
 subset of interest can be extracted and investigated separately. This
 might improve performance and reduce the computational load.
 
-Let us store `GlobalPatterns` into `tse` and check its original number
-of features (rows) and samples (columns).
+Let us store `GlobalPatterns` [@Caporaso2011] into `tse` and check its original
+number of features (rows) and samples (columns).
 
 ```{r}
 #| label: load_data
@@ -47,7 +38,7 @@ When subsetting by sample, expect the number of columns to decrease.
 When subsetting by feature, expect the number of rows to decrease.
 :::
 
-## Subset by sample (column-wise)
+## By sample
 
 Several criteria can be used to subset by sample:
 
@@ -91,12 +82,12 @@ dim(tse_sub)
 ::: callout-note
 ## Note
 
-After subsetting, expect the number of columns to equal the sum of the
+After subsetting, expect the number of rows to equal the sum of the
 frequencies of the samples that you are interested in. For instance,
 `ncols = Feces + Skin + Tongue = 4 + 3 + 2 = 9`.
 :::
 
-## Subset by feature (row-wise)
+## By feature
 
 Similarly, here we will extract a subset containing only the features
 that belong to the phyla *Actinobacteria* and *Chlamydiae*, stored as
@@ -120,7 +111,7 @@ rowData(tse)$Phylum |>
 ::: callout-note
 ## Note
 
-After subsetting, expect the number of columns to equal the sum of the
+After subsetting, expect the number of rows to equal the sum of the
 frequencies of the feature(s) that you are interested in. For instance,
 `nrows = Actinobacteria + Chlamydiae = 1631 + 21 = 1652`.
 :::
@@ -136,7 +127,7 @@ details).
 Next, we *logically index* across the rows of `tse` (make sure to leave
 the second index empty to select all columns) and filter for the
 features that fall in either *Actinobacteria* or *Chlamydiae* group. For
-this, we use the information on the samples from the metadata
+this, we use the information on the features from the metadata
 `rowData(tse)`.
 
 The first term with the `%in%` operator includes all the features of
@@ -155,7 +146,7 @@ tse_sub <- tse[selected, ]
 dim(tse_sub)
 ```
 
-## Subset by samples and features
+## By sample and feature
 
 Finally, we can subset data by sample and feature at once. The resulting
 subset contains all the samples of human origin and all the features of
@@ -185,7 +176,7 @@ If a study was to consider and quantify the presence of *Actinobacteria*
 as well as *Chlamydiae* in different sites of the human body, `tse_sub`
 might be a suitable subset to start with.
 
-## Filtering based on library size {#sec-subset-library-size}
+## By library size {#sec-subset-library-size}
 
 As a preprocessing step, one might want to remove samples that do not
 exceed certain library size, i.e., total number of counts. Additionally,
@@ -229,7 +220,7 @@ containing the selected features. A similar approach can also be applied
 to filter features based on the samples they appear in, ensuring both
 dimensions of the data are relevant to your analysis.
 
-## Filtering out zero-variance features
+## Zero-variance features
 
 In some datasets, certain features remain constant across all samples —
 they show no variance. If our goal is to study or model microbial
@@ -248,35 +239,41 @@ histogram (@fig-subsetting-sd-histogram).
 
 ```{r}
 #| label: fig-subsetting-sd-histogram
-#| fig-cap: "Histogram of the log-transformed standard deviations of feature counts in the GlobalPatterns data set."
+#| fig-cap: "Histogram of the standard deviations of feature counts in the GlobalPatterns data set, shown on a logarithmic x-axis."
+#| fig-alt: "Histogram with the standard deviation of feature counts on a log10 x-axis and the number of features on the y-axis."
+#| warning: false
 
-# Calculate
-rowData(tse)[["sd"]] <- rowSds(assay(tse, "counts"))
+library(miaViz)
+
+# Calculate per-feature QC metrics, including standard deviation
+tse <- addQC(tse, assay.type = "counts", by = "rows")
+
 # Plot
-hist(log(rowData(tse)[["sd"]]))
+plotHistogram(tse, row.var = "sd") +
+    scale_x_log10()
 ```
 
-The histogram uses log-transformed standard deviations only to make the range
-of values easier to inspect; the values stored in `rowData(tse)[["sd"]]`
-remain on their original scale. Features with a standard deviation of zero
-are constant across all samples. Therefore, selecting values greater than
-zero removes only these zero-variance features. Because the SD is calculated
-from the counts assay, this identifies features that are invariant in the
-raw counts. For filtering variance after normalization or transformation,
+`addQC()` stores the metrics in `rowData()`; the standard deviations are in
+`rowData(tse)[["sd"]]`. The logarithmic x-axis only makes the range of values
+easier to inspect; the stored values remain on their original scale. Features
+with a standard deviation of zero cannot be shown on a logarithmic axis, so
+they are left out of the histogram.
+
+Features with a standard deviation of zero are constant across all samples.
+Therefore, selecting values greater than zero removes only these
+zero-variance features. Because `addQC()` calculates the SD from the counts
+assay by default, this identifies features that are invariant in the raw
+counts. For filtering variance after normalization or transformation,
 calculate the SD from the corresponding assay instead.
 
-The filtering can be written with the `filter()` function from the
-`r BiocStyle::Biocpkg("tidySummarizedExperiment")` package, which brings the
-tidyverse syntax to `SummarizedExperiment` objects, including `TreeSE`
-(see also the tidy R programming section in [@sec-datawrangling]). Here we keep
-the features with a standard deviation above zero.
+To filter the data, we select the rows whose standard deviation exceeds the
+desired threshold. Here, the threshold is zero, as we want to keep only
+features that vary across samples.
 
 ```{r}
 #| label: filter_sd
 
-library(tidySummarizedExperiment)
-
-tse_sub <- tse |> filter(sd > 0)
+tse_sub <- tse[rowData(tse)[["sd"]] > 0, ]
 tse_sub
 ```
 
@@ -285,24 +282,53 @@ compared to the original `r nrow(tse)` features. This means we are left
 with features that exhibit variance. A larger threshold could be used when
 the goal is to remove low-variance features as well.
 
-## Subset based on prevalence {#sec-subset_prev}
+::: callout-tip
+## Tidy alternative
 
-We can subset the data based on prevalence using `subsetByPrevalent()`,
-which filters features that exceed a specified prevalence threshold,
-helping to remove rare features that may be artifacts. Conversely,
-`subsetByRare()` allows us to retain only features below the threshold,
-enabling a focus on rare features within the dataset.
+If you are more familiar with tidyverse [@Wickham2019] syntax, the same
+filtering can be done with the `filter()` function from the
+`r BiocStyle::Biocpkg("tidySummarizedExperiment")` package [@Hutchison2024].
+
+```{r}
+#| label: filter_sd_tidy
+#| eval: false
+
+library(tidySummarizedExperiment)
+
+tse_sub <- tse |> filter(sd > 0)
+```
+
+See [@sec-tidy] for more information on tidy R programming.
+:::
+
+## By prevalence {#sec-subset_prev}
+
+We can subset the data based on prevalence with `subsetBy()`. The function
+keeps the features (`rows`) and samples (`cols`) that meet a condition. The
+condition is an R expression that can refer to the assays by their names (e.g.,
+`counts`) and to the columns of `rowData` or `colData`. Filtering prevalent
+features helps to remove rare features that may be artifacts. Conversely,
+keeping only the features below the threshold enables a focus on rare features
+within the dataset.
 
 Here, we apply a prevalence threshold of 10% and a detection threshold
-of 1. A feature is considered detected if it has at least one count in a
-sample, and prevalent if it is detected in at least 10% of the samples.
-The function `subsetByPrevalent()` retains the prevalent features, while
-`subsetByRare()` keeps the features that are not prevalent.
+of 0. Both thresholds are strict: a feature is considered detected if it has
+more than zero counts (i.e., at least one count) in a sample, and prevalent if
+it is detected in more than 10% of the samples. `addPrevalence()` calculates
+the proportion of samples in which each feature is detected and stores it in
+the `prevalence` column of `rowData`. The condition `prevalence > 0.1` would
+retain the prevalent features, while `prevalence <= 0.1` keeps the features
+that are not prevalent.
+
+To evaluate prevalence for genera rather than for the original features, we
+first agglomerate the data to the genus level with `agglomerateByRank()`.
 
 ```{r}
 #| label: subset_by_rare
 
-tse_sub <- subsetByRare(tse, rank = "Genus", prevalence = 0.1, detection = 1)
+tse_sub <- agglomerateByRank(tse, rank = "Genus")
+tse_sub <- addPrevalence(tse_sub)
+tse_sub <- subsetBy(tse_sub, rows = prevalence <= 0.1)
 tse_sub
 ```
 
@@ -317,7 +343,7 @@ meaningful insights. This process is illustrated in
 
 **Exercise 1: Subsetting**
 
-1. Load any of the example datasets mentioned in [@sec-example-data].
+1. Load any of the example data sets described in [@sec-data-sets].
 
 2. Calculate library sizes and add them to `colData`.
 
@@ -334,6 +360,6 @@ Useful functions:
 
 `utils::data()`, `SummarizedExperiment::colData()`,
 `mia::addQC()`, `miaViz::plotHistogram()`,
-`mia::subsetByPrevalent()`
+`mia::addPrevalence()`, `mia::subsetBy()`
 
 :::

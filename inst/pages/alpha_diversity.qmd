@@ -1,14 +1,5 @@
 # Alpha diversity {#sec-alpha-diversity}
 
-```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
 ## Background
 
 Alpha diversity, or within-sample diversity, is a central concept in microbiome
@@ -37,7 +28,7 @@ defined as special cases of a unifying equation of **diversity**, where the
 favor **richness**, the number of distinct taxonomic features, whereas higher
 numbers favor **evenness**, how the taxonomic features are distributed over
 the sample [@Hill1973]. Second, some alpha diversity metrics are weighted based
-on phylogeny, like Faith's PD [-@Faith1992] and PhILR [@Silverman2017].
+on phylogeny, like Faith's PD [-@Faith1992].
 
 ```{r}
 #| label: alpha_table
@@ -57,7 +48,10 @@ phyl_div <- "**Phylogenetic Diversity**
 
 hill_0 <- "Dependent on presence and absence of taxonomic features, not abundance"
 hill_1 <- "Dependent on how evenly taxonomic features are distributed in a sample"
-hill_2 <- "The probability of two randomly picked taxonomic feature not being the same"
+hill_2 <- paste(
+    "The inverse of the probability of two randomly picked individuals",
+    "belonging to the same taxonomic feature"
+)
 
 table_colnames <- c("phyl_desc", hill_0, hill_1, hill_2)
 
@@ -71,7 +65,7 @@ footnote_md <- md(
 # Generate data.frame for table
 cbind.data.frame(
     c(neutral_div, phyl_div),
-    c("Richness (Chao1)", "Faith's Phylogenetic Diversity"),
+    c("Richness (observed)", "Faith's Phylogenetic Diversity"),
     c("Shannon Entropy", "Phylogenetic Entropy"),
     c("Simpson's Index", "Rao's Quadratic Diversity")
 ) |>
@@ -109,8 +103,8 @@ category tend to be correlated, they suggest using the simplest available
 metric. Below are the default choices for each category:
 
 - **Richness**: The number of observed unique features
-- **Dominance**: Berger-Parker
-- **Information**: Shannon
+- **Dominance**: Berger-Parker [@Berger1970]
+- **Information**: Shannon [@Shannon1948]
 - **Phylogenetics**: Faith
 
 ::: callout-note
@@ -125,7 +119,7 @@ modern 16S data, which commonly features denoising and removal of singletons
 
 ## Examples
 
-### Calculate alpha diversity measures {#sec-estimate-diversity}
+### Calculate diversity {#sec-estimate-diversity}
 
 Alpha diversity can be estimated with the `addAlpha()` function, which includes
 built-in methods for calculating some indices, while others are computed via
@@ -147,8 +141,7 @@ tse <- GlobalPatterns
 # dbp_dominance, faith_diversity, observed_richness, and shannon_diversity.
 tse <- addAlpha(
     tse,
-    assay.type = "counts",
-    detection = 10
+    assay.type = "counts"
 )
 
 # Check some of the first values in colData
@@ -156,9 +149,10 @@ tse$observed_richness |> head()
 tse$shannon_diversity |> head()
 ```
 
-Certain indices have additional options, here observed the `detection`
-parameter that controls the detection threshold. Species above this threshold
-are considered detected. See full list of options from `help(addAlpha)`.
+Certain indices have additional options. For example, observed richness has
+the `detection` parameter that controls the detection threshold (by default 0).
+Species above this threshold are considered detected. See full list of options
+from `help(addAlpha)`.
 
 ::: callout-note
 ## Note: Phylogenetic distances require a tree
@@ -168,13 +162,13 @@ used by default. However, the optional argument `tree` must be provided if
 `tse` does not contain a rowTree.
 :::
 
-### Visualize alpha diversity measures {#sec-plot-diversity}
+### Visualize diversity {#sec-plot-diversity}
 
 As alpha diversity metrics typically summarize high-dimensional samples into
 singular values, many visualization approaches are available. Once calculated,
 these metrics can be analyzed directly from the `colData`, for example, by
-plotting them using `plotColData()` from the `r BiocStyle::Biocpkg("scater")`
-package [@R_scater].
+plotting them using `plotBoxplot()` from the `r BiocStyle::Biocpkg("miaViz")`
+package.
 Here, we use the `observed` species as a measure of richness. Let's visualize
 the results against selected `colData` variables (sample type and final
 barcode) in @fig-alpha-richness.
@@ -182,14 +176,15 @@ barcode) in @fig-alpha-richness.
 ```{r}
 #| label: fig-alpha-richness
 #| fig-cap: "Observed richness of the GlobalPatterns samples grouped by sample type (x-axis), with points coloured by final barcode."
+#| fig-alt: "Box plots of observed richness on the y-axis for each sample type on the x-axis, with individual samples overlaid as points coloured by final barcode."
 #| message: false
 
-library(scater)
-plotColData(
+library(miaViz)
+plotBoxplot(
     tse,
-    "observed_richness",
-    "SampleType",
-    colour_by = "Final_Barcode"
+    col.var = "observed_richness",
+    x = "SampleType",
+    colour.by = "Final_Barcode"
 ) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     labs(x = "Sample types", y = expression(Richness[observed_richness]))
@@ -204,8 +199,10 @@ Shannon and Faith indices as a scatter plot.
 ```{r}
 #| label: fig-alpha-shannon-faith
 #| fig-cap: "Scatter plot of Shannon index (x-axis) against Faith's phylogenetic diversity (y-axis) in the GlobalPatterns samples, with a fitted linear regression line and its confidence band."
+#| fig-alt: "Scatter plot of samples with the Shannon index on the x-axis and Faith's phylogenetic diversity on the y-axis, with a linear regression line and a shaded confidence band."
 #| fig-width: 6.5
 
+library(scater)
 plotColData(tse, x = "shannon_diversity", y = "faith_diversity") +
     labs(x = "Shannon index", y = "Faith (phylogenetic) index") +
     geom_smooth(method = "lm")
@@ -227,37 +224,38 @@ plotting (@fig-alpha-all-indices).
 #| code-fold: true
 #| code-summary: "Show the plotting code"
 #| fig-cap: "Observed richness, Berger-Parker dominance, Shannon diversity and Faith's phylogenetic diversity (panels from top to bottom) of the GlobalPatterns samples, grouped and coloured by sample type."
+#| fig-alt: "Four box plot panels stacked vertically for observed richness, Berger-Parker dominance, Shannon diversity and Faith's phylogenetic diversity, each with one box per sample type filled in a different colour. Soil and freshwater creek samples have the highest richness, and tongue samples have the lowest."
 #| fig-width: 6.5
 #| fig-height: 8
 
 library(patchwork)
 
 # Create the plots
-indices <- c(
-    "observed_richness", "dbp_dominance", "shannon_diversity",
-    "faith_diversity"
+p1 <- plotBoxplot(
+    tse,
+    col.var = "observed_richness", x = "SampleType", fill.by = "SampleType"
 )
-plots <- lapply(
-    indices,
-    plotColData,
-    object = tse,
-    x = "SampleType",
-    colour_by = "SampleType"
+p2 <- plotBoxplot(
+    tse,
+    col.var = "dbp_dominance", x = "SampleType", fill.by = "SampleType"
+)
+p3 <- plotBoxplot(
+    tse,
+    col.var = "shannon_diversity", x = "SampleType", fill.by = "SampleType"
+)
+p4 <- plotBoxplot(
+    tse,
+    col.var = "faith_diversity", x = "SampleType", fill.by = "SampleType"
 )
 
-# Fine-tune visual appearance
-plots <- lapply(
-    plots, "+",
+# Combine the plots and remove the sample type labels from the x-axis
+wrap_plots(p1, p2, p3, p4, ncol = 1) +
+    plot_layout(guides = "collect") &
     theme(
         axis.text.x = element_blank(),
         axis.title.x = element_blank(),
         axis.ticks.x = element_blank()
     )
-)
-
-# Plot the figures
-wrap_plots(plots, ncol = 1) +
-    plot_layout(guides = "collect")
 ```
 
 All these different metrics provide information from different aspects of alpha
@@ -315,6 +313,7 @@ Next compare the results with and without rarefaction
 ```{r}
 #| label: fig-alpha-rarefaction
 #| fig-cap: "Boxplots of observed richness in the GlobalPatterns samples without (left) and with (right) rarefaction, coloured by sample type."
+#| fig-alt: "Two box plot panels side by side for observed richness without and with rarefaction, with boxes filled by sample type. The rarefied values are lower and the ranking of sample types changes, while soil stays the richest."
 library(miaViz)
 
 plotBoxplot(tse, col.var = "observed_richness", fill.by = "SampleType") +
@@ -323,15 +322,20 @@ plotBoxplot(tse, col.var = "observed_richness", fill.by = "SampleType") +
 ```
 
 These results illustrate that uneven sequencing depth affects the diversity
-estimates: applying rarefaction changes the values compared with the
-non-rarefied analysis, indicating that part of the apparent differences was
-driven by sampling effort rather than biology.
+estimates. The rarefied values are lower, as every sample is subsampled to the
+same, smaller depth, and the ranking of the sample types changes. Skin and
+estuary sediment samples, which have relatively few reads, rank higher after
+rarefaction, whereas the deeply sequenced freshwater and feces samples rank
+lower. Soil remains the richest sample type in both analyses. This indicates
+that part of the apparent differences in the non-rarefied analysis was driven
+by sampling effort rather than biology.
 
-### Statistical analysis of alpha diversity measures {#sec-stats-diversity}
+### Statistical testing {#sec-stats-diversity}
 
 We can then analyze the statistical significance. We use the non-parametric
-Wilcoxon or Mann-Whitney test, as it is more flexible than the commonly used
-Student's t-Test, since it does not assume normality.
+Wilcoxon or Mann-Whitney test [@Wilcoxon1945; @Mann1947], as it is more
+flexible than the commonly used Student's t-Test, since it does not assume
+normality.
 
 ```{r}
 #| label: test_alpha
@@ -347,12 +351,13 @@ pairwise.wilcox.test(
 Next, let's compare the Shannon index between sample groups and visualize the
 statistical significance. `plotBoxplot()` can annotate pairwise group
 comparisons directly. By default, it uses Wilcoxon tests and adjusts p-values
-with the FDR method. The resulting plot is shown in
+with the FDR method [@Benjamini1995]. The resulting plot is shown in
 @fig-alpha-shannon-pvalues.
 
 ```{r}
 #| label: fig-alpha-shannon-pvalues
 #| fig-cap: "Shannon diversity in feces, skin and tongue samples of the GlobalPatterns data shown as boxplots, annotated with FDR-adjusted p-values from pairwise Wilcoxon tests."
+#| fig-alt: "Three box plots of Shannon diversity, one each for feces, skin and tongue samples, with brackets above the boxes connecting each pair of groups and labelled with adjusted p-values."
 
 # Subsets the data by selecting only samples from feces, skin, or tongue.
 tse_sub <- tse[, tse[["SampleType"]] %in% c("Feces", "Skin", "Tongue")]
@@ -379,7 +384,7 @@ diversities and to compare them between sample groups.
 
 **Exercise 1: Alpha diversity**
 
-1. Load any of the example datasets mentioned in [@sec-example-data].
+1. Load any of the example data sets described in [@sec-data-sets].
 
 2. Calculate the Shannon diversity index, and add the results to `colData()`.
 

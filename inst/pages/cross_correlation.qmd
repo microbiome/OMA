@@ -1,15 +1,6 @@
 # Cross-association {#sec-cross-correlation}
 
 ```{r}
-#| label: setup
-#| echo: false
-#| results: asis
-
-library(rebook)
-chapterPreamble(cache = FALSE)
-```
-
-```{r}
 #| label: load_pkg
 
 library(mia)
@@ -40,13 +31,18 @@ transformation.
 ```{r}
 #| label: cross-association2
 # Agglomerate microbiome data at family level
-mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Family", na.rm = TRUE)
+mae[[1]] <- agglomerateByRank(mae[[1]], rank = "Family", na.rm = TRUE)
+mae[[1]] <- addPrevalence(mae[[1]])
+mae[[1]] <- subsetBy(
+    mae[[1]],
+    rows = prevalence > 0.5, collapse = TRUE
+)
 # Does log10 transform for microbiome data
 mae[[1]] <- transformAssay(mae[[1]], method = "log10", pseudocount = TRUE)
 ```
 
 Next we can perform a cross-association analysis. Let us analyze if
-individual bacteria genera are correlated with concentrations of
+individual bacterial families are correlated with concentrations of
 individual metabolites. This helps to answer the following question: "If
 bacterium X is present, is the concentration of metabolite Y lower or higher"?
 
@@ -69,11 +65,12 @@ res <- getCrossAssociation(
 ```
 
 Next, we create a heatmap depicting all cross-correlations between bacterial
-genera and metabolite concentrations (@fig-cross-association-heatmap).
+families and metabolite concentrations (@fig-cross-association-heatmap).
 
 ```{r}
 #| label: fig-cross-association-heatmap
 #| fig-cap: "Heatmap of Spearman correlations between log10-transformed abundances of prevalent bacterial families (rows) and NMR metabolite concentrations (columns) in the Hintikka et al. (2021) data. Colour shows the correlation and X marks correlations with adjusted p-value below 0.05."
+#| fig-alt: "Clustered heatmap with bacterial families as rows and metabolites as columns, filled by Spearman correlation on a colour scale, with an X in the cells of significant correlations."
 #| fig-width: 10
 #| fig-height: 8
 
@@ -124,9 +121,11 @@ in [@sec-example-data].
 
 2. Agglomerate microbiota data to prevalent phyla.
 
-3. Apply the CLR transformation to microbiota data.
+3. Apply a log-based transformation, such as CLR or log10, to the microbiota
+data.
 
-4. Apply the relative and log10 transformations to the other omic data.
+4. If needed, transform the other omic data to an appropriate scale, for
+example, with the log10 transformation.
 
 5. Calculate correlations between the different omics data.
 
@@ -138,7 +137,7 @@ Do the associations make sense in light of the literature?
 
 Useful functions:
 
-`utils::data()`, `mia::agglomerateByPrevalence`, `mia::transformAssay()`,
+`utils::data()`, `mia::agglomerateByRank()`, `mia::addPrevalence()`, `mia::subsetBy()`, `mia::transformAssay()`,
 `mia::getCrossAssociation()`, `ComplexHeatmap::Heatmap()`
 
 :::
