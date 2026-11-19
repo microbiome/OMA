@@ -23,13 +23,9 @@ tse <- GlobalPatterns
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 
 # Agglomerate to phyla and combine the non-prevalent phyla into "Other"
-tse_sub <- agglomerateByPrevalence(
-    tse,
-    rank = "Phylum",
-    assay.type = "relabundance",
-    detection = 1 / 100,
-    prevalence = 20 / 100
-)
+tse_sub <- agglomerateByRank(tse, rank = "Phylum")
+tse_sub <- addPrevalence(tse_sub, assay.type = "relabundance", detection = 0.01)
+tse_sub <- subsetBy(tse_sub, rows = prevalence > 0.2, collapse = TRUE)
 
 # Visualizing the composition barplot, with samples ordered by "Bacteroidetes"
 plotAbundance(
@@ -65,7 +61,9 @@ on transformation methods, refer to [@sec-assay-transform].
 tse <- GlobalPatterns
 
 # Agglomerate to phylum level
-tse <- agglomerateByPrevalence(tse, rank = "Phylum")
+tse <- agglomerateByRank(tse, rank = "Phylum")
+tse <- addPrevalence(tse)
+tse <- subsetBy(tse, rows = prevalence > 0.5, collapse = TRUE)
 
 # Add clr-transformation on samples
 tse <- transformAssay(
