@@ -204,7 +204,8 @@ plotHistogram(x = tse, col.var = "total")
 
 # Subsets based on library size and then subsets again based on feature prevalence
 tse_library <- tse[, tse$total > 500000]
-tse_subset <- subsetByPrevalent(tse_library, detection = 1, prevalence = 2 / 10)
+tse_library <- addPrevalence(tse_library, detection = 1)
+tse_subset <- subsetBy(tse_library, rows = prevalence > 0.2)
 ```
 
 ## Agglomeration
@@ -240,8 +241,10 @@ altExpNames(tse_all_ranks)
 altExp(tse_all_ranks, "Phylum")
 
 # Agglomerate by prevalence
-tse_prevalence <- agglomerateByPrevalence(tse)
-altExp(tse, "prevalent") <- agglomerateByPrevalence(tse)
+tse <- addPrevalence(tse)
+tse_prevalence <- subsetBy(
+    tse, rows = prevalence > 0.5, collapse = TRUE)
+altExp(tse, "prevalent") <- tse_prevalence
 
 # Show column variables and merges the data based on one
 colData(tse) |> colnames()
@@ -329,7 +332,10 @@ data(HintikkaXOData)
 mae <- HintikkaXOData
 
 # Agglomerate microbiome data
-mae[[1]] <- agglomerateByPrevalence(mae[[1]], rank = "Phylum")
+mae[[1]] <- agglomerateByRank(mae[[1]], rank = "Phylum")
+mae[[1]] <- addPrevalence(mae[[1]])
+mae[[1]] <- subsetBy(
+    mae[[1]], rows = prevalence > 0.5, collapse = TRUE)
 
 # Apply robust CLR (rclr), a CLR variant that handles zeros without a
 # pseudocount
@@ -445,9 +451,15 @@ data(HintikkaXOData)
 mae_mofa <- HintikkaXOData
 
 # Agglomerate microbiome data to prevalent genera
-mae_mofa[["microbiota"]] <- agglomerateByPrevalence(
+mae_mofa[["microbiota"]] <- agglomerateByRank(
     mae_mofa[["microbiota"]],
     rank = "Genus"
+)
+mae_mofa[["microbiota"]] <- addPrevalence(mae_mofa[["microbiota"]])
+mae_mofa[["microbiota"]] <- subsetBy(
+    mae_mofa[["microbiota"]],
+    rows = prevalence > 0.5,
+    collapse = TRUE
 )
 
 # Apply CLR
