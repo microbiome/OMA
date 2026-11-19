@@ -604,80 +604,399 @@ Alternatively, both experiments can be stored side-by-side in an `MAE`
 data container.
 :::
 
-::: {.callout-tip icon="false"}
-## Exercises
+## Exercises {#sec-containers-exercises}
 
-**Goal:** The goal of these exercises is to understand the elements and
-structure of a `TreeSE` object.
+In Exercises 2-5, we use the
+[`GlobalPatterns`](data_sets.qmd#sec-data-globalpatterns) dataset, and in
+Exercise 6 the [`HintikkaXOData`](data_sets.qmd#sec-data-hintikka) dataset.
 
-**Exercise 1: Assay retrieval**
+Solve the exercises in order, as Exercises 2-5 continue from each other. Try
+to solve each exercise yourself before opening the solution.
 
-1. Load any of the example data sets described in [@sec-data-sets].
+:::: {.callout-tip icon="false"}
+## Exercise 1: Where is the data stored?
 
-2. List the names of all available assays. Which tables are present?
+**Goal:** Understand which slot or data container is suitable for each type
+of data.
 
-3. Fetch the list of assays. How long is the list?
+Answer the following questions without writing any code. The list of slots in
+the beginning of this chapter and [@tbl-options] will help you.
 
-4. Retrieve an available assay. Briefly explore the data. Can you
-see many zeroes? If so, why does the data contain many zeroes?
+In which slot of a `TreeSE` object, or in which data container, would you
+store each of the following?
 
-**Exercise 2: Sample information**
+1. The abundance table of counts
 
-1. Import the `r BiocStyle::Biocpkg("mia")` package, load any of the example
-datasets mentioned in [@sec-example-data].
+2. A transformed copy of the abundance table, for example relative
+abundances
 
-2. Check the names of the samples.
+3. The taxonomic classification of each feature
 
-3. List the available columns in the sample metadata.
+4. The age and sex of the subject from whom each sample was collected
 
-4. Now do the same for the rows of the sample metadata. What do these names
-correspond to?
+5. A phylogenetic tree of the features
 
-5. Visualize the sample metadata with `View()` and briefly look at the
-information stored in the different columns.
+6. An abundance table of the same samples agglomerated to the genus level
 
-**Exercise 3: Feature information**
+7. Metabolomic data from the same subjects, measured from a different set of
+samples
 
-1. Import the `r BiocStyle::Biocpkg("mia")` package, load any of the example
-datasets mentioned in [@sec-example-data].
+::: {.callout-note collapse="true"}
+## Solution
 
-2. Check the names of the features.
+1. `assays`
 
-3. List the available columns stored in the feature metadata or the taxonomy
-table.
+2. `assays`. A transformed table has the same features and samples as the
+original table, so it can be stored as another assay.
 
-4. Now do the same for the rows of in `rowData`. What do these names correspond
-to?
+3. `rowData`
 
-5. Visualize the feature metadata with `View()` and briefly look at the
-information stored in the different columns.
+4. `colData`
 
-**Exercise 4: Other elements**
+5. `rowTree`. The links between the features and the nodes of the tree are
+stored in `rowLinks`.
 
-Extract some of the other `TreeSE` elements listed in [@sec-containers].
-However, note that such data is not always included.
+6. `altExp`. The table has the same samples but fewer features than the
+original table, so it cannot be stored as an assay.
 
-1. Import the `r BiocStyle::Biocpkg("mia")` package, load any of the example
-datasets mentioned in [@sec-example-data].
+7. A `MAE` object. The samples do not match one-to-one with the microbiome
+samples, so the connections between the samples and the subjects are stored
+in the `sampleMap`.
+:::
+::::
 
-2. Fetch the metadata of the `TreeSE`. Is there any information
+:::: {.callout-tip icon="false"}
+## Exercise 2: Rows, columns and assays
+
+**Goal:** Learn to explore the dimensions and the assays of a `TreeSE`
+object, and to subset it.
+
+1. Load the `GlobalPatterns` dataset from the `mia` package and store it in a
+variable called `tse`. Print `tse` to see an overview of the object.
+
+2. How many features (rows) and samples (columns) does `tse` have? Show the
+first names of the features and the samples.
+
+3. Fetch the list of assays. How many assays are there, and what are their
+names?
+
+4. Show the first rows of the `counts` assay. Do you see many zeroes? Why
+does microbiome data often contain many zeroes?
+
+5. Subset `tse` to the first 10 features and the first 5 samples, and store
+the result in a variable called `tse_sub`. Check the dimensions of `tse_sub`
+and the number of rows in its `colData`.
+
+6. Create an empty matrix with the same dimensions as `tse_sub`, and add it to
+`tse_sub` as an assay called `"empty_table"`. Fetch the list of assays again.
+
+7. Why must all the assays of a `TreeSE` object have the same dimensions?
+
+**Useful functions:** `data()`, `dim()`, `rownames()`, `colnames()`,
+`head()`, `SummarizedExperiment::assays()`, `SummarizedExperiment::assay()`,
+`SummarizedExperiment::colData()`, `matrix()`, `nrow()`, `ncol()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_containers_assays
+
+library(mia)
+
+# 1. Load the data
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+tse
+
+# 2. Dimensions and names of features and samples
+dim(tse)
+head(rownames(tse))
+head(colnames(tse))
+
+# 3. List of assays
+assays(tse)
+
+# 4. First rows of the counts assay
+assay(tse, "counts") |> head()
+
+# 5. Subset the data
+tse_sub <- tse[1:10, 1:5]
+dim(tse_sub)
+nrow(colData(tse_sub))
+
+# 6. Add an empty assay
+mat <- matrix(nrow = nrow(tse_sub), ncol = ncol(tse_sub))
+assay(tse_sub, "empty_table", withDimnames = FALSE) <- mat
+assays(tse_sub)
+```
+
+4. Yes, most of the values are zeroes. Most taxa are present only in some
+samples, and rare taxa might not be detected because only a limited number of
+reads is sequenced from each sample.
+
+5. When the `TreeSE` object is subsetted, all its parts are subsetted at the
+same time. Therefore, `colData` has 5 rows, one for each remaining sample, and
+it stays matched with the assays.
+
+7. Each row of an assay corresponds to a feature in `rowData`, and each column
+corresponds to a sample in `colData`. The assays can be linked to the feature
+and sample information only if they all have the same features and samples.
+Data with different features is stored in `altExp` instead.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Sample and feature information
+
+**Goal:** Learn to explore the sample metadata and the feature metadata.
+
+1. Show the sample metadata of `tse` from Exercise 2. Which columns are
 available?
 
-3. Access the phylogenetic tree. How big is it in terms of tips and
-nodes?
+2. Which sample types are found in the `SampleType` column, and how many
+samples are there of each type?
 
-4. Check if a sample tree is available.
+3. Show the feature metadata of `tse`. Which columns are available, and what
+do they describe?
 
-5. If present, obtain the information on feature DNA sequences from the
-`referenceSeq` slot.
+4. Check that the row names of the sample metadata are the same as the
+column names of `tse`, and that the row names of the feature metadata are the
+same as the row names of `tse`. What do these names correspond to?
 
-Useful functions:
+**Useful functions:** `SummarizedExperiment::colData()`,
+`SummarizedExperiment::rowData()`, `colnames()`, `rownames()`, `table()`,
+`all()`
 
-`utils::data()`, `SummarizedExperiment::assayNames()`,
-`SummarizedExperiment::assays()`, `SummarizedExperiment::assay()`,
-`SummarizedExperiment::colData()`, `SummarizedExperiment::rowData()`,
-`SummarizedExperiment::rownames()`, `SummarizedExperiment::colnames()`,
-`TreeSummarizedExperiment::rowTree()`, `TreeSummarizedExperiment::colTree()`,
-`TreeSummarizedExperiment::referenceSeq()`
+::: {.callout-note collapse="true"}
+## Solution
 
+```{r}
+#| label: exercise_containers_metadata
+
+# 1. Sample metadata
+colData(tse)
+colnames(colData(tse))
+
+# 2. Number of samples of each sample type
+table(colData(tse)[["SampleType"]])
+
+# 3. Feature metadata
+rowData(tse)
+colnames(rowData(tse))
+
+# 4. Compare the names
+all(rownames(colData(tse)) == colnames(tse))
+all(rownames(rowData(tse)) == rownames(tse))
+```
+
+3. The columns of the feature metadata are taxonomic ranks, from kingdom to
+species. Together they give the taxonomic classification of each feature.
+
+4. The row names of `colData` are the sample names, and the row names of
+`rowData` are the feature names. Both comparisons return `TRUE`: each row of
+`colData` describes one column of the assays, and each row of `rowData`
+describes one row of the assays.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Phylogenetic tree and other slots
+
+**Goal:** Learn to access the phylogenetic tree and the other slots of a
+`TreeSE` object.
+
+1. Access the phylogenetic tree of `tse`. How many tips and internal nodes
+does it have? Compare the number of tips with the number of features in
+`tse`.
+
+2. Show the first rows of the links between the features and the nodes of the
+tree. Which column tells whether a feature is linked to a tip (leaf) of the
+tree?
+
+3. Check whether `tse` contains a sample tree, reference sequences and
+metadata about the experiment.
+
+4. Which of the slots that you accessed in Exercises 2-4 are shared with the
+`SummarizedExperiment` class, and which are unique to `TreeSE`?
+
+**Useful functions:** `TreeSummarizedExperiment::rowTree()`,
+`TreeSummarizedExperiment::rowLinks()`,
+`TreeSummarizedExperiment::colTree()`,
+`TreeSummarizedExperiment::referenceSeq()`, `S4Vectors::metadata()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_containers_tree
+
+# 1. Phylogenetic tree
+rowTree(tse)
+
+# 2. Links between the features and the tree
+rowLinks(tse) |> head()
+
+# 3. Sample tree, reference sequences and metadata
+colTree(tse)
+referenceSeq(tse)
+metadata(tse)
+```
+
+1. The number of tips and internal nodes is printed with the tree. Each
+feature is linked to a node of the tree, so here the number of tips equals
+the number of features. This is not required, as features can also be linked
+to internal nodes or to no node at all.
+
+2. The `isLeaf` column tells whether the node is a tip (`TRUE`) or an
+internal node (`FALSE`).
+
+3. `NULL` or an empty list means that the slot is empty. Not all datasets
+contain data in all slots.
+
+4. `assays`, `rowData`, `colData` and `metadata` are shared with
+`SummarizedExperiment`. `rowTree`, `rowLinks`, `colTree` and `referenceSeq`
+are unique to `TreeSE`.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Alternative experiments
+
+**Goal:** Learn to store data with a different set of features as an
+alternative experiment.
+
+1. Subset `tse` to its first 10 features and store the result in a variable
+called `tse_first10`. Check that `tse` and `tse_first10` have the same number
+of samples.
+
+2. Add `tse_first10` to `tse` as an alternative experiment called
+`"first10"`. List the names of the alternative experiments in `tse`.
+
+3. Subset `tse` to its first 3 samples and store the result in a variable
+called `tse_3`. What are the dimensions of the alternative experiment in
+`tse_3`?
+
+4. Name the main experiment of `tse` `"original"`. Then promote the
+alternative experiment `"first10"` to the main experiment and print the
+object. Finally, restore the original main experiment.
+
+5. Why is `tse_first10` stored as an alternative experiment and not as an
+assay?
+
+**Useful functions:** `dim()`, `SingleCellExperiment::altExp()`,
+`SingleCellExperiment::altExpNames()`,
+`SingleCellExperiment::mainExpName()`,
+`SingleCellExperiment::swapAltExp()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_containers_altexp
+
+# 1. Subset the features
+tse_first10 <- tse[1:10, ]
+dim(tse)
+dim(tse_first10)
+
+# 2. Add the alternative experiment
+altExp(tse, "first10") <- tse_first10
+altExpNames(tse)
+
+# 3. Subset the samples
+tse_3 <- tse[, 1:3]
+dim(altExp(tse_3, "first10"))
+
+# 4. Promote the alternative experiment and restore the original
+mainExpName(tse) <- "original"
+tse <- swapAltExp(tse, "first10")
+tse
+tse <- swapAltExp(tse, "original")
+```
+
+3. The alternative experiment has 10 features and 3 samples. Subsetting the
+samples of the main experiment subsets the alternative experiments as well,
+so they stay matched.
+
+4. The printed object has more `colData` columns than `tse`. By default,
+`swapAltExp()` combines the `colData` of the main experiment with the
+`colData` of the alternative experiment, and here both contain the same
+columns.
+
+5. An assay must have the same features as the main experiment, but
+`tse_first10` has fewer features. An alternative experiment must have only
+the same samples. This is the case, for example, with abundance tables that
+are agglomerated to different taxonomic ranks.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 6: MultiAssayExperiment
+
+**Goal:** Learn to explore a `MAE` object and how it links samples to
+subjects.
+
+1. Load the `HintikkaXOData` dataset from the `mia` package and store it in a
+variable called `mae`. Print `mae`. How many experiments does it contain, and
+what are their names?
+
+2. Show the `colData` of `mae`. What does each row describe?
+
+3. Show the first rows of the `sampleMap` of `mae`. What do the columns
+`assay`, `primary` and `colname` contain?
+
+4. Subset `mae` to its first 5 columns, store the result in a variable called
+`mae_sub`, and print it. How many samples are left in each experiment?
+
+5. When would you store experiments in a `MAE` object instead of as
+alternative experiments in a `TreeSE` object?
+
+**Useful functions:** `data()`, `MultiAssayExperiment::colData()`,
+`MultiAssayExperiment::sampleMap()`, `head()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_containers_mae
+
+# 1. Load the data
+data("HintikkaXOData", package = "mia")
+mae <- HintikkaXOData
+mae
+
+# 2. colData of the MAE
+colData(mae)
+
+# 3. sampleMap
+sampleMap(mae) |> head()
+
+# 4. Subset the MAE
+mae_sub <- mae[, 1:5, ]
+mae_sub
+```
+
+1. The number and names of the experiments are listed when the object is
+printed. Here, there are three experiments: `microbiota`, `metabolites` and
+`biomarkers`.
+
+2. Each row describes one subject, here one rat. The `colData` of a `MAE`
+stores information that stays constant during the study.
+
+3. `assay` is the name of the experiment, `colname` is the name of the
+sample in that experiment, and `primary` is the subject from whom the sample
+was collected. In this dataset, each rat has one sample in each experiment.
+In the HoloFood example of this chapter, some animals have several samples,
+and the `sampleMap` links all of them to the same animal.
+
+4. The printed object shows the number of rows and columns of each
+experiment. Subsetting the columns of a `MAE` subsets the samples in all
+experiments at the same time, based on the `sampleMap`.
+
+5. Use a `MAE` object when the samples do not match one-to-one between the
+experiments, for example when some subjects are missing from one experiment
+or a subject has several samples. Alternative experiments require exactly the
+same samples as the main experiment.
+:::
+::::

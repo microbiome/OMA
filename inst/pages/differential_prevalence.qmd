@@ -218,30 +218,150 @@ implementation of Firth logistic regression for DPA, one needs to use a custom
 function. Such custom function with application examples is given in the
 [extra materials](https://microbiome.github.io/OMA-extras/docs/devel/pages/extra_daa.html#sec-firth).
 
-::: {.callout-tip icon=false}
+## Exercises {#sec-differential-prevalence-exercises}
 
-## Exercises
+We use the [`peerj13075`](data_sets.qmd#sec-data-peerj13075) dataset, as in
+the exercises of [@sec-differential-abundance].
 
-**Goal:** The goal of these exercises is to learn how to perform differential
-prevalence analysis.
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-**Exercises: Differential prevalence analysis (DPA)**
+:::: {.callout-tip icon="false"}
+## Exercise 1: Prepare the data
 
-1. Load and prepare a data set as in the DAA exercises
-(@sec-differential-abundance).
+**Goal:** Learn to prepare the data for DPA.
 
-2. Run DPA with `maaslin3()`, controlling for the sequencing depth.
+1. Load the `peerj13075` dataset from the `mia` package and store it in a
+variable called `tse`.
 
-3. Explore the results. Are there taxa whose prevalence differs between the
-groups? Compare the results with those of DAA.
+2. Agglomerate the data to genus level with `rank = "genus"`. (Note that the
+rank names of this dataset are written in lowercase.) Then add the prevalence
+and keep only the genera that are present in more than 50% of the samples.
 
-4. Bonus: Try to run DPA with Firth logistic regression with the custom
-function provided in the
-[extra materials](https://microbiome.github.io/OMA-extras/docs/devel/pages/extra_daa.html#sec-firth).
-See how the results differ from the results obtained with `maaslin3()`.
+3. Convert the `Diet` column to a factor and set `Mixed` as the reference
+level.
 
-Useful functions:
+4. Convert the `Geographical_location` column to a factor with the levels
+`Pune`, `Ahmednagar` and `Nashik`, in this order. `Pune` is then the
+reference level.
 
-`mia::agglomerateByRank()`, `mia::addPrevalence()`, `mia::subsetBy()`, `scater::addQC()`, `maaslin3::maaslin3()`
+**Useful functions:** `data()`, `mia::agglomerateByRank()`,
+`mia::addPrevalence()`, `mia::subsetBy()`, `factor()`
 
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_dpa_prepare
+
+library(mia)
+
+# 1. Load the data
+data("peerj13075", package = "mia")
+tse <- peerj13075
+
+# 2. Agglomerate to genus level and keep prevalent genera
+tse <- agglomerateByRank(tse, rank = "genus")
+tse <- addPrevalence(tse)
+tse <- subsetBy(tse, rows = prevalence > 0.5)
+
+# 3. Set Mixed as the reference level
+tse$Diet <- factor(tse$Diet, levels = c("Mixed", "Veg"))
+
+# 4. Set Pune as the reference level
+tse$Geographical_location <- factor(
+    tse$Geographical_location,
+    levels = c("Pune", "Ahmednagar", "Nashik")
+)
+```
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Logistic regression
+
+**Goal:** Learn to compare the presence and absence of taxa between groups
+with `maaslin3()`.
+
+1. Calculate the total number of reads in each sample with `addQC()`. The
+results are stored in the `total` column of `colData`.
+
+2. Run `maaslin3()` with `tse` and the formula
+`~ Diet + Geographical_location + total`. Set `output = "output"`,
+`plot_associations = FALSE`, `plot_summary_plot = FALSE` and
+`verbosity = "ERROR"`. Store the result in a variable called `obj_dpa`.
+
+3. Extract the results of the prevalence model (`fit_data_prevalence`).
+Remove the rows for `total`, add the 95% confidence intervals, calculate the
+q-values separately for each variable, and keep the columns `feature`,
+`name`, `coef`, `pval` (renamed from `pval_individual`), `qval`, `ci_lwr`
+and `ci_upr`, as shown in @sec-DPA. Store the table in a variable called
+`res_dpa`.
+
+4. Show the six genera with the smallest p-values for `DietVeg`.
+
+5. What does `coef` describe in these results? Why is the total number of
+reads included in the model? Why are `coef` and the p-values missing (`NA`)
+for some genera?
+
+**Useful functions:** `scater::addQC()`, `maaslin3::maaslin3()`,
+`dplyr::filter()`, `dplyr::mutate()`, `stats::qnorm()`, `dplyr::group_by()`,
+`stats::p.adjust()`, `dplyr::ungroup()`, `dplyr::select()`,
+`dplyr::arrange()`, `head()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_dpa_maaslin3
+
+library(scater)
+library(maaslin3)
+library(dplyr)
+
+# 1. Calculate the total number of reads in each sample
+tse <- addQC(tse)
+
+# 2. Run maaslin3 with diet, city and total number of reads
+obj_dpa <- maaslin3(
+    tse,
+    formula = ~ Diet + Geographical_location + total,
+    output = "output",
+    plot_associations = FALSE,
+    plot_summary_plot = FALSE,
+    verbosity = "ERROR"
+)
+
+# 3. Extract the results of the prevalence model
+res_dpa <- obj_dpa$fit_data_prevalence$results |>
+    filter(name != "total") |>
+    mutate(
+        ci_lwr = coef - qnorm(.975) * stderr,
+        ci_upr = coef + qnorm(.975) * stderr
+    ) |>
+    group_by(metadata) |>
+    mutate(qval = p.adjust(pval_individual, method = "fdr")) |>
+    ungroup() |>
+    select(feature, name, coef, pval = pval_individual, qval, ci_lwr, ci_upr)
+
+# 4. Genera with the smallest p-values for diet
+res_dpa |>
+    filter(name == "DietVeg") |>
+    arrange(pval) |>
+    head()
+```
+
+5. In DPA, `coef` is the log-odds ratio of the presence of the genus between
+the `Veg` and `Mixed` groups. A positive value means that the genus is
+estimated to be more prevalent in the `Veg` group, and a negative value that
+it is less prevalent. The odds ratio is `exp(coef)`.
+
+The more reads a sample has, the more likely it is that a taxon is detected.
+The total number of reads is therefore included as a technical covariate, so
+that differences in sequencing depth do not appear as differences in
+prevalence.
+
+For genera that are present in all samples, `coef` and the p-values are
+`NA`, because their presence and absence does not vary.
+:::
+::::

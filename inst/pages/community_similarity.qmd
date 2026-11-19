@@ -246,10 +246,22 @@ the plot.
 #| label: fig-community-dissimilarity-heatmap
 #| fig-cap: "Heatmap of pairwise UniFrac dissimilarities between the GlobalPatterns samples. Samples are ordered by seriation and split by sample type."
 #| fig-alt: "Square heatmap with the samples on both axes, where cell colour shows the UniFrac dissimilarity of each sample pair. Samples are split into blocks by sample type, and samples of the same type tend to be the most similar to each other."
+#| fig-width: 12
+#| fig-height: 8
 
 library(miaViz)
 
-plotDissimilarity(tse, name = "unifrac", col.var = "SampleType")
+# Wrap long sample type names
+tse_plot <- tse
+tse_plot[["SampleType"]] <- factor(
+    tse_plot[["SampleType"]],
+    labels = gsub(" \\(", "\n(", levels(tse_plot[["SampleType"]]))
+)
+
+plotDissimilarity(tse_plot, name = "unifrac", col.var = "SampleType") +
+    theme(
+        strip.text = element_text(size = 6)
+    )
 ```
 
 From the heatmap, we can observe that samples within the same sample type are
@@ -1211,75 +1223,418 @@ For more information on sample clustering, you can refer to:
 * [@sec-clustering] on community typing
 :::
 
-::: {.callout-tip icon=false}
-## Exercises
+## Exercises {#sec-community-similarity-exercises}
 
-**Goal:** To get insight into differences in the microbial community between
-groups of samples.
+We use the [`Tengeler2020`](data_sets.qmd#sec-data-tengeler2020) dataset.
 
-**Exercise 1: Principal Component Analysis (PCA)**
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-1. Load any of the example data sets described in [@sec-data-sets].
+:::: {.callout-tip icon="false"}
+## Exercise 1: Dissimilarity metrics
 
-2. Apply a CLR transformation.
+**Goal:** Understand how the choice of dissimilarity metric affects what is
+compared between samples.
 
-3. Reduce dimensionality with Principal Component analysis (PCA).
+Imagine two samples that both contain the same three taxa and 100 reads in
+total:
 
-4. List all available reduced dimensionalities stored in a `tse` -object using
-the `reducedDimNames()` -function. Is the PCA reduced dimension available?
+| Taxon   | Sample A | Sample B |
+|---------|---------:|---------:|
+| Taxon 1 | 50       | 5        |
+| Taxon 2 | 30       | 5        |
+| Taxon 3 | 20       | 90       |
 
-5. Retrieve PCA results (using the `reducedDim()` -function), and explore them.
-Where are the principal components located? How about the feature loadings and
-eigenvalues?
+Answer the following questions without writing any code. The beginning of
+this chapter and the callouts "Dissimilarity or distance?" and "Common mistake
+in Jaccard index" will help you.
 
-6. Visualize the first two principal components.
+1. What is the (presence/absence) Jaccard dissimilarity between the samples?
 
-7. Choose one sample-metadata variable from `colData` and visualize the first
-two principal components again, coloring samples by that variable. Can you
-observe any patterns?
+2. Would the Bray-Curtis dissimilarity between the samples be the same as the
+Jaccard dissimilarity? Why?
 
-8. Visualize the PCA loadings for the two first components. Which features have
-the strongest associations? Interpret these results in reflect to sample
-grouping. Is there association between abundance of certain features and sample
-variable?
+3. Which metric would you choose if you wanted to take into account how
+closely related the taxa are in the phylogenetic tree?
 
-**Exercise 2: Principal Coordinate Analysis (PCoA)**
+4. The Aitchison distance can be calculated as a Euclidean distance. Which
+transformation must be applied to the counts first?
 
-1. Load any of the example data sets described in [@sec-data-sets].
+5. Is Bray-Curtis a distance or a dissimilarity?
 
-2. Transform counts to relative abundance.
+::: {.callout-note collapse="true"}
+## Solution
 
-3. Apply Principal Coordinate Analysis (PCoA) to relative abundances with
-Bray-Curtis dissimilarity.
+1. The Jaccard dissimilarity is 0. The presence/absence Jaccard index only
+compares which taxa are present, and both samples contain the same three taxa.
 
-4. List all available reduced dimensionalities stored in a `tse` -object using
-the `reducedDimNames()` -function. Is the PCoA reduced dimension available?
+2. No. Bray-Curtis takes the abundances of the taxa into account. The samples
+contain the same taxa, but in very different proportions, so the Bray-Curtis
+dissimilarity is larger than zero, whereas the Jaccard dissimilarity is zero.
 
-5. Visualize PCoA results with sample grouping.
+3. UniFrac, which uses the phylogenetic tree of the taxa.
 
-6. Run PCoA with rarefaction. Visualize the results and compare them to PCoA
-without rarefaction. Do the plots look similar? What does rarefaction do, and
-what is it used for?
+4. The centered log-ratio (clr) transformation. The Aitchison distance is the
+Euclidean distance between clr-transformed abundances.
 
-**Exercise 3: Distance-based Redundancy Analysis (db-RDA)**
-
-1. Load any of the example data sets described in [@sec-data-sets].
-
-2. Explore `colData`. Choose one or more relevant sample-metadata variables
-and run distance-based redundancy analysis (db-RDA) on relative abundances
-with Bray-Curtis dissimilarity.
-
-3. Explore the statistical significance of the results. Do the sample groups
-have homogeneous variances? Is there a significant association between any
-variables and the microbial profile?
-
-4. Visualize the db-RDA results.
-
-Useful functions:
-
-`utils::data()`, `mia::transformAssay()`, `scater::runPCA()`,
-`SingleCellExperiment::reducedDimNames()`, `SingleCellExperiment::reducedDim()`,
-`scater::plotReducedDim()`, `miaViz::plotLoadings()`, `mia::addMDS()`,
-`mia::addRDA()`, `mia::getReducedDimAttribute()`, `miaViz::plotRDA()`
-
+5. Bray-Curtis is a dissimilarity. It does not fulfill all the requirements
+of a distance metric.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Dissimilarity and divergence
+
+**Goal:** Learn to calculate and visualize the dissimilarities between
+samples, and the divergence of each sample from a reference.
+
+1. Load the `Tengeler2020` dataset from the `mia` package and store it in a
+variable called `tse`.
+
+2. Transform the `counts` assay to relative abundances. The new assay is
+called `relabundance`.
+
+3. Calculate the Bray-Curtis dissimilarities between the samples from the
+`relabundance` assay with `addDissimilarity()`. Check the names of
+`metadata(tse)`. Where was the result stored?
+
+4. Visualize the dissimilarity matrix as a heatmap, and annotate the samples
+by `patient_status`.
+
+5. Calculate the divergence of each sample from the median sample with
+`addDivergence()`. Use the `relabundance` assay, `reference = "median"` and
+`method = "bray"`. The result is stored in the `divergence` column of
+`colData`.
+
+6. Visualize the divergence as boxplots, with one box for each group in
+`patient_status`.
+
+7. What does a single value in the dissimilarity matrix tell? What does a
+high divergence tell about a sample?
+
+**Useful functions:** `data()`, `mia::transformAssay()`,
+`mia::addDissimilarity()`, `metadata()`, `miaViz::plotDissimilarity()`,
+`mia::addDivergence()`, `miaViz::plotBoxplot()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_community_dissimilarity
+
+library(mia)
+library(miaViz)
+
+# 1. Load the data
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# 2. Relative abundances
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+
+# 3. Bray-Curtis dissimilarities, stored in metadata
+tse <- addDissimilarity(tse, assay.type = "relabundance", method = "bray")
+names(metadata(tse))
+
+# 4. Heatmap of the dissimilarities
+plotDissimilarity(tse, name = "bray", col.var = "patient_status")
+
+# 5. Divergence from the median sample
+tse <- addDivergence(
+    tse,
+    assay.type = "relabundance",
+    reference = "median",
+    method = "bray"
+)
+
+# 6. Boxplot of divergence by group
+plotBoxplot(tse, col.var = "divergence", x = "patient_status")
+```
+
+3. The dissimilarity matrix was stored in `metadata(tse)` under the name
+`bray`.
+
+7. Each value in the dissimilarity matrix compares one pair of samples. A
+value close to 0 means that the two communities are very similar, and a value
+close to 1 means that they share hardly any abundance. The divergence
+compares a sample to a reference, here the median sample. A high divergence
+means that the community of the sample differs much from the typical
+community in the data.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Principal Coordinate Analysis (PCoA)
+
+**Goal:** Learn to run PCoA and to see how the choice of dissimilarity metric
+and assay affects the ordination.
+
+1. Run PCoA with `addMDS()` on the `relabundance` assay using Bray-Curtis
+dissimilarity. Store the result under the name `"MDS_bray"`.
+
+2. List the names of the reduced dimensions stored in `tse`. Is `"MDS_bray"`
+among them?
+
+3. Plot the first two coordinates of `"MDS_bray"` and colour the samples by
+`patient_status`.
+
+4. Apply the clr transformation to the `counts` assay with
+`pseudocount = TRUE`. Then run PCoA on the `clr` assay with Euclidean
+distance, that is, with the Aitchison distance. Store the result under the
+name `"MDS_aitchison"`.
+
+5. Plot the first two coordinates of `"MDS_aitchison"` and colour the samples
+by `patient_status`. Compare the plot with the plot from step 3.
+
+6. How do you read a PCoA plot? Why can the two plots look different, even
+though they are based on the same samples?
+
+**Useful functions:** `mia::addMDS()`, `mia::getDissimilarity()`,
+`SingleCellExperiment::reducedDimNames()`, `miaViz::plotOrdination()`,
+`mia::transformAssay()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_community_pcoa
+
+library(miaViz)
+
+# 1. PCoA with Bray-Curtis dissimilarity
+tse <- addMDS(
+    tse,
+    FUN = getDissimilarity,
+    method = "bray",
+    assay.type = "relabundance",
+    name = "MDS_bray"
+)
+
+# 2. Names of the reduced dimensions
+reducedDimNames(tse)
+
+# 3. Plot the Bray-Curtis PCoA
+plotOrdination(tse, "MDS_bray", colour.by = "patient_status")
+
+# 4. clr transformation and PCoA with Aitchison distance
+tse <- transformAssay(
+    tse,
+    assay.type = "counts", method = "clr", pseudocount = TRUE
+)
+tse <- addMDS(
+    tse,
+    FUN = getDissimilarity,
+    method = "euclidean",
+    assay.type = "clr",
+    name = "MDS_aitchison"
+)
+
+# 5. Plot the Aitchison PCoA
+plotOrdination(tse, "MDS_aitchison", colour.by = "patient_status")
+```
+
+6. Each point is a sample. Samples that are close to each other have similar
+community compositions, and samples that are far apart have different
+compositions. If the samples of a group cluster together and apart from the
+other group, the groups differ in community composition. If the groups
+overlap, the ordination does not show a clear difference. The two plots are
+based on different metrics. Bray-Curtis on relative abundances is dominated
+by the most abundant taxa. The Aitchison distance compares log-ratios, so a
+relative (fold) change counts equally regardless of the abundance of the
+taxon, and rare taxa have more influence than in Bray-Curtis. Therefore,
+the metric and assay should be chosen to fit the research question.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Rarefaction in PCoA
+
+**Goal:** Learn how uneven sequencing depth can be taken into account with
+rarefaction in ordination.
+
+1. Calculate the library size of each sample, that is, the total number of
+reads in each sample, and summarize the library sizes.
+
+2. Run PCoA with Bray-Curtis dissimilarity and rarefaction. Use the `counts`
+assay, set the rarefaction depth `sample` to the smallest library size, use
+`niter = 10` iterations, and store the result under the name
+`"MDS_bray_rarefied"`. Set a seed before running the PCoA, as rarefaction is
+random.
+
+3. Plot the first two coordinates of `"MDS_bray_rarefied"` and colour the
+samples by `patient_status`. Compare the plot with the `"MDS_bray"` plot from
+Exercise 3.
+
+4. Why do we rarefy, and why do we use the smallest library size as the
+rarefaction depth?
+
+**Useful functions:** `assay()`, `colSums()`, `summary()`, `min()`,
+`set.seed()`, `mia::addMDS()`, `mia::getDissimilarity()`,
+`miaViz::plotOrdination()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_community_rarefaction
+
+# 1. Library sizes
+lib_size <- colSums(assay(tse, "counts"))
+summary(lib_size)
+
+# 2. PCoA with rarefaction
+set.seed(123)
+tse <- addMDS(
+    tse,
+    FUN = getDissimilarity,
+    method = "bray",
+    assay.type = "counts",
+    sample = min(lib_size),
+    niter = 10,
+    name = "MDS_bray_rarefied"
+)
+
+# 3. Plot the rarefied PCoA
+plotOrdination(tse, "MDS_bray_rarefied", colour.by = "patient_status")
+```
+
+4. Samples with more reads tend to have more taxa detected, so part of the
+differences between samples can be due to sequencing depth. Rarefaction
+subsamples every sample to the same number of reads, and the dissimilarities
+are averaged over the iterations. A sample cannot be subsampled to more reads
+than it contains, so samples with fewer reads than the chosen depth would
+have to be removed. Using the smallest library size keeps all the samples.
+If the rarefied and non-rarefied plots look similar, the differences in
+sequencing depth have little effect on the ordination. If they look
+different, sequencing depth affects the result. Note that PCoA axes can be
+flipped between runs, so compare the relative positions of the samples
+rather than the signs of the coordinates.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: PERMANOVA
+
+**Goal:** Learn to test whether a variable explains differences in community
+composition, and to check the homogeneity of group dispersions.
+
+1. Set a seed, as PERMANOVA is based on random permutations. Then run
+PERMANOVA with `getPERMANOVA()` on the `relabundance` assay with Bray-Curtis
+dissimilarity and the formula `x ~ patient_status`. Store the result in
+`res`.
+
+2. Look at the `permanova` table of the result. Find the proportion of
+variance explained (`R2`) by `patient_status` and the p-value (`Pr(>F)`).
+
+3. Look at the `homogeneity` table of the result. What does this test
+measure?
+
+4. Why should the homogeneity of group dispersions be checked when
+interpreting PERMANOVA?
+
+**Useful functions:** `set.seed()`, `mia::getPERMANOVA()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_community_permanova
+
+# 1. PERMANOVA
+set.seed(123)
+res <- getPERMANOVA(
+    tse,
+    assay.type = "relabundance",
+    method = "bray",
+    formula = x ~ patient_status
+)
+
+# 2. PERMANOVA results
+res$permanova
+
+# 3. Homogeneity of group dispersions
+res$homogeneity
+```
+
+2. `R2` tells the proportion of the variation in community composition that
+`patient_status` explains, and `Pr(>F)` is the permutation p-value. A p-value
+below the significance threshold (e.g. 0.05) means that the group centroids
+differ more than would be expected by chance.
+
+3. The homogeneity test compares the group dispersions, that is, the average
+distances between the samples and their group centroid.
+
+4. PERMANOVA compares the group centroids and assumes that the dispersions
+of the groups are similar. A significant PERMANOVA result together with a
+non-significant homogeneity test supports a difference in composition between
+the groups. If the homogeneity test is also significant, the PERMANOVA result
+may be caused by differences in the within-group variability instead, and it
+should be interpreted with caution.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 6: Distance-based redundancy analysis (dbRDA)
+
+**Goal:** Learn to run dbRDA with several covariates and to visualize the
+result.
+
+1. Set a seed. Then run dbRDA with `addRDA()` on the `relabundance` assay
+with Bray-Curtis dissimilarity (`distance = "bray"`) and the formula
+`assay ~ patient_status + cohort`.
+
+2. Retrieve the `"significance"` attribute of the `"RDA"` reduced dimension
+and store it in `rda_info`. Look at its `permanova` and `homogeneity`
+tables.
+
+3. Visualize the dbRDA result and colour the samples by `patient_status`.
+
+4. Visualize the loadings of the 10 taxa with the largest contributions to
+the first two dbRDA components.
+
+5. Why do we include `cohort` in the formula? How do you read the arrows in
+the dbRDA plot?
+
+**Useful functions:** `set.seed()`, `mia::addRDA()`, `attr()`,
+`SingleCellExperiment::reducedDim()`, `miaViz::plotRDA()`,
+`miaViz::plotLoadings()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_community_dbrda
+
+# 1. dbRDA with two covariates
+set.seed(123)
+tse <- addRDA(
+    tse,
+    assay.type = "relabundance",
+    formula = assay ~ patient_status + cohort,
+    distance = "bray"
+)
+
+# 2. PERMANOVA and homogeneity results
+rda_info <- attr(reducedDim(tse, "RDA"), "significance")
+rda_info$permanova
+rda_info$homogeneity
+
+# 3. dbRDA plot
+plotRDA(tse, "RDA", colour.by = "patient_status")
+
+# 4. Loadings of the top 10 taxa
+plotLoadings(tse, "RDA", ncomponents = 2, n = 10)
+```
+
+5. The mice come from different cohorts, and the cohort may also affect
+community composition. When `cohort` is included in the formula, the effect
+of `patient_status` is estimated while controlling for cohort, and the
+`permanova` table shows the variance explained by each variable separately.
+In the dbRDA plot, each arrow shows a covariate. For a categorical variable,
+there is one arrow for each level, compared to the reference level. The
+direction of an arrow shows in which direction the samples differ along that
+covariate, and a longer arrow means a stronger association with community
+composition. The labels show the explained variance and the p-value of each
+variable.
+:::
+::::

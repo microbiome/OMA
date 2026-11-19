@@ -331,57 +331,302 @@ which level gives the smallest p-values.
 It can be useful to check whether the main results hold at more than one
 level. For choosing the transformation, see @sec-choose-transformation.
 
-::: {.callout-tip icon="false"}
-## Exercises
+## Exercises {#sec-agglomeration-exercises}
 
-**Goal:** The goal is to learn how to agglomerate the data.
+We use the [`Tengeler2020`](data_sets.qmd#sec-data-tengeler2020) dataset.
 
-**Exercise 1: Agglomerate data**
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-1. Load any of the example data sets described in [@sec-data-sets].
+:::: {.callout-tip icon="false"}
+## Exercise 1: What happens in agglomeration
 
-2. List the available taxonomic ranks in the data with `taxonomyRanks()`.
+**Goal:** Understand how agglomeration combines features.
 
-3. Select a single taxonomy rank and list all unique values in this
-rank. How many unique values are there?
+Imagine a dataset with four bacterial species from two genera, measured in
+two samples:
 
-4. Agglomerate data to the rank and save the agglomerated data to a new
-variable.
+| Species                | Genus       | Sample A | Sample B |
+|------------------------|-------------|---------:|---------:|
+| *Bacteroides fragilis* | Bacteroides | 10       | 0        |
+| *Bacteroides ovatus*   | Bacteroides | 30       | 5        |
+| *Prevotella copri*     | Prevotella  | 55       | 90       |
+| *Prevotella bivia*     | Prevotella  | 5        | 5        |
 
-5. How many rows are there in the agglomerated data? Does this correspond to
-the number of unique values in step 2? If not, why do they not match?
+Answer the following questions without writing any code. The beginning of
+this chapter will help you.
 
-6. Observe `rowData` of agglomerated data. What has happened? Why are there
-so many `NA`s?
+1. What are the counts of *Bacteroides* and *Prevotella* in both samples
+after the data is agglomerated to the Genus rank?
 
-7. Agglomerate data to all taxonomy ranks at once.
+2. How many rows and columns does the agglomerated data have?
 
-8. Print all available alternative experiments. What do these names correspond
-to?
+3. After agglomeration, what value would you expect in the Species column of
+the taxonomy table? Why?
 
-9. Select a single alternative experiment, and retrieve the agglomerated data
-from the `altExp` slot. How many rows and columns are there?
+4. Does the total number of reads in each sample change in agglomeration?
 
-10. Agglomerate the data based on prevalence and save the agglomerated data to
-a new variable.
+5. Suppose *Prevotella bivia* is considered rare. What happens to its reads
+if rare features are removed, and what happens if they are agglomerated based
+on prevalence instead?
 
-11. How does prevalence-agglomeration differ from prevalence-subsetting?
+::: {.callout-note collapse="true"}
+## Solution
 
-12. Add prevalence-agglomerated data to `altExp` slot of the original `TreeSE`
-object.
+1. The counts of the species in the same genus are summed. *Bacteroides* has
+10 + 30 = 40 reads in Sample A and 0 + 5 = 5 reads in Sample B. *Prevotella*
+has 55 + 5 = 60 reads in Sample A and 90 + 5 = 95 reads in Sample B.
 
-13. Explore `colData`. Select some grouping variable and agglomerate the data
-on the groups. Save the agglomerated data to a new variable. How many rows and
-columns are there? Why can this data not be added to `altExp()`?
+2. The data has two rows, one for each genus, and two columns. Agglomeration
+of features does not change the samples.
 
-Useful functions:
+3. The Species column would contain `NA`. Each row now represents a whole
+genus that contains several species, so it cannot be mapped to a single
+species.
 
-`utils::data()`, `mia::taxonomyRanks()`, `mia::getUnique()`,
-`mia::agglomerateByRank()`, `SummarizedExperiment::rowData()`,
-`mia::agglomerateByRanks()`, `SingleCellExperiment::altExpNames()`,
-`SingleCellExperiment::altExp()`, `base::dim()`,
-`mia::addPrevalence()`, `mia::subsetBy()`,
-`SingleCellExperiment::altExp()<-`, `SummarizedExperiment::colData()`,
-`mia::agglomerateByVariable()`
+4. No. The counts are only summed into larger groups, so each sample has
+the same total number of reads as before (100 reads in both samples here).
+This holds as long as all features have a value in the chosen rank.
 
+5. If rare features are removed, the reads of *Prevotella bivia* are lost. In
+agglomeration based on prevalence, the rare features are combined into a
+single feature called "Other", so their reads are kept in the data.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Agglomerate to a taxonomy rank
+
+**Goal:** Learn to agglomerate features to a taxonomy rank and to explore the
+agglomerated data.
+
+1. Load the `Tengeler2020` dataset from the `mia` package and store it in a
+variable called `tse`.
+
+2. List the taxonomy ranks available in the data.
+
+3. Agglomerate the data to the Phylum rank and store the result in a variable
+called `tse_phylum`.
+
+4. Compare the number of rows in `tse` and `tse_phylum`. What does one row
+represent in each object?
+
+5. Look at the `rowData` of `tse_phylum`. Why do the columns below Phylum
+contain only `NA` values?
+
+6. Calculate the total number of reads in each sample, that is, the column
+sums of the `counts` assay, in both `tse` and `tse_phylum`. Do they differ?
+
+7. Subset `tse_phylum` to the phyla `"Bacteroidetes"` and `"Firmicutes"`, and
+show their counts.
+
+**Useful functions:** `data()`, `mia::taxonomyRanks()`,
+`mia::agglomerateByRank()`, `nrow()`, `rowData()`, `assay()`, `colSums()`,
+`head()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_agglomeration_rank
+
+library(mia)
+
+# 1. Load the data
+data("Tengeler2020", package = "mia")
+tse <- Tengeler2020
+
+# 2. Available taxonomy ranks
+taxonomyRanks(tse)
+
+# 3. Agglomerate to Phylum rank
+tse_phylum <- agglomerateByRank(tse, rank = "Phylum")
+
+# 4. Number of rows
+nrow(tse)
+nrow(tse_phylum)
+
+# 5. Taxonomy table of the agglomerated data
+rowData(tse_phylum)
+
+# 6. Total number of reads per sample
+colSums(assay(tse, "counts")) |> head()
+colSums(assay(tse_phylum, "counts")) |> head()
+
+# 7. Subset to two phyla
+phyla <- c("Bacteroidetes", "Firmicutes")
+tse_sub <- tse_phylum[phyla, ]
+assay(tse_sub, "counts")
+```
+
+4. In `tse`, each row is a single taxonomic feature. In `tse_phylum`, each row
+is a phylum, and its values are the sums of all features that belong to that
+phylum. The number of rows equals the number of phyla in the data.
+
+5. Each row now represents a whole phylum, which can contain many classes,
+orders, families and genera. Therefore, the lowest rank that the rows can be
+uniquely mapped to is Phylum.
+
+6. If the totals are equal, all reads were kept and only summed into larger
+groups. Features that have no value in the chosen rank are not assigned to
+any group, so the totals can become smaller when you agglomerate to a rank
+with missing values.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Store agglomerated data in altExp
+
+**Goal:** Learn to store agglomerated data in the alternative experiment
+slot, and to agglomerate the data to all ranks at once.
+
+1. Add `tse_phylum` to the alternative experiments of `tse` under the name
+`"phylum"`. List the names of the alternative experiments.
+
+2. Agglomerate `tse` to all taxonomy ranks at once and store the result back
+in `tse`. List the names of the alternative experiments again. What do the
+new names correspond to?
+
+3. Retrieve the Genus-level data from the alternative experiments and store
+it in a variable called `tse_genus`. How many rows and columns does it have?
+
+4. Why is the alternative experiment slot a suitable place for data that is
+agglomerated by features?
+
+**Useful functions:** `altExp()<-`, `altExpNames()`,
+`mia::agglomerateByRanks()`, `altExp()`, `dim()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_agglomeration_altexp
+
+# 1. Add Phylum data to altExp
+altExp(tse, "phylum") <- tse_phylum
+altExpNames(tse)
+
+# 2. Agglomerate to all ranks
+tse <- agglomerateByRanks(tse)
+altExpNames(tse)
+
+# 3. Retrieve Genus-level data
+tse_genus <- altExp(tse, "Genus")
+dim(tse_genus)
+```
+
+2. The new names correspond to the taxonomy ranks of the data. Each
+alternative experiment contains the data agglomerated to that rank.
+
+3. The number of columns is the same as in `tse`, because the samples do not
+change. The number of rows is the number of genera.
+
+4. An alternative experiment must have the same samples as the main
+experiment, but it can have different features. Data agglomerated by features
+fulfils this, so all the agglomerated datasets can be kept together with the
+original data in one object.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: Agglomerate samples
+
+**Goal:** Learn to agglomerate samples based on a variable in `colData`.
+
+1. Agglomerate the samples of `tse` based on the `patient_status` column of
+`colData`, and store the result in a variable called `tse_status`.
+
+2. How many rows and columns does `tse_status` have? What are its column
+names?
+
+3. Why can `tse_status` not be added to the alternative experiments of `tse`?
+
+**Useful functions:** `mia::agglomerateByVariable()`, `dim()`, `colnames()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_agglomeration_samples
+
+# 1. Agglomerate samples by patient status
+tse_status <- agglomerateByVariable(
+    tse,
+    by = "cols",
+    group = "patient_status"
+)
+
+# 2. Dimensions and column names
+dim(tse_status)
+colnames(tse_status)
+```
+
+2. The features do not change, so the number of rows is the same as in `tse`.
+There is one column for each group in `patient_status`, and the columns are
+named after the groups. The counts of the samples in each group are summed.
+
+3. An alternative experiment must have the same samples as the main
+experiment. Here, the samples were combined into groups, so the columns no
+longer match those of `tse`.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Agglomerate based on prevalence
+
+**Goal:** Learn to combine rare features into a single feature with
+prevalence-based agglomeration.
+
+1. Add the prevalence of each feature to `rowData` with `addPrevalence()`.
+Use the `counts` assay and a detection threshold of 1 count.
+
+2. Keep the features with a prevalence over 0.2 and combine the rest into a
+single feature with `subsetBy()` and `collapse = TRUE`. Store the result in a
+variable called `tse_prev`.
+
+3. How many rows does `tse_prev` have? Show the last row names. Which feature
+contains the rare features?
+
+4. Agglomerate `tse` to the Phylum rank, and then combine the phyla in the
+same way. Show the row names of the result.
+
+**Useful functions:** `mia::addPrevalence()`, `mia::subsetBy()`,
+`mia::agglomerateByRank()`, `nrow()`, `rownames()`, `tail()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_agglomeration_prevalence
+#| warning: false
+
+# 1. Add prevalence to rowData
+tse <- addPrevalence(tse, assay.type = "counts", detection = 1)
+
+# 2. Keep prevalent features and combine the rest
+tse_prev <- subsetBy(tse, rows = prevalence > 0.2, collapse = TRUE)
+
+# 3. Number of rows and the last row names
+nrow(tse_prev)
+rownames(tse_prev) |> tail()
+
+# 4. Agglomerate to Phylum rank, and then based on prevalence
+tse_prev_phylum <- agglomerateByRank(tse, rank = "Phylum")
+tse_prev_phylum <- addPrevalence(tse_prev_phylum, detection = 1)
+tse_prev_phylum <- subsetBy(
+    tse_prev_phylum,
+    rows = prevalence > 0.2, collapse = TRUE
+)
+rownames(tse_prev_phylum)
+```
+
+3. The features that have more than 1 count in more than 20% of the samples
+are kept as they are. All other features are summed into the last row, which
+is called "Other".
+
+4. The data is first agglomerated to the Phylum rank, and then the phyla that
+do not exceed the thresholds are combined into "Other". The prevalence is
+calculated again after the agglomeration, because the prevalence of a phylum
+differs from the prevalence of the features that it contains.
+:::
+::::

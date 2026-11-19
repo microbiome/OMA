@@ -540,35 +540,420 @@ see the attached [.Rmd file](extra_material/add-comm-typing.Rmd).
 
 :::
 
-::: {.callout-tip icon=false}
-## Exercises
+## Exercises {#sec-clustering-exercises}
 
-**Goal:** After completing this exercise, you should be able to find clusters
-from the data.
+We use the [`GlobalPatterns`](data_sets.qmd#sec-data-globalpatterns) dataset.
 
-**Exercise 1: Community typing**
+Solve the exercises in order, as each exercise continues from the previous
+one. Try to solve each exercise yourself before opening the solution.
 
-1. Load any of the example data sets described in [@sec-data-sets].
+:::: {.callout-tip icon="false"}
+## Exercise 1: Clustering and dimensionality reduction
 
-2. Complete the exercises in [@sec-community-similarity] and perform Principal
-Coordinate Analysis (PCoA) with Bray-Curtis dissimilarity.
+**Goal:** Understand the main ideas of community typing.
 
-3. Perform clustering for samples with Dirichlet Multinomial Mixtures. Add
-calculated clusters to `colData`.
+Answer the following questions without writing any code. The beginning of
+this chapter and the sections "Clustering methods" and "Dimensionality
+reduction"
+will help you.
 
-4. Visualize the distribution of clusters with a bar plot.
+1. Clustering of samples consists of two steps. What are they?
 
-5. Visualize PCoA results with points colored based on clusters.
+2. In clustering, how many clusters does each sample belong to? How does
+this differ in dimensionality reduction methods such as NMF?
 
-6. Do the clusters correspond to the same variable or grouping found in the
-sample metadata? You can, for instance, visualize the variables with a box plot.
+3. Can the data be clustered only based on samples?
 
-Useful functions:
+::: {.callout-note collapse="true"}
+## Solution
 
-`utils::data()`, `mia::transformAssay()`, `mia::addMDS()`,
-`SingleCellExperiment::reducedDimNames()`,
-`SingleCellExperiment::reducedDim()`, `mia::addCluster()`,
-`miaViz::plotBarplot()`, `scater::plotReducedDim()`,
-`SummarizedExperiment::colData()`, `scater::plotColData()`
+1. First, the dissimilarities between the samples are calculated with a
+chosen dissimilarity metric, such as Bray-Curtis. Second, the clusters are
+formed from the dissimilarity matrix with a clustering algorithm, such as
+hierarchical clustering.
 
+2. In clustering, each sample is assigned to exactly one cluster. In
+dimensionality reduction, each sample has a continuous membership across all
+community types. For instance, in NMF a sample can belong partly to several
+community types.
+
+3. No. The data can be clustered either based on samples or based on
+features. For example, taxonomic features with similar abundance patterns
+can be clustered together.
 :::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 2: Hierarchical clustering
+
+**Goal:** Learn to cluster samples with hierarchical clustering and to
+visualize the clusters.
+
+1. Load the `GlobalPatterns` dataset from the `mia` package and store it in a
+variable called `tse`.
+
+2. Agglomerate the data to the Class rank, and transform the `counts` assay
+into relative abundances. Then add the prevalence using the `relabundance`
+assay and a detection threshold of 0.01, and combine the classes with a
+prevalence of 0.2 or less into "Other". How many features are left?
+
+3. Cluster the samples with hierarchical clustering with `addCluster()`. Use
+the `counts` assay, Bray-Curtis dissimilarity and the `ward.D2` method.
+Return the full results with `full = TRUE` and store the clusters in the
+`colData` column `"hclust"`.
+
+4. Show the number of samples in each cluster. Then cross-tabulate the
+clusters with `SampleType`.
+
+5. Plot the dendrogram of the hierarchical clustering, which is stored in
+`metadata(tse)$clustering$hclust`. Label the samples by their `SampleType`.
+
+6. Run PCoA with Bray-Curtis dissimilarity on the `counts` assay with
+`addMDS()`. Plot the first two coordinates and colour the samples by the
+`"hclust"` clusters. Then make the same plot again, but colour the samples by
+`SampleType`.
+
+7. How can you tell from the cross-tabulation and the plots whether the
+clusters correspond to the sample types?
+
+**Useful functions:** `data()`, `mia::agglomerateByRank()`,
+`mia::transformAssay()`, `mia::addPrevalence()`, `mia::subsetBy()`,
+`mia::addCluster()`, `bluster::HclustParam()`, `mia::getDissimilarity()`,
+`table()`, `metadata()`, `plot()`, `mia::addMDS()`, `miaViz::plotOrdination()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_clustering_hclust
+
+library(mia)
+library(bluster)
+library(miaViz)
+
+# 1. Load the data
+data("GlobalPatterns", package = "mia")
+tse <- GlobalPatterns
+
+# 2. Agglomerate to prevalent classes
+tse <- agglomerateByRank(tse, rank = "Class")
+tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
+tse <- addPrevalence(tse, assay.type = "relabundance", detection = 0.01)
+tse <- subsetBy(tse, rows = prevalence > 0.2, collapse = TRUE)
+nrow(tse)
+
+# 3. Hierarchical clustering of samples
+tse <- addCluster(
+    tse,
+    assay.type = "counts",
+    by = "cols",
+    HclustParam(
+        method = "ward.D2", dist.fun = getDissimilarity, metric = "bray"
+    ),
+    full = TRUE,
+    clust.col = "hclust"
+)
+
+# 4. Cluster sizes, and clusters compared to sample types
+table(tse$hclust)
+table(tse$hclust, tse$SampleType)
+
+# 5. Dendrogram labelled by sample type
+hclust_res <- metadata(tse)$clustering$hclust
+plot(hclust_res, labels = tse$SampleType)
+
+# 6. PCoA coloured by clusters and by sample type
+tse <- addMDS(
+    tse,
+    FUN = getDissimilarity,
+    method = "bray",
+    assay.type = "counts"
+)
+plotOrdination(tse, "MDS", colour.by = "hclust")
+plotOrdination(tse, "MDS", colour.by = "SampleType")
+```
+
+7. In the cross-tabulation, each row is a cluster and each column a sample
+type. If the clusters correspond to the sample types, the samples of each
+sample type fall into a single cluster. If the samples of a sample type are
+spread across several clusters, or a cluster contains many sample types, the
+clusters and the sample types do not match well. In the plots, the clusters
+correspond to the sample types if the two colourings group the same samples
+together.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 3: Dirichlet Multinomial Mixtures (DMM)
+
+**Goal:** Learn to cluster samples with DMM and to choose the number of
+clusters.
+
+1. Set a seed, as DMM is random. Then cluster the samples with DMM with
+`addCluster()`. Use the `counts` assay and test from 1 to 5 clusters with
+Laplace approximation (`k = 1:5`, `type = "laplace"`). Store the models in
+`metadata` under the name `"DMM"` with `full = TRUE`, and the clusters in the
+`colData` column `"dmmclust"`.
+
+2. Plot the model fit for each number of clusters. Which number of clusters
+fits the data best?
+
+3. Show the number of samples in each DMM cluster. Then cross-tabulate the
+DMM clusters with the hierarchical clusters from Exercise 2.
+
+4. Plot the PCoA from Exercise 2 and colour the samples by the DMM clusters.
+
+5. Get the best model from `metadata(tse)$DMM`, calculate how much each
+taxonomic feature contributes to each cluster with `fitted()`, and visualize
+the contributions.
+
+**Useful functions:** `set.seed()`, `mia::addCluster()`,
+`bluster::DmmParam()`, `miaViz::plotDMNFit()`, `table()`,
+`miaViz::plotOrdination()`, `metadata()`,
+`DirichletMultinomial::fitted()`, `miaViz::plotLoadings()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_clustering_dmm
+
+library(miaViz)
+library(DirichletMultinomial)
+
+# 1. DMM clustering with 1 to 5 clusters
+set.seed(123)
+tse <- addCluster(
+    tse,
+    assay.type = "counts",
+    name = "DMM",
+    DmmParam(k = 1:5, type = "laplace"),
+    by = "cols",
+    full = TRUE,
+    clust.col = "dmmclust"
+)
+
+# 2. Model fit
+plotDMNFit(tse, type = "laplace", name = "DMM")
+
+# 3. Cluster sizes, and DMM clusters compared to hierarchical clusters
+table(tse$dmmclust)
+table(tse$hclust, tse$dmmclust)
+
+# 4. PCoA coloured by DMM clusters
+plotOrdination(tse, "MDS", colour.by = "dmmclust")
+
+# 5. Contributions of the features to each cluster in the best model
+models <- metadata(tse)$DMM
+n_clusters <- models[["best"]]
+best_model <- models[["dmm"]][[n_clusters]]
+drivers <- fitted(best_model, scale = TRUE)
+plotLoadings(drivers, ncomponents = n_clusters)
+```
+
+2. The best number of clusters is the one with the lowest value of the
+Laplace approximation. It is also stored in `metadata(tse)$DMM$best`.
+
+3. Different algorithms can give different clusters for the same data. If
+each hierarchical cluster falls into a single DMM cluster, the methods agree.
+DMM may also merge several hierarchical clusters into one.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 4: K-means clustering
+
+**Goal:** Learn to cluster samples with k-means and to choose the number of
+clusters with the silhouette method.
+
+1. Apply the clr transformation to the `counts` assay with
+`pseudocount = TRUE`.
+
+2. Set a seed, as k-means is random. Then plot the average silhouette width
+for different numbers of clusters with `fviz_nbclust()`. K-means clusters
+the rows of the data, so give the function the transposed `clr` assay, where
+the samples are in rows. Use `nstart = 25`, so that k-means is run from 25
+random starting points and the result is stable.
+
+3. Set a seed again, and cluster the samples with k-means with
+`addCluster()`. Use the `clr` assay, 5 clusters (`centers = 5`) and
+`nstart = 25`. Store the clusters in the `colData` column `"kmeans"`. Check
+the plot from step 2: how does the average silhouette width of 5 clusters
+compare to the other numbers of clusters?
+
+4. Cross-tabulate the k-means clusters with `SampleType`.
+
+**Useful functions:** `mia::transformAssay()`, `set.seed()`,
+`factoextra::fviz_nbclust()`, `t()`, `assay()`, `mia::addCluster()`,
+`bluster::KmeansParam()`, `table()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_clustering_kmeans
+
+library(factoextra)
+
+# 1. clr transformation
+tse <- transformAssay(
+    tse,
+    assay.type = "counts", method = "clr", pseudocount = TRUE
+)
+
+# 2. Silhouette method
+set.seed(123)
+fviz_nbclust(
+    t(assay(tse, "clr")), kmeans,
+    method = "silhouette", nstart = 25
+)
+
+# 3. k-means clustering with 5 clusters
+set.seed(123)
+tse <- addCluster(
+    tse,
+    assay.type = "clr",
+    by = "cols",
+    KmeansParam(centers = 5, nstart = 25),
+    clust.col = "kmeans"
+)
+
+# 4. k-means clusters compared to sample types
+table(tse$kmeans, tse$SampleType)
+```
+
+2. The silhouette width measures how well each sample fits its own cluster
+compared to the other clusters. The number of clusters with the highest
+average silhouette width (marked with a dashed line) gives the most clearly
+separated clusters.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Clustering taxonomic features
+
+**Goal:** Learn to cluster taxonomic features and to agglomerate the data
+based on the clusters.
+
+1. Standardize the `clr` assay by features (`method = "standardize"`,
+`MARGIN = "rows"`). The new assay is called `standardize`.
+
+2. Cluster the features with hierarchical clustering with `addCluster()`. Use
+the `standardize` assay, cluster by rows, use the `complete` method, and cut
+the tree into 4 clusters (`cut.params = list(k = 4)`). Store the clusters in
+the `rowData` column `"taxa_clusters"`.
+
+3. Visualize the number of features in each cluster with a bar plot.
+
+4. Agglomerate the data based on the feature clusters. How many rows does the
+agglomerated data have?
+
+5. Why are the abundances transformed with clr before clustering the
+features? Why does the agglomeration give a warning about the `clr` and
+`standardize` assays?
+
+**Useful functions:** `mia::transformAssay()`, `mia::addCluster()`,
+`bluster::HclustParam()`, `miaViz::plotBarplot()`,
+`mia::agglomerateByVariable()`, `nrow()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_clustering_features
+
+# 1. Standardize the clr assay by features
+tse <- transformAssay(
+    tse,
+    assay.type = "clr", method = "standardize", MARGIN = "rows"
+)
+
+# 2. Hierarchical clustering of features into 4 clusters
+tse <- addCluster(
+    tse,
+    assay.type = "standardize",
+    by = "rows",
+    HclustParam(method = "complete", cut.params = list(k = 4)),
+    clust.col = "taxa_clusters"
+)
+
+# 3. Number of features in each cluster
+plotBarplot(tse, row.var = "taxa_clusters")
+
+# 4. Agglomerate the data based on the clusters
+tse_merged <- agglomerateByVariable(
+    tse,
+    by = "rows", group = "taxa_clusters"
+)
+nrow(tse_merged)
+```
+
+4. The agglomerated data has one row for each cluster, that is, 4 rows.
+
+5. Microbiome data is compositional, so the clr transformation is applied to
+make the abundances comparable before the dissimilarities are calculated.
+In agglomeration, the values of the features in the same cluster are summed.
+This is meaningful for counts, but not for transformed values that include
+negative values, such as clr and standardized values. Therefore, the
+transformations should be calculated again from the agglomerated counts.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 6: Heatmap with clusters
+
+**Goal:** Learn to visualize the clusters of samples and features together
+with the abundances on a heatmap.
+
+1. Visualize the `standardize` assay as a heatmap with `plotHeatmap()`. Group
+the rows by the feature clusters in the `rowData` column `"taxa_clusters"`
+from Exercise 5, and the columns by the k-means clusters in the `colData`
+column `"kmeans"` from Exercise 4 and by `SampleType`.
+
+2. Look at the rows of the heatmap. How can you see from the heatmap that the
+features in the same cluster have similar abundance profiles across the
+samples?
+
+3. Look at the columns of the heatmap. How can you see whether the k-means
+clusters match the sample types?
+
+4. Why is the standardized clr assay used for the heatmap instead of the
+counts?
+
+**Useful functions:** `miaViz::plotHeatmap()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_clustering_heatmap
+#| fig-width: 13
+#| fig-height: 9
+
+# 1. Heatmap grouped by feature and sample clusters
+plotHeatmap(
+    tse,
+    assay.type = "standardize",
+    row.var = "taxa_clusters",
+    col.var = c("kmeans", "SampleType")
+)
+```
+
+2. Each row group contains the features of one cluster. If the features in
+a cluster have similar abundance profiles, the colours within the group change
+in a similar way across the samples, which forms horizontal patterns of
+similar colour.
+
+3. The columns are first grouped by the k-means clusters and then by
+`SampleType`. If a sample type appears in only one k-means cluster, the
+clustering separates that sample type from the others. If the same sample type
+appears in several k-means clusters, the clusters do not match the sample
+types.
+
+4. The counts of different features vary greatly in scale, so a few abundant
+features would dominate the colours. The clr transformation accounts for the
+compositionality of the data, and the standardization puts all features on the
+same scale, so that the patterns across the samples can be compared between
+the features. This is the same data that was used to cluster the features.
+:::
+::::
