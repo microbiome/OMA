@@ -253,8 +253,8 @@ to agglomerate data effectively.
 features. In some cases, it might be beneficial to combine the features that
 would otherwise be removed. For example, instead of filtering out rare taxa, we
 can combine the reads from all these rare taxa under a new feature which we can
-call "Rare taxa". The function `agglomerateByPrevalence()` accomplishes this by
-merging filtered features into a single feature called "Other" by default,
+call "Rare taxa". The function `subsetBy()` with `collapse = TRUE` accomplishes
+this by merging filtered features into a single feature called "Other" by default,
 preventing unnecessary loss of information. This is particularly useful when
 working with right-skewed feature data, such as soil microbiome data sets where
 rare taxa may represent a significant proportion of the reads when combined.
@@ -276,11 +276,11 @@ transformations are introduced in more detail in [@sec-assay-transform].
 tse <- transformAssay(tse, method = "relabundance")
 
 # Agglomerate
-tse_prev <- agglomerateByPrevalence(
+tse <- addPrevalence(tse, assay.type = "relabundance", detection = 0.001)
+tse_prev <- subsetBy(
     tse,
-    assay.type = "relabundance",
-    prevalence = 20 / 100,
-    detection = 0.1 / 100
+    rows = prevalence > 0.2,
+    collapse = TRUE
 )
 tse_prev
 ```
@@ -288,17 +288,18 @@ tse_prev
 We have now successfully agglomerated the data based on prevalence. Similarly,
 if we were interested in only the most prevalent phyla, we can certainly first
 agglomerate the data by Phylum rank and then by prevalence, combining the rarer
-Phyla into one category. In fact, the function `agglomerateByPrevalence()`
-allows us to accomplish both tasks simultaneously.
+Phyla into one category. This is done by agglomerating the data with
+`agglomerateByRank()` before `subsetBy()`.
 
 ```{r}
 #| label: agg_prev_phylum
 
-tse_prev_phylum <- agglomerateByPrevalence(
-    tse,
-    rank = "Phylum",
-    prevalence = 20 / 100,
-    detection = 1
+tse_prev_phylum <- agglomerateByRank(tse, rank = "Phylum")
+tse_prev_phylum <- addPrevalence(tse_prev_phylum, detection = 1)
+tse_prev_phylum <- subsetBy(
+    tse_prev_phylum,
+    rows = prevalence > 0.2,
+    collapse = TRUE
 )
 tse_prev_phylum
 ```
@@ -352,7 +353,7 @@ Useful functions:
 `mia::agglomerateByRank()`, `SummarizedExperiment::rowData()`,
 `mia::agglomerateByRanks()`, `SingleCellExperiment::altExpNames()`,
 `SingleCellExperiment::altExp()`, `base::dim()`,
-`mia::agglomerateByPrevalence()`, `mia::subsetByPrevalent()`,
+`mia::addPrevalence()`, `mia::subsetBy()`,
 `SingleCellExperiment::altExp()<-`, `SummarizedExperiment::colData()`,
 `mia::agglomerateByVariable()`
 
