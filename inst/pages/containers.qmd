@@ -8,8 +8,8 @@ library(DT)
 ```
 
 This section provides an introduction to the
-`r BiocStyle::Biocpkg("TreeSummarizedExperiment")` `(TreeSE)`
-and `r BiocStyle::Biocpkg("MultiAssayExperiment")` `(MAE)` data containers
+`r BiocStyle::Biocpkg("TreeSummarizedExperiment")` (`TreeSE`)
+and `r BiocStyle::Biocpkg("MultiAssayExperiment")` (`MAE`) data containers
 introduced in [@sec-microbiome-bioc]. In microbiome data science, these
 containers link taxonomic abundance tables with rich side information on the
 features and samples.
@@ -138,16 +138,16 @@ tse <- tse[1:5, c(1, 19, 16)]
 tse
 ```
 
-Compared to the original data the dimensions are for rows and columns 5
+Compared to the original data, the dimensions for rows and columns are 5
 and 3, respectively.
 
 ::: callout-note
 ## Note
 
 `r BiocStyle::Biocpkg("SummarizedExperiment")` objects have rows and columns.
-Also `r BiocStyle::Biocpkg("MultiAssayExperiment")`, introduced in [@sec-mae],
-have rows and columns but the structure is more complicated. You can find more
-examples on subsetting from [@sec-treese_subsetting].
+`r BiocStyle::Biocpkg("MultiAssayExperiment")` objects, introduced in
+[@sec-mae], also have rows and columns but the structure is more complicated.
+You can find more examples of subsetting in [@sec-treese_subsetting].
 :::
 
 ## Assay data {#sec-assay-slot}
@@ -159,7 +159,7 @@ table forms the core of the TreeSE object, called the ‘assay data’.
 An assay is a measurement of the presence and abundance of different
 taxonomic features in a sample. The assay data records this in a table
 where rows are unique features and columns are unique samples and each
-entry contain a number describing the amount a given feature is present
+entry contains a number describing the amount a given feature is present
 in a given sample. Note that when storing assays, the original data is
 count-based. However, due to the nature of how microbiome data is
 produced, these count-based abundances rarely reflect the true counts of
@@ -260,7 +260,7 @@ abundance of taxonomic features in each sample but also the evolutionary
 relatedness among these taxonomic features. The `TreeSE` class can keep track
 of relations among features via two functions, `rowTree` and `rowLinks`.
 
-A tree can be accessed via `rowTree` as `phylo` object.
+A tree can be accessed via `rowTree` as a `phylo` object.
 
 ```{r}
 #| label: rowtree
@@ -307,7 +307,7 @@ same set of samples can be stored as
 1. Separate *assays* assuming that the taxonomic information can be mapped
 between features directly 1:1; or
 2. Data in the `altExp` slot of the `TreeSE`, if the feature dimensions differ.
-Each element of the `altExp` slot is a `SE` or an object from a derived class
+Each element of the `altExp` slot is an `SE` or an object from a derived class
 with independent feature data.
 
 The following shows how to store taxonomic abundance tables agglomerated
@@ -417,7 +417,10 @@ dim(altExp(tse_single_sample, "subsetted"))
 When an analysis expects the data of interest in the main experiment, an
 alternative experiment can be promoted temporarily with `swapAltExp()`.
 The previous main experiment is retained as an alternative experiment, so
-the operation can be reversed without losing any data.
+the operation can be reversed without losing any data. We set
+`withColData = FALSE`, because by default `swapAltExp()` adds the `colData`
+of the main experiment to that of the promoted experiment, which would
+duplicate the `colData` columns.
 
 ```{r}
 #| label: swap_altexp
@@ -426,11 +429,11 @@ the operation can be reversed without losing any data.
 mainExpName(tse) <- "original"
 
 # Promote the alternative experiment for an analysis
-tse <- swapAltExp(tse, "subsetted")
+tse <- swapAltExp(tse, "subsetted", withColData = FALSE)
 tse
 
 # Restore the original main experiment
-tse <- swapAltExp(tse, "original")
+tse <- swapAltExp(tse, "original", withColData = FALSE)
 tse
 ```
 
@@ -450,11 +453,11 @@ data can be stored as:
 
 1. `altExp` if the samples can be matched directly 1:1; or
 2. As `MAE` objects, in which the connections between samples are
-defined through a `sampleMap`. Each element on the `ExperimentList` of an
-`MAE` is `matrix` or `matrix`-like objects, including `SE` objects, and the
+defined through a `sampleMap`. Each element of the `ExperimentList` of an
+`MAE` is a `matrix` or a `matrix`-like object, including `SE` objects, and the
 number of samples can differ between the elements.
 
-In a `MAE`, the "subjects" represent patients. The `MAE` has four main
+In an `MAE`, the "subjects" represent patients. The `MAE` has four main
 slots, with `experiments` being the core. This slot holds a list of
 experiments, each in (`Tree`)`SE` format. To handle complex mappings
 between samples (observations) across different experiments, the
@@ -506,7 +509,7 @@ measurements.
 sampleMap(mae) |> head()
 ```
 
-For illustration, let's subset the data by taking first five samples.
+For illustration, let's subset the data by taking the first five samples.
 
 ```{r}
 #| label: show_mae3
@@ -518,15 +521,15 @@ mae
 ::: callout-note
 ## Note
 
-If you have multiple experiments containing multiple measures from same
+If you have multiple experiments containing multiple measures from the same
 sources (e.g., patients/host, individuals/sites), you can utilize the
 `r BiocStyle::Biocpkg("MultiAssayExperiment")` object to keep track of which
 samples belong to which patient.
 :::
 
-The following data set ([@sec-data-holofood]) illustrates how to utilize the
-sample mapping system in `MAE`. It includes two omics data: biogenic amines and
-fatty acids, collected from 10 chickens.
+The following dataset ([@sec-data-holofood]) illustrates how to utilize the
+sample mapping system in `MAE`. It includes two omics datasets: biogenic
+amines and fatty acids, collected from 10 chickens.
 
 ```{r}
 #| label: show_holofood_mae
@@ -563,7 +566,7 @@ collected for those individuals.
 sampleMap(mae)
 ```
 
-For information have a look at the
+For more information, have a look at the
 [intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html)
 of the `r BiocStyle::Biocpkg("MultiAssayExperiment")` package.
 
@@ -581,7 +584,7 @@ match between rows and columns across the assays). The *alternative
 experiments* are particularly suitable for alternative versions of the
 data that are of same type but may have a different number of features
 (e.g. taxonomic groups); this is for instance the case with taxonomic
-abundance tables agglomerated at different levels (e.g. genus vs. phyla)
+abundance tables agglomerated at different levels (e.g. genus vs. phylum)
 or alternative profiling technologies (e.g. amplicon sequencing vs.
 shallow shotgun metagenomics). For alternative experiments one-to-one
 match between samples (cols) is required but the alternative experiment
@@ -599,7 +602,7 @@ are scalable and contain different types of data in a single container,
 making this framework particularly suited for multi-assay microbiome
 data incorporating different types of complementary data sources in a
 single, reproducible workflow. An alternative experiment can be stored
-in *altExp* slot of the SCE (and thus TreeSE) data container.
+in the *altExp* slot of the SCE (and thus TreeSE) data container.
 Alternatively, both experiments can be stored side-by-side in an `MAE`
 data container.
 :::
@@ -659,7 +662,7 @@ stored in `rowLinks`.
 6. `altExp`. The table has the same samples but fewer features than the
 original table, so it cannot be stored as an assay.
 
-7. A `MAE` object. The samples do not match one-to-one with the microbiome
+7. An `MAE` object. The samples do not match one-to-one with the microbiome
 samples, so the connections between the samples and the subjects are stored
 in the `sampleMap`.
 :::
@@ -910,19 +913,20 @@ dim(altExp(tse_3, "first10"))
 
 # 4. Promote the alternative experiment and restore the original
 mainExpName(tse) <- "original"
-tse <- swapAltExp(tse, "first10")
+tse <- swapAltExp(tse, "first10", withColData = FALSE)
 tse
-tse <- swapAltExp(tse, "original")
+tse <- swapAltExp(tse, "original", withColData = FALSE)
 ```
 
 3. The alternative experiment has 10 features and 3 samples. Subsetting the
 samples of the main experiment subsets the alternative experiments as well,
 so they stay matched.
 
-4. The printed object has more `colData` columns than `tse`. By default,
-`swapAltExp()` combines the `colData` of the main experiment with the
-`colData` of the alternative experiment, and here both contain the same
-columns.
+4. The printed object has the same `colData` columns as `tse`, because
+`withColData = FALSE` is used. By default, `swapAltExp()` combines the
+`colData` of the main experiment with the `colData` of the alternative
+experiment, and here both contain the same columns, so they would be
+duplicated.
 
 5. An assay must have the same features as the main experiment, but
 `tse_first10` has fewer features. An alternative experiment must have only
@@ -934,7 +938,7 @@ are agglomerated to different taxonomic ranks.
 :::: {.callout-tip icon="false"}
 ## Exercise 6: MultiAssayExperiment
 
-**Goal:** Learn to explore a `MAE` object and how it links samples to
+**Goal:** Learn to explore an `MAE` object and how it links samples to
 subjects.
 
 1. Load the `HintikkaXOData` dataset from the `mia` package and store it in a
@@ -949,7 +953,7 @@ what are their names?
 4. Subset `mae` to its first 5 columns, store the result in a variable called
 `mae_sub`, and print it. How many samples are left in each experiment?
 
-5. When would you store experiments in a `MAE` object instead of as
+5. When would you store experiments in an `MAE` object instead of as
 alternative experiments in a `TreeSE` object?
 
 **Useful functions:** `data()`, `MultiAssayExperiment::colData()`,
@@ -981,7 +985,7 @@ mae_sub
 printed. Here, there are three experiments: `microbiota`, `metabolites` and
 `biomarkers`.
 
-2. Each row describes one subject, here one rat. The `colData` of a `MAE`
+2. Each row describes one subject, here one rat. The `colData` of an `MAE`
 stores information that stays constant during the study.
 
 3. `assay` is the name of the experiment, `colname` is the name of the
@@ -991,10 +995,10 @@ In the HoloFood example of this chapter, some animals have several samples,
 and the `sampleMap` links all of them to the same animal.
 
 4. The printed object shows the number of rows and columns of each
-experiment. Subsetting the columns of a `MAE` subsets the samples in all
+experiment. Subsetting the columns of an `MAE` subsets the samples in all
 experiments at the same time, based on the `sampleMap`.
 
-5. Use a `MAE` object when the samples do not match one-to-one between the
+5. Use an `MAE` object when the samples do not match one-to-one between the
 experiments, for example when some subjects are missing from one experiment
 or a subject has several samples. Alternative experiments require exactly the
 same samples as the main experiment.
