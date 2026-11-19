@@ -625,6 +625,8 @@ to a file, which preserves all of its components and allows loading it back
 later as the same object. Alternatively, the data can be exported as tables,
 which can be opened with other tools, such as spreadsheet programs or other
 programming languages, but which do not preserve the structure of the object.
+The data can also be exported in formats that other microbiome analysis tools
+can read ([@sec-export-tools]).
 
 ### Save the data container {#sec-save-data-container}
 
@@ -743,7 +745,7 @@ se2xls(tse, filename = "path/to/tse.xlsx")
 
 #### MultiAssayExperiment
 
-Exporting a `MultiAssayExperiment` data container can also be done using
+Exporting a `MultiAssayExperiment` data container can also be done using the
 `r BiocStyle::CRANpkg("feather")` package.
 
 ```{r}
@@ -765,6 +767,85 @@ And as a CSV file.
 write.csv(molten_mae, "path/to/mae.csv", row.names = FALSE)
 ```
 
+### Export to other tools {#sec-export-tools}
+
+The data can be exported in formats that are nearly ready for analysis with
+other microbiome analysis tools. `exportQIIME2()` and `exportMothur()` write
+the abundance table, taxonomy table, sample metadata and phylogenetic tree as
+separate files for [QIIME 2](https://qiime2.org/) and
+[mothur](https://mothur.org/), respectively. The files need some further
+processing in the target tool.
+
+```{r}
+#| label: write_qiime2
+#| eval: false
+
+exportQIIME2(tse, "path/to/qiime2_folder")
+```
+
+In QIIME 2, the files can be converted into QIIME 2 artifacts (QZA files) in
+the terminal as follows.
+
+```bash
+# Navigate to the output folder
+cd path/to/qiime2_folder
+
+# Convert the abundance table to BIOM format (HDF5)
+biom convert -i counts.tsv -o counts.hdf5 --to-hdf5
+
+# Import the abundance table
+qiime tools import \
+    --input-path counts.hdf5 \
+    --type 'FeatureTable[Frequency]' \
+    --input-format BIOMV210Format \
+    --output-path counts.qza
+
+# Import the taxonomy table
+qiime tools import \
+    --input-path taxonomy.tsv \
+    --type 'FeatureData[Taxonomy]' \
+    --output-path taxonomy.qza
+
+# Import the phylogenetic tree
+qiime tools import \
+    --input-path tree.nwk \
+    --type 'Phylogeny[Rooted]' \
+    --output-path tree.qza
+```
+
+Similarly, the data can be exported for mothur.
+
+```{r}
+#| label: write_mothur
+#| eval: false
+
+exportMothur(tse, "path/to/mothur_folder")
+```
+
+In mothur, a shared file can be created from the abundance table in the
+terminal.
+
+```bash
+# Navigate to the output folder
+cd path/to/mothur_folder
+
+# Create a shared file from the abundance table
+mothur "#make.shared(count=counts.tsv, label=asv);"
+```
+
+Many tools can also read BIOM files [@McDonald2012]. `convertToBIOM()`
+converts `TreeSE` into a BIOM object, which can be saved with
+`r BiocStyle::Biocpkg("biomformat")`.
+
+```{r}
+#| label: write_biom
+#| eval: false
+
+# Convert TreeSE into BIOM object and save it
+biom <- convertToBIOM(tse)
+biomformat::write_biom(biom, "path/to/tse.biom")
+```
+
 ## Exercises {#sec-import-exercises}
 
 In Exercises 1 and 2, we use the files of the
@@ -782,9 +863,9 @@ directory. In your own work, you would give a path to the location where you
 want to keep the file.
 
 Solve the exercises in order. Exercise 2 continues from Exercise 1, Exercise
-4 from Exercise 3, Exercises 5 and 6 from the previous exercises, and Exercise
-9 from Exercise 8. Try to solve each exercise yourself before opening the
-solution.
+4 from Exercise 3, Exercises 5 and 6 from the previous exercises, and
+Exercises 9 and 11 from Exercise 8. Try to solve each exercise yourself before
+opening the solution.
 
 :::: {.callout-tip icon="false"}
 ## Exercise 1: Import a BIOM file
@@ -1426,5 +1507,45 @@ three experiments: `microbiota`, `metabolites` and `biomarkers`.
 3. The `assay` column tells which experiment each value comes from. The
 other columns give the subject (`primary`), the sample (`colname`), the
 feature (`rowname`) and the value.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 11: Export for other tools
+
+**Goal:** Learn to export the data for other microbiome analysis tools.
+
+1. Create a path for a folder with `tempfile()`. Export `tse` to the folder
+for QIIME 2.
+
+2. List the files in the folder. Which component of `tse` does each file
+contain?
+
+3. Which steps are still needed before the files can be used in QIIME 2?
+
+**Useful functions:** `tempfile()`, `mia::exportQIIME2()`, `list.files()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_export_tools
+
+# 1. Export for QIIME 2
+qiime2_dir <- tempfile()
+exportQIIME2(tse, qiime2_dir)
+
+# 2. List the files
+list.files(qiime2_dir)
+```
+
+2. `counts.tsv` contains the abundance table, `taxonomy.tsv` the taxonomy
+table (`rowData`), `metadata.tsv` the sample metadata (`colData`) and
+`tree.nwk` the phylogenetic tree (`rowTree`).
+
+3. The files must be imported into QIIME 2 artifacts (QZA files) in the
+terminal. The abundance table is first converted to the BIOM format and then
+imported with `qiime tools import`, as are the taxonomy table and the tree
+([@sec-export-tools]).
 :::
 ::::
