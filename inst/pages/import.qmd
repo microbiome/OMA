@@ -57,24 +57,59 @@ from [this repository](https://github.com/microbiome/data/tree/main/Tengeler2020
 - tree file: phylogenetic tree
 
 In your own analysis, you would store the data in a local directory, such
-as *data/*, and define the source file paths. Here, the example files are
-shipped with the OMA package, so we locate them with `system.file()`.
+as *data/*, and define the source file paths. To follow the examples in this
+chapter, download the example files from the
+[OMA repository](https://github.com/microbiome/OMA/tree/devel/inst/extdata)
+to a *data/* directory:
+
+```{r}
+#| label: import_download
+#| eval: false
+
+# Example files used in this chapter
+files <- c(
+    "Aggregated_humanization2.biom", "Mapping_file_ADHD_aggregated.csv",
+    "Data_humanization_phylo_aggregation.tre", "assay_taxa.csv",
+    "rowdata_taxa.csv", "coldata.csv", "assay_metabolites.csv"
+)
+url <- "https://raw.githubusercontent.com/microbiome/OMA/devel/inst/extdata"
+
+# Download the files to data/
+dir.create("data", showWarnings = FALSE)
+for (file in files) {
+    download.file(file.path(url, file), file.path("data", file), mode = "wb")
+}
+```
+
+```{r}
+#| label: import_download_book
+#| include: false
+
+# The book uses the copies of the same files that are shipped with OMA. They
+# are copied to data/ in a temporary directory, which is used as the working
+# directory in the rest of this chapter.
+files <- c(
+    "Aggregated_humanization2.biom", "Mapping_file_ADHD_aggregated.csv",
+    "Data_humanization_phylo_aggregation.tre", "assay_taxa.csv",
+    "rowdata_taxa.csv", "coldata.csv", "assay_metabolites.csv"
+)
+work_dir <- tempfile("oma_import_")
+dir.create(file.path(work_dir, "data"), recursive = TRUE)
+stopifnot(all(file.copy(
+    system.file("extdata", files, package = "OMA"),
+    file.path(work_dir, "data")
+)))
+knitr::opts_knit$set(root.dir = work_dir)
+```
+
+Then we define the paths to the files.
 
 ```{r}
 #| label: import1
 
-biom_file_path <- system.file(
-    "extdata", "Aggregated_humanization2.biom",
-    package = "OMA"
-)
-sample_meta_file_path <- system.file(
-    "extdata", "Mapping_file_ADHD_aggregated.csv",
-    package = "OMA"
-)
-tree_file_path <- system.file(
-    "extdata", "Data_humanization_phylo_aggregation.tre",
-    package = "OMA"
-)
+biom_file_path <- "data/Aggregated_humanization2.biom"
+sample_meta_file_path <- "data/Mapping_file_ADHD_aggregated.csv"
+tree_file_path <- "data/Data_humanization_phylo_aggregation.tre"
 ```
 
 Now we can read in the biom file and convert it into a `TreeSE` object.
@@ -247,9 +282,9 @@ After you have set up the CSV files, you can read them in R:
 #| label: import_csv1
 #| message: false
 
-count_file <- system.file("extdata", "assay_taxa.csv", package = "OMA")
-tax_file <- system.file("extdata", "rowdata_taxa.csv", package = "OMA")
-sample_file <- system.file("extdata", "coldata.csv", package = "OMA")
+count_file <- "data/assay_taxa.csv"
+tax_file <- "data/rowdata_taxa.csv"
+sample_file <- "data/coldata.csv"
 
 # Load files
 counts <- read.csv(count_file, row.names = 1) # Abundance table (e.g. ASV data; to assay data)
@@ -368,8 +403,8 @@ Here we import metabolite data from the same study.
 #| label: import_mae1
 #| message: false
 
-conc_file <- system.file("extdata", "assay_metabolites.csv", package = "OMA")
-sample_file <- system.file("extdata", "coldata.csv", package = "OMA")
+conc_file <- "data/assay_metabolites.csv"
+sample_file <- "data/coldata.csv"
 
 # Load files
 concs <- read.csv(conc_file, row.names = 1)
@@ -463,6 +498,39 @@ can refer to the following functions:
 Open demonstration data for testing and benchmarking purposes is
 available from multiple locations. This section introduces some options.
 The datasets used in this book are described in [@sec-data-sets].
+
+### MGnify {#sec-mgnify}
+
+[MGnify](https://www.ebi.ac.uk/metagenomics/) [@Richardson2022] is EBI's
+resource for the analysis of metagenomic, metatranscriptomic and amplicon
+data. It provides taxonomic and functional profiles for tens of thousands of
+public studies, all processed with the same pipelines. The
+`r BiocStyle::Biocpkg("MGnifyR")` package fetches these profiles directly as
+`TreeSE` objects, or as an `MAE` when several types of profiles are fetched.
+
+The example below finds studies from a given biome and fetches the
+taxonomic profiles of one of them, together with the sample metadata from
+BioSamples. The functions shown here belong to the new and faster interface of
+`r BiocStyle::Biocpkg("MGnifyR")`, which is available in the development
+version of the package. See the
+[MGnifyR vignette](https://ebi-metagenomics.github.io/MGnifyR/) for more
+options, such as functional profiles and selecting analyses by sample
+metadata.
+
+```{r}
+#| label: mgnifyr
+#| eval: false
+
+library(MGnifyR)
+
+# Find studies from a biome
+studies <- searchStudies(biome = "root:Host-associated:Human", max.hits = 10)
+studies[, c("accession", "title")]
+
+# Fetch the taxonomic profiles of a study as a TreeSE
+tse <- fetchStudies("MGYS00005116", biosamples = TRUE)
+tse
+```
 
 ### Package data {#sec-package-data}
 
@@ -608,12 +676,12 @@ directly as `TreeSE` objects.
 
 ### Other data sources
 
-The following packages provide access to further microbiome data resources
-and return the data as `TreeSE` or `MAE` objects.
+In addition to `r BiocStyle::Biocpkg("MGnifyR")` ([@sec-mgnify]), the
+following packages provide access to further microbiome data resources and
+return the data as `TreeSE` or `MAE` objects.
 
 | Package | Resource |
 |---------|----------|
-| `r BiocStyle::Biocpkg("MGnifyR")` | [EBI/MGnify](https://www.ebi.ac.uk/metagenomics/) [@Richardson2022] |
 | `r BiocStyle::Biocpkg("HoloFoodR")` [@Borman2025a] | [EBI/HoloFood](https://www.holofooddata.org/) |
 | `r BiocStyle::Githubpkg("jbisanz/qiime2R")` | [QIIME2](https://amplicon-docs.qiime2.org/en/latest/) artifacts with `qza_to_tse()` |
 
@@ -851,9 +919,9 @@ write_biom(biom, "path/to/tse.biom", format = "hdf5")
 In Exercises 1 and 2, we use the files of the
 [`Tengeler2020`](data_sets.qmd#sec-data-tengeler2020) dataset, and in
 Exercises 3 and 4 CSV files of the
-[`HintikkaXOData`](data_sets.qmd#sec-data-hintikka) dataset. The files are
-shipped with the `r BiocStyle::Githubpkg("microbiome/OMA")` package, so you
-can find them with `system.file()` as shown in this chapter. In Exercises
+[`HintikkaXOData`](data_sets.qmd#sec-data-hintikka) dataset. Use the files
+that you downloaded to *data/* at the beginning of this chapter
+([@sec-loading-experimental-microbiome-data]). In Exercises
 5-9, we use the `Tengeler2020` dataset from the `r BiocStyle::Biocpkg("mia")`
 package, and in Exercise 10 the `HintikkaXOData` dataset.
 
@@ -891,7 +959,7 @@ yet?
 5. Which function would you use to import data from QIIME2? And from
 MetaPhlAn?
 
-**Useful functions:** `system.file()`, `mia::importBIOM()`,
+**Useful functions:** `mia::importBIOM()`,
 `SummarizedExperiment::rowData()`, `SummarizedExperiment::colData()`,
 `TreeSummarizedExperiment::rowTree()`, `head()`
 
@@ -904,10 +972,7 @@ MetaPhlAn?
 library(mia)
 
 # 1. Path to the BIOM file
-biom_file_path <- system.file(
-    "extdata", "Aggregated_humanization2.biom",
-    package = "OMA"
-)
+biom_file_path <- "data/Aggregated_humanization2.biom"
 
 # 2. Import without optional arguments
 tse_raw <- importBIOM(biom_file_path)
@@ -969,7 +1034,7 @@ the `rowTree` slot of `tse`. Print `tse`.
 5. Why must you check the order of the samples yourself before you add the
 sample metadata?
 
-**Useful functions:** `system.file()`, `read.csv()`, `rownames()`,
+**Useful functions:** `read.csv()`, `rownames()`,
 `colnames()`, `match()`, `S4Vectors::DataFrame()`,
 `SummarizedExperiment::colData()`, `ape::read.tree()`,
 `TreeSummarizedExperiment::rowTree()`
@@ -981,10 +1046,7 @@ sample metadata?
 #| label: exercise_import_coldata_tree
 
 # 1. Read the sample metadata
-sample_meta_file_path <- system.file(
-    "extdata", "Mapping_file_ADHD_aggregated.csv",
-    package = "OMA"
-)
+sample_meta_file_path <- "data/Mapping_file_ADHD_aggregated.csv"
 sample_meta <- read.csv(sample_meta_file_path, row.names = 1)
 sample_meta |> head()
 
@@ -1001,10 +1063,7 @@ colData(tse) <- DataFrame(sample_meta)
 colData(tse) |> head()
 
 # 4. Read and add the phylogenetic tree
-tree_file_path <- system.file(
-    "extdata", "Data_humanization_phylo_aggregation.tre",
-    package = "OMA"
-)
+tree_file_path <- "data/Data_humanization_phylo_aggregation.tre"
 tree <- ape::read.tree(tree_file_path)
 rowTree(tse) <- tree
 tse
@@ -1045,7 +1104,7 @@ in the `counts` assay of `tse_taxa`.
 
 6. Why should all the tables have row names?
 
-**Useful functions:** `system.file()`, `read.csv()`, `as.matrix()`,
+**Useful functions:** `read.csv()`, `as.matrix()`,
 `rownames()`, `colnames()`, `all()`, `class()`,
 `TreeSummarizedExperiment::TreeSummarizedExperiment()`,
 `S4Vectors::SimpleList()`, `SummarizedExperiment::assay()`
@@ -1057,9 +1116,9 @@ in the `counts` assay of `tse_taxa`.
 #| label: exercise_import_csv
 
 # 1. Read the files
-count_file <- system.file("extdata", "assay_taxa.csv", package = "OMA")
-tax_file <- system.file("extdata", "rowdata_taxa.csv", package = "OMA")
-sample_file <- system.file("extdata", "coldata.csv", package = "OMA")
+count_file <- "data/assay_taxa.csv"
+tax_file <- "data/rowdata_taxa.csv"
+sample_file <- "data/coldata.csv"
 
 counts <- read.csv(count_file, row.names = 1)
 tax <- read.csv(tax_file, row.names = 1)
@@ -1132,10 +1191,7 @@ still be stored in the same `MAE` object?
 #| label: exercise_import_mae
 
 # 1. Create a TreeSE for the metabolite data
-metabolite_file <- system.file(
-    "extdata", "assay_metabolites.csv",
-    package = "OMA"
-)
+metabolite_file <- "data/assay_metabolites.csv"
 concs <- read.csv(metabolite_file, row.names = 1)
 
 tse_metabolite <- TreeSummarizedExperiment(
