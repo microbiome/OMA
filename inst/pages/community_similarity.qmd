@@ -258,10 +258,7 @@ tse_plot[["SampleType"]] <- factor(
     labels = gsub(" \\(", "\n(", levels(tse_plot[["SampleType"]]))
 )
 
-plotDissimilarity(tse_plot, name = "unifrac", col.var = "SampleType") +
-    theme(
-        strip.text = element_text(size = 6)
-    )
+plotDissimilarity(tse_plot, name = "unifrac", col.var = "SampleType")
 ```
 
 From the heatmap, we can observe that samples within the same sample type are
@@ -823,12 +820,10 @@ ggplot(df, aes(x = d0, y = dmds)) +
     geom_smooth() +
     geom_point() +
     labs(
-        title = "Shepard plot",
         x = "Original distance",
         y = "MDS distance",
         subtitle = paste("Stress:", round(stress, 2))
-    ) +
-    theme_bw()
+    )
 ```
 
 ## Constrained ordination
@@ -1128,36 +1123,22 @@ most_abundant <- lapply(
     }
 )
 
-# Storing the previous results as a new column within colData
-colData(tse_genus)$most_abundant <- as.character(most_abundant)
+most_abundant <- as.character(most_abundant)
 
 # Calculating percentage of the most abundant
-most_abundant_freq <- table(as.character(most_abundant))
-most_abundant_percent <- round(
-    most_abundant_freq / sum(most_abundant_freq) * 100,
-    1
-)
+most_abundant_percent <- round(prop.table(table(most_abundant)) * 100, 1)
 
-# Define colors for visualization
-my_colors <- c(
-    "black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"
+# Storing the genera with their percentages as a new column within colData
+colData(tse_genus)$most_abundant <- paste0(
+    most_abundant, " (", most_abundant_percent[most_abundant], "%)"
 )
 
 # Visualization
-p <- plotOrdination(
+plotOrdination(
     tse_genus, "PCoA_BC",
     colour.by = "most_abundant",
     add.expl.var = TRUE
-) +
-    scale_colour_manual(
-        values = my_colors,
-        labels = paste0(
-            names(most_abundant_percent), " (", most_abundant_percent, "%)"
-        )
-    ) +
-    labs(color = "")
-
-p
+)
 ```
 
 Similarly, we visualize and compare the sub-population
@@ -1177,9 +1158,7 @@ plotOrdination(
     colour.by = "most_abundant",
     facet.by = "Group",
     add.expl.var = TRUE
-) +
-    scale_colour_manual(values = my_colors) +
-    labs(color = "")
+)
 ```
 
 ::: {.callout-tip}
