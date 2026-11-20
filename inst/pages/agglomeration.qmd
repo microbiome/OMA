@@ -247,9 +247,6 @@ Now, the data includes as many columns as there are sample types.
 In [@sec-taxa-clustering], we will explore how cluster information can be used
 to agglomerate data effectively.
 
-To combine rare features into a single feature, such as "Other", see
-[@sec-agglomerate_prev].
-
 ## Choosing a taxonomic level {#sec-choose-rank}
 
 There is no single correct taxonomic level for an analysis; the choice depends
@@ -514,5 +511,57 @@ named after the groups. The counts of the samples in each group are summed.
 3. An alternative experiment must have the same samples as the main
 experiment. Here, the samples were combined into groups, so the columns no
 longer match those of `tse`.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 5: Combine rare phyla
+
+**Goal:** Agglomerate the data to a taxonomy rank and combine the rare
+features.
+
+1. Agglomerate `tse` to the Phylum rank, and store the result in a variable
+called `tse_prev_phylum`.
+
+2. Add the prevalence of each phylum to `rowData` with a detection threshold
+of 1.
+
+3. Keep the phyla with a prevalence over 0.2 and combine the rest into a
+single feature with `subsetBy()` and `collapse = TRUE`. Show the row names of
+the result.
+
+4. Why is the prevalence calculated after the agglomeration?
+
+**Useful functions:** `mia::agglomerateByRank()`, `mia::addPrevalence()`,
+`mia::subsetBy()`, `rownames()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_agglomeration_collapse
+#| warning: false
+
+# 1. Agglomerate to Phylum rank
+tse_prev_phylum <- agglomerateByRank(tse, rank = "Phylum")
+
+# 2. Add prevalence
+tse_prev_phylum <- addPrevalence(tse_prev_phylum, detection = 1)
+
+# 3. Keep prevalent phyla and combine the rest
+tse_prev_phylum <- subsetBy(
+    tse_prev_phylum,
+    rows = prevalence > 0.2, collapse = TRUE
+)
+rownames(tse_prev_phylum)
+```
+
+3. The phyla that have more than 1 count in more than 20% of the samples are
+kept as they are. The other phyla are combined into "Other".
+
+4. The prevalence of a phylum differs from the prevalence of the features that
+it contains. A phylum is detected in a sample when the sum of its features
+exceeds the detection threshold, so the prevalence must be calculated from
+the agglomerated data.
 :::
 ::::
