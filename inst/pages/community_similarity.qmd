@@ -271,8 +271,8 @@ sample type.
 
 The divergence measure refers to a difference in community composition
 between the given sample(s) and a reference sample. This can be evaluated with
-`addDivergence()`. Reference and algorithm for the calculation of divergence
-can be specified as `reference` and `FUN`, respectively.
+`addDivergence()`. The reference and the dissimilarity measure can be
+specified with the `reference` and `method` arguments, respectively.
 
 ```{r}
 #| label: add_divergence
@@ -280,8 +280,7 @@ can be specified as `reference` and `FUN`, respectively.
 tse <- addDivergence(
     tse,
     assay.type = "counts",
-    reference = "median",
-    FUN = getDissimilarity
+    reference = "median"
 )
 ```
 
@@ -429,20 +428,17 @@ between stool samples and samples of differing origin.
 
 ### Comparing communities {#sec-comparing-communities-by-beta-diversity-analysis}
 
-A typical comparison of community compositions starts with a visual
-representation of the groups by a 2D ordination. Then we estimate relative
-abundances and MDS ordination based on Bray-Curtis index between the groups,
-and visualize the results.
+A typical comparison of community compositions starts with calculating the
+dissimilarities between the samples, for example with the Bray-Curtis index
+on the relative abundances. The samples are then ordinated with MDS, and the
+groups are compared visually in a 2D ordination plot. The `addMDS()` and
+`addNMDS()` functions calculate the dissimilarities and the ordination in one
+step.
 
-In the following examples dissimilarity is calculated with the function
-supplied to the `FUN` argument. Several metrics of beta diversity are defined
-by the `vegdist()` function of the `r BiocStyle::CRANpkg("vegan")`
-package, which is often used in
-this context. However, custom functions created by the user also work, as long
-as they return a `dist` object. In either case, this function is then applied
-to calculate reduced dimensions via an ordination method, the results of which
-can be stored in the `reducedDim` slot of the TreeSE. This entire process is
-contained by the `addMDS()` and `addNMDS()` functions.
+The choice of the dissimilarity metric is important. It is selected with the
+`method` argument of `addMDS()` and `addNMDS()`. All standard metrics are
+available; see `?getDissimilarity` for the full list. The results are stored
+in the `reducedDim` slot of the TreeSE.
 
 ```{r}
 #| label: addMDS
@@ -453,7 +449,6 @@ library(miaViz)
 # Run PCoA on relabundance assay with Bray-Curtis distances
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     method = "bray",
     assay.type = "relabundance",
     name = "MDS_bray"
@@ -512,7 +507,6 @@ three factors can affect the resulting lower-dimensional data.
 # Run NMDS on relabundance assay with Bray-Curtis distances
 tse <- addNMDS(
     tse,
-    FUN = getDissimilarity,
     method = "bray",
     assay.type = "relabundance",
     name = "NMDS_bray"
@@ -521,7 +515,6 @@ tse <- addNMDS(
 # Run MDS on clr assay with Aitchison distances
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     method = "euclidean",
     assay.type = "clr",
     name = "MDS_aitchison"
@@ -530,7 +523,6 @@ tse <- addMDS(
 # Run NMDS on clr assay with Euclidean distances
 tse <- addNMDS(
     tse,
-    FUN = getDissimilarity,
     method = "euclidean",
     assay.type = "clr",
     name = "NMDS_aitchison"
@@ -579,7 +571,6 @@ used within `addMDS()` (@fig-community-mds-unifrac).
 
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     method = "unifrac",
     name = "unifrac",
     tree = rowTree(tse),
@@ -612,7 +603,6 @@ tse <- transformAssay(
 # Run MDS on clr assay with Aitchison distance
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     method = "euclidean",
     assay.type = "clr_pc1",
     name = "MDS_aitchison_pc1"
@@ -633,7 +623,6 @@ clr <- function(x) {
 tse <- addMDS(
     tse,
     assay.type = "counts",
-    FUN = getDissimilarity,
     method = "euclidean",
     niter = 10, # Number of iterations
     sample = min(colSums(assay(tse, "counts"))), # Rarefaction depth
@@ -786,7 +775,6 @@ d0 <- as.matrix(getDissimilarity(t(assay(tse, "relabundance")), "bray"))
 # PCoA Ordination
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     name = "PCoA",
     method = "bray",
     assay.type = "relabundance"
@@ -1092,7 +1080,6 @@ Next, we perform PCoA with Bray-Curtis dissimilarity.
 
 tse_genus <- addMDS(
     tse_genus,
-    FUN = getDissimilarity,
     name = "PCoA_BC",
     method = "bray",
     assay.type = "relabundance"
@@ -1376,7 +1363,6 @@ library(miaViz)
 # 1. PCoA with Bray-Curtis dissimilarity
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     method = "bray",
     assay.type = "relabundance",
     name = "MDS_bray"
@@ -1395,7 +1381,6 @@ tse <- transformAssay(
 )
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     method = "euclidean",
     assay.type = "clr",
     name = "MDS_aitchison"
@@ -1457,7 +1442,6 @@ summary(lib_size)
 set.seed(123)
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     method = "bray",
     assay.type = "counts",
     sample = min(lib_size),

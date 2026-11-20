@@ -129,16 +129,14 @@ features that fall in either *Actinobacteria* or *Chlamydiae* group. For
 this, we use the information on the features from the metadata
 `rowData(tse)`.
 
-The first term with the `%in%` operator includes all the features of
-interest, whereas the second term after the AND operator `&` filters out
-all features that have an `NA` in place of the phylum variable.
+The `%in%` operator selects all the features of interest. It returns `FALSE`
+for features that have `NA` in place of the phylum, so they are left out.
 
 ```{r}
 #| label: subset_features
 
 # Subset by feature
-selected <- rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") &
-    !is.na(rowData(tse)$Phylum)
+selected <- rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae")
 tse_sub <- tse[selected, ]
 
 # Show dimensions
@@ -154,9 +152,8 @@ phyla *Actinobacteria* or *Chlamydiae*.
 ```{r}
 #| label: subset_samples_and_feat
 
-# Subset by sample and feature and remove NAs
-selected_rows <- rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") &
-    !is.na(rowData(tse)$Phylum)
+# Subset by sample and feature
+selected_rows <- rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae")
 selected_cols <- tse$SampleType %in% c("Feces", "Skin", "Tongue")
 tse_sub <- tse[selected_rows, selected_cols]
 
@@ -175,6 +172,25 @@ If a study was to consider and quantify the presence of *Actinobacteria*
 as well as *Chlamydiae* in different sites of the human body, `tse_sub`
 might be a suitable subset to start with.
 
+The same subsets can be created with `subsetBy()`. Its `rows` and `cols`
+arguments take conditions that can refer directly to the columns of `rowData`
+and `colData`. This makes it easier to define more complex filtering rules.
+In addition, `subsetBy()` can combine the features that are filtered out into
+a single feature instead of removing them ([@sec-agglomerate_prev]).
+
+```{r}
+#| label: subset_by_subsetBy
+
+tse_sub <- subsetBy(
+    tse,
+    rows = Phylum %in% c("Actinobacteria", "Chlamydiae"),
+    cols = SampleType %in% c("Feces", "Skin", "Tongue")
+)
+
+# Show dimensions
+dim(tse_sub)
+```
+
 ## By library size {#sec-subset-library-size}
 
 As a preprocessing step, one might want to remove samples that do not
@@ -188,8 +204,7 @@ only in those features that belong to the species *Achromatiumoxaliferum*.
 ```{r}
 #| label: select_archaea
 
-ind <- rowData(tse)$Species == "Achromatiumoxaliferum"
-ind[is.na(ind)] <- FALSE
+ind <- rowData(tse)$Species %in% "Achromatiumoxaliferum"
 tse_sub <- tse[ind, ]
 ```
 
@@ -319,21 +334,57 @@ the `prevalence` column of `rowData`. The condition `prevalence > 0.1` would
 retain the prevalent features, while `prevalence <= 0.1` keeps the features
 that are not prevalent.
 
-To evaluate prevalence for genera rather than for the original features, we
-first agglomerate the data to the genus level with `agglomerateByRank()`.
-
 ```{r}
 #| label: subset_by_rare
 
-tse_sub <- agglomerateByRank(tse, rank = "Genus")
-tse_sub <- addPrevalence(tse_sub)
+tse_sub <- addPrevalence(tse)
 tse_sub <- subsetBy(tse_sub, rows = prevalence <= 0.1)
 tse_sub
 ```
 
-In some cases, agglomerating based on prevalence can provide more
-meaningful insights. This process is illustrated in
-[@sec-agglomerate_prev].
+### Collapse rare features {#sec-agglomerate_prev}
+
+Above, we selected only prevalent or rare features. In some cases, it might
+be beneficial to combine the features that would otherwise be removed. For
+example, instead of filtering out rare taxa, we
+can combine the reads from all these rare taxa under a new feature which we can
+call "Rare taxa". The function `subsetBy()` with `collapse = TRUE` accomplishes
+this by merging filtered features into a single feature called "Other" by
+default, preventing unnecessary loss of information. This is particularly useful
+when working with right-skewed feature data, such as soil microbiome datasets
+where rare taxa may represent a significant proportion of the reads when
+combined.
+
+Here, we demonstrate how to combine the rare features using prevalence and
+abundance thresholds of 20% and 0.1%, respectively. This means that for a
+feature to be considered detected in a sample, its relative abundance must
+exceed 0.1% and after this, the feature must be detected in more than 20% of
+samples. Taxa that do not meet these criteria are combined in the "Other" group.
+
+To use relative abundances for the detection threshold, we must first transform
+the data to relative abundances (aka normalize as proportions). These kinds of
+transformations are introduced in more detail in [@sec-assay-transform].
+
+```{r}
+#| label: agg_prevalence
+
+# Transform
+tse <- transformAssay(tse, method = "relabundance")
+
+# Add prevalence and combine rare features
+tse <- addPrevalence(tse, assay.type = "relabundance", detection = 0.001)
+tse_prev <- subsetBy(
+    tse,
+    rows = prevalence > 0.2,
+    collapse = TRUE
+)
+tse_prev
+```
+
+We have now combined the rare features into one feature. To combine rare
+features at a higher taxonomic rank, such as phylum, the data is first
+agglomerated to that rank ([@sec-agglomeration]), and then subset as shown
+above.
 
 ## Exercises {#sec-treese_subsetting-exercises}
 
@@ -600,27 +651,23 @@ the more likely this is.
 
 **Goal:** Subset the data to prevalent or rare features.
 
-1. Agglomerate `tse` to the Genus rank and store the result in a variable
-called `tse_genus`.
-
-2. Add the prevalence of each genus to `rowData` with a detection threshold
+1. Add the prevalence of each feature to `rowData` with a detection threshold
 of 1.
 
-3. Subset `tse_genus` to the genera with a prevalence over 0.2. Store the
-result in a variable called `tse_prevalent`.
+2. Subset `tse` to the features with a prevalence over 0.2. Store the result
+in a variable called `tse_prevalent`.
 
-4. Subset `tse_genus` to the rest of the genera, that is, the rare genera.
+3. Subset `tse` to the rest of the features, that is, the rare features.
 Store the result in a variable called `tse_rare`.
 
-5. Check the number of features in `tse_prevalent` and `tse_rare`.
+4. Check the number of features in `tse_prevalent` and `tse_rare`.
 
-6. What does it mean that a genus is prevalent with these thresholds?
+5. What does it mean that a feature is prevalent with these thresholds?
 
-7. How are the features in `tse_prevalent` and `tse_rare` related to each
+6. How are the features in `tse_prevalent` and `tse_rare` related to each
 other?
 
-**Useful functions:** `mia::agglomerateByRank()`, `mia::addPrevalence()`,
-`mia::subsetBy()`, `nrow()`
+**Useful functions:** `mia::addPrevalence()`, `mia::subsetBy()`, `nrow()`
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -628,27 +675,115 @@ other?
 ```{r}
 #| label: exercise_subsetting_prevalence
 
-# 1. Agglomerate to genus level
-tse_genus <- agglomerateByRank(tse, rank = "Genus")
+# 1. Add prevalence
+tse <- addPrevalence(tse, detection = 1)
 
-# 2. Add prevalence
-tse_genus <- addPrevalence(tse_genus, detection = 1)
+# 2. Prevalent features
+tse_prevalent <- subsetBy(tse, rows = prevalence > 0.2)
 
-# 3. Prevalent genera
-tse_prevalent <- subsetBy(tse_genus, rows = prevalence > 0.2)
+# 3. Rare features
+tse_rare <- subsetBy(tse, rows = prevalence <= 0.2)
 
-# 4. Rare genera
-tse_rare <- subsetBy(tse_genus, rows = prevalence <= 0.2)
-
-# 5. Number of features
+# 4. Number of features
 nrow(tse_prevalent)
 nrow(tse_rare)
 ```
 
-6. A genus is detected in a sample if it has more than 1 count in it. It is
+5. A feature is detected in a sample if it has more than 1 count in it. It is
 prevalent if it is detected in more than 20% of the samples.
 
-7. The two subsets are complementary: each genus is either prevalent or
-rare. Together, they contain all genera of the data.
+6. The two subsets are complementary: each feature is either prevalent or
+rare. Together, they contain all features of the data.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 7: Collapse rare features
+
+**Goal:** Combine rare features into a single feature.
+
+1. Keep the features with a prevalence over 0.2 and combine the rest into a
+single feature with `subsetBy()` and `collapse = TRUE`. Use the prevalence
+that you added in Exercise 6. Store the result in a variable called
+`tse_prev`.
+
+2. How many rows does `tse_prev` have? Show the last row names. Which feature
+contains the rare features?
+
+**Useful functions:** `mia::subsetBy()`, `nrow()`, `rownames()`, `tail()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_subsetting_collapse
+#| warning: false
+
+# 1. Keep prevalent features and combine the rest
+tse_prev <- subsetBy(tse, rows = prevalence > 0.2, collapse = TRUE)
+
+# 2. Number of rows and the last row names
+nrow(tse_prev)
+rownames(tse_prev) |> tail()
+```
+
+2. The features that have more than 1 count in more than 20% of the samples
+are kept as they are. All other features are summed into the last row, which
+is called "Other".
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 8: Keep top features
+
+**Goal:** Keep the most abundant features and combine the rest into a single
+feature.
+
+1. Find the 10 features with the highest mean counts with `getTop()`. Store
+the result in a variable called `top_features`.
+
+2. Keep the top features and combine the rest into a single feature with
+`subsetBy()` and `collapse = TRUE`. Store the result in a variable called
+`tse_top`.
+
+3. How many rows does `tse_top` have? Show its row names.
+
+4. Calculate the total counts of the samples in `tse` and `tse_top` with
+`addQC()`, and compare them. Why are they the same?
+
+**Useful functions:** `mia::getTop()`, `mia::subsetBy()`, `%in%`, `nrow()`,
+`rownames()`, `mia::addQC()`, `all()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_subsetting_top
+#| warning: false
+
+# 1. Top 10 features by mean
+top_features <- getTop(tse, top = 10, method = "mean")
+
+# 2. Keep top features and combine the rest
+tse_top <- subsetBy(
+    tse,
+    rows = rownames(tse) %in% top_features, collapse = TRUE
+)
+
+# 3. Number of rows and row names
+nrow(tse_top)
+rownames(tse_top)
+
+# 4. Total counts of the samples
+tse <- addQC(tse)
+tse_top <- addQC(tse_top)
+all(tse$total == tse_top$total)
+```
+
+3. `tse_top` has 11 rows: the 10 top features and "Other", which contains the
+sum of all other features.
+
+4. The features that are not among the top features are not removed but
+summed into "Other". Therefore, the total counts of the samples do not change.
 :::
 ::::
