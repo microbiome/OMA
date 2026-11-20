@@ -338,21 +338,14 @@ obj_daa_basic <- Maaslin2(
 ```
 
 Next, we extract the `data.frame` of results from the list object returned by
-`Maaslin2()`. We also calculate the 95% confidence intervals and transform the
-results to a slightly more convenient format. (The sample size `N` is used as
-an approximation for the residual degrees of freedom (`df`) in the calculation
-of confidence intervals.)
+`Maaslin2()` and keep the most relevant columns.
 
 ```{r}
 #| label: results_daa_basic
 
-# Extract the results from the list object and calculate the 95% CIs
+# Extract the results from the list object
 res_daa_basic <- obj_daa_basic$results |>
-    mutate(
-        ci_lwr = coef - qt(.975, df = N) * stderr,
-        ci_upr = coef + qt(.975, df = N) * stderr
-    ) |>
-    select(feature, name, coef, pval, qval, ci_lwr, ci_upr)
+    select(feature, name, coef, stderr, pval, qval)
 
 # Print the results for taxa with the smallest p-values
 res_daa_basic |>
@@ -374,12 +367,12 @@ Most importantly, positive values indicate abundance being higher in the
 non-reference group (here `ADHD`). More precisely, `2 ^ coef` would be
 interpreted as the ratio of geometric means of the relative abundances
 between the ADHD and Control groups.
+- `stderr` is the standard error of the log~2~-fold change estimate. It is
+used below to calculate the confidence intervals.
 - `pval` is the unadjusted p-value.
 - `qval` (q-value) is the FDR adjusted p-value [@Benjamini1995]. This is
 generally used to define statistical significance. Typically, q-values < .05
 are considered (statistically) significant.
-- `ci_lwr` and `ci_upr` are the lower and upper bounds of the 95% confidence
-intervals for the log~2~-fold change.
 
 Now, if we use the standard criterion for statistical significance, namely,
 q-value < 0.05, we can see that the DAA result is statistically significant for
@@ -404,6 +397,8 @@ the `r BiocStyle::Biocpkg("miaViz")` package (@fig-daa-boxplots).
 #| label: fig-daa-boxplots
 #| fig-cap: "Relative abundances of five significant genera in the ADHD and Control groups of the Tengeler2020 data, shown as strip plots with boxplots in a separate facet for each genus. The bars at the bottom show the prevalence of each genus in each group."
 #| fig-alt: "Five facets, one per genus, each with free y-axis scales and showing relative abundance in the ADHD and Control groups as boxplots overlaid with points for individual samples, plus horizontal prevalence bars below the boxes."
+#| fig-width: 10
+#| fig-height: 6
 
 library(miaViz)
 
@@ -421,14 +416,8 @@ plotBoxplot(
     x = "patient_status", # The variable on the x (horizontal) axis
     facet.by = "rownames", # To create a separate facet for each feature
     scales = "free_y", # To allow different y-axis scales
-    add.proportion = TRUE, # Add bars indicating prevalence
-    point.offset = "quasirandom", # To plot points nicely
-    point.size = 2, # The size of the points
-    point.color = "black", # The color of the edges of the points
-    point.alpha = 1, # The transparency of the edges of the points
-    box.alpha = .20 # The transparency of the boxplots
-) +
-    theme(strip.text = element_text(size = 7)) # The size of the facet labels
+    add.proportion = TRUE # Add bars indicating prevalence
+)
 ```
 
 In each facet,
@@ -450,7 +439,11 @@ show how _Erysipelatoclostridium_ is more prevalent in the control group.
 
 Lastly, we show how the results for all genera can be summarized visually
 by plotting the log~2~-fold change estimates and their 95% confidence
-intervals (@fig-daa-forest).
+intervals (@fig-daa-forest). `plotForest()` calculates the confidence
+intervals from the standard errors (`err.var`), using the t distribution with
+the residual degrees of freedom (`df`) of the model. Here, the degrees of
+freedom are the number of samples minus the number of estimated coefficients,
+that is, the intercept and `patient_status`.
 
 ```{r}
 #| label: fig-daa-forest
@@ -461,8 +454,8 @@ intervals (@fig-daa-forest).
 plotForest(
     res_daa_basic,
     effect.var = "coef",
-    ci.lower.var = "ci_lwr",
-    ci.upper.var = "ci_upr",
+    err.var = "stderr",
+    df = ncol(tse) - 2,
     id.var = "feature",
     order.by = "coef"
 )
@@ -497,16 +490,12 @@ obj_daa_cov <- Maaslin2(
     plot_scatter = FALSE
 )
 
-# Extract the results and calculate the 95% CIs and q-values
+# Extract the results and calculate the q-values for each variable
 res_daa_cov <- obj_daa_cov$results |>
-    mutate(
-        ci_lwr = coef - qt(.975, df = N) * stderr,
-        ci_upr = coef + qt(.975, df = N) * stderr
-    ) |>
     group_by(metadata) |>
     mutate(qval = p.adjust(pval, method = "fdr")) |>
     ungroup() |>
-    select(feature, name, coef, pval, qval, ci_lwr, ci_upr)
+    select(feature, name, coef, stderr, pval, qval)
 ```
 
 ```{r}
@@ -597,11 +586,9 @@ obj_daa_ia <- Maaslin2(
     plot_scatter = FALSE
 )
 
-# Extract the results and calculate the 95% CIs and q-values
+# Extract the results and calculate the q-values for each variable
 res_daa_ia <- obj_daa_ia$results |>
     mutate(
-        ci_lwr = coef - qt(.975, df = N) * stderr,
-        ci_upr = coef + qt(.975, df = N) * stderr,
         metadata = ifelse(
             metadata %in% c(
                 "patient_statusADHD_cohortCohort_2",
@@ -614,7 +601,7 @@ res_daa_ia <- obj_daa_ia$results |>
     group_by(metadata) |>
     mutate(qval = p.adjust(pval, method = "fdr")) |>
     ungroup() |>
-    select(feature, name, coef, pval, qval, ci_lwr, ci_upr)
+    select(feature, name, coef, stderr, pval, qval)
 ```
 
 ```{r}
@@ -665,17 +652,11 @@ abundances of _Coprobacter_ by `patient_status` and `cohort`
 # Plot the abundances of Coprobacter by patient_status and cohort
 plotBoxplot(
     tse,
-    features = c("Coprobacter"),
+    features = "Coprobacter",
     assay.type = "relabundance", # To plot relative abundances
     x = "patient_status", # The variable on the x (horizontal) axis
     facet.by = "cohort", # To create a separate plot for each cohort
-    scales = "fixed", # To have the same y-axis scale in each facet
-    add.proportion = TRUE, # Add bars indicating prevalence
-    point.offset = "quasirandom", # To plot points nicely
-    point.size = 2, # The size of the points
-    point.color = "black", # The color of the edges of the points
-    point.alpha = 1, # The transparency of the edges of the points
-    box.alpha = .20 # The transparency of the boxplots
+    add.proportion = TRUE # Add bars indicating prevalence
 )
 ```
 
@@ -722,19 +703,14 @@ obj_daa_pos_ia <- maaslin3(
     plot_summary_plot = FALSE
 )
 
-# Extract the results and calculate the 95% confidence intervals and q-values
+# Extract the results and calculate the q-values for each variable
 res_daa_pos_ia <- obj_daa_pos_ia$fit_data_abundance$results |>
     filter(!is.na(pval_individual) & N_not_zero > 6) |>
-    mutate(
-        ci_lwr = coef - qt(.975, df = N_not_zero - 6) * stderr,
-        ci_upr = coef + qt(.975, df = N_not_zero - 6) * stderr
-    ) |>
     group_by(metadata) |>
     mutate(qval = p.adjust(pval_individual, method = "fdr")) |>
     ungroup() |>
-    select(feature, name, coef,
-        pval = pval_individual, qval, ci_lwr, ci_upr,
-        N_not_zero
+    select(feature, name, coef, stderr,
+        pval = pval_individual, qval, N_not_zero
     )
 
 # The results for the interaction between patient_status and cohort (when
@@ -809,6 +785,17 @@ examples is given in
 We also note that, in contrast to the
 `Maaslin2()` function, the custom function provides confidence intervals and
 q-values (calculated for the variable of interest) automatically in its output.
+
+#### Taxon set enrichment {#sec-daa-taxsea}
+
+DAA results can be interpreted further with taxon set enrichment analysis,
+which is similar to gene set enrichment analysis in transcriptomics. The
+`r BiocStyle::Biocpkg("TaxSEA")` package [@Pham2025] tests whether the taxa
+in predefined sets, such as producers of specific metabolites or taxa linked
+to a disease in earlier studies, tend to have larger or smaller fold changes
+than other taxa. As input, it takes the fold changes from DAA. See the
+[TaxSEA documentation](https://bioconductor.org/packages/TaxSEA) for
+examples.
 
 ## Exercises {#sec-differential-abundance-exercises}
 
@@ -951,10 +938,9 @@ results.
 `plot_heatmap = FALSE` and `plot_scatter = FALSE`. Store the result in a
 variable called `obj_daa`.
 
-2. Extract the `results` table from `obj_daa`. Add the lower and upper bounds
-of the 95% confidence intervals as columns `ci_lwr` and `ci_upr`, as shown in
-@sec-daa-basic. Keep the columns `feature`, `name`, `coef`, `pval`, `qval`,
-`ci_lwr` and `ci_upr`, and store the table in a variable called `res_daa`.
+2. Extract the `results` table from `obj_daa`. Keep the columns `feature`,
+`name`, `coef`, `stderr`, `pval` and `qval`, as shown in @sec-daa-basic, and
+store the table in a variable called `res_daa`.
 
 3. Show the six genera with the smallest p-values.
 
@@ -964,8 +950,7 @@ of the 95% confidence intervals as columns `ci_lwr` and `ci_upr`, as shown in
 a negative value in the `coef` column?
 
 **Useful functions:** `Maaslin2::Maaslin2()`, `colData()`, `as.data.frame()`,
-`dplyr::mutate()`, `stats::qt()`, `dplyr::select()`, `dplyr::arrange()`,
-`head()`, `sum()`
+`dplyr::select()`, `dplyr::arrange()`, `head()`, `sum()`
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -991,13 +976,9 @@ obj_daa <- Maaslin2(
 ```{r}
 #| label: exercise_daa_basic_results
 
-# 2. Extract the results and calculate the 95% CIs
+# 2. Extract the results
 res_daa <- obj_daa$results |>
-    mutate(
-        ci_lwr = coef - qt(.975, df = N) * stderr,
-        ci_upr = coef + qt(.975, df = N) * stderr
-    ) |>
-    select(feature, name, coef, pval, qval, ci_lwr, ci_upr)
+    select(feature, name, coef, stderr, pval, qval)
 
 # 3. Genera with the smallest p-values
 res_daa |>
@@ -1027,7 +1008,9 @@ statistically significant is seen from the q-value.
 `facet.by = "rownames"`, `scales = "free_y"` and `add.proportion = TRUE`.
 
 2. Plot the log~2~-fold changes and their 95% confidence intervals for all
-genera with `plotForest()`. Order the genera by their log~2~-fold change.
+genera with `plotForest()`. Calculate the intervals from the standard errors
+with the degrees of freedom of the model, as shown in @sec-daa-viz. Order the
+genera by their log~2~-fold change.
 
 3. How can you see from the forest plot whether the abundance of a genus is
 higher or lower in the `Veg` group? How can you see whether the 95%
@@ -1061,11 +1044,12 @@ plotBoxplot(
 )
 
 # 2. Forest plot of the log2-fold changes and their 95% CIs
+# The model has two coefficients: the intercept and Diet
 plotForest(
     res_daa,
     effect.var = "coef",
-    ci.lower.var = "ci_lwr",
-    ci.upper.var = "ci_upr",
+    err.var = "stderr",
+    df = ncol(tse) - 2,
     id.var = "feature",
     order.by = "coef"
 )

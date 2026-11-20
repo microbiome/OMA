@@ -247,7 +247,7 @@ the plot.
 #| fig-cap: "Heatmap of pairwise UniFrac dissimilarities between the GlobalPatterns samples. Samples are ordered by seriation and split by sample type."
 #| fig-alt: "Square heatmap with the samples on both axes, where cell color shows the UniFrac dissimilarity of each sample pair. Samples are split into blocks by sample type, and samples of the same type tend to be the most similar to each other."
 #| fig-width: 12
-#| fig-height: 8
+#| fig-height: 12
 
 library(miaViz)
 
@@ -258,10 +258,7 @@ tse_plot[["SampleType"]] <- factor(
     labels = gsub(" \\(", "\n(", levels(tse_plot[["SampleType"]]))
 )
 
-plotDissimilarity(tse_plot, name = "unifrac", col.var = "SampleType") +
-    theme(
-        strip.text = element_text(size = 6)
-    )
+plotDissimilarity(tse_plot, name = "unifrac", col.var = "SampleType")
 ```
 
 From the heatmap, we can observe that samples within the same sample type are
@@ -274,8 +271,8 @@ sample type.
 
 The divergence measure refers to a difference in community composition
 between the given sample(s) and a reference sample. This can be evaluated with
-`addDivergence()`. Reference and algorithm for the calculation of divergence
-can be specified as `reference` and `FUN`, respectively.
+`addDivergence()`. The reference and the dissimilarity measure can be
+specified with the `reference` and `method` arguments, respectively.
 
 ```{r}
 #| label: add_divergence
@@ -283,8 +280,7 @@ can be specified as `reference` and `FUN`, respectively.
 tse <- addDivergence(
     tse,
     assay.type = "counts",
-    reference = "median",
-    FUN = getDissimilarity
+    reference = "median"
 )
 ```
 
@@ -432,20 +428,17 @@ between stool samples and samples of differing origin.
 
 ### Comparing communities {#sec-comparing-communities-by-beta-diversity-analysis}
 
-A typical comparison of community compositions starts with a visual
-representation of the groups by a 2D ordination. Then we estimate relative
-abundances and MDS ordination based on Bray-Curtis index between the groups,
-and visualize the results.
+A typical comparison of community compositions starts with calculating the
+dissimilarities between the samples, for example with the Bray-Curtis index
+on the relative abundances. The samples are then ordinated with MDS, and the
+groups are compared visually in a 2D ordination plot. The `addMDS()` and
+`addNMDS()` functions calculate the dissimilarities and the ordination in one
+step.
 
-In the following examples dissimilarity is calculated with the function
-supplied to the `FUN` argument. Several metrics of beta diversity are defined
-by the `vegdist()` function of the `r BiocStyle::CRANpkg("vegan")`
-package, which is often used in
-this context. However, custom functions created by the user also work, as long
-as they return a `dist` object. In either case, this function is then applied
-to calculate reduced dimensions via an ordination method, the results of which
-can be stored in the `reducedDim` slot of the TreeSE. This entire process is
-contained by the `addMDS()` and `addNMDS()` functions.
+The choice of the dissimilarity metric is important. It is selected with the
+`method` argument of `addMDS()` and `addNMDS()`. All standard metrics are
+available; see `?getDissimilarity` for the full list. The results are stored
+in the `reducedDim` slot of the TreeSE.
 
 ```{r}
 #| label: addMDS
@@ -456,7 +449,6 @@ library(miaViz)
 # Run PCoA on relabundance assay with Bray-Curtis distances
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     method = "bray",
     assay.type = "relabundance",
     name = "MDS_bray"
@@ -515,7 +507,6 @@ three factors can affect the resulting lower-dimensional data.
 # Run NMDS on relabundance assay with Bray-Curtis distances
 tse <- addNMDS(
     tse,
-    FUN = getDissimilarity,
     method = "bray",
     assay.type = "relabundance",
     name = "NMDS_bray"
@@ -524,7 +515,6 @@ tse <- addNMDS(
 # Run MDS on clr assay with Aitchison distances
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     method = "euclidean",
     assay.type = "clr",
     name = "MDS_aitchison"
@@ -533,7 +523,6 @@ tse <- addMDS(
 # Run NMDS on clr assay with Euclidean distances
 tse <- addNMDS(
     tse,
-    FUN = getDissimilarity,
     method = "euclidean",
     assay.type = "clr",
     name = "NMDS_aitchison"
@@ -582,7 +571,6 @@ used within `addMDS()` (@fig-community-mds-unifrac).
 
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     method = "unifrac",
     name = "unifrac",
     tree = rowTree(tse),
@@ -615,7 +603,6 @@ tse <- transformAssay(
 # Run MDS on clr assay with Aitchison distance
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     method = "euclidean",
     assay.type = "clr_pc1",
     name = "MDS_aitchison_pc1"
@@ -636,7 +623,6 @@ clr <- function(x) {
 tse <- addMDS(
     tse,
     assay.type = "counts",
-    FUN = getDissimilarity,
     method = "euclidean",
     niter = 10, # Number of iterations
     sample = min(colSums(assay(tse, "counts"))), # Rarefaction depth
@@ -789,7 +775,6 @@ d0 <- as.matrix(getDissimilarity(t(assay(tse, "relabundance")), "bray"))
 # PCoA Ordination
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     name = "PCoA",
     method = "bray",
     assay.type = "relabundance"
@@ -823,12 +808,10 @@ ggplot(df, aes(x = d0, y = dmds)) +
     geom_smooth() +
     geom_point() +
     labs(
-        title = "Shepard plot",
         x = "Original distance",
         y = "MDS distance",
         subtitle = paste("Stress:", round(stress, 2))
-    ) +
-    theme_bw()
+    )
 ```
 
 ## Constrained ordination
@@ -1097,67 +1080,35 @@ Next, we perform PCoA with Bray-Curtis dissimilarity.
 
 tse_genus <- addMDS(
     tse_genus,
-    FUN = getDissimilarity,
     name = "PCoA_BC",
     method = "bray",
     assay.type = "relabundance"
 )
 ```
 
-Finally, we get the top taxonomic features and visualize their abundances
-on PCoA (@fig-community-pcoa-dominant).
+Finally, we visualize the dominant genera on the PCoA
+(@fig-community-pcoa-dominant).
 
 ```{r}
 #| label: fig-community-pcoa-dominant
 #| code-fold: true
 #| code-summary: "Show the plotting code"
-#| fig-cap: "Bray-Curtis PCoA of the GlobalPatterns samples colored by their dominant genus. The six top genera are shown separately and the remaining genera are grouped as Other; the legend shows the percentage of samples dominated by each genus."
-#| fig-alt: "Scatter plot of the samples on the first two PCoA axes, with the percentage of variance explained in the axis labels. Points are colored by dominant genus, with seven colors for the six top genera and Other, and the legend shows each genus with its percentage of samples."
+#| fig-cap: "Bray-Curtis PCoA of the GlobalPatterns samples colored by their dominant genus. The six genera that are most often dominant are shown separately and the remaining genera are grouped as Other."
+#| fig-alt: "Scatter plot of the samples on the first two PCoA axes, with the percentage of variance explained in the axis labels. Points are colored by dominant genus, with seven colors for the six most often dominant genera and Other."
 
-# Getting the top taxa
-top_taxa <- getTop(tse_genus, top = 6, assay.type = "relabundance")
-
-# Naming all the rest of non top-taxa "Other"
-most_abundant <- lapply(
-    colData(tse_genus)$dominant_taxa, function(x) {
-        if (x %in% top_taxa) {
-            x
-        } else {
-            "Other"
-        }
-    }
-)
-
-# Storing the previous results as a new column within colData
-colData(tse_genus)$most_abundant <- as.character(most_abundant)
-
-# Calculating percentage of the most abundant
-most_abundant_freq <- table(as.character(most_abundant))
-most_abundant_percent <- round(
-    most_abundant_freq / sum(most_abundant_freq) * 100,
-    1
-)
-
-# Define colors for visualization
-my_colors <- c(
-    "black", "blue", "lightblue", "darkgray", "magenta", "darkgreen", "red"
+# Dominant genus of each sample. Genera other than the six most often
+# dominant ones are named "Other".
+tse_genus <- addDominant(
+    tse_genus,
+    assay.type = "relabundance", n = 6, name = "most_abundant"
 )
 
 # Visualization
-p <- plotOrdination(
+plotOrdination(
     tse_genus, "PCoA_BC",
     colour.by = "most_abundant",
     add.expl.var = TRUE
-) +
-    scale_colour_manual(
-        values = my_colors,
-        labels = paste0(
-            names(most_abundant_percent), " (", most_abundant_percent, "%)"
-        )
-    ) +
-    labs(color = "")
-
-p
+)
 ```
 
 Similarly, we visualize and compare the sub-population
@@ -1168,7 +1119,7 @@ Similarly, we visualize and compare the sub-population
 #| code-fold: true
 #| code-summary: "Show the plotting code"
 #| fig-cap: "Bray-Curtis PCoA of the GlobalPatterns samples colored by their dominant genus, shown separately for non-fecal (FALSE) and fecal (TRUE) samples."
-#| fig-alt: "Two scatter plots side by side, one for non-fecal (FALSE) and one for fecal (TRUE) samples, showing the samples on the first two PCoA axes. Points are colored by dominant genus, using the six top genera and Other."
+#| fig-alt: "Two scatter plots side by side, one for non-fecal (FALSE) and one for fecal (TRUE) samples, showing the samples on the first two PCoA axes. Points are colored by dominant genus, using the six most often dominant genera and Other."
 #| fig-width: 10
 
 # Visualization split by group
@@ -1177,9 +1128,7 @@ plotOrdination(
     colour.by = "most_abundant",
     facet.by = "Group",
     add.expl.var = TRUE
-) +
-    scale_colour_manual(values = my_colors) +
-    labs(color = "")
+)
 ```
 
 ::: {.callout-tip}
@@ -1397,7 +1346,6 @@ library(miaViz)
 # 1. PCoA with Bray-Curtis dissimilarity
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     method = "bray",
     assay.type = "relabundance",
     name = "MDS_bray"
@@ -1416,7 +1364,6 @@ tse <- transformAssay(
 )
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     method = "euclidean",
     assay.type = "clr",
     name = "MDS_aitchison"
@@ -1478,7 +1425,6 @@ summary(lib_size)
 set.seed(123)
 tse <- addMDS(
     tse,
-    FUN = getDissimilarity,
     method = "bray",
     assay.type = "counts",
     sample = min(lib_size),
