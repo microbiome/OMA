@@ -665,6 +665,23 @@ wrap_plots(p1, p2) +
     plot_layout(guides = "collect")
 ```
 
+The same can be done more compactly with `lapply()`, which creates one plot
+for each ordination. This is convenient when comparing more than two
+ordinations, as only the vector of names needs to be extended:
+
+```{r}
+#| label: mds_rarefaction_lapply
+#| eval: false
+
+# One plot for each ordination, combined into a multi-panel plot
+plots <- lapply(
+    c("MDS_aitchison_pc1", "MDS_aitchison_rarefied"),
+    function(name) plotOrdination(tse, name, colour.by = "SampleType")
+)
+wrap_plots(plots) +
+    plot_layout(guides = "collect")
+```
+
 ::: {.callout-note}
 ## Note
 
@@ -685,40 +702,7 @@ The argument `niter` sets the number of rarefaction rounds. By default
 (`niter = NULL`), no rarefaction is applied; here 10 iterations is often
 sufficient for beta diversity calculations. To use transformations after the
 rarefaction of the samples and before the beta diversity calculation, we can
-use the argument `transf`. We can also plot the correlation between principal
-coordinates PCx and PCy for both the rarefied and non-rarefied distance
-calculations (@fig-community-rarefaction-pc-correlation):
-
-```{r}
-#| label: fig-community-rarefaction-pc-correlation
-#| code-fold: true
-#| code-summary: "Show the plotting code"
-#| fig-cap: "Correlation between the sample scores of the non-rarefied (x-axis) and rarefied (y-axis) Aitchison MDS for the first two principal coordinates. Lines show linear fits with Pearson correlations."
-#| fig-alt: "Two scatter plots, one per principal coordinate, with the non-rarefied sample scores on the x-axis and the rarefied scores on the y-axis. Each panel has a linear regression line with a confidence band and a printed Pearson correlation coefficient and p-value."
-
-library(ggpubr)
-
-p <- lapply(1:2, function(i) {
-    # Principal axes are sign invariant;
-    # align the signs; if the correlation is negative then flip the rarefied axis
-    original <- reducedDim(tse, "MDS_aitchison_pc1")[, i]
-    rarefied <- reducedDim(tse, "MDS_aitchison_rarefied")[, i]
-    if (cor(original, rarefied) < 0) {
-        rarefied <- -rarefied
-    }
-
-    temp <- ggplot(
-        data = data.frame(original, rarefied),
-        aes(x = original, y = rarefied)
-    ) +
-        geom_point() +
-        geom_smooth(method = "lm") +
-        stat_cor(method = "pearson") +
-        labs(title = paste0("Principal coordinate ", i))
-    return(temp)
-})
-wrap_plots(p)
-```
+use the argument `transf`.
 
 The `r BiocStyle::Biocpkg("mia")` package's `addAlpha()` and
 `getDissimilarity()` functions support rarefaction in alpha and beta diversity
