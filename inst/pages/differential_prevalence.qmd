@@ -85,25 +85,20 @@ obj_DPA_cov <- maaslin3(
 
 Next, we extract the `data.frame` of results from the list object returned by
 `maaslin3()`. We remove the variable `total` from the output as it is merely a
-technical covariate that we are not interested in. We also calculate the 95%
-confidence intervals. Furthermore, as with `r BiocStyle::Biocpkg("Maaslin2")`,
-we calculate the q-values separately for `patient_status` and `cohort`.
-Lastly, we transform the results to a slightly more convenient format.
+technical covariate that we are not interested in. Furthermore, as with
+`r BiocStyle::Biocpkg("Maaslin2")`, we calculate the q-values separately for
+`patient_status` and `cohort`. Lastly, we keep the most relevant columns.
 
 ```{r}
 #| label: results_DPA_cov
 
-# Extract the results and calculate the 95% CIs and q-values
+# Extract the results and calculate the q-values for each variable
 res_DPA_cov <- obj_DPA_cov$fit_data_prevalence$results |>
     filter(name != "total") |>
-    mutate(
-        ci_lwr = coef - qnorm(.975) * stderr,
-        ci_upr = coef + qnorm(.975) * stderr
-    ) |>
     group_by(metadata) |>
     mutate(qval = p.adjust(pval_individual, method = "fdr")) |>
     ungroup() |>
-    select(feature, name, coef, pval = pval_individual, qval, ci_lwr, ci_upr)
+    select(feature, name, coef, stderr, pval = pval_individual, qval)
 
 # Print the results for taxa with the smallest p-values for patient_status
 res_DPA_cov |>
@@ -290,10 +285,9 @@ results are stored in the `total` column of `colData`.
 `verbosity = "ERROR"`. Store the result in a variable called `obj_dpa`.
 
 3. Extract the results of the prevalence model (`fit_data_prevalence`).
-Remove the rows for `total`, add the 95% confidence intervals, calculate the
-q-values separately for each variable, and keep the columns `feature`,
-`name`, `coef`, `pval` (renamed from `pval_individual`), `qval`, `ci_lwr`
-and `ci_upr`, as shown in @sec-DPA. Store the table in a variable called
+Remove the rows for `total`, calculate the q-values separately for each
+variable, and keep the columns `feature`, `name`, `coef`, `stderr`, `pval`
+(renamed from `pval_individual`) and `qval`, as shown in @sec-DPA. Store the table in a variable called
 `res_dpa`.
 
 4. Show the six genera with the smallest p-values for `DietVeg`.
@@ -303,7 +297,7 @@ reads included in the model? Why are `coef` and the p-values missing (`NA`)
 for some genera?
 
 **Useful functions:** `mia::addQC()`, `maaslin3::maaslin3()`,
-`dplyr::filter()`, `dplyr::mutate()`, `stats::qnorm()`, `dplyr::group_by()`,
+`dplyr::filter()`, `dplyr::mutate()`, `dplyr::group_by()`,
 `stats::p.adjust()`, `dplyr::ungroup()`, `dplyr::select()`,
 `dplyr::arrange()`, `head()`
 
@@ -332,14 +326,10 @@ obj_dpa <- maaslin3(
 # 3. Extract the results of the prevalence model
 res_dpa <- obj_dpa$fit_data_prevalence$results |>
     filter(name != "total") |>
-    mutate(
-        ci_lwr = coef - qnorm(.975) * stderr,
-        ci_upr = coef + qnorm(.975) * stderr
-    ) |>
     group_by(metadata) |>
     mutate(qval = p.adjust(pval_individual, method = "fdr")) |>
     ungroup() |>
-    select(feature, name, coef, pval = pval_individual, qval, ci_lwr, ci_upr)
+    select(feature, name, coef, stderr, pval = pval_individual, qval)
 
 # 4. Genera with the smallest p-values for diet
 res_dpa |>
