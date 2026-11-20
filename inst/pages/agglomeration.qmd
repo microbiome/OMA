@@ -247,62 +247,8 @@ Now, the data includes as many columns as there are sample types.
 In [@sec-taxa-clustering], we will explore how cluster information can be used
 to agglomerate data effectively.
 
-## By prevalence {#sec-agglomerate_prev}
-
-[@sec-subset_prev] demonstrated how to select data with only prevalent or rare
-features. In some cases, it might be beneficial to combine the features that
-would otherwise be removed. For example, instead of filtering out rare taxa, we
-can combine the reads from all these rare taxa under a new feature which we can
-call "Rare taxa". The function `subsetBy()` with `collapse = TRUE` accomplishes
-this by merging filtered features into a single feature called "Other" by default,
-preventing unnecessary loss of information. This is particularly useful when
-working with right-skewed feature data, such as soil microbiome datasets where
-rare taxa may represent a significant proportion of the reads when combined.
-
-Here, we demonstrate how to agglomerate the data using prevalence and abundance
-thresholds of 20% and 0.1%, respectively. This means that for a feature to be
-considered detected in a sample, its relative abundance must exceed 0.1% and
-after this, the feature must be detected in more than 20% of samples. Taxa that
-do not meet these criteria are combined in the "Other" group.
-
-To use relative abundances for the detection threshold, we must first transform
-the data to relative abundances (aka normalize as proportions). These kinds of
-transformations are introduced in more detail in [@sec-assay-transform].
-
-```{r}
-#| label: agg_prevalence
-
-# Transform
-tse <- transformAssay(tse, method = "relabundance")
-
-# Agglomerate
-tse <- addPrevalence(tse, assay.type = "relabundance", detection = 0.001)
-tse_prev <- subsetBy(
-    tse,
-    rows = prevalence > 0.2,
-    collapse = TRUE
-)
-tse_prev
-```
-
-We have now successfully agglomerated the data based on prevalence. Similarly,
-if we were interested in only the most prevalent phyla, we can certainly first
-agglomerate the data by Phylum rank and then by prevalence, combining the rarer
-phyla into one category. This is done by agglomerating the data with
-`agglomerateByRank()` before `subsetBy()`.
-
-```{r}
-#| label: agg_prev_phylum
-
-tse_prev_phylum <- agglomerateByRank(tse, rank = "Phylum")
-tse_prev_phylum <- addPrevalence(tse_prev_phylum, detection = 1)
-tse_prev_phylum <- subsetBy(
-    tse_prev_phylum,
-    rows = prevalence > 0.2,
-    collapse = TRUE
-)
-tse_prev_phylum
-```
+To combine rare features into a single feature, such as "Other", see
+[@sec-agglomerate_prev].
 
 ## Choosing a taxonomic level {#sec-choose-rank}
 
@@ -568,65 +514,5 @@ named after the groups. The counts of the samples in each group are summed.
 3. An alternative experiment must have the same samples as the main
 experiment. Here, the samples were combined into groups, so the columns no
 longer match those of `tse`.
-:::
-::::
-
-:::: {.callout-tip icon="false"}
-## Exercise 5: Agglomerate based on prevalence
-
-**Goal:** Combine rare features into a single feature with prevalence-based
-agglomeration.
-
-1. Add the prevalence of each feature to `rowData` with `addPrevalence()`.
-Use the `counts` assay and a detection threshold of 1 count.
-
-2. Keep the features with a prevalence over 0.2 and combine the rest into a
-single feature with `subsetBy()` and `collapse = TRUE`. Store the result in a
-variable called `tse_prev`.
-
-3. How many rows does `tse_prev` have? Show the last row names. Which feature
-contains the rare features?
-
-4. Agglomerate `tse` to the Phylum rank, and then combine the phyla in the
-same way. Show the row names of the result.
-
-**Useful functions:** `mia::addPrevalence()`, `mia::subsetBy()`,
-`mia::agglomerateByRank()`, `nrow()`, `rownames()`, `tail()`
-
-::: {.callout-note collapse="true"}
-## Solution
-
-```{r}
-#| label: exercise_agglomeration_prevalence
-#| warning: false
-
-# 1. Add prevalence to rowData
-tse <- addPrevalence(tse, assay.type = "counts", detection = 1)
-
-# 2. Keep prevalent features and combine the rest
-tse_prev <- subsetBy(tse, rows = prevalence > 0.2, collapse = TRUE)
-
-# 3. Number of rows and the last row names
-nrow(tse_prev)
-rownames(tse_prev) |> tail()
-
-# 4. Agglomerate to Phylum rank, and then based on prevalence
-tse_prev_phylum <- agglomerateByRank(tse, rank = "Phylum")
-tse_prev_phylum <- addPrevalence(tse_prev_phylum, detection = 1)
-tse_prev_phylum <- subsetBy(
-    tse_prev_phylum,
-    rows = prevalence > 0.2, collapse = TRUE
-)
-rownames(tse_prev_phylum)
-```
-
-3. The features that have more than 1 count in more than 20% of the samples
-are kept as they are. All other features are summed into the last row, which
-is called "Other".
-
-4. The data is first agglomerated to the Phylum rank, and then the phyla that
-do not exceed the thresholds are combined into "Other". The prevalence is
-calculated again after the agglomeration, because the prevalence of a phylum
-differs from the prevalence of the features that it contains.
 :::
 ::::

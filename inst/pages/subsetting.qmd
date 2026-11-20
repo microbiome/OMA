@@ -129,16 +129,14 @@ features that fall in either *Actinobacteria* or *Chlamydiae* group. For
 this, we use the information on the features from the metadata
 `rowData(tse)`.
 
-The first term with the `%in%` operator includes all the features of
-interest, whereas the second term after the AND operator `&` filters out
-all features that have an `NA` in place of the phylum variable.
+The `%in%` operator selects all the features of interest. It returns `FALSE`
+for features that have `NA` in place of the phylum, so they are left out.
 
 ```{r}
 #| label: subset_features
 
 # Subset by feature
-selected <- rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") &
-    !is.na(rowData(tse)$Phylum)
+selected <- rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae")
 tse_sub <- tse[selected, ]
 
 # Show dimensions
@@ -154,9 +152,8 @@ phyla *Actinobacteria* or *Chlamydiae*.
 ```{r}
 #| label: subset_samples_and_feat
 
-# Subset by sample and feature and remove NAs
-selected_rows <- rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae") &
-    !is.na(rowData(tse)$Phylum)
+# Subset by sample and feature
+selected_rows <- rowData(tse)$Phylum %in% c("Actinobacteria", "Chlamydiae")
 selected_cols <- tse$SampleType %in% c("Feces", "Skin", "Tongue")
 tse_sub <- tse[selected_rows, selected_cols]
 
@@ -175,6 +172,24 @@ If a study was to consider and quantify the presence of *Actinobacteria*
 as well as *Chlamydiae* in different sites of the human body, `tse_sub`
 might be a suitable subset to start with.
 
+The same subsets can be created with `subsetBy()`. Its `rows` and `cols`
+arguments take conditions that can refer directly to the columns of `rowData`
+and `colData`. We use `subsetBy()` again below to subset the data by
+prevalence ([@sec-subset_prev]).
+
+```{r}
+#| label: subset_by_subsetBy
+
+tse_sub <- subsetBy(
+    tse,
+    rows = Phylum %in% c("Actinobacteria", "Chlamydiae"),
+    cols = SampleType %in% c("Feces", "Skin", "Tongue")
+)
+
+# Show dimensions
+dim(tse_sub)
+```
+
 ## By library size {#sec-subset-library-size}
 
 As a preprocessing step, one might want to remove samples that do not
@@ -188,8 +203,7 @@ only in those features that belong to the species *Achromatiumoxaliferum*.
 ```{r}
 #| label: select_archaea
 
-ind <- rowData(tse)$Species == "Achromatiumoxaliferum"
-ind[is.na(ind)] <- FALSE
+ind <- rowData(tse)$Species %in% "Achromatiumoxaliferum"
 tse_sub <- tse[ind, ]
 ```
 
@@ -331,9 +345,62 @@ tse_sub <- subsetBy(tse_sub, rows = prevalence <= 0.1)
 tse_sub
 ```
 
-In some cases, agglomerating based on prevalence can provide more
-meaningful insights. This process is illustrated in
-[@sec-agglomerate_prev].
+### Collapse rare features {#sec-agglomerate_prev}
+
+Above, we selected only prevalent or rare features. In some cases, it might
+be beneficial to combine the features that would otherwise be removed. For
+example, instead of filtering out rare taxa, we
+can combine the reads from all these rare taxa under a new feature which we can
+call "Rare taxa". The function `subsetBy()` with `collapse = TRUE` accomplishes
+this by merging filtered features into a single feature called "Other" by default,
+preventing unnecessary loss of information. This is particularly useful when
+working with right-skewed feature data, such as soil microbiome datasets where
+rare taxa may represent a significant proportion of the reads when combined.
+
+Here, we demonstrate how to combine the rare features using prevalence and abundance
+thresholds of 20% and 0.1%, respectively. This means that for a feature to be
+considered detected in a sample, its relative abundance must exceed 0.1% and
+after this, the feature must be detected in more than 20% of samples. Taxa that
+do not meet these criteria are combined in the "Other" group.
+
+To use relative abundances for the detection threshold, we must first transform
+the data to relative abundances (aka normalize as proportions). These kinds of
+transformations are introduced in more detail in [@sec-assay-transform].
+
+```{r}
+#| label: agg_prevalence
+
+# Transform
+tse <- transformAssay(tse, method = "relabundance")
+
+# Add prevalence and combine rare features
+tse <- addPrevalence(tse, assay.type = "relabundance", detection = 0.001)
+tse_prev <- subsetBy(
+    tse,
+    rows = prevalence > 0.2,
+    collapse = TRUE
+)
+tse_prev
+```
+
+We have now combined the rare features into one feature. Similarly,
+if we were interested in only the most prevalent phyla, we can first
+agglomerate the data by Phylum rank and then combine the rarer phyla into one
+category. This is done by agglomerating the data with
+`agglomerateByRank()` before `subsetBy()`.
+
+```{r}
+#| label: agg_prev_phylum
+
+tse_prev_phylum <- agglomerateByRank(tse, rank = "Phylum")
+tse_prev_phylum <- addPrevalence(tse_prev_phylum, detection = 1)
+tse_prev_phylum <- subsetBy(
+    tse_prev_phylum,
+    rows = prevalence > 0.2,
+    collapse = TRUE
+)
+tse_prev_phylum
+```
 
 ## Exercises {#sec-treese_subsetting-exercises}
 
@@ -650,5 +717,64 @@ prevalent if it is detected in more than 20% of the samples.
 
 7. The two subsets are complementary: each genus is either prevalent or
 rare. Together, they contain all genera of the data.
+:::
+::::
+
+:::: {.callout-tip icon="false"}
+## Exercise 7: Collapse rare features
+
+**Goal:** Combine rare features into a single feature.
+
+1. Add the prevalence of each feature to `rowData` with `addPrevalence()`.
+Use the `counts` assay and a detection threshold of 1 count.
+
+2. Keep the features with a prevalence over 0.2 and combine the rest into a
+single feature with `subsetBy()` and `collapse = TRUE`. Store the result in a
+variable called `tse_prev`.
+
+3. How many rows does `tse_prev` have? Show the last row names. Which feature
+contains the rare features?
+
+4. Agglomerate `tse` to the Phylum rank, and then combine the phyla in the
+same way. Show the row names of the result.
+
+**Useful functions:** `mia::addPrevalence()`, `mia::subsetBy()`,
+`mia::agglomerateByRank()`, `nrow()`, `rownames()`, `tail()`
+
+::: {.callout-note collapse="true"}
+## Solution
+
+```{r}
+#| label: exercise_subsetting_collapse
+#| warning: false
+
+# 1. Add prevalence to rowData
+tse <- addPrevalence(tse, assay.type = "counts", detection = 1)
+
+# 2. Keep prevalent features and combine the rest
+tse_prev <- subsetBy(tse, rows = prevalence > 0.2, collapse = TRUE)
+
+# 3. Number of rows and the last row names
+nrow(tse_prev)
+rownames(tse_prev) |> tail()
+
+# 4. Agglomerate to Phylum rank, and then combine rare phyla
+tse_prev_phylum <- agglomerateByRank(tse, rank = "Phylum")
+tse_prev_phylum <- addPrevalence(tse_prev_phylum, detection = 1)
+tse_prev_phylum <- subsetBy(
+    tse_prev_phylum,
+    rows = prevalence > 0.2, collapse = TRUE
+)
+rownames(tse_prev_phylum)
+```
+
+3. The features that have more than 1 count in more than 20% of the samples
+are kept as they are. All other features are summed into the last row, which
+is called "Other".
+
+4. The data is first agglomerated to the Phylum rank, and then the phyla that
+do not exceed the thresholds are combined into "Other". The prevalence is
+calculated again after the agglomeration, because the prevalence of a phylum
+differs from the prevalence of the features that it contains.
 :::
 ::::
