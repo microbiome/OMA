@@ -1099,29 +1099,21 @@ tse_genus <- addMDS(
 )
 ```
 
-Finally, we get the top taxonomic features and visualize their abundances
-on PCoA (@fig-community-pcoa-dominant).
+Finally, we visualize the dominant genera on the PCoA
+(@fig-community-pcoa-dominant).
 
 ```{r}
 #| label: fig-community-pcoa-dominant
 #| code-fold: true
 #| code-summary: "Show the plotting code"
-#| fig-cap: "Bray-Curtis PCoA of the GlobalPatterns samples colored by their dominant genus. The six top genera are shown separately and the remaining genera are grouped as Other; the legend shows the percentage of samples dominated by each genus."
-#| fig-alt: "Scatter plot of the samples on the first two PCoA axes, with the percentage of variance explained in the axis labels. Points are colored by dominant genus, with seven colors for the six top genera and Other, and the legend shows each genus with its percentage of samples."
+#| fig-cap: "Bray-Curtis PCoA of the GlobalPatterns samples colored by their dominant genus. The six genera that are most often dominant are shown separately and the remaining genera are grouped as Other."
+#| fig-alt: "Scatter plot of the samples on the first two PCoA axes, with the percentage of variance explained in the axis labels. Points are colored by dominant genus, with seven colors for the six most often dominant genera and Other."
 
-# Getting the top taxa
-top_taxa <- getTop(tse_genus, top = 6, assay.type = "relabundance")
-
-# Naming all the rest of non top-taxa "Other"
-dominant <- tse_genus$dominant_taxa
-most_abundant <- ifelse(dominant %in% top_taxa, dominant, "Other")
-
-# Calculating percentage of the most abundant
-most_abundant_percent <- round(prop.table(table(most_abundant)) * 100, 1)
-
-# Storing the genera with their percentages as a new column within colData
-colData(tse_genus)$most_abundant <- paste0(
-    most_abundant, " (", most_abundant_percent[most_abundant], "%)"
+# Dominant genus of each sample. Genera other than the six most often
+# dominant ones are named "Other".
+tse_genus <- addDominant(
+    tse_genus,
+    assay.type = "relabundance", n = 6, name = "most_abundant"
 )
 
 # Visualization
@@ -1140,7 +1132,7 @@ Similarly, we visualize and compare the sub-population
 #| code-fold: true
 #| code-summary: "Show the plotting code"
 #| fig-cap: "Bray-Curtis PCoA of the GlobalPatterns samples colored by their dominant genus, shown separately for non-fecal (FALSE) and fecal (TRUE) samples."
-#| fig-alt: "Two scatter plots side by side, one for non-fecal (FALSE) and one for fecal (TRUE) samples, showing the samples on the first two PCoA axes. Points are colored by dominant genus, using the six top genera and Other."
+#| fig-alt: "Two scatter plots side by side, one for non-fecal (FALSE) and one for fecal (TRUE) samples, showing the samples on the first two PCoA axes. Points are colored by dominant genus, using the six most often dominant genera and Other."
 #| fig-width: 10
 
 # Visualization split by group
