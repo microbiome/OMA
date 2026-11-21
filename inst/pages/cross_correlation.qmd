@@ -32,6 +32,8 @@ logarithmic transformation.
 #| label: cross-association2
 # Agglomerate microbiome data at family level
 mae[[1]] <- agglomerateByRank(mae[[1]], rank = "Family", na.rm = TRUE)
+# Remove the "D_4__" prefix of the SILVA family names
+rownames(mae[[1]]) <- sub("^D_4__", "", rownames(mae[[1]]))
 mae[[1]] <- addPrevalence(mae[[1]])
 mae[[1]] <- subsetBy(
     mae[[1]],
@@ -71,8 +73,8 @@ families and metabolite concentrations (@fig-cross-association-heatmap).
 #| label: fig-cross-association-heatmap
 #| fig-cap: "Heatmap of Spearman correlations between log10-transformed abundances of prevalent bacterial families (rows) and NMR metabolite concentrations (columns) in the Hintikka et al. (2021) data. Color shows the correlation and X marks correlations with adjusted p-value below 0.05."
 #| fig-alt: "Clustered heatmap with bacterial families as rows and metabolites as columns, filled by Spearman correlation on a color scale, with an X in the cells of significant correlations."
-#| fig-width: 10
-#| fig-height: 8
+#| fig-width: 12
+#| fig-height: 9
 #| column: page
 
 library(ComplexHeatmap)
@@ -92,18 +94,12 @@ add_signif <- function(j, i, x, y, width, height, fill) {
 
 # Create a heatmap
 p <- Heatmap(res$cor,
-    name = "correlation",
     # Print values to cells
     cell_fun = add_signif,
-    heatmap_legend_param = list(legend_height = unit(5, "cm")),
-    row_names_gp = gpar(fontsize = 9),
-    column_names_gp = gpar(fontsize = 9),
-    column_names_rot = 90,
-    # Reserve enough space for the longest row name
-    row_names_max_width = max_text_width(
-        rownames(res$cor),
-        gp = gpar(fontsize = 9)
-    )
+    heatmap_legend_param = list(
+        title = "correlation", legend_height = unit(5, "cm")
+    ),
+    column_names_rot = 90
 )
 p
 ```
@@ -207,6 +203,8 @@ mae[["microbiota"]] <- agglomerateByRank(
     mae[["microbiota"]],
     rank = "Family", na.rm = TRUE
 )
+rownames(mae[["microbiota"]]) <-
+    sub("^D_4__", "", rownames(mae[["microbiota"]]))
 mae[["microbiota"]] <- addPrevalence(mae[["microbiota"]])
 mae[["microbiota"]] <- subsetBy(
     mae[["microbiota"]],
@@ -284,9 +282,8 @@ is the correlation between one family and one biomarker.
 **Goal:** Visualize cross-associations with a heatmap.
 
 1. Visualize the correlation matrix `res$cor` from Exercise 3 with a heatmap.
-Name the color legend `"correlation"` (`name = "correlation"`), and rotate
-the column names by 90 degrees (`column_names_rot = 90`) so that they do not
-overlap.
+Rotate the column names by 90 degrees (`column_names_rot = 90`) and name the
+legend (`name = "correlation"`).
 
 2. How do you read the heatmap? What does a positive and a negative
 correlation between a family and a biomarker mean?
@@ -298,23 +295,13 @@ correlation between a family and a biomarker mean?
 
 ```{r}
 #| label: exercise_cross_correlation_heatmap
-#| fig-width: 10
-#| fig-height: 8
+#| fig-width: 12
+#| fig-height: 9
 
 library(ComplexHeatmap)
 
 # 1. Heatmap of the correlations
-Heatmap(
-    res$cor,
-    name = "correlation",
-    row_names_gp = gpar(fontsize = 9),
-    column_names_gp = gpar(fontsize = 9),
-    column_names_rot = 90,
-    row_names_max_width = max_text_width(
-        rownames(res$cor),
-        gp = gpar(fontsize = 9)
-    )
-)
+Heatmap(res$cor, name = "correlation", column_names_rot = 90)
 ```
 
 2. Each row is a family and each column a biomarker, and the color of a cell
