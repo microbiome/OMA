@@ -184,8 +184,10 @@ box plot and histogram (@fig-qc-library-size).
 library(miaViz)
 library(patchwork)
 
-p1 <- plotBoxplot(tse, col.var = "total", x = "sex", add.points = FALSE)
-p2 <- plotHistogram(tse, col.var = "total")
+p1 <- plotBoxplot(tse, col.var = "total", x = "sex", add.points = FALSE) +
+    labs(x = "Sex", y = "Library size")
+p2 <- plotHistogram(tse, col.var = "total") +
+    labs(x = "Library size", y = "Number of samples")
 
 p1 + p2
 ```
@@ -327,7 +329,11 @@ distribution with a histogram (@fig-qc-counts-histogram).
 #| fig-alt: "Histogram of count values on a log-scaled x-axis with a very tall bar at zero and a long, thin tail towards large counts."
 
 plotHistogram(tse, assay.type = "counts") +
-    scale_x_continuous(transform = "log1p", breaks = c(0, 10^(1:5)))
+    scale_x_continuous(
+        transform = "log1p", breaks = c(0, 10^(1:5)), labels = scales::comma
+    ) +
+    scale_y_continuous(labels = scales::comma) +
+    labs(x = "Count", y = "Number of values")
 ```
 
 The microbiome data is typically zero-inflated, meaning that there are lots of
@@ -341,9 +347,9 @@ zeroes. The same method can also be used to visualize continuous variables from
 #| fig-alt: "Two panels. Left: histogram of sample age. Right: bar chart with one bar per sex showing the number of samples."
 
 p1 <- plotHistogram(tse, col.var = "age") +
-    labs(x = "Age")
+    labs(x = "Age", y = "Number of samples")
 p2 <- plotBarplot(tse, col.var = "sex") +
-    labs(x = "Sex")
+    labs(x = "Sex", y = "Number of samples")
 
 p1 + p2
 ```
@@ -376,7 +382,8 @@ plotAbundanceDensity(
     # Small, transparent points show where the many samples concentrate
     point.size = 1, point.shape = 19, point.alpha = 0.1
 ) +
-    scale_x_log10(labels = scales::percent)
+    scale_x_log10(labels = scales::percent) +
+    labs(x = "Relative abundance")
 ```
 
 The relative abundance values for the top-5 taxonomic features can be
@@ -394,7 +401,8 @@ plotAbundanceDensity(
     assay.type = "relabundance",
     n = 5, colour.by = "sex"
 ) +
-    scale_x_log10()
+    scale_x_log10() +
+    labs(x = "Relative abundance", colour = "Sex")
 ```
 
 Alternatively, the `plotBoxplot()` function from the
@@ -422,7 +430,8 @@ plotBoxplot(
     facet.by = "rownames",
     add.points = FALSE
 ) +
-    scale_y_log10()
+    scale_y_log10() +
+    labs(x = "Sex", y = "Relative abundance", fill = "Sex")
 ```
 
 ### Prevalence
@@ -450,7 +459,8 @@ mostly rare taxonomic features. The population prevalence (frequency) at a
 tse <- addPrevalence(tse, detection = 0.1 / 100, as.relative = TRUE)
 
 # Plot them with a histogram
-plotHistogram(tse, row.var = "prevalence")
+plotHistogram(tse, row.var = "prevalence") +
+    labs(x = "Prevalence", y = "Number of features")
 ```
 
 Most of the features are present only in a minority of the samples with a
@@ -521,7 +531,8 @@ can then visualize this distribution again with a histogram
 tse <- addPrevalentAbundance(tse, prevalence = 50 / 100, detection = 0.1 / 100)
 
 # Visualize
-plotHistogram(tse, col.var = "prevalent_abundance")
+plotHistogram(tse, col.var = "prevalent_abundance") +
+    labs(x = "Abundance of core features", y = "Number of samples")
 ```
 
 The histogram shows how many samples have a given proportion of core
@@ -748,10 +759,12 @@ tse <- addQC(tse)
 colnames(colData(tse))
 
 # 2. Histogram of library sizes
-plotHistogram(tse, col.var = "total")
+plotHistogram(tse, col.var = "total") +
+    labs(x = "Library size", y = "Number of samples")
 
 # 3. Number of samples by diet
-plotBarplot(tse, col.var = "Diet")
+plotBarplot(tse, col.var = "Diet") +
+    labs(y = "Number of samples")
 ```
 
 1. The library size, that is, the total count of each sample, is stored in
@@ -797,7 +810,11 @@ choosing a statistical test?
 
 # 1. Histogram of counts
 plotHistogram(tse, assay.type = "counts") +
-    scale_x_continuous(transform = "log1p", breaks = c(0, 10^(1:5)))
+    scale_x_continuous(
+        transform = "log1p", breaks = c(0, 10^(1:5)), labels = scales::comma
+    ) +
+    scale_y_continuous(labels = scales::comma) +
+    labs(x = "Count", y = "Number of values")
 
 # 2. Jitter plot of the top 20 features
 plotAbundanceDensity(
@@ -866,10 +883,12 @@ abundance.
 tse <- addPrevalence(tse, detection = 0.1 / 100, as.relative = TRUE)
 
 # 2. Histogram of prevalences
-plotHistogram(tse, row.var = "prevalence")
+plotHistogram(tse, row.var = "prevalence") +
+    labs(x = "Prevalence", y = "Number of features")
 
 # 3. Prevalence against abundance
-plotPrevalentAbundance(tse)
+plotPrevalentAbundance(tse) +
+    scale_x_log10()
 
 # 4. Proportion of core features in each sample
 tse <- addPrevalentAbundance(
@@ -877,7 +896,8 @@ tse <- addPrevalentAbundance(
     prevalence = 50 / 100,
     detection = 0.1 / 100
 )
-plotHistogram(tse, col.var = "prevalent_abundance")
+plotHistogram(tse, col.var = "prevalent_abundance") +
+    labs(x = "Abundance of core features", y = "Number of samples")
 ```
 
 4. The histogram shows how large a proportion of each sample consists of the
