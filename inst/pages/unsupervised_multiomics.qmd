@@ -69,6 +69,10 @@ instead of a log transformation, we standardize each biomarker.
 
 # Agglomerate microbiome data
 mae[["microbiota"]] <- agglomerateByRank(mae[["microbiota"]], rank = "Genus")
+# Remove the "D_5__" prefix of the SILVA genus names to shorten the labels
+rownames(mae[["microbiota"]]) <- sub(
+    "^D_5__", "", rownames(mae[["microbiota"]])
+)
 
 # Filter the raw counts in steps
 tse <- mae[["microbiota"]]
@@ -151,7 +155,7 @@ not the proportion of variance explained in the observed data
 
 library(miaViz)
 
-plotJointRPCAExplainedVariance(mae, "JointRPCA")
+plotJointRPCAExplainedVariance(mae, "JointRPCA", add.total = TRUE)
 ```
 
 As in other ordination methods, the samples can be visualized in the space of
@@ -248,6 +252,7 @@ library(MOFA2)
 
 # Agglomerate microbiome data
 mae[[1]] <- agglomerateByRank(mae[[1]], rank = "Genus")
+rownames(mae[[1]]) <- sub("^D_5__", "", rownames(mae[[1]]))
 mae[[1]] <- addPrevalence(mae[[1]])
 mae[[1]] <- subsetBy(
     mae[[1]],
@@ -383,7 +388,7 @@ p2 <- plot_top_weights(
     nfeatures = 10
 )
 
-wrap_plots(p1, p2, ncol = 1)
+wrap_plots(p1 + ggtitle("Microbiota"), p2 + ggtitle("Metabolites"), ncol = 1)
 ```
 
 More tutorials and examples of using the package are found at
@@ -492,6 +497,8 @@ assayNames(mae[["biomarkers"]])
 
 # 3. Agglomerate the microbiota data to genus level
 mae[["microbiota"]] <- agglomerateByRank(mae[["microbiota"]], rank = "Genus")
+rownames(mae[["microbiota"]]) <-
+    sub("^D_5__", "", rownames(mae[["microbiota"]]))
 
 # 4. Filter the counts in three steps
 tse <- mae[["microbiota"]]
@@ -576,7 +583,7 @@ mae <- addJointRPCA(
 metadata(mae)[["JointRPCA"]] |> head()
 
 # 3. Explained variance
-plotJointRPCAExplainedVariance(mae, "JointRPCA")
+plotJointRPCAExplainedVariance(mae, "JointRPCA", add.total = TRUE)
 
 # 4. Samples colored by diet
 plotJointRPCA(mae, "JointRPCA", colour.by = "Diet")
@@ -616,6 +623,8 @@ calculated from the observed data?
 
 ```{r}
 #| label: exercise_multiomics_jrpca_features
+#| fig-width: 10
+#| fig-height: 10
 
 # 1. Top loadings in each omic layer
 plotJointRPCALoadings(mae, "JointRPCA", ncomponents = 2, n = 10)
@@ -701,6 +710,8 @@ mae[["microbiota"]] <- agglomerateByRank(
     mae[["microbiota"]],
     rank = "Genus"
 )
+rownames(mae[["microbiota"]]) <-
+    sub("^D_5__", "", rownames(mae[["microbiota"]]))
 mae[["microbiota"]] <- addPrevalence(mae[["microbiota"]])
 mae[["microbiota"]] <- subsetBy(
     mae[["microbiota"]],
