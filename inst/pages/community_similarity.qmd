@@ -189,7 +189,7 @@ tse <- transformAssay(
 )
 
 # Add group information Feces yes/no
-tse$Group <- tse$SampleType == "Feces"
+tse$Group <- ifelse(tse$SampleType == "Feces", "Fecal", "Non-fecal")
 ```
 
 ::: {.callout-caution }
@@ -465,7 +465,7 @@ the groups in @fig-community-mds-bray?
 ```{r}
 #| label: fig-community-mds-bray
 #| fig-cap: "MDS (PCoA) plot based on the Bray-Curtis dissimilarities of relative abundances in the GlobalPatterns dataset. Points are colored by group (fecal or non-fecal sample), and axis labels show the proportion of variance explained."
-#| fig-alt: "Scatter plot of the samples on the first two MDS axes, with the percentage of variance explained in the axis labels. Points are colored by whether the sample is fecal (TRUE) or not (FALSE)."
+#| fig-alt: "Scatter plot of the samples on the first two MDS axes, with the percentage of variance explained in the axis labels. Points are colored by whether the sample is fecal or not."
 
 # Create ggplot object with explained variance in the axis labels
 p <- plotOrdination(
@@ -544,8 +544,8 @@ question.
 #| label: fig-community-mds-nmds-comparison
 #| code-fold: true
 #| code-summary: "Show the plotting code"
-#| fig-cap: "Comparison of MDS and NMDS plots based on the Bray-Curtis or Aitchison distances on the GlobalPatterns dataset. Points are colored by group (fecal or non-fecal sample)."
-#| fig-alt: "Grid of four scatter plots: MDS and NMDS ordinations with Bray-Curtis and with Aitchison distances. In every panel, points are colored by fecal (TRUE) or non-fecal (FALSE) sample, with a shared legend."
+#| fig-cap: "Comparison of MDS and NMDS plots based on the Bray-Curtis or Aitchison distances on the GlobalPatterns dataset: (A) MDS, Bray-Curtis; (B) MDS, Aitchison; (C) NMDS, Bray-Curtis; (D) NMDS, Aitchison. Points are colored by group (fecal or non-fecal sample)."
+#| fig-alt: "Grid of four scatter plots: MDS and NMDS ordinations with Bray-Curtis and with Aitchison distances. In every panel, points are colored by fecal or non-fecal sample, with a shared legend."
 #| fig-width: 8
 #| fig-height: 7
 
@@ -560,7 +560,8 @@ p4 <- plotOrdination(tse, "NMDS_aitchison", colour.by = "Group")
 
 # Generate multi-panel plot
 wrap_plots(p1, p2, p3, p4) +
-    plot_layout(guides = "collect")
+    plot_layout(guides = "collect") +
+    plot_annotation(tag_levels = "A")
 ```
 
 The _Unifrac_ method is a special case, as it requires data on the
@@ -571,7 +572,7 @@ used within `addMDS()` (@fig-community-mds-unifrac).
 ```{r}
 #| label: fig-community-mds-unifrac
 #| fig-cap: "UniFrac distances scaled by MDS of the GlobalPatterns dataset. Points are colored by group (fecal or non-fecal sample)."
-#| fig-alt: "Scatter plot of the samples on the first two MDS axes based on UniFrac distances, with points colored by fecal (TRUE) or non-fecal (FALSE) sample."
+#| fig-alt: "Scatter plot of the samples on the first two MDS axes based on UniFrac distances, with points colored by fecal or non-fecal sample."
 
 tse <- addMDS(
     tse,
@@ -709,13 +710,13 @@ with `runUMAP()` from the `r BiocStyle::Biocpkg("scater")` package
 
 ```{r}
 #| label: fig-community-pca
-#| fig-cap: "PCA plot of the counts in the GlobalPatterns dataset containing samples from different sources. Points are colored by group (fecal or non-fecal sample), and axis labels show the proportion of variance explained."
-#| fig-alt: "Scatter plot of the samples on the first two principal components, with the percentage of variance explained in the axis labels. Points are colored by fecal (TRUE) or non-fecal (FALSE) sample."
+#| fig-cap: "PCA plot of the clr-transformed abundances in the GlobalPatterns dataset containing samples from different sources. Points are colored by group (fecal or non-fecal sample), and axis labels show the proportion of variance explained."
+#| fig-alt: "Scatter plot of the samples on the first two principal components, with the percentage of variance explained in the axis labels. Points are colored by fecal or non-fecal sample."
 
 tse <- addPCA(
     tse,
     name = "PCA",
-    assay.type = "counts",
+    assay.type = "clr",
     ncomponents = 10
 )
 
@@ -729,7 +730,7 @@ sample set and research question.
 ```{r}
 #| label: fig-community-umap
 #| fig-cap: "UMAP plot of the first two components of the GlobalPatterns dataset containing samples from different sources. Points are colored by group (fecal or non-fecal sample)."
-#| fig-alt: "Scatter plot of the samples on the first two UMAP components, with points colored by fecal (TRUE) or non-fecal (FALSE) sample."
+#| fig-alt: "Scatter plot of the samples on the first two UMAP components, with points colored by fecal or non-fecal sample."
 
 library(scater)
 
@@ -849,6 +850,7 @@ and a few covariates such as gender and age.
 # Load data
 data("enterotype", package = "mia")
 tse2 <- enterotype
+rownames(tse2)[rownames(tse2) == "-1"] <- "Unassigned"
 
 # Apply relative transform
 tse2 <- transformAssay(tse2, method = "relabundance")
@@ -1122,8 +1124,8 @@ Similarly, we visualize and compare the sub-population
 #| label: fig-community-pcoa-dominant-groups
 #| code-fold: true
 #| code-summary: "Show the plotting code"
-#| fig-cap: "Bray-Curtis PCoA of the GlobalPatterns samples colored by their dominant genus, shown separately for non-fecal (FALSE) and fecal (TRUE) samples."
-#| fig-alt: "Two scatter plots side by side, one for non-fecal (FALSE) and one for fecal (TRUE) samples, showing the samples on the first two PCoA axes. Points are colored by dominant genus, using the six most often dominant genera and Other."
+#| fig-cap: "Bray-Curtis PCoA of the GlobalPatterns samples colored by their dominant genus, shown separately for fecal and non-fecal samples."
+#| fig-alt: "Two scatter plots side by side, one for fecal and one for non-fecal samples, showing the samples on the first two PCoA axes. Points are colored by dominant genus, using the six most often dominant genera and Other."
 #| fig-width: 10
 
 # Visualization split by group
