@@ -713,7 +713,8 @@ subsampling of a given assay within a `TreeSummarizedExperiment` dataset.
 
 ### Other methods {#sec-other-ord-methods}
 
-Other dimension reduction methods, such as PCA and UMAP, are also available.
+Other dimension reduction methods, such as PCA, robust PCA and UMAP, are also
+available.
 PCA is calculated with `addPCA()` from `r BiocStyle::Biocpkg("mia")`, and UMAP
 with `runUMAP()` from the `r BiocStyle::Biocpkg("scater")` package
 [@McCarthy2017]. PCA is shown in @fig-community-pca and UMAP in
@@ -733,6 +734,47 @@ tse <- addPCA(
 
 # Visualize the result
 plotOrdination(tse, "PCA", colour.by = "Group", add.expl.var = TRUE)
+```
+
+A scree plot shows how much variance each component explains
+(@fig-community-pca-scree). It helps to decide how many components are worth
+interpreting: typically those before the curve levels off.
+
+```{r}
+#| label: fig-community-pca-scree
+#| fig-cap: "Scree plot of the PCA of the clr-transformed GlobalPatterns data. Each point is the eigenvalue (explained variance) of one principal component."
+#| fig-alt: "Line plot with the principal components 1 to 10 on the x-axis and their eigenvalues on the y-axis. The eigenvalues drop steeply over the first three components and then level off."
+#| fig-width: 6
+#| fig-height: 4
+
+plotScree(tse, "PCA")
+```
+
+Robust Aitchison PCA (RPCA) [@Martino2019] is a PCA for compositional data
+with many zeros. It uses the robust clr (rclr) transformation, which is
+calculated from the non-zero values only, and treats the zeros as missing
+values that are filled in by matrix completion. Unlike the clr
+transformation, it does not need a pseudocount. RPCA is calculated with
+`addRPCA()` (@fig-community-rpca). The same method is extended to multiple
+omics in Joint-RPCA ([@sec-unsupervised-multiomics]).
+
+```{r}
+#| label: fig-community-rpca
+#| fig-cap: "Robust Aitchison PCA (RPCA) of the GlobalPatterns dataset. Points are colored by group (fecal or non-fecal sample), and axis labels show the proportion of variance explained."
+#| fig-alt: "Scatter plot of the samples on the first two RPCA components, with the percentage of variance explained in the axis labels. Points are colored by fecal or non-fecal sample."
+#| fig-width: 7
+#| fig-height: 5
+
+# rclr without imputation: RPCA itself handles the zeros
+tse <- transformAssay(
+    tse,
+    assay.type = "counts",
+    method = "rclr",
+    impute = FALSE
+)
+tse <- addRPCA(tse, assay.type = "rclr", name = "RPCA")
+
+plotOrdination(tse, "RPCA", colour.by = "Group", add.expl.var = TRUE)
 ```
 
 As mentioned before, applicability of the different methods depends on your

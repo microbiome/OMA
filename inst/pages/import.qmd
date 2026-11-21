@@ -278,6 +278,10 @@ should be numeric (abundances).
 provides feature IDs, the first row provides column headers; this file usually
 contains the taxonomic mapping between different taxonomic levels. Ideally, the
 feature IDs (row names) match one-to-one with the abundance table row names.
+Some pipelines store the taxonomy as a single string per feature, such as
+`"k__Bacteria; p__Firmicutes; c__Bacilli"`. Such strings can be split into
+one column per rank with `parseTaxonomy()` from
+`r BiocStyle::Biocpkg("mia")`.
 
 - Column data (`coldata.csv`): data table (samples x info); first column
 provides sample IDs, the first row provides column headers; this file usually
@@ -449,6 +453,22 @@ experiments <- ExperimentList(
 mae <- MultiAssayExperiment(experiments = experiments)
 
 mae
+```
+
+When the experiments share the same samples, they can also be stored in a
+single `TreeSE`, with the other experiments as alternative experiments
+(`altExp()`). `convertToTreeSE()` and `convertToMAE()` convert between the
+two containers.
+
+```{r}
+#| label: import_mae3
+
+# MAE to TreeSE: the other experiments become altExps of the first one
+tse_all <- convertToTreeSE(mae)
+altExpNames(tse_all)
+
+# And back to MAE
+convertToMAE(tse_all)
 ```
 
 ## Import from other R objects {#sec-conversions-between-data-formats-in-r}
