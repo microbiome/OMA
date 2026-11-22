@@ -125,7 +125,7 @@ local({
     p2 <- ggplot(dd, aes(s1, s2, fill = value)) +
         geom_tile(colour = "white") +
         geom_text(aes(label = sprintf("%.2f", value)), size = 3) +
-        scale_fill_gradient(low = "#ffffff", high = "#E69F00", guide = "none") +
+        scale_fill_gradient(low = "#fff3e0", high = "#E69F00", guide = "none") +
         labs(title = "2. Dissimilarities", x = NULL, y = NULL) +
         theme_minimal(base_size = 12) +
         theme(panel.grid = element_blank())
@@ -555,9 +555,15 @@ question.
 library(patchwork)
 
 # Generate plots for all 4 reducedDims
-p1 <- plotOrdination(tse, "MDS_bray", colour.by = "Group") +
+p1 <- plotOrdination(
+    tse, "MDS_bray",
+    colour.by = "Group", add.expl.var = TRUE
+) +
     labs(title = "MDS, Bray-Curtis")
-p2 <- plotOrdination(tse, "MDS_aitchison", colour.by = "Group") +
+p2 <- plotOrdination(
+    tse, "MDS_aitchison",
+    colour.by = "Group", add.expl.var = TRUE
+) +
     labs(title = "MDS, Aitchison")
 p3 <- plotOrdination(tse, "NMDS_bray", colour.by = "Group") +
     labs(title = "NMDS, Bray-Curtis")
@@ -591,8 +597,7 @@ tse <- addMDS(
     assay.type = "counts"
 )
 
-plotOrdination(tse, "unifrac", colour.by = "Group") +
-    labs(x = "PCoA1 (UniFrac)", y = "PCoA2 (UniFrac)")
+plotOrdination(tse, "unifrac", colour.by = "Group", add.expl.var = TRUE)
 ```
 
 ### Rarefaction {#sec-rarefaction_ordination}
@@ -724,6 +729,8 @@ with `runUMAP()` from the `r BiocStyle::Biocpkg("scater")` package
 #| label: fig-community-pca
 #| fig-cap: "PCA plot of the clr-transformed abundances in the GlobalPatterns dataset containing samples from different sources. Points are colored by group (fecal or non-fecal sample), and axis labels show the proportion of variance explained."
 #| fig-alt: "Scatter plot of the samples on the first two principal components, with the percentage of variance explained in the axis labels. Points are colored by fecal or non-fecal sample."
+#| fig-width: 7
+#| fig-height: 5
 
 tse <- addPCA(
     tse,
@@ -784,6 +791,8 @@ sample set and research question.
 #| label: fig-community-umap
 #| fig-cap: "UMAP plot of the first two components of the GlobalPatterns dataset containing samples from different sources. Points are colored by group (fecal or non-fecal sample)."
 #| fig-alt: "Scatter plot of the samples on the first two UMAP components, with points colored by fecal or non-fecal sample."
+#| fig-width: 6
+#| fig-height: 5
 
 library(scater)
 
@@ -854,7 +863,7 @@ between the observations (@fig-community-shepard).
 #| code-fold: true
 #| code-summary: "Show the plotting code"
 #| fig-cap: "Shepard plot comparing the original Bray-Curtis dissimilarities (x-axis) with the distances in the PCoA space (y-axis) for the GlobalPatterns samples. The relative stress is shown in the subtitle."
-#| fig-alt: "Scatter plot with the original Bray-Curtis dissimilarity on the x-axis and the distance in the PCoA space on the y-axis, one point per sample pair, with a smoothed trend line. The subtitle gives the stress value."
+#| fig-alt: "Scatter plot with the original Bray-Curtis dissimilarity on the x-axis and the distance in the PCoA space on the y-axis, one point per sample pair. The subtitle gives the stress value."
 
 ord <- order(as.vector(d0))
 df <- data.frame(
@@ -863,8 +872,7 @@ df <- data.frame(
 )
 
 ggplot(df, aes(x = d0, y = dmds)) +
-    geom_smooth() +
-    geom_point() +
+    geom_point(alpha = 0.3) +
     labs(
         x = "Original distance",
         y = "MDS distance",
@@ -979,7 +987,7 @@ the `plotRDA()` function from the `r BiocStyle::Biocpkg("miaViz")` package
 library(miaViz)
 
 # Generate RDA plot colored by clinical status
-plotRDA(tse2, "RDA", colour.by = "ClinicalStatus", vec.text = FALSE) +
+plotRDA(tse2, "RDA", colour.by = "ClinicalStatus") +
     labs(colour = "Clinical status")
 ```
 
@@ -1616,8 +1624,8 @@ the dbRDA plot?
 
 ```{r}
 #| label: exercise_community_dbrda
-#| fig-width: 8
-#| fig-height: 7
+#| fig-width: 7
+#| fig-height: 6
 
 # 1. dbRDA with two covariates
 set.seed(123)
@@ -1634,7 +1642,7 @@ rda_info$permanova
 rda_info$homogeneity
 
 # 3. dbRDA plot
-plotRDA(tse, "RDA", colour.by = "patient_status", vec.text = FALSE) +
+plotRDA(tse, "RDA", colour.by = "patient_status") +
     labs(colour = "Patient status")
 
 # 4. Loadings of the top 10 taxa
