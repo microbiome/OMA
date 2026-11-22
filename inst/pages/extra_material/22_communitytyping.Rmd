@@ -31,9 +31,19 @@ Let's cluster the data with DMM clustering.
 # Runs model and calculates the most likely number of clusters from 1 to 7.
 # Since this is a large dataset it takes long computational time.
 # For this reason we use only a subset of the data; agglomerated by Phylum as a rank.
+library(bluster)
+
 tse <- GlobalPatterns
-tse <- agglomerateByRank(tse, rank = "Phylum", agglomerateTree = TRUE)
-tse_dmn <- runDMN(tse, name = "DMN", k = 1:7)
+tse <- agglomerateByRank(tse, rank = "Phylum", update.tree = TRUE)
+tse_dmn <- addCluster(
+    tse,
+    assay.type = "counts",
+    name = "DMN",
+    DmmParam(k = 1:7, type = "laplace"),
+    by = "samples",
+    full = TRUE,
+    clust.col = "dmmclust"
+)
 ```
 
 ```{r}
@@ -50,7 +60,8 @@ names(metadata(tse_dmn))
 This returns a list of DMN objects for a closer investigation.
 
 ```{r}
-getDMN(tse_dmn)
+dmn_models <- metadata(tse_dmn)[["DMN"]]
+dmn_models[["dmm"]]
 ```
 
 
@@ -61,10 +72,11 @@ library(miaViz)
 plotDMNFit(tse_dmn, type = "laplace")
 ```
 
-Return the model that has the best fit (see also `BestDMNFit`, which returns the index of the best fit).
+Return the model that has the best fit (`dmn_models[["best"]]` gives its number of components).
 
 ```{r}
-getBestDMNFit(tse_dmn, type = "laplace")
+best_model <- dmn_models[["dmm"]][[dmn_models[["best"]]]]
+best_model
 ```
 ### PCoA for ASV-level data with Bray-Curtis; with DMM clusters shown with colors
 
@@ -84,7 +96,7 @@ Mixture weights  (rough measure of the cluster size).
 
 
 ```{r}
-DirichletMultinomial::mixturewt(getBestDMNFit(tse_dmn))
+DirichletMultinomial::mixturewt(best_model)
 ```
 
 
@@ -92,19 +104,19 @@ Samples-cluster assignment probabilities / how probable it is that sample belong
 to each cluster
 
 ```{r}
-DirichletMultinomial::mixture(getBestDMNFit(tse_dmn)) |> head()
+DirichletMultinomial::mixture(best_model) |> head()
 ```
 
 Contribution of each taxa to each component
 
 ```{r}
-DirichletMultinomial::fitted(getBestDMNFit(tse_dmn)) |> head()
+DirichletMultinomial::fitted(best_model) |> head()
 ```
 Get the assignment probabilities
 
 
 ```{r}
-prob <- DirichletMultinomial::mixture(getBestDMNFit(tse_dmn))
+prob <- DirichletMultinomial::mixture(best_model)
 # Add column names
 colnames(prob) <- c("comp1", "comp2")
 
