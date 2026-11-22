@@ -161,9 +161,9 @@ be generally divided into two categories:
 - unsupervised ordination
 - supervised ordination
 
-The former includes Principal Coordinate Analysis (PCoA) [@Gower1966],
-Principal Component Analysis (PCA), and Uniform Manifold Approximation and
-Projection for Dimension Reduction (UMAP) [@McInnes2018], whereas the latter
+The former includes Principal Coordinate Analysis (PCoA) [@Gower1966] and
+Principal Component Analysis (PCA) [@Pearson1901; @Hotelling1933], whereas the
+latter
 is mainly represented by distance-based redundancy analysis (dbRDA)
 [@Legendre1999]. First, we will discuss unsupervised ordination
 methods and then proceed to supervised ones.
@@ -201,7 +201,7 @@ tse$Group <- ifelse(tse$SampleType == "Feces", "Fecal", "Non-fecal")
 The standard Jaccard index is calculated based on a presence/absence table.
 However, a common mistake is using the quantitative version instead. By
 default, the function `vegdist()` from the `r BiocStyle::CRANpkg("vegan")`
-package computes the abundance-weighted Jaccard
+package [@R_vegan] computes the abundance-weighted Jaccard
 dissimilarity, which is similar to Bray-Curtis. This can be controlled using
 the `binary` parameter.
 
@@ -384,7 +384,8 @@ local({
 ```
 
 Since PERMANOVA relies on comparing centroids, it assumes that the groups have
-similar within-group variation, i.e., homogeneous multivariate dispersions. If
+similar within-group variation, i.e., homogeneous multivariate dispersions
+[@Anderson2006]. If
 this assumption isn’t met, a significant result may reflect differences in
 dispersion rather than in centroids, so it’s important to check this
 assumption before drawing conclusions.
@@ -605,7 +606,9 @@ plotOrdination(tse, "MDS_unifrac", colour.by = "Group", add.expl.var = TRUE)
 
 ### Rarefaction {#sec-rarefaction_ordination}
 
-Background on rarefaction is provided in [@sec-rarefaction].
+Background on rarefaction [@Sanders1968; @Hurlbert1971] is provided in
+[@sec-rarefaction]. For rarefaction in beta diversity analysis, see
+@Schloss2024rarefaction1.
 
 Let us first convert the count assay to centered log ratio (clr) assay and
 calculate MDS with Aitchison distance without rarefaction:
@@ -721,12 +724,17 @@ subsampling of a given assay within a `TreeSummarizedExperiment` dataset.
 
 ### Other methods {#sec-other-ord-methods}
 
-Other dimension reduction methods, such as PCA, robust PCA and UMAP, are also
-available.
-PCA is calculated with `addPCA()` from `r BiocStyle::Biocpkg("mia")`, and UMAP
-with `runUMAP()` from the `r BiocStyle::Biocpkg("scater")` package
-[@McCarthy2017]. PCA is shown in @fig-community-pca and UMAP in
-@fig-community-umap.
+Other dimension reduction methods, such as PCA [@Pearson1901; @Hotelling1933]
+and robust PCA, are also available. PCA is calculated with `addPCA()` from
+`r BiocStyle::Biocpkg("mia")` and shown in @fig-community-pca.
+
+Nonlinear methods such as t-distributed stochastic neighbor embedding (t-SNE)
+[@vanderMaaten2008] and Uniform Manifold Approximation and Projection (UMAP)
+[@McInnes2018] are available in the `r BiocStyle::Biocpkg("scater")` package
+[@McCarthy2017] (see the list at the end of this chapter). They are rarely
+used for microbiome data, and we do not show examples here: the result
+depends strongly on the tuning parameters and the random seed, and the
+distances between groups of samples in the plot are not interpretable.
 
 ```{r}
 #| label: fig-community-pca
@@ -785,29 +793,6 @@ tse <- transformAssay(
 tse <- addRPCA(tse, assay.type = "rclr", name = "RPCA")
 
 plotOrdination(tse, "RPCA", colour.by = "Group", add.expl.var = TRUE)
-```
-
-As mentioned before, applicability of the different methods depends on your
-sample set and research question.
-
-```{r}
-#| label: fig-community-umap
-#| fig-cap: "UMAP plot of the first two components of the GlobalPatterns dataset containing samples from different sources. Points are colored by group (fecal or non-fecal sample)."
-#| fig-alt: "Scatter plot of the samples on the first two UMAP components, with points colored by fecal or non-fecal sample."
-#| fig-width: 6
-#| fig-height: 5
-
-library(scater)
-
-tse <- runUMAP(
-    tse,
-    name = "UMAP",
-    assay.type = "counts",
-    ncomponents = 3
-)
-
-# Visualize the result
-plotOrdination(tse, "UMAP", colour.by = "Group")
 ```
 
 ### Explained variance
@@ -894,7 +879,7 @@ unsupervised ordination methods.
 |                          | supervised ordination  | unsupervised ordination  |
 |:------------------------:|:----------------------:|:------------------------:|
 | Euclidean distance       | RDA                    | PCA                      |
-| non-Euclidean distance   | dbRDA                  | PCoA/MDS, NMDS, UMAP     |
+| non-Euclidean distance   | dbRDA                  | PCoA/MDS, NMDS           |
 
 In summary, the "dbRDA" is the more general method that allows a wider
 variety of dissimilarity, or beta diversity, indices. This method is available
@@ -1218,11 +1203,13 @@ packages. The `get` (and `calculate`) methods return the result, such as a
 matrix of reduced dimensions, as an output, whereas the `add` (and `run`)
 methods store the result into the specified `TreeSE`.
 
-* Canonical Correspondence Analysis (CCA): `getCCA()` and `addCCA()`
+* Canonical Correspondence Analysis (CCA) [@terBraak1986]: `getCCA()` and
+`addCCA()`
 * dbRDA: `getRDA()` and `addRDA()`; our recommended default method to assess
 differences in community composition (beta diversity)
-* Double Principal Coordinate Analysis (DPCoA): `getDPCoA()` and `addDPCoA()`
-* Jensen-Shannon Divergence (JSD): `getDissimilarity()` and
+* Double Principal Coordinate Analysis (DPCoA) [@Pavoine2004]: `getDPCoA()`
+and `addDPCoA()`
+* Jensen-Shannon Divergence (JSD) [@Lin1991]: `getDissimilarity()` and
 `addDissimilarity()` with `method = "jsd"`
 * MDS: `getMDS()` and `addMDS()`
 * NMDS: `getNMDS()` and `addNMDS()`
@@ -1232,9 +1219,10 @@ differences in community composition (beta diversity)
 `vegan::adonis2()`) can be used to assess significance
 when comparing community composition between groups. However, retrieving the
 loadings and components is more tricky.
-* t-distributed Stochastic Neighbor Embedding (t-SNE): `calculateTSNE()`
-and `runTSNE()`
-* UMAP: `calculateUMAP()` and `runUMAP()`
+* t-distributed Stochastic Neighbor Embedding (t-SNE) [@vanderMaaten2008]:
+`calculateTSNE()` and `runTSNE()` (not commonly used for microbiome data)
+* UMAP [@McInnes2018]: `calculateUMAP()` and `runUMAP()` (not commonly used for
+microbiome data)
 
 For more information on sample clustering, you can refer to:
 
