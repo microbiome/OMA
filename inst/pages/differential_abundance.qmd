@@ -284,11 +284,13 @@ res_limrots |>
 ```
 
 Using the standard criterion for statistical significance, q-value < 0.05, the
-abundances of several genera differ between the groups. For instance,
-_Faecalibacterium_ has a positive log~2~-fold change, so it is more abundant
-in the ADHD group, while _Erysipelatoclostridium_ is less abundant. We repeat
-the analysis with MaAsLin2 in the following sections and compare the results
-in @sec-daa-cov.
+abundances of `r sum(res_limrots$qval < 0.05)` out of `r nrow(res_limrots)`
+genera differ between the groups. Several genera share the smallest p-value
+that is possible with the number of permutations used. For instance,
+_[Eubacterium] fissicatena group_ has a positive log~2~-fold change, so it is
+more abundant in the ADHD group, while _Eubacterium_ is less abundant. We
+repeat the analysis with MaAsLin2 in the following sections and compare the
+results in @sec-daa-cov.
 
 ### MaAsLin2 {#sec-daa-maaslin2}
 
@@ -377,13 +379,17 @@ are considered (statistically) significant.
 
 Now, if we use the standard criterion for statistical significance, namely,
 q-value < 0.05, we can see that the DAA result is statistically significant for
-the genera named as _[Ruminococcus] gauvreauii group_, _Faecalibacterium_,
-_Catabacter_, _[Clostridium] innocuum group_ and _Erysipelatoclostridium_.
+`r sum(res_daa_basic$qval < 0.05)` out of `r nrow(res_daa_basic)` genera. The
+smallest p-values are observed for the genera named as _Eubacterium_,
+_Dielma_, _Ruminococcaceae UCG-004_, _[Eubacterium] rectale group_ and
+_[Eubacterium] fissicatena group_.
 (`r BiocStyle::Biocpkg("Maaslin2")` has some problems with special characters
 such as `[` or `]`, so we mapped the names back to the original ones above.)
-Moreover, for instance, the positive log~2~-fold change estimate of
-_Faecalibacterium_ tells that the average relative abundance of
-_Faecalibacterium_ is higher in the ADHD group.
+Moreover, for instance, the negative log~2~-fold change estimate of
+_Eubacterium_ tells that the average relative abundance of _Eubacterium_ is
+lower in the ADHD group, whereas the positive estimate of
+_Ruminococcaceae UCG-004_ tells that its average relative abundance is higher
+in the ADHD group.
 
 #### Visualizing the results {#sec-daa-viz}
 
@@ -391,13 +397,13 @@ While the numbers above provide summarized information about the group
 differences for each taxon, it is often useful to further examine these
 associations in more detail. That can be done, for instance, using strip
 plots with boxplots. We show here how such plots can be created for the
-significant taxa by using `plotBoxplot` function from
-the `r BiocStyle::Biocpkg("miaViz")` package (@fig-daa-boxplots).
+five significant genera with the smallest p-values by using `plotBoxplot`
+function from the `r BiocStyle::Biocpkg("miaViz")` package (@fig-daa-boxplots).
 
 ```{r}
 #| label: fig-daa-boxplots
-#| fig-cap: "Relative abundances of five significant genera in the ADHD and Control groups of the Tengeler2020 data, shown as strip plots with boxplots in a separate facet for each genus. The bars at the bottom show the prevalence of each genus in each group."
-#| fig-alt: "Five facets, one per genus, each with free y-axis scales and showing relative abundance in the ADHD and Control groups as boxplots overlaid with points for individual samples, plus horizontal prevalence bars below the boxes."
+#| fig-cap: "Relative abundances of the five significant genera with the smallest p-values in the ADHD and Control groups of the Tengeler2020 data, shown as strip plots with boxplots in a separate facet for each genus. The bars at the bottom show the prevalence of each genus in each group."
+#| fig-alt: "Five facets, one per genus, each with free y-axis scales and showing relative abundance in the ADHD and Control groups as boxplots overlaid with points for individual samples, plus horizontal prevalence bars below the boxes. Eubacterium, Dielma and [Eubacterium] rectale group are higher in the Control group, whereas Ruminococcaceae UCG-004 and [Eubacterium] fissicatena group are higher in the ADHD group."
 #| fig-width: 10
 #| fig-height: 6
 
@@ -407,11 +413,11 @@ library(miaViz)
 plotBoxplot(
     tse,
     features = c(
-        "[Ruminococcus]_gauvreauii_group",
-        "Faecalibacterium",
-        "Catabacter",
-        "Erysipelatoclostridium",
-        "[Clostridium]_innocuum_group"
+        "Eubacterium",
+        "Dielma",
+        "Ruminococcaceae_UCG-004",
+        "[Eubacterium]_rectale_group",
+        "[Eubacterium]_fissicatena_group"
     ),
     assay.type = "relabundance", # To plot relative abundances
     x = "patient_status", # The variable on the x (horizontal) axis
@@ -434,10 +440,12 @@ and
 each group.
 
 The strip plots and boxplots clearly show, for instance, how the relative
-abundance of _Faecalibacterium_ is higher in the ADHD group, as was indicated
-by the positive log~2~-fold change estimate (`coef`) in the results table above.
-Moreover, for instance, the prevalence bars of _Erysipelatoclostridium_
-show how _Erysipelatoclostridium_ is more prevalent in the control group.
+abundance of _Eubacterium_ is lower in the ADHD group, as was indicated
+by the negative log~2~-fold change estimate (`coef`) in the results table above.
+Moreover, the prevalence bars show that these genera differ also in their
+presence. For instance, _Eubacterium_ is present in all samples of the control
+group but in none of the ADHD group, whereas _Ruminococcaceae UCG-004_ is
+present only in the ADHD group.
 
 Lastly, we show how the results for all genera can be summarized visually
 by plotting the log~2~-fold change estimates and their 95% confidence
@@ -450,7 +458,7 @@ that is, the intercept and `patient_status`.
 ```{r}
 #| label: fig-daa-forest
 #| fig-cap: "Forest plot of the log2-fold change estimates (ADHD vs. Control) and their 95% confidence intervals for all genera in the Tengeler2020 data, ordered by the estimate."
-#| fig-alt: "Forest plot with one row per genus, sorted by estimate, showing the log2-fold change as a point with a horizontal 95% confidence interval."
+#| fig-alt: "Forest plot with one row per genus, sorted by estimate, showing the log2-fold change as a point with a horizontal 95% confidence interval. Many genera have confidence intervals that do not contain zero, some with negative and some with positive estimates."
 #| fig-height: 9
 # Plot the log2-fold changes and the 95% confidence intervals
 plotForest(
@@ -461,7 +469,7 @@ plotForest(
     id.var = "feature",
     order.by = "coef"
 ) +
-    labs(x = "Coefficient")
+    labs(x = "Log2 fold change (ADHD vs. Control)")
 ```
 
 #### With covariates {#sec-daa-cov}
@@ -534,20 +542,22 @@ res_daa_cov |>
 ```
 
 When comparing these results to the results in @sec-daa-basic, we
-can see that, for instance, the q-values of _Faecalibacterium_ and
-_Catabacter_ are now somewhat smaller. Nevertheless, the results look overall
-rather similar to the results without the covariate included. Therefore, cohort
-does not seem to be a confounder causing spurious associations between
-patient status and the abundances of any taxa.
+can see that, for instance, the q-values of _Dielma_ and _Parabacteroides_
+are now somewhat smaller, and a few more genera have q-values below 0.05.
+Nevertheless, the results look overall rather similar to the results without
+the covariate included: the same genera have the smallest p-values, and the
+genera that were significant without the covariate remain significant.
+Therefore, cohort does not seem to be a confounder causing spurious
+associations between patient status and the abundances of any taxa.
 
 These results also agree well with those of LimROTS with the same model
-(@sec-daa-limrots). The same genera have the smallest p-values, and their
-log~2~-fold changes have the same signs. The estimates are not identical, as
-the zeros are replaced differently (MaAsLin2 uses the smallest non-zero value
-of each taxon, whereas we used the smallest value in the whole data with
-LimROTS) and the p-values are computed differently. In this example, LimROTS
-gave somewhat smaller q-values, so a few more genera passed the q < 0.05
-threshold.
+(@sec-daa-limrots). Largely the same genera have the smallest p-values, and the
+log~2~-fold changes of the significant genera have the same signs. The
+estimates are not identical, as the zeros are replaced differently (MaAsLin2
+uses the smallest non-zero value of each taxon, whereas we used the smallest
+value in the whole data with LimROTS) and the p-values are computed
+differently. In this example, a few more genera passed the q < 0.05
+threshold with LimROTS.
 
 #### With an interaction {#sec-daa-ia}
 
@@ -637,25 +647,25 @@ res_daa_ia |>
     format_tt(digits = 3, num_fmt = "significant_cell")
 ```
 
-The smallest p-value is observed for _Coprobacter_. As the corresponding
+The smallest p-value is observed for _Paraprevotella_. As the corresponding
 log~2~-fold change
-estimate is negative it means that the difference in the relative abundance of
-_Coprobacter_ between the ADHD and Control groups is higher in Cohort 1 than
-in Cohort 3.
+estimate is positive it means that the difference in the relative abundance of
+_Paraprevotella_ between the ADHD and Control groups is higher in Cohort 3 than
+in Cohort 1.
 
 This interaction can be better illustrated by plotting the relative
-abundances of _Coprobacter_ by `patient_status` and `cohort`
+abundances of _Paraprevotella_ by `patient_status` and `cohort`
 (@fig-daa-interaction).
 
 ```{r}
 #| label: fig-daa-interaction
-#| fig-cap: "Relative abundances of Coprobacter in the ADHD and Control groups of the Tengeler2020 data, shown separately for each cohort. The bars at the bottom show the prevalence of Coprobacter in each group."
-#| fig-alt: "Facets for each cohort with the same y-axis scale, each showing Coprobacter relative abundance in the ADHD and Control groups as boxplots with points for individual samples and prevalence bars below. ADHD is higher in Cohort 1 and Control is higher in Cohort 3."
+#| fig-cap: "Relative abundances of Paraprevotella in the ADHD and Control groups of the Tengeler2020 data, shown separately for each cohort. The bars at the bottom show the prevalence of Paraprevotella in each group."
+#| fig-alt: "Facets for each cohort with the same y-axis scale, each showing Paraprevotella relative abundance in the ADHD and Control groups as boxplots with points for individual samples and prevalence bars below. Paraprevotella is present only in the Control group in Cohort 1, absent in Cohort 2, and present only in the ADHD group in Cohort 3."
 
-# Plot the abundances of Coprobacter by patient_status and cohort
+# Plot the abundances of Paraprevotella by patient_status and cohort
 plotBoxplot(
     tse,
-    features = "Coprobacter",
+    features = "Paraprevotella",
     assay.type = "relabundance", # To plot relative abundances
     x = "patient_status", # The variable on the x (horizontal) axis
     facet.by = "cohort", # To create a separate plot for each cohort
@@ -664,12 +674,14 @@ plotBoxplot(
     labs(x = "Patient status", y = "Relative abundance")
 ```
 
-Here we can clearly see how the relative abundances of _Coprobacter_ are higher
-in the ADHD group in Cohort 1 but they are higher in the Control group in
-Cohort 3. As the association is positive in Cohort 1 (the baseline cohort) and
-negative in Cohort 3, the sign of the interaction estimate is negative (the
-association becomes more negative when we move from the baseline cohort to a
-non-baseline cohort).
+Here we can clearly see how the relative abundances of _Paraprevotella_ are
+higher in the Control group in Cohort 1 but they are higher in the ADHD group
+in Cohort 3. As the association is negative in Cohort 1 (the baseline cohort)
+and positive in Cohort 3, the sign of the interaction estimate is positive (the
+association becomes more positive when we move from the baseline cohort to a
+non-baseline cohort). Note also that within each cohort, _Paraprevotella_ is
+present in only one of the groups, if at all. With such sparse data, the
+estimates of complex models should be interpreted with caution.
 
 Note that a similar plot could also be used to illustrate a possible confounding
 effect.
@@ -1028,6 +1040,7 @@ confidence interval contains zero?
 
 ```{r}
 #| label: exercise_daa_visualize
+#| fig-height: 8
 
 library(miaViz)
 
