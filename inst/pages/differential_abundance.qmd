@@ -194,13 +194,13 @@ tse$cohort <- factor(tse$cohort, levels = c("Cohort_1", "Cohort_2", "Cohort_3"))
 We first perform DAA with `r BiocStyle::Biocpkg("LimROTS")` [@Anwar2025],
 which fits a linear model for each taxon. It combines the linear model and the
 empirical Bayes variance moderation of `r BiocStyle::Biocpkg("limma")`
-[@Ritchie2015] with a reproducibility-optimized test statistic. The LimROTS
-method was inspired by @Elo2008, and added support for covariates. The
+[@Ritchie2015] with a reproducibility-optimized test statistic. LimROTS
+extends the ROTS method [@Elo2008] with support for covariates. The
 statistic is tuned with bootstrap resampling so that the ranking of the taxa
 is as reproducible as possible, and the p-values are obtained by permutation.
 LimROTS works directly with
 `SummarizedExperiment` objects, including `TreeSE`, and it adds the results to
-the `rowData` of the data. LimROTS applies to log-transformed omics data.
+the `rowData` of the data.
 
 Compared with standard linear models, such as those fitted by MaAsLin2
 (@sec-daa-basic), LimROTS has some potential advantages. The empirical Bayes
@@ -288,7 +288,8 @@ abundances of `r sum(res_limrots$qval < 0.05)` out of `r nrow(res_limrots)`
 genera differ between the groups. Several genera share the smallest p-value
 that is possible with the number of permutations used. For instance,
 _[Eubacterium] fissicatena group_ has a positive log~2~-fold change, so it is
-more abundant in the ADHD group, while _Eubacterium_ is less abundant. We
+more abundant in the ADHD group, while _[Eubacterium] rectale group_ is less
+abundant. We
 repeat the analysis with MaAsLin2 in the following sections and compare the
 results in @sec-daa-cov.
 
@@ -397,8 +398,8 @@ While the numbers above provide summarized information about the group
 differences for each taxon, it is often useful to further examine these
 associations in more detail. That can be done, for instance, using strip
 plots with boxplots. We show here how such plots can be created for the
-five significant genera with the smallest p-values by using `plotBoxplot`
-function from the `r BiocStyle::Biocpkg("miaViz")` package (@fig-daa-boxplots).
+five significant genera with the smallest p-values by using the
+`plotBoxplot()` function from the `r BiocStyle::Biocpkg("miaViz")` package (@fig-daa-boxplots).
 
 ```{r}
 #| label: fig-daa-boxplots
@@ -506,7 +507,8 @@ res_daa_cov <- obj_daa_cov$results |>
     group_by(metadata) |>
     mutate(qval = p.adjust(pval, method = "fdr")) |>
     ungroup() |>
-    select(feature, name, coef, stderr, pval, qval)
+    select(feature, name, coef, stderr, pval, qval) |>
+    mutate(feature = rownames(tse)[match(feature, make.names(rownames(tse)))])
 ```
 
 ```{r}
@@ -557,7 +559,10 @@ estimates are not identical, as the zeros are replaced differently (MaAsLin2
 uses the smallest non-zero value of each taxon, whereas we used the smallest
 value in the whole data with LimROTS) and the p-values are computed
 differently. In this example, a few more genera passed the q < 0.05
-threshold with LimROTS.
+threshold with LimROTS (`r sum(res_limrots$qval < 0.05)` genera) than with
+MaAsLin2
+(`r sum(res_daa_cov$qval[res_daa_cov$name == "patient_statusADHD"] < 0.05)`
+genera).
 
 #### With an interaction {#sec-daa-ia}
 
@@ -614,7 +619,8 @@ res_daa_ia <- obj_daa_ia$results |>
     group_by(metadata) |>
     mutate(qval = p.adjust(pval, method = "fdr")) |>
     ungroup() |>
-    select(feature, name, coef, stderr, pval, qval)
+    select(feature, name, coef, stderr, pval, qval) |>
+    mutate(feature = rownames(tse)[match(feature, make.names(rownames(tse)))])
 ```
 
 ```{r}
@@ -835,8 +841,8 @@ level. The results are the following:
 | Taxon B | -2.0 | 0.004 | 0.03 |
 | Taxon C | 1.5  | 0.020 | 0.12 |
 
-Answer the following questions without writing any code. The section
-@sec-daa-basic will help you.
+Answer the following questions without writing any code. @sec-daa-basic will
+help you.
 
 1. Which taxa are statistically significant when the standard criterion
 q-value < 0.05 is used?
@@ -876,8 +882,7 @@ false discovery rate (FDR).
 5. Different DAA methods often give very different results. If we try many
 methods, we are likely to find a method that supports our hypothesis just by
 chance (cherry-picking). The method should therefore be chosen before the
-analysis, for example, based on the recommendations in
-@sec-daa-recommendations.
+analysis, for example, based on the recommendations in @sec-daa-recommendations.
 :::
 ::::
 

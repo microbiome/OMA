@@ -1,7 +1,7 @@
 # Multi-omics ordination {#sec-unsupervised-multiomics}
 
 
-In this chapter, we continue from where we left off in the previous section
+In this chapter, we continue from where we left off in the previous chapter
 ([@sec-cross-correlation]). Instead of testing feature pairs one by one, we
 now look for patterns that are shared across the omic layers. We introduce two
 unsupervised integration methods: Joint Robust Principal Component Analysis
@@ -107,7 +107,7 @@ mae[["biomarkers"]] <- transformAssay(
 )
 ```
 
-::: callout-note
+::: {.callout-note}
 ## Note: Filtering with mia functions
 
 The metrics can also be calculated with `getPrevalence()` and `addQC()` from
@@ -252,20 +252,25 @@ Bernoulli distribution models are also available.
 library(MOFA2)
 
 # Agglomerate microbiome data
-mae[[1]] <- agglomerateByRank(mae[[1]], rank = "Genus")
-rownames(mae[[1]]) <- sub("^D_5__", "", rownames(mae[[1]]))
-mae[[1]] <- addPrevalence(mae[[1]])
-mae[[1]] <- subsetBy(
-    mae[[1]],
+mae[["microbiota"]] <- agglomerateByRank(mae[["microbiota"]], rank = "Genus")
+rownames(mae[["microbiota"]]) <-
+    sub("^D_5__", "", rownames(mae[["microbiota"]]))
+mae[["microbiota"]] <- addPrevalence(mae[["microbiota"]])
+mae[["microbiota"]] <- subsetBy(
+    mae[["microbiota"]],
     rows = prevalence > 0.5, collapse = TRUE
 )
 
 # Apply CLR transformation to microbiome counts assay
-mae[[1]] <- transformAssay(mae[[1]], method = "clr", pseudocount = TRUE)
+mae[["microbiota"]] <- transformAssay(
+    mae[["microbiota"]],
+    method = "clr",
+    pseudocount = TRUE
+)
 
 # Standardize microbiome CLR assay
-mae[[1]] <- transformAssay(
-    mae[[1]],
+mae[["microbiota"]] <- transformAssay(
+    mae[["microbiota"]],
     assay.type = "clr",
     method = "standardize",
     MARGIN = "rows",
@@ -273,11 +278,15 @@ mae[[1]] <- transformAssay(
 )
 
 # Apply log10 transformation to metabolome NMR assay
-mae[[2]] <- transformAssay(mae[[2]], assay.type = "nmr", method = "log10")
+mae[["metabolites"]] <- transformAssay(
+    mae[["metabolites"]],
+    assay.type = "nmr",
+    method = "log10"
+)
 
 # Standardize metabolome log10 assay
-mae[[2]] <- transformAssay(
-    mae[[2]],
+mae[["metabolites"]] <- transformAssay(
+    mae[["metabolites"]],
     assay.type = "log10",
     method = "standardize",
     MARGIN = "rows",
@@ -285,8 +294,8 @@ mae[[2]] <- transformAssay(
 )
 
 # Standardize biomarker assay
-mae[[3]] <- transformAssay(
-    mae[[3]],
+mae[["biomarkers"]] <- transformAssay(
+    mae[["biomarkers"]],
     assay.type = "signals",
     method = "standardize",
     MARGIN = "rows",
@@ -294,10 +303,9 @@ mae[[3]] <- transformAssay(
 )
 ```
 
-Then, we prepare the MOFA2 model and define the data and training parameters
-available as additional arguments, which will otherwise be set to default
-values.
-The full parameter list can be found with `?mofa2`.
+Then, we create the MOFA model with `mofa2()`. Data, model and training
+options can be given as additional arguments; otherwise, defaults are used
+(see `?mofa2`).
 
 ```{r}
 #| label: mofa4
@@ -314,7 +322,7 @@ model <- mofa2(
 model
 ```
 
-The model is then trained with `run_mofa`.
+The model is then trained with `run_mofa()`.
 
 ```{r}
 #| label: mofa5
@@ -533,6 +541,11 @@ mae[["biomarkers"]] <- transformAssay(
     MARGIN = "rows"
 )
 ```
+
+4. `dim()` shows the number of remaining genera and samples. No samples are
+removed by the last step.
+
+<!-- -->
 
 6. The two numbers are equal, because each zero in the counts becomes a
 missing value in the rclr assay. Joint-RPCA estimates these missing values

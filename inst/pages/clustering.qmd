@@ -235,7 +235,7 @@ tse <- addCluster(
 
 The results are stored in the `rowData` column specified with the `clust.col`
 parameter. To better visualize the results and the distribution of the
-clusters, we can plot the histogram of the clusters
+clusters, we can plot the number of features in each cluster
 (@fig-clustering-taxa-barplot).
 
 ```{r}
@@ -287,7 +287,7 @@ altExp(tse, "prevalent") <- addCluster(
     assay.type = "counts",
     name = "DMM",
     DmmParam(k = 1:6, type = "laplace"),
-    by = "samples",
+    by = "cols",
     full = TRUE,
     clust.col = "dmmclust"
 )
@@ -296,8 +296,6 @@ altExp(tse, "prevalent") <- addCluster(
 @fig-clustering-dmm-fit represents the Laplace approximation to the model
 evidence for each of the six models. We can see that the best number of clusters
 is two, as the minimum value of Laplace approximation determines the optimal k.
-The optimal k suggests to fit a model with k mixtures of Dirichlet distributions
-as a prior.
 
 ```{r}
 #| label: fig-clustering-dmm-fit
@@ -312,8 +310,7 @@ plotDMNFit(altExp(tse, "prevalent"), type = "laplace", name = "DMM") +
     scale_x_continuous(breaks = 1:6)
 ```
 
-The plot above confirms our previous suggestion that two clusters describe the
-data the best. Now we can plot which taxonomic features define the key cluster
+Two clusters describe the data best. Now we can plot which taxonomic features define the key cluster
 features (@fig-clustering-dmm-drivers).
 
 ```{r}
@@ -324,7 +321,7 @@ features (@fig-clustering-dmm-drivers).
 #| fig-height: 3.5
 library(DirichletMultinomial)
 
-# Get the estimates on how much each phylum contributes on each cluster
+# Get the estimates of how much each class contributes to each cluster
 models <- metadata(altExp(tse, "prevalent"))$DMM
 n_clusters <- models[["best"]]
 best_model <- models[["dmm"]][[n_clusters]]
@@ -391,7 +388,7 @@ library(NMF)
 set.seed(3221)
 res <- getNMF(altExp(tse, "prevalent"), k = 4)
 
-# Obtain the relative abundance of ES in each sample
+# Obtain the relative membership of each component in each sample
 wrel <- t(apply(res, 1, function(x) {
     x / sum(x)
 }))
@@ -529,8 +526,8 @@ tse <- addCluster(
     clust.col = "sample_cluster"
 )
 
-# Prints samples and their clusters
-colData(tse)[["sample_cluster"]]
+# Number of samples in each cluster
+table(colData(tse)[["sample_cluster"]])
 ```
 
 Now we can create a heatmap where the taxa are grouped by their clusters, and
@@ -966,7 +963,7 @@ plotHeatmap(
 2. Each row group contains the features of one cluster. If the features in
 a cluster have similar abundance profiles, the colors within the group change
 in a similar way across the samples, which forms horizontal patterns of
-similar colour.
+similar color.
 
 3. The columns are first grouped by the k-means clusters and then by
 `SampleType`. If a sample type appears in only one k-means cluster, the

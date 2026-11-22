@@ -32,27 +32,6 @@ mae <- HintikkaXOData
 experiments(mae)
 ```
 
-```{r}
-#| label: global_microbiota
-
-# Microbiome data
-getWithColData(mae, "microbiota")
-```
-
-```{r}
-#| label: global_metabolites
-
-# Metabolite data
-getWithColData(mae, "metabolites")
-```
-
-```{r}
-#| label: global_biomarkers
-
-# Biomarker data
-getWithColData(mae, "biomarkers")
-```
-
 Before the analysis, we preprocess both tables. The microbiome data is
 agglomerated to genus level and transformed to relative abundances. For the
 metabolites, we drop features with missing values, apply a log10
@@ -112,8 +91,16 @@ permutations.
 
 library(vegan)
 set.seed(123)
-mantel(dist_mb, dist_mt, method = "spearman", permutations = 999)
+res_mantel <- mantel(
+    dist_mb, dist_mt,
+    method = "spearman", permutations = 999
+)
+res_mantel
 ```
+
+The Mantel statistic r = `r round(res_mantel$statistic, 2)` (p =
+`r res_mantel$signif`) shows a weak but significant positive association
+between the microbiome and the metabolite profiles.
 
 ## Procrustes analysis {#sec-procrustes}
 
@@ -133,6 +120,10 @@ set.seed(123)
 res <- protest(pcoa_mb, pcoa_mt, permutations = 999)
 res
 ```
+
+The correlation in the symmetric Procrustes rotation is
+`r round(res$t0, 2)` (p = `r res$signif`), so the two ordinations agree more
+than expected by chance.
 
 The result can be visualized by plotting how much each sample shifts between
 the two ordinations (@fig-global-procrustes).
@@ -162,8 +153,12 @@ library(MiRKAT)
 mat_mt <- t(assay(mae[["metabolites"]], "standardize"))
 
 kernel_mb <- D2K(as.matrix(dist_mb))
-KRV(kernels.otu = kernel_mb, y = mat_mt, kernel.y = "linear")
+res_krv <- KRV(kernels.otu = kernel_mb, y = mat_mt, kernel.y = "linear")
+res_krv
 ```
+
+The KRV test also indicates a significant association between the microbiome
+and the metabolite table (p `r format.pval(res_krv$p_values, digits = 2, eps = 0.001)`).
 
 The original MiRKAT test takes a single outcome. By running it separately for
 each metabolite, we can see which metabolites are associated with the overall
@@ -180,7 +175,7 @@ padj <- p.adjust(pvals, method = "fdr")
 
 res <- data.frame(p = pvals, p_adj = padj)
 res <- res[order(res[["p_adj"]]), ]
-res
+head(res, 10)
 ```
 
 The next chapters investigate the associations between the omic layers in

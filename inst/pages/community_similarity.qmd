@@ -25,6 +25,9 @@ mathematical concept whose definition is not satisfied by certain ecological
 measures, such as the Bray-Curtis index. Therefore, the terms dissimilarity and
 beta diversity are preferred.
 
+The table below lists commonly used combinations of assay type and beta
+diversity metric.
+
 | Method description          | Assay type          | Beta diversity metric |
 |:---------------------------:|:-------------------:|:---------------------:|
 | Quantitative profiling      | Absolute counts     | Bray-Curtis           |
@@ -272,7 +275,8 @@ sample type.
 The divergence measure refers to a difference in community composition
 between the given sample(s) and a reference sample. This can be evaluated with
 `addDivergence()`. The reference and the dissimilarity measure can be
-specified with the `reference` and `method` arguments, respectively.
+specified with the `reference` and `method` arguments, respectively. The
+result is stored in the `divergence` column of `colData`.
 
 ```{r}
 #| label: add_divergence
@@ -282,6 +286,7 @@ tse <- addDivergence(
     assay.type = "counts",
     reference = "median"
 )
+tse$divergence |> head()
 ```
 
 ## Group comparison (PERMANOVA) {#sec-permanova}
@@ -387,6 +392,7 @@ assumption before drawing conclusions.
 ```{r}
 #| label: permanova
 
+set.seed(123)
 res <- getPERMANOVA(
     tse,
     assay.type = "relabundance",
@@ -412,7 +418,7 @@ by dispersion differences.
 PERMANOVA and distance-based redundancy analysis (dbRDA) are closely related,
 and they often give similar results. However, their assumptions are different;
 while PERMANOVA is a non-parametric method, dbRDA assumes linear relationships
-in the dissimilarity matrix. However, dbRDA can be used more broadly as the
+in the dissimilarity matrix. In addition, dbRDA can be used more broadly as the
 ordination can also be visualized.
 
 ## Unsupervised ordination {#sec-unsupervised-ordination}
@@ -576,10 +582,9 @@ wrap_plots(p1, p2, p3, p4) +
     plot_annotation(tag_levels = "A")
 ```
 
-The _Unifrac_ method is a special case, as it requires data on the
-relationship of features in the form of a `phylo` tree. `getDissimilarity()`
-performs the calculation to return a `dist` object, which can again be
-used within `addMDS()` (@fig-community-mds-unifrac).
+The _UniFrac_ method is a special case, as it requires the phylogenetic tree
+of the features. `addMDS()` uses the tree in `rowTree(tse)` by default
+(@fig-community-mds-unifrac).
 
 ```{r}
 #| label: fig-community-mds-unifrac
@@ -592,8 +597,6 @@ tse <- addMDS(
     tse,
     method = "unifrac",
     name = "MDS_unifrac",
-    tree = rowTree(tse),
-    ntop = nrow(tse),
     assay.type = "counts"
 )
 
@@ -931,6 +934,7 @@ variables is missing.
 #| label: run_rda
 
 # Perform RDA
+set.seed(123)
 tse2 <- addRDA(
     tse2,
     assay.type = "relabundance",
@@ -1109,7 +1113,7 @@ appropriate choice for comparing community compositions.
 
 ## Case studies
 
-#### Visualizing the most dominant genus on PCoA {#sec-pcoa-genus}
+### Visualizing the most dominant genus on PCoA {#sec-pcoa-genus}
 
 In this section, we visualize the most dominant genus with PCoA. A similar
 visualization was proposed by @Salosensaari2021. First, let us agglomerate the
@@ -1205,7 +1209,7 @@ plotOrdination(
 ```
 
 ::: {.callout-tip}
-## Summary
+## Functions for dissimilarity and ordination
 
 As a final note, we provide a comprehensive list of functions for the
 evaluation of dissimilarity indices available in the
@@ -1371,6 +1375,8 @@ plotBoxplot(tse, col.var = "divergence", x = "patient_status") +
 
 3. The dissimilarity matrix was stored in `metadata(tse)` under the name
 `bray`.
+
+<!-- -->
 
 7. Each value in the dissimilarity matrix compares one pair of samples. A
 value close to 0 means that the two communities are very similar, and a value

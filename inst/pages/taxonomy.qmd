@@ -111,15 +111,14 @@ same, this part is omitted, but can be added by setting
 ```{r}
 #| label: get_taxa_labels2
 
-# Features that are classified to phylum but not to class
-phylum <- !taxonomyRankEmpty(tse, rank = "Phylum") &
-    taxonomyRankEmpty(tse, rank = "Class")
+# Features whose lowest classified rank is phylum
+phylum <- getTaxonomyLabels(tse, with.rank = TRUE) |> startsWith("Phylum:")
 getTaxonomyLabels(tse[phylum, ]) |> head()
 getTaxonomyLabels(tse[phylum, ], with.rank = TRUE) |> head()
 ```
 
 By default the return value of `getTaxonomyLabels()` contains only
-unique elements by passing it through `make.unique`. This step can be
+unique elements by passing it through `make.unique()`. This step can be
 omitted by setting `make.unique = FALSE`.
 
 ```{r}
@@ -154,11 +153,11 @@ features that match with "Escherichia".
 mapTaxonomy(tse, taxa = "Escherichia")
 ```
 
-## Prune taxonomy tree {#sec-update-tree}
+## Prune the row tree {#sec-update-tree}
 
 Subsetting is explained in detail in [@sec-treese_subsetting]. However,
 if you've already subsetted your data, you may have noticed that the
-taxonomy tree does not automatically update when using the `[]`
+phylogenetic tree does not automatically update when using the `[]`
 operators. Although the linkages between rows and tree nodes remain
 correct, the tree retains its original, complex structure. You may be
 wondering how to update the tree to reflect the newly simplified data.
@@ -193,7 +192,7 @@ tse_sub <- subsetByLeaf(tse_sub, rowLeaf = rownames(tse_sub))
 tse_sub
 ```
 
-Now, we can see that the taxonomy tree has a simpler structure,
+Now, we can see that the phylogenetic tree has a simpler structure,
 including only the selected leaves.
 
 ## Build a hierarchy tree {#sec-fly-tree}
@@ -212,6 +211,9 @@ is removed.
 
 getHierarchyTree(tse)
 ```
+
+`addHierarchyTree()` builds the same tree and stores it as the `rowTree` of
+the object. The tree now has one leaf for each unique taxonomy.
 
 ```{r}
 #| label: addHierarchyTree

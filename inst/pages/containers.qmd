@@ -7,7 +7,7 @@
 library(DT)
 ```
 
-This section provides an introduction to the
+This chapter provides an introduction to the
 `r BiocStyle::Biocpkg("TreeSummarizedExperiment")` (`TreeSE`)
 and `r BiocStyle::Biocpkg("MultiAssayExperiment")` (`MAE`) data containers
 introduced in [@sec-microbiome-bioc]. In microbiome data science, these
@@ -141,7 +141,7 @@ tse
 Compared to the original data, the dimensions for rows and columns are 5
 and 3, respectively.
 
-::: callout-note
+::: {.callout-note}
 ## Note
 
 `r BiocStyle::Biocpkg("SummarizedExperiment")` objects have rows and columns.
@@ -170,8 +170,8 @@ with each other. See [@sec-assay-transform] for more information on
 transformations.
 
 The microbial abundance tables are stored in ***assays***. The `assays`
-slot contains the abundance data as multiple count matrices. The result
-of `assays` is a list of matrices.
+slot contains the abundance data as one or more matrices (e.g. counts and
+their transformations). The result of `assays` is a list of matrices.
 
 ```{r}
 #| label: assay1
@@ -229,9 +229,9 @@ description of the sample.
 colData(tse)
 ```
 
-To illustrate, ***X.SampleID*** gives the sample identifier,
-***SampleType*** indicates the sample type (e.g. soil, fecal matter,
-control) and ***Description*** provides an additional description of the
+To illustrate, `X.SampleID` gives the sample identifier,
+`SampleType` indicates the sample type (e.g. soil, fecal matter,
+control) and `Description` provides an additional description of the
 sample.
 
 ## Feature data (rowData) {#sec-rowData}
@@ -267,6 +267,9 @@ A tree can be accessed via `rowTree` as a `phylo` object.
 
 rowTree(tse)
 ```
+
+Note that subsetting the rows does not prune the tree; it still contains all
+`r length(rowTree(tse)$tip.label)` tips of the original data.
 
 Each row in `TreeSE` is linked to a specific node in a tree. This
 relationship is stored in the `rowLinks` slot, which has the same rows
@@ -310,10 +313,10 @@ between features directly 1:1; or
 Each element of the `altExp` slot is an `SE` or an object from a derived class
 with independent feature data.
 
-The following shows how to store taxonomic abundance tables agglomerated
-at different taxonomic levels. However, the data could as well originate
-from entirely different measurement sources (e.g., 16S amplicon and
-metagenomic sequence data) as long as the samples match
+The following shows how to store a subset of the features as an alternative
+experiment. In practice, it could be, e.g., the data agglomerated to another
+taxonomic rank, or data from an entirely different measurement source (e.g.,
+16S amplicon and metagenomic sequence data), as long as the samples match
 (@fig-altexp).
 
 ```{r}
@@ -457,7 +460,7 @@ defined through a `sampleMap`. Each element of the `ExperimentList` of an
 `MAE` is a `matrix` or a `matrix`-like object, including `SE` objects, and the
 number of samples can differ between the elements.
 
-In an `MAE`, the "subjects" represent patients. The `MAE` has four main
+In an `MAE`, the "subjects" represent patients. The `MAE` has three main
 slots, with `experiments` being the core. This slot holds a list of
 experiments, each in (`Tree`)`SE` format. To handle complex mappings
 between samples (observations) across different experiments, the
@@ -492,7 +495,7 @@ ensuring that the data remains consistent and well-organized.
 ```{r}
 #| label: show_mae1
 
-data("HintikkaXOData")
+data("HintikkaXOData", package = "mia")
 mae <- HintikkaXOData
 mae
 ```
@@ -518,7 +521,7 @@ mae <- mae[, 1:5, ]
 mae
 ```
 
-::: callout-note
+::: {.callout-note}
 ## Note
 
 If you have multiple experiments containing multiple measures from the same
@@ -553,7 +556,7 @@ trial.
 ```{r}
 #| label: show_coldata_mae
 
-colData(mae)
+colData(mae)[, c("Treatment name", "Trial description", "animal")]
 ```
 
 The `sampleMap` slot now contains mappings between each unique sample
@@ -576,7 +579,7 @@ For more information, have a look at the
 [intro vignette](https://bioconductor.org/packages/release/bioc/vignettes/MultiAssayExperiment/inst/doc/MultiAssayExperiment.html)
 of the `r BiocStyle::Biocpkg("MultiAssayExperiment")` package.
 
-::: callout-tip
+::: {.callout-tip}
 ## Storing multiple data tables
 
 |     Option | Rows (features) | Cols (samples) |             Recommended |
@@ -688,8 +691,8 @@ first names of the features and the samples.
 3. Fetch the list of assays. How many assays are there, and what are their
 names?
 
-4. Show the first rows of the `counts` assay. Do you see many zeroes? Why
-does microbiome data often contain many zeroes?
+4. Show the first rows and columns of the `counts` assay. Do you see many
+zeros? Why does microbiome data often contain many zeros?
 
 5. Subset `tse` to the first 10 features and the first 5 samples, and store
 the result in a variable called `tse_sub`. Check the dimensions of `tse_sub`
@@ -725,8 +728,8 @@ head(colnames(tse))
 # 3. List of assays
 assays(tse)
 
-# 4. First rows of the counts assay
-assay(tse, "counts") |> head()
+# 4. First rows and columns of the counts assay
+assay(tse, "counts")[1:5, 1:5]
 
 # 5. Subset the data
 tse_sub <- tse[1:10, 1:5]
@@ -739,13 +742,15 @@ assay(tse_sub, "empty_table", withDimnames = FALSE) <- mat
 assays(tse_sub)
 ```
 
-4. Yes, most of the values are zeroes. Most taxa are present only in some
+4. Yes, most of the values are zeros. Most taxa are present only in some
 samples, and rare taxa might not be detected because only a limited number of
 reads is sequenced from each sample.
 
 5. When the `TreeSE` object is subsetted, all its parts are subsetted at the
 same time. Therefore, `colData` has 5 rows, one for each remaining sample, and
 it stays matched with the assays.
+
+<!-- -->
 
 7. Each row of an assay corresponds to a feature in `rowData`, and each column
 corresponds to a sample in `colData`. The assays can be linked to the feature

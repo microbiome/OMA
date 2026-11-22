@@ -95,7 +95,8 @@ uniq <- getUnique(tse, rank = "Phylum")
 uniq
 ```
 
-There are `r length(uniq)` phyla present in the dataset.
+There are `r sum(!is.na(uniq))` phyla (plus unassigned `NA`) present in the
+dataset.
 
 Next, we might be interested in assessing which features are the most abundant.
 This can be done by utilizing the `getTop()` function. Below, we pick the top
@@ -195,8 +196,8 @@ p1 + p2
 ```
 
 As @fig-qc-library-size shows, the distribution of library size is
-right-skewed. Most of the samples follow
-normal distribution while some of the samples deviate from this. This might be
+right-skewed: most samples have library sizes between about 20,000 and 80,000,
+but a long tail of samples has much larger library sizes. This might be
 caused by technical variations or biological factors.
 
 Nevertheless, the most important check is to ensure that the sampling depth is
@@ -252,7 +253,7 @@ contamination identification.
 
 library(knitr)
 
-colData(tse) |>
+colData(tse)[, c("baboon_id", "sex", "age", "post_pcr_dna_ng")] |>
     head() |>
     kable()
 ```
@@ -274,8 +275,8 @@ The method performs statistical tests to identify contaminants. By default, it
 uses a 0.1 probability threshold for identifying contaminants, which can be
 adjusted as needed. In this case,
 `r round(sum(rowData(tse)[["contaminant"]])/nrow(tse)*100, 1)`% of
-sequences were detected to be contaminants. We can then filter out these
-features from the data.
+sequences were detected to be contaminants. If any are detected, they can be
+filtered out from the data.
 
 ```{r}
 #| label: filter_contaminants
@@ -292,6 +293,7 @@ First, we add arbitrary control samples:
 ```{r}
 #| label: add_control_info
 
+set.seed(123)
 control <- rep(FALSE, ncol(tse))
 control[sample(seq_len(ncol(tse)), 1)] <- TRUE
 tse[["control"]] <- control
@@ -339,7 +341,7 @@ plotHistogram(tse, assay.type = "counts") +
 ```
 
 The microbiome data is typically zero-inflated, meaning that there are lots of
-zeroes. The same method can also be used to visualize continuous variables from
+zeros. The same method can also be used to visualize continuous variables from
 `colData`. For categorical values, one can utilize `plotBarplot()`
 (@fig-qc-age-sex).
 
@@ -514,10 +516,10 @@ plotPrevalence(
     scale_x_log10()
 ```
 
-The plot shows the relationship between microbial relative abundance and
-prevalence across samples. Features with higher prevalence (yellow) tend to
-have lower relative abundance, while less prevalent features (purple) can still
-reach higher abundances in some cases.
+The plot shows how many features exceed each detection threshold in at least
+the given proportion of samples. The number drops quickly as either the
+detection threshold or the prevalence level (from purple to yellow) increases:
+only a few features are both abundant and prevalent.
 
 To analyze how much the core taxonomic features are present in samples, we can
 calculate how large a proportion of each sample the core features make up. We
@@ -678,10 +680,16 @@ length(phyla)
 2. The dimensions are shown on the `dim` line: the first number is the number
 of features (rows) and the second the number of samples (columns).
 
+<!-- -->
+
 4. Each row is a genus that is the most abundant genus in at least one
 sample. The columns show in how many samples the genus is dominant, and what
 proportion of all samples this is. A genus at the top of the table is the most
 abundant genus in the largest number of samples.
+
+5. `length()` returns `r length(phyla)`, but one of the values is `"NA"`, and
+some names contain typos or trailing spaces, so the number of real phyla is
+smaller. It is good to check the names before counting them.
 :::
 ::::
 
@@ -776,6 +784,8 @@ the `total` column.
 A wide spread or a long tail means that the sequencing depth differs a lot
 between samples.
 
+<!-- -->
+
 4. First, check that the sampling depth is sufficient. Samples with a very
 small library size can be removed. Uneven sampling depth can be taken into
 account with data transformations or rarefaction.
@@ -847,6 +857,8 @@ few values are very large.
 2. Each row is a feature and each point is one sample. The x-axis shows the
 abundance of the feature in that sample. A wide spread of points
 means that the abundance of the feature varies a lot between samples.
+
+<!-- -->
 
 4. Many common statistical tests assume that the data is normally
 distributed. Microbiome data rarely is, and using such tests anyway can lead
