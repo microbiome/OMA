@@ -138,8 +138,9 @@ hclust_data <- metadata(altExp(tse, "prevalent"))$clustering$hclust
 dendro <- as.dendrogram(hclust_data)
 k <- length(unique(altExp(tse, "prevalent")$hclust))
 
-# Color the branches by clusters
-cols <- scales::hue_pal()(k)
+# Color the branches by clusters, with the same Okabe-Ito colors as in the
+# miaViz plots (black, the first color, is skipped)
+cols <- palette.colors(k + 1, "Okabe-Ito")[-1]
 
 # Order the colors to be equivalent to the factor levels; color_branches()
 # colors the clusters from left to right in the order of the leaves
@@ -191,7 +192,7 @@ altExp(tse, "prevalent") <- addMDS(
 
 plotOrdination(
     altExp(tse, "prevalent"), "MDS",
-    colour.by = "hclust"
+    colour.by = "hclust", add.expl.var = TRUE
 ) +
     labs(colour = "Cluster")
 ```
@@ -307,7 +308,8 @@ as a prior.
 
 library(miaViz)
 
-plotDMNFit(altExp(tse, "prevalent"), type = "laplace", name = "DMM")
+plotDMNFit(altExp(tse, "prevalent"), type = "laplace", name = "DMM") +
+    scale_x_continuous(breaks = 1:6)
 ```
 
 The plot above confirms our previous suggestion that two clusters describe the
@@ -345,7 +347,7 @@ division.
 # DMM clusters
 plotOrdination(
     altExp(tse, "prevalent"), "MDS",
-    colour.by = "dmmclust"
+    colour.by = "dmmclust", add.expl.var = TRUE
 ) +
     labs(colour = "DMM cluster")
 ```
@@ -410,7 +412,7 @@ for each sample onto a two-dimensional surface (@fig-clustering-nmf-mds).
 # NMF community types
 plotOrdination(
     altExp(tse, "prevalent"), "MDS",
-    colour.by = "NMFcomponent"
+    colour.by = "NMFcomponent", add.expl.var = TRUE
 ) +
     labs(colour = "NMF component")
 ```
@@ -493,7 +495,7 @@ and silhouette [@Rousseeuw1987] methods for this purpose.
 ```{r}
 #| label: fig-clustering-kmeans-k
 #| fig-cap: "Selection of the number of k-means clusters. Left: total within-cluster sum of squares (elbow method). Right: average silhouette width, both as a function of the number of clusters."
-#| fig-alt: "Two line plots with the number of clusters on the x-axis. Left: total within-cluster sum of squares, which levels off after about three clusters. Right: average silhouette width, which is highest at two to three clusters."
+#| fig-alt: "Two line plots with the number of clusters on the x-axis. Left: total within-cluster sum of squares, which levels off after about three clusters. Right: average silhouette width, which is highest at two clusters, followed by three."
 #| fig-width: 11
 #| fig-height: 4
 #| column: page
@@ -513,8 +515,8 @@ p1 + p2 & labs(title = NULL)
 ```
 
 The decrease in the within-cluster sum of squares levels off after about three
-clusters, and the average silhouette width is highest for two to three
-clusters. Based on the results, we split the columns into three clusters.
+clusters, and the average silhouette width is highest for two clusters and
+second highest for three. Based on the results, we split the columns into three clusters.
 
 ```{r}
 #| label: sample_clusters
@@ -644,6 +646,7 @@ clusters correspond to the sample types?
 
 ```{r}
 #| label: exercise_clustering_hclust
+#| fig-height: 6
 
 library(mia)
 library(bluster)
@@ -686,9 +689,9 @@ tse <- addMDS(
     method = "bray",
     assay.type = "counts"
 )
-plotOrdination(tse, "MDS", colour.by = "hclust") +
+plotOrdination(tse, "MDS", colour.by = "hclust", add.expl.var = TRUE) +
     labs(colour = "Cluster")
-plotOrdination(tse, "MDS", colour.by = "SampleType") +
+plotOrdination(tse, "MDS", colour.by = "SampleType", add.expl.var = TRUE) +
     labs(colour = "Sample type")
 ```
 
@@ -759,7 +762,7 @@ table(tse$dmmclust)
 table(tse$hclust, tse$dmmclust)
 
 # 4. PCoA colored by DMM clusters
-plotOrdination(tse, "MDS", colour.by = "dmmclust") +
+plotOrdination(tse, "MDS", colour.by = "dmmclust", add.expl.var = TRUE) +
     labs(colour = "DMM cluster")
 
 # 5. Contributions of the features to each cluster in the best model
@@ -948,7 +951,7 @@ counts?
 
 ```{r}
 #| label: exercise_clustering_heatmap
-#| fig-width: 13
+#| fig-width: 14
 #| fig-height: 9
 
 # 1. Heatmap grouped by feature and sample clusters
