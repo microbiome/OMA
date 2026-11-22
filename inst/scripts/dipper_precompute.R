@@ -41,9 +41,10 @@ fit_dipper <- dipper(
 res_dipper <- summary(fit_dipper)
 write.csv(res_dipper, "inst/extdata/dipper_tengeler2020.csv", row.names = FALSE)
 
-p <- plot(fit_dipper)
+# Extra right margin so that the last x-axis label is not cut off
+p <- plot(fit_dipper) + theme(plot.margin = margin(5.5, 20, 5.5, 5.5))
 ggsave("inst/pages/figures/dipper_tengeler2020.png", p,
-    width = 7, height = 4, dpi = 150, bg = "white"
+    width = 7.5, height = 6.5, dpi = 150, bg = "white"
 )
 
 cat("DiPPER", as.character(packageVersion("DiPPER")), "on", format(Sys.Date()), "\n")
