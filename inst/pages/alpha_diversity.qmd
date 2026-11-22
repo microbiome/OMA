@@ -44,7 +44,7 @@ neutral_div <- "**Neutral Diversity**
 phyl_div <- "**Phylogenetic Diversity**
 
 ---
-*Indices are scaled based on taxonomic closeness with a phylogenetic tree*"
+*Indices are scaled based on phylogenetic closeness with a phylogenetic tree*"
 
 hill_0 <- "Dependent on presence and absence of taxonomic features, not abundance"
 hill_1 <- "Dependent on how evenly taxonomic features are distributed in a sample"
@@ -107,7 +107,7 @@ metric. Below are the default choices for each category:
 - **Information**: Shannon [@Shannon1948]
 - **Phylogenetics**: Faith
 
-::: callout-note
+::: {.callout-note}
 ## Note: Richness estimators and denoising
 
 Several estimators have been developed to address the confounding effect of
@@ -133,7 +133,7 @@ of the `SummarizedExperiment` object with the given `name`.
 
 # First, let's load some example data.
 library(mia)
-data("GlobalPatterns")
+data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 
 # The 'index' parameter allows computing multiple diversity indices
@@ -151,11 +151,11 @@ tse$shannon_diversity |> head()
 
 Certain indices have additional options. For example, observed richness has
 the `detection` parameter that controls the detection threshold (by default 0).
-Species above this threshold are considered detected. See the full list of
+Features above this threshold are considered detected. See the full list of
 options from `help(addAlpha)`.
 
-::: callout-note
-## Note: Phylogenetic distances require a tree
+::: {.callout-note}
+## Note: Faith's diversity requires a tree
 
 Because `tse` is a `TreeSummarizedExperiment` object, its phylogenetic tree is
 used by default. However, the optional argument `tree` must be provided if
@@ -165,7 +165,7 @@ used by default. However, the optional argument `tree` must be provided if
 ### Visualize diversity {#sec-plot-diversity}
 
 As alpha diversity metrics typically summarize high-dimensional samples into
-singular values, many visualization approaches are available. Once calculated,
+single values, many visualization approaches are available. Once calculated,
 these metrics can be analyzed directly from the `colData`, for example, by
 plotting them using `plotBoxplot()` from the `r BiocStyle::Biocpkg("miaViz")`
 package.
@@ -188,7 +188,7 @@ plotBoxplot(
     labs(x = "Sample type", y = "Observed richness")
 ```
 
-#### Alpha diversity measures comparisons {#sec-compare-alpha}
+#### Comparing alpha diversity indices {#sec-compare-alpha}
 
 We can compare alpha diversities for example by calculating the correlation
 between them. @fig-alpha-shannon-faith shows a visual comparison between
@@ -296,10 +296,13 @@ To control for uneven sampling depths, we can do rarefaction
 by specifying the optional arguments `sample` and `niter` in `addAlpha()`.
 `niter` controls the number of rarefaction iterations (choose a sufficiently
 large value for stable estimates). `sample` sets the rarefaction depth, i.e.,
-the number of reads sampled per iteration from each sample.
+the number of reads sampled per iteration from each sample (default: the
+smallest library size).
 
 ```{r}
 #| label: alpha_rarefaction
+
+set.seed(123)
 tse <- addAlpha(
     tse,
     assay.type = "counts",
@@ -309,7 +312,7 @@ tse <- addAlpha(
 )
 ```
 
-Next compare the results with and without rarefaction
+Next, we compare the results with and without rarefaction
 (@fig-alpha-rarefaction).
 
 ```{r}
@@ -329,8 +332,8 @@ These results illustrate that uneven sequencing depth affects the diversity
 estimates. The rarefied values are lower, as every sample is subsampled to the
 same, smaller depth, and the ranking of the sample types changes. Skin and
 estuary sediment samples, which have relatively few reads, rank higher after
-rarefaction, whereas the deeply sequenced freshwater and feces samples rank
-lower. Soil remains the richest sample type in both analyses. This indicates
+rarefaction, whereas the deeply sequenced freshwater samples rank lower.
+Soil remains the richest sample type in both analyses. This indicates
 that part of the apparent differences in the non-rarefied analysis was driven
 by sampling effort rather than biology.
 
@@ -349,6 +352,9 @@ pairwise.wilcox.test(
     p.adjust.method = "fdr"
 )
 ```
+
+With only two to four samples per sample type, none of the pairwise
+differences is significant after FDR correction.
 
 #### Visualizing significance in group-wise comparisons
 

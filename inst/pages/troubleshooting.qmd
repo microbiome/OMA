@@ -1,7 +1,8 @@
 # Installation troubleshooting {#sec-install-troubleshooting}
 
 First of all, please ensure that you have an up-to-date version of R
-(this note is based on R 4.3.1).
+(the notes below were tested on R 4.3–4.4; see the session info of each
+section).
 
 ## Mac M1 user
 
@@ -24,31 +25,29 @@ during the package compilation process. If you encounter this error,
 you can use the following workaround:
 
 1. Install two essential tools in order to compile R for macOS as
-described in [Mac-r-project](https://mac.r-project.org/tools/)
+   described in [Mac-r-project](https://mac.r-project.org/tools/):
 
-- Install Xcode:
-	- sudo xcode-select --install
-- GNU Fortran compiler*
-	- download from
-	[here](https://mac.r-project.org/tools/gfortran-12.2-universal.pkg)
-	*you can also install from package manager for example homebrew,
-	but it is not recommended.
+   - Install Xcode: `sudo xcode-select --install`
+   - Install the GNU Fortran compiler: download it from
+     [here](https://mac.r-project.org/tools/gfortran-12.2-universal.pkg).
+     You can also install it from a package manager, for example
+     Homebrew, but it is not recommended.
 
 2. Locate the gfortran using `which gfortran` to find the version of
-gfortran that is stored in your ~/.bashrc or ~/.bash_profile. Make sure
-it points to the gfortran that you want to use. For example if you
-have both homebrew and mac-r project gfortran, you may want to add the
-mac-r project gfortran to your $PATH variable.
+   gfortran that is stored in your ~/.bashrc or ~/.bash_profile. Make sure
+   it points to the gfortran that you want to use. For example if you
+   have both homebrew and mac-r project gfortran, you may want to add the
+   mac-r project gfortran to your $PATH variable.
 
-- add `export PATH="/opt/gfortran/bin:$PATH"` to your ~/.bash_profile
-or ~/.bashrc, followed by `source ~/.bash_profile` in your terminal
+   - Add `export PATH="/opt/gfortran/bin:$PATH"` to your ~/.bash_profile
+     or ~/.bashrc, followed by `source ~/.bash_profile` in your terminal.
 
 3. Modify your `/Library/Frameworks/R.framework/Resources/etc/Makeconf`
 
 	from:
 
 	```
-	FLIBS =  -L/opt/R/arm64/gfortran/lib/gcc/aarch64-apple-darwin20.2.0     /11.0.0 -L/opt/R/arm64/gfortran/lib -lgfortran -lemutls_w -lm
+	FLIBS =  -L/opt/R/arm64/gfortran/lib/gcc/aarch64-apple-darwin20.2.0/11.0.0 -L/opt/R/arm64/gfortran/lib -lgfortran -lemutls_w -lm
 	```
 	to*:
 
@@ -111,7 +110,7 @@ loaded via a namespace (and not attached):
 Windows users commonly encounter Rtools-related issues when installing miaverse packages that contain
 C++ code. Rtools is a collection of software tools required for building R packages from source on Windows.
 
-### Common Rtools Error Messages
+### Common Rtools error messages
 
 You may see warnings like:
 
@@ -129,18 +128,22 @@ fatal error: R.h: No such file or directory
 compilation terminated.
 ```
 
-### Rtools Installation Steps
+### Rtools installation steps
 
 1. **Determine your R version** by running in R console:
    ```r
    R.version.string
    ```
 
-2. **Download the correct Rtools version** from [https://cran.r-project.org/bin/windows/Rtools/](https://cran.r-project.org/bin/windows/Rtools/):
-   - For R 4.4 and later: Use Rtools 4.4 or newer
-   - For R 4.2-4.3: Use Rtools 4.2
-   - For R 4.0-4.1: Use Rtools 4.0
-   - For R 3.5-3.6: Use Rtools 3.5
+2. **Download the correct Rtools version** from [https://cran.r-project.org/bin/windows/Rtools/](https://cran.r-project.org/bin/windows/Rtools/).
+   Rtools must match your R version:
+
+   - For R 4.5: Use Rtools45
+   - For R 4.4: Use Rtools44
+   - For R 4.3: Use Rtools43
+   - For R 4.2: Use Rtools42
+   - For R 4.0-4.1: Use Rtools40
+   - For R 3.5-3.6: Use Rtools35
 
 3. **Install Rtools**:
    - Run the downloaded installer (e.g., `rtools44-6104-6039.exe`)
@@ -157,7 +160,7 @@ compilation terminated.
    pkgbuild::find_rtools()
    ```
 
-### Troubleshooting Rtools Issues
+### Troubleshooting Rtools issues
 
 If Rtools is not detected after installation:
 
@@ -169,10 +172,10 @@ If Rtools is not detected after installation:
 
 2. **Manual PATH setup using .Renviron file** (recommended approach):
    ```r
-   # Create or edit .Renviron file
-   writeLines(
-     'PATH="${RTOOLS44_HOME}\\usr\\bin;${PATH}"',
-     con = "~/.Renviron"
+   # Add a line to the .Renviron file (creates the file if needed)
+   cat(
+     'PATH="${RTOOLS44_HOME}\\usr\\bin;${PATH}"\n',
+     file = "~/.Renviron", append = TRUE
    )
    ```
 
@@ -187,7 +190,7 @@ If Rtools is not detected after installation:
 
 4. **Restart R/RStudio** after installation and PATH configuration for changes to take effect.
 
-### Alternative Solutions
+### Alternative solutions
 
 1. **Use pre-compiled binaries**: If possible, install binary versions of packages instead of compiling from source:
    ```r
@@ -196,7 +199,7 @@ If Rtools is not detected after installation:
 
 2. **Docker approach**: Use the Docker installation as described in the Linux section below, which avoids compilation issues entirely.
 
-### Common Issues and Solutions
+### Common issues and solutions
 
 - **Anti-virus interference**: Some anti-virus software may block Rtools installation. Temporarily disable it during installation.
 - **Permissions**: Ensure you have administrator rights when installing Rtools.
@@ -204,7 +207,7 @@ If Rtools is not detected after installation:
 - **Mixed architectures**: Ensure Rtools architecture (64-bit) matches your R installation.
 - **Username with spaces**: Windows usernames with spaces can cause issues. Consider editing TMP and TEMP environment variables to a location without spaces, like `C:\TEMP`.
 
-### Testing Rtools Installation
+### Testing Rtools installation
 
 After successful installation, test with a simple package compilation:
 

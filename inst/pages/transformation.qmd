@@ -85,7 +85,7 @@ coverage (sampling zeros).
 ## Common methods
 
 Let us now summarize some commonly used transformations in microbiome data
-science; further details and benchmarkings are available in the
+science; further details and benchmarks are available in the
 references.
 
 - **alr**: The additive log ratio transformation is part of a broader Aitchison
@@ -170,14 +170,15 @@ available transformations and parameters is available in the function
 [help](https://microbiome.github.io/mia/reference/transformAssay.html).
 
 ::: {.callout-important}
+## Important: Choosing a pseudocount
 
-`Pseudocount` is a small non-negative value (e.g., 1) added to the normalized
+A pseudocount is a small non-negative value (e.g., 1) added to the normalized
 data to avoid taking the logarithm of zero. Its value can have a significant
 impact on the results when applying a logarithm transformation to normalized
 data, as the logarithm transformation is a nonlinear operation that can
 fundamentally change the data distribution [@Costea2014].
 
-`Pseudocount` should be chosen consistently across all normalization
+The pseudocount should be chosen consistently across all normalization
 methods being compared, for example, by setting it to a value smaller
 than the minimum abundance value before transformation. Some tools, like
 `r BiocStyle::Biocpkg("ANCOMBC")` [@ancombc2020], take into account the effect
@@ -194,20 +195,20 @@ Below, we apply relative transformation to the counts table.
 
 # Load example data
 library(mia)
-data("Tengeler2020")
+data("Tengeler2020", package = "mia")
 tse <- Tengeler2020
 
 # Transform counts assay to relative abundances
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 ```
 
-Get the values in the resulting assay, and view some of the first
-entries of it with the `head` command.
+Get the values in the resulting assay, and view the first five rows and
+columns of it.
 
 ```{r}
 #| label: transf2
 
-assay(tse, "relabundance") |> head()
+assay(tse, "relabundance")[1:5, 1:5]
 ```
 
 In the 'pa' transformation, the abundance table is converted to a
@@ -218,16 +219,15 @@ whether the given feature is detected in the sample.
 #| label: transf3
 
 tse <- transformAssay(tse, method = "pa")
-assay(tse, "pa") |> head()
+assay(tse, "pa")[1:5, 1:5]
 ```
 
-You can now view the entire list of abundance assays in your data object
-with:
+You can now view the names of all assays in your data object with:
 
 ```{r}
 #| label: transf4
 
-assays(tse)
+assayNames(tse)
 ```
 
 A common question is whether the centered log-ratio (clr) transformation
@@ -279,7 +279,10 @@ transformations fail to capture.
 ```{r}
 #| label: transf6
 
-tse <- transformAssay(tse, method = "philr", MARGIN = 1L, pseudocount = 0.5)
+tse <- transformAssay(
+    tse,
+    method = "philr", MARGIN = "rows", pseudocount = 0.5
+)
 ```
 
 Unlike other transformations, `r BiocStyle::Biocpkg("philr")` outputs a table
@@ -346,7 +349,7 @@ of reads sampled (@fig-transformation-rarefaction-curve).
 library(mia)
 library(vegan)
 
-data(GlobalPatterns)
+data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 
 mat <- tse |>
@@ -377,7 +380,6 @@ counts per sample (@fig-transformation-library-size).
 #| fig-cap: "Library sizes (total counts per sample) in the GlobalPatterns dataset, grouped by sample type."
 #| fig-alt: "Boxplots of total counts per sample (y-axis) for each sample type (x-axis), with the individual samples drawn as points."
 #| fig-width: 10
-library(scater)
 library(miaViz)
 
 tse <- addQC(tse, assay.type = "counts")
@@ -407,7 +409,7 @@ number of reads.
 
 Conceptually, the workflow is:
 
-1. Choose a rarefaction depth (often the minimum library size across samples, here `r tse[["total"]] |> min()`).
+1. Choose a rarefaction depth (often the minimum library size across samples, here `r tse[["total"]] |> min() |> format(big.mark = ",")`).
 2. Discard samples with fewer reads than this depth.
 3. For each remaining sample, randomly subsample exactly that many reads.
 
@@ -446,7 +448,7 @@ effort are currently being debated [@Schloss2026].
 diversity, and [@sec-rarefaction_ordination] extends the approach to
 beta diversity.
 
-::: callout-tip
+::: {.callout-tip}
 ## Summary
 
 Microbiome data is characterized by the following features:
@@ -455,7 +457,7 @@ Microbiome data is characterized by the following features:
 - High variability
 - Zero-inflation
 
-[OSCA book](https://bioconductor.org/books/3.18/OSCA.basic/normalization.html#normalization-transformation)
+[OSCA book](https://bioconductor.org/books/release/OSCA.basic/normalization.html#normalization-transformation)
 provides additional information on normalization from the perspective of
 single-cell analysis.
 
@@ -534,13 +536,13 @@ variable called `tse`.
 
 2. Transform the `counts` assay into relative abundances.
 
-3. Show the first rows of the `relabundance` assay.
+3. Show the first five rows and columns of the `relabundance` assay.
 
 4. Calculate the sum of the relative abundances in each sample, that is, the
 column sums of the `relabundance` assay. What values do you get, and why?
 
 5. Apply the presence/absence (`pa`) transformation to the `counts` assay and
-show the first rows of the `pa` assay. What do the values mean?
+show the first five rows and columns of the `pa` assay. What do the values mean?
 
 6. List the names of all assays in `tse`. Was the original `counts` assay
 kept?
@@ -564,14 +566,14 @@ tse <- Tengeler2020
 tse <- transformAssay(tse, assay.type = "counts", method = "relabundance")
 
 # 3. First rows of the relabundance assay
-assay(tse, "relabundance") |> head()
+assay(tse, "relabundance")[1:5, 1:5]
 
 # 4. Sum of relative abundances in each sample
 colSums(assay(tse, "relabundance")) |> head()
 
 # 5. Presence/absence transformation
 tse <- transformAssay(tse, assay.type = "counts", method = "pa")
-assay(tse, "pa") |> head()
+assay(tse, "pa")[1:5, 1:5]
 
 # 6. Assay names
 assayNames(tse)
@@ -599,13 +601,13 @@ keeps the original assays in the object.
 2. Apply the clr transformation to the `counts` assay. Add a pseudocount of
 0.5, and name the new assay `"clr"`.
 
-3. Show the first rows of the `clr` assay and compare them with the first rows
-of the `counts` assay. What happened to the zeros?
+3. Show the first five rows and columns of the `clr` assay and compare them
+with those of the `counts` assay. What happened to the zeros?
 
 4. Why should the same pseudocount be used when you compare different
 transformations?
 
-**Useful functions:** `assay()`, `any()`, `mia::transformAssay()`, `head()`
+**Useful functions:** `assay()`, `any()`, `mia::transformAssay()`
 
 ::: {.callout-note collapse="true"}
 ## Solution
@@ -626,8 +628,8 @@ tse <- transformAssay(
 )
 
 # 3. Compare clr values with counts
-assay(tse, "clr") |> head()
-assay(tse, "counts") |> head()
+assay(tse, "clr")[1:5, 1:5]
+assay(tse, "counts")[1:5, 1:5]
 ```
 
 3. The pseudocount is added to all values before the logarithm is taken, so
@@ -649,7 +651,7 @@ by the pseudocounts and not by the transformations.
 
 **Goal:** Apply the phILR transformation and find where the result is stored.
 
-1. Apply the phILR transformation to `tse`. Use `MARGIN = 1L` and add a
+1. Apply the phILR transformation to `tse`. Use `MARGIN = "rows"` and add a
 pseudocount of 0.5.
 
 2. List the assay names and the alternative experiment names of `tse`. Where
@@ -670,7 +672,10 @@ do they differ?
 #| warning: false
 
 # 1. phILR transformation
-tse <- transformAssay(tse, method = "philr", MARGIN = 1L, pseudocount = 0.5)
+tse <- transformAssay(
+    tse,
+    method = "philr", MARGIN = "rows", pseudocount = 0.5
+)
 
 # 2. Assays and alternative experiments
 assayNames(tse)
@@ -702,7 +707,7 @@ experiment, as long as the samples are the same.
 **Goal:** Examine variation in sequencing depth and rarefy the data.
 
 1. Draw rarefaction curves for the samples from the `counts` assay. Use a
-step size of 1000 reads.
+step size of 100 reads.
 
 2. Calculate the library size of each sample and add it to `colData`.
 

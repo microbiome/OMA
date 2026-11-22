@@ -32,7 +32,7 @@ that are specific to individual sample types.
 library(mia)
 library(knitr) # Only needed for formatting the tables with kable()
 
-data("GlobalPatterns")
+data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 
 # Agglomerate to phyla
@@ -59,7 +59,7 @@ available for subsequent analyses.
 ```{r}
 #| label: modify_coldata
 
-data("GlobalPatterns")
+data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 
 # Modify the Description entries
@@ -193,8 +193,8 @@ For several custom analysis and visualization packages, such as those from
 molten_tse <- meltSE(
     tse,
     assay.type = "counts",
-    add.row = TRUE,
-    add.col = TRUE
+    add.row = "Phylum",
+    add.col = "SampleType"
 )
 
 molten_tse |>
@@ -208,7 +208,7 @@ instead utilize `longForm()`.
 ```{r}
 #| label: melt-mae-data
 
-data(HintikkaXOData)
+data("HintikkaXOData", package = "mia")
 mae <- HintikkaXOData
 
 molten_mae <- longForm(
@@ -238,7 +238,7 @@ abstraction, familiar from `r BiocStyle::CRANpkg("tidyverse")`.
 ```{r}
 #| label: tidy1
 
-data("GlobalPatterns")
+data("GlobalPatterns", package = "mia")
 tse <- GlobalPatterns
 
 library(tidySingleCellExperiment)
@@ -256,11 +256,11 @@ by using the tidy paradigm. For more information on library size, see
 ```{r}
 #| label: tidy2
 
-tse %>%
-    join_features(features = rownames(tse), shape = "long") %>%
-    group_by(.cell) %>%
-    mutate(total_counts = sum(.abundance_counts)) %>%
-    group_by(SampleType) %>%
+tse |>
+    join_features(features = rownames(tse), shape = "long") |>
+    group_by(.cell) |>
+    mutate(total_counts = sum(.abundance_counts)) |>
+    group_by(SampleType) |>
     summarise(total_counts = mean(total_counts))
 ```
 
@@ -278,10 +278,10 @@ tools. Before plotting, we apply CLR transformation by using `transformAssay()`
 
 library(ggplot2)
 
-tse %>%
-    filter(SampleType == "Soil") %>%
-    transformAssay(method = "clr", pseudocount = 0.5) %>%
-    join_features(features = rownames(tse), shape = "long") %>%
+tse |>
+    filter(SampleType == "Soil") |>
+    transformAssay(method = "clr", pseudocount = 0.5) |>
+    join_features(features = rownames(tse), shape = "long") |>
     ggplot(aes(x = .cell, y = .abundance_clr)) +
     geom_boxplot(outlier.alpha = 0.1) +
     labs(x = "Sample", y = "CLR abundance")
@@ -353,6 +353,8 @@ sapply(tse_list, getTop, top = 5)
 3. The list has one `TreeSE` for each unique value in `cohort`, and the
 elements are named after these values. Each element contains only the
 samples of one cohort.
+
+<!-- -->
 
 5. The top features of the whole dataset describe all samples together.
 Features that are abundant only in some of the groups can then be hidden.
@@ -450,8 +452,8 @@ common?
 4. Merge `tse1` and `tse2` with an inner join. Check the dimensions of the
 result.
 
-5. Merge `tse1` and `tse2` with a left join, and fill the missing values with
-0. Check the dimensions of the result.
+5. Merge `tse1` and `tse2` with a left join, and fill the missing values
+with 0. Check the dimensions of the result.
 
 6. Why do the inner join and the left join give a different number of rows?
 Why can `cbind()` be used in step 2, but not to combine `tse1` and `tse2`?
@@ -491,6 +493,8 @@ dim(tse_left)
 
 3. Rows 51 to 100 are included in both subsets, so they have 50 features in
 common.
+
+<!-- -->
 
 6. The inner join keeps only the features that are found in both datasets.
 The left join keeps all features of the first dataset; the features that
@@ -596,15 +600,15 @@ library(tidySingleCellExperiment)
 tse
 
 # 2. Mean library size in each group
-tse %>%
-    join_features(features = rownames(tse), shape = "long") %>%
-    group_by(.cell) %>%
-    mutate(total_counts = sum(.abundance_counts)) %>%
-    group_by(patient_status) %>%
+tse |>
+    join_features(features = rownames(tse), shape = "long") |>
+    group_by(.cell) |>
+    mutate(total_counts = sum(.abundance_counts)) |>
+    group_by(patient_status) |>
     summarise(total_counts = mean(total_counts))
 
 # 3. Select samples of Cohort_1
-tse_cohort1 <- tse %>%
+tse_cohort1 <- tse |>
     filter(cohort == "Cohort_1")
 ncol(tse_cohort1)
 ```
