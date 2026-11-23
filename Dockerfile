@@ -9,8 +9,10 @@ COPY DESCRIPTION /opt/pkg/DESCRIPTION
 # Remove when the image's CRAN snapshot is newer.
 RUN Rscript -e 'install.packages(c("treelayout", "tidytree"), repos = "https://cloud.r-project.org")'
 
-# Install the book's dependencies
-RUN Rscript -e 'repos <- BiocManager::repositories(); options(repos = repos); devtools::install_deps("/opt/pkg", dependencies = TRUE); sessioninfo::session_info(installed.packages()[,"Package"], include_base = TRUE)'
+# Install the book's dependencies. install.packages() keeps the highest
+# version across repositories, so current sources win over the older
+# container binaries.
+RUN Rscript -e 'd <- read.dcf("/opt/pkg/DESCRIPTION", c("Depends", "Imports", "Suggests")); p <- trimws(sub("[(].*", "", unlist(strsplit(d[!is.na(d)], ",")))); p <- setdiff(p[nzchar(p)], c("R", rownames(installed.packages(priority = "base")))); BiocManager::install(p, update = FALSE, ask = FALSE, Ncpus = parallel::detectCores()); stopifnot(all(p %in% rownames(installed.packages()))); sessioninfo::session_info(installed.packages()[,"Package"], include_base = TRUE)'
 
 COPY . /opt/pkg
 
